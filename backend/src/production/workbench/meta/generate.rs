@@ -2887,6 +2887,7 @@ fn compact_contextual_video_style_note(
             neighbor_style_fragment_matches_storyboard(fragment, &fields, &expected_camera)
         })
         .filter_map(|fragment| trim_style_fragment_against_storyboard_fields(&fragment, &fields))
+        .filter(|fragment| !style_fragment_lags_current_emotional_turn(fragment, &fields))
         .map(|fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         .collect::<Vec<_>>();
     if fragments.is_empty() {
@@ -2987,6 +2988,79 @@ fn storyboard_supports_voice_style(fields: &StructuredStoryboardDescription) -> 
     ]
     .iter()
     .any(|keyword| normalized_action.contains(keyword))
+}
+
+fn style_fragment_lags_current_emotional_turn(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    if !fragment.starts_with("语气") {
+        return false;
+    }
+
+    let Some(fragment_voice_family) = style_voice_family_for_generate(fragment) else {
+        return false;
+    };
+    let Some(context_voice_family) = current_storyboard_voice_family(fields) else {
+        return false;
+    };
+    if fragment_voice_family == context_voice_family {
+        return false;
+    }
+
+    current_storyboard_is_fragile_emotional_turn(fields)
+        || matches!(context_voice_family, "fragile" | "clipped")
+}
+
+fn current_storyboard_voice_family(
+    fields: &StructuredStoryboardDescription,
+) -> Option<&'static str> {
+    [
+        fields.dialogue.as_str(),
+        fields.action.as_str(),
+        fields.mood.as_str(),
+    ]
+    .into_iter()
+    .find_map(style_voice_family_for_generate)
+}
+
+fn current_storyboard_is_fragile_emotional_turn(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+        fields.mood.as_str(),
+    ]
+    .into_iter()
+    .any(|field| {
+        ["哽咽", "发哽", "含泪", "泪", "哭", "发颤", "颤声", "鼻音"]
+            .iter()
+            .any(|keyword| field.contains(keyword))
+    })
+}
+
+fn style_voice_family_for_generate(text: &str) -> Option<&'static str> {
+    [
+        ("哽咽", "fragile"),
+        ("发哽", "fragile"),
+        ("失声", "fragile"),
+        ("哑声", "fragile"),
+        ("哭腔", "fragile"),
+        ("颤声", "fragile"),
+        ("鼻音", "fragile"),
+        ("抽气", "fragile"),
+        ("发颤", "fragile"),
+        ("低声", "low"),
+        ("压低", "low"),
+        ("轻声", "light"),
+        ("轻轻", "light"),
+        ("呢喃", "murmur"),
+        ("喃喃", "murmur"),
+        ("耳语", "murmur"),
+        ("短促", "clipped"),
+        ("急促", "clipped"),
+    ]
+    .into_iter()
+    .find_map(|(keyword, family)| text.contains(keyword).then_some(family))
 }
 
 fn build_video_prompt_quality_tail(
@@ -3432,6 +3506,10 @@ fn compact_memory_style_anchor(
         })
         .filter_map(|fragment| {
             trim_style_fragment_against_prompt_coverage(&fragment, prompt_coverage)
+        })
+        .filter(|fragment| {
+            structured_fields
+                .is_none_or(|fields| !style_fragment_lags_current_emotional_turn(fragment, fields))
         })
         .filter(|fragment| {
             !(has_base_motion_style_anchor
@@ -6960,7 +7038,8 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 mod tests {
     use super::{
         art_style_director_profile, build_video_prompt, build_video_prompt_with_diagnostics,
-        compact_camera_clause, compact_director_emotion_fragment_group,
+        compact_camera_clause, compact_contextual_video_style_note,
+        compact_director_emotion_fragment_group,
         compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
         observation_style_note_context_evidence, parse_director_emotion_cues,
         parse_director_environment_cues, parse_director_environment_texture_cues,
@@ -10749,6 +10828,67 @@ mod tests {
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_drops_stale_soft_voice_fragment_for_fragile_turning_point() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、呼吸发颤后哽咽开口、哽咽压抑、夜间冷蓝窗光、你别看我、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气轻声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气轻声"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn compact_contextual_video_style_note_drops_stale_role_voice_when_scene_turns_fragile() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚终于失声开口".into()),
+            video_desc: Some("（林晚终于失声开口、咖啡厅窗边、林晚、4秒、中景、缓推、呼吸发颤后哽咽开口、哽咽压抑、夜间冷蓝窗光、你别看我、轻微环境声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "表演呼吸发颤，语气轻声克制",
+                Some(&storyboard_row),
+            ),
+            Some("表演呼吸发颤".to_string())
+        );
+    }
+
+    #[test]
+    fn compact_contextual_video_style_note_drops_soft_voice_for_broken_breath_turn() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚失声后勉强开口".into()),
+            video_desc: Some("（林晚失声后勉强开口、咖啡厅窗边、林晚、4秒、中景、缓推、抽气后失声开口、压抑、夜间冷蓝窗光、我没事、轻微环境声、A13）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "表演喉结滚动，语气轻声克制",
+                Some(&storyboard_row),
+            ),
+            Some("表演喉结滚动".to_string())
+        );
     }
 
     #[test]
