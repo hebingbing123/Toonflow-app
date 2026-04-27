@@ -3823,23 +3823,55 @@ fn style_fragment_is_low_gain_mood_carryover(
     fragment: &str,
     fields: &StructuredStoryboardDescription,
 ) -> bool {
-    if !fragment.starts_with("语气") || !storyboard_supports_voice_style(fields) {
-        return false;
+    if fragment.starts_with("语气") {
+        if !storyboard_supports_voice_style(fields) {
+            return false;
+        }
+
+        let body = normalize_prompt_text(fragment.trim_start_matches("语气"));
+        return !body.is_empty()
+            && body
+                .split(['，', ',', '；', ';', '、', '/', ' '])
+                .map(normalize_prompt_text)
+                .filter(|part| !part.is_empty())
+                .all(|part| voice_fragment_token_is_generic_mood_carryover(part.as_str()));
     }
 
-    let body = normalize_prompt_text(fragment.trim_start_matches("语气"));
-    !body.is_empty()
-        && body
-            .split(['，', ',', '；', ';', '、', '/', ' '])
-            .map(normalize_prompt_text)
-            .filter(|part| !part.is_empty())
-            .all(voice_fragment_token_is_generic_mood_carryover)
+    if fragment.starts_with("情绪") {
+        let body = normalize_prompt_text(fragment.trim_start_matches("情绪"));
+        return mood_fragment_is_generic_carryover(body.as_str());
+    }
+
+    fragment.starts_with("动作")
+        && !video_prompt_scene_has_motion_risk(fields)
+        && generic_motion_style_fragment(fragment)
 }
 
 fn voice_fragment_token_is_generic_mood_carryover(token: &str) -> bool {
     matches!(
         token,
         "克制" | "平静" | "冷静" | "沉静" | "从容" | "隐忍" | "压抑"
+    )
+}
+
+fn mood_fragment_is_generic_carryover(body: &str) -> bool {
+    matches!(
+        body,
+        "克制"
+            | "隐忍"
+            | "压抑"
+            | "平静"
+            | "冷静"
+            | "沉静"
+            | "从容"
+            | "隐忍克制"
+            | "克制隐忍"
+            | "压抑克制"
+            | "克制压抑"
+            | "平静克制"
+            | "克制平静"
+            | "冷静克制"
+            | "克制冷静"
     )
 }
 
@@ -11244,6 +11276,24 @@ mod tests {
     }
 
     #[test]
+    fn compact_contextual_video_style_note_drops_generic_emotion_and_motion_carryover_for_dialogue_scene(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边低声开口".into()),
+            video_desc: Some("（林晚站在窗边低声开口、咖啡厅窗边、林晚、4秒、中景、缓推、停顿后低声说你终于来了、隐忍 / 克制、夜间冷蓝窗光、你终于来了、轻微环境声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "情绪压抑克制，动作自然，表演喉结滚动",
+                Some(&storyboard_row),
+            ),
+            Some("表演喉结滚动".to_string())
+        );
+    }
+
+    #[test]
     fn build_video_prompt_drops_voice_fragment_when_action_and_mood_already_cover_it() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -11295,6 +11345,34 @@ mod tests {
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气轻声"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_drops_generic_emotion_and_motion_carryover_for_dialogue_scene() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、停顿后低声说你终于来了、隐忍克制、夜间冷蓝窗光、你终于来了、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["情绪压抑克制，动作自然，表演喉结滚动".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("情绪压抑"), "{}", result.prompt);
+        assert!(!result.prompt.contains("情绪克制"), "{}", result.prompt);
+        assert!(!result.prompt.contains("动作自然"), "{}", result.prompt);
     }
 
     #[test]
