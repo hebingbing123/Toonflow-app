@@ -2874,6 +2874,8 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
             style_fragments.push(format!("场景{}", clip_prompt_fragment(&setting, 12)));
         }
         style_fragments = compact_selected_memory_style_fragments(style_fragments);
+        style_fragments =
+            compact_selected_memory_identity_scene_style_fragments(style_fragments, &fields);
         let note = compact_selected_memory_note_fragments(style_fragments, narrative_fragments);
         if !note.is_empty() {
             return Some(note);
@@ -3078,6 +3080,107 @@ fn selected_memory_has_high_signal_visual_performance_cue(action: &str) -> bool 
         ]
         .iter()
         .any(|keyword| action.contains(keyword))
+}
+
+fn selected_memory_needs_identity_continuity(fields: &StructuredStoryboardDescription) -> bool {
+    let shot = normalize_prompt_text(&fields.shot);
+    let camera_move = normalize_prompt_text(&fields.camera_move);
+    let action = normalize_prompt_text(&fields.action);
+
+    let mut score = 0i32;
+    if ["特写", "近特写", "大特写", "近景"]
+        .iter()
+        .any(|keyword| shot.contains(keyword))
+    {
+        score += 2;
+    }
+    if ["中近景", "肩部", "半身"]
+        .iter()
+        .any(|keyword| shot.contains(keyword))
+    {
+        score += 1;
+    }
+    if [
+        "抬眼", "抬眸", "垂眼", "低头", "眼神", "目光", "唇", "嘴角", "喉结",
+    ]
+    .iter()
+    .any(|keyword| action.contains(keyword))
+    {
+        score += 1;
+    }
+    if ["静止", "停顿", "驻足", "慢推", "缓推", "定镜"]
+        .iter()
+        .any(|keyword| camera_move.contains(keyword) || action.contains(keyword))
+    {
+        score += 1;
+    }
+
+    score >= 2
+}
+
+fn compact_selected_memory_identity_scene_style_fragments(
+    fragments: Vec<String>,
+    fields: &StructuredStoryboardDescription,
+) -> Vec<String> {
+    if !selected_memory_needs_identity_continuity(fields)
+        || !selected_memory_field_looks_silent(&fields.dialogue)
+    {
+        return fragments;
+    }
+
+    let has_micro_performance = fragments.iter().any(|fragment| {
+        fragment.starts_with("表演")
+            && (score_selected_identity_micro_performance_fragment(fragment) >= 3
+                || ["眼神", "目光", "抬眼", "眉", "唇", "喉结"]
+                    .iter()
+                    .any(|keyword| fragment.contains(keyword)))
+    });
+    if !has_micro_performance {
+        return fragments;
+    }
+
+    let original_len = fragments.len();
+    let filtered = fragments
+        .iter()
+        .filter(|fragment| {
+            !matches!(
+                selected_identity_scene_low_gain_fragment_family(fragment),
+                Some("镜头") | Some("光影") | Some("环境") | Some("场景") | Some("声场")
+            )
+        })
+        .cloned()
+        .collect::<Vec<_>>();
+    if filtered.is_empty() || filtered.len() == original_len {
+        return fragments;
+    }
+
+    filtered
+}
+
+fn selected_identity_scene_low_gain_fragment_family(fragment: &str) -> Option<&'static str> {
+    [
+        "镜头", "光影", "环境", "场景", "声场", "动作", "情绪", "表演", "语气",
+    ]
+    .into_iter()
+    .find(|prefix| fragment.starts_with(prefix))
+}
+
+fn score_selected_identity_micro_performance_fragment(fragment: &str) -> i32 {
+    let body = fragment.strip_prefix("表演").unwrap_or(fragment);
+    let mut score = 0;
+    for keyword in [
+        "抬眼", "垂眼", "眼神", "目光", "咬唇", "抿唇", "嘴角", "喉结", "下颌",
+    ] {
+        if body.contains(keyword) {
+            score += 2;
+        }
+    }
+    for keyword in ["停顿", "迟疑", "欲言又止", "发颤", "绷紧", "发红"] {
+        if body.contains(keyword) {
+            score += 1;
+        }
+    }
+    score
 }
 
 fn compact_selected_memory_note_fragments(
@@ -6627,6 +6730,42 @@ mod tests {
         assert!(!content.contains("动作从容克制"), "{content}");
         assert!(!content.contains("情绪克制"), "{content}");
         assert!(!content.contains("语气低声克制"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_identity_silent_scene_prefers_micro_performance_only() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚在镜前停住".into()),
+                video_desc: Some("（林晚在镜前停住、化妆镜前、林晚、4秒、近景、静止、抬眼看向镜中倒影后停顿、克制、暖金逆光、无台词、静场留白、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("style=表演抬眼停顿"), "{content}");
+        assert!(!content.contains("镜头近景"), "{content}");
+        assert!(!content.contains("光影暖金逆光"), "{content}");
+        assert!(!content.contains("声场静场留白"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_identity_scene_keeps_visual_carryover_when_no_micro_performance_exists(
+    ) {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚在镜前沉默".into()),
+                video_desc: Some("（林晚在镜前沉默、化妆镜前、林晚、4秒、近景、静止、静静看向镜中倒影、克制、暖金逆光、无台词、静场留白、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("光影暖金逆光"), "{content}");
+        assert!(content.contains("声场静场留白"), "{content}");
+        assert!(!content.contains("style=表演"), "{content}");
     }
 
     #[test]
