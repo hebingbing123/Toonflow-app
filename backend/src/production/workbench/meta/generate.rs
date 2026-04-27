@@ -43,7 +43,15 @@ const VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS: usize = 48;
+const VIDEO_PROMPT_ENVIRONMENT_ANCHOR_MAX_CHARS: usize = 20;
 const VIDEO_PROMPT_MOTION_ANCHOR_MAX_CHARS: usize = 20;
+const DIRECTOR_ENVIRONMENT_PRIMARY_TOKENS: [&str; 24] = [
+    "咖啡", "手机", "屏幕", "电梯", "车灯", "车流", "霓虹", "窗帘", "雨滴", "雨丝", "玻璃", "花瓣",
+    "落花", "飞絮", "轻烟", "烟雾", "流水", "水波", "竹林", "烛火", "树叶", "云层", "樱花", "雪花",
+];
+const DIRECTOR_ENVIRONMENT_SECONDARY_TOKENS: [&str; 11] = [
+    "窗", "雨", "花", "云", "水", "灯", "叶", "风", "雾", "烟", "雪",
+];
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -489,6 +497,101 @@ fn parse_director_motion_cue(markdown: &str) -> Option<String> {
     None
 }
 
+fn parse_director_environment_cues(markdown: &str) -> Vec<String> {
+    let mut cues = Vec::new();
+    let mut in_environment_section = false;
+
+    for raw_line in markdown.lines() {
+        let line = raw_line.trim();
+        if !in_environment_section {
+            if line.starts_with("## ") && (line.contains("环境动态") || line.contains("色块动态"))
+            {
+                in_environment_section = true;
+            }
+            continue;
+        }
+
+        if line.starts_with("## ") {
+            break;
+        }
+        if !line.starts_with("- **") || !(line.contains("画面呼吸感") || line.contains("元素优先"))
+        {
+            continue;
+        }
+
+        let body = line
+            .split_once('—')
+            .or_else(|| line.split_once("——"))
+            .map(|(_, value)| normalize_prompt_text(value))
+            .unwrap_or_default();
+        let Some((_, tail)) = body.split_once('：') else {
+            continue;
+        };
+        let trimmed_tail = tail
+            .split("。每")
+            .next()
+            .unwrap_or(tail)
+            .split("，禁止")
+            .next()
+            .unwrap_or(tail);
+
+        for cue in trimmed_tail
+            .split(['、', '，', ',', '/', '／'])
+            .map(normalize_prompt_text)
+            .filter(|cue| cue.chars().count() >= 2)
+        {
+            if !cues.iter().any(|existing| existing == &cue) {
+                cues.push(cue);
+            }
+        }
+    }
+
+    cues
+}
+
+fn score_director_environment_cue_match(
+    fields: &StructuredStoryboardDescription,
+    cue: &str,
+) -> usize {
+    let cue = normalize_prompt_text(cue);
+    if cue.is_empty() {
+        return 0;
+    }
+
+    let context = normalize_prompt_text(
+        &[
+            fields.setting.as_str(),
+            fields.action.as_str(),
+            fields.sound.as_str(),
+            fields.lighting.as_str(),
+        ]
+        .into_iter()
+        .filter(|part| !part.trim().is_empty())
+        .collect::<Vec<_>>()
+        .join(" "),
+    );
+
+    if context.is_empty() {
+        return 0;
+    }
+    if context.contains(&cue) {
+        return 12;
+    }
+
+    let mut score = 0;
+    for token in DIRECTOR_ENVIRONMENT_PRIMARY_TOKENS {
+        if cue.contains(token) && context.contains(token) {
+            score += 3;
+        }
+    }
+    for token in DIRECTOR_ENVIRONMENT_SECONDARY_TOKENS {
+        if cue.contains(token) && context.contains(token) {
+            score += 1;
+        }
+    }
+    score
+}
+
 fn resolve_performance_style_anchor(
     project_art_style: Option<&str>,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -535,6 +638,44 @@ fn resolve_performance_style_anchor(
     Some(clip_prompt_fragment(
         &fragments.join(", "),
         VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS,
+    ))
+}
+
+fn resolve_environment_style_anchor(
+    project_art_style: Option<&str>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+) -> Option<String> {
+    let fields = structured_fields?;
+    if fields.setting.trim().is_empty() {
+        return None;
+    }
+
+    let profile = art_style_director_profile(project_art_style?)?;
+    let cue = parse_director_environment_cues(profile.director_storyboard_table_style)
+        .into_iter()
+        .filter_map(|cue| {
+            let score = score_director_environment_cue_match(fields, &cue);
+            (score > 0).then_some((score, cue))
+        })
+        .max_by(|(left_score, left_cue), (right_score, right_cue)| {
+            left_score
+                .cmp(right_score)
+                .then_with(|| right_cue.chars().count().cmp(&left_cue.chars().count()))
+        })?
+        .1;
+
+    if prompt_fragment_is_covered(&cue, prompt_coverage)
+        || fields.setting.contains(&cue)
+        || fields.action.contains(&cue)
+        || fields.sound.contains(&cue)
+    {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &cue,
+        VIDEO_PROMPT_ENVIRONMENT_ANCHOR_MAX_CHARS,
     ))
 }
 
@@ -1947,6 +2088,14 @@ fn build_project_visual_anchors(
         &style_coverage,
     ) {
         anchors.push(performance_anchor);
+        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    }
+    if let Some(environment_anchor) = resolve_environment_style_anchor(
+        ctx.project_art_style.as_deref(),
+        structured_fields,
+        &style_coverage,
+    ) {
+        anchors.push(environment_anchor);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
     if let Some(motion_anchor) = resolve_motion_style_anchor(
@@ -4893,15 +5042,16 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_video_prompt, build_video_prompt_with_diagnostics, compact_camera_clause,
-        compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
-        parse_structured_storyboard_description, prune_low_signal_observation_candidates,
-        resolve_observation_filter_style_note, resolve_video_prompt_duration,
-        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
-        select_script_asset_anchors, select_video_prompt_asset_seed_rows,
-        select_video_prompt_memory_notes, select_video_prompt_style_notes,
-        trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
-        video_prompt_observation_conflicts_with_style,
+        art_style_director_profile, build_video_prompt, build_video_prompt_with_diagnostics,
+        compact_camera_clause, compact_negative_constraint_against_storyboard_style,
+        compact_script_asset_anchor, parse_director_emotion_cues, parse_director_environment_cues,
+        parse_director_motion_cue, parse_structured_storyboard_description,
+        prune_low_signal_observation_candidates, resolve_observation_filter_style_note,
+        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
+        select_best_video_prompt_observation_note, select_script_asset_anchors,
+        select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
+        select_video_prompt_style_notes, trim_video_prompt_memory_rows,
+        trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptDiagnostics,
         GenerateVideoPromptResponse, ScriptRolePromptSeedRow, VideoPromptContext,
         VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
@@ -7839,6 +7989,37 @@ mod tests {
         let cue = parse_director_motion_cue(profile.director_storyboard_table_style);
 
         assert_eq!(cue.as_deref(), Some("动作缓慢优雅"));
+    }
+
+    #[test]
+    fn parse_director_environment_cues_reads_bundled_environment_section() {
+        let profile = art_style_director_profile("真人都市写实").expect("matched art style");
+        let cues = parse_director_environment_cues(profile.director_storyboard_table_style);
+
+        assert!(cues.iter().any(|cue| cue == "咖啡热气"));
+        assert!(cues.iter().any(|cue| cue == "手机屏幕亮灭"));
+    }
+
+    #[test]
+    fn build_video_prompt_adds_environment_style_anchor_for_matching_setting() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在咖啡厅窗边、咖啡厅窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、夜间冷蓝窗光、无台词、雨声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("咖啡热气"), "{prompt}");
+        assert!(prompt.contains("动作自然"), "{prompt}");
     }
 
     #[test]
