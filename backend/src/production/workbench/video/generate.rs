@@ -3744,6 +3744,31 @@ mod tests {
     }
 
     #[test]
+    fn build_storyboard_negative_prompts_keeps_frantic_guard_for_cold_oppressive_mood() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=2 | avoid=avoid overly cold, oppressive, or frantic mood"
+                        .into(),
+            }],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("主角站在门厅冷静对峙"),
+                Some("（主角站在门厅冷静对峙、旧宅门厅、主角、5秒、中景、静止、盯住来人、冷峻压迫、室内冷光、你终于来了、风声回响、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(selection.as_deref(), Some("avoid frantic mood"));
+        assert_eq!(selection.budget_tier, "lean");
+    }
+
+    #[test]
     fn review_fragment_is_irrelevant_to_dialogue_free_storyboard() {
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("主角贴墙前行".into()),
