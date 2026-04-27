@@ -3009,7 +3009,7 @@ fn compact_contextual_video_style_note(
         .into_iter()
         .filter(|part| !part.is_empty())
         .collect::<String>();
-    let fragments = normalized
+    let mut fragments = normalized
         .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
@@ -3018,8 +3018,19 @@ fn compact_contextual_video_style_note(
         })
         .filter_map(|fragment| trim_style_fragment_against_storyboard_fields(&fragment, &fields))
         .filter(|fragment| !style_fragment_lags_current_emotional_turn(fragment, &fields))
+        .filter(|fragment| !style_fragment_is_low_gain_mood_carryover(fragment, &fields))
         .map(|fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         .collect::<Vec<_>>();
+    if !fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"))
+    {
+        if let Some(fragment) =
+            fallback_contextual_performance_fragment(&normalized, &fields, &fragments)
+        {
+            fragments.push(fragment);
+        }
+    }
     if fragments.is_empty() {
         return None;
     }
@@ -3028,6 +3039,45 @@ fn compact_contextual_video_style_note(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn fallback_contextual_performance_fragment(
+    note: &str,
+    fields: &StructuredStoryboardDescription,
+    kept_fragments: &[String],
+) -> Option<String> {
+    if storyboard_dialogue_is_empty(&fields.dialogue)
+        && !video_prompt_scene_needs_emotional_memory(fields)
+    {
+        return None;
+    }
+
+    note.split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| fragment.starts_with("表演"))
+        .filter_map(|fragment| trim_style_fragment_against_storyboard_fields(&fragment, fields))
+        .filter(|fragment| !style_fragment_lags_current_emotional_turn(fragment, fields))
+        .filter(|fragment| {
+            score_memory_fragment_human_performance_detail(
+                fragment,
+                style_note_fragment_family(fragment),
+            ) >= 3
+        })
+        .filter(|fragment| {
+            !kept_fragments
+                .iter()
+                .any(|existing| style_note_fragment_conflicts_or_overlaps(existing, fragment))
+        })
+        .max_by(|left, right| {
+            score_memory_fragment_human_performance_detail(left, style_note_fragment_family(left))
+                .cmp(&score_memory_fragment_human_performance_detail(
+                    right,
+                    style_note_fragment_family(right),
+                ))
+                .then_with(|| right.chars().count().cmp(&left.chars().count()))
+                .then_with(|| right.cmp(left))
+        })
+        .map(|fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
 }
 
 fn neighbor_style_fragment_matches_storyboard(
@@ -3642,6 +3692,10 @@ fn compact_memory_style_anchor(
                 .is_none_or(|fields| !style_fragment_lags_current_emotional_turn(fragment, fields))
         })
         .filter(|fragment| {
+            structured_fields
+                .is_none_or(|fields| !style_fragment_is_low_gain_mood_carryover(fragment, fields))
+        })
+        .filter(|fragment| {
             !(has_base_motion_style_anchor
                 && fragment.starts_with("动作")
                 && generic_motion_style_fragment(fragment))
@@ -3763,6 +3817,30 @@ fn score_memory_style_fragment_for_lean_tier(
     }
 
     score
+}
+
+fn style_fragment_is_low_gain_mood_carryover(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    if !fragment.starts_with("语气") || !storyboard_supports_voice_style(fields) {
+        return false;
+    }
+
+    let body = normalize_prompt_text(fragment.trim_start_matches("语气"));
+    !body.is_empty()
+        && body
+            .split(['，', ',', '；', ';', '、', '/', ' '])
+            .map(normalize_prompt_text)
+            .filter(|part| !part.is_empty())
+            .all(voice_fragment_token_is_generic_mood_carryover)
+}
+
+fn voice_fragment_token_is_generic_mood_carryover(token: &str) -> bool {
+    matches!(
+        token,
+        "克制" | "平静" | "冷静" | "沉静" | "从容" | "隐忍" | "压抑"
+    )
 }
 
 fn score_memory_fragment_human_performance_detail(
@@ -7255,12 +7333,13 @@ mod tests {
         compact_camera_clause, compact_contextual_video_style_note,
         compact_director_emotion_fragment_group,
         compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
-        observation_style_note_context_evidence, parse_director_emotion_cues,
-        parse_director_environment_cues, parse_director_environment_texture_cues,
-        parse_director_motion_cue, parse_structured_storyboard_description,
-        prune_low_signal_observation_candidates, prune_storyboard_observation_candidates,
-        resolve_observation_filter_style_note, resolve_video_prompt_duration,
-        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
+        exact_style_notes_should_yield_to_role_memory, observation_style_note_context_evidence,
+        parse_director_emotion_cues, parse_director_environment_cues,
+        parse_director_environment_texture_cues, parse_director_motion_cue,
+        parse_structured_storyboard_description, prune_low_signal_observation_candidates,
+        prune_storyboard_observation_candidates, resolve_observation_filter_style_note,
+        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
+        select_best_video_prompt_observation_note,
         select_contextual_observation_summary_style_note, select_script_asset_anchors,
         select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
         select_video_prompt_style_notes, trim_video_prompt_memory_rows,
@@ -10461,7 +10540,7 @@ mod tests {
     }
 
     #[test]
-    fn contextual_observation_style_summary_uses_action_and_voice_overlap() {
+    fn contextual_observation_style_summary_drops_voice_tail_that_only_repeats_mood() {
         let rows = vec![
             AgentMemoryRow {
                 name: "script_video_style_memory".into(),
@@ -10484,7 +10563,7 @@ mod tests {
 
         assert_eq!(
             select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row)),
-            Some("语气克制".to_string())
+            Some("表演喉结滚动".to_string())
         );
     }
 
@@ -10562,36 +10641,16 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
-            vec!["语气轻声".to_string()]
+            vec!["语气轻声，表演喉结滚动".to_string()]
         );
     }
 
     #[test]
-    fn select_video_prompt_style_notes_keeps_exact_note_when_it_carries_non_template_pressure() {
-        let rows = vec![
-            AgentMemoryRow {
-                name: "selected_video_memory".into(),
-                content:
-                    "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=情绪冷色压迫感，动作自然"
-                        .into(),
-            },
-            AgentMemoryRow {
-                name: "script_role_video_style_memory".into(),
-                content:
-                    "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演喉结滚动，语气轻声克制 | note=表演喉结滚动，语气轻声克制"
-                        .into(),
-            },
-        ];
-        let storyboard_row = StoryboardPromptSeedRow {
-            prompt: Some("林晚站在窗边回头".into()),
-            video_desc: Some("（林晚站在窗边回头、咖啡厅窗边、林晚、4秒、中景,稳定跟拍、停顿后回头看向门口、压抑、夜间冷蓝窗光、无台词、轻微环境声、A12）".into()),
-            duration: Some("4s".into()),
-        };
-
-        assert_eq!(
-            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
-            vec!["情绪冷色压迫感".to_string()]
-        );
+    fn exact_style_notes_do_not_yield_when_exact_note_has_non_template_signal() {
+        assert!(!exact_style_notes_should_yield_to_role_memory(
+            &["情绪冷色压迫感，动作自然".to_string()],
+            &["表演喉结滚动，语气轻声克制".to_string()]
+        ));
     }
 
     #[test]
@@ -11133,8 +11192,7 @@ mod tests {
     }
 
     #[test]
-    fn build_video_prompt_with_diagnostics_keeps_performance_and_voice_pair_for_emotional_lean_scene(
-    ) {
+    fn build_video_prompt_with_diagnostics_drops_mood_only_voice_tail_for_emotional_lean_scene() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、欲言又止后低声开口、隐忍哽咽、夜间冷蓝窗光、你别看我、轻微环境声、A12）".into()),
@@ -11157,13 +11215,31 @@ mod tests {
 
         assert_eq!(result.diagnostics.memory_budget_tier, "lean");
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
-        assert!(result.prompt.contains("语气克制"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气低声克制"), "{}", result.prompt);
         assert!(!result.prompt.contains("环境咖啡热气"), "{}", result.prompt);
         assert!(
             result.diagnostics.memory_style_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
             "{:?}",
             result.diagnostics
+        );
+    }
+
+    #[test]
+    fn compact_contextual_video_style_note_drops_voice_fragment_when_trim_only_leaves_mood_tail() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边终于开口".into()),
+            video_desc: Some("（林晚站在窗边终于开口、城市夜景落地窗边、林晚、4秒、中景、缓推、抿唇后停顿片刻才低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A26）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "表演喉结滚动，语气低声克制",
+                Some(&storyboard_row),
+            ),
+            Some("表演喉结滚动".to_string())
         );
     }
 
@@ -11235,6 +11311,24 @@ mod tests {
                 Some(&storyboard_row),
             ),
             Some("表演呼吸发颤".to_string())
+        );
+    }
+
+    #[test]
+    fn compact_contextual_video_style_note_keeps_high_signal_performance_detail_for_dialogue_scene()
+    {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边低声开口".into()),
+            video_desc: Some("（林晚站在窗边低声开口、咖啡厅窗边、林晚、4秒、中景、缓推、停顿后低声说你终于来了、克制、夜间冷蓝窗光、你终于来了、轻微环境声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "表演喉结滚动，语气轻声克制",
+                Some(&storyboard_row),
+            ),
+            Some("语气轻声，表演喉结滚动".to_string())
         );
     }
 
