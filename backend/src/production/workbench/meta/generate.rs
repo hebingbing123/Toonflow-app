@@ -12272,6 +12272,50 @@ mod tests {
     }
 
     #[test]
+    fn observation_note_conflict_filter_drops_blank_expression_when_style_note_already_carries_specific_performance_direction(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚抽气后哽咽开口".into()),
+            video_desc: Some(
+                "（林晚抽气后哽咽开口、病房门口、林晚、4秒、中景、缓推、抽气后哽咽开口、压抑、冷白侧光、我没事、空调低鸣、A18）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_negative_constraint_against_storyboard_style(
+                "avoid blank expression or monotone delivery",
+                Some("表演喉结滚动，语气哽咽克制"),
+                Some(&storyboard_row),
+            ),
+            None
+        );
+    }
+
+    #[test]
+    fn observation_note_conflict_filter_keeps_blank_expression_when_style_note_is_only_generic_mood(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚低声开口".into()),
+            video_desc: Some(
+                "（林晚低声开口、病房门口、林晚、4秒、中景、缓推、停顿后低声开口、压抑、冷白侧光、我没事、空调低鸣、A19）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_negative_constraint_against_storyboard_style(
+                "avoid blank expression or monotone delivery",
+                Some("情绪压抑克制"),
+                Some(&storyboard_row),
+            ),
+            Some("avoid blank expression or monotone delivery".to_string())
+        );
+    }
+
+    #[test]
     fn observation_note_irrelevant_filter_skips_lip_sync_for_silent_storyboard() {
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("主角贴墙前行".into()),

@@ -72,6 +72,9 @@ fn negative_constraint_conflicts_with_style_note(constraint: &str, style_note: &
     if negative_constraint_targets_tragic_mood(constraint) {
         return note.contains("悲怆");
     }
+    if negative_constraint_targets_blank_expression_or_monotone_delivery(constraint) {
+        return style_note_has_specific_performance_direction(note);
+    }
 
     false
 }
@@ -192,4 +195,47 @@ fn negative_constraint_targets_neon_reflections(constraint: &str) -> bool {
 
 fn negative_constraint_targets_tragic_mood(constraint: &str) -> bool {
     constraint == "avoid heavy tragic mood"
+}
+
+fn negative_constraint_targets_blank_expression_or_monotone_delivery(constraint: &str) -> bool {
+    constraint == "avoid blank expression or monotone delivery"
+}
+
+fn style_note_has_specific_performance_direction(note: &str) -> bool {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return false;
+    }
+
+    let has_specific_performance = normalized.contains("表演")
+        && [
+            "喉结",
+            "吞咽",
+            "呼吸",
+            "抽气",
+            "发颤",
+            "眼眶",
+            "眼尾",
+            "唇线",
+            "唇角",
+            "眉心",
+            "嘴角",
+            "下颌",
+            "指尖",
+            "欲言又止",
+            "停顿",
+            "抬眼",
+            "垂眼",
+            "强忍",
+        ]
+        .iter()
+        .any(|keyword| normalized.contains(keyword));
+    let has_specific_voice = normalized.contains("语气")
+        && [
+            "哽咽", "失声", "发颤", "抽气", "气息", "换气", "尾音", "压低", "短促",
+        ]
+        .iter()
+        .any(|keyword| normalized.contains(keyword));
+
+    has_specific_performance || has_specific_voice
 }
