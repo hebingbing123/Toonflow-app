@@ -2745,6 +2745,9 @@ fn neighbor_style_fragment_matches_storyboard(
             || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
     }
     if fragment.starts_with("语气") {
+        if !storyboard_supports_voice_style(fields) {
+            return false;
+        }
         return prompt_style_fragment_overlaps_field(fragment, &fields.dialogue)
             || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
     }
@@ -2762,6 +2765,33 @@ fn prompt_style_fragment_overlaps_field(fragment: &str, field: &str) -> bool {
     let canonical = canonical_continuity_fragment(fragment);
     !canonical.is_empty()
         && (canonical == field || canonical.contains(field) || field.contains(&canonical))
+}
+
+fn storyboard_supports_voice_style(fields: &StructuredStoryboardDescription) -> bool {
+    if !storyboard_dialogue_is_empty(&fields.dialogue) {
+        return true;
+    }
+
+    let normalized_action = normalize_prompt_text(&fields.action);
+    if normalized_action.is_empty() {
+        return false;
+    }
+
+    [
+        "开口",
+        "说",
+        "说道",
+        "说出",
+        "低声",
+        "轻声",
+        "呢喃",
+        "哽咽",
+        "吸气",
+        "呼吸",
+        "欲言又止",
+    ]
+    .iter()
+    .any(|keyword| normalized_action.contains(keyword))
 }
 
 fn build_video_prompt_quality_tail(
@@ -3327,6 +3357,9 @@ fn trim_style_fragment_against_storyboard_fields(
         );
     }
     if fragment.starts_with("语气") {
+        if !storyboard_supports_voice_style(fields) {
+            return None;
+        }
         return trim_prefixed_style_fragment(
             fragment,
             "语气",
@@ -9870,6 +9903,32 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_with_diagnostics_skips_voice_fragment_for_truly_silent_scene() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚/咖啡杯、4秒、中景、缓推、看向窗外、隐忍克制、夜间冷蓝窗光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演抬眼停顿，语气轻声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert!(result.prompt.contains("表演抬眼停顿"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气轻声"), "{}", result.prompt);
+    }
+
+    #[test]
     fn build_video_prompt_with_diagnostics_prefers_lighting_fragment_in_lean_memory_tier_for_reflective_scene(
     ) {
         let context = VideoPromptContext {
@@ -10517,6 +10576,42 @@ mod tests {
                 &subject_candidates,
             ),
             Some("表演抬眼停顿，语气轻声".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_drops_voice_memory_for_silent_non_speaking_storyboard() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演抬眼停顿，语气轻声克制 | note=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边看向门外".into()),
+            video_desc: Some("（林晚站在窗边看向门外、雨夜门厅、林晚、5秒、近景、稳定跟拍、停步抬眼看向门外、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let subject_candidates = storyboard_row
+            .video_desc
+            .as_deref()
+            .and_then(parse_structured_storyboard_description)
+            .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+            .unwrap_or_default();
+
+        assert_eq!(
+            resolve_observation_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                &subject_candidates,
+            ),
+            Some("表演抬眼停顿".to_string())
         );
     }
 
