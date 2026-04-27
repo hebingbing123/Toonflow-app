@@ -1101,12 +1101,17 @@ fn resolve_guardrail_performance_anchor(
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let fields = structured_fields?;
-    let pressure = constraint_pressure?;
+    let pressure = constraint_pressure.filter(|pressure| {
+        pressure.has_dialogue_guardrail
+            || pressure.has_emotion_guardrail
+            || pressure.has_identity_guardrail
+    });
+    let has_fragile_turn = current_storyboard_is_fragile_emotional_turn(fields);
+    let has_visible_dialogue_risk = storyboard_has_visible_speech_performance_risk(fields, None);
+    let should_add_proactive_anchor = has_visible_dialogue_risk
+        || (has_fragile_turn && video_prompt_scene_needs_identity_memory(fields));
 
-    if !pressure.has_dialogue_guardrail
-        && !pressure.has_emotion_guardrail
-        && !pressure.has_identity_guardrail
-    {
+    if pressure.is_none() && !should_add_proactive_anchor {
         return None;
     }
 
@@ -1126,16 +1131,42 @@ fn resolve_guardrail_performance_anchor(
     });
 
     let mut fragments = Vec::new();
-    if !storyboard_dialogue_is_empty(&fields.dialogue) && pressure.has_dialogue_guardrail {
+    if !storyboard_dialogue_is_empty(&fields.dialogue)
+        && pressure.is_some_and(|pressure| pressure.has_dialogue_guardrail)
+    {
         if !has_face_signal {
-            fragments.push("眼神先动再开口".to_string());
+            fragments.push(if has_fragile_turn {
+                "开口前先压住气息".to_string()
+            } else {
+                "眼神先动再开口".to_string()
+            });
         }
         if !has_delivery_signal {
-            fragments.push("气息带情绪起伏".to_string());
+            fragments.push(if has_fragile_turn {
+                "尾音带轻颤".to_string()
+            } else {
+                "气息带情绪起伏".to_string()
+            });
         }
-    } else if pressure.has_emotion_guardrail
-        || (pressure.has_identity_guardrail && video_prompt_scene_needs_identity_memory(fields))
-    {
+    } else if pressure.is_some_and(|pressure| {
+        pressure.has_emotion_guardrail
+            || (pressure.has_identity_guardrail && video_prompt_scene_needs_identity_memory(fields))
+    }) {
+        if has_face_signal {
+            return None;
+        }
+        fragments.push("眼神嘴角细微递进".to_string());
+    } else if has_visible_dialogue_risk {
+        if !has_face_signal {
+            fragments.push(if has_fragile_turn {
+                "开口前先压住气息".to_string()
+            } else {
+                "眼神先动再开口".to_string()
+            });
+        } else if !has_delivery_signal && has_fragile_turn {
+            fragments.push("尾音带轻颤".to_string());
+        }
+    } else if has_fragile_turn && video_prompt_scene_needs_identity_memory(fields) {
         if has_face_signal {
             return None;
         }
@@ -13974,6 +14005,55 @@ mod tests {
             "{}",
             result.prompt
         );
+    }
+
+    #[test]
+    fn build_video_prompt_adds_proactive_performance_anchor_for_fragile_dialogue_scene_without_pressure(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚强忍泪意低声说我没事、病房门口、林晚、4秒、近景、缓推、抽气后低声说我没事、压抑、冷白侧光、我没事、空调低鸣、A18）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["病房门口: 冷白墙面与玻璃门".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt =
+            build_video_prompt(None, Some("https://example.com/frame.png"), Some(&context));
+
+        assert!(prompt.contains("开口前先压住气息"), "{prompt}");
+        assert!(prompt.contains("尾音带轻颤"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_skips_proactive_performance_anchor_when_storyboard_already_has_micro_performance(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚近景低声开口、咖啡厅窗边、林晚、4秒、近景、缓推、抬眼后压低气息说你先走、克制、夜间冷蓝窗光、你先走、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt =
+            build_video_prompt(None, Some("https://example.com/frame.png"), Some(&context));
+
+        assert!(!prompt.contains("眼神先动再开口"), "{prompt}");
+        assert!(!prompt.contains("开口前先压住气息"), "{prompt}");
+        assert!(!prompt.contains("尾音带轻颤"), "{prompt}");
     }
 
     #[test]
