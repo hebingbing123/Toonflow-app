@@ -2836,9 +2836,17 @@ fn build_video_prompt_quality_tail(
         || style_anchors
             .iter()
             .any(|anchor| continuity_tail_matches(anchor));
+    let motion_is_explicit = style_anchors
+        .iter()
+        .chain(continuity_notes.iter())
+        .any(|fragment| quality_tail_motion_is_explicit(fragment));
 
-    if continuity_is_explicit {
+    if continuity_is_explicit && motion_is_explicit {
+        "No extra shot changes.".to_string()
+    } else if continuity_is_explicit {
         "Natural motion, no extra shot changes.".to_string()
+    } else if motion_is_explicit {
+        "Stable continuity, no extra shot changes.".to_string()
     } else {
         "Natural motion, stable continuity, no extra shot changes.".to_string()
     }
@@ -2860,6 +2868,16 @@ fn continuity_tail_matches(value: &str) -> bool {
         && ["稳定", "跟拍", "衔接", "连续", "一致", "统一"]
             .iter()
             .any(|keyword| normalized.contains(keyword))
+}
+
+fn quality_tail_motion_is_explicit(value: &str) -> bool {
+    let normalized = normalize_prompt_text(value);
+    !normalized.is_empty()
+        && [
+            "动作", "节奏", "跟拍", "推进", "拉远", "手持", "转身", "快步", "呼吸", "停顿", "自然",
+        ]
+        .iter()
+        .any(|keyword| normalized.contains(keyword))
 }
 
 fn compact_camera_clause(
@@ -8335,14 +8353,9 @@ mod tests {
             prompt.contains("Style anchor: 胶片悬疑; 稳定跟拍, 质感克制粗粝."),
             "{prompt}"
         );
-        assert!(
-            prompt.contains("Natural motion, no extra shot changes."),
-            "{prompt}"
-        );
-        assert!(
-            !prompt.contains("Natural motion, stable continuity, no extra shot changes."),
-            "{prompt}"
-        );
+        assert!(prompt.contains("No extra shot changes."), "{prompt}");
+        assert!(!prompt.contains("Natural motion"), "{prompt}");
+        assert!(!prompt.contains("stable continuity"), "{prompt}");
     }
 
     #[test]
@@ -8368,10 +8381,8 @@ mod tests {
             "{prompt}"
         );
         assert!(!prompt.contains("镜头衔接统一"), "{prompt}");
-        assert!(
-            prompt.contains("Natural motion, no extra shot changes."),
-            "{prompt}"
-        );
+        assert!(prompt.contains("No extra shot changes."), "{prompt}");
+        assert!(!prompt.contains("Natural motion"), "{prompt}");
     }
 
     #[test]
@@ -10186,6 +10197,43 @@ mod tests {
             result.prompt
         );
         assert!(!result.prompt.contains("表演呼吸发颤"), "{}", result.prompt);
+        assert!(
+            !result.prompt.contains("Natural motion"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("No extra shot changes."),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_drops_motion_tail_when_continuity_note_already_carries_motion_guidance() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、静止、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["保持上一镜头动作节奏连续".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Continuity notes: 动作节奏连续."),
+            "{prompt}"
+        );
+        assert!(prompt.contains("No extra shot changes."), "{prompt}");
+        assert!(!prompt.contains("Natural motion"), "{prompt}");
+        assert!(!prompt.contains("stable continuity"), "{prompt}");
     }
 
     #[test]
