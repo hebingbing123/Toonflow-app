@@ -44,6 +44,7 @@ const VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS: usize = 48;
 const VIDEO_PROMPT_ENVIRONMENT_ANCHOR_MAX_CHARS: usize = 20;
+const VIDEO_PROMPT_ENVIRONMENT_TEXTURE_ANCHOR_MAX_CHARS: usize = 20;
 const VIDEO_PROMPT_MOTION_ANCHOR_MAX_CHARS: usize = 20;
 const DIRECTOR_ENVIRONMENT_PRIMARY_TOKENS: [&str; 24] = [
     "咖啡", "手机", "屏幕", "电梯", "车灯", "车流", "霓虹", "窗帘", "雨滴", "雨丝", "玻璃", "花瓣",
@@ -51,6 +52,10 @@ const DIRECTOR_ENVIRONMENT_PRIMARY_TOKENS: [&str; 24] = [
 ];
 const DIRECTOR_ENVIRONMENT_SECONDARY_TOKENS: [&str; 11] = [
     "窗", "雨", "花", "云", "水", "灯", "叶", "风", "雾", "烟", "雪",
+];
+const DIRECTOR_ENVIRONMENT_TEXTURE_MATCH_TOKENS: [&str; 19] = [
+    "雨", "灯", "光", "窗", "玻璃", "布", "衣", "袖", "裙", "帘", "带", "花", "烟", "雾", "水",
+    "波", "叶", "云", "车",
 ];
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
@@ -248,6 +253,12 @@ struct DirectorEmotionCue {
     face: String,
     eyes: String,
     micro_expression: String,
+}
+
+#[derive(Debug, Clone)]
+struct DirectorEnvironmentTextureCue {
+    cue: String,
+    match_terms: Vec<String>,
 }
 
 const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[
@@ -549,6 +560,74 @@ fn parse_director_environment_cues(markdown: &str) -> Vec<String> {
     cues
 }
 
+fn parse_director_environment_texture_cues(markdown: &str) -> Vec<DirectorEnvironmentTextureCue> {
+    let mut cues: Vec<DirectorEnvironmentTextureCue> = Vec::new();
+    let mut in_environment_section = false;
+
+    for raw_line in markdown.lines() {
+        let line = raw_line.trim();
+        if !in_environment_section {
+            if line.starts_with("## ") && (line.contains("环境动态") || line.contains("色块动态"))
+            {
+                in_environment_section = true;
+            }
+            continue;
+        }
+
+        if line.starts_with("## ") {
+            break;
+        }
+        if !line.starts_with("- **") || !(line.contains("动态表现") || line.contains("动态质感"))
+        {
+            continue;
+        }
+
+        let body = line
+            .split_once('—')
+            .or_else(|| line.split_once("——"))
+            .map(|(_, value)| normalize_prompt_text(value))
+            .unwrap_or_default();
+        let tail = body
+            .split_once('：')
+            .map(|(_, value)| value)
+            .unwrap_or(body.as_str());
+
+        for fragment in tail
+            .split(['、', '，', ',', '；', ';'])
+            .map(normalize_prompt_text)
+            .filter(|value| !value.is_empty())
+        {
+            let cue = if fragment.contains("光影斑驳") || fragment.contains("手绘质感") {
+                "手绘光影斑驳"
+            } else if fragment.contains("线条美感") || fragment.contains("细腻线条") {
+                "细腻线条动态"
+            } else if fragment.contains("赛璐璐渲染效果") || fragment.contains("赛璐璐平涂质感")
+            {
+                "赛璐璐动态质感"
+            } else {
+                continue;
+            };
+
+            if cues.iter().any(|existing| existing.cue == cue) {
+                continue;
+            }
+
+            let match_terms = DIRECTOR_ENVIRONMENT_TEXTURE_MATCH_TOKENS
+                .iter()
+                .filter(|token| fragment.contains(**token))
+                .map(|token| (*token).to_string())
+                .collect::<Vec<_>>();
+
+            cues.push(DirectorEnvironmentTextureCue {
+                cue: cue.to_string(),
+                match_terms,
+            });
+        }
+    }
+
+    cues
+}
+
 fn score_director_environment_cue_match(
     fields: &StructuredStoryboardDescription,
     cue: &str,
@@ -589,6 +668,48 @@ fn score_director_environment_cue_match(
             score += 1;
         }
     }
+    score
+}
+
+fn score_director_environment_texture_cue_match(
+    fields: &StructuredStoryboardDescription,
+    cue: &DirectorEnvironmentTextureCue,
+) -> usize {
+    let context = normalize_prompt_text(
+        &[
+            fields.setting.as_str(),
+            fields.action.as_str(),
+            fields.sound.as_str(),
+            fields.lighting.as_str(),
+        ]
+        .into_iter()
+        .filter(|part| !part.trim().is_empty())
+        .collect::<Vec<_>>()
+        .join(" "),
+    );
+    if context.is_empty() {
+        return 0;
+    }
+
+    let mut score = cue
+        .match_terms
+        .iter()
+        .filter(|term| context.contains(term.as_str()))
+        .count()
+        * 3;
+
+    if score == 0 && cue.cue == "手绘光影斑驳" && !fields.lighting.trim().is_empty() {
+        score = 1;
+    }
+    if score == 0
+        && cue.cue == "细腻线条动态"
+        && ["窗帘", "衣", "袖", "裙", "带", "发"]
+            .iter()
+            .any(|token| context.contains(token))
+    {
+        score = 1;
+    }
+
     score
 }
 
@@ -676,6 +797,49 @@ fn resolve_environment_style_anchor(
     Some(clip_prompt_fragment(
         &cue,
         VIDEO_PROMPT_ENVIRONMENT_ANCHOR_MAX_CHARS,
+    ))
+}
+
+fn resolve_environment_texture_style_anchor(
+    project_art_style: Option<&str>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+) -> Option<String> {
+    let fields = structured_fields?;
+    if fields.setting.trim().is_empty() {
+        return None;
+    }
+
+    let profile = art_style_director_profile(project_art_style?)?;
+    let cue = parse_director_environment_texture_cues(profile.director_storyboard_table_style)
+        .into_iter()
+        .filter_map(|cue| {
+            let score = score_director_environment_texture_cue_match(fields, &cue);
+            (score > 0).then_some((score, cue))
+        })
+        .max_by(|(left_score, left_cue), (right_score, right_cue)| {
+            left_score.cmp(right_score).then_with(|| {
+                right_cue
+                    .cue
+                    .chars()
+                    .count()
+                    .cmp(&left_cue.cue.chars().count())
+            })
+        })?
+        .1
+        .cue;
+
+    if prompt_fragment_is_covered(&cue, prompt_coverage)
+        || fields.setting.contains(&cue)
+        || fields.action.contains(&cue)
+        || fields.sound.contains(&cue)
+    {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &cue,
+        VIDEO_PROMPT_ENVIRONMENT_TEXTURE_ANCHOR_MAX_CHARS,
     ))
 }
 
@@ -2096,6 +2260,14 @@ fn build_project_visual_anchors(
         &style_coverage,
     ) {
         anchors.push(environment_anchor);
+        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    }
+    if let Some(environment_texture_anchor) = resolve_environment_texture_style_anchor(
+        ctx.project_art_style.as_deref(),
+        structured_fields,
+        &style_coverage,
+    ) {
+        anchors.push(environment_texture_anchor);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
     if let Some(motion_anchor) = resolve_motion_style_anchor(
@@ -5045,13 +5217,14 @@ mod tests {
         art_style_director_profile, build_video_prompt, build_video_prompt_with_diagnostics,
         compact_camera_clause, compact_negative_constraint_against_storyboard_style,
         compact_script_asset_anchor, parse_director_emotion_cues, parse_director_environment_cues,
-        parse_director_motion_cue, parse_structured_storyboard_description,
-        prune_low_signal_observation_candidates, resolve_observation_filter_style_note,
-        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
-        select_best_video_prompt_observation_note, select_script_asset_anchors,
-        select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
-        select_video_prompt_style_notes, trim_video_prompt_memory_rows,
-        trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
+        parse_director_environment_texture_cues, parse_director_motion_cue,
+        parse_structured_storyboard_description, prune_low_signal_observation_candidates,
+        resolve_observation_filter_style_note, resolve_video_prompt_duration,
+        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
+        select_script_asset_anchors, select_video_prompt_asset_seed_rows,
+        select_video_prompt_memory_notes, select_video_prompt_style_notes,
+        trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
+        video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptDiagnostics,
         GenerateVideoPromptResponse, ScriptRolePromptSeedRow, VideoPromptContext,
         VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
@@ -8001,6 +8174,17 @@ mod tests {
     }
 
     #[test]
+    fn parse_director_environment_texture_cues_reads_bundled_texture_section() {
+        let profile =
+            art_style_director_profile("成熟都市言情二次元动画").expect("matched art style");
+        let cues = parse_director_environment_texture_cues(profile.director_storyboard_table_style);
+
+        assert!(cues.iter().any(|cue| cue.cue == "手绘光影斑驳"));
+        assert!(cues.iter().any(|cue| cue.cue == "细腻线条动态"));
+        assert!(cues.iter().any(|cue| cue.cue == "赛璐璐动态质感"));
+    }
+
+    #[test]
     fn build_video_prompt_adds_environment_style_anchor_for_matching_setting() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -8020,6 +8204,28 @@ mod tests {
 
         assert!(prompt.contains("咖啡热气"), "{prompt}");
         assert!(prompt.contains("动作自然"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_adds_environment_texture_style_anchor_for_matching_setting() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（沈知微站在落地窗旁、城市夜景落地窗边、沈知微、4秒、中景、缓推、看着雨丝划过玻璃并轻扶窗帘、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A13）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("成熟都市言情二次元动画".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["沈知微: 米色风衣".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert_eq!(prompt.matches("雨丝划过玻璃").count(), 1, "{prompt}");
+        assert!(prompt.contains("赛璐璐动态质感"), "{prompt}");
     }
 
     #[test]
