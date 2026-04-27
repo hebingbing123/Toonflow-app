@@ -18,8 +18,9 @@ use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
     select_pending_rejected_video_observation_candidates, select_prioritized_video_style_note,
     select_project_video_style_memory_notes, select_script_video_style_memory_notes,
-    select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
-    StoryboardPromptSeedRow,
+    select_selected_video_memory_notes, select_subject_role_video_style_memory_notes,
+    selected_memory_subject_aliases, selected_memory_subject_identity, storyboard_prompt_seed,
+    AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -30,6 +31,7 @@ const VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
+const VIDEO_PROMPT_ROLE_STYLE_MEMORY_ROW_LIMIT: usize = 4;
 const VIDEO_PROMPT_OBSERVATION_FETCH_ROW_LIMIT: i64 = 24;
 const VIDEO_PROMPT_OBSERVATION_REJECTION_ROW_LIMIT: usize = 8;
 const VIDEO_PROMPT_OBSERVATION_SCRIPT_STYLE_ROW_LIMIT: usize = 1;
@@ -1043,8 +1045,8 @@ async fn load_video_prompt_memory_notes(
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
           AND (
-            (episodes_id = $3 AND name IN ('selected_video_memory', 'script_video_style_memory', 'auto_scope_memory'))
-            OR (episodes_id IS NULL AND name = 'project_video_style_memory')
+            (episodes_id = $3 AND name IN ('selected_video_memory', 'script_video_style_memory', 'script_role_video_style_memory', 'auto_scope_memory'))
+            OR (episodes_id IS NULL AND name IN ('project_video_style_memory', 'project_role_video_style_memory'))
           )
         ORDER BY create_time_ms DESC
         LIMIT $4
@@ -1082,6 +1084,12 @@ fn select_video_prompt_style_notes(
     current_prompt_seed: Option<&str>,
     storyboard_row: &StoryboardPromptSeedRow,
 ) -> Vec<String> {
+    let current_subject_candidates = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
     let exact =
         select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed)
             .into_iter()
@@ -1089,6 +1097,16 @@ fn select_video_prompt_style_notes(
             .collect::<Vec<_>>();
     if !exact.is_empty() {
         return exact;
+    }
+
+    let role_memory_notes =
+        select_subject_role_video_style_memory_notes(rows, &current_subject_candidates)
+            .into_iter()
+            .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+            .take(1)
+            .collect::<Vec<_>>();
+    if !role_memory_notes.is_empty() {
+        return role_memory_notes;
     }
 
     let prioritized = select_prioritized_video_style_note(
@@ -1167,14 +1185,18 @@ fn trim_video_prompt_memory_rows(
     let mut selected_candidates = Vec::new();
     let mut auto_scope_candidates = Vec::new();
     let mut script_style_candidates = Vec::new();
+    let mut script_role_style_candidates = Vec::new();
     let mut project_style_candidates = Vec::new();
+    let mut project_role_style_candidates = Vec::new();
 
     for (idx, row) in rows.into_iter().enumerate() {
         match row.name.as_str() {
             "selected_video_memory" => selected_candidates.push((idx, row)),
             "auto_scope_memory" => auto_scope_candidates.push((idx, row)),
             "script_video_style_memory" => script_style_candidates.push((idx, row)),
+            "script_role_video_style_memory" => script_role_style_candidates.push((idx, row)),
             "project_video_style_memory" => project_style_candidates.push((idx, row)),
+            "project_role_video_style_memory" => project_role_style_candidates.push((idx, row)),
             _ => {}
         }
     }
@@ -1208,11 +1230,25 @@ fn trim_video_prompt_memory_rows(
     {
         kept.insert(*idx);
     }
+    for (idx, _) in script_role_style_candidates
+        .iter()
+        .take(VIDEO_PROMPT_ROLE_STYLE_MEMORY_ROW_LIMIT)
+    {
+        kept.insert(*idx);
+    }
+    for (idx, _) in project_role_style_candidates
+        .iter()
+        .take(VIDEO_PROMPT_ROLE_STYLE_MEMORY_ROW_LIMIT)
+    {
+        kept.insert(*idx);
+    }
 
     let mut all_rows = selected_candidates;
     all_rows.extend(auto_scope_candidates);
     all_rows.extend(script_style_candidates);
+    all_rows.extend(script_role_style_candidates);
     all_rows.extend(project_style_candidates);
+    all_rows.extend(project_role_style_candidates);
     all_rows.sort_by_key(|(idx, _)| *idx);
     all_rows
         .into_iter()
@@ -7671,6 +7707,30 @@ mod tests {
         assert_eq!(
             select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
             vec!["情绪压迫".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_prefers_subject_role_memory_before_generic_summary() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=6 | style=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边迟疑开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            vec!["表演抬眼停顿，语气轻声".to_string()]
         );
     }
 

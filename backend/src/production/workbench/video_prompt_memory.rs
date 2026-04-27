@@ -8,10 +8,14 @@ use crate::error::ApiError;
 const SELECTED_VIDEO_MEMORY_NAME: &str = "selected_video_memory";
 const SCRIPT_VIDEO_STYLE_MEMORY_NAME: &str = "script_video_style_memory";
 const PROJECT_VIDEO_STYLE_MEMORY_NAME: &str = "project_video_style_memory";
+const SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME: &str = "script_role_video_style_memory";
+const PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME: &str = "project_role_video_style_memory";
 const REJECTED_VIDEO_NEGATIVE_MEMORY_NAME: &str = "rejected_video_negative_memory";
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
+const SCRIPT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 6;
+const PROJECT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 8;
 const PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT: usize = 2;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
@@ -208,6 +212,17 @@ pub(crate) fn build_selected_video_memory(
     let mut parts = vec![format!("storyboardIds={storyboard_numeric_id}")];
     if let Some(prompt_seed) = storyboard_prompt_seed(row) {
         parts.push(format!("promptSeed={prompt_seed}"));
+    }
+    if let Some(fields) = row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+    {
+        if let Some(subject) =
+            selected_memory_subject_identity(&fields.subject, &fields.subject_refs)
+        {
+            parts.push(format!("subject={subject}"));
+        }
     }
     let style = style_only_note(&note);
     if let Some(style) = style.as_ref() {
@@ -703,6 +718,17 @@ pub(crate) async fn refresh_script_video_style_memory(
         summarized.as_deref(),
         SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS,
     )
+    .await?;
+
+    replace_summary_memories(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME,
+        build_script_role_video_style_memories(&rows),
+        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS,
+    )
     .await
 }
 
@@ -741,6 +767,16 @@ pub(crate) async fn refresh_project_video_style_memory(
         summarized.as_deref(),
         PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS,
     )
+    .await?;
+
+    replace_project_summary_memories(
+        pool,
+        user_id,
+        project_numeric_id,
+        PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME,
+        build_project_role_video_style_memories(&rows),
+        PROJECT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS,
+    )
     .await
 }
 
@@ -759,6 +795,33 @@ pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -
         .filter(|row| row.name == PROJECT_VIDEO_STYLE_MEMORY_NAME)
         .filter_map(selected_video_style_value)
         .take(1)
+        .collect()
+}
+
+pub(crate) fn select_subject_role_video_style_memory_notes(
+    rows: &[AgentMemoryRow],
+    subject: &str,
+) -> Vec<String> {
+    let subject = normalize_prompt_text(subject);
+    if subject.is_empty() {
+        return Vec::new();
+    }
+
+    rows.iter()
+        .filter(|row| {
+            matches!(
+                row.name.as_str(),
+                SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME | PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME
+            )
+        })
+        .filter(|row| {
+            extract_key_value(&row.content, "subject")
+                .map(|value| normalize_prompt_text(&value))
+                .as_deref()
+                == Some(subject.as_str())
+        })
+        .filter_map(selected_video_style_value)
+        .take(2)
         .collect()
 }
 
@@ -2166,6 +2229,63 @@ fn compact_selected_memory_performance_style(
     None
 }
 
+pub(crate) fn selected_memory_subject_identity(
+    subject: &str,
+    subject_refs: &str,
+) -> Option<String> {
+    selected_memory_subject_aliases(subject, subject_refs)
+        .into_iter()
+        .max_by_key(|candidate| candidate.chars().count())
+}
+
+pub(crate) fn selected_memory_subject_aliases(subject: &str, subject_refs: &str) -> Vec<String> {
+    let mut aliases = Vec::new();
+
+    let refs = normalize_prompt_text(subject_refs);
+    if !refs.is_empty() {
+        for candidate in refs
+            .split(['/', '／', '、', ',', '，'])
+            .map(normalize_prompt_text)
+            .filter(|value| !value.is_empty())
+        {
+            if let Some(identity) = normalize_selected_memory_identity_candidate(&candidate) {
+                aliases.push(identity);
+            }
+        }
+    }
+
+    if let Some(identity) =
+        normalize_selected_memory_identity_candidate(&normalize_prompt_text(subject))
+    {
+        aliases.push(identity);
+    }
+
+    aliases.sort();
+    aliases.dedup();
+    aliases.truncate(4);
+    aliases
+}
+
+fn normalize_selected_memory_identity_candidate(candidate: &str) -> Option<String> {
+    let normalized = normalize_prompt_text(candidate);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    let stripped = strip_selected_memory_subject_role_prefix(&normalized)
+        .map(normalize_prompt_text)
+        .unwrap_or(normalized);
+    if stripped.is_empty()
+        || ACTION_SUBJECT_PREFIXES
+            .iter()
+            .any(|prefix| stripped == *prefix)
+    {
+        return None;
+    }
+    let clipped = clip_prompt_fragment(&stripped, 12);
+    (clipped.chars().count() >= 2).then_some(clipped)
+}
+
 fn compact_selected_memory_sound_style(sound: &str) -> Option<String> {
     if selected_memory_field_looks_silent(sound) {
         return None;
@@ -2917,7 +3037,9 @@ fn collect_ranked_video_style_note_candidates(
                 (120, extract_style_note_value(row))
             }
             SCRIPT_VIDEO_STYLE_MEMORY_NAME => (90, extract_style_note_value(row)),
+            SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => (102, extract_style_note_value(row)),
             PROJECT_VIDEO_STYLE_MEMORY_NAME => (70, extract_style_note_value(row)),
+            PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => (82, extract_style_note_value(row)),
             _ => continue,
         };
         let Some(note) = note else {
@@ -3013,7 +3135,9 @@ fn ranked_style_note_is_worth_recalling(
     match note.source_name.as_str() {
         SELECTED_VIDEO_MEMORY_NAME => evidence >= 1,
         SCRIPT_VIDEO_STYLE_MEMORY_NAME => evidence >= 2,
+        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => evidence >= 1,
         PROJECT_VIDEO_STYLE_MEMORY_NAME => evidence >= 3,
+        PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => evidence >= 2,
         _ => false,
     }
 }
@@ -3154,6 +3278,103 @@ fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<Str
     Some(format!("sampleCount={} | style={}", notes.len(), style))
 }
 
+fn build_script_role_video_style_memories(rows: &[AgentMemoryRow]) -> Vec<String> {
+    build_role_video_style_memories(rows.iter().map(|row| {
+        (
+            row.name.as_str(),
+            row.content.as_str(),
+            extract_key_value(&row.content, "storyboardIds")
+                .map(|storyboard_id| format!("script:{storyboard_id}")),
+            None,
+        )
+    }))
+}
+
+fn build_project_role_video_style_memories(rows: &[ScopedAgentMemoryRow]) -> Vec<String> {
+    build_role_video_style_memories(rows.iter().map(|row| {
+        (
+            row.name.as_str(),
+            row.content.as_str(),
+            extract_key_value(&row.content, "storyboardIds").map(|storyboard_id| {
+                format!(
+                    "{}:{storyboard_id}",
+                    row.episodes_id
+                        .map(|value| value.to_string())
+                        .unwrap_or_else(|| "project".to_string())
+                )
+            }),
+            row.episodes_id.map(|value| value.to_string()),
+        )
+    }))
+}
+
+fn build_role_video_style_memories<'a>(
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
+) -> Vec<String> {
+    #[derive(Default)]
+    struct RoleStyleGroup {
+        primary_subject: String,
+        aliases: Vec<String>,
+        notes: Vec<String>,
+    }
+
+    let mut grouped = Vec::<RoleStyleGroup>::new();
+    for (subject, aliases, note) in distinct_selected_video_style_notes_with_subject(rows) {
+        if let Some(existing) = grouped.iter_mut().find(|group| {
+            group
+                .aliases
+                .iter()
+                .any(|alias| aliases.iter().any(|candidate| candidate == alias))
+        }) {
+            if existing.primary_subject.is_empty() {
+                existing.primary_subject = subject.clone();
+            }
+            existing.aliases.extend(aliases);
+            existing.aliases.sort();
+            existing.aliases.dedup();
+            existing.notes.push(note);
+            continue;
+        }
+
+        grouped.push(RoleStyleGroup {
+            primary_subject: subject,
+            aliases,
+            notes: vec![note],
+        });
+    }
+
+    grouped
+        .into_iter()
+        .filter_map(|group| {
+            if group.notes.len() < 2 {
+                return None;
+            }
+            let recurring = recurring_style_fragments(&group.notes);
+            if recurring.is_empty() {
+                return None;
+            }
+            let style =
+                clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+            let primary_subject = clip_prompt_fragment(&group.primary_subject, 16);
+            let subject_aliases = group
+                .aliases
+                .iter()
+                .filter(|alias| **alias != group.primary_subject)
+                .cloned()
+                .collect::<Vec<_>>();
+            let mut parts = vec![
+                format!("subject={primary_subject}"),
+                format!("sampleCount={}", group.notes.len()),
+            ];
+            if !subject_aliases.is_empty() {
+                parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
+            }
+            parts.push(format!("style={style}"));
+            Some(parts.join(" | "))
+        })
+        .collect()
+}
+
 fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
     distinct_selected_video_style_notes_by_scope(
         rows.iter().map(|row| {
@@ -3188,6 +3409,80 @@ fn distinct_project_selected_video_style_notes(rows: &[ScopedAgentMemoryRow]) ->
         }),
         Some(PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT),
     )
+}
+
+fn distinct_selected_video_style_notes_with_subject<'a>(
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
+) -> Vec<(String, Vec<String>, String)> {
+    let mut storyboard_keys = Vec::new();
+    let mut sample_keys = Vec::new();
+    let mut notes = Vec::new();
+
+    for (name, content, scoped_storyboard_key, scope_key) in rows {
+        if name != SELECTED_VIDEO_MEMORY_NAME {
+            continue;
+        }
+        let Some(subject) = extract_key_value(content, "subject")
+            .map(|value| normalize_prompt_text(&value))
+            .filter(|value| !value.is_empty())
+        else {
+            continue;
+        };
+        let aliases = role_memory_subject_candidates(content);
+        let Some(note) = selected_video_style_value_from_content(content) else {
+            continue;
+        };
+        if let Some(storyboard_key) = scoped_storyboard_key {
+            let dedupe_key = format!("{subject}|{storyboard_key}");
+            if storyboard_keys
+                .iter()
+                .any(|existing| existing == &dedupe_key)
+            {
+                continue;
+            }
+            storyboard_keys.push(dedupe_key);
+        } else {
+            let prompt_seed = extract_key_value(content, "promptSeed").unwrap_or_default();
+            let sample_key = format!(
+                "{}|{}|{}",
+                subject,
+                scope_key.unwrap_or_else(|| "script".to_string()),
+                if prompt_seed.is_empty() {
+                    note.clone()
+                } else {
+                    prompt_seed
+                }
+            );
+            if sample_keys.iter().any(|existing| existing == &sample_key) {
+                continue;
+            }
+            sample_keys.push(sample_key);
+        }
+        notes.push((subject, aliases, note));
+    }
+
+    notes
+}
+
+fn role_memory_subject_candidates(content: &str) -> Vec<String> {
+    let mut subjects = Vec::new();
+    if let Some(subject) = extract_key_value(content, "subject")
+        .map(|value| normalize_prompt_text(&value))
+        .filter(|value| !value.is_empty())
+    {
+        subjects.push(subject);
+    }
+    if let Some(aliases) = extract_key_value(content, "subjectAliases") {
+        subjects.extend(
+            aliases
+                .split(['/', '／', '、', ',', '，'])
+                .map(normalize_prompt_text)
+                .filter(|value| !value.is_empty()),
+        );
+    }
+    subjects.sort();
+    subjects.dedup();
+    subjects
 }
 
 fn distinct_selected_video_style_notes_by_scope<'a>(
@@ -3944,6 +4239,57 @@ async fn replace_summary_memory(
     Ok(())
 }
 
+async fn replace_summary_memories(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    name: &str,
+    contents: Vec<String>,
+    keep_rows: i64,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(name)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    for content in contents.into_iter().take(keep_rows as usize) {
+        sqlx::query(
+            r#"
+            INSERT INTO app_agent_memory (
+              owner_user_id, numeric_project_id, episodes_id, agent_type,
+              memory_type, role, name, content, summarized, create_time_ms
+            )
+            VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+            "#,
+        )
+        .bind(user_id)
+        .bind(project_numeric_id)
+        .bind(script_numeric_id)
+        .bind(name)
+        .bind(content)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    }
+
+    Ok(())
+}
+
 async fn replace_project_summary_memory(
     pool: &PgPool,
     user_id: Uuid,
@@ -4019,10 +4365,59 @@ async fn replace_project_summary_memory(
     Ok(())
 }
 
+async fn replace_project_summary_memories(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    name: &str,
+    contents: Vec<String>,
+    keep_rows: i64,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id IS NULL
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $3
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(name)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    for content in contents.into_iter().take(keep_rows as usize) {
+        sqlx::query(
+            r#"
+            INSERT INTO app_agent_memory (
+              owner_user_id, numeric_project_id, episodes_id, agent_type,
+              memory_type, role, name, content, summarized, create_time_ms
+            )
+            VALUES ($1, $2, NULL, 'productionAgent', 'summary', 'assistant', $3, $4, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+            "#,
+        )
+        .bind(user_id)
+        .bind(project_numeric_id)
+        .bind(name)
+        .bind(content)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        build_project_video_style_memory, build_rejected_video_negative_memory,
+        build_project_role_video_style_memories, build_project_video_style_memory,
+        build_rejected_video_negative_memory, build_script_role_video_style_memories,
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
@@ -4035,6 +4430,7 @@ mod tests {
         select_pending_rejected_video_observation_note, select_prioritized_video_style_note,
         select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
         select_script_video_style_memory_notes, select_selected_video_memory_notes,
+        select_subject_role_video_style_memory_notes, selected_memory_subject_identity,
         selected_video_memory_quality_score, selected_video_memory_scope,
         selected_video_memory_update_would_reduce_quality, storyboard_prompt_seed, AgentMemoryRow,
         ScopedAgentMemoryRow, SelectedVideoMemoryScope, StoryboardPromptSeedRow,
@@ -4231,6 +4627,21 @@ mod tests {
 
         assert!(content.contains("语气低声克制"), "{content}");
         assert!(content.contains("声场雨声回响"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_persists_subject_identity_for_role_memory() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚看着窗外低声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、冷蓝窗光、低声说：你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("subject=林晚"), "{content}");
     }
 
     #[test]
@@ -5413,6 +5824,88 @@ mod tests {
         .expect("summary");
 
         assert!(summary.contains("表演抬眼停顿"), "{summary}");
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_groups_persona_by_subject() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=表演抬眼停顿，语气轻声克制"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=表演抬眼停顿，语气低声克制"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=24 | subject=顾承泽 | style=动作从容克制".into(),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_project_role_video_style_memories_keep_subjects_isolated_across_scripts() {
+        let summaries = build_project_role_video_style_memories(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=表演抬眼停顿，语气轻声克制"
+                    .into(),
+                episodes_id: Some(7),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=表演抬眼停顿，语气低声克制"
+                    .into(),
+                episodes_id: Some(8),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=21 | subject=顾承泽 | style=动作从容克制".into(),
+                episodes_id: Some(8),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_matches_exact_subject_only() {
+        let notes = select_subject_role_video_style_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=顾承泽 | sampleCount=3 | style=动作从容克制，语气低声克制"
+                        .into(),
+                },
+            ],
+            "林晚",
+        );
+
+        assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
+    }
+
+    #[test]
+    fn selected_memory_subject_identity_prefers_subject_refs_name() {
+        assert_eq!(
+            selected_memory_subject_identity("女主站在窗边", "林晚/咖啡杯"),
+            Some("林晚".to_string())
+        );
     }
 
     #[test]
