@@ -1160,11 +1160,15 @@ fn select_video_prompt_style_notes(
         return prioritized;
     }
 
-    collect_neighbor_video_prompt_style_notes(rows, storyboard_numeric_id)
-        .into_iter()
-        .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
-        .take(1)
-        .collect()
+    collect_neighbor_video_prompt_style_notes(
+        rows,
+        storyboard_numeric_id,
+        &current_subject_candidates,
+    )
+    .into_iter()
+    .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+    .take(1)
+    .collect()
 }
 
 fn exact_style_notes_should_yield_to_role_memory(
@@ -1223,6 +1227,7 @@ fn low_signal_local_camera_style_fragment(fragment: &str) -> bool {
 fn collect_neighbor_video_prompt_style_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
+    current_subject_candidates: &[String],
 ) -> Vec<String> {
     let mut scored = rows
         .iter()
@@ -1233,19 +1238,30 @@ fn collect_neighbor_video_prompt_style_notes(
             if storyboard_ids.is_empty() || storyboard_ids.contains(&storyboard_numeric_id) {
                 return None;
             }
+            let subject_match =
+                memory_content_matches_subject_candidates(&row.content, current_subject_candidates);
+            let has_explicit_subject = memory_content_has_subject_identity(&row.content);
+            if has_explicit_subject && !current_subject_candidates.is_empty() && !subject_match {
+                return None;
+            }
             let distance = storyboard_ids
                 .iter()
                 .map(|id| (storyboard_numeric_id - *id).abs())
                 .min()?;
             let note = extract_key_value(&row.content, "style")
                 .or_else(|| extract_key_value(&row.content, "note"))?;
-            Some((distance, idx, note))
+            Some((!subject_match, distance, idx, note))
         })
         .collect::<Vec<_>>();
-    scored.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+    scored.sort_by(|a, b| {
+        a.0.cmp(&b.0)
+            .then(a.1.cmp(&b.1))
+            .then(a.2.cmp(&b.2))
+            .then(a.3.cmp(&b.3))
+    });
 
     let mut notes = Vec::new();
-    for (_, _, note) in scored {
+    for (_, _, _, note) in scored {
         if notes.iter().any(|existing| existing == &note) {
             continue;
         }
@@ -1255,6 +1271,40 @@ fn collect_neighbor_video_prompt_style_notes(
         }
     }
     notes
+}
+
+fn memory_content_has_subject_identity(content: &str) -> bool {
+    extract_key_value(content, "subject").is_some()
+        || extract_key_value(content, "subjectAliases").is_some()
+}
+
+fn memory_content_matches_subject_candidates(content: &str, subject_candidates: &[String]) -> bool {
+    if subject_candidates.is_empty() {
+        return false;
+    }
+
+    let memory_subjects = extract_key_value(content, "subject")
+        .into_iter()
+        .chain(
+            extract_key_value(content, "subjectAliases")
+                .into_iter()
+                .flat_map(|value| {
+                    value
+                        .split('/')
+                        .map(normalize_prompt_text)
+                        .filter(|alias| !alias.is_empty())
+                        .collect::<Vec<_>>()
+                }),
+        )
+        .collect::<Vec<_>>();
+    !memory_subjects.is_empty()
+        && memory_subjects.iter().any(|memory_subject| {
+            subject_candidates.iter().any(|candidate| {
+                candidate == memory_subject
+                    || candidate.contains(memory_subject)
+                    || memory_subject.contains(candidate)
+            })
+        })
 }
 
 fn extract_storyboard_ids_from_memory_content(content: &str) -> Vec<i32> {
@@ -7894,6 +7944,30 @@ mod tests {
         assert_eq!(
             select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
             vec!["光影潮湿路灯".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_skips_neighbor_memory_from_other_subject() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=21 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=表演低头停顿，语气低声克制".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=19 | subject=林晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边迟疑开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            vec!["表演抬眼停顿，语气轻声".to_string()]
         );
     }
 
