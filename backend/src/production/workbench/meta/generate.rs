@@ -2835,7 +2835,13 @@ fn resolve_video_prompt_memory_budget_tier(
     {
         risk_score += 1;
     }
-    if context.is_some_and(|ctx| !ctx.continuity_notes.is_empty()) {
+    let has_effective_continuity_note = context.is_some_and(|ctx| {
+        video_prompt_has_effective_continuity_note_for_budget(
+            &ctx.continuity_notes,
+            structured_fields,
+        )
+    });
+    if has_effective_continuity_note {
         risk_score += 1;
     }
     if structured_fields.is_some_and(video_prompt_scene_needs_emotional_memory) {
@@ -2845,7 +2851,7 @@ fn resolve_video_prompt_memory_budget_tier(
         && structured_fields.is_some_and(video_prompt_scene_is_grounded_low_risk)
         && !role_anchors.is_empty()
         && (!scene_anchors.is_empty() || !tool_anchors.is_empty())
-        && context.is_none_or(|ctx| ctx.continuity_notes.is_empty())
+        && !has_effective_continuity_note
     {
         risk_score = risk_score.saturating_sub(2);
     }
@@ -2855,6 +2861,17 @@ fn resolve_video_prompt_memory_budget_tier(
     } else {
         VideoPromptMemoryBudgetTier::Lean
     }
+}
+
+fn video_prompt_has_effective_continuity_note_for_budget(
+    notes: &[String],
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> bool {
+    notes.iter().any(|note| {
+        compact_continuity_note(note, structured_fields, &[]).is_some_and(|compacted| {
+            continuity_note_matches_storyboard_risk(&compacted, structured_fields)
+        })
+    })
 }
 
 fn video_prompt_scene_needs_emotional_memory(fields: &StructuredStoryboardDescription) -> bool {
@@ -9299,6 +9316,35 @@ mod tests {
         assert!(!result.prompt.contains("Prop anchor:"), "{}", result.prompt);
         assert!(
             !result.prompt.contains("Style anchor:"),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_keeps_grounded_low_risk_shot_in_lean_tier_when_continuity_note_is_only_generic_tail(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚/咖啡杯、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演眼神放松，动作轻缓克制".into()],
+            continuity_notes: vec!["保持上一镜头衔接统一".into()],
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert_eq!(result.diagnostics.continuity_note_count, 0);
+        assert!(result.prompt.contains("Single shot."), "{}", result.prompt);
+        assert!(
+            !result.prompt.contains("Continuity notes:"),
             "{}",
             result.prompt
         );
