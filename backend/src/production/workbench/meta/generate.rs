@@ -3501,6 +3501,11 @@ fn trim_style_fragment_against_storyboard_fields(
                 fields.mood.as_str(),
             ],
         );
+        let trimmed = trim_style_fragment_by_shared_voice_keywords(
+            trimmed,
+            "语气",
+            &[fields.action.as_str(), fields.dialogue.as_str()],
+        );
         return trim_style_fragment_by_shared_mood_keywords(trimmed, "语气", &fields.mood);
     }
     if fragment.starts_with("声场") {
@@ -3586,6 +3591,54 @@ fn trim_style_fragment_by_shared_mood_keywords(
     let mut trimmed = body.to_string();
     for keyword in ["克制", "隐忍", "压抑", "平静", "冷静", "从容", "沉静"] {
         if !normalized_mood.contains(keyword) || !trimmed.contains(keyword) {
+            continue;
+        }
+        let candidate = normalize_prompt_text(&trimmed.replace(keyword, ""));
+        if candidate.chars().count() >= 2 {
+            trimmed = candidate;
+        }
+    }
+
+    if trimmed == body {
+        return Some(fragment);
+    }
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(format!("{prefix}{trimmed}"))
+    }
+}
+
+fn trim_style_fragment_by_shared_voice_keywords(
+    fragment: Option<String>,
+    prefix: &str,
+    fields: &[&str],
+) -> Option<String> {
+    let fragment = fragment?;
+    let body = fragment
+        .strip_prefix(prefix)
+        .unwrap_or(fragment.as_str())
+        .trim();
+    if body.is_empty() {
+        return None;
+    }
+
+    let normalized_fields = fields
+        .iter()
+        .map(|field| normalize_prompt_text(field))
+        .filter(|field| !field.is_empty())
+        .collect::<Vec<_>>();
+    if normalized_fields.is_empty() {
+        return Some(fragment);
+    }
+
+    let mut trimmed = body.to_string();
+    for keyword in ["低声", "轻声", "呢喃", "哽咽", "短促"] {
+        if !trimmed.contains(keyword)
+            || !normalized_fields
+                .iter()
+                .any(|field| field.contains(keyword))
+        {
             continue;
         }
         let candidate = normalize_prompt_text(&trimmed.replace(keyword, ""));
@@ -10197,13 +10250,41 @@ mod tests {
 
         assert_eq!(result.diagnostics.memory_budget_tier, "lean");
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
-        assert!(result.prompt.contains("语气低声克制"), "{}", result.prompt);
+        assert!(result.prompt.contains("语气克制"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气低声克制"), "{}", result.prompt);
         assert!(!result.prompt.contains("环境咖啡热气"), "{}", result.prompt);
         assert!(
             result.diagnostics.memory_style_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
             "{:?}",
             result.diagnostics
         );
+    }
+
+    #[test]
+    fn build_video_prompt_drops_voice_fragment_when_action_and_mood_already_cover_it() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、低声开口后停顿、克制、夜间冷蓝窗光、你别看我、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气低声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
     }
 
     #[test]
