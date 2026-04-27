@@ -2351,6 +2351,9 @@ fn build_video_prompt_with_diagnostics(
     let structured_fields = resolved_description
         .as_deref()
         .and_then(parse_structured_storyboard_description);
+    let compact_labels = structured_fields
+        .as_ref()
+        .is_some_and(video_prompt_scene_is_grounded_low_risk);
     let mut clauses = Vec::new();
     clauses.push(build_video_prompt_opening_clause(
         structured_fields.as_ref(),
@@ -2363,7 +2366,11 @@ fn build_video_prompt_with_diagnostics(
         &prompt_coverage,
     );
     if !role_anchors.is_empty() {
-        clauses.push(format!("Character anchor: {}.", role_anchors.join("; ")));
+        clauses.push(format!(
+            "{}: {}.",
+            video_prompt_anchor_label("Character anchor", "Character", compact_labels),
+            role_anchors.join("; ")
+        ));
     }
     let scene_anchors = build_script_scene_anchors(
         context,
@@ -2372,7 +2379,11 @@ fn build_video_prompt_with_diagnostics(
         &prompt_coverage,
     );
     if !scene_anchors.is_empty() {
-        clauses.push(format!("Scene anchor: {}.", scene_anchors.join("; ")));
+        clauses.push(format!(
+            "{}: {}.",
+            video_prompt_anchor_label("Scene anchor", "Scene", compact_labels),
+            scene_anchors.join("; ")
+        ));
     }
     let tool_anchors = build_script_tool_anchors(
         context,
@@ -2381,7 +2392,11 @@ fn build_video_prompt_with_diagnostics(
         &prompt_coverage,
     );
     if !tool_anchors.is_empty() {
-        clauses.push(format!("Prop anchor: {}.", tool_anchors.join("; ")));
+        clauses.push(format!(
+            "{}: {}.",
+            video_prompt_anchor_label("Prop anchor", "Prop", compact_labels),
+            tool_anchors.join("; ")
+        ));
     }
     let mut asset_coverage = Vec::new();
     extend_prompt_coverage(&mut asset_coverage, &role_anchors);
@@ -2487,7 +2502,11 @@ fn build_video_prompt_with_diagnostics(
     }
 
     if !style_anchors.is_empty() {
-        clauses.push(format!("Style anchor: {}.", style_anchors.join("; ")));
+        clauses.push(format!(
+            "{}: {}.",
+            video_prompt_anchor_label("Style anchor", "Style", compact_labels),
+            style_anchors.join("; ")
+        ));
     }
     extend_prompt_coverage(&mut prompt_coverage, &style_anchors);
     let continuity_notes = build_continuity_notes(
@@ -2502,7 +2521,8 @@ fn build_video_prompt_with_diagnostics(
         .sum();
     if !continuity_notes.is_empty() {
         clauses.push(format!(
-            "Continuity notes: {}.",
+            "{}: {}.",
+            video_prompt_anchor_label("Continuity notes", "Continuity", compact_labels),
             continuity_notes.join("; ")
         ));
     }
@@ -2534,6 +2554,18 @@ fn build_video_prompt_with_diagnostics(
             memory_budget_tier: memory_budget_tier.as_str().to_string(),
         },
         prompt,
+    }
+}
+
+fn video_prompt_anchor_label(
+    default_label: &'static str,
+    compact_label: &'static str,
+    compact_labels: bool,
+) -> &'static str {
+    if compact_labels {
+        compact_label
+    } else {
+        default_label
     }
 }
 
@@ -9224,6 +9256,95 @@ mod tests {
             "{}",
             result.prompt
         );
+        assert!(
+            result.prompt.contains("Character: 林晚:黑色针织外套."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("Scene: 咖啡厅窗边:木桌与雨痕玻璃."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("Prop: 咖啡杯:陶瓷白杯."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result
+                .prompt
+                .contains("Style: 真人都市写实; 咖啡热气; 动作自然; 表演眼神放松."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            !result.prompt.contains("Character anchor:"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            !result.prompt.contains("Scene anchor:"),
+            "{}",
+            result.prompt
+        );
+        assert!(!result.prompt.contains("Prop anchor:"), "{}", result.prompt);
+        assert!(
+            !result.prompt.contains("Style anchor:"),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_keeps_full_labels_for_high_risk_scene() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚冲出旧宅、旧宅走廊、林晚/青铜匕首、5秒、中景、稳定跟拍、快步推门冲出、哽咽压抑、逆光雨夜、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色风衣，短发".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: vec!["青铜匕首: 刀身旧磨损".into()],
+            memory_style_notes: vec!["表演呼吸发颤，语气哽咽克制".into()],
+            continuity_notes: vec!["保留上一镜头走位连续".into()],
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert!(
+            result
+                .prompt
+                .contains("Character anchor: 林晚:黑色风衣，短发."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result
+                .prompt
+                .contains("Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损."),
+            "{}",
+            result.prompt
+        );
+        assert!(result.prompt.contains("Style anchor:"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("Continuity notes:"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            !result.prompt.contains("Character: 林晚"),
+            "{}",
+            result.prompt
+        );
+        assert_eq!(result.diagnostics.memory_budget_tier, "expanded");
     }
 
     #[test]
