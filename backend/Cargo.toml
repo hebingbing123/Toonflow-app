@@ -56,3 +56,8 @@ path = "src/bin/export_openapi.rs"
 
 [features]
 redis = []
+
+[profile.test]
+debug = 0
+incremental = true
+codegen-units = 256
