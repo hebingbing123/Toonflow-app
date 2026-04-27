@@ -1137,6 +1137,11 @@ fn select_video_prompt_style_notes(
             .into_iter()
             .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
             .collect::<Vec<_>>();
+    if let Some(merged) =
+        merge_emotional_exact_and_role_style_notes(&exact, &role_memory_notes, storyboard_row)
+    {
+        return vec![merged];
+    }
     if !exact.is_empty()
         && !exact_style_notes_should_yield_to_role_memory(&exact, &role_memory_notes)
     {
@@ -1222,6 +1227,106 @@ fn low_signal_local_camera_style_fragment(fragment: &str) -> bool {
         ]
         .iter()
         .any(|candidate| body == *candidate)
+}
+
+fn merge_emotional_exact_and_role_style_notes(
+    exact_notes: &[String],
+    role_memory_notes: &[String],
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Option<String> {
+    let Some(fields) = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return None;
+    };
+    if !video_prompt_scene_needs_emotional_memory(&fields) {
+        return None;
+    }
+
+    exact_notes.iter().find_map(|exact_note| {
+        role_memory_notes
+            .iter()
+            .find_map(|role_note| merge_complementary_style_note_pair(exact_note, role_note))
+    })
+}
+
+fn merge_complementary_style_note_pair(exact_note: &str, role_note: &str) -> Option<String> {
+    let mut merged_fragments = split_prompt_note_fragments(exact_note).collect::<Vec<_>>();
+    if merged_fragments.is_empty() {
+        return None;
+    }
+
+    let mut added_role_signal = false;
+    for fragment in split_prompt_note_fragments(role_note) {
+        if !role_memory_fragment_is_high_value(fragment.as_str()) {
+            continue;
+        }
+        if merged_fragments
+            .iter()
+            .any(|existing| style_note_fragment_conflicts_or_overlaps(existing, &fragment))
+        {
+            continue;
+        }
+        merged_fragments.push(fragment);
+        added_role_signal = true;
+    }
+
+    if !added_role_signal {
+        return None;
+    }
+
+    let merged = compact_video_style_prompt_note(&merged_fragments.join("，"))?;
+    let exact = compact_video_style_prompt_note(exact_note)?;
+    let merged_score = merged_style_note_signal_score(&merged);
+    let exact_score = merged_style_note_signal_score(&exact);
+    (merged != exact && merged_score > exact_score).then_some(merged)
+}
+
+fn role_memory_fragment_is_high_value(fragment: &str) -> bool {
+    fragment.starts_with("表演")
+        || fragment.starts_with("语气")
+        || (fragment.starts_with("动作")
+            && ["克制", "迟疑", "停顿", "轻缓", "自然", "优雅"]
+                .iter()
+                .any(|keyword| fragment.contains(keyword)))
+}
+
+fn style_note_fragment_conflicts_or_overlaps(existing: &str, candidate: &str) -> bool {
+    if existing == candidate {
+        return true;
+    }
+
+    let existing_family = style_note_fragment_family(existing);
+    let candidate_family = style_note_fragment_family(candidate);
+    if existing_family.is_some() && existing_family == candidate_family {
+        return true;
+    }
+
+    existing.contains(candidate) || candidate.contains(existing)
+}
+
+fn style_note_fragment_family(fragment: &str) -> Option<&'static str> {
+    for prefix in [
+        "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场",
+    ] {
+        if fragment.starts_with(prefix) {
+            return Some(prefix);
+        }
+    }
+    None
+}
+
+fn merged_style_note_signal_score(note: &str) -> usize {
+    split_prompt_note_fragments(note)
+        .map(|fragment| match style_note_fragment_family(&fragment) {
+            Some("表演") | Some("语气") => 3,
+            Some("情绪") | Some("光影") => 2,
+            Some("镜头") | Some("动作") | Some("环境") | Some("声场") => 1,
+            _ => 0,
+        })
+        .sum()
 }
 
 fn is_local_framing_only_fragment(fragment: &str) -> bool {
@@ -2363,10 +2468,7 @@ fn build_video_prompt_with_diagnostics(
                 ));
             }
             if let Some(dialogue) = compacted_dialogue.as_deref() {
-                clauses.push(format!(
-                    "Dialogue or voice-over: {}.",
-                    clip_prompt_fragment(dialogue, 60)
-                ));
+                clauses.push(format!("Dialogue: {}.", clip_prompt_fragment(dialogue, 60)));
             }
             if let Some(sound) = compact_sound_clause(
                 &fields.sound,
@@ -5992,7 +6094,7 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(prompt.contains("Subject: 主角冲出旧宅."));
-        assert!(prompt.contains("Dialogue or voice-over: 别回头."));
+        assert!(prompt.contains("Dialogue: 别回头."));
         assert!(prompt.contains("Continuity notes: 保持上一镜头已确认的冷调压迫感."));
     }
 
@@ -7139,10 +7241,7 @@ mod tests {
             !prompt.contains("Action: 驻足回头并低声说你终于来了."),
             "{prompt}"
         );
-        assert!(
-            prompt.contains("Dialogue or voice-over: 你终于来了."),
-            "{prompt}"
-        );
+        assert!(prompt.contains("Dialogue: 你终于来了."), "{prompt}");
     }
 
     #[test]
@@ -7154,10 +7253,7 @@ mod tests {
         );
 
         assert!(prompt.contains("Action: 低声说你终于来了."), "{prompt}");
-        assert!(
-            prompt.contains("Dialogue or voice-over: 你终于来了."),
-            "{prompt}"
-        );
+        assert!(prompt.contains("Dialogue: 你终于来了."), "{prompt}");
     }
 
     #[test]
@@ -7924,7 +8020,7 @@ mod tests {
             None,
         );
 
-        assert!(prompt.contains("Dialogue or voice-over: 别回头."));
+        assert!(prompt.contains("Dialogue: 别回头."));
         assert!(prompt.contains("Sound: 脚步声逼近."));
         assert!(!prompt.contains("Sound: 低声说别回头"));
     }
@@ -7937,8 +8033,8 @@ mod tests {
             None,
         );
 
-        assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
-        assert!(!prompt.contains("Dialogue or voice-over: 轻声说：你终于来了."));
+        assert!(prompt.contains("Dialogue: 你终于来了."));
+        assert!(!prompt.contains("Dialogue: 轻声说：你终于来了."));
     }
 
     #[test]
@@ -7949,7 +8045,7 @@ mod tests {
             None,
         );
 
-        assert!(!prompt.contains("Dialogue or voice-over:"), "{prompt}");
+        assert!(!prompt.contains("Dialogue:"), "{prompt}");
         assert!(prompt.contains("Sound: 脚步声拖行."), "{prompt}");
     }
 
@@ -7961,7 +8057,7 @@ mod tests {
             None,
         );
 
-        assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
+        assert!(prompt.contains("Dialogue: 你终于来了."));
         assert!(prompt.contains("Sound: 风声回响."));
         assert!(!prompt.contains("Sound: 轻声说你终于来了"));
     }
@@ -7974,10 +8070,7 @@ mod tests {
             None,
         );
 
-        assert!(
-            prompt.contains("Dialogue or voice-over: 别出声."),
-            "{prompt}"
-        );
+        assert!(prompt.contains("Dialogue: 别出声."), "{prompt}");
     }
 
     #[test]
@@ -7988,7 +8081,7 @@ mod tests {
             None,
         );
 
-        assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
+        assert!(prompt.contains("Dialogue: 你终于来了."));
         assert!(!prompt.contains("Sound:"));
     }
 
@@ -8013,7 +8106,7 @@ mod tests {
             None,
         );
 
-        assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
+        assert!(prompt.contains("Dialogue: 你终于来了."));
         assert!(!prompt.contains("Sound:"), "{prompt}");
     }
 
@@ -8432,7 +8525,31 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
-            vec!["镜头低机位压迫感，情绪压迫".to_string()]
+            vec!["镜头低机位压迫感，情绪压迫，语气轻声".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_merges_exact_and_role_memory_for_emotional_scene() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=22 | style=镜头低机位压迫感，情绪冷峻压迫 | note=镜头低机位压迫感，情绪冷峻压迫".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边迟疑开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            vec!["镜头低机位压迫感，情绪压迫，表演抬眼停顿，语气轻声".to_string()]
         );
     }
 
