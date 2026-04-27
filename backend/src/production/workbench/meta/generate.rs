@@ -3424,6 +3424,7 @@ fn score_memory_style_fragment_for_lean_tier(
         Some("镜头") => 2,
         _ => 0,
     };
+    score += score_memory_fragment_human_performance_detail(fragment, family);
 
     if let Some(fields) = structured_fields {
         if video_prompt_scene_needs_emotional_memory(fields) {
@@ -3454,6 +3455,45 @@ fn score_memory_style_fragment_for_lean_tier(
         if storyboard_dialogue_is_empty(&fields.dialogue) && family == Some("语气") {
             score -= 2;
         }
+    }
+
+    score
+}
+
+fn score_memory_fragment_human_performance_detail(
+    fragment: &str,
+    family: Option<&'static str>,
+) -> i32 {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0;
+    match family {
+        Some("表演") => {
+            for keyword in [
+                "喉结", "吞咽", "呼吸", "鼻息", "眼尾", "眼眶", "眼睫", "嘴角", "眉心", "眉梢",
+                "唇线", "唇角", "眨眼",
+            ] {
+                if normalized.contains(keyword) {
+                    score += 3;
+                }
+            }
+            for keyword in ["自然", "克制", "平静", "沉静", "放松"] {
+                if normalized.contains(keyword) {
+                    score -= 1;
+                }
+            }
+        }
+        Some("语气") => {
+            for keyword in ["气息", "换气", "哽咽", "发颤", "尾音", "压低"] {
+                if normalized.contains(keyword) {
+                    score += 3;
+                }
+            }
+        }
+        _ => {}
     }
 
     score
@@ -10379,6 +10419,33 @@ mod tests {
         assert_eq!(result.diagnostics.memory_budget_tier, "lean");
         assert!(result.prompt.contains("表演眼神放松"), "{}", result.prompt);
         assert!(!result.prompt.contains("镜头稳定跟拍"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_prefers_micro_expression_fragment_in_lean_memory_tier() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、欲言又止后停顿片刻、隐忍克制、夜间冷蓝窗光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演自然克制，表演喉结滚动".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("表演自然克制"), "{}", result.prompt);
     }
 
     #[test]
