@@ -270,17 +270,20 @@ void main() {
         sceneAnchorCount: 2,
         toolAnchorCount: 1,
         styleAnchorCount: 2,
+        memoryStyleAnchorCount: 1,
+        memoryStyleChars: 36,
         continuityNoteCount: 1,
+        continuityNoteChars: 18,
         usesReferenceFrame: true,
       );
 
       expect(
         buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
-        'Prompt 318 chars · Negative 64 · Observation 22',
+        'Prompt 318 chars · Negative 64 · Observation 22 · Memory 36',
       );
       expect(
         buildStoryboardVideoPromptAnchorSummary(diagnostics),
-        '角色锚点 1 · 场景锚点 2 · 道具锚点 1 · 风格锚点 2 · 连续性记忆 1 · 已引用当前画面',
+        '角色锚点 1 · 场景锚点 2 · 道具锚点 1 · 风格锚点 2 · 私有记忆 1 · 连续性记忆 1 · 已引用当前画面',
       );
     },
   );
@@ -294,7 +297,10 @@ void main() {
       sceneAnchorCount: 0,
       toolAnchorCount: 0,
       styleAnchorCount: 0,
+      memoryStyleAnchorCount: 0,
+      memoryStyleChars: 0,
       continuityNoteCount: 0,
+      continuityNoteChars: 0,
       usesReferenceFrame: false,
     );
 
@@ -317,7 +323,10 @@ void main() {
       sceneAnchorCount: 2,
       toolAnchorCount: 1,
       styleAnchorCount: 2,
+      memoryStyleAnchorCount: 1,
+      memoryStyleChars: 44,
       continuityNoteCount: 1,
+      continuityNoteChars: 18,
       usesReferenceFrame: true,
     );
 
@@ -338,7 +347,10 @@ void main() {
         sceneAnchorCount: 0,
         toolAnchorCount: 0,
         styleAnchorCount: 0,
+        memoryStyleAnchorCount: 0,
+        memoryStyleChars: 0,
         continuityNoteCount: 0,
+        continuityNoteChars: 0,
         usesReferenceFrame: true,
       );
 
@@ -360,13 +372,41 @@ void main() {
         sceneAnchorCount: 1,
         toolAnchorCount: 1,
         styleAnchorCount: 1,
+        memoryStyleAnchorCount: 1,
+        memoryStyleChars: 32,
         continuityNoteCount: 1,
+        continuityNoteChars: 20,
         usesReferenceFrame: true,
       );
 
       expect(
         buildStoryboardVideoPromptBudgetHint(diagnostics),
         '当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。',
+      );
+    },
+  );
+
+  test(
+    'buildStoryboardVideoPromptBudgetHint warns when private memory gets heavy',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 412,
+        negativePromptChars: 28,
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 0,
+        styleAnchorCount: 2,
+        memoryStyleAnchorCount: 2,
+        memoryStyleChars: 64,
+        continuityNoteCount: 1,
+        continuityNoteChars: 22,
+        usesReferenceFrame: true,
+      );
+
+      expect(
+        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        '当前提示词里的私有记忆占比已经不低，优先合并泛化风格句，别先删角色表演记忆。',
       );
     },
   );

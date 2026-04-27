@@ -2600,6 +2600,36 @@ mod tests {
     }
 
     #[test]
+    fn build_storyboard_negative_prompts_prefers_matching_role_rejected_memory_alias() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | avoid=avoid identity drift".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | rejectionCount=3 | avoid=avoid lip-sync mismatch".into(),
+                },
+            ],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚强忍泪意看向门外"),
+                Some("（晚晚强忍泪意看向门外、雨夜门厅、晚晚/林晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、克制、冷调逆光、无台词、雨声回响、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        assert_eq!(
+            prompts.get(&12).and_then(|value| value.as_deref()),
+            Some("avoid identity drift")
+        );
+    }
+
+    #[test]
     fn review_fragment_is_irrelevant_to_dialogue_free_storyboard() {
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("主角贴墙前行".into()),

@@ -9,6 +9,8 @@ String buildStoryboardVideoPromptDiagnosticsLine(
       'Negative ${diagnostics.negativePromptChars}',
     if (diagnostics.observationNoteChars > 0)
       'Observation ${diagnostics.observationNoteChars}',
+    if (diagnostics.memoryStyleChars > 0)
+      'Memory ${diagnostics.memoryStyleChars}',
   ];
   return parts.join(' · ');
 }
@@ -23,6 +25,8 @@ String buildStoryboardVideoPromptAnchorSummary(
     if (diagnostics.toolAnchorCount > 0) '道具锚点 ${diagnostics.toolAnchorCount}',
     if (diagnostics.styleAnchorCount > 0)
       '风格锚点 ${diagnostics.styleAnchorCount}',
+    if (diagnostics.memoryStyleAnchorCount > 0)
+      '私有记忆 ${diagnostics.memoryStyleAnchorCount}',
     if (diagnostics.continuityNoteCount > 0)
       '连续性记忆 ${diagnostics.continuityNoteCount}',
     if (diagnostics.usesReferenceFrame) '已引用当前画面',
@@ -43,9 +47,15 @@ String buildStoryboardVideoPromptBudgetHint(
   if (diagnostics.promptChars >= 520) {
     return '当前提示词偏长，优先删重复场景/风格描述，先别动角色和关键道具锚点。';
   }
+  if (diagnostics.promptChars >= 380 && diagnostics.memoryStyleChars >= 48) {
+    return '当前提示词里的私有记忆占比已经不低，优先合并泛化风格句，别先删角色表演记忆。';
+  }
   if (diagnostics.promptChars >= 380 &&
       diagnostics.styleAnchorCount + diagnostics.continuityNoteCount >= 3) {
     return '当前提示词已接近长 prompt，继续补充前先检查风格锚点和连续性记忆是否重复。';
+  }
+  if (diagnostics.continuityNoteChars >= 48) {
+    return '连续性记忆已经偏长，先把重复的衔接描述压成更短的动作或表演锚点。';
   }
   if (anchorCount == 0 && diagnostics.styleAnchorCount == 0) {
     return '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。';

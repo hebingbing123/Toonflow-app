@@ -16,7 +16,10 @@ class GenerateVideoPromptDiagnostics {
     required this.sceneAnchorCount,
     required this.toolAnchorCount,
     required this.styleAnchorCount,
+    required this.memoryStyleAnchorCount,
+    required this.memoryStyleChars,
     required this.continuityNoteCount,
+    required this.continuityNoteChars,
     required this.usesReferenceFrame,
   });
 
@@ -27,7 +30,10 @@ class GenerateVideoPromptDiagnostics {
   final int sceneAnchorCount;
   final int toolAnchorCount;
   final int styleAnchorCount;
+  final int memoryStyleAnchorCount;
+  final int memoryStyleChars;
   final int continuityNoteCount;
+  final int continuityNoteChars;
   final bool usesReferenceFrame;
 
   factory GenerateVideoPromptDiagnostics.fromJson(Map<String, dynamic> json) {
@@ -40,7 +46,11 @@ class GenerateVideoPromptDiagnostics {
       sceneAnchorCount: (json['sceneAnchorCount'] as num?)?.toInt() ?? 0,
       toolAnchorCount: (json['toolAnchorCount'] as num?)?.toInt() ?? 0,
       styleAnchorCount: (json['styleAnchorCount'] as num?)?.toInt() ?? 0,
+      memoryStyleAnchorCount:
+          (json['memoryStyleAnchorCount'] as num?)?.toInt() ?? 0,
+      memoryStyleChars: (json['memoryStyleChars'] as num?)?.toInt() ?? 0,
       continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
+      continuityNoteChars: (json['continuityNoteChars'] as num?)?.toInt() ?? 0,
       usesReferenceFrame: json['usesReferenceFrame'] == true,
     );
   }

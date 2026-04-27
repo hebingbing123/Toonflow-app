@@ -5373,9 +5373,11 @@ mod tests {
         VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
     };
     use crate::production::workbench::video_prompt_memory::{
-        select_neighbor_selected_video_memory_notes, select_prioritized_video_style_note,
-        select_project_video_style_memory_notes, select_script_video_style_memory_notes,
-        AgentMemoryRow, StoryboardPromptSeedRow,
+        select_neighbor_selected_video_memory_notes,
+        select_pending_rejected_video_observation_candidates_for_subject,
+        select_prioritized_video_style_note, select_project_video_style_memory_notes,
+        select_script_video_style_memory_notes, selected_memory_subject_aliases, AgentMemoryRow,
+        StoryboardPromptSeedRow,
     };
 
     #[test]
@@ -8033,6 +8035,51 @@ mod tests {
                 .count(),
             8
         );
+    }
+
+    #[test]
+    fn observation_note_conflict_filter_prefers_matching_role_rejection_memory_alias() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚强忍泪意看向门外".into()),
+            video_desc: Some("（晚晚强忍泪意看向门外、雨夜门厅、晚晚/林晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let subject_candidates = storyboard_row
+            .video_desc
+            .as_deref()
+            .and_then(parse_structured_storyboard_description)
+            .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+            .unwrap_or_default();
+
+        let note = select_best_video_prompt_observation_note(
+            prune_low_signal_observation_candidates(
+                select_pending_rejected_video_observation_candidates_for_subject(
+                    &[
+                        AgentMemoryRow {
+                            name: "rejected_video_negative_memory".into(),
+                            content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | avoid=avoid identity drift".into(),
+                        },
+                        AgentMemoryRow {
+                            name: "rejected_video_negative_memory".into(),
+                            content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | rejectionCount=1 | avoid=avoid lip-sync mismatch".into(),
+                        },
+                    ],
+                    12,
+                    None,
+                    &subject_candidates,
+                )
+                .into_iter()
+                .filter(|candidate| {
+                    !video_prompt_observation_is_irrelevant_to_storyboard(
+                        candidate,
+                        Some(&storyboard_row),
+                    )
+                })
+                .collect(),
+            ),
+        );
+
+        assert_eq!(note, Some("avoid identity drift".to_string()));
     }
 
     #[test]
