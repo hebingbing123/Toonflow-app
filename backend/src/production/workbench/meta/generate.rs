@@ -3206,9 +3206,9 @@ fn compact_memory_style_anchor(
 
     let note = match memory_budget_tier {
         VideoPromptMemoryBudgetTier::Lean => {
-            select_best_memory_style_fragment_for_lean_tier(&fragments).map(|fragment| {
-                clip_prompt_fragment(&fragment, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS)
-            })?
+            select_best_memory_style_fragment_for_lean_tier(&fragments, structured_fields).map(
+                |fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS),
+            )?
         }
         VideoPromptMemoryBudgetTier::Expanded => {
             clip_prompt_fragment(&fragments.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
@@ -3217,27 +3217,67 @@ fn compact_memory_style_anchor(
     Some(note)
 }
 
-fn select_best_memory_style_fragment_for_lean_tier(fragments: &[String]) -> Option<String> {
+fn select_best_memory_style_fragment_for_lean_tier(
+    fragments: &[String],
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
     fragments
         .iter()
         .max_by(|left, right| {
-            score_memory_style_fragment_for_lean_tier(left)
-                .cmp(&score_memory_style_fragment_for_lean_tier(right))
+            score_memory_style_fragment_for_lean_tier(left, structured_fields)
+                .cmp(&score_memory_style_fragment_for_lean_tier(
+                    right,
+                    structured_fields,
+                ))
                 .then_with(|| right.chars().count().cmp(&left.chars().count()))
                 .then_with(|| right.cmp(left))
         })
         .cloned()
 }
 
-fn score_memory_style_fragment_for_lean_tier(fragment: &str) -> i32 {
-    match style_note_fragment_family(fragment) {
+fn score_memory_style_fragment_for_lean_tier(
+    fragment: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> i32 {
+    let family = style_note_fragment_family(fragment);
+    let mut score = match family {
         Some("表演") | Some("语气") => 6,
         Some("情绪") | Some("光影") => 5,
         Some("动作") => 4,
         Some("环境") | Some("声场") => 3,
         Some("镜头") => 2,
         _ => 0,
+    };
+
+    if let Some(fields) = structured_fields {
+        if video_prompt_scene_needs_emotional_memory(fields) {
+            score += match family {
+                Some("表演") | Some("语气") => 5,
+                Some("情绪") => 4,
+                _ => 0,
+            };
+        }
+        if video_prompt_scene_has_lighting_risk(fields) {
+            score += match family {
+                Some("光影") => 6,
+                Some("环境") | Some("声场") => 4,
+                _ => 0,
+            };
+        }
+        if video_prompt_scene_has_motion_risk(fields) {
+            score += match family {
+                Some("动作") => 6,
+                Some("镜头") => 5,
+                Some("表演") => 1,
+                _ => 0,
+            };
+        }
+        if storyboard_dialogue_is_empty(&fields.dialogue) && family == Some("语气") {
+            score -= 2;
+        }
     }
+
+    score
 }
 
 fn trim_style_fragment_against_storyboard_fields(
@@ -9827,6 +9867,67 @@ mod tests {
         assert_eq!(result.diagnostics.memory_budget_tier, "lean");
         assert!(result.prompt.contains("表演眼神放松"), "{}", result.prompt);
         assert!(!result.prompt.contains("镜头稳定跟拍"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_prefers_lighting_fragment_in_lean_memory_tier_for_reflective_scene(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚立在车窗边、雨夜街边车窗、林晚、4秒、中景、静止、抬眼看向倒影、克制隐忍、霓虹反光逆光、无台词、车流闷响、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["雨夜街边车窗: 玻璃水痕".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演眼神放松，光影霓虹反光层次，环境车窗水痕".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert!(
+            result.prompt.contains("光影霓虹反光层次"),
+            "{}",
+            result.prompt
+        );
+        assert!(!result.prompt.contains("表演眼神放松"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_prefers_motion_fragment_in_lean_memory_tier_for_follow_shot(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚穿过旧楼梯口、旧楼梯口、林晚、4秒、中景、稳定跟拍、快步下楼回头、紧张克制、冷色走廊灯、无台词、脚步空响、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色风衣".into()],
+            script_scene_anchors: vec!["旧楼梯口: 冷色墙面".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演呼吸发颤，镜头稳定跟拍压迫，动作快步回头停顿".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert!(
+            result.prompt.contains("动作快步回头停顿")
+                || result.prompt.contains("镜头稳定跟拍压迫"),
+            "{}",
+            result.prompt
+        );
+        assert!(!result.prompt.contains("表演呼吸发颤"), "{}", result.prompt);
     }
 
     #[test]
