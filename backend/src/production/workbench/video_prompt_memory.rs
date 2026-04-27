@@ -4352,7 +4352,7 @@ fn compact_role_character_mood_redundancy(fragments: &mut Vec<String>) {
         let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) else {
             return true;
         };
-        !matches!(mood, "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
+        !matches!(mood.as_str(), "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
     });
 }
 
@@ -4633,7 +4633,7 @@ fn compact_cross_fragment_style_redundancy(fragments: &mut Vec<String>) {
         let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) else {
             return true;
         };
-        if !matches!(mood, "冷调" | "冷色") {
+        if !matches!(mood.as_str(), "冷调" | "冷色") {
             return true;
         }
         !lighting_fragments

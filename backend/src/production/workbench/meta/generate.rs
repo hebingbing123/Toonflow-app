@@ -2445,8 +2445,9 @@ fn observation_candidate_matches_storyboard_risk(
     };
 
     match observation_note_budget_family(note) {
-        VideoPromptObservationFamily::Identity | VideoPromptObservationFamily::Blocking => true,
+        VideoPromptObservationFamily::Identity => true,
         VideoPromptObservationFamily::Dialogue => !storyboard_dialogue_is_empty(&fields.dialogue),
+        VideoPromptObservationFamily::Blocking => video_prompt_scene_has_blocking_risk(&fields),
         VideoPromptObservationFamily::Lighting => video_prompt_scene_has_lighting_risk(&fields),
         VideoPromptObservationFamily::Motion => video_prompt_scene_has_motion_risk(&fields),
         VideoPromptObservationFamily::Emotion => video_prompt_scene_needs_emotional_memory(&fields),
@@ -12165,6 +12166,46 @@ mod tests {
                 Some(&storyboard_row)
             ),
             vec!["avoid lip-sync mismatch".to_string()]
+        );
+    }
+
+    #[test]
+    fn prune_storyboard_observation_candidates_drops_blocking_note_for_grounded_low_risk_storyboard(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（林晚坐在窗边、雨夜书房、林晚、4秒、中景、静止、低头捏紧信纸、克制、室内暖光、你终于来了、雨声压过呼吸声、A21）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert!(prune_storyboard_observation_candidates(
+            vec!["avoid extra shot changes or wrong framing".into()],
+            Some(&storyboard_row)
+        )
+        .is_empty());
+    }
+
+    #[test]
+    fn prune_storyboard_observation_candidates_keeps_blocking_note_for_multi_subject_blocking_storyboard(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（林晚与顾承泽对峙、旧宅门厅、林晚/顾承泽、5秒、中景、稳定跟拍、林晚侧身让开后顾承泽逼近一步、压迫、冷调逆光、别过来、风声回响、A22）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            prune_storyboard_observation_candidates(
+                vec!["avoid extra shot changes or wrong framing".into()],
+                Some(&storyboard_row)
+            ),
+            vec!["avoid extra shot changes or wrong framing".to_string()]
         );
     }
 
