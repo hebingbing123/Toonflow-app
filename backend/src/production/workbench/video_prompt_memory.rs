@@ -3528,10 +3528,12 @@ fn compact_role_recurring_style_fragments(
         return Vec::new();
     }
 
-    combined
+    let mut filtered = combined
         .into_iter()
         .filter(|fragment| !fragment.starts_with("镜头"))
-        .collect()
+        .collect::<Vec<_>>();
+    compact_role_character_mood_redundancy(&mut filtered);
+    filtered
 }
 
 fn role_memory_fragment_is_character_signal(fragment: &str) -> bool {
@@ -3568,6 +3570,26 @@ fn summarize_role_voice_fragment(notes: &[String]) -> Option<String> {
     }
 
     Some(format!("语气{}克制", restrained.join("")))
+}
+
+fn compact_role_character_mood_redundancy(fragments: &mut Vec<String>) {
+    if fragments.len() < 2 {
+        return;
+    }
+
+    let has_character_performance_signal = fragments.iter().any(|fragment| {
+        fragment.starts_with("表演") || fragment.starts_with("语气") || fragment.starts_with("动作")
+    });
+    if !has_character_performance_signal {
+        return;
+    }
+
+    fragments.retain(|fragment| {
+        let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) else {
+            return true;
+        };
+        !matches!(mood.as_str(), "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
+    });
 }
 
 fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
@@ -6173,6 +6195,47 @@ mod tests {
         ]);
 
         assert!(summaries.is_empty(), "{summaries:?}");
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_drop_generic_restrained_mood_when_performance_exists()
+    {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=表演抬眼停顿，情绪克制".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=表演抬眼停顿，情绪隐忍".into(),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=2 | style=表演抬眼停顿".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_keep_distinct_intense_mood_when_performance_exists() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=表演抬眼停顿，情绪冷峻压迫"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=表演抬眼停顿，情绪冷峻压迫"
+                    .into(),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=2 | style=情绪冷峻压迫，表演抬眼停顿".to_string()]
+        );
     }
 
     #[test]
