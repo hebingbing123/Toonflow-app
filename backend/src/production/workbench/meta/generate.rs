@@ -19,8 +19,8 @@ use crate::production::workbench::video_prompt_memory::{
     select_pending_rejected_video_observation_candidates, select_prioritized_video_style_note,
     select_project_video_style_memory_notes, select_script_video_style_memory_notes,
     select_selected_video_memory_notes, select_subject_role_video_style_memory_notes,
-    selected_memory_subject_aliases, selected_memory_subject_identity, storyboard_prompt_seed,
-    AgentMemoryRow, StoryboardPromptSeedRow,
+    selected_memory_subject_aliases, storyboard_prompt_seed, AgentMemoryRow,
+    StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;

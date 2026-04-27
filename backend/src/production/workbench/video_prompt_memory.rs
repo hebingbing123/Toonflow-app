@@ -223,6 +223,11 @@ pub(crate) fn build_selected_video_memory(
         {
             parts.push(format!("subject={subject}"));
         }
+        let subject_aliases =
+            selected_memory_subject_aliases(&fields.subject, &fields.subject_refs);
+        if subject_aliases.len() > 1 {
+            parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
+        }
     }
     let style = style_only_note(&note);
     if let Some(style) = style.as_ref() {
@@ -800,10 +805,14 @@ pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -
 
 pub(crate) fn select_subject_role_video_style_memory_notes(
     rows: &[AgentMemoryRow],
-    subject: &str,
+    subject_candidates: &[String],
 ) -> Vec<String> {
-    let subject = normalize_prompt_text(subject);
-    if subject.is_empty() {
+    let subject_candidates = subject_candidates
+        .iter()
+        .map(|value| normalize_prompt_text(value))
+        .filter(|value| !value.is_empty())
+        .collect::<Vec<_>>();
+    if subject_candidates.is_empty() {
         return Vec::new();
     }
 
@@ -815,10 +824,15 @@ pub(crate) fn select_subject_role_video_style_memory_notes(
             )
         })
         .filter(|row| {
-            extract_key_value(&row.content, "subject")
-                .map(|value| normalize_prompt_text(&value))
-                .as_deref()
-                == Some(subject.as_str())
+            let memory_subjects = role_memory_subject_candidates(&row.content);
+            !memory_subjects.is_empty()
+                && memory_subjects.iter().any(|memory_subject| {
+                    subject_candidates.iter().any(|candidate| {
+                        candidate == memory_subject
+                            || candidate.contains(memory_subject)
+                            || memory_subject.contains(candidate)
+                    })
+                })
         })
         .filter_map(selected_video_style_value)
         .take(2)
@@ -2235,7 +2249,7 @@ pub(crate) fn selected_memory_subject_identity(
 ) -> Option<String> {
     selected_memory_subject_aliases(subject, subject_refs)
         .into_iter()
-        .max_by_key(|candidate| candidate.chars().count())
+        .next()
 }
 
 pub(crate) fn selected_memory_subject_aliases(subject: &str, subject_refs: &str) -> Vec<String> {
@@ -2260,8 +2274,14 @@ pub(crate) fn selected_memory_subject_aliases(subject: &str, subject_refs: &str)
         aliases.push(identity);
     }
 
-    aliases.sort();
-    aliases.dedup();
+    let mut deduped = Vec::new();
+    for alias in aliases {
+        if deduped.iter().any(|existing| existing == &alias) {
+            continue;
+        }
+        deduped.push(alias);
+    }
+    let mut aliases = deduped;
     aliases.truncate(4);
     aliases
 }
@@ -4645,6 +4665,23 @@ mod tests {
     }
 
     #[test]
+    fn build_selected_video_memory_persists_subject_aliases_for_role_memory() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("晚晚看着窗外低声开口".into()),
+                video_desc: Some("（晚晚站在窗边、城市夜景落地窗边、林晚/晚晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、冷蓝窗光、低声说：你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("subjectAliases="), "{content}");
+        assert!(content.contains("林晚"), "{content}");
+        assert!(content.contains("晚晚"), "{content}");
+    }
+
+    #[test]
     fn build_selected_video_memory_extracts_performance_style_fragment() {
         let content = build_selected_video_memory(
             23,
@@ -5831,12 +5868,12 @@ mod tests {
         let summaries = build_script_role_video_style_memories(&[
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=12 | subject=林晚 | style=表演抬眼停顿，语气轻声克制"
+                content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气轻声克制"
                     .into(),
             },
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=18 | subject=林晚 | style=表演抬眼停顿，语气低声克制"
+                content: "storyboardIds=18 | subject=晚晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气低声克制"
                     .into(),
             },
             AgentMemoryRow {
@@ -5847,7 +5884,7 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
+            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
         );
     }
 
@@ -5856,13 +5893,13 @@ mod tests {
         let summaries = build_project_role_video_style_memories(&[
             ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=12 | subject=林晚 | style=表演抬眼停顿，语气轻声克制"
+                content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气轻声克制"
                     .into(),
                 episodes_id: Some(7),
             },
             ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=18 | subject=林晚 | style=表演抬眼停顿，语气低声克制"
+                content: "storyboardIds=18 | subject=晚晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气低声克制"
                     .into(),
                 episodes_id: Some(8),
             },
@@ -5875,17 +5912,17 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
+            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
         );
     }
 
     #[test]
-    fn select_subject_role_video_style_memory_notes_matches_exact_subject_only() {
+    fn select_subject_role_video_style_memory_notes_matches_subject_aliases() {
         let notes = select_subject_role_video_style_memory_notes(
             &[
                 AgentMemoryRow {
                     name: "script_role_video_style_memory".into(),
-                    content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制"
+                    content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制"
                         .into(),
                 },
                 AgentMemoryRow {
@@ -5894,7 +5931,7 @@ mod tests {
                         .into(),
                 },
             ],
-            "林晚",
+            &["晚晚".to_string()],
         );
 
         assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
