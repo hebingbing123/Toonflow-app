@@ -788,10 +788,60 @@ fn prune_storyboard_negative_fragments(
 ) -> Vec<String> {
     let mut kept = fragments
         .into_iter()
+        .filter_map(|fragment| {
+            compact_negative_fragment_against_storyboard_risk(&fragment, storyboard_row)
+        })
         .filter(|fragment| negative_fragment_matches_storyboard_risk(fragment, storyboard_row))
         .collect::<Vec<_>>();
     kept.dedup();
     kept
+}
+
+fn compact_negative_fragment_against_storyboard_risk(
+    fragment: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let trimmed = fragment.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return Some(trimmed.to_string());
+    };
+
+    match canonical_negative_fragment(trimmed).as_str() {
+        "avoid extra shot changes or wrong framing" => {
+            if negative_prompt_scene_has_framing_risk(&fields) {
+                Some(trimmed.to_string())
+            } else {
+                Some("avoid unnecessary shot changes".to_string())
+            }
+        }
+        "avoid warped anatomy, blur, flicker" => {
+            if negative_prompt_scene_has_motion_risk(&fields) {
+                Some(trimmed.to_string())
+            } else {
+                Some("avoid warped anatomy or blur".to_string())
+            }
+        }
+        "avoid flat cold lighting or harsh backlight silhouette" => {
+            let has_flat_cold_lighting = negative_prompt_scene_has_flat_cold_lighting_risk(&fields);
+            let has_backlight = negative_prompt_scene_has_backlight_silhouette_risk(&fields);
+            match (has_flat_cold_lighting, has_backlight) {
+                (true, true) => Some(trimmed.to_string()),
+                (true, false) => Some("avoid flat cold lighting".to_string()),
+                (false, true) => Some("avoid harsh backlight silhouette".to_string()),
+                (false, false) => {
+                    negative_prompt_scene_has_lighting_risk(&fields).then_some(trimmed.to_string())
+                }
+            }
+        }
+        _ => Some(trimmed.to_string()),
+    }
 }
 
 fn negative_fragment_matches_storyboard_risk(
@@ -806,9 +856,10 @@ fn negative_fragment_matches_storyboard_risk(
     };
 
     match negative_fragment_family(fragment) {
+        "shot_change_only" => true,
         "lip_sync_mismatch" => !storyboard_dialogue_is_empty(&fields.dialogue),
         "lighting_backlight" => negative_prompt_scene_has_lighting_risk(&fields),
-        "rushed_motion" => negative_prompt_scene_has_motion_risk(&fields),
+        "rushed_motion" => true,
         "mood_tone" => negative_prompt_scene_needs_emotional_memory(&fields),
         "camera_framing" | "shot_change_framing" => negative_prompt_scene_has_framing_risk(&fields),
         _ => true,
@@ -858,6 +909,49 @@ fn negative_prompt_scene_has_lighting_risk(fields: &StructuredStoryboardDescript
                 "backlight",
                 "reflection",
                 "flicker",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn negative_prompt_scene_has_backlight_silhouette_risk(
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    [
+        fields.setting.as_str(),
+        fields.lighting.as_str(),
+        fields.sound.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && ["逆光", "背光", "剪影", "车灯", "silhouette", "backlight"]
+                .iter()
+                .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn negative_prompt_scene_has_flat_cold_lighting_risk(
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    [
+        fields.setting.as_str(),
+        fields.lighting.as_str(),
+        fields.sound.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "冷光",
+                "冷调",
+                "阴天",
+                "曝光",
+                "flat lighting",
+                "cold lighting",
             ]
             .iter()
             .any(|keyword| value.contains(keyword))
@@ -1802,6 +1896,7 @@ fn score_negative_prompt_budget_fragment(fragment: &str) -> i32 {
     let canonical = canonical_negative_fragment(fragment);
     let family_score = match negative_fragment_family(fragment) {
         "flicker_motion_jitter" => 36,
+        "shot_change_only" => 30,
         "shot_change_framing" | "camera_framing" => 34,
         "lighting_backlight" => 22,
         "mood_tone" => 16,
@@ -2054,6 +2149,11 @@ fn parse_visual_error_fragment(fragment: &str) -> Option<VisualErrorFlags> {
             blur: true,
             flicker: true,
         }),
+        "avoid warped anatomy or blur" => Some(VisualErrorFlags {
+            warped_anatomy: true,
+            blur: true,
+            ..Default::default()
+        }),
         "avoid warped hands or limbs" | "avoid warped anatomy" => Some(VisualErrorFlags {
             warped_anatomy: true,
             ..Default::default()
@@ -2073,6 +2173,9 @@ fn parse_visual_error_fragment(fragment: &str) -> Option<VisualErrorFlags> {
 fn render_visual_error_fragments(flags: VisualErrorFlags) -> Vec<String> {
     if flags.warped_anatomy && flags.blur && flags.flicker {
         return vec!["avoid warped anatomy, blur, flicker".to_string()];
+    }
+    if flags.warped_anatomy && flags.blur {
+        return vec!["avoid warped anatomy or blur".to_string()];
     }
 
     let mut fragments = Vec::new();
@@ -2259,9 +2362,8 @@ fn negative_fragment_family(value: &str) -> &'static str {
     let canonical = canonical_negative_fragment(value);
     match canonical.as_str() {
         "avoid flicker" | "avoid flicker or motion jitter" => "flicker_motion_jitter",
-        "avoid unnecessary shot changes" | "avoid extra shot changes or wrong framing" => {
-            "shot_change_framing"
-        }
+        "avoid unnecessary shot changes" => "shot_change_only",
+        "avoid extra shot changes or wrong framing" => "shot_change_framing",
         "avoid rushed motion" | "avoid rushed or jerky motion" => "rushed_motion",
         "avoid extreme camera angle"
         | "avoid overly tight close-up framing"
@@ -2336,7 +2438,8 @@ fn infer_video_provider(model: &str) -> &'static str {
 mod tests {
     use super::{
         build_storyboard_negative_prompts, clip_negative_prompt, collect_negative_review_fragments,
-        compact_negative_constraint_against_storyboard_style, compact_negative_review_constraints,
+        compact_negative_constraint_against_storyboard_style,
+        compact_negative_fragment_against_storyboard_risk, compact_negative_review_constraints,
         compact_review_fragments_against_rejected_memory, compact_video_ratio,
         infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
         map_bad_case_category_with_comments, merge_negative_prompts,
@@ -2503,6 +2606,71 @@ mod tests {
             "avoid extreme camera angle or overly tight close-up framing",
             Some(&storyboard_row),
         ));
+    }
+
+    #[test]
+    fn compact_negative_fragment_against_storyboard_risk_keeps_shot_change_only_for_grounded_shot()
+    {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、静止、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_negative_fragment_against_storyboard_risk(
+                "avoid extra shot changes or wrong framing",
+                Some(&storyboard_row),
+            )
+            .as_deref(),
+            Some("avoid unnecessary shot changes")
+        );
+    }
+
+    #[test]
+    fn compact_negative_fragment_against_storyboard_risk_drops_motion_half_for_static_visual_error()
+    {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、静止、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_negative_fragment_against_storyboard_risk(
+                "avoid warped anatomy, blur, flicker",
+                Some(&storyboard_row),
+            )
+            .as_deref(),
+            Some("avoid warped anatomy or blur")
+        );
+    }
+
+    #[test]
+    fn compact_negative_fragment_against_storyboard_risk_keeps_only_matching_lighting_half() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（林晚停在门厅、旧宅门厅、林晚、5秒、中景、静止、停步抬头、克制、阴天冷光、无台词、风声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            compact_negative_fragment_against_storyboard_risk(
+                "avoid flat cold lighting or harsh backlight silhouette",
+                Some(&storyboard_row),
+            )
+            .as_deref(),
+            Some("avoid flat cold lighting")
+        );
     }
 
     #[test]
@@ -3030,6 +3198,32 @@ mod tests {
         assert_eq!(selection.as_deref(), Some("avoid rushed motion"));
         assert_eq!(selection.fragment_count, 1);
         assert_eq!(selection.budget_tier, "lean");
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_keeps_shot_change_guard_for_grounded_storyboard_mismatch()
+    {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("output".into()),
+                target_id: None,
+                bad_case_category: Some("storyboard_mismatch".into()),
+                comments: None,
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("林晚站在窗边"),
+                Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、静止、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）"),
+                Some("4s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(selection.as_deref(), Some("avoid unnecessary shot changes"));
+        assert_eq!(selection.fragment_count, 1);
     }
 
     #[test]
