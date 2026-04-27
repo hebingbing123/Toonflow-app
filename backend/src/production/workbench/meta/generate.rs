@@ -40,6 +40,7 @@ const VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT: usize = 2;
+const VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT: usize = 2;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
@@ -1847,7 +1848,11 @@ fn build_script_scene_anchors(
     let setting = structured_fields
         .map(|fields| normalize_prompt_text(&fields.setting))
         .unwrap_or_default();
+    let action = structured_fields
+        .map(|fields| normalize_prompt_text(&fields.action))
+        .unwrap_or_default();
     let mut scored = Vec::new();
+    let mut directly_referenced_anchor_count = 0usize;
     for (idx, anchor) in ctx.script_scene_anchors.iter().enumerate() {
         let Some((name, note)) = anchor.split_once(':') else {
             continue;
@@ -1862,13 +1867,23 @@ fn build_script_scene_anchors(
         ) else {
             continue;
         };
-        let score = score_script_asset_anchor(&name, &description, &setting, "");
+        let ref_match_score = score_scene_ref_match(&name, &description, &setting, &action);
+        let score =
+            score_script_asset_anchor(&name, &description, &setting, &action) + ref_match_score;
         if name.is_empty() || score <= 0 {
             continue;
         }
+        if ref_match_score > 0 {
+            directly_referenced_anchor_count += 1;
+        }
         scored.push((score, idx, anchor));
     }
-    select_script_asset_anchors(scored, 1)
+    let scene_anchor_limit = if directly_referenced_anchor_count > 1 {
+        VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT.min(directly_referenced_anchor_count)
+    } else {
+        1
+    };
+    select_script_asset_anchors(scored, scene_anchor_limit)
 }
 
 fn build_script_tool_anchors(
@@ -1980,6 +1995,68 @@ fn score_subject_ref_match(name: &str, subject_refs: &[String]) -> i32 {
                 .then_some(220 - (idx.min(4) as i32 * 8))
         })
         .unwrap_or(0)
+}
+
+fn score_scene_ref_match(name: &str, description: &str, setting: &str, action: &str) -> i32 {
+    if name.is_empty() {
+        return 0;
+    }
+
+    let mut best = 0;
+    for suffix in scene_anchor_suffix_candidates(name) {
+        let Some(prefix) = name.strip_suffix(&suffix).map(normalize_prompt_text) else {
+            continue;
+        };
+        let prefix_matches_context = !prefix.is_empty()
+            && [description, setting, action]
+                .into_iter()
+                .any(|field| field.contains(&prefix));
+        if !prefix_matches_context {
+            continue;
+        }
+        if setting.contains(&suffix) {
+            best = best.max(120 - suffix.chars().count() as i32);
+        }
+        if action.contains(&suffix) {
+            best = best.max(72 - suffix.chars().count() as i32);
+        }
+        if description.contains(&suffix) {
+            best = best.max(48 - suffix.chars().count() as i32);
+        }
+    }
+    best
+}
+
+fn scene_anchor_suffix_candidates(name: &str) -> Vec<String> {
+    let normalized = normalize_prompt_text(name);
+    if normalized.chars().count() < 4 {
+        return Vec::new();
+    }
+
+    let chars = normalized.chars().collect::<Vec<_>>();
+    let mut suffixes = Vec::new();
+    for len in 2..=4 {
+        if chars.len() <= len {
+            continue;
+        }
+        let suffix = chars[chars.len() - len..].iter().collect::<String>();
+        if scene_anchor_suffix_looks_specific(&suffix)
+            && !suffixes.iter().any(|existing| existing == &suffix)
+        {
+            suffixes.push(suffix);
+        }
+    }
+    suffixes
+}
+
+fn scene_anchor_suffix_looks_specific(suffix: &str) -> bool {
+    !suffix.is_empty()
+        && [
+            "门厅", "走廊", "街口", "巷口", "门口", "楼梯", "楼道", "雨巷", "包间", "车内", "车门",
+            "客厅", "卧室", "仓库", "天台", "屋顶", "尽头",
+        ]
+        .iter()
+        .any(|keyword| suffix.ends_with(keyword))
 }
 
 fn structured_subject_ref_names(fields: &StructuredStoryboardDescription) -> Vec<String> {
@@ -5554,6 +5631,64 @@ mod tests {
             selected,
             vec!["主角:黑色风衣".to_string(), "反派:深灰长外套".to_string()]
         );
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_two_scene_anchors_for_transition_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角在旧宅走廊尽头回头、在旧宅走廊尽头的门厅、主角、5秒、中景、稳定跟拍、在旧宅走廊尽头停步回头、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec![
+                "旧宅走廊: 潮湿斑驳，冷色长廊".into(),
+                "旧宅门厅: 破损玻璃，潮湿回声".into(),
+                "医院门厅: 冷白瓷砖，回声明亮".into(),
+            ],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains(
+                "Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊; 旧宅门厅:破损玻璃，潮湿回声."
+            ) || prompt.contains(
+                "Scene anchor: 旧宅门厅:破损玻璃，潮湿回声; 旧宅走廊:潮湿斑驳，冷色长廊."
+            ),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("医院门厅:冷白瓷砖，回声明亮"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_single_scene_anchor_for_regular_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角停步回头、旧宅走廊、主角、5秒、中景、稳定跟拍、停步回头、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec![
+                "旧宅走廊: 潮湿斑驳，冷色长廊".into(),
+                "旧宅门厅: 破损玻璃，潮湿回声".into(),
+            ],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊."));
+        assert!(!prompt.contains("旧宅门厅:破损玻璃，潮湿回声"), "{prompt}");
     }
 
     #[test]
