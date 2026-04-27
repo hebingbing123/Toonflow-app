@@ -2055,6 +2055,10 @@ fn neighbor_style_fragment_matches_storyboard(
     if fragment.starts_with("光影") {
         return prompt_style_fragment_overlaps_field(fragment, &fields.lighting);
     }
+    if fragment.starts_with("动作") {
+        return prompt_style_fragment_overlaps_field(fragment, &fields.action)
+            || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
+    }
     false
 }
 
@@ -2421,6 +2425,13 @@ fn trim_style_fragment_against_storyboard_fields(
             ],
         );
     }
+    if fragment.starts_with("动作") {
+        return trim_prefixed_style_fragment(
+            fragment,
+            "动作",
+            &[fields.action.as_str(), fields.mood.as_str()],
+        );
+    }
     Some(fragment.to_string())
 }
 
@@ -2464,13 +2475,13 @@ fn style_fragment_matches_prompt_style_field(
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
-    ["镜头", "情绪", "光影", "环境"]
+    ["镜头", "情绪", "光影", "动作", "环境"]
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
 }
 
 fn style_fragment_body(fragment: &str) -> Option<String> {
-    ["镜头", "情绪", "光影", "环境"]
+    ["镜头", "情绪", "光影", "动作", "环境"]
         .iter()
         .find_map(|prefix| fragment.strip_prefix(prefix))
         .map(normalize_prompt_text)
@@ -5384,6 +5395,29 @@ mod tests {
         assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 镜头低机位压迫感，情绪冷色压迫感."));
         assert!(prompt.contains("Continuity notes: 保持上一镜头走位连续."));
         assert!(!prompt.contains("Continuity notes: 镜头低机位压迫感"));
+    }
+
+    #[test]
+    fn build_video_prompt_promotes_motion_style_memory_into_style_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（女主站在窗边、城市夜景落地窗边、女主、4秒、中景、缓推、看着雨丝划过玻璃并轻扶窗帘、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A18）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["动作从容克制，环境雨丝玻璃".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 真人都市写实;"), "{prompt}");
+        assert!(prompt.contains("环境雨丝玻璃"), "{prompt}");
+        assert!(prompt.contains("动作从容克制"), "{prompt}");
     }
 
     #[test]

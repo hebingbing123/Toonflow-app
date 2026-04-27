@@ -17,8 +17,8 @@ const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
 const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
-const STYLE_NOTE_PREFIXES: [&str; 5] = ["镜头", "情绪", "光影", "环境", "场景"];
-const STYLE_PROMPT_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "环境"];
+const STYLE_NOTE_PREFIXES: [&str; 6] = ["镜头", "情绪", "光影", "动作", "环境", "场景"];
+const STYLE_PROMPT_PREFIXES: [&str; 5] = ["镜头", "情绪", "光影", "动作", "环境"];
 const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 8] = [
     "稳定跟拍",
     "手持跟拍",
@@ -84,6 +84,16 @@ const ENVIRONMENT_STYLE_KEYWORDS: [&str; 13] = [
     "花瓣飘落",
     "树叶轻摆",
     "雪花飘落",
+];
+const MOTION_STYLE_KEYWORDS: [&str; 8] = [
+    "缓慢优雅",
+    "从容克制",
+    "克制自然",
+    "简洁平滑",
+    "自然",
+    "缓慢",
+    "轻盈",
+    "利落",
 ];
 const ACTION_PACE_PREFIXES: [&str; 9] = [
     "快步", "缓步", "迅速", "缓慢", "慢慢", "急忙", "猛地", "立刻", "立即",
@@ -1823,6 +1833,9 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
                 }
             }
         }
+        if let Some(motion) = compact_selected_memory_motion_style(&fields.action, &fields.mood) {
+            fragments.push(motion);
+        }
         let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
             .into_iter()
             .filter(|part| !part.is_empty())
@@ -1878,6 +1891,56 @@ fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String
         return None;
     }
     Some(subject)
+}
+
+fn compact_selected_memory_motion_style(action: &str, mood: &str) -> Option<String> {
+    let action = normalize_prompt_text(action);
+    if action.is_empty() {
+        return None;
+    }
+    let mood = normalize_prompt_text(mood);
+
+    if [
+        "优雅", "轻盈", "舒展", "轻拂", "轻旋", "轻扬", "提裙", "拂袖",
+    ]
+    .iter()
+    .any(|keyword| action.contains(keyword))
+    {
+        return Some("动作缓慢优雅".to_string());
+    }
+
+    let subtle_motion = [
+        "轻扶", "轻抬", "轻触", "轻拢", "轻掀", "抬眼", "垂眼", "停顿", "顿住", "收住", "缓缓",
+        "徐徐", "稳稳", "从容", "迟疑", "克制",
+    ]
+    .iter()
+    .any(|keyword| action.contains(keyword));
+    let restrained_mood = ["隐忍", "克制", "压抑", "沉静", "沉稳", "冷静"]
+        .iter()
+        .any(|keyword| mood.contains(keyword));
+    if subtle_motion && restrained_mood {
+        return Some("动作从容克制".to_string());
+    }
+
+    if [
+        "自然",
+        "生活化",
+        "日常",
+        "轻轻",
+        "慢慢",
+        "缓步",
+        "缓慢",
+        "平稳",
+        "稳步",
+    ]
+    .iter()
+    .any(|keyword| action.contains(keyword))
+        || subtle_motion
+    {
+        return Some("动作自然".to_string());
+    }
+
+    None
 }
 
 fn trim_selected_memory_subject_action_overlap(subject: &str, action: &str) -> Option<String> {
@@ -2928,6 +2991,13 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
             &LIGHTING_STYLE_KEYWORDS,
         ));
     }
+    if fragment.starts_with("动作") {
+        return Some(compact_prefixed_style_fragment_with_keywords(
+            fragment,
+            "动作",
+            &MOTION_STYLE_KEYWORDS,
+        ));
+    }
     if fragment.starts_with("环境") {
         return Some(compact_prefixed_style_fragment_with_keywords(
             fragment,
@@ -3150,6 +3220,9 @@ fn score_selected_video_memory_style_fragment(fragment: String) -> i32 {
     if fragment.starts_with("光影") {
         score += 6;
     }
+    if fragment.starts_with("动作") {
+        score += 5;
+    }
     if fragment.starts_with("环境") {
         score += 4;
     }
@@ -3252,6 +3325,7 @@ fn summarize_recurring_style_keywords(
         "镜头" => &SHOT_STYLE_KEYWORDS[..],
         "情绪" => &MOOD_STYLE_KEYWORDS[..],
         "光影" => &LIGHTING_STYLE_KEYWORDS[..],
+        "动作" => &MOTION_STYLE_KEYWORDS[..],
         "环境" => &ENVIRONMENT_STYLE_KEYWORDS[..],
         _ => return None,
     };
@@ -3782,6 +3856,21 @@ mod tests {
 
         assert!(content.contains("环境雨丝玻璃"), "{content}");
         assert!(!content.contains("场景城市夜景落地窗边"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_extracts_motion_style_fragment() {
+        let content = build_selected_video_memory(
+            21,
+            &StoryboardPromptSeedRow {
+                prompt: Some("女主站在窗边压住情绪".into()),
+                video_desc: Some("（女主站在窗边、城市夜景落地窗边、女主、4秒、中景、缓推、缓缓抬眼轻扶窗帘、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A21）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("style=动作从容克制"), "{content}");
     }
 
     #[test]
@@ -4889,6 +4978,26 @@ mod tests {
         .expect("summary");
 
         assert!(summary.contains("环境雨丝玻璃"), "{summary}");
+    }
+
+    #[test]
+    fn build_script_video_style_memory_keeps_recurring_motion_fragment() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头稳定跟拍，动作从容克制，情绪克制 | note=..."
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=10 | style=镜头近景稳定跟拍，动作从容克制，情绪隐忍 | note=..."
+                        .into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("动作从容克制"), "{summary}");
     }
 
     #[test]
