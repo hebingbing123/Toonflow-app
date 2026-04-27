@@ -528,7 +528,7 @@ pub(crate) async fn load_storyboard_negative_prompt_runtime(
     let selected_rows =
         load_selected_video_memory_rows(pool, user_id, project_numeric_id, script_numeric_id, 1)
             .await?;
-    let mut storyboard_seed_rows = load_storyboard_prompt_seed_rows(
+    let storyboard_seed_rows = load_storyboard_prompt_seed_rows(
         pool,
         user_id,
         project_numeric_id,
@@ -639,11 +639,15 @@ async fn load_storyboard_prompt_support_rows(
                 'selected_video_memory',
                 'script_video_style_memory',
                 'script_role_video_style_memory',
+                'script_video_observation_memory',
+                'script_role_video_observation_memory',
                 'auto_scope_memory'
             ))
             OR (episodes_id IS NULL AND name IN (
                 'project_video_style_memory',
-                'project_role_video_style_memory'
+                'project_role_video_style_memory',
+                'project_video_observation_memory',
+                'project_role_video_observation_memory'
             ))
           )
         ORDER BY create_time_ms DESC
@@ -683,10 +687,19 @@ async fn load_rejected_video_negative_memory_rows(
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
-          AND episodes_id = $3
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
-          AND name = 'rejected_video_negative_memory'
+          AND (
+            (episodes_id = $3 AND name IN (
+                'rejected_video_negative_memory',
+                'script_video_observation_memory',
+                'script_role_video_observation_memory'
+            ))
+            OR (episodes_id IS NULL AND name IN (
+                'project_video_observation_memory',
+                'project_role_video_observation_memory'
+            ))
+          )
         ORDER BY create_time_ms DESC
         LIMIT $4
         "#,

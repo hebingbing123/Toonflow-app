@@ -14,7 +14,8 @@ use crate::production::workbench::meta::common::{
     StructuredStoryboardDescription,
 };
 use crate::production::workbench::video::generate::{
-    load_storyboard_negative_prompt_runtime, StoryboardNegativePromptRuntime,
+    load_storyboard_negative_prompt_runtime, AutoNegativePromptSelection,
+    StoryboardNegativePromptRuntime,
 };
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,

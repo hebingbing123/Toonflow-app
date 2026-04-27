@@ -11,6 +11,10 @@ const PROJECT_VIDEO_STYLE_MEMORY_NAME: &str = "project_video_style_memory";
 const SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME: &str = "script_role_video_style_memory";
 const PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME: &str = "project_role_video_style_memory";
 const REJECTED_VIDEO_NEGATIVE_MEMORY_NAME: &str = "rejected_video_negative_memory";
+const SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME: &str = "script_video_observation_memory";
+const PROJECT_VIDEO_OBSERVATION_MEMORY_NAME: &str = "project_video_observation_memory";
+const SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME: &str = "script_role_video_observation_memory";
+const PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME: &str = "project_role_video_observation_memory";
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
@@ -20,6 +24,11 @@ const PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT: usize = 2;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
 const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
+const SCRIPT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS: i64 = 1;
+const PROJECT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS: i64 = 1;
+const SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS: i64 = 6;
+const PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS: i64 = 8;
+const PROJECT_VIDEO_OBSERVATION_MEMORY_MAX_SAMPLES_PER_SCRIPT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 9] = [
     "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场", "场景",
@@ -967,7 +976,7 @@ pub(crate) async fn refresh_script_video_style_memory(
     project_numeric_id: i32,
     script_numeric_id: i32,
 ) -> Result<(), ApiError> {
-    let rows = sqlx::query_as::<_, AgentMemoryRow>(
+    let selected_rows = sqlx::query_as::<_, AgentMemoryRow>(
         r#"
         SELECT name, content
         FROM app_agent_memory
@@ -990,7 +999,30 @@ pub(crate) async fn refresh_script_video_style_memory(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let summarized = build_script_video_style_memory(&rows);
+    let rejected_rows = sqlx::query_as::<_, AgentMemoryRow>(
+        r#"
+        SELECT name, content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        ORDER BY create_time_ms DESC
+        LIMIT $5
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let summarized = build_script_video_style_memory(&selected_rows);
     replace_summary_memory(
         pool,
         user_id,
@@ -1008,8 +1040,30 @@ pub(crate) async fn refresh_script_video_style_memory(
         project_numeric_id,
         script_numeric_id,
         SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME,
-        build_script_role_video_style_memories(&rows),
+        build_script_role_video_style_memories(&selected_rows),
         SCRIPT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS,
+    )
+    .await?;
+
+    replace_summary_memory(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME,
+        build_script_video_observation_memory(&rejected_rows).as_deref(),
+        SCRIPT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
+    )
+    .await?;
+
+    replace_summary_memories(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME,
+        build_script_role_video_observation_memories(&rejected_rows),
+        SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
     )
     .await
 }
@@ -1019,7 +1073,7 @@ pub(crate) async fn refresh_project_video_style_memory(
     user_id: Uuid,
     project_numeric_id: i32,
 ) -> Result<(), ApiError> {
-    let rows = sqlx::query_as::<_, ScopedAgentMemoryRow>(
+    let selected_rows = sqlx::query_as::<_, ScopedAgentMemoryRow>(
         r#"
         SELECT name, content, episodes_id
         FROM app_agent_memory
@@ -1040,7 +1094,28 @@ pub(crate) async fn refresh_project_video_style_memory(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let summarized = build_project_video_style_memory(&rows);
+    let rejected_rows = sqlx::query_as::<_, ScopedAgentMemoryRow>(
+        r#"
+        SELECT name, content, episodes_id
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $3
+        ORDER BY create_time_ms DESC
+        LIMIT $4
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS * 4)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let summarized = build_project_video_style_memory(&selected_rows);
     replace_project_summary_memory(
         pool,
         user_id,
@@ -1056,8 +1131,28 @@ pub(crate) async fn refresh_project_video_style_memory(
         user_id,
         project_numeric_id,
         PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME,
-        build_project_role_video_style_memories(&rows),
+        build_project_role_video_style_memories(&selected_rows),
         PROJECT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS,
+    )
+    .await?;
+
+    replace_project_summary_memory(
+        pool,
+        user_id,
+        project_numeric_id,
+        PROJECT_VIDEO_OBSERVATION_MEMORY_NAME,
+        build_project_video_observation_memory(&rejected_rows).as_deref(),
+        PROJECT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
+    )
+    .await?;
+
+    replace_project_summary_memories(
+        pool,
+        user_id,
+        project_numeric_id,
+        PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME,
+        build_project_role_video_observation_memories(&rejected_rows),
+        PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
     )
     .await
 }
@@ -1451,6 +1546,16 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
         })
         .flatten()
         .collect::<Vec<_>>();
+    if scored.is_empty() {
+        let summary_notes = select_rejected_video_observation_summary_notes(
+            rows,
+            &normalized_subject_candidates,
+            storyboard_row,
+        );
+        if !summary_notes.is_empty() {
+            return summary_notes;
+        }
+    }
     scored.sort_by(|a, b| {
         b.0.cmp(&a.0)
             .then(a.2.cmp(&b.2))
@@ -1475,6 +1580,85 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
         .then(|| selected.join(", "))
         .into_iter()
         .collect()
+}
+
+fn select_rejected_video_observation_summary_notes(
+    rows: &[AgentMemoryRow],
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let storyboard_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
+    if storyboard_tags.is_empty() {
+        return Vec::new();
+    }
+
+    let mut scored = rows
+        .iter()
+        .filter(|row| {
+            matches!(
+                row.name.as_str(),
+                SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+                    | PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+                    | SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME
+                    | PROJECT_VIDEO_OBSERVATION_MEMORY_NAME
+            )
+        })
+        .filter(|row| memory_matches_rejected_video_risk_tags(&row.content, &storyboard_tags))
+        .filter(|row| {
+            if matches!(
+                row.name.as_str(),
+                SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+                    | PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+            ) {
+                memory_matches_subject_candidates(&row.content, subject_candidates)
+            } else {
+                true
+            }
+        })
+        .filter_map(|row| {
+            let avoid = extract_key_value(&row.content, "avoid")?;
+            let fragments = ranked_rejected_negative_fragments(&avoid);
+            (!fragments.is_empty()).then_some((
+                rejected_observation_summary_scope_priority(row.name.as_str()),
+                observation_summary_sample_count(&row.content),
+                fragments,
+            ))
+        })
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+
+    let mut selected = Vec::new();
+    for (_, _, fragments) in scored {
+        for fragment in fragments {
+            if observation_note_is_covered(&fragment, &selected) {
+                continue;
+            }
+            selected.retain(|existing| !observation_note_covers(&fragment, existing));
+            selected.push(fragment);
+            if selected.len() >= REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
+                return vec![selected.join(", ")];
+            }
+        }
+    }
+    (!selected.is_empty())
+        .then(|| vec![selected.join(", ")])
+        .unwrap_or_default()
+}
+
+fn rejected_observation_summary_scope_priority(name: &str) -> u8 {
+    match name {
+        SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME => 0,
+        SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME => 1,
+        PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME => 2,
+        PROJECT_VIDEO_OBSERVATION_MEMORY_NAME => 3,
+        _ => u8::MAX,
+    }
+}
+
+fn observation_summary_sample_count(content: &str) -> usize {
+    extract_key_value(content, "sampleCount")
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(0)
 }
 
 #[cfg_attr(not(test), allow(dead_code))]
@@ -4788,6 +4972,323 @@ fn build_project_role_video_style_memories(rows: &[ScopedAgentMemoryRow]) -> Vec
     }))
 }
 
+fn build_script_video_observation_memory(rows: &[AgentMemoryRow]) -> Option<String> {
+    build_video_observation_memory(
+        rows.iter().map(|row| {
+            (
+                row.name.as_str(),
+                row.content.as_str(),
+                extract_key_value(&row.content, "storyboardIds")
+                    .map(|storyboard_id| format!("script:{storyboard_id}")),
+                None,
+            )
+        }),
+        None,
+    )
+}
+
+fn build_project_video_observation_memory(rows: &[ScopedAgentMemoryRow]) -> Option<String> {
+    build_video_observation_memory(
+        rows.iter().map(|row| {
+            (
+                row.name.as_str(),
+                row.content.as_str(),
+                extract_key_value(&row.content, "storyboardIds").map(|storyboard_id| {
+                    format!(
+                        "{}:{storyboard_id}",
+                        row.episodes_id
+                            .map(|value| value.to_string())
+                            .unwrap_or_else(|| "project".to_string())
+                    )
+                }),
+                row.episodes_id.map(|value| value.to_string()),
+            )
+        }),
+        Some(PROJECT_VIDEO_OBSERVATION_MEMORY_MAX_SAMPLES_PER_SCRIPT),
+    )
+}
+
+fn build_script_role_video_observation_memories(rows: &[AgentMemoryRow]) -> Vec<String> {
+    build_role_video_observation_memories(rows.iter().map(|row| {
+        (
+            row.name.as_str(),
+            row.content.as_str(),
+            extract_key_value(&row.content, "storyboardIds")
+                .map(|storyboard_id| format!("script:{storyboard_id}")),
+            None,
+        )
+    }))
+}
+
+fn build_project_role_video_observation_memories(rows: &[ScopedAgentMemoryRow]) -> Vec<String> {
+    build_role_video_observation_memories(rows.iter().map(|row| {
+        (
+            row.name.as_str(),
+            row.content.as_str(),
+            extract_key_value(&row.content, "storyboardIds").map(|storyboard_id| {
+                format!(
+                    "{}:{storyboard_id}",
+                    row.episodes_id
+                        .map(|value| value.to_string())
+                        .unwrap_or_else(|| "project".to_string())
+                )
+            }),
+            row.episodes_id.map(|value| value.to_string()),
+        )
+    }))
+}
+
+fn build_video_observation_memory<'a>(
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
+    max_samples_per_scope: Option<usize>,
+) -> Option<String> {
+    let samples = distinct_rejected_video_observation_samples(rows, max_samples_per_scope);
+    if samples.len() < 2 {
+        return None;
+    }
+
+    let fragments = summarize_observation_fragments(
+        samples.iter().map(|sample| sample.avoid.as_str()),
+        REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT,
+    );
+    if fragments.is_empty() {
+        return None;
+    }
+
+    let risk_tags = summarize_observation_risk_tags(&samples);
+    let mut parts = vec![format!("sampleCount={}", samples.len())];
+    if !risk_tags.is_empty() {
+        parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
+    parts.push(format!("avoid={}", fragments.join(", ")));
+    Some(parts.join(" | "))
+}
+
+fn build_role_video_observation_memories<'a>(
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
+) -> Vec<String> {
+    #[derive(Default)]
+    struct RoleObservationGroup {
+        primary_subject: String,
+        aliases: Vec<String>,
+        samples: Vec<RejectedObservationSample>,
+    }
+
+    let mut grouped = Vec::<RoleObservationGroup>::new();
+    for sample in distinct_rejected_video_observation_samples(rows, None) {
+        if sample.subject.is_empty() || sample.subject_aliases.is_empty() {
+            continue;
+        }
+        if let Some(existing) = grouped.iter_mut().find(|group| {
+            group.aliases.iter().any(|alias| {
+                sample
+                    .subject_aliases
+                    .iter()
+                    .any(|candidate| candidate == alias)
+            })
+        }) {
+            if existing.primary_subject.is_empty() {
+                existing.primary_subject = sample.subject.clone();
+            }
+            existing.aliases.extend(sample.subject_aliases.clone());
+            existing.aliases.sort();
+            existing.aliases.dedup();
+            existing.samples.push(sample);
+            continue;
+        }
+
+        grouped.push(RoleObservationGroup {
+            primary_subject: sample.subject.clone(),
+            aliases: sample.subject_aliases.clone(),
+            samples: vec![sample],
+        });
+    }
+
+    grouped
+        .into_iter()
+        .filter_map(|group| {
+            if group.samples.len() < 2 {
+                return None;
+            }
+            let fragments = summarize_observation_fragments(
+                group.samples.iter().map(|sample| sample.avoid.as_str()),
+                REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT,
+            );
+            if fragments.is_empty() {
+                return None;
+            }
+            let risk_tags = summarize_observation_risk_tags(&group.samples);
+            let primary_subject = clip_prompt_fragment(&group.primary_subject, 16);
+            let subject_aliases = group
+                .aliases
+                .into_iter()
+                .filter(|alias| alias != &group.primary_subject)
+                .collect::<Vec<_>>();
+            let mut parts = vec![
+                format!("subject={primary_subject}"),
+                format!("sampleCount={}", group.samples.len()),
+            ];
+            if !subject_aliases.is_empty() {
+                parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
+            }
+            if !risk_tags.is_empty() {
+                parts.push(format!("riskTags={}", risk_tags.join("/")));
+            }
+            parts.push(format!("avoid={}", fragments.join(", ")));
+            Some(parts.join(" | "))
+        })
+        .collect()
+}
+
+#[derive(Debug, Clone)]
+struct RejectedObservationSample {
+    subject: String,
+    subject_aliases: Vec<String>,
+    avoid: String,
+    risk_tags: Vec<String>,
+}
+
+fn distinct_rejected_video_observation_samples<'a>(
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
+    max_samples_per_scope: Option<usize>,
+) -> Vec<RejectedObservationSample> {
+    let mut storyboard_keys = Vec::new();
+    let mut sample_keys = Vec::new();
+    let mut scope_counts = Vec::<(String, usize)>::new();
+    let mut samples = Vec::new();
+
+    for (name, content, scoped_storyboard_key, scope_key) in rows {
+        if name != REJECTED_VIDEO_NEGATIVE_MEMORY_NAME
+            || rejected_video_negative_rejection_count(content)
+                < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
+        {
+            continue;
+        }
+        let Some(avoid) = extract_key_value(content, "avoid")
+            .map(|value| compact_rejected_negative_avoid(&value))
+        else {
+            continue;
+        };
+        if avoid.is_empty() {
+            continue;
+        }
+
+        if let Some(storyboard_key) = scoped_storyboard_key {
+            if storyboard_keys
+                .iter()
+                .any(|existing| existing == &storyboard_key)
+            {
+                continue;
+            }
+            storyboard_keys.push(storyboard_key);
+        } else {
+            let prompt_seed = extract_key_value(content, "promptSeed").unwrap_or_default();
+            let scope_key = scope_key.unwrap_or_else(|| "script".to_string());
+            let sample_key = if prompt_seed.is_empty() {
+                format!("{scope_key}|{avoid}")
+            } else {
+                format!("{scope_key}|{prompt_seed}")
+            };
+            if sample_keys.iter().any(|existing| existing == &sample_key) {
+                continue;
+            }
+            if let Some(limit) = max_samples_per_scope {
+                let count = scope_counts
+                    .iter_mut()
+                    .find(|(existing_scope, _)| existing_scope == &scope_key);
+                match count {
+                    Some((_, count)) if *count >= limit => continue,
+                    Some((_, count)) => *count += 1,
+                    None => scope_counts.push((scope_key.clone(), 1)),
+                }
+            }
+            sample_keys.push(sample_key);
+        }
+
+        let subject = extract_key_value(content, "subject")
+            .map(|value| normalize_prompt_text(&value))
+            .unwrap_or_default();
+        samples.push(RejectedObservationSample {
+            subject,
+            subject_aliases: role_memory_subject_candidates(content),
+            avoid,
+            risk_tags: extract_rejected_video_risk_tags(content),
+        });
+    }
+
+    samples
+}
+
+fn summarize_observation_fragments<'a>(
+    avoids: impl Iterator<Item = &'a str>,
+    limit: usize,
+) -> Vec<String> {
+    let mut counts = Vec::<(String, usize, i32)>::new();
+    for avoid in avoids {
+        let mut seen = Vec::<String>::new();
+        for fragment in ranked_rejected_negative_fragments(avoid) {
+            if seen.iter().any(|existing| existing == &fragment) {
+                continue;
+            }
+            seen.push(fragment.clone());
+            if let Some((_, count, _)) = counts
+                .iter_mut()
+                .find(|(existing, _, _)| existing == &fragment)
+            {
+                *count += 1;
+            } else {
+                counts.push((
+                    fragment.clone(),
+                    1,
+                    score_rejected_negative_fragment(&fragment),
+                ));
+            }
+        }
+    }
+    counts.sort_by(|a, b| b.1.cmp(&a.1).then(b.2.cmp(&a.2)).then(a.0.cmp(&b.0)));
+
+    let mut selected = Vec::new();
+    for (fragment, count, _) in counts {
+        if count < 2 {
+            continue;
+        }
+        if observation_note_is_covered(&fragment, &selected) {
+            continue;
+        }
+        selected.retain(|existing| !observation_note_covers(&fragment, existing));
+        selected.push(fragment);
+        if selected.len() >= limit {
+            break;
+        }
+    }
+    selected
+}
+
+fn summarize_observation_risk_tags(samples: &[RejectedObservationSample]) -> Vec<String> {
+    let mut counts = Vec::<(String, usize)>::new();
+    for sample in samples {
+        let mut seen = Vec::<String>::new();
+        for tag in &sample.risk_tags {
+            if seen.iter().any(|existing| existing == tag) {
+                continue;
+            }
+            seen.push(tag.clone());
+            if let Some((_, count)) = counts.iter_mut().find(|(existing, _)| existing == tag) {
+                *count += 1;
+            } else {
+                counts.push((tag.clone(), 1));
+            }
+        }
+    }
+    counts.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    counts
+        .into_iter()
+        .filter(|(_, count)| *count >= 2)
+        .map(|(tag, _)| tag)
+        .take(REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT)
+        .collect()
+}
+
 fn build_role_video_style_memories<'a>(
     rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
 ) -> Vec<String> {
@@ -6492,7 +6993,8 @@ async fn replace_project_summary_memories(
 mod tests {
     use super::{
         build_project_role_video_style_memories, build_project_video_style_memory,
-        build_rejected_video_negative_memory, build_script_role_video_style_memories,
+        build_rejected_video_negative_memory, build_script_role_video_observation_memories,
+        build_script_role_video_style_memories, build_script_video_observation_memory,
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
@@ -8427,6 +8929,91 @@ mod tests {
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("avoid flicker or motion jitter"));
         assert!(merged.contains("avoid flat cold lighting or harsh backlight silhouette"));
+    }
+
+    #[test]
+    fn build_script_video_observation_memory_summarizes_recurring_failure_guards() {
+        let summary = build_script_video_observation_memory(&[
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=9 | rejectionCount=2 | riskTags=motion/lighting | avoid=avoid shaky handheld motion, avoid flat cold lighting".into(),
+            },
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=10 | rejectionCount=3 | riskTags=motion/lighting | avoid=avoid shaky handheld motion, avoid harsh backlight silhouette".into(),
+            },
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=11 | rejectionCount=2 | riskTags=motion | avoid=avoid shaky handheld motion".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=3"), "{summary}");
+        assert!(summary.contains("riskTags=motion/lighting"), "{summary}");
+        assert!(
+            summary.contains("avoid=avoid shaky handheld motion"),
+            "{summary}"
+        );
+        assert!(!summary.contains("harsh backlight"), "{summary}");
+    }
+
+    #[test]
+    fn build_script_role_video_observation_memories_groups_subject_specific_failures() {
+        let summaries = build_script_role_video_observation_memories(&[
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=9 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=2 | riskTags=identity/dialogue | avoid=avoid face distortion or identity drift, avoid blank expression or monotone delivery".into(),
+            },
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=10 | subject=晚晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=identity/dialogue | avoid=avoid face distortion or identity drift, avoid blank expression or monotone delivery".into(),
+            },
+        ]);
+
+        assert_eq!(summaries.len(), 1);
+        let summary = &summaries[0];
+        assert!(
+            summary.contains("subject=林晚") || summary.contains("subject=晚晚"),
+            "{summary}"
+        );
+        assert!(summary.contains("subjectAliases="), "{summary}");
+        assert!(
+            summary.contains("riskTags=dialogue/identity")
+                || summary.contains("riskTags=identity/dialogue"),
+            "{summary}"
+        );
+        assert!(summary.contains("avoid=avoid face distortion or identity drift, avoid blank expression or monotone delivery"), "{summary}");
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_can_fallback_to_role_observation_summary() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚低声回头".into()),
+            video_desc: Some(
+                "（晚晚站在落地窗边、雨夜办公室、林晚/晚晚、4秒、近景、慢推、回头低声开口喉结滚动、压抑、霓虹反光、你别看我、雨声回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[AgentMemoryRow {
+                name: "script_role_video_observation_memory".into(),
+                content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=2 | riskTags=identity/dialogue | avoid=avoid face distortion or identity drift, avoid blank expression or monotone delivery".into(),
+            }],
+            15,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid face distortion or identity drift, avoid blank expression or monotone delivery"
+                    .to_string()
+            ]
+        );
     }
 
     #[test]
