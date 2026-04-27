@@ -3469,14 +3469,15 @@ fn trim_style_fragment_against_storyboard_fields(
         );
     }
     if fragment.starts_with("动作") {
-        return trim_prefixed_style_fragment(
+        let trimmed = trim_prefixed_style_fragment(
             fragment,
             "动作",
             &[fields.action.as_str(), fields.mood.as_str()],
         );
+        return trim_style_fragment_by_shared_mood_keywords(trimmed, "动作", &fields.mood);
     }
     if fragment.starts_with("表演") {
-        return trim_prefixed_style_fragment(
+        let trimmed = trim_prefixed_style_fragment(
             fragment,
             "表演",
             &[
@@ -3485,12 +3486,13 @@ fn trim_style_fragment_against_storyboard_fields(
                 fields.mood.as_str(),
             ],
         );
+        return trim_style_fragment_by_shared_mood_keywords(trimmed, "表演", &fields.mood);
     }
     if fragment.starts_with("语气") {
         if !storyboard_supports_voice_style(fields) {
             return None;
         }
-        return trim_prefixed_style_fragment(
+        let trimmed = trim_prefixed_style_fragment(
             fragment,
             "语气",
             &[
@@ -3499,6 +3501,7 @@ fn trim_style_fragment_against_storyboard_fields(
                 fields.mood.as_str(),
             ],
         );
+        return trim_style_fragment_by_shared_mood_keywords(trimmed, "语气", &fields.mood);
     }
     if fragment.starts_with("声场") {
         let trimmed = trim_prefixed_style_fragment(
@@ -3554,6 +3557,46 @@ fn trim_prefixed_style_fragment(fragment: &str, prefix: &str, fields: &[&str]) -
                 )
         })
         .to_string();
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(format!("{prefix}{trimmed}"))
+    }
+}
+
+fn trim_style_fragment_by_shared_mood_keywords(
+    fragment: Option<String>,
+    prefix: &str,
+    mood: &str,
+) -> Option<String> {
+    let fragment = fragment?;
+    let body = fragment
+        .strip_prefix(prefix)
+        .unwrap_or(fragment.as_str())
+        .trim();
+    if body.is_empty() {
+        return None;
+    }
+
+    let normalized_mood = normalize_prompt_text(mood);
+    if normalized_mood.is_empty() {
+        return Some(fragment);
+    }
+
+    let mut trimmed = body.to_string();
+    for keyword in ["克制", "隐忍", "压抑", "平静", "冷静", "从容", "沉静"] {
+        if !normalized_mood.contains(keyword) || !trimmed.contains(keyword) {
+            continue;
+        }
+        let candidate = normalize_prompt_text(&trimmed.replace(keyword, ""));
+        if candidate.chars().count() >= 2 {
+            trimmed = candidate;
+        }
+    }
+
+    if trimmed == body {
+        return Some(fragment);
+    }
     if trimmed.is_empty() {
         None
     } else {
@@ -10507,6 +10550,8 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(prompt.contains("表演抬眼停顿"), "{prompt}");
+        assert!(prompt.contains("语气轻声"), "{prompt}");
+        assert!(!prompt.contains("语气轻声克制"), "{prompt}");
     }
 
     #[test]
