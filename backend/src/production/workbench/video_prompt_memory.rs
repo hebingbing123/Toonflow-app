@@ -164,6 +164,9 @@ const SUBJECT_IDENTITY_TAIL_MARKERS: [&str; 37] = [
     "捧着", "握着", "拿着", "提着", "轻声", "低声", "压低", "呢喃", "开口", "说着", "说道", "说出",
     "说",
 ];
+const LOW_SIGNAL_SUBJECT_POSE_PREFIXES: [&str; 11] = [
+    "站在", "站定", "看向", "看着", "望向", "望着", "坐在", "靠在", "倚在", "留在", "待在",
+];
 const NON_CHARACTER_ALIAS_SUFFIXES: [&str; 16] = [
     "窗边",
     "门厅",
@@ -237,6 +240,7 @@ pub(crate) fn build_selected_video_memory(
     if let Some(prompt_seed) = storyboard_prompt_seed(row) {
         parts.push(format!("promptSeed={prompt_seed}"));
     }
+    let mut selected_subject = None;
     if let Some(fields) = row
         .video_desc
         .as_deref()
@@ -245,6 +249,7 @@ pub(crate) fn build_selected_video_memory(
         if let Some(subject) =
             selected_memory_subject_identity(&fields.subject, &fields.subject_refs)
         {
+            selected_subject = Some(subject.clone());
             parts.push(format!("subject={subject}"));
             let subject_aliases =
                 selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
@@ -265,7 +270,9 @@ pub(crate) fn build_selected_video_memory(
     } else {
         Some(note)
     };
-    if let Some(note) = residual_note {
+    if let Some(note) = residual_note
+        .and_then(|note| compact_selected_memory_residual_note(&note, selected_subject.as_deref()))
+    {
         parts.push(format!("note={note}"));
     }
     Some(parts.join(" | "))
@@ -4116,6 +4123,44 @@ fn non_style_note(note: &str) -> Option<String> {
     ))
 }
 
+fn compact_selected_memory_residual_note(note: &str, subject: Option<&str>) -> Option<String> {
+    let normalized_subject = subject
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty());
+    let mut fragments = split_prompt_note_fragments(note)
+        .filter(|fragment| !selected_memory_field_looks_silent(fragment))
+        .collect::<Vec<_>>();
+    if let Some(subject) = normalized_subject.as_deref() {
+        if fragments.len() > 1 {
+            fragments.retain(|fragment| fragment != subject);
+        }
+        if fragments.len() == 1 {
+            let fragment = normalize_prompt_text(&fragments[0]);
+            let fragment = fragment
+                .strip_prefix(subject)
+                .map(normalize_prompt_text)
+                .unwrap_or(fragment);
+            if fragment.is_empty() || low_signal_subject_pose_fragment(&fragment) {
+                return None;
+            }
+            fragments[0] = fragment;
+        }
+    }
+    if fragments.is_empty() {
+        return None;
+    }
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
+}
+
+fn low_signal_subject_pose_fragment(fragment: &str) -> bool {
+    LOW_SIGNAL_SUBJECT_POSE_PREFIXES
+        .iter()
+        .any(|prefix| fragment.starts_with(prefix))
+}
+
 fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
     if let Some(value) = extract_key_value(&row.content, "style") {
         return compact_video_style_prompt_note(&value);
@@ -4836,7 +4881,8 @@ mod tests {
         )
         .expect("content");
 
-        assert!(content.contains("note=主角，停步回头"));
+        assert!(content.contains("停步回头"), "{content}");
+        assert!(!content.contains("note=主角"), "{content}");
         assert!(!content.contains("note=主角在旧宅走廊尽头停步回头，镜头中景稳定跟拍"));
         assert!(!content.contains("note=主角在旧宅走廊尽头停步回头"));
         assert!(!content.contains("场景旧宅走廊尽头"));
@@ -5096,6 +5142,26 @@ mod tests {
 
         assert!(content.contains("情绪克制"), "{content}");
         assert!(!content.contains("光影无"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_drops_subject_only_note_when_identity_is_stored() {
+        let content = build_selected_video_memory(
+            26,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚站在窗边".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、无、克制、冷蓝窗光、无台词、雨声、A26）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("subject=林晚"), "{content}");
+        assert!(
+            content.contains("style=情绪克制，光影冷蓝窗光"),
+            "{content}"
+        );
+        assert!(!content.contains("note="), "{content}");
     }
 
     #[test]
