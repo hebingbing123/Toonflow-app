@@ -1502,11 +1502,14 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
         })
         .filter_map(|(idx, row)| {
             let avoid = extract_key_value(&row.content, "avoid")?;
+            let subject_priority =
+                memory_subject_match_priority(&row.content, &normalized_subject_candidates);
             let ranked = ranked_rejected_negative_fragments(&avoid);
             if ranked.is_empty() {
                 let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
                 return Some(vec![(
                     score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags),
+                    subject_priority,
                     idx,
                     reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                     storyboard_fallback_priority(
@@ -1530,6 +1533,7 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
                                 &note,
                                 &storyboard_tags,
                             ),
+                            subject_priority,
                             idx,
                             reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                             storyboard_fallback_priority(
@@ -1562,17 +1566,22 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
         }
     }
     scored.sort_by(|a, b| {
-        b.0.cmp(&a.0)
-            .then(a.2.cmp(&b.2))
+        a.1.cmp(&b.1)
+            .then(b.0.cmp(&a.0))
             .then(a.3.cmp(&b.3))
             .then(a.4.cmp(&b.4))
-            .then(a.1.cmp(&b.1))
             .then(a.5.cmp(&b.5))
+            .then(a.2.cmp(&b.2))
             .then(a.6.cmp(&b.6))
+            .then(a.7.cmp(&b.7))
     });
 
+    let locked_subject_priority = scored.first().map(|entry| entry.1);
     let mut selected = Vec::new();
-    for (_, _, _, _, _, _, fragment) in scored {
+    for (_, subject_priority, _, _, _, _, _, fragment) in scored {
+        if locked_subject_priority.is_some_and(|locked| subject_priority > locked) {
+            continue;
+        }
         if observation_note_is_covered(&fragment, &selected) {
             continue;
         }
@@ -1626,6 +1635,7 @@ fn select_rejected_video_observation_summary_notes(
             let row_overlap = rejected_video_risk_tag_overlap(&row.content, &storyboard_tags);
             let sample_count = observation_summary_sample_count(&row.content);
             let scope_priority = rejected_observation_summary_scope_priority(row.name.as_str());
+            let subject_priority = memory_subject_match_priority(&row.content, subject_candidates);
             let Some(avoid) = extract_key_value(&row.content, "avoid") else {
                 return Vec::new();
             };
@@ -1639,6 +1649,7 @@ fn select_rejected_video_observation_summary_notes(
                             &fragment,
                             &storyboard_tags,
                         ),
+                        subject_priority,
                         fragment_storyboard_risk_overlap(&fragment, &storyboard_tags),
                         row_overlap,
                         scope_priority,
@@ -1653,16 +1664,17 @@ fn select_rejected_video_observation_summary_notes(
         .collect::<Vec<_>>();
     scored.sort_by(|a, b| {
         b.0.cmp(&a.0)
-            .then(b.1.cmp(&a.1))
+            .then(a.1.cmp(&b.1))
             .then(b.2.cmp(&a.2))
-            .then(a.3.cmp(&b.3))
-            .then(b.4.cmp(&a.4))
-            .then(a.5.cmp(&b.5))
+            .then(b.3.cmp(&a.3))
+            .then(a.4.cmp(&b.4))
+            .then(b.5.cmp(&a.5))
             .then(a.6.cmp(&b.6))
+            .then(a.7.cmp(&b.7))
     });
 
     let mut selected = Vec::new();
-    for (_, _, _, _, _, _, _, fragment) in scored {
+    for (_, _, _, _, _, _, _, _, fragment) in scored {
         if observation_note_is_covered(&fragment, &selected) {
             continue;
         }
@@ -1802,6 +1814,8 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
         })
         .filter_map(|(idx, row)| {
             let avoid = extract_key_value(&row.content, "avoid")?;
+            let subject_priority =
+                memory_subject_match_priority(&row.content, &normalized_subject_candidates);
             let ranked = ranked_observation_fragments(&avoid);
             if ranked.len() == 1
                 && ranked
@@ -1814,6 +1828,7 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                 let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
                 return Some(vec![(
                     score_pending_observation_note_for_storyboard(&note, &storyboard_tags),
+                    subject_priority,
                     idx,
                     reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                     storyboard_fallback_priority(
@@ -1834,6 +1849,7 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                     .map(|(fragment_idx, note)| {
                         (
                             score_pending_observation_note_for_storyboard(&note, &storyboard_tags),
+                            subject_priority,
                             idx,
                             reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                             storyboard_fallback_priority(
@@ -1855,18 +1871,33 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
         })
         .flatten()
         .collect::<Vec<_>>();
+    if scored.is_empty() {
+        let summary_notes = select_rejected_video_observation_summary_notes(
+            rows,
+            &normalized_subject_candidates,
+            storyboard_row,
+        );
+        if !summary_notes.is_empty() {
+            return summary_notes;
+        }
+    }
     scored.sort_by(|a, b| {
-        b.0.cmp(&a.0)
-            .then(a.2.cmp(&b.2))
+        a.1.cmp(&b.1)
+            .then(b.0.cmp(&a.0))
             .then(a.3.cmp(&b.3))
             .then(a.4.cmp(&b.4))
-            .then(a.1.cmp(&b.1))
             .then(a.5.cmp(&b.5))
+            .then(a.2.cmp(&b.2))
             .then(a.6.cmp(&b.6))
+            .then(a.7.cmp(&b.7))
     });
 
+    let locked_subject_priority = scored.first().map(|entry| entry.1);
     let mut notes = Vec::new();
-    for (_, _, _, _, _, _, note) in scored {
+    for (_, subject_priority, _, _, _, _, _, note) in scored {
+        if locked_subject_priority.is_some_and(|locked| subject_priority > locked) {
+            continue;
+        }
         if observation_note_is_covered(&note, &notes) {
             continue;
         }
@@ -3064,18 +3095,32 @@ fn merged_rejected_video_risk_tags(existing: &str, incoming: &str) -> Vec<String
 }
 
 fn memory_matches_subject_candidates(content: &str, subject_candidates: &[String]) -> bool {
+    memory_subject_match_priority(content, subject_candidates) != usize::MAX
+}
+
+fn memory_subject_match_priority(content: &str, subject_candidates: &[String]) -> usize {
     if subject_candidates.is_empty() {
-        return false;
+        return usize::MAX;
     }
     let memory_subjects = role_memory_subject_candidates(content);
-    !memory_subjects.is_empty()
-        && memory_subjects.iter().any(|memory_subject| {
-            subject_candidates.iter().any(|candidate| {
-                candidate == memory_subject
-                    || candidate.contains(memory_subject)
-                    || memory_subject.contains(candidate)
-            })
+    if memory_subjects.is_empty() {
+        return usize::MAX;
+    }
+
+    subject_candidates
+        .iter()
+        .enumerate()
+        .find_map(|(idx, candidate)| {
+            memory_subjects
+                .iter()
+                .any(|memory_subject| {
+                    candidate == memory_subject
+                        || candidate.contains(memory_subject)
+                        || memory_subject.contains(candidate)
+                })
+                .then_some(idx)
         })
+        .unwrap_or(usize::MAX)
 }
 
 fn merge_rejected_negative_avoid(existing: Option<&str>, incoming: Option<&str>) -> String {
@@ -8301,6 +8346,48 @@ mod tests {
     }
 
     #[test]
+    fn select_rejected_video_negative_memory_notes_for_subject_prefers_primary_subject_when_multiple_roles_match(
+    ) {
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | rejectionCount=3 | riskTags=identity/dialogue | avoid=avoid lip-sync mismatch".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | rejectionCount=3 | riskTags=identity/dialogue | avoid=avoid face distortion or identity drift".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=identity/dialogue | avoid=avoid blank expression or monotone delivery".into(),
+                },
+            ],
+            12,
+            None,
+            &[
+                "林晚".to_string(),
+                "晚晚".to_string(),
+                "顾承泽".to_string(),
+                "顾总".to_string(),
+            ],
+            None,
+        );
+
+        assert!(notes.iter().any(|note| note.contains("blank expression")));
+        assert_eq!(
+            notes
+                .iter()
+                .filter(|note| {
+                    note.contains("lip-sync mismatch")
+                        || note.contains("face distortion or identity drift")
+                })
+                .count(),
+            0
+        );
+    }
+
+    #[test]
     fn select_rejected_video_negative_memory_notes_for_subject_can_fallback_to_same_role_matching_risk(
     ) {
         let storyboard_row = StoryboardPromptSeedRow {
@@ -8540,6 +8627,51 @@ mod tests {
     }
 
     #[test]
+    fn select_pending_rejected_video_observation_candidates_prefers_primary_subject_when_multiple_roles_match(
+    ) {
+        let notes = select_pending_rejected_video_observation_candidates_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | rejectionCount=1 | riskTags=identity/dialogue | avoid=avoid lip-sync mismatch".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | rejectionCount=1 | riskTags=identity/dialogue | avoid=avoid face distortion or identity drift".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=identity/dialogue | avoid=avoid blank expression or monotone delivery".into(),
+                },
+            ],
+            12,
+            None,
+            &[
+                "林晚".to_string(),
+                "晚晚".to_string(),
+                "顾承泽".to_string(),
+                "顾总".to_string(),
+            ],
+            None,
+        );
+
+        assert_eq!(
+            notes.first().map(String::as_str),
+            Some("avoid blank expression or monotone delivery")
+        );
+        assert_eq!(
+            notes
+                .iter()
+                .filter(|note| {
+                    note.contains("lip-sync mismatch")
+                        || note.contains("face distortion or identity drift")
+                })
+                .count(),
+            0
+        );
+    }
+
+    #[test]
     fn select_pending_rejected_video_observation_candidates_can_fallback_to_same_role_matching_risk(
     ) {
         let storyboard_row = StoryboardPromptSeedRow {
@@ -8702,6 +8834,48 @@ mod tests {
                 "avoid face distortion or identity drift".to_string()
             ]
         );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_summary_prefers_primary_subject_role_summary_when_multiple_roles_match(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头低声开口".into()),
+            video_desc: Some(
+                "（晚晚站在落地窗边、雨夜办公室、林晚/晚晚、4秒、近景、慢推、回头低声开口喉结滚动、压抑、霓虹反光、你别看我、雨声回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_observation_memory".into(),
+                    content: "subject=顾承泽 | subjectAliases=顾承泽/顾总 | sampleCount=6 | riskTags=identity/dialogue | avoid=avoid lip-sync mismatch, avoid face distortion or identity drift".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_observation_memory".into(),
+                    content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | riskTags=identity/dialogue/performance | avoid=avoid blank expression or monotone delivery".into(),
+                },
+            ],
+            15,
+            None,
+            &[
+                "林晚".to_string(),
+                "晚晚".to_string(),
+                "顾承泽".to_string(),
+                "顾总".to_string(),
+            ],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes.first().map(String::as_str),
+            Some(
+                "avoid blank expression or monotone delivery, avoid face distortion or identity drift"
+            )
+        );
+        assert_eq!(notes.get(1).map(String::as_str), None);
     }
 
     #[test]
@@ -9319,6 +9493,48 @@ mod tests {
         assert_eq!(
             notes,
             vec!["avoid face distortion or identity drift, avoid flat cold lighting".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_role_observation_summary_prefers_primary_subject_when_multiple_roles_match(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚停住呼吸看向顾承泽".into()),
+            video_desc: Some(
+                "（晚晚停在落地窗边、雨夜办公室、林晚/晚晚/顾承泽、4秒、近景、慢推、抬眼停顿后低声开口、压抑、霓虹反光、你别看我、雨声回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_observation_memory".into(),
+                    content: "subject=顾承泽 | subjectAliases=顾承泽/顾总 | sampleCount=6 | riskTags=identity/dialogue | avoid=avoid lip-sync mismatch, avoid face distortion or identity drift".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_observation_memory".into(),
+                    content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | riskTags=identity/dialogue/performance | avoid=avoid blank expression or monotone delivery, avoid face distortion or identity drift".into(),
+                },
+            ],
+            15,
+            None,
+            &[
+                "林晚".to_string(),
+                "晚晚".to_string(),
+                "顾承泽".to_string(),
+                "顾总".to_string(),
+            ],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid blank expression or monotone delivery, avoid face distortion or identity drift"
+                    .to_string()
+            ]
         );
     }
 
