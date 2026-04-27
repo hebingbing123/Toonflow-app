@@ -882,10 +882,14 @@ fn compact_negative_fragment_against_storyboard_risk(
         "avoid flat cold lighting or harsh backlight silhouette" => {
             let has_flat_cold_lighting = negative_prompt_scene_has_flat_cold_lighting_risk(&fields);
             let has_backlight = negative_prompt_scene_has_backlight_silhouette_risk(&fields);
+            let has_neon_reflections = negative_prompt_scene_has_neon_reflection_risk(&fields);
             match (has_flat_cold_lighting, has_backlight) {
                 (true, true) => Some(trimmed.to_string()),
                 (true, false) => Some("avoid flat cold lighting".to_string()),
                 (false, true) => Some("avoid harsh backlight silhouette".to_string()),
+                (false, false) if has_neon_reflections => {
+                    Some("avoid distracting neon reflections".to_string())
+                }
                 (false, false) => {
                     negative_prompt_scene_has_lighting_risk(&fields).then_some(trimmed.to_string())
                 }
@@ -946,6 +950,14 @@ fn negative_prompt_scene_has_motion_risk(fields: &StructuredStoryboardDescriptio
 }
 
 fn negative_prompt_scene_has_lighting_risk(fields: &StructuredStoryboardDescription) -> bool {
+    negative_prompt_scene_has_backlight_silhouette_risk(fields)
+        || negative_prompt_scene_has_flat_cold_lighting_risk(fields)
+        || negative_prompt_scene_has_neon_reflection_risk(fields)
+}
+
+fn negative_prompt_scene_has_neon_reflection_risk(
+    fields: &StructuredStoryboardDescription,
+) -> bool {
     [
         fields.setting.as_str(),
         fields.lighting.as_str(),
@@ -956,19 +968,13 @@ fn negative_prompt_scene_has_lighting_risk(fields: &StructuredStoryboardDescript
     .any(|value| {
         !value.is_empty()
             && [
-                "逆光",
                 "霓虹",
                 "反光",
                 "玻璃",
                 "雨",
-                "车灯",
-                "闪烁",
-                "曝光",
-                "剪影",
-                "silhouette",
-                "backlight",
                 "reflection",
-                "flicker",
+                "wet street",
+                "headlight reflection",
             ]
             .iter()
             .any(|keyword| value.contains(keyword))
@@ -1650,6 +1656,10 @@ fn compact_negative_constraint_fragments_against_storyboard_style(
             .into_iter()
             .collect()
         }
+        "avoid distracting neon reflections" => (!conflicts(trimmed))
+            .then_some(trimmed.to_string())
+            .into_iter()
+            .collect(),
         _ => (!conflicts(trimmed))
             .then_some(trimmed.to_string())
             .into_iter()
@@ -1974,6 +1984,18 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
             "avoid flat cold lighting",
         ),
         (
+            &[
+                "霓虹",
+                "反光",
+                "玻璃反射",
+                "雨地反光",
+                "车流反光",
+                "neon reflection",
+                "reflection",
+            ][..],
+            "avoid distracting neon reflections",
+        ),
+        (
             &["镜头", "构图", "机位", "切镜", "shot", "framing", "camera"][..],
             "avoid unnecessary shot changes",
         ),
@@ -2040,7 +2062,7 @@ fn score_review_negative_fragment(
     let family_score = match negative_fragment_family(fragment) {
         "flicker_motion_jitter" => 36,
         "shot_change_framing" | "camera_framing" => 34,
-        "lighting_backlight" => 20,
+        "lighting_backlight" | "lighting_reflection" => 20,
         "mood_tone" => 16,
         _ => {
             if canonical.contains("face")
@@ -2204,7 +2226,7 @@ fn score_negative_prompt_budget_fragment(fragment: &str) -> i32 {
         "flicker_motion_jitter" => 36,
         "shot_change_only" => 30,
         "shot_change_framing" | "camera_framing" => 34,
-        "lighting_backlight" => 22,
+        "lighting_backlight" | "lighting_reflection" => 22,
         "mood_tone" => 16,
         _ => 14,
     };
@@ -2255,6 +2277,7 @@ struct VisualStyleConstraintFlags {
     overly_cold_emotional_tone: bool,
     flat_cold_lighting: bool,
     harsh_backlight_silhouette: bool,
+    distracting_neon_reflections: bool,
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -2416,6 +2439,10 @@ fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleC
             harsh_backlight_silhouette: true,
             ..Default::default()
         }),
+        "avoid distracting neon reflections" => Some(VisualStyleConstraintFlags {
+            distracting_neon_reflections: true,
+            ..Default::default()
+        }),
         "avoid flat cold lighting or harsh backlight silhouette" => {
             Some(VisualStyleConstraintFlags {
                 flat_cold_lighting: true,
@@ -2459,6 +2486,9 @@ fn render_visual_style_constraint_fragments(flags: VisualStyleConstraintFlags) -
         fragments.push("avoid flat cold lighting".to_string());
     } else if flags.harsh_backlight_silhouette {
         fragments.push("avoid harsh backlight silhouette".to_string());
+    }
+    if flags.distracting_neon_reflections {
+        fragments.push("avoid distracting neon reflections".to_string());
     }
 
     fragments
@@ -2647,6 +2677,7 @@ fn visual_style_constraint_flags_cover(
         && (!candidate.overly_cold_emotional_tone || existing.overly_cold_emotional_tone)
         && (!candidate.flat_cold_lighting || existing.flat_cold_lighting)
         && (!candidate.harsh_backlight_silhouette || existing.harsh_backlight_silhouette)
+        && (!candidate.distracting_neon_reflections || existing.distracting_neon_reflections)
 }
 
 fn negative_fragment_covers(existing: &str, candidate: &str) -> bool {
@@ -2741,6 +2772,7 @@ fn negative_fragment_family(value: &str) -> &'static str {
         "avoid flat cold lighting"
         | "avoid harsh backlight silhouette"
         | "avoid flat cold lighting or harsh backlight silhouette" => "lighting_backlight",
+        "avoid distracting neon reflections" => "lighting_reflection",
         "avoid lip-sync mismatch" => "lip_sync_mismatch",
         _ => "",
     }
@@ -3041,6 +3073,28 @@ mod tests {
     }
 
     #[test]
+    fn compact_negative_fragment_against_storyboard_risk_swaps_generic_lighting_bundle_for_reflection_axis(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（主角穿过雨巷、霓虹雨巷、主角、5秒、中景、稳定跟拍、踩水快步穿行、克制、霓虹反光、无台词、雨声脚步声、A12）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            compact_negative_fragment_against_storyboard_risk(
+                "avoid flat cold lighting or harsh backlight silhouette",
+                Some(&storyboard_row),
+            )
+            .as_deref(),
+            Some("avoid distracting neon reflections")
+        );
+    }
+
+    #[test]
     fn pacing_issue_category_is_redundant_when_comments_cover_rushed_and_jerky_motion() {
         assert!(pacing_issue_category_is_redundant(
             &infer_negative_fragments_from_comments("动作太赶，还有明显抖动")
@@ -3127,6 +3181,21 @@ mod tests {
         assert!(fragments.contains(&"avoid blur".to_string()));
         assert!(fragments.contains(&"avoid flicker or motion jitter".to_string()));
         assert!(!fragments.contains(&"avoid warped anatomy, blur, flicker".to_string()));
+    }
+
+    #[test]
+    fn collect_negative_review_fragments_pulls_reflection_guard_from_comments() {
+        let fragments = collect_negative_review_fragments(
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("霓虹反光太脏，玻璃反射抢戏".into()),
+            }],
+            12,
+        );
+
+        assert!(fragments.contains(&"avoid distracting neon reflections".to_string()));
     }
 
     #[test]
