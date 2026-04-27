@@ -3235,6 +3235,9 @@ fn compact_memory_style_anchor(
     if normalized.is_empty() {
         return None;
     }
+    let has_base_motion_style_anchor = prompt_coverage
+        .iter()
+        .any(|fragment| fragment.starts_with("动作") && generic_motion_style_fragment(fragment));
     let expected_camera = structured_fields.map(|fields| {
         [fields.shot.as_str(), fields.camera_move.as_str()]
             .into_iter()
@@ -3251,6 +3254,11 @@ fn compact_memory_style_anchor(
                 return trim_style_fragment_against_storyboard_fields(&fragment, fields);
             }
             Some(fragment)
+        })
+        .filter(|fragment| {
+            !(has_base_motion_style_anchor
+                && fragment.starts_with("动作")
+                && generic_motion_style_fragment(fragment))
         })
         .filter(|fragment| {
             if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
@@ -3592,6 +3600,22 @@ fn style_fragment_body(fragment: &str) -> Option<String> {
     .find_map(|prefix| fragment.strip_prefix(prefix))
     .map(normalize_prompt_text)
     .filter(|body| !body.is_empty())
+}
+
+fn generic_motion_style_fragment(fragment: &str) -> bool {
+    let body = normalize_prompt_text(fragment.trim_start_matches("动作"));
+    matches!(
+        body.as_str(),
+        "自然"
+            | "从容克制"
+            | "克制自然"
+            | "缓慢优雅"
+            | "简洁平滑"
+            | "缓慢"
+            | "轻盈"
+            | "利落"
+            | "轻缓克制"
+    )
 }
 
 fn style_fragment_or_body_is_semantically_covered(fragment: &str, coverage: &[String]) -> bool {
@@ -6698,7 +6722,7 @@ mod tests {
     }
 
     #[test]
-    fn build_video_prompt_promotes_motion_style_memory_into_style_anchor() {
+    fn build_video_prompt_drops_generic_motion_memory_when_base_motion_anchor_exists() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（女主站在窗边、城市夜景落地窗边、女主、4秒、中景、缓推、看着雨丝划过玻璃并轻扶窗帘、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A18）".into()),
@@ -6717,7 +6741,8 @@ mod tests {
 
         assert!(prompt.contains("Style anchor: 真人都市写实;"), "{prompt}");
         assert!(prompt.contains("环境雨丝玻璃"), "{prompt}");
-        assert!(prompt.contains("动作从容克制"), "{prompt}");
+        assert!(prompt.contains("动作自然"), "{prompt}");
+        assert!(!prompt.contains("动作从容克制"), "{prompt}");
     }
 
     #[test]
