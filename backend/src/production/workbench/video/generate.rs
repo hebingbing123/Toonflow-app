@@ -16,9 +16,8 @@ use crate::production::workbench::meta::common::negative_constraint_conflicts_wi
 use crate::production::workbench::video_prompt_memory::{
     clip_prompt_fragment, compact_video_style_prompt_note, extract_key_value,
     normalize_prompt_text, parse_structured_storyboard_description,
-    select_pending_rejected_video_observation_candidates_for_subject,
     select_prioritized_video_style_note, select_project_video_style_memory_notes,
-    select_rejected_video_negative_memory_notes_for_subject,
+    select_rejected_video_memory_notes_and_observation_candidates_for_subject,
     select_script_video_style_memory_notes, select_selected_video_memory_notes,
     select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
@@ -96,6 +95,7 @@ struct StoryboardNegativePromptContext {
 pub(crate) struct StoryboardNegativePromptRuntime {
     pub(crate) storyboard_id: i32,
     pub(crate) selection: AutoNegativePromptSelection,
+    pub(crate) pending_observation_candidates: Vec<String>,
     pub(crate) rejected_rows: Vec<AgentMemoryRow>,
     pub(crate) selected_rows: Vec<AgentMemoryRow>,
     pub(crate) prompt_support_rows: Vec<AgentMemoryRow>,
@@ -553,7 +553,8 @@ pub(crate) async fn load_storyboard_negative_prompt_runtime(
                 current_prompt_seed: None,
                 subject_candidates: Vec::new(),
             });
-    let selection = build_storyboard_negative_prompt_selection(&context, &rejected_rows);
+    let (selection, pending_observation_candidates) =
+        build_storyboard_negative_prompt_selection(&context, &rejected_rows);
     let prompt_support_rows =
         load_storyboard_prompt_support_rows(pool, user_id, project_numeric_id, script_numeric_id)
             .await?;
@@ -561,6 +562,7 @@ pub(crate) async fn load_storyboard_negative_prompt_runtime(
     Ok(StoryboardNegativePromptRuntime {
         storyboard_id,
         selection,
+        pending_observation_candidates,
         rejected_rows,
         selected_rows,
         prompt_support_rows,
@@ -891,7 +893,7 @@ fn build_storyboard_negative_prompts(
         .map(|storyboard_id| {
             let selection = contexts
                 .get(&storyboard_id)
-                .map(|context| build_storyboard_negative_prompt_selection(context, rejected_rows))
+                .map(|context| build_storyboard_negative_prompt_selection(context, rejected_rows).0)
                 .unwrap_or_else(|| {
                     build_storyboard_negative_prompt_selection(
                         &StoryboardNegativePromptContext {
@@ -904,6 +906,7 @@ fn build_storyboard_negative_prompts(
                         },
                         rejected_rows,
                     )
+                    .0
                 });
             (storyboard_id, selection)
         })
@@ -974,7 +977,7 @@ fn build_storyboard_negative_prompt_contexts(
 fn build_storyboard_negative_prompt_selection(
     context: &StoryboardNegativePromptContext,
     rejected_rows: &[AgentMemoryRow],
-) -> AutoNegativePromptSelection {
+) -> (AutoNegativePromptSelection, Vec<String>) {
     let selected_style_note = select_selected_video_memory_notes(
         &context.selected_rows,
         context.storyboard_id,
@@ -995,19 +998,18 @@ fn build_storyboard_negative_prompt_selection(
         prioritized_style_note.as_deref(),
         context.storyboard_row.as_ref(),
     );
+    let rejected_memory_selection =
+        select_rejected_video_memory_notes_and_observation_candidates_for_subject(
+            rejected_rows,
+            context.storyboard_id,
+            context.current_prompt_seed.as_deref(),
+            &context.subject_candidates,
+            context.storyboard_row.as_ref(),
+        );
+    let negative_memory_notes = rejected_memory_selection.negative_notes;
+    let pending_observation_candidates = rejected_memory_selection.observation_notes;
     let rejected_fragments = filter_conflicting_review_fragments(
-        split_negative_prompt_fragments(
-            select_rejected_video_negative_memory_notes_for_subject(
-                rejected_rows,
-                context.storyboard_id,
-                context.current_prompt_seed.as_deref(),
-                &context.subject_candidates,
-                context.storyboard_row.as_ref(),
-            )
-            .into_iter()
-            .next()
-            .as_deref(),
-        ),
+        split_negative_prompt_fragments(negative_memory_notes.into_iter().next().as_deref()),
         prioritized_style_note.as_deref(),
         context.storyboard_row.as_ref(),
     );
@@ -1024,10 +1026,7 @@ fn build_storyboard_negative_prompt_selection(
     );
     let observation_fragments = if rejected_fragments.is_empty() && review_fragments.is_empty() {
         build_storyboard_observation_negative_fragments(
-            rejected_rows,
-            context.storyboard_id,
-            context.current_prompt_seed.as_deref(),
-            &context.subject_candidates,
+            pending_observation_candidates.clone(),
             prioritized_style_note.as_deref(),
             context.storyboard_row.as_ref(),
         )
@@ -1061,31 +1060,24 @@ fn build_storyboard_negative_prompt_selection(
         .map(|value| split_negative_prompt_fragments(Some(value)).len())
         .unwrap_or(0);
 
-    AutoNegativePromptSelection {
-        prompt,
-        fragment_count,
-        budget_tier: budget_tier.as_str(),
-        review_fragment_count,
-        rejected_memory_fragment_count,
-        used_pending_observation_fallback,
-    }
+    (
+        AutoNegativePromptSelection {
+            prompt,
+            fragment_count,
+            budget_tier: budget_tier.as_str(),
+            review_fragment_count,
+            rejected_memory_fragment_count,
+            used_pending_observation_fallback,
+        },
+        pending_observation_candidates,
+    )
 }
 
 fn build_storyboard_observation_negative_fragments(
-    rejected_rows: &[AgentMemoryRow],
-    storyboard_id: i32,
-    current_prompt_seed: Option<&str>,
-    subject_candidates: &[String],
+    observation_fragments: Vec<String>,
     prioritized_style_note: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
-    let observation_fragments = select_pending_rejected_video_observation_candidates_for_subject(
-        rejected_rows,
-        storyboard_id,
-        current_prompt_seed,
-        subject_candidates,
-        storyboard_row,
-    );
     let observation_fragments = filter_conflicting_review_fragments(
         observation_fragments,
         prioritized_style_note,

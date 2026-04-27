@@ -2302,6 +2302,7 @@ fn build_pending_video_observation_note_from_runtime(
         runtime.current_prompt_seed.as_deref(),
         runtime.storyboard_row.as_ref(),
         &runtime.subject_candidates,
+        Some(runtime.pending_observation_candidates.clone()),
         constraint_pressure,
     )
 }
@@ -2312,6 +2313,7 @@ fn build_pending_video_observation_note(
     current_prompt_seed: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     subject_candidates: &[String],
+    preselected_candidates: Option<Vec<String>>,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let rows = trim_video_prompt_observation_rows(
@@ -2329,15 +2331,17 @@ fn build_pending_video_observation_note(
         subject_candidates,
         constraint_pressure,
     );
+    let pending_observation_candidates = preselected_candidates.unwrap_or_else(|| {
+        select_pending_rejected_video_observation_candidates_for_subject(
+            &rows,
+            storyboard_numeric_id,
+            current_prompt_seed,
+            subject_candidates,
+            storyboard_row,
+        )
+    });
     let note = select_best_video_prompt_observation_note(prune_storyboard_observation_candidates(
-        {
-            select_pending_rejected_video_observation_candidates_for_subject(
-                &rows,
-                storyboard_numeric_id,
-                current_prompt_seed,
-                subject_candidates,
-                storyboard_row,
-            )
+        pending_observation_candidates
             .into_iter()
             .filter_map(|note| {
                 compact_negative_constraint_against_storyboard_style(
@@ -2349,8 +2353,7 @@ fn build_pending_video_observation_note(
             .filter(|note| {
                 !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row)
             })
-            .collect::<Vec<_>>()
-        },
+            .collect::<Vec<_>>(),
         storyboard_row,
     ));
 
@@ -12701,6 +12704,7 @@ mod tests {
                 rejected_memory_fragment_count: 0,
                 used_pending_observation_fallback: false,
             },
+            pending_observation_candidates: vec!["avoid identity drift".into()],
             rejected_rows: Vec::new(),
             selected_rows: Vec::new(),
             prompt_support_rows: vec![
@@ -12713,6 +12717,47 @@ mod tests {
                     content: "subject=晚晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演抬眼停顿，语气轻声克制".into(),
                 },
             ],
+            storyboard_row: Some(storyboard_row),
+            current_prompt_seed: None,
+            subject_candidates,
+        };
+
+        assert_eq!(
+            build_pending_video_observation_note_from_runtime(&runtime),
+            Some("待观察失败倾向：avoid identity drift".to_string())
+        );
+    }
+
+    #[test]
+    fn build_pending_video_observation_note_from_runtime_uses_cached_candidates() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚强忍泪意看向门外".into()),
+            video_desc: Some("（晚晚强忍泪意看向门外、雨夜门厅、晚晚/林晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let subject_candidates = storyboard_row
+            .video_desc
+            .as_deref()
+            .and_then(parse_structured_storyboard_description)
+            .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+            .unwrap_or_default();
+        let runtime = StoryboardNegativePromptRuntime {
+            storyboard_id: 12,
+            selection: AutoNegativePromptSelection {
+                prompt: None,
+                fragment_count: 0,
+                budget_tier: "lean",
+                review_fragment_count: 0,
+                rejected_memory_fragment_count: 0,
+                used_pending_observation_fallback: false,
+            },
+            pending_observation_candidates: vec!["avoid identity drift".into()],
+            rejected_rows: Vec::new(),
+            selected_rows: Vec::new(),
+            prompt_support_rows: vec![AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=晚晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演抬眼停顿，语气轻声克制".into(),
+            }],
             storyboard_row: Some(storyboard_row),
             current_prompt_seed: None,
             subject_candidates,
@@ -12750,6 +12795,10 @@ mod tests {
                 rejected_memory_fragment_count: 0,
                 used_pending_observation_fallback: false,
             },
+            pending_observation_candidates: vec![
+                "avoid face distortion or identity drift".into(),
+                "avoid blank expression or monotone delivery".into(),
+            ],
             rejected_rows: Vec::new(),
             selected_rows: Vec::new(),
             prompt_support_rows: vec![AgentMemoryRow {
