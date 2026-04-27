@@ -1224,6 +1224,13 @@ fn low_signal_local_camera_style_fragment(fragment: &str) -> bool {
         .any(|candidate| body == *candidate)
 }
 
+fn is_local_framing_only_fragment(fragment: &str) -> bool {
+    matches!(
+        fragment,
+        "镜头近景" | "镜头中景" | "镜头远景" | "镜头特写" | "镜头全景"
+    )
+}
+
 fn collect_neighbor_video_prompt_style_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -1540,8 +1547,8 @@ async fn load_pending_video_observation_note(
         current_prompt_seed,
         storyboard_row.as_ref(),
     );
-    let note =
-        select_best_video_prompt_observation_note(prune_low_signal_observation_candidates({
+    let note = select_best_video_prompt_observation_note(prune_storyboard_observation_candidates(
+        {
             let subject_candidates = storyboard_row
                 .as_ref()
                 .and_then(|row| row.video_desc.as_deref())
@@ -1569,7 +1576,9 @@ async fn load_pending_video_observation_note(
                 !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
             })
             .collect::<Vec<_>>()
-        }));
+        },
+        storyboard_row.as_ref(),
+    ));
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
 }
@@ -1854,10 +1863,38 @@ fn select_best_video_prompt_observation_note(candidates: Vec<String>) -> Option<
     })
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum VideoPromptObservationFamily {
+    Identity,
+    Blocking,
+    Dialogue,
+    Lighting,
+    Motion,
+    Emotion,
+    Generic,
+}
+
 fn prune_low_signal_observation_candidates(candidates: Vec<String>) -> Vec<String> {
     let mut kept = candidates
         .into_iter()
         .filter(|note| !observation_candidate_is_low_signal(note))
+        .filter(|note| observation_candidate_matches_storyboard_risk(note, None))
+        .collect::<Vec<_>>();
+    if kept.is_empty() {
+        return Vec::new();
+    }
+    kept.dedup();
+    kept
+}
+
+fn prune_storyboard_observation_candidates(
+    candidates: Vec<String>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let mut kept = candidates
+        .into_iter()
+        .filter(|note| !observation_candidate_is_low_signal(note))
+        .filter(|note| observation_candidate_matches_storyboard_risk(note, storyboard_row))
         .collect::<Vec<_>>();
     if kept.is_empty() {
         return Vec::new();
@@ -1875,6 +1912,138 @@ fn observation_candidate_is_low_signal(note: &str) -> bool {
             | "avoid heavy tragic mood"
             | "avoid overly cold, oppressive, or frantic mood"
     )
+}
+
+fn observation_candidate_matches_storyboard_risk(
+    note: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> bool {
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return !matches!(
+            observation_note_budget_family(note),
+            VideoPromptObservationFamily::Generic
+        );
+    };
+
+    match observation_note_budget_family(note) {
+        VideoPromptObservationFamily::Identity | VideoPromptObservationFamily::Blocking => true,
+        VideoPromptObservationFamily::Dialogue => !storyboard_dialogue_is_empty(&fields.dialogue),
+        VideoPromptObservationFamily::Lighting => video_prompt_scene_has_lighting_risk(&fields),
+        VideoPromptObservationFamily::Motion => video_prompt_scene_has_motion_risk(&fields),
+        VideoPromptObservationFamily::Emotion => video_prompt_scene_needs_emotional_memory(&fields),
+        VideoPromptObservationFamily::Generic => false,
+    }
+}
+
+fn observation_note_budget_family(note: &str) -> VideoPromptObservationFamily {
+    let normalized = canonical_observation_note(note);
+    if normalized.is_empty() {
+        return VideoPromptObservationFamily::Generic;
+    }
+
+    if [
+        "identity drift",
+        "costume drift",
+        "costume inconsistency",
+        "face distortion",
+        "脸",
+        "身份",
+        "服装",
+        "角色一致",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
+    {
+        return VideoPromptObservationFamily::Identity;
+    }
+    if [
+        "lip-sync",
+        "口型",
+        "dialogue",
+        "voice-over",
+        "台词",
+        "对白",
+        "旁白",
+        "语音",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
+    {
+        return VideoPromptObservationFamily::Dialogue;
+    }
+    if [
+        "jump axis",
+        "axis",
+        "eyeline",
+        "framing",
+        "composition",
+        "direction",
+        "camera angle",
+        "close-up",
+        "跳轴",
+        "视线",
+        "构图",
+        "方向",
+        "站位",
+        "走位",
+        "机位",
+        "景别",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
+    {
+        return VideoPromptObservationFamily::Blocking;
+    }
+    if [
+        "backlight",
+        "silhouette",
+        "lighting",
+        "light",
+        "flicker",
+        "exposure",
+        "reflection",
+        "反光",
+        "逆光",
+        "光影",
+        "曝光",
+        "闪烁",
+        "霓虹",
+        "玻璃",
+        "雨",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
+    {
+        return VideoPromptObservationFamily::Lighting;
+    }
+    if [
+        "shaky", "handheld", "motion", "stutter", "blur", "抖动", "手持", "运镜",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
+    {
+        return VideoPromptObservationFamily::Motion;
+    }
+    if [
+        "mood",
+        "emotion",
+        "tragic",
+        "oppressive",
+        "frantic",
+        "情绪",
+        "压迫",
+        "悲怆",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
+    {
+        return VideoPromptObservationFamily::Emotion;
+    }
+
+    VideoPromptObservationFamily::Generic
 }
 
 fn score_video_prompt_observation_specificity(note: &str) -> i32 {
@@ -2009,6 +2178,55 @@ fn score_video_prompt_observation_quality(note: &str) -> i32 {
         }
     }
     score
+}
+
+fn video_prompt_scene_has_motion_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.shot.as_str(),
+        fields.camera_move.as_str(),
+        fields.action.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "跟拍", "推进", "拉远", "摇镜", "手持", "奔跑", "跑", "冲", "扑", "追", "快步",
+                "转身", "扑向", "踉跄", "急退",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn video_prompt_scene_has_lighting_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.setting.as_str(),
+        fields.lighting.as_str(),
+        fields.sound.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "逆光",
+                "霓虹",
+                "反光",
+                "玻璃",
+                "雨",
+                "车灯",
+                "闪烁",
+                "曝光",
+                "剪影",
+                "silhouette",
+                "backlight",
+                "reflection",
+                "flicker",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
 }
 
 fn build_video_prompt(
@@ -3375,6 +3593,7 @@ fn build_continuity_notes(
                 .filter_map(|note| {
                     compact_continuity_note(note, structured_fields, prompt_coverage)
                 })
+                .filter(|note| continuity_note_matches_storyboard_risk(note, structured_fields))
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
@@ -3390,6 +3609,67 @@ fn build_continuity_notes(
     });
     notes.truncate(VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT);
     notes
+}
+
+fn continuity_note_matches_storyboard_risk(
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> bool {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return false;
+    }
+    if continuity_note_adds_specific_guidance(&normalized) {
+        return true;
+    }
+    let Some(fields) = structured_fields else {
+        return true;
+    };
+    if continuity_note_mentions_dialogue_risk(&normalized) {
+        return !storyboard_dialogue_is_empty(&fields.dialogue);
+    }
+    if continuity_note_mentions_emotional_risk(&normalized) {
+        return video_prompt_scene_needs_emotional_memory(fields);
+    }
+    if continuity_note_mentions_lighting_risk(&normalized) {
+        return video_prompt_scene_has_lighting_risk(fields);
+    }
+    if continuity_note_mentions_motion_risk(&normalized) {
+        return video_prompt_scene_has_motion_risk(fields);
+    }
+    false
+}
+
+fn continuity_note_mentions_dialogue_risk(note: &str) -> bool {
+    [
+        "对白", "台词", "口型", "语气", "旁白", "voice", "dialogue", "lip-sync",
+    ]
+    .iter()
+    .any(|keyword| note.contains(keyword))
+}
+
+fn continuity_note_mentions_emotional_risk(note: &str) -> bool {
+    [
+        "情绪", "压迫", "冷峻", "悲怆", "克制", "隐忍", "急迫", "停顿", "哽咽", "表演", "状态",
+    ]
+    .iter()
+    .any(|keyword| note.contains(keyword))
+}
+
+fn continuity_note_mentions_lighting_risk(note: &str) -> bool {
+    [
+        "光", "影", "逆光", "反光", "曝光", "闪烁", "霓虹", "玻璃", "雨", "灯",
+    ]
+    .iter()
+    .any(|keyword| note.contains(keyword))
+}
+
+fn continuity_note_mentions_motion_risk(note: &str) -> bool {
+    [
+        "跟拍", "推进", "拉远", "手持", "运镜", "抖动", "动作", "节奏", "转身", "快步",
+    ]
+    .iter()
+    .any(|keyword| note.contains(keyword))
 }
 
 fn compact_continuity_note(
@@ -5604,15 +5884,15 @@ mod tests {
         compact_script_asset_anchor, parse_director_emotion_cues, parse_director_environment_cues,
         parse_director_environment_texture_cues, parse_director_motion_cue,
         parse_structured_storyboard_description, prune_low_signal_observation_candidates,
-        resolve_observation_filter_style_note, resolve_video_prompt_duration,
-        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
-        select_script_asset_anchors, select_video_prompt_asset_seed_rows,
-        select_video_prompt_memory_notes, select_video_prompt_style_notes,
-        trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
-        video_prompt_observation_conflicts_with_style,
+        prune_storyboard_observation_candidates, resolve_observation_filter_style_note,
+        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
+        select_best_video_prompt_observation_note, select_script_asset_anchors,
+        select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
+        select_video_prompt_style_notes, trim_video_prompt_memory_rows,
+        trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptDiagnostics,
         GenerateVideoPromptResponse, ScriptRolePromptSeedRow, VideoPromptContext,
-        VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
+        VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes,
@@ -5737,6 +6017,51 @@ mod tests {
 
         assert!(prompt.contains("Continuity notes: 保持上一镜头压迫感."));
         assert!(!prompt.contains("镜头中景稳定跟拍，情绪急迫"));
+    }
+
+    #[test]
+    fn build_video_prompt_drops_low_value_lighting_continuity_for_grounded_indoor_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（男主坐在木桌前、室内书房、男主、4秒、中景、静止、低头翻开信纸、克制、室内暖光、无台词、纸张摩擦声、A03）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["保持上一镜头暖光层次".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("Continuity notes:"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_lighting_continuity_for_reflective_night_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（女主站在落地窗边、城市夜景落地窗边、女主、4秒、中景、缓推、看着雨丝划过玻璃、隐忍、冷蓝窗光与路灯反射、无台词、雨声、A18）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["保持上一镜头冷蓝反光层次".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Continuity notes: 保持上一镜头冷蓝反光层次."),
+            "{prompt}"
+        );
     }
 
     #[test]
@@ -8989,6 +9314,64 @@ mod tests {
                 "avoid extreme camera angle".to_string(),
             ]),
             vec!["avoid extreme camera angle".to_string()]
+        );
+    }
+
+    #[test]
+    fn prune_storyboard_observation_candidates_drops_mood_only_note_for_low_risk_storyboard() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（男主坐在木桌前、室内书房、男主、4秒、中景、静止、低头翻开信纸、平静、室内暖光、无台词、纸张摩擦声、A03）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert!(prune_storyboard_observation_candidates(
+            vec!["avoid overly cold emotional tone".into()],
+            Some(&storyboard_row)
+        )
+        .is_empty());
+    }
+
+    #[test]
+    fn prune_storyboard_observation_candidates_keeps_lighting_note_for_reflective_storyboard() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（女主站在落地窗边、城市夜景落地窗边、女主、4秒、中景、缓推、看着雨丝划过玻璃、隐忍、冷蓝窗光与路灯反射、无台词、雨声、A18）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            prune_storyboard_observation_candidates(
+                vec!["avoid harsh backlight silhouette".into()],
+                Some(&storyboard_row)
+            ),
+            vec!["avoid harsh backlight silhouette".to_string()]
+        );
+    }
+
+    #[test]
+    fn prune_storyboard_observation_candidates_keeps_lip_sync_note_for_dialogue_storyboard() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（女主逼近门厅、旧宅门厅、女主、5秒、近景、推进、停步回头、克制、冷调逆光、你别再骗我、风声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            prune_storyboard_observation_candidates(
+                vec!["avoid lip-sync mismatch".into()],
+                Some(&storyboard_row)
+            ),
+            vec!["avoid lip-sync mismatch".to_string()]
         );
     }
 

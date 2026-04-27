@@ -704,7 +704,7 @@ fn build_storyboard_negative_prompts(
             );
             let fragment_count = review_prompt
                 .as_deref()
-                .map(split_negative_prompt_fragments)
+                .map(|prompt| split_negative_prompt_fragments(Some(prompt)))
                 .map(|fragments| fragments.len())
                 .unwrap_or(0);
             (
@@ -2195,7 +2195,8 @@ mod tests {
         resolve_negative_filter_style_note, review_fragment_conflicts_with_selected_style,
         review_fragment_is_irrelevant_to_storyboard, selected_memory_fetch_limit,
         storyboard_dialogue_is_empty, storyboard_mismatch_category_is_redundant,
-        visual_error_category_is_redundant, QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        visual_error_category_is_redundant, QualityReviewSeedRow, VideoNegativePromptBudgetTier,
+        VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
