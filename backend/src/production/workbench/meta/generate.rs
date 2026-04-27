@@ -4209,8 +4209,21 @@ fn score_memory_fragment_against_constraint_pressure(
             _ => 0,
         };
     }
-    if pressure.has_identity_guardrail && matches!(family, Some("情绪") | Some("声场")) {
-        score -= 2;
+    if pressure.has_identity_guardrail {
+        score += match family {
+            Some("表演") => 4,
+            Some("语气") => {
+                if memory_fragment_has_high_signal_voice_detail(&normalized) {
+                    0
+                } else {
+                    -4
+                }
+            }
+            Some("动作") if generic_motion_style_fragment(&normalized) => -4,
+            Some("环境") | Some("声场") => -4,
+            Some("情绪") => -3,
+            _ => 0,
+        };
     }
 
     score
@@ -4236,7 +4249,7 @@ fn memory_style_fragment_should_yield_to_negative_pressure(
     let family = style_note_fragment_family(&normalized);
     match family {
         Some("情绪") => {
-            pressure.has_emotion_guardrail
+            (pressure.has_emotion_guardrail || pressure.has_identity_guardrail)
                 && mood_fragment_is_generic_carryover(
                     normalize_prompt_text(normalized.trim_start_matches("情绪")).as_str(),
                 )
@@ -4246,21 +4259,26 @@ fn memory_style_fragment_should_yield_to_negative_pressure(
                 return true;
             }
             !memory_fragment_has_high_signal_voice_detail(&normalized)
-                && (pressure.has_dialogue_guardrail || pressure.has_emotion_guardrail)
+                && (pressure.has_dialogue_guardrail
+                    || pressure.has_emotion_guardrail
+                    || pressure.has_identity_guardrail)
         }
         Some("声场") => {
             pressure.has_dialogue_guardrail
                 || pressure.has_motion_guardrail
                 || pressure.has_emotion_guardrail
+                || pressure.has_identity_guardrail
         }
         Some("环境") => {
-            pressure.has_lighting_guardrail
-                && !["反光", "逆光", "霓虹", "雨丝", "玻璃", "水痕", "影"]
-                    .iter()
-                    .any(|keyword| normalized.contains(keyword))
+            pressure.has_identity_guardrail
+                || pressure.has_lighting_guardrail
+                    && !["反光", "逆光", "霓虹", "雨丝", "玻璃", "水痕", "影"]
+                        .iter()
+                        .any(|keyword| normalized.contains(keyword))
         }
         Some("动作") => {
-            pressure.has_motion_guardrail && generic_motion_style_fragment(&normalized)
+            (pressure.has_motion_guardrail || pressure.has_identity_guardrail)
+                && generic_motion_style_fragment(&normalized)
         }
         Some("镜头") => {
             pressure.has_blocking_guardrail && is_local_framing_only_fragment(&normalized)
@@ -12173,6 +12191,70 @@ mod tests {
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
         assert!(!result.prompt.contains("情绪压抑"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_identity_guardrail_drops_generic_environment_and_motion_memory() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚在窗边停住、咖啡厅窗边、林晚、4秒、中景、缓推、停住后看向门外、克制、夜间暖光、无台词、轻微杯碟声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与暖色玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["动作克制自然，环境雨丝玻璃，表演眼神迟疑".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(result.prompt.contains("表演眼神迟疑"), "{}", result.prompt);
+        assert!(!result.prompt.contains("动作克制自然"), "{}", result.prompt);
+        assert!(!result.prompt.contains("环境雨丝玻璃"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_identity_guardrail_drops_generic_voice_memory_without_micro_detail() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚低声开口、咖啡厅窗边、林晚、4秒、中景、缓推、低声说你先走、克制、夜间冷蓝窗光、你先走、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["语气低声克制，表演喉结滚动".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                has_dialogue_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
     }
 
     #[test]
