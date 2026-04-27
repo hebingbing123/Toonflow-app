@@ -2295,12 +2295,15 @@ fn storyboard_distance_from_memory_content(
 fn build_pending_video_observation_note_from_runtime(
     runtime: &StoryboardNegativePromptRuntime,
 ) -> Option<String> {
+    let constraint_pressure =
+        VideoPromptConstraintPressure::from_runtime_constraints(Some(&runtime.selection), None);
     build_pending_video_observation_note(
         runtime.prompt_support_rows.clone(),
         runtime.storyboard_id,
         runtime.current_prompt_seed.as_deref(),
         runtime.storyboard_row.as_ref(),
         &runtime.subject_candidates,
+        constraint_pressure,
     )
 }
 
@@ -2310,6 +2313,7 @@ fn build_pending_video_observation_note(
     current_prompt_seed: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     subject_candidates: &[String],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let rows = trim_video_prompt_observation_rows(
         rows,
@@ -2324,6 +2328,7 @@ fn build_pending_video_observation_note(
         current_prompt_seed,
         storyboard_row,
         subject_candidates,
+        constraint_pressure,
     );
     let note = select_best_video_prompt_observation_note(prune_storyboard_observation_candidates(
         {
@@ -2657,32 +2662,46 @@ fn resolve_observation_filter_style_note(
     current_prompt_seed: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     subject_candidates: &[String],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
-    if let Some(note) = select_subject_role_video_style_memory_notes_for_storyboard(
+    let role_notes = select_subject_role_video_style_memory_notes_for_storyboard(
         rows,
         subject_candidates,
         storyboard_row,
     )
     .into_iter()
     .filter_map(|note| compact_contextual_video_style_note(&note, storyboard_row))
-    .next()
-    {
-        return Some(note);
-    }
-
-    select_prioritized_video_style_note(
+    .collect::<Vec<_>>();
+    let prioritized_notes = select_prioritized_video_style_note(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
         storyboard_row,
     )
-    .and_then(|note| compact_contextual_video_style_note(&note, storyboard_row))
-    .or_else(|| select_contextual_observation_summary_style_note(rows, storyboard_row))
+    .into_iter()
+    .filter_map(|note| compact_contextual_video_style_note(&note, storyboard_row))
+    .collect::<Vec<_>>();
+    let summary_notes =
+        select_contextual_observation_summary_style_note(rows, storyboard_row, constraint_pressure)
+            .into_iter()
+            .collect::<Vec<_>>();
+
+    select_pressure_prioritized_observation_filter_style_note(
+        &role_notes,
+        &prioritized_notes,
+        &summary_notes,
+        storyboard_row,
+        constraint_pressure,
+    )
+    .or_else(|| role_notes.into_iter().next())
+    .or_else(|| prioritized_notes.into_iter().next())
+    .or_else(|| summary_notes.into_iter().next())
 }
 
 fn select_contextual_observation_summary_style_note(
     rows: &[AgentMemoryRow],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let context = storyboard_row
         .and_then(|row| row.video_desc.as_deref())
@@ -2693,7 +2712,9 @@ fn select_contextual_observation_summary_style_note(
         .chain(select_project_video_style_memory_notes(rows))
         .filter_map(|note| {
             let evidence = observation_style_note_context_evidence(&note, &context);
-            let compacted = compact_contextual_video_style_note(&note, storyboard_row)?;
+            let compacted =
+                compact_guardrail_sensitive_style_note(&note, storyboard_row?, constraint_pressure)
+                    .or_else(|| compact_contextual_video_style_note(&note, storyboard_row))?;
             (evidence >= 2).then_some((evidence, compacted))
         })
         .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
@@ -2702,6 +2723,70 @@ fn select_contextual_observation_summary_style_note(
                 .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
         })
         .map(|(_, note)| note)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum ObservationFilterStyleCandidateSource {
+    Summary,
+    Prioritized,
+    Role,
+}
+
+fn select_pressure_prioritized_observation_filter_style_note(
+    role_notes: &[String],
+    prioritized_notes: &[String],
+    summary_notes: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    let pressure = constraint_pressure
+        .filter(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())?;
+    let storyboard_row = storyboard_row?;
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    let mut best: Option<(i32, usize, ObservationFilterStyleCandidateSource, String)> = None;
+
+    let mut consider = |note: &String, source: ObservationFilterStyleCandidateSource| {
+        let compacted =
+            compact_guardrail_sensitive_style_note(note, storyboard_row, Some(pressure))
+                .or_else(|| compact_contextual_video_style_note(note, Some(storyboard_row)));
+        let Some(compacted) = compacted else {
+            return;
+        };
+        let score =
+            score_compacted_style_note_against_constraint_pressure(&compacted, &fields, pressure)
+                + match source {
+                    ObservationFilterStyleCandidateSource::Role => 2,
+                    ObservationFilterStyleCandidateSource::Prioritized => 1,
+                    ObservationFilterStyleCandidateSource::Summary => 0,
+                };
+        let len = compacted.chars().count();
+
+        match &best {
+            Some((best_score, best_len, best_source, best_note))
+                if *best_score > score
+                    || (*best_score == score
+                        && (*best_len < len
+                            || (*best_len == len
+                                && (*best_source > source
+                                    || (*best_source == source && best_note <= &compacted))))) => {}
+            _ => best = Some((score, len, source, compacted)),
+        }
+    };
+
+    for note in role_notes {
+        consider(note, ObservationFilterStyleCandidateSource::Role);
+    }
+    for note in prioritized_notes {
+        consider(note, ObservationFilterStyleCandidateSource::Prioritized);
+    }
+    for note in summary_notes {
+        consider(note, ObservationFilterStyleCandidateSource::Summary);
+    }
+
+    best.map(|(_, _, _, note)| note)
 }
 
 fn observation_style_note_context_evidence(
@@ -12325,7 +12410,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row)),
+            select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row), None,),
             Some("表演喉结滚动".to_string())
         );
     }
@@ -12465,10 +12550,15 @@ mod tests {
             duration: Some("5s".into()),
         };
 
-        assert!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[])
-                .is_none()
-        );
+        assert!(resolve_observation_filter_style_note(
+            &rows,
+            12,
+            None,
+            Some(&storyboard_row),
+            &[],
+            None,
+        )
+        .is_none());
     }
 
     #[test]
@@ -14719,7 +14809,14 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[]),
+            resolve_observation_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                &[],
+                None,
+            ),
             Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string())
         );
     }
@@ -14759,6 +14856,7 @@ mod tests {
                 None,
                 Some(&storyboard_row),
                 &subject_candidates,
+                None,
             ),
             Some("语气轻声".to_string())
         );
@@ -14795,6 +14893,7 @@ mod tests {
                 None,
                 Some(&storyboard_row),
                 &subject_candidates,
+                None,
             ),
             Some("表演抬眼停顿".to_string())
         );
@@ -14812,10 +14911,15 @@ mod tests {
             duration: Some("5s".into()),
         };
 
-        assert!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[])
-                .is_none()
-        );
+        assert!(resolve_observation_filter_style_note(
+            &rows,
+            12,
+            None,
+            Some(&storyboard_row),
+            &[],
+            None,
+        )
+        .is_none());
     }
 
     #[test]
@@ -14837,7 +14941,14 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[]),
+            resolve_observation_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                &[],
+                None,
+            ),
             Some("镜头推进".to_string())
         );
     }
@@ -14886,8 +14997,46 @@ mod tests {
         };
 
         assert_eq!(
-            select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row)),
+            select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row), None,),
             Some("声场雨声回响".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_pressure_prefers_micro_performance_over_global_lighting_summary(
+    ) {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=6 | style=镜头稳定跟拍，情绪压抑，光影冷调逆光 | note=镜头稳定跟拍，情绪压抑，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=5 | style=表演喉结滚动，语气轻声克制，声场雨声回响 | note=表演喉结滚动，语气轻声克制，声场雨声回响".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚停顿后低声说你终于来了".into()),
+            video_desc: Some("（林晚停顿后低声说你终于来了、雨夜窗边、林晚、5秒、近景、静止、抿唇停顿后低声开口、压抑、冷调逆光、你终于来了、雨声压过呼吸声、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let pressure = Some(VideoPromptConstraintPressure {
+            has_identity_guardrail: true,
+            has_dialogue_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        });
+
+        assert_eq!(
+            resolve_observation_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                &[],
+                pressure,
+            ),
+            Some("表演喉结滚动，语气轻声".to_string())
         );
     }
 }
