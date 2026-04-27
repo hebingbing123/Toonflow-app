@@ -1447,6 +1447,13 @@ fn select_video_prompt_style_notes(
             .into_iter()
             .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
             .collect::<Vec<_>>();
+    if let Some(role_only) = prefer_role_memory_only_for_silent_identity_scene(
+        &exact,
+        &role_memory_notes,
+        storyboard_row,
+    ) {
+        return vec![role_only];
+    }
     if let Some(merged) = merge_exact_and_role_style_notes_for_high_value_scene(
         &exact,
         &role_memory_notes,
@@ -1610,6 +1617,53 @@ fn video_prompt_scene_needs_identity_memory(fields: &StructuredStoryboardDescrip
             ]
             .iter()
             .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn prefer_role_memory_only_for_silent_identity_scene(
+    exact_notes: &[String],
+    role_memory_notes: &[String],
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Option<String> {
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    if !video_prompt_scene_needs_identity_memory(&fields)
+        || !storyboard_dialogue_is_empty(&fields.dialogue)
+    {
+        return None;
+    }
+    if !exact_notes
+        .iter()
+        .all(|note| exact_style_note_is_low_gain_identity_carryover(note))
+    {
+        return None;
+    }
+
+    role_memory_notes
+        .iter()
+        .find_map(|note| role_style_note_has_visible_micro_performance(note).then(|| note.clone()))
+}
+
+fn exact_style_note_is_low_gain_identity_carryover(note: &str) -> bool {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    !fragments.is_empty()
+        && fragments.iter().all(|fragment| {
+            matches!(
+                style_note_fragment_family(fragment),
+                Some("镜头") | Some("光影") | Some("环境") | Some("声场")
+            )
+        })
+}
+
+fn role_style_note_has_visible_micro_performance(note: &str) -> bool {
+    split_prompt_note_fragments(note).any(|fragment| {
+        fragment.starts_with("表演")
+            && (score_memory_fragment_human_performance_detail(&fragment, Some("表演")) >= 3
+                || ["眼神", "目光", "抬眼", "眉", "唇", "喉结"]
+                    .iter()
+                    .any(|keyword| fragment.contains(keyword)))
     })
 }
 
@@ -8104,24 +8158,25 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 #[cfg(test)]
 mod tests {
     use super::{
-        art_style_director_profile, build_video_prompt, build_video_prompt_with_diagnostics,
+        art_style_director_profile, build_video_prompt,
+        build_video_prompt_with_constraint_pressure, build_video_prompt_with_diagnostics,
         compact_camera_clause, compact_contextual_video_style_note,
         compact_director_emotion_fragment_group,
         compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
         exact_style_notes_should_yield_to_role_memory, observation_style_note_context_evidence,
         parse_director_emotion_cues, parse_director_environment_cues,
         parse_director_environment_texture_cues, parse_director_motion_cue,
-        parse_structured_storyboard_description, prune_low_signal_observation_candidates,
-        prune_storyboard_observation_candidates, resolve_observation_filter_style_note,
-        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
-        select_best_video_prompt_observation_note,
+        parse_structured_storyboard_description, prefer_role_memory_only_for_silent_identity_scene,
+        prune_low_signal_observation_candidates, prune_storyboard_observation_candidates,
+        resolve_observation_filter_style_note, resolve_video_prompt_duration,
+        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
         select_contextual_observation_summary_style_note, select_script_asset_anchors,
         select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
         select_video_prompt_style_notes, trim_video_prompt_memory_rows,
         trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, DirectorEmotionFragmentGroup,
         GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse, ScriptRolePromptSeedRow,
-        VideoPromptContext, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
+        VideoPromptConstraintPressure, VideoPromptContext, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
         VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
     };
     use crate::production::workbench::video_prompt_memory::{
@@ -10822,19 +10877,7 @@ mod tests {
     }
 
     #[test]
-    fn select_video_prompt_style_notes_merges_role_micro_performance_for_identity_risk_scene() {
-        let rows = vec![
-            AgentMemoryRow {
-                name: "selected_video_memory".into(),
-                content:
-                    "storyboardIds=22 | style=镜头近景，光影暖金逆光 | note=镜头近景，光影暖金逆光"
-                        .into(),
-            },
-            AgentMemoryRow {
-                name: "script_role_video_style_memory".into(),
-                content: "subject=林晚 | sampleCount=2 | style=表演眼神迟疑，语气轻声克制".into(),
-            },
-        ];
+    fn prefer_role_memory_only_for_silent_identity_scene_uses_micro_performance_note() {
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("林晚在镜前停住".into()),
             video_desc: Some("（林晚在镜前停住、化妆镜前、林晚、4秒、近景、静止、抬眼看向镜中倒影、克制、暖金逆光、无台词、静场留白、A22）".into()),
@@ -10842,8 +10885,30 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
-            vec!["光影暖金逆光，表演眼神迟疑".to_string()]
+            prefer_role_memory_only_for_silent_identity_scene(
+                &["光影暖金逆光".to_string()],
+                &["表演眼神迟疑".to_string()],
+                &storyboard_row,
+            ),
+            Some("表演眼神迟疑".to_string())
+        );
+    }
+
+    #[test]
+    fn prefer_role_memory_only_for_silent_identity_scene_skips_emotional_dialogue_turn() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边迟疑开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中近景、缓推、抬眼后迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            prefer_role_memory_only_for_silent_identity_scene(
+                &["光影冷蓝窗光".to_string()],
+                &["表演抬眼停顿，语气轻声".to_string()],
+                &storyboard_row,
+            ),
+            None
         );
     }
 
