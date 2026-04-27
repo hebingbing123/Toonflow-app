@@ -1558,7 +1558,11 @@ fn trim_video_prompt_memory_rows(
 
     for (idx, row) in rows.into_iter().enumerate() {
         match row.name.as_str() {
-            "selected_video_memory" => selected_candidates.push((idx, row)),
+            "selected_video_memory" => {
+                if selected_memory_row_matches_subject_candidates(&row, subject_candidates) {
+                    selected_candidates.push((idx, row))
+                }
+            }
             "auto_scope_memory" => auto_scope_candidates.push((idx, row)),
             "script_video_style_memory" => script_style_candidates.push((idx, row)),
             "script_role_video_style_memory" => script_role_style_candidates.push((idx, row)),
@@ -1570,10 +1574,7 @@ fn trim_video_prompt_memory_rows(
 
     let mut kept = std::collections::HashSet::new();
     for idx in prioritize_storyboard_memory_indices(
-        &filter_selected_memory_candidates_for_subject(
-            &selected_candidates,
-            subject_candidates,
-        ),
+        &selected_candidates,
         storyboard_numeric_id,
         current_prompt_seed,
         VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT,
@@ -1651,19 +1652,6 @@ fn keep_matching_role_style_rows(
     {
         kept.insert(*idx);
     }
-}
-
-fn filter_selected_memory_candidates_for_subject<'a>(
-    candidates: &'a [(usize, AgentMemoryRow)],
-    subject_candidates: &[String],
-) -> Vec<(usize, AgentMemoryRow)> {
-    candidates
-        .iter()
-        .filter(|(_, row)| {
-            selected_memory_row_matches_subject_candidates(row, subject_candidates)
-        })
-        .cloned()
-        .collect()
 }
 
 fn selected_memory_row_matches_subject_candidates(
@@ -9526,6 +9514,10 @@ mod tests {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=22 | subject=林晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气轻声克制".into(),
             },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演喉结滚动，语气轻声克制".into(),
+            },
         ];
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("林晚站在窗边迟疑开口".into()),
@@ -9535,7 +9527,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
-            vec!["表演抬眼停顿，语气轻声".to_string()]
+            Vec::<String>::new()
         );
     }
 
