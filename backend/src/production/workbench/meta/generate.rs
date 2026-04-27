@@ -8515,8 +8515,10 @@ mod tests {
         parse_structured_storyboard_description, prefer_role_memory_only_for_silent_identity_scene,
         prune_low_signal_observation_candidates, prune_storyboard_observation_candidates,
         resolve_observation_filter_style_note, resolve_video_prompt_duration,
+        score_compacted_style_note_against_constraint_pressure,
         score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
-        select_contextual_observation_summary_style_note, select_script_asset_anchors,
+        select_contextual_observation_summary_style_note,
+        select_pressure_prioritized_style_note_candidate, select_script_asset_anchors,
         select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
         select_video_prompt_style_notes, trim_video_prompt_memory_rows,
         trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
@@ -11054,7 +11056,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row, None),
             vec!["镜头稳定".to_string()]
         );
     }
@@ -11078,7 +11080,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row, None),
             vec!["光影潮湿路灯".to_string()]
         );
     }
@@ -11102,7 +11104,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row, None),
             vec!["表演抬眼停顿，语气轻声".to_string()]
         );
     }
@@ -11120,7 +11122,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row, None),
             vec!["情绪压迫".to_string()]
         );
     }
@@ -11144,7 +11146,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row, None),
             vec!["表演抬眼停顿，语气轻声".to_string()]
         );
     }
@@ -11172,7 +11174,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row, None),
             Vec::<String>::new()
         );
     }
@@ -11196,7 +11198,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row, None),
             vec!["镜头低机位压迫感，情绪压迫，语气轻声".to_string()]
         );
     }
@@ -11220,7 +11222,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row, None),
             vec!["镜头低机位压迫感，情绪压迫，表演抬眼停顿，语气轻声".to_string()]
         );
     }
@@ -11270,6 +11272,84 @@ mod tests {
                 }),
             ),
             Some("光影层次".to_string())
+        );
+    }
+
+    #[test]
+    fn pressure_style_note_selection_prefers_micro_performance_for_dialogue_guardrail() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚停顿后低声开口".into()),
+            video_desc: Some("（林晚停顿后低声开口、办公室窗边、林晚、4秒、中景、静止、停顿后低声说你先出去、克制、夜间暖光、你先出去、空调低鸣、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_pressure_prioritized_style_note_candidate(
+                &["光影暖金逆光层次".into()],
+                &["表演喉结滚动，语气压低气息尾音发颤".into()],
+                &[],
+                &[],
+                &storyboard_row,
+                Some(VideoPromptConstraintPressure {
+                    has_dialogue_guardrail: true,
+                    has_emotion_guardrail: true,
+                    forces_compact_memory: true,
+                    ..VideoPromptConstraintPressure::default()
+                }),
+            ),
+            Some("表演喉结滚动，语气压低气息尾音发颤".to_string())
+        );
+    }
+
+    #[test]
+    fn pressure_style_note_selection_keeps_lighting_when_only_lighting_guardrail_is_active() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在镜前".into()),
+            video_desc: Some("（林晚站在镜前、化妆镜前、林晚、4秒、中景、静止、看向镜中倒影、平静、暖金逆光、无台词、静场留白、A13）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_pressure_prioritized_style_note_candidate(
+                &["光影暖金逆光层次".into()],
+                &["表演眼神放松".into()],
+                &[],
+                &[],
+                &storyboard_row,
+                Some(VideoPromptConstraintPressure {
+                    has_lighting_guardrail: true,
+                    forces_compact_memory: true,
+                    ..VideoPromptConstraintPressure::default()
+                }),
+            ),
+            Some("光影层次".to_string())
+        );
+    }
+
+    #[test]
+    fn compacted_style_pressure_score_rewards_micro_performance_under_identity_guardrail() {
+        let fields = parse_structured_storyboard_description(
+            "（林晚停顿后低声开口、办公室窗边、林晚、4秒、中景、静止、停顿后低声说你先出去、克制、夜间暖光、你先出去、空调低鸣、A12）",
+        )
+        .expect("structured storyboard");
+        let pressure = VideoPromptConstraintPressure {
+            has_identity_guardrail: true,
+            has_dialogue_guardrail: true,
+            has_emotion_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        };
+
+        assert!(
+            score_compacted_style_note_against_constraint_pressure(
+                "表演喉结滚动，语气压低气息尾音发颤",
+                &fields,
+                pressure,
+            ) > score_compacted_style_note_against_constraint_pressure(
+                "光影暖金逆光层次",
+                &fields,
+                pressure,
+            )
         );
     }
 
@@ -11328,7 +11408,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row, None),
             vec!["表演抬眼停顿，语气轻声".to_string()]
         );
     }
@@ -11345,7 +11425,7 @@ mod tests {
             duration: Some("5s".into()),
         };
 
-        assert!(select_video_prompt_style_notes(&rows, 12, None, &storyboard_row).is_empty());
+        assert!(select_video_prompt_style_notes(&rows, 12, None, &storyboard_row, None).is_empty());
     }
 
     #[test]
@@ -12039,7 +12119,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row, None),
             vec!["语气轻声，表演喉结滚动".to_string()]
         );
     }
