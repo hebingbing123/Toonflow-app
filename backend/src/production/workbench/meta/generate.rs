@@ -2703,8 +2703,10 @@ fn select_contextual_observation_summary_style_note(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
+    let storyboard_row = storyboard_row?;
     let context = storyboard_row
-        .and_then(|row| row.video_desc.as_deref())
+        .video_desc
+        .as_deref()
         .and_then(parse_structured_storyboard_description)?;
 
     select_script_video_style_memory_notes(rows)
@@ -2713,16 +2715,108 @@ fn select_contextual_observation_summary_style_note(
         .filter_map(|note| {
             let evidence = observation_style_note_context_evidence(&note, &context);
             let compacted =
-                compact_guardrail_sensitive_style_note(&note, storyboard_row?, constraint_pressure)
-                    .or_else(|| compact_contextual_video_style_note(&note, storyboard_row))?;
-            (evidence >= 2).then_some((evidence, compacted))
+                compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
+                    .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+            let compacted = rank_observation_summary_style_note_fragments(
+                &compacted,
+                &context,
+                constraint_pressure,
+            )?;
+            let fragment_score =
+                observation_summary_style_note_score(&compacted, &context, constraint_pressure);
+            (evidence >= 2).then_some((evidence, fragment_score, compacted))
         })
-        .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
-            left_evidence
-                .cmp(right_evidence)
-                .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
+        .max_by(
+            |(left_evidence, left_score, left_note), (right_evidence, right_score, right_note)| {
+                left_evidence
+                    .cmp(right_evidence)
+                    .then(left_score.cmp(right_score))
+                    .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
+            },
+        )
+        .map(|(_, _, note)| note)
+}
+
+fn rank_observation_summary_style_note_fragments(
+    note: &str,
+    context: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    let max_chars = if constraint_pressure
+        .is_some_and(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())
+    {
+        VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS
+    } else {
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS
+    };
+    let max_fragments = if max_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS {
+        2
+    } else {
+        3
+    };
+
+    let mut scored = split_prompt_note_fragments(note)
+        .filter_map(|fragment| {
+            let evidence = observation_style_note_context_evidence(&fragment, context);
+            (evidence > 0).then_some((
+                observation_summary_style_fragment_score(&fragment, context, constraint_pressure),
+                evidence,
+                fragment.chars().count(),
+                fragment,
+            ))
         })
-        .map(|(_, note)| note)
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then(b.1.cmp(&a.1))
+            .then(a.2.cmp(&b.2))
+            .then(a.3.cmp(&b.3))
+    });
+
+    let mut selected = Vec::new();
+    let mut used_chars = 0usize;
+    for (_, _, _, fragment) in scored {
+        if selected
+            .iter()
+            .any(|existing| style_note_fragment_conflicts_or_overlaps(existing, &fragment))
+        {
+            continue;
+        }
+        let separator_chars = usize::from(!selected.is_empty());
+        let next_chars = used_chars + separator_chars + fragment.chars().count();
+        if next_chars > max_chars {
+            continue;
+        }
+        used_chars = next_chars;
+        selected.push(fragment);
+        if selected.len() >= max_fragments {
+            break;
+        }
+    }
+
+    (!selected.is_empty()).then(|| selected.join("，"))
+}
+
+fn observation_summary_style_note_score(
+    note: &str,
+    context: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    split_prompt_note_fragments(note)
+        .map(|fragment| {
+            observation_summary_style_fragment_score(&fragment, context, constraint_pressure)
+        })
+        .sum()
+}
+
+fn observation_summary_style_fragment_score(
+    fragment: &str,
+    context: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    let evidence = observation_style_note_context_evidence(fragment, context) as i32;
+    score_memory_style_fragment_for_lean_tier(fragment, Some(context), constraint_pressure)
+        + evidence * 12
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -14999,6 +15093,34 @@ mod tests {
         assert_eq!(
             select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row), None,),
             Some("声场雨声回响".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_contextual_summary_reorders_fragments_for_dialogue_risk() {
+        let rows = vec![AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=5 | style=表演喉结滚动，语气轻声克制，光影冷调逆光 | note=表演喉结滚动，语气轻声克制，光影冷调逆光".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚停顿后低声说你终于来了".into()),
+            video_desc: Some("（林晚停顿后低声说你终于来了、雨夜窗边、林晚、5秒、近景、静止、抿唇停顿后低声开口、压抑、冷调逆光、你终于来了、雨声压过呼吸声、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let pressure = Some(VideoPromptConstraintPressure {
+            has_identity_guardrail: true,
+            has_dialogue_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        });
+
+        assert_eq!(
+            select_contextual_observation_summary_style_note(
+                &rows,
+                Some(&storyboard_row),
+                pressure,
+            ),
+            Some("表演喉结滚动，语气轻声".to_string())
         );
     }
 
