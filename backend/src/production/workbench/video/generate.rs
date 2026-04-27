@@ -77,11 +77,32 @@ pub(crate) struct AutoNegativePromptSelection {
     pub(crate) prompt: Option<String>,
     pub(crate) fragment_count: usize,
     pub(crate) budget_tier: &'static str,
+    pub(crate) review_fragment_count: usize,
+    pub(crate) rejected_memory_fragment_count: usize,
+    pub(crate) used_pending_observation_fallback: bool,
 }
 
 impl AutoNegativePromptSelection {
     fn as_deref(&self) -> Option<&str> {
         self.prompt.as_deref()
+    }
+
+    pub(crate) fn source_label(&self) -> Option<&'static str> {
+        if self.prompt.is_none() {
+            return None;
+        }
+        if self.used_pending_observation_fallback {
+            return Some("pending_rejected_observation");
+        }
+        match (
+            self.review_fragment_count > 0,
+            self.rejected_memory_fragment_count > 0,
+        ) {
+            (true, true) => Some("review+rejected_memory"),
+            (true, false) => Some("review"),
+            (false, true) => Some("rejected_memory"),
+            (false, false) => None,
+        }
     }
 }
 
@@ -736,6 +757,11 @@ fn build_storyboard_negative_prompts(
                 &review_fragments,
                 subject_candidates.len(),
             );
+            let review_fragment_count = review_fragments.len();
+            let rejected_memory_fragment_count = effective_rejected_fragments.len();
+            let used_pending_observation_fallback = rejected_fragments.is_empty()
+                && review_fragments.is_empty()
+                && !observation_fragments.is_empty();
             let review_prompt = merge_prioritized_negative_prompt_fragment_groups(
                 &[effective_rejected_fragments, review_fragments],
                 budget_tier,
@@ -751,6 +777,9 @@ fn build_storyboard_negative_prompts(
                     prompt: review_prompt,
                     fragment_count,
                     budget_tier: budget_tier.as_str(),
+                    review_fragment_count,
+                    rejected_memory_fragment_count,
+                    used_pending_observation_fallback,
                 },
             )
         })
@@ -4162,6 +4191,13 @@ mod tests {
         assert_eq!(selection.as_deref(), Some("avoid flicker or motion jitter"));
         assert_eq!(selection.fragment_count, 1);
         assert_eq!(selection.budget_tier, "lean");
+        assert_eq!(selection.review_fragment_count, 0);
+        assert_eq!(selection.rejected_memory_fragment_count, 1);
+        assert!(selection.used_pending_observation_fallback);
+        assert_eq!(
+            selection.source_label(),
+            Some("pending_rejected_observation")
+        );
     }
 
     #[test]

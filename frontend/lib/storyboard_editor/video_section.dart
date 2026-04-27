@@ -164,6 +164,13 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
+            buildStoryboardVideoPromptSourceSummary(promptDiagnostics!),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
             buildStoryboardVideoPromptAnchorSummary(promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.outline,

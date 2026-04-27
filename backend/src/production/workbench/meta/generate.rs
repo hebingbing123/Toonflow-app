@@ -13,7 +13,9 @@ use crate::production::workbench::meta::common::{
     normalize_prompt_text, parse_positive_int, parse_structured_storyboard_description,
     StructuredStoryboardDescription,
 };
-use crate::production::workbench::video::generate::load_auto_negative_prompt_details;
+use crate::production::workbench::video::generate::{
+    load_auto_negative_prompt_details, AutoNegativePromptSelection,
+};
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
     select_pending_rejected_video_observation_candidates_for_subject,
@@ -121,6 +123,9 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     negative_prompt_chars: usize,
     negative_constraint_count: usize,
     negative_budget_tier: String,
+    auto_negative_source: Option<String>,
+    auto_negative_review_fragment_count: usize,
+    auto_negative_memory_fragment_count: usize,
     observation_note_chars: usize,
     role_anchor_count: usize,
     scene_anchor_count: usize,
@@ -237,14 +242,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     );
 
     let diagnostics = prompt_result.diagnostics.with_runtime_notes(
-        negative_prompt.as_deref(),
-        negative_prompt_selection
-            .as_ref()
-            .map(|selection| selection.fragment_count)
-            .unwrap_or(0),
-        negative_prompt_selection
-            .as_ref()
-            .map(|selection| selection.budget_tier),
+        negative_prompt_selection.as_ref(),
         observation_note.as_deref(),
     );
 
@@ -372,20 +370,38 @@ const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[
 impl GenerateVideoPromptDiagnostics {
     fn with_runtime_notes(
         mut self,
-        negative_prompt: Option<&str>,
-        negative_constraint_count: usize,
-        negative_budget_tier: Option<&str>,
+        selection: Option<&AutoNegativePromptSelection>,
         observation_note: Option<&str>,
     ) -> Self {
+        let negative_prompt = selection.and_then(|value| value.prompt.as_deref());
+        let negative_constraint_count = selection.map(|value| value.fragment_count).unwrap_or(0);
+        let negative_budget_tier = selection.map(|value| value.budget_tier);
+        let auto_negative_source = selection
+            .and_then(AutoNegativePromptSelection::source_label)
+            .map(str::to_string)
+            .or_else(|| {
+                observation_note
+                    .filter(|note| !normalize_prompt_text(note).is_empty())
+                    .map(|_| "pending_observation_note".to_string())
+            });
+        let auto_negative_review_fragment_count = selection
+            .map(|value| value.review_fragment_count)
+            .unwrap_or(0);
+        let auto_negative_memory_fragment_count = selection
+            .map(|value| value.rejected_memory_fragment_count)
+            .unwrap_or(0);
         self.negative_prompt_chars = negative_prompt
             .map(normalize_prompt_text)
             .map(|value| value.chars().count())
             .unwrap_or(0);
         self.negative_constraint_count = negative_constraint_count;
         self.negative_budget_tier = negative_budget_tier.unwrap_or("lean").to_string();
+        self.auto_negative_source = auto_negative_source;
+        self.auto_negative_review_fragment_count = auto_negative_review_fragment_count;
+        self.auto_negative_memory_fragment_count = auto_negative_memory_fragment_count;
         self.observation_note_chars = observation_note
             .map(normalize_prompt_text)
-            .map(|value| value.chars().count())
+            .map(|value: String| value.chars().count())
             .unwrap_or(0);
         self
     }
@@ -2646,6 +2662,9 @@ fn build_video_prompt_with_diagnostics(
             negative_prompt_chars: 0,
             negative_constraint_count: 0,
             negative_budget_tier: "lean".to_string(),
+            auto_negative_source: None,
+            auto_negative_review_fragment_count: 0,
+            auto_negative_memory_fragment_count: 0,
             observation_note_chars: 0,
             role_anchor_count: role_anchors.len(),
             scene_anchor_count: scene_anchors.len(),
@@ -9685,6 +9704,9 @@ mod tests {
                 negative_prompt_chars: 0,
                 negative_constraint_count: 0,
                 negative_budget_tier: "lean".into(),
+                auto_negative_source: Some("pending_observation_note".into()),
+                auto_negative_review_fragment_count: 0,
+                auto_negative_memory_fragment_count: 0,
                 observation_note_chars: 40,
                 role_anchor_count: 1,
                 scene_anchor_count: 1,
@@ -9728,6 +9750,13 @@ mod tests {
                 .and_then(|item| item.get("negativeBudgetTier"))
                 .and_then(serde_json::Value::as_str),
             Some("lean")
+        );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("autoNegativeSource"))
+                .and_then(serde_json::Value::as_str),
+            Some("pending_observation_note")
         );
         assert_eq!(
             value

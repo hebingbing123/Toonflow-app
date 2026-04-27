@@ -13,6 +13,9 @@ class GenerateVideoPromptDiagnostics {
     required this.negativePromptChars,
     required this.negativeConstraintCount,
     required this.negativeBudgetTier,
+    required this.autoNegativeSource,
+    required this.autoNegativeReviewFragmentCount,
+    required this.autoNegativeMemoryFragmentCount,
     required this.observationNoteChars,
     required this.roleAnchorCount,
     required this.sceneAnchorCount,
@@ -30,6 +33,9 @@ class GenerateVideoPromptDiagnostics {
   final int negativePromptChars;
   final int negativeConstraintCount;
   final String negativeBudgetTier;
+  final String? autoNegativeSource;
+  final int autoNegativeReviewFragmentCount;
+  final int autoNegativeMemoryFragmentCount;
   final int observationNoteChars;
   final int roleAnchorCount;
   final int sceneAnchorCount;
@@ -49,6 +55,11 @@ class GenerateVideoPromptDiagnostics {
       negativeConstraintCount:
           (json['negativeConstraintCount'] as num?)?.toInt() ?? 0,
       negativeBudgetTier: json['negativeBudgetTier'] as String? ?? 'lean',
+      autoNegativeSource: json['autoNegativeSource'] as String?,
+      autoNegativeReviewFragmentCount:
+          (json['autoNegativeReviewFragmentCount'] as num?)?.toInt() ?? 0,
+      autoNegativeMemoryFragmentCount:
+          (json['autoNegativeMemoryFragmentCount'] as num?)?.toInt() ?? 0,
       observationNoteChars:
           (json['observationNoteChars'] as num?)?.toInt() ?? 0,
       roleAnchorCount: (json['roleAnchorCount'] as num?)?.toInt() ?? 0,

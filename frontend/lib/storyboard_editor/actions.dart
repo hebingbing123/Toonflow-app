@@ -370,9 +370,12 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
       ),
     );
     if (!mounted) return;
+    final sourceSummary = describeStoryboardAutoNegativeSource(
+      generated.diagnostics,
+    );
     final followUp = generated.observationNote == null
-        ? '已生成默认视频提示词并回填时长。'
-        : '已生成默认视频提示词并回填时长；${generated.observationNote}。';
+        ? '已生成默认视频提示词并回填时长；$sourceSummary。'
+        : '已生成默认视频提示词并回填时长；$sourceSummary；${generated.observationNote}。';
     _applyWorkbenchState(() => _setWorkbenchFollowUp(followUp));
   }
 

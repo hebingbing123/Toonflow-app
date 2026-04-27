@@ -16,6 +16,38 @@ String buildStoryboardVideoPromptDiagnosticsLine(
   return parts.join(' · ');
 }
 
+String describeStoryboardAutoNegativeSource(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  switch (diagnostics.autoNegativeSource) {
+    case 'review':
+      return '自动负向来自最近评审坏例';
+    case 'rejected_memory':
+      return '自动负向来自私有坏例记忆';
+    case 'review+rejected_memory':
+      return '自动负向同时用了评审坏例和私有记忆';
+    case 'pending_rejected_observation':
+      return '自动负向来自最近一次 reject 观察兜底';
+    case 'pending_observation_note':
+      return '当前还没正式负向词，只回带待观察失败提示';
+    default:
+      return '当前没有额外自动负向来源。';
+  }
+}
+
+String buildStoryboardVideoPromptSourceSummary(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  final parts = <String>[describeStoryboardAutoNegativeSource(diagnostics)];
+  if (diagnostics.autoNegativeReviewFragmentCount > 0) {
+    parts.add('评审 ${diagnostics.autoNegativeReviewFragmentCount} 条');
+  }
+  if (diagnostics.autoNegativeMemoryFragmentCount > 0) {
+    parts.add('记忆 ${diagnostics.autoNegativeMemoryFragmentCount} 条');
+  }
+  return parts.join(' · ');
+}
+
 String buildStoryboardVideoPromptAnchorSummary(
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
@@ -70,6 +102,13 @@ String buildStoryboardVideoPromptBudgetHint(
   if (diagnostics.negativeBudgetTier == 'lean' &&
       diagnostics.negativePromptChars >= 56) {
     return '当前负向约束已经偏长，优先合并重复的情绪/光影警告，别先删身份一致性约束。';
+  }
+  if (diagnostics.autoNegativeSource == 'review+rejected_memory' &&
+      diagnostics.autoNegativeMemoryFragmentCount >= 2) {
+    return '当前负向词已经自动带入评审和私有坏例，手动补词前先检查是否只是重复表达。';
+  }
+  if (diagnostics.autoNegativeSource == 'pending_rejected_observation') {
+    return '这次已经自动继承最近失败观察，先看重试结果，别急着再补一串同义负面词。';
   }
   if (anchorCount == 0 && diagnostics.styleAnchorCount == 0) {
     return '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。';
