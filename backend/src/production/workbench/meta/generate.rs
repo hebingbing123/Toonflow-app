@@ -2436,7 +2436,38 @@ fn trim_style_fragment_against_storyboard_fields(
             &[fields.action.as_str(), fields.mood.as_str()],
         );
     }
+    if fragment.starts_with("语气") {
+        return trim_prefixed_style_fragment(fragment, "语气", &[fields.mood.as_str()]);
+    }
+    if fragment.starts_with("声场") {
+        let trimmed = trim_prefixed_style_fragment(
+            fragment,
+            "声场",
+            &[
+                fields.sound.as_str(),
+                fields.setting.as_str(),
+                fields.action.as_str(),
+            ],
+        );
+        return match trimmed {
+            Some(compacted)
+                if compacted
+                    .strip_prefix("声场")
+                    .is_some_and(sound_stage_fragment_too_generic_after_trim) =>
+            {
+                Some(fragment.to_string())
+            }
+            other => other,
+        };
+    }
     Some(fragment.to_string())
+}
+
+fn sound_stage_fragment_too_generic_after_trim(body: &str) -> bool {
+    matches!(
+        normalize_prompt_text(body).as_str(),
+        "回响" | "回荡" | "空响" | "闷响" | "轻响" | "回声" | "贴近" | "摩擦" | "留白"
+    )
 }
 
 fn trim_prefixed_style_fragment(fragment: &str, prefix: &str, fields: &[&str]) -> Option<String> {
@@ -2476,16 +2507,19 @@ fn style_fragment_matches_prompt_style_field(
     (!fields.mood.is_empty() && style_fragment_semantically_covers_field(fragment, &fields.mood))
         || (!fields.lighting.is_empty()
             && style_fragment_semantically_covers_field(fragment, &fields.lighting))
+        || (fragment.starts_with("语气")
+            && !fields.mood.is_empty()
+            && style_fragment_semantically_covers_field(fragment, &fields.mood))
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
-    ["镜头", "情绪", "光影", "动作", "环境"]
+    ["镜头", "情绪", "光影", "动作", "环境", "语气", "声场"]
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
 }
 
 fn style_fragment_body(fragment: &str) -> Option<String> {
-    ["镜头", "情绪", "光影", "动作", "环境"]
+    ["镜头", "情绪", "光影", "动作", "环境", "语气", "声场"]
         .iter()
         .find_map(|prefix| fragment.strip_prefix(prefix))
         .map(normalize_prompt_text)
@@ -8298,6 +8332,29 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(prompt.contains("环境雨丝玻璃"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_consumes_voice_and_sound_memory_style_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["语气轻声克制，声场雨声回响".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("语气轻声"), "{prompt}");
+        assert!(prompt.contains("声场雨声回响"), "{prompt}");
+        assert!(!prompt.contains("声场回响"), "{prompt}");
     }
 
     #[test]

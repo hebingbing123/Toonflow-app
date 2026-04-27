@@ -17,8 +17,10 @@ const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
 const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
-const STYLE_NOTE_PREFIXES: [&str; 6] = ["镜头", "情绪", "光影", "动作", "环境", "场景"];
-const STYLE_PROMPT_PREFIXES: [&str; 5] = ["镜头", "情绪", "光影", "动作", "环境"];
+const STYLE_NOTE_PREFIXES: [&str; 8] = [
+    "镜头", "情绪", "光影", "动作", "环境", "语气", "声场", "场景",
+];
+const STYLE_PROMPT_PREFIXES: [&str; 7] = ["镜头", "情绪", "光影", "动作", "环境", "语气", "声场"];
 const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 8] = [
     "稳定跟拍",
     "手持跟拍",
@@ -94,6 +96,27 @@ const MOTION_STYLE_KEYWORDS: [&str; 8] = [
     "缓慢",
     "轻盈",
     "利落",
+];
+const VOICE_STYLE_KEYWORDS: [&str; 8] = [
+    "轻声克制",
+    "低声克制",
+    "哽咽克制",
+    "轻声",
+    "低声",
+    "呢喃",
+    "哽咽",
+    "短促",
+];
+const SOUND_STAGE_STYLE_KEYWORDS: [&str; 9] = [
+    "雨声回响",
+    "脚步空响",
+    "风声回荡",
+    "呼吸贴近",
+    "车流闷响",
+    "门轴轻响",
+    "衣料摩擦",
+    "水滴回声",
+    "静场留白",
 ];
 const ACTION_PACE_PREFIXES: [&str; 9] = [
     "快步", "缓步", "迅速", "缓慢", "慢慢", "急忙", "猛地", "立刻", "立即",
@@ -1805,7 +1828,8 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         .as_deref()
         .and_then(parse_structured_storyboard_description)
     {
-        let mut fragments = Vec::new();
+        let mut narrative_fragments = Vec::new();
+        let mut style_fragments = Vec::new();
         let subject = compact_selected_memory_subject(&fields.subject, &fields.action);
         let setting = compact_selected_memory_setting(
             &fields.setting,
@@ -1823,18 +1847,21 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         );
 
         match merge_selected_memory_subject_action(subject.as_deref(), action.as_deref()) {
-            Some(merged) => fragments.push(clip_prompt_fragment(&merged, 20)),
+            Some(merged) => narrative_fragments.push(clip_prompt_fragment(&merged, 20)),
             None => {
                 if let Some(subject) = subject.as_ref() {
-                    fragments.push(clip_prompt_fragment(subject, 20));
+                    narrative_fragments.push(clip_prompt_fragment(subject, 20));
                 }
                 if let Some(action) = action.as_ref() {
-                    fragments.push(clip_prompt_fragment(action, 18));
+                    narrative_fragments.push(clip_prompt_fragment(action, 18));
                 }
             }
         }
         if let Some(motion) = compact_selected_memory_motion_style(&fields.action, &fields.mood) {
-            fragments.push(motion);
+            style_fragments.push(motion);
+        }
+        if let Some(voice) = compact_selected_memory_voice_style(&fields.dialogue, &fields.mood) {
+            style_fragments.push(voice);
         }
         let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
             .into_iter()
@@ -1842,28 +1869,28 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
             .collect::<Vec<_>>()
             .join("");
         if !camera.is_empty() {
-            fragments.push(format!("镜头{}", clip_prompt_fragment(&camera, 14)));
+            style_fragments.push(format!("镜头{}", clip_prompt_fragment(&camera, 14)));
         }
         if !fields.mood.is_empty() {
-            fragments.push(format!("情绪{}", clip_prompt_fragment(&fields.mood, 12)));
+            style_fragments.push(format!("情绪{}", clip_prompt_fragment(&fields.mood, 12)));
         }
         if !fields.lighting.is_empty() {
-            fragments.push(format!(
+            style_fragments.push(format!(
                 "光影{}",
                 clip_prompt_fragment(&fields.lighting, 14)
             ));
         }
-        if let Some(environment) = compact_selected_memory_environment(&fields) {
-            fragments.push(format!("环境{}", clip_prompt_fragment(&environment, 12)));
-        } else if let Some(setting) = setting {
-            fragments.push(format!("场景{}", clip_prompt_fragment(&setting, 12)));
+        if let Some(sound_stage) = compact_selected_memory_sound_style(&fields.sound) {
+            style_fragments.push(sound_stage);
         }
-        let note = fragments.join("，");
+        if let Some(environment) = compact_selected_memory_environment(&fields) {
+            style_fragments.push(format!("环境{}", clip_prompt_fragment(&environment, 12)));
+        } else if let Some(setting) = setting {
+            style_fragments.push(format!("场景{}", clip_prompt_fragment(&setting, 12)));
+        }
+        let note = compact_selected_memory_note_fragments(style_fragments, narrative_fragments);
         if !note.is_empty() {
-            return Some(clip_prompt_fragment(
-                &note,
-                VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
-            ));
+            return Some(note);
         }
     }
 
@@ -1879,6 +1906,39 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
                 .filter(|text| !text.is_empty())
                 .map(|text| clip_prompt_fragment(&text, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         })
+}
+
+fn selected_memory_field_looks_silent(value: &str) -> bool {
+    let normalized = normalize_prompt_text(value);
+    normalized.is_empty()
+        || matches!(
+            normalized.as_str(),
+            "无" | "无台词" | "无对白" | "无音效" | "无声音" | "none" | "no dialogue" | "no sound"
+        )
+}
+
+fn compact_selected_memory_note_fragments(
+    style_fragments: Vec<String>,
+    narrative_fragments: Vec<String>,
+) -> String {
+    let mut selected = Vec::new();
+    let mut used_chars = 0usize;
+
+    for fragment in style_fragments.into_iter().chain(narrative_fragments) {
+        let fragment = clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+        if fragment.is_empty() || selected.iter().any(|existing| existing == &fragment) {
+            continue;
+        }
+        let separator_chars = usize::from(!selected.is_empty());
+        let next_chars = used_chars + separator_chars + fragment.chars().count();
+        if next_chars > VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS {
+            continue;
+        }
+        used_chars = next_chars;
+        selected.push(fragment);
+    }
+
+    selected.join("，")
 }
 
 fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String> {
@@ -1938,6 +1998,112 @@ fn compact_selected_memory_motion_style(action: &str, mood: &str) -> Option<Stri
         || subtle_motion
     {
         return Some("动作自然".to_string());
+    }
+
+    None
+}
+
+fn compact_selected_memory_voice_style(dialogue: &str, mood: &str) -> Option<String> {
+    if selected_memory_field_looks_silent(dialogue) {
+        return None;
+    }
+
+    let dialogue = normalize_prompt_text(dialogue);
+    let mood = normalize_prompt_text(mood);
+    let restrained_mood = ["隐忍", "克制", "压抑", "沉静", "沉稳", "冷静"]
+        .iter()
+        .any(|keyword| mood.contains(keyword));
+    let hushed = [
+        "轻声",
+        "低声",
+        "压低",
+        "压着嗓子",
+        "压着声音",
+        "耳语",
+        "呢喃",
+        "喃喃",
+        "悄声",
+    ]
+    .iter()
+    .any(|keyword| dialogue.contains(keyword));
+    let fragile = ["哽咽", "颤声", "发颤", "鼻音", "抽气"]
+        .iter()
+        .any(|keyword| dialogue.contains(keyword));
+    let clipped = ["短促", "急声", "脱口", "急急", "急促"]
+        .iter()
+        .any(|keyword| dialogue.contains(keyword));
+
+    if fragile && restrained_mood {
+        return Some("语气哽咽克制".to_string());
+    }
+    if hushed && restrained_mood {
+        return Some(if dialogue.contains("低声") || dialogue.contains("压低") {
+            "语气低声克制".to_string()
+        } else {
+            "语气轻声克制".to_string()
+        });
+    }
+    if fragile {
+        return Some("语气哽咽".to_string());
+    }
+    if hushed {
+        return Some(if dialogue.contains("低声") || dialogue.contains("压低") {
+            "语气低声".to_string()
+        } else if dialogue.contains("呢喃")
+            || dialogue.contains("喃喃")
+            || dialogue.contains("耳语")
+        {
+            "语气呢喃".to_string()
+        } else {
+            "语气轻声".to_string()
+        });
+    }
+    if clipped {
+        return Some("语气短促".to_string());
+    }
+
+    None
+}
+
+fn compact_selected_memory_sound_style(sound: &str) -> Option<String> {
+    if selected_memory_field_looks_silent(sound) {
+        return None;
+    }
+
+    let sound = normalize_prompt_text(sound);
+    for cue in SOUND_STAGE_STYLE_KEYWORDS {
+        if sound.contains(cue) {
+            return Some(format!("声场{cue}"));
+        }
+    }
+
+    if sound.contains("雨") && (sound.contains("回响") || sound.contains("回荡")) {
+        return Some("声场雨声回响".to_string());
+    }
+    if sound.contains("脚步")
+        && (sound.contains("空") || sound.contains("回响") || sound.contains("回荡"))
+    {
+        return Some("声场脚步空响".to_string());
+    }
+    if sound.contains("风声") && (sound.contains("回响") || sound.contains("回荡")) {
+        return Some("声场风声回荡".to_string());
+    }
+    if sound.contains("呼吸")
+        && (sound.contains("近") || sound.contains("贴") || sound.contains("轻"))
+    {
+        return Some("声场呼吸贴近".to_string());
+    }
+    if sound.contains("车流") && (sound.contains("闷") || sound.contains("远")) {
+        return Some("声场车流闷响".to_string());
+    }
+    if sound.contains("门轴") || (sound.contains("门") && sound.contains("轻响")) {
+        return Some("声场门轴轻响".to_string());
+    }
+    if sound.contains("衣料") || sound.contains("布料") {
+        return Some("声场衣料摩擦".to_string());
+    }
+    if sound.contains("水滴") && (sound.contains("回声") || sound.contains("回响")) {
+        return Some("声场水滴回声".to_string());
     }
 
     None
@@ -2566,6 +2732,8 @@ struct StyleNoteSelectionContext {
     camera_move: String,
     mood: String,
     lighting: String,
+    dialogue: String,
+    sound: String,
 }
 
 #[derive(Debug, Clone)]
@@ -2621,6 +2789,14 @@ fn build_style_note_selection_context(
         lighting: fields
             .as_ref()
             .map(|value| normalize_prompt_text(&value.lighting))
+            .unwrap_or_default(),
+        dialogue: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.dialogue))
+            .unwrap_or_default(),
+        sound: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.sound))
             .unwrap_or_default(),
     }
 }
@@ -2780,6 +2956,27 @@ fn score_style_note_context_evidence(
         fragment.starts_with("镜头")
             && ((!context.shot.is_empty() && fragment.contains(&context.shot))
                 || (!context.camera_move.is_empty() && fragment.contains(&context.camera_move)))
+    }) {
+        evidence += 2;
+    }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("语气")
+            && ((!context.dialogue.is_empty()
+                && context
+                    .dialogue
+                    .contains(fragment.trim_start_matches("语气")))
+                || (!context.mood.is_empty() && fragment.contains(&context.mood)))
+    }) {
+        evidence += 2;
+    }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("声场")
+            && ((!context.sound.is_empty()
+                && context.sound.contains(fragment.trim_start_matches("声场")))
+                || (!context.description.is_empty()
+                    && context
+                        .description
+                        .contains(fragment.trim_start_matches("声场"))))
     }) {
         evidence += 2;
     }
@@ -3005,6 +3202,20 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
             &ENVIRONMENT_STYLE_KEYWORDS,
         ));
     }
+    if fragment.starts_with("语气") {
+        return Some(compact_prefixed_style_fragment_with_keywords(
+            fragment,
+            "语气",
+            &VOICE_STYLE_KEYWORDS,
+        ));
+    }
+    if fragment.starts_with("声场") {
+        return Some(compact_prefixed_style_fragment_with_keywords(
+            fragment,
+            "声场",
+            &SOUND_STAGE_STYLE_KEYWORDS,
+        ));
+    }
     None
 }
 
@@ -3226,6 +3437,12 @@ fn score_selected_video_memory_style_fragment(fragment: String) -> i32 {
     if fragment.starts_with("环境") {
         score += 4;
     }
+    if fragment.starts_with("语气") {
+        score += 5;
+    }
+    if fragment.starts_with("声场") {
+        score += 5;
+    }
     if fragment.starts_with("场景") {
         score += 2;
     }
@@ -3327,6 +3544,8 @@ fn summarize_recurring_style_keywords(
         "光影" => &LIGHTING_STYLE_KEYWORDS[..],
         "动作" => &MOTION_STYLE_KEYWORDS[..],
         "环境" => &ENVIRONMENT_STYLE_KEYWORDS[..],
+        "语气" => &VOICE_STYLE_KEYWORDS[..],
+        "声场" => &SOUND_STAGE_STYLE_KEYWORDS[..],
         _ => return None,
     };
     let min_support = recurring_fragment_support_threshold(parsed_notes.len());
@@ -3357,6 +3576,7 @@ fn summarize_recurring_style_keywords(
         .take(match prefix {
             "镜头" => 3,
             "环境" => 1,
+            "声场" => 1,
             _ => 2,
         })
         .copied()
@@ -3871,6 +4091,22 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("style=动作从容克制"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_extracts_voice_and_sound_style_fragments() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚看着窗外低声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、冷蓝窗光、低声说：你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("语气低声克制"), "{content}");
+        assert!(content.contains("声场雨声回响"), "{content}");
     }
 
     #[test]
@@ -4998,6 +5234,26 @@ mod tests {
         .expect("summary");
 
         assert!(summary.contains("动作从容克制"), "{summary}");
+    }
+
+    #[test]
+    fn build_script_video_style_memory_keeps_recurring_voice_and_sound_fragments() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头稳定跟拍，语气轻声克制，声场雨声回响 | note=..."
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | style=镜头近景稳定跟拍，语气轻声克制，声场雨声回响 | note=..."
+                    .into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("语气轻声克制"), "{summary}");
+        assert!(summary.contains("声场雨声回响"), "{summary}");
     }
 
     #[test]
