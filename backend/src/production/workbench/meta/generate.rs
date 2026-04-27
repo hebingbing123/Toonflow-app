@@ -1299,12 +1299,13 @@ fn build_video_prompt_with_diagnostics(
             {
                 clauses.push(format!("Camera: {}.", clip_prompt_fragment(&camera, 40)));
             }
-            if !fields.mood.is_empty() && !prompt_fragment_is_covered(&fields.mood, &style_coverage)
+            if !fields.mood.is_empty()
+                && !prompt_style_field_is_covered(&fields.mood, &style_coverage)
             {
                 clauses.push(format!("Mood: {}.", clip_prompt_fragment(&fields.mood, 36)));
             }
             if !fields.lighting.is_empty()
-                && !prompt_fragment_is_covered(&fields.lighting, &style_coverage)
+                && !prompt_style_field_is_covered(&fields.lighting, &style_coverage)
             {
                 clauses.push(format!(
                     "Lighting: {}.",
@@ -1792,10 +1793,9 @@ fn style_fragment_matches_prompt_style_field(
     fragment: &str,
     fields: &StructuredStoryboardDescription,
 ) -> bool {
-    let canonical = canonical_continuity_fragment(fragment);
-    !canonical.is_empty()
-        && ((!fields.mood.is_empty() && canonical == fields.mood)
-            || (!fields.lighting.is_empty() && canonical == fields.lighting))
+    (!fields.mood.is_empty() && style_fragment_semantically_covers_field(fragment, &fields.mood))
+        || (!fields.lighting.is_empty()
+            && style_fragment_semantically_covers_field(fragment, &fields.lighting))
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
@@ -3269,6 +3269,51 @@ fn prompt_fragment_is_covered(fragment: &str, coverage: &[String]) -> bool {
     })
 }
 
+fn prompt_style_field_is_covered(field: &str, coverage: &[String]) -> bool {
+    prompt_fragment_is_covered(field, coverage)
+        || coverage
+            .iter()
+            .any(|fragment| style_fragment_semantically_covers_field(fragment, field))
+}
+
+fn style_fragment_semantically_covers_field(fragment: &str, field: &str) -> bool {
+    let canonical_field = canonical_prompt_fragment(field);
+    if canonical_field.is_empty() {
+        return false;
+    }
+
+    let canonical_fragment = canonical_continuity_fragment(fragment);
+    if canonical_fragment.is_empty() || !canonical_fragment.contains(&canonical_field) {
+        return false;
+    }
+
+    let trimmed = canonical_style_field_fragment(&canonical_fragment);
+    !trimmed.is_empty()
+        && (trimmed == canonical_field
+            || (trimmed.contains(&canonical_field)
+                && normalize_prompt_text(&trimmed.replace(&canonical_field, "")).is_empty()))
+}
+
+fn canonical_style_field_fragment(fragment: &str) -> String {
+    [
+        "风格",
+        "质感",
+        "氛围",
+        "情绪",
+        "光影",
+        "色调",
+        "影调",
+        "气质",
+        "颗粒",
+        "电影感",
+        "感",
+    ]
+    .into_iter()
+    .fold(normalize_prompt_text(fragment), |acc, token| {
+        acc.replace(token, "")
+    })
+}
+
 fn canonical_prompt_fragment(fragment: &str) -> String {
     normalize_prompt_text(fragment)
         .trim_matches(|ch: char| {
@@ -3319,13 +3364,16 @@ fn compact_project_director_note(
         if project_director_fragment_is_generic_quality_tail_overlap(&fragment) {
             continue;
         }
-        if prompt_fragment_is_covered(&fragment, prompt_coverage) {
+        let style_field_overlap = structured_fields
+            .is_some_and(|fields| style_fragment_matches_prompt_style_field(&fragment, fields));
+        if prompt_fragment_is_covered(&fragment, prompt_coverage) && !style_field_overlap {
             continue;
         }
         if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
-            if continuity_fragment_matches_fields(&fragment, fields, camera)
+            if ((continuity_fragment_matches_fields(&fragment, fields, camera)
                 || fragment == fields.mood
-                || fragment == fields.lighting
+                || fragment == fields.lighting)
+                && !style_field_overlap)
                 || fragment == fields.setting
             {
                 continue;
@@ -4512,7 +4560,7 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_video_prompt, compact_camera_clause,
+        build_video_prompt, build_video_prompt_with_diagnostics, compact_camera_clause,
         compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
         parse_structured_storyboard_description, prune_low_signal_observation_candidates,
         resolve_observation_filter_style_note, resolve_video_prompt_duration,
@@ -4521,8 +4569,9 @@ mod tests {
         select_video_prompt_memory_notes, select_video_prompt_style_notes,
         trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
         video_prompt_observation_conflicts_with_style,
-        video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
-        ScriptRolePromptSeedRow, VideoPromptContext, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
+        video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptDiagnostics,
+        GenerateVideoPromptResponse, ScriptRolePromptSeedRow, VideoPromptContext,
+        VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_prioritized_video_style_note,
@@ -4884,10 +4933,38 @@ mod tests {
                 .contains("Style anchor: 胶片悬疑; 冷峻压迫风格, 冷调逆光质感; 镜头低机位压迫感."),
             "{prompt}"
         );
-        assert_eq!(prompt.matches("冷峻压迫").count(), 2, "{prompt}");
-        assert_eq!(prompt.matches("冷调逆光").count(), 2, "{prompt}");
+        assert_eq!(prompt.matches("冷峻压迫").count(), 1, "{prompt}");
+        assert_eq!(prompt.matches("冷调逆光").count(), 1, "{prompt}");
         assert!(!prompt.contains("情绪冷峻压迫"), "{prompt}");
         assert!(!prompt.contains("光影冷调逆光"), "{prompt}");
+        assert!(!prompt.contains("Mood: 冷峻压迫."), "{prompt}");
+        assert!(!prompt.contains("Lighting: 冷调逆光."), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_skips_explicit_mood_and_lighting_when_style_anchor_already_covers_them() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻压迫、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: Some("保持冷峻压迫风格，冷调逆光质感".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片悬疑; 冷峻压迫风格, 冷调逆光质感."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("Mood: 冷峻压迫."), "{prompt}");
+        assert!(!prompt.contains("Lighting: 冷调逆光."), "{prompt}");
     }
 
     #[test]
