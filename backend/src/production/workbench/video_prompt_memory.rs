@@ -1469,9 +1469,9 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
                 >= REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
         })
         .collect::<Vec<_>>();
-    let subject_scoped_fallback_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
+    let storyboard_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
     let allow_subject_scoped_fallback =
-        exact_candidate_rows.is_empty() && !subject_scoped_fallback_tags.is_empty();
+        exact_candidate_rows.is_empty() && !storyboard_tags.is_empty();
     let candidate_rows = if allow_subject_scoped_fallback {
         rows.iter()
             .enumerate()
@@ -1484,7 +1484,7 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
                 memory_matches_subject_candidates(&row.content, &normalized_subject_candidates)
             })
             .filter(|(_, row)| {
-                memory_matches_rejected_video_risk_tags(&row.content, &subject_scoped_fallback_tags)
+                memory_matches_rejected_video_risk_tags(&row.content, &storyboard_tags)
             })
             .collect::<Vec<_>>()
     } else {
@@ -1506,8 +1506,9 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
             if ranked.is_empty() {
                 let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
                 return Some(vec![(
-                    score_rejected_negative_fragment(&note),
+                    score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags),
                     idx,
+                    reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                     storyboard_fallback_priority(
                         &row.content,
                         storyboard_numeric_id,
@@ -1525,8 +1526,12 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
                     .enumerate()
                     .map(|(fragment_idx, note)| {
                         (
-                            score_rejected_negative_fragment(&note),
+                            score_rejected_negative_fragment_for_storyboard(
+                                &note,
+                                &storyboard_tags,
+                            ),
                             idx,
+                            reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                             storyboard_fallback_priority(
                                 &row.content,
                                 storyboard_numeric_id,
@@ -1560,13 +1565,14 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
         b.0.cmp(&a.0)
             .then(a.2.cmp(&b.2))
             .then(a.3.cmp(&b.3))
-            .then(a.1.cmp(&b.1))
             .then(a.4.cmp(&b.4))
+            .then(a.1.cmp(&b.1))
             .then(a.5.cmp(&b.5))
+            .then(a.6.cmp(&b.6))
     });
 
     let mut selected = Vec::new();
-    for (_, _, _, _, _, fragment) in scored {
+    for (_, _, _, _, _, _, fragment) in scored {
         if observation_note_is_covered(&fragment, &selected) {
             continue;
         }
@@ -1729,9 +1735,9 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                 < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
         })
         .collect::<Vec<_>>();
-    let subject_scoped_fallback_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
+    let storyboard_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
     let allow_subject_scoped_fallback =
-        exact_candidate_rows.is_empty() && !subject_scoped_fallback_tags.is_empty();
+        exact_candidate_rows.is_empty() && !storyboard_tags.is_empty();
     let candidate_rows = if allow_subject_scoped_fallback {
         rows.iter()
             .enumerate()
@@ -1744,7 +1750,7 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                 memory_matches_subject_candidates(&row.content, &normalized_subject_candidates)
             })
             .filter(|(_, row)| {
-                memory_matches_rejected_video_risk_tags(&row.content, &subject_scoped_fallback_tags)
+                memory_matches_rejected_video_risk_tags(&row.content, &storyboard_tags)
             })
             .collect::<Vec<_>>()
     } else {
@@ -1773,8 +1779,9 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
             if ranked.is_empty() {
                 let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
                 return Some(vec![(
-                    score_pending_observation_note(&note),
+                    score_pending_observation_note_for_storyboard(&note, &storyboard_tags),
                     idx,
+                    reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                     storyboard_fallback_priority(
                         &row.content,
                         storyboard_numeric_id,
@@ -1792,8 +1799,9 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                     .enumerate()
                     .map(|(fragment_idx, note)| {
                         (
-                            score_pending_observation_note(&note),
+                            score_pending_observation_note_for_storyboard(&note, &storyboard_tags),
                             idx,
+                            reversed_risk_tag_overlap_priority(&row.content, &storyboard_tags),
                             storyboard_fallback_priority(
                                 &row.content,
                                 storyboard_numeric_id,
@@ -1817,13 +1825,14 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
         b.0.cmp(&a.0)
             .then(a.2.cmp(&b.2))
             .then(a.3.cmp(&b.3))
-            .then(a.1.cmp(&b.1))
             .then(a.4.cmp(&b.4))
+            .then(a.1.cmp(&b.1))
             .then(a.5.cmp(&b.5))
+            .then(a.6.cmp(&b.6))
     });
 
     let mut notes = Vec::new();
-    for (_, _, _, _, _, note) in scored {
+    for (_, _, _, _, _, _, note) in scored {
         if observation_note_is_covered(&note, &notes) {
             continue;
         }
@@ -2014,6 +2023,14 @@ fn score_rejected_negative_fragment(fragment: &str) -> i32 {
     score - normalized.chars().count() as i32 / 8
 }
 
+fn score_rejected_negative_fragment_for_storyboard(
+    fragment: &str,
+    storyboard_tags: &[String],
+) -> i32 {
+    score_rejected_negative_fragment(fragment)
+        + fragment_storyboard_risk_overlap(fragment, storyboard_tags) as i32 * 18
+}
+
 fn score_pending_observation_note(note: &str) -> i32 {
     let normalized = normalize_prompt_text(note).to_lowercase();
     if normalized.is_empty() {
@@ -2061,6 +2078,15 @@ fn score_pending_observation_note(note: &str) -> i32 {
         }
     }
     score - normalized.chars().count() as i32 / 6
+}
+
+fn score_pending_observation_note_for_storyboard(note: &str, storyboard_tags: &[String]) -> i32 {
+    score_pending_observation_note(note)
+        + fragment_storyboard_risk_overlap(note, storyboard_tags) as i32 * 18
+}
+
+fn reversed_risk_tag_overlap_priority(content: &str, storyboard_tags: &[String]) -> usize {
+    usize::MAX - rejected_video_risk_tag_overlap(content, storyboard_tags)
 }
 
 fn compact_rejected_negative_fragment_risk_budget(fragments: Vec<String>) -> Vec<String> {
@@ -2806,6 +2832,62 @@ fn storyboard_risk_tags_for_subject_fallback(
         tags.push("dialogue".to_string());
     }
     tags
+}
+
+fn rejected_video_risk_tag_overlap(content: &str, storyboard_tags: &[String]) -> usize {
+    if storyboard_tags.is_empty() {
+        return 0;
+    }
+    let memory_tags = extract_rejected_video_risk_tags(content);
+    memory_tags
+        .iter()
+        .filter(|memory_tag| storyboard_tags.iter().any(|tag| tag == *memory_tag))
+        .count()
+}
+
+fn fragment_storyboard_risk_overlap(fragment: &str, storyboard_tags: &[String]) -> usize {
+    if storyboard_tags.is_empty() {
+        return 0;
+    }
+    negative_fragment_storyboard_risk_tags(fragment)
+        .iter()
+        .filter(|tag| storyboard_tags.iter().any(|value| value == **tag))
+        .count()
+}
+
+fn negative_fragment_storyboard_risk_tags(fragment: &str) -> &'static [&'static str] {
+    match canonical_observation_note(fragment).as_str() {
+        "avoid rushed motion"
+        | "avoid rushed or jerky motion"
+        | "avoid flicker"
+        | "avoid flicker or motion jitter" => &["motion"],
+        "avoid unnecessary shot changes"
+        | "avoid extra shot changes or wrong framing"
+        | "avoid extreme camera angle"
+        | "avoid overly tight close-up framing"
+        | "avoid extreme camera angle or overly tight close-up framing" => &["framing"],
+        "avoid flat cold lighting"
+        | "avoid harsh backlight silhouette"
+        | "avoid flat cold lighting or harsh backlight silhouette"
+        | "avoid distracting neon reflections" => &["lighting"],
+        "avoid face distortion"
+        | "avoid identity drift"
+        | "avoid costume drift"
+        | "avoid face distortion or identity drift"
+        | "avoid costume or character drift"
+        | "avoid face drift or costume inconsistency"
+        | "avoid face distortion, identity drift, costume drift" => &["identity"],
+        "avoid lip-sync mismatch" => &["dialogue"],
+        "avoid blank expression"
+        | "avoid monotone delivery"
+        | "avoid blank expression or monotone delivery" => &["performance", "dialogue", "emotion"],
+        "avoid oppressive mood"
+        | "avoid frantic mood"
+        | "avoid oppressive or frantic mood"
+        | "avoid overly cold emotional tone"
+        | "avoid overly cold, oppressive, or frantic mood" => &["emotion"],
+        _ => &[],
+    }
 }
 
 fn rejected_negative_scene_has_identity_risk(fields: &StructuredStoryboardDescription) -> bool {
@@ -8219,6 +8301,34 @@ mod tests {
     }
 
     #[test]
+    fn select_rejected_video_negative_memory_notes_for_subject_prioritizes_matching_fragment_for_scene_risk(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头盯住来人".into()),
+            video_desc: Some(
+                "（晚晚回头盯住来人、旧宅走廊、林晚/晚晚、4秒、近景、慢推、回头抬眼停顿、压抑、冷调逆光、无台词、脚步回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=15 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=identity/lighting | avoid=avoid flat cold lighting, avoid face distortion or identity drift".into(),
+            }],
+            15,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid face distortion or identity drift, avoid flat cold lighting".to_string()]
+        );
+    }
+
+    #[test]
     fn select_rejected_video_negative_memory_notes_for_subject_can_fallback_to_same_role_identity_risk(
     ) {
         let storyboard_row = StoryboardPromptSeedRow {
@@ -8426,6 +8536,37 @@ mod tests {
         assert_eq!(
             notes,
             vec!["avoid blank expression or monotone delivery".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_prioritizes_matching_fragment_for_scene_risk(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚压住情绪低声开口".into()),
+            video_desc: Some(
+                "（晚晚盯着门外、雨夜门厅、林晚/晚晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、隐忍 / 克制、冷调逆光、你别走、雨声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=8 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=lighting/performance/dialogue | avoid=avoid flat cold lighting, avoid blank expression or monotone delivery".into(),
+            }],
+            12,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid blank expression or monotone delivery".to_string(),
+                "avoid flat cold lighting".to_string()
+            ]
         );
     }
 
