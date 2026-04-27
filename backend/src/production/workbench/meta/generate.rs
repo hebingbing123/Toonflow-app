@@ -5021,7 +5021,7 @@ fn continuity_note_is_lean_critical(note: &str) -> bool {
 }
 
 fn video_prompt_scene_has_axis_risk(fields: &StructuredStoryboardDescription) -> bool {
-    let has_dialogue = !storyboard_dialogue_is_empty(&fields.dialogue);
+    let has_dialogue = storyboard_has_meaningful_spoken_dialogue(fields);
     let subject_count = video_prompt_scene_subject_count(fields);
     if has_dialogue && subject_count > 1 {
         return true;
@@ -5104,7 +5104,7 @@ fn continuity_note_matches_storyboard_risk(
             || video_prompt_scene_has_blocking_risk(fields);
     }
     if continuity_note_mentions_dialogue_risk(&normalized) {
-        return !storyboard_dialogue_is_empty(&fields.dialogue);
+        return storyboard_has_meaningful_spoken_dialogue(fields);
     }
     if continuity_note_mentions_emotional_risk(&normalized) {
         return video_prompt_scene_needs_emotional_memory(fields);
@@ -9772,6 +9772,26 @@ mod tests {
     }
 
     #[test]
+    fn select_video_prompt_memory_notes_drops_axis_guidance_for_multi_subject_filler_utterance_scene(
+    ) {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content:
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=人物视线方向一致，人物站位不要跳轴"
+                    .to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚和顾承泽对视后轻轻嗯了一声".into()),
+            video_desc: Some("（林晚和顾承泽对视、咖啡厅门口、林晚/顾承泽、4秒、中景、缓推、对视后微微点头、克制紧张、夜间暖光、嗯、轻微杯碟声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)).is_empty()
+        );
+    }
+
+    #[test]
     fn select_video_prompt_memory_notes_drops_generic_continuity_half_inside_same_summary() {
         let rows = vec![AgentMemoryRow {
             name: "auto_scope_memory".into(),
@@ -11110,6 +11130,29 @@ mod tests {
         );
 
         assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert_eq!(result.diagnostics.continuity_note_count, 0);
+        assert!(!result.prompt.contains("Continuity:"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_drops_axis_continuity_for_multi_subject_filler_utterance_scene(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚和顾承泽对视、咖啡厅门口、林晚/顾承泽、4秒、中景、缓推、对视后微微点头、克制紧张、夜间暖光、嗯、轻微杯碟声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into(), "顾承泽: 深灰大衣".into()],
+            script_scene_anchors: vec!["咖啡厅门口: 木门与暖色玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演眼神迟疑，动作轻缓克制".into()],
+            continuity_notes: vec!["保留上一镜头走位连续，人物站位不要跳轴".into()],
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
         assert_eq!(result.diagnostics.continuity_note_count, 0);
         assert!(!result.prompt.contains("Continuity:"), "{}", result.prompt);
     }
