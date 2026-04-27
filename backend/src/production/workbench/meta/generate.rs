@@ -3486,6 +3486,11 @@ fn trim_style_fragment_against_storyboard_fields(
                 fields.mood.as_str(),
             ],
         );
+        let trimmed = trim_style_fragment_by_shared_performance_keywords(
+            trimmed,
+            "表演",
+            &[fields.action.as_str(), fields.dialogue.as_str()],
+        );
         return trim_style_fragment_by_shared_mood_keywords(trimmed, "表演", &fields.mood);
     }
     if fragment.starts_with("语气") {
@@ -3634,6 +3639,54 @@ fn trim_style_fragment_by_shared_voice_keywords(
 
     let mut trimmed = body.to_string();
     for keyword in ["低声", "轻声", "呢喃", "哽咽", "短促"] {
+        if !trimmed.contains(keyword)
+            || !normalized_fields
+                .iter()
+                .any(|field| field.contains(keyword))
+        {
+            continue;
+        }
+        let candidate = normalize_prompt_text(&trimmed.replace(keyword, ""));
+        if candidate.chars().count() >= 2 {
+            trimmed = candidate;
+        }
+    }
+
+    if trimmed == body {
+        return Some(fragment);
+    }
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(format!("{prefix}{trimmed}"))
+    }
+}
+
+fn trim_style_fragment_by_shared_performance_keywords(
+    fragment: Option<String>,
+    prefix: &str,
+    fields: &[&str],
+) -> Option<String> {
+    let fragment = fragment?;
+    let body = fragment
+        .strip_prefix(prefix)
+        .unwrap_or(fragment.as_str())
+        .trim();
+    if body.is_empty() {
+        return None;
+    }
+
+    let normalized_fields = fields
+        .iter()
+        .map(|field| normalize_prompt_text(field))
+        .filter(|field| !field.is_empty())
+        .collect::<Vec<_>>();
+    if normalized_fields.is_empty() {
+        return Some(fragment);
+    }
+
+    let mut trimmed = body.to_string();
+    for keyword in ["欲言又止", "抬眼", "停顿", "迟疑", "回头", "看向"] {
         if !trimmed.contains(keyword)
             || !normalized_fields
                 .iter()
@@ -10630,9 +10683,32 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("表演抬眼停顿"), "{prompt}");
         assert!(prompt.contains("语气轻声"), "{prompt}");
+        assert!(!prompt.contains("表演抬眼停顿"), "{prompt}");
         assert!(!prompt.contains("语气轻声克制"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_trims_shared_performance_keywords_but_keeps_micro_expression_detail() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后停顿片刻才低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A24）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演抬眼停顿喉结滚动，语气低声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("表演喉结滚动"), "{prompt}");
+        assert!(!prompt.contains("表演抬眼停顿喉结滚动"), "{prompt}");
+        assert!(!prompt.contains("表演抬眼"), "{prompt}");
     }
 
     #[test]
