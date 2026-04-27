@@ -1388,6 +1388,8 @@ fn score_role_style_note_context_evidence(
         recency_idx: 0,
         source_name: source_name.to_string(),
         storyboard_distance: None,
+        storyboard_focus: 0,
+        subject_priority: usize::MAX,
     };
     score_style_note_context_evidence(&ranked, context)
 }
@@ -1456,17 +1458,43 @@ pub(crate) fn select_prioritized_video_style_note(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Option<String> {
     let context = build_style_note_selection_context(storyboard_row);
+    let subject_candidates = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
     let mut candidates = collect_ranked_video_style_note_candidates(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
+        storyboard_row,
+        &subject_candidates,
     )
     .into_iter()
     .filter(|candidate| ranked_style_note_is_worth_recalling(candidate, &context))
     .collect::<Vec<_>>();
+    let locked_storyboard_focus = candidates
+        .iter()
+        .map(|candidate| candidate.storyboard_focus)
+        .max()
+        .unwrap_or(0);
+    if locked_storyboard_focus > 0 {
+        candidates.retain(|candidate| candidate.storyboard_focus == locked_storyboard_focus);
+    }
+    let locked_subject_priority = candidates
+        .iter()
+        .map(|candidate| candidate.subject_priority)
+        .min();
+    if let Some(locked_subject_priority) = locked_subject_priority {
+        if locked_subject_priority != usize::MAX {
+            candidates.retain(|candidate| candidate.subject_priority == locked_subject_priority);
+        }
+    }
     candidates.sort_by(|a, b| {
-        score_ranked_style_note(b, &context)
-            .cmp(&score_ranked_style_note(a, &context))
+        b.storyboard_focus
+            .cmp(&a.storyboard_focus)
+            .then(a.subject_priority.cmp(&b.subject_priority))
+            .then(score_ranked_style_note(b, &context).cmp(&score_ranked_style_note(a, &context)))
             .then(a.note.chars().count().cmp(&b.note.chars().count()))
             .then(b.score.cmp(&a.score))
             .then(a.recency_idx.cmp(&b.recency_idx))
@@ -4693,6 +4721,8 @@ struct RankedStyleNote {
     recency_idx: usize,
     source_name: String,
     storyboard_distance: Option<i32>,
+    storyboard_focus: usize,
+    subject_priority: usize,
 }
 
 fn build_style_note_selection_context(
@@ -4756,6 +4786,8 @@ fn collect_ranked_video_style_note_candidates(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
     _current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    subject_candidates: &[String],
 ) -> Vec<RankedStyleNote> {
     let mut candidates = Vec::new();
     for (idx, row) in rows.iter().enumerate() {
@@ -4789,6 +4821,8 @@ fn collect_ranked_video_style_note_candidates(
                     storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
                 })
                 .flatten(),
+            storyboard_focus: role_style_storyboard_focus_score(&row.content, storyboard_row),
+            subject_priority: memory_subject_match_priority(&row.content, subject_candidates),
         });
     }
     candidates
@@ -8290,6 +8324,37 @@ mod tests {
         );
 
         assert_eq!(note, Some("表演呼吸发颤，语气哽咽克制".to_string()));
+    }
+
+    #[test]
+    fn select_prioritized_video_style_note_prefers_primary_subject_role_summary_when_multiple_roles_match(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚与顾承泽擦肩后强忍泪意".into()),
+            video_desc: Some("（林晚与顾承泽擦肩后强忍泪意、雨夜门厅、林晚/顾承泽、5秒、近景、稳定跟拍、林晚抬眼停顿后侧身让开、克制、冷调逆光、无台词、雨声回响、A14）".into()),
+            duration: Some("5s".into()),
+        };
+        let note = select_prioritized_video_style_note(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=13 | promptSeed=neighbor-seed-0001 | style=镜头近景稳定跟拍，情绪克制，光影冷调逆光 | note=顾承泽逼近后停步，镜头近景稳定跟拍，情绪克制，光影冷调逆光".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=4 | style=表演抬眼停顿，语气轻声克制 | note=表演抬眼停顿，语气轻声克制".into(),
+                },
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=顾承泽 | subjectAliases=顾总 | sampleCount=6 | style=表演冷眼逼视，语气低声压迫 | note=表演冷眼逼视，语气低声压迫".into(),
+                },
+            ],
+            14,
+            Some("current-seed-0003"),
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(note, Some("表演抬眼停顿，语气轻声克制".to_string()));
     }
 
     #[test]

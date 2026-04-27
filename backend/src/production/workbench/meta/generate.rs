@@ -5368,6 +5368,17 @@ fn trim_style_fragment_against_storyboard_fields(
             "表演",
             &[fields.action.as_str(), fields.dialogue.as_str()],
         );
+        let trimmed = if trimmed.is_none()
+            && video_prompt_scene_needs_identity_memory(fields)
+            && style_note_matches_shared_keyword_family(
+                fragment,
+                &[fields.action.as_str(), fields.dialogue.as_str()],
+                PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+            ) {
+            Some(fragment.to_string())
+        } else {
+            trimmed
+        };
         return trim_style_fragment_by_shared_mood_keywords(trimmed, "表演", &fields.mood);
     }
     if fragment.starts_with("语气") {
