@@ -362,7 +362,7 @@ pub(crate) fn build_rejected_video_negative_memory(
 }
 
 fn compact_rejected_negative_memory_fragments(fragments: Vec<String>) -> Vec<String> {
-    let mut compacted = fragments;
+    let mut compacted = compact_rejected_negative_fragment_risk_budget(fragments);
     let has_cold_lighting = compacted
         .iter()
         .any(|fragment| canonical_observation_note(fragment) == "avoid flat cold lighting");
@@ -1390,8 +1390,8 @@ fn ranked_observation_fragments(avoid: &str) -> Vec<String> {
 }
 
 fn rejected_negative_fragments(avoid: &str) -> Vec<String> {
-    compact_rejected_negative_fragment_families(stitch_rejected_negative_fragments(
-        split_prompt_note_fragments(avoid).collect(),
+    compact_rejected_negative_fragment_risk_budget(compact_rejected_negative_fragment_families(
+        stitch_rejected_negative_fragments(split_prompt_note_fragments(avoid).collect()),
     ))
 }
 
@@ -1590,6 +1590,49 @@ fn score_pending_observation_note(note: &str) -> i32 {
         }
     }
     score - normalized.chars().count() as i32 / 6
+}
+
+fn compact_rejected_negative_fragment_risk_budget(fragments: Vec<String>) -> Vec<String> {
+    if fragments.len() < 2 {
+        return fragments;
+    }
+
+    let has_high_signal_visual_guard = fragments
+        .iter()
+        .any(|fragment| rejected_negative_fragment_is_high_signal_visual_guard(fragment));
+    if !has_high_signal_visual_guard {
+        return fragments;
+    }
+
+    let filtered = fragments
+        .iter()
+        .filter(|fragment| !rejected_negative_fragment_is_low_priority_style_retry(fragment))
+        .cloned()
+        .collect::<Vec<_>>();
+    if filtered.is_empty() {
+        fragments
+    } else {
+        filtered
+    }
+}
+
+fn rejected_negative_fragment_is_high_signal_visual_guard(fragment: &str) -> bool {
+    matches!(
+        canonical_observation_note(fragment).as_str(),
+        "avoid face distortion, identity drift, costume drift"
+            | "avoid warped anatomy, blur, flicker"
+    )
+}
+
+fn rejected_negative_fragment_is_low_priority_style_retry(fragment: &str) -> bool {
+    if rejected_negative_memory_fragment_is_low_signal(fragment) {
+        return true;
+    }
+
+    matches!(
+        observation_note_family(fragment),
+        "camera_framing" | "lighting_backlight" | "lighting_reflection"
+    )
 }
 
 fn observation_note_is_covered(candidate: &str, existing_notes: &[String]) -> bool {
@@ -3946,7 +3989,7 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
         return None;
     }
 
-    let recurring = compact_global_recurring_style_fragments(
+    let mut recurring = compact_global_recurring_style_fragments(
         recurring_style_fragments(&notes),
         distinct_selected_video_subject_group_count(rows.iter().map(|row| {
             (
@@ -3976,7 +4019,7 @@ fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<Str
         return None;
     }
 
-    let recurring = compact_global_recurring_style_fragments(
+    let mut recurring = compact_global_recurring_style_fragments(
         recurring_style_fragments(&notes),
         distinct_selected_video_subject_group_count(rows.iter().map(|row| {
             (
@@ -4145,18 +4188,15 @@ fn compact_global_character_style_redundancy(fragments: &mut Vec<String>) {
 }
 
 fn global_voice_fragment_is_low_gain_carryover(voice: &str) -> bool {
-    matches!(voice.as_str(), "低声克制" | "轻声克制" | "呢喃")
+    matches!(voice, "低声克制" | "轻声克制" | "呢喃")
 }
 
 fn global_mood_fragment_is_generic_restrained(mood: &str) -> bool {
-    matches!(mood.as_str(), "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
+    matches!(mood, "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
 }
 
 fn global_motion_fragment_is_low_gain_carryover(action: &str) -> bool {
-    matches!(
-        action.as_str(),
-        "从容克制" | "克制自然" | "自然" | "简洁平滑"
-    )
+    matches!(action, "从容克制" | "克制自然" | "自然" | "简洁平滑")
 }
 
 fn distinct_selected_video_subject_group_count<'a>(
@@ -4312,7 +4352,7 @@ fn compact_role_character_mood_redundancy(fragments: &mut Vec<String>) {
         let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) else {
             return true;
         };
-        !matches!(mood.as_str(), "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
+        !matches!(mood, "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
     });
 }
 
@@ -4593,7 +4633,7 @@ fn compact_cross_fragment_style_redundancy(fragments: &mut Vec<String>) {
         let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) else {
             return true;
         };
-        if !matches!(mood.as_str(), "冷调" | "冷色") {
+        if !matches!(mood, "冷调" | "冷色") {
             return true;
         }
         !lighting_fragments
@@ -6888,6 +6928,24 @@ mod tests {
     }
 
     #[test]
+    fn select_rejected_video_negative_memory_notes_drops_generic_style_fillers_for_high_signal_visual_guard(
+    ) {
+        let notes = select_rejected_video_negative_memory_notes(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=3 | avoid=avoid face distortion, identity drift, costume drift, avoid extreme camera angle, avoid flat cold lighting".into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid face distortion, identity drift, costume drift".to_string()]
+        );
+    }
+
+    #[test]
     fn select_rejected_video_negative_memory_notes_parses_ascii_and_cjk_delimiters() {
         let notes = select_rejected_video_negative_memory_notes(
             &[AgentMemoryRow {
@@ -7383,8 +7441,36 @@ mod tests {
 
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("avoid face distortion or identity drift"));
-        assert!(merged.contains("avoid flat cold lighting"));
+        assert!(!merged.contains("avoid flat cold lighting"));
         assert!(!merged.contains("avoid oppressive or frantic mood"));
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_drops_generic_style_budget_fillers_when_high_signal_visual_guard_exists(
+    ) {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid face distortion, identity drift, costume drift, avoid extreme camera angle",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("avoid face distortion, identity drift, costume drift"));
+        assert!(!merged.contains("avoid extreme camera angle"));
+        assert!(!merged.contains("avoid flat cold lighting"));
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_keeps_performance_guard_when_high_signal_visual_guard_exists(
+    ) {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid face distortion, identity drift, costume drift",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid blank expression or monotone delivery, avoid flat cold lighting",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("avoid face distortion, identity drift, costume drift"));
+        assert!(merged.contains("avoid blank expression or monotone delivery"));
+        assert!(!merged.contains("avoid flat cold lighting"));
     }
 
     #[test]
