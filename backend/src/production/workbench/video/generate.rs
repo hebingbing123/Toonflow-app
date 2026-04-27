@@ -704,6 +704,11 @@ fn build_storyboard_negative_prompts(
                 review_fragments,
                 &rejected_fragments,
             );
+            let rejected_fragments = compact_rejected_fragments_against_review_focus(
+                rejected_fragments,
+                &review_fragments,
+                storyboard_row,
+            );
             let budget_tier = resolve_negative_prompt_budget_tier(
                 storyboard_row,
                 &storyboard_review_rows,
@@ -1547,6 +1552,33 @@ fn compact_review_fragments_against_rejected_memory(
         .filter_map(|fragment| {
             compact_review_fragment_against_rejected_memory(&fragment, rejected_fragments)
         })
+        .collect()
+}
+
+fn compact_rejected_fragments_against_review_focus(
+    rejected_fragments: Vec<String>,
+    review_fragments: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return rejected_fragments;
+    };
+    if !negative_prompt_scene_prefers_restrained_emotional_guard(&fields) {
+        return rejected_fragments;
+    }
+    let review_has_performance_guard = review_fragments
+        .iter()
+        .any(|fragment| negative_fragment_family(fragment) == "performance_delivery");
+    if !review_has_performance_guard {
+        return rejected_fragments;
+    }
+
+    rejected_fragments
+        .into_iter()
+        .filter(|fragment| canonical_negative_fragment(fragment) != "avoid frantic mood")
         .collect()
 }
 
@@ -4003,6 +4035,41 @@ mod tests {
             Some("avoid blank expression or monotone delivery")
         );
         assert_eq!(selection.fragment_count, 1);
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_drops_redundant_frantic_guard_when_review_flags_monotone_restrained_scene(
+    ) {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("台词像读文章，表情发木没情绪".into()),
+            }],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=2 | avoid=avoid overly cold, oppressive, or frantic mood"
+                        .into(),
+            }],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚低声开口"),
+                Some("（晚晚低声开口、医院走廊、晚晚/林晚、5秒、中景、静止、停顿后低声开口、克制、夜间中性光、别再问了、空调低鸣、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(
+            selection.as_deref(),
+            Some("avoid blank expression or monotone delivery")
+        );
+        assert_eq!(selection.fragment_count, 1);
+        assert_eq!(selection.budget_tier, "lean");
     }
 
     #[test]
