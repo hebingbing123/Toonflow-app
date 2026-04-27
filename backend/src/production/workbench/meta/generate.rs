@@ -120,7 +120,9 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     tool_anchor_count: usize,
     style_anchor_count: usize,
     memory_style_anchor_count: usize,
+    memory_style_chars: usize,
     continuity_note_count: usize,
+    continuity_note_chars: usize,
     uses_reference_frame: bool,
 }
 
@@ -1878,6 +1880,12 @@ fn build_video_prompt_with_diagnostics(
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
     let (style_anchors, memory_style_anchor_count) =
         build_project_visual_anchors(context, structured_fields.as_ref(), &prompt_coverage);
+    let memory_style_chars = style_anchors
+        .iter()
+        .rev()
+        .take(memory_style_anchor_count)
+        .map(|anchor| anchor.chars().count())
+        .sum();
     let mut style_coverage = Vec::new();
     extend_prompt_coverage(&mut style_coverage, &style_anchors);
     match structured_fields.as_ref() {
@@ -1963,6 +1971,10 @@ fn build_video_prompt_with_diagnostics(
     extend_prompt_coverage(&mut prompt_coverage, &style_anchors);
     let continuity_notes =
         build_continuity_notes(context, structured_fields.as_ref(), &prompt_coverage);
+    let continuity_note_chars = continuity_notes
+        .iter()
+        .map(|note| note.chars().count())
+        .sum();
     if !continuity_notes.is_empty() {
         clauses.push(format!(
             "Continuity notes: {}.",
@@ -1988,7 +2000,9 @@ fn build_video_prompt_with_diagnostics(
             tool_anchor_count: tool_anchors.len(),
             style_anchor_count: style_anchors.len(),
             memory_style_anchor_count,
+            memory_style_chars,
             continuity_note_count: continuity_notes.len(),
+            continuity_note_chars,
             uses_reference_frame: image_url.is_some(),
         },
         prompt,
@@ -2436,6 +2450,17 @@ fn trim_style_fragment_against_storyboard_fields(
             &[fields.action.as_str(), fields.mood.as_str()],
         );
     }
+    if fragment.starts_with("表演") {
+        return trim_prefixed_style_fragment(
+            fragment,
+            "表演",
+            &[
+                fields.action.as_str(),
+                fields.dialogue.as_str(),
+                fields.mood.as_str(),
+            ],
+        );
+    }
     if fragment.starts_with("语气") {
         return trim_prefixed_style_fragment(fragment, "语气", &[fields.mood.as_str()]);
     }
@@ -2507,23 +2532,34 @@ fn style_fragment_matches_prompt_style_field(
     (!fields.mood.is_empty() && style_fragment_semantically_covers_field(fragment, &fields.mood))
         || (!fields.lighting.is_empty()
             && style_fragment_semantically_covers_field(fragment, &fields.lighting))
+        || (fragment.starts_with("表演")
+            && ((!fields.action.is_empty()
+                && style_fragment_semantically_covers_field(fragment, &fields.action))
+                || (!fields.dialogue.is_empty()
+                    && style_fragment_semantically_covers_field(fragment, &fields.dialogue))
+                || (!fields.mood.is_empty()
+                    && style_fragment_semantically_covers_field(fragment, &fields.mood))))
         || (fragment.starts_with("语气")
             && !fields.mood.is_empty()
             && style_fragment_semantically_covers_field(fragment, &fields.mood))
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
-    ["镜头", "情绪", "光影", "动作", "环境", "语气", "声场"]
-        .iter()
-        .any(|prefix| fragment.starts_with(prefix))
+    [
+        "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场",
+    ]
+    .iter()
+    .any(|prefix| fragment.starts_with(prefix))
 }
 
 fn style_fragment_body(fragment: &str) -> Option<String> {
-    ["镜头", "情绪", "光影", "动作", "环境", "语气", "声场"]
-        .iter()
-        .find_map(|prefix| fragment.strip_prefix(prefix))
-        .map(normalize_prompt_text)
-        .filter(|body| !body.is_empty())
+    [
+        "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场",
+    ]
+    .iter()
+    .find_map(|prefix| fragment.strip_prefix(prefix))
+    .map(normalize_prompt_text)
+    .filter(|body| !body.is_empty())
 }
 
 fn style_fragment_or_body_is_semantically_covered(fragment: &str, coverage: &[String]) -> bool {
@@ -8123,7 +8159,9 @@ mod tests {
                 tool_anchor_count: 0,
                 style_anchor_count: 1,
                 memory_style_anchor_count: 0,
+                memory_style_chars: 0,
                 continuity_note_count: 0,
+                continuity_note_chars: 0,
                 uses_reference_frame: false,
             },
             model: "runway-gen-2".into(),
@@ -8176,7 +8214,9 @@ mod tests {
         assert_eq!(result.diagnostics.tool_anchor_count, 1);
         assert_eq!(result.diagnostics.style_anchor_count, 2);
         assert_eq!(result.diagnostics.memory_style_anchor_count, 1);
+        assert!(result.diagnostics.memory_style_chars > 0);
         assert_eq!(result.diagnostics.continuity_note_count, 1);
+        assert!(result.diagnostics.continuity_note_chars > 0);
         assert!(result.diagnostics.uses_reference_frame);
         assert!(result.diagnostics.prompt_chars > 0);
     }
@@ -8355,6 +8395,27 @@ mod tests {
         assert!(prompt.contains("语气轻声"), "{prompt}");
         assert!(prompt.contains("声场雨声回响"), "{prompt}");
         assert!(!prompt.contains("声场回响"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_consumes_performance_memory_style_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后停顿片刻迟迟没有开口、隐忍 / 克制、冷蓝窗光、无台词、雨声、A23）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演抬眼停顿，语气轻声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("表演抬眼停顿"), "{prompt}");
     }
 
     #[test]

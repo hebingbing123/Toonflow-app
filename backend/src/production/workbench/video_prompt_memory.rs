@@ -17,10 +17,12 @@ const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
 const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
-const STYLE_NOTE_PREFIXES: [&str; 8] = [
-    "镜头", "情绪", "光影", "动作", "环境", "语气", "声场", "场景",
+const STYLE_NOTE_PREFIXES: [&str; 9] = [
+    "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场", "场景",
 ];
-const STYLE_PROMPT_PREFIXES: [&str; 7] = ["镜头", "情绪", "光影", "动作", "环境", "语气", "声场"];
+const STYLE_PROMPT_PREFIXES: [&str; 8] = [
+    "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场",
+];
 const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 8] = [
     "稳定跟拍",
     "手持跟拍",
@@ -96,6 +98,18 @@ const MOTION_STYLE_KEYWORDS: [&str; 8] = [
     "缓慢",
     "轻盈",
     "利落",
+];
+const PERFORMANCE_STYLE_KEYWORDS: [&str; 10] = [
+    "抬眼停顿",
+    "垂眼停顿",
+    "眼眶发红",
+    "唇线收紧",
+    "欲言又止",
+    "强忍泪意",
+    "呼吸发颤",
+    "喉结滚动",
+    "眉心紧锁",
+    "嘴角发僵",
 ];
 const VOICE_STYLE_KEYWORDS: [&str; 8] = [
     "轻声克制",
@@ -1860,6 +1874,13 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         if let Some(motion) = compact_selected_memory_motion_style(&fields.action, &fields.mood) {
             style_fragments.push(motion);
         }
+        if let Some(performance) = compact_selected_memory_performance_style(
+            &fields.action,
+            &fields.dialogue,
+            &fields.mood,
+        ) {
+            style_fragments.push(performance);
+        }
         if let Some(voice) = compact_selected_memory_voice_style(&fields.dialogue, &fields.mood) {
             style_fragments.push(voice);
         }
@@ -2060,6 +2081,86 @@ fn compact_selected_memory_voice_style(dialogue: &str, mood: &str) -> Option<Str
     }
     if clipped {
         return Some("语气短促".to_string());
+    }
+
+    None
+}
+
+fn compact_selected_memory_performance_style(
+    action: &str,
+    dialogue: &str,
+    mood: &str,
+) -> Option<String> {
+    let action = normalize_prompt_text(action);
+    let dialogue = normalize_prompt_text(dialogue);
+    let mood = normalize_prompt_text(mood);
+    if action.is_empty() && dialogue.is_empty() && mood.is_empty() {
+        return None;
+    }
+
+    let restrained_mood = ["隐忍", "克制", "压抑", "沉静", "沉稳", "冷静"]
+        .iter()
+        .any(|keyword| mood.contains(keyword));
+    let fragile_mood = ["悲伤", "难过", "心碎", "哀伤", "哽咽"]
+        .iter()
+        .any(|keyword| mood.contains(keyword));
+
+    if ["抬眼", "抬眸", "抬头"]
+        .iter()
+        .any(|keyword| action.contains(keyword))
+        && ["停顿", "顿住", "迟疑", "没有开口", "欲言又止"]
+            .iter()
+            .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演抬眼停顿".to_string());
+    }
+    if ["垂眼", "低头", "别开眼", "移开视线"]
+        .iter()
+        .any(|keyword| action.contains(keyword))
+        && ["停顿", "沉默", "没有开口", "欲言又止"]
+            .iter()
+            .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演垂眼停顿".to_string());
+    }
+    if ["咬唇", "抿唇", "唇线绷紧", "嘴唇发白"]
+        .iter()
+        .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演唇线收紧".to_string());
+    }
+    if ["眼眶发红", "眼圈泛红", "红了眼眶", "眼眶微红"]
+        .iter()
+        .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演眼眶发红".to_string());
+    }
+    if ["欲言又止", "迟迟没有开口", "张了张嘴", "话到嘴边"]
+        .iter()
+        .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演欲言又止".to_string());
+    }
+    if restrained_mood
+        && ["忍住", "强忍", "憋住", "压住", "收住"]
+            .iter()
+            .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演强忍泪意".to_string());
+    }
+    if fragile_mood
+        && ["抽气", "呼吸发颤", "呼吸不稳", "气息发颤"]
+            .iter()
+            .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演呼吸发颤".to_string());
+    }
+    if restrained_mood
+        && ["眉心紧锁", "蹙眉", "皱眉"]
+            .iter()
+            .any(|keyword| action.contains(keyword))
+    {
+        return Some("表演眉心紧锁".to_string());
     }
 
     None
@@ -2980,6 +3081,18 @@ fn score_style_note_context_evidence(
     }) {
         evidence += 2;
     }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("表演")
+            && ((!context.action.is_empty()
+                && context.action.contains(fragment.trim_start_matches("表演")))
+                || (!context.dialogue.is_empty()
+                    && context
+                        .dialogue
+                        .contains(fragment.trim_start_matches("表演")))
+                || (!context.mood.is_empty() && fragment.contains(&context.mood)))
+    }) {
+        evidence += 2;
+    }
     if !context.subject.is_empty()
         && fragments
             .iter()
@@ -3193,6 +3306,13 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
             fragment,
             "动作",
             &MOTION_STYLE_KEYWORDS,
+        ));
+    }
+    if fragment.starts_with("表演") {
+        return Some(compact_prefixed_style_fragment_with_keywords(
+            fragment,
+            "表演",
+            &PERFORMANCE_STYLE_KEYWORDS,
         ));
     }
     if fragment.starts_with("环境") {
@@ -3434,6 +3554,9 @@ fn score_selected_video_memory_style_fragment(fragment: String) -> i32 {
     if fragment.starts_with("动作") {
         score += 5;
     }
+    if fragment.starts_with("表演") {
+        score += 6;
+    }
     if fragment.starts_with("环境") {
         score += 4;
     }
@@ -3543,6 +3666,7 @@ fn summarize_recurring_style_keywords(
         "情绪" => &MOOD_STYLE_KEYWORDS[..],
         "光影" => &LIGHTING_STYLE_KEYWORDS[..],
         "动作" => &MOTION_STYLE_KEYWORDS[..],
+        "表演" => &PERFORMANCE_STYLE_KEYWORDS[..],
         "环境" => &ENVIRONMENT_STYLE_KEYWORDS[..],
         "语气" => &VOICE_STYLE_KEYWORDS[..],
         "声场" => &SOUND_STAGE_STYLE_KEYWORDS[..],
@@ -4107,6 +4231,21 @@ mod tests {
 
         assert!(content.contains("语气低声克制"), "{content}");
         assert!(content.contains("声场雨声回响"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_extracts_performance_style_fragment() {
+        let content = build_selected_video_memory(
+            23,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚抬眼却没说出口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后停顿片刻迟迟没有开口、隐忍 / 克制、冷蓝窗光、无台词、雨声、A23）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("表演抬眼停顿"), "{content}");
     }
 
     #[test]
@@ -5254,6 +5393,26 @@ mod tests {
 
         assert!(summary.contains("语气轻声克制"), "{summary}");
         assert!(summary.contains("声场雨声回响"), "{summary}");
+    }
+
+    #[test]
+    fn build_script_video_style_memory_keeps_recurring_performance_fragment() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头稳定跟拍，表演抬眼停顿，情绪克制 | note=..."
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=10 | style=镜头近景稳定跟拍，表演抬眼停顿，情绪隐忍 | note=..."
+                        .into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("表演抬眼停顿"), "{summary}");
     }
 
     #[test]
