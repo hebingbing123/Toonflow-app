@@ -687,6 +687,10 @@ fn build_storyboard_negative_prompts(
                 prioritized_style_note.as_deref(),
                 storyboard_row,
             );
+            let review_fragments =
+                prune_storyboard_negative_fragments(review_fragments, storyboard_row);
+            let rejected_fragments =
+                prune_storyboard_negative_fragments(rejected_fragments, storyboard_row);
             let review_fragments = compact_review_fragments_against_rejected_memory(
                 review_fragments,
                 &rejected_fragments,
@@ -775,6 +779,152 @@ fn negative_prompt_scene_needs_expanded_budget(fields: &StructuredStoryboardDesc
         ]
         .iter()
         .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn prune_storyboard_negative_fragments(
+    fragments: Vec<String>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let mut kept = fragments
+        .into_iter()
+        .filter(|fragment| negative_fragment_matches_storyboard_risk(fragment, storyboard_row))
+        .collect::<Vec<_>>();
+    kept.dedup();
+    kept
+}
+
+fn negative_fragment_matches_storyboard_risk(
+    fragment: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> bool {
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return true;
+    };
+
+    match negative_fragment_family(fragment) {
+        "lip_sync_mismatch" => !storyboard_dialogue_is_empty(&fields.dialogue),
+        "lighting_backlight" => negative_prompt_scene_has_lighting_risk(&fields),
+        "rushed_motion" => negative_prompt_scene_has_motion_risk(&fields),
+        "mood_tone" => negative_prompt_scene_needs_emotional_memory(&fields),
+        "camera_framing" | "shot_change_framing" => negative_prompt_scene_has_framing_risk(&fields),
+        _ => true,
+    }
+}
+
+fn negative_prompt_scene_has_motion_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.shot.as_str(),
+        fields.camera_move.as_str(),
+        fields.action.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "跟拍", "推进", "拉远", "摇镜", "手持", "奔跑", "跑", "冲", "扑", "追", "快步",
+                "转身", "踉跄", "急退", "handheld", "push in", "whip",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn negative_prompt_scene_has_lighting_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.setting.as_str(),
+        fields.lighting.as_str(),
+        fields.sound.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "逆光",
+                "霓虹",
+                "反光",
+                "玻璃",
+                "雨",
+                "车灯",
+                "闪烁",
+                "曝光",
+                "剪影",
+                "silhouette",
+                "backlight",
+                "reflection",
+                "flicker",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn negative_prompt_scene_has_framing_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.shot.as_str(),
+        fields.camera_move.as_str(),
+        fields.action.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "近景",
+                "特写",
+                "大全景",
+                "仰拍",
+                "俯拍",
+                "倾斜",
+                "跟拍",
+                "推进",
+                "拉远",
+                "手持",
+                "close-up",
+                "wide shot",
+                "low angle",
+                "high angle",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn negative_prompt_scene_needs_emotional_memory(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.mood.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "哭",
+                "泪",
+                "哽咽",
+                "颤",
+                "停顿",
+                "压抑",
+                "克制",
+                "愤怒",
+                "惊慌",
+                "紧张",
+                "崩溃",
+                "隐忍",
+                "欲言又止",
+                "迟疑",
+                "回头",
+                "犹豫",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
     })
 }
 
@@ -2189,14 +2339,15 @@ mod tests {
         compact_negative_constraint_against_storyboard_style, compact_negative_review_constraints,
         compact_review_fragments_against_rejected_memory, compact_video_ratio,
         infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
-        map_bad_case_category_with_comments, merge_negative_prompts, negative_review_fetch_limit,
+        map_bad_case_category_with_comments, merge_negative_prompts,
+        negative_fragment_matches_storyboard_risk, negative_review_fetch_limit,
         normalize_upload_sources, pacing_issue_category_is_redundant,
-        quality_review_row_matches_storyboard, rejected_negative_memory_fetch_limit,
-        resolve_negative_filter_style_note, review_fragment_conflicts_with_selected_style,
-        review_fragment_is_irrelevant_to_storyboard, selected_memory_fetch_limit,
-        storyboard_dialogue_is_empty, storyboard_mismatch_category_is_redundant,
-        visual_error_category_is_redundant, QualityReviewSeedRow, VideoNegativePromptBudgetTier,
-        VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        prune_storyboard_negative_fragments, quality_review_row_matches_storyboard,
+        rejected_negative_memory_fetch_limit, resolve_negative_filter_style_note,
+        review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
+        selected_memory_fetch_limit, storyboard_dialogue_is_empty,
+        storyboard_mismatch_category_is_redundant, visual_error_category_is_redundant,
+        QualityReviewSeedRow, VideoNegativePromptBudgetTier, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
@@ -2302,6 +2453,55 @@ mod tests {
         ));
         assert!(!storyboard_mismatch_category_is_redundant(
             &infer_negative_fragments_from_comments("切镜太多")
+        ));
+    }
+
+    #[test]
+    fn prune_storyboard_negative_fragments_drops_unmatched_risk_for_grounded_silent_shot() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（男主坐在木桌前、室内书房、男主、4秒、中景、静止、低头翻开信纸、平静、室内暖光、无台词、纸张摩擦声、A03）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            prune_storyboard_negative_fragments(
+                vec![
+                    "avoid lip-sync mismatch".into(),
+                    "avoid harsh backlight silhouette".into(),
+                    "avoid face distortion or identity drift".into(),
+                ],
+                Some(&storyboard_row),
+            ),
+            vec!["avoid face distortion or identity drift".to_string()]
+        );
+    }
+
+    #[test]
+    fn negative_fragment_matches_storyboard_risk_keeps_dialogue_and_lighting_for_risky_shot() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: None,
+            video_desc: Some(
+                "（女主逼近门厅、旧宅门厅、女主、5秒、近景、推进、停步回头、克制、冷调逆光、你别再骗我、风声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+
+        assert!(negative_fragment_matches_storyboard_risk(
+            "avoid lip-sync mismatch",
+            Some(&storyboard_row),
+        ));
+        assert!(negative_fragment_matches_storyboard_risk(
+            "avoid harsh backlight silhouette",
+            Some(&storyboard_row),
+        ));
+        assert!(negative_fragment_matches_storyboard_risk(
+            "avoid extreme camera angle or overly tight close-up framing",
+            Some(&storyboard_row),
         ));
     }
 
