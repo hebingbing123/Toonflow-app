@@ -1063,6 +1063,9 @@ fn resolve_motion_style_anchor(
 
     let profile = art_style_director_profile(project_art_style?)?;
     let cue = parse_director_motion_cue(profile.director_storyboard_table_style)?;
+    if motion_style_anchor_lags_fragile_emotional_turn(&cue, fields) {
+        return None;
+    }
     if prompt_fragment_is_covered(&cue, prompt_coverage) || fields.action.contains(&cue) {
         return None;
     }
@@ -1071,6 +1074,37 @@ fn resolve_motion_style_anchor(
         &cue,
         VIDEO_PROMPT_MOTION_ANCHOR_MAX_CHARS,
     ))
+}
+
+fn motion_style_anchor_lags_fragile_emotional_turn(
+    cue: &str,
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    current_storyboard_is_fragile_emotional_turn(fields)
+        && ["动作缓慢", "动作缓慢优雅", "动作自然", "动作克制自然"]
+            .iter()
+            .any(|keyword| cue.contains(keyword))
+        && [
+            fields.action.as_str(),
+            fields.dialogue.as_str(),
+            fields.mood.as_str(),
+        ]
+        .into_iter()
+        .any(|field| {
+            [
+                "哽咽",
+                "失声",
+                "抽气",
+                "发颤",
+                "颤声",
+                "强忍泪意",
+                "含泪",
+                "鼻音",
+                "哭",
+            ]
+            .iter()
+            .any(|keyword| field.contains(keyword))
+        })
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -11152,6 +11186,7 @@ mod tests {
             prompt.contains("Style anchor: 真人都市写实; 神情低落, 眼神黯淡, 眉心轻蹙"),
             "{prompt}"
         );
+        assert!(!prompt.contains("动作自然"), "{prompt}");
         assert!(!prompt.contains("神情内敛"), "{prompt}");
         assert!(!prompt.contains("眼神深沉"), "{prompt}");
         assert!(!prompt.contains("唇线收紧"), "{prompt}");
@@ -11179,6 +11214,7 @@ mod tests {
             prompt.contains("Style anchor: 成熟都市言情二次元动画; 神情哀戚, 眼神低垂, 眉头轻锁"),
             "{prompt}"
         );
+        assert!(!prompt.contains("动作缓慢"), "{prompt}");
         assert!(!prompt.contains("神情内敛"), "{prompt}");
         assert!(!prompt.contains("眼神深沉"), "{prompt}");
         assert!(!prompt.contains("唇线收紧"), "{prompt}");
