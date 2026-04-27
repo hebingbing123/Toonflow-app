@@ -15,8 +15,9 @@ use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::meta::common::negative_constraint_conflicts_with_storyboard_style;
 use crate::production::workbench::video_prompt_memory::{
     clip_prompt_fragment, compact_video_style_prompt_note, normalize_prompt_text,
-    parse_structured_storyboard_description, select_prioritized_video_style_note,
-    select_project_video_style_memory_notes,
+    parse_structured_storyboard_description,
+    select_pending_rejected_video_observation_candidates_for_subject,
+    select_prioritized_video_style_note, select_project_video_style_memory_notes,
     select_rejected_video_negative_memory_notes_for_subject,
     select_script_video_style_memory_notes, select_selected_video_memory_notes,
     select_subject_role_video_style_memory_notes, selected_memory_subject_aliases,
@@ -709,15 +710,34 @@ fn build_storyboard_negative_prompts(
                 &review_fragments,
                 storyboard_row,
             );
+            let observation_fragments =
+                if rejected_fragments.is_empty() && review_fragments.is_empty() {
+                    build_storyboard_observation_negative_fragments(
+                        rejected_rows,
+                        storyboard_id,
+                        current_prompt_seed.as_deref(),
+                        &subject_candidates,
+                        prioritized_style_note.as_deref(),
+                        storyboard_row,
+                    )
+                } else {
+                    Vec::new()
+                };
+            let effective_rejected_fragments =
+                if rejected_fragments.is_empty() && review_fragments.is_empty() {
+                    observation_fragments.clone()
+                } else {
+                    rejected_fragments.clone()
+                };
             let budget_tier = resolve_negative_prompt_budget_tier(
                 storyboard_row,
                 &storyboard_review_rows,
-                &rejected_fragments,
+                &effective_rejected_fragments,
                 &review_fragments,
                 subject_candidates.len(),
             );
             let review_prompt = merge_prioritized_negative_prompt_fragment_groups(
-                &[rejected_fragments, review_fragments],
+                &[effective_rejected_fragments, review_fragments],
                 budget_tier,
             );
             let fragment_count = review_prompt
@@ -735,6 +755,28 @@ fn build_storyboard_negative_prompts(
             )
         })
         .collect()
+}
+
+fn build_storyboard_observation_negative_fragments(
+    rejected_rows: &[AgentMemoryRow],
+    storyboard_id: i32,
+    current_prompt_seed: Option<&str>,
+    subject_candidates: &[String],
+    prioritized_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let observation_fragments = select_pending_rejected_video_observation_candidates_for_subject(
+        rejected_rows,
+        storyboard_id,
+        current_prompt_seed,
+        subject_candidates,
+    );
+    let observation_fragments = filter_conflicting_review_fragments(
+        observation_fragments,
+        prioritized_style_note,
+        storyboard_row,
+    );
+    prune_storyboard_negative_fragments(observation_fragments, storyboard_row)
 }
 
 fn resolve_negative_prompt_budget_tier(
@@ -4093,6 +4135,33 @@ mod tests {
         );
 
         assert_eq!(prompts.get(&12).and_then(|value| value.as_deref()), None);
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_falls_back_to_pending_observation_when_no_promoted_negative_exists(
+    ) {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=1 | avoid=avoid flicker or motion jitter"
+                        .into(),
+            }],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("主角冲下楼梯"),
+                Some("（主角冲下楼梯、旧宅楼梯、主角、5秒、近景、稳定跟拍、冲下楼梯、紧张、室内冷光、快走、急促脚步声、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(selection.as_deref(), Some("avoid flicker or motion jitter"));
+        assert_eq!(selection.fragment_count, 1);
+        assert_eq!(selection.budget_tier, "lean");
     }
 
     #[test]
