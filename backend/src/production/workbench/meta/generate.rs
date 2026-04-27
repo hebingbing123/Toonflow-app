@@ -1570,7 +1570,10 @@ fn trim_video_prompt_memory_rows(
 
     let mut kept = std::collections::HashSet::new();
     for idx in prioritize_storyboard_memory_indices(
-        &selected_candidates,
+        &filter_selected_memory_candidates_for_subject(
+            &selected_candidates,
+            subject_candidates,
+        ),
         storyboard_numeric_id,
         current_prompt_seed,
         VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT,
@@ -1648,6 +1651,33 @@ fn keep_matching_role_style_rows(
     {
         kept.insert(*idx);
     }
+}
+
+fn filter_selected_memory_candidates_for_subject<'a>(
+    candidates: &'a [(usize, AgentMemoryRow)],
+    subject_candidates: &[String],
+) -> Vec<(usize, AgentMemoryRow)> {
+    candidates
+        .iter()
+        .filter(|(_, row)| {
+            selected_memory_row_matches_subject_candidates(row, subject_candidates)
+        })
+        .cloned()
+        .collect()
+}
+
+fn selected_memory_row_matches_subject_candidates(
+    row: &AgentMemoryRow,
+    subject_candidates: &[String],
+) -> bool {
+    if row.name != "selected_video_memory" {
+        return true;
+    }
+    let has_explicit_subject = memory_content_has_subject_identity(&row.content);
+    if !has_explicit_subject || subject_candidates.is_empty() {
+        return true;
+    }
+    memory_content_matches_subject_candidates(&row.content, subject_candidates)
 }
 
 fn prioritize_storyboard_memory_indices(
@@ -1852,7 +1882,9 @@ fn trim_video_prompt_observation_rows(
         match row.name.as_str() {
             "rejected_video_negative_memory" => rejection_candidates.push((idx, row)),
             "script_video_style_memory" | "selected_video_memory" => {
-                script_style_candidates.push((idx, row))
+                if selected_memory_row_matches_subject_candidates(&row, subject_candidates) {
+                    script_style_candidates.push((idx, row))
+                }
             }
             "script_role_video_style_memory" => script_role_style_candidates.push((idx, row)),
             "project_video_style_memory" => project_style_candidates.push((idx, row)),
@@ -9484,6 +9516,30 @@ mod tests {
     }
 
     #[test]
+    fn select_video_prompt_style_notes_skips_exact_selected_memory_from_other_subject() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=22 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头低机位压迫感，表演冷眼逼视，语气低声压迫".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=22 | subject=林晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边迟疑开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            vec!["表演抬眼停顿，语气轻声".to_string()]
+        );
+    }
+
+    #[test]
     fn select_video_prompt_style_notes_keeps_exact_memory_when_it_carries_strong_style_signal() {
         let rows = vec![
             AgentMemoryRow {
@@ -9929,6 +9985,34 @@ mod tests {
         }));
         assert!(!trimmed.iter().any(|row| {
             row.name == "project_role_video_style_memory" && row.content.contains("subject=沈知遥")
+        }));
+    }
+
+    #[test]
+    fn trim_video_prompt_observation_rows_skips_exact_selected_memory_from_other_subject() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=表演冷眼逼视，语气低声压迫".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+
+        let trimmed = trim_video_prompt_observation_rows(
+            rows,
+            12,
+            Some("seed-12-current"),
+            &["林晚".to_string(), "晚晚".to_string()],
+        );
+
+        assert!(trimmed.iter().any(|row| {
+            row.name == "selected_video_memory" && row.content.contains("subject=林晚")
+        }));
+        assert!(!trimmed.iter().any(|row| {
+            row.name == "selected_video_memory" && row.content.contains("subject=顾承泽")
         }));
     }
 
@@ -11636,7 +11720,7 @@ mod tests {
 
         assert_eq!(
             select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row)),
-            Some("表演喉结滚动，语气低声，声场雨声回响".to_string())
+            Some("声场雨声回响".to_string())
         );
     }
 }
