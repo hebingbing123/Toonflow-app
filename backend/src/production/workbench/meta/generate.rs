@@ -2242,13 +2242,14 @@ fn build_video_prompt_with_diagnostics(
     image_url: Option<&str>,
     context: Option<&VideoPromptContext>,
 ) -> VideoPromptBuildResult {
-    let mut clauses = Vec::new();
-    clauses.push("Single cinematic shot.".to_string());
-
     let resolved_description = resolve_video_prompt_description(description, context);
     let structured_fields = resolved_description
         .as_deref()
         .and_then(parse_structured_storyboard_description);
+    let mut clauses = Vec::new();
+    clauses.push(build_video_prompt_opening_clause(
+        structured_fields.as_ref(),
+    ));
     let mut prompt_coverage = collect_prompt_coverage(structured_fields.as_ref());
     let role_anchors = build_script_role_anchors(
         context,
@@ -2404,7 +2405,7 @@ fn build_video_prompt_with_diagnostics(
         ));
     }
     if image_url.is_some() {
-        clauses.push("Use the supplied frame as the visual reference.".to_string());
+        clauses.push("Use the supplied frame as reference.".to_string());
     }
     clauses.push(build_video_prompt_quality_tail(
         structured_fields.as_ref(),
@@ -2517,6 +2518,10 @@ fn build_video_prompt_quality_tail(
     style_anchors: &[String],
     continuity_notes: &[String],
 ) -> String {
+    if structured_fields.is_some_and(video_prompt_scene_is_grounded_low_risk) {
+        return "No extra shot changes.".to_string();
+    }
+
     let camera = structured_fields
         .map(|fields| {
             [fields.shot.as_str(), fields.camera_move.as_str()]
@@ -2535,6 +2540,16 @@ fn build_video_prompt_quality_tail(
         "Natural motion, no extra shot changes.".to_string()
     } else {
         "Natural motion, stable continuity, no extra shot changes.".to_string()
+    }
+}
+
+fn build_video_prompt_opening_clause(
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> String {
+    if structured_fields.is_some_and(video_prompt_scene_is_grounded_low_risk) {
+        "Single shot.".to_string()
+    } else {
+        "Single cinematic shot.".to_string()
     }
 }
 
@@ -2731,6 +2746,12 @@ fn video_prompt_scene_needs_emotional_memory(fields: &StructuredStoryboardDescri
             .iter()
             .any(|keyword| value.contains(keyword))
     })
+}
+
+fn video_prompt_scene_is_grounded_low_risk(fields: &StructuredStoryboardDescription) -> bool {
+    !video_prompt_scene_has_motion_risk(fields)
+        && !video_prompt_scene_has_lighting_risk(fields)
+        && !video_prompt_scene_needs_emotional_memory(fields)
 }
 
 fn build_project_visual_anchors(
@@ -7649,6 +7670,59 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_uses_compact_template_for_grounded_low_risk_shot() {
+        let prompt = build_video_prompt(
+            Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、看向窗外、平静、暖光、无台词、轻微环境声、A12）"),
+            None,
+            Some(&VideoPromptContext {
+                storyboard_prompt: None,
+                storyboard_video_desc: None,
+                storyboard_duration: None,
+                storyboard_prompt_seed: None,
+                project_art_style: None,
+                project_director_manual: None,
+                script_role_anchors: Vec::new(),
+                script_scene_anchors: Vec::new(),
+                script_tool_anchors: Vec::new(),
+                memory_style_notes: Vec::new(),
+                continuity_notes: Vec::new(),
+            }),
+        );
+
+        assert!(prompt.contains("Single shot."), "{prompt}");
+        assert!(!prompt.contains("Single cinematic shot."), "{prompt}");
+        assert!(prompt.contains("No extra shot changes."), "{prompt}");
+        assert!(!prompt.contains("Natural motion"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_full_template_for_high_risk_emotional_shot() {
+        let prompt = build_video_prompt(
+            Some("（林晚冲出旧宅、旧宅走廊、林晚、5秒、中景、稳定跟拍、快步推门冲出、哽咽压抑、逆光雨夜、别回头、脚步声门响、A12）"),
+            None,
+            Some(&VideoPromptContext {
+                storyboard_prompt: None,
+                storyboard_video_desc: None,
+                storyboard_duration: None,
+                storyboard_prompt_seed: None,
+                project_art_style: None,
+                project_director_manual: None,
+                script_role_anchors: Vec::new(),
+                script_scene_anchors: Vec::new(),
+                script_tool_anchors: Vec::new(),
+                memory_style_notes: Vec::new(),
+                continuity_notes: Vec::new(),
+            }),
+        );
+
+        assert!(prompt.contains("Single cinematic shot."), "{prompt}");
+        assert!(
+            prompt.contains("Natural motion, no extra shot changes."),
+            "{prompt}"
+        );
+    }
+
+    #[test]
     fn build_video_prompt_keeps_full_quality_tail_when_generic_director_continuity_is_trimmed() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -8989,7 +9063,7 @@ mod tests {
 
         assert!(result
             .prompt
-            .contains("Use the supplied frame as the visual reference."));
+            .contains("Use the supplied frame as reference."));
         assert_eq!(result.diagnostics.role_anchor_count, 1);
         assert_eq!(result.diagnostics.scene_anchor_count, 1);
         assert_eq!(result.diagnostics.tool_anchor_count, 1);
