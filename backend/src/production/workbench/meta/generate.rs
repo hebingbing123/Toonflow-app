@@ -119,6 +119,7 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     scene_anchor_count: usize,
     tool_anchor_count: usize,
     style_anchor_count: usize,
+    memory_style_anchor_count: usize,
     continuity_note_count: usize,
     uses_reference_frame: bool,
 }
@@ -1875,7 +1876,7 @@ fn build_video_prompt_with_diagnostics(
     extend_prompt_coverage(&mut prompt_coverage, &role_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &scene_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
-    let style_anchors =
+    let (style_anchors, memory_style_anchor_count) =
         build_project_visual_anchors(context, structured_fields.as_ref(), &prompt_coverage);
     let mut style_coverage = Vec::new();
     extend_prompt_coverage(&mut style_coverage, &style_anchors);
@@ -1986,6 +1987,7 @@ fn build_video_prompt_with_diagnostics(
             scene_anchor_count: scene_anchors.len(),
             tool_anchor_count: tool_anchors.len(),
             style_anchor_count: style_anchors.len(),
+            memory_style_anchor_count,
             continuity_note_count: continuity_notes.len(),
             uses_reference_frame: image_url.is_some(),
         },
@@ -2227,12 +2229,13 @@ fn build_project_visual_anchors(
     context: Option<&VideoPromptContext>,
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
-) -> Vec<String> {
+) -> (Vec<String>, usize) {
     let Some(ctx) = context else {
-        return Vec::new();
+        return (Vec::new(), 0);
     };
 
     let mut anchors = Vec::new();
+    let mut memory_anchor_count = 0usize;
     let mut style_coverage = prompt_coverage.to_vec();
     if let Some(style) = ctx
         .project_art_style
@@ -2297,9 +2300,10 @@ fn build_project_visual_anchors(
         }
         extend_prompt_coverage(&mut style_coverage, std::slice::from_ref(&note));
         anchors.push(note);
+        memory_anchor_count += 1;
         break;
     }
-    anchors
+    (anchors, memory_anchor_count)
 }
 
 fn compact_project_art_style_note(
@@ -8084,6 +8088,7 @@ mod tests {
                 scene_anchor_count: 1,
                 tool_anchor_count: 0,
                 style_anchor_count: 1,
+                memory_style_anchor_count: 0,
                 continuity_note_count: 0,
                 uses_reference_frame: false,
             },
@@ -8136,6 +8141,7 @@ mod tests {
         assert_eq!(result.diagnostics.scene_anchor_count, 1);
         assert_eq!(result.diagnostics.tool_anchor_count, 1);
         assert_eq!(result.diagnostics.style_anchor_count, 2);
+        assert_eq!(result.diagnostics.memory_style_anchor_count, 1);
         assert_eq!(result.diagnostics.continuity_note_count, 1);
         assert!(result.diagnostics.uses_reference_frame);
         assert!(result.diagnostics.prompt_chars > 0);
