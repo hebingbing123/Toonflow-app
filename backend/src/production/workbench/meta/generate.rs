@@ -3654,6 +3654,9 @@ fn compact_sound_clause(
         if fragment.is_empty() || looks_like_silence(&fragment) {
             continue;
         }
+        if sound_fragment_is_low_signal_ambient(&fragment) {
+            continue;
+        }
         if dialogue
             .as_deref()
             .is_some_and(|line| sound_fragment_is_dialogue_covered(&fragment, line))
@@ -3796,6 +3799,39 @@ fn sound_fragment_has_high_value_acoustic_detail(fragment: &str) -> bool {
     ]
     .iter()
     .any(|keyword| fragment.contains(keyword))
+}
+
+fn sound_fragment_is_low_signal_ambient(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() || sound_fragment_has_high_value_acoustic_detail(&normalized) {
+        return false;
+    }
+
+    let generic_ambient = [
+        "背景音乐",
+        "音乐渐起",
+        "配乐渐起",
+        "氛围音乐",
+        "一片死寂",
+        "四周死寂",
+        "四周寂静",
+        "周围寂静",
+        "环境安静",
+        "安静无声",
+        "空气凝固",
+        "气氛压抑",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword));
+    if !generic_ambient {
+        return false;
+    }
+
+    ![
+        "风声", "雨声", "脚步", "足音", "门", "敲", "回响", "回荡", "滴答", "雷声", "水声",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
 }
 
 fn sound_fragment_matches_footstep_action(fragment: &str, action: &str) -> bool {
@@ -6310,6 +6346,17 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_drops_low_signal_ambient_sound_clause() {
+        let prompt = build_video_prompt(
+            Some("（主角缓步推门、旧宅门厅、主角、5秒、中景、慢推、缓步推门进入、压抑、冷调逆光、无台词、背景音乐渐起，四周一片死寂、A12）"),
+            None,
+            None,
+        );
+
+        assert!(!prompt.contains("Sound:"), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_drops_generic_footstep_sound_when_action_already_covers_it() {
         let prompt = build_video_prompt(
             Some("（黑衣人、走廊尽头、黑衣人、5秒、中景、慢推、脚步逼近门口、紧张、冷光、、脚步声逼近、A12）"),
@@ -6324,7 +6371,7 @@ mod tests {
     #[test]
     fn build_video_prompt_keeps_detailed_door_sound_even_when_action_mentions_door() {
         let prompt = build_video_prompt(
-            Some("（林夏、旧宅门厅、林夏、5秒、中景、推进、推门闯入、压迫、冷调逆光、、门轴吱呀作响、A12）"),
+            Some("（林夏、旧宅门厅、林夏、5秒、中景、推进、推门闯入、压迫、冷调逆光、无台词、门轴吱呀作响、A12）"),
             None,
             None,
         );
