@@ -21,7 +21,8 @@ use crate::production::workbench::video_prompt_memory::{
     select_pending_rejected_video_observation_candidates_for_subject,
     select_prioritized_video_style_note, select_project_video_style_memory_notes,
     select_script_video_style_memory_notes, select_selected_video_memory_notes,
-    select_subject_role_video_style_memory_notes, selected_memory_subject_aliases,
+    select_subject_role_video_style_memory_notes,
+    select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
@@ -1338,12 +1339,15 @@ fn select_video_prompt_style_notes(
         .and_then(parse_structured_storyboard_description)
         .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
         .unwrap_or_default();
-    let role_memory_notes =
-        select_subject_role_video_style_memory_notes(rows, &current_subject_candidates)
-            .into_iter()
-            .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
-            .take(1)
-            .collect::<Vec<_>>();
+    let role_memory_notes = select_subject_role_video_style_memory_notes_for_storyboard(
+        rows,
+        &current_subject_candidates,
+        Some(storyboard_row),
+    )
+    .into_iter()
+    .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+    .take(1)
+    .collect::<Vec<_>>();
     let exact =
         select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed)
             .into_iter()
@@ -2064,10 +2068,14 @@ fn resolve_observation_filter_style_note(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     subject_candidates: &[String],
 ) -> Option<String> {
-    if let Some(note) = select_subject_role_video_style_memory_notes(rows, subject_candidates)
-        .into_iter()
-        .filter_map(|note| compact_contextual_video_style_note(&note, storyboard_row))
-        .next()
+    if let Some(note) = select_subject_role_video_style_memory_notes_for_storyboard(
+        rows,
+        subject_candidates,
+        storyboard_row,
+    )
+    .into_iter()
+    .filter_map(|note| compact_contextual_video_style_note(&note, storyboard_row))
+    .next()
     {
         return Some(note);
     }

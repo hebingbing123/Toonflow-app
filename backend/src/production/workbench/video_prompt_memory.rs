@@ -882,6 +882,14 @@ pub(crate) fn select_subject_role_video_style_memory_notes(
     rows: &[AgentMemoryRow],
     subject_candidates: &[String],
 ) -> Vec<String> {
+    select_subject_role_video_style_memory_notes_for_storyboard(rows, subject_candidates, None)
+}
+
+pub(crate) fn select_subject_role_video_style_memory_notes_for_storyboard(
+    rows: &[AgentMemoryRow],
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
     let subject_candidates = subject_candidates
         .iter()
         .map(|value| normalize_prompt_text(value))
@@ -891,6 +899,7 @@ pub(crate) fn select_subject_role_video_style_memory_notes(
         return Vec::new();
     }
 
+    let context = build_style_note_selection_context(storyboard_row);
     let mut matches = rows
         .iter()
         .filter(|row| {
@@ -912,18 +921,29 @@ pub(crate) fn select_subject_role_video_style_memory_notes(
         })
         .filter_map(|row| {
             selected_video_style_value(row).map(|note| {
+                let evidence =
+                    score_role_style_note_context_evidence(&note, row.name.as_str(), &context);
+                let min_evidence =
+                    role_style_memory_min_context_evidence(row.name.as_str(), &context);
                 (
-                    role_style_memory_scope_priority(row.name.as_str()),
-                    role_style_memory_sample_count(&row.content),
-                    note,
+                    evidence >= min_evidence,
+                    (
+                        role_style_memory_scope_priority(row.name.as_str()),
+                        evidence,
+                        role_style_memory_sample_count(&row.content),
+                        note,
+                    ),
                 )
             })
         })
+        .filter(|(passes_context_gate, _)| *passes_context_gate)
+        .map(|(_, candidate)| candidate)
         .collect::<Vec<_>>();
     matches.sort_by(|a, b| {
         a.0.cmp(&b.0)
             .then(b.1.cmp(&a.1))
-            .then(a.2.len().cmp(&b.2.len()))
+            .then(b.2.cmp(&a.2))
+            .then(a.3.len().cmp(&b.3.len()))
     });
     merge_subject_role_style_memory_notes(matches)
 }
@@ -942,14 +962,14 @@ fn role_style_memory_sample_count(content: &str) -> usize {
         .unwrap_or(0)
 }
 
-fn merge_subject_role_style_memory_notes(matches: Vec<(u8, usize, String)>) -> Vec<String> {
+fn merge_subject_role_style_memory_notes(matches: Vec<(u8, usize, usize, String)>) -> Vec<String> {
     let mut merged_fragments = Vec::<String>::new();
     let mut fallback_note = None;
     let has_script_scope = matches
         .iter()
-        .any(|(scope_priority, _, _)| *scope_priority == 0);
+        .any(|(scope_priority, _, _, _)| *scope_priority == 0);
 
-    for (scope_priority, sample_count, note) in matches {
+    for (scope_priority, _, sample_count, note) in matches {
         let compacted = compact_video_style_prompt_note(&note).unwrap_or(note);
         if fallback_note.is_none() {
             fallback_note = Some(compacted.clone());
@@ -981,6 +1001,40 @@ fn merge_subject_role_style_memory_notes(matches: Vec<(u8, usize, String)>) -> V
         .or(fallback_note)
         .into_iter()
         .collect()
+}
+
+fn role_style_memory_min_context_evidence(
+    name: &str,
+    context: &StyleNoteSelectionContext,
+) -> usize {
+    if style_note_selection_context_is_empty(context) {
+        return 0;
+    }
+
+    match name {
+        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => 1,
+        PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => 2,
+        _ => usize::MAX,
+    }
+}
+
+fn score_role_style_note_context_evidence(
+    note: &str,
+    source_name: &str,
+    context: &StyleNoteSelectionContext,
+) -> usize {
+    if style_note_selection_context_is_empty(context) {
+        return 0;
+    }
+
+    let ranked = RankedStyleNote {
+        note: note.to_string(),
+        score: 0,
+        recency_idx: 0,
+        source_name: source_name.to_string(),
+        storyboard_distance: None,
+    };
+    score_style_note_context_evidence(&ranked, context)
 }
 
 fn role_style_fragment_conflicts_or_overlaps(existing: &str, candidate: &str) -> bool {
@@ -5562,11 +5616,12 @@ mod tests {
         select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
         select_rejected_video_negative_memory_notes_for_subject,
         select_script_video_style_memory_notes, select_selected_video_memory_notes,
-        select_subject_role_video_style_memory_notes, selected_memory_subject_aliases,
-        selected_memory_subject_identity, selected_video_memory_quality_score,
-        selected_video_memory_scope, selected_video_memory_update_would_reduce_quality,
-        storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow, SelectedVideoMemoryScope,
-        StoryboardPromptSeedRow,
+        select_subject_role_video_style_memory_notes,
+        select_subject_role_video_style_memory_notes_for_storyboard,
+        selected_memory_subject_aliases, selected_memory_subject_identity,
+        selected_video_memory_quality_score, selected_video_memory_scope,
+        selected_video_memory_update_would_reduce_quality, storyboard_prompt_seed, AgentMemoryRow,
+        ScopedAgentMemoryRow, SelectedVideoMemoryScope, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -7598,6 +7653,46 @@ mod tests {
             notes,
             vec!["表演抬眼停顿，动作从容克制，语气低声克制".to_string()]
         );
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_for_storyboard_drops_mismatched_soft_voice() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚抽气后失声开口".into()),
+            video_desc: Some("（林晚抽气后失声开口、雨夜门厅、林晚、5秒、近景、稳定跟拍、抽气后失声开口、压抑、冷调逆光、我没事、雨声回响、A13）".into()),
+            duration: Some("5s".into()),
+        };
+
+        let notes = select_subject_role_video_style_memory_notes_for_storyboard(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=4 | style=表演抬眼停顿，语气轻声克制".into(),
+                },
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=4 | style=表演呼吸发颤，语气哽咽克制".into(),
+                },
+            ],
+            &["林晚".to_string(), "晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(notes, vec!["表演呼吸发颤，语气哽咽克制".to_string()]);
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_for_storyboard_keeps_no_context_behavior() {
+        let notes = select_subject_role_video_style_memory_notes_for_storyboard(
+            &[AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制".into(),
+            }],
+            &["晚晚".to_string()],
+            None,
+        );
+
+        assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
     }
 
     #[test]

@@ -20,7 +20,7 @@ use crate::production::workbench::video_prompt_memory::{
     select_prioritized_video_style_note, select_project_video_style_memory_notes,
     select_rejected_video_negative_memory_notes_for_subject,
     select_script_video_style_memory_notes, select_selected_video_memory_notes,
-    select_subject_role_video_style_memory_notes, selected_memory_subject_aliases,
+    select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
     StructuredStoryboardDescription,
 };
@@ -1383,10 +1383,13 @@ fn resolve_negative_filter_style_note(
     selected_style_note: Option<String>,
     subject_candidates: &[String],
 ) -> Option<String> {
-    let role_style_note =
-        select_subject_role_video_style_memory_notes(selected_rows, subject_candidates)
-            .into_iter()
-            .find(|note| !note.is_empty());
+    let role_style_note = select_subject_role_video_style_memory_notes_for_storyboard(
+        selected_rows,
+        subject_candidates,
+        storyboard_row,
+    )
+    .into_iter()
+    .find(|note| !note.is_empty());
     let exact_style_note = selected_style_note.filter(|note| {
         !negative_filter_exact_style_note_should_yield_to_role_memory(
             note,
@@ -1473,21 +1476,25 @@ fn select_contextual_summary_style_note(
         .and_then(|row| row.video_desc.as_deref())
         .and_then(parse_structured_storyboard_description)?;
 
-    select_subject_role_video_style_memory_notes(selected_rows, subject_candidates)
-        .into_iter()
-        .chain(select_script_video_style_memory_notes(selected_rows))
-        .chain(select_project_video_style_memory_notes(selected_rows))
-        .filter_map(|note| {
-            let evidence = style_note_context_evidence(&note, &context);
-            let compacted = compact_contextual_negative_style_note(&note, storyboard_row)?;
-            (evidence >= 2).then_some((evidence, compacted))
-        })
-        .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
-            left_evidence
-                .cmp(right_evidence)
-                .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
-        })
-        .map(|(_, note)| note)
+    select_subject_role_video_style_memory_notes_for_storyboard(
+        selected_rows,
+        subject_candidates,
+        storyboard_row,
+    )
+    .into_iter()
+    .chain(select_script_video_style_memory_notes(selected_rows))
+    .chain(select_project_video_style_memory_notes(selected_rows))
+    .filter_map(|note| {
+        let evidence = style_note_context_evidence(&note, &context);
+        let compacted = compact_contextual_negative_style_note(&note, storyboard_row)?;
+        (evidence >= 2).then_some((evidence, compacted))
+    })
+    .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
+        left_evidence
+            .cmp(right_evidence)
+            .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
+    })
+    .map(|(_, note)| note)
 }
 
 fn compact_contextual_negative_style_note(
