@@ -1077,7 +1077,7 @@ fn resolve_negative_filter_style_note(
     let role_style_note =
         select_subject_role_video_style_memory_notes(selected_rows, subject_candidates)
             .into_iter()
-            .find_map(|note| compact_contextual_negative_style_note(&note, storyboard_row));
+            .find(|note| !note.is_empty());
     let exact_style_note = selected_style_note.filter(|note| {
         !negative_filter_exact_style_note_should_yield_to_role_memory(
             note,
@@ -3189,6 +3189,31 @@ mod tests {
                 &["女主".into(), "苏晚".into()],
             ),
             Some("表演欲言又止，语气轻声克制".to_string())
+        );
+    }
+
+    #[test]
+    fn negative_filter_style_note_keeps_exact_note_when_camera_fragment_carries_emotion_signal() {
+        let rows = vec![AgentMemoryRow {
+            name: "script_role_video_style_memory".into(),
+            content: "subject=女主 | subjectAliases=女主/苏晚 | sampleCount=3 | style=表演欲言又止，语气轻声克制".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、稳定跟拍、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5".into()),
+        };
+
+        assert_eq!(
+            resolve_negative_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                Some("镜头稳定跟拍，情绪克制停顿".to_string()),
+                &["女主".into(), "苏晚".into()],
+            ),
+            Some("镜头稳定跟拍，情绪克制停顿".to_string())
         );
     }
 
