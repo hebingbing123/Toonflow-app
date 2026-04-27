@@ -811,6 +811,12 @@ fn resolve_performance_style_anchor(
         let Some(fragment) = compact_director_emotion_fragment_group(fragment, group) else {
             continue;
         };
+        let Some(fragment) = trim_director_performance_fragment_against_storyboard_fields(
+            &fragment,
+            &[fields.action.as_str(), fields.dialogue.as_str()],
+        ) else {
+            continue;
+        };
         if prompt_fragment_is_covered(&fragment, prompt_coverage)
             || fragments.iter().any(|existing| existing == &fragment)
         {
@@ -3828,11 +3834,52 @@ fn trim_style_fragment_by_shared_performance_keywords(
     prefix: &str,
     fields: &[&str],
 ) -> Option<String> {
+    trim_fragment_by_shared_keyword_families(
+        fragment,
+        prefix,
+        fields,
+        PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+    )
+}
+
+const PERFORMANCE_SHARED_KEYWORD_FAMILIES: &[&[&str]] = &[
+    &["欲言又止", "欲说还休"],
+    &["抬眼", "抬眸", "抬起眼"],
+    &["停顿", "顿住", "停了停"],
+    &["迟疑", "犹疑", "犹豫"],
+    &["回头", "回眸", "回身看"],
+    &["看向", "望向", "望着", "看着", "注视"],
+    &["唇线收紧", "抿唇", "嘴唇抿紧", "唇角绷紧", "嘴角绷紧"],
+    &["眉心轻蹙", "蹙眉", "眉头轻蹙", "眉心微蹙"],
+];
+
+fn trim_director_performance_fragment_against_storyboard_fields(
+    fragment: &str,
+    fields: &[&str],
+) -> Option<String> {
+    trim_fragment_by_shared_keyword_families(
+        Some(fragment.to_string()),
+        "",
+        fields,
+        PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+    )
+}
+
+fn trim_fragment_by_shared_keyword_families(
+    fragment: Option<String>,
+    prefix: &str,
+    fields: &[&str],
+    families: &[&[&str]],
+) -> Option<String> {
     let fragment = fragment?;
-    let body = fragment
-        .strip_prefix(prefix)
-        .unwrap_or(fragment.as_str())
-        .trim();
+    let body = if prefix.is_empty() {
+        fragment.trim()
+    } else {
+        fragment
+            .strip_prefix(prefix)
+            .unwrap_or(fragment.as_str())
+            .trim()
+    };
     if body.is_empty() {
         return None;
     }
@@ -3847,15 +3894,22 @@ fn trim_style_fragment_by_shared_performance_keywords(
     }
 
     let mut trimmed = body.to_string();
-    for keyword in ["欲言又止", "抬眼", "停顿", "迟疑", "回头", "看向"] {
-        if !trimmed.contains(keyword)
+    for family in families {
+        if !family.iter().any(|keyword| trimmed.contains(keyword))
             || !normalized_fields
                 .iter()
-                .any(|field| field.contains(keyword))
+                .any(|field| family.iter().any(|keyword| field.contains(keyword)))
         {
             continue;
         }
-        let candidate = normalize_prompt_text(&trimmed.replace(keyword, ""));
+        let candidate = family
+            .iter()
+            .fold(trimmed.clone(), |acc, keyword| acc.replace(keyword, ""));
+        let candidate = normalize_prompt_text(&candidate);
+        if candidate.is_empty() {
+            trimmed = candidate;
+            break;
+        }
         if candidate.chars().count() >= 2 {
             trimmed = candidate;
         }
@@ -3866,6 +3920,8 @@ fn trim_style_fragment_by_shared_performance_keywords(
     }
     if trimmed.is_empty() {
         None
+    } else if prefix.is_empty() {
+        Some(trimmed)
     } else {
         Some(format!("{prefix}{trimmed}"))
     }
@@ -6832,8 +6888,9 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 mod tests {
     use super::{
         art_style_director_profile, build_video_prompt, build_video_prompt_with_diagnostics,
-        compact_camera_clause, compact_negative_constraint_against_storyboard_style,
-        compact_script_asset_anchor, parse_director_emotion_cues, parse_director_environment_cues,
+        compact_camera_clause, compact_director_emotion_fragment_group,
+        compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
+        parse_director_emotion_cues, parse_director_environment_cues,
         parse_director_environment_texture_cues, parse_director_motion_cue,
         parse_structured_storyboard_description, prune_low_signal_observation_candidates,
         prune_storyboard_observation_candidates, resolve_observation_filter_style_note,
@@ -6842,9 +6899,10 @@ mod tests {
         select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
         select_video_prompt_style_notes, trim_video_prompt_memory_rows,
         trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
-        video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptDiagnostics,
-        GenerateVideoPromptResponse, ScriptRolePromptSeedRow, VideoPromptContext,
-        VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
+        video_prompt_observation_is_irrelevant_to_storyboard, DirectorEmotionFragmentGroup,
+        GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse, ScriptRolePromptSeedRow,
+        VideoPromptContext, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
+        VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes,
@@ -10791,6 +10849,28 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_trims_director_micro_expression_when_storyboard_already_states_it() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抿唇后停顿片刻才低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A14）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 真人都市写实;"), "{prompt}");
+        assert!(!prompt.contains("唇线收紧"), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_skips_performance_anchor_without_matching_art_style_profile() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -10985,6 +11065,29 @@ mod tests {
         assert!(prompt.contains("表演喉结滚动"), "{prompt}");
         assert!(!prompt.contains("表演抬眼停顿喉结滚动"), "{prompt}");
         assert!(!prompt.contains("表演抬眼"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_trims_synonymous_performance_micro_expression_but_keeps_unique_detail() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抿唇后停顿片刻才低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A25）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演唇线收紧喉结滚动，语气低声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("表演喉结滚动"), "{prompt}");
+        assert!(!prompt.contains("表演唇线收紧喉结滚动"), "{prompt}");
+        assert!(!prompt.contains("唇线收紧"), "{prompt}");
     }
 
     #[test]
