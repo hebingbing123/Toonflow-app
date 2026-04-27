@@ -158,6 +158,28 @@ const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
     "附近的",
 ];
 const PROMPT_LEADING_BRIDGES: [&str; 7] = ["在", "于", "向", "朝", "往", "从", "自"];
+const SUBJECT_IDENTITY_TAIL_MARKERS: [&str; 24] = [
+    "站在", "停在", "坐在", "靠在", "倚在", "走向", "看向", "看着", "望向", "望着", "强忍", "抬眼",
+    "垂眼", "低头", "回头", "停步", "对峙", "冲出", "逼近", "捧着", "握着", "拿着", "提着", "扶着",
+];
+const NON_CHARACTER_ALIAS_SUFFIXES: [&str; 16] = [
+    "窗边",
+    "门厅",
+    "门口",
+    "走廊",
+    "桌边",
+    "桌前",
+    "玻璃",
+    "咖啡杯",
+    "杯",
+    "手机",
+    "匕首",
+    "雨伞",
+    "窗帘",
+    "门外",
+    "落地窗边",
+    "夜景",
+];
 
 pub(crate) fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {
     note.split(['，', ',', '；', ';', '。', '\n'])
@@ -222,11 +244,14 @@ pub(crate) fn build_selected_video_memory(
             selected_memory_subject_identity(&fields.subject, &fields.subject_refs)
         {
             parts.push(format!("subject={subject}"));
-        }
-        let subject_aliases =
-            selected_memory_subject_aliases(&fields.subject, &fields.subject_refs);
-        if subject_aliases.len() > 1 {
-            parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
+            let subject_aliases =
+                selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
+                    .into_iter()
+                    .filter(|alias| alias != &subject)
+                    .collect::<Vec<_>>();
+            if !subject_aliases.is_empty() {
+                parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
+            }
         }
     }
     let style = style_only_note(&note);
@@ -283,10 +308,14 @@ pub(crate) fn build_rejected_video_negative_memory(
     }
     if let Some(subject) = selected_memory_subject_identity(&fields.subject, &fields.subject_refs) {
         parts.push(format!("subject={subject}"));
-    }
-    let subject_aliases = selected_memory_subject_aliases(&fields.subject, &fields.subject_refs);
-    if subject_aliases.len() > 1 {
-        parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
+        let subject_aliases =
+            selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
+                .into_iter()
+                .filter(|alias| alias != &subject)
+                .collect::<Vec<_>>();
+        if !subject_aliases.is_empty() {
+            parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
+        }
     }
     parts.push("rejectionCount=1".to_string());
     parts.push(format!("avoid={}", fragments.join(", ")));
@@ -2362,6 +2391,8 @@ pub(crate) fn selected_memory_subject_identity(
 
 pub(crate) fn selected_memory_subject_aliases(subject: &str, subject_refs: &str) -> Vec<String> {
     let mut aliases = Vec::new();
+    let subject_hint =
+        normalize_selected_memory_identity_candidate(&selected_memory_identity_source(subject));
 
     let refs = normalize_prompt_text(subject_refs);
     if !refs.is_empty() {
@@ -2370,15 +2401,16 @@ pub(crate) fn selected_memory_subject_aliases(subject: &str, subject_refs: &str)
             .map(normalize_prompt_text)
             .filter(|value| !value.is_empty())
         {
-            if let Some(identity) = normalize_selected_memory_identity_candidate(&candidate) {
+            if let Some(identity) = normalize_selected_memory_identity_candidate_with_hint(
+                &candidate,
+                subject_hint.as_deref(),
+            ) {
                 aliases.push(identity);
             }
         }
     }
 
-    if let Some(identity) =
-        normalize_selected_memory_identity_candidate(&normalize_prompt_text(subject))
-    {
+    if let Some(identity) = subject_hint {
         aliases.push(identity);
     }
 
@@ -2394,11 +2426,40 @@ pub(crate) fn selected_memory_subject_aliases(subject: &str, subject_refs: &str)
     aliases
 }
 
+fn selected_memory_identity_source(candidate: &str) -> String {
+    let normalized = normalize_prompt_text(candidate);
+    if normalized.is_empty() {
+        return normalized;
+    }
+
+    let Some((split_idx, _)) = SUBJECT_IDENTITY_TAIL_MARKERS
+        .iter()
+        .filter_map(|marker| normalized.find(marker).map(|idx| (idx, *marker)))
+        .min_by_key(|(idx, _)| *idx)
+    else {
+        return normalized;
+    };
+    let prefix = normalized[..split_idx].trim_end();
+    if (2..=6).contains(&prefix.chars().count()) {
+        prefix.to_string()
+    } else {
+        normalized
+    }
+}
+
 fn normalize_selected_memory_identity_candidate(candidate: &str) -> Option<String> {
+    normalize_selected_memory_identity_candidate_with_hint(candidate, None)
+}
+
+fn normalize_selected_memory_identity_candidate_with_hint(
+    candidate: &str,
+    subject_hint: Option<&str>,
+) -> Option<String> {
     let normalized = normalize_prompt_text(candidate);
     if normalized.is_empty() {
         return None;
     }
+    let normalized = selected_memory_identity_source(&normalized);
 
     let stripped = strip_selected_memory_subject_role_prefix(&normalized)
         .map(normalize_prompt_text)
@@ -2407,11 +2468,31 @@ fn normalize_selected_memory_identity_candidate(candidate: &str) -> Option<Strin
         || ACTION_SUBJECT_PREFIXES
             .iter()
             .any(|prefix| stripped == *prefix)
+        || selected_memory_identity_looks_like_non_character_fragment(&stripped, subject_hint)
     {
         return None;
     }
     let clipped = clip_prompt_fragment(&stripped, 12);
     (clipped.chars().count() >= 2).then_some(clipped)
+}
+
+fn selected_memory_identity_looks_like_non_character_fragment(
+    candidate: &str,
+    subject_hint: Option<&str>,
+) -> bool {
+    candidate.contains('的')
+        || NON_CHARACTER_ALIAS_SUFFIXES
+            .iter()
+            .any(|suffix| candidate.ends_with(suffix))
+        || subject_hint.is_some_and(|hint| {
+            !hint.is_empty()
+                && candidate != hint
+                && !candidate.contains(hint)
+                && !hint.contains(candidate)
+                && NON_CHARACTER_ALIAS_SUFFIXES
+                    .iter()
+                    .any(|suffix| candidate.ends_with(suffix))
+        })
 }
 
 fn compact_selected_memory_sound_style(sound: &str) -> Option<String> {
@@ -4688,10 +4769,11 @@ mod tests {
         select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
         select_rejected_video_negative_memory_notes_for_subject,
         select_script_video_style_memory_notes, select_selected_video_memory_notes,
-        select_subject_role_video_style_memory_notes, selected_memory_subject_identity,
-        selected_video_memory_quality_score, selected_video_memory_scope,
-        selected_video_memory_update_would_reduce_quality, storyboard_prompt_seed, AgentMemoryRow,
-        ScopedAgentMemoryRow, SelectedVideoMemoryScope, StoryboardPromptSeedRow,
+        select_subject_role_video_style_memory_notes, selected_memory_subject_aliases,
+        selected_memory_subject_identity, selected_video_memory_quality_score,
+        selected_video_memory_scope, selected_video_memory_update_would_reduce_quality,
+        storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow, SelectedVideoMemoryScope,
+        StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -4915,8 +4997,27 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("subjectAliases="), "{content}");
-        assert!(content.contains("林晚"), "{content}");
-        assert!(content.contains("晚晚"), "{content}");
+        assert!(content.contains("subject=林晚"), "{content}");
+        assert!(content.contains("subjectAliases=晚晚"), "{content}");
+        assert!(!content.contains("subjectAliases=林晚/"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_drops_descriptive_or_prop_subject_alias_noise() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚站在窗边轻声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚站在窗边/晚晚/咖啡杯、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、冷蓝窗光、低声说：你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("subject=林晚"), "{content}");
+        assert!(content.contains("subjectAliases=晚晚"), "{content}");
+        assert!(!content.contains("林晚站在窗边"), "{content}");
+        assert!(!content.contains("咖啡杯"), "{content}");
     }
 
     #[test]
@@ -6366,6 +6467,14 @@ mod tests {
         assert_eq!(
             selected_memory_subject_identity("女主站在窗边", "林晚/咖啡杯"),
             Some("林晚".to_string())
+        );
+    }
+
+    #[test]
+    fn selected_memory_subject_aliases_trim_descriptive_subject_and_drop_prop_refs() {
+        assert_eq!(
+            selected_memory_subject_aliases("林晚站在窗边", "林晚站在窗边/晚晚/咖啡杯"),
+            vec!["林晚".to_string(), "晚晚".to_string()]
         );
     }
 
