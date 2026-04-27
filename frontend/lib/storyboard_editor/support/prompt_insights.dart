@@ -11,6 +11,7 @@ String buildStoryboardVideoPromptDiagnosticsLine(
       'Observation ${diagnostics.observationNoteChars}',
     if (diagnostics.memoryStyleChars > 0)
       'Memory ${diagnostics.memoryStyleChars}',
+    'Memory tier ${diagnostics.memoryBudgetTier}',
   ];
   return parts.join(' · ');
 }
@@ -49,6 +50,11 @@ String buildStoryboardVideoPromptBudgetHint(
   }
   if (diagnostics.promptChars >= 380 && diagnostics.memoryStyleChars >= 48) {
     return '当前提示词里的私有记忆占比已经不低，优先合并泛化风格句，别先删角色表演记忆。';
+  }
+  if (diagnostics.memoryBudgetTier == 'expanded' &&
+      diagnostics.memoryStyleChars <= 40 &&
+      diagnostics.continuityNoteChars <= 40) {
+    return '当前镜头被判定为高风险，先保留角色表演和连续性记忆，再压其他泛化描述。';
   }
   if (diagnostics.promptChars >= 380 &&
       diagnostics.styleAnchorCount + diagnostics.continuityNoteCount >= 3) {

@@ -38,6 +38,7 @@ const VIDEO_PROMPT_OBSERVATION_SCRIPT_STYLE_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
+const VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS: usize = 36;
 const VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT: usize = 6;
@@ -126,6 +127,22 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     continuity_note_count: usize,
     continuity_note_chars: usize,
     uses_reference_frame: bool,
+    memory_budget_tier: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum VideoPromptMemoryBudgetTier {
+    Lean,
+    Expanded,
+}
+
+impl VideoPromptMemoryBudgetTier {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Lean => "lean",
+            Self::Expanded => "expanded",
+        }
+    }
 }
 
 #[utoipa::path(
@@ -1925,8 +1942,20 @@ fn build_video_prompt_with_diagnostics(
     extend_prompt_coverage(&mut prompt_coverage, &role_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &scene_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
-    let (style_anchors, memory_style_anchor_count) =
-        build_project_visual_anchors(context, structured_fields.as_ref(), &prompt_coverage);
+    let memory_budget_tier = resolve_video_prompt_memory_budget_tier(
+        image_url,
+        context,
+        structured_fields.as_ref(),
+        &role_anchors,
+        &scene_anchors,
+        &tool_anchors,
+    );
+    let (style_anchors, memory_style_anchor_count) = build_project_visual_anchors(
+        context,
+        structured_fields.as_ref(),
+        &prompt_coverage,
+        memory_budget_tier,
+    );
     let memory_style_chars = style_anchors
         .iter()
         .rev()
@@ -2016,8 +2045,12 @@ fn build_video_prompt_with_diagnostics(
         clauses.push(format!("Style anchor: {}.", style_anchors.join("; ")));
     }
     extend_prompt_coverage(&mut prompt_coverage, &style_anchors);
-    let continuity_notes =
-        build_continuity_notes(context, structured_fields.as_ref(), &prompt_coverage);
+    let continuity_notes = build_continuity_notes(
+        context,
+        structured_fields.as_ref(),
+        &prompt_coverage,
+        memory_budget_tier,
+    );
     let continuity_note_chars = continuity_notes
         .iter()
         .map(|note| note.chars().count())
@@ -2051,6 +2084,7 @@ fn build_video_prompt_with_diagnostics(
             continuity_note_count: continuity_notes.len(),
             continuity_note_chars,
             uses_reference_frame: image_url.is_some(),
+            memory_budget_tier: memory_budget_tier.as_str().to_string(),
         },
         prompt,
     }
@@ -2286,10 +2320,80 @@ fn resolve_video_prompt_description(
     })
 }
 
+fn resolve_video_prompt_memory_budget_tier(
+    image_url: Option<&str>,
+    context: Option<&VideoPromptContext>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    role_anchors: &[String],
+    scene_anchors: &[String],
+    tool_anchors: &[String],
+) -> VideoPromptMemoryBudgetTier {
+    let mut risk_score = 0;
+    if image_url.is_none() {
+        risk_score += 2;
+    }
+    if role_anchors.is_empty() && structured_fields.is_some_and(|fields| !fields.subject.is_empty())
+    {
+        risk_score += 1;
+    }
+    if scene_anchors.is_empty()
+        && tool_anchors.is_empty()
+        && structured_fields.is_some_and(|fields| !fields.setting.is_empty())
+    {
+        risk_score += 1;
+    }
+    if context.is_some_and(|ctx| !ctx.continuity_notes.is_empty()) {
+        risk_score += 1;
+    }
+    if structured_fields.is_some_and(video_prompt_scene_needs_emotional_memory) {
+        risk_score += 1;
+    }
+
+    if risk_score >= 2 {
+        VideoPromptMemoryBudgetTier::Expanded
+    } else {
+        VideoPromptMemoryBudgetTier::Lean
+    }
+}
+
+fn video_prompt_scene_needs_emotional_memory(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.mood.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "哭",
+                "泪",
+                "哽咽",
+                "颤",
+                "停顿",
+                "压抑",
+                "克制",
+                "愤怒",
+                "惊慌",
+                "紧张",
+                "崩溃",
+                "隐忍",
+                "欲言又止",
+                "迟疑",
+                "回头",
+                "犹豫",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
 fn build_project_visual_anchors(
     context: Option<&VideoPromptContext>,
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
+    memory_budget_tier: VideoPromptMemoryBudgetTier,
 ) -> (Vec<String>, usize) {
     let Some(ctx) = context else {
         return (Vec::new(), 0);
@@ -2353,6 +2457,7 @@ fn build_project_visual_anchors(
             structured_fields,
             &style_coverage,
             has_base_style_anchor,
+            memory_budget_tier,
         ) else {
             continue;
         };
@@ -2415,6 +2520,7 @@ fn compact_memory_style_anchor(
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
     allow_prompt_covered_style_fragments: bool,
+    memory_budget_tier: VideoPromptMemoryBudgetTier,
 ) -> Option<String> {
     let normalized = normalize_prompt_text(note);
     if normalized.is_empty() {
@@ -2456,10 +2562,16 @@ fn compact_memory_style_anchor(
     if fragments.is_empty() {
         return None;
     }
-    Some(clip_prompt_fragment(
-        &fragments.join("，"),
-        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
-    ))
+
+    let note = match memory_budget_tier {
+        VideoPromptMemoryBudgetTier::Lean => fragments.into_iter().next().map(|fragment| {
+            clip_prompt_fragment(&fragment, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS)
+        })?,
+        VideoPromptMemoryBudgetTier::Expanded => {
+            clip_prompt_fragment(&fragments.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
+        }
+    };
+    Some(note)
 }
 
 fn trim_style_fragment_against_storyboard_fields(
@@ -3125,7 +3237,11 @@ fn build_continuity_notes(
     context: Option<&VideoPromptContext>,
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
+    memory_budget_tier: VideoPromptMemoryBudgetTier,
 ) -> Vec<String> {
+    if matches!(memory_budget_tier, VideoPromptMemoryBudgetTier::Lean) {
+        return Vec::new();
+    }
     let mut notes = context
         .map(|ctx| {
             ctx.continuity_notes
@@ -8281,6 +8397,7 @@ mod tests {
                 continuity_note_count: 0,
                 continuity_note_chars: 0,
                 uses_reference_frame: false,
+                memory_budget_tier: "lean".into(),
             },
             model: "runway-gen-2".into(),
             duration: 5,
@@ -8299,6 +8416,13 @@ mod tests {
                 .and_then(|item| item.get("promptChars"))
                 .and_then(serde_json::Value::as_u64),
             Some(22)
+        );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("memoryBudgetTier"))
+                .and_then(serde_json::Value::as_str),
+            Some("lean")
         );
     }
 
@@ -8336,7 +8460,40 @@ mod tests {
         assert_eq!(result.diagnostics.continuity_note_count, 1);
         assert!(result.diagnostics.continuity_note_chars > 0);
         assert!(result.diagnostics.uses_reference_frame);
+        assert_eq!(result.diagnostics.memory_budget_tier, "expanded");
         assert!(result.diagnostics.prompt_chars > 0);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_uses_lean_memory_tier_for_grounded_low_risk_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚/咖啡杯、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演眼神放松，动作轻缓克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert_eq!(result.diagnostics.continuity_note_count, 0);
+        assert!(result.diagnostics.memory_style_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS);
+        assert!(
+            !result.prompt.contains("Continuity notes:"),
+            "{}",
+            result.prompt
+        );
     }
 
     #[test]

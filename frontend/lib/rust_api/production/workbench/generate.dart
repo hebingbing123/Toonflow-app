@@ -21,6 +21,7 @@ class GenerateVideoPromptDiagnostics {
     required this.continuityNoteCount,
     required this.continuityNoteChars,
     required this.usesReferenceFrame,
+    required this.memoryBudgetTier,
   });
 
   final int promptChars;
@@ -35,6 +36,7 @@ class GenerateVideoPromptDiagnostics {
   final int continuityNoteCount;
   final int continuityNoteChars;
   final bool usesReferenceFrame;
+  final String memoryBudgetTier;
 
   factory GenerateVideoPromptDiagnostics.fromJson(Map<String, dynamic> json) {
     return GenerateVideoPromptDiagnostics(
@@ -52,6 +54,7 @@ class GenerateVideoPromptDiagnostics {
       continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
       continuityNoteChars: (json['continuityNoteChars'] as num?)?.toInt() ?? 0,
       usesReferenceFrame: json['usesReferenceFrame'] == true,
+      memoryBudgetTier: json['memoryBudgetTier'] as String? ?? 'expanded',
     );
   }
 }

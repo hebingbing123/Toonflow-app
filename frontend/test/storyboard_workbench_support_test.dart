@@ -259,34 +259,32 @@ void main() {
     },
   );
 
-  test(
-    'buildStoryboardVideoPromptDiagnosticsLine summarizes prompt budget',
-    () {
-      const diagnostics = GenerateVideoPromptDiagnostics(
-        promptChars: 318,
-        negativePromptChars: 64,
-        observationNoteChars: 22,
-        roleAnchorCount: 1,
-        sceneAnchorCount: 2,
-        toolAnchorCount: 1,
-        styleAnchorCount: 2,
-        memoryStyleAnchorCount: 1,
-        memoryStyleChars: 36,
-        continuityNoteCount: 1,
-        continuityNoteChars: 18,
-        usesReferenceFrame: true,
-      );
+  test('buildStoryboardVideoPromptDiagnosticsLine summarizes prompt budget', () {
+    const diagnostics = GenerateVideoPromptDiagnostics(
+      promptChars: 318,
+      negativePromptChars: 64,
+      observationNoteChars: 22,
+      roleAnchorCount: 1,
+      sceneAnchorCount: 2,
+      toolAnchorCount: 1,
+      styleAnchorCount: 2,
+      memoryStyleAnchorCount: 1,
+      memoryStyleChars: 36,
+      continuityNoteCount: 1,
+      continuityNoteChars: 18,
+      usesReferenceFrame: true,
+      memoryBudgetTier: 'expanded',
+    );
 
-      expect(
-        buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
-        'Prompt 318 chars · Negative 64 · Observation 22 · Memory 36',
-      );
-      expect(
-        buildStoryboardVideoPromptAnchorSummary(diagnostics),
-        '角色锚点 1 · 场景锚点 2 · 道具锚点 1 · 风格锚点 2 · 私有记忆 1 · 连续性记忆 1 · 已引用当前画面',
-      );
-    },
-  );
+    expect(
+      buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
+      'Prompt 318 chars · Negative 64 · Observation 22 · Memory 36 · Memory tier expanded',
+    );
+    expect(
+      buildStoryboardVideoPromptAnchorSummary(diagnostics),
+      '角色锚点 1 · 场景锚点 2 · 道具锚点 1 · 风格锚点 2 · 私有记忆 1 · 连续性记忆 1 · 已引用当前画面',
+    );
+  });
 
   test('buildStoryboardVideoPromptAnchorSummary handles empty diagnostics', () {
     const diagnostics = GenerateVideoPromptDiagnostics(
@@ -302,6 +300,7 @@ void main() {
       continuityNoteCount: 0,
       continuityNoteChars: 0,
       usesReferenceFrame: false,
+      memoryBudgetTier: 'lean',
     );
 
     expect(
@@ -328,6 +327,7 @@ void main() {
       continuityNoteCount: 1,
       continuityNoteChars: 18,
       usesReferenceFrame: true,
+      memoryBudgetTier: 'expanded',
     );
 
     expect(
@@ -352,6 +352,7 @@ void main() {
         continuityNoteCount: 0,
         continuityNoteChars: 0,
         usesReferenceFrame: true,
+        memoryBudgetTier: 'lean',
       );
 
       expect(
@@ -377,6 +378,7 @@ void main() {
         continuityNoteCount: 1,
         continuityNoteChars: 20,
         usesReferenceFrame: true,
+        memoryBudgetTier: 'lean',
       );
 
       expect(
@@ -402,11 +404,38 @@ void main() {
         continuityNoteCount: 1,
         continuityNoteChars: 22,
         usesReferenceFrame: true,
+        memoryBudgetTier: 'expanded',
       );
 
       expect(
         buildStoryboardVideoPromptBudgetHint(diagnostics),
         '当前提示词里的私有记忆占比已经不低，优先合并泛化风格句，别先删角色表演记忆。',
+      );
+    },
+  );
+
+  test(
+    'buildStoryboardVideoPromptBudgetHint preserves expanded memory on risky shots',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 340,
+        negativePromptChars: 18,
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 0,
+        styleAnchorCount: 2,
+        memoryStyleAnchorCount: 1,
+        memoryStyleChars: 28,
+        continuityNoteCount: 1,
+        continuityNoteChars: 26,
+        usesReferenceFrame: true,
+        memoryBudgetTier: 'expanded',
+      );
+
+      expect(
+        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        '当前镜头被判定为高风险，先保留角色表演和连续性记忆，再压其他泛化描述。',
       );
     },
   );
