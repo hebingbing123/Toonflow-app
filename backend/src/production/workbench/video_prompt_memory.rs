@@ -2377,6 +2377,8 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         .as_deref()
         .and_then(parse_structured_storyboard_description)
     {
+        let visible_speech_risk =
+            selected_memory_has_visible_speech_performance_risk(&fields, row.prompt.as_deref());
         let mut narrative_fragments = Vec::new();
         let mut style_fragments = Vec::new();
         let subject = compact_selected_memory_subject(&fields.subject, &fields.action);
@@ -2413,11 +2415,18 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
             &fields.action,
             &fields.dialogue,
             &fields.mood,
-        ) {
+        )
+        .filter(|_| {
+            visible_speech_risk
+                || selected_memory_has_high_signal_visual_performance_cue(&fields.action)
+        }) {
             style_fragments.push(performance);
         }
-        if let Some(voice) = compact_selected_memory_voice_style(&fields.dialogue, &fields.mood) {
-            style_fragments.push(voice);
+        if visible_speech_risk {
+            if let Some(voice) = compact_selected_memory_voice_style(&fields.dialogue, &fields.mood)
+            {
+                style_fragments.push(voice);
+            }
         }
         let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
             .into_iter()
@@ -2472,6 +2481,183 @@ fn selected_memory_field_looks_silent(value: &str) -> bool {
             normalized.as_str(),
             "无" | "无台词" | "无对白" | "无音效" | "无声音" | "none" | "no dialogue" | "no sound"
         )
+}
+
+fn selected_memory_has_visible_speech_performance_risk(
+    fields: &StructuredStoryboardDescription,
+    prompt: Option<&str>,
+) -> bool {
+    if selected_memory_field_looks_silent(&fields.dialogue) {
+        return false;
+    }
+
+    let dialogue = normalize_prompt_text(&fields.dialogue);
+    let action = normalize_prompt_text(&fields.action);
+    let shot = normalize_prompt_text(&fields.shot);
+    let camera_move = normalize_prompt_text(&fields.camera_move);
+    let prompt = prompt.map(normalize_prompt_text).unwrap_or_default();
+
+    if selected_memory_dialogue_is_low_gain_utterance(&dialogue)
+        && !selected_memory_explicitly_signals_speech(&action, &dialogue, &prompt)
+    {
+        return false;
+    }
+
+    let mut score = 0i32;
+    if ["特写", "近景", "近特写", "大特写"]
+        .iter()
+        .any(|keyword| shot.contains(keyword))
+    {
+        score += 2;
+    } else if shot.contains("中景") {
+        score += 1;
+    } else if ["远景", "全景"]
+        .iter()
+        .any(|keyword| shot.contains(keyword))
+    {
+        score -= 1;
+    }
+
+    if selected_memory_explicitly_signals_speech(&action, &dialogue, &prompt)
+        || [
+            "嘴角", "唇线", "抿唇", "喉结", "口型", "嘴唇", "失声", "哽咽", "呢喃", "低声", "轻声",
+        ]
+        .iter()
+        .any(|keyword| {
+            action.contains(keyword) || dialogue.contains(keyword) || prompt.contains(keyword)
+        })
+    {
+        score += 2;
+    }
+
+    if !selected_memory_scene_has_motion_risk(fields)
+        || ["静止", "缓推", "慢推", "停顿", "驻足", "停步"]
+            .iter()
+            .any(|keyword| camera_move.contains(keyword) || action.contains(keyword))
+    {
+        score += 1;
+    }
+
+    if selected_memory_subject_count(fields) > 1 {
+        score -= 1;
+    }
+
+    score >= 2
+}
+
+fn selected_memory_dialogue_is_low_gain_utterance(dialogue: &str) -> bool {
+    let stripped = dialogue
+        .chars()
+        .filter(|ch| {
+            !ch.is_whitespace()
+                && !matches!(ch, '：' | ':' | '，' | ',' | '。' | '！' | '!' | '？' | '?')
+        })
+        .collect::<String>();
+    if stripped.is_empty() {
+        return true;
+    }
+    let char_count = stripped.chars().count();
+    if char_count > 2 {
+        return false;
+    }
+
+    [
+        "嗯", "啊", "呀", "哎", "欸", "诶", "哦", "喂", "哈", "呵", "呃", "唉", "哼",
+    ]
+    .iter()
+    .any(|token| stripped == *token)
+}
+
+fn selected_memory_explicitly_signals_speech(action: &str, dialogue: &str, prompt: &str) -> bool {
+    [action, dialogue, prompt].into_iter().any(|value| {
+        !value.is_empty()
+            && [
+                "开口",
+                "说道",
+                "说出",
+                "说着",
+                "低声说",
+                "轻声说",
+                "哽咽",
+                "失声",
+                "喊",
+                "叫住",
+                "质问",
+                "回答",
+                "回应",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn selected_memory_scene_has_motion_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.shot.as_str(),
+        fields.camera_move.as_str(),
+        fields.action.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "跟拍", "推进", "拉远", "摇镜", "手持", "奔跑", "跑", "冲", "扑", "追", "快步",
+                "转身", "扑向", "踉跄", "急退",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn selected_memory_subject_count(fields: &StructuredStoryboardDescription) -> usize {
+    let subject_refs = selected_memory_subject_aliases(&fields.subject, &fields.subject_refs);
+    if !subject_refs.is_empty() {
+        return subject_refs.len();
+    }
+
+    fields
+        .subject
+        .split(['/', '／', ',', '，', '、', ';', '；', '|'])
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .fold(Vec::new(), |mut subjects, value| {
+            if !subjects.iter().any(|existing| existing == &value) {
+                subjects.push(value);
+            }
+            subjects
+        })
+        .len()
+}
+
+fn selected_memory_has_high_signal_visual_performance_cue(action: &str) -> bool {
+    let action = normalize_prompt_text(action);
+    !action.is_empty()
+        && [
+            "抬眼",
+            "抬眸",
+            "垂眼",
+            "低头",
+            "咬唇",
+            "抿唇",
+            "眼眶发红",
+            "喉结滚动",
+            "喉头滚动",
+            "指尖发颤",
+            "嘴角发僵",
+            "下颌绷紧",
+            "欲言又止",
+            "迟迟没有开口",
+            "张了张嘴",
+            "话到嘴边",
+            "抽气",
+            "呼吸发颤",
+            "眉心紧锁",
+            "蹙眉",
+            "皱眉",
+        ]
+        .iter()
+        .any(|keyword| action.contains(keyword))
 }
 
 fn compact_selected_memory_note_fragments(
@@ -6005,6 +6191,23 @@ mod tests {
         assert!(!content.contains("动作从容克制"), "{content}");
         assert!(!content.contains("情绪克制"), "{content}");
         assert!(!content.contains("语气低声克制"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_skips_voice_memory_for_wide_moving_low_visibility_dialogue() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚穿过雨幕边跑边喊".into()),
+                video_desc: Some("（林晚穿过雨幕、雨夜街头、林晚、4秒、远景、手持跟拍、穿过雨幕奔跑并喊别回头、紧张、霓虹反光、别回头、脚步声和雨声混在一起、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(!content.contains("语气"), "{content}");
+        assert!(!content.contains("表演"), "{content}");
+        assert!(content.contains("镜头远景手持跟拍"), "{content}");
     }
 
     #[test]
