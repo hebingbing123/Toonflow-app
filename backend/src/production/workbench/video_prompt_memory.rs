@@ -386,6 +386,13 @@ fn rejected_video_negative_risk_tags(
     }
     if families
         .iter()
+        .any(|family| *family == "character_consistency")
+        && rejected_negative_scene_has_identity_risk(fields)
+    {
+        tags.push("identity");
+    }
+    if families
+        .iter()
         .any(|family| matches!(*family, "camera_framing" | "shot_change_framing"))
         && rejected_negative_scene_has_framing_risk(fields)
     {
@@ -2596,6 +2603,9 @@ fn storyboard_risk_tags_for_subject_fallback(
     if selected_memory_scene_has_motion_risk(&fields) {
         tags.push("motion".to_string());
     }
+    if rejected_negative_scene_has_identity_risk(&fields) {
+        tags.push("identity".to_string());
+    }
     if rejected_negative_scene_has_framing_risk(&fields) {
         tags.push("framing".to_string());
     }
@@ -2612,6 +2622,56 @@ fn storyboard_risk_tags_for_subject_fallback(
         tags.push("dialogue".to_string());
     }
     tags
+}
+
+fn rejected_negative_scene_has_identity_risk(fields: &StructuredStoryboardDescription) -> bool {
+    let has_subject = !normalize_prompt_text(&fields.subject).is_empty();
+    if !has_subject {
+        return false;
+    }
+
+    if rejected_negative_scene_needs_expressive_performance_guard(fields)
+        || rejected_negative_scene_has_dialogue_guard(fields)
+    {
+        return true;
+    }
+
+    [
+        fields.shot.as_str(),
+        fields.camera_move.as_str(),
+        fields.action.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "近景",
+                "中近景",
+                "半身",
+                "特写",
+                "脸部",
+                "面部",
+                "肖像",
+                "抬眼",
+                "回头",
+                "对视",
+                "凝视",
+                "眼神",
+                "唇",
+                "喉结",
+                "眉",
+                "泪",
+                "close-up",
+                "medium close-up",
+                "portrait",
+                "face",
+                "eye",
+                "gaze",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
 }
 
 fn memory_matches_rejected_video_risk_tags(content: &str, storyboard_tags: &[String]) -> bool {
@@ -7088,6 +7148,24 @@ mod tests {
     }
 
     #[test]
+    fn build_rejected_video_negative_memory_persists_identity_risk_tag_for_face_visible_shot() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("晚晚回头看向镜头".into()),
+                video_desc: Some(
+                    "（晚晚回头看向镜头、旧宅走廊、林晚/晚晚、4秒、近景、慢推、回头抬眼停顿、压抑、冷调逆光、无台词、脚步回响、A15）"
+                        .into(),
+                ),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("riskTags=identity"), "{content}");
+    }
+
+    #[test]
     fn select_selected_video_memory_notes_keeps_latest_matching_storyboard() {
         let notes = select_selected_video_memory_notes(
             &[
@@ -7500,6 +7578,34 @@ mod tests {
     }
 
     #[test]
+    fn select_rejected_video_negative_memory_notes_for_subject_can_fallback_to_same_role_identity_risk(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头看向镜头".into()),
+            video_desc: Some(
+                "（晚晚回头看向镜头、旧宅走廊、林晚/晚晚、4秒、近景、慢推、回头抬眼停顿、压抑、冷调逆光、无台词、脚步回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=8 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=identity/lighting | avoid=avoid face distortion or identity drift".into(),
+            }],
+            15,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid face distortion or identity drift".to_string()]
+        );
+    }
+
+    #[test]
     fn select_rejected_video_negative_memory_notes_deduplicates_weaker_family_across_rows() {
         let notes = select_rejected_video_negative_memory_notes(
             &[
@@ -7679,6 +7785,34 @@ mod tests {
         assert_eq!(
             notes,
             vec!["avoid blank expression or monotone delivery".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_can_fallback_to_same_role_identity_risk(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头看向镜头".into()),
+            video_desc: Some(
+                "（晚晚回头看向镜头、旧宅走廊、林晚/晚晚、4秒、近景、慢推、回头抬眼停顿、压抑、冷调逆光、无台词、脚步回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=8 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=identity/lighting | avoid=avoid face distortion or identity drift".into(),
+            }],
+            15,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid face distortion or identity drift".to_string()]
         );
     }
 
