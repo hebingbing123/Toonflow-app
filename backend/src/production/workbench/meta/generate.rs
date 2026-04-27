@@ -3016,7 +3016,11 @@ fn build_video_prompt_with_diagnostics(
                 &prompt_coverage,
                 compacted_dialogue.as_deref(),
                 Some(fields.setting.as_str()),
-            );
+            )
+            .map(|action| {
+                compact_hidden_speech_action_clause(&action, &fields.dialogue, fields, context)
+            })
+            .unwrap_or(None);
 
             if prompt_clauses_substantially_overlap(subject.as_deref(), action.as_deref()) {
                 subject = None;
@@ -5624,6 +5628,30 @@ fn compact_action_clause(
     (!trimmed.is_empty()).then_some(trimmed)
 }
 
+fn compact_hidden_speech_action_clause(
+    action: &str,
+    dialogue: &str,
+    fields: &StructuredStoryboardDescription,
+    context: Option<&VideoPromptContext>,
+) -> Option<String> {
+    let prompt = context
+        .and_then(|value| value.storyboard_prompt.as_deref())
+        .unwrap_or_default();
+    let canonical_dialogue = canonical_dialogue_fragment(dialogue);
+    if canonical_dialogue.is_empty()
+        || !dialogue_clause_is_low_gain_for_offscreen_or_low_visibility_speech(
+            &canonical_dialogue,
+            fields,
+            prompt,
+        )
+    {
+        return Some(action.to_string());
+    }
+
+    strip_low_visibility_dialogue_payload_from_action(action, &canonical_dialogue)
+        .or_else(|| Some(action.to_string()))
+}
+
 #[derive(Debug, Clone, Copy)]
 enum PromptClauseKind {
     Subject,
@@ -6136,6 +6164,92 @@ fn strip_dialogue_covered_action_suffix(action: &str, dialogue: &str) -> Option<
     }
 
     None
+}
+
+fn strip_low_visibility_dialogue_payload_from_action(
+    action: &str,
+    canonical_dialogue: &str,
+) -> Option<String> {
+    let normalized_action = normalize_prompt_text(action);
+    if normalized_action.is_empty() || canonical_dialogue.is_empty() {
+        return None;
+    }
+
+    for speech_prefix in [
+        "低声说",
+        "轻声说",
+        "小声说",
+        "喃喃道",
+        "喃喃说",
+        "呢喃",
+        "说道",
+        "说出",
+        "说",
+        "喊道",
+        "喊出",
+        "大喊",
+        "呼喊",
+        "叫喊",
+        "质问",
+        "回答",
+        "回应",
+        "重复",
+    ] {
+        let patterns = [
+            format!("并{speech_prefix}{canonical_dialogue}"),
+            format!("后{speech_prefix}{canonical_dialogue}"),
+            format!("再{speech_prefix}{canonical_dialogue}"),
+            format!("{speech_prefix}{canonical_dialogue}"),
+        ];
+        for pattern in patterns {
+            let Some(prefix) = normalized_action.strip_suffix(&pattern) else {
+                continue;
+            };
+            let normalized_prefix = normalize_prompt_text(prefix);
+            let trimmed = normalized_prefix.trim_end_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(
+                        ch,
+                        ',' | '，' | ';' | '；' | ':' | '：' | '、' | '并' | '后' | '再'
+                    )
+            });
+            if trimmed.chars().count() >= 2 && !action_fragment_is_speech_delivery_only(trimmed) {
+                return Some(trimmed.to_string());
+            }
+
+            return compact_low_visibility_speech_delivery(trimmed, speech_prefix);
+        }
+    }
+
+    None
+}
+
+fn compact_low_visibility_speech_delivery(fragment: &str, speech_prefix: &str) -> Option<String> {
+    let normalized = normalize_prompt_text(fragment);
+    if !normalized.is_empty() && !action_fragment_is_speech_delivery_only(&normalized) {
+        return None;
+    }
+
+    Some(
+        if speech_prefix.contains("低声") || speech_prefix.contains("小声") {
+            "低声开口"
+        } else if speech_prefix.contains("轻声") {
+            "轻声开口"
+        } else if speech_prefix.contains("喃喃") || speech_prefix.contains("呢喃") {
+            "呢喃开口"
+        } else if speech_prefix.contains("喊") {
+            "急喊示意"
+        } else if speech_prefix == "质问" {
+            "开口质问"
+        } else if speech_prefix == "回答" || speech_prefix == "回应" {
+            "开口回应"
+        } else if speech_prefix == "重复" {
+            "重复示意"
+        } else {
+            "开口示意"
+        }
+        .to_string(),
+    )
 }
 
 fn action_fragment_is_speech_delivery_only(fragment: &str) -> bool {
@@ -9700,6 +9814,19 @@ mod tests {
         assert!(!prompt.contains("Dialogue:"), "{prompt}");
         assert!(prompt.contains("Action: 穿过雨幕奔跑"), "{prompt}");
         assert!(prompt.contains("Sound: 脚步声和雨声混在一起."), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_compacts_speech_only_action_when_low_visibility_dialogue_is_dropped() {
+        let prompt = build_video_prompt(
+            Some("（林晚冲向街口、雨夜街头、林晚、5秒、远景、手持跟拍、喊别回头、紧张、霓虹反光、别回头、脚步声和雨声混在一起、A12）"),
+            None,
+            None,
+        );
+
+        assert!(!prompt.contains("Dialogue:"), "{prompt}");
+        assert!(prompt.contains("Action: 急喊示意."), "{prompt}");
+        assert!(!prompt.contains("Action: 喊别回头."), "{prompt}");
     }
 
     #[test]
