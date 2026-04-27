@@ -904,6 +904,10 @@ fn compact_negative_fragment_against_storyboard_risk(
                 Some(trimmed.to_string())
             }
         }
+        "avoid blank expression or monotone delivery" => {
+            negative_prompt_scene_needs_expressive_performance_guard(&fields)
+                .then_some(trimmed.to_string())
+        }
         _ => Some(trimmed.to_string()),
     }
 }
@@ -925,6 +929,7 @@ fn negative_fragment_matches_storyboard_risk(
         "lighting_backlight" => negative_prompt_scene_has_lighting_risk(&fields),
         "rushed_motion" => true,
         "mood_tone" => negative_prompt_scene_needs_emotional_memory(&fields),
+        "performance_delivery" => negative_prompt_scene_needs_expressive_performance_guard(&fields),
         "camera_framing" | "shot_change_framing" => negative_prompt_scene_has_framing_risk(&fields),
         _ => true,
     }
@@ -1127,6 +1132,39 @@ fn negative_prompt_scene_needs_emotional_memory(fields: &StructuredStoryboardDes
             .iter()
             .any(|keyword| value.contains(keyword))
     })
+}
+
+fn negative_prompt_scene_needs_expressive_performance_guard(
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    if !negative_prompt_scene_needs_emotional_memory(fields) {
+        return false;
+    }
+
+    if !storyboard_dialogue_is_empty(&fields.dialogue) {
+        return true;
+    }
+
+    [fields.mood.as_str(), fields.action.as_str()]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .any(|value| {
+            !value.is_empty()
+                && [
+                    "欲言又止",
+                    "隐忍",
+                    "哽咽",
+                    "低声",
+                    "轻声",
+                    "迟疑",
+                    "停顿",
+                    "犹豫",
+                    "强忍",
+                    "颤",
+                ]
+                .iter()
+                .any(|keyword| value.contains(keyword))
+        })
 }
 
 fn negative_prompt_scene_prefers_restrained_emotional_guard(
@@ -1969,6 +2007,31 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
             "avoid overly cold, oppressive, or frantic mood",
         ),
         (
+            &[
+                "表情僵",
+                "表情木",
+                "木讷",
+                "木然",
+                "面瘫",
+                "没情绪",
+                "没有情绪",
+                "情绪太平",
+                "语气太平",
+                "台词太平",
+                "台词生硬",
+                "念稿",
+                "读稿",
+                "像读文章",
+                "生硬",
+                "monotone",
+                "flat delivery",
+                "blank expression",
+                "wooden",
+                "stiff performance",
+            ][..],
+            "avoid blank expression or monotone delivery",
+        ),
+        (
             &["逆光", "背光", "剪影", "backlight", "silhouette"][..],
             "avoid harsh backlight silhouette",
         ),
@@ -2062,6 +2125,7 @@ fn score_review_negative_fragment(
     let family_score = match negative_fragment_family(fragment) {
         "flicker_motion_jitter" => 36,
         "shot_change_framing" | "camera_framing" => 34,
+        "performance_delivery" => 24,
         "lighting_backlight" | "lighting_reflection" => 20,
         "mood_tone" => 16,
         _ => {
@@ -2226,6 +2290,7 @@ fn score_negative_prompt_budget_fragment(fragment: &str) -> i32 {
         "flicker_motion_jitter" => 36,
         "shot_change_only" => 30,
         "shot_change_framing" | "camera_framing" => 34,
+        "performance_delivery" => 26,
         "lighting_backlight" | "lighting_reflection" => 22,
         "mood_tone" => 16,
         _ => 14,
@@ -2274,6 +2339,7 @@ struct VisualStyleConstraintFlags {
     tight_close_up: bool,
     oppressive_mood: bool,
     frantic_mood: bool,
+    blank_expression_or_monotone_delivery: bool,
     overly_cold_emotional_tone: bool,
     flat_cold_lighting: bool,
     harsh_backlight_silhouette: bool,
@@ -2311,6 +2377,8 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
             visual_style_flags.tight_close_up |= flags.tight_close_up;
             visual_style_flags.oppressive_mood |= flags.oppressive_mood;
             visual_style_flags.frantic_mood |= flags.frantic_mood;
+            visual_style_flags.blank_expression_or_monotone_delivery |=
+                flags.blank_expression_or_monotone_delivery;
             visual_style_flags.overly_cold_emotional_tone |= flags.overly_cold_emotional_tone;
             visual_style_flags.flat_cold_lighting |= flags.flat_cold_lighting;
             visual_style_flags.harsh_backlight_silhouette |= flags.harsh_backlight_silhouette;
@@ -2413,6 +2481,10 @@ fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleC
             frantic_mood: true,
             ..Default::default()
         }),
+        "avoid blank expression or monotone delivery" => Some(VisualStyleConstraintFlags {
+            blank_expression_or_monotone_delivery: true,
+            ..Default::default()
+        }),
         "avoid oppressive mood" => Some(VisualStyleConstraintFlags {
             oppressive_mood: true,
             ..Default::default()
@@ -2478,6 +2550,9 @@ fn render_visual_style_constraint_fragments(flags: VisualStyleConstraintFlags) -
         fragments.push("avoid frantic mood".to_string());
     } else if flags.overly_cold_emotional_tone {
         fragments.push("avoid overly cold emotional tone".to_string());
+    }
+    if flags.blank_expression_or_monotone_delivery {
+        fragments.push("avoid blank expression or monotone delivery".to_string());
     }
 
     if flags.flat_cold_lighting && flags.harsh_backlight_silhouette {
@@ -2674,6 +2749,8 @@ fn visual_style_constraint_flags_cover(
         && (!candidate.tight_close_up || existing.tight_close_up)
         && (!candidate.oppressive_mood || existing.oppressive_mood)
         && (!candidate.frantic_mood || existing.frantic_mood)
+        && (!candidate.blank_expression_or_monotone_delivery
+            || existing.blank_expression_or_monotone_delivery)
         && (!candidate.overly_cold_emotional_tone || existing.overly_cold_emotional_tone)
         && (!candidate.flat_cold_lighting || existing.flat_cold_lighting)
         && (!candidate.harsh_backlight_silhouette || existing.harsh_backlight_silhouette)
@@ -2761,6 +2838,7 @@ fn negative_fragment_family(value: &str) -> &'static str {
         "avoid unnecessary shot changes" => "shot_change_only",
         "avoid extra shot changes or wrong framing" => "shot_change_framing",
         "avoid rushed motion" | "avoid rushed or jerky motion" => "rushed_motion",
+        "avoid blank expression or monotone delivery" => "performance_delivery",
         "avoid extreme camera angle"
         | "avoid overly tight close-up framing"
         | "avoid extreme camera angle or overly tight close-up framing" => "camera_framing",
@@ -3897,6 +3975,57 @@ mod tests {
         let selection = prompts.get(&12).expect("storyboard 12 prompt");
         assert_eq!(selection.as_deref(), Some("avoid frantic mood"));
         assert_eq!(selection.budget_tier, "lean");
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_keeps_performance_guard_for_restrained_dialogue_scene() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("台词像读文章，表情发木没情绪".into()),
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚低声开口"),
+                Some("（晚晚低声开口、医院走廊、晚晚/林晚、5秒、中景、静止、停顿后低声开口、克制、夜间中性光、别再问了、空调低鸣、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(
+            selection.as_deref(),
+            Some("avoid blank expression or monotone delivery")
+        );
+        assert_eq!(selection.fragment_count, 1);
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_drops_performance_guard_for_non_emotional_silent_scene() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("台词像读文章，表情发木没情绪".into()),
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("主角站在门口"),
+                Some("（主角站在门口、旧宅门厅、主角、4秒、中景、静止、站在门口、平静、室内暖光、无台词、风声、A12）"),
+                Some("4s"),
+            )]),
+        );
+
+        assert_eq!(prompts.get(&12).and_then(|value| value.as_deref()), None);
     }
 
     #[test]

@@ -330,6 +330,10 @@ pub(crate) fn build_rejected_video_negative_memory(
         &mut fragments,
         map_rejected_lighting_fragment(&fields.lighting),
     );
+    push_rejected_negative_fragment(
+        &mut fragments,
+        map_rejected_performance_fragment(&fields.action, &fields.dialogue, &fields.mood),
+    );
     let fragments = compact_rejected_negative_memory_fragments_for_storage(
         fragments.into_iter().map(str::to_string).collect(),
     );
@@ -1468,10 +1472,15 @@ fn score_rejected_negative_fragment(fragment: &str) -> i32 {
         "oppressive",
         "frantic",
         "tone",
+        "monotone",
+        "expression",
+        "delivery",
         "情绪",
         "压迫",
         "冷调",
         "悲怆",
+        "台词",
+        "表演",
     ] {
         if normalized.contains(keyword) {
             score += 8;
@@ -1513,10 +1522,14 @@ fn score_pending_observation_note(note: &str) -> i32 {
         "emotion",
         "oppressive",
         "frantic",
+        "monotone",
+        "expression",
+        "delivery",
         "情绪",
         "压迫",
         "节奏",
         "表演",
+        "台词",
     ] {
         if normalized.contains(keyword) {
             score += 8;
@@ -1570,6 +1583,7 @@ fn observation_note_family(value: &str) -> &'static str {
         "avoid extreme camera angle"
         | "avoid overly tight close-up framing"
         | "avoid extreme camera angle or overly tight close-up framing" => "camera_framing",
+        "avoid blank expression or monotone delivery" => "performance_delivery",
         "avoid oppressive or frantic mood"
         | "avoid overly cold emotional tone"
         | "avoid overly cold, oppressive, or frantic mood" => "mood_tone",
@@ -1602,6 +1616,11 @@ fn observation_note_family(value: &str) -> &'static str {
                 || canonical.contains("cold emotional tone")
             {
                 "mood_tone"
+            } else if canonical.contains("blank expression")
+                || canonical.contains("monotone")
+                || canonical.contains("delivery")
+            {
+                "performance_delivery"
             } else if canonical.contains("neon reflection") || canonical.contains("reflection") {
                 "lighting_reflection"
             } else if canonical.contains("lip-sync") {
@@ -1762,6 +1781,7 @@ struct ObservationVisualStyleConstraintFlags {
     extreme_camera_angle: bool,
     tight_close_up: bool,
     oppressive_or_frantic_mood: bool,
+    blank_expression_or_monotone_delivery: bool,
     overly_cold_emotional_tone: bool,
     flat_cold_lighting: bool,
     harsh_backlight_silhouette: bool,
@@ -1796,6 +1816,8 @@ fn compact_rejected_negative_fragment_families(fragments: Vec<String>) -> Vec<St
             visual_style_flags.extreme_camera_angle |= flags.extreme_camera_angle;
             visual_style_flags.tight_close_up |= flags.tight_close_up;
             visual_style_flags.oppressive_or_frantic_mood |= flags.oppressive_or_frantic_mood;
+            visual_style_flags.blank_expression_or_monotone_delivery |=
+                flags.blank_expression_or_monotone_delivery;
             visual_style_flags.overly_cold_emotional_tone |= flags.overly_cold_emotional_tone;
             visual_style_flags.flat_cold_lighting |= flags.flat_cold_lighting;
             visual_style_flags.harsh_backlight_silhouette |= flags.harsh_backlight_silhouette;
@@ -1935,6 +1957,12 @@ fn parse_observation_visual_style_constraint_fragment(
             oppressive_or_frantic_mood: true,
             ..Default::default()
         }),
+        "avoid blank expression or monotone delivery" => {
+            Some(ObservationVisualStyleConstraintFlags {
+                blank_expression_or_monotone_delivery: true,
+                ..Default::default()
+            })
+        }
         "avoid overly cold emotional tone" => Some(ObservationVisualStyleConstraintFlags {
             overly_cold_emotional_tone: true,
             ..Default::default()
@@ -1983,6 +2011,9 @@ fn render_observation_visual_style_constraint_fragments(
         fragments.push("avoid oppressive or frantic mood".to_string());
     } else if flags.overly_cold_emotional_tone {
         fragments.push("avoid overly cold emotional tone".to_string());
+    }
+    if flags.blank_expression_or_monotone_delivery {
+        fragments.push("avoid blank expression or monotone delivery".to_string());
     }
 
     if flags.flat_cold_lighting && flags.harsh_backlight_silhouette {
@@ -4982,6 +5013,43 @@ fn map_rejected_mood_fragment(value: &str) -> Option<&'static str> {
     None
 }
 
+fn map_rejected_performance_fragment(
+    action: &str,
+    dialogue: &str,
+    mood: &str,
+) -> Option<&'static str> {
+    let action = normalize_prompt_text(action);
+    let dialogue = normalize_prompt_text(dialogue);
+    let mood = normalize_prompt_text(mood);
+    let has_dialogue = !dialogue.is_empty()
+        && !["无台词", "沉默", "静默", "无对白"]
+            .iter()
+            .any(|token| dialogue.contains(token));
+    let has_restrained_emotional_signal = [action.as_str(), dialogue.as_str(), mood.as_str()]
+        .into_iter()
+        .any(|value| {
+            !value.is_empty()
+                && [
+                    "欲言又止",
+                    "隐忍",
+                    "哽咽",
+                    "低声",
+                    "轻声",
+                    "迟疑",
+                    "停顿",
+                    "犹豫",
+                    "压低声音",
+                    "强忍",
+                    "颤",
+                    "克制",
+                ]
+                .iter()
+                .any(|keyword| value.contains(keyword))
+        });
+    (has_dialogue && has_restrained_emotional_signal)
+        .then_some("avoid blank expression or monotone delivery")
+}
+
 fn map_rejected_lighting_fragment(value: &str) -> Option<&'static str> {
     let value = normalize_prompt_text(value);
     if value.is_empty() {
@@ -5909,6 +5977,24 @@ mod tests {
 
         assert!(content.contains("avoid=avoid flat cold lighting"));
         assert!(!content.contains("avoid overly cold emotional tone"));
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_adds_performance_guard_for_restrained_dialogue_scene() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("晚晚欲言又止".into()),
+                video_desc: Some(
+                    "（晚晚欲言又止、医院走廊、晚晚/林晚、5秒、中景、静止、停顿后低声开口、克制、夜间中性光、别再问了、空调低鸣、A12）"
+                        .into(),
+                ),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("avoid blank expression or monotone delivery"));
     }
 
     #[test]
