@@ -4162,6 +4162,7 @@ fn role_style_supplement_fragments(notes: &[String]) -> Vec<String> {
 }
 
 fn summarize_role_voice_fragment(notes: &[String]) -> Option<String> {
+    let recurring_performance = summarize_recurring_role_performance_fragment(notes);
     let mut variants = Vec::<(&str, usize)>::new();
 
     for note in notes {
@@ -4192,7 +4193,22 @@ fn summarize_role_voice_fragment(notes: &[String]) -> Option<String> {
             .then_with(|| role_voice_variant_priority(a.0).cmp(&role_voice_variant_priority(b.0)))
     });
     let best = variants.first()?.0;
+    if recurring_performance.is_some() && role_voice_variant_is_low_gain_carryover(best) {
+        return None;
+    }
     Some(format!("语气{best}"))
+}
+
+fn summarize_recurring_role_performance_fragment(notes: &[String]) -> Option<String> {
+    let parsed = notes
+        .iter()
+        .map(|note| split_prompt_note_fragments(note).collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+    summarize_recurring_prefixed_fragment(&parsed, "表演")
+}
+
+fn role_voice_variant_is_low_gain_carryover(variant: &str) -> bool {
+    matches!(variant, "低声克制" | "轻声克制" | "呢喃")
 }
 
 fn summarize_role_voice_variant(fragment: &str) -> Option<&'static str> {
@@ -7402,7 +7418,10 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气低声克制".to_string()]
+            vec![
+                "subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿"
+                    .to_string()
+            ]
         );
     }
 
@@ -7430,7 +7449,10 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气低声克制".to_string()]
+            vec![
+                "subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿"
+                    .to_string()
+            ]
         );
     }
 
@@ -7456,7 +7478,28 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=3 | style=表演抬眼停顿，语气低声克制".to_string()]
+            vec!["subject=林晚 | sampleCount=3 | style=表演抬眼停顿".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_keep_fragile_voice_when_it_carries_emotional_turn() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=表演呼吸发颤，语气哽咽克制"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=表演呼吸发颤，语气哽咽克制"
+                    .into(),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=2 | style=表演呼吸发颤，语气哽咽克制".to_string()]
         );
     }
 
