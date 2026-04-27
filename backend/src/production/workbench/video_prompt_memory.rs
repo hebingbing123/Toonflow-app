@@ -4972,7 +4972,7 @@ fn compact_role_recurring_style_fragments(
 }
 
 fn role_memory_fragment_is_character_signal(fragment: &str) -> bool {
-    ["动作", "表演", "语气", "情绪", "光影", "声场", "环境"]
+    ["动作", "表演", "语气", "情绪"]
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
 }
@@ -8759,6 +8759,24 @@ mod tests {
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=18 | subject=林晚 | style=镜头近景稳定跟拍".into(),
+            },
+        ]);
+
+        assert!(summaries.is_empty(), "{summaries:?}");
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_skip_scene_shell_without_character_signal() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=光影冷调逆光，声场雨声回响"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=光影冷调逆光，环境雨丝玻璃"
+                    .into(),
             },
         ]);
 
