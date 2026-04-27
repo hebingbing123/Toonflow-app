@@ -2401,6 +2401,7 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         } else if let Some(setting) = setting {
             style_fragments.push(format!("场景{}", clip_prompt_fragment(&setting, 12)));
         }
+        style_fragments = compact_selected_memory_style_fragments(style_fragments);
         let note = compact_selected_memory_note_fragments(style_fragments, narrative_fragments);
         if !note.is_empty() {
             return Some(note);
@@ -2452,6 +2453,13 @@ fn compact_selected_memory_note_fragments(
     }
 
     selected.join("，")
+}
+
+fn compact_selected_memory_style_fragments(fragments: Vec<String>) -> Vec<String> {
+    let note = fragments.join("，");
+    compact_video_style_prompt_note(&note)
+        .map(|value| split_prompt_note_fragments(&value).collect())
+        .unwrap_or_default()
 }
 
 fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String> {
@@ -4608,6 +4616,21 @@ fn compact_cross_fragment_style_redundancy(fragments: &mut Vec<String>) {
         });
     }
 
+    let has_performance_signal = fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"));
+    if has_performance_signal {
+        fragments.retain(|fragment| {
+            if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
+                return !selected_style_fragment_is_low_gain_voice(&voice);
+            }
+            if let Some(action) = fragment.strip_prefix("动作").map(normalize_prompt_text) {
+                return !selected_style_fragment_is_low_gain_motion(&action);
+            }
+            true
+        });
+    }
+
     let has_non_camera_style_signal = fragments.iter().any(|fragment| {
         !fragment.starts_with("镜头")
             && ((fragment.starts_with("情绪")
@@ -4640,6 +4663,14 @@ fn lighting_fragment_covers_generic_mood_tone(lighting: &str, mood: &str) -> boo
 
 fn selected_style_fragment_is_generic_restrained_mood(mood: &str) -> bool {
     matches!(mood, "克制" | "隐忍" | "压抑" | "沉静" | "沉稳" | "冷静")
+}
+
+fn selected_style_fragment_is_low_gain_voice(voice: &str) -> bool {
+    matches!(voice, "低声克制" | "轻声克制" | "呢喃")
+}
+
+fn selected_style_fragment_is_low_gain_motion(action: &str) -> bool {
+    matches!(action, "从容克制" | "克制自然" | "自然" | "简洁平滑")
 }
 
 fn compact_prefixed_style_fragment_with_keywords(
@@ -5000,9 +5031,13 @@ fn selected_video_memory_quality_score(content: &str) -> i32 {
 
     if let Some(style) = selected_video_style_value_from_content(content) {
         score += 80;
-        score += split_prompt_note_fragments(&style)
+        let fragments = split_prompt_note_fragments(&style).collect::<Vec<_>>();
+        score += fragments
+            .iter()
+            .cloned()
             .map(score_selected_video_memory_style_fragment)
             .sum::<i32>();
+        score -= selected_video_memory_style_redundancy_penalty(&fragments);
     }
 
     if let Some(note) = extract_key_value(content, "note")
@@ -5016,6 +5051,34 @@ fn selected_video_memory_quality_score(content: &str) -> i32 {
     }
 
     score
+}
+
+fn selected_video_memory_style_redundancy_penalty(fragments: &[String]) -> i32 {
+    if !fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"))
+    {
+        return 0;
+    }
+
+    fragments.iter().fold(0, |penalty, fragment| {
+        if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
+            if selected_style_fragment_is_low_gain_voice(&voice) {
+                return penalty + 8;
+            }
+        }
+        if let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) {
+            if selected_style_fragment_is_generic_restrained_mood(&mood) {
+                return penalty + 6;
+            }
+        }
+        if let Some(action) = fragment.strip_prefix("动作").map(normalize_prompt_text) {
+            if selected_style_fragment_is_low_gain_motion(&action) {
+                return penalty + 6;
+            }
+        }
+        penalty
+    })
 }
 
 fn score_selected_video_memory_style_fragment(fragment: String) -> i32 {
@@ -5884,6 +5947,27 @@ mod tests {
     }
 
     #[test]
+    fn build_selected_video_memory_drops_low_gain_voice_mood_and_motion_when_performance_exists() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚抬眼后低声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、缓缓抬眼后停顿片刻、隐忍 / 克制、冷蓝窗光、低声说：你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains("style=表演抬眼停顿，光影冷蓝窗光，声场雨声回响"),
+            "{content}"
+        );
+        assert!(!content.contains("动作从容克制"), "{content}");
+        assert!(!content.contains("情绪克制"), "{content}");
+        assert!(!content.contains("语气低声克制"), "{content}");
+    }
+
+    #[test]
     fn build_selected_video_memory_persists_subject_identity_for_role_memory() {
         let content = build_selected_video_memory(
             22,
@@ -6470,6 +6554,22 @@ mod tests {
         assert!(!selected_video_memory_update_would_reduce_quality(
             "storyboardIds=12 | promptSeed=seed-12 | note=主角贴墙前行",
             "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=主角贴墙前行"
+        ));
+    }
+
+    #[test]
+    fn selected_video_memory_quality_score_penalizes_low_gain_style_redundancy_when_performance_exists(
+    ) {
+        assert!(
+            selected_video_memory_quality_score(
+                "storyboardIds=12 | promptSeed=seed-12 | style=动作从容克制，表演抬眼停顿，语气低声克制，情绪克制，光影冷蓝窗光，声场雨声回响"
+            ) < selected_video_memory_quality_score(
+                "storyboardIds=12 | promptSeed=seed-12 | style=表演抬眼停顿，光影冷蓝窗光，声场雨声回响"
+            )
+        );
+        assert!(!selected_video_memory_update_would_reduce_quality(
+            "storyboardIds=12 | promptSeed=seed-12 | style=动作从容克制，表演抬眼停顿，语气低声克制，情绪克制，光影冷蓝窗光，声场雨声回响",
+            "storyboardIds=12 | promptSeed=seed-12 | style=表演抬眼停顿，光影冷蓝窗光，声场雨声回响"
         ));
     }
 
