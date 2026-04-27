@@ -198,14 +198,14 @@ pub(crate) fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = St
         .filter(|fragment| !fragment.is_empty())
 }
 
-#[derive(Debug, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Deserialize, sqlx::FromRow)]
 pub(crate) struct StoryboardPromptSeedRow {
     pub(crate) prompt: Option<String>,
     pub(crate) video_desc: Option<String>,
     pub(crate) duration: Option<String>,
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow)]
 pub(crate) struct AgentMemoryRow {
     pub(crate) name: String,
     pub(crate) content: String,

@@ -14,7 +14,7 @@ use crate::production::workbench::meta::common::{
     StructuredStoryboardDescription,
 };
 use crate::production::workbench::video::generate::{
-    load_auto_negative_prompt_details, AutoNegativePromptSelection,
+    load_storyboard_negative_prompt_runtime, StoryboardNegativePromptRuntime,
 };
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
@@ -35,7 +35,6 @@ const VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_ROLE_STYLE_MEMORY_ROW_LIMIT: usize = 4;
-const VIDEO_PROMPT_OBSERVATION_FETCH_ROW_LIMIT: i64 = 24;
 const VIDEO_PROMPT_OBSERVATION_REJECTION_ROW_LIMIT: usize = 8;
 const VIDEO_PROMPT_OBSERVATION_SCRIPT_STYLE_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT: usize = 1;
@@ -190,52 +189,40 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         body.script_id,
     )
     .await?;
+    let single_storyboard_runtime =
+        if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
+            Some(
+                load_storyboard_negative_prompt_runtime(
+                    pool,
+                    user_id,
+                    body.project_id,
+                    body.script_id,
+                    storyboard_id,
+                )
+                .await?,
+            )
+        } else {
+            None
+        };
     let context = load_video_prompt_context(
         pool,
         user_id,
         body.project_id,
         body.script_id,
         body.storyboard_id,
+        single_storyboard_runtime.as_ref(),
     )
     .await?;
-
-    let negative_prompt_selection =
-        if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
-            load_auto_negative_prompt_details(
-                pool,
-                user_id,
-                body.project_id,
-                body.script_id,
-                &[storyboard_id],
-            )
-            .await?
-            .remove(&storyboard_id)
-        } else {
-            None
-        };
+    let negative_prompt_selection = single_storyboard_runtime
+        .as_ref()
+        .map(|runtime| runtime.selection.clone());
     let negative_prompt = negative_prompt_selection
         .as_ref()
         .and_then(|selection| selection.prompt.clone());
-    let current_prompt_seed = context
+    let observation_note = single_storyboard_runtime
         .as_ref()
-        .and_then(|value| value.storyboard_prompt_seed.as_deref());
-    let observation_note = if negative_prompt.is_none() {
-        if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
-            load_pending_video_observation_note(
-                pool,
-                user_id,
-                body.project_id,
-                body.script_id,
-                storyboard_id,
-                current_prompt_seed,
-            )
-            .await?
-        } else {
-            None
-        }
-    } else {
-        None
-    };
+        .filter(|runtime| runtime.selection.prompt.is_none())
+        .and_then(build_pending_video_observation_note_from_runtime);
     let constraint_pressure = VideoPromptConstraintPressure::from_runtime_constraints(
         negative_prompt_selection.as_ref(),
         observation_note.as_deref(),
@@ -1279,44 +1266,58 @@ async fn load_video_prompt_context(
     project_id: i32,
     script_id: i32,
     storyboard_id: Option<i32>,
+    runtime: Option<&StoryboardNegativePromptRuntime>,
 ) -> Result<Option<VideoPromptContext>, ApiError> {
     let Some(storyboard_numeric_id) = storyboard_id.filter(|id| *id > 0) else {
         return Ok(None);
     };
-    let storyboard_uuid = crate::scope::owned_storyboard_in_script_scope(
-        pool,
-        user_id,
-        project_id,
-        script_id,
-        storyboard_numeric_id,
-    )
-    .await
-    .map_err(|e| e.into_api_error())?
-    .storyboard_id;
-    let row = sqlx::query_as::<_, StoryboardPromptSeedRow>(
-        r#"
-        SELECT prompt, video_desc, duration
-        FROM app_storyboard
-        WHERE id = $1
-        "#,
-    )
-    .bind(storyboard_uuid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
+    let (row, memory_style_notes, continuity_notes) = if let Some(runtime) = runtime {
+        let row = runtime.storyboard_row.clone().ok_or(ApiError::NotFound)?;
+        let (memory_style_notes, continuity_notes) = build_video_prompt_memory_notes(
+            runtime.prompt_support_rows.clone(),
+            storyboard_numeric_id,
+            runtime.current_prompt_seed.as_deref(),
+            &row,
+        );
+        (row, memory_style_notes, continuity_notes)
+    } else {
+        let storyboard_uuid = crate::scope::owned_storyboard_in_script_scope(
+            pool,
+            user_id,
+            project_id,
+            script_id,
+            storyboard_numeric_id,
+        )
+        .await
+        .map_err(|e| e.into_api_error())?
+        .storyboard_id;
+        let row = sqlx::query_as::<_, StoryboardPromptSeedRow>(
+            r#"
+            SELECT prompt, video_desc, duration
+            FROM app_storyboard
+            WHERE id = $1
+            "#,
+        )
+        .bind(storyboard_uuid)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        .ok_or(ApiError::NotFound)?;
 
+        let current_prompt_seed = storyboard_prompt_seed(&row);
+        let (memory_style_notes, continuity_notes) = load_video_prompt_memory_notes(
+            pool,
+            user_id,
+            project_id,
+            script_id,
+            storyboard_numeric_id,
+            current_prompt_seed.as_deref(),
+            &row,
+        )
+        .await?;
+        (row, memory_style_notes, continuity_notes)
+    };
     let current_prompt_seed = storyboard_prompt_seed(&row);
-    let (memory_style_notes, continuity_notes) = load_video_prompt_memory_notes(
-        pool,
-        user_id,
-        project_id,
-        script_id,
-        storyboard_numeric_id,
-        current_prompt_seed.as_deref(),
-        &row,
-    )
-    .await?;
     let project_row = sqlx::query_as::<_, ProjectPromptSeedRow>(
         r#"
         SELECT art_style, director_manual
@@ -1449,6 +1450,21 @@ async fn load_video_prompt_memory_notes(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(build_video_prompt_memory_notes(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        storyboard_row,
+    ))
+}
+
+fn build_video_prompt_memory_notes(
+    rows: Vec<AgentMemoryRow>,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> (Vec<String>, Vec<String>) {
     let subject_candidates = storyboard_row
         .video_desc
         .as_deref()
@@ -1461,7 +1477,7 @@ async fn load_video_prompt_memory_notes(
         current_prompt_seed,
         &subject_candidates,
     );
-    Ok((
+    (
         select_video_prompt_style_notes(
             &rows,
             storyboard_numeric_id,
@@ -1476,7 +1492,7 @@ async fn load_video_prompt_memory_notes(
             current_prompt_seed,
             Some(storyboard_row),
         ),
-    ))
+    )
 }
 
 fn select_video_prompt_style_notes(
@@ -2120,72 +2136,37 @@ fn storyboard_distance_from_memory_content(
         .min()
 }
 
-async fn load_pending_video_observation_note(
-    pool: &PgPool,
-    user_id: Uuid,
-    project_numeric_id: i32,
-    script_numeric_id: i32,
+fn build_pending_video_observation_note_from_runtime(
+    runtime: &StoryboardNegativePromptRuntime,
+) -> Option<String> {
+    build_pending_video_observation_note(
+        runtime.prompt_support_rows.clone(),
+        runtime.storyboard_id,
+        runtime.current_prompt_seed.as_deref(),
+        runtime.storyboard_row.as_ref(),
+        &runtime.subject_candidates,
+    )
+}
+
+fn build_pending_video_observation_note(
+    rows: Vec<AgentMemoryRow>,
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
-) -> Result<Option<String>, ApiError> {
-    let rows = sqlx::query_as::<_, AgentMemoryRow>(
-        r#"
-        SELECT name, content
-        FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
-          AND agent_type = 'productionAgent'
-          AND memory_type = 'summary'
-          AND (
-            (episodes_id = $3 AND name IN (
-                'rejected_video_negative_memory',
-                'selected_video_memory',
-                'script_video_style_memory',
-                'script_role_video_style_memory'
-            ))
-            OR (episodes_id IS NULL AND name IN (
-                'project_video_style_memory',
-                'project_role_video_style_memory'
-            ))
-        )
-        ORDER BY create_time_ms DESC
-        LIMIT $4
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .bind(VIDEO_PROMPT_OBSERVATION_FETCH_ROW_LIMIT)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let storyboard_row = load_storyboard_prompt_seed_row(
-        pool,
-        user_id,
-        project_numeric_id,
-        script_numeric_id,
-        storyboard_numeric_id,
-    )
-    .await?;
-    let subject_candidates = storyboard_row
-        .as_ref()
-        .and_then(|row| row.video_desc.as_deref())
-        .and_then(parse_structured_storyboard_description)
-        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
-        .unwrap_or_default();
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    subject_candidates: &[String],
+) -> Option<String> {
     let rows = trim_video_prompt_observation_rows(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
-        &subject_candidates,
+        subject_candidates,
     );
     let prioritized_style_note = resolve_observation_filter_style_note(
         &rows,
         storyboard_numeric_id,
         current_prompt_seed,
-        storyboard_row.as_ref(),
-        &subject_candidates,
+        storyboard_row,
+        subject_candidates,
     );
     let note = select_best_video_prompt_observation_note(prune_storyboard_observation_candidates(
         {
@@ -2193,26 +2174,26 @@ async fn load_pending_video_observation_note(
                 &rows,
                 storyboard_numeric_id,
                 current_prompt_seed,
-                &subject_candidates,
-                storyboard_row.as_ref(),
+                subject_candidates,
+                storyboard_row,
             )
             .into_iter()
             .filter_map(|note| {
                 compact_negative_constraint_against_storyboard_style(
                     &note,
                     prioritized_style_note.as_deref(),
-                    storyboard_row.as_ref(),
+                    storyboard_row,
                 )
             })
             .filter(|note| {
-                !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
+                !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row)
             })
             .collect::<Vec<_>>()
         },
-        storyboard_row.as_ref(),
+        storyboard_row,
     ));
 
-    Ok(note.map(|note| format!("待观察失败倾向：{note}")))
+    note.map(|note| format!("待观察失败倾向：{note}"))
 }
 
 fn trim_video_prompt_observation_rows(
@@ -2454,35 +2435,6 @@ fn style_note_matches_mood_keyword(note: &str, mood: &str) -> bool {
         && ["克制", "隐忍", "压抑", "平静", "冷静", "从容", "沉静"]
             .iter()
             .any(|keyword| normalized_mood.contains(keyword) && note.contains(keyword))
-}
-
-async fn load_storyboard_prompt_seed_row(
-    pool: &PgPool,
-    user_id: Uuid,
-    project_numeric_id: i32,
-    script_numeric_id: i32,
-    storyboard_numeric_id: i32,
-) -> Result<Option<StoryboardPromptSeedRow>, ApiError> {
-    sqlx::query_as::<_, StoryboardPromptSeedRow>(
-        r#"
-        SELECT sb.prompt, sb.video_desc, sb.duration
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND sc.numeric_id = $3
-          AND sb.numeric_id = $4
-        LIMIT 1
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .bind(storyboard_numeric_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
 fn video_prompt_observation_conflicts_with_style(
@@ -8278,7 +8230,8 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 #[cfg(test)]
 mod tests {
     use super::{
-        art_style_director_profile, build_video_prompt,
+        art_style_director_profile, build_pending_video_observation_note_from_runtime,
+        build_video_prompt, build_video_prompt_memory_notes,
         build_video_prompt_with_constraint_pressure, build_video_prompt_with_diagnostics,
         compact_camera_clause, compact_contextual_video_style_note,
         compact_director_emotion_fragment_group,
@@ -8298,6 +8251,9 @@ mod tests {
         GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse, ScriptRolePromptSeedRow,
         VideoPromptConstraintPressure, VideoPromptContext, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
         VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
+    };
+    use crate::production::workbench::video::generate::{
+        AutoNegativePromptSelection, StoryboardNegativePromptRuntime,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes,
@@ -11505,6 +11461,84 @@ mod tests {
         );
 
         assert_eq!(note, Some("avoid identity drift".to_string()));
+    }
+
+    #[test]
+    fn build_pending_video_observation_note_from_runtime_reuses_loaded_rows() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚强忍泪意看向门外".into()),
+            video_desc: Some("（晚晚强忍泪意看向门外、雨夜门厅、晚晚/林晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let subject_candidates = storyboard_row
+            .video_desc
+            .as_deref()
+            .and_then(parse_structured_storyboard_description)
+            .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+            .unwrap_or_default();
+        let runtime = StoryboardNegativePromptRuntime {
+            storyboard_id: 12,
+            selection: AutoNegativePromptSelection {
+                prompt: None,
+                fragment_count: 0,
+                budget_tier: "lean",
+                review_fragment_count: 0,
+                rejected_memory_fragment_count: 0,
+                used_pending_observation_fallback: false,
+            },
+            rejected_rows: Vec::new(),
+            selected_rows: Vec::new(),
+            prompt_support_rows: vec![
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | avoid=avoid identity drift".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=晚晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演抬眼停顿，语气轻声克制".into(),
+                },
+            ],
+            storyboard_row: Some(storyboard_row),
+            current_prompt_seed: None,
+            subject_candidates,
+        };
+
+        assert_eq!(
+            build_pending_video_observation_note_from_runtime(&runtime),
+            Some("待观察失败倾向：avoid identity drift".to_string())
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_memory_notes_reuses_runtime_rows_for_style_and_continuity() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚盯着门外，呼吸发紧".into()),
+            video_desc: Some("（林晚盯着门外、雨夜门厅、林晚/晚晚、6秒、近景、稳定跟拍、抬眼停顿后缓慢吸气、压抑、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("6s".into()),
+        };
+
+        let (style_notes, continuity_notes) = build_video_prompt_memory_notes(
+            vec![
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | promptSeed=seed-12 | style=镜头近景稳定，表演抬眼停顿，语气压低后缓慢吸气".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=晚晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演抬眼停顿，喉结轻滚".into(),
+                },
+                AgentMemoryRow {
+                    name: "auto_scope_memory".into(),
+                    content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=11,12 | review=target=storyboardTable; summary=动作接上门边停住".into(),
+                },
+            ],
+            12,
+            Some("seed-12"),
+            &storyboard_row,
+        );
+
+        assert_eq!(style_notes, vec!["镜头近景稳定，表演抬眼停顿".to_string()]);
+        assert_eq!(continuity_notes, vec!["动作接上门边停住".to_string()]);
     }
 
     #[test]

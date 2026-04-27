@@ -82,6 +82,18 @@ pub(crate) struct AutoNegativePromptSelection {
     pub(crate) used_pending_observation_fallback: bool,
 }
 
+#[derive(Debug)]
+pub(crate) struct StoryboardNegativePromptRuntime {
+    pub(crate) storyboard_id: i32,
+    pub(crate) selection: AutoNegativePromptSelection,
+    pub(crate) rejected_rows: Vec<AgentMemoryRow>,
+    pub(crate) selected_rows: Vec<AgentMemoryRow>,
+    pub(crate) prompt_support_rows: Vec<AgentMemoryRow>,
+    pub(crate) storyboard_row: Option<StoryboardPromptSeedRow>,
+    pub(crate) current_prompt_seed: Option<String>,
+    pub(crate) subject_candidates: Vec<String>,
+}
+
 impl AutoNegativePromptSelection {
     fn as_deref(&self) -> Option<&str> {
         self.prompt.as_deref()
@@ -436,11 +448,128 @@ pub(crate) async fn load_auto_negative_prompt_details(
         return Ok(HashMap::new());
     }
     let review_row_limit = negative_review_fetch_limit(storyboard_ids.len());
+    let rows = load_negative_review_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids,
+        review_row_limit,
+    )
+    .await?;
+    let rejected_rows = load_rejected_video_negative_memory_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids.len(),
+    )
+    .await?;
+    let selected_rows = load_selected_video_memory_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids.len(),
+    )
+    .await?;
+    let storyboard_seed_rows = load_storyboard_prompt_seed_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids,
+    )
+    .await?;
+
+    Ok(build_storyboard_negative_prompts(
+        storyboard_ids,
+        &rows,
+        &rejected_rows,
+        &selected_rows,
+        &storyboard_seed_rows,
+    ))
+}
+
+pub(crate) async fn load_storyboard_negative_prompt_runtime(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_id: i32,
+) -> Result<StoryboardNegativePromptRuntime, ApiError> {
+    let review_rows = load_negative_review_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        &[storyboard_id],
+        negative_review_fetch_limit(1),
+    )
+    .await?;
+    let rejected_rows = load_rejected_video_negative_memory_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        1,
+    )
+    .await?;
+    let selected_rows =
+        load_selected_video_memory_rows(pool, user_id, project_numeric_id, script_numeric_id, 1)
+            .await?;
+    let mut storyboard_seed_rows = load_storyboard_prompt_seed_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        &[storyboard_id],
+    )
+    .await?;
+    let storyboard_row = storyboard_seed_rows.remove(&storyboard_id);
+    let current_prompt_seed = storyboard_row.as_ref().and_then(storyboard_prompt_seed);
+    let subject_candidates = storyboard_row
+        .as_ref()
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
+    let selection = build_storyboard_negative_prompt_selection(
+        storyboard_id,
+        &review_rows,
+        &rejected_rows,
+        &selected_rows,
+        storyboard_row.as_ref(),
+    );
+    let prompt_support_rows =
+        load_storyboard_prompt_support_rows(pool, user_id, project_numeric_id, script_numeric_id)
+            .await?;
+
+    Ok(StoryboardNegativePromptRuntime {
+        storyboard_id,
+        selection,
+        rejected_rows,
+        selected_rows,
+        prompt_support_rows,
+        storyboard_row,
+        current_prompt_seed,
+        subject_candidates,
+    })
+}
+
+async fn load_negative_review_rows(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_ids: &[i32],
+    review_row_limit: i64,
+) -> Result<Vec<QualityReviewSeedRow>, ApiError> {
     let storyboard_target_ids = storyboard_ids
         .iter()
         .map(ToString::to_string)
         .collect::<Vec<_>>();
-    let rows = sqlx::query_as::<_, QualityReviewSeedRow>(
+    sqlx::query_as::<_, QualityReviewSeedRow>(
         r#"
         SELECT target_type, target_id, bad_case_category, comments
         FROM app_quality_review
@@ -474,39 +603,46 @@ pub(crate) async fn load_auto_negative_prompt_details(
     .bind(review_row_limit)
     .fetch_all(pool)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let rejected_rows = load_rejected_video_negative_memory_rows(
-        pool,
-        user_id,
-        project_numeric_id,
-        script_numeric_id,
-        storyboard_ids.len(),
-    )
-    .await?;
-    let selected_rows = load_selected_video_memory_rows(
-        pool,
-        user_id,
-        project_numeric_id,
-        script_numeric_id,
-        storyboard_ids.len(),
-    )
-    .await?;
-    let storyboard_seed_rows = load_storyboard_prompt_seed_rows(
-        pool,
-        user_id,
-        project_numeric_id,
-        script_numeric_id,
-        storyboard_ids,
-    )
-    .await?;
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
 
-    Ok(build_storyboard_negative_prompts(
-        storyboard_ids,
-        &rows,
-        &rejected_rows,
-        &selected_rows,
-        &storyboard_seed_rows,
-    ))
+async fn load_storyboard_prompt_support_rows(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<Vec<AgentMemoryRow>, ApiError> {
+    sqlx::query_as::<_, AgentMemoryRow>(
+        r#"
+        SELECT name, content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND (
+            (episodes_id = $3 AND name IN (
+                'rejected_video_negative_memory',
+                'selected_video_memory',
+                'script_video_style_memory',
+                'script_role_video_style_memory',
+                'auto_scope_memory'
+            ))
+            OR (episodes_id IS NULL AND name IN (
+                'project_video_style_memory',
+                'project_role_video_style_memory'
+            ))
+          )
+        ORDER BY create_time_ms DESC
+        LIMIT 24
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
 fn negative_review_fetch_limit(storyboard_count: usize) -> i64 {
@@ -720,124 +856,133 @@ fn build_storyboard_negative_prompts(
         .iter()
         .copied()
         .map(|storyboard_id| {
-            let storyboard_row = storyboard_seed_rows.get(&storyboard_id);
-            let storyboard_review_rows = review_rows
-                .iter()
-                .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
-                .cloned()
-                .collect::<Vec<_>>();
-            let current_prompt_seed = storyboard_row.and_then(storyboard_prompt_seed);
-            let subject_candidates = storyboard_row
-                .and_then(|row| row.video_desc.as_deref())
-                .and_then(parse_structured_storyboard_description)
-                .map(|fields| {
-                    selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
-                })
-                .unwrap_or_default();
-            let subject_scoped_selected_rows =
-                filter_selected_rows_for_subject(selected_rows, &subject_candidates);
-            let selected_style_note = select_selected_video_memory_notes(
-                &subject_scoped_selected_rows,
-                storyboard_id,
-                current_prompt_seed.as_deref(),
-            )
-            .into_iter()
-            .next();
-            let prioritized_style_note = resolve_negative_filter_style_note(
-                &subject_scoped_selected_rows,
-                storyboard_id,
-                current_prompt_seed.as_deref(),
-                storyboard_row,
-                selected_style_note,
-                &subject_candidates,
-            );
-            let review_fragments = filter_conflicting_review_fragments(
-                collect_negative_review_fragments(&storyboard_review_rows, storyboard_id),
-                prioritized_style_note.as_deref(),
-                storyboard_row,
-            );
-            let rejected_fragments = filter_conflicting_review_fragments(
-                split_negative_prompt_fragments(
-                    select_rejected_video_negative_memory_notes_for_subject(
-                        rejected_rows,
-                        storyboard_id,
-                        current_prompt_seed.as_deref(),
-                        &subject_candidates,
-                        storyboard_row,
-                    )
-                    .into_iter()
-                    .next()
-                    .as_deref(),
-                ),
-                prioritized_style_note.as_deref(),
-                storyboard_row,
-            );
-            let review_fragments =
-                prune_storyboard_negative_fragments(review_fragments, storyboard_row);
-            let rejected_fragments =
-                prune_storyboard_negative_fragments(rejected_fragments, storyboard_row);
-            let review_fragments = compact_review_fragments_against_rejected_memory(
-                review_fragments,
-                &rejected_fragments,
-            );
-            let rejected_fragments = compact_rejected_fragments_against_review_focus(
-                rejected_fragments,
-                &review_fragments,
-                storyboard_row,
-            );
-            let observation_fragments =
-                if rejected_fragments.is_empty() && review_fragments.is_empty() {
-                    build_storyboard_observation_negative_fragments(
-                        rejected_rows,
-                        storyboard_id,
-                        current_prompt_seed.as_deref(),
-                        &subject_candidates,
-                        prioritized_style_note.as_deref(),
-                        storyboard_row,
-                    )
-                } else {
-                    Vec::new()
-                };
-            let effective_rejected_fragments =
-                if rejected_fragments.is_empty() && review_fragments.is_empty() {
-                    observation_fragments.clone()
-                } else {
-                    rejected_fragments.clone()
-                };
-            let budget_tier = resolve_negative_prompt_budget_tier(
-                storyboard_row,
-                &storyboard_review_rows,
-                &effective_rejected_fragments,
-                &review_fragments,
-                subject_candidates.len(),
-            );
-            let review_fragment_count = review_fragments.len();
-            let rejected_memory_fragment_count = effective_rejected_fragments.len();
-            let used_pending_observation_fallback = rejected_fragments.is_empty()
-                && review_fragments.is_empty()
-                && !observation_fragments.is_empty();
-            let review_prompt = merge_prioritized_negative_prompt_fragment_groups(
-                &[effective_rejected_fragments, review_fragments],
-                budget_tier,
-            );
-            let fragment_count = review_prompt
-                .as_deref()
-                .map(|prompt| split_negative_prompt_fragments(Some(prompt)))
-                .map(|fragments| fragments.len())
-                .unwrap_or(0);
             (
                 storyboard_id,
-                AutoNegativePromptSelection {
-                    prompt: review_prompt,
-                    fragment_count,
-                    budget_tier: budget_tier.as_str(),
-                    review_fragment_count,
-                    rejected_memory_fragment_count,
-                    used_pending_observation_fallback,
-                },
+                build_storyboard_negative_prompt_selection(
+                    storyboard_id,
+                    review_rows,
+                    rejected_rows,
+                    selected_rows,
+                    storyboard_seed_rows.get(&storyboard_id),
+                ),
             )
         })
         .collect()
+}
+
+fn build_storyboard_negative_prompt_selection(
+    storyboard_id: i32,
+    review_rows: &[QualityReviewSeedRow],
+    rejected_rows: &[AgentMemoryRow],
+    selected_rows: &[AgentMemoryRow],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> AutoNegativePromptSelection {
+    let storyboard_review_rows = review_rows
+        .iter()
+        .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
+        .cloned()
+        .collect::<Vec<_>>();
+    let current_prompt_seed = storyboard_row.and_then(storyboard_prompt_seed);
+    let subject_candidates = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
+    let subject_scoped_selected_rows =
+        filter_selected_rows_for_subject(selected_rows, &subject_candidates);
+    let selected_style_note = select_selected_video_memory_notes(
+        &subject_scoped_selected_rows,
+        storyboard_id,
+        current_prompt_seed.as_deref(),
+    )
+    .into_iter()
+    .next();
+    let prioritized_style_note = resolve_negative_filter_style_note(
+        &subject_scoped_selected_rows,
+        storyboard_id,
+        current_prompt_seed.as_deref(),
+        storyboard_row,
+        selected_style_note,
+        &subject_candidates,
+    );
+    let review_fragments = filter_conflicting_review_fragments(
+        collect_negative_review_fragments(&storyboard_review_rows, storyboard_id),
+        prioritized_style_note.as_deref(),
+        storyboard_row,
+    );
+    let rejected_fragments = filter_conflicting_review_fragments(
+        split_negative_prompt_fragments(
+            select_rejected_video_negative_memory_notes_for_subject(
+                rejected_rows,
+                storyboard_id,
+                current_prompt_seed.as_deref(),
+                &subject_candidates,
+                storyboard_row,
+            )
+            .into_iter()
+            .next()
+            .as_deref(),
+        ),
+        prioritized_style_note.as_deref(),
+        storyboard_row,
+    );
+    let review_fragments = prune_storyboard_negative_fragments(review_fragments, storyboard_row);
+    let rejected_fragments =
+        prune_storyboard_negative_fragments(rejected_fragments, storyboard_row);
+    let review_fragments =
+        compact_review_fragments_against_rejected_memory(review_fragments, &rejected_fragments);
+    let rejected_fragments = compact_rejected_fragments_against_review_focus(
+        rejected_fragments,
+        &review_fragments,
+        storyboard_row,
+    );
+    let observation_fragments = if rejected_fragments.is_empty() && review_fragments.is_empty() {
+        build_storyboard_observation_negative_fragments(
+            rejected_rows,
+            storyboard_id,
+            current_prompt_seed.as_deref(),
+            &subject_candidates,
+            prioritized_style_note.as_deref(),
+            storyboard_row,
+        )
+    } else {
+        Vec::new()
+    };
+    let effective_rejected_fragments =
+        if rejected_fragments.is_empty() && review_fragments.is_empty() {
+            observation_fragments.clone()
+        } else {
+            rejected_fragments.clone()
+        };
+    let budget_tier = resolve_negative_prompt_budget_tier(
+        storyboard_row,
+        &storyboard_review_rows,
+        &effective_rejected_fragments,
+        &review_fragments,
+        subject_candidates.len(),
+    );
+    let review_fragment_count = review_fragments.len();
+    let rejected_memory_fragment_count = effective_rejected_fragments.len();
+    let used_pending_observation_fallback = rejected_fragments.is_empty()
+        && review_fragments.is_empty()
+        && !observation_fragments.is_empty();
+    let prompt = merge_prioritized_negative_prompt_fragment_groups(
+        &[effective_rejected_fragments, review_fragments],
+        budget_tier,
+    );
+    let fragment_count = prompt
+        .as_deref()
+        .map(|value| split_negative_prompt_fragments(Some(value)).len())
+        .unwrap_or(0);
+
+    AutoNegativePromptSelection {
+        prompt,
+        fragment_count,
+        budget_tier: budget_tier.as_str(),
+        review_fragment_count,
+        rejected_memory_fragment_count,
+        used_pending_observation_fallback,
+    }
 }
 
 fn build_storyboard_observation_negative_fragments(
