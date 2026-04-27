@@ -270,9 +270,9 @@ pub(crate) fn build_selected_video_memory(
     } else {
         Some(note)
     };
-    if let Some(note) = residual_note
-        .and_then(|note| compact_selected_memory_residual_note(&note, selected_subject.as_deref()))
-    {
+    if let Some(note) = residual_note.and_then(|note| {
+        compact_selected_memory_residual_note(&note, selected_subject.as_deref(), style.as_deref())
+    }) {
         parts.push(format!("note={note}"));
     }
     Some(parts.join(" | "))
@@ -4123,8 +4123,15 @@ fn non_style_note(note: &str) -> Option<String> {
     ))
 }
 
-fn compact_selected_memory_residual_note(note: &str, subject: Option<&str>) -> Option<String> {
+fn compact_selected_memory_residual_note(
+    note: &str,
+    subject: Option<&str>,
+    style: Option<&str>,
+) -> Option<String> {
     let normalized_subject = subject
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty());
+    let normalized_style = style
         .map(normalize_prompt_text)
         .filter(|value| !value.is_empty());
     let mut fragments = split_prompt_note_fragments(note)
@@ -4146,6 +4153,22 @@ fn compact_selected_memory_residual_note(note: &str, subject: Option<&str>) -> O
             fragments[0] = fragment;
         }
     }
+    if let Some(style) = normalized_style.as_deref() {
+        fragments = fragments
+            .into_iter()
+            .filter_map(|fragment| {
+                trim_selected_memory_fragment_covered_by_style(&fragment, style).and_then(
+                    |fragment| {
+                        let fragment = normalize_prompt_text(&fragment);
+                        (!fragment.is_empty()
+                            && !low_signal_subject_pose_fragment(&fragment)
+                            && !low_signal_object_hold_fragment(&fragment))
+                        .then_some(fragment)
+                    },
+                )
+            })
+            .collect();
+    }
     if fragments.is_empty() {
         return None;
     }
@@ -4159,6 +4182,104 @@ fn low_signal_subject_pose_fragment(fragment: &str) -> bool {
     LOW_SIGNAL_SUBJECT_POSE_PREFIXES
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
+}
+
+fn low_signal_object_hold_fragment(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    ACTION_OBJECT_PREFIX_VERBS.iter().any(|prefix| {
+        normalized.starts_with(prefix)
+            && normalized.chars().count() <= 6
+            && ![
+                "转", "冲", "跑", "推", "拉", "挡", "扑", "扑向", "回望", "回头", "走", "穿",
+            ]
+            .iter()
+            .any(|keyword| normalized.contains(keyword))
+    })
+}
+
+fn trim_selected_memory_fragment_covered_by_style(fragment: &str, style: &str) -> Option<String> {
+    let mut normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    if style.contains("表演欲言又止") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &[
+                "迟迟没有开口",
+                "没有开口",
+                "欲言又止",
+                "话到嘴边",
+                "张了张嘴",
+            ],
+        );
+    }
+    if style.contains("表演抬眼停顿") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &["抬眼后停顿片刻", "抬眼停顿", "抬眼", "停顿片刻"],
+        );
+    }
+    if style.contains("表演垂眼停顿") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &["垂眼停顿", "垂眼", "低头停顿", "低头", "停顿片刻"],
+        );
+    }
+    if style.contains("语气低声") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &[
+                "低声开口",
+                "低声说道",
+                "低声说",
+                "压低声音开口",
+                "压低声音",
+                "压低嗓音",
+                "压低",
+            ],
+        );
+    } else if style.contains("语气轻声") || style.contains("语气呢喃") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &[
+                "轻声开口",
+                "轻声说道",
+                "轻声说",
+                "呢喃开口",
+                "呢喃说道",
+                "呢喃",
+                "耳语开口",
+                "耳语",
+            ],
+        );
+    }
+
+    normalized = normalize_prompt_text(
+        normalized
+            .trim_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(ch, ',' | '，' | ';' | '；' | '.' | '。' | ':' | '：' | '、')
+            })
+            .trim_start_matches('后')
+            .trim_start_matches('又')
+            .trim_start_matches('再')
+            .trim_start_matches('便')
+            .trim_start_matches('才'),
+    );
+    if normalized.is_empty() {
+        return None;
+    }
+    Some(normalized)
+}
+
+fn remove_fragment_phrases(fragment: &str, phrases: &[&str]) -> String {
+    let mut normalized = normalize_prompt_text(fragment);
+    for phrase in phrases {
+        normalized = normalized.replace(phrase, "");
+    }
+    normalize_prompt_text(&normalized)
 }
 
 fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
@@ -5022,6 +5143,8 @@ mod tests {
 
         assert!(content.contains("语气低声克制"), "{content}");
         assert!(content.contains("声场雨声回响"), "{content}");
+        assert!(!content.contains("迟迟没有开口"), "{content}");
+        assert!(!content.contains("低声开口"), "{content}");
     }
 
     #[test]
@@ -5106,6 +5229,24 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("表演抬眼停顿"), "{content}");
+        assert!(!content.contains("抬眼后停顿片刻"), "{content}");
+        assert!(!content.contains("note="), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_keeps_action_note_not_covered_by_style() {
+        let content = build_selected_video_memory(
+            27,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角推门后回望".into()),
+                video_desc: Some("（主角推门后回望、旧宅门厅、主角、4秒、中景、稳定跟拍、抬眼停顿后推门回望、克制、冷蓝窗光、无台词、雨声、A27）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("表演抬眼停顿"), "{content}");
+        assert!(content.contains("note=主角，推门回望"), "{content}");
     }
 
     #[test]
