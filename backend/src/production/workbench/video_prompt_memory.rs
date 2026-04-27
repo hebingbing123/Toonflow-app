@@ -3953,6 +3953,10 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
     if recurring.is_empty() {
         return None;
     }
+    compact_global_character_style_redundancy(&mut recurring);
+    if recurring.is_empty() {
+        return None;
+    }
 
     let style = clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
     Some(format!("sampleCount={} | style={}", notes.len(), style))
@@ -3982,6 +3986,10 @@ fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<Str
             )
         })),
     );
+    if recurring.is_empty() {
+        return None;
+    }
+    compact_global_character_style_redundancy(&mut recurring);
     if recurring.is_empty() {
         return None;
     }
@@ -4102,6 +4110,45 @@ fn compact_global_recurring_style_fragments(
         .into_iter()
         .filter(|fragment| !fragment.starts_with("表演") && !fragment.starts_with("语气"))
         .collect()
+}
+
+fn compact_global_character_style_redundancy(fragments: &mut Vec<String>) {
+    if fragments.len() < 2 {
+        return;
+    }
+
+    let has_performance_signal = fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"));
+    if has_performance_signal {
+        fragments.retain(|fragment| {
+            if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
+                return !global_voice_fragment_is_low_gain_carryover(&voice);
+            }
+            if let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) {
+                return !global_mood_fragment_is_generic_restrained(&mood);
+            }
+            if let Some(action) = fragment.strip_prefix("动作").map(normalize_prompt_text) {
+                return !global_motion_fragment_is_low_gain_carryover(&action);
+            }
+            true
+        });
+    }
+}
+
+fn global_voice_fragment_is_low_gain_carryover(voice: &str) -> bool {
+    matches!(voice.as_str(), "低声克制" | "轻声克制" | "呢喃")
+}
+
+fn global_mood_fragment_is_generic_restrained(mood: &str) -> bool {
+    matches!(mood.as_str(), "克制" | "隐忍" | "压抑" | "沉静" | "冷静")
+}
+
+fn global_motion_fragment_is_low_gain_carryover(action: &str) -> bool {
+    matches!(
+        action.as_str(),
+        "从容克制" | "克制自然" | "自然" | "简洁平滑"
+    )
 }
 
 fn distinct_selected_video_subject_group_count<'a>(
@@ -7378,6 +7425,31 @@ mod tests {
     }
 
     #[test]
+    fn build_script_video_style_memory_drops_low_gain_voice_mood_and_motion_when_performance_exists(
+    ) {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头稳定跟拍，表演呼吸发颤，语气轻声克制，情绪克制，动作从容克制，声场静场留白 | note=..."
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | style=镜头近景稳定跟拍，表演呼吸发颤，语气轻声克制，情绪隐忍，动作从容克制，声场静场留白 | note=..."
+                    .into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("表演呼吸发颤"), "{summary}");
+        assert!(summary.contains("声场静场留白"), "{summary}");
+        assert!(!summary.contains("语气轻声克制"), "{summary}");
+        assert!(!summary.contains("情绪克制"), "{summary}");
+        assert!(!summary.contains("情绪隐忍"), "{summary}");
+        assert!(!summary.contains("动作从容克制"), "{summary}");
+    }
+
+    #[test]
     fn build_script_video_style_memory_drops_character_signature_fragments_when_subjects_mix() {
         let summary = build_script_video_style_memory(&[
             AgentMemoryRow {
@@ -7889,6 +7961,39 @@ mod tests {
         assert!(summary.contains("情绪冷峻压迫"), "{summary}");
         assert!(!summary.contains("表演抬眼停顿"), "{summary}");
         assert!(!summary.contains("语气轻声克制"), "{summary}");
+    }
+
+    #[test]
+    fn build_project_video_style_memory_drops_low_gain_voice_mood_and_motion_when_performance_exists(
+    ) {
+        let summary = build_project_video_style_memory(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | style=镜头稳定跟拍，表演呼吸发颤，语气轻声克制，情绪克制，动作自然，声场静场留白 | note=..."
+                    .into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头近景稳定跟拍，表演呼吸发颤，语气轻声克制，情绪隐忍，动作自然，声场静场留白 | note=..."
+                    .into(),
+                episodes_id: Some(2),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=17 | style=镜头稳定跟拍，表演呼吸发颤，语气轻声克制，情绪克制，动作自然，声场静场留白 | note=..."
+                    .into(),
+                episodes_id: Some(3),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("表演呼吸发颤"), "{summary}");
+        assert!(summary.contains("声场静场留白"), "{summary}");
+        assert!(!summary.contains("语气轻声克制"), "{summary}");
+        assert!(!summary.contains("情绪克制"), "{summary}");
+        assert!(!summary.contains("情绪隐忍"), "{summary}");
+        assert!(!summary.contains("动作自然"), "{summary}");
     }
 
     #[test]
