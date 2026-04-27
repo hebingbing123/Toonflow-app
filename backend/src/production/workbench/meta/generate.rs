@@ -16,11 +16,11 @@ use crate::production::workbench::meta::common::{
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
-    select_pending_rejected_video_observation_candidates, select_prioritized_video_style_note,
-    select_project_video_style_memory_notes, select_script_video_style_memory_notes,
-    select_selected_video_memory_notes, select_subject_role_video_style_memory_notes,
-    selected_memory_subject_aliases, storyboard_prompt_seed, AgentMemoryRow,
-    StoryboardPromptSeedRow,
+    select_pending_rejected_video_observation_candidates_for_subject,
+    select_prioritized_video_style_note, select_project_video_style_memory_notes,
+    select_script_video_style_memory_notes, select_selected_video_memory_notes,
+    select_subject_role_video_style_memory_notes, selected_memory_subject_aliases,
+    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -1399,25 +1399,36 @@ async fn load_pending_video_observation_note(
         current_prompt_seed,
         storyboard_row.as_ref(),
     );
-    let note = select_best_video_prompt_observation_note(prune_low_signal_observation_candidates(
-        select_pending_rejected_video_observation_candidates(
-            &rows,
-            storyboard_numeric_id,
-            current_prompt_seed,
-        )
-        .into_iter()
-        .filter_map(|note| {
-            compact_negative_constraint_against_storyboard_style(
-                &note,
-                prioritized_style_note.as_deref(),
-                storyboard_row.as_ref(),
+    let note =
+        select_best_video_prompt_observation_note(prune_low_signal_observation_candidates({
+            let subject_candidates = storyboard_row
+                .as_ref()
+                .and_then(|row| row.video_desc.as_deref())
+                .and_then(parse_structured_storyboard_description)
+                .map(|fields| {
+                    selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
+                })
+                .unwrap_or_default();
+
+            select_pending_rejected_video_observation_candidates_for_subject(
+                &rows,
+                storyboard_numeric_id,
+                current_prompt_seed,
+                &subject_candidates,
             )
-        })
-        .filter(|note| {
-            !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
-        })
-        .collect(),
-    ));
+            .into_iter()
+            .filter_map(|note| {
+                compact_negative_constraint_against_storyboard_style(
+                    &note,
+                    prioritized_style_note.as_deref(),
+                    storyboard_row.as_ref(),
+                )
+            })
+            .filter(|note| {
+                !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
+            })
+            .collect::<Vec<_>>()
+        }));
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
 }

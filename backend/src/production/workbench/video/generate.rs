@@ -16,10 +16,11 @@ use crate::production::workbench::meta::common::negative_constraint_conflicts_wi
 use crate::production::workbench::video_prompt_memory::{
     clip_prompt_fragment, compact_video_style_prompt_note, normalize_prompt_text,
     parse_structured_storyboard_description, select_prioritized_video_style_note,
-    select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
+    select_project_video_style_memory_notes,
+    select_rejected_video_negative_memory_notes_for_subject,
     select_script_video_style_memory_notes, select_selected_video_memory_notes,
-    split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
-    StructuredStoryboardDescription,
+    selected_memory_subject_aliases, split_prompt_note_fragments, storyboard_prompt_seed,
+    AgentMemoryRow, StoryboardPromptSeedRow, StructuredStoryboardDescription,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
@@ -588,6 +589,13 @@ fn build_storyboard_negative_prompts(
         .map(|storyboard_id| {
             let storyboard_row = storyboard_seed_rows.get(&storyboard_id);
             let current_prompt_seed = storyboard_row.and_then(storyboard_prompt_seed);
+            let subject_candidates = storyboard_row
+                .and_then(|row| row.video_desc.as_deref())
+                .and_then(parse_structured_storyboard_description)
+                .map(|fields| {
+                    selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
+                })
+                .unwrap_or_default();
             let selected_style_note = select_selected_video_memory_notes(
                 selected_rows,
                 storyboard_id,
@@ -616,10 +624,11 @@ fn build_storyboard_negative_prompts(
             );
             let rejected_fragments = filter_conflicting_review_fragments(
                 split_negative_prompt_fragments(
-                    select_rejected_video_negative_memory_notes(
+                    select_rejected_video_negative_memory_notes_for_subject(
                         rejected_rows,
                         storyboard_id,
                         current_prompt_seed.as_deref(),
+                        &subject_candidates,
                     )
                     .into_iter()
                     .next()
