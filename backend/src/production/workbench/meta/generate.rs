@@ -3877,6 +3877,8 @@ fn compact_continuity_note(
         .filter_map(|fragment| {
             trim_continuity_fragment_against_storyboard_fields(&fragment, fields)
         })
+        .map(|fragment| compact_continuity_fragment_wording(&fragment))
+        .filter(|fragment| !fragment.is_empty())
         .map(|fragment| {
             trim_continuity_fragment_against_prompt_coverage(&fragment, prompt_coverage)
         })
@@ -3899,6 +3901,42 @@ fn compact_continuity_note(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn compact_continuity_fragment_wording(fragment: &str) -> String {
+    let mut compacted = normalize_prompt_text(fragment);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    for (from, to) in [
+        ("人物站位不要跳轴", "站位不要跳轴"),
+        ("角色站位不要跳轴", "站位不要跳轴"),
+        ("人物站位连续", "站位连续"),
+        ("角色站位连续", "站位连续"),
+        ("人物走位连续", "走位连续"),
+        ("角色走位连续", "走位连续"),
+        ("人物视线方向一致", "视线方向一致"),
+        ("角色视线方向一致", "视线方向一致"),
+        ("镜头方向连续", "方向连续"),
+        ("人物动作节奏", "动作节奏"),
+        ("角色动作节奏", "动作节奏"),
+        ("人物前后景", "前后景"),
+        ("角色前后景", "前后景"),
+    ] {
+        compacted = compacted.replace(from, to);
+    }
+
+    if compacted.contains("不要") {
+        for prefix in ["保持", "保留", "延续"] {
+            if let Some(stripped) = compacted.strip_prefix(prefix) {
+                compacted = normalize_prompt_text(stripped);
+                break;
+            }
+        }
+    }
+
+    normalize_prompt_text(&compacted)
 }
 
 fn trim_continuity_fragment_against_prompt_coverage(
@@ -5707,6 +5745,7 @@ fn compact_auto_scope_continuity_summary(note: &str) -> Option<String> {
 
     let fragments = split_prompt_note_fragments(&normalized)
         .map(|fragment| strip_auto_scope_continuity_scaffolding(&fragment))
+        .map(|fragment| compact_continuity_fragment_wording(&fragment))
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
     let fragments = compact_auto_scope_continuity_fragments(fragments);
@@ -5875,6 +5914,8 @@ fn compact_storyboard_memory_continuity_note(
         .filter_map(|fragment| {
             trim_continuity_fragment_against_storyboard_fields(&fragment, fields)
         })
+        .map(|fragment| compact_continuity_fragment_wording(&fragment))
+        .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
     if fragments.is_empty() {
         return None;
@@ -7625,7 +7666,7 @@ mod tests {
             .and_then(|value| value.split('.').next())
             .unwrap_or("");
 
-        assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续，人物站位不要跳轴."));
+        assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续，站位不要跳轴."));
         assert_eq!(prompt.matches("Continuity notes:").count(), 1);
         assert!(!continuity_clause.contains("保持低机位压迫感"));
         assert!(prompt.contains("Natural motion, no extra shot changes."));
@@ -7650,7 +7691,7 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(
-            prompt.contains("Continuity notes: 人物站位不要跳轴."),
+            prompt.contains("Continuity notes: 站位不要跳轴."),
             "{prompt}"
         );
         assert!(
@@ -7739,7 +7780,7 @@ mod tests {
             "{prompt}"
         );
         assert!(
-            prompt.contains("Continuity notes: 人物站位不要跳轴."),
+            prompt.contains("Continuity notes: 站位不要跳轴."),
             "{prompt}"
         );
         assert!(
@@ -8032,9 +8073,35 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("Continuity notes: 人物站位不要跳轴."));
+        assert!(prompt.contains("Continuity notes: 站位不要跳轴."));
         assert!(!prompt.contains("Continuity notes: 保持上一镜头衔接统一"));
         assert!(prompt.contains("Natural motion, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_shortens_specific_continuity_wording_without_dropping_guidance() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角对视后停步、旧宅门厅、主角、5秒、中景、静止、停步抬眼、克制紧张、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["人物视线方向一致，镜头方向连续".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Continuity notes: 视线方向一致."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("人物视线方向一致"), "{prompt}");
+        assert!(!prompt.contains("镜头方向连续"), "{prompt}");
     }
 
     #[test]
@@ -8060,7 +8127,7 @@ mod tests {
             "{prompt}"
         );
         assert!(
-            prompt.contains("Continuity notes: 人物站位不要跳轴."),
+            prompt.contains("Continuity notes: 站位不要跳轴."),
             "{prompt}"
         );
         assert!(
@@ -8230,7 +8297,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
-            vec!["保持镜头方向连续".to_string()]
+            vec!["方向连续".to_string()]
         );
     }
 
@@ -8272,7 +8339,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
-            vec!["人物站位不要跳轴".to_string()]
+            vec!["站位不要跳轴".to_string()]
         );
     }
 
@@ -8310,7 +8377,25 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
-            vec!["保持角色站位不要跳轴".to_string()]
+            vec!["站位不要跳轴".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_shortens_redundant_subject_fillers_in_auto_scope_summary() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=人物视线方向一致，镜头方向连续".to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
+            vec!["视线方向一致".to_string()]
         );
     }
 
@@ -8328,7 +8413,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
-            vec!["人物站位不要跳轴".to_string()]
+            vec!["站位不要跳轴".to_string()]
         );
     }
 
@@ -8346,7 +8431,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
-            vec!["人物站位不要跳轴".to_string()]
+            vec!["站位不要跳轴".to_string()]
         );
     }
 
@@ -8364,7 +8449,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
-            vec!["保持角色站位不要跳轴".to_string()]
+            vec!["站位不要跳轴".to_string()]
         );
     }
 
@@ -8406,7 +8491,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, Some("seed-new"), Some(&storyboard_row)),
-            vec!["人物站位不要跳轴".to_string()]
+            vec!["站位不要跳轴".to_string()]
         );
     }
 
@@ -8431,7 +8516,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, Some("seed-new"), Some(&storyboard_row)),
-            vec!["人物站位不要跳轴".to_string()]
+            vec!["站位不要跳轴".to_string()]
         );
     }
 
