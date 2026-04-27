@@ -2773,7 +2773,7 @@ fn rank_observation_summary_style_note_fragments(
             .then(a.3.cmp(&b.3))
     });
 
-    let mut selected = Vec::new();
+    let mut selected: Vec<String> = Vec::new();
     let mut used_chars = 0usize;
     for (_, _, _, fragment) in scored {
         if selected
@@ -3813,6 +3813,7 @@ fn build_video_prompt_with_constraint_pressure(
         structured_fields.as_ref(),
         &prompt_coverage,
         memory_budget_tier,
+        constraint_pressure,
     );
     let continuity_note_chars = continuity_notes
         .iter()
@@ -3832,6 +3833,7 @@ fn build_video_prompt_with_constraint_pressure(
         structured_fields.as_ref(),
         &style_anchors,
         &continuity_notes,
+        constraint_pressure,
     ));
     let prompt = clauses.join(" ");
     VideoPromptBuildResult {
@@ -4154,6 +4156,7 @@ fn build_video_prompt_quality_tail(
     structured_fields: Option<&StructuredStoryboardDescription>,
     style_anchors: &[String],
     continuity_notes: &[String],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> String {
     if structured_fields.is_some_and(video_prompt_scene_is_grounded_low_risk) {
         return "No extra shot changes.".to_string();
@@ -4172,12 +4175,23 @@ fn build_video_prompt_quality_tail(
         || style_anchors
             .iter()
             .any(|anchor| continuity_tail_matches(anchor));
+    let guardrail_continuity_is_explicit =
+        style_anchors
+            .iter()
+            .chain(continuity_notes.iter())
+            .any(|fragment| {
+                continuity_fragment_matches_constraint_pressure(fragment, constraint_pressure)
+            });
     let motion_is_explicit = style_anchors
         .iter()
         .chain(continuity_notes.iter())
         .any(|fragment| quality_tail_motion_is_explicit(fragment));
 
-    if continuity_is_explicit && motion_is_explicit {
+    if guardrail_continuity_is_explicit
+        && constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory)
+    {
+        "No extra shot changes.".to_string()
+    } else if continuity_is_explicit && motion_is_explicit {
         "No extra shot changes.".to_string()
     } else if continuity_is_explicit {
         "Natural motion, no extra shot changes.".to_string()
@@ -6195,6 +6209,7 @@ fn build_continuity_notes(
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
     memory_budget_tier: VideoPromptMemoryBudgetTier,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Vec<String> {
     let mut notes = context
         .map(|ctx| {
@@ -6208,8 +6223,9 @@ fn build_continuity_notes(
         })
         .unwrap_or_default();
     notes.sort_by(|a, b| {
-        score_continuity_specificity(b)
-            .cmp(&score_continuity_specificity(a))
+        continuity_note_pressure_score(b, constraint_pressure)
+            .cmp(&continuity_note_pressure_score(a, constraint_pressure))
+            .then(score_continuity_specificity(b).cmp(&score_continuity_specificity(a)))
             .then(
                 score_continuity_note(b, structured_fields)
                     .cmp(&score_continuity_note(a, structured_fields)),
@@ -6217,6 +6233,14 @@ fn build_continuity_notes(
             .then(a.len().cmp(&b.len()))
             .then(a.cmp(b))
     });
+    if let Some(pressure) = constraint_pressure.filter(|pressure| pressure.forces_compact_memory) {
+        let has_guardrail_specific_note = notes
+            .iter()
+            .any(|note| continuity_note_pressure_score(note, Some(pressure)) > 0);
+        if has_guardrail_specific_note {
+            notes.retain(|note| continuity_note_pressure_score(note, Some(pressure)) > 0);
+        }
+    }
     match memory_budget_tier {
         VideoPromptMemoryBudgetTier::Expanded => {
             notes.truncate(VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT);
@@ -6382,6 +6406,79 @@ fn continuity_note_mentions_motion_risk(note: &str) -> bool {
     ]
     .iter()
     .any(|keyword| note.contains(keyword))
+}
+
+fn continuity_fragment_matches_constraint_pressure(
+    fragment: &str,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    continuity_note_pressure_score(fragment, constraint_pressure) > 0
+}
+
+fn continuity_note_pressure_score(
+    note: &str,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    let Some(pressure) = constraint_pressure else {
+        return 0;
+    };
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    let mentions_axis = continuity_note_mentions_axis_risk(&normalized);
+    let mentions_blocking = continuity_note_mentions_blocking_risk(&normalized);
+    let mentions_dialogue = continuity_note_mentions_dialogue_risk(&normalized);
+    let mentions_emotion = continuity_note_mentions_emotional_risk(&normalized);
+    let mentions_lighting = continuity_note_mentions_lighting_risk(&normalized);
+    let mentions_motion = continuity_note_mentions_motion_risk(&normalized);
+
+    let mut score = 0;
+    if pressure.has_dialogue_guardrail {
+        if mentions_dialogue {
+            score += 24;
+        }
+        if mentions_axis {
+            score += 18;
+        }
+    }
+    if pressure.has_identity_guardrail {
+        if mentions_axis || mentions_blocking {
+            score += 18;
+        }
+        if mentions_lighting {
+            score += 12;
+        }
+    }
+    if pressure.has_blocking_guardrail {
+        if mentions_blocking {
+            score += 22;
+        }
+        if mentions_motion {
+            score += 12;
+        }
+    }
+    if pressure.has_motion_guardrail {
+        if mentions_motion {
+            score += 20;
+        }
+        if mentions_blocking {
+            score += 10;
+        }
+    }
+    if pressure.has_lighting_guardrail && mentions_lighting {
+        score += 20;
+    }
+    if pressure.has_emotion_guardrail {
+        if mentions_emotion {
+            score += 18;
+        }
+        if mentions_dialogue {
+            score += 8;
+        }
+    }
+    score
 }
 
 fn compact_continuity_note(
@@ -10760,6 +10857,105 @@ mod tests {
         assert!(prompt.contains("No extra shot changes."), "{prompt}");
         assert!(!prompt.contains("Natural motion"), "{prompt}");
         assert!(!prompt.contains("stable continuity"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_pressure_prefers_axis_continuity_for_identity_dialogue_scene() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停顿后看向顾承泽、雨夜走廊、林晚/顾承泽、5秒、近景、静止、林晚抬眼停顿后低声开口、压抑、冷调逆光、你终于来了、雨声压过呼吸声、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec![
+                "保持上一镜头冷调逆光层次连续".into(),
+                "保持上一镜头视线方向一致，人物站位不要跳轴".into(),
+            ],
+        };
+        let pressure = Some(VideoPromptConstraintPressure {
+            has_identity_guardrail: true,
+            has_dialogue_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        });
+
+        let result =
+            build_video_prompt_with_constraint_pressure(None, None, Some(&context), pressure);
+
+        assert!(
+            result.prompt.contains("Continuity notes:"),
+            "{}",
+            result.prompt
+        );
+        assert!(result.prompt.contains("视线方向一致"), "{}", result.prompt);
+        assert!(result.prompt.contains("站位不要跳轴"), "{}", result.prompt);
+        assert!(
+            !result.prompt.contains("冷调逆光层次连续"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("No extra shot changes."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            !result
+                .prompt
+                .contains("Natural motion, no extra shot changes."),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_pressure_prefers_lighting_continuity_for_reflection_scene() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在落地窗边、雨夜落地窗边、林晚、5秒、中近景、缓推、停步望向玻璃反光、克制、冷调逆光与霓虹反光、无台词、雨声与车流闷响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec![
+                "保持上一镜头动作节奏自然".into(),
+                "保持上一镜头玻璃反光不过曝".into(),
+            ],
+        };
+        let pressure = Some(VideoPromptConstraintPressure {
+            has_lighting_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        });
+
+        let result =
+            build_video_prompt_with_constraint_pressure(None, None, Some(&context), pressure);
+
+        assert!(
+            result.prompt.contains("Continuity notes:"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("玻璃反光不过曝"),
+            "{}",
+            result.prompt
+        );
+        assert!(!result.prompt.contains("动作节奏自然"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("No extra shot changes."),
+            "{}",
+            result.prompt
+        );
     }
 
     #[test]
