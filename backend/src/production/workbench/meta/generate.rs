@@ -1995,7 +1995,9 @@ fn observation_style_note_context_evidence(
     let mut evidence = 0usize;
 
     let mood = normalize_prompt_text(&context.mood);
-    if !mood.is_empty() && note.contains(&mood) {
+    if (!mood.is_empty() && note.contains(&mood))
+        || style_note_matches_mood_keyword(&note, &context.mood)
+    {
         evidence += 1;
     }
 
@@ -2012,7 +2014,61 @@ fn observation_style_note_context_evidence(
         evidence += 1;
     }
 
+    let action = normalize_prompt_text(&context.action);
+    let dialogue = normalize_prompt_text(&context.dialogue);
+    if style_note_matches_shared_keyword_family(
+        &note,
+        &[action.as_str(), dialogue.as_str()],
+        PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+    ) {
+        evidence += 1;
+    }
+    if style_note_matches_shared_keyword_family(
+        &note,
+        &[action.as_str(), dialogue.as_str()],
+        VOICE_SHARED_KEYWORD_FAMILIES,
+    ) {
+        evidence += 1;
+    }
+
+    let sound = normalize_prompt_text(&context.sound);
+    if style_note_matches_shared_keyword_family(
+        &note,
+        &[sound.as_str()],
+        SOUND_SHARED_KEYWORD_FAMILIES,
+    ) || (!sound.is_empty() && note.contains(&sound))
+    {
+        evidence += 1;
+    }
+
     evidence
+}
+
+fn style_note_matches_shared_keyword_family(
+    note: &str,
+    fields: &[&str],
+    families: &[&[&str]],
+) -> bool {
+    let normalized_fields = fields
+        .iter()
+        .map(|field| normalize_prompt_text(field))
+        .filter(|field| !field.is_empty())
+        .collect::<Vec<_>>();
+    !normalized_fields.is_empty()
+        && families.iter().any(|family| {
+            family.iter().any(|keyword| note.contains(keyword))
+                && normalized_fields
+                    .iter()
+                    .any(|field| family.iter().any(|keyword| field.contains(keyword)))
+        })
+}
+
+fn style_note_matches_mood_keyword(note: &str, mood: &str) -> bool {
+    let normalized_mood = normalize_prompt_text(mood);
+    !normalized_mood.is_empty()
+        && ["克制", "隐忍", "压抑", "平静", "冷静", "从容", "沉静"]
+            .iter()
+            .any(|keyword| normalized_mood.contains(keyword) && note.contains(keyword))
 }
 
 async fn load_storyboard_prompt_seed_row(
@@ -2846,18 +2902,33 @@ fn neighbor_style_fragment_matches_storyboard(
     if fragment.starts_with("表演") {
         return prompt_style_fragment_overlaps_field(fragment, &fields.action)
             || prompt_style_fragment_overlaps_field(fragment, &fields.dialogue)
-            || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
+            || prompt_style_fragment_overlaps_field(fragment, &fields.mood)
+            || style_note_matches_shared_keyword_family(
+                fragment,
+                &[fields.action.as_str(), fields.dialogue.as_str()],
+                PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+            );
     }
     if fragment.starts_with("语气") {
         if !storyboard_supports_voice_style(fields) {
             return false;
         }
         return prompt_style_fragment_overlaps_field(fragment, &fields.dialogue)
-            || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
+            || prompt_style_fragment_overlaps_field(fragment, &fields.mood)
+            || style_note_matches_shared_keyword_family(
+                fragment,
+                &[fields.action.as_str(), fields.dialogue.as_str()],
+                VOICE_SHARED_KEYWORD_FAMILIES,
+            );
     }
     if fragment.starts_with("声场") {
         return prompt_style_fragment_overlaps_field(fragment, &fields.sound)
-            || prompt_style_fragment_overlaps_field(fragment, &fields.setting);
+            || prompt_style_fragment_overlaps_field(fragment, &fields.setting)
+            || style_note_matches_shared_keyword_family(
+                fragment,
+                &[fields.sound.as_str()],
+                SOUND_SHARED_KEYWORD_FAMILIES,
+            );
     }
     false
 }
@@ -3781,52 +3852,33 @@ fn trim_style_fragment_by_shared_mood_keywords(
     }
 }
 
+const VOICE_SHARED_KEYWORD_FAMILIES: &[&[&str]] = &[
+    &["低声", "压低声音", "低低开口"],
+    &["轻声", "轻轻开口", "轻轻说道"],
+    &["呢喃", "喃喃", "喃喃道", "喃喃说"],
+    &["哽咽", "带着哽意", "声音发哽"],
+    &["短促", "短促开口", "短促出声"],
+];
+
+const SOUND_SHARED_KEYWORD_FAMILIES: &[&[&str]] = &[
+    &["雨声", "雨滴声", "雨丝声", "雨点击窗"],
+    &["风声", "风响", "风掠过", "风穿堂"],
+    &["呼吸", "喘息", "呼吸声", "气息"],
+    &["脚步", "足音", "步声", "脚步声"],
+    &["门轴", "门响", "敲门", "开门声", "关门声", "门被推开"],
+];
+
 fn trim_style_fragment_by_shared_voice_keywords(
     fragment: Option<String>,
     prefix: &str,
     fields: &[&str],
 ) -> Option<String> {
-    let fragment = fragment?;
-    let body = fragment
-        .strip_prefix(prefix)
-        .unwrap_or(fragment.as_str())
-        .trim();
-    if body.is_empty() {
-        return None;
-    }
-
-    let normalized_fields = fields
-        .iter()
-        .map(|field| normalize_prompt_text(field))
-        .filter(|field| !field.is_empty())
-        .collect::<Vec<_>>();
-    if normalized_fields.is_empty() {
-        return Some(fragment);
-    }
-
-    let mut trimmed = body.to_string();
-    for keyword in ["低声", "轻声", "呢喃", "哽咽", "短促"] {
-        if !trimmed.contains(keyword)
-            || !normalized_fields
-                .iter()
-                .any(|field| field.contains(keyword))
-        {
-            continue;
-        }
-        let candidate = normalize_prompt_text(&trimmed.replace(keyword, ""));
-        if candidate.chars().count() >= 2 {
-            trimmed = candidate;
-        }
-    }
-
-    if trimmed == body {
-        return Some(fragment);
-    }
-    if trimmed.is_empty() {
-        None
-    } else {
-        Some(format!("{prefix}{trimmed}"))
-    }
+    trim_fragment_by_shared_keyword_families(
+        fragment,
+        prefix,
+        fields,
+        VOICE_SHARED_KEYWORD_FAMILIES,
+    )
 }
 
 fn trim_style_fragment_by_shared_performance_keywords(
@@ -6890,12 +6942,13 @@ mod tests {
         art_style_director_profile, build_video_prompt, build_video_prompt_with_diagnostics,
         compact_camera_clause, compact_director_emotion_fragment_group,
         compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
-        parse_director_emotion_cues, parse_director_environment_cues,
-        parse_director_environment_texture_cues, parse_director_motion_cue,
-        parse_structured_storyboard_description, prune_low_signal_observation_candidates,
-        prune_storyboard_observation_candidates, resolve_observation_filter_style_note,
-        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
-        select_best_video_prompt_observation_note, select_script_asset_anchors,
+        observation_style_note_context_evidence, parse_director_emotion_cues,
+        parse_director_environment_cues, parse_director_environment_texture_cues,
+        parse_director_motion_cue, parse_structured_storyboard_description,
+        prune_low_signal_observation_candidates, prune_storyboard_observation_candidates,
+        resolve_observation_filter_style_note, resolve_video_prompt_duration,
+        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
+        select_contextual_observation_summary_style_note, select_script_asset_anchors,
         select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
         select_video_prompt_style_notes, trim_video_prompt_memory_rows,
         trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
@@ -6909,7 +6962,7 @@ mod tests {
         select_pending_rejected_video_observation_candidates_for_subject,
         select_prioritized_video_style_note, select_project_video_style_memory_notes,
         select_script_video_style_memory_notes, selected_memory_subject_aliases, AgentMemoryRow,
-        StoryboardPromptSeedRow,
+        StoryboardPromptSeedRow, StructuredStoryboardDescription,
     };
 
     #[test]
@@ -10001,6 +10054,34 @@ mod tests {
     }
 
     #[test]
+    fn contextual_observation_style_summary_uses_action_and_voice_overlap() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content:
+                    "sampleCount=4 | style=表演喉结滚动，语气低声克制 | note=表演喉结滚动，语气低声克制"
+                        .into(),
+            },
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content:
+                    "sampleCount=6 | style=光影冷蓝窗光，环境雨丝玻璃 | note=光影冷蓝窗光，环境雨丝玻璃"
+                        .into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边终于开口".into()),
+            video_desc: Some("（林晚站在窗边终于开口、城市夜景落地窗边、林晚、4秒、中景、缓推、抿唇后停顿片刻才低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A26）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row)),
+            Some("语气克制".to_string())
+        );
+    }
+
+    #[test]
     fn prioritized_video_prompt_memory_skips_exact_storyboard_selection_when_it_only_repeats_current_prompt(
     ) {
         let rows = vec![
@@ -11507,6 +11588,55 @@ mod tests {
         assert_eq!(
             resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[]),
             Some("镜头推进".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_style_note_context_evidence_counts_action_voice_and_sound_families() {
+        let context = StructuredStoryboardDescription {
+            subject: "林晚".into(),
+            setting: "雨夜窗边".into(),
+            subject_refs: "林晚".into(),
+            duration_seconds: Some(5),
+            shot: "近景".into(),
+            camera_move: "静止".into(),
+            action: "抿唇停顿后低声开口".into(),
+            mood: "克制".into(),
+            lighting: "室内暗光".into(),
+            dialogue: "你终于来了".into(),
+            sound: "雨声压过呼吸声".into(),
+        };
+
+        assert_eq!(
+            observation_style_note_context_evidence(
+                "表演抿唇喉结滚动，语气低声克制，声场雨声回响",
+                &context,
+            ),
+            4
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_contextual_summary_keeps_matching_sound_family_note() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=5 | style=表演抿唇喉结滚动，语气低声克制，声场雨声回响 | note=表演抿唇喉结滚动，语气低声克制，声场雨声回响".into(),
+            },
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚贴窗低声开口".into()),
+            video_desc: Some("（林晚贴窗低声开口、雨夜窗边、林晚、5秒、近景、静止、抿唇停顿后低声开口、克制、室内暗光、你终于来了、雨声压过呼吸声、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_contextual_observation_summary_style_note(&rows, Some(&storyboard_row)),
+            Some("表演喉结滚动，语气低声，声场雨声回响".to_string())
         );
     }
 }
