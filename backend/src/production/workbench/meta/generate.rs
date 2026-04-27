@@ -1848,6 +1848,9 @@ fn build_script_scene_anchors(
     let setting = structured_fields
         .map(|fields| normalize_prompt_text(&fields.setting))
         .unwrap_or_default();
+    let setting_refs = structured_fields
+        .map(structured_setting_ref_names)
+        .unwrap_or_default();
     let action = structured_fields
         .map(|fields| normalize_prompt_text(&fields.action))
         .unwrap_or_default();
@@ -1867,7 +1870,8 @@ fn build_script_scene_anchors(
         ) else {
             continue;
         };
-        let ref_match_score = score_scene_ref_match(&name, &description, &setting, &action);
+        let ref_match_score =
+            score_scene_ref_match(&name, &description, &setting, &setting_refs, &action);
         let score =
             score_script_asset_anchor(&name, &description, &setting, &action) + ref_match_score;
         if name.is_empty() || score <= 0 {
@@ -1997,12 +2001,25 @@ fn score_subject_ref_match(name: &str, subject_refs: &[String]) -> i32 {
         .unwrap_or(0)
 }
 
-fn score_scene_ref_match(name: &str, description: &str, setting: &str, action: &str) -> i32 {
+fn score_scene_ref_match(
+    name: &str,
+    description: &str,
+    setting: &str,
+    setting_refs: &[String],
+    action: &str,
+) -> i32 {
     if name.is_empty() {
         return 0;
     }
 
-    let mut best = 0;
+    let mut best = setting_refs
+        .iter()
+        .enumerate()
+        .find_map(|(idx, setting_ref)| {
+            (setting_ref == name || setting_ref.contains(name) || name.contains(setting_ref))
+                .then_some(220 - (idx.min(4) as i32 * 8))
+        })
+        .unwrap_or(0);
     for suffix in scene_anchor_suffix_candidates(name) {
         let Some(prefix) = name.strip_suffix(&suffix).map(normalize_prompt_text) else {
             continue;
@@ -2062,6 +2079,20 @@ fn scene_anchor_suffix_looks_specific(suffix: &str) -> bool {
 fn structured_subject_ref_names(fields: &StructuredStoryboardDescription) -> Vec<String> {
     fields
         .subject_refs
+        .split(['/', '／', ',', '，', '、', ';', '；', '|'])
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .fold(Vec::new(), |mut refs, value| {
+            if !refs.iter().any(|existing| existing == &value) {
+                refs.push(value);
+            }
+            refs
+        })
+}
+
+fn structured_setting_ref_names(fields: &StructuredStoryboardDescription) -> Vec<String> {
+    fields
+        .setting
         .split(['/', '／', ',', '，', '、', ';', '；', '|'])
         .map(normalize_prompt_text)
         .filter(|value| !value.is_empty())
@@ -5735,6 +5766,39 @@ mod tests {
         let context = VideoPromptContext {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角在旧宅走廊尽头回头、在旧宅走廊尽头的门厅、主角、5秒、中景、稳定跟拍、在旧宅走廊尽头停步回头、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec![
+                "旧宅走廊: 潮湿斑驳，冷色长廊".into(),
+                "旧宅门厅: 破损玻璃，潮湿回声".into(),
+                "医院门厅: 冷白瓷砖，回声明亮".into(),
+            ],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains(
+                "Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊; 旧宅门厅:破损玻璃，潮湿回声."
+            ) || prompt.contains(
+                "Scene anchor: 旧宅门厅:破损玻璃，潮湿回声; 旧宅走廊:潮湿斑驳，冷色长廊."
+            ),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("医院门厅:冷白瓷砖，回声明亮"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_two_scene_anchors_for_structured_multi_setting_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角停步回头、旧宅门厅/走廊尽头、主角、5秒、中景、稳定跟拍、停步回头确认身后动静、压抑、阴天冷光、无台词、风声回响、A12）".into()),
             storyboard_duration: Some("5s".into()),
             storyboard_prompt_seed: None,
             project_art_style: None,
