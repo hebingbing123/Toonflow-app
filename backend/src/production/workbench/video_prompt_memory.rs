@@ -1600,50 +1600,71 @@ fn select_rejected_video_observation_summary_notes(
 
     let mut scored = rows
         .iter()
+        .enumerate()
         .filter(|row| {
             matches!(
-                row.name.as_str(),
+                row.1.name.as_str(),
                 SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
                     | PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
                     | SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME
                     | PROJECT_VIDEO_OBSERVATION_MEMORY_NAME
             )
         })
-        .filter(|row| memory_matches_rejected_video_risk_tags(&row.content, &storyboard_tags))
+        .filter(|row| memory_matches_rejected_video_risk_tags(&row.1.content, &storyboard_tags))
         .filter(|row| {
             if matches!(
-                row.name.as_str(),
+                row.1.name.as_str(),
                 SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
                     | PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
             ) {
-                memory_matches_subject_candidates(&row.content, subject_candidates)
+                memory_matches_subject_candidates(&row.1.content, subject_candidates)
             } else {
                 true
             }
         })
-        .filter_map(|row| {
-            let avoid = extract_key_value(&row.content, "avoid")?;
+        .flat_map(|(row_idx, row)| {
+            let row_overlap = rejected_video_risk_tag_overlap(&row.content, &storyboard_tags);
+            let sample_count = observation_summary_sample_count(&row.content);
+            let scope_priority = rejected_observation_summary_scope_priority(row.name.as_str());
+            let Some(avoid) = extract_key_value(&row.content, "avoid") else {
+                return Vec::new();
+            };
             let fragments = ranked_rejected_negative_fragments(&avoid);
-            (!fragments.is_empty()).then_some((
-                rejected_observation_summary_scope_priority(row.name.as_str()),
-                observation_summary_sample_count(&row.content),
-                fragments,
-            ))
+            fragments
+                .into_iter()
+                .enumerate()
+                .map(|(fragment_idx, fragment)| {
+                    (
+                        fragment_storyboard_risk_overlap(&fragment, &storyboard_tags),
+                        row_overlap,
+                        sample_count,
+                        scope_priority,
+                        row_idx,
+                        fragment_idx,
+                        fragment,
+                    )
+                })
+                .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
-    scored.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    scored.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then(b.1.cmp(&a.1))
+            .then(b.2.cmp(&a.2))
+            .then(a.3.cmp(&b.3))
+            .then(a.4.cmp(&b.4))
+            .then(a.5.cmp(&b.5))
+    });
 
     let mut selected = Vec::new();
-    for (_, _, fragments) in scored {
-        for fragment in fragments {
-            if observation_note_is_covered(&fragment, &selected) {
-                continue;
-            }
-            selected.retain(|existing| !observation_note_covers(&fragment, existing));
-            selected.push(fragment);
-            if selected.len() >= REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
-                return vec![selected.join(", ")];
-            }
+    for (_, _, _, _, _, _, fragment) in scored {
+        if observation_note_is_covered(&fragment, &selected) {
+            continue;
+        }
+        selected.retain(|existing| !observation_note_covers(&fragment, existing));
+        selected.push(fragment);
+        if selected.len() >= REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
+            return vec![selected.join(", ")];
         }
     }
     (!selected.is_empty())
@@ -9154,6 +9175,65 @@ mod tests {
                 "avoid face distortion or identity drift, avoid blank expression or monotone delivery"
                     .to_string()
             ]
+        );
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_role_observation_summary_prioritizes_dialogue_guard_fragment_for_dialogue_scene(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头低声开口".into()),
+            video_desc: Some(
+                "（晚晚站在落地窗边、雨夜办公室、林晚/晚晚、4秒、近景、慢推、回头低声开口喉结滚动、压抑、霓虹反光、你别看我、雨声回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[AgentMemoryRow {
+                name: "script_role_video_observation_memory".into(),
+                content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=5 | riskTags=identity/dialogue/lighting | avoid=avoid face distortion or identity drift, avoid flat cold lighting, avoid blank expression or monotone delivery".into(),
+            }],
+            15,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid blank expression or monotone delivery, avoid face distortion or identity drift"
+                    .to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_role_observation_summary_prioritizes_identity_guard_fragment_for_identity_scene(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头盯住镜头".into()),
+            video_desc: Some(
+                "（晚晚回头盯住镜头、旧宅走廊、林晚/晚晚、4秒、近景、慢推、回头抬眼停顿、压抑、冷调逆光、无台词、脚步回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[AgentMemoryRow {
+                name: "script_role_video_observation_memory".into(),
+                content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=5 | riskTags=identity/dialogue/lighting | avoid=avoid blank expression or monotone delivery, avoid face distortion or identity drift, avoid flat cold lighting".into(),
+            }],
+            15,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid face distortion or identity drift, avoid flat cold lighting".to_string()]
         );
     }
 
