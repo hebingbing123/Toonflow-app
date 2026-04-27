@@ -65,6 +65,10 @@ const DIRECTOR_ENVIRONMENT_TEXTURE_MATCH_TOKENS: [&str; 19] = [
     "雨", "灯", "光", "窗", "玻璃", "布", "衣", "袖", "裙", "帘", "带", "花", "烟", "雾", "水",
     "波", "叶", "云", "车",
 ];
+const STORYBOARD_ENVIRONMENT_DYNAMIC_TOKENS: [&str; 19] = [
+    "热气", "亮灭", "明灭", "闪烁", "光晕", "反光", "车流", "车灯", "雨滴", "雨丝", "玻璃", "窗帘",
+    "树叶", "落叶", "花瓣", "烟雾", "水波", "烛火", "轻摆",
+];
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -816,26 +820,37 @@ fn score_director_environment_texture_cue_match(
         return 0;
     }
 
-    let mut score = cue
+    let score = cue
         .match_terms
         .iter()
         .filter(|term| context.contains(term.as_str()))
         .count()
         * 3;
 
-    if score == 0 && cue.cue == "手绘光影斑驳" && !fields.lighting.trim().is_empty() {
-        score = 1;
-    }
-    if score == 0
-        && cue.cue == "细腻线条动态"
-        && ["窗帘", "衣", "袖", "裙", "带", "发"]
-            .iter()
-            .any(|token| context.contains(token))
-    {
-        score = 1;
+    score
+}
+
+fn storyboard_environment_dynamic_density(fields: &StructuredStoryboardDescription) -> usize {
+    let context = normalize_prompt_text(
+        &[
+            fields.setting.as_str(),
+            fields.action.as_str(),
+            fields.sound.as_str(),
+            fields.lighting.as_str(),
+        ]
+        .into_iter()
+        .filter(|part| !part.trim().is_empty())
+        .collect::<Vec<_>>()
+        .join(" "),
+    );
+    if context.is_empty() {
+        return 0;
     }
 
-    score
+    STORYBOARD_ENVIRONMENT_DYNAMIC_TOKENS
+        .iter()
+        .filter(|token| context.contains(**token))
+        .count()
 }
 
 fn resolve_performance_style_anchor(
@@ -978,6 +993,9 @@ fn resolve_environment_style_anchor(
 ) -> Option<String> {
     let fields = structured_fields?;
     if fields.setting.trim().is_empty() {
+        return None;
+    }
+    if storyboard_environment_dynamic_density(fields) >= 3 {
         return None;
     }
 
@@ -11435,6 +11453,52 @@ mod tests {
 
         assert_eq!(prompt.matches("雨丝划过玻璃").count(), 1, "{prompt}");
         assert!(prompt.contains("赛璐璐动态质感"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_skips_environment_style_anchor_for_dense_environment_storyboard() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（沈知微站在落地窗旁、城市夜景落地窗边、沈知微、4秒、中景、缓推、看着雨丝划过玻璃并轻扶窗帘、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A13）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("成熟都市言情二次元动画".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["沈知微: 米色风衣".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("窗帘轻摆"), "{prompt}");
+        assert!(!prompt.contains("车流光影"), "{prompt}");
+        assert!(!prompt.contains("路灯光晕闪烁"), "{prompt}");
+        assert!(prompt.contains("赛璐璐动态质感"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_skips_weak_environment_texture_fallback_without_direct_match() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在公司走廊尽头、公司走廊尽头、林晚、4秒、中景、缓推、拽了拽袖口后停住、隐忍 / 克制、灰冷顶色、无台词、空调低鸣、A41）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("成熟都市言情二次元动画".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色西装外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("细腻线条动态"), "{prompt}");
+        assert!(!prompt.contains("手绘光影斑驳"), "{prompt}");
     }
 
     #[test]
