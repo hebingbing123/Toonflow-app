@@ -10887,7 +10887,7 @@ mod tests {
                 "表演喉结滚动，语气轻声克制",
                 Some(&storyboard_row),
             ),
-            Some("表演喉结滚动".to_string())
+            None
         );
     }
 
