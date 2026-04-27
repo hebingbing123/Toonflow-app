@@ -19,8 +19,9 @@ use crate::production::workbench::video_prompt_memory::{
     select_project_video_style_memory_notes,
     select_rejected_video_negative_memory_notes_for_subject,
     select_script_video_style_memory_notes, select_selected_video_memory_notes,
-    selected_memory_subject_aliases, split_prompt_note_fragments, storyboard_prompt_seed,
-    AgentMemoryRow, StoryboardPromptSeedRow, StructuredStoryboardDescription,
+    select_subject_role_video_style_memory_notes, selected_memory_subject_aliases,
+    split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
+    StructuredStoryboardDescription,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
@@ -587,8 +588,15 @@ async fn load_selected_video_memory_rows(
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
           AND (
-            (episodes_id = $3 AND name IN ('selected_video_memory', 'script_video_style_memory'))
-            OR (episodes_id IS NULL AND name = 'project_video_style_memory')
+            (episodes_id = $3 AND name IN (
+                'selected_video_memory',
+                'script_video_style_memory',
+                'script_role_video_style_memory'
+            ))
+            OR (episodes_id IS NULL AND name IN (
+                'project_video_style_memory',
+                'project_role_video_style_memory'
+            ))
           )
         ORDER BY create_time_ms DESC
         LIMIT $4
@@ -666,6 +674,7 @@ fn build_storyboard_negative_prompts(
                 current_prompt_seed.as_deref(),
                 storyboard_row,
                 selected_style_note,
+                &subject_candidates,
             );
             let review_fragments = filter_conflicting_review_fragments(
                 collect_negative_review_fragments(&storyboard_review_rows, storyboard_id),
@@ -1063,8 +1072,14 @@ fn resolve_negative_filter_style_note(
     current_prompt_seed: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     selected_style_note: Option<String>,
+    subject_candidates: &[String],
 ) -> Option<String> {
     selected_style_note
+        .or_else(|| {
+            select_subject_role_video_style_memory_notes(selected_rows, subject_candidates)
+                .into_iter()
+                .find_map(|note| compact_contextual_negative_style_note(&note, storyboard_row))
+        })
         .or_else(|| {
             select_prioritized_video_style_note(
                 selected_rows,
@@ -1074,19 +1089,23 @@ fn resolve_negative_filter_style_note(
             )
             .and_then(|note| compact_contextual_negative_style_note(&note, storyboard_row))
         })
-        .or_else(|| select_contextual_summary_style_note(selected_rows, storyboard_row))
+        .or_else(|| {
+            select_contextual_summary_style_note(selected_rows, storyboard_row, subject_candidates)
+        })
 }
 
 fn select_contextual_summary_style_note(
     selected_rows: &[AgentMemoryRow],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
+    subject_candidates: &[String],
 ) -> Option<String> {
     let context = storyboard_row
         .and_then(|row| row.video_desc.as_deref())
         .and_then(parse_structured_storyboard_description)?;
 
-    select_script_video_style_memory_notes(selected_rows)
+    select_subject_role_video_style_memory_notes(selected_rows, subject_candidates)
         .into_iter()
+        .chain(select_script_video_style_memory_notes(selected_rows))
         .chain(select_project_video_style_memory_notes(selected_rows))
         .filter_map(|note| {
             let evidence = style_note_context_evidence(&note, &context);
@@ -3033,7 +3052,7 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None),
+            resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None, &[]),
             None
         );
     }
@@ -3051,8 +3070,39 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None),
+            resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None, &[]),
             None
+        );
+    }
+
+    #[test]
+    fn negative_filter_style_note_prefers_matching_role_memory_before_generic_summary() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=6 | style=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=女主 | subjectAliases=女主/苏晚 | sampleCount=3 | style=表演欲言又止，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、稳定跟拍、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5".into()),
+        };
+
+        assert_eq!(
+            resolve_negative_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                None,
+                &["女主".into(), "苏晚".into()],
+            ),
+            Some("表演欲言又止，语气轻声克制".to_string())
         );
     }
 
