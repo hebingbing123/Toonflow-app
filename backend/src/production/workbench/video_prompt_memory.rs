@@ -3443,6 +3443,19 @@ fn extract_storyboard_ids(content: &str) -> Vec<i32> {
         .unwrap_or_default()
 }
 
+fn storyboard_distance_from_memory_content(
+    content: &str,
+    storyboard_numeric_id: i32,
+) -> Option<i32> {
+    if storyboard_numeric_id <= 0 {
+        return None;
+    }
+    extract_storyboard_ids(content)
+        .into_iter()
+        .map(|id| (storyboard_numeric_id - id).abs())
+        .min()
+}
+
 #[derive(Debug, Clone)]
 struct StyleNoteSelectionContext {
     description: String,
@@ -3462,6 +3475,7 @@ struct RankedStyleNote {
     score: i32,
     recency_idx: usize,
     source_name: String,
+    storyboard_distance: Option<i32>,
 }
 
 fn build_style_note_selection_context(
@@ -3553,6 +3567,11 @@ fn collect_ranked_video_style_note_candidates(
             score: base_score + sample_count * 4,
             recency_idx: idx,
             source_name: row.name.clone(),
+            storyboard_distance: (row.name == SELECTED_VIDEO_MEMORY_NAME)
+                .then(|| {
+                    storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
+                })
+                .flatten(),
         });
     }
     candidates
@@ -3578,6 +3597,10 @@ fn selected_video_style_value_from_content(content: &str) -> Option<String> {
 
 fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionContext) -> i32 {
     let mut score = note.score;
+    if note.source_name == SELECTED_VIDEO_MEMORY_NAME {
+        score -= neighbor_selected_style_distance_penalty(note.storyboard_distance);
+        score -= neighbor_selected_character_state_mismatch_penalty(note, context);
+    }
     let fragments = split_prompt_note_fragments(&note.note)
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
@@ -3620,6 +3643,80 @@ fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionC
         }
     }
     score
+}
+
+fn neighbor_selected_style_distance_penalty(distance: Option<i32>) -> i32 {
+    match distance.unwrap_or(2) {
+        i32::MIN..=1 => 10,
+        2 => 16,
+        3 => 22,
+        _ => 28,
+    }
+}
+
+fn neighbor_selected_character_state_mismatch_penalty(
+    note: &RankedStyleNote,
+    context: &StyleNoteSelectionContext,
+) -> i32 {
+    let mut penalty = 0;
+    if selected_voice_family_conflicts_with_context(&note.note, context) {
+        penalty += 18;
+    }
+    if selected_generic_restrained_mood_lags_fragile_scene(&note.note, context) {
+        penalty += 8;
+    }
+    penalty
+}
+
+fn selected_voice_family_conflicts_with_context(
+    note: &str,
+    context: &StyleNoteSelectionContext,
+) -> bool {
+    let Some(note_family) = style_voice_family(note) else {
+        return false;
+    };
+    let context_voice = [context.dialogue.as_str(), context.action.as_str()]
+        .into_iter()
+        .find_map(style_voice_family);
+    matches!(context_voice, Some(context_family) if context_family != note_family)
+}
+
+fn style_voice_family(text: &str) -> Option<&'static str> {
+    [
+        ("哽咽", "fragile"),
+        ("发哽", "fragile"),
+        ("低声", "low"),
+        ("压低", "low"),
+        ("轻声", "light"),
+        ("轻轻", "light"),
+        ("呢喃", "murmur"),
+        ("喃喃", "murmur"),
+        ("耳语", "murmur"),
+        ("短促", "clipped"),
+        ("急促", "clipped"),
+    ]
+    .into_iter()
+    .find_map(|(keyword, family)| text.contains(keyword).then_some(family))
+}
+
+fn selected_generic_restrained_mood_lags_fragile_scene(
+    note: &str,
+    context: &StyleNoteSelectionContext,
+) -> bool {
+    note.contains("情绪克制")
+        && [
+            context.dialogue.as_str(),
+            context.action.as_str(),
+            context.mood.as_str(),
+        ]
+        .into_iter()
+        .any(|field| {
+            ["哽咽", "泪", "发颤", "哭"]
+                .iter()
+                .any(|keyword| field.contains(keyword))
+        })
+        && !note.contains("哽咽")
+        && !note.contains("发颤")
 }
 
 fn ranked_style_note_is_worth_recalling(
@@ -6309,7 +6406,34 @@ mod tests {
             Some(&storyboard_row),
         );
 
-        assert_eq!(note, Some("镜头近景稳定跟拍，情绪压迫".to_string()));
+        assert_eq!(note, Some("镜头稳定跟拍，情绪压迫".to_string()));
+    }
+
+    #[test]
+    fn select_prioritized_video_style_note_prefers_role_summary_when_neighbor_style_is_only_adjacent_carryover(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主含泪开口".into()),
+            video_desc: Some("（女主含泪开口、旧宅走廊、女主、5秒、近景、稳定跟拍、呼吸发颤后哽咽开口、克制 / 哽咽、冷调逆光、你别走、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let note = select_prioritized_video_style_note(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=11 | promptSeed=neighbor-seed-0001 | style=镜头近景稳定跟拍，情绪克制，语气轻声克制 | note=女主贴墙前行，镜头近景稳定跟拍，情绪克制，语气轻声克制".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=女主 | sampleCount=4 | style=表演呼吸发颤，语气哽咽克制 | note=表演呼吸发颤，语气哽咽克制".into(),
+                },
+            ],
+            12,
+            Some("current-seed-9999"),
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(note, Some("表演呼吸发颤，语气哽咽克制".to_string()));
     }
 
     #[test]
