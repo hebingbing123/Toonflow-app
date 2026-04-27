@@ -36,6 +36,7 @@ const VIDEO_PROMPT_OBSERVATION_FETCH_ROW_LIMIT: i64 = 24;
 const VIDEO_PROMPT_OBSERVATION_REJECTION_ROW_LIMIT: usize = 8;
 const VIDEO_PROMPT_OBSERVATION_SCRIPT_STYLE_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT: usize = 1;
+const VIDEO_PROMPT_OBSERVATION_ROLE_STYLE_ROW_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
 const VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS: usize = 36;
@@ -1621,9 +1622,13 @@ async fn load_pending_video_observation_note(
             (episodes_id = $3 AND name IN (
                 'rejected_video_negative_memory',
                 'selected_video_memory',
-                'script_video_style_memory'
+                'script_video_style_memory',
+                'script_role_video_style_memory'
             ))
-            OR (episodes_id IS NULL AND name = 'project_video_style_memory')
+            OR (episodes_id IS NULL AND name IN (
+                'project_video_style_memory',
+                'project_role_video_style_memory'
+            ))
         )
         ORDER BY create_time_ms DESC
         LIMIT $4
@@ -1645,24 +1650,27 @@ async fn load_pending_video_observation_note(
         storyboard_numeric_id,
     )
     .await?;
-    let rows = trim_video_prompt_observation_rows(rows, storyboard_numeric_id, current_prompt_seed);
+    let subject_candidates = storyboard_row
+        .as_ref()
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
+    let rows = trim_video_prompt_observation_rows(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        &subject_candidates,
+    );
     let prioritized_style_note = resolve_observation_filter_style_note(
         &rows,
         storyboard_numeric_id,
         current_prompt_seed,
         storyboard_row.as_ref(),
+        &subject_candidates,
     );
     let note = select_best_video_prompt_observation_note(prune_storyboard_observation_candidates(
         {
-            let subject_candidates = storyboard_row
-                .as_ref()
-                .and_then(|row| row.video_desc.as_deref())
-                .and_then(parse_structured_storyboard_description)
-                .map(|fields| {
-                    selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
-                })
-                .unwrap_or_default();
-
             select_pending_rejected_video_observation_candidates_for_subject(
                 &rows,
                 storyboard_numeric_id,
@@ -1692,10 +1700,13 @@ fn trim_video_prompt_observation_rows(
     rows: Vec<AgentMemoryRow>,
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
+    subject_candidates: &[String],
 ) -> Vec<AgentMemoryRow> {
     let mut rejection_candidates = Vec::new();
     let mut script_style_candidates = Vec::new();
+    let mut script_role_style_candidates = Vec::new();
     let mut project_style_candidates = Vec::new();
+    let mut project_role_style_candidates = Vec::new();
 
     for (idx, row) in rows.into_iter().enumerate() {
         match row.name.as_str() {
@@ -1703,7 +1714,9 @@ fn trim_video_prompt_observation_rows(
             "script_video_style_memory" | "selected_video_memory" => {
                 script_style_candidates.push((idx, row))
             }
+            "script_role_video_style_memory" => script_role_style_candidates.push((idx, row)),
             "project_video_style_memory" => project_style_candidates.push((idx, row)),
+            "project_role_video_style_memory" => project_role_style_candidates.push((idx, row)),
             _ => {}
         }
     }
@@ -1731,10 +1744,18 @@ fn trim_video_prompt_observation_rows(
     {
         kept.insert(*idx);
     }
+    keep_matching_role_observation_rows(
+        &mut kept,
+        &script_role_style_candidates,
+        &project_role_style_candidates,
+        subject_candidates,
+    );
 
     let mut all_rows = rejection_candidates;
     all_rows.extend(script_style_candidates);
+    all_rows.extend(script_role_style_candidates);
     all_rows.extend(project_style_candidates);
+    all_rows.extend(project_role_style_candidates);
     all_rows.sort_by_key(|(idx, _)| *idx);
     all_rows
         .into_iter()
@@ -1742,12 +1763,56 @@ fn trim_video_prompt_observation_rows(
         .collect()
 }
 
+fn keep_matching_role_observation_rows(
+    kept: &mut std::collections::HashSet<usize>,
+    script_candidates: &[(usize, AgentMemoryRow)],
+    project_candidates: &[(usize, AgentMemoryRow)],
+    subject_candidates: &[String],
+) {
+    let matching_indices = [script_candidates, project_candidates]
+        .into_iter()
+        .flat_map(|candidates| candidates.iter())
+        .filter(|(_, row)| {
+            !select_subject_role_video_style_memory_notes(
+                std::slice::from_ref(row),
+                subject_candidates,
+            )
+            .is_empty()
+        })
+        .map(|(idx, _)| *idx)
+        .take(VIDEO_PROMPT_OBSERVATION_ROLE_STYLE_ROW_LIMIT)
+        .collect::<Vec<_>>();
+    if !matching_indices.is_empty() {
+        for idx in matching_indices {
+            kept.insert(idx);
+        }
+        return;
+    }
+
+    for (idx, _) in script_candidates
+        .iter()
+        .chain(project_candidates.iter())
+        .take(VIDEO_PROMPT_OBSERVATION_ROLE_STYLE_ROW_LIMIT)
+    {
+        kept.insert(*idx);
+    }
+}
+
 fn resolve_observation_filter_style_note(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
+    subject_candidates: &[String],
 ) -> Option<String> {
+    if let Some(note) = select_subject_role_video_style_memory_notes(rows, subject_candidates)
+        .into_iter()
+        .filter_map(|note| compact_contextual_video_style_note(&note, storyboard_row))
+        .next()
+    {
+        return Some(note);
+    }
+
     select_prioritized_video_style_note(
         rows,
         storyboard_numeric_id,
@@ -2635,6 +2700,19 @@ fn neighbor_style_fragment_matches_storyboard(
         return prompt_style_fragment_overlaps_field(fragment, &fields.action)
             || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
     }
+    if fragment.starts_with("表演") {
+        return prompt_style_fragment_overlaps_field(fragment, &fields.action)
+            || prompt_style_fragment_overlaps_field(fragment, &fields.dialogue)
+            || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
+    }
+    if fragment.starts_with("语气") {
+        return prompt_style_fragment_overlaps_field(fragment, &fields.dialogue)
+            || prompt_style_fragment_overlaps_field(fragment, &fields.mood);
+    }
+    if fragment.starts_with("声场") {
+        return prompt_style_fragment_overlaps_field(fragment, &fields.sound)
+            || prompt_style_fragment_overlaps_field(fragment, &fields.setting);
+    }
     false
 }
 
@@ -3170,7 +3248,15 @@ fn trim_style_fragment_against_storyboard_fields(
         );
     }
     if fragment.starts_with("语气") {
-        return trim_prefixed_style_fragment(fragment, "语气", &[fields.mood.as_str()]);
+        return trim_prefixed_style_fragment(
+            fragment,
+            "语气",
+            &[
+                fields.action.as_str(),
+                fields.dialogue.as_str(),
+                fields.mood.as_str(),
+            ],
+        );
     }
     if fragment.starts_with("声场") {
         let trimmed = trim_prefixed_style_fragment(
@@ -3248,8 +3334,12 @@ fn style_fragment_matches_prompt_style_field(
                 || (!fields.mood.is_empty()
                     && style_fragment_semantically_covers_field(fragment, &fields.mood))))
         || (fragment.starts_with("语气")
-            && !fields.mood.is_empty()
-            && style_fragment_semantically_covers_field(fragment, &fields.mood))
+            && ((!fields.action.is_empty()
+                && style_fragment_semantically_covers_field(fragment, &fields.action))
+                || (!fields.dialogue.is_empty()
+                    && style_fragment_semantically_covers_field(fragment, &fields.dialogue))
+                || (!fields.mood.is_empty()
+                    && style_fragment_semantically_covers_field(fragment, &fields.mood))))
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
@@ -5205,6 +5295,11 @@ fn canonical_continuity_fragment(fragment: &str) -> String {
             "情绪",
             "光影",
             "场景",
+            "环境",
+            "动作",
+            "表演",
+            "语气",
+            "声场",
         ] {
             if let Some(stripped) = canonical.strip_prefix(prefix) {
                 canonical = stripped
@@ -8984,7 +9079,7 @@ mod tests {
             content: "storyboardIds=12 | promptSeed=seed-12-current | rejectionCount=1 | avoid=avoid shaky handheld motion".into(),
         });
 
-        let trimmed = trim_video_prompt_observation_rows(rows, 12, Some("seed-12-current"));
+        let trimmed = trim_video_prompt_observation_rows(rows, 12, Some("seed-12-current"), &[]);
 
         assert!(trimmed.iter().any(|row| {
             row.name == "rejected_video_negative_memory"
@@ -9019,7 +9114,7 @@ mod tests {
             content: "storyboardIds=12 | promptSeed=seed-12-current | rejectionCount=1 | avoid=avoid shaky handheld motion".into(),
         });
 
-        let trimmed = trim_video_prompt_observation_rows(rows, 12, Some("seed-12-current"));
+        let trimmed = trim_video_prompt_observation_rows(rows, 12, Some("seed-12-current"), &[]);
 
         assert!(trimmed.iter().any(|row| {
             row.name == "rejected_video_negative_memory"
@@ -9032,6 +9127,41 @@ mod tests {
                 .count(),
             8
         );
+    }
+
+    #[test]
+    fn trim_video_prompt_observation_rows_prefers_matching_role_memory_over_newer_other_roles() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=顾承泽 | subjectAliases=顾总 | sampleCount=4 | style=表演冷眼逼视，语气低声压迫".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=晚晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+            AgentMemoryRow {
+                name: "project_role_video_style_memory".into(),
+                content: "subject=沈知遥 | sampleCount=5 | style=动作克制停顿，语气淡声".into(),
+            },
+        ];
+
+        let trimmed = trim_video_prompt_observation_rows(
+            rows,
+            12,
+            Some("seed-12-current"),
+            &["林晚".to_string(), "晚晚".to_string()],
+        );
+
+        assert!(trimmed.iter().any(|row| {
+            row.name == "script_role_video_style_memory" && row.content.contains("subject=晚晚")
+        }));
+        assert!(!trimmed.iter().any(|row| {
+            row.name == "script_role_video_style_memory" && row.content.contains("subject=顾承泽")
+        }));
+        assert!(!trimmed.iter().any(|row| {
+            row.name == "project_role_video_style_memory" && row.content.contains("subject=沈知遥")
+        }));
     }
 
     #[test]
@@ -9255,7 +9385,8 @@ mod tests {
         };
 
         assert!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)).is_none()
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[])
+                .is_none()
         );
     }
 
@@ -10068,8 +10199,48 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)),
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[]),
             Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_prefers_matching_role_memory_over_global_summary() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演抬眼停顿，语气轻声克制 | note=表演抬眼停顿，语气轻声克制".into(),
+            },
+            AgentMemoryRow {
+                name: "project_role_video_style_memory".into(),
+                content: "subject=顾承泽 | subjectAliases=顾承泽/顾总 | sampleCount=4 | style=表演冷眼逼视，语气低声压迫 | note=表演冷眼逼视，语气低声压迫".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚强忍泪意看向门外".into()),
+            video_desc: Some("（晚晚强忍泪意看向门外、雨夜门厅、晚晚/林晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let subject_candidates = storyboard_row
+            .video_desc
+            .as_deref()
+            .and_then(parse_structured_storyboard_description)
+            .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+            .unwrap_or_default();
+
+        assert_eq!(
+            resolve_observation_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                &subject_candidates,
+            ),
+            Some("表演抬眼停顿，语气轻声".to_string())
         );
     }
 
@@ -10086,7 +10257,8 @@ mod tests {
         };
 
         assert!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)).is_none()
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[])
+                .is_none()
         );
     }
 
@@ -10109,7 +10281,7 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)),
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row), &[]),
             Some("镜头推进".to_string())
         );
     }
