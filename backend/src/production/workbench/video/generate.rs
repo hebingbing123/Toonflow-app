@@ -700,7 +700,7 @@ fn build_storyboard_negative_prompts(
                 &storyboard_review_rows,
                 &rejected_fragments,
                 &review_fragments,
-                !subject_candidates.is_empty(),
+                subject_candidates.len(),
             );
             let review_prompt = merge_prioritized_negative_prompt_fragment_groups(
                 &[rejected_fragments, review_fragments],
@@ -728,10 +728,14 @@ fn resolve_negative_prompt_budget_tier(
     storyboard_review_rows: &[QualityReviewSeedRow],
     rejected_fragments: &[String],
     review_fragments: &[String],
-    has_subject_alias: bool,
+    subject_alias_count: usize,
 ) -> VideoNegativePromptBudgetTier {
     let mut risk_score = 0;
-    if has_subject_alias {
+    if subject_aliases_need_expanded_negative_budget(
+        subject_alias_count,
+        rejected_fragments,
+        review_fragments,
+    ) {
         risk_score += 1;
     }
     if storyboard_row
@@ -760,6 +764,25 @@ fn resolve_negative_prompt_budget_tier(
     } else {
         VideoNegativePromptBudgetTier::Lean
     }
+}
+
+fn subject_aliases_need_expanded_negative_budget(
+    _subject_alias_count: usize,
+    rejected_fragments: &[String],
+    review_fragments: &[String],
+) -> bool {
+    review_fragments
+        .iter()
+        .chain(rejected_fragments.iter())
+        .any(|fragment| negative_fragment_targets_identity_consistency(fragment))
+}
+
+fn negative_fragment_targets_identity_consistency(fragment: &str) -> bool {
+    let canonical = canonical_negative_fragment(fragment);
+    canonical.contains("face")
+        || canonical.contains("identity")
+        || canonical.contains("costume")
+        || canonical.contains("character")
 }
 
 fn negative_prompt_scene_needs_expanded_budget(fields: &StructuredStoryboardDescription) -> bool {
@@ -3195,7 +3218,33 @@ mod tests {
         );
 
         let selection = prompts.get(&12).expect("storyboard 12 prompt");
-        assert_eq!(selection.as_deref(), Some("avoid rushed motion"));
+        assert_eq!(selection.as_deref(), Some("avoid rushed or jerky motion"));
+        assert_eq!(selection.fragment_count, 1);
+        assert_eq!(selection.budget_tier, "lean");
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_keeps_lean_budget_for_single_subject_low_risk_warning() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("output".into()),
+                target_id: None,
+                bad_case_category: Some("pacing_issue".into()),
+                comments: None,
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚站在窗边"),
+                Some("（晚晚站在窗边、咖啡厅窗边、晚晚/林晚、4秒、中景、静止、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）"),
+                Some("4s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(selection.as_deref(), Some("avoid rushed or jerky motion"));
         assert_eq!(selection.fragment_count, 1);
         assert_eq!(selection.budget_tier, "lean");
     }
@@ -3224,6 +3273,36 @@ mod tests {
         let selection = prompts.get(&12).expect("storyboard 12 prompt");
         assert_eq!(selection.as_deref(), Some("avoid unnecessary shot changes"));
         assert_eq!(selection.fragment_count, 1);
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_keeps_expanded_budget_for_single_subject_identity_warning()
+    {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("output".into()),
+                target_id: None,
+                bad_case_category: Some("character_break".into()),
+                comments: None,
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚站在窗边"),
+                Some("（晚晚站在窗边、咖啡厅窗边、晚晚/林晚、4秒、中景、静止、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）"),
+                Some("4s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(
+            selection.as_deref(),
+            Some("avoid face drift or costume inconsistency")
+        );
+        assert_eq!(selection.fragment_count, 1);
+        assert_eq!(selection.budget_tier, "expanded");
     }
 
     #[test]
