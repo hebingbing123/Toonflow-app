@@ -14,8 +14,8 @@ use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::meta::common::negative_constraint_conflicts_with_storyboard_style;
 use crate::production::workbench::video_prompt_memory::{
-    clip_prompt_fragment, compact_video_style_prompt_note, normalize_prompt_text,
-    parse_structured_storyboard_description,
+    clip_prompt_fragment, compact_video_style_prompt_note, extract_key_value,
+    normalize_prompt_text, parse_structured_storyboard_description,
     select_pending_rejected_video_observation_candidates_for_subject,
     select_prioritized_video_style_note, select_project_video_style_memory_notes,
     select_rejected_video_negative_memory_notes_for_subject,
@@ -658,6 +658,57 @@ fn selected_memory_fetch_limit(storyboard_count: usize) -> i64 {
     .min(VIDEO_NEGATIVE_SELECTED_MEMORY_MAX_LIMIT)
 }
 
+fn filter_selected_rows_for_subject(
+    selected_rows: &[AgentMemoryRow],
+    subject_candidates: &[String],
+) -> Vec<AgentMemoryRow> {
+    if subject_candidates.is_empty() {
+        return selected_rows
+            .iter()
+            .map(|row| AgentMemoryRow {
+                name: row.name.clone(),
+                content: row.content.clone(),
+            })
+            .collect();
+    }
+
+    let normalized_candidates = subject_candidates
+        .iter()
+        .map(|candidate| normalize_prompt_text(candidate))
+        .filter(|candidate| !candidate.is_empty())
+        .collect::<Vec<_>>();
+    selected_rows
+        .iter()
+        .filter(|row| {
+            if row.name != "selected_video_memory" {
+                return true;
+            }
+            let Some(subject) = extract_key_value(&row.content, "subject")
+                .or_else(|| extract_key_value(&row.content, "subjectAliases"))
+            else {
+                return true;
+            };
+            let memory_subjects = subject
+                .split('/')
+                .map(normalize_prompt_text)
+                .filter(|subject| !subject.is_empty())
+                .collect::<Vec<_>>();
+            memory_subjects.is_empty()
+                || memory_subjects.iter().any(|memory_subject| {
+                    normalized_candidates.iter().any(|candidate| {
+                        candidate == memory_subject
+                            || candidate.contains(memory_subject)
+                            || memory_subject.contains(candidate)
+                    })
+                })
+        })
+        .map(|row| AgentMemoryRow {
+            name: row.name.clone(),
+            content: row.content.clone(),
+        })
+        .collect()
+}
+
 fn build_storyboard_negative_prompts(
     storyboard_ids: &[i32],
     review_rows: &[QualityReviewSeedRow],
@@ -683,15 +734,17 @@ fn build_storyboard_negative_prompts(
                     selected_memory_subject_aliases(&fields.subject, &fields.subject_refs)
                 })
                 .unwrap_or_default();
+            let subject_scoped_selected_rows =
+                filter_selected_rows_for_subject(selected_rows, &subject_candidates);
             let selected_style_note = select_selected_video_memory_notes(
-                selected_rows,
+                &subject_scoped_selected_rows,
                 storyboard_id,
                 current_prompt_seed.as_deref(),
             )
             .into_iter()
             .next();
             let prioritized_style_note = resolve_negative_filter_style_note(
-                selected_rows,
+                &subject_scoped_selected_rows,
                 storyboard_id,
                 current_prompt_seed.as_deref(),
                 storyboard_row,
@@ -3058,10 +3111,10 @@ mod tests {
         compact_negative_constraint_against_storyboard_style,
         compact_negative_fragment_against_storyboard_risk, compact_negative_review_constraints,
         compact_review_fragments_against_rejected_memory, compact_video_ratio,
-        infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
-        map_bad_case_category_with_comments, merge_negative_prompts,
-        negative_fragment_matches_storyboard_risk, negative_review_fetch_limit,
-        normalize_upload_sources, pacing_issue_category_is_redundant,
+        filter_selected_rows_for_subject, infer_negative_fragments_from_comments,
+        infer_video_provider, load_auto_negative_prompts, map_bad_case_category_with_comments,
+        merge_negative_prompts, negative_fragment_matches_storyboard_risk,
+        negative_review_fetch_limit, normalize_upload_sources, pacing_issue_category_is_redundant,
         prune_storyboard_negative_fragments, quality_review_row_matches_storyboard,
         rejected_negative_memory_fetch_limit, resolve_negative_filter_style_note,
         review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
@@ -4576,6 +4629,38 @@ mod tests {
 
         let prompt = prompts.get(&12).and_then(|value| value.as_deref());
         assert_eq!(prompt, None);
+    }
+
+    #[test]
+    fn filter_selected_rows_for_subject_skips_other_subject_exact_memory() {
+        let filtered = filter_selected_rows_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头近景，情绪冷峻压迫".into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=表演抬眼停顿，语气轻声克制".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_video_style_memory".into(),
+                    content: "style=镜头稳定跟拍，情绪冷峻压迫".into(),
+                },
+            ],
+            &["林晚".to_string(), "晚晚".to_string()],
+        );
+
+        assert_eq!(filtered.len(), 2);
+        assert!(filtered.iter().any(|row| {
+            row.name == "selected_video_memory" && row.content.contains("subject=林晚")
+        }));
+        assert!(filtered
+            .iter()
+            .any(|row| row.name == "script_video_style_memory"));
+        assert!(!filtered.iter().any(|row| {
+            row.name == "selected_video_memory" && row.content.contains("subject=顾承泽")
+        }));
     }
 
     #[test]
