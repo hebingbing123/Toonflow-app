@@ -43,6 +43,7 @@ const VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS: usize = 48;
+const VIDEO_PROMPT_MOTION_ANCHOR_MAX_CHARS: usize = 20;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -230,6 +231,7 @@ struct VideoPromptBuildResult {
 struct ArtStyleDirectorProfile {
     aliases: &'static [&'static str],
     director_storyboard: &'static str,
+    director_storyboard_table_style: &'static str,
 }
 
 #[derive(Debug, Clone)]
@@ -249,14 +251,17 @@ const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[
             "怀旧日漫",
         ],
         director_storyboard: include_str!("../../../../data/skills/art_skills/2D_90s_japanese_anime/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/2D_90s_japanese_anime/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &["2d_chinese_guofeng", "国风二次元", "新国潮", "国风动画"],
         director_storyboard: include_str!("../../../../data/skills/art_skills/2D_chinese_guofeng/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/2D_chinese_guofeng/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &["2d_flat_design", "flat design", "2d扁平", "扁平风"],
         director_storyboard: include_str!("../../../../data/skills/art_skills/2D_flat_design/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/2D_flat_design/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &[
@@ -266,18 +271,22 @@ const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[
             "都市言情动画",
         ],
         director_storyboard: include_str!("../../../../data/skills/art_skills/2D_mature_urban_romance/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/2D_mature_urban_romance/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &["3d_anime_render", "3d动画渲染", "3d 动画渲染"],
         director_storyboard: include_str!("../../../../data/skills/art_skills/3D_anime_render/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/3D_anime_render/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &["3d_chinese_traditional", "国风3d", "国风 3d"],
         director_storyboard: include_str!("../../../../data/skills/art_skills/3D_chinese_traditional/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/3D_chinese_traditional/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &["3d_clay_stopmotion", "定格动画黏土", "黏土", "黏土风"],
         director_storyboard: include_str!("../../../../data/skills/art_skills/3D_clay_stopmotion/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/3D_clay_stopmotion/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &[
@@ -287,6 +296,7 @@ const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[
             "古风真人",
         ],
         director_storyboard: include_str!("../../../../data/skills/art_skills/realpeople_ancient_chinese/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/realpeople_ancient_chinese/driector_skills/director_storyboard_table_style.md"),
     },
     ArtStyleDirectorProfile {
         aliases: &[
@@ -297,6 +307,7 @@ const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[
             "真人现代",
         ],
         director_storyboard: include_str!("../../../../data/skills/art_skills/realpeople_urban_modern/driector_skills/director_storyboard.md"),
+        director_storyboard_table_style: include_str!("../../../../data/skills/art_skills/realpeople_urban_modern/driector_skills/director_storyboard_table_style.md"),
     },
 ];
 
@@ -417,6 +428,67 @@ fn score_director_emotion_cue_match(mood: &str, cue: &DirectorEmotionCue) -> usi
         .unwrap_or(0)
 }
 
+fn parse_director_motion_cue(markdown: &str) -> Option<String> {
+    let mut in_motion_section = false;
+
+    for raw_line in markdown.lines() {
+        let line = raw_line.trim();
+        if !in_motion_section {
+            if line.starts_with("## ") && line.contains("动作节奏") {
+                in_motion_section = true;
+            }
+            continue;
+        }
+
+        if line.starts_with("## ") {
+            break;
+        }
+        if !line.starts_with("- **") || !line.contains("动作") {
+            continue;
+        }
+
+        let title = line
+            .strip_prefix("- **")
+            .and_then(|value| value.split("**").next())
+            .map(normalize_prompt_text)
+            .unwrap_or_default();
+        let body = line
+            .split_once('—')
+            .or_else(|| line.split_once("——"))
+            .map(|(_, value)| normalize_prompt_text(value))
+            .unwrap_or_default();
+        let quoted = body
+            .split('"')
+            .enumerate()
+            .filter(|(idx, _)| idx % 2 == 1)
+            .map(|(_, value)| normalize_prompt_text(value))
+            .find(|value| !value.is_empty());
+
+        let cue = if let Some(quoted) = quoted {
+            format!("动作{}", quoted.replace('/', ""))
+        } else if title.contains("自然") {
+            "动作自然".to_string()
+        } else if title.contains("克制") {
+            "动作从容克制".to_string()
+        } else if title.contains("优雅") {
+            "动作缓慢优雅".to_string()
+        } else if title.contains("简洁") {
+            "动作简洁平滑".to_string()
+        } else if title.contains("慢") || title.contains("缓") {
+            "动作缓慢".to_string()
+        } else {
+            String::new()
+        };
+
+        let cue = normalize_prompt_text(&cue);
+        if !cue.is_empty() {
+            return Some(cue);
+        }
+    }
+
+    None
+}
+
 fn resolve_performance_style_anchor(
     project_art_style: Option<&str>,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -463,6 +535,28 @@ fn resolve_performance_style_anchor(
     Some(clip_prompt_fragment(
         &fragments.join(", "),
         VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS,
+    ))
+}
+
+fn resolve_motion_style_anchor(
+    project_art_style: Option<&str>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+) -> Option<String> {
+    let fields = structured_fields?;
+    if fields.subject.trim().is_empty() || fields.action.trim().is_empty() {
+        return None;
+    }
+
+    let profile = art_style_director_profile(project_art_style?)?;
+    let cue = parse_director_motion_cue(profile.director_storyboard_table_style)?;
+    if prompt_fragment_is_covered(&cue, prompt_coverage) || fields.action.contains(&cue) {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &cue,
+        VIDEO_PROMPT_MOTION_ANCHOR_MAX_CHARS,
     ))
 }
 
@@ -1853,6 +1947,14 @@ fn build_project_visual_anchors(
         &style_coverage,
     ) {
         anchors.push(performance_anchor);
+        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    }
+    if let Some(motion_anchor) = resolve_motion_style_anchor(
+        ctx.project_art_style.as_deref(),
+        structured_fields,
+        &style_coverage,
+    ) {
+        anchors.push(motion_anchor);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
     let has_base_style_anchor = !anchors.is_empty();
@@ -7693,6 +7795,7 @@ mod tests {
             prompt.contains("Style anchor: 真人都市写实; 神情内敛, 眼神深沉, 唇线收紧"),
             "{prompt}"
         );
+        assert!(prompt.contains("动作自然"), "{prompt}");
     }
 
     #[test]
@@ -7728,6 +7831,14 @@ mod tests {
                 && cue.face == "神情内敛，面容沉静"
                 && cue.eyes == "眼神深沉，眼底有情绪压抑"
         }));
+    }
+
+    #[test]
+    fn parse_director_motion_cue_reads_bundled_motion_style_section() {
+        let profile = art_style_director_profile("国风二次元").expect("matched art style");
+        let cue = parse_director_motion_cue(profile.director_storyboard_table_style);
+
+        assert_eq!(cue.as_deref(), Some("动作缓慢优雅"));
     }
 
     #[test]
