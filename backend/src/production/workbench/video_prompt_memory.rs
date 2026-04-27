@@ -1635,10 +1635,14 @@ fn select_rejected_video_observation_summary_notes(
                 .enumerate()
                 .map(|(fragment_idx, fragment)| {
                     (
+                        score_rejected_observation_summary_fragment_for_storyboard(
+                            &fragment,
+                            &storyboard_tags,
+                        ),
                         fragment_storyboard_risk_overlap(&fragment, &storyboard_tags),
                         row_overlap,
-                        sample_count,
                         scope_priority,
+                        sample_count,
                         row_idx,
                         fragment_idx,
                         fragment,
@@ -1652,12 +1656,13 @@ fn select_rejected_video_observation_summary_notes(
             .then(b.1.cmp(&a.1))
             .then(b.2.cmp(&a.2))
             .then(a.3.cmp(&b.3))
-            .then(a.4.cmp(&b.4))
+            .then(b.4.cmp(&a.4))
             .then(a.5.cmp(&b.5))
+            .then(a.6.cmp(&b.6))
     });
 
     let mut selected = Vec::new();
-    for (_, _, _, _, _, _, fragment) in scored {
+    for (_, _, _, _, _, _, _, fragment) in scored {
         if observation_note_is_covered(&fragment, &selected) {
             continue;
         }
@@ -1680,6 +1685,14 @@ fn rejected_observation_summary_scope_priority(name: &str) -> u8 {
         PROJECT_VIDEO_OBSERVATION_MEMORY_NAME => 3,
         _ => u8::MAX,
     }
+}
+
+fn score_rejected_observation_summary_fragment_for_storyboard(
+    fragment: &str,
+    storyboard_tags: &[String],
+) -> i32 {
+    score_pending_observation_note_for_storyboard(fragment, storyboard_tags)
+        + score_rejected_negative_fragment_for_storyboard(fragment, storyboard_tags)
 }
 
 fn observation_summary_sample_count(content: &str) -> usize {
@@ -8616,6 +8629,78 @@ mod tests {
         assert_eq!(
             notes,
             vec!["avoid face distortion or identity drift".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_summary_prefers_performance_guard_over_higher_sample_lighting(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚压住情绪低声开口".into()),
+            video_desc: Some(
+                "（晚晚盯着门外、雨夜门厅、林晚/晚晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、隐忍 / 克制、冷调逆光、你别走、雨声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "script_video_observation_memory".into(),
+                    content: "sampleCount=9 | riskTags=lighting | avoid=avoid flat cold lighting"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_observation_memory".into(),
+                    content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=2 | riskTags=performance/dialogue | avoid=avoid blank expression or monotone delivery".into(),
+                },
+            ],
+            12,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid blank expression or monotone delivery".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_summary_prefers_role_summary_over_project_generic_fill(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头低声开口".into()),
+            video_desc: Some(
+                "（晚晚站在落地窗边、雨夜办公室、林晚/晚晚、4秒、近景、慢推、回头低声开口喉结滚动、压抑、霓虹反光、你别看我、雨声回响、A15）"
+                    .into(),
+            ),
+            duration: Some("4".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "project_video_observation_memory".into(),
+                    content: "sampleCount=8 | riskTags=identity/lighting | avoid=avoid flat cold lighting, avoid face distortion or identity drift".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_observation_memory".into(),
+                    content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | riskTags=dialogue/performance | avoid=avoid blank expression or monotone delivery".into(),
+                },
+            ],
+            15,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid blank expression or monotone delivery".to_string(),
+                "avoid face distortion or identity drift".to_string()
+            ]
         );
     }
 
