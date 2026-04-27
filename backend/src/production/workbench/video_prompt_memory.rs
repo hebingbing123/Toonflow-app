@@ -340,6 +340,7 @@ pub(crate) fn build_rejected_video_negative_memory(
     if fragments.is_empty() {
         return None;
     }
+    let risk_tags = rejected_video_negative_risk_tags(&fields, &fragments);
 
     let mut parts = vec![format!("storyboardIds={storyboard_numeric_id}")];
     if let Some(prompt_seed) = storyboard_prompt_seed(row) {
@@ -357,8 +358,202 @@ pub(crate) fn build_rejected_video_negative_memory(
         }
     }
     parts.push("rejectionCount=1".to_string());
+    if !risk_tags.is_empty() {
+        parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
     parts.push(format!("avoid={}", fragments.join(", ")));
     Some(parts.join(" | "))
+}
+
+fn rejected_video_negative_risk_tags(
+    fields: &StructuredStoryboardDescription,
+    fragments: &[String],
+) -> Vec<&'static str> {
+    let families = fragments
+        .iter()
+        .map(|fragment| observation_note_family(fragment))
+        .collect::<Vec<_>>();
+    let mut tags = Vec::new();
+
+    if families.iter().any(|family| {
+        matches!(
+            *family,
+            "camera_motion_stability" | "flicker_motion_jitter" | "shot_change_framing"
+        )
+    }) && selected_memory_scene_has_motion_risk(fields)
+    {
+        tags.push("motion");
+    }
+    if families
+        .iter()
+        .any(|family| matches!(*family, "camera_framing" | "shot_change_framing"))
+        && rejected_negative_scene_has_framing_risk(fields)
+    {
+        tags.push("framing");
+    }
+    if families
+        .iter()
+        .any(|family| matches!(*family, "lighting_backlight" | "lighting_reflection"))
+        && rejected_negative_scene_has_lighting_risk(fields)
+    {
+        tags.push("lighting");
+    }
+    if families.iter().any(|family| *family == "mood_tone")
+        && rejected_negative_scene_needs_emotional_guard(fields)
+    {
+        tags.push("emotion");
+    }
+    if families
+        .iter()
+        .any(|family| *family == "performance_delivery")
+        && rejected_negative_scene_needs_expressive_performance_guard(fields)
+    {
+        tags.push("performance");
+    }
+    if families.iter().any(|family| *family == "lip_sync")
+        && rejected_negative_scene_has_dialogue_guard(fields)
+    {
+        tags.push("dialogue");
+    }
+
+    tags
+}
+
+fn rejected_negative_scene_has_framing_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [fields.shot.as_str(), fields.camera_move.as_str()]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .any(|value| {
+            !value.is_empty()
+                && [
+                    "近景",
+                    "特写",
+                    "仰拍",
+                    "俯拍",
+                    "倾斜",
+                    "跟拍",
+                    "推进",
+                    "拉远",
+                    "摇镜",
+                    "甩镜",
+                    "切换",
+                    "转场",
+                    "close-up",
+                    "tight close-up",
+                    "low angle",
+                    "high angle",
+                    "dutch angle",
+                    "follow",
+                    "push in",
+                    "pull back",
+                    "whip",
+                    "pan",
+                ]
+                .iter()
+                .any(|keyword| value.contains(keyword))
+        })
+}
+
+fn rejected_negative_scene_has_lighting_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.setting.as_str(),
+        fields.lighting.as_str(),
+        fields.sound.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "霓虹",
+                "反光",
+                "玻璃",
+                "雨",
+                "逆光",
+                "背光",
+                "剪影",
+                "车灯",
+                "冷光",
+                "冷调",
+                "阴天",
+                "曝光",
+                "reflection",
+                "wet street",
+                "headlight reflection",
+                "silhouette",
+                "backlight",
+                "flat lighting",
+                "cold lighting",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn rejected_negative_scene_needs_emotional_guard(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.mood.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "哭",
+                "泪",
+                "哽咽",
+                "颤",
+                "停顿",
+                "压抑",
+                "克制",
+                "愤怒",
+                "惊慌",
+                "紧张",
+                "压迫",
+                "冷峻",
+                "崩溃",
+                "隐忍",
+                "欲言又止",
+                "迟疑",
+                "回头",
+                "犹豫",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn rejected_negative_scene_needs_expressive_performance_guard(
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    rejected_negative_scene_needs_emotional_guard(fields)
+        && (!selected_memory_field_looks_silent(&fields.dialogue)
+            || [fields.mood.as_str(), fields.action.as_str()]
+                .into_iter()
+                .map(normalize_prompt_text)
+                .any(|value| {
+                    !value.is_empty()
+                        && [
+                            "欲言又止",
+                            "隐忍",
+                            "哽咽",
+                            "低声",
+                            "轻声",
+                            "迟疑",
+                            "停顿",
+                            "犹豫",
+                            "强忍",
+                            "颤",
+                        ]
+                        .iter()
+                        .any(|keyword| value.contains(keyword))
+                }))
+}
+
+fn rejected_negative_scene_has_dialogue_guard(fields: &StructuredStoryboardDescription) -> bool {
+    !selected_memory_field_looks_silent(&fields.dialogue)
 }
 
 fn compact_rejected_negative_memory_fragments(fragments: Vec<String>) -> Vec<String> {
@@ -1132,6 +1327,7 @@ pub(crate) fn select_rejected_video_negative_memory_notes(
         storyboard_numeric_id,
         current_prompt_seed,
         &[],
+        None,
     )
 }
 
@@ -1140,6 +1336,7 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
     subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
     let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
         rows,
@@ -1152,7 +1349,7 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
         .map(|value| normalize_prompt_text(value))
         .filter(|value| !value.is_empty())
         .collect::<Vec<_>>();
-    let candidate_rows = rows
+    let exact_candidate_rows = rows
         .iter()
         .enumerate()
         .filter(|(_, row)| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
@@ -1170,6 +1367,27 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
                 >= REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
         })
         .collect::<Vec<_>>();
+    let subject_scoped_fallback_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
+    let allow_subject_scoped_fallback =
+        exact_candidate_rows.is_empty() && !subject_scoped_fallback_tags.is_empty();
+    let candidate_rows = if allow_subject_scoped_fallback {
+        rows.iter()
+            .enumerate()
+            .filter(|(_, row)| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+            .filter(|(_, row)| {
+                rejected_video_negative_rejection_count(&row.content)
+                    >= REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
+            })
+            .filter(|(_, row)| {
+                memory_matches_subject_candidates(&row.content, &normalized_subject_candidates)
+            })
+            .filter(|(_, row)| {
+                memory_matches_rejected_video_risk_tags(&row.content, &subject_scoped_fallback_tags)
+            })
+            .collect::<Vec<_>>()
+    } else {
+        exact_candidate_rows
+    };
     let has_matching_subject = !normalized_subject_candidates.is_empty()
         && candidate_rows.iter().any(|(_, row)| {
             memory_matches_subject_candidates(&row.content, &normalized_subject_candidates)
@@ -1188,6 +1406,13 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
                 return Some(vec![(
                     score_rejected_negative_fragment(&note),
                     idx,
+                    storyboard_fallback_priority(
+                        &row.content,
+                        storyboard_numeric_id,
+                        allow_subject_scoped_fallback,
+                    ),
+                    storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
+                        .unwrap_or(i32::MAX),
                     0usize,
                     note,
                 )]);
@@ -1200,6 +1425,16 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
                         (
                             score_rejected_negative_fragment(&note),
                             idx,
+                            storyboard_fallback_priority(
+                                &row.content,
+                                storyboard_numeric_id,
+                                allow_subject_scoped_fallback,
+                            ),
+                            storyboard_distance_from_memory_content(
+                                &row.content,
+                                storyboard_numeric_id,
+                            )
+                            .unwrap_or(i32::MAX),
                             fragment_idx,
                             note,
                         )
@@ -1211,13 +1446,15 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
         .collect::<Vec<_>>();
     scored.sort_by(|a, b| {
         b.0.cmp(&a.0)
-            .then(a.1.cmp(&b.1))
             .then(a.2.cmp(&b.2))
             .then(a.3.cmp(&b.3))
+            .then(a.1.cmp(&b.1))
+            .then(a.4.cmp(&b.4))
+            .then(a.5.cmp(&b.5))
     });
 
     let mut selected = Vec::new();
-    for (_, _, _, fragment) in scored {
+    for (_, _, _, _, _, fragment) in scored {
         if observation_note_is_covered(&fragment, &selected) {
             continue;
         }
@@ -1244,6 +1481,7 @@ pub(crate) fn select_pending_rejected_video_observation_note(
         storyboard_numeric_id,
         current_prompt_seed,
         &[],
+        None,
     )
     .into_iter()
     .next()
@@ -1259,6 +1497,7 @@ pub(crate) fn select_pending_rejected_video_observation_candidates(
         storyboard_numeric_id,
         current_prompt_seed,
         &[],
+        None,
     )
 }
 
@@ -1267,6 +1506,7 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
     subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
     let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
         rows,
@@ -1279,7 +1519,7 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
         .map(|value| normalize_prompt_text(value))
         .filter(|value| !value.is_empty())
         .collect::<Vec<_>>();
-    let candidate_rows = rows
+    let exact_candidate_rows = rows
         .iter()
         .enumerate()
         .filter(|(_, row)| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
@@ -1298,6 +1538,27 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                 < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
         })
         .collect::<Vec<_>>();
+    let subject_scoped_fallback_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
+    let allow_subject_scoped_fallback =
+        exact_candidate_rows.is_empty() && !subject_scoped_fallback_tags.is_empty();
+    let candidate_rows = if allow_subject_scoped_fallback {
+        rows.iter()
+            .enumerate()
+            .filter(|(_, row)| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+            .filter(|(_, row)| {
+                rejected_video_negative_rejection_count(&row.content)
+                    < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
+            })
+            .filter(|(_, row)| {
+                memory_matches_subject_candidates(&row.content, &normalized_subject_candidates)
+            })
+            .filter(|(_, row)| {
+                memory_matches_rejected_video_risk_tags(&row.content, &subject_scoped_fallback_tags)
+            })
+            .collect::<Vec<_>>()
+    } else {
+        exact_candidate_rows
+    };
     let has_matching_subject = !normalized_subject_candidates.is_empty()
         && candidate_rows.iter().any(|(_, row)| {
             memory_matches_subject_candidates(&row.content, &normalized_subject_candidates)
@@ -1323,6 +1584,13 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                 return Some(vec![(
                     score_pending_observation_note(&note),
                     idx,
+                    storyboard_fallback_priority(
+                        &row.content,
+                        storyboard_numeric_id,
+                        allow_subject_scoped_fallback,
+                    ),
+                    storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
+                        .unwrap_or(i32::MAX),
                     0usize,
                     note,
                 )]);
@@ -1335,6 +1603,16 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
                         (
                             score_pending_observation_note(&note),
                             idx,
+                            storyboard_fallback_priority(
+                                &row.content,
+                                storyboard_numeric_id,
+                                allow_subject_scoped_fallback,
+                            ),
+                            storyboard_distance_from_memory_content(
+                                &row.content,
+                                storyboard_numeric_id,
+                            )
+                            .unwrap_or(i32::MAX),
                             fragment_idx,
                             note,
                         )
@@ -1346,13 +1624,15 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
         .collect::<Vec<_>>();
     scored.sort_by(|a, b| {
         b.0.cmp(&a.0)
-            .then(a.1.cmp(&b.1))
             .then(a.2.cmp(&b.2))
             .then(a.3.cmp(&b.3))
+            .then(a.1.cmp(&b.1))
+            .then(a.4.cmp(&b.4))
+            .then(a.5.cmp(&b.5))
     });
 
     let mut notes = Vec::new();
-    for (_, _, _, note) in scored {
+    for (_, _, _, _, _, note) in scored {
         if observation_note_is_covered(&note, &notes) {
             continue;
         }
@@ -2291,6 +2571,74 @@ fn rejected_video_memory_prompt_seed(content: &str) -> Option<String> {
     extract_key_value(content, "promptSeed")
 }
 
+fn extract_rejected_video_risk_tags(content: &str) -> Vec<String> {
+    extract_key_value(content, "riskTags")
+        .map(|value| {
+            value
+                .split(['/', ',', '，', ';', '；'])
+                .map(normalize_prompt_text)
+                .filter(|tag| !tag.is_empty())
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default()
+}
+
+fn storyboard_risk_tags_for_subject_fallback(
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return Vec::new();
+    };
+    let mut tags = Vec::new();
+    if selected_memory_scene_has_motion_risk(&fields) {
+        tags.push("motion".to_string());
+    }
+    if rejected_negative_scene_has_framing_risk(&fields) {
+        tags.push("framing".to_string());
+    }
+    if rejected_negative_scene_has_lighting_risk(&fields) {
+        tags.push("lighting".to_string());
+    }
+    if rejected_negative_scene_needs_emotional_guard(&fields) {
+        tags.push("emotion".to_string());
+    }
+    if rejected_negative_scene_needs_expressive_performance_guard(&fields) {
+        tags.push("performance".to_string());
+    }
+    if rejected_negative_scene_has_dialogue_guard(&fields) {
+        tags.push("dialogue".to_string());
+    }
+    tags
+}
+
+fn memory_matches_rejected_video_risk_tags(content: &str, storyboard_tags: &[String]) -> bool {
+    if storyboard_tags.is_empty() {
+        return false;
+    }
+    let memory_tags = extract_rejected_video_risk_tags(content);
+    !memory_tags.is_empty()
+        && memory_tags
+            .iter()
+            .any(|memory_tag| storyboard_tags.iter().any(|tag| tag == memory_tag))
+}
+
+fn storyboard_fallback_priority(
+    content: &str,
+    storyboard_numeric_id: i32,
+    allow_subject_scoped_fallback: bool,
+) -> u8 {
+    if memory_matches_storyboard(content, storyboard_numeric_id) {
+        0
+    } else if allow_subject_scoped_fallback {
+        1
+    } else {
+        0
+    }
+}
+
 fn merged_subject_aliases(existing: &str, incoming: &str, subject: &str) -> String {
     let mut aliases = role_memory_subject_candidates(existing);
     aliases.extend(role_memory_subject_candidates(incoming));
@@ -2318,6 +2666,7 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
         .unwrap_or_default();
     let subject_aliases = merged_subject_aliases(existing, incoming, &subject);
     let rejection_count = rejected_video_negative_rejection_count(existing).saturating_add(1);
+    let risk_tags = merged_rejected_video_risk_tags(existing, incoming);
     let avoid = merge_rejected_negative_avoid(
         extract_key_value(existing, "avoid").as_deref(),
         extract_key_value(incoming, "avoid").as_deref(),
@@ -2337,10 +2686,21 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
         parts.push(format!("subjectAliases={subject_aliases}"));
     }
     parts.push(format!("rejectionCount={rejection_count}"));
+    if !risk_tags.is_empty() {
+        parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
     if !avoid.is_empty() {
         parts.push(format!("avoid={avoid}"));
     }
     parts.join(" | ")
+}
+
+fn merged_rejected_video_risk_tags(existing: &str, incoming: &str) -> Vec<String> {
+    let mut tags = extract_rejected_video_risk_tags(existing);
+    tags.extend(extract_rejected_video_risk_tags(incoming));
+    tags.sort();
+    tags.dedup();
+    tags
 }
 
 fn memory_matches_subject_candidates(content: &str, subject_candidates: &[String]) -> bool {
@@ -6707,6 +7067,27 @@ mod tests {
     }
 
     #[test]
+    fn build_rejected_video_negative_memory_persists_compact_risk_tags() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("晚晚抬眼后低声开口".into()),
+                video_desc: Some(
+                    "（晚晚看向门外、雨夜门厅、林晚/晚晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、隐忍 / 克制、冷调逆光、你别走、雨声回响、A12）"
+                        .into(),
+                ),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains("riskTags=lighting/emotion/performance/dialogue"),
+            "{content}"
+        );
+    }
+
+    #[test]
     fn select_selected_video_memory_notes_keeps_latest_matching_storyboard() {
         let notes = select_selected_video_memory_notes(
             &[
@@ -7078,9 +7459,44 @@ mod tests {
             12,
             None,
             &["晚晚".to_string()],
+            None,
         );
 
         assert_eq!(notes, vec!["avoid identity drift".to_string()]);
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_for_subject_can_fallback_to_same_role_matching_risk(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚抬眼后低声开口".into()),
+            video_desc: Some(
+                "（晚晚看向门外、雨夜门厅、林晚/晚晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、隐忍 / 克制、冷调逆光、你别走、雨声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let notes = select_rejected_video_negative_memory_notes_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=8 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=lighting/performance/dialogue | avoid=avoid blank expression or monotone delivery".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=9 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=motion/framing | avoid=avoid shaky handheld motion".into(),
+                },
+            ],
+            12,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid blank expression or monotone delivery".to_string()]
+        );
     }
 
     #[test]
@@ -7226,22 +7642,58 @@ mod tests {
             12,
             None,
             &["晚晚".to_string()],
+            None,
         );
 
         assert_eq!(notes, vec!["avoid identity drift".to_string()]);
     }
 
     #[test]
+    fn select_pending_rejected_video_observation_candidates_can_fallback_to_same_role_matching_risk(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚抬眼后低声开口".into()),
+            video_desc: Some(
+                "（晚晚看向门外、雨夜门厅、林晚/晚晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、隐忍 / 克制、冷调逆光、你别走、雨声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=8 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=lighting/performance/dialogue | avoid=avoid blank expression or monotone delivery".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=9 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=motion/framing | avoid=avoid shaky handheld motion".into(),
+                },
+            ],
+            12,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid blank expression or monotone delivery".to_string()]
+        );
+    }
+
+    #[test]
     fn merge_rejected_video_negative_memory_accumulates_rejection_count_and_deduplicates() {
         let merged = merge_rejected_video_negative_memory(
-            "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=2 | avoid=avoid shaky handheld motion, avoid flat cold lighting",
-            "storyboardIds=12 | subject=晚晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood",
+            "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=2 | riskTags=motion/lighting | avoid=avoid shaky handheld motion, avoid flat cold lighting",
+            "storyboardIds=12 | subject=晚晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=lighting/emotion | avoid=avoid flat cold lighting, avoid oppressive or frantic mood",
         );
 
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("storyboardIds=12"));
         assert!(merged.contains("subject=晚晚"));
         assert!(merged.contains("subjectAliases=林晚"));
+        assert!(merged.contains("riskTags=emotion/lighting/motion"));
         assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting"));
         assert!(!merged.contains("avoid oppressive or frantic mood"));
     }

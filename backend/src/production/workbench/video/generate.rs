@@ -763,6 +763,7 @@ fn build_storyboard_negative_prompts(
                         storyboard_id,
                         current_prompt_seed.as_deref(),
                         &subject_candidates,
+                        storyboard_row,
                     )
                     .into_iter()
                     .next()
@@ -852,6 +853,7 @@ fn build_storyboard_observation_negative_fragments(
         storyboard_id,
         current_prompt_seed,
         subject_candidates,
+        storyboard_row,
     );
     let observation_fragments = filter_conflicting_review_fragments(
         observation_fragments,

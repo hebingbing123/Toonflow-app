@@ -1960,6 +1960,7 @@ async fn load_pending_video_observation_note(
                 storyboard_numeric_id,
                 current_prompt_seed,
                 &subject_candidates,
+                storyboard_row.as_ref(),
             )
             .into_iter()
             .filter_map(|note| {
@@ -10974,6 +10975,7 @@ mod tests {
                     12,
                     None,
                     &subject_candidates,
+                    Some(&storyboard_row),
                 )
                 .into_iter()
                 .filter(|candidate| {
