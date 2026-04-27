@@ -42,6 +42,7 @@ const VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT: usize = 2;
+const VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS: usize = 48;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -225,6 +226,80 @@ struct VideoPromptBuildResult {
     diagnostics: GenerateVideoPromptDiagnostics,
 }
 
+#[derive(Clone, Copy)]
+struct ArtStyleDirectorProfile {
+    aliases: &'static [&'static str],
+    director_storyboard: &'static str,
+}
+
+#[derive(Debug, Clone)]
+struct DirectorEmotionCue {
+    emotion_terms: Vec<String>,
+    face: String,
+    eyes: String,
+    micro_expression: String,
+}
+
+const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[
+    ArtStyleDirectorProfile {
+        aliases: &[
+            "2d_90s_japanese_anime",
+            "90年代日式动画",
+            "日式动画",
+            "怀旧日漫",
+        ],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/2D_90s_japanese_anime/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &["2d_chinese_guofeng", "国风二次元", "新国潮", "国风动画"],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/2D_chinese_guofeng/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &["2d_flat_design", "flat design", "2d扁平", "扁平风"],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/2D_flat_design/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &[
+            "2d_mature_urban_romance",
+            "成熟都市言情二次元动画",
+            "成熟都市言情",
+            "都市言情动画",
+        ],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/2D_mature_urban_romance/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &["3d_anime_render", "3d动画渲染", "3d 动画渲染"],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/3D_anime_render/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &["3d_chinese_traditional", "国风3d", "国风 3d"],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/3D_chinese_traditional/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &["3d_clay_stopmotion", "定格动画黏土", "黏土", "黏土风"],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/3D_clay_stopmotion/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &[
+            "realpeople_ancient_chinese",
+            "真人古风写实",
+            "古风写实",
+            "古风真人",
+        ],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/realpeople_ancient_chinese/driector_skills/director_storyboard.md"),
+    },
+    ArtStyleDirectorProfile {
+        aliases: &[
+            "realpeople_urban_modern",
+            "真人都市写实",
+            "都市写实",
+            "现代都市写实",
+            "真人现代",
+        ],
+        director_storyboard: include_str!("../../../../data/skills/art_skills/realpeople_urban_modern/driector_skills/director_storyboard.md"),
+    },
+];
+
 impl GenerateVideoPromptDiagnostics {
     fn with_runtime_notes(
         mut self,
@@ -241,6 +316,154 @@ impl GenerateVideoPromptDiagnostics {
             .unwrap_or(0);
         self
     }
+}
+
+fn art_style_director_profile(project_art_style: &str) -> Option<&'static ArtStyleDirectorProfile> {
+    let normalized = normalize_prompt_text(project_art_style).to_lowercase();
+    if normalized.is_empty() {
+        return None;
+    }
+
+    ART_STYLE_DIRECTOR_PROFILES.iter().find(|profile| {
+        profile.aliases.iter().any(|alias| {
+            let alias = normalize_prompt_text(alias).to_lowercase();
+            !alias.is_empty() && normalized.contains(&alias)
+        })
+    })
+}
+
+fn parse_director_emotion_cues(markdown: &str) -> Vec<DirectorEmotionCue> {
+    let mut cues = Vec::new();
+    let mut in_emotion_table = false;
+
+    for raw_line in markdown.lines() {
+        let line = raw_line.trim();
+        if !in_emotion_table {
+            if line.contains("情绪") && line.contains("面容") && line.contains("眼神") {
+                in_emotion_table = true;
+            }
+            continue;
+        }
+
+        if line.starts_with("## ") && !line.contains("情绪") {
+            break;
+        }
+        if !line.starts_with('|') || line.contains("---") || line.contains("情绪输入") {
+            continue;
+        }
+
+        let cells = line
+            .trim_matches('|')
+            .split('|')
+            .map(normalize_prompt_text)
+            .collect::<Vec<_>>();
+        if cells.len() < 4 {
+            continue;
+        }
+
+        let emotion_terms = cells[0]
+            .split(['/', '／'])
+            .map(normalize_prompt_text)
+            .filter(|term| !term.is_empty())
+            .collect::<Vec<_>>();
+        if emotion_terms.is_empty() {
+            continue;
+        }
+
+        cues.push(DirectorEmotionCue {
+            emotion_terms,
+            face: cells[1].clone(),
+            eyes: cells[2].clone(),
+            micro_expression: cells[3].clone(),
+        });
+    }
+
+    cues
+}
+
+fn score_director_emotion_cue_match(mood: &str, cue: &DirectorEmotionCue) -> usize {
+    let mood = normalize_prompt_text(mood);
+    if mood.is_empty() {
+        return 0;
+    }
+
+    cue.emotion_terms
+        .iter()
+        .map(|term| {
+            if term.is_empty() {
+                return 0;
+            }
+            if mood == *term {
+                return 8;
+            }
+            if mood.contains(term) || term.contains(&mood) {
+                return 6;
+            }
+            let mood_chars = mood.chars().collect::<Vec<_>>();
+            let term_chars = term.chars().collect::<Vec<_>>();
+            let overlap = mood_chars
+                .iter()
+                .filter(|ch| term_chars.contains(ch))
+                .count();
+            if overlap >= 2 {
+                3 + overlap
+            } else if overlap == 1 {
+                1
+            } else {
+                0
+            }
+        })
+        .max()
+        .unwrap_or(0)
+}
+
+fn resolve_performance_style_anchor(
+    project_art_style: Option<&str>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+) -> Option<String> {
+    let fields = structured_fields?;
+    if fields.subject.trim().is_empty() || fields.mood.trim().is_empty() {
+        return None;
+    }
+
+    let profile = art_style_director_profile(project_art_style?)?;
+    let cue = parse_director_emotion_cues(profile.director_storyboard)
+        .into_iter()
+        .filter_map(|cue| {
+            let score = score_director_emotion_cue_match(&fields.mood, &cue);
+            (score > 0).then_some((score, cue))
+        })
+        .max_by(|(left_score, left_cue), (right_score, right_cue)| {
+            left_score.cmp(right_score).then_with(|| {
+                right_cue
+                    .emotion_terms
+                    .len()
+                    .cmp(&left_cue.emotion_terms.len())
+            })
+        })?
+        .1;
+
+    let mut fragments = Vec::new();
+    for fragment in [&cue.face, &cue.eyes, &cue.micro_expression] {
+        let fragment = normalize_prompt_text(fragment);
+        if fragment.is_empty()
+            || prompt_fragment_is_covered(&fragment, prompt_coverage)
+            || fragments.iter().any(|existing| existing == &fragment)
+        {
+            continue;
+        }
+        fragments.push(fragment);
+    }
+
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &fragments.join(", "),
+        VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS,
+    ))
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -1622,6 +1845,14 @@ fn build_project_visual_anchors(
         .and_then(|value| compact_project_director_note(value, structured_fields, &style_coverage))
     {
         anchors.push(note);
+        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    }
+    if let Some(performance_anchor) = resolve_performance_style_anchor(
+        ctx.project_art_style.as_deref(),
+        structured_fields,
+        &style_coverage,
+    ) {
+        anchors.push(performance_anchor);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
     let has_base_style_anchor = !anchors.is_empty();
@@ -7438,6 +7669,65 @@ mod tests {
         assert_eq!(result.diagnostics.continuity_note_count, 1);
         assert!(result.diagnostics.uses_reference_frame);
         assert!(result.diagnostics.prompt_chars > 0);
+    }
+
+    #[test]
+    fn build_video_prompt_adds_art_style_performance_anchor_for_matching_mood() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在咖啡厅窗边、咖啡厅窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、夜间冷蓝窗光、无台词、雨声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 真人都市写实; 神情内敛, 眼神深沉, 唇线收紧"),
+            "{prompt}"
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_skips_performance_anchor_without_matching_art_style_profile() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角在门口停下、门口、主角、4秒、中景、静止、停步回望、紧张、阴天冷光、无台词、风声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("眼神深沉"));
+        assert!(!prompt.contains("表情略带茫然"));
+    }
+
+    #[test]
+    fn parse_director_emotion_cues_reads_bundled_emotion_table() {
+        let profile =
+            art_style_director_profile("成熟都市言情二次元动画").expect("matched art style");
+        let cues = parse_director_emotion_cues(profile.director_storyboard);
+
+        assert!(cues.iter().any(|cue| {
+            cue.emotion_terms.iter().any(|term| term == "隐忍")
+                && cue.face == "神情内敛，面容沉静"
+                && cue.eyes == "眼神深沉，眼底有情绪压抑"
+        }));
     }
 
     #[test]
