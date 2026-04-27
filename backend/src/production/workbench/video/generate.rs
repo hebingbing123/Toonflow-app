@@ -847,10 +847,29 @@ fn compact_negative_fragment_against_storyboard_risk(
 
     match canonical_negative_fragment(trimmed).as_str() {
         "avoid extra shot changes or wrong framing" => {
-            if negative_prompt_scene_has_framing_risk(&fields) {
-                Some(trimmed.to_string())
-            } else {
-                Some("avoid unnecessary shot changes".to_string())
+            let has_shot_change_risk = negative_prompt_scene_has_shot_change_risk(&fields);
+            let has_extreme_angle_risk = negative_prompt_scene_has_extreme_angle_risk(&fields);
+            let has_tight_close_up_risk = negative_prompt_scene_has_tight_close_up_risk(&fields);
+            match (
+                has_shot_change_risk,
+                has_extreme_angle_risk,
+                has_tight_close_up_risk,
+            ) {
+                (true, true, true) => Some(trimmed.to_string()),
+                (true, true, false) => {
+                    Some("avoid unnecessary shot changes, avoid extreme camera angle".to_string())
+                }
+                (true, false, true) => Some(
+                    "avoid unnecessary shot changes, avoid overly tight close-up framing"
+                        .to_string(),
+                ),
+                (true, false, false) => Some("avoid unnecessary shot changes".to_string()),
+                (false, true, true) => {
+                    Some("avoid extreme camera angle or overly tight close-up framing".to_string())
+                }
+                (false, true, false) => Some("avoid extreme camera angle".to_string()),
+                (false, false, true) => Some("avoid overly tight close-up framing".to_string()),
+                (false, false, false) => Some("avoid unnecessary shot changes".to_string()),
             }
         }
         "avoid warped anatomy, blur, flicker" => {
@@ -1000,6 +1019,12 @@ fn negative_prompt_scene_has_flat_cold_lighting_risk(
 }
 
 fn negative_prompt_scene_has_framing_risk(fields: &StructuredStoryboardDescription) -> bool {
+    negative_prompt_scene_has_extreme_angle_risk(fields)
+        || negative_prompt_scene_has_tight_close_up_risk(fields)
+        || negative_prompt_scene_has_shot_change_risk(fields)
+}
+
+fn negative_prompt_scene_has_shot_change_risk(fields: &StructuredStoryboardDescription) -> bool {
     [
         fields.shot.as_str(),
         fields.camera_move.as_str(),
@@ -1010,24 +1035,57 @@ fn negative_prompt_scene_has_framing_risk(fields: &StructuredStoryboardDescripti
     .any(|value| {
         !value.is_empty()
             && [
-                "近景",
-                "特写",
-                "大全景",
-                "仰拍",
-                "俯拍",
-                "倾斜",
                 "跟拍",
                 "推进",
                 "拉远",
+                "摇镜",
+                "甩镜",
+                "切换",
+                "转场",
+                "追",
+                "跑",
+                "冲",
                 "手持",
-                "close-up",
-                "wide shot",
-                "low angle",
-                "high angle",
+                "follow",
+                "push in",
+                "pull back",
+                "whip",
+                "pan",
             ]
             .iter()
             .any(|keyword| value.contains(keyword))
     })
+}
+
+fn negative_prompt_scene_has_extreme_angle_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [fields.shot.as_str(), fields.camera_move.as_str()]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .any(|value| {
+            !value.is_empty()
+                && [
+                    "仰拍",
+                    "俯拍",
+                    "倾斜",
+                    "low angle",
+                    "high angle",
+                    "dutch angle",
+                ]
+                .iter()
+                .any(|keyword| value.contains(keyword))
+        })
+}
+
+fn negative_prompt_scene_has_tight_close_up_risk(fields: &StructuredStoryboardDescription) -> bool {
+    [fields.shot.as_str(), fields.camera_move.as_str()]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .any(|value| {
+            !value.is_empty()
+                && ["近景", "特写", "close-up", "tight close-up"]
+                    .iter()
+                    .any(|keyword| value.contains(keyword))
+        })
 }
 
 fn negative_prompt_scene_needs_emotional_memory(fields: &StructuredStoryboardDescription) -> bool {
@@ -3660,6 +3718,61 @@ mod tests {
         let selection = prompts.get(&12).expect("storyboard 12 prompt");
         assert_eq!(selection.as_deref(), Some("avoid unnecessary shot changes"));
         assert_eq!(selection.fragment_count, 1);
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_trims_storyboard_mismatch_to_framing_only_axis() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("output".into()),
+                target_id: None,
+                bad_case_category: Some("storyboard_mismatch".into()),
+                comments: None,
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("主角抬头看向楼梯上方"),
+                Some("（主角抬头看向楼梯上方、旧宅楼梯口、主角、4秒、仰拍中景、静止、抬头盯住楼上、压抑、室内暖光、无台词、木地板回响、A12）"),
+                Some("4s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(selection.as_deref(), Some("avoid extreme camera angle"));
+        assert_eq!(selection.fragment_count, 1);
+        assert_eq!(selection.budget_tier, "lean");
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_trims_storyboard_mismatch_to_tight_close_up_only_axis() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("output".into()),
+                target_id: None,
+                bad_case_category: Some("storyboard_mismatch".into()),
+                comments: None,
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("主角压低声音盯住来人"),
+                Some("（主角压低声音盯住来人、旧宅门厅、主角、4秒、特写、静止、盯住来人、克制、室内暖光、你终于来了、空调低鸣、A12）"),
+                Some("4s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(
+            selection.as_deref(),
+            Some("avoid overly tight close-up framing")
+        );
+        assert_eq!(selection.fragment_count, 1);
+        assert_eq!(selection.budget_tier, "lean");
     }
 
     #[test]
