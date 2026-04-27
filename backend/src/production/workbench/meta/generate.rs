@@ -3236,9 +3236,8 @@ fn compact_memory_style_anchor(
 
     let note = match memory_budget_tier {
         VideoPromptMemoryBudgetTier::Lean => {
-            select_best_memory_style_fragment_for_lean_tier(&fragments, structured_fields).map(
-                |fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS),
-            )?
+            select_best_memory_style_note_for_lean_tier(&fragments, structured_fields)
+                .map(|note| clip_prompt_fragment(&note, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS))?
         }
         VideoPromptMemoryBudgetTier::Expanded => {
             clip_prompt_fragment(&fragments.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
@@ -3247,11 +3246,11 @@ fn compact_memory_style_anchor(
     Some(note)
 }
 
-fn select_best_memory_style_fragment_for_lean_tier(
+fn select_best_memory_style_note_for_lean_tier(
     fragments: &[String],
     structured_fields: Option<&StructuredStoryboardDescription>,
 ) -> Option<String> {
-    fragments
+    let best_single = fragments
         .iter()
         .max_by(|left, right| {
             score_memory_style_fragment_for_lean_tier(left, structured_fields)
@@ -3262,7 +3261,27 @@ fn select_best_memory_style_fragment_for_lean_tier(
                 .then_with(|| right.chars().count().cmp(&left.chars().count()))
                 .then_with(|| right.cmp(left))
         })
-        .cloned()
+        .cloned()?;
+
+    let Some(fields) =
+        structured_fields.filter(|fields| video_prompt_scene_needs_emotional_memory(fields))
+    else {
+        return Some(best_single);
+    };
+
+    let best_pair = select_best_emotional_memory_pair_for_lean_tier(fragments, fields);
+    match best_pair {
+        Some((pair, pair_score)) => {
+            let single_score =
+                score_memory_style_fragment_for_lean_tier(&best_single, structured_fields);
+            if pair_score > single_score {
+                Some(pair)
+            } else {
+                Some(best_single)
+            }
+        }
+        None => Some(best_single),
+    }
 }
 
 fn score_memory_style_fragment_for_lean_tier(
@@ -3289,10 +3308,13 @@ fn score_memory_style_fragment_for_lean_tier(
         }
         if video_prompt_scene_has_lighting_risk(fields) {
             score += match family {
-                Some("光影") => 6,
-                Some("环境") | Some("声场") => 4,
+                Some("光影") => 8,
+                Some("环境") | Some("声场") => 5,
                 _ => 0,
             };
+            if family == Some("表演") {
+                score -= 2;
+            }
         }
         if video_prompt_scene_has_motion_risk(fields) {
             score += match family {
@@ -3308,6 +3330,68 @@ fn score_memory_style_fragment_for_lean_tier(
     }
 
     score
+}
+
+fn select_best_emotional_memory_pair_for_lean_tier(
+    fragments: &[String],
+    fields: &StructuredStoryboardDescription,
+) -> Option<(String, i32)> {
+    let dialogue_is_empty = storyboard_dialogue_is_empty(&fields.dialogue);
+    let has_motion_risk = video_prompt_scene_has_motion_risk(fields);
+    let has_lighting_risk = video_prompt_scene_has_lighting_risk(fields);
+    let mut best: Option<(String, i32, usize)> = None;
+
+    for (left_idx, left) in fragments.iter().enumerate() {
+        for right in fragments.iter().skip(left_idx + 1) {
+            if style_note_fragment_conflicts_or_overlaps(left, right) {
+                continue;
+            }
+            let pair = format!("{left}，{right}");
+            let pair_len = normalize_prompt_text(&pair).chars().count();
+            if pair_len > VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS {
+                continue;
+            }
+
+            let left_family = style_note_fragment_family(left);
+            let right_family = style_note_fragment_family(right);
+            let families = [left_family, right_family];
+            if dialogue_is_empty && families.contains(&Some("语气")) {
+                continue;
+            }
+            if !families.contains(&Some("表演")) {
+                continue;
+            }
+            let allows_pair = families.contains(&Some("语气"))
+                || families.contains(&Some("情绪"))
+                || (has_motion_risk && !has_lighting_risk && families.contains(&Some("动作")));
+            if !allows_pair {
+                continue;
+            }
+
+            let mut score = score_memory_style_fragment_for_lean_tier(left, Some(fields))
+                + score_memory_style_fragment_for_lean_tier(right, Some(fields));
+            if families.contains(&Some("语气")) {
+                score += 8;
+            }
+            if families.contains(&Some("情绪")) {
+                score += 5;
+            }
+            if has_motion_risk && families.contains(&Some("动作")) {
+                score += 3;
+            }
+
+            match &best {
+                Some((best_pair, best_score, best_len))
+                    if *best_score > score
+                        || (*best_score == score
+                            && (*best_len < pair_len
+                                || (*best_len == pair_len && best_pair <= &pair))) => {}
+                _ => best = Some((pair, score, pair_len)),
+            }
+        }
+    }
+
+    best.map(|(pair, score, _)| (pair, score))
 }
 
 fn trim_style_fragment_against_storyboard_fields(
@@ -9926,6 +10010,40 @@ mod tests {
 
         assert!(result.prompt.contains("表演抬眼停顿"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气轻声"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_keeps_performance_and_voice_pair_for_emotional_lean_scene(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、欲言又止后低声开口、隐忍哽咽、夜间冷蓝窗光、你别看我、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气低声克制，环境咖啡热气".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(result.prompt.contains("语气低声克制"), "{}", result.prompt);
+        assert!(!result.prompt.contains("环境咖啡热气"), "{}", result.prompt);
+        assert!(
+            result.diagnostics.memory_style_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
+            "{:?}",
+            result.diagnostics
+        );
     }
 
     #[test]
