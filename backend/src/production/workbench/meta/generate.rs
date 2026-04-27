@@ -4260,6 +4260,8 @@ fn select_best_memory_style_note_for_lean_tier(
         Some(LeanMemoryPairFocus::Emotional)
     } else if video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure) {
         Some(LeanMemoryPairFocus::Dialogue)
+    } else if video_prompt_scene_needs_identity_lighting_pair_memory(fields, constraint_pressure) {
+        Some(LeanMemoryPairFocus::IdentityLighting)
     } else {
         None
     };
@@ -4294,6 +4296,7 @@ fn select_best_memory_style_note_for_lean_tier(
 enum LeanMemoryPairFocus {
     Emotional,
     Dialogue,
+    IdentityLighting,
 }
 
 fn video_prompt_scene_needs_dialogue_performance_memory(
@@ -4307,6 +4310,17 @@ fn video_prompt_scene_needs_dialogue_performance_memory(
             || constraint_pressure.is_some_and(|pressure| {
                 pressure.has_dialogue_guardrail || pressure.has_identity_guardrail
             }))
+}
+
+fn video_prompt_scene_needs_identity_lighting_pair_memory(
+    fields: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    video_prompt_scene_needs_identity_memory(fields)
+        && video_prompt_scene_has_lighting_risk(fields)
+        && constraint_pressure.is_some_and(|pressure| {
+            pressure.has_identity_guardrail || pressure.has_lighting_guardrail
+        })
 }
 
 fn score_memory_style_fragment_for_lean_tier(
@@ -4638,6 +4652,16 @@ fn select_best_expressive_memory_pair_for_lean_tier(
                             && !has_lighting_risk
                             && families.contains(&Some("动作")))
                 }
+                LeanMemoryPairFocus::IdentityLighting => {
+                    families.contains(&Some("光影"))
+                        && [left.as_str(), right.as_str()].into_iter().any(|fragment| {
+                            style_note_fragment_family(fragment) == Some("表演")
+                                && score_memory_fragment_human_performance_detail(
+                                    fragment,
+                                    Some("表演"),
+                                ) >= 3
+                        })
+                }
             };
             if !allows_pair {
                 continue;
@@ -4654,6 +4678,7 @@ fn select_best_expressive_memory_pair_for_lean_tier(
                 score += match pair_focus {
                     LeanMemoryPairFocus::Dialogue => 10,
                     LeanMemoryPairFocus::Emotional => 8,
+                    LeanMemoryPairFocus::IdentityLighting => 0,
                 };
             }
             if pair_focus == LeanMemoryPairFocus::Emotional && families.contains(&Some("情绪")) {
@@ -4664,6 +4689,12 @@ fn select_best_expressive_memory_pair_for_lean_tier(
                 && families.contains(&Some("动作"))
             {
                 score += 3;
+            }
+            if pair_focus == LeanMemoryPairFocus::IdentityLighting {
+                score += 11;
+                if families.contains(&Some("光影")) {
+                    score += 5;
+                }
             }
 
             match &best {
@@ -12979,6 +13010,50 @@ mod tests {
             result.prompt
         );
         assert!(!result.prompt.contains("表演眼神放松"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_constraint_pressure_keeps_micro_performance_and_lighting_pair_for_identity_close_up(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚在镜前停住、化妆镜前、林晚、4秒、近景、静止、抬眼看向镜中倒影、克制隐忍、暖金逆光、无台词、静场留白、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["化妆镜前: 镜面暖光".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演眼神迟疑，光影暖金逆光层次，环境镜面微雾".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                has_lighting_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert!(result.prompt.contains("表演眼神迟疑"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("光影暖金逆光层次"),
+            "{}",
+            result.prompt
+        );
+        assert!(!result.prompt.contains("环境镜面微雾"), "{}", result.prompt);
+        assert!(
+            result.diagnostics.memory_style_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
+            "{:?}",
+            result.diagnostics
+        );
     }
 
     #[test]
