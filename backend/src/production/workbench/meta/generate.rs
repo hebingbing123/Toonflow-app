@@ -4176,14 +4176,27 @@ fn select_best_memory_style_note_for_lean_tier(
         })
         .cloned()?;
 
-    let Some(fields) =
-        structured_fields.filter(|fields| video_prompt_scene_needs_emotional_memory(fields))
-    else {
+    let Some(fields) = structured_fields else {
         return Some(best_single);
     };
 
-    let best_pair =
-        select_best_emotional_memory_pair_for_lean_tier(fragments, fields, constraint_pressure);
+    let pair_focus = if video_prompt_scene_needs_emotional_memory(fields) {
+        Some(LeanMemoryPairFocus::Emotional)
+    } else if video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure) {
+        Some(LeanMemoryPairFocus::Dialogue)
+    } else {
+        None
+    };
+    let Some(pair_focus) = pair_focus else {
+        return Some(best_single);
+    };
+
+    let best_pair = select_best_expressive_memory_pair_for_lean_tier(
+        fragments,
+        fields,
+        constraint_pressure,
+        pair_focus,
+    );
     match best_pair {
         Some((pair, pair_score)) => {
             let single_score = score_memory_style_fragment_for_lean_tier(
@@ -4199,6 +4212,25 @@ fn select_best_memory_style_note_for_lean_tier(
         }
         None => Some(best_single),
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum LeanMemoryPairFocus {
+    Emotional,
+    Dialogue,
+}
+
+fn video_prompt_scene_needs_dialogue_performance_memory(
+    fields: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    !storyboard_dialogue_is_empty(&fields.dialogue)
+        && storyboard_supports_voice_style(fields)
+        && (video_prompt_scene_needs_identity_memory(fields)
+            || current_storyboard_is_fragile_emotional_turn(fields)
+            || constraint_pressure.is_some_and(|pressure| {
+                pressure.has_dialogue_guardrail || pressure.has_identity_guardrail
+            }))
 }
 
 fn score_memory_style_fragment_for_lean_tier(
@@ -4482,10 +4514,11 @@ fn score_memory_fragment_human_performance_detail(
     score
 }
 
-fn select_best_emotional_memory_pair_for_lean_tier(
+fn select_best_expressive_memory_pair_for_lean_tier(
     fragments: &[String],
     fields: &StructuredStoryboardDescription,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
+    pair_focus: LeanMemoryPairFocus,
 ) -> Option<(String, i32)> {
     let dialogue_is_empty = storyboard_dialogue_is_empty(&fields.dialogue);
     let has_motion_risk = video_prompt_scene_has_motion_risk(fields);
@@ -4512,9 +4545,24 @@ fn select_best_emotional_memory_pair_for_lean_tier(
             if !families.contains(&Some("表演")) {
                 continue;
             }
-            let allows_pair = families.contains(&Some("语气"))
-                || families.contains(&Some("情绪"))
-                || (has_motion_risk && !has_lighting_risk && families.contains(&Some("动作")));
+            let allows_pair = match pair_focus {
+                LeanMemoryPairFocus::Dialogue => {
+                    families.contains(&Some("语气"))
+                        && [left.as_str(), right.as_str()].into_iter().any(|fragment| {
+                            style_note_fragment_family(fragment) == Some("语气")
+                                && memory_fragment_has_high_signal_voice_detail(
+                                    normalize_prompt_text(fragment).as_str(),
+                                )
+                        })
+                }
+                LeanMemoryPairFocus::Emotional => {
+                    families.contains(&Some("语气"))
+                        || families.contains(&Some("情绪"))
+                        || (has_motion_risk
+                            && !has_lighting_risk
+                            && families.contains(&Some("动作")))
+                }
+            };
             if !allows_pair {
                 continue;
             }
@@ -4527,12 +4575,18 @@ fn select_best_emotional_memory_pair_for_lean_tier(
                         constraint_pressure,
                     );
             if families.contains(&Some("语气")) {
-                score += 8;
+                score += match pair_focus {
+                    LeanMemoryPairFocus::Dialogue => 10,
+                    LeanMemoryPairFocus::Emotional => 8,
+                };
             }
-            if families.contains(&Some("情绪")) {
+            if pair_focus == LeanMemoryPairFocus::Emotional && families.contains(&Some("情绪")) {
                 score += 5;
             }
-            if has_motion_risk && families.contains(&Some("动作")) {
+            if pair_focus == LeanMemoryPairFocus::Emotional
+                && has_motion_risk
+                && families.contains(&Some("动作"))
+            {
                 score += 3;
             }
 
@@ -12392,6 +12446,81 @@ mod tests {
 
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_identity_dialogue_scene_keeps_micro_performance_and_high_signal_voice_pair(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚近景低声开口、咖啡厅窗边、林晚、4秒、近景、缓推、抬眼后压低气息说你先走、克制、夜间冷蓝窗光、你先走、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气压低气息尾音发颤".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                has_dialogue_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("语气压低气息尾音发颤"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.diagnostics.memory_style_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
+            "{:?}",
+            result.diagnostics
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_identity_dialogue_scene_still_skips_generic_voice_pair() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚近景低声开口、咖啡厅窗边、林晚、4秒、近景、缓推、抬眼后低声说你先走、克制、夜间冷蓝窗光、你先走、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气低声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                has_dialogue_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
     }
 
     #[test]
