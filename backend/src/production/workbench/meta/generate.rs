@@ -198,11 +198,6 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     )
     .await?;
 
-    let prompt_result = build_video_prompt_with_diagnostics(
-        body.description.as_deref(),
-        body.image_url.as_deref(),
-        context.as_ref(),
-    );
     let negative_prompt_selection =
         if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
             load_auto_negative_prompt_details(
@@ -240,6 +235,16 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     } else {
         None
     };
+    let constraint_pressure = VideoPromptConstraintPressure::from_runtime_constraints(
+        negative_prompt_selection.as_ref(),
+        observation_note.as_deref(),
+    );
+    let prompt_result = build_video_prompt_with_constraint_pressure(
+        body.description.as_deref(),
+        body.image_url.as_deref(),
+        context.as_ref(),
+        constraint_pressure,
+    );
     let duration = resolve_video_prompt_duration(
         body.duration_hint,
         body.description.as_deref(),
@@ -280,6 +285,77 @@ struct VideoPromptContext {
 struct VideoPromptBuildResult {
     prompt: String,
     diagnostics: GenerateVideoPromptDiagnostics,
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+struct VideoPromptConstraintPressure {
+    has_identity_guardrail: bool,
+    has_dialogue_guardrail: bool,
+    has_blocking_guardrail: bool,
+    has_lighting_guardrail: bool,
+    has_motion_guardrail: bool,
+    has_emotion_guardrail: bool,
+    forces_compact_memory: bool,
+}
+
+impl VideoPromptConstraintPressure {
+    fn from_runtime_constraints(
+        selection: Option<&AutoNegativePromptSelection>,
+        observation_note: Option<&str>,
+    ) -> Option<Self> {
+        let mut pressure = Self::default();
+
+        if let Some(selection) = selection {
+            pressure.forces_compact_memory = selection.used_pending_observation_fallback
+                || selection.fragment_count >= 2
+                || selection.budget_tier == "expanded";
+            for fragment in split_runtime_negative_constraint_fragments(selection.prompt.as_deref())
+            {
+                pressure.absorb_fragment(&fragment);
+            }
+        }
+
+        if let Some(note) = observation_note {
+            let trimmed =
+                normalize_prompt_text(note.strip_prefix("待观察失败倾向：").unwrap_or(note).trim());
+            if !trimmed.is_empty() {
+                pressure.forces_compact_memory = true;
+                pressure.absorb_fragment(&trimmed);
+            }
+        }
+
+        pressure.has_active_guardrail().then_some(pressure)
+    }
+
+    fn has_active_guardrail(self) -> bool {
+        self.has_identity_guardrail
+            || self.has_dialogue_guardrail
+            || self.has_blocking_guardrail
+            || self.has_lighting_guardrail
+            || self.has_motion_guardrail
+            || self.has_emotion_guardrail
+    }
+
+    fn absorb_fragment(&mut self, fragment: &str) {
+        match observation_note_budget_family(fragment) {
+            VideoPromptObservationFamily::Identity => self.has_identity_guardrail = true,
+            VideoPromptObservationFamily::Dialogue => self.has_dialogue_guardrail = true,
+            VideoPromptObservationFamily::Blocking => self.has_blocking_guardrail = true,
+            VideoPromptObservationFamily::Lighting => self.has_lighting_guardrail = true,
+            VideoPromptObservationFamily::Motion => self.has_motion_guardrail = true,
+            VideoPromptObservationFamily::Emotion => self.has_emotion_guardrail = true,
+            VideoPromptObservationFamily::Generic => {}
+        }
+    }
+}
+
+fn split_runtime_negative_constraint_fragments(value: Option<&str>) -> Vec<String> {
+    value
+        .into_iter()
+        .flat_map(|text| text.split([',', ';', '，', '；', '\n']))
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .collect()
 }
 
 #[derive(Clone, Copy)]
@@ -2906,13 +2982,22 @@ fn build_video_prompt(
     image_url: Option<&str>,
     context: Option<&VideoPromptContext>,
 ) -> String {
-    build_video_prompt_with_diagnostics(description, image_url, context).prompt
+    build_video_prompt_with_constraint_pressure(description, image_url, context, None).prompt
 }
 
 fn build_video_prompt_with_diagnostics(
     description: Option<&str>,
     image_url: Option<&str>,
     context: Option<&VideoPromptContext>,
+) -> VideoPromptBuildResult {
+    build_video_prompt_with_constraint_pressure(description, image_url, context, None)
+}
+
+fn build_video_prompt_with_constraint_pressure(
+    description: Option<&str>,
+    image_url: Option<&str>,
+    context: Option<&VideoPromptContext>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> VideoPromptBuildResult {
     let resolved_description = resolve_video_prompt_description(description, context);
     let structured_fields = resolved_description
@@ -2979,12 +3064,14 @@ fn build_video_prompt_with_diagnostics(
         &role_anchors,
         &scene_anchors,
         &tool_anchors,
+        constraint_pressure,
     );
     let (style_anchors, memory_style_anchor_count) = build_project_visual_anchors(
         context,
         structured_fields.as_ref(),
         &prompt_coverage,
         memory_budget_tier,
+        constraint_pressure,
     );
     let memory_style_chars = style_anchors
         .iter()
@@ -3614,6 +3701,7 @@ fn resolve_video_prompt_memory_budget_tier(
     role_anchors: &[String],
     scene_anchors: &[String],
     tool_anchors: &[String],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> VideoPromptMemoryBudgetTier {
     let mut risk_score: i32 = 0;
     if image_url.is_none() {
@@ -3648,6 +3736,16 @@ fn resolve_video_prompt_memory_budget_tier(
         && !has_effective_continuity_note
     {
         risk_score = risk_score.saturating_sub(2);
+    }
+    if constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory) {
+        risk_score = risk_score.saturating_sub(1);
+    }
+    if constraint_pressure.is_some_and(|pressure| {
+        pressure.has_active_guardrail()
+            && !role_anchors.is_empty()
+            && (!scene_anchors.is_empty() || !tool_anchors.is_empty())
+    }) {
+        risk_score = risk_score.saturating_sub(1);
     }
 
     if risk_score >= 2 {
@@ -3712,6 +3810,7 @@ fn build_project_visual_anchors(
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
     memory_budget_tier: VideoPromptMemoryBudgetTier,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> (Vec<String>, usize) {
     let Some(ctx) = context else {
         return (Vec::new(), 0);
@@ -3784,6 +3883,7 @@ fn build_project_visual_anchors(
             &style_coverage,
             has_base_style_anchor,
             memory_budget_tier,
+            constraint_pressure,
         ) else {
             continue;
         };
@@ -3874,6 +3974,7 @@ fn compact_memory_style_anchor(
     prompt_coverage: &[String],
     allow_prompt_covered_style_fragments: bool,
     memory_budget_tier: VideoPromptMemoryBudgetTier,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let normalized = normalize_prompt_text(note);
     if normalized.is_empty() {
@@ -3911,6 +4012,13 @@ fn compact_memory_style_anchor(
                 .is_none_or(|fields| !style_fragment_is_low_gain_mood_carryover(fragment, fields))
         })
         .filter(|fragment| {
+            !memory_style_fragment_should_yield_to_negative_pressure(
+                fragment,
+                structured_fields,
+                constraint_pressure,
+            )
+        })
+        .filter(|fragment| {
             !(has_base_motion_style_anchor
                 && fragment.starts_with("动作")
                 && generic_motion_style_fragment(fragment))
@@ -3936,10 +4044,12 @@ fn compact_memory_style_anchor(
     }
 
     let note = match memory_budget_tier {
-        VideoPromptMemoryBudgetTier::Lean => {
-            select_best_memory_style_note_for_lean_tier(&fragments, structured_fields)
-                .map(|note| clip_prompt_fragment(&note, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS))?
-        }
+        VideoPromptMemoryBudgetTier::Lean => select_best_memory_style_note_for_lean_tier(
+            &fragments,
+            structured_fields,
+            constraint_pressure,
+        )
+        .map(|note| clip_prompt_fragment(&note, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS))?,
         VideoPromptMemoryBudgetTier::Expanded => {
             clip_prompt_fragment(&fragments.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
         }
@@ -3950,14 +4060,16 @@ fn compact_memory_style_anchor(
 fn select_best_memory_style_note_for_lean_tier(
     fragments: &[String],
     structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let best_single = fragments
         .iter()
         .max_by(|left, right| {
-            score_memory_style_fragment_for_lean_tier(left, structured_fields)
+            score_memory_style_fragment_for_lean_tier(left, structured_fields, constraint_pressure)
                 .cmp(&score_memory_style_fragment_for_lean_tier(
                     right,
                     structured_fields,
+                    constraint_pressure,
                 ))
                 .then_with(|| right.chars().count().cmp(&left.chars().count()))
                 .then_with(|| right.cmp(left))
@@ -3970,11 +4082,15 @@ fn select_best_memory_style_note_for_lean_tier(
         return Some(best_single);
     };
 
-    let best_pair = select_best_emotional_memory_pair_for_lean_tier(fragments, fields);
+    let best_pair =
+        select_best_emotional_memory_pair_for_lean_tier(fragments, fields, constraint_pressure);
     match best_pair {
         Some((pair, pair_score)) => {
-            let single_score =
-                score_memory_style_fragment_for_lean_tier(&best_single, structured_fields);
+            let single_score = score_memory_style_fragment_for_lean_tier(
+                &best_single,
+                structured_fields,
+                constraint_pressure,
+            );
             if pair_score > single_score {
                 Some(pair)
             } else {
@@ -3988,6 +4104,7 @@ fn select_best_memory_style_note_for_lean_tier(
 fn score_memory_style_fragment_for_lean_tier(
     fragment: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> i32 {
     let family = style_note_fragment_family(fragment);
     let mut score = match family {
@@ -4030,8 +4147,126 @@ fn score_memory_style_fragment_for_lean_tier(
             score -= 2;
         }
     }
+    if let Some(pressure) = constraint_pressure {
+        score += score_memory_fragment_against_constraint_pressure(fragment, family, pressure);
+    }
 
     score
+}
+
+fn score_memory_fragment_against_constraint_pressure(
+    fragment: &str,
+    family: Option<&'static str>,
+    pressure: VideoPromptConstraintPressure,
+) -> i32 {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0;
+    if pressure.has_emotion_guardrail {
+        score += match family {
+            Some("表演") => 4,
+            Some("情绪") => -5,
+            Some("语气") => {
+                if memory_fragment_has_high_signal_voice_detail(&normalized) {
+                    1
+                } else {
+                    -6
+                }
+            }
+            Some("声场") => -4,
+            _ => 0,
+        };
+    }
+    if pressure.has_dialogue_guardrail && family == Some("语气") {
+        score += if memory_fragment_has_high_signal_voice_detail(&normalized) {
+            0
+        } else {
+            -6
+        };
+    }
+    if pressure.has_motion_guardrail {
+        score += match family {
+            Some("动作") if generic_motion_style_fragment(&normalized) => -4,
+            Some("镜头") if is_local_framing_only_fragment(&normalized) => -3,
+            Some("表演") => 1,
+            _ => 0,
+        };
+    }
+    if pressure.has_lighting_guardrail {
+        score += match family {
+            Some("光影") => 3,
+            Some("环境") | Some("声场") => -3,
+            _ => 0,
+        };
+    }
+    if pressure.has_blocking_guardrail {
+        score += match family {
+            Some("镜头") if is_local_framing_only_fragment(&normalized) => -4,
+            Some("动作") if generic_motion_style_fragment(&normalized) => -3,
+            _ => 0,
+        };
+    }
+    if pressure.has_identity_guardrail && matches!(family, Some("情绪") | Some("声场")) {
+        score -= 2;
+    }
+
+    score
+}
+
+fn memory_fragment_has_high_signal_voice_detail(fragment: &str) -> bool {
+    ["气息", "换气", "哽咽", "发颤", "尾音", "压低"]
+        .iter()
+        .any(|keyword| fragment.contains(keyword))
+}
+
+fn memory_style_fragment_should_yield_to_negative_pressure(
+    fragment: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    let Some(pressure) = constraint_pressure.filter(|pressure| pressure.has_active_guardrail())
+    else {
+        return false;
+    };
+
+    let normalized = normalize_prompt_text(fragment);
+    let family = style_note_fragment_family(&normalized);
+    match family {
+        Some("情绪") => {
+            pressure.has_emotion_guardrail
+                && mood_fragment_is_generic_carryover(
+                    normalize_prompt_text(normalized.trim_start_matches("情绪")).as_str(),
+                )
+        }
+        Some("语气") => {
+            if structured_fields.is_some_and(|fields| !storyboard_supports_voice_style(fields)) {
+                return true;
+            }
+            !memory_fragment_has_high_signal_voice_detail(&normalized)
+                && (pressure.has_dialogue_guardrail || pressure.has_emotion_guardrail)
+        }
+        Some("声场") => {
+            pressure.has_dialogue_guardrail
+                || pressure.has_motion_guardrail
+                || pressure.has_emotion_guardrail
+        }
+        Some("环境") => {
+            pressure.has_lighting_guardrail
+                && !["反光", "逆光", "霓虹", "雨丝", "玻璃", "水痕", "影"]
+                    .iter()
+                    .any(|keyword| normalized.contains(keyword))
+        }
+        Some("动作") => {
+            pressure.has_motion_guardrail && generic_motion_style_fragment(&normalized)
+        }
+        Some("镜头") => {
+            pressure.has_blocking_guardrail && is_local_framing_only_fragment(&normalized)
+        }
+        _ => false,
+    }
 }
 
 fn style_fragment_is_low_gain_mood_carryover(
@@ -4132,6 +4367,7 @@ fn score_memory_fragment_human_performance_detail(
 fn select_best_emotional_memory_pair_for_lean_tier(
     fragments: &[String],
     fields: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<(String, i32)> {
     let dialogue_is_empty = storyboard_dialogue_is_empty(&fields.dialogue);
     let has_motion_risk = video_prompt_scene_has_motion_risk(fields);
@@ -4165,8 +4401,13 @@ fn select_best_emotional_memory_pair_for_lean_tier(
                 continue;
             }
 
-            let mut score = score_memory_style_fragment_for_lean_tier(left, Some(fields))
-                + score_memory_style_fragment_for_lean_tier(right, Some(fields));
+            let mut score =
+                score_memory_style_fragment_for_lean_tier(left, Some(fields), constraint_pressure)
+                    + score_memory_style_fragment_for_lean_tier(
+                        right,
+                        Some(fields),
+                        constraint_pressure,
+                    );
             if families.contains(&Some("语气")) {
                 score += 8;
             }
@@ -11419,6 +11660,40 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_constraint_pressure_can_pull_emotional_scene_back_to_lean_when_base_anchors_are_present(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停步回头、旧宅走廊、林晚、4秒、中景、缓推、回头后强忍情绪低声开口、压抑哽咽、夜间冷蓝窗光、你别看我、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["旧宅走廊: 冷蓝反光墙面".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["情绪压抑克制，表演喉结滚动".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            None,
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_emotion_guardrail: true,
+                has_dialogue_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("情绪压抑克制"), "{}", result.prompt);
+    }
+
+    #[test]
     fn build_video_prompt_with_diagnostics_keeps_grounded_low_risk_shot_in_lean_tier_when_continuity_note_is_only_generic_tail(
     ) {
         let context = VideoPromptContext {
@@ -11864,6 +12139,40 @@ mod tests {
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气轻声"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_constraint_pressure_keeps_micro_performance_but_drops_generic_voice_and_mood_memory(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、低声说你别看我后喉结发紧、压抑哽咽、夜间冷蓝窗光、你别看我、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["情绪压抑克制，语气低声克制，表演喉结滚动".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_emotion_guardrail: true,
+                has_dialogue_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
+        assert!(!result.prompt.contains("情绪压抑"), "{}", result.prompt);
     }
 
     #[test]
