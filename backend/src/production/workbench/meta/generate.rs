@@ -2267,7 +2267,7 @@ fn video_prompt_observation_is_irrelevant_to_storyboard(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> bool {
     canonical_observation_note(observation_note) == "avoid lip-sync mismatch"
-        && storyboard_row.is_some_and(storyboard_lacks_meaningful_spoken_dialogue)
+        && storyboard_row.is_some_and(storyboard_lacks_visible_speech_performance_risk)
 }
 
 fn storyboard_dialogue_is_empty_row(row: &StoryboardPromptSeedRow) -> bool {
@@ -2299,25 +2299,99 @@ fn storyboard_lacks_meaningful_spoken_dialogue(row: &StoryboardPromptSeedRow) ->
     row.video_desc
         .as_deref()
         .and_then(parse_structured_storyboard_description)
-        .is_none_or(|fields| !storyboard_has_meaningful_spoken_dialogue(&fields))
+        .is_none_or(|fields| {
+            !storyboard_has_meaningful_spoken_dialogue_with_prompt(&fields, row.prompt.as_deref())
+        })
+}
+
+fn storyboard_lacks_visible_speech_performance_risk(row: &StoryboardPromptSeedRow) -> bool {
+    row.video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .is_none_or(|fields| {
+            !storyboard_has_visible_speech_performance_risk(&fields, row.prompt.as_deref())
+        })
 }
 
 fn storyboard_has_meaningful_spoken_dialogue(fields: &StructuredStoryboardDescription) -> bool {
+    storyboard_has_meaningful_spoken_dialogue_with_prompt(fields, None)
+}
+
+fn storyboard_has_meaningful_spoken_dialogue_with_prompt(
+    fields: &StructuredStoryboardDescription,
+    prompt: Option<&str>,
+) -> bool {
     if storyboard_dialogue_is_empty(&fields.dialogue) {
         return false;
     }
 
     let dialogue = normalize_prompt_text(&fields.dialogue);
     let action = normalize_prompt_text(&fields.action);
-    let subject = normalize_prompt_text(&fields.subject);
+    let prompt = prompt.map(normalize_prompt_text).unwrap_or_default();
 
     if dialogue_fragment_is_low_gain_utterance(&dialogue)
-        && !storyboard_explicitly_signals_speech(&action, &dialogue, &subject)
+        && !storyboard_explicitly_signals_speech(&action, &dialogue, &prompt)
     {
         return false;
     }
 
     true
+}
+
+fn storyboard_has_visible_speech_performance_risk(
+    fields: &StructuredStoryboardDescription,
+    prompt: Option<&str>,
+) -> bool {
+    if !storyboard_has_meaningful_spoken_dialogue_with_prompt(fields, prompt) {
+        return false;
+    }
+
+    let shot = normalize_prompt_text(&fields.shot);
+    let camera_move = normalize_prompt_text(&fields.camera_move);
+    let action = normalize_prompt_text(&fields.action);
+    let dialogue = normalize_prompt_text(&fields.dialogue);
+    let prompt = prompt.map(normalize_prompt_text).unwrap_or_default();
+
+    let mut score = 0i32;
+    if ["特写", "近景", "近特写", "大特写"]
+        .iter()
+        .any(|keyword| shot.contains(keyword))
+    {
+        score += 2;
+    } else if shot.contains("中景") {
+        score += 1;
+    } else if ["远景", "全景"]
+        .iter()
+        .any(|keyword| shot.contains(keyword))
+    {
+        score -= 1;
+    }
+
+    if storyboard_explicitly_signals_speech(&action, &dialogue, &prompt)
+        || [
+            "嘴角", "唇线", "抿唇", "喉结", "口型", "嘴唇", "失声", "哽咽", "呢喃", "低声", "轻声",
+        ]
+        .iter()
+        .any(|keyword| {
+            action.contains(keyword) || dialogue.contains(keyword) || prompt.contains(keyword)
+        })
+    {
+        score += 2;
+    }
+
+    if !video_prompt_scene_has_motion_risk(fields)
+        || ["静止", "缓推", "慢推", "停顿", "驻足", "停步"]
+            .iter()
+            .any(|keyword| camera_move.contains(keyword) || action.contains(keyword))
+    {
+        score += 1;
+    }
+
+    if video_prompt_scene_subject_count(fields) > 1 {
+        score -= 1;
+    }
+
+    score >= 2
 }
 
 fn dialogue_fragment_is_low_gain_utterance(dialogue: &str) -> bool {
@@ -2505,8 +2579,15 @@ fn observation_candidate_matches_storyboard_risk(
     note: &str,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> bool {
-    let Some(fields) = storyboard_row
-        .and_then(|row| row.video_desc.as_deref())
+    let Some(row) = storyboard_row else {
+        return !matches!(
+            observation_note_budget_family(note),
+            VideoPromptObservationFamily::Generic
+        );
+    };
+    let Some(fields) = row
+        .video_desc
+        .as_deref()
         .and_then(parse_structured_storyboard_description)
     else {
         return !matches!(
@@ -2518,7 +2599,7 @@ fn observation_candidate_matches_storyboard_risk(
     match observation_note_budget_family(note) {
         VideoPromptObservationFamily::Identity => true,
         VideoPromptObservationFamily::Dialogue => {
-            storyboard_has_meaningful_spoken_dialogue(&fields)
+            storyboard_has_visible_speech_performance_risk(&fields, row.prompt.as_deref())
         }
         VideoPromptObservationFamily::Blocking => video_prompt_scene_has_blocking_risk(&fields),
         VideoPromptObservationFamily::Lighting => video_prompt_scene_has_lighting_risk(&fields),
@@ -12304,6 +12385,25 @@ mod tests {
     }
 
     #[test]
+    fn prune_storyboard_observation_candidates_drops_lip_sync_note_for_wide_moving_dialogue_storyboard(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角在街口边跑边喊别管我".into()),
+            video_desc: Some(
+                "（主角穿过雨夜街口、雨夜街口、主角、5秒、全景、手持跟拍、奔跑间回头喊出别管我、紧张、霓虹反光、别管我、雨声车流声、A14）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+
+        assert!(prune_storyboard_observation_candidates(
+            vec!["avoid lip-sync mismatch".into()],
+            Some(&storyboard_row)
+        )
+        .is_empty());
+    }
+
+    #[test]
     fn prune_storyboard_observation_candidates_drops_blocking_note_for_grounded_low_risk_storyboard(
     ) {
         let storyboard_row = StoryboardPromptSeedRow {
@@ -12537,6 +12637,23 @@ mod tests {
                     .into(),
             ),
             duration: Some("4s".into()),
+        };
+
+        assert!(video_prompt_observation_is_irrelevant_to_storyboard(
+            "avoid lip-sync mismatch",
+            Some(&storyboard_row),
+        ));
+    }
+
+    #[test]
+    fn observation_note_irrelevant_filter_skips_lip_sync_for_wide_moving_dialogue_storyboard() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角在街口边跑边喊别管我".into()),
+            video_desc: Some(
+                "（主角穿过雨夜街口、雨夜街口、主角、5秒、全景、手持跟拍、奔跑间回头喊出别管我、紧张、霓虹反光、别管我、雨声车流声、A14）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
         };
 
         assert!(video_prompt_observation_is_irrelevant_to_storyboard(
