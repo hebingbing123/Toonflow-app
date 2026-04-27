@@ -17,8 +17,8 @@ const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
 const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
-const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
-const STYLE_PROMPT_PREFIXES: [&str; 3] = ["镜头", "情绪", "光影"];
+const STYLE_NOTE_PREFIXES: [&str; 5] = ["镜头", "情绪", "光影", "环境", "场景"];
+const STYLE_PROMPT_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "环境"];
 const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 8] = [
     "稳定跟拍",
     "手持跟拍",
@@ -69,6 +69,21 @@ const LIGHTING_STYLE_KEYWORDS: [&str; 12] = [
     "冷光",
     "暖光",
     "霓虹",
+];
+const ENVIRONMENT_STYLE_KEYWORDS: [&str; 13] = [
+    "咖啡热气",
+    "手机屏幕亮灭",
+    "雨丝玻璃",
+    "窗帘轻摆",
+    "车流反光",
+    "霓虹反光",
+    "烛火轻晃",
+    "竹影摇动",
+    "水波微晃",
+    "烟雾流动",
+    "花瓣飘落",
+    "树叶轻摆",
+    "雪花飘落",
 ];
 const ACTION_PACE_PREFIXES: [&str; 9] = [
     "快步", "缓步", "迅速", "缓慢", "慢慢", "急忙", "猛地", "立刻", "立即",
@@ -1825,7 +1840,9 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
                 clip_prompt_fragment(&fields.lighting, 14)
             ));
         }
-        if let Some(setting) = setting {
+        if let Some(environment) = compact_selected_memory_environment(&fields) {
+            fragments.push(format!("环境{}", clip_prompt_fragment(&environment, 12)));
+        } else if let Some(setting) = setting {
             fragments.push(format!("场景{}", clip_prompt_fragment(&setting, 12)));
         }
         let note = fragments.join("，");
@@ -2911,6 +2928,13 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
             &LIGHTING_STYLE_KEYWORDS,
         ));
     }
+    if fragment.starts_with("环境") {
+        return Some(compact_prefixed_style_fragment_with_keywords(
+            fragment,
+            "环境",
+            &ENVIRONMENT_STYLE_KEYWORDS,
+        ));
+    }
     None
 }
 
@@ -3126,6 +3150,9 @@ fn score_selected_video_memory_style_fragment(fragment: String) -> i32 {
     if fragment.starts_with("光影") {
         score += 6;
     }
+    if fragment.starts_with("环境") {
+        score += 4;
+    }
     if fragment.starts_with("场景") {
         score += 2;
     }
@@ -3225,6 +3252,7 @@ fn summarize_recurring_style_keywords(
         "镜头" => &SHOT_STYLE_KEYWORDS[..],
         "情绪" => &MOOD_STYLE_KEYWORDS[..],
         "光影" => &LIGHTING_STYLE_KEYWORDS[..],
+        "环境" => &ENVIRONMENT_STYLE_KEYWORDS[..],
         _ => return None,
     };
     let min_support = recurring_fragment_support_threshold(parsed_notes.len());
@@ -3254,6 +3282,7 @@ fn summarize_recurring_style_keywords(
         })
         .take(match prefix {
             "镜头" => 3,
+            "环境" => 1,
             _ => 2,
         })
         .copied()
@@ -3293,6 +3322,47 @@ fn extract_style_keywords<'a>(
         matched.push(*keyword);
     }
     matched
+}
+
+fn compact_selected_memory_environment(fields: &StructuredStoryboardDescription) -> Option<String> {
+    let context = normalize_prompt_text(
+        &[
+            fields.setting.as_str(),
+            fields.action.as_str(),
+            fields.sound.as_str(),
+            fields.lighting.as_str(),
+        ]
+        .into_iter()
+        .filter(|part| !part.trim().is_empty())
+        .collect::<Vec<_>>()
+        .join(" "),
+    );
+    if context.is_empty() {
+        return None;
+    }
+
+    let candidates: [(&[&str], &str); 13] = [
+        (&["咖啡"], "咖啡热气"),
+        (&["手机", "屏幕"], "手机屏幕亮灭"),
+        (&["雨", "玻璃"], "雨丝玻璃"),
+        (&["窗帘"], "窗帘轻摆"),
+        (&["车流"], "车流反光"),
+        (&["霓虹"], "霓虹反光"),
+        (&["烛火"], "烛火轻晃"),
+        (&["竹"], "竹影摇动"),
+        (&["水", "波"], "水波微晃"),
+        (&["烟"], "烟雾流动"),
+        (&["花瓣"], "花瓣飘落"),
+        (&["树叶"], "树叶轻摆"),
+        (&["雪"], "雪花飘落"),
+    ];
+
+    candidates.into_iter().find_map(|(tokens, cue)| {
+        tokens
+            .iter()
+            .all(|token| context.contains(*token))
+            .then_some(cue.to_string())
+    })
 }
 
 fn push_rejected_negative_fragment(
@@ -3696,6 +3766,22 @@ mod tests {
         assert!(content.contains("停步回头"), "{content}");
         assert!(!content.contains("场景在旧宅走廊尽头的门厅"), "{content}");
         assert!(!content.contains("在旧宅走廊尽头停步回头"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_prefers_environment_fragment_over_raw_scene_suffix() {
+        let content = build_selected_video_memory(
+            18,
+            &StoryboardPromptSeedRow {
+                prompt: Some("女主站在窗边看着雨幕".into()),
+                video_desc: Some("（女主站在窗边、城市夜景落地窗边、女主、4秒、中景、缓推、看着雨丝划过玻璃并轻扶窗帘、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A18）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("环境雨丝玻璃"), "{content}");
+        assert!(!content.contains("场景城市夜景落地窗边"), "{content}");
     }
 
     #[test]
@@ -4783,6 +4869,26 @@ mod tests {
 
         assert!(summary.contains("sampleCount=2"));
         assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_keeps_recurring_environment_fragment() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头稳定跟拍，情绪克制，环境雨丝玻璃 | note=..."
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=10 | style=镜头近景稳定跟拍，情绪克制，环境雨丝玻璃 | note=..."
+                        .into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("环境雨丝玻璃"), "{summary}");
     }
 
     #[test]

@@ -2410,6 +2410,17 @@ fn trim_style_fragment_against_storyboard_fields(
     if fragment.starts_with("光影") {
         return trim_prefixed_style_fragment(fragment, "光影", &[fields.lighting.as_str()]);
     }
+    if fragment.starts_with("环境") {
+        return trim_prefixed_style_fragment(
+            fragment,
+            "环境",
+            &[
+                fields.setting.as_str(),
+                fields.action.as_str(),
+                fields.sound.as_str(),
+            ],
+        );
+    }
     Some(fragment.to_string())
 }
 
@@ -2453,13 +2464,13 @@ fn style_fragment_matches_prompt_style_field(
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
-    ["镜头", "情绪", "光影"]
+    ["镜头", "情绪", "光影", "环境"]
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
 }
 
 fn style_fragment_body(fragment: &str) -> Option<String> {
-    ["镜头", "情绪", "光影"]
+    ["镜头", "情绪", "光影", "环境"]
         .iter()
         .find_map(|prefix| fragment.strip_prefix(prefix))
         .map(normalize_prompt_text)
@@ -8226,6 +8237,27 @@ mod tests {
 
         assert_eq!(prompt.matches("雨丝划过玻璃").count(), 1, "{prompt}");
         assert!(prompt.contains("赛璐璐动态质感"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_consumes_environment_memory_style_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（女主站在窗边、城市夜景落地窗边、女主、4秒、中景、缓推、看着雨丝划过玻璃、隐忍 / 克制、冷蓝窗光、无台词、雨声、A13）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["镜头稳定跟拍，环境雨丝玻璃".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("环境雨丝玻璃"), "{prompt}");
     }
 
     #[test]
