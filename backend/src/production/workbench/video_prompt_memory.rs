@@ -733,13 +733,23 @@ pub(crate) fn select_rejected_video_negative_memory_notes(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
 ) -> Vec<String> {
+    let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        &[REJECTED_VIDEO_NEGATIVE_MEMORY_NAME],
+    );
     let mut scored = rows
         .iter()
         .enumerate()
         .filter(|(_, row)| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
         .filter_map(|(idx, row)| {
             (memory_matches_storyboard(&row.content, storyboard_numeric_id)
-                && memory_matches_prompt_seed(&row.content, current_prompt_seed))
+                && memory_matches_prompt_seed_with_fallback(
+                    &row.content,
+                    current_prompt_seed,
+                    allow_unseeded_fallback,
+                ))
             .then_some((idx, row))
         })
         .filter(|row| {
@@ -819,6 +829,12 @@ pub(crate) fn select_pending_rejected_video_observation_candidates(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
 ) -> Vec<String> {
+    let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        &[REJECTED_VIDEO_NEGATIVE_MEMORY_NAME],
+    );
     let mut scored = rows
         .iter()
         .enumerate()
@@ -826,7 +842,13 @@ pub(crate) fn select_pending_rejected_video_observation_candidates(
         .filter_map(|(idx, row)| {
             memory_matches_storyboard(&row.content, storyboard_numeric_id).then_some((idx, row))
         })
-        .filter(|(_, row)| memory_matches_prompt_seed(&row.content, current_prompt_seed))
+        .filter(|(_, row)| {
+            memory_matches_prompt_seed_with_fallback(
+                &row.content,
+                current_prompt_seed,
+                allow_unseeded_fallback,
+            )
+        })
         .filter(|(_, row)| {
             rejected_video_negative_rejection_count(&row.content)
                 < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
@@ -1176,6 +1198,12 @@ pub(crate) fn select_selected_video_memory_notes(
     if storyboard_numeric_id <= 0 {
         return Vec::new();
     }
+    let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        &[SELECTED_VIDEO_MEMORY_NAME],
+    );
     let mut style_notes = Vec::new();
     let mut fallback_notes = Vec::new();
     for row in rows {
@@ -1185,7 +1213,11 @@ pub(crate) fn select_selected_video_memory_notes(
         if !memory_matches_storyboard(&row.content, storyboard_numeric_id) {
             continue;
         }
-        if !memory_matches_prompt_seed(&row.content, current_prompt_seed) {
+        if !memory_matches_prompt_seed_with_fallback(
+            &row.content,
+            current_prompt_seed,
+            allow_unseeded_fallback,
+        ) {
             continue;
         }
         if let Some(note) = selected_video_style_value(row) {
@@ -2405,6 +2437,33 @@ fn memory_matches_prompt_seed(content: &str, current_prompt_seed: Option<&str>) 
         }
         _ => true,
     }
+}
+
+fn memory_matches_prompt_seed_with_fallback(
+    content: &str,
+    current_prompt_seed: Option<&str>,
+    allow_unseeded_fallback: bool,
+) -> bool {
+    if memory_matches_prompt_seed(content, current_prompt_seed) {
+        return true;
+    }
+    allow_unseeded_fallback
+        && matches!(current_prompt_seed, Some(seed) if !seed.is_empty())
+        && extract_key_value(content, "promptSeed").is_none()
+}
+
+fn has_exact_prompt_seed_memory_match(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    names: &[&str],
+) -> bool {
+    matches!(current_prompt_seed, Some(seed) if !seed.is_empty())
+        && rows.iter().any(|row| {
+            names.iter().any(|name| row.name == *name)
+                && memory_matches_storyboard(&row.content, storyboard_numeric_id)
+                && memory_matches_prompt_seed(&row.content, current_prompt_seed)
+        })
 }
 
 fn extract_storyboard_ids(content: &str) -> Vec<i32> {
@@ -4299,6 +4358,32 @@ mod tests {
     }
 
     #[test]
+    fn select_selected_video_memory_notes_falls_back_to_unseeded_when_current_seed_has_no_match() {
+        let notes = select_selected_video_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content:
+                        "storyboardIds=12 | promptSeed=oldseed000001 | style=镜头冷调近景，情绪压迫"
+                            .into(),
+                },
+            ],
+            12,
+            Some("newseed000002"),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string()]
+        );
+    }
+
+    #[test]
     fn select_pending_rejected_video_observation_note_skips_stale_prompt_seed() {
         let note = select_pending_rejected_video_observation_note(
             &[AgentMemoryRow {
@@ -4310,6 +4395,54 @@ mod tests {
         );
 
         assert_eq!(note, None);
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_note_falls_back_to_unseeded_when_current_seed_has_no_match(
+    ) {
+        let note = select_pending_rejected_video_observation_note(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=1 | avoid=avoid flicker or motion jitter"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | promptSeed=oldseed000001 | rejectionCount=1 | avoid=avoid flat cold lighting"
+                        .into(),
+                },
+            ],
+            12,
+            Some("newseed000002"),
+        );
+
+        assert_eq!(note, Some("avoid flicker or motion jitter".into()));
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_falls_back_to_unseeded_when_current_seed_has_no_match(
+    ) {
+        let notes = select_rejected_video_negative_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=2 | avoid=avoid flicker or motion jitter"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | promptSeed=oldseed000001 | rejectionCount=2 | avoid=avoid flat cold lighting"
+                        .into(),
+                },
+            ],
+            12,
+            Some("newseed000002"),
+        );
+
+        assert_eq!(notes, vec!["avoid flicker or motion jitter".to_string()]);
     }
 
     #[test]
