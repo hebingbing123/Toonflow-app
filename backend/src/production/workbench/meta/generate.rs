@@ -2469,6 +2469,7 @@ fn keep_prioritized_observation_summary_rows(
     for idx in prioritize_observation_summary_indices(
         script_candidates,
         storyboard_row,
+        subject_candidates,
         VIDEO_PROMPT_OBSERVATION_SCRIPT_SUMMARY_ROW_LIMIT,
     ) {
         kept.insert(idx);
@@ -2476,6 +2477,7 @@ fn keep_prioritized_observation_summary_rows(
     for idx in prioritize_observation_summary_indices(
         project_candidates,
         storyboard_row,
+        subject_candidates,
         VIDEO_PROMPT_OBSERVATION_PROJECT_SUMMARY_ROW_LIMIT,
     ) {
         kept.insert(idx);
@@ -2505,6 +2507,7 @@ fn keep_prioritized_observation_summary_rows(
     for idx in prioritize_observation_summary_indices(
         prioritized_role_refs.as_slice(),
         storyboard_row,
+        subject_candidates,
         VIDEO_PROMPT_OBSERVATION_ROLE_SUMMARY_ROW_LIMIT,
     ) {
         kept.insert(idx);
@@ -2514,6 +2517,7 @@ fn keep_prioritized_observation_summary_rows(
 fn prioritize_observation_summary_indices(
     rows: &[(usize, AgentMemoryRow)],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
+    subject_candidates: &[String],
     limit: usize,
 ) -> Vec<usize> {
     let storyboard_tags = storyboard_observation_summary_risk_tags(storyboard_row);
@@ -2523,15 +2527,21 @@ fn prioritize_observation_summary_indices(
             (
                 *idx,
                 observation_summary_row_risk_overlap(&row.content, &storyboard_tags),
+                memory_subject_match_priority(&row.content, subject_candidates),
                 observation_summary_row_sample_count(&row.content),
             )
         })
         .collect::<Vec<_>>();
-    scored.sort_by(|a, b| b.1.cmp(&a.1).then(b.2.cmp(&a.2)).then(a.0.cmp(&b.0)));
+    scored.sort_by(|a, b| {
+        b.1.cmp(&a.1)
+            .then(a.2.cmp(&b.2))
+            .then(b.3.cmp(&a.3))
+            .then(a.0.cmp(&b.0))
+    });
     scored
         .into_iter()
         .take(limit)
-        .map(|(idx, _, _)| idx)
+        .map(|(idx, _, _, _)| idx)
         .collect()
 }
 
@@ -2539,11 +2549,15 @@ fn observation_summary_row_matches_subject_candidates(
     row: &AgentMemoryRow,
     subject_candidates: &[String],
 ) -> bool {
+    memory_subject_match_priority(&row.content, subject_candidates) != usize::MAX
+}
+
+fn memory_subject_match_priority(content: &str, subject_candidates: &[String]) -> usize {
     if subject_candidates.is_empty() {
-        return false;
+        return usize::MAX;
     }
-    let memory_subjects = extract_key_value(&row.content, "subjectAliases")
-        .or_else(|| extract_key_value(&row.content, "subject"))
+    let memory_subjects = extract_key_value(content, "subjectAliases")
+        .or_else(|| extract_key_value(content, "subject"))
         .map(|value| {
             value
                 .split(['/', ',', '，', ';', '；'])
@@ -2552,15 +2566,25 @@ fn observation_summary_row_matches_subject_candidates(
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
-    !memory_subjects.is_empty()
-        && memory_subjects.iter().any(|memory_subject| {
-            subject_candidates.iter().any(|candidate| {
-                let candidate = normalize_prompt_text(candidate);
-                candidate == *memory_subject
-                    || candidate.contains(memory_subject)
-                    || memory_subject.contains(&candidate)
-            })
+    if memory_subjects.is_empty() {
+        return usize::MAX;
+    }
+
+    subject_candidates
+        .iter()
+        .enumerate()
+        .find_map(|(idx, candidate)| {
+            let candidate = normalize_prompt_text(candidate);
+            memory_subjects
+                .iter()
+                .any(|memory_subject| {
+                    candidate == *memory_subject
+                        || candidate.contains(memory_subject)
+                        || memory_subject.contains(&candidate)
+                })
+                .then_some(idx)
         })
+        .unwrap_or(usize::MAX)
 }
 
 fn observation_summary_row_sample_count(content: &str) -> usize {
@@ -12432,6 +12456,62 @@ mod tests {
             row.name == "script_role_video_observation_memory"
                 && row.content.contains("subject=顾承泽")
         }));
+    }
+
+    #[test]
+    fn trim_video_prompt_observation_rows_prefers_primary_subject_role_summary_under_limit() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚低声开口顾承泽沉默看着她".into()),
+            video_desc: Some(
+                "（晚晚低声开口、雨夜办公室、林晚/晚晚/顾承泽、5秒、近景、慢推、回头低声开口喉结滚动顾承泽站在身后沉默注视、压抑、霓虹反光、你别逼我、雨声回响、A16）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_role_video_observation_memory".into(),
+                content: "subject=顾承泽 | subjectAliases=顾承泽/顾总 | sampleCount=9 | riskTags=identity/dialogue | avoid=avoid lip-sync mismatch".into(),
+            },
+            AgentMemoryRow {
+                name: "project_role_video_observation_memory".into(),
+                content: "subject=顾承泽 | subjectAliases=顾承泽/顾总 | sampleCount=8 | riskTags=identity/dialogue | avoid=avoid face distortion or identity drift".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_observation_memory".into(),
+                content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | riskTags=identity/dialogue/lighting | avoid=avoid blank expression or monotone delivery".into(),
+            },
+        ];
+
+        let trimmed = trim_video_prompt_observation_rows(
+            rows,
+            16,
+            Some("seed-16-current"),
+            &[
+                "林晚".to_string(),
+                "晚晚".to_string(),
+                "顾承泽".to_string(),
+                "顾总".to_string(),
+            ],
+            Some(&storyboard_row),
+        );
+
+        let kept_role_rows = trimmed
+            .iter()
+            .filter(|row| row.name.ends_with("role_video_observation_memory"))
+            .map(|row| row.content.as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(kept_role_rows.len(), 2, "{kept_role_rows:?}");
+        assert!(kept_role_rows
+            .iter()
+            .any(|content| content.contains("subject=林晚")));
+        assert_eq!(
+            kept_role_rows
+                .iter()
+                .filter(|content| content.contains("subject=顾承泽"))
+                .count(),
+            1
+        );
     }
 
     #[test]
