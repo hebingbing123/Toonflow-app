@@ -2540,6 +2540,18 @@ fn compact_selected_memory_performance_style(
     {
         return Some("表演眼眶发红".to_string());
     }
+    if ["喉结滚动", "喉头滚动", "喉结滑动", "喉头滑动"]
+        .iter()
+        .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演喉结滚动".to_string());
+    }
+    if ["嘴角发僵", "嘴角僵住", "嘴角绷紧", "唇角发僵"]
+        .iter()
+        .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演嘴角发僵".to_string());
+    }
     if ["欲言又止", "迟迟没有开口", "张了张嘴", "话到嘴边"]
         .iter()
         .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
@@ -4515,6 +4527,18 @@ fn trim_selected_memory_fragment_covered_by_style(fragment: &str, style: &str) -
             &["垂眼停顿", "垂眼", "低头停顿", "低头", "停顿片刻"],
         );
     }
+    if style.contains("表演喉结滚动") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &["喉结滚动", "喉头滚动", "喉结滑动", "喉头滑动"],
+        );
+    }
+    if style.contains("表演嘴角发僵") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &["嘴角发僵", "嘴角僵住", "嘴角绷紧", "唇角发僵"],
+        );
+    }
     if style.contains("语气低声") {
         normalized = remove_fragment_phrases(
             &normalized,
@@ -5519,6 +5543,38 @@ mod tests {
         assert!(content.contains("表演抬眼停顿"), "{content}");
         assert!(!content.contains("抬眼后停顿片刻"), "{content}");
         assert!(!content.contains("note="), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_extracts_throat_motion_performance_fragment() {
+        let content = build_selected_video_memory(
+            23,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚喉头滚动后低声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头滚动后低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A23）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("表演喉结滚动"), "{content}");
+        assert!(!content.contains("喉头滚动后低声开口"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_extracts_stiff_smile_performance_fragment() {
+        let content = build_selected_video_memory(
+            23,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚嘴角僵住仍强撑微笑".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、嘴角僵住仍强撑微笑、压抑、冷蓝窗光、无台词、雨声、A23）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("表演嘴角发僵"), "{content}");
+        assert!(!content.contains("嘴角僵住仍强撑微笑"), "{content}");
     }
 
     #[test]
