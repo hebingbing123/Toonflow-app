@@ -3861,29 +3861,67 @@ fn role_style_supplement_fragments(notes: &[String]) -> Vec<String> {
 }
 
 fn summarize_role_voice_fragment(notes: &[String]) -> Option<String> {
-    let mut restrained = Vec::new();
+    let mut variants = Vec::<(&str, usize)>::new();
 
     for note in notes {
         for fragment in split_prompt_note_fragments(note) {
             if !fragment.starts_with("语气") {
                 continue;
             }
-            if fragment.contains("轻声克制") && restrained.iter().all(|value| *value != "轻声")
-            {
-                restrained.push("轻声");
-            }
-            if fragment.contains("低声克制") && restrained.iter().all(|value| *value != "低声")
-            {
-                restrained.push("低声");
+            if let Some(variant) = summarize_role_voice_variant(&fragment) {
+                if let Some((_, count)) = variants
+                    .iter_mut()
+                    .find(|(existing, _)| *existing == variant)
+                {
+                    *count += 1;
+                } else {
+                    variants.push((variant, 1));
+                }
             }
         }
     }
 
-    if restrained.len() < 2 {
+    let total_support = variants.iter().map(|(_, count)| *count).sum::<usize>();
+    if total_support < 2 {
         return None;
     }
 
-    Some(format!("语气{}克制", restrained.join("")))
+    variants.sort_by(|a, b| {
+        b.1.cmp(&a.1)
+            .then_with(|| role_voice_variant_priority(a.0).cmp(&role_voice_variant_priority(b.0)))
+    });
+    let best = variants.first()?.0;
+    Some(format!("语气{best}"))
+}
+
+fn summarize_role_voice_variant(fragment: &str) -> Option<&'static str> {
+    if fragment.contains("哽咽克制") || fragment.contains("哽咽") {
+        return Some("哽咽克制");
+    }
+    if fragment.contains("低声克制") || fragment.contains("低声") {
+        return Some("低声克制");
+    }
+    if fragment.contains("轻声克制") || fragment.contains("轻声") {
+        return Some("轻声克制");
+    }
+    if fragment.contains("呢喃克制") || fragment.contains("呢喃") {
+        return Some("呢喃");
+    }
+    if fragment.contains("短促") {
+        return Some("短促");
+    }
+    None
+}
+
+fn role_voice_variant_priority(variant: &str) -> usize {
+    match variant {
+        "哽咽克制" => 0,
+        "低声克制" => 1,
+        "轻声克制" => 2,
+        "呢喃" => 3,
+        "短促" => 4,
+        _ => usize::MAX,
+    }
 }
 
 fn compact_role_character_mood_redundancy(fragments: &mut Vec<String>) {
@@ -6788,7 +6826,7 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
+            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气低声克制".to_string()]
         );
     }
 
@@ -6816,7 +6854,33 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
+            vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气低声克制".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_prefers_most_supported_voice_variant() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=表演抬眼停顿，语气轻声克制"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=表演抬眼停顿，语气低声克制"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=24 | subject=林晚 | style=表演抬眼停顿，语气低声克制"
+                    .into(),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=3 | style=表演抬眼停顿，语气低声克制".to_string()]
         );
     }
 
