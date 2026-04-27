@@ -1418,15 +1418,20 @@ fn exact_style_notes_should_yield_to_role_memory(
         && !exact_notes.is_empty()
         && exact_notes
             .iter()
-            .all(|note| exact_style_note_is_low_signal_local_camera(note))
+            .all(|note| exact_style_note_is_low_signal_template(note))
 }
 
-fn exact_style_note_is_low_signal_local_camera(note: &str) -> bool {
+fn exact_style_note_is_low_signal_template(note: &str) -> bool {
     let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
     !fragments.is_empty()
         && fragments
             .iter()
-            .all(|fragment| low_signal_local_camera_style_fragment(fragment))
+            .all(|fragment| low_signal_template_style_fragment(fragment))
+}
+
+fn low_signal_template_style_fragment(fragment: &str) -> bool {
+    low_signal_local_camera_style_fragment(fragment)
+        || (fragment.starts_with("动作") && generic_motion_style_fragment(fragment))
 }
 
 fn low_signal_local_camera_style_fragment(fragment: &str) -> bool {
@@ -4832,7 +4837,9 @@ fn continuity_note_is_lean_critical(note: &str) -> bool {
 }
 
 fn video_prompt_scene_has_axis_risk(fields: &StructuredStoryboardDescription) -> bool {
-    if !storyboard_dialogue_is_empty(&fields.dialogue) {
+    let has_dialogue = !storyboard_dialogue_is_empty(&fields.dialogue);
+    let subject_count = video_prompt_scene_subject_count(fields);
+    if has_dialogue && subject_count > 1 {
         return true;
     }
 
@@ -4852,6 +4859,26 @@ fn video_prompt_scene_has_axis_risk(fields: &StructuredStoryboardDescription) ->
             .iter()
             .any(|keyword| value.contains(keyword))
     })
+}
+
+fn video_prompt_scene_subject_count(fields: &StructuredStoryboardDescription) -> usize {
+    let subject_refs = structured_subject_ref_names(fields);
+    if !subject_refs.is_empty() {
+        return subject_refs.len();
+    }
+
+    fields
+        .subject
+        .split(['/', '／', ',', '，', '、', ';', '；', '|'])
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .fold(Vec::new(), |mut subjects, value| {
+            if !subjects.iter().any(|existing| existing == &value) {
+                subjects.push(value);
+            }
+            subjects
+        })
+        .len()
 }
 
 fn video_prompt_scene_has_blocking_risk(fields: &StructuredStoryboardDescription) -> bool {
@@ -9541,6 +9568,25 @@ mod tests {
     }
 
     #[test]
+    fn select_video_prompt_memory_notes_drops_axis_guidance_for_single_subject_dialogue_scene() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content:
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=人物视线方向一致，人物站位不要跳轴"
+                    .to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边低声说你终于来了".into()),
+            video_desc: Some("（林晚站在窗边低声说话、咖啡厅窗边、林晚、4秒、中景、缓推、看向门口后低声说你终于来了、隐忍、夜间暖光、你终于来了、轻微杯碟声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)).is_empty()
+        );
+    }
+
+    #[test]
     fn select_video_prompt_memory_notes_drops_generic_continuity_half_inside_same_summary() {
         let rows = vec![AgentMemoryRow {
             name: "auto_scope_memory".into(),
@@ -10493,6 +10539,62 @@ mod tests {
     }
 
     #[test]
+    fn select_video_prompt_style_notes_prefers_role_memory_over_exact_template_motion_note() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头稳定跟拍，动作自然"
+                        .into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content:
+                    "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演喉结滚动，语气轻声克制 | note=表演喉结滚动，语气轻声克制"
+                        .into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边低声开口".into()),
+            video_desc: Some("（林晚站在窗边低声开口、咖啡厅窗边、林晚、4秒、中景、缓推、停顿后低声说你终于来了、克制、夜间冷蓝窗光、你终于来了、轻微环境声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            vec!["语气轻声".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_keeps_exact_note_when_it_carries_non_template_pressure() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=情绪冷色压迫感，动作自然"
+                        .into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content:
+                    "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=3 | style=表演喉结滚动，语气轻声克制 | note=表演喉结滚动，语气轻声克制"
+                        .into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边回头".into()),
+            video_desc: Some("（林晚站在窗边回头、咖啡厅窗边、林晚、4秒、中景,稳定跟拍、停顿后回头看向门口、压抑、夜间冷蓝窗光、无台词、轻微环境声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            vec!["情绪冷色压迫感".to_string()]
+        );
+    }
+
+    #[test]
     fn prioritized_video_prompt_memory_keeps_neighbor_local_framing_when_no_summary_exists() {
         let rows = vec![AgentMemoryRow {
             name: "selected_video_memory".into(),
@@ -10813,10 +10915,38 @@ mod tests {
         assert!(
             result
                 .prompt
-                .contains("Continuity: 保留上一镜头走位连续，站位不要跳轴."),
+                .contains("Continuity notes: 保留上一镜头走位连续，站位不要跳轴."),
             "{}",
             result.prompt
         );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_drops_axis_continuity_for_single_subject_dialogue_scene()
+    {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边低声说话、咖啡厅窗边、林晚、4秒、中景、缓推、看向门口后低声说你终于来了、隐忍、夜间暖光、你终于来了、轻微杯碟声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与暖色玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演呼吸压住情绪，眼神迟疑".into()],
+            continuity_notes: vec!["保留上一镜头走位连续，人物站位不要跳轴".into()],
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert_eq!(result.diagnostics.continuity_note_count, 0);
+        assert!(!result.prompt.contains("Continuity:"), "{}", result.prompt);
     }
 
     #[test]
