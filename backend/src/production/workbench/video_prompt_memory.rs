@@ -158,9 +158,11 @@ const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
     "附近的",
 ];
 const PROMPT_LEADING_BRIDGES: [&str; 7] = ["在", "于", "向", "朝", "往", "从", "自"];
-const SUBJECT_IDENTITY_TAIL_MARKERS: [&str; 24] = [
+const SUBJECT_IDENTITY_TAIL_MARKERS: [&str; 37] = [
     "站在", "停在", "坐在", "靠在", "倚在", "走向", "看向", "看着", "望向", "望着", "强忍", "抬眼",
-    "垂眼", "低头", "回头", "停步", "对峙", "冲出", "逼近", "捧着", "握着", "拿着", "提着", "扶着",
+    "垂眼", "低头", "回头", "停步", "对峙", "冲出", "逼近", "转身", "伸手", "抬手", "扶着", "扶住",
+    "捧着", "握着", "拿着", "提着", "轻声", "低声", "压低", "呢喃", "开口", "说着", "说道", "说出",
+    "说",
 ];
 const NON_CHARACTER_ALIAS_SUFFIXES: [&str; 16] = [
     "窗边",
@@ -5028,6 +5030,24 @@ mod tests {
     }
 
     #[test]
+    fn build_selected_video_memory_drops_dialogue_shaped_subject_alias_noise() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("晚晚低声开口".into()),
+                video_desc: Some("（晚晚低声开口、城市夜景落地窗边、林晚轻声说道/晚晚低声开口、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、冷蓝窗光、低声说：你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("subject=林晚"), "{content}");
+        assert!(content.contains("subjectAliases=晚晚"), "{content}");
+        assert!(!content.contains("林晚轻声说道"), "{content}");
+        assert!(!content.contains("晚晚低声开口"), "{content}");
+    }
+
+    #[test]
     fn build_selected_video_memory_extracts_performance_style_fragment() {
         let content = build_selected_video_memory(
             23,
@@ -6481,6 +6501,14 @@ mod tests {
     fn selected_memory_subject_aliases_trim_descriptive_subject_and_drop_prop_refs() {
         assert_eq!(
             selected_memory_subject_aliases("林晚站在窗边", "林晚站在窗边/晚晚/咖啡杯"),
+            vec!["林晚".to_string(), "晚晚".to_string()]
+        );
+    }
+
+    #[test]
+    fn selected_memory_subject_aliases_trim_dialogue_or_action_tails() {
+        assert_eq!(
+            selected_memory_subject_aliases("晚晚低声开口", "林晚轻声说道/晚晚低声开口"),
             vec!["林晚".to_string(), "晚晚".to_string()]
         );
     }
