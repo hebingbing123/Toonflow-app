@@ -3727,11 +3727,19 @@ fn build_project_visual_anchors(
         anchors.push(clip_prompt_fragment(&style, 32));
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
-    if let Some(note) = ctx
-        .project_director_manual
-        .as_deref()
-        .and_then(|value| compact_project_director_note(value, structured_fields, &style_coverage))
-    {
+    let reserved_art_style_anchors = collect_reserved_art_style_anchors(
+        ctx.project_art_style.as_deref(),
+        structured_fields,
+        &style_coverage,
+    );
+    if let Some(note) = ctx.project_director_manual.as_deref().and_then(|value| {
+        compact_project_director_note(
+            value,
+            structured_fields,
+            &style_coverage,
+            &reserved_art_style_anchors,
+        )
+    }) {
         anchors.push(note);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
@@ -3787,6 +3795,33 @@ fn build_project_visual_anchors(
         break;
     }
     (anchors, memory_anchor_count)
+}
+
+fn collect_reserved_art_style_anchors(
+    project_art_style: Option<&str>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+) -> Vec<String> {
+    let mut reserved = Vec::new();
+    for candidate in [
+        resolve_performance_style_anchor(project_art_style, structured_fields, prompt_coverage),
+        resolve_environment_style_anchor(project_art_style, structured_fields, prompt_coverage),
+        resolve_environment_texture_style_anchor(
+            project_art_style,
+            structured_fields,
+            prompt_coverage,
+        ),
+        resolve_motion_style_anchor(project_art_style, structured_fields, prompt_coverage),
+    ]
+    .into_iter()
+    .flatten()
+    {
+        if reserved.iter().any(|existing| existing == &candidate) {
+            continue;
+        }
+        reserved.push(candidate);
+    }
+    reserved
 }
 
 fn compact_project_art_style_note(
@@ -6405,6 +6440,7 @@ fn compact_project_director_note(
     note: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
+    reserved_style_anchors: &[String],
 ) -> Option<String> {
     let expected_camera = structured_fields.map(|fields| {
         [fields.shot.as_str(), fields.camera_move.as_str()]
@@ -6432,6 +6468,12 @@ fn compact_project_director_note(
             continue;
         }
         if project_director_fragment_is_generic_visual_placeholder(&fragment) {
+            continue;
+        }
+        if project_director_fragment_is_redundant_with_reserved_style_anchors(
+            &fragment,
+            reserved_style_anchors,
+        ) {
             continue;
         }
         if scored
@@ -6472,6 +6514,36 @@ fn compact_project_director_note(
         .map(|(_, _, fragment)| fragment)
         .collect::<Vec<_>>();
     Some(clip_prompt_fragment(&fragments.join(", "), 48))
+}
+
+fn project_director_fragment_is_redundant_with_reserved_style_anchors(
+    fragment: &str,
+    reserved_style_anchors: &[String],
+) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() || reserved_style_anchors.is_empty() {
+        return false;
+    }
+    if style_fragment_or_body_is_semantically_covered(&normalized, reserved_style_anchors) {
+        return true;
+    }
+    normalized
+        .strip_prefix("情绪")
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .is_some_and(|mood| {
+            project_director_mood_fragment_is_generic_carryover(&mood)
+                && reserved_style_anchors
+                    .iter()
+                    .any(|anchor| anchor.starts_with("表演"))
+        })
+}
+
+fn project_director_mood_fragment_is_generic_carryover(mood: &str) -> bool {
+    matches!(
+        normalize_prompt_text(mood).as_str(),
+        "克制" | "隐忍" | "压抑" | "沉静" | "冷静" | "隐忍克制" | "克制隐忍"
+    )
 }
 
 fn compact_project_director_fragment_language(fragment: &str) -> String {
@@ -12061,6 +12133,55 @@ mod tests {
             "{prompt}"
         );
         assert!(prompt.contains("动作自然"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_drops_generic_director_mood_when_art_style_performance_anchor_exists() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在咖啡厅窗边、咖啡厅窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、夜间冷蓝窗光、无台词、雨声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: Some("情绪隐忍克制，镜头衔接统一".into()),
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 真人都市写实; 神情内敛, 眼神深沉, 唇线收紧"),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("情绪隐忍克制"), "{prompt}");
+        assert!(!prompt.contains("镜头衔接统一"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_unique_director_camera_fragment_after_dropping_generic_mood() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在咖啡厅窗边、咖啡厅窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、夜间冷蓝窗光、无台词、雨声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: Some("低机位压迫感，情绪隐忍克制".into()),
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("低机位压迫感"), "{prompt}");
+        assert!(!prompt.contains("情绪隐忍克制"), "{prompt}");
+        assert!(prompt.contains("神情内敛, 眼神深沉, 唇线收紧"), "{prompt}");
     }
 
     #[test]
