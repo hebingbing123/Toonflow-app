@@ -40,6 +40,7 @@ const VIDEO_PROMPT_OBSERVATION_ROLE_STYLE_ROW_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
 const VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS: usize = 36;
+const VIDEO_PROMPT_LEAN_CONTINUITY_NOTE_MAX_CHARS: usize = 24;
 const VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT: usize = 6;
@@ -4074,9 +4075,6 @@ fn build_continuity_notes(
     prompt_coverage: &[String],
     memory_budget_tier: VideoPromptMemoryBudgetTier,
 ) -> Vec<String> {
-    if matches!(memory_budget_tier, VideoPromptMemoryBudgetTier::Lean) {
-        return Vec::new();
-    }
     let mut notes = context
         .map(|ctx| {
             ctx.continuity_notes
@@ -4098,8 +4096,29 @@ fn build_continuity_notes(
             .then(a.len().cmp(&b.len()))
             .then(a.cmp(b))
     });
-    notes.truncate(VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT);
+    match memory_budget_tier {
+        VideoPromptMemoryBudgetTier::Expanded => {
+            notes.truncate(VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT);
+        }
+        VideoPromptMemoryBudgetTier::Lean => {
+            notes.retain(|note| continuity_note_is_lean_critical(note));
+            notes
+                .retain(|note| note.chars().count() <= VIDEO_PROMPT_LEAN_CONTINUITY_NOTE_MAX_CHARS);
+            notes.truncate(1);
+        }
+    }
     notes
+}
+
+fn continuity_note_is_lean_critical(note: &str) -> bool {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() || !continuity_note_adds_specific_guidance(&normalized) {
+        return false;
+    }
+
+    ["跳轴", "视线", "构图", "方向", "站位", "走位", "前后景"]
+        .iter()
+        .any(|keyword| normalized.contains(keyword))
 }
 
 fn continuity_note_matches_storyboard_risk(
@@ -9851,6 +9870,39 @@ mod tests {
         assert!(result.prompt.contains("Single shot."), "{}", result.prompt);
         assert!(
             !result.prompt.contains("Continuity notes:"),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_keeps_single_specific_continuity_note_in_lean_tier() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚/咖啡杯、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演眼神放松，动作轻缓克制".into()],
+            continuity_notes: vec!["保留上一镜头走位连续，人物站位不要跳轴".into()],
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert_eq!(result.diagnostics.continuity_note_count, 1);
+        assert!(
+            result
+                .prompt
+                .contains("Continuity: 保留上一镜头走位连续，站位不要跳轴."),
             "{}",
             result.prompt
         );
