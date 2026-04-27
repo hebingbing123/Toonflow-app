@@ -1977,6 +1977,15 @@ fn rejected_video_memory_prompt_seed(content: &str) -> Option<String> {
     extract_key_value(content, "promptSeed")
 }
 
+fn merged_subject_aliases(existing: &str, incoming: &str, subject: &str) -> String {
+    let mut aliases = role_memory_subject_candidates(existing);
+    aliases.extend(role_memory_subject_candidates(incoming));
+    aliases.retain(|alias| alias != subject);
+    aliases.sort();
+    aliases.dedup();
+    aliases.join("/")
+}
+
 fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> String {
     let incoming_prompt_seed = rejected_video_memory_prompt_seed(incoming);
     let existing_prompt_seed = rejected_video_memory_prompt_seed(existing);
@@ -1993,9 +2002,7 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
     let subject = extract_key_value(incoming, "subject")
         .or_else(|| extract_key_value(existing, "subject"))
         .unwrap_or_default();
-    let subject_aliases = extract_key_value(incoming, "subjectAliases")
-        .or_else(|| extract_key_value(existing, "subjectAliases"))
-        .unwrap_or_default();
+    let subject_aliases = merged_subject_aliases(existing, incoming, &subject);
     let rejection_count = rejected_video_negative_rejection_count(existing).saturating_add(1);
     let avoid = merge_rejected_negative_avoid(
         extract_key_value(existing, "avoid").as_deref(),
@@ -5723,7 +5730,7 @@ mod tests {
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("storyboardIds=12"));
         assert!(merged.contains("subject=晚晚"));
-        assert!(merged.contains("subjectAliases=林晚/晚晚"));
+        assert!(merged.contains("subjectAliases=林晚"));
         assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting"));
         assert!(!merged.contains("avoid oppressive or frantic mood"));
     }
