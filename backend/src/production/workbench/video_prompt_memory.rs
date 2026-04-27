@@ -5046,8 +5046,30 @@ fn map_rejected_performance_fragment(
                 .iter()
                 .any(|keyword| value.contains(keyword))
         });
-    (has_dialogue && has_restrained_emotional_signal)
-        .then_some("avoid blank expression or monotone delivery")
+    if has_dialogue && has_restrained_emotional_signal {
+        return Some("avoid blank expression or monotone delivery");
+    }
+
+    let has_silent_high_signal = [action.as_str(), mood.as_str()].into_iter().any(|value| {
+        !value.is_empty()
+            && [
+                "欲言又止",
+                "隐忍",
+                "哽咽",
+                "迟疑",
+                "停顿",
+                "犹豫",
+                "强忍",
+                "颤",
+                "喉结",
+                "嘴角发僵",
+                "下颌绷紧",
+                "指尖发颤",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    });
+    has_silent_high_signal.then_some("avoid blank expression or monotone delivery")
 }
 
 fn map_rejected_lighting_fragment(value: &str) -> Option<&'static str> {
@@ -5995,6 +6017,42 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("avoid blank expression or monotone delivery"));
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_adds_performance_guard_for_high_signal_silent_scene() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("她强忍泪意转身".into()),
+                video_desc: Some(
+                    "（她强忍泪意转身、病房门口、她、4秒、中景、静止、喉结滚动后慢慢转身、隐忍、冷白侧光、无台词、空调低鸣、A12）"
+                        .into(),
+                ),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("avoid blank expression or monotone delivery"));
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_skips_performance_guard_for_low_signal_silent_scene() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角站在门口".into()),
+                video_desc: Some(
+                    "（主角站在门口、旧宅门厅、主角、4秒、中景、静止、站在门口、平静、室内暖光、无台词、风声、A12）"
+                        .into(),
+                ),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(!content.contains("avoid blank expression or monotone delivery"));
     }
 
     #[test]
