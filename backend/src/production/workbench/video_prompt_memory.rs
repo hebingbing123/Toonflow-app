@@ -103,7 +103,7 @@ const MOTION_STYLE_KEYWORDS: [&str; 8] = [
     "轻盈",
     "利落",
 ];
-const PERFORMANCE_STYLE_KEYWORDS: [&str; 10] = [
+const PERFORMANCE_STYLE_KEYWORDS: [&str; 12] = [
     "抬眼停顿",
     "垂眼停顿",
     "眼眶发红",
@@ -112,8 +112,10 @@ const PERFORMANCE_STYLE_KEYWORDS: [&str; 10] = [
     "强忍泪意",
     "呼吸发颤",
     "喉结滚动",
+    "指尖发颤",
     "眉心紧锁",
     "嘴角发僵",
+    "下颌绷紧",
 ];
 const VOICE_STYLE_KEYWORDS: [&str; 8] = [
     "轻声克制",
@@ -2546,11 +2548,23 @@ fn compact_selected_memory_performance_style(
     {
         return Some("表演喉结滚动".to_string());
     }
+    if ["指尖发颤", "手指发颤", "指尖轻颤", "手指轻颤"]
+        .iter()
+        .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演指尖发颤".to_string());
+    }
     if ["嘴角发僵", "嘴角僵住", "嘴角绷紧", "唇角发僵"]
         .iter()
         .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
     {
         return Some("表演嘴角发僵".to_string());
+    }
+    if ["下颌绷紧", "下巴绷紧", "下颌发紧", "下巴发紧"]
+        .iter()
+        .any(|keyword| action.contains(keyword) || dialogue.contains(keyword))
+    {
+        return Some("表演下颌绷紧".to_string());
     }
     if ["欲言又止", "迟迟没有开口", "张了张嘴", "话到嘴边"]
         .iter()
@@ -4533,10 +4547,22 @@ fn trim_selected_memory_fragment_covered_by_style(fragment: &str, style: &str) -
             &["喉结滚动", "喉头滚动", "喉结滑动", "喉头滑动"],
         );
     }
+    if style.contains("表演指尖发颤") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &["指尖发颤", "手指发颤", "指尖轻颤", "手指轻颤"],
+        );
+    }
     if style.contains("表演嘴角发僵") {
         normalized = remove_fragment_phrases(
             &normalized,
             &["嘴角发僵", "嘴角僵住", "嘴角绷紧", "唇角发僵"],
+        );
+    }
+    if style.contains("表演下颌绷紧") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &["下颌绷紧", "下巴绷紧", "下颌发紧", "下巴发紧"],
         );
     }
     if style.contains("语气低声") {
@@ -5575,6 +5601,38 @@ mod tests {
 
         assert!(content.contains("表演嘴角发僵"), "{content}");
         assert!(!content.contains("嘴角僵住仍强撑微笑"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_extracts_finger_tremble_performance_fragment() {
+        let content = build_selected_video_memory(
+            23,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚手指轻颤着攥紧衣角".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、手指轻颤着攥紧衣角、隐忍、冷蓝窗光、无台词、雨声、A23）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("表演指尖发颤"), "{content}");
+        assert!(!content.contains("手指轻颤着攥紧衣角"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_extracts_tight_jaw_performance_fragment() {
+        let content = build_selected_video_memory(
+            23,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚下颌绷紧后才慢慢转身".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、下颌绷紧后才慢慢转身、压抑、冷蓝窗光、无台词、雨声、A23）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("表演下颌绷紧"), "{content}");
+        assert!(!content.contains("下颌绷紧后才慢慢转身"), "{content}");
     }
 
     #[test]
