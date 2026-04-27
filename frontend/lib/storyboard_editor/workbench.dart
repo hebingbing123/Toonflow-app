@@ -53,6 +53,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   String? _workbenchLine;
   String? _lastGeneratedVideoPromptText;
   String? _lastGeneratedVideoPromptSignature;
+  GenerateVideoPromptDiagnostics? _lastGeneratedVideoPromptDiagnostics;
   bool _videoPromptEditedAfterAutoGenerate = false;
   bool _syncingGeneratedVideoPrompt = false;
   String _mode = 'standard';
@@ -165,6 +166,18 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
         _videoPromptCtrl.text.trim() != generated;
   }
 
+  GenerateVideoPromptDiagnostics? _visiblePromptDiagnostics() {
+    final diagnostics = _lastGeneratedVideoPromptDiagnostics;
+    final generated = _lastGeneratedVideoPromptText?.trim();
+    if (diagnostics == null || generated == null || generated.isEmpty) {
+      return null;
+    }
+    if (_videoPromptCtrl.text.trim() != generated) {
+      return null;
+    }
+    return diagnostics;
+  }
+
   String _storyboardProductionMetaLine(ProductionStoryboardItemV1? row) {
     if (row == null) return '制作视图尚未加载';
     final parts = <String>[
@@ -234,6 +247,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           generateData: _generateData,
           productionRow: _productionRow,
           workbenchLine: _workbenchLine,
+          promptDiagnostics: _visiblePromptDiagnostics(),
           knownTrackIds: viewState.knownTrackIds,
           storyboardVideos: viewState.storyboardVideos,
           onResolutionChanged: _setResolutionValue,

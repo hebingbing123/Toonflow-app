@@ -74,6 +74,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     _syncingGeneratedVideoPrompt = false;
     _lastGeneratedVideoPromptText = generated.prompt.trim();
     _lastGeneratedVideoPromptSignature = signature;
+    _lastGeneratedVideoPromptDiagnostics = generated.diagnostics;
     _videoPromptEditedAfterAutoGenerate = false;
   }
 

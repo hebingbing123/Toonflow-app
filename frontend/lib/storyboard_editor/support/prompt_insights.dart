@@ -1,0 +1,54 @@
+part of 'diagnosis.dart';
+
+String buildStoryboardVideoPromptDiagnosticsLine(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  final parts = <String>[
+    'Prompt ${diagnostics.promptChars} chars',
+    if (diagnostics.negativePromptChars > 0)
+      'Negative ${diagnostics.negativePromptChars}',
+    if (diagnostics.observationNoteChars > 0)
+      'Observation ${diagnostics.observationNoteChars}',
+  ];
+  return parts.join(' · ');
+}
+
+String buildStoryboardVideoPromptAnchorSummary(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  final parts = <String>[
+    if (diagnostics.roleAnchorCount > 0) '角色锚点 ${diagnostics.roleAnchorCount}',
+    if (diagnostics.sceneAnchorCount > 0)
+      '场景锚点 ${diagnostics.sceneAnchorCount}',
+    if (diagnostics.toolAnchorCount > 0) '道具锚点 ${diagnostics.toolAnchorCount}',
+    if (diagnostics.styleAnchorCount > 0)
+      '风格锚点 ${diagnostics.styleAnchorCount}',
+    if (diagnostics.continuityNoteCount > 0)
+      '连续性记忆 ${diagnostics.continuityNoteCount}',
+    if (diagnostics.usesReferenceFrame) '已引用当前画面',
+  ];
+  return parts.isEmpty ? '当前提示词未命中额外锚点或记忆。' : parts.join(' · ');
+}
+
+String buildStoryboardVideoPromptBudgetHint(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  if (!diagnostics.usesReferenceFrame) {
+    return '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。';
+  }
+  final anchorCount =
+      diagnostics.roleAnchorCount +
+      diagnostics.sceneAnchorCount +
+      diagnostics.toolAnchorCount;
+  if (diagnostics.promptChars >= 520) {
+    return '当前提示词偏长，优先删重复场景/风格描述，先别动角色和关键道具锚点。';
+  }
+  if (diagnostics.promptChars >= 380 &&
+      diagnostics.styleAnchorCount + diagnostics.continuityNoteCount >= 3) {
+    return '当前提示词已接近长 prompt，继续补充前先检查风格锚点和连续性记忆是否重复。';
+  }
+  if (anchorCount == 0 && diagnostics.styleAnchorCount == 0) {
+    return '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。';
+  }
+  return '当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。';
+}

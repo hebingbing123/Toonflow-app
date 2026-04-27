@@ -259,6 +259,118 @@ void main() {
     },
   );
 
+  test(
+    'buildStoryboardVideoPromptDiagnosticsLine summarizes prompt budget',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 318,
+        negativePromptChars: 64,
+        observationNoteChars: 22,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 2,
+        toolAnchorCount: 1,
+        styleAnchorCount: 2,
+        continuityNoteCount: 1,
+        usesReferenceFrame: true,
+      );
+
+      expect(
+        buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
+        'Prompt 318 chars · Negative 64 · Observation 22',
+      );
+      expect(
+        buildStoryboardVideoPromptAnchorSummary(diagnostics),
+        '角色锚点 1 · 场景锚点 2 · 道具锚点 1 · 风格锚点 2 · 连续性记忆 1 · 已引用当前画面',
+      );
+    },
+  );
+
+  test('buildStoryboardVideoPromptAnchorSummary handles empty diagnostics', () {
+    const diagnostics = GenerateVideoPromptDiagnostics(
+      promptChars: 120,
+      negativePromptChars: 0,
+      observationNoteChars: 0,
+      roleAnchorCount: 0,
+      sceneAnchorCount: 0,
+      toolAnchorCount: 0,
+      styleAnchorCount: 0,
+      continuityNoteCount: 0,
+      usesReferenceFrame: false,
+    );
+
+    expect(
+      buildStoryboardVideoPromptAnchorSummary(diagnostics),
+      '当前提示词未命中额外锚点或记忆。',
+    );
+    expect(
+      buildStoryboardVideoPromptBudgetHint(diagnostics),
+      '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。',
+    );
+  });
+
+  test('buildStoryboardVideoPromptBudgetHint warns about bloated prompt', () {
+    const diagnostics = GenerateVideoPromptDiagnostics(
+      promptChars: 548,
+      negativePromptChars: 70,
+      observationNoteChars: 20,
+      roleAnchorCount: 1,
+      sceneAnchorCount: 2,
+      toolAnchorCount: 1,
+      styleAnchorCount: 2,
+      continuityNoteCount: 1,
+      usesReferenceFrame: true,
+    );
+
+    expect(
+      buildStoryboardVideoPromptBudgetHint(diagnostics),
+      '当前提示词偏长，优先删重复场景/风格描述，先别动角色和关键道具锚点。',
+    );
+  });
+
+  test(
+    'buildStoryboardVideoPromptBudgetHint prefers anchor warning before extra trimming',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 220,
+        negativePromptChars: 0,
+        observationNoteChars: 0,
+        roleAnchorCount: 0,
+        sceneAnchorCount: 0,
+        toolAnchorCount: 0,
+        styleAnchorCount: 0,
+        continuityNoteCount: 0,
+        usesReferenceFrame: true,
+      );
+
+      expect(
+        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。',
+      );
+    },
+  );
+
+  test(
+    'buildStoryboardVideoPromptBudgetHint confirms healthy prompt budget',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 260,
+        negativePromptChars: 36,
+        observationNoteChars: 18,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 1,
+        styleAnchorCount: 1,
+        continuityNoteCount: 1,
+        usesReferenceFrame: true,
+      );
+
+      expect(
+        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        '当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。',
+      );
+    },
+  );
+
   test('resolveStoryboardNarrationText prefers script narration first', () {
     final narration = resolveStoryboardNarrationText(
       scriptStoryboard: const StoryboardRow(

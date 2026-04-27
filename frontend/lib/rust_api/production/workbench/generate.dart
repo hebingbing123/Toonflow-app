@@ -7,11 +7,51 @@ import '../../core.dart';
 import 'tracks.dart';
 
 /// OpenAPI **`GenerateVideoPromptResponse`**.
+class GenerateVideoPromptDiagnostics {
+  const GenerateVideoPromptDiagnostics({
+    required this.promptChars,
+    required this.negativePromptChars,
+    required this.observationNoteChars,
+    required this.roleAnchorCount,
+    required this.sceneAnchorCount,
+    required this.toolAnchorCount,
+    required this.styleAnchorCount,
+    required this.continuityNoteCount,
+    required this.usesReferenceFrame,
+  });
+
+  final int promptChars;
+  final int negativePromptChars;
+  final int observationNoteChars;
+  final int roleAnchorCount;
+  final int sceneAnchorCount;
+  final int toolAnchorCount;
+  final int styleAnchorCount;
+  final int continuityNoteCount;
+  final bool usesReferenceFrame;
+
+  factory GenerateVideoPromptDiagnostics.fromJson(Map<String, dynamic> json) {
+    return GenerateVideoPromptDiagnostics(
+      promptChars: (json['promptChars'] as num?)?.toInt() ?? 0,
+      negativePromptChars: (json['negativePromptChars'] as num?)?.toInt() ?? 0,
+      observationNoteChars:
+          (json['observationNoteChars'] as num?)?.toInt() ?? 0,
+      roleAnchorCount: (json['roleAnchorCount'] as num?)?.toInt() ?? 0,
+      sceneAnchorCount: (json['sceneAnchorCount'] as num?)?.toInt() ?? 0,
+      toolAnchorCount: (json['toolAnchorCount'] as num?)?.toInt() ?? 0,
+      styleAnchorCount: (json['styleAnchorCount'] as num?)?.toInt() ?? 0,
+      continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
+      usesReferenceFrame: json['usesReferenceFrame'] == true,
+    );
+  }
+}
+
 class GenerateVideoPromptResponse {
   const GenerateVideoPromptResponse({
     required this.prompt,
     this.negativePrompt,
     this.observationNote,
+    required this.diagnostics,
     required this.model,
     required this.duration,
   });
@@ -19,6 +59,7 @@ class GenerateVideoPromptResponse {
   final String prompt;
   final String? negativePrompt;
   final String? observationNote;
+  final GenerateVideoPromptDiagnostics diagnostics;
   final String model;
   final int duration;
 
@@ -27,6 +68,9 @@ class GenerateVideoPromptResponse {
       prompt: json['prompt'] as String,
       negativePrompt: json['negativePrompt'] as String?,
       observationNote: json['observationNote'] as String?,
+      diagnostics: GenerateVideoPromptDiagnostics.fromJson(
+        (json['diagnostics'] as Map<String, dynamic>?) ?? const {},
+      ),
       model: json['model'] as String,
       duration: (json['duration'] as num).toInt(),
     );

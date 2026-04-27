@@ -89,8 +89,23 @@ pub(in crate::production) struct GenerateVideoPromptResponse {
     prompt: String,
     negative_prompt: Option<String>,
     observation_note: Option<String>,
+    diagnostics: GenerateVideoPromptDiagnostics,
     model: String,
     duration: i32,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(in crate::production) struct GenerateVideoPromptDiagnostics {
+    prompt_chars: usize,
+    negative_prompt_chars: usize,
+    observation_note_chars: usize,
+    role_anchor_count: usize,
+    scene_anchor_count: usize,
+    tool_anchor_count: usize,
+    style_anchor_count: usize,
+    continuity_note_count: usize,
+    uses_reference_frame: bool,
 }
 
 #[utoipa::path(
@@ -132,7 +147,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     )
     .await?;
 
-    let prompt = build_video_prompt(
+    let prompt_result = build_video_prompt_with_diagnostics(
         body.description.as_deref(),
         body.image_url.as_deref(),
         context.as_ref(),
@@ -175,10 +190,15 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         context.as_ref(),
     );
 
+    let diagnostics = prompt_result
+        .diagnostics
+        .with_runtime_notes(negative_prompt.as_deref(), observation_note.as_deref());
+
     Ok(JsonResponse(GenerateVideoPromptResponse {
-        prompt,
+        prompt: prompt_result.prompt,
         negative_prompt,
         observation_note,
+        diagnostics,
         model: "runway-gen-2".to_string(),
         duration,
     }))
@@ -197,6 +217,30 @@ struct VideoPromptContext {
     script_tool_anchors: Vec<String>,
     memory_style_notes: Vec<String>,
     continuity_notes: Vec<String>,
+}
+
+#[derive(Debug)]
+struct VideoPromptBuildResult {
+    prompt: String,
+    diagnostics: GenerateVideoPromptDiagnostics,
+}
+
+impl GenerateVideoPromptDiagnostics {
+    fn with_runtime_notes(
+        mut self,
+        negative_prompt: Option<&str>,
+        observation_note: Option<&str>,
+    ) -> Self {
+        self.negative_prompt_chars = negative_prompt
+            .map(normalize_prompt_text)
+            .map(|value| value.chars().count())
+            .unwrap_or(0);
+        self.observation_note_chars = observation_note
+            .map(normalize_prompt_text)
+            .map(|value| value.chars().count())
+            .unwrap_or(0);
+        self
+    }
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -1159,6 +1203,14 @@ fn build_video_prompt(
     image_url: Option<&str>,
     context: Option<&VideoPromptContext>,
 ) -> String {
+    build_video_prompt_with_diagnostics(description, image_url, context).prompt
+}
+
+fn build_video_prompt_with_diagnostics(
+    description: Option<&str>,
+    image_url: Option<&str>,
+    context: Option<&VideoPromptContext>,
+) -> VideoPromptBuildResult {
     let mut clauses = Vec::new();
     clauses.push("Single cinematic shot.".to_string());
 
@@ -1301,7 +1353,21 @@ fn build_video_prompt(
         &style_anchors,
         &continuity_notes,
     ));
-    clauses.join(" ")
+    let prompt = clauses.join(" ");
+    VideoPromptBuildResult {
+        diagnostics: GenerateVideoPromptDiagnostics {
+            prompt_chars: prompt.chars().count(),
+            negative_prompt_chars: 0,
+            observation_note_chars: 0,
+            role_anchor_count: role_anchors.len(),
+            scene_anchor_count: scene_anchors.len(),
+            tool_anchor_count: tool_anchors.len(),
+            style_anchor_count: style_anchors.len(),
+            continuity_note_count: continuity_notes.len(),
+            uses_reference_frame: image_url.is_some(),
+        },
+        prompt,
+    }
 }
 
 fn compact_neighbor_video_style_note(
@@ -7232,6 +7298,17 @@ mod tests {
             prompt: "Single cinematic shot.".into(),
             negative_prompt: None,
             observation_note: Some("待观察失败倾向：avoid shaky handheld motion".into()),
+            diagnostics: GenerateVideoPromptDiagnostics {
+                prompt_chars: 22,
+                negative_prompt_chars: 0,
+                observation_note_chars: 40,
+                role_anchor_count: 1,
+                scene_anchor_count: 1,
+                tool_anchor_count: 0,
+                style_anchor_count: 1,
+                continuity_note_count: 0,
+                uses_reference_frame: false,
+            },
             model: "runway-gen-2".into(),
             duration: 5,
         })
@@ -7243,6 +7320,47 @@ mod tests {
                 .and_then(serde_json::Value::as_str),
             Some("待观察失败倾向：avoid shaky handheld motion")
         );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("promptChars"))
+                .and_then(serde_json::Value::as_u64),
+            Some(22)
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_reports_anchor_and_memory_counts() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角停步回头、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、停步回头确认身后动静、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: vec!["青铜匕首: 刀身旧磨损".into()],
+            memory_style_notes: vec!["镜头低机位压迫感".into()],
+            continuity_notes: vec!["保留上一镜头走位连续".into()],
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert!(result
+            .prompt
+            .contains("Use the supplied frame as the visual reference."));
+        assert_eq!(result.diagnostics.role_anchor_count, 1);
+        assert_eq!(result.diagnostics.scene_anchor_count, 1);
+        assert_eq!(result.diagnostics.tool_anchor_count, 1);
+        assert_eq!(result.diagnostics.style_anchor_count, 2);
+        assert_eq!(result.diagnostics.continuity_note_count, 1);
+        assert!(result.diagnostics.uses_reference_frame);
+        assert!(result.diagnostics.prompt_chars > 0);
     }
 
     #[test]

@@ -81,6 +81,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
           _videoPromptCtrl.text = videoPromptSeed;
           _lastGeneratedVideoPromptText = null;
           _lastGeneratedVideoPromptSignature = null;
+          _lastGeneratedVideoPromptDiagnostics = null;
           _videoPromptEditedAfterAutoGenerate = false;
         }
         if ((_videoDurationCtrl.text.trim().isEmpty ||

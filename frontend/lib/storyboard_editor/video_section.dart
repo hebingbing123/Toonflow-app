@@ -19,6 +19,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.generateData,
     required this.productionRow,
     required this.workbenchLine,
+    required this.promptDiagnostics,
     required this.knownTrackIds,
     required this.storyboardVideos,
     required this.onResolutionChanged,
@@ -53,6 +54,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final GetGenerateDataResponse? generateData;
   final ProductionStoryboardItemV1? productionRow;
   final String? workbenchLine;
+  final GenerateVideoPromptDiagnostics? promptDiagnostics;
   final List<int> knownTrackIds;
   final List<VideoItem> storyboardVideos;
   final ValueChanged<String> onResolutionChanged;
@@ -154,6 +156,27 @@ class _StoryboardVideoSection extends StatelessWidget {
             alignLabelWithHint: true,
           ),
         ),
+        if (promptDiagnostics != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            buildStoryboardVideoPromptDiagnosticsLine(promptDiagnostics!),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            buildStoryboardVideoPromptAnchorSummary(promptDiagnostics!),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            buildStoryboardVideoPromptBudgetHint(promptDiagnostics!),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         TextField(
           controller: negativeVideoPromptCtrl,
