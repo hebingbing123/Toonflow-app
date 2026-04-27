@@ -4345,7 +4345,11 @@ fn compact_global_recurring_style_fragments(
 
     fragments
         .into_iter()
-        .filter(|fragment| !fragment.starts_with("表演") && !fragment.starts_with("语气"))
+        .filter(|fragment| {
+            !fragment.starts_with("表演")
+                && !fragment.starts_with("语气")
+                && !fragment.starts_with("声场")
+        })
         .collect()
 }
 
@@ -4357,6 +4361,9 @@ fn compact_global_character_style_redundancy(fragments: &mut Vec<String>) {
     let has_performance_signal = fragments
         .iter()
         .any(|fragment| fragment.starts_with("表演"));
+    let has_visual_signal = fragments.iter().any(|fragment| {
+        fragment.starts_with("光影") || fragment.starts_with("环境") || fragment.starts_with("镜头")
+    });
     if has_performance_signal {
         fragments.retain(|fragment| {
             if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
@@ -4367,6 +4374,11 @@ fn compact_global_character_style_redundancy(fragments: &mut Vec<String>) {
             }
             if let Some(action) = fragment.strip_prefix("动作").map(normalize_prompt_text) {
                 return !global_motion_fragment_is_low_gain_carryover(&action);
+            }
+            if has_visual_signal {
+                if let Some(sound) = fragment.strip_prefix("声场").map(normalize_prompt_text) {
+                    return !global_sound_fragment_is_low_gain_ambience(&sound);
+                }
             }
             true
         });
@@ -4383,6 +4395,10 @@ fn global_mood_fragment_is_generic_restrained(mood: &str) -> bool {
 
 fn global_motion_fragment_is_low_gain_carryover(action: &str) -> bool {
     matches!(action, "从容克制" | "克制自然" | "自然" | "简洁平滑")
+}
+
+fn global_sound_fragment_is_low_gain_ambience(sound: &str) -> bool {
+    matches!(sound, "雨声回响" | "风声回荡" | "车流闷响" | "水滴回声")
 }
 
 fn distinct_selected_video_subject_group_count<'a>(
@@ -7839,6 +7855,29 @@ mod tests {
     }
 
     #[test]
+    fn build_script_video_style_memory_drops_ambient_sound_when_visual_and_performance_fragments_exist(
+    ) {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头稳定跟拍，表演喉结滚动，光影冷蓝窗光，环境雨丝玻璃，声场雨声回响 | note=..."
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | style=镜头近景稳定跟拍，表演喉结滚动，光影冷蓝窗光，环境雨丝玻璃，声场雨声回响 | note=..."
+                    .into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("表演喉结滚动"), "{summary}");
+        assert!(summary.contains("光影冷蓝窗光"), "{summary}");
+        assert!(summary.contains("环境雨丝玻璃"), "{summary}");
+        assert!(!summary.contains("声场雨声回响"), "{summary}");
+    }
+
+    #[test]
     fn build_script_video_style_memory_drops_character_signature_fragments_when_subjects_mix() {
         let summary = build_script_video_style_memory(&[
             AgentMemoryRow {
@@ -8383,6 +8422,35 @@ mod tests {
         assert!(!summary.contains("情绪克制"), "{summary}");
         assert!(!summary.contains("情绪隐忍"), "{summary}");
         assert!(!summary.contains("动作自然"), "{summary}");
+    }
+
+    #[test]
+    fn build_project_video_style_memory_drops_recurring_sound_when_subjects_mix() {
+        let summary = build_project_video_style_memory(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头稳定跟拍，光影冷调逆光，声场雨声回响 | note=..."
+                    .into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头近景稳定跟拍，光影冷调逆光，声场雨声回响 | note=..."
+                    .into(),
+                episodes_id: Some(2),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=17 | subject=沈砚 | subjectAliases=沈砚/阿砚 | style=镜头稳定跟拍，光影冷调逆光，声场雨声回响 | note=..."
+                    .into(),
+                episodes_id: Some(3),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("镜头稳定跟拍"), "{summary}");
+        assert!(summary.contains("光影冷调逆光"), "{summary}");
+        assert!(!summary.contains("声场雨声回响"), "{summary}");
     }
 
     #[test]
