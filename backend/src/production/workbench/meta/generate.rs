@@ -4306,7 +4306,9 @@ fn compact_subject_clause(
     action: Option<&str>,
 ) -> Option<String> {
     let subject = trim_subject_action_overlap(subject, action).unwrap_or_else(|| subject.into());
-    compact_prompt_clause(&subject, asset_coverage, None, PromptClauseKind::Subject)
+    let compacted =
+        compact_prompt_clause(&subject, asset_coverage, None, PromptClauseKind::Subject)?;
+    (!prompt_clause_key_is_covered_by_anchor(&compacted, asset_coverage)).then_some(compacted)
 }
 
 fn compact_setting_clause(
@@ -4323,6 +4325,7 @@ fn compact_setting_clause(
         compact_prompt_clause(&compacted, asset_coverage, None, PromptClauseKind::Setting)?;
     let compacted = normalize_prompt_clause_compaction(&compacted, PromptClauseKind::Setting);
     (!compacted.is_empty()
+        && !prompt_clause_key_is_covered_by_anchor(&compacted, asset_coverage)
         && !prompt_fragment_has_direct_coverage(&compacted, asset_coverage)
         && !prompt_fragment_has_direct_coverage(&compacted, prompt_coverage))
     .then_some(compacted)
@@ -4451,6 +4454,20 @@ fn prompt_fragment_has_direct_coverage(fragment: &str, coverage: &[String]) -> b
         .iter()
         .map(|entry| canonical_prompt_fragment(entry))
         .any(|existing| !existing.is_empty() && existing == canonical_fragment)
+}
+
+fn prompt_clause_key_is_covered_by_anchor(fragment: &str, coverage: &[String]) -> bool {
+    let canonical_fragment = canonical_prompt_fragment(fragment);
+    if canonical_fragment.is_empty() {
+        return false;
+    }
+
+    coverage.iter().any(|entry| {
+        entry.split_once(':').is_some_and(|(anchor_key, _)| {
+            let canonical_anchor = canonical_prompt_fragment(anchor_key);
+            !canonical_anchor.is_empty() && canonical_anchor == canonical_fragment
+        })
+    })
 }
 
 fn strip_leading_covered_prompt_fragment(fragment: &str, coverage: &[String]) -> String {
@@ -9622,6 +9639,73 @@ mod tests {
             !result
                 .prompt
                 .contains("Use the supplied frame as reference."),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_drops_subject_and_setting_when_anchor_keys_match() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚/咖啡杯、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演眼神放松，动作轻缓克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert!(!result.prompt.contains("Subject:"), "{}", result.prompt);
+        assert!(!result.prompt.contains("Setting:"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("Character: 林晚:黑色针织外套."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("Scene: 咖啡厅窗边:木桌与雨痕玻璃."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("Action: 看向窗外."),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_keeps_subject_when_anchor_key_only_partially_matches() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚看向门外、雨夜门厅、林晚、4秒、中景、稳定跟拍、停步回头、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚礼服版: 黑色丝绒长裙".into()],
+            script_scene_anchors: vec!["旧宅门厅: 雨水反光石阶".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演抬眼停顿，语气轻声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert!(
+            result.prompt.contains("Subject: 林晚."),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains("Setting: 雨夜门厅."),
             "{}",
             result.prompt
         );
