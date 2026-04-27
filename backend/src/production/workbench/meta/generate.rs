@@ -4831,6 +4831,45 @@ fn continuity_note_is_lean_critical(note: &str) -> bool {
         .any(|keyword| normalized.contains(keyword))
 }
 
+fn video_prompt_scene_has_axis_risk(fields: &StructuredStoryboardDescription) -> bool {
+    if !storyboard_dialogue_is_empty(&fields.dialogue) {
+        return true;
+    }
+
+    [
+        fields.action.as_str(),
+        fields.mood.as_str(),
+        fields.sound.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "对视", "对峙", "回头", "转身", "逼近", "靠近", "擦肩", "并肩", "交错", "相望",
+                "互看",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn video_prompt_scene_has_blocking_risk(fields: &StructuredStoryboardDescription) -> bool {
+    if video_prompt_scene_has_motion_risk(fields) || video_prompt_scene_has_axis_risk(fields) {
+        return true;
+    }
+
+    normalize_prompt_text(&fields.action)
+        .split(['，', ',', '；', ';', '。', '\n'])
+        .any(|fragment| {
+            [
+                "停步", "站定", "侧身", "让开", "绕过", "穿过", "退后", "后退",
+            ]
+            .iter()
+            .any(|keyword| fragment.contains(keyword))
+        })
+}
+
 fn continuity_note_matches_storyboard_risk(
     note: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -4839,12 +4878,20 @@ fn continuity_note_matches_storyboard_risk(
     if normalized.is_empty() {
         return false;
     }
-    if continuity_note_adds_specific_guidance(&normalized) {
-        return true;
-    }
     let Some(fields) = structured_fields else {
         return true;
     };
+    if continuity_note_mentions_axis_risk(&normalized) {
+        return video_prompt_scene_has_axis_risk(fields);
+    }
+    if continuity_note_mentions_blocking_risk(&normalized) {
+        return video_prompt_scene_has_blocking_risk(fields);
+    }
+    if continuity_note_adds_specific_guidance(&normalized) {
+        return video_prompt_scene_has_motion_risk(fields)
+            || video_prompt_scene_has_axis_risk(fields)
+            || video_prompt_scene_has_blocking_risk(fields);
+    }
     if continuity_note_mentions_dialogue_risk(&normalized) {
         return !storyboard_dialogue_is_empty(&fields.dialogue);
     }
@@ -4858,6 +4905,18 @@ fn continuity_note_matches_storyboard_risk(
         return video_prompt_scene_has_motion_risk(fields);
     }
     false
+}
+
+fn continuity_note_mentions_axis_risk(note: &str) -> bool {
+    ["跳轴", "视线", "方向", "构图"]
+        .iter()
+        .any(|keyword| note.contains(keyword))
+}
+
+fn continuity_note_mentions_blocking_risk(note: &str) -> bool {
+    ["站位", "走位", "位置", "前后景"]
+        .iter()
+        .any(|keyword| note.contains(keyword))
 }
 
 fn continuity_note_mentions_dialogue_risk(note: &str) -> bool {
@@ -6740,6 +6799,9 @@ fn select_video_prompt_memory_notes(
                 })?;
             let continuity_score = score_continuity_note(&note, structured_fields.as_ref());
             if continuity_score <= 0 {
+                return None;
+            }
+            if !continuity_note_matches_storyboard_risk(&note, structured_fields.as_ref()) {
                 return None;
             }
             let specificity_score = score_continuity_specificity(&note);
@@ -9460,6 +9522,25 @@ mod tests {
     }
 
     #[test]
+    fn select_video_prompt_memory_notes_drops_axis_guidance_for_grounded_single_subject_scene() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content:
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=人物视线方向一致，人物站位不要跳轴"
+                    .to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边看向窗外".into()),
+            video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)).is_empty()
+        );
+    }
+
+    #[test]
     fn select_video_prompt_memory_notes_drops_generic_continuity_half_inside_same_summary() {
         let rows = vec![AgentMemoryRow {
             name: "auto_scope_memory".into(),
@@ -10678,7 +10759,7 @@ mod tests {
     }
 
     #[test]
-    fn build_video_prompt_with_diagnostics_keeps_single_specific_continuity_note_in_lean_tier() {
+    fn build_video_prompt_with_diagnostics_drops_specific_continuity_note_without_scene_risk() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚/咖啡杯、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）".into()),
@@ -10700,6 +10781,34 @@ mod tests {
         );
 
         assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert_eq!(result.diagnostics.continuity_note_count, 0);
+        assert!(!result.prompt.contains("Continuity:"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_keeps_single_specific_continuity_note_when_axis_risk_exists(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚对视后停步、咖啡厅门口、林晚、4秒、中景、缓推、对视后停步回头、克制紧张、夜间暖光、你怎么来了、杯碟轻响、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅门口: 木门与暖色玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演眼神放松，动作轻缓克制".into()],
+            continuity_notes: vec!["保留上一镜头走位连续，人物站位不要跳轴".into()],
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "expanded");
         assert_eq!(result.diagnostics.continuity_note_count, 1);
         assert!(
             result
