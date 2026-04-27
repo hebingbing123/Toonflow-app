@@ -470,13 +470,17 @@ fn parse_director_emotion_cues(markdown: &str) -> Vec<DirectorEmotionCue> {
     cues
 }
 
-fn score_director_emotion_cue_match(mood: &str, cue: &DirectorEmotionCue) -> usize {
-    let mood = normalize_prompt_text(mood);
+fn score_director_emotion_cue_match(
+    fields: &StructuredStoryboardDescription,
+    cue: &DirectorEmotionCue,
+) -> usize {
+    let mood = normalize_prompt_text(&fields.mood);
     if mood.is_empty() {
         return 0;
     }
 
-    cue.emotion_terms
+    let mut score = cue
+        .emotion_terms
         .iter()
         .map(|term| {
             if term.is_empty() {
@@ -503,7 +507,68 @@ fn score_director_emotion_cue_match(mood: &str, cue: &DirectorEmotionCue) -> usi
             }
         })
         .max()
-        .unwrap_or(0)
+        .unwrap_or(0) as i32;
+
+    if current_storyboard_is_fragile_emotional_turn(fields) {
+        score += fragile_turn_director_emotion_cue_bonus(cue);
+    }
+
+    score.max(0) as usize
+}
+
+fn fragile_turn_director_emotion_cue_bonus(cue: &DirectorEmotionCue) -> i32 {
+    let mut bonus = 0;
+
+    if cue.emotion_terms.iter().any(|term| {
+        ["悲伤", "失落", "压抑", "哀伤", "哀戚"]
+            .iter()
+            .any(|keyword| term.contains(keyword))
+    }) {
+        bonus += 7;
+    }
+    if cue.emotion_terms.iter().any(|term| {
+        ["隐忍", "克制", "冷漠", "坚定", "愤怒", "压迫"]
+            .iter()
+            .any(|keyword| term.contains(keyword))
+    }) {
+        bonus -= 7;
+    }
+
+    let combined_fragments = [
+        cue.face.as_str(),
+        cue.eyes.as_str(),
+        cue.micro_expression.as_str(),
+    ]
+    .join(" ");
+    if [
+        "低落",
+        "哀戚",
+        "眼眶微红",
+        "眼神低垂",
+        "眉头轻锁",
+        "眉心轻蹙",
+        "黯淡",
+        "泪",
+    ]
+    .iter()
+    .any(|keyword| combined_fragments.contains(keyword))
+    {
+        bonus += 4;
+    }
+    if [
+        "神情内敛",
+        "眼神深沉",
+        "眼底有情绪压抑",
+        "唇线收紧",
+        "喉结微动",
+    ]
+    .iter()
+    .any(|keyword| combined_fragments.contains(keyword))
+    {
+        bonus -= 4;
+    }
+
+    bonus
 }
 
 fn parse_director_motion_cue(markdown: &str) -> Option<String> {
@@ -786,7 +851,7 @@ fn resolve_performance_style_anchor(
     let cue = parse_director_emotion_cues(profile.director_storyboard)
         .into_iter()
         .filter_map(|cue| {
-            let score = score_director_emotion_cue_match(&fields.mood, &cue);
+            let score = score_director_emotion_cue_match(fields, &cue);
             (score > 0).then_some((score, cue))
         })
         .max_by(|(left_score, left_cue), (right_score, right_cue)| {
@@ -869,11 +934,11 @@ fn score_director_emotion_fragment(group: DirectorEmotionFragmentGroup, fragment
     }
 
     let mut score = normalized.chars().count().min(10) as i32;
-    let preferred_prefixes = match group {
-        DirectorEmotionFragmentGroup::Face => ["神情", "眉眼", "面容", "面色", "表情", "神态"],
-        DirectorEmotionFragmentGroup::Eyes => ["眼神", "目光", "眼底", "眼尾", "眼眶", "视线"],
+    let preferred_prefixes: &[&str] = match group {
+        DirectorEmotionFragmentGroup::Face => &["神情", "眉眼", "面容", "面色", "表情", "神态"],
+        DirectorEmotionFragmentGroup::Eyes => &["眼神", "目光", "眼底", "眼尾", "眼眶", "视线"],
         DirectorEmotionFragmentGroup::MicroExpression => {
-            ["唇线", "喉结", "嘴角", "眉心", "眉梢", "唇形"]
+            &["唇线", "喉结", "嘴角", "眉心", "眉头", "眉梢", "唇形"]
         }
     };
     for (idx, prefix) in preferred_prefixes.iter().enumerate() {
@@ -884,7 +949,7 @@ fn score_director_emotion_fragment(group: DirectorEmotionFragmentGroup, fragment
     }
 
     for keyword in [
-        "唇线", "喉结", "嘴角", "眉心", "眉梢", "唇形", "眼底", "眼尾", "眼眶",
+        "唇线", "喉结", "嘴角", "眉心", "眉头", "眉梢", "唇形", "眼底", "眼尾", "眼眶",
     ] {
         if normalized.contains(keyword) {
             score += 4;
@@ -11063,6 +11128,60 @@ mod tests {
             "{prompt}"
         );
         assert!(prompt.contains("动作自然"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_prefers_fragile_director_anchor_for_broken_voice_turn() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、抽气后失声开口、隐忍哽咽、夜间冷蓝窗光、我没事、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 真人都市写实; 神情低落, 眼神黯淡, 眉心轻蹙"),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("神情内敛"), "{prompt}");
+        assert!(!prompt.contains("眼神深沉"), "{prompt}");
+        assert!(!prompt.contains("唇线收紧"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_prefers_fragile_director_anchor_for_sad_anime_turn() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（沈知微停在雨夜落地窗旁、城市夜景落地窗边、沈知微、4秒、中景、缓推、哽咽后强忍泪意看向窗外、隐忍哽咽、冷蓝窗光与路灯反射、无台词、雨声、A13）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("成熟都市言情二次元动画".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["沈知微: 米色风衣".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 成熟都市言情二次元动画; 神情哀戚, 眼神低垂, 眉头轻锁"),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("神情内敛"), "{prompt}");
+        assert!(!prompt.contains("眼神深沉"), "{prompt}");
+        assert!(!prompt.contains("唇线收紧"), "{prompt}");
     }
 
     #[test]

@@ -3660,7 +3660,11 @@ fn neighbor_selected_character_state_mismatch_penalty(
 ) -> i32 {
     let mut penalty = 0;
     if selected_voice_family_conflicts_with_context(&note.note, context) {
-        penalty += 18;
+        penalty += if current_context_voice_family(context) == Some("fragile") {
+            34
+        } else {
+            18
+        };
     }
     if selected_generic_restrained_mood_lags_fragile_scene(&note.note, context) {
         penalty += 8;
@@ -3675,16 +3679,43 @@ fn selected_voice_family_conflicts_with_context(
     let Some(note_family) = style_voice_family(note) else {
         return false;
     };
-    let context_voice = [context.dialogue.as_str(), context.action.as_str()]
-        .into_iter()
-        .find_map(style_voice_family);
+    let context_voice = current_context_voice_family(context);
     matches!(context_voice, Some(context_family) if context_family != note_family)
+}
+
+fn current_context_voice_family(context: &StyleNoteSelectionContext) -> Option<&'static str> {
+    [context.dialogue.as_str(), context.action.as_str()]
+        .into_iter()
+        .find_map(style_voice_family)
+}
+
+fn context_is_fragile_voice_turn(context: &StyleNoteSelectionContext) -> bool {
+    current_context_voice_family(context) == Some("fragile")
+        || [
+            context.dialogue.as_str(),
+            context.action.as_str(),
+            context.mood.as_str(),
+        ]
+        .into_iter()
+        .any(|field| {
+            [
+                "哽咽", "失声", "哑声", "发颤", "颤声", "鼻音", "抽气", "含泪", "哭",
+            ]
+            .iter()
+            .any(|keyword| field.contains(keyword))
+        })
 }
 
 fn style_voice_family(text: &str) -> Option<&'static str> {
     [
         ("哽咽", "fragile"),
         ("发哽", "fragile"),
+        ("失声", "fragile"),
+        ("哑声", "fragile"),
+        ("颤声", "fragile"),
+        ("鼻音", "fragile"),
+        ("抽气", "fragile"),
+        ("发颤", "fragile"),
         ("低声", "low"),
         ("压低", "low"),
         ("轻声", "light"),
@@ -3711,7 +3742,7 @@ fn selected_generic_restrained_mood_lags_fragile_scene(
         ]
         .into_iter()
         .any(|field| {
-            ["哽咽", "泪", "发颤", "哭"]
+            ["哽咽", "泪", "发颤", "哭", "失声", "哑声", "鼻音", "抽气"]
                 .iter()
                 .any(|keyword| field.contains(keyword))
         })
@@ -3786,7 +3817,9 @@ fn score_style_note_context_evidence(
                 && context
                     .dialogue
                     .contains(fragment.trim_start_matches("语气")))
-                || (!context.mood.is_empty() && fragment.contains(&context.mood)))
+                || (!context.mood.is_empty() && fragment.contains(&context.mood))
+                || (context_is_fragile_voice_turn(context)
+                    && style_voice_family(fragment) == Some("fragile")))
     }) {
         evidence += 2;
     }
@@ -3809,7 +3842,8 @@ fn score_style_note_context_evidence(
                     && context
                         .dialogue
                         .contains(fragment.trim_start_matches("表演")))
-                || (!context.mood.is_empty() && fragment.contains(&context.mood)))
+                || (!context.mood.is_empty() && fragment.contains(&context.mood))
+                || (context_is_fragile_voice_turn(context) && fragment.contains("呼吸发颤")))
     }) {
         evidence += 2;
     }
@@ -6430,6 +6464,32 @@ mod tests {
             ],
             12,
             Some("current-seed-9999"),
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(note, Some("表演呼吸发颤，语气哽咽克制".to_string()));
+    }
+
+    #[test]
+    fn select_prioritized_video_style_note_prefers_fragile_role_summary_for_broken_breath_turn() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主抽气后失声开口".into()),
+            video_desc: Some("（女主抽气后失声开口、旧宅走廊、女主、5秒、近景、稳定跟拍、抽气后失声开口、压抑、冷调逆光、我没事、雨声回响、A13）".into()),
+            duration: Some("5s".into()),
+        };
+        let note = select_prioritized_video_style_note(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | promptSeed=neighbor-seed-0001 | style=镜头近景稳定跟拍，情绪克制，语气轻声克制 | note=女主贴墙前行，镜头近景稳定跟拍，情绪克制，语气轻声克制".into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=女主 | sampleCount=4 | style=表演呼吸发颤，语气哽咽克制 | note=表演呼吸发颤，语气哽咽克制".into(),
+                },
+            ],
+            13,
+            Some("current-seed-0002"),
             Some(&storyboard_row),
         );
 
