@@ -3477,7 +3477,10 @@ fn build_role_video_style_memories<'a>(
             if group.notes.len() < 2 {
                 return None;
             }
-            let recurring = recurring_style_fragments(&group.notes);
+            let recurring = compact_role_recurring_style_fragments(
+                recurring_style_fragments(&group.notes),
+                role_style_supplement_fragments(&group.notes),
+            );
             if recurring.is_empty() {
                 return None;
             }
@@ -3501,6 +3504,70 @@ fn build_role_video_style_memories<'a>(
             Some(parts.join(" | "))
         })
         .collect()
+}
+
+fn compact_role_recurring_style_fragments(
+    fragments: Vec<String>,
+    supplements: Vec<String>,
+) -> Vec<String> {
+    let mut combined = Vec::new();
+    for fragment in fragments.into_iter().chain(supplements) {
+        if combined.iter().any(|existing| existing == &fragment) {
+            continue;
+        }
+        combined.push(fragment);
+    }
+    if combined.is_empty() {
+        return combined;
+    }
+
+    let has_character_signal = combined
+        .iter()
+        .any(|fragment| role_memory_fragment_is_character_signal(fragment));
+    if !has_character_signal {
+        return Vec::new();
+    }
+
+    combined
+        .into_iter()
+        .filter(|fragment| !fragment.starts_with("镜头"))
+        .collect()
+}
+
+fn role_memory_fragment_is_character_signal(fragment: &str) -> bool {
+    ["动作", "表演", "语气", "情绪", "光影", "声场", "环境"]
+        .iter()
+        .any(|prefix| fragment.starts_with(prefix))
+}
+
+fn role_style_supplement_fragments(notes: &[String]) -> Vec<String> {
+    summarize_role_voice_fragment(notes).into_iter().collect()
+}
+
+fn summarize_role_voice_fragment(notes: &[String]) -> Option<String> {
+    let mut restrained = Vec::new();
+
+    for note in notes {
+        for fragment in split_prompt_note_fragments(note) {
+            if !fragment.starts_with("语气") {
+                continue;
+            }
+            if fragment.contains("轻声克制") && restrained.iter().all(|value| *value != "轻声")
+            {
+                restrained.push("轻声");
+            }
+            if fragment.contains("低声克制") && restrained.iter().all(|value| *value != "低声")
+            {
+                restrained.push("低声");
+            }
+        }
+    }
+
+    if restrained.len() < 2 {
+        return None;
+    }
+
+    Some(format!("语气{}克制", restrained.join("")))
 }
 
 fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
@@ -6069,6 +6136,43 @@ mod tests {
             summaries,
             vec!["subject=林晚 | sampleCount=2 | subjectAliases=晚晚 | style=表演抬眼停顿，语气轻声低声克制".to_string()]
         );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_drop_camera_shell_when_character_signal_exists() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=镜头稳定跟拍，表演抬眼停顿，情绪克制"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=镜头近景稳定跟拍，表演抬眼停顿，情绪隐忍"
+                    .into(),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=2 | style=表演抬眼停顿".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_skip_camera_only_role_memory() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=镜头稳定跟拍".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=镜头近景稳定跟拍".into(),
+            },
+        ]);
+
+        assert!(summaries.is_empty(), "{summaries:?}");
     }
 
     #[test]
