@@ -3169,6 +3169,9 @@ fn compact_contextual_video_style_note(
         .into_iter()
         .filter(|part| !part.is_empty())
         .collect::<String>();
+    let storyboard_prompt = storyboard_row
+        .and_then(|row| row.prompt.as_deref())
+        .unwrap_or_default();
     let mut fragments = normalized
         .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
@@ -3177,6 +3180,9 @@ fn compact_contextual_video_style_note(
             neighbor_style_fragment_matches_storyboard(fragment, &fields, &expected_camera)
         })
         .filter_map(|fragment| trim_style_fragment_against_storyboard_fields(&fragment, &fields))
+        .filter(|fragment| {
+            !style_fragment_is_low_gain_hidden_speech_voice(fragment, &fields, storyboard_prompt)
+        })
         .filter(|fragment| !style_fragment_lags_current_emotional_turn(fragment, &fields))
         .filter(|fragment| !style_fragment_is_low_gain_mood_carryover(fragment, &fields))
         .map(|fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
@@ -3328,6 +3334,19 @@ fn storyboard_supports_voice_style(fields: &StructuredStoryboardDescription) -> 
     ]
     .iter()
     .any(|keyword| normalized_action.contains(keyword))
+}
+
+fn style_fragment_is_low_gain_hidden_speech_voice(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+    prompt: &str,
+) -> bool {
+    fragment.starts_with("语气")
+        && dialogue_clause_is_low_gain_for_offscreen_or_low_visibility_speech(
+            &fields.dialogue,
+            fields,
+            prompt,
+        )
 }
 
 fn style_fragment_lags_current_emotional_turn(
@@ -11833,6 +11852,23 @@ mod tests {
                 Some(&storyboard_row),
             ),
             Some("语气轻声，表演喉结滚动".to_string())
+        );
+    }
+
+    #[test]
+    fn compact_contextual_video_style_note_drops_voice_fragment_for_low_visibility_hidden_speech() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚穿过雨幕回头".into()),
+            video_desc: Some("（林晚穿过雨幕回头、雨夜街头、林晚、5秒、远景、手持跟拍、穿过雨幕奔跑并喊别回头、紧张、霓虹反光、别回头、脚步声和雨声混在一起、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "语气轻声克制，声场雨声回响",
+                Some(&storyboard_row),
+            ),
+            Some("声场雨声回响".to_string())
         );
     }
 
