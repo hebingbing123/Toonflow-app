@@ -145,6 +145,10 @@ const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
 const ACTION_SUBJECT_PREFIXES: [&str; 10] = [
     "主角", "女主", "男主", "反派", "女孩", "男孩", "女人", "男人", "老人", "孩子",
 ];
+const GENERIC_SUBJECT_ACTION_LEADERS: [&str; 22] = [
+    "推", "拉", "冲", "跑", "走", "回", "转", "穿", "扑", "握", "拿", "提", "站", "停", "坐", "靠",
+    "看", "望", "抬", "低", "开口", "说",
+];
 const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
     "身后的",
     "身后",
@@ -241,11 +245,22 @@ pub(crate) fn build_selected_video_memory(
         parts.push(format!("promptSeed={prompt_seed}"));
     }
     let mut selected_subject = None;
+    let mut residual_subject_hint = None;
+    let mut residual_action_hint = None;
     if let Some(fields) = row
         .video_desc
         .as_deref()
         .and_then(parse_structured_storyboard_description)
     {
+        residual_subject_hint = Some(selected_memory_identity_source(&fields.subject));
+        residual_action_hint = compact_selected_memory_action(
+            &fields.action,
+            Some(fields.subject.as_str()),
+            Some(fields.subject.as_str()),
+            Some(fields.subject_refs.as_str()),
+            Some(fields.setting.as_str()),
+            &fields.mood,
+        );
         if let Some(subject) =
             selected_memory_subject_identity(&fields.subject, &fields.subject_refs)
         {
@@ -271,7 +286,16 @@ pub(crate) fn build_selected_video_memory(
         Some(note)
     };
     if let Some(note) = residual_note.and_then(|note| {
-        compact_selected_memory_residual_note(&note, selected_subject.as_deref(), style.as_deref())
+        compact_selected_memory_residual_note(
+            &note,
+            selected_subject
+                .as_deref()
+                .or(residual_subject_hint.as_deref())
+                .filter(|value| !value.is_empty()),
+            style.as_deref(),
+            selected_subject.is_some(),
+            residual_action_hint.as_deref(),
+        )
     }) {
         parts.push(format!("note={note}"));
     }
@@ -883,18 +907,131 @@ pub(crate) fn select_subject_role_video_style_memory_notes(
         .filter_map(|row| {
             selected_video_style_value(row).map(|note| {
                 (
-                    match row.name.as_str() {
-                        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => 0_u8,
-                        PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => 1_u8,
-                        _ => 2_u8,
-                    },
+                    role_style_memory_scope_priority(row.name.as_str()),
+                    role_style_memory_sample_count(&row.content),
                     note,
                 )
             })
         })
         .collect::<Vec<_>>();
-    matches.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.len().cmp(&b.1.len())));
-    matches.into_iter().map(|(_, note)| note).take(2).collect()
+    matches.sort_by(|a, b| {
+        a.0.cmp(&b.0)
+            .then(b.1.cmp(&a.1))
+            .then(a.2.len().cmp(&b.2.len()))
+    });
+    merge_subject_role_style_memory_notes(matches)
+}
+
+fn role_style_memory_scope_priority(name: &str) -> u8 {
+    match name {
+        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => 0,
+        PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => 1,
+        _ => 2,
+    }
+}
+
+fn role_style_memory_sample_count(content: &str) -> usize {
+    extract_key_value(content, "sampleCount")
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(0)
+}
+
+fn merge_subject_role_style_memory_notes(matches: Vec<(u8, usize, String)>) -> Vec<String> {
+    let mut merged_fragments = Vec::<String>::new();
+    let mut fallback_note = None;
+    let has_script_scope = matches
+        .iter()
+        .any(|(scope_priority, _, _)| *scope_priority == 0);
+
+    for (scope_priority, sample_count, note) in matches {
+        let compacted = compact_video_style_prompt_note(&note).unwrap_or(note);
+        if fallback_note.is_none() {
+            fallback_note = Some(compacted.clone());
+        }
+
+        for fragment in split_prompt_note_fragments(&compacted) {
+            if has_script_scope
+                && scope_priority > 0
+                && role_style_project_fill_fragment_is_low_support(fragment.as_str(), sample_count)
+            {
+                continue;
+            }
+            if !role_memory_fragment_is_character_signal(fragment.as_str())
+                || merged_fragments
+                    .iter()
+                    .any(|existing| role_style_fragment_conflicts_or_overlaps(existing, &fragment))
+            {
+                continue;
+            }
+            merged_fragments.push(fragment);
+        }
+    }
+
+    if merged_fragments.is_empty() {
+        return fallback_note.into_iter().collect();
+    }
+
+    compact_video_style_prompt_note(&merged_fragments.join("，"))
+        .or(fallback_note)
+        .into_iter()
+        .collect()
+}
+
+fn role_style_fragment_conflicts_or_overlaps(existing: &str, candidate: &str) -> bool {
+    if existing == candidate {
+        return true;
+    }
+
+    let existing_family = role_style_fragment_family(existing);
+    let candidate_family = role_style_fragment_family(candidate);
+    if existing_family.is_some() && existing_family == candidate_family {
+        return true;
+    }
+
+    existing.contains(candidate) || candidate.contains(existing)
+}
+
+fn role_style_fragment_family(fragment: &str) -> Option<&'static str> {
+    for prefix in [
+        "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场",
+    ] {
+        if fragment.starts_with(prefix) {
+            return Some(prefix);
+        }
+    }
+    None
+}
+
+fn role_style_project_fill_fragment_is_low_support(fragment: &str, sample_count: usize) -> bool {
+    sample_count < 4 && role_style_fragment_prefers_strong_support(fragment)
+}
+
+fn role_style_fragment_prefers_strong_support(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return false;
+    }
+
+    if let Some(value) = normalized.strip_prefix("动作") {
+        return matches!(
+            normalize_prompt_text(value).as_str(),
+            "从容克制" | "克制自然" | "自然" | "缓慢" | "轻盈" | "利落"
+        );
+    }
+    if let Some(value) = normalized.strip_prefix("语气") {
+        return matches!(
+            normalize_prompt_text(value).as_str(),
+            "轻声克制" | "低声克制" | "轻声" | "低声" | "短促"
+        );
+    }
+    if let Some(value) = normalized.strip_prefix("情绪") {
+        return matches!(
+            normalize_prompt_text(value).as_str(),
+            "克制" | "隐忍" | "压抑" | "沉静" | "冷静"
+        );
+    }
+
+    false
 }
 
 pub(crate) fn select_prioritized_video_style_note(
@@ -2448,6 +2585,16 @@ fn selected_memory_identity_source(candidate: &str) -> String {
         return normalized;
     }
 
+    if let Some(role_prefix) = ACTION_SUBJECT_PREFIXES
+        .iter()
+        .find(|prefix| normalized.starts_with(**prefix))
+    {
+        let remainder = normalize_prompt_text(normalized.trim_start_matches(role_prefix));
+        if generic_subject_role_is_followed_by_actionish_fragment(&remainder) {
+            return (*role_prefix).to_string();
+        }
+    }
+
     let Some((split_idx, _)) = SUBJECT_IDENTITY_TAIL_MARKERS
         .iter()
         .filter_map(|marker| normalized.find(marker).map(|idx| (idx, *marker)))
@@ -2463,6 +2610,17 @@ fn selected_memory_identity_source(candidate: &str) -> String {
     }
 }
 
+fn generic_subject_role_is_followed_by_actionish_fragment(remainder: &str) -> bool {
+    let remainder = normalize_prompt_text(remainder);
+    !remainder.is_empty()
+        && (GENERIC_SUBJECT_ACTION_LEADERS
+            .iter()
+            .any(|prefix| remainder.starts_with(prefix))
+            || SUBJECT_IDENTITY_TAIL_MARKERS
+                .iter()
+                .any(|marker| remainder.starts_with(marker)))
+}
+
 fn normalize_selected_memory_identity_candidate(candidate: &str) -> Option<String> {
     normalize_selected_memory_identity_candidate_with_hint(candidate, None)
 }
@@ -2476,6 +2634,12 @@ fn normalize_selected_memory_identity_candidate_with_hint(
         return None;
     }
     let normalized = selected_memory_identity_source(&normalized);
+    if ACTION_SUBJECT_PREFIXES
+        .iter()
+        .any(|prefix| normalized == *prefix)
+    {
+        return Some(normalized);
+    }
 
     let stripped = strip_selected_memory_subject_role_prefix(&normalized)
         .map(normalize_prompt_text)
@@ -2598,9 +2762,24 @@ fn merge_selected_memory_subject_action(
 ) -> Option<String> {
     let subject = subject.map(normalize_prompt_text)?;
     let action = action.map(normalize_prompt_text)?;
+    let simplified_subject = normalize_prompt_text(
+        &subject
+            .replace(['后', '又', '再', '便', '才'], "")
+            .trim()
+            .to_string(),
+    );
+    let simplified_action = normalize_prompt_text(
+        &action
+            .replace(['后', '又', '再', '便', '才'], "")
+            .trim()
+            .to_string(),
+    );
     if subject.is_empty()
         || action.is_empty()
         || subject == action
+        || (!simplified_subject.is_empty()
+            && !simplified_action.is_empty()
+            && simplified_subject.contains(&simplified_action))
         || subject.contains('在')
         || action.chars().count() < 4
     {
@@ -4127,11 +4306,16 @@ fn compact_selected_memory_residual_note(
     note: &str,
     subject: Option<&str>,
     style: Option<&str>,
+    subject_is_stored: bool,
+    action_hint: Option<&str>,
 ) -> Option<String> {
     let normalized_subject = subject
         .map(normalize_prompt_text)
         .filter(|value| !value.is_empty());
     let normalized_style = style
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty());
+    let normalized_action_hint = action_hint
         .map(normalize_prompt_text)
         .filter(|value| !value.is_empty());
     let mut fragments = split_prompt_note_fragments(note)
@@ -4147,6 +4331,34 @@ fn compact_selected_memory_residual_note(
                 .strip_prefix(subject)
                 .map(normalize_prompt_text)
                 .unwrap_or(fragment);
+            if !subject_is_stored {
+                if let Some(action) = normalized_action_hint.as_deref() {
+                    let action = normalize_prompt_text(action);
+                    if !action.is_empty() {
+                        fragments = vec![subject.to_string(), action];
+                        if let Some(style) = normalized_style.as_deref() {
+                            fragments = fragments
+                                .into_iter()
+                                .filter_map(|fragment| {
+                                    trim_selected_memory_fragment_covered_by_style(&fragment, style)
+                                })
+                                .collect();
+                        }
+                        fragments.retain(|fragment| {
+                            !fragment.is_empty()
+                                && !low_signal_subject_pose_fragment(fragment)
+                                && !low_signal_object_hold_fragment(fragment)
+                        });
+                        if fragments.is_empty() {
+                            return None;
+                        }
+                        return Some(clip_prompt_fragment(
+                            &fragments.join("，"),
+                            VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+                        ));
+                    }
+                }
+            }
             if fragment.is_empty() || low_signal_subject_pose_fragment(&fragment) {
                 return None;
             }
@@ -6689,10 +6901,79 @@ mod tests {
 
         assert_eq!(
             notes,
-            vec![
-                "表演抬眼停顿，语气轻声克制".to_string(),
-                "动作从容克制，语气低声克制".to_string()
-            ]
+            vec!["表演抬眼停顿，语气轻声克制，动作从容克制".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_merges_project_fill_only_when_axis_is_missing()
+    {
+        let notes = select_subject_role_video_style_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=5 | style=动作从容克制，语气低声克制，光影冷蓝窗光"
+                        .into(),
+                },
+            ],
+            &["林晚".to_string()],
+        );
+
+        assert_eq!(
+            notes,
+            vec!["表演抬眼停顿，语气轻声克制，动作从容克制，光影冷蓝窗光".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_skips_low_support_generic_project_fill() {
+        let notes = select_subject_role_video_style_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=2 | style=动作从容克制，语气低声克制，光影冷蓝窗光"
+                        .into(),
+                },
+            ],
+            &["林晚".to_string()],
+        );
+
+        assert_eq!(
+            notes,
+            vec!["表演抬眼停顿，语气轻声克制，光影冷蓝窗光".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_keeps_supported_generic_project_fill() {
+        let notes = select_subject_role_video_style_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿".into(),
+                },
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=4 | style=动作从容克制，语气低声克制"
+                        .into(),
+                },
+            ],
+            &["林晚".to_string()],
+        );
+
+        assert_eq!(
+            notes,
+            vec!["表演抬眼停顿，动作从容克制，语气低声克制".to_string()]
         );
     }
 
@@ -6717,6 +6998,14 @@ mod tests {
         assert_eq!(
             selected_memory_subject_aliases("晚晚低声开口", "林晚轻声说道/晚晚低声开口"),
             vec!["林晚".to_string(), "晚晚".to_string()]
+        );
+    }
+
+    #[test]
+    fn selected_memory_subject_aliases_keep_generic_role_when_followed_by_action() {
+        assert_eq!(
+            selected_memory_subject_aliases("主角推门回望", "主角推门回望/门厅"),
+            vec!["主角".to_string()]
         );
     }
 

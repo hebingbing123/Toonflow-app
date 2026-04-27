@@ -1096,7 +1096,18 @@ async fn load_video_prompt_memory_notes(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let rows = trim_video_prompt_memory_rows(rows, storyboard_numeric_id, current_prompt_seed);
+    let subject_candidates = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
+    let rows = trim_video_prompt_memory_rows(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        &subject_candidates,
+    );
     Ok((
         select_video_prompt_style_notes(
             &rows,
@@ -1435,6 +1446,7 @@ fn trim_video_prompt_memory_rows(
     rows: Vec<AgentMemoryRow>,
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
+    subject_candidates: &[String],
 ) -> Vec<AgentMemoryRow> {
     let mut selected_candidates = Vec::new();
     let mut auto_scope_candidates = Vec::new();
@@ -1484,18 +1496,13 @@ fn trim_video_prompt_memory_rows(
     {
         kept.insert(*idx);
     }
-    for (idx, _) in script_role_style_candidates
-        .iter()
-        .take(VIDEO_PROMPT_ROLE_STYLE_MEMORY_ROW_LIMIT)
-    {
-        kept.insert(*idx);
-    }
-    for (idx, _) in project_role_style_candidates
-        .iter()
-        .take(VIDEO_PROMPT_ROLE_STYLE_MEMORY_ROW_LIMIT)
-    {
-        kept.insert(*idx);
-    }
+    keep_matching_role_style_rows(
+        &mut kept,
+        &script_role_style_candidates,
+        &project_role_style_candidates,
+        subject_candidates,
+        VIDEO_PROMPT_ROLE_STYLE_MEMORY_ROW_LIMIT,
+    );
 
     let mut all_rows = selected_candidates;
     all_rows.extend(auto_scope_candidates);
@@ -1508,6 +1515,38 @@ fn trim_video_prompt_memory_rows(
         .into_iter()
         .filter_map(|(idx, row)| kept.contains(&idx).then_some(row))
         .collect()
+}
+
+fn keep_matching_role_style_rows(
+    kept: &mut std::collections::HashSet<usize>,
+    script_candidates: &[(usize, AgentMemoryRow)],
+    project_candidates: &[(usize, AgentMemoryRow)],
+    subject_candidates: &[String],
+    row_limit: usize,
+) {
+    let matching_indices = [script_candidates, project_candidates]
+        .into_iter()
+        .flat_map(|candidates| candidates.iter())
+        .filter(|(_, row)| {
+            memory_content_matches_subject_candidates(&row.content, subject_candidates)
+        })
+        .map(|(idx, _)| *idx)
+        .take(row_limit)
+        .collect::<Vec<_>>();
+    if !matching_indices.is_empty() {
+        for idx in matching_indices {
+            kept.insert(idx);
+        }
+        return;
+    }
+
+    for (idx, _) in script_candidates
+        .iter()
+        .chain(project_candidates.iter())
+        .take(row_limit)
+    {
+        kept.insert(*idx);
+    }
 }
 
 fn prioritize_storyboard_memory_indices(
@@ -8933,7 +8972,7 @@ mod tests {
                     .into(),
         });
 
-        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"), &[]);
 
         assert_eq!(
             trimmed
@@ -9005,7 +9044,7 @@ mod tests {
                     .into(),
         });
 
-        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"), &[]);
 
         assert!(trimmed.iter().any(|row| {
             row.name == "selected_video_memory"
@@ -9043,7 +9082,7 @@ mod tests {
                     .into(),
         });
 
-        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"), &[]);
 
         assert!(trimmed.iter().any(|row| {
             row.name == "selected_video_memory"
@@ -9072,7 +9111,7 @@ mod tests {
             },
         ];
 
-        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"), &[]);
 
         assert!(trimmed.iter().any(|row| {
             row.name == "auto_scope_memory"
@@ -9080,6 +9119,58 @@ mod tests {
                     .content
                     .contains("storyboardPromptSeeds=12:seed-12-current,14:seed-14-current")
         }));
+    }
+
+    #[test]
+    fn trim_video_prompt_memory_rows_prefers_matching_role_style_rows_for_current_subject() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=顾承泽 | sampleCount=3 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | sampleCount=3 | style=表演欲言又止，语气低声克制".into(),
+            },
+            AgentMemoryRow {
+                name: "project_role_video_style_memory".into(),
+                content: "subject=沈知遥 | sampleCount=5 | style=动作从容克制，光影冷蓝窗光".into(),
+            },
+            AgentMemoryRow {
+                name: "project_role_video_style_memory".into(),
+                content: "subject=晚晚 | sampleCount=5 | style=动作克制自然，光影暖金逆光".into(),
+            },
+        ];
+
+        let trimmed = trim_video_prompt_memory_rows(
+            rows,
+            12,
+            Some("seed-12-current"),
+            &["林晚".to_string(), "晚晚".to_string()],
+        );
+
+        assert_eq!(
+            trimmed
+                .iter()
+                .filter(|row| {
+                    row.name == "script_role_video_style_memory"
+                        || row.name == "project_role_video_style_memory"
+                })
+                .count(),
+            2
+        );
+        assert!(trimmed.iter().any(|row| {
+            row.name == "script_role_video_style_memory" && row.content.contains("subject=林晚")
+        }));
+        assert!(trimmed.iter().any(|row| {
+            row.name == "project_role_video_style_memory" && row.content.contains("subject=晚晚")
+        }));
+        assert!(!trimmed
+            .iter()
+            .any(|row| row.content.contains("subject=顾承泽")));
+        assert!(!trimmed
+            .iter()
+            .any(|row| row.content.contains("subject=沈知遥")));
     }
 
     #[test]
