@@ -823,7 +823,8 @@ pub(crate) fn select_subject_role_video_style_memory_notes(
         return Vec::new();
     }
 
-    rows.iter()
+    let mut matches = rows
+        .iter()
         .filter(|row| {
             matches!(
                 row.name.as_str(),
@@ -841,9 +842,21 @@ pub(crate) fn select_subject_role_video_style_memory_notes(
                     })
                 })
         })
-        .filter_map(selected_video_style_value)
-        .take(2)
-        .collect()
+        .filter_map(|row| {
+            selected_video_style_value(row).map(|note| {
+                (
+                    match row.name.as_str() {
+                        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => 0_u8,
+                        PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => 1_u8,
+                        _ => 2_u8,
+                    },
+                    note,
+                )
+            })
+        })
+        .collect::<Vec<_>>();
+    matches.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.len().cmp(&b.1.len())));
+    matches.into_iter().map(|(_, note)| note).take(2).collect()
 }
 
 pub(crate) fn select_prioritized_video_style_note(
@@ -6077,6 +6090,33 @@ mod tests {
         );
 
         assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_prefers_script_scope_over_project_scope() {
+        let notes = select_subject_role_video_style_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=5 | style=动作从容克制，语气低声克制"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制"
+                        .into(),
+                },
+            ],
+            &["林晚".to_string()],
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "表演抬眼停顿，语气轻声克制".to_string(),
+                "动作从容克制，语气低声克制".to_string()
+            ]
+        );
     }
 
     #[test]
