@@ -3968,6 +3968,7 @@ fn fallback_contextual_performance_fragment(
 ) -> Option<String> {
     if storyboard_dialogue_is_empty(&fields.dialogue)
         && !video_prompt_scene_needs_emotional_memory(fields)
+        && !video_prompt_scene_needs_identity_memory(fields)
     {
         return None;
     }
@@ -3982,6 +3983,12 @@ fn fallback_contextual_performance_fragment(
                 fragment,
                 style_note_fragment_family(fragment),
             ) >= 3
+                || (video_prompt_scene_needs_identity_memory(fields)
+                    && style_note_matches_shared_keyword_family(
+                        fragment,
+                        &[fields.action.as_str(), fields.dialogue.as_str()],
+                        PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+                    ))
         })
         .filter(|fragment| {
             !kept_fragments
@@ -14003,6 +14010,24 @@ mod tests {
     }
 
     #[test]
+    fn compact_contextual_video_style_note_keeps_action_matched_performance_for_silent_identity_scene(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚在镜前停住".into()),
+            video_desc: Some("（林晚在镜前停住、化妆镜前、林晚、4秒、近景、静止、抬眼停顿后看向镜中倒影、克制、暖金逆光、无台词、静场留白、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "光影暖金逆光，表演抬眼停顿",
+                Some(&storyboard_row),
+            ),
+            Some("表演抬眼停顿".to_string())
+        );
+    }
+
+    #[test]
     fn compact_contextual_video_style_note_drops_voice_fragment_for_low_visibility_hidden_speech() {
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("林晚穿过雨幕回头".into()),
@@ -15218,6 +15243,14 @@ mod tests {
             .and_then(parse_structured_storyboard_description)
             .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
             .unwrap_or_default();
+        assert_eq!(
+            crate::production::workbench::video_prompt_memory::select_subject_role_video_style_memory_notes_for_storyboard(
+                &rows,
+                &subject_candidates,
+                Some(&storyboard_row),
+            ),
+            vec!["表演抬眼停顿，语气轻声克制".to_string()]
+        );
 
         assert_eq!(
             resolve_observation_filter_style_note(
@@ -15229,6 +15262,48 @@ mod tests {
                 None,
             ),
             Some("语气轻声".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_prefers_primary_subject_role_memory_when_multiple_roles_match()
+    {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=4 | style=表演抬眼停顿，语气轻声克制 | note=表演抬眼停顿，语气轻声克制".into(),
+            },
+            AgentMemoryRow {
+                name: "project_role_video_style_memory".into(),
+                content: "subject=顾承泽 | subjectAliases=顾总 | sampleCount=6 | style=表演冷眼逼视，语气低声压迫 | note=表演冷眼逼视，语气低声压迫".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚与顾承泽擦肩后强忍泪意".into()),
+            video_desc: Some("（林晚与顾承泽擦肩后强忍泪意、雨夜门厅、林晚/顾承泽、5秒、近景、稳定跟拍、林晚抬眼停顿后侧身让开、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let subject_candidates = storyboard_row
+            .video_desc
+            .as_deref()
+            .and_then(parse_structured_storyboard_description)
+            .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+            .unwrap_or_default();
+
+        assert_eq!(
+            resolve_observation_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                &subject_candidates,
+                None,
+            ),
+            Some("表演抬眼停顿".to_string())
         );
     }
 
