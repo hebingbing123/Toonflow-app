@@ -36,8 +36,15 @@ fn negative_constraint_conflicts_with_style_note(constraint: &str, style_note: &
     if negative_constraint_targets_extreme_angle(constraint) {
         return note.contains("低机位") || note.contains("高机位");
     }
-    if negative_constraint_targets_cold_oppressive_mood(constraint) {
+    if negative_constraint_targets_oppressive_mood(constraint) {
         return note.contains("压迫") || note.contains("紧张") || note.contains("冷峻");
+    }
+    if negative_constraint_targets_frantic_mood(constraint) {
+        return note.contains("惊慌")
+            || note.contains("崩溃")
+            || note.contains("失控")
+            || note.contains("怒吼")
+            || note.contains("慌乱");
     }
     if negative_constraint_targets_cold_emotional_tone(constraint) {
         return note.contains("冷调") || note.contains("冷色") || note.contains("冷峻");
@@ -82,10 +89,20 @@ fn negative_constraint_conflicts_with_storyboard_context(
             || fields.camera_move.contains("低机位")
             || fields.camera_move.contains("高机位");
     }
-    if negative_constraint_targets_cold_oppressive_mood(constraint) {
+    if negative_constraint_targets_oppressive_mood(constraint) {
         return fields.mood.contains("压迫")
             || fields.mood.contains("紧张")
             || fields.mood.contains("冷峻");
+    }
+    if negative_constraint_targets_frantic_mood(constraint) {
+        return fields.mood.contains("惊慌")
+            || fields.mood.contains("崩溃")
+            || fields.mood.contains("失控")
+            || fields.mood.contains("慌乱")
+            || fields.action.contains("狂奔")
+            || fields.action.contains("冲")
+            || fields.action.contains("扑")
+            || fields.dialogue.contains("怒吼");
     }
     if negative_constraint_targets_cold_emotional_tone(constraint) {
         return fields.mood.contains("冷调")
@@ -134,8 +151,15 @@ fn negative_constraint_targets_extreme_angle(constraint: &str) -> bool {
     constraint == "avoid extreme camera angle"
 }
 
-fn negative_constraint_targets_cold_oppressive_mood(constraint: &str) -> bool {
-    constraint == "avoid oppressive or frantic mood"
+fn negative_constraint_targets_oppressive_mood(constraint: &str) -> bool {
+    constraint == "avoid oppressive mood"
+        || constraint == "avoid oppressive or frantic mood"
+        || constraint == "avoid overly cold, oppressive, or frantic mood"
+}
+
+fn negative_constraint_targets_frantic_mood(constraint: &str) -> bool {
+    constraint == "avoid frantic mood"
+        || constraint == "avoid oppressive or frantic mood"
         || constraint == "avoid overly cold, oppressive, or frantic mood"
 }
 

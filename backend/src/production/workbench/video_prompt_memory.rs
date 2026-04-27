@@ -1330,7 +1330,45 @@ fn ranked_observation_fragments(avoid: &str) -> Vec<String> {
 }
 
 fn rejected_negative_fragments(avoid: &str) -> Vec<String> {
-    compact_rejected_negative_fragment_families(split_prompt_note_fragments(avoid).collect())
+    compact_rejected_negative_fragment_families(stitch_rejected_negative_fragments(
+        split_prompt_note_fragments(avoid).collect(),
+    ))
+}
+
+fn stitch_rejected_negative_fragments(fragments: Vec<String>) -> Vec<String> {
+    let mut stitched = Vec::with_capacity(fragments.len());
+    let mut idx = 0usize;
+    while idx < fragments.len() {
+        if let Some((combined, consumed)) =
+            match_known_rejected_negative_fragment_sequence(&fragments[idx..])
+        {
+            stitched.push(combined);
+            idx += consumed;
+            continue;
+        }
+        stitched.push(fragments[idx].clone());
+        idx += 1;
+    }
+    stitched
+}
+
+fn match_known_rejected_negative_fragment_sequence(parts: &[String]) -> Option<(String, usize)> {
+    const KNOWN_COMPOSITES: &[(&str, usize)] = &[
+        ("avoid overly cold, oppressive, or frantic mood", 3),
+        ("avoid warped anatomy, blur, flicker", 3),
+        ("avoid face distortion, identity drift, costume drift", 3),
+    ];
+
+    for &(candidate, consumed) in KNOWN_COMPOSITES {
+        if parts.len() < consumed {
+            continue;
+        }
+        let joined = parts[..consumed].join(", ");
+        if normalize_prompt_text(&joined) == normalize_prompt_text(candidate) {
+            return Some((candidate.to_string(), consumed));
+        }
+    }
+    None
 }
 
 fn compact_rejected_negative_avoid(avoid: &str) -> String {

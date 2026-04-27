@@ -872,6 +872,15 @@ fn compact_negative_fragment_against_storyboard_risk(
                 }
             }
         }
+        "avoid oppressive or frantic mood" | "avoid overly cold, oppressive, or frantic mood" => {
+            if negative_prompt_scene_intends_frantic_mood(&fields) {
+                None
+            } else if negative_prompt_scene_prefers_restrained_emotional_guard(&fields) {
+                Some("avoid frantic mood".to_string())
+            } else {
+                Some(trimmed.to_string())
+            }
+        }
         _ => Some(trimmed.to_string()),
     }
 }
@@ -1042,12 +1051,81 @@ fn negative_prompt_scene_needs_emotional_memory(fields: &StructuredStoryboardDes
                 "愤怒",
                 "惊慌",
                 "紧张",
+                "压迫",
+                "冷峻",
                 "崩溃",
                 "隐忍",
                 "欲言又止",
                 "迟疑",
                 "回头",
                 "犹豫",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn negative_prompt_scene_prefers_restrained_emotional_guard(
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    let restrained = [
+        fields.mood.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "克制",
+                "隐忍",
+                "欲言又止",
+                "迟疑",
+                "犹豫",
+                "哽咽",
+                "停顿",
+                "低声",
+                "轻声",
+                "压低声音",
+                "忍住",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    });
+    let intended_cold_or_oppressive = [fields.mood.as_str(), fields.lighting.as_str()]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .any(|value| {
+            !value.is_empty()
+                && ["压迫", "紧张", "冷峻", "冷调", "冷色", "冷光"]
+                    .iter()
+                    .any(|keyword| value.contains(keyword))
+        });
+    restrained
+        && !intended_cold_or_oppressive
+        && !negative_prompt_scene_intends_frantic_mood(fields)
+}
+
+fn negative_prompt_scene_intends_frantic_mood(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.mood.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "惊慌",
+                "崩溃",
+                "失控",
+                "慌乱",
+                "怒吼",
+                "狂奔",
+                "冲出",
+                "扑过去",
             ]
             .iter()
             .any(|keyword| value.contains(keyword))
@@ -1347,8 +1425,8 @@ fn filter_conflicting_review_fragments(
 ) -> Vec<String> {
     fragments
         .into_iter()
-        .filter_map(|fragment| {
-            compact_negative_constraint_against_storyboard_style(
+        .flat_map(|fragment| {
+            compact_negative_constraint_fragments_against_storyboard_style(
                 &fragment,
                 selected_style_note,
                 storyboard_row,
@@ -1462,9 +1540,26 @@ fn compact_negative_constraint_against_storyboard_style(
     selected_style_note: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Option<String> {
+    let compacted = compact_negative_constraint_fragments_against_storyboard_style(
+        fragment,
+        selected_style_note,
+        storyboard_row,
+    );
+    match compacted.len() {
+        0 => None,
+        1 => compacted.into_iter().next(),
+        _ => Some(compacted.join(", ")),
+    }
+}
+
+fn compact_negative_constraint_fragments_against_storyboard_style(
+    fragment: &str,
+    selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
     let trimmed = fragment.trim();
     if trimmed.is_empty() {
-        return None;
+        return Vec::new();
     }
     let conflicts = |value: &str| {
         negative_constraint_conflicts_with_storyboard_style(
@@ -1481,13 +1576,12 @@ fn compact_negative_constraint_against_storyboard_style(
                 "avoid overly tight close-up framing",
                 conflicts,
             )
+            .into_iter()
+            .collect()
         }
-        "avoid overly cold, oppressive, or frantic mood" => compact_conflicting_negative_pair(
-            trimmed,
-            "avoid oppressive or frantic mood",
-            "avoid overly cold emotional tone",
-            conflicts,
-        ),
+        "avoid oppressive or frantic mood" | "avoid overly cold, oppressive, or frantic mood" => {
+            compact_conflicting_mood_constraints(trimmed, conflicts)
+        }
         "avoid flat cold lighting or harsh backlight silhouette" => {
             compact_conflicting_negative_pair(
                 trimmed,
@@ -1495,8 +1589,13 @@ fn compact_negative_constraint_against_storyboard_style(
                 "avoid harsh backlight silhouette",
                 conflicts,
             )
+            .into_iter()
+            .collect()
         }
-        _ => (!conflicts(trimmed)).then_some(trimmed.to_string()),
+        _ => (!conflicts(trimmed))
+            .then_some(trimmed.to_string())
+            .into_iter()
+            .collect(),
     }
 }
 
@@ -1514,6 +1613,52 @@ fn compact_conflicting_negative_pair(
         (false, true) => Some(lhs.to_string()),
         (true, true) => None,
     }
+}
+
+fn compact_conflicting_mood_constraints(
+    original: &str,
+    conflicts: impl Fn(&str) -> bool,
+) -> Vec<String> {
+    let canonical = canonical_negative_fragment(original);
+    let (allow_oppressive, allow_frantic, allow_cold) = match canonical.as_str() {
+        "avoid oppressive or frantic mood" => (true, true, false),
+        "avoid overly cold, oppressive, or frantic mood" => (true, true, true),
+        "avoid oppressive mood" => (true, false, false),
+        "avoid frantic mood" => (false, true, false),
+        "avoid overly cold emotional tone" => (false, false, true),
+        _ => return vec![original.to_string()],
+    };
+
+    render_mood_tone_constraint_fragments(
+        allow_oppressive && !conflicts("avoid oppressive mood"),
+        allow_frantic && !conflicts("avoid frantic mood"),
+        allow_cold && !conflicts("avoid overly cold emotional tone"),
+    )
+}
+
+fn render_mood_tone_constraint_fragments(
+    oppressive: bool,
+    frantic: bool,
+    cold: bool,
+) -> Vec<String> {
+    if oppressive && frantic && cold {
+        return vec!["avoid overly cold, oppressive, or frantic mood".to_string()];
+    }
+    if oppressive && frantic {
+        return vec!["avoid oppressive or frantic mood".to_string()];
+    }
+
+    let mut fragments = Vec::new();
+    if oppressive {
+        fragments.push("avoid oppressive mood".to_string());
+    }
+    if frantic {
+        fragments.push("avoid frantic mood".to_string());
+    }
+    if cold {
+        fragments.push("avoid overly cold emotional tone".to_string());
+    }
+    fragments
 }
 
 fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
@@ -2047,7 +2192,8 @@ struct VisualStyleConstraintFlags {
     unnecessary_shot_changes: bool,
     extreme_camera_angle: bool,
     tight_close_up: bool,
-    oppressive_or_frantic_mood: bool,
+    oppressive_mood: bool,
+    frantic_mood: bool,
     overly_cold_emotional_tone: bool,
     flat_cold_lighting: bool,
     harsh_backlight_silhouette: bool,
@@ -2082,7 +2228,8 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
             visual_style_flags.unnecessary_shot_changes |= flags.unnecessary_shot_changes;
             visual_style_flags.extreme_camera_angle |= flags.extreme_camera_angle;
             visual_style_flags.tight_close_up |= flags.tight_close_up;
-            visual_style_flags.oppressive_or_frantic_mood |= flags.oppressive_or_frantic_mood;
+            visual_style_flags.oppressive_mood |= flags.oppressive_mood;
+            visual_style_flags.frantic_mood |= flags.frantic_mood;
             visual_style_flags.overly_cold_emotional_tone |= flags.overly_cold_emotional_tone;
             visual_style_flags.flat_cold_lighting |= flags.flat_cold_lighting;
             visual_style_flags.harsh_backlight_silhouette |= flags.harsh_backlight_silhouette;
@@ -2181,7 +2328,16 @@ fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleC
             })
         }
         "avoid oppressive or frantic mood" => Some(VisualStyleConstraintFlags {
-            oppressive_or_frantic_mood: true,
+            oppressive_mood: true,
+            frantic_mood: true,
+            ..Default::default()
+        }),
+        "avoid oppressive mood" => Some(VisualStyleConstraintFlags {
+            oppressive_mood: true,
+            ..Default::default()
+        }),
+        "avoid frantic mood" => Some(VisualStyleConstraintFlags {
+            frantic_mood: true,
             ..Default::default()
         }),
         "avoid overly cold emotional tone" => Some(VisualStyleConstraintFlags {
@@ -2189,7 +2345,8 @@ fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleC
             ..Default::default()
         }),
         "avoid overly cold, oppressive, or frantic mood" => Some(VisualStyleConstraintFlags {
-            oppressive_or_frantic_mood: true,
+            oppressive_mood: true,
+            frantic_mood: true,
             overly_cold_emotional_tone: true,
             ..Default::default()
         }),
@@ -2226,10 +2383,14 @@ fn render_visual_style_constraint_fragments(flags: VisualStyleConstraintFlags) -
         fragments.push("avoid overly tight close-up framing".to_string());
     }
 
-    if flags.oppressive_or_frantic_mood && flags.overly_cold_emotional_tone {
+    if flags.oppressive_mood && flags.frantic_mood && flags.overly_cold_emotional_tone {
         fragments.push("avoid overly cold, oppressive, or frantic mood".to_string());
-    } else if flags.oppressive_or_frantic_mood {
+    } else if flags.oppressive_mood && flags.frantic_mood {
         fragments.push("avoid oppressive or frantic mood".to_string());
+    } else if flags.oppressive_mood {
+        fragments.push("avoid oppressive mood".to_string());
+    } else if flags.frantic_mood {
+        fragments.push("avoid frantic mood".to_string());
     } else if flags.overly_cold_emotional_tone {
         fragments.push("avoid overly cold emotional tone".to_string());
     }
@@ -2295,21 +2456,63 @@ fn render_visual_error_fragments(flags: VisualErrorFlags) -> Vec<String> {
 }
 
 fn split_negative_prompt_fragments(prompt: Option<&str>) -> Vec<String> {
-    let mut fragments = Vec::new();
+    let mut raw_fragments = Vec::new();
     if let Some(prompt) = prompt {
         for fragment in prompt.split([',', ';', '，', '；', '\n']) {
             let fragment = fragment.trim();
             if fragment.is_empty() {
                 continue;
             }
-            if negative_fragment_is_covered(fragment, &fragments) {
-                continue;
-            }
-            fragments.retain(|existing| !negative_fragment_covers(fragment, existing));
-            fragments.push(fragment.to_string());
+            raw_fragments.push(fragment.to_string());
         }
     }
+
+    let mut fragments = Vec::new();
+    for fragment in stitch_split_negative_fragments(raw_fragments) {
+        if negative_fragment_is_covered(&fragment, &fragments) {
+            continue;
+        }
+        fragments.retain(|existing| !negative_fragment_covers(&fragment, existing));
+        fragments.push(fragment);
+    }
     fragments
+}
+
+fn stitch_split_negative_fragments(fragments: Vec<String>) -> Vec<String> {
+    let mut stitched = Vec::with_capacity(fragments.len());
+    let mut idx = 0usize;
+    while idx < fragments.len() {
+        if let Some((combined, consumed)) =
+            match_known_negative_fragment_sequence(&fragments[idx..])
+        {
+            stitched.push(combined);
+            idx += consumed;
+            continue;
+        }
+        stitched.push(fragments[idx].clone());
+        idx += 1;
+    }
+    stitched
+}
+
+fn match_known_negative_fragment_sequence(parts: &[String]) -> Option<(String, usize)> {
+    const KNOWN_COMPOSITES: &[(&str, usize)] = &[
+        ("avoid overly cold, oppressive, or frantic mood", 3),
+        ("avoid warped anatomy, blur, flicker", 3),
+        ("avoid face distortion, identity drift, costume drift", 3),
+        ("avoid flat cold lighting or harsh backlight silhouette", 1),
+    ];
+
+    for &(candidate, consumed) in KNOWN_COMPOSITES {
+        if parts.len() < consumed {
+            continue;
+        }
+        let joined = parts[..consumed].join(", ");
+        if canonical_negative_fragment(&joined) == canonical_negative_fragment(candidate) {
+            return Some((candidate.to_string(), consumed));
+        }
+    }
+    None
 }
 
 fn push_negative_fragment_without_budget(target: &mut Vec<String>, candidate: &str) {
@@ -2381,7 +2584,8 @@ fn visual_style_constraint_flags_cover(
     (!candidate.unnecessary_shot_changes || existing.unnecessary_shot_changes)
         && (!candidate.extreme_camera_angle || existing.extreme_camera_angle)
         && (!candidate.tight_close_up || existing.tight_close_up)
-        && (!candidate.oppressive_or_frantic_mood || existing.oppressive_or_frantic_mood)
+        && (!candidate.oppressive_mood || existing.oppressive_mood)
+        && (!candidate.frantic_mood || existing.frantic_mood)
         && (!candidate.overly_cold_emotional_tone || existing.overly_cold_emotional_tone)
         && (!candidate.flat_cold_lighting || existing.flat_cold_lighting)
         && (!candidate.harsh_backlight_silhouette || existing.harsh_backlight_silhouette)
@@ -2471,7 +2675,9 @@ fn negative_fragment_family(value: &str) -> &'static str {
         "avoid extreme camera angle"
         | "avoid overly tight close-up framing"
         | "avoid extreme camera angle or overly tight close-up framing" => "camera_framing",
-        "avoid oppressive or frantic mood"
+        "avoid oppressive mood"
+        | "avoid frantic mood"
+        | "avoid oppressive or frantic mood"
         | "avoid overly cold emotional tone"
         | "avoid overly cold, oppressive, or frantic mood" => "mood_tone",
         "avoid flat cold lighting"
@@ -2929,6 +3135,26 @@ mod tests {
                 Some(&cold_light_storyboard),
             ),
             Some("avoid harsh backlight silhouette".to_string())
+        );
+    }
+
+    #[test]
+    fn compact_negative_constraint_against_storyboard_style_keeps_frantic_guard_for_cold_scene() {
+        let cold_oppressive_storyboard = StoryboardPromptSeedRow {
+            prompt: Some("冷光对峙".into()),
+            video_desc: Some(
+                "（主角对峙、旧宅门厅、主角、5秒、中景、静止、盯住来人、冷峻压迫、室内冷光、、、A16）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+        assert_eq!(
+            compact_negative_constraint_against_storyboard_style(
+                "avoid overly cold, oppressive, or frantic mood",
+                None,
+                Some(&cold_oppressive_storyboard),
+            ),
+            Some("avoid frantic mood".to_string())
         );
     }
 
@@ -3464,6 +3690,57 @@ mod tests {
         );
         assert_eq!(selection.fragment_count, 1);
         assert_eq!(selection.budget_tier, "expanded");
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_compacts_broad_mood_guard_for_restrained_scene() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=2 | avoid=avoid overly cold, oppressive, or frantic mood"
+                        .into(),
+            }],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚低声忍住眼泪"),
+                Some("（晚晚低声忍住眼泪、医院走廊、晚晚/林晚、5秒、中景、静止、停顿后低声开口、克制、夜间中性光、别问了、空调低鸣、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(selection.as_deref(), Some("avoid frantic mood"));
+        assert_eq!(selection.budget_tier, "lean");
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_narrows_frantic_guard_for_intended_panic_scene() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=2 | avoid=avoid overly cold, oppressive, or frantic mood"
+                        .into(),
+            }],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("主角惊慌冲出门厅"),
+                Some("（主角惊慌冲出门厅、旧宅门厅、主角、5秒、近景、手持跟拍、狂奔冲出门厅、惊慌失控、车灯逆光、快跑啊、呼吸急促混着脚步声、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        assert_eq!(
+            prompts.get(&12).and_then(|value| value.as_deref()),
+            Some("avoid oppressive mood")
+        );
     }
 
     #[test]
