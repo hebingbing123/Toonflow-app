@@ -2267,7 +2267,7 @@ fn video_prompt_observation_is_irrelevant_to_storyboard(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> bool {
     canonical_observation_note(observation_note) == "avoid lip-sync mismatch"
-        && storyboard_row.is_some_and(storyboard_dialogue_is_empty_row)
+        && storyboard_row.is_some_and(storyboard_lacks_meaningful_spoken_dialogue)
 }
 
 fn storyboard_dialogue_is_empty_row(row: &StoryboardPromptSeedRow) -> bool {
@@ -2293,6 +2293,77 @@ fn storyboard_dialogue_is_empty(dialogue: &str) -> bool {
         .iter()
         .map(|marker| normalize_prompt_text(marker).to_ascii_lowercase())
         .any(|marker| normalized_ascii == marker)
+}
+
+fn storyboard_lacks_meaningful_spoken_dialogue(row: &StoryboardPromptSeedRow) -> bool {
+    row.video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .is_none_or(|fields| !storyboard_has_meaningful_spoken_dialogue(&fields))
+}
+
+fn storyboard_has_meaningful_spoken_dialogue(fields: &StructuredStoryboardDescription) -> bool {
+    if storyboard_dialogue_is_empty(&fields.dialogue) {
+        return false;
+    }
+
+    let dialogue = normalize_prompt_text(&fields.dialogue);
+    let action = normalize_prompt_text(&fields.action);
+    let subject = normalize_prompt_text(&fields.subject);
+
+    if dialogue_fragment_is_low_gain_utterance(&dialogue)
+        && !storyboard_explicitly_signals_speech(&action, &dialogue, &subject)
+    {
+        return false;
+    }
+
+    true
+}
+
+fn dialogue_fragment_is_low_gain_utterance(dialogue: &str) -> bool {
+    let stripped = dialogue
+        .chars()
+        .filter(|ch| {
+            !ch.is_whitespace()
+                && !matches!(ch, '：' | ':' | '，' | ',' | '。' | '！' | '!' | '？' | '?')
+        })
+        .collect::<String>();
+    if stripped.is_empty() {
+        return true;
+    }
+    let char_count = stripped.chars().count();
+    if char_count > 2 {
+        return false;
+    }
+
+    [
+        "嗯", "啊", "呀", "哎", "欸", "诶", "哦", "喂", "哈", "呵", "呃", "唉", "哼",
+    ]
+    .iter()
+    .any(|token| stripped == *token)
+}
+
+fn storyboard_explicitly_signals_speech(action: &str, dialogue: &str, prompt: &str) -> bool {
+    [action, dialogue, prompt].into_iter().any(|value| {
+        !value.is_empty()
+            && [
+                "开口",
+                "说道",
+                "说出",
+                "说着",
+                "低声说",
+                "轻声说",
+                "哽咽",
+                "失声",
+                "喊",
+                "叫住",
+                "质问",
+                "回答",
+                "回应",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
 }
 
 fn canonical_observation_note(value: &str) -> String {
@@ -2446,7 +2517,9 @@ fn observation_candidate_matches_storyboard_risk(
 
     match observation_note_budget_family(note) {
         VideoPromptObservationFamily::Identity => true,
-        VideoPromptObservationFamily::Dialogue => !storyboard_dialogue_is_empty(&fields.dialogue),
+        VideoPromptObservationFamily::Dialogue => {
+            storyboard_has_meaningful_spoken_dialogue(&fields)
+        }
         VideoPromptObservationFamily::Blocking => video_prompt_scene_has_blocking_risk(&fields),
         VideoPromptObservationFamily::Lighting => video_prompt_scene_has_lighting_risk(&fields),
         VideoPromptObservationFamily::Motion => video_prompt_scene_has_motion_risk(&fields),
@@ -12170,6 +12243,24 @@ mod tests {
     }
 
     #[test]
+    fn prune_storyboard_observation_candidates_drops_lip_sync_note_for_brief_filler_utterance() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角在门口低低应了一声".into()),
+            video_desc: Some(
+                "（主角停在门口、旧宅门口、主角、4秒、近景、静止、抿唇后轻轻应了一声、克制、冷调逆光、嗯、风声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert!(prune_storyboard_observation_candidates(
+            vec!["avoid lip-sync mismatch".into()],
+            Some(&storyboard_row)
+        )
+        .is_empty());
+    }
+
+    #[test]
     fn prune_storyboard_observation_candidates_drops_blocking_note_for_grounded_low_risk_storyboard(
     ) {
         let storyboard_row = StoryboardPromptSeedRow {
@@ -12389,6 +12480,23 @@ mod tests {
         };
 
         assert!(!video_prompt_observation_is_irrelevant_to_storyboard(
+            "avoid lip-sync mismatch",
+            Some(&storyboard_row),
+        ));
+    }
+
+    #[test]
+    fn observation_note_irrelevant_filter_skips_lip_sync_for_brief_filler_utterance() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角在门口低低应了一声".into()),
+            video_desc: Some(
+                "（主角停在门口、旧宅门口、主角、4秒、近景、静止、抿唇后轻轻应了一声、克制、冷调逆光、嗯、风声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("4s".into()),
+        };
+
+        assert!(video_prompt_observation_is_irrelevant_to_storyboard(
             "avoid lip-sync mismatch",
             Some(&storyboard_row),
         ));
