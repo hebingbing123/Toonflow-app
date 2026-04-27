@@ -51,6 +51,7 @@ const VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT: usize = 2;
 const VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS: usize = 48;
+const VIDEO_PROMPT_GUARDRAIL_PERFORMANCE_ANCHOR_MAX_CHARS: usize = 26;
 const VIDEO_PROMPT_ENVIRONMENT_ANCHOR_MAX_CHARS: usize = 20;
 const VIDEO_PROMPT_ENVIRONMENT_TEXTURE_ANCHOR_MAX_CHARS: usize = 20;
 const VIDEO_PROMPT_MOTION_ANCHOR_MAX_CHARS: usize = 20;
@@ -1100,6 +1101,63 @@ fn resolve_environment_style_anchor(
     Some(clip_prompt_fragment(
         &cue,
         VIDEO_PROMPT_ENVIRONMENT_ANCHOR_MAX_CHARS,
+    ))
+}
+
+fn resolve_guardrail_performance_anchor(
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    let fields = structured_fields?;
+    let pressure = constraint_pressure?;
+
+    if !pressure.has_dialogue_guardrail
+        && !pressure.has_emotion_guardrail
+        && !pressure.has_identity_guardrail
+    {
+        return None;
+    }
+
+    let normalized_coverage = prompt_coverage
+        .iter()
+        .map(|fragment| normalize_prompt_text(fragment))
+        .collect::<Vec<_>>();
+    let has_face_signal = normalized_coverage.iter().any(|fragment| {
+        ["眼神", "目光", "眼底", "眼尾", "喉结", "嘴角", "唇线"]
+            .iter()
+            .any(|keyword| fragment.contains(keyword))
+    });
+    let has_delivery_signal = normalized_coverage.iter().any(|fragment| {
+        ["气息", "换气", "尾音", "发颤"]
+            .iter()
+            .any(|keyword| fragment.contains(keyword))
+    });
+
+    let mut fragments = Vec::new();
+    if !storyboard_dialogue_is_empty(&fields.dialogue) && pressure.has_dialogue_guardrail {
+        if !has_face_signal {
+            fragments.push("眼神先动再开口".to_string());
+        }
+        if !has_delivery_signal {
+            fragments.push("气息带情绪起伏".to_string());
+        }
+    } else if pressure.has_emotion_guardrail
+        || (pressure.has_identity_guardrail && video_prompt_scene_needs_identity_memory(fields))
+    {
+        if has_face_signal {
+            return None;
+        }
+        fragments.push("眼神嘴角细微递进".to_string());
+    }
+
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &fragments.join(", "),
+        VIDEO_PROMPT_GUARDRAIL_PERFORMANCE_ANCHOR_MAX_CHARS,
     ))
 }
 
@@ -3949,6 +4007,14 @@ fn build_project_visual_anchors(
         &style_coverage,
     ) {
         anchors.push(performance_anchor);
+        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    }
+    if let Some(guardrail_performance_anchor) = resolve_guardrail_performance_anchor(
+        structured_fields,
+        &style_coverage,
+        constraint_pressure,
+    ) {
+        anchors.push(guardrail_performance_anchor);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
     if let Some(environment_anchor) = resolve_environment_style_anchor(
@@ -12521,6 +12587,83 @@ mod tests {
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气低声"), "{}", result.prompt);
         assert!(!result.prompt.contains("语气克制"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_constraint_pressure_adds_guardrail_performance_anchor_for_flat_dialogue_scene(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边开口、咖啡厅窗边、林晚、4秒、中景、缓推、看向门外说你先走、克制、夜间冷蓝窗光、你先走、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_dialogue_guardrail: true,
+                has_emotion_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(
+            result.prompt.contains("气息带情绪起伏"),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_constraint_pressure_skips_guardrail_performance_anchor_when_micro_performance_already_present(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚近景低声开口、咖啡厅窗边、林晚、4秒、近景、缓推、抬眼后压低气息说你先走、克制、夜间冷蓝窗光、你先走、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_dialogue_guardrail: true,
+                has_identity_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(
+            !result.prompt.contains("眼神先动再开口"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            !result.prompt.contains("气息带情绪起伏"),
+            "{}",
+            result.prompt
+        );
     }
 
     #[test]
