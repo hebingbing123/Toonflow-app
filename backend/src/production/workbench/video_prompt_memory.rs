@@ -3753,7 +3753,18 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
         return None;
     }
 
-    let recurring = recurring_style_fragments(&notes);
+    let recurring = compact_global_recurring_style_fragments(
+        recurring_style_fragments(&notes),
+        distinct_selected_video_subject_group_count(rows.iter().map(|row| {
+            (
+                row.name.as_str(),
+                row.content.as_str(),
+                extract_key_value(&row.content, "storyboardIds")
+                    .map(|storyboard_id| format!("script:{storyboard_id}")),
+                None,
+            )
+        })),
+    );
     if recurring.is_empty() {
         return None;
     }
@@ -3768,7 +3779,24 @@ fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<Str
         return None;
     }
 
-    let recurring = recurring_style_fragments(&notes);
+    let recurring = compact_global_recurring_style_fragments(
+        recurring_style_fragments(&notes),
+        distinct_selected_video_subject_group_count(rows.iter().map(|row| {
+            (
+                row.name.as_str(),
+                row.content.as_str(),
+                extract_key_value(&row.content, "storyboardIds").map(|storyboard_id| {
+                    format!(
+                        "{}:{storyboard_id}",
+                        row.episodes_id
+                            .map(|value| value.to_string())
+                            .unwrap_or_else(|| "project".to_string())
+                    )
+                }),
+                row.episodes_id.map(|value| value.to_string()),
+            )
+        })),
+    );
     if recurring.is_empty() {
         return None;
     }
@@ -3875,6 +3903,37 @@ fn build_role_video_style_memories<'a>(
             Some(parts.join(" | "))
         })
         .collect()
+}
+
+fn compact_global_recurring_style_fragments(
+    fragments: Vec<String>,
+    distinct_subject_group_count: usize,
+) -> Vec<String> {
+    if distinct_subject_group_count < 2 {
+        return fragments;
+    }
+
+    fragments
+        .into_iter()
+        .filter(|fragment| !fragment.starts_with("表演") && !fragment.starts_with("语气"))
+        .collect()
+}
+
+fn distinct_selected_video_subject_group_count<'a>(
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
+) -> usize {
+    let mut groups = Vec::<Vec<String>>::new();
+    for (_, aliases, _) in distinct_selected_video_style_notes_with_subject(rows) {
+        if groups.iter().any(|existing| {
+            existing
+                .iter()
+                .any(|alias| aliases.iter().any(|candidate| candidate == alias))
+        }) {
+            continue;
+        }
+        groups.push(aliases);
+    }
+    groups.len()
 }
 
 fn compact_role_recurring_style_fragments(
@@ -7064,6 +7123,26 @@ mod tests {
     }
 
     #[test]
+    fn build_script_video_style_memory_drops_character_signature_fragments_when_subjects_mix() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头稳定跟拍，表演抬眼停顿，语气轻声克制，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头近景稳定跟拍，表演抬眼停顿，语气轻声克制，光影冷调逆光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("镜头稳定跟拍"), "{summary}");
+        assert!(summary.contains("光影冷调逆光"), "{summary}");
+        assert!(!summary.contains("表演抬眼停顿"), "{summary}");
+        assert!(!summary.contains("语气轻声克制"), "{summary}");
+    }
+
+    #[test]
     fn build_script_role_video_style_memories_groups_persona_by_subject() {
         let summaries = build_script_role_video_style_memories(&[
             AgentMemoryRow {
@@ -7461,6 +7540,33 @@ mod tests {
         assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫"));
         assert!(!summary.contains("中景"));
         assert!(!summary.contains("场景废弃走廊"));
+    }
+
+    #[test]
+    fn build_project_video_style_memory_drops_character_signature_fragments_when_subjects_mix() {
+        let summary = build_project_video_style_memory(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头稳定跟拍，表演抬眼停顿，语气轻声克制，情绪冷峻压迫 | note=...".into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头稳定跟拍，表演抬眼停顿，语气轻声克制，情绪冷峻压迫 | note=...".into(),
+                episodes_id: Some(2),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=17 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头近景稳定跟拍，表演抬眼停顿，语气轻声克制，情绪冷峻压迫 | note=...".into(),
+                episodes_id: Some(3),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("镜头稳定跟拍"), "{summary}");
+        assert!(summary.contains("情绪冷峻压迫"), "{summary}");
+        assert!(!summary.contains("表演抬眼停顿"), "{summary}");
+        assert!(!summary.contains("语气轻声克制"), "{summary}");
     }
 
     #[test]

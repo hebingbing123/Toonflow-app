@@ -11585,7 +11585,7 @@ mod tests {
                 Some(&storyboard_row),
                 &subject_candidates,
             ),
-            Some("表演抬眼停顿，语气轻声".to_string())
+            Some("语气轻声".to_string())
         );
     }
 
