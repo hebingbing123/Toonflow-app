@@ -263,6 +263,8 @@ void main() {
     const diagnostics = GenerateVideoPromptDiagnostics(
       promptChars: 318,
       negativePromptChars: 64,
+      negativeConstraintCount: 3,
+      negativeBudgetTier: 'expanded',
       observationNoteChars: 22,
       roleAnchorCount: 1,
       sceneAnchorCount: 2,
@@ -278,7 +280,7 @@ void main() {
 
     expect(
       buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
-      'Prompt 318 chars · Negative 64 · Observation 22 · Memory 36 · Memory tier expanded',
+      'Prompt 318 chars · Negative 64 (expanded) · Observation 22 · Memory 36 · Memory tier expanded',
     );
     expect(
       buildStoryboardVideoPromptAnchorSummary(diagnostics),
@@ -290,6 +292,8 @@ void main() {
     const diagnostics = GenerateVideoPromptDiagnostics(
       promptChars: 120,
       negativePromptChars: 0,
+      negativeConstraintCount: 0,
+      negativeBudgetTier: 'lean',
       observationNoteChars: 0,
       roleAnchorCount: 0,
       sceneAnchorCount: 0,
@@ -317,6 +321,8 @@ void main() {
     const diagnostics = GenerateVideoPromptDiagnostics(
       promptChars: 548,
       negativePromptChars: 70,
+      negativeConstraintCount: 2,
+      negativeBudgetTier: 'expanded',
       observationNoteChars: 20,
       roleAnchorCount: 1,
       sceneAnchorCount: 2,
@@ -342,6 +348,8 @@ void main() {
       const diagnostics = GenerateVideoPromptDiagnostics(
         promptChars: 220,
         negativePromptChars: 0,
+        negativeConstraintCount: 0,
+        negativeBudgetTier: 'lean',
         observationNoteChars: 0,
         roleAnchorCount: 0,
         sceneAnchorCount: 0,
@@ -368,6 +376,8 @@ void main() {
       const diagnostics = GenerateVideoPromptDiagnostics(
         promptChars: 260,
         negativePromptChars: 36,
+        negativeConstraintCount: 1,
+        negativeBudgetTier: 'lean',
         observationNoteChars: 18,
         roleAnchorCount: 1,
         sceneAnchorCount: 1,
@@ -394,6 +404,8 @@ void main() {
       const diagnostics = GenerateVideoPromptDiagnostics(
         promptChars: 412,
         negativePromptChars: 28,
+        negativeConstraintCount: 2,
+        negativeBudgetTier: 'expanded',
         observationNoteChars: 0,
         roleAnchorCount: 1,
         sceneAnchorCount: 1,
@@ -420,6 +432,8 @@ void main() {
       const diagnostics = GenerateVideoPromptDiagnostics(
         promptChars: 340,
         negativePromptChars: 18,
+        negativeConstraintCount: 3,
+        negativeBudgetTier: 'expanded',
         observationNoteChars: 0,
         roleAnchorCount: 1,
         sceneAnchorCount: 1,
@@ -436,6 +450,34 @@ void main() {
       expect(
         buildStoryboardVideoPromptBudgetHint(diagnostics),
         '当前镜头被判定为高风险，先保留角色表演和连续性记忆，再压其他泛化描述。',
+      );
+    },
+  );
+
+  test(
+    'buildStoryboardVideoPromptBudgetHint warns before trimming expanded negative constraints',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 310,
+        negativePromptChars: 62,
+        negativeConstraintCount: 3,
+        negativeBudgetTier: 'expanded',
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 0,
+        styleAnchorCount: 1,
+        memoryStyleAnchorCount: 0,
+        memoryStyleChars: 0,
+        continuityNoteCount: 0,
+        continuityNoteChars: 0,
+        usesReferenceFrame: true,
+        memoryBudgetTier: 'lean',
+      );
+
+      expect(
+        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        '当前镜头的防穿帮约束已切到 expanded，先保留人物一致性和镜头连续性，再压泛化负面词。',
       );
     },
   );

@@ -6,7 +6,7 @@ String buildStoryboardVideoPromptDiagnosticsLine(
   final parts = <String>[
     'Prompt ${diagnostics.promptChars} chars',
     if (diagnostics.negativePromptChars > 0)
-      'Negative ${diagnostics.negativePromptChars}',
+      'Negative ${diagnostics.negativePromptChars} (${diagnostics.negativeBudgetTier})',
     if (diagnostics.observationNoteChars > 0)
       'Observation ${diagnostics.observationNoteChars}',
     if (diagnostics.memoryStyleChars > 0)
@@ -62,6 +62,14 @@ String buildStoryboardVideoPromptBudgetHint(
   }
   if (diagnostics.continuityNoteChars >= 48) {
     return '连续性记忆已经偏长，先把重复的衔接描述压成更短的动作或表演锚点。';
+  }
+  if (diagnostics.negativeBudgetTier == 'expanded' &&
+      diagnostics.negativeConstraintCount >= 3) {
+    return '当前镜头的防穿帮约束已切到 expanded，先保留人物一致性和镜头连续性，再压泛化负面词。';
+  }
+  if (diagnostics.negativeBudgetTier == 'lean' &&
+      diagnostics.negativePromptChars >= 56) {
+    return '当前负向约束已经偏长，优先合并重复的情绪/光影警告，别先删身份一致性约束。';
   }
   if (anchorCount == 0 && diagnostics.styleAnchorCount == 0) {
     return '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。';

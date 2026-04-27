@@ -11,6 +11,8 @@ class GenerateVideoPromptDiagnostics {
   const GenerateVideoPromptDiagnostics({
     required this.promptChars,
     required this.negativePromptChars,
+    required this.negativeConstraintCount,
+    required this.negativeBudgetTier,
     required this.observationNoteChars,
     required this.roleAnchorCount,
     required this.sceneAnchorCount,
@@ -26,6 +28,8 @@ class GenerateVideoPromptDiagnostics {
 
   final int promptChars;
   final int negativePromptChars;
+  final int negativeConstraintCount;
+  final String negativeBudgetTier;
   final int observationNoteChars;
   final int roleAnchorCount;
   final int sceneAnchorCount;
@@ -42,6 +46,9 @@ class GenerateVideoPromptDiagnostics {
     return GenerateVideoPromptDiagnostics(
       promptChars: (json['promptChars'] as num?)?.toInt() ?? 0,
       negativePromptChars: (json['negativePromptChars'] as num?)?.toInt() ?? 0,
+      negativeConstraintCount:
+          (json['negativeConstraintCount'] as num?)?.toInt() ?? 0,
+      negativeBudgetTier: json['negativeBudgetTier'] as String? ?? 'lean',
       observationNoteChars:
           (json['observationNoteChars'] as num?)?.toInt() ?? 0,
       roleAnchorCount: (json['roleAnchorCount'] as num?)?.toInt() ?? 0,

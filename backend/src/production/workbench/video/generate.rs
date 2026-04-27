@@ -26,6 +26,8 @@ use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 const VIDEO_NEGATIVE_PROMPT_MAX_CHARS: usize = 120;
+const VIDEO_NEGATIVE_PROMPT_LEAN_MAX_CHARS: usize = 84;
+const VIDEO_NEGATIVE_PROMPT_LEAN_FRAGMENT_LIMIT: usize = 2;
 const VIDEO_NEGATIVE_REVIEW_BASE_LIMIT: i64 = 8;
 const VIDEO_NEGATIVE_REVIEW_PER_STORYBOARD_ROWS: i64 = 4;
 const VIDEO_NEGATIVE_REVIEW_MAX_LIMIT: i64 = 24;
@@ -66,6 +68,34 @@ struct ScoredNegativeFragment {
 struct StoryboardNegativePrompt {
     storyboard_id: i32,
     negative_prompt: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct AutoNegativePromptSelection {
+    pub(crate) prompt: Option<String>,
+    pub(crate) fragment_count: usize,
+    pub(crate) budget_tier: &'static str,
+}
+
+impl AutoNegativePromptSelection {
+    fn as_deref(&self) -> Option<&str> {
+        self.prompt.as_deref()
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum VideoNegativePromptBudgetTier {
+    Lean,
+    Expanded,
+}
+
+impl VideoNegativePromptBudgetTier {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Lean => "lean",
+            Self::Expanded => "expanded",
+        }
+    }
 }
 
 #[utoipa::path(
@@ -337,7 +367,7 @@ pub(crate) async fn load_auto_negative_prompt(
     script_numeric_id: i32,
     storyboard_ids: &[i32],
 ) -> Result<Option<String>, ApiError> {
-    let prompts = load_auto_negative_prompts(
+    let prompts = load_auto_negative_prompt_details(
         pool,
         user_id,
         project_numeric_id,
@@ -345,9 +375,11 @@ pub(crate) async fn load_auto_negative_prompt(
         storyboard_ids,
     )
     .await?;
-    Ok(storyboard_ids
-        .iter()
-        .find_map(|storyboard_id| prompts.get(storyboard_id).cloned().flatten()))
+    Ok(storyboard_ids.iter().find_map(|storyboard_id| {
+        prompts
+            .get(storyboard_id)
+            .and_then(|item| item.prompt.clone())
+    }))
 }
 
 pub(crate) async fn load_auto_negative_prompts(
@@ -357,6 +389,26 @@ pub(crate) async fn load_auto_negative_prompts(
     script_numeric_id: i32,
     storyboard_ids: &[i32],
 ) -> Result<HashMap<i32, Option<String>>, ApiError> {
+    Ok(load_auto_negative_prompt_details(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids,
+    )
+    .await?
+    .into_iter()
+    .map(|(storyboard_id, selection)| (storyboard_id, selection.prompt))
+    .collect())
+}
+
+pub(crate) async fn load_auto_negative_prompt_details(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<HashMap<i32, AutoNegativePromptSelection>, ApiError> {
     if storyboard_ids.is_empty() {
         return Ok(HashMap::new());
     }
@@ -582,12 +634,17 @@ fn build_storyboard_negative_prompts(
     rejected_rows: &[AgentMemoryRow],
     selected_rows: &[AgentMemoryRow],
     storyboard_seed_rows: &HashMap<i32, StoryboardPromptSeedRow>,
-) -> HashMap<i32, Option<String>> {
+) -> HashMap<i32, AutoNegativePromptSelection> {
     storyboard_ids
         .iter()
         .copied()
         .map(|storyboard_id| {
             let storyboard_row = storyboard_seed_rows.get(&storyboard_id);
+            let storyboard_review_rows = review_rows
+                .iter()
+                .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
+                .cloned()
+                .collect::<Vec<_>>();
             let current_prompt_seed = storyboard_row.and_then(storyboard_prompt_seed);
             let subject_candidates = storyboard_row
                 .and_then(|row| row.video_desc.as_deref())
@@ -611,14 +668,7 @@ fn build_storyboard_negative_prompts(
                 selected_style_note,
             );
             let review_fragments = filter_conflicting_review_fragments(
-                collect_negative_review_fragments(
-                    &review_rows
-                        .iter()
-                        .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
-                        .cloned()
-                        .collect::<Vec<_>>(),
-                    storyboard_id,
-                ),
+                collect_negative_review_fragments(&storyboard_review_rows, storyboard_id),
                 prioritized_style_note.as_deref(),
                 storyboard_row,
             );
@@ -641,13 +691,103 @@ fn build_storyboard_negative_prompts(
                 review_fragments,
                 &rejected_fragments,
             );
-            let review_prompt = merge_prioritized_negative_prompt_fragment_groups(&[
-                rejected_fragments,
-                review_fragments,
-            ]);
-            (storyboard_id, review_prompt)
+            let budget_tier = resolve_negative_prompt_budget_tier(
+                storyboard_row,
+                &storyboard_review_rows,
+                &rejected_fragments,
+                &review_fragments,
+                !subject_candidates.is_empty(),
+            );
+            let review_prompt = merge_prioritized_negative_prompt_fragment_groups(
+                &[rejected_fragments, review_fragments],
+                budget_tier,
+            );
+            let fragment_count = review_prompt
+                .as_deref()
+                .map(split_negative_prompt_fragments)
+                .map(|fragments| fragments.len())
+                .unwrap_or(0);
+            (
+                storyboard_id,
+                AutoNegativePromptSelection {
+                    prompt: review_prompt,
+                    fragment_count,
+                    budget_tier: budget_tier.as_str(),
+                },
+            )
         })
         .collect()
+}
+
+fn resolve_negative_prompt_budget_tier(
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    storyboard_review_rows: &[QualityReviewSeedRow],
+    rejected_fragments: &[String],
+    review_fragments: &[String],
+    has_subject_alias: bool,
+) -> VideoNegativePromptBudgetTier {
+    let mut risk_score = 0;
+    if has_subject_alias {
+        risk_score += 1;
+    }
+    if storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+        .is_some_and(|fields| negative_prompt_scene_needs_expanded_budget(&fields))
+    {
+        risk_score += 1;
+    }
+    if !storyboard_review_rows.is_empty() {
+        risk_score += 1;
+    }
+    if rejected_fragments.len() >= 2 {
+        risk_score += 1;
+    }
+    if review_fragments
+        .iter()
+        .chain(rejected_fragments.iter())
+        .any(|fragment| negative_fragment_requires_strict_continuity_budget(fragment))
+    {
+        risk_score += 1;
+    }
+
+    if risk_score >= 2 {
+        VideoNegativePromptBudgetTier::Expanded
+    } else {
+        VideoNegativePromptBudgetTier::Lean
+    }
+}
+
+fn negative_prompt_scene_needs_expanded_budget(fields: &StructuredStoryboardDescription) -> bool {
+    [
+        fields.mood.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+        fields.camera_move.as_str(),
+        fields.shot.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        [
+            "哭", "泪", "怒", "吼", "崩溃", "压迫", "紧张", "慌", "急", "追", "跑", "冲", "喊",
+            "颤", "手持", "handheld", "近景", "特写",
+        ]
+        .iter()
+        .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn negative_fragment_requires_strict_continuity_budget(fragment: &str) -> bool {
+    let canonical = canonical_negative_fragment(fragment);
+    canonical.contains("face")
+        || canonical.contains("identity")
+        || canonical.contains("costume")
+        || canonical.contains("warped")
+        || canonical.contains("anatom")
+        || canonical.contains("lip-sync")
+        || canonical.contains("shot changes")
+        || canonical.contains("wrong framing")
 }
 
 fn resolve_negative_filter_style_note(
@@ -1439,12 +1579,19 @@ fn prioritize_negative_prompt_fragments_for_budget(fragments: Vec<String>) -> Ve
 
     let mut budgeted = Vec::new();
     for (_, _, _, fragment) in prioritized {
-        push_negative_fragment_with_budget(&mut budgeted, &fragment);
+        push_negative_fragment_with_budget(
+            &mut budgeted,
+            &fragment,
+            VideoNegativePromptBudgetTier::Expanded,
+        );
     }
     budgeted
 }
 
-fn merge_prioritized_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Option<String> {
+fn merge_prioritized_negative_prompt_fragment_groups(
+    groups: &[Vec<String>],
+    budget_tier: VideoNegativePromptBudgetTier,
+) -> Option<String> {
     let mut candidates = Vec::new();
     for (group_idx, group) in groups.iter().enumerate() {
         for (fragment_idx, fragment) in group.iter().enumerate() {
@@ -1483,7 +1630,7 @@ fn merge_prioritized_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> 
 
     let mut budgeted = Vec::new();
     for fragment in fragments {
-        push_negative_fragment_with_budget(&mut budgeted, &fragment);
+        push_negative_fragment_with_budget(&mut budgeted, &fragment, budget_tier);
     }
     if budgeted.is_empty() {
         None
@@ -1817,7 +1964,11 @@ fn push_negative_fragment_without_budget(target: &mut Vec<String>, candidate: &s
     target.push(candidate.to_string());
 }
 
-fn push_negative_fragment_with_budget(target: &mut Vec<String>, candidate: &str) {
+fn push_negative_fragment_with_budget(
+    target: &mut Vec<String>,
+    candidate: &str,
+    budget_tier: VideoNegativePromptBudgetTier,
+) {
     if negative_fragment_is_covered(candidate, target) {
         return;
     }
@@ -1825,19 +1976,23 @@ fn push_negative_fragment_with_budget(target: &mut Vec<String>, candidate: &str)
     let mut next = target.clone();
     next.push(candidate.to_string());
     let joined = next.join(", ");
-    if joined.chars().count() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS {
+    if next.len() <= negative_prompt_fragment_budget(budget_tier)
+        && joined.chars().count() <= negative_prompt_char_budget(budget_tier)
+    {
         *target = next;
         return;
     }
 
-    let clipped = clip_negative_prompt(candidate);
+    let clipped = clip_negative_prompt(candidate, budget_tier);
     if clipped.is_empty() || negative_fragment_is_covered(&clipped, target) {
         return;
     }
     let mut clipped_next = target.clone();
     clipped_next.push(clipped);
     let clipped_joined = clipped_next.join(", ");
-    if clipped_joined.chars().count() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS {
+    if clipped_next.len() <= negative_prompt_fragment_budget(budget_tier)
+        && clipped_joined.chars().count() <= negative_prompt_char_budget(budget_tier)
+    {
         *target = clipped_next;
     }
 }
@@ -1988,12 +2143,26 @@ fn canonical_negative_fragment(value: &str) -> String {
         .to_ascii_lowercase()
 }
 
-fn clip_negative_prompt(prompt: &str) -> String {
+fn negative_prompt_char_budget(budget_tier: VideoNegativePromptBudgetTier) -> usize {
+    match budget_tier {
+        VideoNegativePromptBudgetTier::Lean => VIDEO_NEGATIVE_PROMPT_LEAN_MAX_CHARS,
+        VideoNegativePromptBudgetTier::Expanded => VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+    }
+}
+
+fn negative_prompt_fragment_budget(budget_tier: VideoNegativePromptBudgetTier) -> usize {
+    match budget_tier {
+        VideoNegativePromptBudgetTier::Lean => VIDEO_NEGATIVE_PROMPT_LEAN_FRAGMENT_LIMIT,
+        VideoNegativePromptBudgetTier::Expanded => usize::MAX,
+    }
+}
+
+fn clip_negative_prompt(prompt: &str, budget_tier: VideoNegativePromptBudgetTier) -> String {
     let normalized = prompt.split_whitespace().collect::<Vec<_>>().join(" ");
     let mut chars = normalized.chars();
     let clipped = chars
         .by_ref()
-        .take(VIDEO_NEGATIVE_PROMPT_MAX_CHARS)
+        .take(negative_prompt_char_budget(budget_tier))
         .collect::<String>();
     if chars.next().is_some() {
         format!("{}...", clipped.trim_end())
@@ -2302,7 +2471,10 @@ mod tests {
             merged,
             "avoid blur, avoid flicker, avoid wrong setting details"
         );
-        assert!(clip_negative_prompt(&"a".repeat(160)).ends_with("..."));
+        assert!(
+            clip_negative_prompt(&"a".repeat(160), VideoNegativePromptBudgetTier::Expanded)
+                .ends_with("...")
+        );
     }
 
     #[test]
@@ -2627,6 +2799,36 @@ mod tests {
             prompts.get(&12).and_then(|value| value.as_deref()),
             Some("avoid identity drift")
         );
+        assert_eq!(
+            prompts.get(&12).map(|value| value.budget_tier),
+            Some("expanded")
+        );
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_uses_lean_budget_for_low_risk_single_axis_warning() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("output".into()),
+                target_id: None,
+                bad_case_category: Some("pacing_issue".into()),
+                comments: None,
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("林晚站在窗边"),
+                Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）"),
+                Some("4s"),
+            )]),
+        );
+
+        let selection = prompts.get(&12).expect("storyboard 12 prompt");
+        assert_eq!(selection.as_deref(), Some("avoid rushed motion"));
+        assert_eq!(selection.fragment_count, 1);
+        assert_eq!(selection.budget_tier, "lean");
     }
 
     #[test]

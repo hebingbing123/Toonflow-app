@@ -13,7 +13,7 @@ use crate::production::workbench::meta::common::{
     normalize_prompt_text, parse_positive_int, parse_structured_storyboard_description,
     StructuredStoryboardDescription,
 };
-use crate::production::workbench::video::generate::load_auto_negative_prompt;
+use crate::production::workbench::video::generate::load_auto_negative_prompt_details;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
     select_pending_rejected_video_observation_candidates_for_subject,
@@ -117,6 +117,8 @@ pub(in crate::production) struct GenerateVideoPromptResponse {
 pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     prompt_chars: usize,
     negative_prompt_chars: usize,
+    negative_constraint_count: usize,
+    negative_budget_tier: String,
     observation_note_chars: usize,
     role_anchor_count: usize,
     scene_anchor_count: usize,
@@ -189,18 +191,23 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         body.image_url.as_deref(),
         context.as_ref(),
     );
-    let negative_prompt = if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
-        load_auto_negative_prompt(
-            pool,
-            user_id,
-            body.project_id,
-            body.script_id,
-            &[storyboard_id],
-        )
-        .await?
-    } else {
-        None
-    };
+    let negative_prompt_selection =
+        if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
+            load_auto_negative_prompt_details(
+                pool,
+                user_id,
+                body.project_id,
+                body.script_id,
+                &[storyboard_id],
+            )
+            .await?
+            .remove(&storyboard_id)
+        } else {
+            None
+        };
+    let negative_prompt = negative_prompt_selection
+        .as_ref()
+        .and_then(|selection| selection.prompt.clone());
     let current_prompt_seed = context
         .as_ref()
         .and_then(|value| value.storyboard_prompt_seed.as_deref());
@@ -227,9 +234,17 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         context.as_ref(),
     );
 
-    let diagnostics = prompt_result
-        .diagnostics
-        .with_runtime_notes(negative_prompt.as_deref(), observation_note.as_deref());
+    let diagnostics = prompt_result.diagnostics.with_runtime_notes(
+        negative_prompt.as_deref(),
+        negative_prompt_selection
+            .as_ref()
+            .map(|selection| selection.fragment_count)
+            .unwrap_or(0),
+        negative_prompt_selection
+            .as_ref()
+            .map(|selection| selection.budget_tier),
+        observation_note.as_deref(),
+    );
 
     Ok(JsonResponse(GenerateVideoPromptResponse {
         prompt: prompt_result.prompt,
@@ -356,12 +371,16 @@ impl GenerateVideoPromptDiagnostics {
     fn with_runtime_notes(
         mut self,
         negative_prompt: Option<&str>,
+        negative_constraint_count: usize,
+        negative_budget_tier: Option<&str>,
         observation_note: Option<&str>,
     ) -> Self {
         self.negative_prompt_chars = negative_prompt
             .map(normalize_prompt_text)
             .map(|value| value.chars().count())
             .unwrap_or(0);
+        self.negative_constraint_count = negative_constraint_count;
+        self.negative_budget_tier = negative_budget_tier.unwrap_or("lean").to_string();
         self.observation_note_chars = observation_note
             .map(normalize_prompt_text)
             .map(|value| value.chars().count())
@@ -1107,21 +1126,23 @@ fn select_video_prompt_style_notes(
         .and_then(parse_structured_storyboard_description)
         .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
         .unwrap_or_default();
-    let exact =
-        select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed)
-            .into_iter()
-            .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
-            .collect::<Vec<_>>();
-    if !exact.is_empty() {
-        return exact;
-    }
-
     let role_memory_notes =
         select_subject_role_video_style_memory_notes(rows, &current_subject_candidates)
             .into_iter()
             .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
             .take(1)
             .collect::<Vec<_>>();
+    let exact =
+        select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed)
+            .into_iter()
+            .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+            .collect::<Vec<_>>();
+    if !exact.is_empty()
+        && !exact_style_notes_should_yield_to_role_memory(&exact, &role_memory_notes)
+    {
+        return exact;
+    }
+
     if !role_memory_notes.is_empty() {
         return role_memory_notes;
     }
@@ -1144,6 +1165,59 @@ fn select_video_prompt_style_notes(
         .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
         .take(1)
         .collect()
+}
+
+fn exact_style_notes_should_yield_to_role_memory(
+    exact_notes: &[String],
+    role_memory_notes: &[String],
+) -> bool {
+    !role_memory_notes.is_empty()
+        && !exact_notes.is_empty()
+        && exact_notes
+            .iter()
+            .all(|note| exact_style_note_is_low_signal_local_camera(note))
+}
+
+fn exact_style_note_is_low_signal_local_camera(note: &str) -> bool {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    !fragments.is_empty()
+        && fragments
+            .iter()
+            .all(|fragment| low_signal_local_camera_style_fragment(fragment))
+}
+
+fn low_signal_local_camera_style_fragment(fragment: &str) -> bool {
+    if !fragment.starts_with("镜头") {
+        return false;
+    }
+
+    let body = normalize_prompt_text(fragment.trim_start_matches("镜头"));
+    if body.is_empty() {
+        return false;
+    }
+    if [
+        "压迫", "冷峻", "紧张", "逆光", "光影", "情绪", "表演", "语气", "环境", "声场", "雨丝",
+        "霓虹", "停顿", "哽咽",
+    ]
+    .iter()
+    .any(|keyword| body.contains(keyword))
+    {
+        return false;
+    }
+
+    is_local_framing_only_fragment(fragment)
+        || [
+            "稳定",
+            "稳定跟拍",
+            "跟拍",
+            "近景稳定",
+            "中景稳定",
+            "远景稳定",
+            "特写稳定",
+            "全景稳定",
+        ]
+        .iter()
+        .any(|candidate| body == *candidate)
 }
 
 fn collect_neighbor_video_prompt_style_notes(
@@ -2074,6 +2148,8 @@ fn build_video_prompt_with_diagnostics(
         diagnostics: GenerateVideoPromptDiagnostics {
             prompt_chars: prompt.chars().count(),
             negative_prompt_chars: 0,
+            negative_constraint_count: 0,
+            negative_budget_tier: "lean".to_string(),
             observation_note_chars: 0,
             role_anchor_count: role_anchors.len(),
             scene_anchor_count: scene_anchors.len(),
@@ -7840,6 +7916,54 @@ mod tests {
     }
 
     #[test]
+    fn select_video_prompt_style_notes_prefers_role_memory_over_low_signal_exact_camera_note() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=22 | style=镜头中景稳定跟拍 | note=镜头中景稳定跟拍".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边迟疑开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            vec!["表演抬眼停顿，语气轻声".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_keeps_exact_memory_when_it_carries_strong_style_signal() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=22 | style=镜头低机位压迫感，情绪冷峻压迫 | note=镜头低机位压迫感，情绪冷峻压迫".into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | sampleCount=2 | style=表演抬眼停顿，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚贴墙压低声音".into()),
+            video_desc: Some("（林晚贴墙站定、昏暗走廊墙边、林晚、4秒、中景、缓推、压低声音试探开口、紧张 / 克制、冷调逆光、你听见了吗、衣料摩擦声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            vec!["镜头低机位压迫感，情绪压迫".to_string()]
+        );
+    }
+
+    #[test]
     fn select_video_prompt_style_notes_prefers_subject_role_memory_before_generic_summary() {
         let rows = vec![
             AgentMemoryRow {
@@ -8387,6 +8511,8 @@ mod tests {
             diagnostics: GenerateVideoPromptDiagnostics {
                 prompt_chars: 22,
                 negative_prompt_chars: 0,
+                negative_constraint_count: 0,
+                negative_budget_tier: "lean".into(),
                 observation_note_chars: 40,
                 role_anchor_count: 1,
                 scene_anchor_count: 1,
@@ -8416,6 +8542,20 @@ mod tests {
                 .and_then(|item| item.get("promptChars"))
                 .and_then(serde_json::Value::as_u64),
             Some(22)
+        );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("negativeConstraintCount"))
+                .and_then(serde_json::Value::as_u64),
+            Some(0)
+        );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("negativeBudgetTier"))
+                .and_then(serde_json::Value::as_str),
+            Some("lean")
         );
         assert_eq!(
             value
