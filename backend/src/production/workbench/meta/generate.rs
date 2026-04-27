@@ -3930,6 +3930,8 @@ fn build_project_visual_anchors(
     let mut anchors = Vec::new();
     let mut memory_anchor_count = 0usize;
     let mut style_coverage = prompt_coverage.to_vec();
+    let compact_decorative_style_anchors =
+        should_compact_decorative_style_anchors(structured_fields, constraint_pressure);
     if let Some(style) = ctx
         .project_art_style
         .as_deref()
@@ -3970,29 +3972,47 @@ fn build_project_visual_anchors(
         anchors.push(guardrail_performance_anchor);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
-    if let Some(environment_anchor) = resolve_environment_style_anchor(
-        ctx.project_art_style.as_deref(),
-        structured_fields,
-        &style_coverage,
-    ) {
-        anchors.push(environment_anchor);
-        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    if !compact_decorative_style_anchors
+        || structured_fields
+            .zip(constraint_pressure)
+            .is_some_and(|(fields, pressure)| {
+                should_keep_environment_style_anchor_under_pressure(fields, pressure)
+            })
+    {
+        if let Some(environment_anchor) = resolve_environment_style_anchor(
+            ctx.project_art_style.as_deref(),
+            structured_fields,
+            &style_coverage,
+        ) {
+            anchors.push(environment_anchor);
+            extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        }
     }
-    if let Some(environment_texture_anchor) = resolve_environment_texture_style_anchor(
-        ctx.project_art_style.as_deref(),
-        structured_fields,
-        &style_coverage,
-    ) {
-        anchors.push(environment_texture_anchor);
-        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    if !compact_decorative_style_anchors {
+        if let Some(environment_texture_anchor) = resolve_environment_texture_style_anchor(
+            ctx.project_art_style.as_deref(),
+            structured_fields,
+            &style_coverage,
+        ) {
+            anchors.push(environment_texture_anchor);
+            extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        }
     }
-    if let Some(motion_anchor) = resolve_motion_style_anchor(
-        ctx.project_art_style.as_deref(),
-        structured_fields,
-        &style_coverage,
-    ) {
-        anchors.push(motion_anchor);
-        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+    if !compact_decorative_style_anchors
+        || structured_fields
+            .zip(constraint_pressure)
+            .is_some_and(|(fields, pressure)| {
+                should_keep_motion_style_anchor_under_pressure(fields, pressure)
+            })
+    {
+        if let Some(motion_anchor) = resolve_motion_style_anchor(
+            ctx.project_art_style.as_deref(),
+            structured_fields,
+            &style_coverage,
+        ) {
+            anchors.push(motion_anchor);
+            extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        }
     }
     let has_base_style_anchor = !anchors.is_empty();
     for note in &ctx.memory_style_notes {
@@ -4015,6 +4035,43 @@ fn build_project_visual_anchors(
         break;
     }
     (anchors, memory_anchor_count)
+}
+
+fn should_compact_decorative_style_anchors(
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    let Some(fields) = structured_fields else {
+        return false;
+    };
+    let Some(pressure) = constraint_pressure
+        .filter(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())
+    else {
+        return false;
+    };
+
+    video_prompt_scene_needs_dialogue_performance_memory(fields, Some(pressure))
+        || current_storyboard_is_fragile_emotional_turn(fields)
+        || (pressure.has_identity_guardrail && video_prompt_scene_needs_identity_memory(fields))
+}
+
+fn should_keep_environment_style_anchor_under_pressure(
+    fields: &StructuredStoryboardDescription,
+    pressure: VideoPromptConstraintPressure,
+) -> bool {
+    video_prompt_scene_has_lighting_risk(fields)
+        && !pressure.has_dialogue_guardrail
+        && !pressure.has_identity_guardrail
+}
+
+fn should_keep_motion_style_anchor_under_pressure(
+    fields: &StructuredStoryboardDescription,
+    pressure: VideoPromptConstraintPressure,
+) -> bool {
+    video_prompt_scene_has_motion_risk(fields)
+        && !pressure.has_dialogue_guardrail
+        && !pressure.has_emotion_guardrail
+        && !current_storyboard_is_fragile_emotional_turn(fields)
 }
 
 fn collect_reserved_art_style_anchors(
@@ -12696,6 +12753,83 @@ mod tests {
         );
         assert!(
             !result.prompt.contains("气息带情绪起伏"),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_constraint_pressure_drops_decorative_environment_texture_for_dialogue_guardrail_scene(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（沈知微站在落地窗旁开口、城市夜景落地窗边、沈知微、4秒、中景、缓推、抬眼后压低气息说你终于来了、隐忍 / 克制、冷蓝窗光与路灯反射、你终于来了、雨声、A13）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("成熟都市言情二次元动画".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["沈知微: 米色风衣".into()],
+            script_scene_anchors: vec!["城市夜景落地窗边: 雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演抬眼停顿，语气压低气息尾音发颤".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_dialogue_guardrail: true,
+                has_identity_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(result.prompt.contains("表演抬眼停顿"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("语气压低气息尾音发颤"),
+            "{}",
+            result.prompt
+        );
+        assert!(
+            !result.prompt.contains("赛璐璐动态质感"),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_constraint_pressure_still_keeps_environment_anchor_for_non_dialogue_lighting_guardrail(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在车窗边停住、雨夜街边车窗、林晚、4秒、中景、静止、抬眼看向倒影、克制隐忍、霓虹反光逆光、无台词、车流闷响、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("成熟都市言情二次元动画".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["雨夜街边车窗: 玻璃水痕".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["光影霓虹反光层次".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_lighting_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(
+            result.prompt.contains("霓虹") || result.prompt.contains("反光"),
             "{}",
             result.prompt
         );
