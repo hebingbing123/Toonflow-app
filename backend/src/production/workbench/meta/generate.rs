@@ -2763,18 +2763,27 @@ fn select_contextual_observation_summary_style_note(
 
             let note = extract_key_value(&row.content, "style")
                 .or_else(|| extract_key_value(&row.content, "note"))?;
-            let evidence = observation_style_note_context_evidence(&note, &context);
             let compacted =
                 compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
                     .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+            let evidence = observation_style_note_context_evidence(&note, &context).max(
+                observation_style_note_context_evidence(&compacted, &context),
+            );
             let compacted = rank_observation_summary_style_note_fragments(
                 &compacted,
                 &context,
                 constraint_pressure,
             )?;
+            let min_evidence = observation_summary_style_note_min_evidence(
+                &compacted,
+                &context,
+                scope_priority,
+                subject_priority,
+                constraint_pressure,
+            );
             let fragment_score =
                 observation_summary_style_note_score(&compacted, &context, constraint_pressure);
-            (evidence >= 2).then_some((
+            (evidence >= min_evidence).then_some((
                 subject_priority,
                 scope_priority,
                 evidence,
@@ -2806,6 +2815,50 @@ fn select_contextual_observation_summary_style_note(
             },
         )
         .map(|(_, _, _, _, note)| note)
+}
+
+fn observation_summary_style_note_min_evidence(
+    compacted_note: &str,
+    context: &StructuredStoryboardDescription,
+    scope_priority: u8,
+    subject_priority: usize,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> usize {
+    if scope_priority > 1 || subject_priority == usize::MAX {
+        return 2;
+    }
+
+    let scene_needs_subject_locked_memory = video_prompt_scene_needs_identity_memory(context)
+        || video_prompt_scene_needs_emotional_memory(context)
+        || constraint_pressure.is_some_and(|pressure| {
+            pressure.has_identity_guardrail
+                || pressure.has_dialogue_guardrail
+                || pressure.has_emotion_guardrail
+        });
+    if !scene_needs_subject_locked_memory {
+        return 2;
+    }
+
+    let has_high_signal_subject_detail = split_prompt_note_fragments(compacted_note).any(
+        |fragment| match style_note_fragment_family(&fragment) {
+            Some("表演") => {
+                score_memory_fragment_human_performance_detail(&fragment, Some("表演")) >= 3
+            }
+            Some("语气") => {
+                storyboard_supports_voice_style(context)
+                    && memory_fragment_has_high_signal_voice_detail(
+                        normalize_prompt_text(&fragment).as_str(),
+                    )
+            }
+            _ => false,
+        },
+    );
+
+    if has_high_signal_subject_detail {
+        1
+    } else {
+        2
+    }
 }
 
 fn rank_observation_summary_style_note_fragments(
@@ -15552,6 +15605,42 @@ mod tests {
                 None,
             ),
             Some("表演抬眼停顿".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_contextual_summary_keeps_primary_role_high_signal_voice_note_even_when_global_summary_has_more_context_hits(
+    ) {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=6 | style=镜头稳定跟拍，情绪压抑，光影冷调逆光 | note=镜头稳定跟拍，情绪压抑，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "project_role_video_style_memory".into(),
+                content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=2 | style=语气低声尾音发颤 | note=语气低声尾音发颤".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚抿唇后低声说我没事".into()),
+            video_desc: Some("（林晚抿唇后低声说我没事、雨夜门厅、林晚、5秒、近景、稳定跟拍、抿唇后低声说我没事、压抑、冷调逆光、我没事、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let subject_candidates = storyboard_row
+            .video_desc
+            .as_deref()
+            .and_then(parse_structured_storyboard_description)
+            .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+            .unwrap_or_default();
+
+        assert_eq!(
+            select_contextual_observation_summary_style_note(
+                &rows,
+                Some(&storyboard_row),
+                &subject_candidates,
+                None,
+            ),
+            Some("语气低声尾音发颤".to_string())
         );
     }
 
