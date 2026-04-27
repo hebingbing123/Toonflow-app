@@ -3255,6 +3255,9 @@ fn compact_memory_style_anchor(
             }
             Some(fragment)
         })
+        .filter_map(|fragment| {
+            trim_style_fragment_against_prompt_coverage(&fragment, prompt_coverage)
+        })
         .filter(|fragment| {
             !(has_base_motion_style_anchor
                 && fragment.starts_with("动作")
@@ -3574,6 +3577,46 @@ fn trim_prefixed_style_fragment(fragment: &str, prefix: &str, fields: &[&str]) -
     }
 }
 
+fn trim_style_fragment_against_prompt_coverage(
+    fragment: &str,
+    prompt_coverage: &[String],
+) -> Option<String> {
+    let Some((prefix, body)) = style_fragment_prefix_and_body(fragment) else {
+        return Some(fragment.to_string());
+    };
+    if !matches!(prefix, "表演" | "语气") {
+        return Some(fragment.to_string());
+    }
+
+    let mut trimmed = body.clone();
+    let mut candidates = prompt_coverage
+        .iter()
+        .map(|entry| canonical_prompt_fragment(entry))
+        .filter(|entry| !entry.is_empty())
+        .collect::<Vec<_>>();
+    candidates.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+    candidates.dedup();
+
+    for candidate in candidates {
+        if candidate.chars().count() < 2 || !trimmed.contains(&candidate) {
+            continue;
+        }
+        let residual = normalize_prompt_text(&trimmed.replace(&candidate, ""));
+        if residual.chars().count() >= 2 {
+            trimmed = residual;
+        }
+    }
+
+    let trimmed = normalize_prompt_text(&trimmed);
+    if trimmed.is_empty() {
+        None
+    } else if trimmed == body {
+        Some(fragment.to_string())
+    } else {
+        Some(format!("{prefix}{trimmed}"))
+    }
+}
+
 fn trim_style_fragment_by_shared_mood_keywords(
     fragment: Option<String>,
     prefix: &str,
@@ -3741,14 +3784,22 @@ fn style_fragment_prefix(fragment: &str) -> bool {
     .any(|prefix| fragment.starts_with(prefix))
 }
 
-fn style_fragment_body(fragment: &str) -> Option<String> {
+fn style_fragment_prefix_and_body(fragment: &str) -> Option<(&'static str, String)> {
     [
         "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场",
     ]
     .iter()
-    .find_map(|prefix| fragment.strip_prefix(prefix))
-    .map(normalize_prompt_text)
-    .filter(|body| !body.is_empty())
+    .find_map(|prefix| {
+        fragment
+            .strip_prefix(prefix)
+            .map(normalize_prompt_text)
+            .filter(|body| !body.is_empty())
+            .map(|body| (*prefix, body))
+    })
+}
+
+fn style_fragment_body(fragment: &str) -> Option<String> {
+    style_fragment_prefix_and_body(fragment).map(|(_, body)| body)
 }
 
 fn generic_motion_style_fragment(fragment: &str) -> bool {
@@ -10512,6 +10563,32 @@ mod tests {
             "{prompt}"
         );
         assert!(prompt.contains("动作自然"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_unique_micro_expression_when_memory_overlaps_director_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在咖啡厅窗边、咖啡厅窗边、林晚、4秒、中景、缓推、捧着咖啡迟迟没有开口、隐忍 / 克制、夜间冷蓝窗光、无台词、雨声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演神情内敛眼神深沉喉结滚动，语气轻声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 真人都市写实; 神情内敛, 眼神深沉, 唇线收紧;"),
+            "{prompt}"
+        );
+        assert!(prompt.contains("表演喉结滚动"), "{prompt}");
+        assert!(!prompt.contains("表演神情内敛眼神深沉喉结滚动"), "{prompt}");
     }
 
     #[test]
