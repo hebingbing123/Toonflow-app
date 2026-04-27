@@ -53,6 +53,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   String? _workbenchLine;
   String? _lastGeneratedVideoPromptText;
   String? _lastGeneratedVideoPromptSignature;
+  String? _lastGeneratedAutoNegativePrompt;
   GenerateVideoPromptDiagnostics? _lastGeneratedVideoPromptDiagnostics;
   bool _videoPromptEditedAfterAutoGenerate = false;
   bool _syncingGeneratedVideoPrompt = false;

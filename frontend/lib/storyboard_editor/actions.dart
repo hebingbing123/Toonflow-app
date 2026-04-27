@@ -74,6 +74,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     _syncingGeneratedVideoPrompt = false;
     _lastGeneratedVideoPromptText = generated.prompt.trim();
     _lastGeneratedVideoPromptSignature = signature;
+    _lastGeneratedAutoNegativePrompt = generated.negativePrompt?.trim();
     _lastGeneratedVideoPromptDiagnostics = generated.diagnostics;
     _videoPromptEditedAfterAutoGenerate = false;
   }
@@ -158,7 +159,12 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     if (prompt.isEmpty) {
       throw const FormatException('视频提示词不能为空');
     }
-    final negativePrompt = _negativeVideoPromptCtrl.text.trim();
+    final rawNegativePrompt = _negativeVideoPromptCtrl.text.trim();
+    final compactedManualNegative = compactStoryboardManualNegativePrompt(
+      manualPrompt: rawNegativePrompt,
+      automaticPrompt: _lastGeneratedAutoNegativePrompt,
+    );
+    final negativePrompt = compactedManualNegative.manualPrompt.trim();
     final response = await postProductionWorkbenchGenerateVideoV1(
       widget.token,
       projectId: widget.projectNumericId,
@@ -186,7 +192,11 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     _applyWorkbenchState(() {
       _setWorkbenchFollowUp(
         appliedNegativePrompt.isEmpty
-            ? '已提交 ${response.total} 条视频任务。'
+            ? compactedManualNegative.removedFragmentCount > 0
+                  ? '已提交 ${response.total} 条视频任务，并自动剔除 ${compactedManualNegative.removedFragmentCount} 条重复负向约束。'
+                  : '已提交 ${response.total} 条视频任务。'
+            : compactedManualNegative.removedFragmentCount > 0
+            ? '已提交 ${response.total} 条视频任务，自动剔除 ${compactedManualNegative.removedFragmentCount} 条重复负向约束，并回填最终负向提示词。'
             : '已提交 ${response.total} 条视频任务，并回填最终负向提示词。',
       );
     });

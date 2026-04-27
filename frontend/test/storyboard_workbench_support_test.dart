@@ -3,6 +3,37 @@ import 'package:openflow_app/storyboard_editor/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {
+  test(
+    'compactStoryboardManualNegativePrompt drops manual fragments already covered by auto negative',
+    () {
+      final compressed = compactStoryboardManualNegativePrompt(
+        manualPrompt:
+            'avoid blur, avoid flicker, avoid face distortion, avoid blank expression',
+        automaticPrompt:
+            'avoid blur, avoid flicker or motion jitter, avoid face distortion or identity drift',
+      );
+
+      expect(compressed.manualPrompt, 'avoid blank expression');
+      expect(compressed.removedFragmentCount, 3);
+    },
+  );
+
+  test(
+    'compactStoryboardManualNegativePrompt keeps more specific manual fragment',
+    () {
+      final compressed = compactStoryboardManualNegativePrompt(
+        manualPrompt: 'avoid blank expression or monotone delivery',
+        automaticPrompt: 'avoid blank expression',
+      );
+
+      expect(
+        compressed.manualPrompt,
+        'avoid blank expression or monotone delivery',
+      );
+      expect(compressed.removedFragmentCount, 0);
+    },
+  );
+
   test('diagnoseStoryboardList requests creation when there are no boards', () {
     final diagnosis = diagnoseStoryboardList(
       boards: const <StoryboardRow>[],
@@ -265,6 +296,9 @@ void main() {
       negativePromptChars: 64,
       negativeConstraintCount: 3,
       negativeBudgetTier: 'expanded',
+      autoNegativeSource: null,
+      autoNegativeReviewFragmentCount: 0,
+      autoNegativeMemoryFragmentCount: 0,
       observationNoteChars: 22,
       roleAnchorCount: 1,
       sceneAnchorCount: 2,
@@ -294,6 +328,9 @@ void main() {
       negativePromptChars: 0,
       negativeConstraintCount: 0,
       negativeBudgetTier: 'lean',
+      autoNegativeSource: null,
+      autoNegativeReviewFragmentCount: 0,
+      autoNegativeMemoryFragmentCount: 0,
       observationNoteChars: 0,
       roleAnchorCount: 0,
       sceneAnchorCount: 0,
@@ -323,6 +360,9 @@ void main() {
       negativePromptChars: 70,
       negativeConstraintCount: 2,
       negativeBudgetTier: 'expanded',
+      autoNegativeSource: null,
+      autoNegativeReviewFragmentCount: 0,
+      autoNegativeMemoryFragmentCount: 0,
       observationNoteChars: 20,
       roleAnchorCount: 1,
       sceneAnchorCount: 2,
@@ -350,6 +390,9 @@ void main() {
         negativePromptChars: 0,
         negativeConstraintCount: 0,
         negativeBudgetTier: 'lean',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
         observationNoteChars: 0,
         roleAnchorCount: 0,
         sceneAnchorCount: 0,
@@ -378,6 +421,9 @@ void main() {
         negativePromptChars: 36,
         negativeConstraintCount: 1,
         negativeBudgetTier: 'lean',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
         observationNoteChars: 18,
         roleAnchorCount: 1,
         sceneAnchorCount: 1,
@@ -406,6 +452,9 @@ void main() {
         negativePromptChars: 28,
         negativeConstraintCount: 2,
         negativeBudgetTier: 'expanded',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
         observationNoteChars: 0,
         roleAnchorCount: 1,
         sceneAnchorCount: 1,
@@ -434,6 +483,9 @@ void main() {
         negativePromptChars: 18,
         negativeConstraintCount: 3,
         negativeBudgetTier: 'expanded',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
         observationNoteChars: 0,
         roleAnchorCount: 1,
         sceneAnchorCount: 1,
@@ -462,6 +514,9 @@ void main() {
         negativePromptChars: 62,
         negativeConstraintCount: 3,
         negativeBudgetTier: 'expanded',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
         observationNoteChars: 0,
         roleAnchorCount: 1,
         sceneAnchorCount: 1,

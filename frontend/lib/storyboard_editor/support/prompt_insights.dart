@@ -1,5 +1,88 @@
 part of 'diagnosis.dart';
 
+class StoryboardNegativePromptCompression {
+  const StoryboardNegativePromptCompression({
+    required this.manualPrompt,
+    required this.removedFragmentCount,
+  });
+
+  final String manualPrompt;
+  final int removedFragmentCount;
+}
+
+StoryboardNegativePromptCompression compactStoryboardManualNegativePrompt({
+  required String manualPrompt,
+  String? automaticPrompt,
+}) {
+  final manualFragments = _splitStoryboardNegativePromptFragments(manualPrompt);
+  if (manualFragments.isEmpty) {
+    return const StoryboardNegativePromptCompression(
+      manualPrompt: '',
+      removedFragmentCount: 0,
+    );
+  }
+  final automaticFragments = _splitStoryboardNegativePromptFragments(
+    automaticPrompt ?? '',
+  );
+  if (automaticFragments.isEmpty) {
+    return StoryboardNegativePromptCompression(
+      manualPrompt: manualFragments.join(', '),
+      removedFragmentCount: 0,
+    );
+  }
+
+  final kept = <String>[];
+  var removed = 0;
+  for (final fragment in manualFragments) {
+    if (_storyboardNegativeFragmentCoveredByAutomatic(
+      fragment,
+      automaticFragments,
+    )) {
+      removed += 1;
+      continue;
+    }
+    kept.add(fragment);
+  }
+  return StoryboardNegativePromptCompression(
+    manualPrompt: kept.join(', '),
+    removedFragmentCount: removed,
+  );
+}
+
+List<String> _splitStoryboardNegativePromptFragments(String prompt) {
+  return prompt
+      .split(RegExp(r'[，,；;。\n]+'))
+      .map((fragment) => _normalizeStoryboardNegativePromptText(fragment))
+      .where((fragment) => fragment.isNotEmpty)
+      .toList(growable: false);
+}
+
+bool _storyboardNegativeFragmentCoveredByAutomatic(
+  String manualFragment,
+  List<String> automaticFragments,
+) {
+  final normalizedManual = _normalizeStoryboardNegativePromptText(
+    manualFragment,
+  ).toLowerCase();
+  if (normalizedManual.isEmpty) {
+    return true;
+  }
+  return automaticFragments.any((fragment) {
+    final normalizedAutomatic = _normalizeStoryboardNegativePromptText(
+      fragment,
+    ).toLowerCase();
+    if (normalizedAutomatic.isEmpty) {
+      return false;
+    }
+    return normalizedAutomatic == normalizedManual ||
+        normalizedAutomatic.contains(normalizedManual);
+  });
+}
+
+String _normalizeStoryboardNegativePromptText(String text) {
+  return text.trim().replaceAll(RegExp(r'\s+'), ' ');
+}
+
 String buildStoryboardVideoPromptDiagnosticsLine(
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
