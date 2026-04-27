@@ -800,10 +800,18 @@ fn resolve_performance_style_anchor(
         .1;
 
     let mut fragments = Vec::new();
-    for fragment in [&cue.face, &cue.eyes, &cue.micro_expression] {
-        let fragment = normalize_prompt_text(fragment);
-        if fragment.is_empty()
-            || prompt_fragment_is_covered(&fragment, prompt_coverage)
+    for (group, fragment) in [
+        (DirectorEmotionFragmentGroup::Face, cue.face.as_str()),
+        (DirectorEmotionFragmentGroup::Eyes, cue.eyes.as_str()),
+        (
+            DirectorEmotionFragmentGroup::MicroExpression,
+            cue.micro_expression.as_str(),
+        ),
+    ] {
+        let Some(fragment) = compact_director_emotion_fragment_group(fragment, group) else {
+            continue;
+        };
+        if prompt_fragment_is_covered(&fragment, prompt_coverage)
             || fragments.iter().any(|existing| existing == &fragment)
         {
             continue;
@@ -819,6 +827,76 @@ fn resolve_performance_style_anchor(
         &fragments.join(", "),
         VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS,
     ))
+}
+
+#[derive(Clone, Copy)]
+enum DirectorEmotionFragmentGroup {
+    Face,
+    Eyes,
+    MicroExpression,
+}
+
+fn compact_director_emotion_fragment_group(
+    fragment: &str,
+    group: DirectorEmotionFragmentGroup,
+) -> Option<String> {
+    let candidates = split_prompt_note_fragments(fragment).collect::<Vec<_>>();
+    if candidates.is_empty() {
+        return None;
+    }
+    if candidates.len() == 1 {
+        return candidates.into_iter().next();
+    }
+
+    candidates.into_iter().max_by(|left, right| {
+        score_director_emotion_fragment(group, left)
+            .cmp(&score_director_emotion_fragment(group, right))
+            .then_with(|| right.chars().count().cmp(&left.chars().count()))
+            .then_with(|| left.cmp(right))
+    })
+}
+
+fn score_director_emotion_fragment(group: DirectorEmotionFragmentGroup, fragment: &str) -> i32 {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return i32::MIN;
+    }
+
+    let mut score = normalized.chars().count().min(10) as i32;
+    let preferred_prefixes = match group {
+        DirectorEmotionFragmentGroup::Face => ["神情", "眉眼", "面容", "面色", "表情", "神态"],
+        DirectorEmotionFragmentGroup::Eyes => ["眼神", "目光", "眼底", "眼尾", "眼眶", "视线"],
+        DirectorEmotionFragmentGroup::MicroExpression => {
+            ["唇线", "喉结", "嘴角", "眉心", "眉梢", "唇形"]
+        }
+    };
+    for (idx, prefix) in preferred_prefixes.iter().enumerate() {
+        if normalized.starts_with(prefix) {
+            score += 12 - idx as i32;
+            break;
+        }
+    }
+
+    for keyword in [
+        "唇线", "喉结", "嘴角", "眉心", "眉梢", "唇形", "眼底", "眼尾", "眼眶",
+    ] {
+        if normalized.contains(keyword) {
+            score += 4;
+        }
+    }
+    for keyword in ["情绪", "气质", "表情", "神态"] {
+        if normalized.contains(keyword) {
+            score -= match group {
+                DirectorEmotionFragmentGroup::MicroExpression if keyword == "表情" => 1,
+                _ => 3,
+            };
+        }
+    }
+    if normalized.contains("有") {
+        score -= 1;
+    }
+
+    score
 }
 
 fn resolve_environment_style_anchor(
@@ -10566,6 +10644,34 @@ mod tests {
     }
 
     #[test]
+    fn compact_director_emotion_fragment_group_prefers_high_signal_cue() {
+        assert_eq!(
+            compact_director_emotion_fragment_group(
+                "神情内敛，面容沉静",
+                DirectorEmotionFragmentGroup::Face,
+            )
+            .as_deref(),
+            Some("神情内敛")
+        );
+        assert_eq!(
+            compact_director_emotion_fragment_group(
+                "眼神深沉，眼底有情绪压抑",
+                DirectorEmotionFragmentGroup::Eyes,
+            )
+            .as_deref(),
+            Some("眼神深沉")
+        );
+        assert_eq!(
+            compact_director_emotion_fragment_group(
+                "眉心轻蹙，表情内敛",
+                DirectorEmotionFragmentGroup::MicroExpression,
+            )
+            .as_deref(),
+            Some("眉心轻蹙")
+        );
+    }
+
+    #[test]
     fn build_video_prompt_keeps_unique_micro_expression_when_memory_overlaps_director_anchor() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -10589,6 +10695,32 @@ mod tests {
         );
         assert!(prompt.contains("表演喉结滚动"), "{prompt}");
         assert!(!prompt.contains("表演神情内敛眼神深沉喉结滚动"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_compacts_director_performance_anchor_to_high_signal_cues() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（沈知微站在落地窗旁、城市夜景落地窗边、沈知微、4秒、中景、缓推、看着雨丝划过玻璃并轻扶窗帘、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A13）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("成熟都市言情二次元动画".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["沈知微: 米色风衣".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 成熟都市言情动画风格; 神情内敛, 眼神深沉, 唇线收紧;"),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("面容沉静"), "{prompt}");
+        assert!(!prompt.contains("眼底有情绪压抑"), "{prompt}");
     }
 
     #[test]
