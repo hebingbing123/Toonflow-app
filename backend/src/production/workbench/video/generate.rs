@@ -2522,6 +2522,18 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
 fn parse_character_consistency_fragment(fragment: &str) -> Option<CharacterConsistencyFlags> {
     let canonical = canonical_negative_fragment(fragment);
     match canonical.as_str() {
+        "avoid face distortion" => Some(CharacterConsistencyFlags {
+            face_distortion: true,
+            ..Default::default()
+        }),
+        "avoid identity drift" => Some(CharacterConsistencyFlags {
+            identity_drift: true,
+            ..Default::default()
+        }),
+        "avoid costume drift" => Some(CharacterConsistencyFlags {
+            costume_inconsistency: true,
+            ..Default::default()
+        }),
         "avoid face distortion or identity drift" => Some(CharacterConsistencyFlags {
             face_distortion: true,
             identity_drift: true,
@@ -2544,8 +2556,16 @@ fn parse_character_consistency_fragment(fragment: &str) -> Option<CharacterConsi
 fn render_character_consistency_fragment(flags: CharacterConsistencyFlags) -> String {
     if flags.face_distortion && flags.costume_inconsistency {
         "avoid face distortion, identity drift, costume drift".to_string()
+    } else if flags.face_distortion && flags.identity_drift {
+        "avoid face distortion or identity drift".to_string()
+    } else if flags.identity_drift && flags.costume_inconsistency {
+        "avoid costume or character drift".to_string()
+    } else if flags.face_distortion {
+        "avoid face distortion".to_string()
+    } else if flags.identity_drift {
+        "avoid identity drift".to_string()
     } else if flags.costume_inconsistency {
-        "avoid face drift or costume inconsistency".to_string()
+        "avoid costume drift".to_string()
     } else {
         "avoid face distortion or identity drift".to_string()
     }
@@ -2582,6 +2602,14 @@ fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleC
         "avoid oppressive or frantic mood" => Some(VisualStyleConstraintFlags {
             oppressive_mood: true,
             frantic_mood: true,
+            ..Default::default()
+        }),
+        "avoid blank expression" => Some(VisualStyleConstraintFlags {
+            blank_expression_or_monotone_delivery: true,
+            ..Default::default()
+        }),
+        "avoid monotone delivery" => Some(VisualStyleConstraintFlags {
+            blank_expression_or_monotone_delivery: true,
             ..Default::default()
         }),
         "avoid blank expression or monotone delivery" => Some(VisualStyleConstraintFlags {
@@ -2941,7 +2969,9 @@ fn negative_fragment_family(value: &str) -> &'static str {
         "avoid unnecessary shot changes" => "shot_change_only",
         "avoid extra shot changes or wrong framing" => "shot_change_framing",
         "avoid rushed motion" | "avoid rushed or jerky motion" => "rushed_motion",
-        "avoid blank expression or monotone delivery" => "performance_delivery",
+        "avoid blank expression"
+        | "avoid monotone delivery"
+        | "avoid blank expression or monotone delivery" => "performance_delivery",
         "avoid extreme camera angle"
         | "avoid overly tight close-up framing"
         | "avoid extreme camera angle or overly tight close-up framing" => "camera_framing",
@@ -2955,6 +2985,13 @@ fn negative_fragment_family(value: &str) -> &'static str {
         | "avoid flat cold lighting or harsh backlight silhouette" => "lighting_backlight",
         "avoid distracting neon reflections" => "lighting_reflection",
         "avoid lip-sync mismatch" => "lip_sync_mismatch",
+        "avoid face distortion"
+        | "avoid identity drift"
+        | "avoid costume drift"
+        | "avoid face distortion or identity drift"
+        | "avoid costume or character drift"
+        | "avoid face drift or costume inconsistency"
+        | "avoid face distortion, identity drift, costume drift" => "character_consistency",
         _ => "",
     }
 }
@@ -3520,6 +3557,31 @@ mod tests {
             merged,
             "avoid face distortion, identity drift, costume drift"
         );
+    }
+
+    #[test]
+    fn merge_negative_prompts_compacts_character_consistency_singletons() {
+        let merged = merge_negative_prompts(
+            Some("avoid identity drift"),
+            Some("avoid face distortion, avoid costume drift"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(
+            merged,
+            "avoid face distortion, identity drift, costume drift"
+        );
+    }
+
+    #[test]
+    fn merge_negative_prompts_compacts_performance_delivery_singletons() {
+        let merged = merge_negative_prompts(
+            Some("avoid blank expression"),
+            Some("avoid monotone delivery"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(merged, "avoid blank expression or monotone delivery");
     }
 
     #[test]
