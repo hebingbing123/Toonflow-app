@@ -205,21 +205,9 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         } else {
             None
         };
-    let context = load_video_prompt_context(
-        pool,
-        user_id,
-        body.project_id,
-        body.script_id,
-        body.storyboard_id,
-        single_storyboard_runtime.as_ref(),
-    )
-    .await?;
     let negative_prompt_selection = single_storyboard_runtime
         .as_ref()
         .map(|runtime| runtime.selection.clone());
-    let negative_prompt = negative_prompt_selection
-        .as_ref()
-        .and_then(|selection| selection.prompt.clone());
     let observation_note = single_storyboard_runtime
         .as_ref()
         .filter(|runtime| runtime.selection.prompt.is_none())
@@ -228,6 +216,19 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         negative_prompt_selection.as_ref(),
         observation_note.as_deref(),
     );
+    let context = load_video_prompt_context(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+        single_storyboard_runtime.as_ref(),
+        constraint_pressure,
+    )
+    .await?;
+    let negative_prompt = negative_prompt_selection
+        .as_ref()
+        .and_then(|selection| selection.prompt.clone());
     let prompt_result = build_video_prompt_with_constraint_pressure(
         body.description.as_deref(),
         body.image_url.as_deref(),
@@ -1268,17 +1269,19 @@ async fn load_video_prompt_context(
     script_id: i32,
     storyboard_id: Option<i32>,
     runtime: Option<&StoryboardNegativePromptRuntime>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Result<Option<VideoPromptContext>, ApiError> {
     let Some(storyboard_numeric_id) = storyboard_id.filter(|id| *id > 0) else {
         return Ok(None);
     };
     let (row, memory_style_notes, continuity_notes) = if let Some(runtime) = runtime {
         let row = runtime.storyboard_row.clone().ok_or(ApiError::NotFound)?;
-        let (memory_style_notes, continuity_notes) = build_video_prompt_memory_notes(
+        let (memory_style_notes, continuity_notes) = build_video_prompt_memory_notes_with_pressure(
             runtime.prompt_support_rows.clone(),
             storyboard_numeric_id,
             runtime.current_prompt_seed.as_deref(),
             &row,
+            constraint_pressure,
         );
         (row, memory_style_notes, continuity_notes)
     } else {
@@ -1314,6 +1317,7 @@ async fn load_video_prompt_context(
             storyboard_numeric_id,
             current_prompt_seed.as_deref(),
             &row,
+            constraint_pressure,
         )
         .await?;
         (row, memory_style_notes, continuity_notes)
@@ -1427,6 +1431,7 @@ async fn load_video_prompt_memory_notes(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
     storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Result<(Vec<String>, Vec<String>), ApiError> {
     let rows = sqlx::query_as::<_, AgentMemoryRow>(
         r#"
@@ -1452,11 +1457,12 @@ async fn load_video_prompt_memory_notes(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(build_video_prompt_memory_notes(
+    Ok(build_video_prompt_memory_notes_with_pressure(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
         storyboard_row,
+        constraint_pressure,
     ))
 }
 
@@ -1465,6 +1471,22 @@ fn build_video_prompt_memory_notes(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
     storyboard_row: &StoryboardPromptSeedRow,
+) -> (Vec<String>, Vec<String>) {
+    build_video_prompt_memory_notes_with_pressure(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        storyboard_row,
+        None,
+    )
+}
+
+fn build_video_prompt_memory_notes_with_pressure(
+    rows: Vec<AgentMemoryRow>,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> (Vec<String>, Vec<String>) {
     let subject_candidates = storyboard_row
         .video_desc
@@ -1478,15 +1500,19 @@ fn build_video_prompt_memory_notes(
         current_prompt_seed,
         &subject_candidates,
     );
-    (
+    let style_notes = compact_guardrail_sensitive_style_notes(
         select_video_prompt_style_notes(
             &rows,
             storyboard_numeric_id,
             current_prompt_seed,
             storyboard_row,
-        )
-        .into_iter()
-        .collect(),
+            constraint_pressure,
+        ),
+        storyboard_row,
+        constraint_pressure,
+    );
+    (
+        style_notes.into_iter().collect(),
         select_video_prompt_memory_notes(
             &rows,
             storyboard_numeric_id,
@@ -1501,6 +1527,7 @@ fn select_video_prompt_style_notes(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
     storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Vec<String> {
     let current_subject_candidates = storyboard_row
         .video_desc
@@ -1522,19 +1549,50 @@ fn select_video_prompt_style_notes(
             .into_iter()
             .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
             .collect::<Vec<_>>();
-    if let Some(role_only) = prefer_role_memory_only_for_silent_identity_scene(
+    let role_only = prefer_role_memory_only_for_silent_identity_scene(
         &exact,
         &role_memory_notes,
         storyboard_row,
-    ) {
+    );
+    let merged = merge_exact_and_role_style_notes_for_high_value_scene(
+        &exact,
+        &role_memory_notes,
+        storyboard_row,
+    );
+    let prioritized = select_prioritized_video_style_note(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        Some(storyboard_row),
+    )
+    .into_iter()
+    .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+    .collect::<Vec<_>>();
+    let neighbor = collect_neighbor_video_prompt_style_notes(
+        rows,
+        storyboard_numeric_id,
+        &current_subject_candidates,
+    )
+    .into_iter()
+    .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+    .take(1)
+    .collect::<Vec<_>>();
+
+    if let Some(role_only) = role_only {
         return vec![role_only];
     }
-    if let Some(merged) = merge_exact_and_role_style_notes_for_high_value_scene(
+    if let Some(merged) = merged {
+        return vec![merged];
+    }
+    if let Some(selected) = select_pressure_prioritized_style_note_candidate(
         &exact,
         &role_memory_notes,
+        &prioritized,
+        &neighbor,
         storyboard_row,
+        constraint_pressure,
     ) {
-        return vec![merged];
+        return vec![selected];
     }
     if !exact.is_empty()
         && !exact_style_notes_should_yield_to_role_memory(&exact, &role_memory_notes)
@@ -1545,29 +1603,123 @@ fn select_video_prompt_style_notes(
     if !role_memory_notes.is_empty() {
         return role_memory_notes;
     }
-
-    let prioritized = select_prioritized_video_style_note(
-        rows,
-        storyboard_numeric_id,
-        current_prompt_seed,
-        Some(storyboard_row),
-    )
-    .into_iter()
-    .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
-    .collect::<Vec<_>>();
     if !prioritized.is_empty() {
         return prioritized;
     }
+    neighbor
+}
 
-    collect_neighbor_video_prompt_style_notes(
-        rows,
-        storyboard_numeric_id,
-        &current_subject_candidates,
-    )
-    .into_iter()
-    .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
-    .take(1)
-    .collect()
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum PressureStyleCandidateSource {
+    Neighbor,
+    Prioritized,
+    Role,
+    Exact,
+}
+
+fn select_pressure_prioritized_style_note_candidate(
+    exact_notes: &[String],
+    role_memory_notes: &[String],
+    prioritized_notes: &[String],
+    neighbor_notes: &[String],
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    let pressure = constraint_pressure
+        .filter(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())?;
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    let mut best: Option<(i32, usize, PressureStyleCandidateSource, String)> = None;
+
+    let mut consider = |note: &String, source: PressureStyleCandidateSource| {
+        let compacted =
+            compact_guardrail_sensitive_style_note(note, storyboard_row, Some(pressure))
+                .or_else(|| compact_contextual_video_style_note(note, Some(storyboard_row)));
+        let Some(compacted) = compacted else {
+            return;
+        };
+        let score =
+            score_compacted_style_note_against_constraint_pressure(&compacted, &fields, pressure)
+                + match source {
+                    PressureStyleCandidateSource::Exact => 2,
+                    PressureStyleCandidateSource::Role => 1,
+                    PressureStyleCandidateSource::Prioritized => 0,
+                    PressureStyleCandidateSource::Neighbor => -1,
+                };
+        let len = compacted.chars().count();
+
+        match &best {
+            Some((best_score, best_len, best_source, best_note))
+                if *best_score > score
+                    || (*best_score == score
+                        && (*best_len < len
+                            || (*best_len == len
+                                && (*best_source > source
+                                    || (*best_source == source && best_note <= &compacted))))) => {}
+            _ => best = Some((score, len, source, compacted)),
+        }
+    };
+
+    for note in exact_notes {
+        consider(note, PressureStyleCandidateSource::Exact);
+    }
+    for note in role_memory_notes {
+        consider(note, PressureStyleCandidateSource::Role);
+    }
+    for note in prioritized_notes {
+        consider(note, PressureStyleCandidateSource::Prioritized);
+    }
+    for note in neighbor_notes {
+        consider(note, PressureStyleCandidateSource::Neighbor);
+    }
+
+    best.map(|(_, _, _, note)| note)
+}
+
+fn compact_guardrail_sensitive_style_notes(
+    notes: Vec<String>,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Vec<String> {
+    notes
+        .into_iter()
+        .filter_map(|note| {
+            compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
+        })
+        .collect()
+}
+
+fn compact_guardrail_sensitive_style_note(
+    note: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    let Some(pressure) = constraint_pressure
+        .filter(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())
+    else {
+        return Some(note.to_string());
+    };
+    let Some(fields) = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return Some(note.to_string());
+    };
+    let note = compact_contextual_video_style_note(note, Some(storyboard_row))?;
+    let fragments = split_prompt_note_fragments(&note).collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return Some(note);
+    }
+
+    let compacted =
+        select_best_memory_style_note_for_lean_tier(&fragments, Some(&fields), Some(pressure))
+            .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS))
+            .unwrap_or(note);
+
+    Some(compacted)
 }
 
 fn exact_style_notes_should_yield_to_role_memory(
@@ -4602,6 +4754,38 @@ fn score_memory_fragment_human_performance_detail(
     }
 
     score
+}
+
+fn score_compacted_style_note_against_constraint_pressure(
+    note: &str,
+    fields: &StructuredStoryboardDescription,
+    pressure: VideoPromptConstraintPressure,
+) -> i32 {
+    let mut score = merged_style_note_signal_score(note) as i32;
+    for fragment in split_prompt_note_fragments(note) {
+        score += score_memory_style_fragment_for_lean_tier(&fragment, Some(fields), Some(pressure));
+    }
+
+    if role_style_note_has_visible_micro_performance(note)
+        && (pressure.has_identity_guardrail
+            || pressure.has_dialogue_guardrail
+            || pressure.has_emotion_guardrail)
+    {
+        score += 8;
+    }
+    if style_note_contains_family(note, "光影") && pressure.has_lighting_guardrail {
+        score += 4;
+    }
+    if style_note_contains_family(note, "动作") && pressure.has_motion_guardrail {
+        score += 3;
+    }
+
+    score
+}
+
+fn style_note_contains_family(note: &str, family: &str) -> bool {
+    split_prompt_note_fragments(note)
+        .any(|fragment| style_note_fragment_family(&fragment) == Some(family))
 }
 
 fn select_best_expressive_memory_pair_for_lean_tier(
@@ -8323,7 +8507,7 @@ mod tests {
         build_video_prompt, build_video_prompt_memory_notes,
         build_video_prompt_with_constraint_pressure, build_video_prompt_with_diagnostics,
         compact_camera_clause, compact_contextual_video_style_note,
-        compact_director_emotion_fragment_group,
+        compact_director_emotion_fragment_group, compact_guardrail_sensitive_style_note,
         compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
         exact_style_notes_should_yield_to_role_memory, observation_style_note_context_evidence,
         parse_director_emotion_cues, parse_director_environment_cues,
@@ -11038,6 +11222,54 @@ mod tests {
         assert_eq!(
             select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
             vec!["镜头低机位压迫感，情绪压迫，表演抬眼停顿，语气轻声".to_string()]
+        );
+    }
+
+    #[test]
+    fn compact_guardrail_sensitive_style_note_prefers_micro_performance_over_generic_emotion_carryover(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚抬眼后低声开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中近景、缓推、抬眼后喉结轻滚再低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        let note = compact_guardrail_sensitive_style_note(
+            "情绪压抑克制，表演抬眼停顿，语气压低气息尾音发颤",
+            &storyboard_row,
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                has_dialogue_guardrail: true,
+                has_emotion_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        )
+        .expect("guardrail-compacted note");
+        assert!(note.contains("表演"), "{note}");
+        assert!(!note.contains("情绪压抑"), "{note}");
+    }
+
+    #[test]
+    fn compact_guardrail_sensitive_style_note_prefers_lighting_over_decorative_environment() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚在镜前停住".into()),
+            video_desc: Some("（林晚在镜前停住、化妆镜前、林晚、4秒、近景、静止、抬眼看向镜中倒影、克制、暖金逆光、无台词、静场留白、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_guardrail_sensitive_style_note(
+                "光影暖金逆光层次，环境镜面微雾",
+                &storyboard_row,
+                Some(VideoPromptConstraintPressure {
+                    has_identity_guardrail: true,
+                    has_lighting_guardrail: true,
+                    forces_compact_memory: true,
+                    ..VideoPromptConstraintPressure::default()
+                }),
+            ),
+            Some("光影层次".to_string())
         );
     }
 
