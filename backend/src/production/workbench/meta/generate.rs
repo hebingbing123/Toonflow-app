@@ -1447,9 +1447,11 @@ fn select_video_prompt_style_notes(
             .into_iter()
             .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
             .collect::<Vec<_>>();
-    if let Some(merged) =
-        merge_emotional_exact_and_role_style_notes(&exact, &role_memory_notes, storyboard_row)
-    {
+    if let Some(merged) = merge_exact_and_role_style_notes_for_high_value_scene(
+        &exact,
+        &role_memory_notes,
+        storyboard_row,
+    ) {
         return vec![merged];
     }
     if !exact.is_empty()
@@ -1544,7 +1546,7 @@ fn low_signal_local_camera_style_fragment(fragment: &str) -> bool {
         .any(|candidate| body == *candidate)
 }
 
-fn merge_emotional_exact_and_role_style_notes(
+fn merge_exact_and_role_style_notes_for_high_value_scene(
     exact_notes: &[String],
     role_memory_notes: &[String],
     storyboard_row: &StoryboardPromptSeedRow,
@@ -1556,7 +1558,9 @@ fn merge_emotional_exact_and_role_style_notes(
     else {
         return None;
     };
-    if !video_prompt_scene_needs_emotional_memory(&fields) {
+    if !video_prompt_scene_needs_emotional_memory(&fields)
+        && !video_prompt_scene_needs_identity_memory(&fields)
+    {
         return None;
     }
 
@@ -1564,6 +1568,48 @@ fn merge_emotional_exact_and_role_style_notes(
         role_memory_notes
             .iter()
             .find_map(|role_note| merge_complementary_style_note_pair(exact_note, role_note))
+    })
+}
+
+fn video_prompt_scene_needs_identity_memory(fields: &StructuredStoryboardDescription) -> bool {
+    if normalize_prompt_text(&fields.subject).is_empty() {
+        return false;
+    }
+
+    [
+        fields.shot.as_str(),
+        fields.camera_move.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "近景",
+                "中近景",
+                "半身",
+                "特写",
+                "close-up",
+                "medium close-up",
+                "portrait",
+                "face",
+                "面部",
+                "脸部",
+                "眼神",
+                "目光",
+                "凝视",
+                "对视",
+                "抬眼",
+                "回头",
+                "唇",
+                "喉结",
+                "眉",
+                "泪",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
     })
 }
 
@@ -10776,6 +10822,32 @@ mod tests {
     }
 
     #[test]
+    fn select_video_prompt_style_notes_merges_role_micro_performance_for_identity_risk_scene() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=22 | style=镜头近景，光影暖金逆光 | note=镜头近景，光影暖金逆光"
+                        .into(),
+            },
+            AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | sampleCount=2 | style=表演眼神迟疑，语气轻声克制".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚在镜前停住".into()),
+            video_desc: Some("（林晚在镜前停住、化妆镜前、林晚、4秒、近景、静止、抬眼看向镜中倒影、克制、暖金逆光、无台词、静场留白、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 22, None, &storyboard_row),
+            vec!["光影暖金逆光，表演眼神迟疑".to_string()]
+        );
+    }
+
+    #[test]
     fn select_video_prompt_style_notes_prefers_subject_role_memory_before_generic_summary() {
         let rows = vec![
             AgentMemoryRow {
@@ -12317,6 +12389,23 @@ mod tests {
                 Some(&storyboard_row),
             ),
             Some("语气轻声，表演喉结滚动".to_string())
+        );
+    }
+
+    #[test]
+    fn compact_contextual_video_style_note_keeps_identity_micro_performance_for_silent_close_up() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚在镜前停住".into()),
+            video_desc: Some("（林晚在镜前停住、化妆镜前、林晚、4秒、近景、静止、抬眼看向镜中倒影、克制、暖金逆光、无台词、静场留白、A12）".into()),
+            duration: Some("4s".into()),
+        };
+
+        assert_eq!(
+            compact_contextual_video_style_note(
+                "表演眼神迟疑，语气轻声克制",
+                Some(&storyboard_row),
+            ),
+            Some("表演眼神迟疑".to_string())
         );
     }
 
