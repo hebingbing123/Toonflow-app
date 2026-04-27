@@ -2080,7 +2080,7 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         if !fields.mood.is_empty() {
             style_fragments.push(format!("情绪{}", clip_prompt_fragment(&fields.mood, 12)));
         }
-        if !fields.lighting.is_empty() {
+        if !selected_memory_field_looks_silent(&fields.lighting) {
             style_fragments.push(format!(
                 "光影{}",
                 clip_prompt_fragment(&fields.lighting, 14)
@@ -3876,6 +3876,41 @@ fn compact_cross_fragment_style_redundancy(fragments: &mut Vec<String>) {
             .iter()
             .any(|lighting| lighting_fragment_covers_generic_mood_tone(lighting, &mood))
     });
+
+    let has_high_value_character_signal = fragments.iter().any(|fragment| {
+        fragment.starts_with("表演")
+            || fragment.starts_with("语气")
+            || fragment.starts_with("动作")
+            || fragment.starts_with("声场")
+    });
+    if has_high_value_character_signal {
+        fragments.retain(|fragment| {
+            let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) else {
+                return true;
+            };
+            !selected_style_fragment_is_generic_restrained_mood(&mood)
+        });
+    }
+
+    let has_non_camera_style_signal = fragments.iter().any(|fragment| {
+        !fragment.starts_with("镜头")
+            && ((fragment.starts_with("情绪")
+                && fragment
+                    .strip_prefix("情绪")
+                    .map(normalize_prompt_text)
+                    .is_some_and(|mood| {
+                        !selected_style_fragment_is_generic_restrained_mood(&mood)
+                    }))
+                || fragment.starts_with("光影")
+                || fragment.starts_with("动作")
+                || fragment.starts_with("表演")
+                || fragment.starts_with("环境")
+                || fragment.starts_with("语气")
+                || fragment.starts_with("声场"))
+    });
+    if has_non_camera_style_signal {
+        fragments.retain(|fragment| !is_local_framing_only_fragment(fragment));
+    }
 }
 
 fn lighting_fragment_covers_generic_mood_tone(lighting: &str, mood: &str) -> bool {
@@ -3885,6 +3920,10 @@ fn lighting_fragment_covers_generic_mood_tone(lighting: &str, mood: &str) -> boo
             .any(|keyword| lighting.contains(keyword)),
         _ => lighting.contains(mood),
     }
+}
+
+fn selected_style_fragment_is_generic_restrained_mood(mood: &str) -> bool {
+    matches!(mood, "克制" | "隐忍" | "压抑" | "沉静" | "沉稳" | "冷静")
 }
 
 fn compact_prefixed_style_fragment_with_keywords(
@@ -4893,6 +4932,42 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("表演抬眼停顿"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_drops_local_framing_when_other_style_signal_exists() {
+        let content = build_selected_video_memory(
+            24,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚站在窗边压住情绪".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、近景、无、抬眼后停顿片刻、克制、冷蓝窗光、无台词、雨声回响、A24）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains("style=动作从容克制，表演抬眼停顿，光影冷蓝窗光，声场雨声回响"),
+            "{content}"
+        );
+        assert!(!content.contains("镜头近景"), "{content}");
+        assert!(!content.contains("情绪克制"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_keeps_generic_restrained_mood_without_character_signal() {
+        let content = build_selected_video_memory(
+            25,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚站在窗边看着雨幕".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、近景、无、站定看向窗外、克制、无、无台词、无音效、A25）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("情绪克制"), "{content}");
+        assert!(!content.contains("光影无"), "{content}");
     }
 
     #[test]
