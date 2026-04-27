@@ -2995,7 +2995,8 @@ fn build_video_prompt_with_diagnostics(
     extend_prompt_coverage(&mut style_coverage, &style_anchors);
     match structured_fields.as_ref() {
         Some(fields) => {
-            let compacted_dialogue = compact_dialogue_clause(&fields.dialogue);
+            let compacted_dialogue =
+                compact_dialogue_clause(&fields.dialogue, Some(fields), context);
             let mut subject = compact_subject_clause(
                 &fields.subject,
                 &asset_coverage,
@@ -6646,7 +6647,11 @@ fn looks_like_silence(text: &str) -> bool {
         || normalized == "no sound"
 }
 
-fn compact_dialogue_clause(dialogue: &str) -> Option<String> {
+fn compact_dialogue_clause(
+    dialogue: &str,
+    fields: Option<&StructuredStoryboardDescription>,
+    context: Option<&VideoPromptContext>,
+) -> Option<String> {
     let normalized = normalize_prompt_text(dialogue);
     if normalized.is_empty() || looks_like_silence(&normalized) {
         return None;
@@ -6665,7 +6670,79 @@ fn compact_dialogue_clause(dialogue: &str) -> Option<String> {
         normalized
     };
 
-    (!dialogue_fragment_is_non_semantic_vocalization(&selected)).then_some(selected)
+    if dialogue_fragment_is_non_semantic_vocalization(&selected) {
+        return None;
+    }
+
+    let prompt = context
+        .and_then(|value| value.storyboard_prompt.as_deref())
+        .unwrap_or_default();
+    if fields.is_some_and(|fields| {
+        dialogue_clause_is_low_gain_for_offscreen_or_low_visibility_speech(
+            &selected, fields, prompt,
+        )
+    }) {
+        return None;
+    }
+
+    Some(selected)
+}
+
+fn dialogue_clause_is_low_gain_for_offscreen_or_low_visibility_speech(
+    dialogue: &str,
+    fields: &StructuredStoryboardDescription,
+    prompt: &str,
+) -> bool {
+    if storyboard_has_visible_speech_performance_risk(fields, Some(prompt))
+        || current_storyboard_is_fragile_emotional_turn(fields)
+    {
+        return false;
+    }
+
+    let normalized = canonical_dialogue_fragment(dialogue);
+    if normalized.is_empty() {
+        return true;
+    }
+
+    let char_count = normalized.chars().count();
+    if char_count <= 4 {
+        return true;
+    }
+
+    if video_prompt_scene_has_motion_risk(fields) && video_prompt_scene_subject_count(fields) > 1 {
+        return char_count <= 6 && !dialogue_fragment_has_high_semantic_density(&normalized);
+    }
+
+    false
+}
+
+fn dialogue_fragment_has_high_semantic_density(dialogue: &str) -> bool {
+    let normalized = canonical_dialogue_fragment(dialogue);
+    if normalized.is_empty() {
+        return false;
+    }
+
+    if normalized.chars().count() >= 8 {
+        return true;
+    }
+
+    [
+        "为什么",
+        "怎么",
+        "不能",
+        "不要",
+        "必须",
+        "一定",
+        "马上",
+        "终于",
+        "已经",
+        "真的",
+        "不是",
+        "别再",
+        "快点",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
 }
 
 fn dialogue_fragment_is_non_semantic_vocalization(value: &str) -> bool {
@@ -9610,6 +9687,30 @@ mod tests {
         );
 
         assert!(prompt.contains("Dialogue: 别出声."), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_drops_brief_dialogue_for_wide_moving_low_visibility_scene() {
+        let prompt = build_video_prompt(
+            Some("（林晚奔向街口、雨夜街头、林晚、5秒、远景、手持跟拍、穿过雨幕奔跑并喊别回头、紧张、霓虹反光、别回头、脚步声和雨声混在一起、A12）"),
+            None,
+            None,
+        );
+
+        assert!(!prompt.contains("Dialogue:"), "{prompt}");
+        assert!(prompt.contains("Action: 穿过雨幕奔跑"), "{prompt}");
+        assert!(prompt.contains("Sound: 脚步声和雨声混在一起."), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_fragile_dialogue_even_when_speech_visibility_is_limited() {
+        let prompt = build_video_prompt(
+            Some("（林晚背对镜头停在走廊尽头、医院走廊、林晚、5秒、远景、拉远、背对镜头停步后失声说我真的撑不住了、崩溃压抑、冷白顶光、我真的撑不住了、空调低鸣、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Dialogue: 我真的撑不住了."), "{prompt}");
     }
 
     #[test]
