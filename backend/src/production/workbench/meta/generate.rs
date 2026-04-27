@@ -3088,14 +3088,39 @@ fn compact_memory_style_anchor(
     }
 
     let note = match memory_budget_tier {
-        VideoPromptMemoryBudgetTier::Lean => fragments.into_iter().next().map(|fragment| {
-            clip_prompt_fragment(&fragment, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS)
-        })?,
+        VideoPromptMemoryBudgetTier::Lean => {
+            select_best_memory_style_fragment_for_lean_tier(&fragments).map(|fragment| {
+                clip_prompt_fragment(&fragment, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS)
+            })?
+        }
         VideoPromptMemoryBudgetTier::Expanded => {
             clip_prompt_fragment(&fragments.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
         }
     };
     Some(note)
+}
+
+fn select_best_memory_style_fragment_for_lean_tier(fragments: &[String]) -> Option<String> {
+    fragments
+        .iter()
+        .max_by(|left, right| {
+            score_memory_style_fragment_for_lean_tier(left)
+                .cmp(&score_memory_style_fragment_for_lean_tier(right))
+                .then_with(|| right.chars().count().cmp(&left.chars().count()))
+                .then_with(|| right.cmp(left))
+        })
+        .cloned()
+}
+
+fn score_memory_style_fragment_for_lean_tier(fragment: &str) -> i32 {
+    match style_note_fragment_family(fragment) {
+        Some("表演") | Some("语气") => 6,
+        Some("情绪") | Some("光影") => 5,
+        Some("动作") => 4,
+        Some("环境") | Some("声场") => 3,
+        Some("镜头") => 2,
+        _ => 0,
+    }
 }
 
 fn trim_style_fragment_against_storyboard_fields(
@@ -9469,6 +9494,33 @@ mod tests {
             "{}",
             result.prompt
         );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_prefers_performance_fragment_in_lean_memory_tier() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、咖啡厅窗边、林晚、4秒、中景、缓推、看向窗外、平静、夜间暖光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["镜头稳定跟拍，环境咖啡热气，表演眼神放松".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+        assert!(result.prompt.contains("表演眼神放松"), "{}", result.prompt);
+        assert!(!result.prompt.contains("镜头稳定跟拍"), "{}", result.prompt);
     }
 
     #[test]
