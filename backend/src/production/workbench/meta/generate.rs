@@ -3564,11 +3564,72 @@ fn compact_dialogue_clause(dialogue: &str) -> Option<String> {
 
     let normalized_len = normalized.chars().count();
     let compacted_len = compacted.chars().count();
-    if compacted_len >= 2 && normalized_len.saturating_sub(compacted_len) >= 2 {
-        Some(compacted)
+    let selected = if compacted_len >= 2 && normalized_len.saturating_sub(compacted_len) >= 2 {
+        compacted
     } else {
-        Some(normalized)
+        normalized
+    };
+
+    (!dialogue_fragment_is_non_semantic_vocalization(&selected)).then_some(selected)
+}
+
+fn dialogue_fragment_is_non_semantic_vocalization(value: &str) -> bool {
+    let normalized = canonical_dialogue_fragment(value);
+    if normalized.is_empty() {
+        return false;
     }
+
+    let mut residual = normalized;
+    for fragment in [
+        "急促",
+        "短促",
+        "轻微",
+        "微弱",
+        "低低",
+        "沙哑",
+        "压抑地",
+        "压着",
+        "颤抖着",
+        "颤声",
+        "轻声",
+        "低声",
+        "缓缓",
+        "忍不住",
+        "一声",
+        "几声",
+        "地",
+        "着",
+        "了",
+    ] {
+        residual = residual.replace(fragment, "");
+    }
+    for fragment in [
+        "倒吸一口气",
+        "呼吸声",
+        "喘息",
+        "喘气",
+        "呼吸",
+        "吸气",
+        "叹息",
+        "长叹",
+        "闷哼",
+        "呻吟",
+        "哽咽",
+        "抽泣",
+        "啜泣",
+        "惊呼",
+        "尖叫",
+        "低吼",
+        "嘶吼",
+        "呜咽",
+    ] {
+        residual = residual.replace(fragment, "");
+    }
+    for fragment in ["啊", "嗯", "呃", "哈", "哼", "唔", "呀", "哦"] {
+        residual = residual.replace(fragment, "");
+    }
+
+    normalize_prompt_text(&residual).is_empty()
 }
 
 fn compact_sound_clause(
@@ -6173,6 +6234,18 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_drops_non_semantic_vocalization_dialogue() {
+        let prompt = build_video_prompt(
+            Some("（主角踉跄扶墙、废弃走廊、主角、5秒、中景、手持跟拍、踉跄扶墙前行、紧张压迫、冷调逆光、急促喘息、脚步声拖行、A12）"),
+            None,
+            None,
+        );
+
+        assert!(!prompt.contains("Dialogue or voice-over:"), "{prompt}");
+        assert!(prompt.contains("Sound: 脚步声拖行."), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_trims_sound_against_compacted_dialogue() {
         let prompt = build_video_prompt(
             Some("（主角驻足回头、旧宅门厅、主角、5秒、中景、静止、驻足回头、压抑、冷调逆光、轻声说：你终于来了、轻声说你终于来了，风声回响、A12）"),
@@ -6183,6 +6256,20 @@ mod tests {
         assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
         assert!(prompt.contains("Sound: 风声回响."));
         assert!(!prompt.contains("Sound: 轻声说你终于来了"));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_semantic_short_dialogue() {
+        let prompt = build_video_prompt(
+            Some("（主角猛然回头、旧宅门厅、主角、5秒、中景、推进、猛然回头后抬手示警、紧张、冷调逆光、别出声、风声压过呼吸声、A12）"),
+            None,
+            None,
+        );
+
+        assert!(
+            prompt.contains("Dialogue or voice-over: 别出声."),
+            "{prompt}"
+        );
     }
 
     #[test]
