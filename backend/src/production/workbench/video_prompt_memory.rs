@@ -1220,13 +1220,17 @@ pub(crate) fn select_subject_role_video_style_memory_notes_for_storyboard(
                 })
         })
         .filter_map(|row| {
-            selected_video_style_value(row).map(|note| {
+            role_style_memory_value_for_storyboard(row, storyboard_row).map(|note| {
+                let evidence_note = selected_video_style_value(row).unwrap_or_else(|| note.clone());
                 let storyboard_focus =
                     role_style_storyboard_focus_score(&row.content, storyboard_row);
                 let subject_priority =
                     memory_subject_match_priority(&row.content, &subject_candidates);
-                let evidence =
-                    score_role_style_note_context_evidence(&note, row.name.as_str(), &context);
+                let evidence = score_role_style_note_context_evidence(
+                    &evidence_note,
+                    row.name.as_str(),
+                    &context,
+                );
                 let min_evidence =
                     role_style_memory_min_context_evidence(row.name.as_str(), &context);
                 (
@@ -1387,6 +1391,7 @@ fn score_role_style_note_context_evidence(
 
     let ranked = RankedStyleNote {
         note: note.to_string(),
+        context_note: note.to_string(),
         score: 0,
         recency_idx: 0,
         source_name: source_name.to_string(),
@@ -4799,6 +4804,7 @@ struct StyleNoteSelectionContext {
 #[derive(Debug, Clone)]
 struct RankedStyleNote {
     note: String,
+    context_note: String,
     score: i32,
     recency_idx: usize,
     source_name: String,
@@ -4873,28 +4879,45 @@ fn collect_ranked_video_style_note_candidates(
 ) -> Vec<RankedStyleNote> {
     let mut candidates = Vec::new();
     for (idx, row) in rows.iter().enumerate() {
-        let (base_score, note) = match row.name.as_str() {
+        let (base_score, note, context_note) = match row.name.as_str() {
             SELECTED_VIDEO_MEMORY_NAME => {
                 if !memory_row_is_neighbor_selected_style(row, storyboard_numeric_id) {
                     continue;
                 }
-                (120, extract_style_note_value(row))
+                let note = extract_style_note_value(row);
+                (120, note.clone(), note)
             }
-            SCRIPT_VIDEO_STYLE_MEMORY_NAME => (90, extract_style_note_value(row)),
-            SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => (102, extract_style_note_value(row)),
-            PROJECT_VIDEO_STYLE_MEMORY_NAME => (70, extract_style_note_value(row)),
-            PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => (82, extract_style_note_value(row)),
+            SCRIPT_VIDEO_STYLE_MEMORY_NAME => {
+                let note = extract_style_note_value(row);
+                (90, note.clone(), note)
+            }
+            SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME => (
+                102,
+                role_style_memory_value_for_storyboard(row, storyboard_row),
+                selected_video_style_value(row),
+            ),
+            PROJECT_VIDEO_STYLE_MEMORY_NAME => {
+                let note = extract_style_note_value(row);
+                (70, note.clone(), note)
+            }
+            PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => (
+                82,
+                role_style_memory_value_for_storyboard(row, storyboard_row),
+                selected_video_style_value(row),
+            ),
             _ => continue,
         };
         let Some(note) = note else {
             continue;
         };
+        let context_note = context_note.unwrap_or_else(|| note.clone());
         let sample_count = extract_key_value(&row.content, "sampleCount")
             .and_then(|value| value.parse::<i32>().ok())
             .unwrap_or(1)
             .clamp(1, 8);
         candidates.push(RankedStyleNote {
             note,
+            context_note,
             score: base_score + sample_count * 4,
             recency_idx: idx,
             source_name: row.name.clone(),
@@ -5121,7 +5144,7 @@ fn score_style_note_context_evidence(
     context: &StyleNoteSelectionContext,
 ) -> usize {
     let mut evidence = 0usize;
-    let fragments = split_prompt_note_fragments(&note.note)
+    let fragments = split_prompt_note_fragments(&note.context_note)
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
 
@@ -5674,6 +5697,9 @@ fn build_role_video_style_memories<'a>(
             }
             let style =
                 clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+            let delivery = summarize_role_delivery_fragment(&group.notes)
+                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+                .filter(|value| value != &style);
             let primary_subject = clip_prompt_fragment(&group.primary_subject, 16);
             let subject_aliases = group
                 .aliases
@@ -5689,6 +5715,9 @@ fn build_role_video_style_memories<'a>(
                 parts.push(format!("subjectAliases={}", subject_aliases.join("/")));
             }
             parts.push(format!("style={style}"));
+            if let Some(delivery) = delivery {
+                parts.push(format!("delivery={delivery}"));
+            }
             Some(parts.join(" | "))
         })
         .collect()
@@ -5815,6 +5844,22 @@ fn role_memory_fragment_is_character_signal(fragment: &str) -> bool {
 
 fn role_style_supplement_fragments(notes: &[String]) -> Vec<String> {
     summarize_role_voice_fragment(notes).into_iter().collect()
+}
+
+fn summarize_role_delivery_fragment(notes: &[String]) -> Option<String> {
+    let recurring_performance = summarize_recurring_role_performance_fragment(notes);
+    let recurring_voice = summarize_role_voice_fragment(notes);
+
+    match (recurring_performance.as_deref(), recurring_voice.as_deref()) {
+        (Some(performance), Some(voice)) => {
+            compact_selected_memory_delivery_style(Some(performance), Some(voice))
+                .or(recurring_performance)
+                .or(recurring_voice)
+        }
+        (Some(_), None) => recurring_performance,
+        (None, Some(_)) => recurring_voice,
+        (None, None) => None,
+    }
 }
 
 fn summarize_role_voice_fragment(notes: &[String]) -> Option<String> {
@@ -6675,6 +6720,48 @@ fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
                 .map(|raw| clip_prompt_fragment(&raw, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         })
     })
+}
+
+fn delivery_style_value_from_content(content: &str) -> Option<String> {
+    extract_key_value(content, "delivery")
+        .and_then(|value| compact_video_style_prompt_note(&value))
+        .filter(|value| !value.is_empty())
+}
+
+fn role_style_memory_value_for_storyboard(
+    row: &AgentMemoryRow,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let fallback = selected_video_style_value(row);
+    if !matches!(
+        row.name.as_str(),
+        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME | PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME
+    ) {
+        return fallback;
+    }
+
+    let should_prefer_delivery = storyboard_row
+        .and_then(|storyboard_row| {
+            storyboard_row
+                .video_desc
+                .as_deref()
+                .and_then(parse_structured_storyboard_description)
+                .map(|fields| {
+                    selected_memory_has_visible_speech_performance_risk(
+                        &fields,
+                        storyboard_row.prompt.as_deref(),
+                    )
+                })
+        })
+        .unwrap_or(false);
+
+    if should_prefer_delivery {
+        if let Some(delivery) = delivery_style_value_from_content(&row.content) {
+            return Some(delivery);
+        }
+    }
+
+    fallback
 }
 
 fn is_low_signal_selected_memory_note(note: &str) -> bool {
@@ -8495,6 +8582,26 @@ mod tests {
     }
 
     #[test]
+    fn select_prioritized_video_style_note_prefers_role_delivery_profile_for_dialogue_scene() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主低声开口".into()),
+            video_desc: Some("（女主低声开口、旧宅走廊、女主、5秒、近景、稳定跟拍、喉结滚动后低声说你先走、克制、冷调逆光、你先走、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let note = select_prioritized_video_style_note(
+            &[AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=女主 | sampleCount=4 | style=表演喉结滚动，语气低声尾音发颤，声场雨声回响 | delivery=表演喉结滚动低声尾音发颤".into(),
+            }],
+            12,
+            Some("current-seed-9999"),
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(note, Some("表演喉结滚动低声尾音发颤".to_string()));
+    }
+
+    #[test]
     fn select_prioritized_video_style_note_prefers_fragile_role_summary_for_broken_breath_turn() {
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("女主抽气后失声开口".into()),
@@ -10224,7 +10331,7 @@ mod tests {
 
         assert_eq!(
             summaries,
-            vec!["subject=林晚 | sampleCount=2 | style=表演呼吸发颤，语气哽咽克制".to_string()]
+            vec!["subject=林晚 | sampleCount=2 | style=表演呼吸发颤，语气哽咽克制 | delivery=表演呼吸发颤哽咽克制".to_string()]
         );
     }
 
@@ -10486,6 +10593,27 @@ mod tests {
         );
 
         assert_eq!(notes, vec!["表演呼吸发颤，语气哽咽克制".to_string()]);
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_for_storyboard_prefers_delivery_profile_for_visible_speech(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚低声开口".into()),
+            video_desc: Some("（林晚低声开口、雨夜门厅、林晚、5秒、近景、稳定跟拍、喉结滚动后低声说我没事、压抑克制、冷调逆光、我没事、雨声回响、A13）".into()),
+            duration: Some("5s".into()),
+        };
+
+        let notes = select_subject_role_video_style_memory_notes_for_storyboard(
+            &[AgentMemoryRow {
+                name: "script_role_video_style_memory".into(),
+                content: "subject=林晚 | subjectAliases=晚晚 | sampleCount=4 | style=表演喉结滚动，语气低声尾音发颤，声场雨声回响 | delivery=表演喉结滚动低声尾音发颤".into(),
+            }],
+            &["林晚".to_string(), "晚晚".to_string()],
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(notes, vec!["表演喉结滚动低声尾音发颤".to_string()]);
     }
 
     #[test]
