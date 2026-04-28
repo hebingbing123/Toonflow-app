@@ -198,6 +198,9 @@ pub(crate) async fn get_token_efficiency(
             COALESCE(ROUND(AVG(((qr.model_params->'diagnostics'->>'promptChars')::double precision))::numeric, 2), 0) AS avg_prompt_chars,
             COALESCE(ROUND(AVG(((qr.model_params->'diagnostics'->>'memoryDeliveryChars')::double precision))::numeric, 2), 0) AS avg_memory_delivery_chars,
             COALESCE(ROUND(AVG(((qr.model_params->'diagnostics'->>'memoryVisualChars')::double precision))::numeric, 2), 0) AS avg_memory_visual_chars,
+            COALESCE(ROUND(AVG(((qr.model_params->'diagnostics'->>'memoryScriptScopeChars')::double precision))::numeric, 2), 0) AS avg_memory_script_scope_chars,
+            COALESCE(ROUND(AVG(((qr.model_params->'diagnostics'->>'memoryProjectScopeChars')::double precision))::numeric, 2), 0) AS avg_memory_project_scope_chars,
+            COALESCE(ROUND(AVG(((qr.model_params->'diagnostics'->>'memoryMixedScopeChars')::double precision))::numeric, 2), 0) AS avg_memory_mixed_scope_chars,
             COALESCE(ROUND(AVG(upr.total_tokens)::numeric, 2), 0) AS avg_linked_total_tokens,
             COALESCE(ROUND(AVG(
                 CASE

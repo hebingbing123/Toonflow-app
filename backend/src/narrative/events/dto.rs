@@ -112,6 +112,7 @@ pub(super) struct GenerateNovelEventsBody {
 #[derive(Debug, Clone, FromRow)]
 pub(super) struct NovelEventExtractionRow {
     pub(super) id: Uuid,
+    pub(super) project_numeric_id: i32,
     pub(super) chapter_index: i32,
     pub(super) reel: Option<String>,
     pub(super) chapter: String,

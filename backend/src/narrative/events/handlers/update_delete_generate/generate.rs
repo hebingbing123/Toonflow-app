@@ -46,7 +46,7 @@ pub(crate) async fn post_generate_novel_events_for_project(
 
     let novels: Vec<NovelEventExtractionRow> = sqlx::query_as(
         r#"
-        SELECT n.id, n.chapter_index, n.reel, n.chapter, n.chapter_data
+        SELECT n.id, p.numeric_id AS project_numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
@@ -86,8 +86,16 @@ pub(crate) async fn post_generate_novel_events_for_project(
     let concurrency = body.concurrent_count;
 
     tokio::spawn(async move {
-        run_novel_event_extraction_task(pool_clone, llm, http_client, prompt, novels, concurrency)
-            .await;
+        run_novel_event_extraction_task(
+            pool_clone,
+            uid,
+            llm,
+            http_client,
+            prompt,
+            novels,
+            concurrency,
+        )
+        .await;
     });
 
     Ok(JsonResponse(NovelOkMessageResponse {

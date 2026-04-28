@@ -100,6 +100,40 @@ fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ 
         .filter(|fragment| !fragment.is_empty())
 }
 
+const VIDEO_PROMPT_STYLE_NOTE_SOURCE_MARKER: &str = "__tf_memory_source__";
+
+fn encode_video_prompt_style_note_source(note: &str, source: &str) -> String {
+    format!("{VIDEO_PROMPT_STYLE_NOTE_SOURCE_MARKER}{source}||{note}")
+}
+
+fn decode_video_prompt_style_note_source(note: &str) -> (Option<&str>, &str) {
+    let Some(encoded) = note.strip_prefix(VIDEO_PROMPT_STYLE_NOTE_SOURCE_MARKER) else {
+        return (None, note);
+    };
+    let Some((source, payload)) = encoded.split_once("||") else {
+        return (None, note);
+    };
+    (Some(source), payload)
+}
+
+fn video_prompt_style_note_text(note: &str) -> &str {
+    decode_video_prompt_style_note_source(note).1
+}
+
+fn video_prompt_style_note_scope_bucket(note: &str) -> &'static str {
+    match decode_video_prompt_style_note_source(note).0 {
+        Some(
+            "selected_video_memory"
+            | "script_video_style_memory"
+            | "script_role_video_style_memory"
+            | "auto_scope_memory",
+        ) => "script",
+        Some("project_video_style_memory" | "project_role_video_style_memory") => "project",
+        Some(_) => "mixed",
+        None => "unknown",
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GenerateVideoPromptBody {
@@ -149,6 +183,9 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     memory_style_chars: usize,
     memory_visual_chars: usize,
     memory_delivery_chars: usize,
+    memory_script_scope_chars: usize,
+    memory_project_scope_chars: usize,
+    memory_mixed_scope_chars: usize,
     director_manual_yielded_to_memory: bool,
     director_manual_yielded_chars: usize,
     director_performance_trimmed_chars: usize,
@@ -283,6 +320,9 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
                 "memoryStyleChars": diagnostics.memory_style_chars,
                 "memoryVisualChars": diagnostics.memory_visual_chars,
                 "memoryDeliveryChars": diagnostics.memory_delivery_chars,
+                "memoryScriptScopeChars": diagnostics.memory_script_scope_chars,
+                "memoryProjectScopeChars": diagnostics.memory_project_scope_chars,
+                "memoryMixedScopeChars": diagnostics.memory_mixed_scope_chars,
                 "memoryDeliveryPriorityApplied": diagnostics.memory_delivery_priority_applied,
                 "memoryStyleAnchorCount": diagnostics.memory_style_anchor_count,
                 "memoryDeliveryAnchorCount": diagnostics.memory_delivery_anchor_count,
@@ -351,6 +391,9 @@ struct VideoPromptStyleAnchorBuild {
     memory_style_anchor_count: usize,
     memory_delivery_anchor_count: usize,
     memory_delivery_priority_applied: bool,
+    memory_script_scope_chars: usize,
+    memory_project_scope_chars: usize,
+    memory_mixed_scope_chars: usize,
     director_manual_yielded_to_memory: bool,
     director_manual_yielded_chars: usize,
     director_performance_trimmed_chars: usize,
@@ -1611,7 +1654,7 @@ fn build_video_prompt_memory_notes_with_pressure(
         &subject_candidates,
     );
     let style_notes = compact_guardrail_sensitive_style_notes(
-        select_video_prompt_style_notes(
+        select_video_prompt_style_notes_with_sources(
             &rows,
             storyboard_numeric_id,
             current_prompt_seed,
@@ -1639,6 +1682,25 @@ fn select_video_prompt_style_notes(
     storyboard_row: &StoryboardPromptSeedRow,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Vec<String> {
+    select_video_prompt_style_notes_with_sources(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        storyboard_row,
+        constraint_pressure,
+    )
+    .into_iter()
+    .map(|note| video_prompt_style_note_text(&note).to_string())
+    .collect()
+}
+
+fn select_video_prompt_style_notes_with_sources(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Vec<String> {
     let current_subject_candidates = storyboard_row
         .video_desc
         .as_deref()
@@ -1652,12 +1714,19 @@ fn select_video_prompt_style_notes(
     )
     .into_iter()
     .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+    .map(|note| {
+        encode_video_prompt_style_note_source(
+            &note,
+            infer_video_prompt_style_note_source(rows, &note, storyboard_row, constraint_pressure),
+        )
+    })
     .take(1)
     .collect::<Vec<_>>();
     let exact =
         select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed)
             .into_iter()
             .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+            .map(|note| encode_video_prompt_style_note_source(&note, "selected_video_memory"))
             .collect::<Vec<_>>();
     let role_only = prefer_role_memory_only_for_silent_identity_scene(
         &exact,
@@ -1677,6 +1746,12 @@ fn select_video_prompt_style_notes(
     )
     .into_iter()
     .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+    .map(|note| {
+        encode_video_prompt_style_note_source(
+            &note,
+            infer_video_prompt_style_note_source(rows, &note, storyboard_row, constraint_pressure),
+        )
+    })
     .collect::<Vec<_>>();
     let neighbor = collect_neighbor_video_prompt_style_notes(
         rows,
@@ -1685,6 +1760,12 @@ fn select_video_prompt_style_notes(
     )
     .into_iter()
     .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+    .map(|note| {
+        encode_video_prompt_style_note_source(
+            &note,
+            infer_video_prompt_style_note_source(rows, &note, storyboard_row, constraint_pressure),
+        )
+    })
     .take(1)
     .collect::<Vec<_>>();
 
@@ -1717,6 +1798,63 @@ fn select_video_prompt_style_notes(
         return prioritized;
     }
     neighbor
+}
+
+fn infer_video_prompt_style_note_source<'a>(
+    rows: &'a [AgentMemoryRow],
+    note: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> &'a str {
+    const SOURCE_PRIORITY: [&str; 6] = [
+        "selected_video_memory",
+        "auto_scope_memory",
+        "script_role_video_style_memory",
+        "project_role_video_style_memory",
+        "script_video_style_memory",
+        "project_video_style_memory",
+    ];
+
+    for source in SOURCE_PRIORITY {
+        if rows.iter().filter(|row| row.name == source).any(|row| {
+            video_prompt_row_style_note_matches(row, note, storyboard_row, constraint_pressure)
+        }) {
+            return source;
+        }
+    }
+
+    "mixed_memory"
+}
+
+fn video_prompt_row_style_note_matches(
+    row: &AgentMemoryRow,
+    note: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    let candidate = match row.name.as_str() {
+        "selected_video_memory" | "auto_scope_memory" => {
+            compact_neighbor_video_style_note(&row.content, Some(storyboard_row))
+        }
+        "script_role_video_style_memory"
+        | "project_role_video_style_memory"
+        | "script_video_style_memory"
+        | "project_video_style_memory" => {
+            contextual_style_memory_value_for_storyboard(row, Some(storyboard_row))
+                .or_else(|| extract_key_value(&row.content, "note"))
+                .and_then(|value| {
+                    compact_guardrail_sensitive_style_note(
+                        &value,
+                        storyboard_row,
+                        constraint_pressure,
+                    )
+                    .or_else(|| compact_contextual_video_style_note(&value, Some(storyboard_row)))
+                })
+        }
+        _ => None,
+    };
+
+    candidate.is_some_and(|candidate| candidate == note)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -1796,7 +1934,12 @@ fn compact_guardrail_sensitive_style_notes(
     notes
         .into_iter()
         .filter_map(|note| {
-            compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
+            let (source, payload) = decode_video_prompt_style_note_source(&note);
+            compact_guardrail_sensitive_style_note(payload, storyboard_row, constraint_pressure)
+                .map(|compacted| match source {
+                    Some(source) => encode_video_prompt_style_note_source(&compacted, source),
+                    None => compacted,
+                })
         })
         .collect()
 }
@@ -4100,6 +4243,9 @@ fn build_video_prompt_with_constraint_pressure(
             memory_style_chars,
             memory_visual_chars,
             memory_delivery_chars,
+            memory_script_scope_chars: style_anchor_build.memory_script_scope_chars,
+            memory_project_scope_chars: style_anchor_build.memory_project_scope_chars,
+            memory_mixed_scope_chars: style_anchor_build.memory_mixed_scope_chars,
             director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
             director_manual_yielded_chars: style_anchor_build.director_manual_yielded_chars,
             director_performance_trimmed_chars: style_anchor_build
@@ -4736,6 +4882,9 @@ fn build_project_visual_anchors(
     let mut memory_anchor_count = 0usize;
     let mut memory_delivery_anchor_count = 0usize;
     let mut memory_delivery_priority_applied = false;
+    let mut memory_script_scope_chars = 0usize;
+    let mut memory_project_scope_chars = 0usize;
+    let mut memory_mixed_scope_chars = 0usize;
     let mut director_manual_yielded_to_memory = false;
     let mut director_manual_yielded_chars = 0usize;
     let mut director_performance_trimmed_chars = 0usize;
@@ -4860,23 +5009,29 @@ fn build_project_visual_anchors(
         .iter()
         .filter_map(|note| {
             compact_memory_style_anchor(
-                note,
+                video_prompt_style_note_text(note),
                 structured_fields,
                 &style_coverage,
                 has_base_style_anchor,
                 memory_budget_tier,
                 constraint_pressure,
             )
+            .map(|compacted| {
+                (
+                    compacted,
+                    video_prompt_style_note_scope_bucket(note).to_string(),
+                )
+            })
         })
-        .filter(|note| !anchors.iter().any(|existing| existing == note))
-        .map(|note| {
+        .filter(|(note, _)| !anchors.iter().any(|existing| existing == note))
+        .map(|(note, scope_bucket)| {
             let is_delivery = memory_style_anchor_has_delivery_signal(&note);
             let score = score_memory_style_note_for_expanded_tier(
                 &note,
                 structured_fields,
                 constraint_pressure,
             );
-            (note, is_delivery, score)
+            (note, is_delivery, score, scope_bucket)
         })
         .collect::<Vec<_>>();
     memory_candidates.sort_by(|left, right| {
@@ -4889,7 +5044,7 @@ fn build_project_visual_anchors(
     });
 
     let mut selected_memory_anchor_kinds = Vec::new();
-    for (note, is_delivery, _) in memory_candidates {
+    for (note, is_delivery, _, scope_bucket) in memory_candidates {
         if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
             && memory_anchor_count >= 1
             && selected_memory_anchor_kinds
@@ -4906,6 +5061,11 @@ fn build_project_visual_anchors(
             extend_prompt_coverage(&mut style_coverage, std::slice::from_ref(&note));
             if is_delivery {
                 memory_delivery_anchor_count += 1;
+            }
+            match scope_bucket.as_str() {
+                "script" => memory_script_scope_chars += note.chars().count(),
+                "project" => memory_project_scope_chars += note.chars().count(),
+                _ => memory_mixed_scope_chars += note.chars().count(),
             }
             anchors.push(note);
             selected_memory_anchor_kinds.push(is_delivery);
@@ -4927,6 +5087,11 @@ fn build_project_visual_anchors(
         if is_delivery {
             memory_delivery_anchor_count += 1;
         }
+        match scope_bucket.as_str() {
+            "script" => memory_script_scope_chars += note.chars().count(),
+            "project" => memory_project_scope_chars += note.chars().count(),
+            _ => memory_mixed_scope_chars += note.chars().count(),
+        }
         anchors.push(note);
         selected_memory_anchor_kinds.push(is_delivery);
         memory_anchor_count += 1;
@@ -4936,6 +5101,9 @@ fn build_project_visual_anchors(
         memory_style_anchor_count: memory_anchor_count,
         memory_delivery_anchor_count,
         memory_delivery_priority_applied,
+        memory_script_scope_chars,
+        memory_project_scope_chars,
+        memory_mixed_scope_chars,
         director_manual_yielded_to_memory,
         director_manual_yielded_chars,
         director_performance_trimmed_chars,
@@ -5046,7 +5214,7 @@ fn project_director_note_should_yield_to_memory_style(
     }
 
     memory_style_notes.iter().any(|note| {
-        split_prompt_note_fragments(note).any(|fragment| {
+        split_prompt_note_fragments(video_prompt_style_note_text(note)).any(|fragment| {
             role_memory_fragment_is_high_value(fragment.as_str())
                 || sound_fragment_has_high_value_acoustic_detail(fragment.as_str())
         })
@@ -5070,7 +5238,7 @@ fn compact_director_performance_anchor_against_memory_style(
 
     let expressive_memory_fragments = memory_style_notes
         .iter()
-        .flat_map(|note| split_prompt_note_fragments(note))
+        .flat_map(|note| split_prompt_note_fragments(video_prompt_style_note_text(note)))
         .filter(|fragment| role_memory_fragment_is_high_value(fragment))
         .collect::<Vec<_>>();
     if expressive_memory_fragments.is_empty() {
@@ -13603,6 +13771,9 @@ mod tests {
                 memory_style_chars: 0,
                 memory_visual_chars: 0,
                 memory_delivery_chars: 0,
+                memory_script_scope_chars: 0,
+                memory_project_scope_chars: 0,
+                memory_mixed_scope_chars: 0,
                 director_manual_yielded_to_memory: false,
                 director_manual_yielded_chars: 0,
                 director_performance_trimmed_chars: 0,
@@ -13774,6 +13945,46 @@ mod tests {
             result.diagnostics.director_manual_yielded_chars
                 + result.diagnostics.director_performance_trimmed_chars
         );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_reports_memory_scope_char_breakdown() {
+        let script_note = "表演喉结滚动，语气低声克制";
+        let project_note = "光影冷蓝窗光，环境雨丝玻璃";
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚缓慢开口、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头微动后低声说你终于来了、隐忍压抑、冷蓝窗光、你终于来了、雨声回响、A31）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec![
+                encode_video_prompt_style_note_source(
+                    script_note,
+                    "script_role_video_style_memory",
+                ),
+                encode_video_prompt_style_note_source(
+                    project_note,
+                    "project_video_style_memory",
+                ),
+            ],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert_eq!(
+            result.diagnostics.memory_script_scope_chars,
+            script_note.chars().count()
+        );
+        assert_eq!(
+            result.diagnostics.memory_project_scope_chars,
+            project_note.chars().count()
+        );
+        assert_eq!(result.diagnostics.memory_mixed_scope_chars, 0);
     }
 
     #[test]

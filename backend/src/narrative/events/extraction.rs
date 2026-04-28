@@ -6,7 +6,8 @@ use sqlx::PgPool;
 use super::dto::NovelEventExtractionRow;
 use super::MAX_GENERATE_EVENTS_CONCURRENCY;
 use crate::error::ApiError;
-use crate::llm::{chat_completion_assistant_text, LlmConfig};
+use crate::llm::{chat_completion_with_usage, LlmConfig};
+use crate::metering::llm_usage::record_llm_usage;
 const DEFAULT_EVENT_EXTRACTION_PROMPT: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/data/prompt_defaults/eventExtraction.txt"
@@ -58,6 +59,7 @@ async fn mark_novel_event_extraction_result(
 
 pub(super) async fn run_novel_event_extraction_task(
     pool: PgPool,
+    uid: uuid::Uuid,
     llm: Option<LlmConfig>,
     http_client: reqwest::Client,
     prompt: String,
@@ -98,12 +100,64 @@ pub(super) async fn run_novel_event_extraction_task(
                     serde_json::json!({"role":"system","content": prompt}),
                     serde_json::json!({"role":"user","content": user_content}),
                 ];
-                match chat_completion_assistant_text(&cfg, &http_client, messages).await {
-                    Ok(text) => {
-                        mark_novel_event_extraction_result(&pool, novel.id, Some(&text), 1, None)
-                            .await;
+                let prompt_chars = serde_json::to_string(&messages)
+                    .ok()
+                    .map(|raw| raw.chars().count() as i64);
+                let started_at = std::time::Instant::now();
+                match chat_completion_with_usage(&cfg, &http_client, messages).await {
+                    Ok(result) => {
+                        record_llm_usage(
+                            &pool,
+                            uid,
+                            Some(novel.project_numeric_id),
+                            None,
+                            None,
+                            "narrative.generate_events",
+                            result.model.as_deref().unwrap_or(&cfg.model),
+                            Some("openai"),
+                            result.usage.as_ref(),
+                            prompt_chars,
+                            true,
+                            None,
+                            Some(started_at.elapsed().as_millis() as i64),
+                            serde_json::json!({
+                                "chapterIndex": novel.chapter_index,
+                                "novelId": novel.id,
+                                "route": "novel-events.generate-events",
+                            }),
+                        )
+                        .await;
+                        mark_novel_event_extraction_result(
+                            &pool,
+                            novel.id,
+                            Some(&result.content),
+                            1,
+                            None,
+                        )
+                        .await;
                     }
                     Err(err) => {
+                        record_llm_usage(
+                            &pool,
+                            uid,
+                            Some(novel.project_numeric_id),
+                            None,
+                            None,
+                            "narrative.generate_events",
+                            &cfg.model,
+                            Some("openai"),
+                            None,
+                            prompt_chars,
+                            false,
+                            Some(&err),
+                            Some(started_at.elapsed().as_millis() as i64),
+                            serde_json::json!({
+                                "chapterIndex": novel.chapter_index,
+                                "novelId": novel.id,
+                                "route": "novel-events.generate-events",
+                            }),
+                        )
+                        .await;
                         mark_novel_event_extraction_result(
                             &pool,
                             novel.id,
