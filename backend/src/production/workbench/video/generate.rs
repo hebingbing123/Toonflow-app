@@ -16,9 +16,9 @@ use crate::production::workbench::meta::common::negative_constraint_conflicts_wi
 use crate::production::workbench::video_prompt_memory::{
     clip_prompt_fragment, compact_video_style_prompt_note, extract_key_value,
     normalize_prompt_text, parse_structured_storyboard_description,
-    select_prioritized_video_style_note, select_project_video_style_memory_notes,
+    select_prioritized_video_style_note, select_project_video_style_memory_notes_for_storyboard,
     select_rejected_video_memory_notes_and_observation_candidates_for_subject,
-    select_script_video_style_memory_notes, select_selected_video_memory_notes,
+    select_script_video_style_memory_notes_for_storyboard, select_selected_video_memory_notes,
     select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
     StructuredStoryboardDescription,
@@ -1707,8 +1707,14 @@ fn select_contextual_summary_style_note(
         storyboard_row,
     )
     .into_iter()
-    .chain(select_script_video_style_memory_notes(selected_rows))
-    .chain(select_project_video_style_memory_notes(selected_rows))
+    .chain(select_script_video_style_memory_notes_for_storyboard(
+        selected_rows,
+        storyboard_row,
+    ))
+    .chain(select_project_video_style_memory_notes_for_storyboard(
+        selected_rows,
+        storyboard_row,
+    ))
     .filter_map(|note| {
         let evidence = style_note_context_evidence(&note, &context);
         let compacted = compact_contextual_negative_style_note(&note, storyboard_row)?;
