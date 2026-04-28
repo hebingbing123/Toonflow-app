@@ -140,7 +140,9 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     tool_anchor_count: usize,
     style_anchor_count: usize,
     memory_style_anchor_count: usize,
+    memory_delivery_anchor_count: usize,
     memory_style_chars: usize,
+    director_manual_yielded_to_memory: bool,
     continuity_note_count: usize,
     continuity_note_chars: usize,
     uses_reference_frame: bool,
@@ -277,6 +279,14 @@ struct VideoPromptContext {
 struct VideoPromptBuildResult {
     prompt: String,
     diagnostics: GenerateVideoPromptDiagnostics,
+}
+
+#[derive(Debug, Default)]
+struct VideoPromptStyleAnchorBuild {
+    anchors: Vec<String>,
+    memory_style_anchor_count: usize,
+    memory_delivery_anchor_count: usize,
+    director_manual_yielded_to_memory: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -3864,13 +3874,15 @@ fn build_video_prompt_with_constraint_pressure(
         &tool_anchors,
         constraint_pressure,
     );
-    let (style_anchors, memory_style_anchor_count) = build_project_visual_anchors(
+    let style_anchor_build = build_project_visual_anchors(
         context,
         structured_fields.as_ref(),
         &prompt_coverage,
         memory_budget_tier,
         constraint_pressure,
     );
+    let style_anchors = style_anchor_build.anchors;
+    let memory_style_anchor_count = style_anchor_build.memory_style_anchor_count;
     let memory_style_chars = style_anchors
         .iter()
         .rev()
@@ -4009,7 +4021,9 @@ fn build_video_prompt_with_constraint_pressure(
             tool_anchor_count: tool_anchors.len(),
             style_anchor_count: style_anchors.len(),
             memory_style_anchor_count,
+            memory_delivery_anchor_count: style_anchor_build.memory_delivery_anchor_count,
             memory_style_chars,
+            director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
             continuity_note_count: continuity_notes.len(),
             continuity_note_chars,
             uses_reference_frame: image_url.is_some(),
@@ -4630,13 +4644,15 @@ fn build_project_visual_anchors(
     prompt_coverage: &[String],
     memory_budget_tier: VideoPromptMemoryBudgetTier,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
-) -> (Vec<String>, usize) {
+) -> VideoPromptStyleAnchorBuild {
     let Some(ctx) = context else {
-        return (Vec::new(), 0);
+        return VideoPromptStyleAnchorBuild::default();
     };
 
     let mut anchors = Vec::new();
     let mut memory_anchor_count = 0usize;
+    let mut memory_delivery_anchor_count = 0usize;
+    let mut director_manual_yielded_to_memory = false;
     let mut style_coverage = prompt_coverage.to_vec();
     let compact_decorative_style_anchors =
         should_compact_decorative_style_anchors(structured_fields, constraint_pressure);
@@ -4661,14 +4677,17 @@ fn build_project_visual_anchors(
             &reserved_art_style_anchors,
         )
     }) {
-        if !project_director_note_should_yield_to_memory_style(
+        let should_yield = project_director_note_should_yield_to_memory_style(
             &note,
             &ctx.memory_style_notes,
             structured_fields,
             constraint_pressure,
-        ) {
+        );
+        if !should_yield {
             anchors.push(note);
             extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        } else {
+            director_manual_yielded_to_memory = true;
         }
     }
     if let Some(performance_anchor) = resolve_performance_style_anchor(
@@ -4745,11 +4764,19 @@ fn build_project_visual_anchors(
             continue;
         }
         extend_prompt_coverage(&mut style_coverage, std::slice::from_ref(&note));
+        if memory_style_anchor_has_delivery_signal(&note) {
+            memory_delivery_anchor_count += 1;
+        }
         anchors.push(note);
         memory_anchor_count += 1;
         break;
     }
-    (anchors, memory_anchor_count)
+    VideoPromptStyleAnchorBuild {
+        anchors,
+        memory_style_anchor_count: memory_anchor_count,
+        memory_delivery_anchor_count,
+        director_manual_yielded_to_memory,
+    }
 }
 
 fn should_compact_decorative_style_anchors(
@@ -4870,6 +4897,36 @@ fn project_director_note_has_unique_visual_signal(note: &str) -> bool {
             .iter()
             .any(|keyword| fragment.contains(keyword))
     })
+}
+
+fn memory_style_anchor_has_delivery_signal(note: &str) -> bool {
+    let note = normalize_prompt_text(note);
+    if note.is_empty() {
+        return false;
+    }
+
+    let has_performance_signal = note.starts_with("表演")
+        || [
+            "抬眼",
+            "垂眼",
+            "喉结",
+            "呼吸",
+            "唇线",
+            "眼眶",
+            "嘴角",
+            "下颌",
+            "眉心",
+            "欲言又止",
+            "强忍泪意",
+            "指尖",
+        ]
+        .iter()
+        .any(|keyword| note.contains(keyword));
+    let has_voice_signal = ["轻声", "低声", "哽咽", "呢喃", "短促", "颤声", "鼻音"]
+        .iter()
+        .any(|keyword| note.contains(keyword));
+
+    has_performance_signal && has_voice_signal
 }
 
 fn compact_project_art_style_note(
@@ -5354,6 +5411,13 @@ fn score_memory_fragment_human_performance_detail(
             ] {
                 if normalized.contains(keyword) {
                     score += 3;
+                }
+            }
+            for keyword in [
+                "气息", "换气", "哽咽", "发颤", "尾音", "压低", "轻声", "低声",
+            ] {
+                if normalized.contains(keyword) {
+                    score += 2;
                 }
             }
             for keyword in ["自然", "克制", "平静", "沉静", "放松"] {
@@ -13217,7 +13281,9 @@ mod tests {
                 tool_anchor_count: 0,
                 style_anchor_count: 1,
                 memory_style_anchor_count: 0,
+                memory_delivery_anchor_count: 0,
                 memory_style_chars: 0,
+                director_manual_yielded_to_memory: false,
                 continuity_note_count: 0,
                 continuity_note_chars: 0,
                 uses_reference_frame: false,
@@ -13269,6 +13335,20 @@ mod tests {
                 .and_then(serde_json::Value::as_str),
             Some("lean")
         );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("memoryDeliveryAnchorCount"))
+                .and_then(serde_json::Value::as_u64),
+            Some(0)
+        );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("directorManualYieldedToMemory"))
+                .and_then(serde_json::Value::as_bool),
+            Some(false)
+        );
     }
 
     #[test]
@@ -13301,12 +13381,37 @@ mod tests {
         assert_eq!(result.diagnostics.tool_anchor_count, 1);
         assert_eq!(result.diagnostics.style_anchor_count, 2);
         assert_eq!(result.diagnostics.memory_style_anchor_count, 1);
+        assert_eq!(result.diagnostics.memory_delivery_anchor_count, 0);
         assert!(result.diagnostics.memory_style_chars > 0);
+        assert!(!result.diagnostics.director_manual_yielded_to_memory);
         assert_eq!(result.diagnostics.continuity_note_count, 1);
         assert!(result.diagnostics.continuity_note_chars > 0);
         assert!(result.diagnostics.uses_reference_frame);
         assert_eq!(result.diagnostics.memory_budget_tier, "expanded");
         assert!(result.diagnostics.prompt_chars > 0);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_reports_memory_yield_and_delivery_anchor_usage() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头滚动后低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A31）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: Some("情绪隐忍克制".into()),
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动低声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert_eq!(result.diagnostics.memory_style_anchor_count, 1);
+        assert_eq!(result.diagnostics.memory_delivery_anchor_count, 1);
+        assert!(result.diagnostics.director_manual_yielded_to_memory);
     }
 
     #[test]
@@ -15059,6 +15164,28 @@ mod tests {
         assert!(prompt.contains("语气轻声"), "{prompt}");
         assert!(!prompt.contains("表演抬眼停顿"), "{prompt}");
         assert!(!prompt.contains("语气轻声克制"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_compacted_delivery_memory_anchor_high_value() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头滚动后低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A31）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: Some("情绪隐忍克制".into()),
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动低声克制".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("表演喉结滚动低声克制"), "{prompt}");
+        assert!(!prompt.contains("情绪隐忍克制"), "{prompt}");
     }
 
     #[test]

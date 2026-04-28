@@ -3279,7 +3279,7 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         if let Some(motion) = compact_selected_memory_motion_style(&fields.action, &fields.mood) {
             style_fragments.push(motion);
         }
-        if let Some(performance) = compact_selected_memory_performance_style(
+        let performance = compact_selected_memory_performance_style(
             &fields.action,
             &fields.dialogue,
             &fields.mood,
@@ -3287,12 +3287,21 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         .filter(|_| {
             visible_speech_risk
                 || selected_memory_has_high_signal_visual_performance_cue(&fields.action)
-        }) {
-            style_fragments.push(performance);
-        }
-        if visible_speech_risk {
-            if let Some(voice) = compact_selected_memory_voice_style(&fields.dialogue, &fields.mood)
-            {
+        });
+        let voice = visible_speech_risk
+            .then(|| {
+                compact_selected_memory_voice_style(&fields.action, &fields.dialogue, &fields.mood)
+            })
+            .flatten();
+        if let Some(delivery) =
+            compact_selected_memory_delivery_style(performance.as_deref(), voice.as_deref())
+        {
+            style_fragments.push(delivery);
+        } else {
+            if let Some(performance) = performance {
+                style_fragments.push(performance);
+            }
+            if let Some(voice) = voice {
                 style_fragments.push(voice);
             }
         }
@@ -3724,13 +3733,15 @@ fn compact_selected_memory_motion_style(action: &str, mood: &str) -> Option<Stri
     None
 }
 
-fn compact_selected_memory_voice_style(dialogue: &str, mood: &str) -> Option<String> {
-    if selected_memory_field_looks_silent(dialogue) {
+fn compact_selected_memory_voice_style(action: &str, dialogue: &str, mood: &str) -> Option<String> {
+    if selected_memory_field_looks_silent(dialogue) && selected_memory_field_looks_silent(action) {
         return None;
     }
 
+    let action = normalize_prompt_text(action);
     let dialogue = normalize_prompt_text(dialogue);
     let mood = normalize_prompt_text(mood);
+    let speech_signal = format!("{action} {dialogue}");
     let restrained_mood = ["隐忍", "克制", "压抑", "沉静", "沉稳", "冷静"]
         .iter()
         .any(|keyword| mood.contains(keyword));
@@ -3746,44 +3757,69 @@ fn compact_selected_memory_voice_style(dialogue: &str, mood: &str) -> Option<Str
         "悄声",
     ]
     .iter()
-    .any(|keyword| dialogue.contains(keyword));
+    .any(|keyword| speech_signal.contains(keyword));
     let fragile = ["哽咽", "颤声", "发颤", "鼻音", "抽气"]
         .iter()
-        .any(|keyword| dialogue.contains(keyword));
+        .any(|keyword| speech_signal.contains(keyword));
     let clipped = ["短促", "急声", "脱口", "急急", "急促"]
         .iter()
-        .any(|keyword| dialogue.contains(keyword));
+        .any(|keyword| speech_signal.contains(keyword));
 
     if fragile && restrained_mood {
         return Some("语气哽咽克制".to_string());
     }
     if hushed && restrained_mood {
-        return Some(if dialogue.contains("低声") || dialogue.contains("压低") {
-            "语气低声克制".to_string()
-        } else {
-            "语气轻声克制".to_string()
-        });
+        return Some(
+            if speech_signal.contains("低声") || speech_signal.contains("压低") {
+                "语气低声克制".to_string()
+            } else {
+                "语气轻声克制".to_string()
+            },
+        );
     }
     if fragile {
         return Some("语气哽咽".to_string());
     }
     if hushed {
-        return Some(if dialogue.contains("低声") || dialogue.contains("压低") {
-            "语气低声".to_string()
-        } else if dialogue.contains("呢喃")
-            || dialogue.contains("喃喃")
-            || dialogue.contains("耳语")
-        {
-            "语气呢喃".to_string()
-        } else {
-            "语气轻声".to_string()
-        });
+        return Some(
+            if speech_signal.contains("低声") || speech_signal.contains("压低") {
+                "语气低声".to_string()
+            } else if speech_signal.contains("呢喃")
+                || speech_signal.contains("喃喃")
+                || speech_signal.contains("耳语")
+            {
+                "语气呢喃".to_string()
+            } else {
+                "语气轻声".to_string()
+            },
+        );
     }
     if clipped {
         return Some("语气短促".to_string());
     }
 
     None
+}
+
+fn compact_selected_memory_delivery_style(
+    performance: Option<&str>,
+    voice: Option<&str>,
+) -> Option<String> {
+    let performance = performance
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())?;
+    let voice = voice
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())?;
+    let performance_body = performance
+        .strip_prefix("表演")
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())?;
+    let voice_body = voice
+        .strip_prefix("语气")
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())?;
+    Some(format!("表演{performance_body}{voice_body}"))
 }
 
 fn compact_selected_memory_performance_style(
@@ -6081,6 +6117,12 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
         ));
     }
     if fragment.starts_with("表演") {
+        if performance_fragment_contains_voice_delivery(fragment) {
+            return Some(clip_prompt_fragment(
+                fragment,
+                VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+            ));
+        }
         return Some(compact_prefixed_style_fragment_with_keywords(
             fragment,
             "表演",
@@ -6109,6 +6151,16 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
         ));
     }
     None
+}
+
+fn performance_fragment_contains_voice_delivery(fragment: &str) -> bool {
+    fragment.starts_with("表演")
+        && PERFORMANCE_STYLE_KEYWORDS
+            .iter()
+            .any(|keyword| fragment.contains(keyword))
+        && VOICE_STYLE_KEYWORDS
+            .iter()
+            .any(|keyword| fragment.contains(keyword))
 }
 
 fn compact_cross_fragment_style_redundancy(fragments: &mut Vec<String>) {
@@ -6198,7 +6250,18 @@ fn lighting_fragment_covers_generic_mood_tone(lighting: &str, mood: &str) -> boo
 }
 
 fn selected_style_fragment_is_generic_restrained_mood(mood: &str) -> bool {
-    matches!(mood, "克制" | "隐忍" | "压抑" | "沉静" | "沉稳" | "冷静")
+    let normalized = normalize_prompt_text(mood);
+    !normalized.is_empty()
+        && normalized
+            .split(['/', '／', '、', '，', ',', ' '])
+            .map(normalize_prompt_text)
+            .filter(|part| !part.is_empty())
+            .all(|part| {
+                matches!(
+                    part.as_str(),
+                    "克制" | "隐忍" | "压抑" | "沉静" | "沉稳" | "冷静"
+                )
+            })
 }
 
 fn selected_style_fragment_is_low_gain_voice(voice: &str) -> bool {
@@ -6471,6 +6534,19 @@ fn trim_selected_memory_fragment_covered_by_style(fragment: &str, style: &str) -
         );
     }
     if style.contains("语气低声") {
+        normalized = remove_fragment_phrases(
+            &normalized,
+            &[
+                "低声开口",
+                "低声说道",
+                "低声说",
+                "压低声音开口",
+                "压低声音",
+                "压低嗓音",
+                "压低",
+            ],
+        );
+    } else if style.contains("表演") && (style.contains("低声") || style.contains("压低")) {
         normalized = remove_fragment_phrases(
             &normalized,
             &[
@@ -7483,6 +7559,24 @@ mod tests {
         assert!(content.contains("声场雨声回响"), "{content}");
         assert!(!content.contains("迟迟没有开口"), "{content}");
         assert!(!content.contains("低声开口"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_compacts_visible_speech_delivery_into_single_fragment() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚喉头滚动后低声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头滚动后低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("表演喉结滚动低声克制"), "{content}");
+        assert!(content.contains("声场雨声回响"), "{content}");
+        assert!(!content.contains("语气低声克制"), "{content}");
+        assert!(!content.contains("note="), "{content}");
     }
 
     #[test]
