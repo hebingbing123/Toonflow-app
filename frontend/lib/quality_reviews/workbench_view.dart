@@ -8,6 +8,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.reviews,
     required this.statsSummary,
     required this.stagePassRateSummary,
+    required this.tokenEfficiencySummary,
     required this.reviewDetails,
     required this.statusLine,
     required this.filterBadCasesOnly,
@@ -19,6 +20,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingBadCases,
     required this.loadingStats,
     required this.loadingStagePassRate,
+    required this.loadingTokenEfficiency,
     required this.loadingReviewById,
     required this.creatingReview,
     required this.targetTypeFilterCtrl,
@@ -36,6 +38,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final List<QualityReview> reviews;
   final String? statsSummary;
   final String? stagePassRateSummary;
+  final String? tokenEfficiencySummary;
   final String? reviewDetails;
   final String? statusLine;
   final bool filterBadCasesOnly;
@@ -47,6 +50,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingBadCases;
   final bool loadingStats;
   final bool loadingStagePassRate;
+  final bool loadingTokenEfficiency;
   final bool loadingReviewById;
   final bool creatingReview;
   final TextEditingController targetTypeFilterCtrl;
@@ -69,6 +73,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onLoadAutoSourceReviews,
     required this.onLoadStats,
     required this.onLoadStagePassRate,
+    required this.onLoadTokenEfficiency,
     required this.onLoadReviewById,
     required this.onCreateReview,
     required this.onCreatePassedChanged,
@@ -83,6 +88,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadAutoSourceReviews;
   final VoidCallback onLoadStats;
   final VoidCallback onLoadStagePassRate;
+  final VoidCallback onLoadTokenEfficiency;
   final VoidCallback onLoadReviewById;
   final VoidCallback onCreateReview;
   final ValueChanged<bool> onCreatePassedChanged;
@@ -121,9 +127,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 model.reviews.isEmpty
                     ? '用同一入口完成评审筛选、坏例查看、统计读取、详情查询和手动创建。'
                     : summarizeQualityReviews(model.reviews),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: outline,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: outline),
               ),
               if (model.filterBadCasesOnly ||
                   model.filterDeliveryPriorityOnly ||
@@ -177,7 +183,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: Text(model.loadingBadCases ? '加载中…' : '只看坏例'),
                   ),
                   OutlinedButton(
-                    onPressed: model.loadingReviews ||
+                    onPressed:
+                        model.loadingReviews ||
                             model.loadingBadCases ||
                             model.creatingReview
                         ? null
@@ -185,7 +192,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: const Text('只看命中表演/语气优先'),
                   ),
                   OutlinedButton(
-                    onPressed: model.loadingReviews ||
+                    onPressed:
+                        model.loadingReviews ||
                             model.loadingBadCases ||
                             model.creatingReview
                         ? null
@@ -204,6 +212,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         : callbacks.onLoadStagePassRate,
                     child: Text(
                       model.loadingStagePassRate ? '读取中…' : '读取阶段通过率',
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: model.loadingTokenEfficiency
+                        ? null
+                        : callbacks.onLoadTokenEfficiency,
+                    child: Text(
+                      model.loadingTokenEfficiency ? '读取中…' : '读取 token 效率',
                     ),
                   ),
                 ],
@@ -275,7 +291,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
-                onPressed: model.creatingReview ? null : callbacks.onCreateReview,
+                onPressed: model.creatingReview
+                    ? null
+                    : callbacks.onCreateReview,
                 child: Text(model.creatingReview ? '创建中…' : '创建评审'),
               ),
               if (model.statusLine != null) ...[
@@ -294,6 +312,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 12),
                 SelectableText('阶段通过率：${model.stagePassRateSummary}'),
               ],
+              if (model.tokenEfficiencySummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('Token 效率：${model.tokenEfficiencySummary}'),
+              ],
               if (model.reviews.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
@@ -309,31 +331,33 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 const SizedBox(height: 8),
-                ...model.reviews.take(8).map(
-                  (review) => ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
+                ...model.reviews
+                    .take(8)
+                    .map(
+                      (review) => ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
+                        ),
+                        subtitle: Text(formatQualityReviewDetails(review)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (review.memoryDeliveryPriorityApplied == true)
+                              const Padding(
+                                padding: EdgeInsets.only(right: 8),
+                                child: Chip(
+                                  label: Text('delivery'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: () => callbacks.onSelectReview(review),
+                      ),
                     ),
-                    subtitle: Text(formatQualityReviewDetails(review)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (review.memoryDeliveryPriorityApplied == true)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 8),
-                            child: Chip(
-                              label: Text('delivery'),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          ),
-                        const Icon(Icons.chevron_right),
-                      ],
-                    ),
-                    onTap: () => callbacks.onSelectReview(review),
-                  ),
-                ),
               ],
             ],
           ),

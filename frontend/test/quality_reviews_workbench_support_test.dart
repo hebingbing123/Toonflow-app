@@ -51,10 +51,7 @@ void main() {
       ),
     ]);
 
-    expect(
-      summary,
-      'output: total=12, pass=75.0% (delivery=75.0%, non=75.0%)',
-    );
+    expect(summary, 'output: total=12, pass=75.0% (delivery=75.0%, non=75.0%)');
   });
 
   test('formatQualityReviewDetails includes core fields', () {
@@ -77,6 +74,35 @@ void main() {
     expect(
       details,
       'r1 · output · manual · target=job-1 · score=88 · passed=true · bad_case · category=continuity',
+    );
+  });
+
+  test('summarizeQualityTokenEfficiencyRows formats efficiency preview', () {
+    final summary = summarizeQualityTokenEfficiencyRows(const [
+      QualityTokenEfficiencyRow(
+        targetType: 'output',
+        totalReviews: 10,
+        linkedLlmReviewCount: 8,
+        avgOverallScore: 84.3,
+        avgPromptChars: 920,
+        avgMemoryDeliveryChars: 120,
+        avgMemoryVisualChars: 88,
+        avgMemoryScriptScopeChars: 70,
+        avgMemoryProjectScopeChars: 22,
+        avgMemoryMixedScopeChars: 14,
+        avgLinkedTotalTokens: 640,
+        avgPromptCharsPerScorePoint: 10.9,
+        avgLinkedTokensPerScorePoint: 7.6,
+        deliveryPriorityAvgPromptCharsPerScorePoint: 9.8,
+        deliveryPriorityAvgLinkedTokensPerScorePoint: 6.9,
+        nonDeliveryPriorityAvgPromptCharsPerScorePoint: 11.7,
+        nonDeliveryPriorityAvgLinkedTokensPerScorePoint: 8.1,
+      ),
+    ]);
+
+    expect(
+      summary,
+      'output: linked=8/10, avgScore=84.3, prompt/score=10.9, token/score=7.6 (delivery=6.9, non=8.1)',
     );
   });
 }

@@ -8,6 +8,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
     required this.initialReviewDetails,
     required this.initialStatsSummary,
     required this.initialStagePassRateSummary,
+    required this.initialTokenEfficiencySummary,
   });
 
   final String accessToken;
@@ -15,6 +16,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   final String? initialReviewDetails;
   final String? initialStatsSummary;
   final String? initialStagePassRateSummary;
+  final String? initialTokenEfficiencySummary;
 
   @override
   State<_QualityReviewsWorkbenchDialog> createState() =>
@@ -28,11 +30,13 @@ class _QualityReviewsWorkbenchDialogState
   List<QualityReview> _reviews = const <QualityReview>[];
   String? _statsSummary;
   String? _stagePassRateSummary;
+  String? _tokenEfficiencySummary;
   String? _reviewDetails;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
   bool _loadingStats = false;
   bool _loadingStagePassRate = false;
+  bool _loadingTokenEfficiency = false;
   bool _loadingReviewById = false;
   bool _creatingReview = false;
   bool _filterBadCasesOnly = false;
@@ -49,6 +53,7 @@ class _QualityReviewsWorkbenchDialogState
     _reviews = List<QualityReview>.from(widget.initialReviews);
     _statsSummary = widget.initialStatsSummary;
     _stagePassRateSummary = widget.initialStagePassRateSummary;
+    _tokenEfficiencySummary = widget.initialTokenEfficiencySummary;
     _reviewDetails = widget.initialReviewDetails;
     if (_reviews.isNotEmpty) {
       _ctrls.reviewIdCtrl.text = _reviews.first.id;
@@ -162,6 +167,28 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
+  Future<void> _loadTokenEfficiency() async {
+    setState(() {
+      _loadingTokenEfficiency = true;
+      _statusLine = null;
+    });
+    try {
+      final rows = await fetchQualityTokenEfficiency(widget.accessToken);
+      if (!mounted) return;
+      setState(() {
+        _tokenEfficiencySummary = summarizeQualityTokenEfficiencyRows(rows);
+        _statusLine = '已刷新 token 效率';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _statusLine = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _loadingTokenEfficiency = false);
+      }
+    }
+  }
+
   Future<void> _loadReviewById() async {
     final reviewId = _ctrls.reviewIdCtrl.text.trim();
     if (reviewId.isEmpty) {
@@ -252,6 +279,7 @@ class _QualityReviewsWorkbenchDialogState
         reviews: _reviews,
         statsSummary: _statsSummary,
         stagePassRateSummary: _stagePassRateSummary,
+        tokenEfficiencySummary: _tokenEfficiencySummary,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
         filterBadCasesOnly: _filterBadCasesOnly,
@@ -263,6 +291,7 @@ class _QualityReviewsWorkbenchDialogState
         loadingBadCases: _loadingBadCases,
         loadingStats: _loadingStats,
         loadingStagePassRate: _loadingStagePassRate,
+        loadingTokenEfficiency: _loadingTokenEfficiency,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
         targetTypeFilterCtrl: _ctrls.targetTypeFilterCtrl,
@@ -307,6 +336,9 @@ class _QualityReviewsWorkbenchDialogState
         onLoadStagePassRate: () {
           _loadStagePassRate();
         },
+        onLoadTokenEfficiency: () {
+          _loadTokenEfficiency();
+        },
         onLoadReviewById: () {
           _loadReviewById();
         },
@@ -327,4 +359,3 @@ class _QualityReviewsWorkbenchDialogState
     );
   }
 }
-

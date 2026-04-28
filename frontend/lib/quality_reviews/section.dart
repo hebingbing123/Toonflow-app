@@ -35,6 +35,7 @@ class QualityReviewsSection extends StatelessWidget {
         initialReviewDetails: controller.qualityReviewByIdLine,
         initialStatsSummary: controller.qualityStatsLine,
         initialStagePassRateSummary: controller.qualityStagePassRateLine,
+        initialTokenEfficiencySummary: null,
       ),
     );
   }

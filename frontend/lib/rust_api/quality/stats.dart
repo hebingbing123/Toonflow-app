@@ -134,6 +134,89 @@ class StagePassRateRow {
   }
 }
 
+class QualityTokenEfficiencyRow {
+  const QualityTokenEfficiencyRow({
+    required this.targetType,
+    required this.totalReviews,
+    required this.linkedLlmReviewCount,
+    required this.avgOverallScore,
+    required this.avgPromptChars,
+    required this.avgMemoryDeliveryChars,
+    required this.avgMemoryVisualChars,
+    required this.avgMemoryScriptScopeChars,
+    required this.avgMemoryProjectScopeChars,
+    required this.avgMemoryMixedScopeChars,
+    required this.avgLinkedTotalTokens,
+    required this.avgPromptCharsPerScorePoint,
+    required this.avgLinkedTokensPerScorePoint,
+    required this.deliveryPriorityAvgPromptCharsPerScorePoint,
+    required this.deliveryPriorityAvgLinkedTokensPerScorePoint,
+    required this.nonDeliveryPriorityAvgPromptCharsPerScorePoint,
+    required this.nonDeliveryPriorityAvgLinkedTokensPerScorePoint,
+  });
+
+  final String targetType;
+  final int totalReviews;
+  final int linkedLlmReviewCount;
+  final double avgOverallScore;
+  final double avgPromptChars;
+  final double avgMemoryDeliveryChars;
+  final double avgMemoryVisualChars;
+  final double avgMemoryScriptScopeChars;
+  final double avgMemoryProjectScopeChars;
+  final double avgMemoryMixedScopeChars;
+  final double avgLinkedTotalTokens;
+  final double avgPromptCharsPerScorePoint;
+  final double avgLinkedTokensPerScorePoint;
+  final double deliveryPriorityAvgPromptCharsPerScorePoint;
+  final double deliveryPriorityAvgLinkedTokensPerScorePoint;
+  final double nonDeliveryPriorityAvgPromptCharsPerScorePoint;
+  final double nonDeliveryPriorityAvgLinkedTokensPerScorePoint;
+
+  factory QualityTokenEfficiencyRow.fromJson(Map<String, dynamic> json) {
+    return QualityTokenEfficiencyRow(
+      targetType: json['targetType'] as String,
+      totalReviews: (json['totalReviews'] as num).toInt(),
+      linkedLlmReviewCount:
+          (json['linkedLlmReviewCount'] as num?)?.toInt() ?? 0,
+      avgOverallScore: (json['avgOverallScore'] as num?)?.toDouble() ?? 0,
+      avgPromptChars: (json['avgPromptChars'] as num?)?.toDouble() ?? 0,
+      avgMemoryDeliveryChars:
+          (json['avgMemoryDeliveryChars'] as num?)?.toDouble() ?? 0,
+      avgMemoryVisualChars:
+          (json['avgMemoryVisualChars'] as num?)?.toDouble() ?? 0,
+      avgMemoryScriptScopeChars:
+          (json['avgMemoryScriptScopeChars'] as num?)?.toDouble() ?? 0,
+      avgMemoryProjectScopeChars:
+          (json['avgMemoryProjectScopeChars'] as num?)?.toDouble() ?? 0,
+      avgMemoryMixedScopeChars:
+          (json['avgMemoryMixedScopeChars'] as num?)?.toDouble() ?? 0,
+      avgLinkedTotalTokens:
+          (json['avgLinkedTotalTokens'] as num?)?.toDouble() ?? 0,
+      avgPromptCharsPerScorePoint:
+          (json['avgPromptCharsPerScorePoint'] as num?)?.toDouble() ?? 0,
+      avgLinkedTokensPerScorePoint:
+          (json['avgLinkedTokensPerScorePoint'] as num?)?.toDouble() ?? 0,
+      deliveryPriorityAvgPromptCharsPerScorePoint:
+          (json['deliveryPriorityAvgPromptCharsPerScorePoint'] as num?)
+              ?.toDouble() ??
+          0,
+      deliveryPriorityAvgLinkedTokensPerScorePoint:
+          (json['deliveryPriorityAvgLinkedTokensPerScorePoint'] as num?)
+              ?.toDouble() ??
+          0,
+      nonDeliveryPriorityAvgPromptCharsPerScorePoint:
+          (json['nonDeliveryPriorityAvgPromptCharsPerScorePoint'] as num?)
+              ?.toDouble() ??
+          0,
+      nonDeliveryPriorityAvgLinkedTokensPerScorePoint:
+          (json['nonDeliveryPriorityAvgLinkedTokensPerScorePoint'] as num?)
+              ?.toDouble() ??
+          0,
+    );
+  }
+}
+
 Future<List<QualityStatsRow>> fetchQualityStats(String accessToken) async {
   final res = await http
       .get(
@@ -165,5 +248,23 @@ Future<List<StagePassRateRow>> fetchQualityStagePassRate(
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => StagePassRateRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+Future<List<QualityTokenEfficiencyRow>> fetchQualityTokenEfficiency(
+  String accessToken,
+) async {
+  final res = await http
+      .get(
+        qualityUri('/api/v1/quality/token-efficiency'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => QualityTokenEfficiencyRow.fromJson(e as Map<String, dynamic>))
       .toList();
 }
