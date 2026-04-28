@@ -126,7 +126,10 @@ const PERFORMANCE_STYLE_KEYWORDS: [&str; 12] = [
     "嘴角发僵",
     "下颌绷紧",
 ];
-const VOICE_STYLE_KEYWORDS: [&str; 8] = [
+const VOICE_STYLE_KEYWORDS: [&str; 11] = [
+    "压低气息尾音发颤",
+    "低声尾音发颤",
+    "轻声尾音发颤",
     "轻声克制",
     "低声克制",
     "哽咽克制",
@@ -3764,6 +3767,32 @@ fn compact_selected_memory_voice_style(action: &str, dialogue: &str, mood: &str)
     let clipped = ["短促", "急声", "脱口", "急急", "急促"]
         .iter()
         .any(|keyword| speech_signal.contains(keyword));
+    let breath_suppressed = [
+        "压低气息",
+        "压住气息",
+        "压着气息",
+        "屏住气息",
+        "收住气息",
+        "抽气后",
+    ]
+    .iter()
+    .any(|keyword| speech_signal.contains(keyword));
+    let tail_tremble = ["尾音", "尾声", "发颤", "轻颤", "颤了颤", "尾音发抖"]
+        .iter()
+        .any(|keyword| speech_signal.contains(keyword));
+
+    if breath_suppressed && (tail_tremble || fragile) {
+        return Some("语气压低气息尾音发颤".to_string());
+    }
+    if hushed && tail_tremble {
+        return Some(
+            if speech_signal.contains("低声") || speech_signal.contains("压低") {
+                "语气低声尾音发颤".to_string()
+            } else {
+                "语气轻声尾音发颤".to_string()
+            },
+        );
+    }
 
     if fragile && restrained_mood {
         return Some("语气哽咽克制".to_string());
@@ -5839,6 +5868,17 @@ fn role_voice_variant_is_low_gain_carryover(variant: &str) -> bool {
 }
 
 fn summarize_role_voice_variant(fragment: &str) -> Option<&'static str> {
+    if fragment.contains("压低气息尾音发颤") {
+        return Some("压低气息尾音发颤");
+    }
+    if fragment.contains("低声尾音发颤") || (fragment.contains("低声") && fragment.contains("尾音"))
+    {
+        return Some("低声尾音发颤");
+    }
+    if fragment.contains("轻声尾音发颤") || (fragment.contains("轻声") && fragment.contains("尾音"))
+    {
+        return Some("轻声尾音发颤");
+    }
     if fragment.contains("哽咽克制") || fragment.contains("哽咽") {
         return Some("哽咽克制");
     }
@@ -5859,11 +5899,14 @@ fn summarize_role_voice_variant(fragment: &str) -> Option<&'static str> {
 
 fn role_voice_variant_priority(variant: &str) -> usize {
     match variant {
-        "哽咽克制" => 0,
-        "低声克制" => 1,
-        "轻声克制" => 2,
-        "呢喃" => 3,
-        "短促" => 4,
+        "压低气息尾音发颤" => 0,
+        "低声尾音发颤" => 1,
+        "轻声尾音发颤" => 2,
+        "哽咽克制" => 3,
+        "低声克制" => 4,
+        "轻声克制" => 5,
+        "呢喃" => 6,
+        "短促" => 7,
         _ => usize::MAX,
     }
 }
@@ -7595,6 +7638,26 @@ mod tests {
         assert!(content.contains("声场雨声回响"), "{content}");
         assert!(!content.contains("语气低声克制"), "{content}");
         assert!(!content.contains("note="), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_keeps_high_signal_tail_tremble_delivery() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚抿唇后压低气息开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头滚动后压低气息说你终于来了尾音发颤、隐忍 / 克制、冷蓝窗光、你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains("表演喉结滚动压低气息尾音发颤"),
+            "{content}"
+        );
+        assert!(!content.contains("语气低声克制"), "{content}");
+        assert!(!content.contains("语气低声尾音发颤"), "{content}");
     }
 
     #[test]
@@ -10162,6 +10225,27 @@ mod tests {
         assert_eq!(
             summaries,
             vec!["subject=林晚 | sampleCount=2 | style=表演呼吸发颤，语气哽咽克制".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_keep_high_signal_tail_tremble_voice_variant() {
+        let summaries = build_script_role_video_style_memories(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | style=表演喉结滚动，语气低声尾音发颤"
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=18 | subject=林晚 | style=表演抿唇停顿，语气低声尾音发颤"
+                    .into(),
+            },
+        ]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=2 | style=语气低声尾音发颤".to_string()]
         );
     }
 
