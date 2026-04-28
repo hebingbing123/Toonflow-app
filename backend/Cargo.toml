@@ -60,4 +60,6 @@ redis = []
 [profile.test]
 debug = 0
 incremental = true
-codegen-units = 256
+# `toonflow-server` 的测试目标很大，256 会把编译切得过碎，长时间停在
+# `Compiling toonflow-server` 且几乎没有可见进度。保留并行，但避免过度切分。
+codegen-units = 64

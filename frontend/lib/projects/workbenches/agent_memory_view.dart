@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
@@ -84,6 +85,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
+    final memoryInsights = _buildAgentMemoryInsights(model.memoryRows);
     return AlertDialog(
       title: const Text('Agent 记忆工作台'),
       content: SizedBox(
@@ -191,35 +193,44 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ).textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],
+              if (memoryInsights.summary != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  memoryInsights.summary!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
+              if (memoryInsights.recommendation != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '建议：${memoryInsights.recommendation}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
               if (model.memoryRows.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
                   '${model.memoryRows.length} 条记忆',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                ...model.memoryRows.take(8).map((row) {
-                  final map = row is Map
-                      ? Map<String, dynamic>.from(row)
-                      : <String, dynamic>{};
-                  final role = map['role']?.toString() ?? 'unknown';
-                  final rawContent = map['content'];
-                  final blocks = rawContent is List
-                      ? rawContent
-                      : const <dynamic>[];
-                  final content = blocks.isNotEmpty && blocks.first is Map
-                      ? (blocks.first as Map)['data']?.toString() ?? ''
-                      : rawContent?.toString() ?? '';
-                  final shortContent = content.length > 60
-                      ? '${content.substring(0, 60)}…'
-                      : content;
-                  final memoryId = map['id']?.toString() ?? '';
+                ...memoryInsights.previews.take(8).map((preview) {
                   return ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: Text(role),
+                    title: Text('${preview.role} · ${preview.charCount} chars'),
                     subtitle: Text(
-                      '${memoryId.isEmpty ? '' : '$memoryId · '}$shortContent',
+                      '${preview.memoryId.isEmpty ? '' : '${preview.memoryId} · '}${preview.shortContent}',
                     ),
+                    trailing: preview.isDuplicated
+                        ? const Chip(
+                            label: Text('重复'),
+                            visualDensity: VisualDensity.compact,
+                          )
+                        : null,
                   );
                 }),
               ],
@@ -308,4 +319,130 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
       ],
     );
   }
+}
+
+class _AgentMemoryInsights {
+  const _AgentMemoryInsights({
+    required this.previews,
+    required this.summary,
+    required this.recommendation,
+  });
+
+  final List<_AgentMemoryPreview> previews;
+  final String? summary;
+  final String? recommendation;
+}
+
+class _AgentMemoryPreview {
+  const _AgentMemoryPreview({
+    required this.memoryId,
+    required this.role,
+    required this.shortContent,
+    required this.charCount,
+    required this.normalizedPrefix,
+    required this.isDuplicated,
+  });
+
+  final String memoryId;
+  final String role;
+  final String shortContent;
+  final int charCount;
+  final String normalizedPrefix;
+  final bool isDuplicated;
+}
+
+_AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
+  final rawPreviews = rows
+      .map(_buildAgentMemoryPreview)
+      .toList(growable: false);
+  if (rawPreviews.isEmpty) {
+    return const _AgentMemoryInsights(
+      previews: <_AgentMemoryPreview>[],
+      summary: null,
+      recommendation: null,
+    );
+  }
+
+  final prefixCounts = <String, int>{};
+  final roleCounts = <String, int>{};
+  var totalChars = 0;
+  var longestChars = 0;
+  for (final preview in rawPreviews) {
+    totalChars += preview.charCount;
+    if (preview.charCount > longestChars) {
+      longestChars = preview.charCount;
+    }
+    roleCounts.update(preview.role, (value) => value + 1, ifAbsent: () => 1);
+    if (preview.normalizedPrefix.isNotEmpty) {
+      prefixCounts.update(
+        preview.normalizedPrefix,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+  }
+
+  final previews = rawPreviews
+      .map(
+        (preview) => _AgentMemoryPreview(
+          memoryId: preview.memoryId,
+          role: preview.role,
+          shortContent: preview.shortContent,
+          charCount: preview.charCount,
+          normalizedPrefix: preview.normalizedPrefix,
+          isDuplicated:
+              preview.normalizedPrefix.isNotEmpty &&
+              (prefixCounts[preview.normalizedPrefix] ?? 0) > 1,
+        ),
+      )
+      .toList(growable: false);
+  final duplicateCount = previews
+      .where((preview) => preview.isDuplicated)
+      .length;
+  final rolesSummary = roleCounts.entries
+      .map((entry) => '${entry.key} ${entry.value}')
+      .join(' / ');
+  final summary =
+      '角色分布：$rolesSummary · 约 $totalChars chars · 最长 $longestChars chars${duplicateCount > 0 ? ' · 重复 $duplicateCount 条' : ''}';
+  String? recommendation;
+  if (duplicateCount >= 2) {
+    recommendation = '检测到重复表述，先去重旧记忆，避免同一约束反复注入。';
+  } else if (totalChars >= 1600 || longestChars >= 420) {
+    recommendation = '当前记忆偏长，优先压缩长记忆，再决定是否继续追加。';
+  } else if (rows.length >= 12) {
+    recommendation = '条数偏多，先读取 summary 或清理旧 message，给当前镜头约束留预算。';
+  } else if ((roleCounts['assistant'] ?? 0) >= 3 &&
+      (roleCounts['assistant'] ?? 0) > (roleCounts['user'] ?? 0) * 2) {
+    recommendation = 'assistant 记忆偏多，先清旧总结，只保留最新执行约束。';
+  }
+
+  return _AgentMemoryInsights(
+    previews: previews,
+    summary: summary,
+    recommendation: recommendation,
+  );
+}
+
+_AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
+  final map = row is Map ? Map<String, dynamic>.from(row) : <String, dynamic>{};
+  final role = map['role']?.toString() ?? 'unknown';
+  final rawContent = map['content'];
+  final blocks = rawContent is List ? rawContent : const <dynamic>[];
+  final content = blocks.isNotEmpty && blocks.first is Map
+      ? (blocks.first as Map)['data']?.toString() ?? ''
+      : rawContent?.toString() ?? '';
+  final shortContent = content.length > 60
+      ? '${content.substring(0, 60)}…'
+      : content;
+  final normalizedPrefix = content.replaceAll(RegExp(r'\s+'), '').toLowerCase();
+  return _AgentMemoryPreview(
+    memoryId: map['id']?.toString() ?? '',
+    role: role,
+    shortContent: shortContent,
+    charCount: content.characters.length,
+    normalizedPrefix: normalizedPrefix.length > 16
+        ? normalizedPrefix.substring(0, 16)
+        : normalizedPrefix,
+    isDuplicated: false,
+  );
 }
