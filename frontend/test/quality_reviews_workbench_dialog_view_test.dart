@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/quality_reviews/support.dart';
 import 'package:openflow_app/quality_reviews/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -28,35 +27,6 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
       isBadCase: false,
     ),
   ],
-  List<QualityTokenEfficiencySampleRow> tokenEfficiencySamples =
-      const <QualityTokenEfficiencySampleRow>[
-        QualityTokenEfficiencySampleRow(
-          reviewId: 'sample-1',
-          createdAt: '2026-04-14T08:00:00Z',
-          projectId: 1,
-          scriptId: 2,
-          jobId: 'job-1',
-          targetType: 'output',
-          targetId: 'storyboard-1',
-          source: 'auto',
-          overallScore: 4,
-          passed: false,
-          isBadCase: true,
-          memoryDeliveryPriorityApplied: false,
-          promptChars: 920,
-          linkedTotalTokens: 640,
-          memoryDeliveryChars: 60,
-          memoryVisualChars: 88,
-          memoryScriptScopeChars: 70,
-          memoryProjectScopeChars: 220,
-          memoryMixedScopeChars: 14,
-          promptCharsPerScorePoint: 230,
-          linkedTokensPerScorePoint: 160,
-          dominantMemoryScope: 'project',
-          recommendedAction: 'shift_to_delivery_memory',
-          recommendedActionReason: '先把预算从泛设定移到情绪、动作和语气约束',
-        ),
-      ],
   bool filterBadCasesOnly = false,
   bool filterDeliveryPriorityOnly = false,
   bool filterAutoSourceOnly = false,
@@ -66,22 +36,17 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   bool loadingBadCases = false,
   bool loadingStats = false,
   bool loadingStagePassRate = false,
-  bool loadingTokenEfficiency = false,
-  bool loadingTokenEfficiencySamples = false,
   bool loadingReviewById = false,
   bool creatingReview = false,
 }) {
   return QualityReviewsWorkbenchDialogViewModel(
     reviews: reviews,
-    tokenEfficiencySamples: tokenEfficiencySamples,
-    memoryDraft: buildQualityMemoryDraft(tokenEfficiencySamples.first),
     statsSummary: 'output: total=1, pass=100%',
     stagePassRateSummary: 'storyboard: 100%',
-    tokenEfficiencySummary: 'output: linked=1/1',
-    tokenEfficiencySampleSummary:
-        'output:score=4,p=230.0,t=160.0,bad/project->shift-to-delivery-memory',
     reviewDetails: 'review-1 · output · manual',
     statusLine: '已读取评审详情',
+    activeFilterQuerySummary: null,
+    activeFilterRequestUrl: null,
     filterBadCasesOnly: filterBadCasesOnly,
     filterDeliveryPriorityOnly: filterDeliveryPriorityOnly,
     filterAutoSourceOnly: filterAutoSourceOnly,
@@ -91,11 +56,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     loadingBadCases: loadingBadCases,
     loadingStats: loadingStats,
     loadingStagePassRate: loadingStagePassRate,
-    loadingTokenEfficiency: loadingTokenEfficiency,
-    loadingTokenEfficiencySamples: loadingTokenEfficiencySamples,
     loadingReviewById: loadingReviewById,
     creatingReview: creatingReview,
-    applyingMemoryDraft: false,
     targetTypeFilterCtrl: targetTypeFilterCtrl,
     targetIdFilterCtrl: targetIdFilterCtrl,
     jobIdFilterCtrl: jobIdFilterCtrl,
@@ -116,15 +78,11 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
   VoidCallback? onLoadAutoSourceReviews = noop,
   VoidCallback? onLoadStats = noop,
   VoidCallback? onLoadStagePassRate = noop,
-  VoidCallback? onLoadTokenEfficiency = noop,
-  VoidCallback? onLoadTokenEfficiencySamples = noop,
   VoidCallback? onLoadReviewById = noop,
   VoidCallback? onCreateReview = noop,
   ValueChanged<bool>? onCreatePassedChanged,
   ValueChanged<bool>? onCreateBadCaseChanged,
   ValueChanged<QualityReview>? onSelectReview,
-  ValueChanged<QualityTokenEfficiencySampleRow>? onSelectTokenEfficiencySample,
-  VoidCallback? onApplyMemoryDraft = noop,
   VoidCallback? onClose = noop,
 }) {
   return QualityReviewsWorkbenchDialogViewCallbacks(
@@ -134,15 +92,11 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onLoadAutoSourceReviews: onLoadAutoSourceReviews ?? noop,
     onLoadStats: onLoadStats ?? noop,
     onLoadStagePassRate: onLoadStagePassRate ?? noop,
-    onLoadTokenEfficiency: onLoadTokenEfficiency ?? noop,
-    onLoadTokenEfficiencySamples: onLoadTokenEfficiencySamples ?? noop,
     onLoadReviewById: onLoadReviewById ?? noop,
     onCreateReview: onCreateReview ?? noop,
     onCreatePassedChanged: onCreatePassedChanged ?? (_) {},
     onCreateBadCaseChanged: onCreateBadCaseChanged ?? (_) {},
     onSelectReview: onSelectReview ?? (_) {},
-    onSelectTokenEfficiencySample: onSelectTokenEfficiencySample ?? (_) {},
-    onApplyMemoryDraft: onApplyMemoryDraft ?? noop,
     onClose: onClose ?? noop,
   );
 }
@@ -216,20 +170,10 @@ void main() {
     expect(find.text('创建评审'), findsNWidgets(2));
     expect(find.text('质量统计：output: total=1, pass=100%'), findsOneWidget);
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
-    expect(find.text('Token 效率：output: linked=1/1'), findsOneWidget);
-    expect(find.text('记忆草案'), findsOneWidget);
-    expect(find.text('写入隔离记忆'), findsOneWidget);
+    expect(find.textContaining('Token效率：'), findsNothing);
     expect(find.text('评审 1 条'), findsOneWidget);
-    expect(find.text('低效样本 1 条'), findsOneWidget);
     expect(
       find.widgetWithText(ListTile, 'output · manual · score=82'),
-      findsOneWidget,
-    );
-    expect(
-      find.widgetWithText(
-        ListTile,
-        'output · score=4 · shift_to_delivery_memory',
-      ),
       findsOneWidget,
     );
   });
@@ -256,8 +200,6 @@ void main() {
               loadingBadCases: true,
               loadingStats: true,
               loadingStagePassRate: true,
-              loadingTokenEfficiency: true,
-              loadingTokenEfficiencySamples: true,
               loadingReviewById: true,
               creatingReview: true,
             ),
@@ -293,8 +235,6 @@ void main() {
     WidgetTester tester,
   ) async {
     QualityReview? selectedReview;
-    QualityTokenEfficiencySampleRow? selectedSample;
-    var applyCalls = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -315,9 +255,6 @@ void main() {
             ),
             callbacks: buildDialogCallbacks(
               onSelectReview: (review) => selectedReview = review,
-              onSelectTokenEfficiencySample: (sample) =>
-                  selectedSample = sample,
-              onApplyMemoryDraft: () => applyCalls += 1,
             ),
           ),
         ),
@@ -332,20 +269,6 @@ void main() {
     expect(find.text('坏例 1 条'), findsOneWidget);
     expect(selectedReview?.id, 'review-1');
     expect(selectedReview?.targetType, 'output');
-
-    final sampleTileTitle = find.text(
-      'output · score=4 · shift_to_delivery_memory',
-    );
-    await tester.ensureVisible(sampleTileTitle);
-    await tester.tap(sampleTileTitle);
-    await tester.pump();
-
-    expect(selectedSample?.reviewId, 'sample-1');
-    expect(selectedSample?.recommendedAction, 'shift_to_delivery_memory');
-
-    await tester.tap(find.text('写入隔离记忆'));
-    await tester.pump();
-    expect(applyCalls, 1);
   });
 }
 

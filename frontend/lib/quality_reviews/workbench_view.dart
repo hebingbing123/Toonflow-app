@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../rust_api.dart';
 import 'support.dart';
@@ -6,14 +7,12 @@ import 'support.dart';
 class QualityReviewsWorkbenchDialogViewModel {
   const QualityReviewsWorkbenchDialogViewModel({
     required this.reviews,
-    required this.tokenEfficiencySamples,
-    required this.memoryDraft,
     required this.statsSummary,
     required this.stagePassRateSummary,
-    required this.tokenEfficiencySummary,
-    required this.tokenEfficiencySampleSummary,
     required this.reviewDetails,
     required this.statusLine,
+    required this.activeFilterQuerySummary,
+    required this.activeFilterRequestUrl,
     required this.filterBadCasesOnly,
     required this.filterDeliveryPriorityOnly,
     required this.filterAutoSourceOnly,
@@ -23,11 +22,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingBadCases,
     required this.loadingStats,
     required this.loadingStagePassRate,
-    required this.loadingTokenEfficiency,
-    required this.loadingTokenEfficiencySamples,
     required this.loadingReviewById,
     required this.creatingReview,
-    required this.applyingMemoryDraft,
     required this.targetTypeFilterCtrl,
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
@@ -41,14 +37,12 @@ class QualityReviewsWorkbenchDialogViewModel {
   });
 
   final List<QualityReview> reviews;
-  final List<QualityTokenEfficiencySampleRow> tokenEfficiencySamples;
-  final QualityMemoryDraft? memoryDraft;
   final String? statsSummary;
   final String? stagePassRateSummary;
-  final String? tokenEfficiencySummary;
-  final String? tokenEfficiencySampleSummary;
   final String? reviewDetails;
   final String? statusLine;
+  final String? activeFilterQuerySummary;
+  final String? activeFilterRequestUrl;
   final bool filterBadCasesOnly;
   final bool filterDeliveryPriorityOnly;
   final bool filterAutoSourceOnly;
@@ -58,11 +52,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingBadCases;
   final bool loadingStats;
   final bool loadingStagePassRate;
-  final bool loadingTokenEfficiency;
-  final bool loadingTokenEfficiencySamples;
   final bool loadingReviewById;
   final bool creatingReview;
-  final bool applyingMemoryDraft;
   final TextEditingController targetTypeFilterCtrl;
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
@@ -83,15 +74,11 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onLoadAutoSourceReviews,
     required this.onLoadStats,
     required this.onLoadStagePassRate,
-    required this.onLoadTokenEfficiency,
-    required this.onLoadTokenEfficiencySamples,
     required this.onLoadReviewById,
     required this.onCreateReview,
     required this.onCreatePassedChanged,
     required this.onCreateBadCaseChanged,
     required this.onSelectReview,
-    required this.onSelectTokenEfficiencySample,
-    required this.onApplyMemoryDraft,
     required this.onClose,
   });
 
@@ -101,16 +88,11 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadAutoSourceReviews;
   final VoidCallback onLoadStats;
   final VoidCallback onLoadStagePassRate;
-  final VoidCallback onLoadTokenEfficiency;
-  final VoidCallback onLoadTokenEfficiencySamples;
   final VoidCallback onLoadReviewById;
   final VoidCallback onCreateReview;
   final ValueChanged<bool> onCreatePassedChanged;
   final ValueChanged<bool> onCreateBadCaseChanged;
   final ValueChanged<QualityReview> onSelectReview;
-  final ValueChanged<QualityTokenEfficiencySampleRow>
-  onSelectTokenEfficiencySample;
-  final VoidCallback onApplyMemoryDraft;
   final VoidCallback onClose;
 }
 
@@ -127,6 +109,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
+    final tokenEfficiencySummary = summarizeTokenEfficiencyFromQualityReviews(
+      model.reviews,
+    );
+    final activeFilters = [
+      if (model.filterBadCasesOnly) '坏例',
+      if (model.filterDeliveryPriorityOnly) '命中表演/语气优先',
+      if (model.filterAutoSourceOnly) 'auto 样本',
+    ];
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 840.0)
@@ -164,6 +154,45 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       const Chip(label: Text('source=auto')),
                   ],
                 ),
+                if (model.activeFilterQuerySummary != null) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SelectableText(
+                          '筛选查询：${model.activeFilterQuerySummary}',
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: '复制筛选查询',
+                        onPressed: () async {
+                          final query = model.activeFilterQuerySummary;
+                          if (query == null || query.isEmpty) return;
+                          await Clipboard.setData(ClipboardData(text: query));
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('已复制筛选查询')),
+                          );
+                        },
+                        icon: const Icon(Icons.copy_rounded),
+                      ),
+                      IconButton(
+                        tooltip: '复制完整 API URL',
+                        onPressed: () async {
+                          final url = model.activeFilterRequestUrl;
+                          if (url == null || url.isEmpty) return;
+                          await Clipboard.setData(ClipboardData(text: url));
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('已复制 API URL')),
+                          );
+                        },
+                        icon: const Icon(Icons.link_rounded),
+                      ),
+                    ],
+                  ),
+                ],
               ],
               const SizedBox(height: 12),
               Text('筛选与读取', style: Theme.of(context).textTheme.titleSmall),
@@ -229,22 +258,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         : callbacks.onLoadStagePassRate,
                     child: Text(
                       model.loadingStagePassRate ? '读取中…' : '读取阶段通过率',
-                    ),
-                  ),
-                  OutlinedButton(
-                    onPressed: model.loadingTokenEfficiency
-                        ? null
-                        : callbacks.onLoadTokenEfficiency,
-                    child: Text(
-                      model.loadingTokenEfficiency ? '读取中…' : '读取 token 效率',
-                    ),
-                  ),
-                  OutlinedButton(
-                    onPressed: model.loadingTokenEfficiencySamples
-                        ? null
-                        : callbacks.onLoadTokenEfficiencySamples,
-                    child: Text(
-                      model.loadingTokenEfficiencySamples ? '读取中…' : '读取低效样本',
                     ),
                   ),
                 ],
@@ -337,82 +350,16 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 12),
                 SelectableText('阶段通过率：${model.stagePassRateSummary}'),
               ],
-              if (model.tokenEfficiencySummary != null) ...[
+              if (tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('Token 效率：${model.tokenEfficiencySummary}'),
-              ],
-              if (model.tokenEfficiencySampleSummary != null) ...[
-                const SizedBox(height: 12),
-                SelectableText('低效样本：${model.tokenEfficiencySampleSummary}'),
-              ],
-              if (model.tokenEfficiencySamples.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(
-                  '低效样本 ${model.tokenEfficiencySamples.length} 条',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 8),
-                ...model.tokenEfficiencySamples
-                    .take(6)
-                    .map(
-                      (sample) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          '${sample.targetType} · score=${sample.overallScore ?? "n/a"} · ${sample.recommendedAction}',
-                        ),
-                        subtitle: Text(
-                          formatQualityTokenEfficiencySampleDetails(sample),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Chip(
-                              label: Text(sample.dominantMemoryScope),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                        onTap: () =>
-                            callbacks.onSelectTokenEfficiencySample(sample),
-                      ),
-                    ),
-              ],
-              if (model.memoryDraft != null) ...[
-                const SizedBox(height: 12),
-                Text('记忆草案', style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 8),
-                SelectableText(model.memoryDraft!.summary),
-                const SizedBox(height: 4),
-                if (model.memoryDraft!.blockingReason != null)
-                  SelectableText('原因：${model.memoryDraft!.blockingReason}')
-                else
-                  SelectableText(model.memoryDraft!.content),
-                const SizedBox(height: 8),
-                FilledButton.tonal(
-                  onPressed:
-                      model.applyingMemoryDraft ||
-                          !model.memoryDraft!.canAppend ||
-                          model.creatingReview
-                      ? null
-                      : callbacks.onApplyMemoryDraft,
-                  child: Text(model.applyingMemoryDraft ? '写入中…' : '写入隔离记忆'),
-                ),
+                SelectableText('Token效率：$tokenEfficiencySummary'),
               ],
               if (model.reviews.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
-                  model.filterBadCasesOnly && model.filterDeliveryPriorityOnly
-                      ? '坏例 + 命中表演/语气优先 ${model.reviews.length} 条'
-                      : model.filterBadCasesOnly
-                      ? '坏例 ${model.reviews.length} 条'
-                      : model.filterDeliveryPriorityOnly
-                      ? '命中表演/语气优先 ${model.reviews.length} 条'
-                      : model.filterAutoSourceOnly
-                      ? 'auto 样本 ${model.reviews.length} 条'
-                      : '评审 ${model.reviews.length} 条',
+                  activeFilters.isEmpty
+                      ? '评审 ${model.reviews.length} 条'
+                      : '${activeFilters.join(' + ')} ${model.reviews.length} 条',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 const SizedBox(height: 8),
@@ -434,6 +381,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                                 padding: EdgeInsets.only(right: 8),
                                 child: Chip(
                                   label: Text('delivery'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ),
+                            if (review.source == 'auto')
+                              const Padding(
+                                padding: EdgeInsets.only(right: 8),
+                                child: Chip(
+                                  label: Text('auto'),
                                   visualDensity: VisualDensity.compact,
                                 ),
                               ),

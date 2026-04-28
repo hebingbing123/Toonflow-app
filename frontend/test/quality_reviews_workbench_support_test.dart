@@ -27,7 +27,10 @@ void main() {
       ),
     ]);
 
-    expect(summary, '评审 2 条 · output:manual:81, storyboard:agent:72');
+    expect(
+      summary,
+      '评审 2 条 · auto 0 条 · output:manual:81, storyboard:agent:72',
+    );
   });
 
   test('summarizeQualityStatsRows formats stats preview', () {
@@ -77,145 +80,53 @@ void main() {
     );
   });
 
-  test('summarizeQualityTokenEfficiencyRows formats efficiency preview', () {
-    final summary = summarizeQualityTokenEfficiencyRows(const [
-      QualityTokenEfficiencyRow(
-        targetType: 'output',
-        totalReviews: 10,
-        linkedLlmReviewCount: 8,
-        avgOverallScore: 84.3,
-        avgPromptChars: 920,
-        avgMemoryDeliveryChars: 120,
-        avgMemoryVisualChars: 88,
-        avgMemoryScriptScopeChars: 70,
-        avgMemoryProjectScopeChars: 22,
-        avgMemoryMixedScopeChars: 14,
-        avgLinkedTotalTokens: 640,
-        avgPromptCharsPerScorePoint: 10.9,
-        avgLinkedTokensPerScorePoint: 7.6,
-        deliveryPriorityAvgPromptCharsPerScorePoint: 9.8,
-        deliveryPriorityAvgLinkedTokensPerScorePoint: 6.9,
-        nonDeliveryPriorityAvgPromptCharsPerScorePoint: 11.7,
-        nonDeliveryPriorityAvgLinkedTokensPerScorePoint: 8.1,
-      ),
-    ]);
-
-    expect(
-      summary,
-      'output: linked=8/10, avgScore=84.3, mem=d120/v88 scope=s70/p22/m14, prompt/score=10.9, token/score=7.6 (delivery=6.9, non=8.1)',
-    );
-  });
-
-  test('summarizeQualityTokenEfficiencySampleRows formats sample preview', () {
-    final summary = summarizeQualityTokenEfficiencySampleRows(const [
-      QualityTokenEfficiencySampleRow(
-        reviewId: 'r-sample',
-        createdAt: '2026-04-10T00:00:00Z',
-        projectId: 1,
-        scriptId: 2,
-        jobId: 'job-1',
-        targetType: 'asset',
-        targetId: 'asset-1',
-        source: 'auto',
-        overallScore: 4,
-        passed: false,
-        isBadCase: true,
-        memoryDeliveryPriorityApplied: true,
-        promptChars: 920,
-        linkedTotalTokens: 0,
-        memoryDeliveryChars: 90,
-        memoryVisualChars: 140,
-        memoryScriptScopeChars: 20,
-        memoryProjectScopeChars: 150,
-        memoryMixedScopeChars: 35,
-        promptCharsPerScorePoint: 230,
-        linkedTokensPerScorePoint: 0,
-        dominantMemoryScope: 'project',
-        recommendedAction: 'shift_to_delivery_memory',
-        recommendedActionReason: '先把预算从泛设定移到情绪、动作和语气约束',
-      ),
-    ]);
-
-    expect(
-      summary,
-      'asset:score=4,p=230.0,t=0.0,bad/delivery/project->shift-to-delivery-memory',
-    );
-  });
-
   test(
-    'buildQualityMemoryDraft creates isolated summary memory for delivery shift',
+    'summarizeQualityTokenEfficiencyRows formats prompt and memory shares',
     () {
-      final draft = buildQualityMemoryDraft(
-        const QualityTokenEfficiencySampleRow(
-          reviewId: 'r-sample',
-          createdAt: '2026-04-10T00:00:00Z',
-          projectId: 1,
-          scriptId: 2,
-          jobId: 'job-1',
-          targetType: 'output',
-          targetId: 'storyboard-1',
-          source: 'auto',
-          overallScore: 4,
-          passed: false,
-          isBadCase: true,
-          memoryDeliveryPriorityApplied: false,
-          promptChars: 920,
-          linkedTotalTokens: 640,
-          memoryDeliveryChars: 60,
-          memoryVisualChars: 88,
-          memoryScriptScopeChars: 70,
-          memoryProjectScopeChars: 220,
-          memoryMixedScopeChars: 14,
-          promptCharsPerScorePoint: 230,
-          linkedTokensPerScorePoint: 160,
-          dominantMemoryScope: 'project',
-          recommendedAction: 'shift_to_delivery_memory',
-          recommendedActionReason: '先把预算从泛设定移到情绪、动作和语气约束',
+      final summary = summarizeQualityTokenEfficiencyRows(const [
+        QualityTokenEfficiencyRow(
+          targetType: 'storyboard',
+          sampleCount: 6,
+          avgPromptChars: 420,
+          avgNonMemoryPromptChars: 348,
+          avgMemoryStyleChars: 72,
+          avgMemoryVisualChars: 40,
+          avgMemoryDeliveryChars: 32,
+          avgMemorySharePercent: 17.1,
+          avgDeliveryMemorySharePercent: 7.6,
+          deliveryPriorityHitRatePercent: 66.7,
         ),
-      );
+      ]);
 
-      expect(draft.canAppend, isTrue);
-      expect(draft.agentType, 'productionAgent');
-      expect(draft.memoryType, 'summary');
-      expect(draft.summary, contains('project#1 / script#2'));
-      expect(draft.content, contains('keep=停顿、气口、表情反应、口型同步、动作反馈'));
+      expect(
+        summary,
+        'storyboard: prompt=420, base=348, memory=72 (17.1%, delivery=32/7.6%, hit=66.7%)',
+      );
     },
   );
 
   test(
-    'buildQualityMemoryDraft blocks append when sample scope is incomplete',
+    'summarizeQualityTokenEfficiencySamples formats recent sample preview',
     () {
-      final draft = buildQualityMemoryDraft(
-        const QualityTokenEfficiencySampleRow(
-          reviewId: 'r-sample',
-          createdAt: '2026-04-10T00:00:00Z',
-          projectId: null,
-          scriptId: 2,
-          jobId: 'job-1',
-          targetType: 'script',
-          targetId: 'script-1',
-          source: 'auto',
-          overallScore: 6,
-          passed: true,
-          isBadCase: false,
+      final summary = summarizeQualityTokenEfficiencySamples(const [
+        QualityTokenEfficiencySampleRow(
+          createdAt: '2026-04-28T09:30:00Z',
+          targetType: 'storyboard',
+          promptChars: 436,
+          nonMemoryPromptChars: 356,
+          memoryStyleChars: 80,
+          memoryVisualChars: 44,
+          memoryDeliveryChars: 36,
+          memorySharePercent: 18.3,
+          deliveryMemorySharePercent: 8.3,
           memoryDeliveryPriorityApplied: true,
-          promptChars: 400,
-          linkedTotalTokens: 320,
-          memoryDeliveryChars: 90,
-          memoryVisualChars: 40,
-          memoryScriptScopeChars: 110,
-          memoryProjectScopeChars: 0,
-          memoryMixedScopeChars: 0,
-          promptCharsPerScorePoint: 66,
-          linkedTokensPerScorePoint: 53,
-          dominantMemoryScope: 'script',
-          recommendedAction: 'trim_script_memory',
-          recommendedActionReason: 'script 级记忆占主导，保留当前镜头强约束即可',
         ),
-      );
+      ]);
 
-      expect(draft.canAppend, isFalse);
-      expect(draft.blockingReason, contains('projectId 或 scriptId'));
+      expect(
+        summary,
+        '04-28 09:30 storyboard: prompt=436, base=356, memory=80 (18.3%, delivery优先)',
+      );
     },
   );
 }

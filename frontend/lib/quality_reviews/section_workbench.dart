@@ -8,8 +8,6 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
     required this.initialReviewDetails,
     required this.initialStatsSummary,
     required this.initialStagePassRateSummary,
-    required this.initialTokenEfficiencySummary,
-    required this.initialTokenEfficiencySampleSummary,
   });
 
   final String accessToken;
@@ -17,8 +15,6 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   final String? initialReviewDetails;
   final String? initialStatsSummary;
   final String? initialStagePassRateSummary;
-  final String? initialTokenEfficiencySummary;
-  final String? initialTokenEfficiencySampleSummary;
 
   @override
   State<_QualityReviewsWorkbenchDialog> createState() =>
@@ -30,29 +26,46 @@ class _QualityReviewsWorkbenchDialogState
   late final _QualityReviewsWorkbenchControllers _ctrls;
 
   List<QualityReview> _reviews = const <QualityReview>[];
-  List<QualityTokenEfficiencySampleRow> _tokenEfficiencySamples =
-      const <QualityTokenEfficiencySampleRow>[];
-  QualityMemoryDraft? _memoryDraft;
   String? _statsSummary;
   String? _stagePassRateSummary;
-  String? _tokenEfficiencySummary;
-  String? _tokenEfficiencySampleSummary;
   String? _reviewDetails;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
   bool _loadingStats = false;
   bool _loadingStagePassRate = false;
-  bool _loadingTokenEfficiency = false;
-  bool _loadingTokenEfficiencySamples = false;
   bool _loadingReviewById = false;
   bool _creatingReview = false;
-  bool _applyingMemoryDraft = false;
   bool _filterBadCasesOnly = false;
   bool _filterDeliveryPriorityOnly = false;
   bool _filterAutoSourceOnly = false;
   bool _createPassed = true;
   bool _createBadCase = false;
   String? _statusLine;
+
+  String? _activeFilterQuerySummary() {
+    final query = <String, String>{};
+    final targetType = _ctrls.targetTypeFilterCtrl.text.trim();
+    final targetId = _ctrls.targetIdFilterCtrl.text.trim();
+    final jobId = _ctrls.jobIdFilterCtrl.text.trim();
+    if (targetType.isNotEmpty) query['targetType'] = targetType;
+    if (targetId.isNotEmpty) query['targetId'] = targetId;
+    if (jobId.isNotEmpty) query['jobId'] = jobId;
+    if (_filterBadCasesOnly) query['isBadCase'] = 'true';
+    if (_filterDeliveryPriorityOnly) {
+      query['memoryDeliveryPriorityApplied'] = 'true';
+    }
+    if (_filterAutoSourceOnly) query['source'] = 'auto';
+    if (query.isEmpty) return null;
+    return query.entries
+        .map((entry) => '${entry.key}=${entry.value}')
+        .join('&');
+  }
+
+  String? _activeFilterRequestUrl() {
+    final query = _activeFilterQuerySummary();
+    if (query == null || query.isEmpty) return null;
+    return '$kApiBaseUrl/api/v1/quality/reviews?$query';
+  }
 
   @override
   void initState() {
@@ -61,8 +74,6 @@ class _QualityReviewsWorkbenchDialogState
     _reviews = List<QualityReview>.from(widget.initialReviews);
     _statsSummary = widget.initialStatsSummary;
     _stagePassRateSummary = widget.initialStagePassRateSummary;
-    _tokenEfficiencySummary = widget.initialTokenEfficiencySummary;
-    _tokenEfficiencySampleSummary = widget.initialTokenEfficiencySampleSummary;
     _reviewDetails = widget.initialReviewDetails;
     if (_reviews.isNotEmpty) {
       _ctrls.reviewIdCtrl.text = _reviews.first.id;
@@ -176,58 +187,6 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
-  Future<void> _loadTokenEfficiency() async {
-    setState(() {
-      _loadingTokenEfficiency = true;
-      _statusLine = null;
-    });
-    try {
-      final rows = await fetchQualityTokenEfficiency(widget.accessToken);
-      if (!mounted) return;
-      setState(() {
-        _tokenEfficiencySummary = summarizeQualityTokenEfficiencyRows(rows);
-        _statusLine = '已刷新 token 效率';
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() => _statusLine = e.toString());
-    } finally {
-      if (mounted) {
-        setState(() => _loadingTokenEfficiency = false);
-      }
-    }
-  }
-
-  Future<void> _loadTokenEfficiencySamples() async {
-    setState(() {
-      _loadingTokenEfficiencySamples = true;
-      _statusLine = null;
-    });
-    try {
-      final rows = await fetchQualityTokenEfficiencySamples(
-        widget.accessToken,
-        targetType: _ctrls.targetTypeFilterCtrl.text.trim(),
-      );
-      if (!mounted) return;
-      setState(() {
-        _tokenEfficiencySamples = rows;
-        _tokenEfficiencySampleSummary =
-            summarizeQualityTokenEfficiencySampleRows(rows);
-        _statusLine = '已刷新低效样本';
-        if (_ctrls.reviewIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
-          _ctrls.reviewIdCtrl.text = rows.first.reviewId;
-        }
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() => _statusLine = e.toString());
-    } finally {
-      if (mounted) {
-        setState(() => _loadingTokenEfficiencySamples = false);
-      }
-    }
-  }
-
   Future<void> _loadReviewById() async {
     final reviewId = _ctrls.reviewIdCtrl.text.trim();
     if (reviewId.isEmpty) {
@@ -311,61 +270,17 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
-  Future<void> _applyMemoryDraft() async {
-    final draft = _memoryDraft;
-    if (draft == null) {
-      setState(() => _statusLine = '请先选择一个低效样本');
-      return;
-    }
-    if (!draft.canAppend ||
-        draft.projectId == null ||
-        draft.episodesId == null) {
-      setState(() => _statusLine = draft.blockingReason ?? '当前草案不能写入记忆');
-      return;
-    }
-    setState(() {
-      _applyingMemoryDraft = true;
-      _statusLine = null;
-    });
-    try {
-      final id = await appendAgentMemory(
-        widget.accessToken,
-        projectId: draft.projectId!,
-        agentType: draft.agentType,
-        episodesId: draft.episodesId,
-        memoryType: draft.memoryType,
-        role: draft.role,
-        name: draft.name,
-        content: draft.content,
-      );
-      if (!mounted) return;
-      setState(() {
-        _statusLine =
-            '已写入隔离记忆 ${id.length > 8 ? '${id.substring(0, 8)}…' : id}';
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() => _statusLine = e.toString());
-    } finally {
-      if (mounted) {
-        setState(() => _applyingMemoryDraft = false);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return QualityReviewsWorkbenchDialogView(
       model: QualityReviewsWorkbenchDialogViewModel(
         reviews: _reviews,
-        tokenEfficiencySamples: _tokenEfficiencySamples,
-        memoryDraft: _memoryDraft,
         statsSummary: _statsSummary,
         stagePassRateSummary: _stagePassRateSummary,
-        tokenEfficiencySummary: _tokenEfficiencySummary,
-        tokenEfficiencySampleSummary: _tokenEfficiencySampleSummary,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
+        activeFilterQuerySummary: _activeFilterQuerySummary(),
+        activeFilterRequestUrl: _activeFilterRequestUrl(),
         filterBadCasesOnly: _filterBadCasesOnly,
         filterDeliveryPriorityOnly: _filterDeliveryPriorityOnly,
         filterAutoSourceOnly: _filterAutoSourceOnly,
@@ -375,11 +290,8 @@ class _QualityReviewsWorkbenchDialogState
         loadingBadCases: _loadingBadCases,
         loadingStats: _loadingStats,
         loadingStagePassRate: _loadingStagePassRate,
-        loadingTokenEfficiency: _loadingTokenEfficiency,
-        loadingTokenEfficiencySamples: _loadingTokenEfficiencySamples,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
-        applyingMemoryDraft: _applyingMemoryDraft,
         targetTypeFilterCtrl: _ctrls.targetTypeFilterCtrl,
         targetIdFilterCtrl: _ctrls.targetIdFilterCtrl,
         jobIdFilterCtrl: _ctrls.jobIdFilterCtrl,
@@ -422,12 +334,6 @@ class _QualityReviewsWorkbenchDialogState
         onLoadStagePassRate: () {
           _loadStagePassRate();
         },
-        onLoadTokenEfficiency: () {
-          _loadTokenEfficiency();
-        },
-        onLoadTokenEfficiencySamples: () {
-          _loadTokenEfficiencySamples();
-        },
         onLoadReviewById: () {
           _loadReviewById();
         },
@@ -439,22 +345,9 @@ class _QualityReviewsWorkbenchDialogState
             setState(() => _createBadCase = value),
         onSelectReview: (review) {
           setState(() {
-            _memoryDraft = null;
             _ctrls.reviewIdCtrl.text = review.id;
             _reviewDetails = formatQualityReviewDetails(review);
-            _statusLine = '已选中评审 ${review.id}';
           });
-        },
-        onSelectTokenEfficiencySample: (sample) {
-          setState(() {
-            _memoryDraft = buildQualityMemoryDraft(sample);
-            _ctrls.reviewIdCtrl.text = sample.reviewId;
-            _reviewDetails = formatQualityTokenEfficiencySampleDetails(sample);
-            _statusLine = '已选中低效样本 ${sample.reviewId}';
-          });
-        },
-        onApplyMemoryDraft: () {
-          _applyMemoryDraft();
         },
         onClose: () => Navigator.of(context).pop(),
       ),
