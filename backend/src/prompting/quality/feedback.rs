@@ -211,50 +211,56 @@ fn build_generic_quality_feedback_content(review: &QualityReview) -> String {
         .plot_coherence
         .filter(|score| *score < LOW_SCORE_THRESHOLD)
     {
-        score_parts.push(format!("plot_coherence:{score}"));
+        score_parts.push((score, format!("plot_coherence:{score}")));
     }
     if let Some(score) = review
         .character_consistency
         .filter(|score| *score < LOW_SCORE_THRESHOLD)
     {
-        score_parts.push(format!("character_consistency:{score}"));
+        score_parts.push((score, format!("character_consistency:{score}")));
     }
     if let Some(score) = review
         .dialogue_naturalness
         .filter(|score| *score < LOW_SCORE_THRESHOLD)
     {
-        score_parts.push(format!("dialogue_naturalness:{score}"));
+        score_parts.push((score, format!("dialogue_naturalness:{score}")));
     }
     if let Some(score) = review.pacing.filter(|score| *score < LOW_SCORE_THRESHOLD) {
-        score_parts.push(format!("pacing:{score}"));
+        score_parts.push((score, format!("pacing:{score}")));
     }
     if let Some(score) = review
         .faithfulness
         .filter(|score| *score < LOW_SCORE_THRESHOLD)
     {
-        score_parts.push(format!("faithfulness:{score}"));
+        score_parts.push((score, format!("faithfulness:{score}")));
     }
     if let Some(score) = review
         .visual_quality
         .filter(|score| *score < LOW_SCORE_THRESHOLD)
     {
-        score_parts.push(format!("visual_quality:{score}"));
+        score_parts.push((score, format!("visual_quality:{score}")));
     }
     if !score_parts.is_empty() {
-        parts.push(format!("low_scores=[{}]", score_parts.join(", ")));
+        score_parts.sort_by_key(|(score, label)| (*score, label.clone()));
+        parts.push(format!(
+            "low_scores=[{}]",
+            score_parts
+                .into_iter()
+                .take(2)
+                .map(|(_, label)| label)
+                .collect::<Vec<_>>()
+                .join(", ")
+        ));
     }
 
     if let Some(comments) = &review.comments {
-        let truncated = if comments.len() > 200 {
-            format!("{}...", &comments[..200])
+        let compact = comments.split_whitespace().collect::<Vec<_>>().join(" ");
+        let truncated = if compact.len() > 120 {
+            format!("{}...", &compact[..120])
         } else {
-            comments.clone()
+            compact
         };
         parts.push(format!("notes={truncated}"));
-    }
-
-    if let Some(model) = &review.model_name {
-        parts.push(format!("model={model}"));
     }
 
     parts.join(" | ")
@@ -351,7 +357,22 @@ mod tests {
         assert!(content.contains("target=script-9"), "{content}");
         assert!(content.contains("low_scores=["), "{content}");
         assert!(content.contains("notes="), "{content}");
-        assert!(content.ends_with("model=demo-model"), "{content}");
+        assert!(!content.contains("model=demo-model"), "{content}");
+    }
+
+    #[test]
+    fn generic_feedback_content_keeps_only_two_lowest_scores() {
+        let mut review = sample_review();
+        review.plot_coherence = Some(3);
+        review.pacing = Some(2);
+        review.faithfulness = Some(5);
+
+        let content = build_generic_quality_feedback_content(&review);
+        assert!(
+            content.contains("low_scores=[pacing:2, plot_coherence:3]"),
+            "{content}"
+        );
+        assert!(!content.contains("faithfulness:5"), "{content}");
     }
 
     #[test]
