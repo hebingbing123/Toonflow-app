@@ -2,6 +2,8 @@ use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::llm::chat_completion_with_usage;
+use crate::metering::llm_usage::record_llm_usage;
 use crate::state::AppState;
 
 /// Check whether summarization is needed and generate summary via LLM.
@@ -68,7 +70,6 @@ pub(super) async fn maybe_summarize_messages(
         .join("\n");
 
     let summary_text = if let Some(ref cfg) = state.llm {
-        let client = reqwest::Client::new();
         let prompt = format!(
             "请总结以下对话的关键要点，用中文输出，不超过100字：\n\n{}",
             conversation
@@ -77,9 +78,65 @@ pub(super) async fn maybe_summarize_messages(
             serde_json::json!({"role": "system", "content": "你是一个对话摘要助手。"}),
             serde_json::json!({"role": "user", "content": prompt}),
         ];
-        match crate::llm::chat_completion_assistant_text(cfg, &client, llm_messages).await {
-            Ok(text) => text,
+        let prompt_chars = serde_json::to_string(&llm_messages)
+            .ok()
+            .map(|raw| raw.chars().count() as i64);
+        let started_at = std::time::Instant::now();
+        match chat_completion_with_usage(cfg, &state.http_client, llm_messages).await {
+            Ok(result) => {
+                record_llm_usage(
+                    pool,
+                    uid,
+                    Some(project_id),
+                    episodes_id,
+                    None,
+                    "agent_memory.summarize",
+                    result.model.as_deref().unwrap_or(&cfg.model),
+                    Some("openai"),
+                    result.usage.as_ref(),
+                    prompt_chars,
+                    true,
+                    None,
+                    Some(started_at.elapsed().as_millis() as i64),
+                    serde_json::json!({
+                        "agentType": agent_type,
+                        "messagesPerSummary": messages_per_summary,
+                        "messageCount": messages.len(),
+                        "scope": {
+                            "projectId": project_id,
+                            "scriptId": episodes_id,
+                        }
+                    }),
+                )
+                .await;
+                result.content
+            }
             Err(e) => {
+                record_llm_usage(
+                    pool,
+                    uid,
+                    Some(project_id),
+                    episodes_id,
+                    None,
+                    "agent_memory.summarize",
+                    &cfg.model,
+                    Some("openai"),
+                    None,
+                    prompt_chars,
+                    false,
+                    Some(&e),
+                    Some(started_at.elapsed().as_millis() as i64),
+                    serde_json::json!({
+                        "agentType": agent_type,
+                        "messagesPerSummary": messages_per_summary,
+                        "messageCount": messages.len(),
+                        "scope": {
+                            "projectId": project_id,
+                            "scriptId": episodes_id,
+                        }
+                    }),
+                )
+                .await;
                 tracing::warn!(error = %e, "LLM summarization failed, using fallback");
                 format!("[摘要] {}条消息待总结", messages.len())
             }

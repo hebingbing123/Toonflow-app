@@ -1,8 +1,10 @@
 //! LLM 优化任务（`asset.polish.*`）。
 
 use serde_json::json;
+use sqlx::PgPool;
 
-use crate::llm::{chat_completion_assistant_text, LlmConfig};
+use crate::llm::{chat_completion_with_usage, LlmConfig, TokenUsage};
+use crate::metering::llm_usage::record_llm_usage;
 use crate::state::AppState;
 
 use crate::jobs::JobRow;
@@ -12,13 +14,21 @@ use super::common::{generation_job_is_cancelled, JobRunError};
 /// Cap polished text stored on the job row (aligned with HTTP **`prompt`** max on enqueue).
 const MAX_POLISHED_PROMPT_CHARS: usize = 48_000;
 
+struct PolishedPromptLlmResult {
+    text: String,
+    usage: Option<TokenUsage>,
+    model_name: String,
+    prompt_chars: i64,
+    duration_ms: i64,
+}
+
 async fn polish_asset_description_llm(
     cfg: &LlmConfig,
     client: &reqwest::Client,
     asset_type: &str,
     name: &str,
     describe: &str,
-) -> Result<String, JobRunError> {
+) -> Result<PolishedPromptLlmResult, JobRunError> {
     let user_msg = format!(
         "Polish the following asset description into a single concise image-generation prompt (keep the user's language).\n\nType: {asset_type}\nName: {name}\nDescription:\n{describe}\n\nReply with only the polished prompt text, no quotes or preamble."
     );
@@ -27,20 +37,33 @@ async fn polish_asset_description_llm(
         json!({"role": "system", "content": "You help users refine prompts for creative asset generation."}),
         json!({"role": "user", "content": user_msg}),
     ];
+    let prompt_chars = serde_json::to_string(&messages)
+        .map(|raw| raw.chars().count() as i64)
+        .unwrap_or(0);
+    let started_at = std::time::Instant::now();
 
-    let mut text = chat_completion_assistant_text(cfg, client, messages)
+    let response = chat_completion_with_usage(cfg, client, messages)
         .await
         .map_err(JobRunError::Failed)?;
+    let mut text = response.content;
 
     if text.len() > MAX_POLISHED_PROMPT_CHARS {
         text.truncate(MAX_POLISHED_PROMPT_CHARS);
     }
 
-    Ok(text)
+    Ok(PolishedPromptLlmResult {
+        text,
+        usage: response.usage,
+        model_name: response.model.unwrap_or_else(|| cfg.model.clone()),
+        prompt_chars,
+        duration_ms: started_at.elapsed().as_millis() as i64,
+    })
 }
 
 pub(super) async fn run_asset_polish_prompt(
     state: &AppState,
+    pool: &PgPool,
+    job_id: uuid::Uuid,
     row: &JobRow,
 ) -> Result<serde_json::Value, JobRunError> {
     let Some(ref cfg) = state.llm else {
@@ -77,14 +100,35 @@ pub(super) async fn run_asset_polish_prompt(
         "asset polish-prompt: calling LLM"
     );
 
-    let text =
+    let result =
         polish_asset_description_llm(cfg, &state.http_client, asset_type, name, describe).await?;
+    record_llm_usage(
+        pool,
+        row.owner_user_id,
+        Some(project_numeric_id as i32),
+        None,
+        Some(job_id),
+        "jobs.asset_polish_prompt",
+        &result.model_name,
+        Some("openai"),
+        result.usage.as_ref(),
+        Some(result.prompt_chars),
+        true,
+        None,
+        Some(result.duration_ms),
+        json!({
+            "assetNumericId": asset_numeric_id,
+            "assetType": asset_type,
+            "jobKind": row.kind,
+        }),
+    )
+    .await;
 
     Ok(json!({
         "source": "assets-generate.polish-prompt",
         "project_numeric_id": project_numeric_id,
         "asset_numeric_id": asset_numeric_id,
-        "polished_prompt": text,
+        "polished_prompt": result.text,
     }))
 }
 
@@ -145,13 +189,34 @@ pub(super) async fn run_asset_polish_batch(
             .and_then(|x| x.as_str())
             .ok_or_else(|| JobRunError::Failed("item missing describe".into()))?;
 
-        let text =
+        let result =
             polish_asset_description_llm(cfg, &state.http_client, asset_type, name, describe)
                 .await?;
+        record_llm_usage(
+            pool,
+            row.owner_user_id,
+            Some(project_numeric_id as i32),
+            None,
+            Some(job_id),
+            "jobs.asset_polish_batch_item",
+            &result.model_name,
+            Some("openai"),
+            result.usage.as_ref(),
+            Some(result.prompt_chars),
+            true,
+            None,
+            Some(result.duration_ms),
+            json!({
+                "assetNumericId": asset_numeric_id,
+                "assetType": asset_type,
+                "jobKind": row.kind,
+            }),
+        )
+        .await;
 
         out.push(json!({
             "asset_numeric_id": asset_numeric_id,
-            "polished_prompt": text,
+            "polished_prompt": result.text,
         }));
     }
 

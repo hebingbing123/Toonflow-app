@@ -19,14 +19,15 @@ mod tests;
 
 pub use types::{
     CreateQualityReviewBody, ListQualityReviewsQuery, QualityReview, QualityStatsResponse,
-    StagePassRateItem,
+    QualityTokenEfficiencyResponse, StagePassRateItem,
 };
 
 // Handlers 与 utoipa `__path_*` 由 `openapi.rs` 的 `paths(...)` 引用；本模块内仅装配路由。
 #[allow(unused_imports)]
 pub(crate) use handlers::{
     __path_create_review, __path_get_review, __path_get_stage_pass_rate, __path_get_stats,
-    __path_list_reviews, create_review, get_review, get_stage_pass_rate, get_stats, list_reviews,
+    __path_get_token_efficiency, __path_list_reviews, create_review, get_review,
+    get_stage_pass_rate, get_stats, get_token_efficiency, list_reviews,
 };
 
 pub fn routes() -> Router<AppState> {
@@ -37,6 +38,10 @@ pub fn routes() -> Router<AppState> {
         )
         .route("/api/v1/quality/reviews/{id}", get(handlers::get_review))
         .route("/api/v1/quality/stats", get(handlers::get_stats))
+        .route(
+            "/api/v1/quality/token-efficiency",
+            get(handlers::get_token_efficiency),
+        )
         .route(
             "/api/v1/quality/stage-pass-rate",
             get(handlers::get_stage_pass_rate),

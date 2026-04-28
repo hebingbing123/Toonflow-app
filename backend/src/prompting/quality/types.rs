@@ -119,3 +119,23 @@ pub struct StagePassRateItem {
     pub non_delivery_priority_bad_case_count: i64,
     pub non_delivery_priority_pass_rate_percent: f64,
 }
+
+/// 质量 / token 效率统计响应
+#[derive(Debug, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityTokenEfficiencyResponse {
+    pub target_type: String,
+    pub total_reviews: i64,
+    pub linked_llm_review_count: i64,
+    pub avg_overall_score: f64,
+    pub avg_prompt_chars: f64,
+    pub avg_memory_delivery_chars: f64,
+    pub avg_memory_visual_chars: f64,
+    pub avg_linked_total_tokens: f64,
+    pub avg_prompt_chars_per_score_point: f64,
+    pub avg_linked_tokens_per_score_point: f64,
+    pub delivery_priority_avg_prompt_chars_per_score_point: f64,
+    pub delivery_priority_avg_linked_tokens_per_score_point: f64,
+    pub non_delivery_priority_avg_prompt_chars_per_score_point: f64,
+    pub non_delivery_priority_avg_linked_tokens_per_score_point: f64,
+}

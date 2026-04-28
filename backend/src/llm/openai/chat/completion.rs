@@ -1,14 +1,22 @@
 use serde_json::{json, Value};
 
 use super::super::config::LlmConfig;
-use super::parse::parse_assistant_content;
+use super::parse::{parse_assistant_content, parse_usage, TokenUsage};
 
-/// Non-streaming chat completion; returns trimmed assistant text (no tools).
-pub async fn chat_completion_assistant_text(
+/// Result of a non-streaming chat completion.
+#[derive(Debug, Clone)]
+pub struct ChatCompletionResult {
+    pub content: String,
+    pub usage: Option<TokenUsage>,
+    pub model: Option<String>,
+}
+
+/// Non-streaming chat completion; returns trimmed assistant text with optional usage.
+pub async fn chat_completion_with_usage(
     cfg: &LlmConfig,
     client: &reqwest::Client,
     messages: Vec<Value>,
-) -> Result<String, String> {
+) -> Result<ChatCompletionResult, String> {
     let url = format!("{}/chat/completions", cfg.base_url);
     let body = json!({
         "model": cfg.model,
@@ -35,5 +43,24 @@ pub async fn chat_completion_assistant_text(
         .json()
         .await
         .map_err(|e| format!("llm json: {e}"))?;
-    parse_assistant_content(&v)
+    let content = parse_assistant_content(&v)?;
+    let usage = parse_usage(&v);
+    let model = v.get("model").and_then(|m| m.as_str()).map(String::from);
+    Ok(ChatCompletionResult {
+        content,
+        usage,
+        model,
+    })
+}
+
+/// Non-streaming chat completion; returns trimmed assistant text (no tools).
+/// Backward-compatible wrapper that discards usage.
+pub async fn chat_completion_assistant_text(
+    cfg: &LlmConfig,
+    client: &reqwest::Client,
+    messages: Vec<Value>,
+) -> Result<String, String> {
+    chat_completion_with_usage(cfg, client, messages)
+        .await
+        .map(|r| r.content)
 }

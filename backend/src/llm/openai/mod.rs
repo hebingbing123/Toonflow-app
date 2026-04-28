@@ -2,11 +2,13 @@
 //!
 //! 聊天补全和图像生成端点，支持流式响应。
 
-mod chat;
+pub mod chat;
 mod config;
-mod images;
+pub mod images;
 
-pub use chat::{chat_completion_assistant_text, stream_chat_turn};
+pub use chat::completion::ChatCompletionResult;
+pub use chat::parse::TokenUsage;
+pub use chat::{chat_completion_assistant_text, chat_completion_with_usage, stream_chat_turn};
 pub use config::LlmConfig;
 pub use images::{
     images_generation_or_edit_url, images_generation_url, resolve_openai_image_model,

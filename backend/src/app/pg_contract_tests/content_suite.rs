@@ -405,6 +405,9 @@ async fn quality_reviews_require_bearer_token() {
     let (status, body) = get_json("/api/v1/quality/stats").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED, "body={body}");
 
+    let (status, body) = get_json("/api/v1/quality/token-efficiency").await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED, "body={body}");
+
     let (status, body) = get_json("/api/v1/quality/stage-pass-rate").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED, "body={body}");
 }
@@ -484,6 +487,10 @@ async fn quality_endpoints_return_database_error_without_pool() {
     assert_eq!(body["code"], "database_error");
 
     let (status, body) = get_json_bearer("/api/v1/quality/stats", &token).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE, "body={body}");
+    assert_eq!(body["code"], "database_error");
+
+    let (status, body) = get_json_bearer("/api/v1/quality/token-efficiency", &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE, "body={body}");
     assert_eq!(body["code"], "database_error");
 

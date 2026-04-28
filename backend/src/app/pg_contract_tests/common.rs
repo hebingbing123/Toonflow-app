@@ -79,6 +79,17 @@ pub(crate) async fn cleanup_quality_reviews(pool: &PgPool, review_ids: &[Uuid]) 
         .await;
 }
 
+pub(crate) async fn cleanup_llm_usage_rows_for_jobs(pool: &PgPool, job_ids: &[Uuid]) {
+    if job_ids.is_empty() {
+        return;
+    }
+
+    let _ = sqlx::query("DELETE FROM public.app_llm_usage_log WHERE job_id = ANY($1)")
+        .bind(job_ids)
+        .execute(pool)
+        .await;
+}
+
 pub(crate) async fn cleanup_jobs(pool: &PgPool, job_ids: &[Uuid]) {
     if job_ids.is_empty() {
         return;

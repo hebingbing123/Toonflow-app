@@ -1,4 +1,23 @@
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+/// Token usage returned by OpenAI-compatible APIs.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TokenUsage {
+    pub prompt_tokens: i64,
+    pub completion_tokens: i64,
+    pub total_tokens: i64,
+}
+
+/// Extract `usage` from a non-streaming chat completion response.
+pub(crate) fn parse_usage(v: &Value) -> Option<TokenUsage> {
+    let usage = v.get("usage")?;
+    Some(TokenUsage {
+        prompt_tokens: usage.get("prompt_tokens")?.as_i64()?,
+        completion_tokens: usage.get("completion_tokens")?.as_i64()?,
+        total_tokens: usage.get("total_tokens")?.as_i64()?,
+    })
+}
 
 /// Parses `choices[0].message.content` from a non-streaming chat completion JSON body.
 pub(crate) fn parse_assistant_content(v: &Value) -> Result<String, String> {

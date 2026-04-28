@@ -10,14 +10,12 @@ use std::collections::BTreeSet;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::production::workbench::video::generate::{
+use crate::production::{
     infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
-};
-use crate::production::workbench::video_prompt_memory::{
     persist_rejected_video_negative_memory, refresh_project_video_style_memory,
     refresh_script_video_style_memory,
 };
-use crate::settings::agent_memory::storage::append_agent_memory;
+use crate::settings::agent_memory::append_agent_memory;
 
 use super::types::QualityReview;
 
@@ -46,13 +44,13 @@ pub async fn maybe_write_quality_feedback_to_memory(
     if let Some(content) = build_quality_review_rejected_video_memory(review) {
         persist_rejected_video_negative_memory(pool, user_id, project_id, script_id, &content)
             .await
-            .map_err(|e| format!("Failed to persist rejected video feedback memory: {e}"))?;
+            .map_err(|e| format!("Failed to persist rejected video feedback memory: {e:?}"))?;
         refresh_script_video_style_memory(pool, user_id, project_id, script_id)
             .await
-            .map_err(|e| format!("Failed to refresh script video feedback memory: {e}"))?;
+            .map_err(|e| format!("Failed to refresh script video feedback memory: {e:?}"))?;
         refresh_project_video_style_memory(pool, user_id, project_id)
             .await
-            .map_err(|e| format!("Failed to refresh project video feedback memory: {e}"))?;
+            .map_err(|e| format!("Failed to refresh project video feedback memory: {e:?}"))?;
 
         tracing::info!(
             review_id = %review.id,
@@ -87,7 +85,7 @@ pub async fn maybe_write_quality_feedback_to_memory(
         None,
     )
     .await
-    .map_err(|e| format!("Failed to write quality feedback summary memory: {e}"))?;
+    .map_err(|e| format!("Failed to write quality feedback summary memory: {e:?}"))?;
 
     Ok(())
 }
@@ -133,7 +131,7 @@ fn build_quality_review_rejected_video_memory(review: &QualityReview) -> Option<
 }
 
 fn collect_negative_fragments(review: &QualityReview) -> Vec<String> {
-    let mut seen = BTreeSet::new();
+    let mut seen: BTreeSet<&'static str> = BTreeSet::new();
     let mut fragments = Vec::new();
 
     if let Some(category) = review.bad_case_category.as_deref() {

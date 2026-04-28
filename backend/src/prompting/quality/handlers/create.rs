@@ -2,6 +2,7 @@ use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::metering::llm_usage::link_quality_review_to_job_usage;
 use crate::state::AppState;
 
 use super::super::feedback::maybe_write_quality_feedback_to_memory;
@@ -76,9 +77,10 @@ pub(crate) async fn create_review(
     // Async feedback to memory (best-effort, don't block response)
     if let (Some(project_id), Some(script_id)) = (body.project_id, body.script_id) {
         let review_clone = review.clone();
+        let pool = pool.clone();
         tokio::spawn(async move {
             let _ = maybe_write_quality_feedback_to_memory(
-                pool,
+                &pool,
                 user_id,
                 project_id,
                 script_id,
@@ -86,6 +88,22 @@ pub(crate) async fn create_review(
             )
             .await;
         });
+    }
+
+    let linked = link_quality_review_to_job_usage(
+        pool,
+        user_id,
+        review.job_id,
+        review.id,
+        review.overall_score,
+    )
+    .await;
+    if linked > 0 {
+        tracing::info!(
+            quality_review_id = %review.id,
+            linked_usage_rows = linked,
+            "linked llm usage rows to quality review"
+        );
     }
 
     Ok(Json(review))

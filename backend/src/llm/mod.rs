@@ -8,10 +8,11 @@
 
 mod agent_loop;
 mod envelope;
-mod openai;
+pub mod openai;
 
 pub use agent_loop::harness_agent_run;
 pub use openai::{
-    chat_completion_assistant_text, images_generation_or_edit_url, images_generation_url,
-    resolve_openai_image_model, resolve_openai_image_size, stream_chat_turn, LlmConfig,
+    chat_completion_assistant_text, chat_completion_with_usage, images_generation_or_edit_url,
+    images_generation_url, resolve_openai_image_model, resolve_openai_image_size, stream_chat_turn,
+    LlmConfig, TokenUsage,
 };

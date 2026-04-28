@@ -48,6 +48,25 @@ async fn quality_reviews_roundtrip() {
         .expect("quality job uuid");
     created_job_ids.push(quality_job_id);
 
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_llm_usage_log (
+            user_id, job_id, call_type, model_name, provider,
+            prompt_tokens, completion_tokens, total_tokens,
+            prompt_chars, success, duration_ms, meta
+        )
+        VALUES (
+            $1, $2, 'jobs.asset_polish_prompt', 'gpt-4o-mini', 'openai',
+            120, 80, 200, 640, true, 800, '{"seed":"quality-roundtrip"}'::jsonb
+        )
+        "#,
+    )
+    .bind(sub)
+    .bind(quality_job_id)
+    .execute(&pool)
+    .await
+    .expect("seed llm usage log");
+
     let res = app
         .clone()
         .oneshot(
@@ -359,6 +378,46 @@ async fn quality_reviews_roundtrip() {
         "asset stats={asset_stats}"
     );
 
+    let linked_usage = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM public.app_llm_usage_log
+        WHERE quality_review_id = $1
+        "#,
+    )
+    .bind(script_review_id)
+    .fetch_one(&pool)
+    .await
+    .expect("linked llm usage count");
+    assert_eq!(linked_usage, 1);
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/quality/token-efficiency")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, token_efficiency) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "token_efficiency={token_efficiency}"
+    );
+    let token_efficiency = token_efficiency.as_array().expect("token efficiency list");
+    let script_efficiency = token_efficiency
+        .iter()
+        .find(|row| row["targetType"].as_str() == Some("script"))
+        .expect("script token efficiency row");
+    assert_eq!(script_efficiency["linkedLlmReviewCount"], 1);
+    assert_eq!(script_efficiency["avgLinkedTotalTokens"], 200.0);
+    assert_eq!(script_efficiency["avgLinkedTokensPerScorePoint"], 25.0);
+
     let res = app
         .clone()
         .oneshot(
@@ -397,6 +456,7 @@ async fn quality_reviews_roundtrip() {
         "stage rows should include asset aggregate: {stage_rows:?}"
     );
 
+    cleanup_llm_usage_rows_for_jobs(&pool, &created_job_ids).await;
     cleanup_quality_reviews(&pool, &created_review_ids).await;
     cleanup_jobs(&pool, &created_job_ids).await;
 }

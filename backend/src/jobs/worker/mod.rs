@@ -194,7 +194,7 @@ async fn execute_kind(
             asset_image::run_asset_generate_image(state, pool, id, row).await
         }
         k if k == JOB_KIND_ASSET_POLISH_PROMPT => {
-            asset_polish::run_asset_polish_prompt(state, row).await
+            asset_polish::run_asset_polish_prompt(state, pool, id, row).await
         }
         k if k == JOB_KIND_ASSET_GENERATE_BATCH => {
             asset_image::run_asset_generate_batch(state, pool, id, row).await

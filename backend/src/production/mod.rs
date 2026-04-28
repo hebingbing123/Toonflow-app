@@ -16,4 +16,10 @@ mod tests;
 pub use openapi::ProductionApi;
 pub use router::router;
 pub(crate) use types::{VideoItem, WorkbenchGenerateVideoBody};
-pub(crate) use workbench::video_prompt_memory::{storyboard_prompt_seed, StoryboardPromptSeedRow};
+pub(crate) use workbench::video::generate::{
+    infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
+};
+pub(crate) use workbench::video_prompt_memory::{
+    persist_rejected_video_negative_memory, refresh_project_video_style_memory,
+    refresh_script_video_style_memory, storyboard_prompt_seed, StoryboardPromptSeedRow,
+};
