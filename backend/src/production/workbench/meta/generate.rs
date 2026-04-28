@@ -5037,6 +5037,7 @@ fn build_project_visual_anchors(
             let is_delivery = memory_style_anchor_has_delivery_signal(&note);
             let score = score_memory_style_note_for_expanded_tier(
                 &note,
+                &scope_bucket,
                 structured_fields,
                 constraint_pressure,
             );
@@ -5054,7 +5055,22 @@ fn build_project_visual_anchors(
             .then_with(|| left.0.cmp(&right.0))
     });
 
+    if video_prompt_prefers_script_scope_delivery_memory(structured_fields, constraint_pressure) {
+        let script_delivery_selected = memory_candidates.iter().any(|candidate| {
+            candidate.3 == "script"
+                && (candidate.1
+                    || memory_style_anchor_has_high_value_performance_signal(&candidate.0))
+        });
+        if script_delivery_selected {
+            memory_candidates.retain(|candidate| {
+                candidate.3 == "script" || memory_style_anchor_is_visual_only(&candidate.0)
+            });
+        }
+    }
+
     let mut selected_memory_anchor_kinds = Vec::new();
+    let restrict_non_script_secondary_anchor =
+        video_prompt_prefers_script_scope_delivery_memory(structured_fields, constraint_pressure);
     for (note, is_delivery, _, scope_bucket, _) in memory_candidates {
         if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
             && memory_anchor_count >= 1
@@ -5068,6 +5084,9 @@ fn build_project_visual_anchors(
                 VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
             )
             && memory_style_anchor_is_complementary(&note, &anchors)
+            && (!restrict_non_script_secondary_anchor
+                || scope_bucket == "script"
+                || memory_style_anchor_is_visual_only(&note))
         {
             extend_prompt_coverage(&mut style_coverage, std::slice::from_ref(&note));
             if is_delivery {
@@ -5393,6 +5412,33 @@ fn memory_style_anchor_is_complementary(note: &str, anchors: &[String]) -> bool 
     })
 }
 
+fn memory_style_anchor_has_high_value_performance_signal(note: &str) -> bool {
+    split_prompt_note_fragments(note).any(|fragment| {
+        role_memory_fragment_is_high_value(fragment.as_str())
+            || sound_fragment_has_high_value_acoustic_detail(fragment.as_str())
+    })
+}
+
+fn memory_style_anchor_is_visual_only(note: &str) -> bool {
+    let families = split_prompt_note_fragments(note)
+        .filter_map(|fragment| style_note_fragment_family(fragment.as_str()))
+        .collect::<Vec<_>>();
+    !families.is_empty()
+        && families
+            .iter()
+            .all(|family| matches!(*family, "镜头" | "光影" | "环境" | "动作"))
+}
+
+fn video_prompt_prefers_script_scope_delivery_memory(
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    structured_fields.is_some_and(|fields| {
+        video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+            || current_storyboard_is_fragile_emotional_turn(fields)
+    })
+}
+
 fn compact_project_art_style_note(
     note: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -5670,6 +5716,7 @@ fn score_memory_style_fragment_for_lean_tier(
 
 fn score_memory_style_note_for_expanded_tier(
     note: &str,
+    scope_bucket: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> i32 {
@@ -5695,6 +5742,20 @@ fn score_memory_style_note_for_expanded_tier(
             if style_note_contains_family(note, "语气") {
                 score += 8;
             }
+        }
+    }
+    if video_prompt_prefers_script_scope_delivery_memory(structured_fields, constraint_pressure) {
+        match scope_bucket {
+            "script"
+                if memory_style_anchor_has_delivery_signal(note)
+                    || memory_style_anchor_has_high_value_performance_signal(note) =>
+            {
+                score += 24;
+            }
+            "project" | "mixed" if !memory_style_anchor_is_visual_only(note) => {
+                score -= 12;
+            }
+            _ => {}
         }
     }
     score
@@ -14029,6 +14090,87 @@ mod tests {
         assert!(result.diagnostics.memory_script_scope_chars > 0);
         assert_eq!(result.diagnostics.memory_project_scope_chars, 0);
         assert!(result.prompt.contains("Style anchor:"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_suppresses_project_emotion_carryover_when_script_delivery_memory_exists(
+    ) {
+        let script_note = "表演喉结滚动，语气压低气息尾音发颤";
+        let project_note = "情绪隐忍克制，环境雨丝玻璃";
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抽气后失声开口、隐忍哽咽、冷蓝窗光、我没事、雨声、A14）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec![
+                encode_video_prompt_style_note_source(
+                    project_note,
+                    "project_video_style_memory",
+                ),
+                encode_video_prompt_style_note_source(
+                    script_note,
+                    "script_role_video_style_memory",
+                ),
+            ],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("语气压低气息尾音发颤"),
+            "{}",
+            result.prompt
+        );
+        assert!(!result.prompt.contains("环境雨丝玻璃"), "{}", result.prompt);
+        assert_eq!(result.diagnostics.memory_project_scope_chars, 0);
+        assert!(result.diagnostics.memory_script_scope_chars > 0);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_keeps_visual_project_memory_as_secondary_anchor_when_script_delivery_memory_exists(
+    ) {
+        let script_note = "表演喉结滚动，语气压低气息尾音发颤";
+        let project_note = "光影冷蓝窗光层次，环境雨丝玻璃";
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抽气后失声开口、隐忍哽咽、冷蓝窗光、我没事、雨声、A14）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec![
+                encode_video_prompt_style_note_source(
+                    project_note,
+                    "project_video_style_memory",
+                ),
+                encode_video_prompt_style_note_source(
+                    script_note,
+                    "script_role_video_style_memory",
+                ),
+            ],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("光影冷蓝窗光层次"),
+            "{}",
+            result.prompt
+        );
+        assert!(result.diagnostics.memory_project_scope_chars > 0);
+        assert!(result.diagnostics.memory_script_scope_chars > 0);
     }
 
     #[test]
