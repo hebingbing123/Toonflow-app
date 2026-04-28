@@ -30,6 +30,8 @@ class _QualityReviewsWorkbenchDialogState
   late final _QualityReviewsWorkbenchControllers _ctrls;
 
   List<QualityReview> _reviews = const <QualityReview>[];
+  List<QualityTokenEfficiencySampleRow> _tokenEfficiencySamples =
+      const <QualityTokenEfficiencySampleRow>[];
   String? _statsSummary;
   String? _stagePassRateSummary;
   String? _tokenEfficiencySummary;
@@ -206,9 +208,13 @@ class _QualityReviewsWorkbenchDialogState
       );
       if (!mounted) return;
       setState(() {
+        _tokenEfficiencySamples = rows;
         _tokenEfficiencySampleSummary =
             summarizeQualityTokenEfficiencySampleRows(rows);
         _statusLine = '已刷新低效样本';
+        if (_ctrls.reviewIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
+          _ctrls.reviewIdCtrl.text = rows.first.reviewId;
+        }
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -308,6 +314,7 @@ class _QualityReviewsWorkbenchDialogState
     return QualityReviewsWorkbenchDialogView(
       model: QualityReviewsWorkbenchDialogViewModel(
         reviews: _reviews,
+        tokenEfficiencySamples: _tokenEfficiencySamples,
         statsSummary: _statsSummary,
         stagePassRateSummary: _stagePassRateSummary,
         tokenEfficiencySummary: _tokenEfficiencySummary,
@@ -388,6 +395,14 @@ class _QualityReviewsWorkbenchDialogState
           setState(() {
             _ctrls.reviewIdCtrl.text = review.id;
             _reviewDetails = formatQualityReviewDetails(review);
+            _statusLine = '已选中评审 ${review.id}';
+          });
+        },
+        onSelectTokenEfficiencySample: (sample) {
+          setState(() {
+            _ctrls.reviewIdCtrl.text = sample.reviewId;
+            _reviewDetails = formatQualityTokenEfficiencySampleDetails(sample);
+            _statusLine = '已选中低效样本 ${sample.reviewId}';
           });
         },
         onClose: () => Navigator.of(context).pop(),

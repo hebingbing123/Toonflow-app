@@ -131,9 +131,14 @@ void main() {
         promptCharsPerScorePoint: 230,
         linkedTokensPerScorePoint: 0,
         dominantMemoryScope: 'project',
+        recommendedAction: 'shift_to_delivery_memory',
+        recommendedActionReason: '先把预算从泛设定移到情绪、动作和语气约束',
       ),
     ]);
 
-    expect(summary, 'asset:score=4,p=230.0,t=0.0,bad/delivery/project');
+    expect(
+      summary,
+      'asset:score=4,p=230.0,t=0.0,bad/delivery/project->shift-to-delivery-memory',
+    );
   });
 }

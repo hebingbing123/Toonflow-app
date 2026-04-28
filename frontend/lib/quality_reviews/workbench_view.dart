@@ -103,7 +103,8 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final ValueChanged<bool> onCreatePassedChanged;
   final ValueChanged<bool> onCreateBadCaseChanged;
   final ValueChanged<QualityReview> onSelectReview;
-  final ValueChanged<QualityTokenEfficiencySampleRow> onSelectTokenEfficiencySample;
+  final ValueChanged<QualityTokenEfficiencySampleRow>
+  onSelectTokenEfficiencySample;
   final VoidCallback onClose;
 }
 
