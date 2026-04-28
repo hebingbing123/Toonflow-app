@@ -15,7 +15,7 @@ use crate::production::{
     persist_rejected_video_negative_memory, refresh_project_video_style_memory,
     refresh_script_video_style_memory,
 };
-use crate::settings::agent_memory::append_agent_memory;
+use crate::settings::agent_memory::replace_named_summary_memory;
 
 use super::types::QualityReview;
 
@@ -72,16 +72,15 @@ pub async fn maybe_write_quality_feedback_to_memory(
         _ => "productionAgent",
     };
 
-    append_agent_memory(
+    replace_named_summary_memory(
         pool,
         user_id,
         project_id,
         Some(script_id),
         agent_type,
-        "summary",
         "assistant",
+        QUALITY_FEEDBACK_MEMORY_NAME,
         &feedback_content,
-        Some(QUALITY_FEEDBACK_MEMORY_NAME),
         None,
     )
     .await
@@ -265,6 +264,7 @@ fn build_generic_quality_feedback_content(review: &QualityReview) -> String {
 mod tests {
     use super::{
         build_generic_quality_feedback_content, build_quality_review_rejected_video_memory,
+        QUALITY_FEEDBACK_MEMORY_NAME,
     };
     use crate::prompting::quality::types::QualityReview;
     use serde_json::json;
@@ -352,5 +352,10 @@ mod tests {
         assert!(content.contains("low_scores=["), "{content}");
         assert!(content.contains("notes="), "{content}");
         assert!(content.ends_with("model=demo-model"), "{content}");
+    }
+
+    #[test]
+    fn generic_feedback_summary_memory_stays_named_for_scope_replacement() {
+        assert_eq!(QUALITY_FEEDBACK_MEMORY_NAME, "quality_feedback_memory");
     }
 }

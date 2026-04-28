@@ -17,6 +17,7 @@ pub(crate) use handlers::{
 };
 pub(crate) use storage::{
     append_agent_memory, delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,
+    replace_named_summary_memory,
 };
 pub(crate) use types::ClearMemoryResponse;
 

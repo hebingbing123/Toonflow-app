@@ -106,3 +106,62 @@ pub(crate) async fn append_agent_memory(
 
     Ok(())
 }
+
+/// Replace a named summary memory within the exact user/project/script/agent scope.
+/// This keeps automated summary memories bounded instead of appending indefinitely.
+pub(crate) async fn replace_named_summary_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    episodes_id: Option<i32>,
+    agent_type: &str,
+    role: &str,
+    name: &str,
+    content: &str,
+    create_time_ms: Option<i64>,
+) -> Result<(), ApiError> {
+    let time_ms = create_time_ms.unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id IS NOT DISTINCT FROM $3
+          AND agent_type = $4
+          AND memory_type = 'summary'
+          AND name = $5
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .bind(episodes_id)
+    .bind(agent_type)
+    .bind(name)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_agent_memory (
+            owner_user_id, numeric_project_id, episodes_id, agent_type,
+            memory_type, role, name, content, summarized, create_time_ms
+        )
+        VALUES ($1, $2, $3, $4, 'summary', $5, $6, $7, 1, $8)
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .bind(episodes_id)
+    .bind(agent_type)
+    .bind(role)
+    .bind(name)
+    .bind(content)
+    .bind(time_ms)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
