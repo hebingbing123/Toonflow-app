@@ -22,7 +22,13 @@ String summarizeQualityStatsRows(
     return '当前没有质量统计';
   }
   final visible = items.take(maxItems).map((row) {
-    return '${row.targetType}: total=${row.totalReviews}, pass=${row.passRatePercent.toStringAsFixed(1)}%';
+    final delivery = row.deliveryPriorityTotalReviews == 0
+        ? 'delivery=n/a'
+        : 'delivery=${row.deliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
+    final nonDelivery = row.nonDeliveryPriorityTotalReviews == 0
+        ? 'non=n/a'
+        : 'non=${row.nonDeliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
+    return '${row.targetType}: total=${row.totalReviews}, pass=${row.passRatePercent.toStringAsFixed(1)}% ($delivery, $nonDelivery)';
   }).join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
   return '$visible$suffix';
@@ -41,7 +47,13 @@ String summarizeStagePassRateRows(
         ? row.reviewDate.substring(0, 10)
         : row.reviewDate;
     final passRate = row.passRatePercent?.toStringAsFixed(1) ?? 'n/a';
-    return '$date ${row.targetType}:$passRate%';
+    final delivery = row.deliveryPriorityTotalReviews == 0
+        ? 'delivery=n/a'
+        : 'delivery=${row.deliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
+    final nonDelivery = row.nonDeliveryPriorityTotalReviews == 0
+        ? 'non=n/a'
+        : 'non=${row.nonDeliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
+    return '$date ${row.targetType}:$passRate% ($delivery, $nonDelivery)';
   }).join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
   return '$visible$suffix';
@@ -52,6 +64,8 @@ String formatQualityReviewDetails(QualityReview row) {
     row.id,
     row.targetType,
     row.source,
+    if (row.memoryDeliveryPriorityApplied != null)
+      'delivery_priority=${row.memoryDeliveryPriorityApplied}',
     if (row.targetId != null && row.targetId!.isNotEmpty) 'target=${row.targetId}',
     if (row.overallScore != null) 'score=${row.overallScore}',
     if (row.passed != null) 'passed=${row.passed}',

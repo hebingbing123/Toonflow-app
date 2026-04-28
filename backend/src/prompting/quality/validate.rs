@@ -26,6 +26,14 @@ pub(super) fn validate_list_reviews_query(query: &ListQualityReviewsQuery) -> Re
             )));
         }
     }
+    if let Some(source) = query.source.as_deref() {
+        if !VALID_SOURCES.contains(&source) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid source: {}, must be one of {:?}",
+                source, VALID_SOURCES
+            )));
+        }
+    }
 
     Ok(())
 }

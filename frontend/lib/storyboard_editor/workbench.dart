@@ -60,6 +60,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   String _mode = 'standard';
   String _resolution = '1080p';
   bool _audio = false;
+  bool _autoQualityReviewOnGeneratePrompt = false;
 
   StoryboardWorkbenchDiagnosis _currentDiagnosis() {
     return diagnoseStoryboardWorkbench(
@@ -244,6 +245,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           resolution: _resolution,
           mode: _mode,
           audio: _audio,
+          autoQualityReviewOnGeneratePrompt: _autoQualityReviewOnGeneratePrompt,
           modelDetail: _modelDetail,
           generateData: _generateData,
           productionRow: _productionRow,
@@ -254,6 +256,10 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onResolutionChanged: _setResolutionValue,
           onModeChanged: _setModeValue,
           onAudioChanged: _setAudioValue,
+          onAutoQualityReviewOnGeneratePromptChanged: (value) =>
+              _applyWorkbenchState(() {
+                _autoQualityReviewOnGeneratePrompt = value;
+              }),
           onAddTrack: () => _runDialogAction(_addTrack),
           onDeleteTrack: () => _runDialogAction(_deleteTrack),
           onGenerateVideoPrompt: () => _runDialogAction(_generateVideoPrompt),

@@ -11,7 +11,9 @@ Future<List<QualityReview>> fetchQualityReviews(
   String? targetType,
   String? targetId,
   String? jobId,
+  String? source,
   bool? isBadCase,
+  bool? memoryDeliveryPriorityApplied,
   int? limit,
   int? offset,
 }) async {
@@ -25,8 +27,14 @@ Future<List<QualityReview>> fetchQualityReviews(
   if (jobId != null && jobId.isNotEmpty) {
     query['jobId'] = jobId;
   }
+  if (source != null && source.isNotEmpty) {
+    query['source'] = source;
+  }
   if (isBadCase != null) {
     query['isBadCase'] = isBadCase.toString();
+  }
+  if (memoryDeliveryPriorityApplied != null) {
+    query['memoryDeliveryPriorityApplied'] = memoryDeliveryPriorityApplied.toString();
   }
   if (limit != null) {
     query['limit'] = '$limit';

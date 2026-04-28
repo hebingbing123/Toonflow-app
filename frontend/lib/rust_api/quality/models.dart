@@ -25,6 +25,7 @@ class QualityReview {
     this.skillVersion,
     this.modelName,
     this.modelParams,
+    this.memoryDeliveryPriorityApplied,
     this.reviewerId,
     required this.isBadCase,
     this.badCaseCategory,
@@ -52,6 +53,7 @@ class QualityReview {
   final String? skillVersion;
   final String? modelName;
   final Map<String, dynamic>? modelParams;
+  final bool? memoryDeliveryPriorityApplied;
   final String? reviewerId;
   final bool isBadCase;
   final String? badCaseCategory;
@@ -85,6 +87,8 @@ class QualityReview {
       modelParams: json['modelParams'] == null
           ? null
           : Map<String, dynamic>.from(json['modelParams'] as Map),
+      memoryDeliveryPriorityApplied:
+          json['memoryDeliveryPriorityApplied'] as bool?,
       reviewerId: json['reviewerId'] as String?,
       isBadCase: json['isBadCase'] as bool? ?? false,
       badCaseCategory: json['badCaseCategory'] as String?,
@@ -112,6 +116,7 @@ class CreateQualityReviewBody {
     this.skillVersion,
     this.modelName,
     this.modelParams,
+    this.memoryDeliveryPriorityApplied,
     this.isBadCase,
     this.badCaseCategory,
   });
@@ -134,6 +139,7 @@ class CreateQualityReviewBody {
   final String? skillVersion;
   final String? modelName;
   final Map<String, dynamic>? modelParams;
+  final bool? memoryDeliveryPriorityApplied;
   final bool? isBadCase;
   final String? badCaseCategory;
 
@@ -162,6 +168,7 @@ class CreateQualityReviewBody {
     put('skillVersion', skillVersion);
     put('modelName', modelName);
     put('modelParams', modelParams);
+    put('memoryDeliveryPriorityApplied', memoryDeliveryPriorityApplied);
     put('isBadCase', isBadCase);
     put('badCaseCategory', badCaseCategory);
     return map;

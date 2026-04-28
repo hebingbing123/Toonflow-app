@@ -94,6 +94,7 @@ String buildStoryboardVideoPromptDiagnosticsLine(
       'Observation ${diagnostics.observationNoteChars}',
     if (diagnostics.memoryStyleChars > 0)
       'Memory ${diagnostics.memoryStyleChars}',
+    if (diagnostics.memoryDeliveryPriorityApplied) 'Delivery-priority ✅',
     'Memory tier ${diagnostics.memoryBudgetTier}',
   ];
   return parts.join(' · ');
@@ -155,6 +156,11 @@ String buildStoryboardVideoPromptBudgetHint(
 ) {
   if (!diagnostics.usesReferenceFrame) {
     return '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。';
+  }
+  if (diagnostics.memoryDeliveryPriorityApplied &&
+      diagnostics.memoryDeliveryChars > 0 &&
+      diagnostics.memoryBudgetTier == 'expanded') {
+    return '已命中表演/语气优先记忆，先别删这段；优先压缩重复的场景/风格与连续性泛句，避免又回到“读稿腔”。';
   }
   final anchorCount =
       diagnostics.roleAnchorCount +

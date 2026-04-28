@@ -53,9 +53,17 @@ pub(crate) async fn list_reviews(
         qb.push(" AND job_id = ");
         qb.push_bind(job_id);
     }
+    if let Some(source) = &query.source {
+        qb.push(" AND source = ");
+        qb.push_bind(source);
+    }
     if let Some(is_bad_case) = query.is_bad_case {
         qb.push(" AND is_bad_case = ");
         qb.push_bind(is_bad_case);
+    }
+    if let Some(memory_delivery_priority_applied) = query.memory_delivery_priority_applied {
+        qb.push(" AND memory_delivery_priority_applied = ");
+        qb.push_bind(memory_delivery_priority_applied);
     }
     qb.push(" ORDER BY created_at DESC LIMIT ");
     qb.push_bind(limit);

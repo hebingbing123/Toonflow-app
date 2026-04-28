@@ -36,6 +36,8 @@ class _QualityReviewsWorkbenchDialogState
   bool _loadingReviewById = false;
   bool _creatingReview = false;
   bool _filterBadCasesOnly = false;
+  bool _filterDeliveryPriorityOnly = false;
+  bool _filterAutoSourceOnly = false;
   bool _createPassed = true;
   bool _createBadCase = false;
   String? _statusLine;
@@ -59,7 +61,11 @@ class _QualityReviewsWorkbenchDialogState
     super.dispose();
   }
 
-  Future<void> _loadReviews({required bool onlyBadCases}) async {
+  Future<void> _loadReviews({
+    required bool onlyBadCases,
+    bool onlyDeliveryPriority = false,
+    bool onlyAutoSource = false,
+  }) async {
     setState(() {
       if (onlyBadCases) {
         _loadingBadCases = true;
@@ -74,16 +80,24 @@ class _QualityReviewsWorkbenchDialogState
         targetType: _ctrls.targetTypeFilterCtrl.text.trim(),
         targetId: _ctrls.targetIdFilterCtrl.text.trim(),
         jobId: _ctrls.jobIdFilterCtrl.text.trim(),
+        source: onlyAutoSource ? 'auto' : null,
         isBadCase: onlyBadCases ? true : null,
+        memoryDeliveryPriorityApplied: onlyDeliveryPriority ? true : null,
         limit: 20,
       );
       if (!mounted) return;
       setState(() {
         _reviews = rows;
         _filterBadCasesOnly = onlyBadCases;
-        _statusLine = onlyBadCases
-            ? '已加载 ${rows.length} 条坏例评审'
-            : '已加载 ${rows.length} 条评审';
+        _filterDeliveryPriorityOnly = onlyDeliveryPriority;
+        _filterAutoSourceOnly = onlyAutoSource;
+        final labels = <String>[];
+        if (onlyBadCases) labels.add('坏例');
+        if (onlyDeliveryPriority) labels.add('命中表演/语气优先');
+        if (onlyAutoSource) labels.add('auto');
+        _statusLine = labels.isEmpty
+            ? '已加载 ${rows.length} 条评审'
+            : '已加载 ${rows.length} 条${labels.join(" + ")}评审';
         if (_ctrls.reviewIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
           _ctrls.reviewIdCtrl.text = rows.first.id;
         }
@@ -216,7 +230,11 @@ class _QualityReviewsWorkbenchDialogState
         _reviewDetails = formatQualityReviewDetails(created);
         _statusLine = '已创建评审 ${created.id}';
       });
-      await _loadReviews(onlyBadCases: _filterBadCasesOnly);
+      await _loadReviews(
+        onlyBadCases: _filterBadCasesOnly,
+        onlyDeliveryPriority: _filterDeliveryPriorityOnly,
+        onlyAutoSource: _filterAutoSourceOnly,
+      );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = e.toString());
@@ -237,6 +255,8 @@ class _QualityReviewsWorkbenchDialogState
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
         filterBadCasesOnly: _filterBadCasesOnly,
+        filterDeliveryPriorityOnly: _filterDeliveryPriorityOnly,
+        filterAutoSourceOnly: _filterAutoSourceOnly,
         createPassed: _createPassed,
         createBadCase: _createBadCase,
         loadingReviews: _loadingReviews,
@@ -258,10 +278,28 @@ class _QualityReviewsWorkbenchDialogState
       ),
       callbacks: QualityReviewsWorkbenchDialogViewCallbacks(
         onLoadReviews: () {
-          _loadReviews(onlyBadCases: false);
+          _loadReviews(onlyBadCases: false, onlyDeliveryPriority: false);
         },
         onLoadBadCases: () {
-          _loadReviews(onlyBadCases: true);
+          _loadReviews(
+            onlyBadCases: true,
+            onlyDeliveryPriority: _filterDeliveryPriorityOnly,
+            onlyAutoSource: _filterAutoSourceOnly,
+          );
+        },
+        onLoadDeliveryPriorityReviews: () {
+          _loadReviews(
+            onlyBadCases: _filterBadCasesOnly,
+            onlyDeliveryPriority: true,
+            onlyAutoSource: _filterAutoSourceOnly,
+          );
+        },
+        onLoadAutoSourceReviews: () {
+          _loadReviews(
+            onlyBadCases: _filterBadCasesOnly,
+            onlyDeliveryPriority: _filterDeliveryPriorityOnly,
+            onlyAutoSource: true,
+          );
         },
         onLoadStats: () {
           _loadStats();

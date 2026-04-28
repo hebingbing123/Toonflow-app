@@ -15,6 +15,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.resolution,
     required this.mode,
     required this.audio,
+    required this.autoQualityReviewOnGeneratePrompt,
     required this.modelDetail,
     required this.generateData,
     required this.productionRow,
@@ -25,6 +26,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onResolutionChanged,
     required this.onModeChanged,
     required this.onAudioChanged,
+    required this.onAutoQualityReviewOnGeneratePromptChanged,
     required this.onAddTrack,
     required this.onDeleteTrack,
     required this.onGenerateVideoPrompt,
@@ -50,6 +52,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final String resolution;
   final String mode;
   final bool audio;
+  final bool autoQualityReviewOnGeneratePrompt;
   final VideoModelDetail? modelDetail;
   final GetGenerateDataResponse? generateData;
   final ProductionStoryboardItemV1? productionRow;
@@ -60,6 +63,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final ValueChanged<String> onResolutionChanged;
   final ValueChanged<String> onModeChanged;
   final ValueChanged<bool> onAudioChanged;
+  final ValueChanged<bool> onAutoQualityReviewOnGeneratePromptChanged;
   final VoidCallback onAddTrack;
   final VoidCallback onDeleteTrack;
   final VoidCallback onGenerateVideoPrompt;
@@ -126,6 +130,20 @@ class _StoryboardVideoSection extends StatelessWidget {
               child: Text(loadingWorkbench ? '刷新中…' : '刷新视频数据'),
             ),
           ],
+        ),
+        const SizedBox(height: 4),
+        CheckboxListTile(
+          value: autoQualityReviewOnGeneratePrompt,
+          onChanged: saving
+              ? null
+              : (value) => onAutoQualityReviewOnGeneratePromptChanged(
+                    value ?? false,
+                  ),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('生成时自动记录质量评审样本'),
+          subtitle: const Text('用于统计“命中表演/语气记忆优先策略”的通过率与坏例趋势。'),
+          controlAffinity: ListTileControlAffinity.leading,
         ),
         const SizedBox(height: 8),
         TextField(

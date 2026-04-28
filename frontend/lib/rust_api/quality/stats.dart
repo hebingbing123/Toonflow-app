@@ -15,6 +15,14 @@ class QualityStatsRow {
     required this.badCaseCount,
     required this.passRatePercent,
     required this.avgOverallScore,
+    required this.deliveryPriorityTotalReviews,
+    required this.deliveryPriorityPassedCount,
+    required this.deliveryPriorityBadCaseCount,
+    required this.deliveryPriorityPassRatePercent,
+    required this.nonDeliveryPriorityTotalReviews,
+    required this.nonDeliveryPriorityPassedCount,
+    required this.nonDeliveryPriorityBadCaseCount,
+    required this.nonDeliveryPriorityPassRatePercent,
   });
 
   final String targetType;
@@ -24,6 +32,14 @@ class QualityStatsRow {
   final int badCaseCount;
   final double passRatePercent;
   final double avgOverallScore;
+  final int deliveryPriorityTotalReviews;
+  final int deliveryPriorityPassedCount;
+  final int deliveryPriorityBadCaseCount;
+  final double deliveryPriorityPassRatePercent;
+  final int nonDeliveryPriorityTotalReviews;
+  final int nonDeliveryPriorityPassedCount;
+  final int nonDeliveryPriorityBadCaseCount;
+  final double nonDeliveryPriorityPassRatePercent;
 
   factory QualityStatsRow.fromJson(Map<String, dynamic> json) {
     return QualityStatsRow(
@@ -34,6 +50,22 @@ class QualityStatsRow {
       badCaseCount: (json['badCaseCount'] as num).toInt(),
       passRatePercent: (json['passRatePercent'] as num).toDouble(),
       avgOverallScore: (json['avgOverallScore'] as num).toDouble(),
+      deliveryPriorityTotalReviews:
+          (json['deliveryPriorityTotalReviews'] as num?)?.toInt() ?? 0,
+      deliveryPriorityPassedCount:
+          (json['deliveryPriorityPassedCount'] as num?)?.toInt() ?? 0,
+      deliveryPriorityBadCaseCount:
+          (json['deliveryPriorityBadCaseCount'] as num?)?.toInt() ?? 0,
+      deliveryPriorityPassRatePercent:
+          (json['deliveryPriorityPassRatePercent'] as num?)?.toDouble() ?? 0,
+      nonDeliveryPriorityTotalReviews:
+          (json['nonDeliveryPriorityTotalReviews'] as num?)?.toInt() ?? 0,
+      nonDeliveryPriorityPassedCount:
+          (json['nonDeliveryPriorityPassedCount'] as num?)?.toInt() ?? 0,
+      nonDeliveryPriorityBadCaseCount:
+          (json['nonDeliveryPriorityBadCaseCount'] as num?)?.toInt() ?? 0,
+      nonDeliveryPriorityPassRatePercent:
+          (json['nonDeliveryPriorityPassRatePercent'] as num?)?.toDouble() ?? 0,
     );
   }
 }
@@ -47,6 +79,14 @@ class StagePassRateRow {
     required this.badCaseCount,
     this.passRatePercent,
     this.avgScore,
+    required this.deliveryPriorityTotalReviews,
+    required this.deliveryPriorityPassedCount,
+    required this.deliveryPriorityBadCaseCount,
+    required this.deliveryPriorityPassRatePercent,
+    required this.nonDeliveryPriorityTotalReviews,
+    required this.nonDeliveryPriorityPassedCount,
+    required this.nonDeliveryPriorityBadCaseCount,
+    required this.nonDeliveryPriorityPassRatePercent,
   });
 
   final String targetType;
@@ -56,6 +96,14 @@ class StagePassRateRow {
   final int badCaseCount;
   final double? passRatePercent;
   final double? avgScore;
+  final int deliveryPriorityTotalReviews;
+  final int deliveryPriorityPassedCount;
+  final int deliveryPriorityBadCaseCount;
+  final double deliveryPriorityPassRatePercent;
+  final int nonDeliveryPriorityTotalReviews;
+  final int nonDeliveryPriorityPassedCount;
+  final int nonDeliveryPriorityBadCaseCount;
+  final double nonDeliveryPriorityPassRatePercent;
 
   factory StagePassRateRow.fromJson(Map<String, dynamic> json) {
     return StagePassRateRow(
@@ -66,6 +114,22 @@ class StagePassRateRow {
       badCaseCount: (json['badCaseCount'] as num).toInt(),
       passRatePercent: (json['passRatePercent'] as num?)?.toDouble(),
       avgScore: (json['avgScore'] as num?)?.toDouble(),
+      deliveryPriorityTotalReviews:
+          (json['deliveryPriorityTotalReviews'] as num?)?.toInt() ?? 0,
+      deliveryPriorityPassedCount:
+          (json['deliveryPriorityPassedCount'] as num?)?.toInt() ?? 0,
+      deliveryPriorityBadCaseCount:
+          (json['deliveryPriorityBadCaseCount'] as num?)?.toInt() ?? 0,
+      deliveryPriorityPassRatePercent:
+          (json['deliveryPriorityPassRatePercent'] as num?)?.toDouble() ?? 0,
+      nonDeliveryPriorityTotalReviews:
+          (json['nonDeliveryPriorityTotalReviews'] as num?)?.toInt() ?? 0,
+      nonDeliveryPriorityPassedCount:
+          (json['nonDeliveryPriorityPassedCount'] as num?)?.toInt() ?? 0,
+      nonDeliveryPriorityBadCaseCount:
+          (json['nonDeliveryPriorityBadCaseCount'] as num?)?.toInt() ?? 0,
+      nonDeliveryPriorityPassRatePercent:
+          (json['nonDeliveryPriorityPassRatePercent'] as num?)?.toDouble() ?? 0,
     );
   }
 }

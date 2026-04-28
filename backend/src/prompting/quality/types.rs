@@ -30,6 +30,7 @@ pub struct QualityReview {
     pub skill_version: Option<String>,
     pub model_name: Option<String>,
     pub model_params: Option<serde_json::Value>,
+    pub memory_delivery_priority_applied: Option<bool>,
     pub reviewer_id: Option<Uuid>,
     pub is_bad_case: bool,
     pub bad_case_category: Option<String>,
@@ -57,6 +58,7 @@ pub struct CreateQualityReviewBody {
     pub skill_version: Option<String>,
     pub model_name: Option<String>,
     pub model_params: Option<serde_json::Value>,
+    pub memory_delivery_priority_applied: Option<bool>,
     pub is_bad_case: Option<bool>,
     pub bad_case_category: Option<String>,
 }
@@ -69,7 +71,9 @@ pub struct ListQualityReviewsQuery {
     pub target_type: Option<String>,
     pub target_id: Option<String>,
     pub job_id: Option<Uuid>,
+    pub source: Option<String>,
     pub is_bad_case: Option<bool>,
+    pub memory_delivery_priority_applied: Option<bool>,
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }
@@ -85,6 +89,14 @@ pub struct QualityStatsResponse {
     pub bad_case_count: i64,
     pub pass_rate_percent: f64,
     pub avg_overall_score: f64,
+    pub delivery_priority_total_reviews: i64,
+    pub delivery_priority_passed_count: i64,
+    pub delivery_priority_bad_case_count: i64,
+    pub delivery_priority_pass_rate_percent: f64,
+    pub non_delivery_priority_total_reviews: i64,
+    pub non_delivery_priority_passed_count: i64,
+    pub non_delivery_priority_bad_case_count: i64,
+    pub non_delivery_priority_pass_rate_percent: f64,
 }
 
 /// 分环节通过率条目
@@ -98,4 +110,12 @@ pub struct StagePassRateItem {
     pub bad_case_count: i64,
     pub pass_rate_percent: Option<f64>,
     pub avg_score: Option<f64>,
+    pub delivery_priority_total_reviews: i64,
+    pub delivery_priority_passed_count: i64,
+    pub delivery_priority_bad_case_count: i64,
+    pub delivery_priority_pass_rate_percent: f64,
+    pub non_delivery_priority_total_reviews: i64,
+    pub non_delivery_priority_passed_count: i64,
+    pub non_delivery_priority_bad_case_count: i64,
+    pub non_delivery_priority_pass_rate_percent: f64,
 }

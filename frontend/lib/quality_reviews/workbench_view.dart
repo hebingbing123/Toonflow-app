@@ -11,6 +11,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.reviewDetails,
     required this.statusLine,
     required this.filterBadCasesOnly,
+    required this.filterDeliveryPriorityOnly,
+    required this.filterAutoSourceOnly,
     required this.createPassed,
     required this.createBadCase,
     required this.loadingReviews,
@@ -37,6 +39,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? reviewDetails;
   final String? statusLine;
   final bool filterBadCasesOnly;
+  final bool filterDeliveryPriorityOnly;
+  final bool filterAutoSourceOnly;
   final bool createPassed;
   final bool createBadCase;
   final bool loadingReviews;
@@ -61,6 +65,8 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   const QualityReviewsWorkbenchDialogViewCallbacks({
     required this.onLoadReviews,
     required this.onLoadBadCases,
+    required this.onLoadDeliveryPriorityReviews,
+    required this.onLoadAutoSourceReviews,
     required this.onLoadStats,
     required this.onLoadStagePassRate,
     required this.onLoadReviewById,
@@ -73,6 +79,8 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
 
   final VoidCallback onLoadReviews;
   final VoidCallback onLoadBadCases;
+  final VoidCallback onLoadDeliveryPriorityReviews;
+  final VoidCallback onLoadAutoSourceReviews;
   final VoidCallback onLoadStats;
   final VoidCallback onLoadStagePassRate;
   final VoidCallback onLoadReviewById;
@@ -117,6 +125,23 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   color: outline,
                 ),
               ),
+              if (model.filterBadCasesOnly ||
+                  model.filterDeliveryPriorityOnly ||
+                  model.filterAutoSourceOnly) ...[
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    if (model.filterBadCasesOnly)
+                      const Chip(label: Text('只看坏例')),
+                    if (model.filterDeliveryPriorityOnly)
+                      const Chip(label: Text('只看命中表演/语气优先')),
+                    if (model.filterAutoSourceOnly)
+                      const Chip(label: Text('source=auto')),
+                  ],
+                ),
+              ],
               const SizedBox(height: 12),
               Text('筛选与读取', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
@@ -150,6 +175,22 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         ? null
                         : callbacks.onLoadBadCases,
                     child: Text(model.loadingBadCases ? '加载中…' : '只看坏例'),
+                  ),
+                  OutlinedButton(
+                    onPressed: model.loadingReviews ||
+                            model.loadingBadCases ||
+                            model.creatingReview
+                        ? null
+                        : callbacks.onLoadDeliveryPriorityReviews,
+                    child: const Text('只看命中表演/语气优先'),
+                  ),
+                  OutlinedButton(
+                    onPressed: model.loadingReviews ||
+                            model.loadingBadCases ||
+                            model.creatingReview
+                        ? null
+                        : callbacks.onLoadAutoSourceReviews,
+                    child: const Text('只看 auto 样本'),
                   ),
                   OutlinedButton(
                     onPressed: model.loadingStats
@@ -256,8 +297,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.reviews.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
-                  model.filterBadCasesOnly
+                  model.filterBadCasesOnly && model.filterDeliveryPriorityOnly
+                      ? '坏例 + 命中表演/语气优先 ${model.reviews.length} 条'
+                      : model.filterBadCasesOnly
                       ? '坏例 ${model.reviews.length} 条'
+                      : model.filterDeliveryPriorityOnly
+                      ? '命中表演/语气优先 ${model.reviews.length} 条'
+                      : model.filterAutoSourceOnly
+                      ? 'auto 样本 ${model.reviews.length} 条'
                       : '评审 ${model.reviews.length} 条',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
@@ -270,7 +317,20 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
                     ),
                     subtitle: Text(formatQualityReviewDetails(review)),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (review.memoryDeliveryPriorityApplied == true)
+                          const Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: Chip(
+                              label: Text('delivery'),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
                     onTap: () => callbacks.onSelectReview(review),
                   ),
                 ),

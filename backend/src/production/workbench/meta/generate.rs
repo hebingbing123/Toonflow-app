@@ -4,6 +4,7 @@ use axum::{
     Json as JsonResponse,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -107,6 +108,8 @@ pub(in crate::production) struct GenerateVideoPromptBody {
     #[serde(default)]
     storyboard_id: Option<i32>,
     #[serde(default)]
+    auto_quality_review: bool,
+    #[serde(default)]
     image_url: Option<String>,
     #[serde(default)]
     description: Option<String>,
@@ -142,10 +145,14 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     style_anchor_count: usize,
     memory_style_anchor_count: usize,
     memory_delivery_anchor_count: usize,
+    memory_delivery_priority_applied: bool,
     memory_style_chars: usize,
     memory_visual_chars: usize,
     memory_delivery_chars: usize,
     director_manual_yielded_to_memory: bool,
+    director_manual_yielded_chars: usize,
+    director_performance_trimmed_chars: usize,
+    director_anchor_saved_chars: usize,
     continuity_note_count: usize,
     continuity_note_chars: usize,
     uses_reference_frame: bool,
@@ -253,6 +260,60 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         observation_note.as_deref(),
     );
 
+    if body.auto_quality_review {
+        let pool = pool.clone();
+        let model_name = "runway-gen-2".to_string();
+        let project_id = body.project_id;
+        let script_id = body.script_id;
+        let target_type = if body.storyboard_id.is_some_and(|id| id > 0) {
+            "storyboard".to_string()
+        } else {
+            "output".to_string()
+        };
+        let target_id = body
+            .storyboard_id
+            .filter(|id| *id > 0)
+            .map(|id| id.to_string());
+        let memory_delivery_priority_applied = diagnostics.memory_delivery_priority_applied;
+        let model_params = json!({
+            "source": "production.workbench.generate-video-prompt",
+            "diagnostics": {
+                "promptChars": diagnostics.prompt_chars,
+                "memoryBudgetTier": diagnostics.memory_budget_tier,
+                "memoryStyleChars": diagnostics.memory_style_chars,
+                "memoryVisualChars": diagnostics.memory_visual_chars,
+                "memoryDeliveryChars": diagnostics.memory_delivery_chars,
+                "memoryDeliveryPriorityApplied": diagnostics.memory_delivery_priority_applied,
+                "memoryStyleAnchorCount": diagnostics.memory_style_anchor_count,
+                "memoryDeliveryAnchorCount": diagnostics.memory_delivery_anchor_count,
+            }
+        });
+        tokio::spawn(async move {
+            let _ = sqlx::query(
+                r#"
+                INSERT INTO app_quality_review (
+                  user_id, project_id, script_id, job_id,
+                  target_type, target_id, source,
+                  model_name, model_params,
+                  memory_delivery_priority_applied,
+                  is_bad_case
+                )
+                VALUES ($1, $2, $3, NULL, $4, $5, 'auto', $6, $7, $8, false)
+                "#,
+            )
+            .bind(user_id)
+            .bind(project_id)
+            .bind(script_id)
+            .bind(target_type)
+            .bind(target_id)
+            .bind(model_name)
+            .bind(model_params)
+            .bind(memory_delivery_priority_applied)
+            .execute(&pool)
+            .await;
+        });
+    }
+
     Ok(JsonResponse(GenerateVideoPromptResponse {
         prompt: prompt_result.prompt,
         negative_prompt,
@@ -289,7 +350,10 @@ struct VideoPromptStyleAnchorBuild {
     anchors: Vec<String>,
     memory_style_anchor_count: usize,
     memory_delivery_anchor_count: usize,
+    memory_delivery_priority_applied: bool,
     director_manual_yielded_to_memory: bool,
+    director_manual_yielded_chars: usize,
+    director_performance_trimmed_chars: usize,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -4032,10 +4096,16 @@ fn build_video_prompt_with_constraint_pressure(
             style_anchor_count: style_anchors.len(),
             memory_style_anchor_count,
             memory_delivery_anchor_count: style_anchor_build.memory_delivery_anchor_count,
+            memory_delivery_priority_applied: style_anchor_build.memory_delivery_priority_applied,
             memory_style_chars,
             memory_visual_chars,
             memory_delivery_chars,
             director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
+            director_manual_yielded_chars: style_anchor_build.director_manual_yielded_chars,
+            director_performance_trimmed_chars: style_anchor_build
+                .director_performance_trimmed_chars,
+            director_anchor_saved_chars: style_anchor_build.director_manual_yielded_chars
+                + style_anchor_build.director_performance_trimmed_chars,
             continuity_note_count: continuity_notes.len(),
             continuity_note_chars,
             uses_reference_frame: image_url.is_some(),
@@ -4665,7 +4735,10 @@ fn build_project_visual_anchors(
     let mut anchors = Vec::new();
     let mut memory_anchor_count = 0usize;
     let mut memory_delivery_anchor_count = 0usize;
+    let mut memory_delivery_priority_applied = false;
     let mut director_manual_yielded_to_memory = false;
+    let mut director_manual_yielded_chars = 0usize;
+    let mut director_performance_trimmed_chars = 0usize;
     let mut style_coverage = prompt_coverage.to_vec();
     let compact_decorative_style_anchors = should_compact_decorative_style_anchors(
         structured_fields,
@@ -4704,23 +4777,32 @@ fn build_project_visual_anchors(
             extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
         } else {
             director_manual_yielded_to_memory = true;
+            director_manual_yielded_chars += note.chars().count();
         }
     }
     if let Some(performance_anchor) = resolve_performance_style_anchor(
         ctx.project_art_style.as_deref(),
         structured_fields,
         &style_coverage,
-    )
-    .and_then(|anchor| {
-        compact_director_performance_anchor_against_memory_style(
-            &anchor,
+    ) {
+        let original_chars = performance_anchor.chars().count();
+        let compacted = compact_director_performance_anchor_against_memory_style(
+            &performance_anchor,
             &ctx.memory_style_notes,
             structured_fields,
             constraint_pressure,
-        )
-    }) {
-        anchors.push(performance_anchor);
-        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        );
+        match compacted {
+            Some(compacted_anchor) => {
+                director_performance_trimmed_chars +=
+                    original_chars.saturating_sub(compacted_anchor.chars().count());
+                anchors.push(compacted_anchor);
+                extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+            }
+            None => {
+                director_performance_trimmed_chars += original_chars;
+            }
+        }
     }
     if let Some(guardrail_performance_anchor) = resolve_guardrail_performance_anchor(
         structured_fields,
@@ -4773,33 +4855,90 @@ fn build_project_visual_anchors(
         }
     }
     let has_base_style_anchor = !anchors.is_empty();
-    for note in &ctx.memory_style_notes {
-        let Some(note) = compact_memory_style_anchor(
-            note,
-            structured_fields,
-            &style_coverage,
-            has_base_style_anchor,
-            memory_budget_tier,
-            constraint_pressure,
-        ) else {
-            continue;
-        };
-        if anchors.iter().any(|existing| existing == &note) {
+    let mut memory_candidates = ctx
+        .memory_style_notes
+        .iter()
+        .filter_map(|note| {
+            compact_memory_style_anchor(
+                note,
+                structured_fields,
+                &style_coverage,
+                has_base_style_anchor,
+                memory_budget_tier,
+                constraint_pressure,
+            )
+        })
+        .filter(|note| !anchors.iter().any(|existing| existing == note))
+        .map(|note| {
+            let is_delivery = memory_style_anchor_has_delivery_signal(&note);
+            let score = score_memory_style_note_for_expanded_tier(
+                &note,
+                structured_fields,
+                constraint_pressure,
+            );
+            (note, is_delivery, score)
+        })
+        .collect::<Vec<_>>();
+    memory_candidates.sort_by(|left, right| {
+        right
+            .2
+            .cmp(&left.2)
+            .then_with(|| right.1.cmp(&left.1))
+            .then_with(|| right.0.chars().count().cmp(&left.0.chars().count()))
+            .then_with(|| left.0.cmp(&right.0))
+    });
+
+    let mut selected_memory_anchor_kinds = Vec::new();
+    for (note, is_delivery, _) in memory_candidates {
+        if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
+            && memory_anchor_count >= 1
+            && selected_memory_anchor_kinds
+                .iter()
+                .any(|kind| *kind != is_delivery)
+            && memory_anchor_total_chars_within_budget(
+                &anchors,
+                &note,
+                memory_anchor_count,
+                VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+            )
+            && memory_style_anchor_is_complementary(&note, &anchors)
+        {
+            extend_prompt_coverage(&mut style_coverage, std::slice::from_ref(&note));
+            if is_delivery {
+                memory_delivery_anchor_count += 1;
+            }
+            anchors.push(note);
+            selected_memory_anchor_kinds.push(is_delivery);
+            memory_anchor_count += 1;
+            break;
+        }
+        if memory_anchor_count > 0 {
             continue;
         }
+        if is_delivery
+            && structured_fields.is_some_and(|fields| {
+                video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+                    || current_storyboard_is_fragile_emotional_turn(fields)
+            })
+        {
+            memory_delivery_priority_applied = true;
+        }
         extend_prompt_coverage(&mut style_coverage, std::slice::from_ref(&note));
-        if memory_style_anchor_has_delivery_signal(&note) {
+        if is_delivery {
             memory_delivery_anchor_count += 1;
         }
         anchors.push(note);
+        selected_memory_anchor_kinds.push(is_delivery);
         memory_anchor_count += 1;
-        break;
     }
     VideoPromptStyleAnchorBuild {
         anchors,
         memory_style_anchor_count: memory_anchor_count,
         memory_delivery_anchor_count,
+        memory_delivery_priority_applied,
         director_manual_yielded_to_memory,
+        director_manual_yielded_chars,
+        director_performance_trimmed_chars,
     }
 }
 
@@ -5036,6 +5175,43 @@ fn memory_style_anchor_char_breakdown(anchors: &[String]) -> (usize, usize) {
     }
 
     (visual_chars, delivery_chars)
+}
+
+fn memory_anchor_total_chars_within_budget(
+    all_style_anchors: &[String],
+    next_memory_anchor: &str,
+    memory_anchor_count: usize,
+    max_chars: usize,
+) -> bool {
+    let current_memory_chars = all_style_anchors
+        .iter()
+        .rev()
+        .take(memory_anchor_count)
+        .map(|anchor| anchor.chars().count())
+        .sum::<usize>();
+    current_memory_chars + next_memory_anchor.chars().count() <= max_chars
+}
+
+fn memory_style_anchor_is_complementary(note: &str, anchors: &[String]) -> bool {
+    let note_fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    if note_fragments.is_empty() {
+        return false;
+    }
+    let existing_fragments = anchors
+        .iter()
+        .flat_map(|anchor| split_prompt_note_fragments(anchor))
+        .collect::<Vec<_>>();
+    !note_fragments.iter().all(|fragment| {
+        prompt_fragment_is_covered(fragment, &existing_fragments)
+            || style_note_matches_shared_keyword_family(
+                fragment,
+                &existing_fragments
+                    .iter()
+                    .map(String::as_str)
+                    .collect::<Vec<_>>(),
+                PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+            )
+    })
 }
 
 fn compact_project_art_style_note(
@@ -5310,6 +5486,38 @@ fn score_memory_style_fragment_for_lean_tier(
         score += score_memory_fragment_against_constraint_pressure(fragment, family, pressure);
     }
 
+    score
+}
+
+fn score_memory_style_note_for_expanded_tier(
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    let mut score = split_prompt_note_fragments(note)
+        .map(|fragment| {
+            score_memory_style_fragment_for_lean_tier(
+                fragment.as_str(),
+                structured_fields,
+                constraint_pressure,
+            )
+        })
+        .sum::<i32>();
+    if let Some(fields) = structured_fields {
+        if video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+            || current_storyboard_is_fragile_emotional_turn(fields)
+        {
+            if memory_style_anchor_has_delivery_signal(note) {
+                score += 18;
+            }
+            if style_note_contains_family(note, "表演") {
+                score += 8;
+            }
+            if style_note_contains_family(note, "语气") {
+                score += 8;
+            }
+        }
+    }
     score
 }
 
@@ -9409,9 +9617,9 @@ mod tests {
         select_video_prompt_style_notes, trim_video_prompt_memory_rows,
         trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, DirectorEmotionFragmentGroup,
-        GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse, ScriptRolePromptSeedRow,
-        VideoPromptConstraintPressure, VideoPromptContext, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
-        VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
+        GenerateVideoPromptBody, GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse,
+        ScriptRolePromptSeedRow, VideoPromptConstraintPressure, VideoPromptContext,
+        VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
     };
     use crate::production::workbench::video::generate::{
         AutoNegativePromptSelection, StoryboardNegativePromptRuntime,
@@ -13391,10 +13599,14 @@ mod tests {
                 style_anchor_count: 1,
                 memory_style_anchor_count: 0,
                 memory_delivery_anchor_count: 0,
+                memory_delivery_priority_applied: false,
                 memory_style_chars: 0,
                 memory_visual_chars: 0,
                 memory_delivery_chars: 0,
                 director_manual_yielded_to_memory: false,
+                director_manual_yielded_chars: 0,
+                director_performance_trimmed_chars: 0,
+                director_anchor_saved_chars: 0,
                 continuity_note_count: 0,
                 continuity_note_chars: 0,
                 uses_reference_frame: false,
@@ -13456,10 +13668,36 @@ mod tests {
         assert_eq!(
             value
                 .get("diagnostics")
+                .and_then(|item| item.get("memoryDeliveryPriorityApplied"))
+                .and_then(serde_json::Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            value
+                .get("diagnostics")
                 .and_then(|item| item.get("directorManualYieldedToMemory"))
                 .and_then(serde_json::Value::as_bool),
             Some(false)
         );
+        assert_eq!(
+            value
+                .get("diagnostics")
+                .and_then(|item| item.get("directorAnchorSavedChars"))
+                .and_then(serde_json::Value::as_u64),
+            Some(0)
+        );
+    }
+
+    #[test]
+    fn generate_video_prompt_body_accepts_auto_quality_review_flag() {
+        let body: GenerateVideoPromptBody = serde_json::from_str(
+            r#"{"projectId":1,"scriptId":2,"storyboardId":3,"autoQualityReview":true}"#,
+        )
+        .unwrap();
+        assert_eq!(body.project_id, 1);
+        assert_eq!(body.script_id, 2);
+        assert_eq!(body.storyboard_id, Some(3));
+        assert!(body.auto_quality_review);
     }
 
     #[test]
@@ -13497,6 +13735,9 @@ mod tests {
         assert!(result.diagnostics.memory_visual_chars > 0);
         assert_eq!(result.diagnostics.memory_delivery_chars, 0);
         assert!(!result.diagnostics.director_manual_yielded_to_memory);
+        assert_eq!(result.diagnostics.director_manual_yielded_chars, 0);
+        assert_eq!(result.diagnostics.director_performance_trimmed_chars, 0);
+        assert_eq!(result.diagnostics.director_anchor_saved_chars, 0);
         assert_eq!(result.diagnostics.continuity_note_count, 1);
         assert!(result.diagnostics.continuity_note_chars > 0);
         assert!(result.diagnostics.uses_reference_frame);
@@ -13527,6 +13768,79 @@ mod tests {
         assert_eq!(result.diagnostics.memory_visual_chars, 0);
         assert!(result.diagnostics.memory_delivery_chars > 0);
         assert!(result.diagnostics.director_manual_yielded_to_memory);
+        assert!(result.diagnostics.director_manual_yielded_chars > 0);
+        assert_eq!(
+            result.diagnostics.director_anchor_saved_chars,
+            result.diagnostics.director_manual_yielded_chars
+                + result.diagnostics.director_performance_trimmed_chars
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_adds_complementary_memory_anchor_in_expanded_tier() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚缓慢开口、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头微动后低声说你终于来了、隐忍压抑、冷蓝窗光、你终于来了、雨声回响、A31）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec![
+                "光影冷蓝窗光，环境雨丝玻璃".into(),
+                "表演喉结滚动，语气压低尾音发颤".into(),
+            ],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert_eq!(result.diagnostics.memory_budget_tier, "expanded");
+        assert_eq!(result.diagnostics.memory_style_anchor_count, 2);
+        assert_eq!(result.diagnostics.memory_delivery_anchor_count, 1);
+        assert!(result.diagnostics.memory_delivery_priority_applied);
+        assert!(result.diagnostics.memory_visual_chars > 0);
+        assert!(result.diagnostics.memory_delivery_chars > 0);
+        assert!(
+            result.diagnostics.memory_style_chars <= 56,
+            "{}",
+            result.prompt
+        );
+        assert!(
+            result.prompt.contains(
+                "Style anchor: 表演喉结滚动，语气压低尾音发颤; 光影冷蓝窗光，环境雨丝玻璃."
+            ),
+            "{}",
+            result.prompt
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_reports_trimmed_director_performance_chars() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚低声开口、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头滚动后压住气息低声说你终于来了、隐忍压抑、冷蓝窗光、你终于来了、雨声、A31）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演神情低落，眼神黯淡，眉心轻蹙，语气压低气息尾音发颤".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert!(result.diagnostics.director_performance_trimmed_chars > 0);
+        assert_eq!(result.diagnostics.director_manual_yielded_chars, 0);
+        assert_eq!(
+            result.diagnostics.director_anchor_saved_chars,
+            result.diagnostics.director_performance_trimmed_chars
+        );
     }
 
     #[test]

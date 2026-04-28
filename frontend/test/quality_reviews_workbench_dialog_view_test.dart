@@ -28,6 +28,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     ),
   ],
   bool filterBadCasesOnly = false,
+  bool filterDeliveryPriorityOnly = false,
+  bool filterAutoSourceOnly = false,
   bool createPassed = true,
   bool createBadCase = false,
   bool loadingReviews = false,
@@ -44,6 +46,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     reviewDetails: 'review-1 · output · manual',
     statusLine: '已读取评审详情',
     filterBadCasesOnly: filterBadCasesOnly,
+    filterDeliveryPriorityOnly: filterDeliveryPriorityOnly,
+    filterAutoSourceOnly: filterAutoSourceOnly,
     createPassed: createPassed,
     createBadCase: createBadCase,
     loadingReviews: loadingReviews,
@@ -68,6 +72,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
 QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
   VoidCallback? onLoadReviews = noop,
   VoidCallback? onLoadBadCases = noop,
+  VoidCallback? onLoadDeliveryPriorityReviews = noop,
+  VoidCallback? onLoadAutoSourceReviews = noop,
   VoidCallback? onLoadStats = noop,
   VoidCallback? onLoadStagePassRate = noop,
   VoidCallback? onLoadReviewById = noop,
@@ -80,6 +86,9 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
   return QualityReviewsWorkbenchDialogViewCallbacks(
     onLoadReviews: onLoadReviews ?? noop,
     onLoadBadCases: onLoadBadCases ?? noop,
+    onLoadDeliveryPriorityReviews:
+        onLoadDeliveryPriorityReviews ?? noop,
+    onLoadAutoSourceReviews: onLoadAutoSourceReviews ?? noop,
     onLoadStats: onLoadStats ?? noop,
     onLoadStagePassRate: onLoadStagePassRate ?? noop,
     onLoadReviewById: onLoadReviewById ?? noop,

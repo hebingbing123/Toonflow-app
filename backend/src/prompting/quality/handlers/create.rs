@@ -40,9 +40,9 @@ pub(crate) async fn create_review(
             user_id, project_id, script_id, job_id, target_type, target_id,
             source, plot_coherence, character_consistency, dialogue_naturalness,
             pacing, faithfulness, visual_quality, overall_score, passed,
-            comments, skill_version, model_name, model_params,
+            comments, skill_version, model_name, model_params, memory_delivery_priority_applied,
             is_bad_case, bad_case_category
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
         RETURNING *
         "#,
     )
@@ -65,6 +65,7 @@ pub(crate) async fn create_review(
     .bind(&body.skill_version)
     .bind(&body.model_name)
     .bind(&body.model_params)
+    .bind(body.memory_delivery_priority_applied)
     .bind(is_bad_case)
     .bind(&body.bad_case_category)
     .fetch_one(pool)

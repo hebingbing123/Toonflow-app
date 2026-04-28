@@ -35,7 +35,39 @@ pub(crate) async fn get_stats(
             COUNT(*) FILTER (WHERE passed = false) as failed_count,
             COUNT(*) FILTER (WHERE is_bad_case = true) as bad_case_count,
             ROUND(COUNT(*) FILTER (WHERE passed = true) * 100.0 / NULLIF(COUNT(*), 0), 2) as pass_rate_percent,
-            COALESCE(AVG(overall_score), 0) as avg_overall_score
+            COALESCE(AVG(overall_score), 0) as avg_overall_score,
+            COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true) as delivery_priority_total_reviews,
+            COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true AND passed = true) as delivery_priority_passed_count,
+            COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true AND is_bad_case = true) as delivery_priority_bad_case_count,
+            COALESCE(ROUND(
+                COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true AND passed = true) * 100.0
+                / NULLIF(COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true), 0),
+                2
+            ), 0) as delivery_priority_pass_rate_percent,
+            COUNT(*) FILTER (
+                WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+            ) as non_delivery_priority_total_reviews,
+            COUNT(*) FILTER (
+                WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                  AND passed = true
+            ) as non_delivery_priority_passed_count,
+            COUNT(*) FILTER (
+                WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                  AND is_bad_case = true
+            ) as non_delivery_priority_bad_case_count,
+            COALESCE(ROUND(
+                COUNT(*) FILTER (
+                    WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                      AND passed = true
+                ) * 100.0
+                / NULLIF(
+                    COUNT(*) FILTER (
+                        WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                    ),
+                    0
+                ),
+                2
+            ), 0) as non_delivery_priority_pass_rate_percent
         FROM app_quality_review
         WHERE user_id = $1
         GROUP BY target_type
@@ -78,7 +110,39 @@ pub(crate) async fn get_stage_pass_rate(
             COUNT(*) FILTER (WHERE passed = true) as passed_count,
             COUNT(*) FILTER (WHERE is_bad_case = true) as bad_case_count,
             ROUND(COUNT(*) FILTER (WHERE passed = true) * 100.0 / NULLIF(COUNT(*), 0), 2) as pass_rate_percent,
-            AVG(overall_score) as avg_score
+            AVG(overall_score) as avg_score,
+            COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true) as delivery_priority_total_reviews,
+            COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true AND passed = true) as delivery_priority_passed_count,
+            COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true AND is_bad_case = true) as delivery_priority_bad_case_count,
+            COALESCE(ROUND(
+                COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true AND passed = true) * 100.0
+                / NULLIF(COUNT(*) FILTER (WHERE memory_delivery_priority_applied = true), 0),
+                2
+            ), 0) as delivery_priority_pass_rate_percent,
+            COUNT(*) FILTER (
+                WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+            ) as non_delivery_priority_total_reviews,
+            COUNT(*) FILTER (
+                WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                  AND passed = true
+            ) as non_delivery_priority_passed_count,
+            COUNT(*) FILTER (
+                WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                  AND is_bad_case = true
+            ) as non_delivery_priority_bad_case_count,
+            COALESCE(ROUND(
+                COUNT(*) FILTER (
+                    WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                      AND passed = true
+                ) * 100.0
+                / NULLIF(
+                    COUNT(*) FILTER (
+                        WHERE memory_delivery_priority_applied IS DISTINCT FROM true
+                    ),
+                    0
+                ),
+                2
+            ), 0) as non_delivery_priority_pass_rate_percent
         FROM app_quality_review
         WHERE user_id = $1
         GROUP BY target_type, DATE_TRUNC('day', created_at)

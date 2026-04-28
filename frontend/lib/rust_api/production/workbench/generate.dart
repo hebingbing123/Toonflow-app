@@ -22,7 +22,11 @@ class GenerateVideoPromptDiagnostics {
     required this.toolAnchorCount,
     required this.styleAnchorCount,
     required this.memoryStyleAnchorCount,
+    required this.memoryDeliveryAnchorCount,
+    required this.memoryDeliveryPriorityApplied,
     required this.memoryStyleChars,
+    required this.memoryVisualChars,
+    required this.memoryDeliveryChars,
     required this.continuityNoteCount,
     required this.continuityNoteChars,
     required this.usesReferenceFrame,
@@ -42,7 +46,11 @@ class GenerateVideoPromptDiagnostics {
   final int toolAnchorCount;
   final int styleAnchorCount;
   final int memoryStyleAnchorCount;
+  final int memoryDeliveryAnchorCount;
+  final bool memoryDeliveryPriorityApplied;
   final int memoryStyleChars;
+  final int memoryVisualChars;
+  final int memoryDeliveryChars;
   final int continuityNoteCount;
   final int continuityNoteChars;
   final bool usesReferenceFrame;
@@ -68,7 +76,13 @@ class GenerateVideoPromptDiagnostics {
       styleAnchorCount: (json['styleAnchorCount'] as num?)?.toInt() ?? 0,
       memoryStyleAnchorCount:
           (json['memoryStyleAnchorCount'] as num?)?.toInt() ?? 0,
+      memoryDeliveryAnchorCount:
+          (json['memoryDeliveryAnchorCount'] as num?)?.toInt() ?? 0,
+      memoryDeliveryPriorityApplied:
+          json['memoryDeliveryPriorityApplied'] == true,
       memoryStyleChars: (json['memoryStyleChars'] as num?)?.toInt() ?? 0,
+      memoryVisualChars: (json['memoryVisualChars'] as num?)?.toInt() ?? 0,
+      memoryDeliveryChars: (json['memoryDeliveryChars'] as num?)?.toInt() ?? 0,
       continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
       continuityNoteChars: (json['continuityNoteChars'] as num?)?.toInt() ?? 0,
       usesReferenceFrame: json['usesReferenceFrame'] == true,
@@ -114,6 +128,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   required int projectId,
   required int scriptId,
   int? storyboardId,
+  bool? autoQualityReview,
   String? imageUrl,
   String? description,
   int? durationHint,
@@ -123,6 +138,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   );
   final body = <String, dynamic>{'projectId': projectId, 'scriptId': scriptId};
   if (storyboardId != null) body['storyboardId'] = storyboardId;
+  if (autoQualityReview == true) body['autoQualityReview'] = true;
   if (imageUrl != null) body['imageUrl'] = imageUrl;
   if (description != null) body['description'] = description;
   if (durationHint != null) body['durationHint'] = durationHint;

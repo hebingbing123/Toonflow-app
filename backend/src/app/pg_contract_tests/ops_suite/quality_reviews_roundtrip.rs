@@ -58,7 +58,7 @@ async fn quality_reviews_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"targetType":"script","targetId":"{script_target_id}","jobId":"{quality_job_id}","source":"auto","overallScore":8,"passed":true,"comments":"pg quality script"}}"#
+                    r#"{{"targetType":"script","targetId":"{script_target_id}","jobId":"{quality_job_id}","source":"auto","overallScore":8,"passed":true,"memoryDeliveryPriorityApplied":true,"comments":"pg quality script"}}"#
                 )))
                 .unwrap(),
         )
@@ -74,6 +74,7 @@ async fn quality_reviews_roundtrip() {
     assert_eq!(created_script["source"], "auto");
     assert_eq!(created_script["overallScore"], 8);
     assert_eq!(created_script["passed"], true);
+    assert_eq!(created_script["memoryDeliveryPriorityApplied"], true);
     let script_review_id =
         Uuid::parse_str(created_script["id"].as_str().expect("script review id")).unwrap();
     let script_review_id_text = script_review_id.to_string();
@@ -153,6 +154,33 @@ async fn quality_reviews_roundtrip() {
             .iter()
             .any(|row| row["id"].as_str() == Some(asset_review_id_text.as_str())),
         "bad case list should include created asset review: {bad_cases:?}"
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/quality/reviews?memoryDeliveryPriorityApplied=true")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, delivery_priority_reviews) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "delivery_priority_reviews={delivery_priority_reviews}"
+    );
+    let delivery_priority_reviews = delivery_priority_reviews
+        .as_array()
+        .expect("delivery priority review list");
+    assert_eq!(delivery_priority_reviews.len(), 1);
+    assert_eq!(
+        delivery_priority_reviews[0]["id"].as_str(),
+        Some(script_review_id_text.as_str())
     );
 
     let res = app
@@ -297,6 +325,20 @@ async fn quality_reviews_roundtrip() {
         script_stats["passedCount"].as_i64().unwrap_or_default() >= 1,
         "script stats={script_stats}"
     );
+    assert!(
+        script_stats["deliveryPriorityTotalReviews"]
+            .as_i64()
+            .unwrap_or_default()
+            >= 1,
+        "script stats={script_stats}"
+    );
+    assert!(
+        script_stats["deliveryPriorityPassedCount"]
+            .as_i64()
+            .unwrap_or_default()
+            >= 1,
+        "script stats={script_stats}"
+    );
     let asset_stats = stats
         .iter()
         .find(|row| row["targetType"].as_str() == Some("asset"))
@@ -307,6 +349,13 @@ async fn quality_reviews_roundtrip() {
     );
     assert!(
         asset_stats["failedCount"].as_i64().unwrap_or_default() >= 1,
+        "asset stats={asset_stats}"
+    );
+    assert!(
+        asset_stats["nonDeliveryPriorityTotalReviews"]
+            .as_i64()
+            .unwrap_or_default()
+            >= 1,
         "asset stats={asset_stats}"
     );
 
@@ -329,6 +378,10 @@ async fn quality_reviews_roundtrip() {
         stage_rows.iter().any(|row| {
             row["targetType"].as_str() == Some("script")
                 && row["passedCount"].as_i64().unwrap_or_default() >= 1
+                && row["deliveryPriorityTotalReviews"]
+                    .as_i64()
+                    .unwrap_or_default()
+                    >= 1
         }),
         "stage rows should include script aggregate: {stage_rows:?}"
     );
@@ -336,6 +389,10 @@ async fn quality_reviews_roundtrip() {
         stage_rows.iter().any(|row| {
             row["targetType"].as_str() == Some("asset")
                 && row["badCaseCount"].as_i64().unwrap_or_default() >= 1
+                && row["nonDeliveryPriorityTotalReviews"]
+                    .as_i64()
+                    .unwrap_or_default()
+                    >= 1
         }),
         "stage rows should include asset aggregate: {stage_rows:?}"
     );

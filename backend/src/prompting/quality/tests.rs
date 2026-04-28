@@ -99,7 +99,9 @@ fn validate_list_reviews_query_rejects_invalid_target_type() {
         target_type: Some("chapter".to_string()),
         target_id: None,
         job_id: None,
+        source: None,
         is_bad_case: None,
+        memory_delivery_priority_applied: None,
         limit: None,
         offset: None,
     };

@@ -40,10 +40,21 @@ void main() {
         badCaseCount: 2,
         passRatePercent: 75.0,
         avgOverallScore: 82.4,
+        deliveryPriorityTotalReviews: 4,
+        deliveryPriorityPassedCount: 3,
+        deliveryPriorityBadCaseCount: 1,
+        deliveryPriorityPassRatePercent: 75.0,
+        nonDeliveryPriorityTotalReviews: 8,
+        nonDeliveryPriorityPassedCount: 6,
+        nonDeliveryPriorityBadCaseCount: 1,
+        nonDeliveryPriorityPassRatePercent: 75.0,
       ),
     ]);
 
-    expect(summary, 'output: total=12, pass=75.0%');
+    expect(
+      summary,
+      'output: total=12, pass=75.0% (delivery=75.0%, non=75.0%)',
+    );
   });
 
   test('formatQualityReviewDetails includes core fields', () {
