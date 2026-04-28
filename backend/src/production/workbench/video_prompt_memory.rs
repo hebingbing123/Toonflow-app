@@ -6451,6 +6451,24 @@ fn compact_selected_memory_residual_note(
             })
             .collect();
     }
+    if subject_is_stored {
+        if let Some(subject) = normalized_subject.as_deref() {
+            fragments = fragments
+                .into_iter()
+                .filter_map(|fragment| {
+                    let stripped = fragment
+                        .strip_prefix(subject)
+                        .map(normalize_prompt_text)
+                        .unwrap_or(fragment);
+                    let stripped = normalize_prompt_text(&stripped);
+                    (!stripped.is_empty()
+                        && !low_signal_subject_pose_fragment(&stripped)
+                        && !low_signal_object_hold_fragment(&stripped))
+                    .then_some(stripped)
+                })
+                .collect();
+        }
+    }
     if fragments.is_empty() {
         return None;
     }

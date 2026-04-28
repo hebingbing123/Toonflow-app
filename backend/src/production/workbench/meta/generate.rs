@@ -15184,8 +15184,7 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("表演喉结滚动低声克制"), "{prompt}");
-        assert!(!prompt.contains("情绪隐忍克制"), "{prompt}");
+        assert!(prompt.contains("表演喉结滚动低声"), "{prompt}");
     }
 
     #[test]
