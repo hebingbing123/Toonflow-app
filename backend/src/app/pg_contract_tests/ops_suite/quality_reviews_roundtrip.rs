@@ -444,7 +444,10 @@ async fn quality_reviews_roundtrip() {
         Some(asset_review_id_text.as_str())
     );
     assert_eq!(sample_rows[0]["dominantMemoryScope"], "project");
-    assert_eq!(sample_rows[0]["recommendedAction"], "shift_to_delivery_memory");
+    assert_eq!(
+        sample_rows[0]["recommendedAction"],
+        "shift_to_delivery_memory"
+    );
     assert_eq!(
         sample_rows[0]["recommendedActionReason"],
         "先把预算从泛设定移到情绪、动作和语气约束"

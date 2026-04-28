@@ -301,9 +301,9 @@ class QualityTokenEfficiencySampleRow {
       linkedTokensPerScorePoint:
           (json['linkedTokensPerScorePoint'] as num?)?.toDouble() ?? 0,
       dominantMemoryScope: json['dominantMemoryScope'] as String? ?? 'none',
-      recommendedAction: json['recommendedAction'] as String? ?? 'tighten_core_prompt',
-      recommendedActionReason:
-          json['recommendedActionReason'] as String? ?? '',
+      recommendedAction:
+          json['recommendedAction'] as String? ?? 'tighten_core_prompt',
+      recommendedActionReason: json['recommendedActionReason'] as String? ?? '',
     );
   }
 }
