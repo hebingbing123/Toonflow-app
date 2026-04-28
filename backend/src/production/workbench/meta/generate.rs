@@ -19,6 +19,7 @@ use crate::production::workbench::video::generate::{
 };
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
+    contextual_style_memory_value_for_storyboard,
     select_pending_rejected_video_observation_candidates_for_subject,
     select_prioritized_video_style_note, select_selected_video_memory_notes,
     select_subject_role_video_style_memory_notes,
@@ -2805,7 +2806,7 @@ fn select_contextual_observation_summary_style_note(
                 return None;
             }
 
-            let note = extract_key_value(&row.content, "style")
+            let note = contextual_style_memory_value_for_storyboard(row, Some(storyboard_row))
                 .or_else(|| extract_key_value(&row.content, "note"))?;
             let compacted =
                 compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
@@ -16133,6 +16134,36 @@ mod tests {
                 pressure,
             ),
             Some("表演喉结滚动，语气轻声".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_contextual_summary_prefers_delivery_memory_for_fragile_dialogue_turn(
+    ) {
+        let rows = vec![AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=5 | style=镜头稳定跟拍，光影冷蓝窗光 | delivery=表演呼吸发颤哽咽克制 | note=镜头稳定跟拍，光影冷蓝窗光".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚含泪低声说别走".into()),
+            video_desc: Some("（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）".into()),
+            duration: Some("5s".into()),
+        };
+        let pressure = Some(VideoPromptConstraintPressure {
+            has_dialogue_guardrail: true,
+            has_emotion_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        });
+
+        assert_eq!(
+            select_contextual_observation_summary_style_note(
+                &rows,
+                Some(&storyboard_row),
+                &[],
+                pressure,
+            ),
+            Some("表演呼吸发颤哽咽克制".to_string())
         );
     }
 

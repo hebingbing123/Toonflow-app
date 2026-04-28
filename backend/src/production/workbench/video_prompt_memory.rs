@@ -6897,6 +6897,21 @@ fn role_style_memory_value_for_storyboard(
     fallback
 }
 
+pub(crate) fn contextual_style_memory_value_for_storyboard(
+    row: &AgentMemoryRow,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    match row.name.as_str() {
+        SCRIPT_VIDEO_STYLE_MEMORY_NAME | PROJECT_VIDEO_STYLE_MEMORY_NAME => {
+            summary_style_memory_value_for_storyboard(row, storyboard_row)
+        }
+        SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME | PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME => {
+            role_style_memory_value_for_storyboard(row, storyboard_row)
+        }
+        _ => selected_video_style_value(row),
+    }
+}
+
 fn is_low_signal_selected_memory_note(note: &str) -> bool {
     let normalized = normalize_prompt_text(note)
         .trim_matches(|ch: char| {
