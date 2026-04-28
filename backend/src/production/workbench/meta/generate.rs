@@ -143,6 +143,8 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     memory_style_anchor_count: usize,
     memory_delivery_anchor_count: usize,
     memory_style_chars: usize,
+    memory_visual_chars: usize,
+    memory_delivery_chars: usize,
     director_manual_yielded_to_memory: bool,
     continuity_note_count: usize,
     continuity_note_chars: usize,
@@ -3885,12 +3887,18 @@ fn build_video_prompt_with_constraint_pressure(
     );
     let style_anchors = style_anchor_build.anchors;
     let memory_style_anchor_count = style_anchor_build.memory_style_anchor_count;
-    let memory_style_chars = style_anchors
+    let memory_anchors = style_anchors
         .iter()
         .rev()
         .take(memory_style_anchor_count)
+        .cloned()
+        .collect::<Vec<_>>();
+    let memory_style_chars = memory_anchors
+        .iter()
         .map(|anchor| anchor.chars().count())
         .sum();
+    let (memory_visual_chars, memory_delivery_chars) =
+        memory_style_anchor_char_breakdown(&memory_anchors);
     let mut style_coverage = Vec::new();
     extend_prompt_coverage(&mut style_coverage, &style_anchors);
     match structured_fields.as_ref() {
@@ -4025,6 +4033,8 @@ fn build_video_prompt_with_constraint_pressure(
             memory_style_anchor_count,
             memory_delivery_anchor_count: style_anchor_build.memory_delivery_anchor_count,
             memory_style_chars,
+            memory_visual_chars,
+            memory_delivery_chars,
             director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
             continuity_note_count: continuity_notes.len(),
             continuity_note_chars,
@@ -5010,6 +5020,22 @@ fn memory_style_anchor_has_delivery_signal(note: &str) -> bool {
         .any(|keyword| note.contains(keyword));
 
     has_performance_signal && has_voice_signal
+}
+
+fn memory_style_anchor_char_breakdown(anchors: &[String]) -> (usize, usize) {
+    let mut visual_chars = 0usize;
+    let mut delivery_chars = 0usize;
+
+    for anchor in anchors {
+        for fragment in split_prompt_note_fragments(anchor) {
+            match style_note_fragment_family(&fragment) {
+                Some("表演") | Some("语气") => delivery_chars += fragment.chars().count(),
+                _ => visual_chars += fragment.chars().count(),
+            }
+        }
+    }
+
+    (visual_chars, delivery_chars)
 }
 
 fn compact_project_art_style_note(
@@ -13366,6 +13392,8 @@ mod tests {
                 memory_style_anchor_count: 0,
                 memory_delivery_anchor_count: 0,
                 memory_style_chars: 0,
+                memory_visual_chars: 0,
+                memory_delivery_chars: 0,
                 director_manual_yielded_to_memory: false,
                 continuity_note_count: 0,
                 continuity_note_chars: 0,
@@ -13466,6 +13494,8 @@ mod tests {
         assert_eq!(result.diagnostics.memory_style_anchor_count, 1);
         assert_eq!(result.diagnostics.memory_delivery_anchor_count, 0);
         assert!(result.diagnostics.memory_style_chars > 0);
+        assert!(result.diagnostics.memory_visual_chars > 0);
+        assert_eq!(result.diagnostics.memory_delivery_chars, 0);
         assert!(!result.diagnostics.director_manual_yielded_to_memory);
         assert_eq!(result.diagnostics.continuity_note_count, 1);
         assert!(result.diagnostics.continuity_note_chars > 0);
@@ -13494,6 +13524,8 @@ mod tests {
 
         assert_eq!(result.diagnostics.memory_style_anchor_count, 1);
         assert_eq!(result.diagnostics.memory_delivery_anchor_count, 1);
+        assert_eq!(result.diagnostics.memory_visual_chars, 0);
+        assert!(result.diagnostics.memory_delivery_chars > 0);
         assert!(result.diagnostics.director_manual_yielded_to_memory);
     }
 
