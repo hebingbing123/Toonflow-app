@@ -2305,7 +2305,7 @@ fn map_bad_case_category(category: &str) -> Option<&'static str> {
     }
 }
 
-fn map_bad_case_category_with_comments(
+pub(crate) fn map_bad_case_category_with_comments(
     category: &str,
     comments: Option<&str>,
 ) -> Option<&'static str> {
@@ -2370,7 +2370,7 @@ fn pacing_issue_category_is_redundant(comment_fragments: &[&'static str]) -> boo
     has_rushed_motion && has_jerky_motion
 }
 
-fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
+pub(crate) fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
     let normalized = comments.trim().to_ascii_lowercase();
     let mut fragments = Vec::new();
     let keyword_groups = [

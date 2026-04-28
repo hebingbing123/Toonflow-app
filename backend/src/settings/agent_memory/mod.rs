@@ -15,7 +15,9 @@ pub(crate) use handlers::{
     __path_append_memory, __path_clear_memory, __path_query_memory, append_memory, clear_memory,
     query_memory,
 };
-pub(crate) use storage::{delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type};
+pub(crate) use storage::{
+    append_agent_memory, delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,
+};
 pub(crate) use types::ClearMemoryResponse;
 
 pub fn router() -> Router<AppState> {

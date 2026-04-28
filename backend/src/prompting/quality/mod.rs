@@ -9,6 +9,7 @@ use axum::{
 
 use crate::state::AppState;
 
+mod feedback;
 mod handlers;
 mod types;
 mod validate;

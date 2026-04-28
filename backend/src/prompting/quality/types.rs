@@ -5,7 +5,7 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 /// 质量评估记录
-#[derive(Debug, FromRow, Serialize)]
+#[derive(Debug, Clone, FromRow, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityReview {
     pub id: Uuid,

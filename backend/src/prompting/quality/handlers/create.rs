@@ -4,6 +4,7 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::super::feedback::maybe_write_quality_feedback_to_memory;
 use super::super::types::{CreateQualityReviewBody, QualityReview};
 use super::super::validate::validate_create_review_body;
 
@@ -71,6 +72,21 @@ pub(crate) async fn create_review(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    // Async feedback to memory (best-effort, don't block response)
+    if let (Some(project_id), Some(script_id)) = (body.project_id, body.script_id) {
+        let review_clone = review.clone();
+        tokio::spawn(async move {
+            let _ = maybe_write_quality_feedback_to_memory(
+                pool,
+                user_id,
+                project_id,
+                script_id,
+                &review_clone,
+            )
+            .await;
+        });
+    }
 
     Ok(Json(review))
 }

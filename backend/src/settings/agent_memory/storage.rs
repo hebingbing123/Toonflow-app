@@ -63,3 +63,44 @@ pub(crate) async fn delete_all_agent_memory_rows(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok(())
 }
+
+/// Append a single memory row to app_agent_memory.
+/// Used internally by quality feedback and other automated systems.
+pub(crate) async fn append_agent_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    episodes_id: Option<i32>,
+    agent_type: &str,
+    memory_type: &str,
+    role: &str,
+    content: &str,
+    name: Option<&str>,
+    create_time_ms: Option<i64>,
+) -> Result<(), ApiError> {
+    let time_ms = create_time_ms.unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_agent_memory (
+            owner_user_id, numeric_project_id, episodes_id, agent_type,
+            memory_type, role, name, content, summarized, create_time_ms
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0, $9)
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .bind(episodes_id)
+    .bind(agent_type)
+    .bind(memory_type)
+    .bind(role)
+    .bind(name)
+    .bind(content)
+    .bind(time_ms)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
