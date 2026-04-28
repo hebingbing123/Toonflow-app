@@ -74,20 +74,19 @@ pub(crate) async fn create_review(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    // Async feedback to memory (best-effort, don't block response)
-    if let (Some(project_id), Some(script_id)) = (body.project_id, body.script_id) {
-        let review_clone = review.clone();
-        let pool = pool.clone();
-        tokio::spawn(async move {
-            let _ = maybe_write_quality_feedback_to_memory(
-                &pool,
-                user_id,
+    if let (Some(project_id), Some(script_id)) = (review.project_id, review.script_id) {
+        if let Err(error) =
+            maybe_write_quality_feedback_to_memory(pool, user_id, project_id, script_id, &review)
+                .await
+        {
+            tracing::warn!(
+                review_id = %review.id,
                 project_id,
                 script_id,
-                &review_clone,
-            )
-            .await;
-        });
+                error,
+                "Failed to mirror quality feedback into isolated agent memory"
+            );
+        }
     }
 
     let linked = link_quality_review_to_job_usage(

@@ -5,6 +5,7 @@ import 'previews.dart';
 import 'support.dart';
 import 'workbench_view.dart';
 import '../../rust_api.dart';
+import '../config.dart';
 
 part 'section_workbench.dart';
 part 'section_workbench_controllers.dart';
@@ -35,8 +36,6 @@ class QualityReviewsSection extends StatelessWidget {
         initialReviewDetails: controller.qualityReviewByIdLine,
         initialStatsSummary: controller.qualityStatsLine,
         initialStagePassRateSummary: controller.qualityStagePassRateLine,
-        initialTokenEfficiencySummary: null,
-        initialTokenEfficiencySampleSummary: null,
       ),
     );
   }
@@ -56,7 +55,7 @@ class QualityReviewsSection extends StatelessWidget {
           Text('质量评审', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           Text(
-            '查看评审列表、坏例与阶段通过率，并按 ID 打开单条记录。',
+            '查看评审列表、坏例与阶段通过率；低分坏例会自动回写项目内隔离记忆。',
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: outline),

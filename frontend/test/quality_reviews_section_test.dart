@@ -53,7 +53,7 @@ void main() {
     );
 
     expect(find.text('打开质量工作台'), findsOneWidget);
-    expect(find.text('评审 1 条 · output:manual:82'), findsOneWidget);
+    expect(find.text('评审 1 条 · auto 0 条 · output:manual:82'), findsOneWidget);
     controller.dispose();
   });
 
@@ -97,8 +97,8 @@ void main() {
     expect(find.text('筛选与读取'), findsOneWidget);
     expect(find.text('创建评审'), findsNWidgets(2));
     expect(find.text('评审详情：r1 · output · manual'), findsNWidgets(2));
-    expect(find.text('读取 token 效率'), findsOneWidget);
-    expect(find.text('读取低效样本'), findsOneWidget);
+    expect(find.textContaining('Token效率：'), findsNothing);
+    expect(find.text('只看 auto 样本'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'output'), findsWidgets);
   });
 }
