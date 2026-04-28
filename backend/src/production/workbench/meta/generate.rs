@@ -4700,7 +4700,15 @@ fn build_project_visual_anchors(
         ctx.project_art_style.as_deref(),
         structured_fields,
         &style_coverage,
-    ) {
+    )
+    .and_then(|anchor| {
+        compact_director_performance_anchor_against_memory_style(
+            &anchor,
+            &ctx.memory_style_notes,
+            structured_fields,
+            constraint_pressure,
+        )
+    }) {
         anchors.push(performance_anchor);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
@@ -4894,6 +4902,54 @@ fn project_director_note_should_yield_to_memory_style(
                 || sound_fragment_has_high_value_acoustic_detail(fragment.as_str())
         })
     })
+}
+
+fn compact_director_performance_anchor_against_memory_style(
+    anchor: &str,
+    memory_style_notes: &[String],
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    let Some(fields) = structured_fields else {
+        return Some(anchor.to_string());
+    };
+    if !video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+        && !current_storyboard_is_fragile_emotional_turn(fields)
+    {
+        return Some(anchor.to_string());
+    }
+
+    let expressive_memory_fragments = memory_style_notes
+        .iter()
+        .flat_map(|note| split_prompt_note_fragments(note))
+        .filter(|fragment| role_memory_fragment_is_high_value(fragment))
+        .collect::<Vec<_>>();
+    if expressive_memory_fragments.is_empty() {
+        return Some(anchor.to_string());
+    }
+
+    let expressive_memory_refs = expressive_memory_fragments
+        .iter()
+        .map(String::as_str)
+        .collect::<Vec<_>>();
+    let retained = split_prompt_note_fragments(anchor)
+        .filter(|fragment| {
+            !prompt_fragment_is_covered(fragment, &expressive_memory_fragments)
+                && !style_note_matches_shared_keyword_family(
+                    fragment,
+                    &expressive_memory_refs,
+                    PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+                )
+        })
+        .collect::<Vec<_>>();
+    if retained.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &retained.join(", "),
+        VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS,
+    ))
 }
 
 fn project_director_note_has_unique_visual_signal(note: &str) -> bool {
@@ -14948,6 +15004,34 @@ mod tests {
         );
         assert!(prompt.contains("表演喉结滚动"), "{prompt}");
         assert!(!prompt.contains("表演神情内敛眼神深沉喉结滚动"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_drops_director_performance_anchor_when_delivery_memory_already_covers_fragile_turn(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抽气后失声开口、隐忍哽咽、冷蓝窗光、我没事、雨声、A14）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演神情低落，眼神黯淡，眉心轻蹙，语气压低气息尾音发颤".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 真人都市写实;"), "{prompt}");
+        assert!(prompt.contains("表演神情低落"), "{prompt}");
+        assert!(prompt.contains("语气压低气息尾音发颤"), "{prompt}");
+        assert!(
+            !prompt.contains("神情低落, 眼神黯淡, 眉心轻蹙;"),
+            "{prompt}"
+        );
     }
 
     #[test]
