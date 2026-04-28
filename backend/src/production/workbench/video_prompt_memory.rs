@@ -585,6 +585,12 @@ fn compact_rejected_negative_memory_fragments(fragments: Vec<String>) -> Vec<Str
             canonical_observation_note(fragment) != "avoid overly cold emotional tone"
         });
     }
+    let has_performance_delivery_guard = compacted
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "performance_delivery");
+    if has_performance_delivery_guard {
+        compacted.retain(|fragment| observation_note_family(fragment) != "mood_tone");
+    }
 
     if compacted.len() == 1
         && compacted
@@ -9989,6 +9995,18 @@ mod tests {
     }
 
     #[test]
+    fn merge_rejected_video_negative_memory_prefers_performance_guard_over_generic_mood_tone() {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid blank expression or monotone delivery",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid oppressive or frantic mood",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("avoid blank expression or monotone delivery"));
+        assert!(!merged.contains("avoid oppressive or frantic mood"));
+    }
+
+    #[test]
     fn merge_rejected_video_negative_memory_parses_ascii_and_cjk_delimiters() {
         let merged = merge_rejected_video_negative_memory(
             "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting；avoid harsh backlight silhouette",
@@ -10025,6 +10043,25 @@ mod tests {
             "{summary}"
         );
         assert!(!summary.contains("harsh backlight"), "{summary}");
+    }
+
+    #[test]
+    fn build_script_video_observation_memory_prefers_performance_guard_over_generic_mood_tone() {
+        let summary = build_script_video_observation_memory(&[
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=9 | rejectionCount=2 | riskTags=dialogue/performance | avoid=avoid blank expression or monotone delivery, avoid oppressive or frantic mood".into(),
+            },
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=10 | rejectionCount=2 | riskTags=dialogue/performance | avoid=avoid blank expression or monotone delivery, avoid heavy tragic mood".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("avoid blank expression or monotone delivery"));
+        assert!(!summary.contains("oppressive or frantic mood"), "{summary}");
+        assert!(!summary.contains("heavy tragic mood"), "{summary}");
     }
 
     #[test]
