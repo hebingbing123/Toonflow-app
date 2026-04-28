@@ -81,6 +81,7 @@ Future<String> appendAgentMemory(
   required String agentType,
   required String content,
   int? episodesId,
+  String memoryType = 'message',
   String role = 'user',
   String? name,
   int? createTime,
@@ -90,6 +91,7 @@ Future<String> appendAgentMemory(
     'projectId': projectId,
     'agentType': agentType,
     'content': content,
+    'memoryType': memoryType,
     'role': role,
   };
   if (episodesId != null) body['episodesId'] = episodesId;

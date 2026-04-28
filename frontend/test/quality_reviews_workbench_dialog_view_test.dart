@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/quality_reviews/support.dart';
 import 'package:openflow_app/quality_reviews/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -73,6 +74,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   return QualityReviewsWorkbenchDialogViewModel(
     reviews: reviews,
     tokenEfficiencySamples: tokenEfficiencySamples,
+    memoryDraft: buildQualityMemoryDraft(tokenEfficiencySamples.first),
     statsSummary: 'output: total=1, pass=100%',
     stagePassRateSummary: 'storyboard: 100%',
     tokenEfficiencySummary: 'output: linked=1/1',
@@ -93,6 +95,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     loadingTokenEfficiencySamples: loadingTokenEfficiencySamples,
     loadingReviewById: loadingReviewById,
     creatingReview: creatingReview,
+    applyingMemoryDraft: false,
     targetTypeFilterCtrl: targetTypeFilterCtrl,
     targetIdFilterCtrl: targetIdFilterCtrl,
     jobIdFilterCtrl: jobIdFilterCtrl,
@@ -121,6 +124,7 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
   ValueChanged<bool>? onCreateBadCaseChanged,
   ValueChanged<QualityReview>? onSelectReview,
   ValueChanged<QualityTokenEfficiencySampleRow>? onSelectTokenEfficiencySample,
+  VoidCallback? onApplyMemoryDraft = noop,
   VoidCallback? onClose = noop,
 }) {
   return QualityReviewsWorkbenchDialogViewCallbacks(
@@ -138,6 +142,7 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onCreateBadCaseChanged: onCreateBadCaseChanged ?? (_) {},
     onSelectReview: onSelectReview ?? (_) {},
     onSelectTokenEfficiencySample: onSelectTokenEfficiencySample ?? (_) {},
+    onApplyMemoryDraft: onApplyMemoryDraft ?? noop,
     onClose: onClose ?? noop,
   );
 }
@@ -212,6 +217,8 @@ void main() {
     expect(find.text('质量统计：output: total=1, pass=100%'), findsOneWidget);
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
     expect(find.text('Token 效率：output: linked=1/1'), findsOneWidget);
+    expect(find.text('记忆草案'), findsOneWidget);
+    expect(find.text('写入隔离记忆'), findsOneWidget);
     expect(find.text('评审 1 条'), findsOneWidget);
     expect(find.text('低效样本 1 条'), findsOneWidget);
     expect(
@@ -287,6 +294,7 @@ void main() {
   ) async {
     QualityReview? selectedReview;
     QualityTokenEfficiencySampleRow? selectedSample;
+    var applyCalls = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -309,6 +317,7 @@ void main() {
               onSelectReview: (review) => selectedReview = review,
               onSelectTokenEfficiencySample: (sample) =>
                   selectedSample = sample,
+              onApplyMemoryDraft: () => applyCalls += 1,
             ),
           ),
         ),
@@ -333,6 +342,10 @@ void main() {
 
     expect(selectedSample?.reviewId, 'sample-1');
     expect(selectedSample?.recommendedAction, 'shift_to_delivery_memory');
+
+    await tester.tap(find.text('写入隔离记忆'));
+    await tester.pump();
+    expect(applyCalls, 1);
   });
 }
 

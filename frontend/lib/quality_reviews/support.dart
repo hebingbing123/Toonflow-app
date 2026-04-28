@@ -1,5 +1,147 @@
 import '../../rust_api.dart';
 
+class QualityMemoryDraft {
+  const QualityMemoryDraft({
+    required this.projectId,
+    required this.episodesId,
+    required this.agentType,
+    required this.memoryType,
+    required this.role,
+    required this.name,
+    required this.summary,
+    required this.content,
+    required this.canAppend,
+    this.blockingReason,
+  });
+
+  final int? projectId;
+  final int? episodesId;
+  final String agentType;
+  final String memoryType;
+  final String role;
+  final String name;
+  final String summary;
+  final String content;
+  final bool canAppend;
+  final String? blockingReason;
+}
+
+QualityMemoryDraft buildQualityMemoryDraft(
+  QualityTokenEfficiencySampleRow row,
+) {
+  final targetLabel = row.targetId == null || row.targetId!.isEmpty
+      ? row.targetType
+      : '${row.targetType}:${row.targetId}';
+  if (row.projectId == null || row.scriptId == null) {
+    return QualityMemoryDraft(
+      projectId: row.projectId,
+      episodesId: row.scriptId,
+      agentType: row.targetType == 'script' || row.targetType == 'storyboard'
+          ? 'scriptAgent'
+          : 'productionAgent',
+      memoryType: 'summary',
+      role: 'assistant',
+      name: 'quality_feedback_memory',
+      summary: '缺少 project/script 归属，不能写入隔离记忆',
+      content: '',
+      canAppend: false,
+      blockingReason: '样本没有 projectId 或 scriptId，不能安全写入独立记忆。',
+    );
+  }
+
+  final agentType = row.targetType == 'script' || row.targetType == 'storyboard'
+      ? 'scriptAgent'
+      : 'productionAgent';
+  final details = <String>[
+    'sample=${row.reviewId}',
+    'target=$targetLabel',
+    'action=${row.recommendedAction}',
+  ];
+  final baseSummary =
+      '$agentType · summary · project#${row.projectId} / script#${row.scriptId}';
+
+  switch (row.recommendedAction) {
+    case 'shift_to_delivery_memory':
+      return QualityMemoryDraft(
+        projectId: row.projectId,
+        episodesId: row.scriptId,
+        agentType: agentType,
+        memoryType: 'summary',
+        role: 'assistant',
+        name: 'quality_feedback_memory',
+        summary: '$baseSummary · 优先把预算给情绪、动作、语气',
+        content:
+            '${details.join(" | ")} | keep=停顿、气口、表情反应、口型同步、动作反馈 | trim=泛设定、长环境描写、重复风格词 | reason=${row.recommendedActionReason}',
+        canAppend: true,
+      );
+    case 'trim_project_memory':
+      return QualityMemoryDraft(
+        projectId: row.projectId,
+        episodesId: row.scriptId,
+        agentType: agentType,
+        memoryType: 'summary',
+        role: 'assistant',
+        name: 'quality_feedback_memory',
+        summary: '$baseSummary · 先压缩 project 级泛记忆',
+        content:
+            '${details.join(" | ")} | keep=角色身份、世界观主设定 | trim=重复风格词、长环境模板、无关镜头铺陈 | dominantScope=${row.dominantMemoryScope}',
+        canAppend: true,
+      );
+    case 'split_mixed_memory':
+      return QualityMemoryDraft(
+        projectId: row.projectId,
+        episodesId: row.scriptId,
+        agentType: agentType,
+        memoryType: 'summary',
+        role: 'assistant',
+        name: 'quality_feedback_memory',
+        summary: '$baseSummary · 拆开 project/script 混合记忆',
+        content:
+            '${details.join(" | ")} | projectMemory=长期风格和角色身份 | scriptMemory=当前镜头动作、情绪、台词节奏 | avoid=同条记忆混写跨层信息',
+        canAppend: true,
+      );
+    case 'trim_script_memory_keep_delivery':
+      return QualityMemoryDraft(
+        projectId: row.projectId,
+        episodesId: row.scriptId,
+        agentType: agentType,
+        memoryType: 'summary',
+        role: 'assistant',
+        name: 'quality_feedback_memory',
+        summary: '$baseSummary · 保留表演约束，删剧情复述',
+        content:
+            '${details.join(" | ")} | keep=情绪起伏、动作反馈、语气和口型同步 | trim=剧情复述、重复人物外观、解释性镜头语言',
+        canAppend: true,
+      );
+    case 'trim_script_memory':
+      return QualityMemoryDraft(
+        projectId: row.projectId,
+        episodesId: row.scriptId,
+        agentType: agentType,
+        memoryType: 'summary',
+        role: 'assistant',
+        name: 'quality_feedback_memory',
+        summary: '$baseSummary · 缩短 script 级记忆',
+        content:
+            '${details.join(" | ")} | keep=当前镜头最关键的人物状态和动作 | trim=重复设定、过长氛围词、非当前镜头信息',
+        canAppend: true,
+      );
+    default:
+      return QualityMemoryDraft(
+        projectId: row.projectId,
+        episodesId: row.scriptId,
+        agentType: agentType,
+        memoryType: 'summary',
+        role: 'assistant',
+        name: 'quality_feedback_memory',
+        summary: '$baseSummary · 当前更适合先收紧核心 prompt',
+        content: '',
+        canAppend: false,
+        blockingReason: '这个样本的首要动作是收紧核心 prompt，不建议先追加记忆。',
+      );
+  }
+}
+
 String summarizeQualityReviews(
   Iterable<QualityReview> rows, {
   int maxItems = 4,

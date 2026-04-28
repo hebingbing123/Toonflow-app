@@ -7,6 +7,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   const QualityReviewsWorkbenchDialogViewModel({
     required this.reviews,
     required this.tokenEfficiencySamples,
+    required this.memoryDraft,
     required this.statsSummary,
     required this.stagePassRateSummary,
     required this.tokenEfficiencySummary,
@@ -26,6 +27,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingTokenEfficiencySamples,
     required this.loadingReviewById,
     required this.creatingReview,
+    required this.applyingMemoryDraft,
     required this.targetTypeFilterCtrl,
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
@@ -40,6 +42,7 @@ class QualityReviewsWorkbenchDialogViewModel {
 
   final List<QualityReview> reviews;
   final List<QualityTokenEfficiencySampleRow> tokenEfficiencySamples;
+  final QualityMemoryDraft? memoryDraft;
   final String? statsSummary;
   final String? stagePassRateSummary;
   final String? tokenEfficiencySummary;
@@ -59,6 +62,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingTokenEfficiencySamples;
   final bool loadingReviewById;
   final bool creatingReview;
+  final bool applyingMemoryDraft;
   final TextEditingController targetTypeFilterCtrl;
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
@@ -87,6 +91,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onCreateBadCaseChanged,
     required this.onSelectReview,
     required this.onSelectTokenEfficiencySample,
+    required this.onApplyMemoryDraft,
     required this.onClose,
   });
 
@@ -105,6 +110,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final ValueChanged<QualityReview> onSelectReview;
   final ValueChanged<QualityTokenEfficiencySampleRow>
   onSelectTokenEfficiencySample;
+  final VoidCallback onApplyMemoryDraft;
   final VoidCallback onClose;
 }
 
@@ -373,6 +379,27 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             callbacks.onSelectTokenEfficiencySample(sample),
                       ),
                     ),
+              ],
+              if (model.memoryDraft != null) ...[
+                const SizedBox(height: 12),
+                Text('记忆草案', style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 8),
+                SelectableText(model.memoryDraft!.summary),
+                const SizedBox(height: 4),
+                if (model.memoryDraft!.blockingReason != null)
+                  SelectableText('原因：${model.memoryDraft!.blockingReason}')
+                else
+                  SelectableText(model.memoryDraft!.content),
+                const SizedBox(height: 8),
+                FilledButton.tonal(
+                  onPressed:
+                      model.applyingMemoryDraft ||
+                          !model.memoryDraft!.canAppend ||
+                          model.creatingReview
+                      ? null
+                      : callbacks.onApplyMemoryDraft,
+                  child: Text(model.applyingMemoryDraft ? '写入中…' : '写入隔离记忆'),
+                ),
               ],
               if (model.reviews.isNotEmpty) ...[
                 const SizedBox(height: 12),

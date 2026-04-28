@@ -34,6 +34,11 @@ pub(crate) async fn append_memory(
     if body.content.trim().is_empty() {
         return Err(ApiError::BadRequest("content must be non-empty".into()));
     }
+    if !matches!(body.memory_type.as_str(), "message" | "summary") {
+        return Err(ApiError::BadRequest(
+            "memoryType must be message or summary".into(),
+        ));
+    }
     let agent_type = parse_agent_type(&body.agent_type)?;
     let pool = state.require_pool()?;
 
@@ -44,13 +49,14 @@ pub(crate) async fn append_memory(
         .create_time
         .unwrap_or_else(|| Utc::now().timestamp_millis());
 
+    let summarized = if body.memory_type == "summary" { 1 } else { 0 };
     let id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO app_agent_memory (
           owner_user_id, numeric_project_id, episodes_id, agent_type,
           memory_type, role, name, content, summarized, create_time_ms
         )
-        VALUES ($1, $2, $3, $4, 'message', $5, $6, $7, 0, $8)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id
         "#,
     )
@@ -58,36 +64,40 @@ pub(crate) async fn append_memory(
     .bind(body.project_id)
     .bind(body.episodes_id)
     .bind(agent_type)
+    .bind(&body.memory_type)
     .bind(&body.role)
     .bind(&body.name)
     .bind(&body.content)
+    .bind(summarized)
     .bind(create_time_ms)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let messages_per_summary = state.memory_config.read().await.messages_per_summary;
-    let pool_clone = pool.clone();
-    let state_clone = state.clone();
-    let uid_clone = uid;
-    let project_id = body.project_id;
-    let episodes_id = body.episodes_id;
-    let agent_type_str = agent_type.to_string();
-    tokio::spawn(async move {
-        if let Err(e) = maybe_summarize_messages(
-            &pool_clone,
-            &state_clone,
-            uid_clone,
-            project_id,
-            episodes_id,
-            &agent_type_str,
-            messages_per_summary,
-        )
-        .await
-        {
-            tracing::warn!(error = %e, "auto-summarization failed");
-        }
-    });
+    if body.memory_type == "message" {
+        let messages_per_summary = state.memory_config.read().await.messages_per_summary;
+        let pool_clone = pool.clone();
+        let state_clone = state.clone();
+        let uid_clone = uid;
+        let project_id = body.project_id;
+        let episodes_id = body.episodes_id;
+        let agent_type_str = agent_type.to_string();
+        tokio::spawn(async move {
+            if let Err(e) = maybe_summarize_messages(
+                &pool_clone,
+                &state_clone,
+                uid_clone,
+                project_id,
+                episodes_id,
+                &agent_type_str,
+                messages_per_summary,
+            )
+            .await
+            {
+                tracing::warn!(error = %e, "auto-summarization failed");
+            }
+        });
+    }
 
     Ok(Json(AppendMemoryResponse { id: id.to_string() }))
 }

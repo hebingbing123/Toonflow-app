@@ -41,6 +41,8 @@ pub(crate) struct AppendMemoryBody {
     pub(crate) agent_type: String,
     #[serde(default)]
     pub(crate) episodes_id: Option<i32>,
+    #[serde(default = "default_append_memory_type")]
+    pub(crate) memory_type: String,
     #[serde(default = "default_role")]
     pub(crate) role: String,
     pub(crate) content: String,
@@ -52,6 +54,10 @@ pub(crate) struct AppendMemoryBody {
 
 fn default_role() -> String {
     "user".to_string()
+}
+
+fn default_append_memory_type() -> String {
+    "message".to_string()
 }
 
 #[derive(Debug, sqlx::FromRow)]

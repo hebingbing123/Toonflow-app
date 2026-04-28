@@ -29,7 +29,7 @@ pub fn router() -> Router<AppState> {
 
 #[cfg(test)]
 mod tests {
-    use super::types::{ClearMemoryBody, QueryMemoryBody};
+    use super::types::{AppendMemoryBody, ClearMemoryBody, QueryMemoryBody};
 
     #[test]
     fn query_body_accepts_camel_case() {
@@ -63,5 +63,24 @@ mod tests {
             serde_json::from_str(r#"{"projectId":1,"agentType":"scriptAgent","type":"message"}"#)
                 .unwrap();
         assert_eq!(b.clear_type, "message");
+    }
+
+    #[test]
+    fn append_defaults_to_message_memory_type() {
+        let body: AppendMemoryBody = serde_json::from_str(
+            r#"{"projectId":1,"agentType":"scriptAgent","content":"记住角色节奏"}"#,
+        )
+        .unwrap();
+        assert_eq!(body.memory_type, "message");
+    }
+
+    #[test]
+    fn append_accepts_summary_memory_type() {
+        let body: AppendMemoryBody = serde_json::from_str(
+            r#"{"projectId":1,"agentType":"productionAgent","memoryType":"summary","role":"assistant","content":"focus=delivery"}"#,
+        )
+        .unwrap();
+        assert_eq!(body.memory_type, "summary");
+        assert_eq!(body.role, "assistant");
     }
 }

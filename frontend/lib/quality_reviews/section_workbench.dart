@@ -32,6 +32,7 @@ class _QualityReviewsWorkbenchDialogState
   List<QualityReview> _reviews = const <QualityReview>[];
   List<QualityTokenEfficiencySampleRow> _tokenEfficiencySamples =
       const <QualityTokenEfficiencySampleRow>[];
+  QualityMemoryDraft? _memoryDraft;
   String? _statsSummary;
   String? _stagePassRateSummary;
   String? _tokenEfficiencySummary;
@@ -45,6 +46,7 @@ class _QualityReviewsWorkbenchDialogState
   bool _loadingTokenEfficiencySamples = false;
   bool _loadingReviewById = false;
   bool _creatingReview = false;
+  bool _applyingMemoryDraft = false;
   bool _filterBadCasesOnly = false;
   bool _filterDeliveryPriorityOnly = false;
   bool _filterAutoSourceOnly = false;
@@ -309,12 +311,55 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
+  Future<void> _applyMemoryDraft() async {
+    final draft = _memoryDraft;
+    if (draft == null) {
+      setState(() => _statusLine = '请先选择一个低效样本');
+      return;
+    }
+    if (!draft.canAppend ||
+        draft.projectId == null ||
+        draft.episodesId == null) {
+      setState(() => _statusLine = draft.blockingReason ?? '当前草案不能写入记忆');
+      return;
+    }
+    setState(() {
+      _applyingMemoryDraft = true;
+      _statusLine = null;
+    });
+    try {
+      final id = await appendAgentMemory(
+        widget.accessToken,
+        projectId: draft.projectId!,
+        agentType: draft.agentType,
+        episodesId: draft.episodesId,
+        memoryType: draft.memoryType,
+        role: draft.role,
+        name: draft.name,
+        content: draft.content,
+      );
+      if (!mounted) return;
+      setState(() {
+        _statusLine =
+            '已写入隔离记忆 ${id.length > 8 ? '${id.substring(0, 8)}…' : id}';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _statusLine = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _applyingMemoryDraft = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return QualityReviewsWorkbenchDialogView(
       model: QualityReviewsWorkbenchDialogViewModel(
         reviews: _reviews,
         tokenEfficiencySamples: _tokenEfficiencySamples,
+        memoryDraft: _memoryDraft,
         statsSummary: _statsSummary,
         stagePassRateSummary: _stagePassRateSummary,
         tokenEfficiencySummary: _tokenEfficiencySummary,
@@ -334,6 +379,7 @@ class _QualityReviewsWorkbenchDialogState
         loadingTokenEfficiencySamples: _loadingTokenEfficiencySamples,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
+        applyingMemoryDraft: _applyingMemoryDraft,
         targetTypeFilterCtrl: _ctrls.targetTypeFilterCtrl,
         targetIdFilterCtrl: _ctrls.targetIdFilterCtrl,
         jobIdFilterCtrl: _ctrls.jobIdFilterCtrl,
@@ -393,6 +439,7 @@ class _QualityReviewsWorkbenchDialogState
             setState(() => _createBadCase = value),
         onSelectReview: (review) {
           setState(() {
+            _memoryDraft = null;
             _ctrls.reviewIdCtrl.text = review.id;
             _reviewDetails = formatQualityReviewDetails(review);
             _statusLine = '已选中评审 ${review.id}';
@@ -400,10 +447,14 @@ class _QualityReviewsWorkbenchDialogState
         },
         onSelectTokenEfficiencySample: (sample) {
           setState(() {
+            _memoryDraft = buildQualityMemoryDraft(sample);
             _ctrls.reviewIdCtrl.text = sample.reviewId;
             _reviewDetails = formatQualityTokenEfficiencySampleDetails(sample);
             _statusLine = '已选中低效样本 ${sample.reviewId}';
           });
+        },
+        onApplyMemoryDraft: () {
+          _applyMemoryDraft();
         },
         onClose: () => Navigator.of(context).pop(),
       ),

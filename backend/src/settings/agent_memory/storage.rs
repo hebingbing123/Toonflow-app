@@ -79,6 +79,7 @@ pub(crate) async fn append_agent_memory(
     create_time_ms: Option<i64>,
 ) -> Result<(), ApiError> {
     let time_ms = create_time_ms.unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
+    let summarized = if memory_type == "summary" { 1 } else { 0 };
 
     sqlx::query(
         r#"
@@ -86,7 +87,7 @@ pub(crate) async fn append_agent_memory(
             owner_user_id, numeric_project_id, episodes_id, agent_type,
             memory_type, role, name, content, summarized, create_time_ms
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0, $9)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         "#,
     )
     .bind(user_id)
@@ -97,6 +98,7 @@ pub(crate) async fn append_agent_memory(
     .bind(role)
     .bind(name)
     .bind(content)
+    .bind(summarized)
     .bind(time_ms)
     .execute(pool)
     .await
