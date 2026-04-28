@@ -102,7 +102,7 @@ void main() {
 
     expect(
       summary,
-      'output: linked=8/10, avgScore=84.3, prompt/score=10.9, token/score=7.6 (delivery=6.9, non=8.1)',
+      'output: linked=8/10, avgScore=84.3, mem=d120/v88 scope=s70/p22/m14, prompt/score=10.9, token/score=7.6 (delivery=6.9, non=8.1)',
     );
   });
 }

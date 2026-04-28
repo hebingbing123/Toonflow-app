@@ -84,6 +84,11 @@ String summarizeQualityTokenEfficiencyRows(
       .map((row) {
         final linked = '${row.linkedLlmReviewCount}/${row.totalReviews}';
         final avgScore = row.avgOverallScore.toStringAsFixed(1);
+        final deliveryMemory = row.avgMemoryDeliveryChars.toStringAsFixed(0);
+        final visualMemory = row.avgMemoryVisualChars.toStringAsFixed(0);
+        final scriptScope = row.avgMemoryScriptScopeChars.toStringAsFixed(0);
+        final projectScope = row.avgMemoryProjectScopeChars.toStringAsFixed(0);
+        final mixedScope = row.avgMemoryMixedScopeChars.toStringAsFixed(0);
         final promptPerScore = row.avgPromptCharsPerScorePoint.toStringAsFixed(
           1,
         );
@@ -96,7 +101,7 @@ String summarizeQualityTokenEfficiencyRows(
         final nonDeliveryTokenPerScore = row
             .nonDeliveryPriorityAvgLinkedTokensPerScorePoint
             .toStringAsFixed(1);
-        return '${row.targetType}: linked=$linked, avgScore=$avgScore, prompt/score=$promptPerScore, token/score=$tokenPerScore (delivery=$deliveryTokenPerScore, non=$nonDeliveryTokenPerScore)';
+        return '${row.targetType}: linked=$linked, avgScore=$avgScore, mem=d$deliveryMemory/v$visualMemory scope=s$scriptScope/p$projectScope/m$mixedScope, prompt/score=$promptPerScore, token/score=$tokenPerScore (delivery=$deliveryTokenPerScore, non=$nonDeliveryTokenPerScore)';
       })
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';

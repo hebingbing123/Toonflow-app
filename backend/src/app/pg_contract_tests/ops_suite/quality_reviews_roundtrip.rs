@@ -417,6 +417,11 @@ async fn quality_reviews_roundtrip() {
     assert_eq!(script_efficiency["linkedLlmReviewCount"], 1);
     assert_eq!(script_efficiency["avgLinkedTotalTokens"], 200.0);
     assert_eq!(script_efficiency["avgLinkedTokensPerScorePoint"], 25.0);
+    assert!(script_efficiency.get("avgMemoryScriptScopeChars").is_some());
+    assert!(script_efficiency
+        .get("avgMemoryProjectScopeChars")
+        .is_some());
+    assert!(script_efficiency.get("avgMemoryMixedScopeChars").is_some());
 
     let res = app
         .clone()
