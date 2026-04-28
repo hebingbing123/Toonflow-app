@@ -3878,6 +3878,7 @@ fn build_video_prompt_with_constraint_pressure(
         context,
         structured_fields.as_ref(),
         &prompt_coverage,
+        image_url.is_some(),
         memory_budget_tier,
         constraint_pressure,
     );
@@ -4642,6 +4643,7 @@ fn build_project_visual_anchors(
     context: Option<&VideoPromptContext>,
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
+    has_reference_frame: bool,
     memory_budget_tier: VideoPromptMemoryBudgetTier,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> VideoPromptStyleAnchorBuild {
@@ -4654,8 +4656,11 @@ fn build_project_visual_anchors(
     let mut memory_delivery_anchor_count = 0usize;
     let mut director_manual_yielded_to_memory = false;
     let mut style_coverage = prompt_coverage.to_vec();
-    let compact_decorative_style_anchors =
-        should_compact_decorative_style_anchors(structured_fields, constraint_pressure);
+    let compact_decorative_style_anchors = should_compact_decorative_style_anchors(
+        structured_fields,
+        has_reference_frame,
+        constraint_pressure,
+    );
     if let Some(style) = ctx
         .project_art_style
         .as_deref()
@@ -4781,11 +4786,19 @@ fn build_project_visual_anchors(
 
 fn should_compact_decorative_style_anchors(
     structured_fields: Option<&StructuredStoryboardDescription>,
+    has_reference_frame: bool,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> bool {
     let Some(fields) = structured_fields else {
         return false;
     };
+    if should_yield_decorative_style_to_reference_frame(
+        fields,
+        has_reference_frame,
+        constraint_pressure,
+    ) {
+        return true;
+    }
     let Some(pressure) = constraint_pressure
         .filter(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())
     else {
@@ -4795,6 +4808,19 @@ fn should_compact_decorative_style_anchors(
     video_prompt_scene_needs_dialogue_performance_memory(fields, Some(pressure))
         || current_storyboard_is_fragile_emotional_turn(fields)
         || (pressure.has_identity_guardrail && video_prompt_scene_needs_identity_memory(fields))
+}
+
+fn should_yield_decorative_style_to_reference_frame(
+    fields: &StructuredStoryboardDescription,
+    has_reference_frame: bool,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    has_reference_frame
+        && !constraint_pressure.is_some_and(|pressure| {
+            pressure.has_lighting_guardrail || pressure.has_motion_guardrail
+        })
+        && (video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+            || current_storyboard_is_fragile_emotional_turn(fields))
 }
 
 fn should_keep_environment_style_anchor_under_pressure(
@@ -13516,6 +13542,78 @@ mod tests {
         assert_eq!(result.diagnostics.memory_budget_tier, "lean");
         assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
         assert!(!result.prompt.contains("情绪压抑克制"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_reference_frame_yields_decorative_style_anchors_for_fragile_dialogue_turn(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在咖啡厅窗边低声开口、咖啡厅窗边、林晚/咖啡杯、4秒、中景、缓推、抿唇停顿后低声说你终于来了、隐忍 / 克制、夜间冷蓝窗光、你终于来了、雨声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: vec!["咖啡杯: 陶瓷白杯".into()],
+            memory_style_notes: vec!["表演喉结滚动，语气压低气息尾音发颤，环境咖啡热气".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+        );
+
+        assert!(result
+            .prompt
+            .contains("Use the supplied frame as reference."));
+        assert!(result.prompt.contains("表演喉结滚动"), "{}", result.prompt);
+        assert!(
+            result.prompt.contains("语气压低气息尾音发颤"),
+            "{}",
+            result.prompt
+        );
+        assert!(!result.prompt.contains("咖啡热气"), "{}", result.prompt);
+        assert!(!result.prompt.contains("动作自然"), "{}", result.prompt);
+    }
+
+    #[test]
+    fn build_video_prompt_with_reference_frame_keeps_visual_style_anchor_when_lighting_guardrail_is_active(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚在镜前低声开口、化妆镜前、林晚、4秒、近景、静止、抿唇停顿后低声说我没事、克制隐忍、暖金逆光、我没事、静场留白、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["化妆镜前: 镜面暖光".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演眼神迟疑，光影暖金逆光层次".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_constraint_pressure(
+            None,
+            Some("https://example.com/frame.png"),
+            Some(&context),
+            Some(VideoPromptConstraintPressure {
+                has_dialogue_guardrail: true,
+                has_lighting_guardrail: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert!(
+            result.prompt.contains("光影暖金逆光层次"),
+            "{}",
+            result.prompt
+        );
     }
 
     #[test]
