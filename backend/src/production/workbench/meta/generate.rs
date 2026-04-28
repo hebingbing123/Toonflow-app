@@ -4661,8 +4661,15 @@ fn build_project_visual_anchors(
             &reserved_art_style_anchors,
         )
     }) {
-        anchors.push(note);
-        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        if !project_director_note_should_yield_to_memory_style(
+            &note,
+            &ctx.memory_style_notes,
+            structured_fields,
+            constraint_pressure,
+        ) {
+            anchors.push(note);
+            extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        }
     }
     if let Some(performance_anchor) = resolve_performance_style_anchor(
         ctx.project_art_style.as_deref(),
@@ -4807,6 +4814,62 @@ fn collect_reserved_art_style_anchors(
         reserved.push(candidate);
     }
     reserved
+}
+
+fn project_director_note_should_yield_to_memory_style(
+    director_note: &str,
+    memory_style_notes: &[String],
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    let Some(fields) = structured_fields else {
+        return false;
+    };
+    if !video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+        && !current_storyboard_is_fragile_emotional_turn(fields)
+    {
+        return false;
+    }
+    if project_director_note_has_unique_visual_signal(director_note) {
+        return false;
+    }
+
+    memory_style_notes.iter().any(|note| {
+        split_prompt_note_fragments(note).any(|fragment| {
+            role_memory_fragment_is_high_value(fragment.as_str())
+                || sound_fragment_has_high_value_acoustic_detail(fragment.as_str())
+        })
+    })
+}
+
+fn project_director_note_has_unique_visual_signal(note: &str) -> bool {
+    split_prompt_note_fragments(note).any(|fragment| {
+        fragment.starts_with("镜头")
+            || fragment.starts_with("光影")
+            || fragment.starts_with("环境")
+            || [
+                "低机位",
+                "高机位",
+                "稳定跟拍",
+                "手持跟拍",
+                "慢推",
+                "推进",
+                "拉远",
+                "环绕",
+                "逆光",
+                "冷光",
+                "暖光",
+                "霓虹",
+                "反光",
+                "玻璃",
+                "窗帘",
+                "车流",
+                "雨丝",
+                "热气",
+            ]
+            .iter()
+            .any(|keyword| fragment.contains(keyword))
+    })
 }
 
 fn compact_project_art_style_note(
@@ -14681,6 +14744,53 @@ mod tests {
         );
         assert!(prompt.contains("表演喉结滚动"), "{prompt}");
         assert!(!prompt.contains("表演神情内敛眼神深沉喉结滚动"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_lets_high_value_memory_replace_generic_director_mood_on_fragile_turn() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抿唇后停顿片刻才低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A14）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: Some("情绪隐忍克制".into()),
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气压低气息尾音发颤".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("表演喉结滚动"), "{prompt}");
+        assert!(prompt.contains("语气压低气息尾音发颤"), "{prompt}");
+        assert!(!prompt.contains("情绪隐忍克制"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_visual_director_note_even_when_memory_handles_delivery() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抿唇后停顿片刻才低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A14）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: Some("低机位压迫感，情绪隐忍克制".into()),
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气压低气息尾音发颤".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("低机位压迫感"), "{prompt}");
+        assert!(prompt.contains("表演喉结滚动"), "{prompt}");
+        assert!(prompt.contains("语气压低气息尾音发颤"), "{prompt}");
+        assert!(!prompt.contains("情绪隐忍克制"), "{prompt}");
     }
 
     #[test]
