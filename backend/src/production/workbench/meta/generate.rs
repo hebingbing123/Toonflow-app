@@ -134,6 +134,15 @@ fn video_prompt_style_note_scope_bucket(note: &str) -> &'static str {
     }
 }
 
+fn video_prompt_style_note_scope_priority(note: &str) -> u8 {
+    match video_prompt_style_note_scope_bucket(note) {
+        "script" => 0,
+        "project" => 1,
+        "mixed" => 2,
+        _ => 3,
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GenerateVideoPromptBody {
@@ -5031,7 +5040,8 @@ fn build_project_visual_anchors(
                 structured_fields,
                 constraint_pressure,
             );
-            (note, is_delivery, score, scope_bucket)
+            let scope_priority = video_prompt_style_note_scope_priority(&note);
+            (note, is_delivery, score, scope_bucket, scope_priority)
         })
         .collect::<Vec<_>>();
     memory_candidates.sort_by(|left, right| {
@@ -5039,12 +5049,13 @@ fn build_project_visual_anchors(
             .2
             .cmp(&left.2)
             .then_with(|| right.1.cmp(&left.1))
+            .then_with(|| left.4.cmp(&right.4))
             .then_with(|| right.0.chars().count().cmp(&left.0.chars().count()))
             .then_with(|| left.0.cmp(&right.0))
     });
 
     let mut selected_memory_anchor_kinds = Vec::new();
-    for (note, is_delivery, _, scope_bucket) in memory_candidates {
+    for (note, is_delivery, _, scope_bucket, _) in memory_candidates {
         if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
             && memory_anchor_count >= 1
             && selected_memory_anchor_kinds
@@ -13985,6 +13996,48 @@ mod tests {
             project_note.chars().count()
         );
         assert_eq!(result.diagnostics.memory_mixed_scope_chars, 0);
+    }
+
+    #[test]
+    fn build_video_prompt_with_diagnostics_prefers_script_scope_memory_when_signal_is_equal() {
+        let shared_note = "表演喉结滚动，语气低声克制";
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚缓慢开口、城市夜景落地窗边、林晚、4秒、中景、缓推、喉头微动后低声说你终于来了、隐忍压抑、冷蓝窗光、你终于来了、雨声回响、A31）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec![
+                encode_video_prompt_style_note_source(
+                    shared_note,
+                    "project_video_style_memory",
+                ),
+                encode_video_prompt_style_note_source(
+                    shared_note,
+                    "script_role_video_style_memory",
+                ),
+            ],
+            continuity_notes: Vec::new(),
+        };
+
+        let result = build_video_prompt_with_diagnostics(None, None, Some(&context));
+
+        assert_eq!(
+            result.diagnostics.memory_script_scope_chars,
+            shared_note.chars().count()
+        );
+        assert_eq!(result.diagnostics.memory_project_scope_chars, 0);
+        assert!(
+            result
+                .prompt
+                .contains("Style anchor: 表演喉结滚动，语气低声克制."),
+            "{}",
+            result.prompt
+        );
     }
 
     #[test]
