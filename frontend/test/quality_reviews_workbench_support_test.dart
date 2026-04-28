@@ -105,4 +105,35 @@ void main() {
       'output: linked=8/10, avgScore=84.3, mem=d120/v88 scope=s70/p22/m14, prompt/score=10.9, token/score=7.6 (delivery=6.9, non=8.1)',
     );
   });
+
+  test('summarizeQualityTokenEfficiencySampleRows formats sample preview', () {
+    final summary = summarizeQualityTokenEfficiencySampleRows(const [
+      QualityTokenEfficiencySampleRow(
+        reviewId: 'r-sample',
+        createdAt: '2026-04-10T00:00:00Z',
+        projectId: 1,
+        scriptId: 2,
+        jobId: 'job-1',
+        targetType: 'asset',
+        targetId: 'asset-1',
+        source: 'auto',
+        overallScore: 4,
+        passed: false,
+        isBadCase: true,
+        memoryDeliveryPriorityApplied: true,
+        promptChars: 920,
+        linkedTotalTokens: 0,
+        memoryDeliveryChars: 90,
+        memoryVisualChars: 140,
+        memoryScriptScopeChars: 20,
+        memoryProjectScopeChars: 150,
+        memoryMixedScopeChars: 35,
+        promptCharsPerScorePoint: 230,
+        linkedTokensPerScorePoint: 0,
+        dominantMemoryScope: 'project',
+      ),
+    ]);
+
+    expect(summary, 'asset:score=4,p=230.0,t=0.0,bad/delivery/project');
+  });
 }

@@ -9,6 +9,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
     required this.initialStatsSummary,
     required this.initialStagePassRateSummary,
     required this.initialTokenEfficiencySummary,
+    required this.initialTokenEfficiencySampleSummary,
   });
 
   final String accessToken;
@@ -17,6 +18,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   final String? initialStatsSummary;
   final String? initialStagePassRateSummary;
   final String? initialTokenEfficiencySummary;
+  final String? initialTokenEfficiencySampleSummary;
 
   @override
   State<_QualityReviewsWorkbenchDialog> createState() =>
@@ -31,12 +33,14 @@ class _QualityReviewsWorkbenchDialogState
   String? _statsSummary;
   String? _stagePassRateSummary;
   String? _tokenEfficiencySummary;
+  String? _tokenEfficiencySampleSummary;
   String? _reviewDetails;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
   bool _loadingStats = false;
   bool _loadingStagePassRate = false;
   bool _loadingTokenEfficiency = false;
+  bool _loadingTokenEfficiencySamples = false;
   bool _loadingReviewById = false;
   bool _creatingReview = false;
   bool _filterBadCasesOnly = false;
@@ -54,6 +58,7 @@ class _QualityReviewsWorkbenchDialogState
     _statsSummary = widget.initialStatsSummary;
     _stagePassRateSummary = widget.initialStagePassRateSummary;
     _tokenEfficiencySummary = widget.initialTokenEfficiencySummary;
+    _tokenEfficiencySampleSummary = widget.initialTokenEfficiencySampleSummary;
     _reviewDetails = widget.initialReviewDetails;
     if (_reviews.isNotEmpty) {
       _ctrls.reviewIdCtrl.text = _reviews.first.id;
@@ -189,6 +194,32 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
+  Future<void> _loadTokenEfficiencySamples() async {
+    setState(() {
+      _loadingTokenEfficiencySamples = true;
+      _statusLine = null;
+    });
+    try {
+      final rows = await fetchQualityTokenEfficiencySamples(
+        widget.accessToken,
+        targetType: _ctrls.targetTypeFilterCtrl.text.trim(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _tokenEfficiencySampleSummary =
+            summarizeQualityTokenEfficiencySampleRows(rows);
+        _statusLine = '已刷新低效样本';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _statusLine = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _loadingTokenEfficiencySamples = false);
+      }
+    }
+  }
+
   Future<void> _loadReviewById() async {
     final reviewId = _ctrls.reviewIdCtrl.text.trim();
     if (reviewId.isEmpty) {
@@ -280,6 +311,7 @@ class _QualityReviewsWorkbenchDialogState
         statsSummary: _statsSummary,
         stagePassRateSummary: _stagePassRateSummary,
         tokenEfficiencySummary: _tokenEfficiencySummary,
+        tokenEfficiencySampleSummary: _tokenEfficiencySampleSummary,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
         filterBadCasesOnly: _filterBadCasesOnly,
@@ -292,6 +324,7 @@ class _QualityReviewsWorkbenchDialogState
         loadingStats: _loadingStats,
         loadingStagePassRate: _loadingStagePassRate,
         loadingTokenEfficiency: _loadingTokenEfficiency,
+        loadingTokenEfficiencySamples: _loadingTokenEfficiencySamples,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
         targetTypeFilterCtrl: _ctrls.targetTypeFilterCtrl,
@@ -338,6 +371,9 @@ class _QualityReviewsWorkbenchDialogState
         },
         onLoadTokenEfficiency: () {
           _loadTokenEfficiency();
+        },
+        onLoadTokenEfficiencySamples: () {
+          _loadTokenEfficiencySamples();
         },
         onLoadReviewById: () {
           _loadReviewById();

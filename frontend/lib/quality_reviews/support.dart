@@ -108,6 +108,48 @@ String summarizeQualityTokenEfficiencyRows(
   return '$visible$suffix';
 }
 
+String summarizeQualityTokenEfficiencySampleRows(
+  Iterable<QualityTokenEfficiencySampleRow> rows, {
+  int maxItems = 3,
+}) {
+  final items = rows.toList(growable: false);
+  if (items.isEmpty) {
+    return '当前没有低效样本';
+  }
+  final visible = items
+      .take(maxItems)
+      .map((row) {
+        final score = row.overallScore?.toString() ?? 'n/a';
+        final promptPerScore = row.promptCharsPerScorePoint.toStringAsFixed(1);
+        final tokenPerScore = row.linkedTokensPerScorePoint.toStringAsFixed(1);
+        final flags = <String>[
+          if (row.isBadCase) 'bad',
+          if (row.memoryDeliveryPriorityApplied == true) 'delivery',
+          row.dominantMemoryScope,
+        ].join('/');
+        final action = row.recommendedAction.replaceAll('_', '-');
+        return '${row.targetType}:score=$score,p=$promptPerScore,t=$tokenPerScore,$flags->$action';
+      })
+      .join(' | ');
+  final suffix = items.length > maxItems ? ' | …' : '';
+  return '$visible$suffix';
+}
+
+String formatQualityTokenEfficiencySampleDetails(
+  QualityTokenEfficiencySampleRow row,
+) {
+  return [
+    row.reviewId,
+    row.targetType,
+    'scope=${row.dominantMemoryScope}',
+    'action=${row.recommendedAction}',
+    'reason=${row.recommendedActionReason}',
+    if (row.overallScore != null) 'score=${row.overallScore}',
+    'prompt/score=${row.promptCharsPerScorePoint.toStringAsFixed(1)}',
+    'token/score=${row.linkedTokensPerScorePoint.toStringAsFixed(1)}',
+  ].join(' · ');
+}
+
 String formatQualityReviewDetails(QualityReview row) {
   return [
     row.id,

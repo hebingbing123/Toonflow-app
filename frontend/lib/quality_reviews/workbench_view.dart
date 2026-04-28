@@ -6,9 +6,11 @@ import 'support.dart';
 class QualityReviewsWorkbenchDialogViewModel {
   const QualityReviewsWorkbenchDialogViewModel({
     required this.reviews,
+    required this.tokenEfficiencySamples,
     required this.statsSummary,
     required this.stagePassRateSummary,
     required this.tokenEfficiencySummary,
+    required this.tokenEfficiencySampleSummary,
     required this.reviewDetails,
     required this.statusLine,
     required this.filterBadCasesOnly,
@@ -21,6 +23,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingStats,
     required this.loadingStagePassRate,
     required this.loadingTokenEfficiency,
+    required this.loadingTokenEfficiencySamples,
     required this.loadingReviewById,
     required this.creatingReview,
     required this.targetTypeFilterCtrl,
@@ -36,9 +39,11 @@ class QualityReviewsWorkbenchDialogViewModel {
   });
 
   final List<QualityReview> reviews;
+  final List<QualityTokenEfficiencySampleRow> tokenEfficiencySamples;
   final String? statsSummary;
   final String? stagePassRateSummary;
   final String? tokenEfficiencySummary;
+  final String? tokenEfficiencySampleSummary;
   final String? reviewDetails;
   final String? statusLine;
   final bool filterBadCasesOnly;
@@ -51,6 +56,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingStats;
   final bool loadingStagePassRate;
   final bool loadingTokenEfficiency;
+  final bool loadingTokenEfficiencySamples;
   final bool loadingReviewById;
   final bool creatingReview;
   final TextEditingController targetTypeFilterCtrl;
@@ -74,11 +80,13 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onLoadStats,
     required this.onLoadStagePassRate,
     required this.onLoadTokenEfficiency,
+    required this.onLoadTokenEfficiencySamples,
     required this.onLoadReviewById,
     required this.onCreateReview,
     required this.onCreatePassedChanged,
     required this.onCreateBadCaseChanged,
     required this.onSelectReview,
+    required this.onSelectTokenEfficiencySample,
     required this.onClose,
   });
 
@@ -89,11 +97,13 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadStats;
   final VoidCallback onLoadStagePassRate;
   final VoidCallback onLoadTokenEfficiency;
+  final VoidCallback onLoadTokenEfficiencySamples;
   final VoidCallback onLoadReviewById;
   final VoidCallback onCreateReview;
   final ValueChanged<bool> onCreatePassedChanged;
   final ValueChanged<bool> onCreateBadCaseChanged;
   final ValueChanged<QualityReview> onSelectReview;
+  final ValueChanged<QualityTokenEfficiencySampleRow> onSelectTokenEfficiencySample;
   final VoidCallback onClose;
 }
 
@@ -222,6 +232,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       model.loadingTokenEfficiency ? '读取中…' : '读取 token 效率',
                     ),
                   ),
+                  OutlinedButton(
+                    onPressed: model.loadingTokenEfficiencySamples
+                        ? null
+                        : callbacks.onLoadTokenEfficiencySamples,
+                    child: Text(
+                      model.loadingTokenEfficiencySamples ? '读取中…' : '读取低效样本',
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -315,6 +333,45 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('Token 效率：${model.tokenEfficiencySummary}'),
+              ],
+              if (model.tokenEfficiencySampleSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('低效样本：${model.tokenEfficiencySampleSummary}'),
+              ],
+              if (model.tokenEfficiencySamples.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '低效样本 ${model.tokenEfficiencySamples.length} 条',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 8),
+                ...model.tokenEfficiencySamples
+                    .take(6)
+                    .map(
+                      (sample) => ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          '${sample.targetType} · score=${sample.overallScore ?? "n/a"} · ${sample.recommendedAction}',
+                        ),
+                        subtitle: Text(
+                          formatQualityTokenEfficiencySampleDetails(sample),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Chip(
+                              label: Text(sample.dominantMemoryScope),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: () =>
+                            callbacks.onSelectTokenEfficiencySample(sample),
+                      ),
+                    ),
               ],
               if (model.reviews.isNotEmpty) ...[
                 const SizedBox(height: 12),

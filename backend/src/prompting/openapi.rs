@@ -12,6 +12,7 @@ use utoipa::OpenApi;
     crate::prompting::quality::get_review,
     crate::prompting::quality::get_stats,
     crate::prompting::quality::get_token_efficiency,
+    crate::prompting::quality::get_token_efficiency_samples,
     crate::prompting::quality::get_stage_pass_rate,
 ))]
 pub struct PromptingHttpOpenApi;

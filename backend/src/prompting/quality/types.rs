@@ -78,6 +78,15 @@ pub struct ListQualityReviewsQuery {
     pub offset: Option<i64>,
 }
 
+/// token 效率低效样本查询参数
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
+#[serde(rename_all = "camelCase")]
+#[into_params(parameter_in = Query, rename_all = "camelCase")]
+pub struct ListQualityTokenEfficiencySamplesQuery {
+    pub target_type: Option<String>,
+    pub limit: Option<i64>,
+}
+
 /// 质量统计响应
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -141,4 +150,34 @@ pub struct QualityTokenEfficiencyResponse {
     pub delivery_priority_avg_linked_tokens_per_score_point: f64,
     pub non_delivery_priority_avg_prompt_chars_per_score_point: f64,
     pub non_delivery_priority_avg_linked_tokens_per_score_point: f64,
+}
+
+/// 质量 / token 效率低效样本
+#[derive(Debug, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityTokenEfficiencySample {
+    pub review_id: Uuid,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub project_id: Option<i32>,
+    pub script_id: Option<i32>,
+    pub job_id: Option<Uuid>,
+    pub target_type: String,
+    pub target_id: Option<String>,
+    pub source: String,
+    pub overall_score: Option<i16>,
+    pub passed: Option<bool>,
+    pub is_bad_case: bool,
+    pub memory_delivery_priority_applied: Option<bool>,
+    pub prompt_chars: f64,
+    pub linked_total_tokens: f64,
+    pub memory_delivery_chars: f64,
+    pub memory_visual_chars: f64,
+    pub memory_script_scope_chars: f64,
+    pub memory_project_scope_chars: f64,
+    pub memory_mixed_scope_chars: f64,
+    pub prompt_chars_per_score_point: f64,
+    pub linked_tokens_per_score_point: f64,
+    pub dominant_memory_scope: String,
+    pub recommended_action: String,
+    pub recommended_action_reason: String,
 }

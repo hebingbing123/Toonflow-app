@@ -2,7 +2,9 @@
 
 use crate::error::ApiError;
 
-use super::types::{CreateQualityReviewBody, ListQualityReviewsQuery};
+use super::types::{
+    CreateQualityReviewBody, ListQualityReviewsQuery, ListQualityTokenEfficiencySamplesQuery,
+};
 
 const VALID_TARGET_TYPES: &[&str] = &["storyboard", "script", "video", "asset", "output"];
 const VALID_SOURCES: &[&str] = &["manual", "auto"];
@@ -31,6 +33,21 @@ pub(super) fn validate_list_reviews_query(query: &ListQualityReviewsQuery) -> Re
             return Err(ApiError::BadRequest(format!(
                 "Invalid source: {}, must be one of {:?}",
                 source, VALID_SOURCES
+            )));
+        }
+    }
+
+    Ok(())
+}
+
+pub(super) fn validate_token_efficiency_samples_query(
+    query: &ListQualityTokenEfficiencySamplesQuery,
+) -> Result<(), ApiError> {
+    if let Some(target_type) = query.target_type.as_deref() {
+        if !VALID_TARGET_TYPES.contains(&target_type) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid target_type: {}, must be one of {:?}",
+                target_type, VALID_TARGET_TYPES
             )));
         }
     }

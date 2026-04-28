@@ -3,8 +3,13 @@
 use crate::error::ApiError;
 use serde_json::json;
 
-use super::types::{CreateQualityReviewBody, ListQualityReviewsQuery};
-use super::validate::{validate_create_review_body, validate_list_reviews_query};
+use super::types::{
+    CreateQualityReviewBody, ListQualityReviewsQuery, ListQualityTokenEfficiencySamplesQuery,
+};
+use super::validate::{
+    validate_create_review_body, validate_list_reviews_query,
+    validate_token_efficiency_samples_query,
+};
 
 #[test]
 fn create_quality_review_body_accepts_valid() {
@@ -106,5 +111,24 @@ fn validate_list_reviews_query_rejects_invalid_target_type() {
         offset: None,
     };
     let err = validate_list_reviews_query(&query).expect_err("invalid target type");
+    assert!(matches!(err, ApiError::BadRequest(_)));
+}
+
+#[test]
+fn token_efficiency_samples_query_accepts_target_type() {
+    let query = ListQualityTokenEfficiencySamplesQuery {
+        target_type: Some("storyboard".to_string()),
+        limit: Some(10),
+    };
+    validate_token_efficiency_samples_query(&query).expect("valid target_type");
+}
+
+#[test]
+fn token_efficiency_samples_query_rejects_invalid_target_type() {
+    let query = ListQualityTokenEfficiencySamplesQuery {
+        target_type: Some("chapter".to_string()),
+        limit: Some(10),
+    };
+    let err = validate_token_efficiency_samples_query(&query).expect_err("invalid target type");
     assert!(matches!(err, ApiError::BadRequest(_)));
 }

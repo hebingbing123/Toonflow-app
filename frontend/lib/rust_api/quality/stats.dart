@@ -217,6 +217,97 @@ class QualityTokenEfficiencyRow {
   }
 }
 
+class QualityTokenEfficiencySampleRow {
+  const QualityTokenEfficiencySampleRow({
+    required this.reviewId,
+    required this.createdAt,
+    required this.projectId,
+    required this.scriptId,
+    required this.jobId,
+    required this.targetType,
+    required this.targetId,
+    required this.source,
+    required this.overallScore,
+    required this.passed,
+    required this.isBadCase,
+    required this.memoryDeliveryPriorityApplied,
+    required this.promptChars,
+    required this.linkedTotalTokens,
+    required this.memoryDeliveryChars,
+    required this.memoryVisualChars,
+    required this.memoryScriptScopeChars,
+    required this.memoryProjectScopeChars,
+    required this.memoryMixedScopeChars,
+    required this.promptCharsPerScorePoint,
+    required this.linkedTokensPerScorePoint,
+    required this.dominantMemoryScope,
+    required this.recommendedAction,
+    required this.recommendedActionReason,
+  });
+
+  final String reviewId;
+  final String createdAt;
+  final int? projectId;
+  final int? scriptId;
+  final String? jobId;
+  final String targetType;
+  final String? targetId;
+  final String source;
+  final int? overallScore;
+  final bool? passed;
+  final bool isBadCase;
+  final bool? memoryDeliveryPriorityApplied;
+  final double promptChars;
+  final double linkedTotalTokens;
+  final double memoryDeliveryChars;
+  final double memoryVisualChars;
+  final double memoryScriptScopeChars;
+  final double memoryProjectScopeChars;
+  final double memoryMixedScopeChars;
+  final double promptCharsPerScorePoint;
+  final double linkedTokensPerScorePoint;
+  final String dominantMemoryScope;
+  final String recommendedAction;
+  final String recommendedActionReason;
+
+  factory QualityTokenEfficiencySampleRow.fromJson(Map<String, dynamic> json) {
+    return QualityTokenEfficiencySampleRow(
+      reviewId: json['reviewId'] as String,
+      createdAt: json['createdAt'] as String,
+      projectId: (json['projectId'] as num?)?.toInt(),
+      scriptId: (json['scriptId'] as num?)?.toInt(),
+      jobId: json['jobId'] as String?,
+      targetType: json['targetType'] as String,
+      targetId: json['targetId'] as String?,
+      source: json['source'] as String,
+      overallScore: (json['overallScore'] as num?)?.toInt(),
+      passed: json['passed'] as bool?,
+      isBadCase: json['isBadCase'] as bool? ?? false,
+      memoryDeliveryPriorityApplied:
+          json['memoryDeliveryPriorityApplied'] as bool?,
+      promptChars: (json['promptChars'] as num?)?.toDouble() ?? 0,
+      linkedTotalTokens: (json['linkedTotalTokens'] as num?)?.toDouble() ?? 0,
+      memoryDeliveryChars:
+          (json['memoryDeliveryChars'] as num?)?.toDouble() ?? 0,
+      memoryVisualChars: (json['memoryVisualChars'] as num?)?.toDouble() ?? 0,
+      memoryScriptScopeChars:
+          (json['memoryScriptScopeChars'] as num?)?.toDouble() ?? 0,
+      memoryProjectScopeChars:
+          (json['memoryProjectScopeChars'] as num?)?.toDouble() ?? 0,
+      memoryMixedScopeChars:
+          (json['memoryMixedScopeChars'] as num?)?.toDouble() ?? 0,
+      promptCharsPerScorePoint:
+          (json['promptCharsPerScorePoint'] as num?)?.toDouble() ?? 0,
+      linkedTokensPerScorePoint:
+          (json['linkedTokensPerScorePoint'] as num?)?.toDouble() ?? 0,
+      dominantMemoryScope: json['dominantMemoryScope'] as String? ?? 'none',
+      recommendedAction: json['recommendedAction'] as String? ?? 'tighten_core_prompt',
+      recommendedActionReason:
+          json['recommendedActionReason'] as String? ?? '',
+    );
+  }
+}
+
 Future<List<QualityStatsRow>> fetchQualityStats(String accessToken) async {
   final res = await http
       .get(
@@ -266,5 +357,37 @@ Future<List<QualityTokenEfficiencyRow>> fetchQualityTokenEfficiency(
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => QualityTokenEfficiencyRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+Future<List<QualityTokenEfficiencySampleRow>>
+fetchQualityTokenEfficiencySamples(
+  String accessToken, {
+  String? targetType,
+  int limit = 8,
+}) async {
+  final query = <String, String>{
+    'limit': limit.toString(),
+    if (targetType != null && targetType.trim().isNotEmpty)
+      'targetType': targetType.trim(),
+  };
+  final res = await http
+      .get(
+        qualityUri(
+          '/api/v1/quality/token-efficiency/samples',
+          queryParameters: query,
+        ),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map(
+        (e) =>
+            QualityTokenEfficiencySampleRow.fromJson(e as Map<String, dynamic>),
+      )
       .toList();
 }

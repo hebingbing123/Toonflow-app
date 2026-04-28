@@ -77,7 +77,7 @@ async fn quality_reviews_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"targetType":"script","targetId":"{script_target_id}","jobId":"{quality_job_id}","source":"auto","overallScore":8,"passed":true,"memoryDeliveryPriorityApplied":true,"comments":"pg quality script"}}"#
+                    r#"{{"targetType":"script","targetId":"{script_target_id}","jobId":"{quality_job_id}","source":"auto","overallScore":8,"passed":true,"memoryDeliveryPriorityApplied":true,"comments":"pg quality script","modelParams":{{"diagnostics":{{"promptChars":640,"memoryDeliveryChars":120,"memoryVisualChars":80,"memoryScriptScopeChars":70,"memoryProjectScopeChars":12,"memoryMixedScopeChars":4}}}}}}"#
                 )))
                 .unwrap(),
         )
@@ -109,7 +109,7 @@ async fn quality_reviews_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"targetType":"asset","targetId":"{asset_target_id}","jobId":"{quality_job_id}","overallScore":4,"passed":false,"isBadCase":true,"badCaseCategory":"visual_error","comments":"pg quality asset"}}"#
+                    r#"{{"targetType":"asset","targetId":"{asset_target_id}","jobId":"{quality_job_id}","overallScore":4,"passed":false,"isBadCase":true,"badCaseCategory":"visual_error","comments":"pg quality asset","modelParams":{{"diagnostics":{{"promptChars":920,"memoryDeliveryChars":90,"memoryVisualChars":140,"memoryScriptScopeChars":20,"memoryProjectScopeChars":150,"memoryMixedScopeChars":35}}}}}}"#
                 )))
                 .unwrap(),
         )
@@ -422,6 +422,61 @@ async fn quality_reviews_roundtrip() {
         .get("avgMemoryProjectScopeChars")
         .is_some());
     assert!(script_efficiency.get("avgMemoryMixedScopeChars").is_some());
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/quality/token-efficiency/samples?limit=2")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, sample_rows) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "sample_rows={sample_rows}");
+    let sample_rows = sample_rows.as_array().expect("sample rows");
+    assert_eq!(sample_rows.len(), 2);
+    assert_eq!(
+        sample_rows[0]["reviewId"].as_str(),
+        Some(asset_review_id_text.as_str())
+    );
+    assert_eq!(sample_rows[0]["dominantMemoryScope"], "project");
+    assert_eq!(sample_rows[0]["recommendedAction"], "shift_to_delivery_memory");
+    assert_eq!(
+        sample_rows[0]["recommendedActionReason"],
+        "先把预算从泛设定移到情绪、动作和语气约束"
+    );
+    assert_eq!(sample_rows[0]["promptCharsPerScorePoint"], 230.0);
+    assert_eq!(sample_rows[1]["dominantMemoryScope"], "script");
+    assert_eq!(
+        sample_rows[1]["recommendedAction"],
+        "trim_script_memory_keep_delivery"
+    );
+    assert_eq!(sample_rows[1]["linkedTokensPerScorePoint"], 25.0);
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/quality/token-efficiency/samples?targetType=script&limit=1")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, script_samples) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "script_samples={script_samples}");
+    let script_samples = script_samples.as_array().expect("script samples");
+    assert_eq!(script_samples.len(), 1);
+    assert_eq!(
+        script_samples[0]["reviewId"].as_str(),
+        Some(script_review_id_text.as_str())
+    );
 
     let res = app
         .clone()

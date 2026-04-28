@@ -98,6 +98,7 @@ void main() {
     expect(find.text('创建评审'), findsNWidgets(2));
     expect(find.text('评审详情：r1 · output · manual'), findsNWidgets(2));
     expect(find.text('读取 token 效率'), findsOneWidget);
+    expect(find.text('读取低效样本'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'output'), findsWidgets);
   });
 }
