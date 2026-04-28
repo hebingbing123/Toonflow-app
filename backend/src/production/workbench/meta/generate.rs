@@ -42,6 +42,7 @@ mod tests;
 mod tokens;
 
 use constraints::VideoPromptConstraintPressure;
+use constraints::{derive_recent_quality_constraint_pressure, RecentQualitySignalRow};
 use handlers::{
     GenerateVideoPromptBody, GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse,
 };
@@ -53,6 +54,86 @@ use director::*;
 use memory::*;
 
 // moved to `generate_tokens.rs`
+
+#[derive(Debug, sqlx::FromRow)]
+struct RecentQualitySignalDbRow {
+    passed: Option<bool>,
+    overall_score: Option<i16>,
+    dialogue_naturalness: Option<i16>,
+    character_consistency: Option<i16>,
+    visual_quality: Option<i16>,
+    memory_delivery_priority_applied: Option<bool>,
+    is_bad_case: bool,
+    bad_case_category: Option<String>,
+    comments: Option<String>,
+}
+
+impl From<RecentQualitySignalDbRow> for RecentQualitySignalRow {
+    fn from(value: RecentQualitySignalDbRow) -> Self {
+        Self {
+            passed: value.passed,
+            overall_score: value.overall_score,
+            dialogue_naturalness: value.dialogue_naturalness,
+            character_consistency: value.character_consistency,
+            visual_quality: value.visual_quality,
+            memory_delivery_priority_applied: value.memory_delivery_priority_applied,
+            is_bad_case: value.is_bad_case,
+            bad_case_category: value.bad_case_category,
+            comments: value.comments,
+        }
+    }
+}
+
+async fn load_recent_quality_constraint_pressure(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: Option<i32>,
+) -> Result<Option<VideoPromptConstraintPressure>, ApiError> {
+    let storyboard_target = storyboard_id.filter(|id| *id > 0).map(|id| id.to_string());
+    let rows = sqlx::query_as::<_, RecentQualitySignalDbRow>(
+        r#"
+        SELECT
+          passed,
+          overall_score,
+          dialogue_naturalness,
+          character_consistency,
+          visual_quality,
+          memory_delivery_priority_applied,
+          is_bad_case,
+          bad_case_category,
+          comments
+        FROM app_quality_review
+        WHERE user_id = $1
+          AND project_id = $2
+          AND script_id = $3
+          AND target_type IN ('storyboard', 'output', 'video', 'asset')
+          AND (
+            $4::text IS NULL
+            OR target_id = $4
+            OR target_id IS NULL
+          )
+        ORDER BY
+          CASE WHEN $4::text IS NOT NULL AND target_id = $4 THEN 0 ELSE 1 END,
+          created_at DESC
+        LIMIT 12
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .bind(script_id)
+    .bind(storyboard_target)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let rows = rows
+        .into_iter()
+        .map(RecentQualitySignalRow::from)
+        .collect::<Vec<_>>();
+    Ok(derive_recent_quality_constraint_pressure(&rows))
+}
 
 fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {
     note.split(['，', ',', '；', ';', '。', '\n'])
@@ -131,6 +212,19 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         negative_prompt_selection.as_ref(),
         observation_note.as_deref(),
     );
+    let constraint_pressure = constraint_pressure.unwrap_or_default().merge(
+        load_recent_quality_constraint_pressure(
+            pool,
+            user_id,
+            body.project_id,
+            body.script_id,
+            body.storyboard_id,
+        )
+        .await?,
+    );
+    let constraint_pressure = constraint_pressure
+        .has_active_guardrail()
+        .then_some(constraint_pressure);
     let context = load_video_prompt_context(
         pool,
         user_id,
