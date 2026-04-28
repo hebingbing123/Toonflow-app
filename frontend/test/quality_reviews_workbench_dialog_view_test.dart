@@ -8,6 +8,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController targetIdFilterCtrl,
   required TextEditingController jobIdFilterCtrl,
   required TextEditingController reviewIdCtrl,
+  required TextEditingController createProjectIdCtrl,
+  required TextEditingController createScriptIdCtrl,
   required TextEditingController createTargetTypeCtrl,
   required TextEditingController createTargetIdCtrl,
   required TextEditingController createSourceCtrl,
@@ -62,6 +64,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     targetIdFilterCtrl: targetIdFilterCtrl,
     jobIdFilterCtrl: jobIdFilterCtrl,
     reviewIdCtrl: reviewIdCtrl,
+    createProjectIdCtrl: createProjectIdCtrl,
+    createScriptIdCtrl: createScriptIdCtrl,
     createTargetTypeCtrl: createTargetTypeCtrl,
     createTargetIdCtrl: createTargetIdCtrl,
     createSourceCtrl: createSourceCtrl,
@@ -106,6 +110,8 @@ void main() {
   late TextEditingController targetIdFilterCtrl;
   late TextEditingController jobIdFilterCtrl;
   late TextEditingController reviewIdCtrl;
+  late TextEditingController createProjectIdCtrl;
+  late TextEditingController createScriptIdCtrl;
   late TextEditingController createTargetTypeCtrl;
   late TextEditingController createTargetIdCtrl;
   late TextEditingController createSourceCtrl;
@@ -118,6 +124,8 @@ void main() {
     targetIdFilterCtrl = TextEditingController(text: 'storyboard-1');
     jobIdFilterCtrl = TextEditingController(text: 'job-1');
     reviewIdCtrl = TextEditingController(text: 'review-1');
+    createProjectIdCtrl = TextEditingController(text: '7');
+    createScriptIdCtrl = TextEditingController(text: '11');
     createTargetTypeCtrl = TextEditingController(text: 'output');
     createTargetIdCtrl = TextEditingController(text: 'storyboard-1');
     createSourceCtrl = TextEditingController(text: 'manual');
@@ -131,6 +139,8 @@ void main() {
     targetIdFilterCtrl.dispose();
     jobIdFilterCtrl.dispose();
     reviewIdCtrl.dispose();
+    createProjectIdCtrl.dispose();
+    createScriptIdCtrl.dispose();
     createTargetTypeCtrl.dispose();
     createTargetIdCtrl.dispose();
     createSourceCtrl.dispose();
@@ -151,6 +161,8 @@ void main() {
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
               reviewIdCtrl: reviewIdCtrl,
+              createProjectIdCtrl: createProjectIdCtrl,
+              createScriptIdCtrl: createScriptIdCtrl,
               createTargetTypeCtrl: createTargetTypeCtrl,
               createTargetIdCtrl: createTargetIdCtrl,
               createSourceCtrl: createSourceCtrl,
@@ -171,6 +183,8 @@ void main() {
     expect(find.text('质量统计：output: total=1, pass=100%'), findsOneWidget);
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
     expect(find.textContaining('Token效率：'), findsNothing);
+    expect(find.widgetWithText(TextField, '7'), findsOneWidget);
+    expect(find.widgetWithText(TextField, '11'), findsOneWidget);
     expect(find.text('评审 1 条'), findsOneWidget);
     expect(
       find.widgetWithText(ListTile, 'output · manual · score=82'),
@@ -190,6 +204,8 @@ void main() {
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
               reviewIdCtrl: reviewIdCtrl,
+              createProjectIdCtrl: createProjectIdCtrl,
+              createScriptIdCtrl: createScriptIdCtrl,
               createTargetTypeCtrl: createTargetTypeCtrl,
               createTargetIdCtrl: createTargetIdCtrl,
               createSourceCtrl: createSourceCtrl,
@@ -245,6 +261,8 @@ void main() {
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
               reviewIdCtrl: reviewIdCtrl,
+              createProjectIdCtrl: createProjectIdCtrl,
+              createScriptIdCtrl: createScriptIdCtrl,
               createTargetTypeCtrl: createTargetTypeCtrl,
               createTargetIdCtrl: createTargetIdCtrl,
               createSourceCtrl: createSourceCtrl,

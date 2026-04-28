@@ -28,6 +28,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
     required this.reviewIdCtrl,
+    required this.createProjectIdCtrl,
+    required this.createScriptIdCtrl,
     required this.createTargetTypeCtrl,
     required this.createTargetIdCtrl,
     required this.createSourceCtrl,
@@ -58,6 +60,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
   final TextEditingController reviewIdCtrl;
+  final TextEditingController createProjectIdCtrl;
+  final TextEditingController createScriptIdCtrl;
   final TextEditingController createTargetTypeCtrl;
   final TextEditingController createTargetIdCtrl;
   final TextEditingController createSourceCtrl;
@@ -278,6 +282,32 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text('创建评审', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: model.createProjectIdCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'projectId（可空）',
+                        helperText: '填写后低分/坏例可自动写入项目隔离记忆',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: model.createScriptIdCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'scriptId（可空）',
+                        helperText: '与 projectId 一起填写，才会落到脚本级记忆',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.createTargetTypeCtrl,

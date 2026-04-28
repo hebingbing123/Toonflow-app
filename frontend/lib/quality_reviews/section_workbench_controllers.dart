@@ -6,6 +6,8 @@ class _QualityReviewsWorkbenchControllers {
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
     required this.reviewIdCtrl,
+    required this.createProjectIdCtrl,
+    required this.createScriptIdCtrl,
     required this.createTargetTypeCtrl,
     required this.createTargetIdCtrl,
     required this.createSourceCtrl,
@@ -20,13 +22,17 @@ class _QualityReviewsWorkbenchControllers {
       targetIdFilterCtrl: TextEditingController(),
       jobIdFilterCtrl: TextEditingController(),
       reviewIdCtrl: TextEditingController(),
+      createProjectIdCtrl: TextEditingController(),
+      createScriptIdCtrl: TextEditingController(),
       createTargetTypeCtrl: TextEditingController(text: 'output'),
       createTargetIdCtrl: TextEditingController(
         text: 'flutter-workbench-${DateTime.now().millisecondsSinceEpoch}',
       ),
       createSourceCtrl: TextEditingController(text: 'manual'),
       createScoreCtrl: TextEditingController(text: '85'),
-      createCommentsCtrl: TextEditingController(text: 'quality workbench review'),
+      createCommentsCtrl: TextEditingController(
+        text: 'quality workbench review',
+      ),
       createBadCaseCategoryCtrl: TextEditingController(),
     );
   }
@@ -35,6 +41,8 @@ class _QualityReviewsWorkbenchControllers {
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
   final TextEditingController reviewIdCtrl;
+  final TextEditingController createProjectIdCtrl;
+  final TextEditingController createScriptIdCtrl;
   final TextEditingController createTargetTypeCtrl;
   final TextEditingController createTargetIdCtrl;
   final TextEditingController createSourceCtrl;
@@ -47,6 +55,8 @@ class _QualityReviewsWorkbenchControllers {
     targetIdFilterCtrl.dispose();
     jobIdFilterCtrl.dispose();
     reviewIdCtrl.dispose();
+    createProjectIdCtrl.dispose();
+    createScriptIdCtrl.dispose();
     createTargetTypeCtrl.dispose();
     createTargetIdCtrl.dispose();
     createSourceCtrl.dispose();
@@ -55,4 +65,3 @@ class _QualityReviewsWorkbenchControllers {
     createBadCaseCategoryCtrl.dispose();
   }
 }
-

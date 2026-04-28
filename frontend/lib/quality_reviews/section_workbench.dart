@@ -217,6 +217,8 @@ class _QualityReviewsWorkbenchDialogState
   Future<void> _createReview() async {
     final targetType = _ctrls.createTargetTypeCtrl.text.trim();
     final source = _ctrls.createSourceCtrl.text.trim();
+    final projectId = int.tryParse(_ctrls.createProjectIdCtrl.text.trim());
+    final scriptId = int.tryParse(_ctrls.createScriptIdCtrl.text.trim());
     final score = int.tryParse(_ctrls.createScoreCtrl.text.trim());
     if (targetType.isEmpty || source.isEmpty) {
       setState(() => _statusLine = 'targetType 和 source 不能为空');
@@ -230,6 +232,8 @@ class _QualityReviewsWorkbenchDialogState
       final created = await createQualityReview(
         widget.accessToken,
         CreateQualityReviewBody(
+          projectId: projectId,
+          scriptId: scriptId,
           targetType: targetType,
           targetId: _ctrls.createTargetIdCtrl.text.trim().isEmpty
               ? null
@@ -296,6 +300,8 @@ class _QualityReviewsWorkbenchDialogState
         targetIdFilterCtrl: _ctrls.targetIdFilterCtrl,
         jobIdFilterCtrl: _ctrls.jobIdFilterCtrl,
         reviewIdCtrl: _ctrls.reviewIdCtrl,
+        createProjectIdCtrl: _ctrls.createProjectIdCtrl,
+        createScriptIdCtrl: _ctrls.createScriptIdCtrl,
         createTargetTypeCtrl: _ctrls.createTargetTypeCtrl,
         createTargetIdCtrl: _ctrls.createTargetIdCtrl,
         createSourceCtrl: _ctrls.createSourceCtrl,
