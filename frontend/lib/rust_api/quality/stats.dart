@@ -239,6 +239,9 @@ class QualityTokenEfficiencyRow {
     required this.avgMemorySharePercent,
     required this.avgDeliveryMemorySharePercent,
     required this.deliveryPriorityHitRatePercent,
+    required this.memoryAction,
+    required this.memoryFocus,
+    required this.memoryReason,
   });
 
   final String targetType;
@@ -251,6 +254,9 @@ class QualityTokenEfficiencyRow {
   final double avgMemorySharePercent;
   final double avgDeliveryMemorySharePercent;
   final double deliveryPriorityHitRatePercent;
+  final String memoryAction;
+  final String memoryFocus;
+  final String memoryReason;
 
   factory QualityTokenEfficiencyRow.fromJson(Map<String, dynamic> json) {
     return QualityTokenEfficiencyRow(
@@ -271,6 +277,9 @@ class QualityTokenEfficiencyRow {
           (json['avgDeliveryMemorySharePercent'] as num?)?.toDouble() ?? 0,
       deliveryPriorityHitRatePercent:
           (json['deliveryPriorityHitRatePercent'] as num?)?.toDouble() ?? 0,
+      memoryAction: json['memoryAction'] as String? ?? 'observe',
+      memoryFocus: json['memoryFocus'] as String? ?? 'observe',
+      memoryReason: json['memoryReason'] as String? ?? '',
     );
   }
 }
@@ -382,11 +391,19 @@ Future<List<StagePassRateRow>> fetchQualityStagePassRate(
 }
 
 Future<List<QualityTokenEfficiencyRow>> fetchQualityTokenEfficiency(
-  String accessToken,
-) async {
+  String accessToken, {
+  int? projectId,
+  int? scriptId,
+}) async {
+  final query = <String, String>{};
+  if (projectId != null) query['projectId'] = '$projectId';
+  if (scriptId != null) query['scriptId'] = '$scriptId';
   final res = await http
       .get(
-        qualityUri('/api/v1/quality/token-efficiency'),
+        qualityUri(
+          '/api/v1/quality/token-efficiency',
+          queryParameters: query.isEmpty ? null : query,
+        ),
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
@@ -402,11 +419,15 @@ Future<List<QualityTokenEfficiencyRow>> fetchQualityTokenEfficiency(
 Future<List<QualityTokenEfficiencySampleRow>>
 fetchQualityTokenEfficiencySamples(
   String accessToken, {
+  int? projectId,
+  int? scriptId,
   int? limit,
   String? targetType,
   bool? memoryDeliveryPriorityApplied,
 }) async {
   final query = <String, String>{};
+  if (projectId != null) query['projectId'] = '$projectId';
+  if (scriptId != null) query['scriptId'] = '$scriptId';
   if (limit != null) query['limit'] = '$limit';
   if (targetType != null && targetType.isNotEmpty) {
     query['targetType'] = targetType;

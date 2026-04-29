@@ -1,6 +1,6 @@
 //! 质量审查 HTTP 处理器。
 
-mod aggregates;
+pub(crate) mod aggregates;
 mod create;
 mod get;
 mod list;

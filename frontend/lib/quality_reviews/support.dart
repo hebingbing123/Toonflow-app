@@ -869,6 +869,83 @@ String? summarizeQualityRepairPlanFromReviews(
       .join(' | ');
 }
 
+String? summarizeQualityTokenEfficiencyActionPlan(
+  Iterable<QualityTokenEfficiencyRow> rows, {
+  int? projectId,
+  int? scriptId,
+  int maxItems = 3,
+}) {
+  final items = rows
+      .where((row) => row.memoryAction != 'observe')
+      .toList(growable: false);
+  if (items.isEmpty) return null;
+
+  final scope = () {
+    if (projectId != null && scriptId != null) return 'P$projectId/S$scriptId';
+    if (projectId != null) return 'P$projectId';
+    return '当前筛选范围';
+  }();
+
+  final ranked = items.toList()
+    ..sort((a, b) {
+      final priority = _qualityTokenEfficiencyActionPriority(
+        b.memoryAction,
+      ).compareTo(_qualityTokenEfficiencyActionPriority(a.memoryAction));
+      if (priority != 0) return priority;
+      return b.sampleCount.compareTo(a.sampleCount);
+    });
+
+  final visible = ranked
+      .take(maxItems)
+      .map((row) {
+        final focus = _qualityTokenEfficiencyFocusLabel(row.memoryFocus);
+        switch (row.memoryAction) {
+          case 'keep_delivery_memory':
+            return '${row.targetType} 保留$focus的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。';
+          case 'reuse_negative_memory':
+            return '${row.targetType} 先复用$focus做坏例隔离约束，锁住穿帮/假感后再决定是否补 prompt。';
+          case 'trim_generic_style_memory':
+            return '${row.targetType} 优先压$focus里的动作/光影/氛围套话，把 token 留给人物表演、口型和连续性。';
+          case 'promote_selected_memory':
+            return '${row.targetType} 从高分样本晋升一条$focus，复用人物情绪和镜头执行，减少重复描述。';
+          default:
+            return null;
+        }
+      })
+      .whereType<String>()
+      .join(' | ');
+  if (visible.isEmpty) return null;
+  return '$scope 独立记忆建议：$visible';
+}
+
+int _qualityTokenEfficiencyActionPriority(String action) {
+  switch (action) {
+    case 'keep_delivery_memory':
+      return 4;
+    case 'reuse_negative_memory':
+      return 3;
+    case 'trim_generic_style_memory':
+      return 2;
+    case 'promote_selected_memory':
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+String _qualityTokenEfficiencyFocusLabel(String focus) {
+  switch (focus) {
+    case 'selected_video_memory':
+      return '镜头级精选记忆';
+    case 'rejected_video_negative_memory':
+      return '坏例记忆';
+    case 'project_video_style_memory':
+      return '项目级风格记忆';
+    default:
+      return '当前记忆';
+  }
+}
+
 String summarizeQualityTokenEfficiencyRows(
   Iterable<QualityTokenEfficiencyRow> rows, {
   int maxItems = 3,
@@ -889,11 +966,51 @@ String summarizeQualityTokenEfficiencyRows(
           1,
         );
         final hitRate = row.deliveryPriorityHitRatePercent.toStringAsFixed(1);
-        return '${row.targetType}: prompt=$prompt, base=$base, memory=$memory ($share%, delivery=$delivery/$deliveryShare%, hit=$hitRate%)';
+        final parts = <String>[
+          '${row.targetType}: prompt=$prompt, base=$base, memory=$memory ($share%, delivery=$delivery/$deliveryShare%, hit=$hitRate%)',
+        ];
+        final memoryAction = _qualityTokenEfficiencyMemoryActionSummary(row);
+        if (memoryAction != null) {
+          parts.add(memoryAction);
+        }
+        return parts.join(' · ');
       })
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
   return '$visible$suffix';
+}
+
+String? _qualityTokenEfficiencyMemoryActionSummary(
+  QualityTokenEfficiencyRow row,
+) {
+  String? label;
+  switch (row.memoryAction) {
+    case 'keep_delivery_memory':
+      label = '动作=保留表演记忆';
+      break;
+    case 'reuse_negative_memory':
+      label = '动作=复用坏例约束';
+      break;
+    case 'trim_generic_style_memory':
+      label = '动作=压项目泛风格';
+      break;
+    case 'promote_selected_memory':
+      label = '动作=晋升优质镜头';
+      break;
+    default:
+      label = null;
+  }
+  if (label == null) return null;
+  final reason = row.memoryReason.trim();
+  final focus = row.memoryFocus.trim();
+  final parts = <String>[label];
+  if (focus.isNotEmpty && focus != 'observe') {
+    parts.add('焦点=$focus');
+  }
+  if (reason.isNotEmpty) {
+    parts.add(reason);
+  }
+  return parts.join(' · ');
 }
 
 String summarizeQualityTokenEfficiencySamples(

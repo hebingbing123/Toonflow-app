@@ -3,6 +3,7 @@
 use crate::error::ApiError;
 use serde_json::json;
 
+use super::handlers::aggregates::{TokenEfficiencyQuery, TokenEfficiencySamplesQuery};
 use super::types::{CreateQualityReviewBody, ListQualityReviewsQuery};
 use super::validate::{validate_create_review_body, validate_list_reviews_query};
 
@@ -122,4 +123,32 @@ fn list_quality_reviews_query_deserializes_scope_filters() {
     assert_eq!(query.project_id, Some(12));
     assert_eq!(query.script_id, Some(7));
     assert_eq!(query.target_type.as_deref(), Some("storyboard"));
+}
+
+#[test]
+fn token_efficiency_query_deserializes_scope_filters() {
+    let json = json!({
+        "projectId": 12,
+        "scriptId": 7
+    });
+    let query: TokenEfficiencyQuery = serde_json::from_value(json).unwrap();
+    assert_eq!(query.project_id, Some(12));
+    assert_eq!(query.script_id, Some(7));
+}
+
+#[test]
+fn token_efficiency_samples_query_deserializes_scope_and_priority_filters() {
+    let json = json!({
+        "projectId": 12,
+        "scriptId": 7,
+        "targetType": "storyboard",
+        "memoryDeliveryPriorityApplied": true,
+        "limit": 4
+    });
+    let query: TokenEfficiencySamplesQuery = serde_json::from_value(json).unwrap();
+    assert_eq!(query.project_id, Some(12));
+    assert_eq!(query.script_id, Some(7));
+    assert_eq!(query.target_type.as_deref(), Some("storyboard"));
+    assert_eq!(query.memory_delivery_priority_applied, Some(true));
+    assert_eq!(query.limit, Some(4));
 }

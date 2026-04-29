@@ -585,28 +585,80 @@ void main() {
     },
   );
 
-  test(
-    'summarizeQualityTokenEfficiencyRows formats prompt and memory shares',
-    () {
-      final summary = summarizeQualityTokenEfficiencyRows(const [
-        QualityTokenEfficiencyRow(
-          targetType: 'storyboard',
-          sampleCount: 6,
-          avgPromptChars: 420,
-          avgNonMemoryPromptChars: 348,
-          avgMemoryStyleChars: 72,
-          avgMemoryVisualChars: 40,
-          avgMemoryDeliveryChars: 32,
-          avgMemorySharePercent: 17.1,
-          avgDeliveryMemorySharePercent: 7.6,
-          deliveryPriorityHitRatePercent: 66.7,
-        ),
-      ]);
+  test('summarizeQualityTokenEfficiencyRows formats prompt and memory shares', () {
+    final summary = summarizeQualityTokenEfficiencyRows(const [
+      QualityTokenEfficiencyRow(
+        targetType: 'storyboard',
+        sampleCount: 6,
+        avgPromptChars: 420,
+        avgNonMemoryPromptChars: 348,
+        avgMemoryStyleChars: 72,
+        avgMemoryVisualChars: 40,
+        avgMemoryDeliveryChars: 32,
+        avgMemorySharePercent: 17.1,
+        avgDeliveryMemorySharePercent: 7.6,
+        deliveryPriorityHitRatePercent: 66.7,
+        memoryAction: 'trim_generic_style_memory',
+        memoryFocus: 'project_video_style_memory',
+        memoryReason:
+            'Project-wide style memory is eating budget; trim generic visual/style lines first.',
+      ),
+    ]);
 
+    expect(
+      summary,
+      'storyboard: prompt=420, base=348, memory=72 (17.1%, delivery=32/7.6%, hit=66.7%) · 动作=压项目泛风格 · 焦点=project_video_style_memory · Project-wide style memory is eating budget; trim generic visual/style lines first.',
+    );
+  });
+
+  test(
+    'summarizeQualityTokenEfficiencyActionPlan prefers scoped quality-first memory actions',
+    () {
+      final summary = summarizeQualityTokenEfficiencyActionPlan(
+        const [
+          QualityTokenEfficiencyRow(
+            targetType: 'storyboard',
+            sampleCount: 6,
+            avgPromptChars: 420,
+            avgNonMemoryPromptChars: 348,
+            avgMemoryStyleChars: 72,
+            avgMemoryVisualChars: 40,
+            avgMemoryDeliveryChars: 32,
+            avgMemorySharePercent: 17.1,
+            avgDeliveryMemorySharePercent: 7.6,
+            deliveryPriorityHitRatePercent: 66.7,
+            memoryAction: 'trim_generic_style_memory',
+            memoryFocus: 'project_video_style_memory',
+            memoryReason:
+                'Project-wide style memory is eating budget; trim generic visual/style lines first.',
+          ),
+          QualityTokenEfficiencyRow(
+            targetType: 'shot',
+            sampleCount: 3,
+            avgPromptChars: 408,
+            avgNonMemoryPromptChars: 336,
+            avgMemoryStyleChars: 72,
+            avgMemoryVisualChars: 28,
+            avgMemoryDeliveryChars: 44,
+            avgMemorySharePercent: 17.6,
+            avgDeliveryMemorySharePercent: 10.8,
+            deliveryPriorityHitRatePercent: 100,
+            memoryAction: 'keep_delivery_memory',
+            memoryFocus: 'selected_video_memory',
+            memoryReason:
+                'Keep scoped acting memory and keep trimming generic style first.',
+          ),
+        ],
+        projectId: 7,
+        scriptId: 11,
+      );
+
+      expect(summary, startsWith('P7/S11 独立记忆建议：'));
       expect(
         summary,
-        'storyboard: prompt=420, base=348, memory=72 (17.1%, delivery=32/7.6%, hit=66.7%)',
+        contains('shot 保留镜头级精选记忆的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。'),
       );
+      expect(summary, contains('storyboard 优先压项目级风格记忆里的动作/光影/氛围套话'));
     },
   );
 

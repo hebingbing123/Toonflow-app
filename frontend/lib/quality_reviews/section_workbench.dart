@@ -29,6 +29,7 @@ class _QualityReviewsWorkbenchDialogState
   String? _statsSummary;
   String? _scopeInsightsSummary;
   String? _tokenEfficiencySummary;
+  String? _tokenEfficiencyActionPlan;
   String? _tokenEfficiencySamplesSummary;
   String? _stagePassRateSummary;
   String? _reviewDetails;
@@ -232,10 +233,19 @@ class _QualityReviewsWorkbenchDialogState
       _statusLine = null;
     });
     try {
-      final rows = await fetchQualityTokenEfficiency(widget.accessToken);
+      final rows = await fetchQualityTokenEfficiency(
+        widget.accessToken,
+        projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
+        scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
+      );
       if (!mounted) return;
       setState(() {
         _tokenEfficiencySummary = summarizeQualityTokenEfficiencyRows(rows);
+        _tokenEfficiencyActionPlan = summarizeQualityTokenEfficiencyActionPlan(
+          rows,
+          projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
+          scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
+        );
         _statusLine = '已刷新 token 聚合';
       });
     } on RustApiException catch (e) {
@@ -256,6 +266,8 @@ class _QualityReviewsWorkbenchDialogState
     try {
       final rows = await fetchQualityTokenEfficiencySamples(
         widget.accessToken,
+        projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
+        scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
         limit: 4,
         targetType: _ctrls.targetTypeFilterCtrl.text.trim(),
         memoryDeliveryPriorityApplied: _filterDeliveryPriorityOnly
@@ -380,6 +392,7 @@ class _QualityReviewsWorkbenchDialogState
         statsSummary: _statsSummary,
         scopeInsightsSummary: _scopeInsightsSummary,
         tokenEfficiencySummary: _tokenEfficiencySummary,
+        tokenEfficiencyActionPlan: _tokenEfficiencyActionPlan,
         tokenEfficiencySamplesSummary: _tokenEfficiencySamplesSummary,
         stagePassRateSummary: _stagePassRateSummary,
         reviewDetails: _reviewDetails,

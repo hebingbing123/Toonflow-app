@@ -167,6 +167,9 @@ pub struct QualityTokenEfficiencyResponse {
     pub avg_memory_share_percent: f64,
     pub avg_delivery_memory_share_percent: f64,
     pub delivery_priority_hit_rate_percent: f64,
+    pub memory_action: String,
+    pub memory_focus: String,
+    pub memory_reason: String,
 }
 
 /// Token efficiency sample row.
