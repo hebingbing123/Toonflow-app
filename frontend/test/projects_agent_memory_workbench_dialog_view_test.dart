@@ -541,6 +541,57 @@ void main() {
     },
   );
 
+  testWidgets('agent memory workbench view prioritizes actionable rows first', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsAgentMemoryWorkbenchDialogView(
+            model: buildModel(
+              projectIdCtrl: projectIdCtrl,
+              agentTypeCtrl: agentTypeCtrl,
+              episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
+              appendContentCtrl: appendContentCtrl,
+              appendRoleCtrl: appendRoleCtrl,
+              clearTypeCtrl: clearTypeCtrl,
+              memoryRows: <dynamic>[
+                <String, Object?>{
+                  'id': 'keep-1',
+                  'name': 'selected_video_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=21 | subject=林晚 | style=表演欲言又止，语气轻声克制 | delivery=表演欲言又止轻声克制',
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 'trim-1',
+                  'name': 'project_video_style_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'sampleCount=6 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
+                    },
+                  ],
+                },
+              ],
+            ),
+            callbacks: buildCallbacks(),
+          ),
+        ),
+      ),
+    );
+
+    final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
+    expect((tiles.first.title as Text).data, contains('待压缩'));
+    expect((tiles.last.title as Text).data, contains('优先保留'));
+  });
+
   testWidgets('agent memory workbench view disables busy actions', (
     WidgetTester tester,
   ) async {

@@ -482,26 +482,28 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
     }
   }
 
-  final previews = rawPreviews
-      .map(
-        (preview) => _AgentMemoryPreview(
-          memoryId: preview.memoryId,
-          memoryName: preview.memoryName,
-          role: preview.role,
-          shortContent: preview.shortContent,
-          charCount: preview.charCount,
-          normalizedPrefix: preview.normalizedPrefix,
-          isDuplicated:
-              preview.normalizedPrefix.isNotEmpty &&
-              (prefixCounts[preview.normalizedPrefix] ?? 0) > 1,
-          classificationLabel: preview.classificationLabel,
-          actionLabel: preview.actionLabel,
-          scopeLabel: preview.scopeLabel,
-          subjectLabel: preview.subjectLabel,
-          signalLabel: preview.signalLabel,
-        ),
-      )
-      .toList(growable: false);
+  final previews =
+      rawPreviews
+          .map(
+            (preview) => _AgentMemoryPreview(
+              memoryId: preview.memoryId,
+              memoryName: preview.memoryName,
+              role: preview.role,
+              shortContent: preview.shortContent,
+              charCount: preview.charCount,
+              normalizedPrefix: preview.normalizedPrefix,
+              isDuplicated:
+                  preview.normalizedPrefix.isNotEmpty &&
+                  (prefixCounts[preview.normalizedPrefix] ?? 0) > 1,
+              classificationLabel: preview.classificationLabel,
+              actionLabel: preview.actionLabel,
+              scopeLabel: preview.scopeLabel,
+              subjectLabel: preview.subjectLabel,
+              signalLabel: preview.signalLabel,
+            ),
+          )
+          .toList(growable: false)
+        ..sort(_compareAgentMemoryPreviewPriority);
   final duplicateCount = previews
       .where((preview) => preview.isDuplicated)
       .length;
@@ -558,6 +560,44 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
     efficiencySummary: efficiencySummary,
     recommendation: recommendation,
   );
+}
+
+int _compareAgentMemoryPreviewPriority(
+  _AgentMemoryPreview left,
+  _AgentMemoryPreview right,
+) {
+  final duplicateOrder = (right.isDuplicated ? 1 : 0).compareTo(
+    left.isDuplicated ? 1 : 0,
+  );
+  if (duplicateOrder != 0) {
+    return duplicateOrder;
+  }
+  final actionOrder = _actionPriority(
+    right.actionLabel,
+  ).compareTo(_actionPriority(left.actionLabel));
+  if (actionOrder != 0) {
+    return actionOrder;
+  }
+  final charOrder = right.charCount.compareTo(left.charCount);
+  if (charOrder != 0) {
+    return charOrder;
+  }
+  return left.memoryId.compareTo(right.memoryId);
+}
+
+int _actionPriority(String actionLabel) {
+  switch (actionLabel) {
+    case '待压缩':
+      return 4;
+    case '合并坏例':
+      return 3;
+    case '优先保留':
+      return 2;
+    case '待观察':
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 _AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
