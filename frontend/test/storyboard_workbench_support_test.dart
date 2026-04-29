@@ -550,6 +550,84 @@ void main() {
   );
 
   test(
+    'buildStoryboardVideoPromptRepairSuggestions prioritizes reference frame and delivery memory',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 436,
+        negativePromptChars: 48,
+        negativeConstraintCount: 2,
+        negativeBudgetTier: 'expanded',
+        autoNegativeSource: 'review+rejected_memory',
+        autoNegativeReviewFragmentCount: 2,
+        autoNegativeMemoryFragmentCount: 3,
+        observationNoteChars: 16,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 0,
+        toolAnchorCount: 0,
+        styleAnchorCount: 1,
+        memoryStyleAnchorCount: 2,
+        memoryDeliveryAnchorCount: 1,
+        memoryDeliveryPriorityApplied: true,
+        memoryStyleChars: 88,
+        memoryVisualChars: 40,
+        memoryDeliveryChars: 32,
+        memoryHitBuckets: ['表演'],
+        memorySuppressedBuckets: ['动作'],
+        memoryHitBucketCounts: {'表演': 2},
+        memorySuppressedBucketCounts: {'动作': 3},
+        continuityNoteCount: 1,
+        continuityNoteChars: 32,
+        usesReferenceFrame: false,
+        memoryBudgetTier: 'expanded',
+      );
+
+      expect(buildStoryboardVideoPromptRepairSuggestions(diagnostics), [
+        '先补当前参考帧，再压词；人物脸、服化道和站位会更稳。',
+        '保留表演/语气记忆，把情绪写成可演动作，别退回成读稿腔。',
+        '优先删动作/光影泛句，把预算让给口型、微表情和人物一致性。',
+        '沿用自动坏例负向约束，手动补词前先去重，避免同义词重复烧 token。',
+        '这次已经命中项目/剧本私有坏例记忆，先复用它，别再堆一层共享长记忆。',
+      ]);
+    },
+  );
+
+  test(
+    'buildStoryboardVideoPromptRepairSuggestions falls back to healthy guidance',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 260,
+        negativePromptChars: 0,
+        negativeConstraintCount: 0,
+        negativeBudgetTier: 'lean',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 1,
+        styleAnchorCount: 1,
+        memoryStyleAnchorCount: 1,
+        memoryDeliveryAnchorCount: 0,
+        memoryDeliveryPriorityApplied: false,
+        memoryStyleChars: 24,
+        memoryVisualChars: 24,
+        memoryDeliveryChars: 0,
+        memoryHitBuckets: const [],
+        memorySuppressedBuckets: const [],
+        continuityNoteCount: 0,
+        continuityNoteChars: 0,
+        usesReferenceFrame: true,
+        memoryBudgetTier: 'lean',
+      );
+
+      expect(buildStoryboardVideoPromptRepairSuggestions(diagnostics), [
+        '当前预算可控，继续保留人物表演、关键道具和情绪细节。',
+      ]);
+    },
+  );
+
+  test(
     'buildStoryboardVideoPromptBudgetHint preserves expanded memory on risky shots',
     () {
       const diagnostics = GenerateVideoPromptDiagnostics(

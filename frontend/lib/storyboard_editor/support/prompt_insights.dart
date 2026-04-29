@@ -154,13 +154,6 @@ String buildStoryboardVideoPromptAnchorSummary(
 String buildStoryboardVideoPromptBudgetHint(
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
-  String? topBucket(Map<String, int> counts) {
-    if (counts.isEmpty) return null;
-    return (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
-        .first
-        .key;
-  }
-
   if (!diagnostics.usesReferenceFrame) {
     return '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。';
   }
@@ -169,7 +162,9 @@ String buildStoryboardVideoPromptBudgetHint(
       diagnostics.memoryBudgetTier == 'expanded') {
     return '已命中表演/语气优先记忆，先别删这段；优先压缩重复的场景/风格与连续性泛句，避免又回到“读稿腔”。';
   }
-  final topSuppressedBucket = topBucket(diagnostics.memorySuppressedBucketCounts);
+  final topSuppressedBucket = _topStoryboardBucket(
+    diagnostics.memorySuppressedBucketCounts,
+  );
   if (topSuppressedBucket != null &&
       diagnostics.promptChars >= 380 &&
       diagnostics.memoryStyleChars >= 48) {
@@ -216,4 +211,67 @@ String buildStoryboardVideoPromptBudgetHint(
     return '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。';
   }
   return '当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。';
+}
+
+String? _topStoryboardBucket(Map<String, int> counts) {
+  if (counts.isEmpty) return null;
+  return (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
+      .first
+      .key;
+}
+
+List<String> buildStoryboardVideoPromptRepairSuggestions(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  final suggestions = <String>[];
+  final tags = <String>{};
+
+  void addTagged(String tag, String suggestion) {
+    if (tags.add(tag)) suggestions.add(suggestion);
+  }
+
+  final topSuppressedBucket = _topStoryboardBucket(
+    diagnostics.memorySuppressedBucketCounts,
+  );
+  final hitBuckets = {
+    ...diagnostics.memoryHitBuckets,
+    ...diagnostics.memoryHitBucketCounts.keys,
+  };
+
+  if (!diagnostics.usesReferenceFrame) {
+    addTagged('reference_frame', '先补当前参考帧，再压词；人物脸、服化道和站位会更稳。');
+  }
+  if (diagnostics.continuityNoteCount > 0 &&
+      diagnostics.continuityNoteChars >= 48) {
+    addTagged('continuity', '连续性约束改成 1-2 条硬规则，只留机位、服化道和角色位置。');
+  }
+  if (diagnostics.memoryDeliveryPriorityApplied ||
+      hitBuckets.contains('表演') ||
+      hitBuckets.contains('语气') ||
+      diagnostics.memoryDeliveryChars >= 24) {
+    addTagged('delivery', '保留表演/语气记忆，把情绪写成可演动作，别退回成读稿腔。');
+  }
+  if (diagnostics.promptChars >= 520 ||
+      diagnostics.memoryStyleChars >= 96 ||
+      topSuppressedBucket == '动作' ||
+      topSuppressedBucket == '光影') {
+    addTagged('trim_generic', '优先删动作/光影泛句，把预算让给口型、微表情和人物一致性。');
+  }
+  if (diagnostics.negativePromptChars > 0 &&
+      diagnostics.autoNegativeSource != null) {
+    addTagged('negative_reuse', '沿用自动坏例负向约束，手动补词前先去重，避免同义词重复烧 token。');
+  }
+  if (diagnostics.autoNegativeSource == 'review+rejected_memory' &&
+      diagnostics.autoNegativeMemoryFragmentCount >= 2) {
+    addTagged('memory_reuse', '这次已经命中项目/剧本私有坏例记忆，先复用它，别再堆一层共享长记忆。');
+  }
+  if (diagnostics.roleAnchorCount == 0 &&
+      diagnostics.sceneAnchorCount == 0 &&
+      diagnostics.styleAnchorCount == 0) {
+    addTagged('anchors', '补角色、场景或关键道具锚点，不然画面更容易漂和穿帮。');
+  }
+  if (suggestions.isEmpty) {
+    addTagged('healthy', '当前预算可控，继续保留人物表演、关键道具和情绪细节。');
+  }
+  return suggestions;
 }

@@ -85,6 +85,9 @@ class _StoryboardVideoSection extends StatelessWidget {
         latestExportUrl != null && latestExportUrl.isNotEmpty
         ? resolveRustApiUrl(latestExportUrl)
         : null;
+    final repairSuggestions = promptDiagnostics == null
+        ? const <String>[]
+        : buildStoryboardVideoPromptRepairSuggestions(promptDiagnostics!);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -136,9 +139,8 @@ class _StoryboardVideoSection extends StatelessWidget {
           value: autoQualityReviewOnGeneratePrompt,
           onChanged: saving
               ? null
-              : (value) => onAutoQualityReviewOnGeneratePromptChanged(
-                    value ?? false,
-                  ),
+              : (value) =>
+                    onAutoQualityReviewOnGeneratePromptChanged(value ?? false),
           dense: true,
           contentPadding: EdgeInsets.zero,
           title: const Text('生成时自动记录质量评审样本'),
@@ -201,6 +203,15 @@ class _StoryboardVideoSection extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
+          if (repairSuggestions.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              '生成前建议：${repairSuggestions.join(' / ')}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
         ],
         const SizedBox(height: 8),
         TextField(
