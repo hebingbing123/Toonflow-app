@@ -11,6 +11,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.scopeInsightsSummary,
     required this.tokenEfficiencySummary,
     required this.tokenEfficiencyActionPlan,
+    required this.tokenEfficiencyExecutionChecklist,
     required this.tokenEfficiencySamplesSummary,
     required this.stagePassRateSummary,
     required this.reviewDetails,
@@ -52,6 +53,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? scopeInsightsSummary;
   final String? tokenEfficiencySummary;
   final String? tokenEfficiencyActionPlan;
+  final String? tokenEfficiencyExecutionChecklist;
   final String? tokenEfficiencySamplesSummary;
   final String? stagePassRateSummary;
   final String? reviewDetails;
@@ -473,6 +475,33 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.tokenEfficiencyActionPlan != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('记忆动作：${model.tokenEfficiencyActionPlan}'),
+              ],
+              if (model.tokenEfficiencyExecutionChecklist != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SelectableText(
+                        model.tokenEfficiencyExecutionChecklist!,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: '复制执行清单',
+                      onPressed: () async {
+                        final checklist =
+                            model.tokenEfficiencyExecutionChecklist;
+                        if (checklist == null || checklist.isEmpty) return;
+                        await Clipboard.setData(ClipboardData(text: checklist));
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('已复制执行清单')),
+                        );
+                      },
+                      icon: const Icon(Icons.copy_all_rounded),
+                    ),
+                  ],
+                ),
               ],
               if (model.tokenEfficiencySamplesSummary != null) ...[
                 const SizedBox(height: 12),

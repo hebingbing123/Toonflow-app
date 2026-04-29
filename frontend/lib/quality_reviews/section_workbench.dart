@@ -26,10 +26,13 @@ class _QualityReviewsWorkbenchDialogState
   late final _QualityReviewsWorkbenchControllers _ctrls;
 
   List<QualityReview> _reviews = const <QualityReview>[];
+  List<QualityTokenEfficiencyRow> _tokenEfficiencyRows =
+      const <QualityTokenEfficiencyRow>[];
   String? _statsSummary;
   String? _scopeInsightsSummary;
   String? _tokenEfficiencySummary;
   String? _tokenEfficiencyActionPlan;
+  String? _tokenEfficiencyExecutionChecklist;
   String? _tokenEfficiencySamplesSummary;
   String? _stagePassRateSummary;
   String? _reviewDetails;
@@ -86,6 +89,7 @@ class _QualityReviewsWorkbenchDialogState
     _statsSummary = widget.initialStatsSummary;
     _stagePassRateSummary = widget.initialStagePassRateSummary;
     _reviewDetails = widget.initialReviewDetails;
+    _refreshExecutionChecklist();
     if (_reviews.isNotEmpty) {
       _ctrls.reviewIdCtrl.text = _reviews.first.id;
     }
@@ -95,6 +99,15 @@ class _QualityReviewsWorkbenchDialogState
   void dispose() {
     _ctrls.dispose();
     super.dispose();
+  }
+
+  void _refreshExecutionChecklist() {
+    _tokenEfficiencyExecutionChecklist = buildQualityScopedExecutionChecklist(
+      reviews: _reviews,
+      tokenRows: _tokenEfficiencyRows,
+      projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
+      scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
+    );
   }
 
   Future<void> _loadReviews({
@@ -126,6 +139,7 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _reviews = rows;
+        _refreshExecutionChecklist();
         _filterBadCasesOnly = onlyBadCases;
         _filterDeliveryPriorityOnly = onlyDeliveryPriority;
         _filterAutoSourceOnly = onlyAutoSource;
@@ -240,12 +254,14 @@ class _QualityReviewsWorkbenchDialogState
       );
       if (!mounted) return;
       setState(() {
+        _tokenEfficiencyRows = rows;
         _tokenEfficiencySummary = summarizeQualityTokenEfficiencyRows(rows);
         _tokenEfficiencyActionPlan = summarizeQualityTokenEfficiencyActionPlan(
           rows,
           projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
           scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
         );
+        _refreshExecutionChecklist();
         _statusLine = '已刷新 token 聚合';
       });
     } on RustApiException catch (e) {
@@ -393,6 +409,7 @@ class _QualityReviewsWorkbenchDialogState
         scopeInsightsSummary: _scopeInsightsSummary,
         tokenEfficiencySummary: _tokenEfficiencySummary,
         tokenEfficiencyActionPlan: _tokenEfficiencyActionPlan,
+        tokenEfficiencyExecutionChecklist: _tokenEfficiencyExecutionChecklist,
         tokenEfficiencySamplesSummary: _tokenEfficiencySamplesSummary,
         stagePassRateSummary: _stagePassRateSummary,
         reviewDetails: _reviewDetails,

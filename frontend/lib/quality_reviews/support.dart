@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import '../../rust_api.dart';
 
 Map<String, dynamic>? _qualityDiagnosticsMap(QualityReview row) {
@@ -916,6 +918,72 @@ String? summarizeQualityTokenEfficiencyActionPlan(
       .join(' | ');
   if (visible.isEmpty) return null;
   return '$scope 独立记忆建议：$visible';
+}
+
+String? buildQualityScopedExecutionChecklist({
+  required Iterable<QualityReview> reviews,
+  Iterable<QualityTokenEfficiencyRow> tokenRows =
+      const <QualityTokenEfficiencyRow>[],
+  int? projectId,
+  int? scriptId,
+  int maxItems = 4,
+}) {
+  final steps = LinkedHashSet<String>();
+  final scope = () {
+    if (projectId != null && scriptId != null) return 'P$projectId/S$scriptId';
+    if (projectId != null) return 'P$projectId';
+    return '当前筛选范围';
+  }();
+
+  for (final row in tokenRows.where((row) => row.memoryAction != 'observe')) {
+    final focus = _qualityTokenEfficiencyFocusLabel(row.memoryFocus);
+    switch (row.memoryAction) {
+      case 'keep_delivery_memory':
+        steps.add('保留$focus里的表演、语气、口型和情绪记忆，只压泛风格套话。');
+        break;
+      case 'reuse_negative_memory':
+        steps.add('先复用$focus里的坏例约束，锁住穿帮、假感和冷场，再决定是否补 prompt。');
+        break;
+      case 'trim_generic_style_memory':
+        steps.add('清掉$focus里的动作、光影、氛围套话，把 token 留给人物表演和连续性。');
+        break;
+      case 'promote_selected_memory':
+        steps.add('把高分样本晋升为$focus，复用人物情绪和镜头执行，减少重复导演描述。');
+        break;
+    }
+    if (steps.length >= maxItems) break;
+  }
+
+  final suggestionCounts = <String, int>{};
+  for (final review in reviews) {
+    for (final suggestion in buildQualityReviewRepairSuggestions(review)) {
+      suggestionCounts.update(
+        suggestion,
+        (count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    }
+  }
+  final rankedSuggestions = suggestionCounts.entries.toList()
+    ..sort((a, b) {
+      final byCount = b.value.compareTo(a.value);
+      if (byCount != 0) return byCount;
+      return a.key.compareTo(b.key);
+    });
+  for (final entry in rankedSuggestions) {
+    if (steps.length >= maxItems) break;
+    steps.add(entry.key);
+  }
+
+  if (steps.isEmpty) return null;
+
+  final numbered = steps.take(maxItems).toList(growable: false);
+  final lines = <String>[
+    '$scope 执行清单：',
+    for (var i = 0; i < numbered.length; i++) '${i + 1}. ${numbered[i]}',
+    '范围：记忆只在 $scope 生效，不跨用户、项目或短剧复用。',
+  ];
+  return lines.join('\n');
 }
 
 int _qualityTokenEfficiencyActionPriority(String action) {

@@ -53,6 +53,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     tokenEfficiencySummary: 'output: samples=2, prompt=420, memory=88',
     tokenEfficiencyActionPlan:
         'P7/S11 独立记忆建议：storyboard 保留镜头级精选记忆的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。',
+    tokenEfficiencyExecutionChecklist:
+        'P7/S11 执行清单：\n1. 保留镜头级精选记忆里的表演、语气、口型和情绪记忆，只压泛风格套话。\n2. 范围：记忆只在 P7/S11 生效，不跨用户、项目或短剧复用。',
     tokenEfficiencySamplesSummary:
         '04-14 08:00 output: prompt=430, base=340, memory=90 (20.9%, delivery优先)',
     stagePassRateSummary: 'storyboard: 100%',
@@ -219,6 +221,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('记忆动作：P7/S11 独立记忆建议'), findsOneWidget);
+    expect(find.textContaining('P7/S11 执行清单：'), findsOneWidget);
+    expect(find.byTooltip('复制执行清单'), findsOneWidget);
     expect(
       find.textContaining('省Token样本：04-14 08:00 output: prompt=430'),
       findsOneWidget,

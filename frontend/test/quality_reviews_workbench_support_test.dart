@@ -663,6 +663,71 @@ void main() {
   );
 
   test(
+    'buildQualityScopedExecutionChecklist keeps scope isolation and quality-first trimming order',
+    () {
+      final checklist = buildQualityScopedExecutionChecklist(
+        projectId: 7,
+        scriptId: 11,
+        tokenRows: const [
+          QualityTokenEfficiencyRow(
+            targetType: 'storyboard',
+            sampleCount: 6,
+            avgPromptChars: 420,
+            avgNonMemoryPromptChars: 348,
+            avgMemoryStyleChars: 72,
+            avgMemoryVisualChars: 40,
+            avgMemoryDeliveryChars: 32,
+            avgMemorySharePercent: 17.1,
+            avgDeliveryMemorySharePercent: 7.6,
+            deliveryPriorityHitRatePercent: 66.7,
+            memoryAction: 'keep_delivery_memory',
+            memoryFocus: 'selected_video_memory',
+            memoryReason: 'Keep acting memory first.',
+          ),
+          QualityTokenEfficiencyRow(
+            targetType: 'storyboard',
+            sampleCount: 4,
+            avgPromptChars: 408,
+            avgNonMemoryPromptChars: 336,
+            avgMemoryStyleChars: 72,
+            avgMemoryVisualChars: 28,
+            avgMemoryDeliveryChars: 44,
+            avgMemorySharePercent: 17.6,
+            avgDeliveryMemorySharePercent: 10.8,
+            deliveryPriorityHitRatePercent: 100,
+            memoryAction: 'trim_generic_style_memory',
+            memoryFocus: 'project_video_style_memory',
+            memoryReason: 'Trim project style memory.',
+          ),
+        ],
+        reviews: const [
+          QualityReview(
+            id: 'review-auto-1',
+            createdAt: '2026-04-14T08:00:00Z',
+            updatedAt: '2026-04-14T08:00:00Z',
+            userId: 'user-1',
+            projectId: 7,
+            scriptId: 11,
+            targetType: 'storyboard',
+            source: 'auto',
+            overallScore: 76,
+            dialogueNaturalness: 70,
+            visualQuality: 78,
+            isBadCase: true,
+            badCaseCategory: 'emotion',
+            comments: '台词偏生硬，没有情绪起伏',
+          ),
+        ],
+      );
+
+      expect(checklist, startsWith('P7/S11 执行清单：'));
+      expect(checklist, contains('保留镜头级精选记忆里的表演、语气、口型和情绪记忆，只压泛风格套话。'));
+      expect(checklist, contains('清掉项目级风格记忆里的动作、光影、氛围套话，把 token 留给人物表演和连续性。'));
+      expect(checklist, contains('范围：记忆只在 P7/S11 生效，不跨用户、项目或短剧复用。'));
+    },
+  );
+
+  test(
     'summarizeQualityTokenEfficiencySamples formats recent sample preview',
     () {
       final summary = summarizeQualityTokenEfficiencySamples(const [
