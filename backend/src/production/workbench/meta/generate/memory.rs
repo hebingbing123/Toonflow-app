@@ -1284,7 +1284,9 @@ fn should_keep_project_style_summary_rows(
         return true;
     }
     if constraint_pressure.is_none() && !script_role_style_candidates.is_empty() {
-        return false;
+        return project_style_candidates.iter().any(|(_, row)| {
+            project_style_note_carries_continuity_specific_visual_risk(row)
+        });
     }
     if !script_role_style_candidates.is_empty()
         && project_style_candidates.iter().all(|(_, row)| {
@@ -1336,6 +1338,30 @@ fn should_keep_project_style_summary_rows(
     project_scores
         .iter()
         .any(|(_, row)| !project_style_note_is_low_gain_global_fill(row, &fields, Some(pressure)))
+}
+
+fn project_style_note_carries_continuity_specific_visual_risk(row: &AgentMemoryRow) -> bool {
+    let note = extract_key_value(&row.content, "style")
+        .or_else(|| extract_key_value(&row.content, "note"));
+    let Some(note) = note else {
+        return false;
+    };
+    let normalized = normalize_prompt_text(&note);
+    [
+        "霓虹反光",
+        "反光",
+        "反射",
+        "潮湿",
+        "地面反射",
+        "逆光",
+        "剪影",
+        "构图",
+        "走位",
+        "方向",
+        "轴线",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
 }
 
 fn project_style_memory_trim_note_score(
