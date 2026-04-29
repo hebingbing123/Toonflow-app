@@ -4089,6 +4089,9 @@ fn generate_video_prompt_response_serializes_observation_note() {
             memory_delivery_anchor_count: 0,
             memory_delivery_priority_applied: false,
             recent_quality_memory_biases: vec!["delivery".into(), "visual_continuity".into()],
+            memory_top_candidate_score: 11,
+            memory_selected_primary_bucket: Some("表演".into()),
+            memory_low_value_candidate_skipped: false,
             memory_style_chars: 0,
             memory_visual_chars: 0,
             memory_delivery_chars: 0,
@@ -4162,6 +4165,27 @@ fn generate_video_prompt_response_serializes_observation_note() {
             .and_then(|item| item.get("动作"))
             .and_then(serde_json::Value::as_u64),
         Some(3)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryTopCandidateScore"))
+            .and_then(serde_json::Value::as_i64),
+        Some(11)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memorySelectedPrimaryBucket"))
+            .and_then(serde_json::Value::as_str),
+        Some("表演")
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryLowValueCandidateSkipped"))
+            .and_then(serde_json::Value::as_bool),
+        Some(false)
     );
     assert_eq!(
         value
@@ -5612,6 +5636,41 @@ fn build_video_prompt_with_diagnostics_prefers_motion_fragment_in_lean_memory_ti
     );
     assert!(
         result.prompt.contains("No extra shot changes."),
+        "{}",
+        result.prompt
+    );
+}
+
+#[test]
+fn build_video_prompt_with_diagnostics_skips_low_value_memory_anchor_in_low_risk_lean_scene() {
+    let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚坐在客厅沙发、客厅沙发、林晚、4秒、中景、静止、安静看向桌面、平静、室内自然光、无台词、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 米色针织衫".into()],
+            script_scene_anchors: vec!["客厅沙发: 木桌与浅灰布艺".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["环境客厅空气安静".into()],
+            continuity_notes: Vec::new(),
+        };
+
+    let result = build_video_prompt_with_diagnostics(
+        None,
+        Some("https://example.com/frame.png"),
+        Some(&context),
+    );
+
+    assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+    assert_eq!(result.diagnostics.memory_top_candidate_score, 3);
+    assert_eq!(result.diagnostics.memory_selected_primary_bucket, None);
+    assert!(result.diagnostics.memory_low_value_candidate_skipped);
+    assert_eq!(result.diagnostics.memory_style_anchor_count, 0);
+    assert_eq!(result.diagnostics.memory_style_chars, 0);
+    assert!(
+        !result.prompt.contains("环境客厅空气安静"),
         "{}",
         result.prompt
     );

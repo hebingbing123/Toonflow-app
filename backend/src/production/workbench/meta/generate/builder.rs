@@ -252,6 +252,10 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
             recent_quality_memory_biases: constraint_pressure
                 .map(VideoPromptConstraintPressure::memory_recall_biases)
                 .unwrap_or_default(),
+            memory_top_candidate_score: style_anchor_build.memory_top_candidate_score,
+            memory_selected_primary_bucket: style_anchor_build.memory_selected_primary_bucket,
+            memory_low_value_candidate_skipped: style_anchor_build
+                .memory_low_value_candidate_skipped,
             memory_style_chars,
             memory_visual_chars,
             memory_delivery_chars,
@@ -905,6 +909,8 @@ pub(super) fn build_project_visual_anchors(
     let mut memory_anchor_count = 0usize;
     let mut memory_delivery_anchor_count = 0usize;
     let mut memory_delivery_priority_applied = false;
+    let mut memory_selected_primary_bucket = None;
+    let mut memory_low_value_candidate_skipped = false;
     let raw_memory_bucket_counts = count_memory_style_buckets(
         ctx.memory_style_notes
             .iter()
@@ -1062,9 +1068,27 @@ pub(super) fn build_project_visual_anchors(
             .then_with(|| right.0.chars().count().cmp(&left.0.chars().count()))
             .then_with(|| left.0.cmp(&right.0))
     });
+    let memory_top_candidate_score = memory_candidates
+        .first()
+        .map(|(_, _, score)| *score)
+        .unwrap_or(0);
 
     let mut selected_memory_anchor_kinds = Vec::new();
-    for (note, is_delivery, _) in memory_candidates {
+    for (note, is_delivery, score) in memory_candidates {
+        if memory_anchor_count == 0
+            && should_skip_low_value_memory_candidate(
+                &note,
+                score,
+                structured_fields,
+                has_reference_frame,
+                has_base_style_anchor,
+                memory_budget_tier,
+                constraint_pressure,
+            )
+        {
+            memory_low_value_candidate_skipped = true;
+            continue;
+        }
         if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
             && memory_anchor_count >= 1
             && selected_memory_anchor_kinds
@@ -1081,6 +1105,9 @@ pub(super) fn build_project_visual_anchors(
             extend_prompt_coverage(&mut style_coverage, std::slice::from_ref(&note));
             if is_delivery {
                 memory_delivery_anchor_count += 1;
+            }
+            if memory_selected_primary_bucket.is_none() {
+                memory_selected_primary_bucket = selected_memory_style_primary_bucket(&note);
             }
             accumulate_memory_style_bucket_counts(&mut selected_memory_bucket_counts, &note);
             anchors.push(note);
@@ -1103,6 +1130,9 @@ pub(super) fn build_project_visual_anchors(
         if is_delivery {
             memory_delivery_anchor_count += 1;
         }
+        if memory_selected_primary_bucket.is_none() {
+            memory_selected_primary_bucket = selected_memory_style_primary_bucket(&note);
+        }
         accumulate_memory_style_bucket_counts(&mut selected_memory_bucket_counts, &note);
         anchors.push(note);
         selected_memory_anchor_kinds.push(is_delivery);
@@ -1122,6 +1152,9 @@ pub(super) fn build_project_visual_anchors(
         memory_style_anchor_count: memory_anchor_count,
         memory_delivery_anchor_count,
         memory_delivery_priority_applied,
+        memory_top_candidate_score,
+        memory_selected_primary_bucket,
+        memory_low_value_candidate_skipped,
         memory_hit_buckets,
         memory_suppressed_buckets,
         memory_hit_bucket_counts: selected_memory_bucket_counts,
@@ -1145,6 +1178,55 @@ fn memory_style_bucket(fragment: &str) -> Option<&'static str> {
     ]
     .into_iter()
     .find_map(|(prefix, bucket)| fragment.starts_with(prefix).then_some(bucket))
+}
+
+fn selected_memory_style_primary_bucket(note: &str) -> Option<String> {
+    let mut counts = std::collections::BTreeMap::new();
+    accumulate_memory_style_bucket_counts(&mut counts, note);
+    [
+        "表演", "语气", "情绪", "动作", "光影", "环境", "声场", "镜头",
+    ]
+    .into_iter()
+    .filter_map(|bucket| counts.get(bucket).copied().map(|count| (bucket, count)))
+    .max_by(|left, right| left.1.cmp(&right.1).then_with(|| left.0.cmp(right.0)))
+    .map(|(bucket, _)| bucket.to_string())
+}
+
+fn should_skip_low_value_memory_candidate(
+    note: &str,
+    score: i32,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    has_reference_frame: bool,
+    has_base_style_anchor: bool,
+    memory_budget_tier: VideoPromptMemoryBudgetTier,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    if memory_budget_tier != VideoPromptMemoryBudgetTier::Lean || score > 4 {
+        return false;
+    }
+    if constraint_pressure.is_some_and(|pressure| pressure.has_active_guardrail()) {
+        return false;
+    }
+    if memory_style_anchor_has_delivery_signal(note)
+        || style_note_contains_family(note, "光影")
+        || style_note_contains_family(note, "动作")
+    {
+        return false;
+    }
+    let Some(fields) = structured_fields else {
+        return has_reference_frame || has_base_style_anchor;
+    };
+    if video_prompt_scene_needs_emotional_memory(fields)
+        || video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+        || video_prompt_scene_needs_identity_memory(fields)
+        || video_prompt_scene_has_lighting_risk(fields)
+        || video_prompt_scene_has_motion_risk(fields)
+        || current_storyboard_is_fragile_emotional_turn(fields)
+    {
+        return false;
+    }
+
+    has_reference_frame || has_base_style_anchor
 }
 
 fn count_memory_style_buckets<'a>(
