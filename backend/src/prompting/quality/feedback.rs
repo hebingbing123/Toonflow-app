@@ -14,8 +14,9 @@ use uuid::Uuid;
 use crate::production::{
     build_selected_video_memory, clear_rejected_video_negative_memory,
     infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
-    persist_rejected_video_negative_memory, persist_selected_video_memory,
-    refresh_project_video_style_memory, refresh_script_video_style_memory, StoryboardPromptSeedRow,
+    optimize_scoped_video_memory, persist_rejected_video_negative_memory,
+    persist_selected_video_memory, refresh_project_video_style_memory,
+    refresh_script_video_style_memory, StoryboardPromptSeedRow,
 };
 use crate::settings::agent_memory::replace_named_summary_memory;
 
@@ -142,18 +143,29 @@ async fn promote_quality_review_selected_video_memory(
     persist_selected_video_memory(pool, user_id, project_id, script_id, &memory_content)
         .await
         .map_err(|e| format!("Failed to persist selected video quality memory: {e:?}"))?;
-    refresh_script_video_style_memory(pool, user_id, project_id, script_id)
+    let optimization = optimize_scoped_video_memory(pool, user_id, project_id, script_id)
         .await
-        .map_err(|e| format!("Failed to refresh script selected video memory: {e:?}"))?;
-    refresh_project_video_style_memory(pool, user_id, project_id)
-        .await
-        .map_err(|e| format!("Failed to refresh project selected video memory: {e:?}"))?;
+        .map_err(|e| format!("Failed to optimize selected video quality memory: {e:?}"))?;
+    if !optimization.refreshed_script_summary {
+        refresh_script_video_style_memory(pool, user_id, project_id, script_id)
+            .await
+            .map_err(|e| format!("Failed to refresh script selected video memory: {e:?}"))?;
+    }
+    if !optimization.refreshed_project_summary {
+        refresh_project_video_style_memory(pool, user_id, project_id)
+            .await
+            .map_err(|e| format!("Failed to refresh project selected video memory: {e:?}"))?;
+    }
 
     tracing::info!(
         review_id = %review.id,
         project_id,
         script_id,
         storyboard_id,
+        optimization_removed_rows = optimization.removed_rows,
+        optimization_removed_chars = optimization.removed_chars,
+        optimization_removed_visual_rows = optimization.removed_visual_rows,
+        optimization_removed_duplicate_rows = optimization.removed_duplicate_rows,
         "Quality feedback promoted approved storyboard/video into isolated selected memory"
     );
 
