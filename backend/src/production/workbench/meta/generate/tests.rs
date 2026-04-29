@@ -3383,6 +3383,92 @@ fn trim_video_prompt_memory_rows_with_context_keeps_visual_selected_rows_when_sc
 }
 
 #[test]
+fn trim_video_prompt_memory_rows_with_context_drops_project_style_fill_when_script_memory_is_precise(
+) {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚含泪低声说别走".into()),
+        video_desc: Some(
+            "（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_role_video_style_memory".into(),
+            content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | style=表演呼吸发颤，语气哽咽克制 | note=表演呼吸发颤，语气哽咽克制".into(),
+        },
+        AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=6 | style=镜头稳定跟拍，情绪压抑，光影冷蓝窗光 | note=镜头稳定跟拍，情绪压抑，光影冷蓝窗光".into(),
+        },
+    ];
+
+    let trimmed = trim_video_prompt_memory_rows_with_context(
+        rows,
+        18,
+        Some("seed-18-current"),
+        &["林晚".to_string(), "晚晚".to_string()],
+        Some(&storyboard_row),
+        Some(VideoPromptConstraintPressure {
+            has_dialogue_guardrail: true,
+            has_emotion_guardrail: true,
+            prefer_delivery_memory_recall: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        }),
+    );
+
+    assert!(trimmed.iter().any(|row| {
+        row.name == "script_role_video_style_memory" && row.content.contains("subject=林晚")
+    }));
+    assert!(!trimmed
+        .iter()
+        .any(|row| row.name == "project_video_style_memory"));
+}
+
+#[test]
+fn trim_video_prompt_memory_rows_with_context_keeps_project_style_when_visual_continuity_is_prioritized(
+) {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚沿着雨夜走廊回头".into()),
+        video_desc: Some(
+            "（林晚沿着雨夜走廊回头、雨夜走廊、林晚、5秒、中景、稳定跟拍、停步回头、压抑、霓虹反光、无台词、雨声车流回响、A22）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_role_video_style_memory".into(),
+            content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | style=表演抬眼停顿，语气轻声克制 | note=表演抬眼停顿，语气轻声克制".into(),
+        },
+        AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=6 | style=镜头稳定跟拍，光影霓虹反光，环境潮湿地面反射 | note=镜头稳定跟拍，光影霓虹反光，环境潮湿地面反射".into(),
+        },
+    ];
+
+    let trimmed = trim_video_prompt_memory_rows_with_context(
+        rows,
+        22,
+        Some("seed-22-current"),
+        &["林晚".to_string(), "晚晚".to_string()],
+        Some(&storyboard_row),
+        Some(VideoPromptConstraintPressure {
+            prefer_visual_continuity_memory_recall: true,
+            has_lighting_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        }),
+    );
+
+    assert!(trimmed
+        .iter()
+        .any(|row| row.name == "project_video_style_memory"));
+}
+
+#[test]
 fn trim_video_prompt_observation_rows_keeps_matching_rejection_row_over_newer_style_noise() {
     let mut rows = Vec::new();
     for _ in 0..12 {
@@ -3605,6 +3691,43 @@ fn trim_video_prompt_observation_rows_prefers_primary_subject_role_summary_under
 }
 
 #[test]
+fn trim_video_prompt_observation_rows_drops_project_style_fill_when_role_memory_is_precise() {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚含泪低声说别走".into()),
+        video_desc: Some(
+            "（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_role_video_style_memory".into(),
+            content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | style=表演呼吸发颤，语气哽咽克制 | note=表演呼吸发颤，语气哽咽克制".into(),
+        },
+        AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=6 | style=镜头稳定跟拍，情绪压抑，光影冷蓝窗光 | note=镜头稳定跟拍，情绪压抑，光影冷蓝窗光".into(),
+        },
+    ];
+
+    let trimmed = trim_video_prompt_observation_rows(
+        rows,
+        18,
+        Some("seed-18-current"),
+        &["林晚".to_string(), "晚晚".to_string()],
+        Some(&storyboard_row),
+    );
+
+    assert!(trimmed.iter().any(|row| {
+        row.name == "script_role_video_style_memory" && row.content.contains("subject=林晚")
+    }));
+    assert!(!trimmed
+        .iter()
+        .any(|row| row.name == "project_video_style_memory"));
+}
+
+#[test]
 fn observation_note_conflict_filter_prefers_matching_role_rejection_memory_alias() {
     let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("晚晚强忍泪意看向门外".into()),
@@ -3668,6 +3791,9 @@ fn build_pending_video_observation_note_from_runtime_reuses_loaded_rows() {
             selection: AutoNegativePromptSelection {
                 prompt: None,
                 fragment_count: 0,
+                candidate_fragment_count: 0,
+                saved_fragment_count: 0,
+                saved_chars: 0,
                 budget_tier: "lean",
                 review_fragment_count: 0,
                 rejected_memory_fragment_count: 0,
@@ -3715,6 +3841,9 @@ fn build_pending_video_observation_note_from_runtime_uses_cached_candidates() {
             selection: AutoNegativePromptSelection {
                 prompt: None,
                 fragment_count: 0,
+                candidate_fragment_count: 0,
+                saved_fragment_count: 0,
+                saved_chars: 0,
                 budget_tier: "lean",
                 review_fragment_count: 0,
                 rejected_memory_fragment_count: 0,
@@ -3759,6 +3888,9 @@ fn build_pending_video_observation_note_from_runtime_can_use_role_observation_su
             selection: AutoNegativePromptSelection {
                 prompt: None,
                 fragment_count: 0,
+                candidate_fragment_count: 0,
+                saved_fragment_count: 0,
+                saved_chars: 0,
                 budget_tier: "lean",
                 review_fragment_count: 0,
                 rejected_memory_fragment_count: 0,
@@ -4076,6 +4208,9 @@ fn generate_video_prompt_response_serializes_observation_note() {
             prompt_chars: 22,
             negative_prompt_chars: 0,
             negative_constraint_count: 0,
+            negative_candidate_fragment_count: 2,
+            negative_saved_fragment_count: 2,
+            negative_saved_chars: 34,
             negative_budget_tier: "lean".into(),
             auto_negative_source: Some("pending_observation_note".into()),
             auto_negative_review_fragment_count: 0,
@@ -4114,6 +4249,9 @@ fn generate_video_prompt_response_serializes_observation_note() {
             continuity_note_chars: 0,
             uses_reference_frame: false,
             memory_budget_tier: "lean".into(),
+            memory_project_scope_row_count: 1,
+            memory_script_scope_row_count: 2,
+            memory_role_scope_row_count: 1,
         },
         model: "runway-gen-2".into(),
         duration: 5,
@@ -4133,6 +4271,34 @@ fn generate_video_prompt_response_serializes_observation_note() {
             .and_then(serde_json::Value::as_array)
             .map(|items| items.len()),
         Some(2)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("negativeSavedChars"))
+            .and_then(serde_json::Value::as_u64),
+        Some(34)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryProjectScopeRowCount"))
+            .and_then(serde_json::Value::as_u64),
+        Some(1)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryScriptScopeRowCount"))
+            .and_then(serde_json::Value::as_u64),
+        Some(2)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryRoleScopeRowCount"))
+            .and_then(serde_json::Value::as_u64),
+        Some(1)
     );
     assert_eq!(
         value
@@ -4272,6 +4438,9 @@ fn build_auto_quality_review_model_params_includes_memory_diagnostics() {
         prompt_chars: 120,
         negative_prompt_chars: 24,
         negative_constraint_count: 1,
+        negative_candidate_fragment_count: 3,
+        negative_saved_fragment_count: 2,
+        negative_saved_chars: 29,
         negative_budget_tier: "lean".into(),
         auto_negative_source: Some("rejected_memory".into()),
         auto_negative_review_fragment_count: 1,
@@ -4308,6 +4477,9 @@ fn build_auto_quality_review_model_params_includes_memory_diagnostics() {
         continuity_note_chars: 0,
         uses_reference_frame: true,
         memory_budget_tier: "lean".into(),
+        memory_project_scope_row_count: 2,
+        memory_script_scope_row_count: 5,
+        memory_role_scope_row_count: 3,
     };
 
     let value = build_auto_quality_review_model_params(&diagnostics);
@@ -4329,6 +4501,30 @@ fn build_auto_quality_review_model_params_includes_memory_diagnostics() {
             .pointer("/diagnostics/memoryLowValueCandidateSkipped")
             .and_then(serde_json::Value::as_bool),
         Some(true)
+    );
+    assert_eq!(
+        value
+            .pointer("/diagnostics/negativeSavedChars")
+            .and_then(serde_json::Value::as_u64),
+        Some(29)
+    );
+    assert_eq!(
+        value
+            .pointer("/diagnostics/memoryProjectScopeRowCount")
+            .and_then(serde_json::Value::as_u64),
+        Some(2)
+    );
+    assert_eq!(
+        value
+            .pointer("/diagnostics/memoryScriptScopeRowCount")
+            .and_then(serde_json::Value::as_u64),
+        Some(5)
+    );
+    assert_eq!(
+        value
+            .pointer("/diagnostics/memoryRoleScopeRowCount")
+            .and_then(serde_json::Value::as_u64),
+        Some(3)
     );
 }
 

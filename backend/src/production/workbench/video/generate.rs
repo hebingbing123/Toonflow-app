@@ -103,6 +103,9 @@ struct StoryboardNegativePrompt {
 pub(crate) struct AutoNegativePromptSelection {
     pub(crate) prompt: Option<String>,
     pub(crate) fragment_count: usize,
+    pub(crate) candidate_fragment_count: usize,
+    pub(crate) saved_fragment_count: usize,
+    pub(crate) saved_chars: usize,
     pub(crate) budget_tier: &'static str,
     pub(crate) review_fragment_count: usize,
     pub(crate) rejected_memory_fragment_count: usize,
@@ -1243,6 +1246,12 @@ fn build_storyboard_negative_prompt_selection(
     );
     let review_fragment_count = review_fragments.len();
     let rejected_memory_fragment_count = effective_rejected_fragments.len();
+    let candidate_fragment_count = review_fragment_count + rejected_memory_fragment_count;
+    let candidate_chars = review_fragments
+        .iter()
+        .chain(effective_rejected_fragments.iter())
+        .map(|fragment| normalize_prompt_text(fragment).chars().count())
+        .sum::<usize>();
     let used_pending_observation_fallback = rejected_fragments.is_empty()
         && review_fragments.is_empty()
         && !observation_fragments.is_empty();
@@ -1255,11 +1264,21 @@ fn build_storyboard_negative_prompt_selection(
         .as_deref()
         .map(|value| split_negative_prompt_fragments(Some(value)).len())
         .unwrap_or(0);
+    let saved_fragment_count = candidate_fragment_count.saturating_sub(fragment_count);
+    let final_chars = prompt
+        .as_deref()
+        .map(normalize_prompt_text)
+        .map(|value| value.chars().count())
+        .unwrap_or(0);
+    let saved_chars = candidate_chars.saturating_sub(final_chars);
 
     (
         AutoNegativePromptSelection {
             prompt,
             fragment_count,
+            candidate_fragment_count,
+            saved_fragment_count,
+            saved_chars,
             budget_tier: budget_tier.as_str(),
             review_fragment_count,
             rejected_memory_fragment_count,

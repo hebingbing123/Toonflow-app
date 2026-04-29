@@ -36,6 +36,9 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     pub(super) prompt_chars: usize,
     pub(super) negative_prompt_chars: usize,
     pub(super) negative_constraint_count: usize,
+    pub(super) negative_candidate_fragment_count: usize,
+    pub(super) negative_saved_fragment_count: usize,
+    pub(super) negative_saved_chars: usize,
     pub(super) negative_budget_tier: String,
     pub(super) auto_negative_source: Option<String>,
     pub(super) auto_negative_review_fragment_count: usize,
@@ -72,4 +75,7 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     pub(super) continuity_note_chars: usize,
     pub(super) uses_reference_frame: bool,
     pub(super) memory_budget_tier: String,
+    pub(super) memory_project_scope_row_count: usize,
+    pub(super) memory_script_scope_row_count: usize,
+    pub(super) memory_role_scope_row_count: usize,
 }

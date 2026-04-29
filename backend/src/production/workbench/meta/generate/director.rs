@@ -96,6 +96,7 @@ impl GenerateVideoPromptDiagnostics {
         mut self,
         selection: Option<&AutoNegativePromptSelection>,
         observation_note: Option<&str>,
+        runtime: Option<&StoryboardNegativePromptRuntime>,
     ) -> Self {
         let negative_prompt = selection.and_then(|value| value.prompt.as_deref());
         let negative_constraint_count = selection.map(|value| value.fragment_count).unwrap_or(0);
@@ -119,6 +120,13 @@ impl GenerateVideoPromptDiagnostics {
             .map(|value| value.chars().count())
             .unwrap_or(0);
         self.negative_constraint_count = negative_constraint_count;
+        self.negative_candidate_fragment_count = selection
+            .map(|value| value.candidate_fragment_count)
+            .unwrap_or(0);
+        self.negative_saved_fragment_count = selection
+            .map(|value| value.saved_fragment_count)
+            .unwrap_or(0);
+        self.negative_saved_chars = selection.map(|value| value.saved_chars).unwrap_or(0);
         self.negative_budget_tier = negative_budget_tier.unwrap_or("lean").to_string();
         self.auto_negative_source = auto_negative_source;
         self.auto_negative_review_fragment_count = auto_negative_review_fragment_count;
@@ -126,6 +134,20 @@ impl GenerateVideoPromptDiagnostics {
         self.observation_note_chars = observation_note
             .map(normalize_prompt_text)
             .map(|value: String| value.chars().count())
+            .unwrap_or(0);
+        let scope_counts = runtime
+            .map(|value| summarize_prompt_support_memory_scope_rows(&value.prompt_support_rows));
+        self.memory_project_scope_row_count = scope_counts
+            .as_ref()
+            .map(|counts| counts.project_scope_rows)
+            .unwrap_or(0);
+        self.memory_script_scope_row_count = scope_counts
+            .as_ref()
+            .map(|counts| counts.script_scope_rows)
+            .unwrap_or(0);
+        self.memory_role_scope_row_count = scope_counts
+            .as_ref()
+            .map(|counts| counts.role_scope_rows)
             .unwrap_or(0);
         self
     }
@@ -146,6 +168,32 @@ impl GenerateVideoPromptDiagnostics {
         self.memory_optimization_removed_duplicate_rows = result.removed_duplicate_rows;
         self
     }
+}
+
+#[derive(Debug, Default)]
+struct PromptSupportMemoryScopeCounts {
+    project_scope_rows: usize,
+    script_scope_rows: usize,
+    role_scope_rows: usize,
+}
+
+fn summarize_prompt_support_memory_scope_rows(
+    rows: &[crate::production::workbench::video_prompt_memory::AgentMemoryRow],
+) -> PromptSupportMemoryScopeCounts {
+    rows.iter().fold(
+        PromptSupportMemoryScopeCounts::default(),
+        |mut counts, row| {
+            if row.name.starts_with("project_") {
+                counts.project_scope_rows += 1;
+            } else {
+                counts.script_scope_rows += 1;
+            }
+            if row.name.contains("_role_") {
+                counts.role_scope_rows += 1;
+            }
+            counts
+        },
+    )
 }
 
 pub(super) fn art_style_director_profile(

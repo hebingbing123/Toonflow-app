@@ -164,6 +164,9 @@ fn build_auto_quality_review_model_params(
             "promptChars": diagnostics.prompt_chars,
             "negativePromptChars": diagnostics.negative_prompt_chars,
             "negativeConstraintCount": diagnostics.negative_constraint_count,
+            "negativeCandidateFragmentCount": diagnostics.negative_candidate_fragment_count,
+            "negativeSavedFragmentCount": diagnostics.negative_saved_fragment_count,
+            "negativeSavedChars": diagnostics.negative_saved_chars,
             "negativeBudgetTier": diagnostics.negative_budget_tier,
             "autoNegativeSource": diagnostics.auto_negative_source,
             "autoNegativeReviewFragmentCount": diagnostics.auto_negative_review_fragment_count,
@@ -196,6 +199,9 @@ fn build_auto_quality_review_model_params(
             "continuityNoteCount": diagnostics.continuity_note_count,
             "continuityNoteChars": diagnostics.continuity_note_chars,
             "usesReferenceFrame": diagnostics.uses_reference_frame,
+            "memoryProjectScopeRowCount": diagnostics.memory_project_scope_row_count,
+            "memoryScriptScopeRowCount": diagnostics.memory_script_scope_row_count,
+            "memoryRoleScopeRowCount": diagnostics.memory_role_scope_row_count,
         }
     })
 }
@@ -304,6 +310,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         .with_runtime_notes(
             negative_prompt_selection.as_ref(),
             observation_note.as_deref(),
+            single_storyboard_runtime.as_ref(),
         )
         .with_memory_optimization(memory_optimization.as_ref());
 
