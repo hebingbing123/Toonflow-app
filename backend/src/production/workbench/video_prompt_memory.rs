@@ -1841,12 +1841,37 @@ pub(crate) struct RejectedVideoMemorySelection {
     pub(crate) observation_notes: Vec<String>,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct VideoPromptMemorySelectionBias {
+    pub(crate) prefer_delivery: bool,
+    pub(crate) prefer_visual_continuity: bool,
+}
+
 pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_subject(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
     subject_candidates: &[String],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> RejectedVideoMemorySelection {
+    select_rejected_video_memory_notes_and_observation_candidates_for_subject_with_bias(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        subject_candidates,
+        storyboard_row,
+        None,
+    )
+}
+
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_subject_with_bias(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    bias: Option<VideoPromptMemorySelectionBias>,
 ) -> RejectedVideoMemorySelection {
     let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
         rows,
@@ -1977,7 +2002,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
         if ranked.is_empty() {
             let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
             negative_scored.push((
-                score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags),
+                score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags)
+                    + score_rejected_video_memory_bias_for_fragment(&note, bias),
                 subject_priority,
                 idx,
                 overlap_priority,
@@ -1989,7 +2015,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
         } else {
             negative_scored.extend(ranked.into_iter().enumerate().map(|(fragment_idx, note)| {
                 (
-                    score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags),
+                    score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags)
+                        + score_rejected_video_memory_bias_for_fragment(&note, bias),
                     subject_priority,
                     idx,
                     overlap_priority,
@@ -2029,7 +2056,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
         if ranked.is_empty() {
             let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
             observation_scored.push((
-                score_pending_observation_note_for_storyboard(&note, &storyboard_tags),
+                score_pending_observation_note_for_storyboard(&note, &storyboard_tags)
+                    + score_rejected_video_memory_bias_for_fragment(&note, bias),
                 subject_priority,
                 idx,
                 overlap_priority,
@@ -2042,7 +2070,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             observation_scored.extend(ranked.into_iter().enumerate().map(
                 |(fragment_idx, note)| {
                     (
-                        score_pending_observation_note_for_storyboard(&note, &storyboard_tags),
+                        score_pending_observation_note_for_storyboard(&note, &storyboard_tags)
+                            + score_rejected_video_memory_bias_for_fragment(&note, bias),
                         subject_priority,
                         idx,
                         overlap_priority,
@@ -2061,6 +2090,7 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             rows,
             &normalized_subject_candidates,
             storyboard_row,
+            bias,
         )
     } else {
         select_ranked_rejected_video_memory_negative_notes(negative_scored)
@@ -2070,6 +2100,7 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             rows,
             &normalized_subject_candidates,
             storyboard_row,
+            bias,
         )
     } else {
         select_ranked_rejected_video_memory_observation_notes(observation_scored)
@@ -2089,12 +2120,32 @@ pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
     subject_candidates: &[String],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
-    select_rejected_video_memory_notes_and_observation_candidates_for_subject(
+    select_rejected_video_negative_memory_notes_for_subject_with_bias(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
         subject_candidates,
         storyboard_row,
+        None,
+    )
+}
+
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) fn select_rejected_video_negative_memory_notes_for_subject_with_bias(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> Vec<String> {
+    select_rejected_video_memory_notes_and_observation_candidates_for_subject_with_bias(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        subject_candidates,
+        storyboard_row,
+        bias,
     )
     .negative_notes
 }
@@ -2103,6 +2154,7 @@ fn select_rejected_video_observation_summary_notes(
     rows: &[AgentMemoryRow],
     subject_candidates: &[String],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
+    bias: Option<VideoPromptMemorySelectionBias>,
 ) -> Vec<String> {
     let storyboard_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
     if storyboard_tags.is_empty() {
@@ -2150,7 +2202,7 @@ fn select_rejected_video_observation_summary_notes(
                         score_rejected_observation_summary_fragment_for_storyboard(
                             &fragment,
                             &storyboard_tags,
-                        ),
+                        ) + score_rejected_video_memory_bias_for_fragment(&fragment, bias),
                         subject_priority,
                         fragment_storyboard_risk_overlap(&fragment, &storyboard_tags),
                         row_overlap,
@@ -2254,12 +2306,32 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject(
     subject_candidates: &[String],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
-    select_rejected_video_memory_notes_and_observation_candidates_for_subject(
+    select_pending_rejected_video_observation_candidates_for_subject_with_bias(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
         subject_candidates,
         storyboard_row,
+        None,
+    )
+}
+
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject_with_bias(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> Vec<String> {
+    select_rejected_video_memory_notes_and_observation_candidates_for_subject_with_bias(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        subject_candidates,
+        storyboard_row,
+        bias,
     )
     .observation_notes
 }
@@ -2568,6 +2640,32 @@ fn score_pending_observation_note(note: &str) -> i32 {
 fn score_pending_observation_note_for_storyboard(note: &str, storyboard_tags: &[String]) -> i32 {
     score_pending_observation_note(note)
         + fragment_storyboard_risk_overlap(note, storyboard_tags) as i32 * 18
+}
+
+fn score_rejected_video_memory_bias_for_fragment(
+    fragment: &str,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> i32 {
+    let Some(bias) = bias else {
+        return 0;
+    };
+    let tags = negative_fragment_storyboard_risk_tags(fragment);
+    let mut score = 0;
+    if bias.prefer_delivery
+        && tags
+            .iter()
+            .any(|tag| matches!(*tag, "dialogue" | "performance" | "emotion"))
+    {
+        score += 18;
+    }
+    if bias.prefer_visual_continuity
+        && tags
+            .iter()
+            .any(|tag| matches!(*tag, "identity" | "lighting" | "motion" | "framing"))
+    {
+        score += 18;
+    }
+    score
 }
 
 fn reversed_risk_tag_overlap_priority(content: &str, storyboard_tags: &[String]) -> usize {
@@ -8302,6 +8400,7 @@ mod tests {
         rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_candidates_for_subject,
+        select_pending_rejected_video_observation_candidates_for_subject_with_bias,
         select_pending_rejected_video_observation_note, select_prioritized_video_style_note,
         select_project_video_style_memory_notes,
         select_project_video_style_memory_notes_for_storyboard,
@@ -8317,7 +8416,7 @@ mod tests {
         selected_video_memory_quality_score, selected_video_memory_scope,
         selected_video_memory_update_would_reduce_quality, storyboard_prompt_seed, AgentMemoryRow,
         ScopedAgentMemoryRow, SelectedVideoMemoryOptimizationCandidate, SelectedVideoMemoryScope,
-        StoryboardPromptSeedRow,
+        StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -10096,6 +10195,69 @@ mod tests {
                 "avoid blank expression or monotone delivery".to_string(),
                 "avoid flat cold lighting".to_string()
             ]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_bias_prefers_delivery_fragments() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头低声开口".into()),
+            video_desc: Some(
+                "（晚晚站在门厅、雨夜门厅、林晚/晚晚、5秒、近景、稳定跟拍、回头停顿后低声开口、隐忍 / 克制、冷调逆光、你别走、雨声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject_with_bias(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=8 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=lighting/performance/dialogue | avoid=avoid flat cold lighting, avoid blank expression or monotone delivery".into(),
+            }],
+            12,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+            Some(VideoPromptMemorySelectionBias {
+                prefer_delivery: true,
+                prefer_visual_continuity: false,
+            }),
+        );
+
+        assert_eq!(
+            notes.first().map(String::as_str),
+            Some("avoid blank expression or monotone delivery")
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_bias_prefers_visual_continuity_fragments(
+    ) {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚回头低声开口".into()),
+            video_desc: Some(
+                "（晚晚站在门厅、雨夜门厅、林晚/晚晚、5秒、近景、稳定跟拍、回头停顿后低声开口、隐忍 / 克制、冷调逆光、你别走、雨声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let notes = select_pending_rejected_video_observation_candidates_for_subject_with_bias(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=8 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=lighting/performance/dialogue | avoid=avoid flat cold lighting, avoid blank expression or monotone delivery".into(),
+            }],
+            12,
+            None,
+            &["晚晚".to_string()],
+            Some(&storyboard_row),
+            Some(VideoPromptMemorySelectionBias {
+                prefer_delivery: false,
+                prefer_visual_continuity: true,
+            }),
+        );
+
+        assert_eq!(
+            notes.first().map(String::as_str),
+            Some("avoid flat cold lighting")
         );
     }
 

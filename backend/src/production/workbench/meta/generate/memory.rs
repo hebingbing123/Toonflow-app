@@ -1,6 +1,22 @@
 //! Memory selection, trimming, and observation handling for prompt generation.
 
 use super::*;
+use crate::production::workbench::video_prompt_memory::{
+    select_pending_rejected_video_observation_candidates_for_subject_with_bias,
+    VideoPromptMemorySelectionBias,
+};
+
+fn rejected_video_memory_selection_bias(
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<VideoPromptMemorySelectionBias> {
+    constraint_pressure.and_then(|pressure| {
+        let bias = VideoPromptMemorySelectionBias {
+            prefer_delivery: pressure.prefer_delivery_memory_recall,
+            prefer_visual_continuity: pressure.prefer_visual_continuity_memory_recall,
+        };
+        (bias.prefer_delivery || bias.prefer_visual_continuity).then_some(bias)
+    })
+}
 
 #[allow(clippy::too_many_arguments)]
 pub(super) async fn load_video_prompt_memory_notes(
@@ -1080,12 +1096,13 @@ pub(super) fn build_pending_video_observation_note(
         constraint_pressure,
     );
     let pending_observation_candidates = preselected_candidates.unwrap_or_else(|| {
-        select_pending_rejected_video_observation_candidates_for_subject(
+        select_pending_rejected_video_observation_candidates_for_subject_with_bias(
             &rows,
             storyboard_numeric_id,
             current_prompt_seed,
             subject_candidates,
             storyboard_row,
+            rejected_video_memory_selection_bias(constraint_pressure),
         )
     });
     let note = select_best_video_prompt_observation_note(prune_storyboard_observation_candidates(
