@@ -5755,9 +5755,10 @@ fn build_script_video_style_memory(
     if recurring.is_empty() {
         return None;
     }
-    let delivery = (distinct_subject_group_count <= 1)
-        .then(|| summarize_role_delivery_fragment(&notes))
-        .flatten()
+    let delivery = summarize_role_delivery_fragment(&notes)
+        .filter(|value| {
+            global_delivery_fragment_is_worth_persisting(value, distinct_subject_group_count)
+        })
         .filter(|value| {
             !delivery_fragment_conflicts_with_rejected_signals(value, &rejected_signals)
         })
@@ -5824,9 +5825,10 @@ fn build_project_video_style_memory(
     if recurring.is_empty() {
         return None;
     }
-    let delivery = (distinct_subject_group_count <= 1)
-        .then(|| summarize_role_delivery_fragment(&notes))
-        .flatten()
+    let delivery = summarize_role_delivery_fragment(&notes)
+        .filter(|value| {
+            global_delivery_fragment_is_worth_persisting(value, distinct_subject_group_count)
+        })
         .filter(|value| {
             !delivery_fragment_conflicts_with_rejected_signals(value, &rejected_signals)
         })
@@ -6652,6 +6654,64 @@ fn summarize_role_delivery_fragment(notes: &[String]) -> Option<String> {
         (None, Some(_)) => recurring_voice,
         (None, None) => None,
     }
+}
+
+fn global_delivery_fragment_is_worth_persisting(
+    fragment: &str,
+    distinct_subject_group_count: usize,
+) -> bool {
+    if fragment.is_empty() {
+        return false;
+    }
+    if distinct_subject_group_count <= 1 {
+        return true;
+    }
+    global_delivery_fragment_is_high_signal(fragment)
+}
+
+fn global_delivery_fragment_is_high_signal(fragment: &str) -> bool {
+    split_prompt_note_fragments(fragment).any(|fragment| {
+        if fragment.starts_with("表演") {
+            let keyword_hits = [
+                "抬眼",
+                "垂眼",
+                "眼神",
+                "目光",
+                "喉结",
+                "唇线",
+                "眉心",
+                "嘴角",
+                "下颌",
+                "呼吸",
+                "停顿",
+                "发颤",
+                "欲言又止",
+                "强忍",
+                "哽咽",
+            ]
+            .iter()
+            .filter(|keyword| fragment.contains(**keyword))
+            .count();
+            let strong_signal = [
+                "喉结",
+                "唇线",
+                "眉心",
+                "下颌",
+                "呼吸",
+                "发颤",
+                "欲言又止",
+                "强忍",
+                "哽咽",
+            ]
+            .iter()
+            .any(|keyword| fragment.contains(*keyword));
+            keyword_hits >= 2 && strong_signal
+        } else if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
+            !role_voice_variant_is_low_gain_carryover(&voice)
+        } else {
+            false
+        }
+    })
 }
 
 fn summarize_role_voice_fragment(notes: &[String]) -> Option<String> {
@@ -11964,6 +12024,30 @@ mod tests {
     }
 
     #[test]
+    fn build_script_video_style_memory_keeps_high_signal_delivery_across_mixed_subjects() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头稳定跟拍，表演喉结滚动，语气低声尾音发颤，光影冷蓝窗光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头中景稳定跟拍，表演喉结滚动，语气低声尾音发颤，光影冷蓝窗光 | note=...".into(),
+            },
+        ], &[])
+        .expect("summary");
+
+        assert!(
+            summary.contains("style=镜头稳定跟拍，光影冷蓝窗光"),
+            "{summary}"
+        );
+        assert!(
+            summary.contains("delivery=表演喉结滚动低声尾音发颤"),
+            "{summary}"
+        );
+    }
+
+    #[test]
     fn build_project_video_style_memory_drops_character_signature_fragments_when_subjects_mix() {
         let summary = build_project_video_style_memory(&[
             ScopedAgentMemoryRow {
@@ -11988,6 +12072,37 @@ mod tests {
         assert!(summary.contains("情绪冷峻压迫"), "{summary}");
         assert!(!summary.contains("表演抬眼停顿"), "{summary}");
         assert!(!summary.contains("语气轻声克制"), "{summary}");
+    }
+
+    #[test]
+    fn build_project_video_style_memory_keeps_high_signal_delivery_across_mixed_subjects() {
+        let summary = build_project_video_style_memory(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头稳定跟拍，表演喉结滚动，语气低声尾音发颤，光影冷蓝窗光 | note=...".into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头稳定跟拍，表演喉结滚动，语气低声尾音发颤，光影冷蓝窗光 | note=...".into(),
+                episodes_id: Some(2),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=17 | subject=苏蔓 | subjectAliases=苏蔓/阿蔓 | style=镜头近景稳定跟拍，表演喉结滚动，语气低声尾音发颤，光影冷蓝窗光 | note=...".into(),
+                episodes_id: Some(3),
+            },
+        ], &[])
+        .expect("summary");
+
+        assert!(
+            summary.contains("style=镜头稳定跟拍，光影冷蓝窗光"),
+            "{summary}"
+        );
+        assert!(
+            summary.contains("delivery=表演喉结滚动低声尾音发颤"),
+            "{summary}"
+        );
     }
 
     #[test]
