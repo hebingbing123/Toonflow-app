@@ -3569,6 +3569,78 @@ fn trim_video_prompt_observation_rows_prefers_matching_role_memory_over_newer_ot
 }
 
 #[test]
+fn trim_video_prompt_observation_rows_drops_project_style_fill_when_script_memory_is_precise() {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚含泪低声说别走".into()),
+        video_desc: Some(
+            "（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_role_video_style_memory".into(),
+            content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | style=表演呼吸发颤，语气哽咽克制 | note=表演呼吸发颤，语气哽咽克制".into(),
+        },
+        AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=6 | style=镜头稳定跟拍，情绪压抑，光影冷蓝窗光 | note=镜头稳定跟拍，情绪压抑，光影冷蓝窗光".into(),
+        },
+    ];
+
+    let trimmed = trim_video_prompt_observation_rows(
+        rows,
+        18,
+        Some("seed-18-current"),
+        &["林晚".to_string(), "晚晚".to_string()],
+        Some(&storyboard_row),
+    );
+
+    assert!(trimmed.iter().any(|row| {
+        row.name == "script_role_video_style_memory" && row.content.contains("subject=林晚")
+    }));
+    assert!(!trimmed
+        .iter()
+        .any(|row| row.name == "project_video_style_memory"));
+}
+
+#[test]
+fn trim_video_prompt_observation_rows_keeps_project_style_when_visual_continuity_is_prioritized()
+{
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚沿着雨夜走廊回头".into()),
+        video_desc: Some(
+            "（林晚沿着雨夜走廊回头、雨夜走廊、林晚、5秒、中景、稳定跟拍、停步回头、压抑、霓虹反光、无台词、雨声车流回响、A22）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_role_video_style_memory".into(),
+            content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | style=表演抬眼停顿，语气轻声克制 | note=表演抬眼停顿，语气轻声克制".into(),
+        },
+        AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=6 | style=镜头稳定跟拍，光影霓虹反光，环境潮湿地面反射 | note=镜头稳定跟拍，光影霓虹反光，环境潮湿地面反射".into(),
+        },
+    ];
+
+    let trimmed = trim_video_prompt_observation_rows(
+        rows,
+        22,
+        Some("seed-22-current"),
+        &["林晚".to_string(), "晚晚".to_string()],
+        Some(&storyboard_row),
+    );
+
+    assert!(trimmed
+        .iter()
+        .any(|row| row.name == "project_video_style_memory"));
+}
+
+#[test]
 fn trim_video_prompt_observation_rows_skips_exact_selected_memory_from_other_subject() {
     let rows = vec![
             AgentMemoryRow {
