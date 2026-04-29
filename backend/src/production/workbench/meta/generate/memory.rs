@@ -1284,9 +1284,9 @@ fn should_keep_project_style_summary_rows(
         return true;
     }
     if constraint_pressure.is_none() && !script_role_style_candidates.is_empty() {
-        return project_style_candidates.iter().any(|(_, row)| {
-            project_style_note_carries_continuity_specific_visual_risk(row)
-        });
+        return project_style_candidates
+            .iter()
+            .any(|(_, row)| project_style_note_carries_continuity_specific_visual_risk(row));
     }
     if !script_role_style_candidates.is_empty()
         && project_style_candidates.iter().all(|(_, row)| {
@@ -1470,8 +1470,16 @@ fn storyboard_style_already_covers_project_fill_fragment(
         .unwrap_or_else(|| normalized_fragment.clone());
 
     let coverage_fields = match family {
-        Some("镜头") => vec![fields.shot.as_str(), fields.camera_move.as_str(), fields.action.as_str()],
-        Some("情绪") => vec![fields.mood.as_str(), fields.action.as_str(), fields.dialogue.as_str()],
+        Some("镜头") => vec![
+            fields.shot.as_str(),
+            fields.camera_move.as_str(),
+            fields.action.as_str(),
+        ],
+        Some("情绪") => vec![
+            fields.mood.as_str(),
+            fields.action.as_str(),
+            fields.dialogue.as_str(),
+        ],
         Some("光影") => vec![fields.lighting.as_str(), fields.setting.as_str()],
         Some("动作") => vec![fields.action.as_str(), fields.camera_move.as_str()],
         Some("环境") => vec![fields.setting.as_str(), fields.sound.as_str()],
