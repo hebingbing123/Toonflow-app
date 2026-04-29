@@ -30,13 +30,7 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
     let structured_fields = resolved_description
         .as_deref()
         .and_then(parse_structured_storyboard_description);
-    let compact_labels = structured_fields
-        .as_ref()
-        .is_some_and(video_prompt_scene_is_grounded_low_risk);
     let mut clauses = Vec::new();
-    clauses.push(build_video_prompt_opening_clause(
-        structured_fields.as_ref(),
-    ));
     let mut prompt_coverage = collect_prompt_coverage(structured_fields.as_ref());
     let role_anchors = build_script_role_anchors(
         context,
@@ -44,39 +38,18 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
         structured_fields.as_ref(),
         &prompt_coverage,
     );
-    if !role_anchors.is_empty() {
-        clauses.push(format!(
-            "{}: {}.",
-            video_prompt_anchor_label("Character anchor", "Character", compact_labels),
-            role_anchors.join("; ")
-        ));
-    }
     let scene_anchors = build_script_scene_anchors(
         context,
         resolved_description.as_deref(),
         structured_fields.as_ref(),
         &prompt_coverage,
     );
-    if !scene_anchors.is_empty() {
-        clauses.push(format!(
-            "{}: {}.",
-            video_prompt_anchor_label("Scene anchor", "Scene", compact_labels),
-            scene_anchors.join("; ")
-        ));
-    }
     let tool_anchors = build_script_tool_anchors(
         context,
         resolved_description.as_deref(),
         structured_fields.as_ref(),
         &prompt_coverage,
     );
-    if !tool_anchors.is_empty() {
-        clauses.push(format!(
-            "{}: {}.",
-            video_prompt_anchor_label("Prop anchor", "Prop", compact_labels),
-            tool_anchors.join("; ")
-        ));
-    }
     let mut asset_coverage = Vec::new();
     extend_prompt_coverage(&mut asset_coverage, &role_anchors);
     extend_prompt_coverage(&mut asset_coverage, &scene_anchors);
@@ -93,6 +66,40 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
         &tool_anchors,
         constraint_pressure,
     );
+    let compact_labels = should_use_compact_prompt_labels(
+        structured_fields.as_ref(),
+        image_url.is_some(),
+        context,
+        &role_anchors,
+        &scene_anchors,
+        &tool_anchors,
+        constraint_pressure,
+    );
+    clauses.push(build_video_prompt_opening_clause(
+        structured_fields.as_ref(),
+        compact_labels,
+    ));
+    if !role_anchors.is_empty() {
+        clauses.push(format!(
+            "{}: {}.",
+            video_prompt_anchor_label("Character anchor", "Character", compact_labels),
+            role_anchors.join("; ")
+        ));
+    }
+    if !scene_anchors.is_empty() {
+        clauses.push(format!(
+            "{}: {}.",
+            video_prompt_anchor_label("Scene anchor", "Scene", compact_labels),
+            scene_anchors.join("; ")
+        ));
+    }
+    if !tool_anchors.is_empty() {
+        clauses.push(format!(
+            "{}: {}.",
+            video_prompt_anchor_label("Prop anchor", "Prop", compact_labels),
+            tool_anchors.join("; ")
+        ));
+    }
     let style_anchor_build = build_project_visual_anchors(
         context,
         structured_fields.as_ref(),
@@ -223,7 +230,14 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
         ));
     }
     if image_url.is_some() {
-        clauses.push("Use the supplied frame as reference.".to_string());
+        clauses.push(
+            if compact_labels {
+                "Use supplied frame as reference."
+            } else {
+                "Use the supplied frame as reference."
+            }
+            .to_string(),
+        );
     }
     clauses.push(build_video_prompt_quality_tail(
         structured_fields.as_ref(),
@@ -640,12 +654,63 @@ pub(super) fn build_video_prompt_quality_tail(
 
 pub(super) fn build_video_prompt_opening_clause(
     structured_fields: Option<&StructuredStoryboardDescription>,
+    compact_labels: bool,
 ) -> String {
-    if structured_fields.is_some_and(video_prompt_scene_is_grounded_low_risk) {
+    if compact_labels || should_use_compact_opening_clause(structured_fields) {
         "Single shot.".to_string()
     } else {
         "Single cinematic shot.".to_string()
     }
+}
+
+pub(super) fn should_use_compact_opening_clause(
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> bool {
+    structured_fields.is_some_and(video_prompt_scene_is_grounded_low_risk)
+}
+
+pub(super) fn should_use_compact_prompt_labels(
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    has_reference_frame: bool,
+    context: Option<&VideoPromptContext>,
+    role_anchors: &[String],
+    scene_anchors: &[String],
+    tool_anchors: &[String],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    if should_use_compact_opening_clause(structured_fields) {
+        return true;
+    }
+
+    let Some(fields) = structured_fields else {
+        return false;
+    };
+    if !has_reference_frame {
+        return false;
+    }
+
+    let explicit_anchor_groups = [
+        !role_anchors.is_empty(),
+        !scene_anchors.is_empty(),
+        !tool_anchors.is_empty(),
+    ]
+    .into_iter()
+    .filter(|present| *present)
+    .count();
+    let has_effective_continuity_note = context.is_some_and(|ctx| {
+        video_prompt_has_effective_continuity_note_for_budget(&ctx.continuity_notes, Some(fields))
+    });
+    let has_delivery_memory = context.is_some_and(|ctx| {
+        ctx.memory_style_notes
+            .iter()
+            .any(|note| memory_style_anchor_has_delivery_signal(note))
+    });
+
+    (explicit_anchor_groups >= 2 || has_effective_continuity_note)
+        && (video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+            || (has_delivery_memory && !storyboard_dialogue_is_empty(&fields.dialogue))
+            || current_storyboard_is_fragile_emotional_turn(fields)
+            || constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory))
 }
 
 pub(super) fn continuity_tail_matches(value: &str) -> bool {

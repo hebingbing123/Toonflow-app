@@ -3606,8 +3606,7 @@ fn trim_video_prompt_observation_rows_drops_project_style_fill_when_script_memor
 }
 
 #[test]
-fn trim_video_prompt_observation_rows_keeps_project_style_when_visual_continuity_is_prioritized()
-{
+fn trim_video_prompt_observation_rows_keeps_project_style_when_visual_continuity_is_prioritized() {
     let storyboard_row = StoryboardPromptSeedRow {
         prompt: Some("林晚沿着雨夜走廊回头".into()),
         video_desc: Some(
@@ -6086,6 +6085,64 @@ fn build_video_prompt_with_diagnostics_keeps_full_labels_for_high_risk_scene() {
         result.prompt
     );
     assert_eq!(result.diagnostics.memory_budget_tier, "expanded");
+}
+
+#[test]
+fn build_video_prompt_with_reference_frame_compacts_labels_for_crowded_dialogue_scene() {
+    let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚停在咖啡厅窗边、咖啡厅窗边、林晚、4秒、中景、缓推、停顿后低声说你终于来了、隐忍 / 克制、夜间冷蓝窗光、你终于来了、轻微环境声、A12）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 黑色针织外套".into()],
+            script_scene_anchors: vec!["咖啡厅窗边: 木桌与雨痕玻璃".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演喉结滚动，语气轻声尾音发颤".into()],
+            continuity_notes: vec!["保持上一镜头走位连续".into()],
+        };
+
+    let result = build_video_prompt_with_diagnostics(
+        None,
+        Some("https://example.com/frame.png"),
+        Some(&context),
+    );
+
+    assert!(result.prompt.contains("Single shot."), "{}", result.prompt);
+    assert!(
+        result.prompt.contains("Character: 林晚:黑色针织外套."),
+        "{}",
+        result.prompt
+    );
+    assert!(
+        result.prompt.contains("Scene: 咖啡厅窗边:木桌与雨痕玻璃."),
+        "{}",
+        result.prompt
+    );
+    assert!(result.prompt.contains("Style:"), "{}", result.prompt);
+    assert!(
+        result.prompt.contains("Use supplied frame as reference."),
+        "{}",
+        result.prompt
+    );
+    assert!(
+        !result.prompt.contains("Character anchor:"),
+        "{}",
+        result.prompt
+    );
+    assert!(
+        !result.prompt.contains("Scene anchor:"),
+        "{}",
+        result.prompt
+    );
+    assert!(
+        !result
+            .prompt
+            .contains("Use the supplied frame as reference."),
+        "{}",
+        result.prompt
+    );
 }
 
 #[test]
