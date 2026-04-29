@@ -179,6 +179,7 @@ fn build_auto_quality_review_model_params(
             "memoryHitBucketCounts": diagnostics.memory_hit_bucket_counts,
             "memorySuppressedBucketCounts": diagnostics.memory_suppressed_bucket_counts,
             "memoryDeliveryPriorityApplied": diagnostics.memory_delivery_priority_applied,
+            "recentQualityMemoryBiases": diagnostics.recent_quality_memory_biases,
             "memoryStyleAnchorCount": diagnostics.memory_style_anchor_count,
             "memoryDeliveryAnchorCount": diagnostics.memory_delivery_anchor_count,
             "memoryOptimizationApplied": diagnostics.memory_optimization_applied,

@@ -249,6 +249,9 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
             memory_style_anchor_count,
             memory_delivery_anchor_count: style_anchor_build.memory_delivery_anchor_count,
             memory_delivery_priority_applied: style_anchor_build.memory_delivery_priority_applied,
+            recent_quality_memory_biases: constraint_pressure
+                .map(VideoPromptConstraintPressure::memory_recall_biases)
+                .unwrap_or_default(),
             memory_style_chars,
             memory_visual_chars,
             memory_delivery_chars,
@@ -1782,6 +1785,30 @@ pub(super) fn score_memory_style_note_for_expanded_tier(
             }
         }
     }
+    if let Some(pressure) = constraint_pressure {
+        if pressure.prefer_delivery_memory_recall {
+            if memory_style_anchor_has_delivery_signal(note) {
+                score += 12;
+            }
+            if style_note_contains_family(note, "表演") {
+                score += 5;
+            }
+            if style_note_contains_family(note, "语气") {
+                score += 5;
+            }
+        }
+        if pressure.prefer_visual_continuity_memory_recall {
+            if style_note_contains_family(note, "光影") {
+                score += 8;
+            }
+            if style_note_contains_family(note, "镜头") {
+                score += 6;
+            }
+            if style_note_contains_family(note, "环境") {
+                score += 4;
+            }
+        }
+    }
     score
 }
 
@@ -2036,6 +2063,25 @@ pub(super) fn score_compacted_style_note_against_constraint_pressure(
             || pressure.has_emotion_guardrail)
     {
         score += 8;
+    }
+    if pressure.prefer_delivery_memory_recall {
+        if style_note_contains_family(note, "表演") {
+            score += 4;
+        }
+        if style_note_contains_family(note, "语气") {
+            score += 4;
+        }
+    }
+    if pressure.prefer_visual_continuity_memory_recall {
+        if style_note_contains_family(note, "光影") {
+            score += 5;
+        }
+        if style_note_contains_family(note, "镜头") {
+            score += 4;
+        }
+        if style_note_contains_family(note, "环境") {
+            score += 2;
+        }
     }
     if style_note_contains_family(note, "光影") && pressure.has_lighting_guardrail {
         score += 4;

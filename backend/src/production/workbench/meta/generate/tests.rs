@@ -2931,6 +2931,33 @@ fn compacted_style_pressure_score_rewards_micro_performance_under_identity_guard
 }
 
 #[test]
+fn compacted_style_pressure_score_rewards_visual_continuity_when_visual_bias_is_active() {
+    let fields = parse_structured_storyboard_description(
+            "（林晚站在雨夜窗边、办公室窗边、林晚、4秒、中景、静止、看向窗外夜色、克制、冷蓝反光、无台词、雨声、A18）",
+        )
+        .expect("structured storyboard");
+    let pressure = VideoPromptConstraintPressure {
+        has_identity_guardrail: true,
+        has_lighting_guardrail: true,
+        forces_compact_memory: true,
+        prefer_visual_continuity_memory_recall: true,
+        ..VideoPromptConstraintPressure::default()
+    };
+
+    assert!(
+        score_compacted_style_note_against_constraint_pressure(
+            "光影冷蓝反光层次，镜头中景稳定",
+            &fields,
+            pressure,
+        ) > score_compacted_style_note_against_constraint_pressure(
+            "表演喉结滚动，语气压低气息尾音发颤",
+            &fields,
+            pressure,
+        )
+    );
+}
+
+#[test]
 fn prefer_role_memory_only_for_silent_identity_scene_uses_micro_performance_note() {
     let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("林晚在镜前停住".into()),
@@ -4061,6 +4088,7 @@ fn generate_video_prompt_response_serializes_observation_note() {
             memory_style_anchor_count: 0,
             memory_delivery_anchor_count: 0,
             memory_delivery_priority_applied: false,
+            recent_quality_memory_biases: vec!["delivery".into(), "visual_continuity".into()],
             memory_style_chars: 0,
             memory_visual_chars: 0,
             memory_delivery_chars: 0,
@@ -4094,6 +4122,14 @@ fn generate_video_prompt_response_serializes_observation_note() {
             .get("observationNote")
             .and_then(serde_json::Value::as_str),
         Some("待观察失败倾向：avoid shaky handheld motion")
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("recentQualityMemoryBiases"))
+            .and_then(serde_json::Value::as_array)
+            .map(|items| items.len()),
+        Some(2)
     );
     assert_eq!(
         value

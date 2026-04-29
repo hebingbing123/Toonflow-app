@@ -14,6 +14,8 @@ pub(super) struct VideoPromptConstraintPressure {
     pub(super) has_motion_guardrail: bool,
     pub(super) has_emotion_guardrail: bool,
     pub(super) forces_compact_memory: bool,
+    pub(super) prefer_delivery_memory_recall: bool,
+    pub(super) prefer_visual_continuity_memory_recall: bool,
 }
 
 impl VideoPromptConstraintPressure {
@@ -64,9 +66,24 @@ impl VideoPromptConstraintPressure {
                 has_motion_guardrail: self.has_motion_guardrail || other.has_motion_guardrail,
                 has_emotion_guardrail: self.has_emotion_guardrail || other.has_emotion_guardrail,
                 forces_compact_memory: self.forces_compact_memory || other.forces_compact_memory,
+                prefer_delivery_memory_recall: self.prefer_delivery_memory_recall
+                    || other.prefer_delivery_memory_recall,
+                prefer_visual_continuity_memory_recall: self.prefer_visual_continuity_memory_recall
+                    || other.prefer_visual_continuity_memory_recall,
             },
             None => self,
         }
+    }
+
+    pub(super) fn memory_recall_biases(self) -> Vec<String> {
+        let mut biases = Vec::new();
+        if self.prefer_delivery_memory_recall {
+            biases.push("delivery".to_string());
+        }
+        if self.prefer_visual_continuity_memory_recall {
+            biases.push("visual_continuity".to_string());
+        }
+        biases
     }
 
     fn absorb_fragment(&mut self, fragment: &str) {
@@ -109,6 +126,10 @@ pub(super) fn derive_recent_quality_constraint_pressure(
 ) -> Option<VideoPromptConstraintPressure> {
     let mut pressure = VideoPromptConstraintPressure::default();
     let mut saw_delivery_success = false;
+    let mut dialogue_like_failures = 0usize;
+    let mut emotion_like_failures = 0usize;
+    let mut identity_like_failures = 0usize;
+    let mut visual_like_failures = 0usize;
 
     for row in rows {
         let comment = row
@@ -153,6 +174,7 @@ pub(super) fn derive_recent_quality_constraint_pressure(
             || contains_any(&category, &["identity", "character", "consistency"])
         {
             pressure.has_identity_guardrail = true;
+            identity_like_failures += 1;
         }
 
         if severe
@@ -178,6 +200,7 @@ pub(super) fn derive_recent_quality_constraint_pressure(
             || contains_any(&category, &["dialogue", "delivery", "lip"])
         {
             pressure.has_dialogue_guardrail = true;
+            dialogue_like_failures += 1;
         }
 
         if severe
@@ -200,12 +223,47 @@ pub(super) fn derive_recent_quality_constraint_pressure(
             || contains_any(&category, &["emotion", "performance"])
         {
             pressure.has_emotion_guardrail = true;
+            emotion_like_failures += 1;
+        }
+
+        if severe
+            || row.visual_quality.is_some_and(|score| score <= 7)
+            || contains_any(
+                &comment,
+                &[
+                    "穿帮",
+                    "不自然",
+                    "很假",
+                    "假脸",
+                    "ai感",
+                    "像ai",
+                    "出戏",
+                    "闪烁",
+                    "模糊",
+                    "flicker",
+                    "fake",
+                    "unnatural",
+                    "plastic",
+                ],
+            )
+            || contains_any(
+                &category,
+                &["visual", "lighting", "motion", "continuity", "face"],
+            )
+        {
+            visual_like_failures += 1;
         }
     }
 
     if saw_delivery_success {
         pressure.has_dialogue_guardrail = true;
         pressure.forces_compact_memory = true;
+    }
+    if saw_delivery_success || dialogue_like_failures + emotion_like_failures > 0 {
+        pressure.prefer_delivery_memory_recall = true;
+    }
+    if identity_like_failures + visual_like_failures > 0 {
+        pressure.prefer_visual_continuity_memory_recall = true;
     }
     if pressure.has_active_guardrail() {
         pressure.forces_compact_memory = true;
@@ -244,6 +302,8 @@ mod tests {
         assert!(pressure.has_dialogue_guardrail);
         assert!(pressure.has_emotion_guardrail);
         assert!(pressure.forces_compact_memory);
+        assert!(pressure.prefer_delivery_memory_recall);
+        assert!(pressure.prefer_visual_continuity_memory_recall);
     }
 
     #[test]
@@ -263,6 +323,26 @@ mod tests {
 
         assert!(pressure.has_dialogue_guardrail);
         assert!(pressure.forces_compact_memory);
+        assert!(pressure.prefer_delivery_memory_recall);
+    }
+
+    #[test]
+    fn derive_recent_quality_constraint_pressure_marks_visual_continuity_bias_for_fake_visual_failures(
+    ) {
+        let pressure = derive_recent_quality_constraint_pressure(&[RecentQualitySignalRow {
+            passed: Some(false),
+            overall_score: Some(5),
+            dialogue_naturalness: Some(8),
+            character_consistency: Some(6),
+            visual_quality: Some(5),
+            memory_delivery_priority_applied: Some(false),
+            is_bad_case: true,
+            bad_case_category: Some("visual".into()),
+            comments: Some("画面不自然而且有穿帮，像 AI 假脸".into()),
+        }])
+        .expect("pressure");
+
+        assert!(pressure.prefer_visual_continuity_memory_recall);
     }
 
     #[test]
@@ -280,5 +360,7 @@ mod tests {
         assert!(merged.has_dialogue_guardrail);
         assert!(merged.has_identity_guardrail);
         assert!(merged.forces_compact_memory);
+        assert!(!merged.prefer_delivery_memory_recall);
+        assert!(!merged.prefer_visual_continuity_memory_recall);
     }
 }

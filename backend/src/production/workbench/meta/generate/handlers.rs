@@ -48,6 +48,7 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     pub(super) memory_style_anchor_count: usize,
     pub(super) memory_delivery_anchor_count: usize,
     pub(super) memory_delivery_priority_applied: bool,
+    pub(super) recent_quality_memory_biases: Vec<String>,
     pub(super) memory_style_chars: usize,
     pub(super) memory_visual_chars: usize,
     pub(super) memory_delivery_chars: usize,

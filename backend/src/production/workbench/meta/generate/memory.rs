@@ -958,7 +958,8 @@ fn storyboard_trim_prefers_delivery_memory(
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> bool {
     if constraint_pressure.is_some_and(|pressure| {
-        pressure.has_dialogue_guardrail
+        pressure.prefer_delivery_memory_recall
+            || pressure.has_dialogue_guardrail
             || pressure.has_emotion_guardrail
             || pressure.has_identity_guardrail
     }) {
