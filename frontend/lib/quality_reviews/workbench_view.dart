@@ -10,6 +10,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.statsSummary,
     required this.scopeInsightsSummary,
     required this.tokenEfficiencySummary,
+    required this.tokenEfficiencyActionPlan,
     required this.tokenEfficiencySamplesSummary,
     required this.stagePassRateSummary,
     required this.reviewDetails,
@@ -50,6 +51,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? statsSummary;
   final String? scopeInsightsSummary;
   final String? tokenEfficiencySummary;
+  final String? tokenEfficiencyActionPlan;
   final String? tokenEfficiencySamplesSummary;
   final String? stagePassRateSummary;
   final String? reviewDetails;
@@ -467,6 +469,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('Token聚合：${model.tokenEfficiencySummary}'),
+              ],
+              if (model.tokenEfficiencyActionPlan != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('记忆动作：${model.tokenEfficiencyActionPlan}'),
               ],
               if (model.tokenEfficiencySamplesSummary != null) ...[
                 const SizedBox(height: 12),

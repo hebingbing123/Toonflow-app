@@ -51,6 +51,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     statsSummary: 'output: total=1, pass=100%',
     scopeInsightsSummary: 'P7/S11 2条 · pass=50.0% · 坏例1',
     tokenEfficiencySummary: 'output: samples=2, prompt=420, memory=88',
+    tokenEfficiencyActionPlan:
+        'P7/S11 独立记忆建议：storyboard 保留镜头级精选记忆的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。',
     tokenEfficiencySamplesSummary:
         '04-14 08:00 output: prompt=430, base=340, memory=90 (20.9%, delivery优先)',
     stagePassRateSummary: 'storyboard: 100%',
@@ -216,6 +218,7 @@ void main() {
       find.text('Token聚合：output: samples=2, prompt=420, memory=88'),
       findsOneWidget,
     );
+    expect(find.textContaining('记忆动作：P7/S11 独立记忆建议'), findsOneWidget);
     expect(
       find.textContaining('省Token样本：04-14 08:00 output: prompt=430'),
       findsOneWidget,
@@ -421,7 +424,7 @@ void main() {
       expect(find.textContaining('正向记忆晋升'), findsOneWidget);
       expect(find.textContaining('写入=selected_video_memory'), findsOneWidget);
       expect(find.text('memory'), findsOneWidget);
-      expect(find.textContaining('建议：'), findsNWidgets(2));
+      expect(find.textContaining('建议：先补参考帧和上一镜衔接'), findsOneWidget);
     },
   );
 }
