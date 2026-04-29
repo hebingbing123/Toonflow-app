@@ -6280,21 +6280,24 @@ fn build_role_video_style_memories<'a>(
     grouped
         .into_iter()
         .filter_map(|group| {
-            if group.notes.len() < 2 {
-                return None;
-            }
-            let recurring = compact_role_recurring_style_fragments(
-                recurring_style_fragments(&group.notes),
-                role_style_supplement_fragments(&group.notes),
-            );
-            if recurring.is_empty() {
-                return None;
-            }
-            let style =
-                clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
-            let delivery = summarize_role_delivery_fragment(&group.notes)
-                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
-                .filter(|value| value != &style);
+            let (style, delivery) = if group.notes.len() >= 2 {
+                let recurring = compact_role_recurring_style_fragments(
+                    recurring_style_fragments(&group.notes),
+                    role_style_supplement_fragments(&group.notes),
+                );
+                if recurring.is_empty() {
+                    return None;
+                }
+                let style =
+                    clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+                let delivery = summarize_role_delivery_fragment(&group.notes)
+                    .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+                    .filter(|value| value != &style);
+                (style, delivery)
+            } else {
+                let note = group.notes.first()?;
+                single_sample_role_style_memory_seed(note)?
+            };
             let primary_subject = clip_prompt_fragment(&group.primary_subject, 16);
             let subject_aliases = group
                 .aliases
@@ -6316,6 +6319,37 @@ fn build_role_video_style_memories<'a>(
             Some(parts.join(" | "))
         })
         .collect()
+}
+
+fn single_sample_role_style_memory_seed(note: &str) -> Option<(String, Option<String>)> {
+    let style = selected_video_delivery_value_from_note(note)
+        .or_else(|| compact_video_style_prompt_note(note))
+        .filter(|value| single_sample_role_style_seed_is_high_signal(value))?;
+    let delivery = selected_video_delivery_value_from_note(note)
+        .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .filter(|value| value != &style)
+        .filter(|value| single_sample_role_style_seed_is_high_signal(value));
+    Some((style, delivery))
+}
+
+fn single_sample_role_style_seed_is_high_signal(note: &str) -> bool {
+    split_prompt_note_fragments(note).any(|fragment| {
+        if fragment.starts_with("表演") {
+            score_memory_fragment_human_performance_detail(&fragment, Some("表演")) >= 3
+                || [
+                    "抬眼", "垂眼", "眼神", "喉结", "唇线", "眉心", "嘴角", "下颌", "呼吸", "停顿",
+                    "发颤",
+                ]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+        } else if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
+            !role_voice_variant_is_low_gain_carryover(&voice)
+        } else if let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) {
+            !global_mood_fragment_is_generic_restrained(&mood)
+        } else {
+            false
+        }
+    })
 }
 
 fn compact_global_recurring_style_fragments(
@@ -11339,6 +11373,29 @@ mod tests {
             summaries,
             vec!["subject=林晚 | sampleCount=2 | style=情绪冷峻压迫，表演抬眼停顿".to_string()]
         );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_seed_single_high_signal_sample() {
+        let summaries = build_script_role_video_style_memories(&[AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头近景稳定跟拍，表演喉结滚动，语气低声尾音发颤，光影冷蓝窗光".into(),
+        }]);
+
+        assert_eq!(
+            summaries,
+            vec!["subject=林晚 | sampleCount=1 | subjectAliases=晚晚 | style=表演喉结滚动低声尾音发颤".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_script_role_video_style_memories_skip_single_generic_soft_sample() {
+        let summaries = build_script_role_video_style_memories(&[AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=12 | subject=林晚 | style=动作从容克制，语气轻声克制".into(),
+        }]);
+
+        assert!(summaries.is_empty(), "{summaries:?}");
     }
 
     #[test]
