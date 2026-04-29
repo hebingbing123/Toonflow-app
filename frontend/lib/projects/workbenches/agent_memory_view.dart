@@ -202,6 +202,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ).textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],
+              if (memoryInsights.videoSummary != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  memoryInsights.videoSummary!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
               if (memoryInsights.recommendation != null) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -218,16 +227,25 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 ...memoryInsights.previews.take(8).map((preview) {
-                  final title = preview.memoryName.isEmpty
-                      ? '${preview.role} · ${preview.charCount} chars'
-                      : '${preview.memoryName} · ${preview.role} · ${preview.charCount} chars';
+                  final titleSegments = <String>[
+                    if (preview.memoryName.isNotEmpty) preview.memoryName,
+                    preview.role,
+                    '${preview.charCount} chars',
+                    if (preview.classificationLabel.isNotEmpty)
+                      preview.classificationLabel,
+                  ];
+                  final subtitleSegments = <String>[
+                    if (preview.memoryId.isNotEmpty) preview.memoryId,
+                    if (preview.scopeLabel.isNotEmpty) preview.scopeLabel,
+                    if (preview.subjectLabel.isNotEmpty)
+                      'subject ${preview.subjectLabel}',
+                    preview.shortContent,
+                  ];
                   return ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: Text(title),
-                    subtitle: Text(
-                      '${preview.memoryId.isEmpty ? '' : '${preview.memoryId} · '}${preview.shortContent}',
-                    ),
+                    title: Text(titleSegments.join(' · ')),
+                    subtitle: Text(subtitleSegments.join(' · ')),
                     trailing: preview.isDuplicated
                         ? const Chip(
                             label: Text('重复'),
@@ -328,11 +346,13 @@ class _AgentMemoryInsights {
   const _AgentMemoryInsights({
     required this.previews,
     required this.summary,
+    required this.videoSummary,
     required this.recommendation,
   });
 
   final List<_AgentMemoryPreview> previews;
   final String? summary;
+  final String? videoSummary;
   final String? recommendation;
 }
 
@@ -345,6 +365,9 @@ class _AgentMemoryPreview {
     required this.charCount,
     required this.normalizedPrefix,
     required this.isDuplicated,
+    required this.classificationLabel,
+    required this.scopeLabel,
+    required this.subjectLabel,
   });
 
   final String memoryId;
@@ -354,6 +377,9 @@ class _AgentMemoryPreview {
   final int charCount;
   final String normalizedPrefix;
   final bool isDuplicated;
+  final String classificationLabel;
+  final String scopeLabel;
+  final String subjectLabel;
 }
 
 _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
@@ -364,6 +390,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
     return const _AgentMemoryInsights(
       previews: <_AgentMemoryPreview>[],
       summary: null,
+      videoSummary: null,
       recommendation: null,
     );
   }
@@ -373,6 +400,12 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
   final memoryNameCounts = <String, int>{};
   var totalChars = 0;
   var longestChars = 0;
+  var deliveryRows = 0;
+  var deliveryChars = 0;
+  var visualRows = 0;
+  var visualChars = 0;
+  var rejectedRows = 0;
+  var rejectedChars = 0;
   for (final preview in rawPreviews) {
     totalChars += preview.charCount;
     if (preview.charCount > longestChars) {
@@ -393,6 +426,21 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
         ifAbsent: () => 1,
       );
     }
+    switch (preview.classificationLabel) {
+      case '表演优先':
+      case '表演+视觉':
+        deliveryRows += 1;
+        deliveryChars += preview.charCount;
+        break;
+      case '视觉偏重':
+        visualRows += 1;
+        visualChars += preview.charCount;
+        break;
+      case '坏例约束':
+        rejectedRows += 1;
+        rejectedChars += preview.charCount;
+        break;
+    }
   }
 
   final previews = rawPreviews
@@ -407,6 +455,9 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
           isDuplicated:
               preview.normalizedPrefix.isNotEmpty &&
               (prefixCounts[preview.normalizedPrefix] ?? 0) > 1,
+          classificationLabel: preview.classificationLabel,
+          scopeLabel: preview.scopeLabel,
+          subjectLabel: preview.subjectLabel,
         ),
       )
       .toList(growable: false);
@@ -426,9 +477,22 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
             .join(' / ');
   final summary =
       '角色分布：$rolesSummary${typeSummary == null ? '' : ' · 类型 $typeSummary'} · 约 $totalChars chars · 最长 $longestChars chars${duplicateCount > 0 ? ' · 重复 $duplicateCount 条' : ''}';
+  final hasVideoMemorySummary =
+      deliveryRows > 0 || visualRows > 0 || rejectedRows > 0;
+  final videoSummary = hasVideoMemorySummary
+      ? '视频记忆：delivery $deliveryRows/$deliveryChars chars · visual $visualRows/$visualChars chars · negative $rejectedRows/$rejectedChars chars'
+      : null;
   String? recommendation;
   if (duplicateCount >= 2) {
     recommendation = '检测到重复表述，先去重旧记忆，避免同一约束反复注入。';
+  } else if (visualRows >= 2 && deliveryRows == 0 && rejectedRows == 0) {
+    recommendation = '当前视频记忆几乎只有镜头/光影，先补一条表演、语气或情绪锚点，再决定删哪条视觉记忆。';
+  } else if (visualRows >= 2 &&
+      visualChars >= deliveryChars + 40 &&
+      deliveryRows > 0) {
+    recommendation = '视觉偏重记忆吃掉了更多预算，先清理只保留镜头/光影的旧条目，把 chars 留给表演、语气和情绪。';
+  } else if (rejectedRows >= 3 && rejectedChars >= 180) {
+    recommendation = '坏例约束累计较多，先合并重复 risk/avoid 片段，避免 negative memory 自己膨胀。';
   } else if (memoryNamesSummary.isNotEmpty &&
       memoryNamesSummary.first.value >= 6) {
     recommendation =
@@ -445,6 +509,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
   return _AgentMemoryInsights(
     previews: previews,
     summary: summary,
+    videoSummary: videoSummary,
     recommendation: recommendation,
   );
 }
@@ -461,16 +526,128 @@ _AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
   final shortContent = content.length > 60
       ? '${content.substring(0, 60)}…'
       : content;
-  final normalizedPrefix = content.replaceAll(RegExp(r'\s+'), '').toLowerCase();
+  final normalizedPrefix = _memorySemanticDedupKey(content);
+  final classificationLabel = _memoryClassificationLabel(memoryName, content);
+  final scopeLabel = _memoryScopeLabel(content);
+  final subjectLabel = _extractMemoryKeyValue(content, 'subject') ?? '';
   return _AgentMemoryPreview(
     memoryId: map['id']?.toString() ?? '',
     memoryName: memoryName,
     role: role,
     shortContent: shortContent,
     charCount: content.characters.length,
-    normalizedPrefix: normalizedPrefix.length > 16
-        ? normalizedPrefix.substring(0, 16)
+    normalizedPrefix: normalizedPrefix.length > 18
+        ? normalizedPrefix.substring(0, 18)
         : normalizedPrefix,
     isDuplicated: false,
+    classificationLabel: classificationLabel,
+    scopeLabel: scopeLabel,
+    subjectLabel: subjectLabel,
   );
 }
+
+String _memoryClassificationLabel(String memoryName, String content) {
+  if (memoryName == 'rejected_video_negative_memory') {
+    return '坏例约束';
+  }
+  if (!_isVideoStyleMemory(memoryName)) {
+    return '';
+  }
+  final deliverySignals = _countKeywordMatches(
+    content,
+    _deliveryMemoryKeywords,
+  );
+  final visualSignals = _countKeywordMatches(content, _visualMemoryKeywords);
+  if (deliverySignals > 0 && visualSignals > 0) {
+    return '表演+视觉';
+  }
+  if (deliverySignals > 0) {
+    return '表演优先';
+  }
+  if (visualSignals > 0) {
+    return '视觉偏重';
+  }
+  return '视频记忆';
+}
+
+bool _isVideoStyleMemory(String memoryName) {
+  return memoryName == 'selected_video_memory' ||
+      memoryName == 'script_role_video_style_memory' ||
+      memoryName == 'script_video_style_memory' ||
+      memoryName == 'project_role_video_style_memory';
+}
+
+int _countKeywordMatches(String content, List<String> keywords) {
+  final normalized = content.toLowerCase();
+  return keywords.where((keyword) => normalized.contains(keyword)).length;
+}
+
+String _memoryScopeLabel(String content) {
+  final storyboardIds = _extractMemoryKeyValue(content, 'storyboardIds');
+  if (storyboardIds != null && storyboardIds.isNotEmpty) {
+    return 'storyboard $storyboardIds';
+  }
+  final sampleCount = _extractMemoryKeyValue(content, 'sampleCount');
+  if (sampleCount != null && sampleCount.isNotEmpty) {
+    return 'samples $sampleCount';
+  }
+  return '';
+}
+
+String? _extractMemoryKeyValue(String content, String key) {
+  for (final part in content.split('|')) {
+    final trimmed = part.trim();
+    if (!trimmed.startsWith('$key=')) {
+      continue;
+    }
+    final value = trimmed.substring(key.length + 1).trim();
+    if (value.isNotEmpty) {
+      return value;
+    }
+  }
+  return null;
+}
+
+String _memorySemanticDedupKey(String content) {
+  final semantic = <String>[
+    _extractMemoryKeyValue(content, 'delivery') ?? '',
+    _extractMemoryKeyValue(content, 'note') ?? '',
+    _extractMemoryKeyValue(content, 'avoid') ?? '',
+    _extractMemoryKeyValue(content, 'style') ?? '',
+    content,
+  ].firstWhere((value) => value.trim().isNotEmpty, orElse: () => content);
+  return semantic.replaceAll(RegExp(r'\s+'), '').toLowerCase();
+}
+
+const List<String> _deliveryMemoryKeywords = <String>[
+  '表演',
+  '语气',
+  '情绪',
+  '呼吸',
+  '停顿',
+  '眼神',
+  '口型',
+  '微表情',
+  'emotion',
+  'expression',
+  'delivery',
+  'lip',
+];
+
+const List<String> _visualMemoryKeywords = <String>[
+  '镜头',
+  '光影',
+  '光线',
+  '逆光',
+  '暖光',
+  '冷光',
+  '运镜',
+  '构图',
+  '机位',
+  '近景',
+  '中景',
+  '远景',
+  'camera',
+  'lighting',
+  'framing',
+];

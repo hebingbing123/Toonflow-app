@@ -39,7 +39,10 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
             'name': 'selected_video_memory',
             'role': 'user',
             'content': <Map<String, String>>[
-              <String, String>{'data': '先补齐第一幕的角色动机和冲突。'},
+              <String, String>{
+                'data':
+                    'storyboardIds=3 | subject=沈青禾 | style=语气克制，情绪压迫，保留停顿 | note=语气克制，情绪压迫，保留停顿',
+              },
             ],
           },
           <String, Object?>{
@@ -166,6 +169,12 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.textContaining(
+        '视频记忆：delivery 1/74 chars · visual 0/0 chars · negative 0/0 chars',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('2 条记忆'), findsOneWidget);
     expect(find.text('追加记忆'), findsNWidgets(2));
     expect(find.text('清理记忆'), findsOneWidget);
@@ -173,8 +182,10 @@ void main() {
       find.textContaining('selected_video_memory · user · '),
       findsOneWidget,
     );
+    expect(find.textContaining('表演优先'), findsOneWidget);
     expect(find.textContaining('memory-1'), findsOneWidget);
-    expect(find.textContaining('先补齐第一幕的角色动机和冲突'), findsOneWidget);
+    expect(find.textContaining('subject 沈青禾'), findsOneWidget);
+    expect(find.textContaining('语气克制，情绪压迫，保留停顿'), findsOneWidget);
   });
 
   testWidgets('agent memory workbench view surfaces dedupe guidance', (
@@ -198,7 +209,9 @@ void main() {
                   'name': 'selected_video_memory',
                   'role': 'assistant',
                   'content': <Map<String, String>>[
-                    <String, String>{'data': '保持女主语气克制且情绪压迫感持续存在，避免读稿腔。'},
+                    <String, String>{
+                      'data': 'storyboardIds=12 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
+                    },
                   ],
                 },
                 <String, Object?>{
@@ -206,7 +219,10 @@ void main() {
                   'name': 'selected_video_memory',
                   'role': 'assistant',
                   'content': <Map<String, String>>[
-                    <String, String>{'data': '保持女主语气克制且情绪压迫感持续存在，同时保留冷感停顿。'},
+                    <String, String>{
+                      'data':
+                          'storyboardIds=15 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸，再加一点冷感尾音',
+                    },
                   ],
                 },
               ],
@@ -257,6 +273,201 @@ void main() {
       find.textContaining('建议：selected_video_memory 已累计 6 条'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('agent memory workbench view highlights visual-heavy video memory', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsAgentMemoryWorkbenchDialogView(
+            model: buildModel(
+              projectIdCtrl: projectIdCtrl,
+              agentTypeCtrl: agentTypeCtrl,
+              episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
+              appendContentCtrl: appendContentCtrl,
+              appendRoleCtrl: appendRoleCtrl,
+              clearTypeCtrl: clearTypeCtrl,
+              memoryRows: <dynamic>[
+                <String, Object?>{
+                  'id': 'memory-1',
+                  'name': 'selected_video_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=12 | style=镜头近景，光影冷调逆光，机位压迫 | note=镜头近景，光影冷调逆光，机位压迫',
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 'memory-2',
+                  'name': 'script_role_video_style_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'sampleCount=4 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 'memory-3',
+                  'name': 'selected_video_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=12 | subject=林晚 | style=表演欲言又止，语气轻声克制，情绪强忍泪意 | note=表演欲言又止，语气轻声克制，情绪强忍泪意',
+                    },
+                  ],
+                },
+              ],
+            ),
+            callbacks: buildCallbacks(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.textContaining(
+        '视频记忆：delivery 1/86 chars · visual 2/131 chars · negative 0/0 chars',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('建议：视觉偏重记忆吃掉了更多预算'), findsOneWidget);
+    expect(find.textContaining('· 视觉偏重'), findsNWidgets(2));
+    expect(find.textContaining('storyboard 12'), findsNWidgets(2));
+    expect(find.textContaining('samples 4'), findsOneWidget);
+    expect(find.textContaining('subject 林晚'), findsOneWidget);
+  });
+
+  testWidgets('agent memory workbench view highlights rejected video constraints', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsAgentMemoryWorkbenchDialogView(
+            model: buildModel(
+              projectIdCtrl: projectIdCtrl,
+              agentTypeCtrl: agentTypeCtrl,
+              episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
+              appendContentCtrl: appendContentCtrl,
+              appendRoleCtrl: appendRoleCtrl,
+              clearTypeCtrl: clearTypeCtrl,
+              memoryRows: <dynamic>[
+                <String, Object?>{
+                  'id': 'memory-1',
+                  'name': 'rejected_video_negative_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=7 | rejectionCount=3 | riskTags=delivery/lip-sync | avoid=avoid blank expression or monotone delivery',
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 'memory-2',
+                  'name': 'rejected_video_negative_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=8 | rejectionCount=2 | riskTags=emotion | avoid=avoid overly cold, oppressive, or frantic mood',
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 'memory-3',
+                  'name': 'rejected_video_negative_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=9 | rejectionCount=2 | riskTags=identity | avoid=avoid face distortion, identity drift, costume drift',
+                    },
+                  ],
+                },
+              ],
+            ),
+            callbacks: buildCallbacks(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.textContaining(
+        '视频记忆：delivery 0/0 chars · visual 0/0 chars · negative 3/338 chars',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('建议：坏例约束累计较多'), findsOneWidget);
+    expect(
+      find.textContaining('rejected_video_negative_memory · assistant ·'),
+      findsNWidgets(3),
+    );
+  });
+
+  testWidgets('agent memory workbench view highlights missing delivery anchors', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsAgentMemoryWorkbenchDialogView(
+            model: buildModel(
+              projectIdCtrl: projectIdCtrl,
+              agentTypeCtrl: agentTypeCtrl,
+              episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
+              appendContentCtrl: appendContentCtrl,
+              appendRoleCtrl: appendRoleCtrl,
+              clearTypeCtrl: clearTypeCtrl,
+              memoryRows: <dynamic>[
+                <String, Object?>{
+                  'id': 'memory-1',
+                  'name': 'selected_video_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=12 | style=镜头近景，光影冷调逆光，机位压迫 | note=镜头近景，光影冷调逆光，机位压迫',
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 'memory-2',
+                  'name': 'script_role_video_style_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'sampleCount=4 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
+                    },
+                  ],
+                },
+              ],
+            ),
+            callbacks: buildCallbacks(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.textContaining(
+        '视频记忆：delivery 0/0 chars · visual 2/131 chars · negative 0/0 chars',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('建议：当前视频记忆几乎只有镜头/光影'), findsOneWidget);
   });
 
   testWidgets('agent memory workbench view disables busy actions', (
