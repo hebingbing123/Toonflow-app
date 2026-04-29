@@ -89,6 +89,11 @@ class QualityScopeInsightRow {
     required this.deliveryPriorityHitRatePercent,
     required this.memoryRemovedChars,
     required this.memoryRemovedRows,
+    required this.feedbackSelectedMemoryPromotions,
+    required this.feedbackRejectedMemoryWrites,
+    required this.feedbackSummaryMemoryWrites,
+    required this.feedbackMemoryRemovedChars,
+    required this.feedbackMemoryRemovedRows,
   });
 
   final String scopeLabel;
@@ -108,6 +113,11 @@ class QualityScopeInsightRow {
   final double deliveryPriorityHitRatePercent;
   final int memoryRemovedChars;
   final int memoryRemovedRows;
+  final int feedbackSelectedMemoryPromotions;
+  final int feedbackRejectedMemoryWrites;
+  final int feedbackSummaryMemoryWrites;
+  final int feedbackMemoryRemovedChars;
+  final int feedbackMemoryRemovedRows;
 
   factory QualityScopeInsightRow.fromJson(Map<String, dynamic> json) {
     return QualityScopeInsightRow(
@@ -130,6 +140,16 @@ class QualityScopeInsightRow {
           (json['deliveryPriorityHitRatePercent'] as num?)?.toDouble() ?? 0,
       memoryRemovedChars: (json['memoryRemovedChars'] as num?)?.toInt() ?? 0,
       memoryRemovedRows: (json['memoryRemovedRows'] as num?)?.toInt() ?? 0,
+      feedbackSelectedMemoryPromotions:
+          (json['feedbackSelectedMemoryPromotions'] as num?)?.toInt() ?? 0,
+      feedbackRejectedMemoryWrites:
+          (json['feedbackRejectedMemoryWrites'] as num?)?.toInt() ?? 0,
+      feedbackSummaryMemoryWrites:
+          (json['feedbackSummaryMemoryWrites'] as num?)?.toInt() ?? 0,
+      feedbackMemoryRemovedChars:
+          (json['feedbackMemoryRemovedChars'] as num?)?.toInt() ?? 0,
+      feedbackMemoryRemovedRows:
+          (json['feedbackMemoryRemovedRows'] as num?)?.toInt() ?? 0,
     );
   }
 }

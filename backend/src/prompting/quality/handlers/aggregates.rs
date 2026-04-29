@@ -196,7 +196,30 @@ pub(crate) async fn get_scope_insights(
                     THEN COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedRows')::int, 0)
                     ELSE 0
                 END
-            ), 0) as memory_removed_rows
+            ), 0) as memory_removed_rows,
+            COUNT(*) FILTER (
+                WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+            ) as feedback_selected_memory_promotions,
+            COUNT(*) FILTER (
+                WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'persisted_rejected_memory'
+            ) as feedback_rejected_memory_writes,
+            COUNT(*) FILTER (
+                WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'replaced_summary_memory'
+            ) as feedback_summary_memory_writes,
+            COALESCE(SUM(
+                CASE
+                    WHEN model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                    THEN COALESCE((model_params->'diagnostics'->'feedbackMemory'->>'removedChars')::int, 0)
+                    ELSE 0
+                END
+            ), 0) as feedback_memory_removed_chars,
+            COALESCE(SUM(
+                CASE
+                    WHEN model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                    THEN COALESCE((model_params->'diagnostics'->'feedbackMemory'->>'removedRows')::int, 0)
+                    ELSE 0
+                END
+            ), 0) as feedback_memory_removed_rows
         FROM app_quality_review
         WHERE user_id = $1
           AND (project_id IS NOT NULL OR script_id IS NOT NULL)

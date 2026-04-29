@@ -365,6 +365,16 @@ void main() {
                         'memoryDeliveryPriorityApplied': true,
                         'autoNegativeSource': 'review+rejected_memory',
                         'directorManualYieldedToMemory': true,
+                        'feedbackMemory': {
+                          'action': 'promoted_selected_memory',
+                          'storyboardId': 19,
+                          'memoryName': 'selected_video_memory',
+                          'clearedMemoryName': 'rejected_video_negative_memory',
+                          'removedRows': 2,
+                          'removedChars': 96,
+                          'removedVisualRows': 1,
+                          'removedDuplicateRows': 1,
+                        },
                       },
                     },
                   ),
@@ -388,6 +398,9 @@ void main() {
       expect(find.textContaining('修复建议：'), findsOneWidget);
       expect(find.textContaining('负向约束=评审+坏例记忆'), findsNWidgets(2));
       expect(find.textContaining('导演让位'), findsNWidgets(2));
+      expect(find.textContaining('正向记忆晋升'), findsOneWidget);
+      expect(find.textContaining('写入=selected_video_memory'), findsOneWidget);
+      expect(find.text('memory'), findsOneWidget);
       expect(find.textContaining('建议：'), findsNWidgets(2));
     },
   );

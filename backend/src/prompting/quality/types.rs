@@ -122,6 +122,11 @@ pub struct QualityScopeInsightResponse {
     pub delivery_priority_hit_rate_percent: f64,
     pub memory_removed_chars: i64,
     pub memory_removed_rows: i64,
+    pub feedback_selected_memory_promotions: i64,
+    pub feedback_rejected_memory_writes: i64,
+    pub feedback_summary_memory_writes: i64,
+    pub feedback_memory_removed_chars: i64,
+    pub feedback_memory_removed_rows: i64,
 }
 
 /// 分环节通过率条目

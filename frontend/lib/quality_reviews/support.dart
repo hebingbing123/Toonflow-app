@@ -8,6 +8,14 @@ Map<String, dynamic>? _qualityDiagnosticsMap(QualityReview row) {
   return Map<String, dynamic>.from(diagnostics);
 }
 
+Map<String, dynamic>? _feedbackMemoryMap(QualityReview row) {
+  final diagnostics = _qualityDiagnosticsMap(row);
+  if (diagnostics == null) return null;
+  final feedback = diagnostics['feedbackMemory'];
+  if (feedback is! Map) return null;
+  return Map<String, dynamic>.from(feedback);
+}
+
 int _diagnosticInt(Map<String, dynamic> map, String key) {
   final value = map[key];
   if (value is num) return value.toInt();
@@ -363,6 +371,57 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
     parts.add('参考帧');
   }
   return parts.join(' · ');
+}
+
+String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
+  final feedback = _feedbackMemoryMap(row);
+  if (feedback == null) return null;
+
+  final action = _diagnosticString(feedback, 'action');
+  final memoryName = _diagnosticString(feedback, 'memoryName');
+  final clearedMemoryName = _diagnosticString(feedback, 'clearedMemoryName');
+  final storyboardId = _diagnosticInt(feedback, 'storyboardId');
+  final removedRows = _diagnosticInt(feedback, 'removedRows');
+  final removedChars = _diagnosticInt(feedback, 'removedChars');
+  final removedVisualRows = _diagnosticInt(feedback, 'removedVisualRows');
+  final removedDuplicateRows = _diagnosticInt(feedback, 'removedDuplicateRows');
+
+  final parts = <String>[];
+  switch (action) {
+    case 'promoted_selected_memory':
+      parts.add('正向记忆晋升');
+      break;
+    case 'persisted_rejected_memory':
+      parts.add('坏例记忆回写');
+      break;
+    case 'replaced_summary_memory':
+      parts.add('评审摘要回写');
+      break;
+    case 'promoted_selected_memory_missing_prompt_seed':
+      parts.add('正向记忆待补 prompt seed');
+      break;
+    case 'promoted_selected_memory_empty':
+      parts.add('正向记忆未提炼出有效片段');
+      break;
+    default:
+      if (action != null) parts.add(action);
+  }
+  if (storyboardId > 0) {
+    parts.add('镜头$storyboardId');
+  }
+  if (memoryName != null) {
+    parts.add('写入=$memoryName');
+  }
+  if (clearedMemoryName != null) {
+    parts.add('清理=$clearedMemoryName');
+  }
+  if (removedChars > 0 || removedRows > 0) {
+    parts.add(
+      'slim ${removedChars} chars / ${removedRows}条'
+      '（重复 $removedDuplicateRows / 纯视觉 $removedVisualRows）',
+    );
+  }
+  return parts.isEmpty ? null : parts.join(' · ');
 }
 
 String? summarizeMemoryScopePressureFromQualityReviews(
@@ -939,6 +998,21 @@ String summarizeQualityScopeInsightRows(
             );
           }
         }
+        if (row.feedbackSelectedMemoryPromotions > 0) {
+          parts.add('晋升${row.feedbackSelectedMemoryPromotions}');
+        }
+        if (row.feedbackRejectedMemoryWrites > 0) {
+          parts.add('坏例回写${row.feedbackRejectedMemoryWrites}');
+        }
+        if (row.feedbackSummaryMemoryWrites > 0) {
+          parts.add('摘要回写${row.feedbackSummaryMemoryWrites}');
+        }
+        if (row.feedbackMemoryRemovedChars > 0 ||
+            row.feedbackMemoryRemovedRows > 0) {
+          parts.add(
+            '回写slim ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}条',
+          );
+        }
         return parts.join(' · ');
       })
       .join(' | ');
@@ -997,6 +1071,10 @@ String formatQualityReviewDetails(QualityReview row) {
   final diagnosticSummary = summarizeQualityReviewPromptDiagnostics(row);
   if (diagnosticSummary != null) {
     parts.add('诊断=$diagnosticSummary');
+  }
+  final writebackSummary = summarizeQualityReviewMemoryWriteback(row);
+  if (writebackSummary != null) {
+    parts.add('回写=$writebackSummary');
   }
   final repairSuggestions = buildQualityReviewRepairSuggestions(row);
   if (repairSuggestions.isNotEmpty) {

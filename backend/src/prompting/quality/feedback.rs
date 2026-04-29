@@ -8,6 +8,7 @@
 
 use std::collections::BTreeSet;
 
+use serde::Serialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -27,6 +28,32 @@ const LOW_SCORE_THRESHOLD: i16 = 6;
 const SEVERE_SCORE_THRESHOLD: i16 = 4;
 const SELECTED_MEMORY_PROMOTION_SCORE_THRESHOLD: i16 = 8;
 
+fn fit_i32(value: usize) -> i32 {
+    i32::try_from(value).unwrap_or(i32::MAX)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityFeedbackMemoryOutcome {
+    pub action: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub storyboard_id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub memory_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cleared_memory_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub removed_rows: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub removed_chars: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub removed_visual_rows: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub removed_duplicate_rows: Option<i32>,
+}
+
 /// Automatically write quality feedback to agent memory if the review indicates issues.
 pub async fn maybe_write_quality_feedback_to_memory(
     pool: &PgPool,
@@ -34,11 +61,13 @@ pub async fn maybe_write_quality_feedback_to_memory(
     project_id: i32,
     script_id: i32,
     review: &QualityReview,
-) -> Result<(), String> {
+) -> Result<Option<QualityFeedbackMemoryOutcome>, String> {
     if should_promote_quality_review_selected_video_memory(review) {
-        promote_quality_review_selected_video_memory(pool, user_id, project_id, script_id, review)
-            .await?;
-        return Ok(());
+        return promote_quality_review_selected_video_memory(
+            pool, user_id, project_id, script_id, review,
+        )
+        .await
+        .map(Some);
     }
 
     let should_write = review.is_bad_case
@@ -48,7 +77,7 @@ pub async fn maybe_write_quality_feedback_to_memory(
             .unwrap_or(false)
         || review.passed == Some(false);
     if !should_write {
-        return Ok(());
+        return Ok(None);
     }
 
     if let Some(content) = build_quality_review_rejected_video_memory(review) {
@@ -68,12 +97,22 @@ pub async fn maybe_write_quality_feedback_to_memory(
             target_id = ?review.target_id,
             "Quality feedback persisted into rejected video memory"
         );
-        return Ok(());
+        return Ok(Some(QualityFeedbackMemoryOutcome {
+            action: "persisted_rejected_memory".into(),
+            agent_type: Some("productionAgent".into()),
+            storyboard_id: quality_review_storyboard_target_id(review),
+            memory_name: Some("rejected_video_negative_memory".into()),
+            cleared_memory_name: None,
+            removed_rows: None,
+            removed_chars: None,
+            removed_visual_rows: None,
+            removed_duplicate_rows: None,
+        }));
     }
 
     let feedback_content = build_generic_quality_feedback_content(review);
     if feedback_content.is_empty() {
-        return Ok(());
+        return Ok(None);
     }
 
     let agent_type = match review.target_type.as_str() {
@@ -96,7 +135,17 @@ pub async fn maybe_write_quality_feedback_to_memory(
     .await
     .map_err(|e| format!("Failed to write quality feedback summary memory: {e:?}"))?;
 
-    Ok(())
+    Ok(Some(QualityFeedbackMemoryOutcome {
+        action: "replaced_summary_memory".into(),
+        agent_type: Some(agent_type.into()),
+        storyboard_id: None,
+        memory_name: Some(QUALITY_FEEDBACK_MEMORY_NAME.into()),
+        cleared_memory_name: None,
+        removed_rows: None,
+        removed_chars: None,
+        removed_visual_rows: None,
+        removed_duplicate_rows: None,
+    }))
 }
 
 async fn promote_quality_review_selected_video_memory(
@@ -105,9 +154,19 @@ async fn promote_quality_review_selected_video_memory(
     project_id: i32,
     script_id: i32,
     review: &QualityReview,
-) -> Result<(), String> {
+) -> Result<QualityFeedbackMemoryOutcome, String> {
     let Some(storyboard_id) = quality_review_storyboard_target_id(review) else {
-        return Ok(());
+        return Ok(QualityFeedbackMemoryOutcome {
+            action: "promoted_selected_memory_skipped".into(),
+            agent_type: Some("productionAgent".into()),
+            storyboard_id: None,
+            memory_name: Some("selected_video_memory".into()),
+            cleared_memory_name: None,
+            removed_rows: None,
+            removed_chars: None,
+            removed_visual_rows: None,
+            removed_duplicate_rows: None,
+        });
     };
 
     let prompt_seed = sqlx::query_as::<_, StoryboardPromptSeedRow>(
@@ -131,10 +190,30 @@ async fn promote_quality_review_selected_video_memory(
     .map_err(|e| format!("Failed to load storyboard prompt seed for quality memory: {e}"))?;
 
     let Some(prompt_seed) = prompt_seed else {
-        return Ok(());
+        return Ok(QualityFeedbackMemoryOutcome {
+            action: "promoted_selected_memory_missing_prompt_seed".into(),
+            agent_type: Some("productionAgent".into()),
+            storyboard_id: Some(storyboard_id),
+            memory_name: Some("selected_video_memory".into()),
+            cleared_memory_name: None,
+            removed_rows: None,
+            removed_chars: None,
+            removed_visual_rows: None,
+            removed_duplicate_rows: None,
+        });
     };
     let Some(memory_content) = build_selected_video_memory(storyboard_id, &prompt_seed) else {
-        return Ok(());
+        return Ok(QualityFeedbackMemoryOutcome {
+            action: "promoted_selected_memory_empty".into(),
+            agent_type: Some("productionAgent".into()),
+            storyboard_id: Some(storyboard_id),
+            memory_name: Some("selected_video_memory".into()),
+            cleared_memory_name: None,
+            removed_rows: None,
+            removed_chars: None,
+            removed_visual_rows: None,
+            removed_duplicate_rows: None,
+        });
     };
 
     clear_rejected_video_negative_memory(pool, user_id, project_id, script_id, storyboard_id)
@@ -169,7 +248,17 @@ async fn promote_quality_review_selected_video_memory(
         "Quality feedback promoted approved storyboard/video into isolated selected memory"
     );
 
-    Ok(())
+    Ok(QualityFeedbackMemoryOutcome {
+        action: "promoted_selected_memory".into(),
+        agent_type: Some("productionAgent".into()),
+        storyboard_id: Some(storyboard_id),
+        memory_name: Some("selected_video_memory".into()),
+        cleared_memory_name: Some("rejected_video_negative_memory".into()),
+        removed_rows: Some(fit_i32(optimization.removed_rows)),
+        removed_chars: Some(fit_i32(optimization.removed_chars)),
+        removed_visual_rows: Some(fit_i32(optimization.removed_visual_rows)),
+        removed_duplicate_rows: Some(fit_i32(optimization.removed_duplicate_rows)),
+    })
 }
 
 fn should_promote_quality_review_selected_video_memory(review: &QualityReview) -> bool {

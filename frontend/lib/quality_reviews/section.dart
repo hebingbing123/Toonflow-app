@@ -55,7 +55,7 @@ class QualityReviewsSection extends StatelessWidget {
           Text('质量评审', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           Text(
-            '查看评审列表、坏例与阶段通过率；低分坏例会自动回写项目内隔离记忆。',
+            '查看评审列表、坏例与阶段通过率；低分坏例会回写负向记忆，高分通过会晋升正向记忆。',
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: outline),

@@ -474,6 +474,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ...model.reviews.take(8).map((review) {
                   final diagnosticSummary =
                       summarizeQualityReviewPromptDiagnostics(review);
+                  final writebackSummary =
+                      summarizeQualityReviewMemoryWriteback(review);
                   final repairSuggestions = buildQualityReviewRepairSuggestions(
                     review,
                   );
@@ -490,6 +492,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         if (diagnosticSummary != null)
                           Text(
                             diagnosticSummary,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: outline),
+                          ),
+                        if (writebackSummary != null)
+                          Text(
+                            writebackSummary,
                             style: Theme.of(
                               context,
                             ).textTheme.bodySmall?.copyWith(color: outline),
@@ -519,6 +528,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             padding: EdgeInsets.only(right: 8),
                             child: Chip(
                               label: Text('auto'),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        if (writebackSummary != null)
+                          const Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: Chip(
+                              label: Text('memory'),
                               visualDensity: VisualDensity.compact,
                             ),
                           ),

@@ -77,12 +77,17 @@ void main() {
         deliveryPriorityHitRatePercent: 66.7,
         memoryRemovedChars: 140,
         memoryRemovedRows: 3,
+        feedbackSelectedMemoryPromotions: 2,
+        feedbackRejectedMemoryWrites: 1,
+        feedbackSummaryMemoryWrites: 0,
+        feedbackMemoryRemovedChars: 88,
+        feedbackMemoryRemovedRows: 2,
       ),
     ]);
 
     expect(
       summary,
-      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条',
+      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条 · 晋升2 · 坏例回写1 · 回写slim 88c/2条',
     );
   });
 
@@ -157,6 +162,48 @@ void main() {
       expect(details, contains('负向精简=2条/34 chars'));
       expect(details, contains('记忆层级=项目1/剧本2/角色1'));
       expect(details, contains('建议='));
+    },
+  );
+
+  test(
+    'formatQualityReviewDetails appends memory writeback summary when present',
+    () {
+      final details = formatQualityReviewDetails(
+        const QualityReview(
+          id: 'r-memory',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          projectId: 7,
+          scriptId: 3,
+          targetType: 'storyboard',
+          targetId: '12',
+          source: 'auto',
+          overallScore: 92,
+          passed: true,
+          isBadCase: false,
+          modelParams: {
+            'diagnostics': {
+              'feedbackMemory': {
+                'action': 'promoted_selected_memory',
+                'storyboardId': 12,
+                'memoryName': 'selected_video_memory',
+                'clearedMemoryName': 'rejected_video_negative_memory',
+                'removedRows': 2,
+                'removedChars': 88,
+                'removedVisualRows': 1,
+                'removedDuplicateRows': 1,
+              },
+            },
+          },
+        ),
+      );
+
+      expect(details, contains('回写=正向记忆晋升'));
+      expect(details, contains('镜头12'));
+      expect(details, contains('写入=selected_video_memory'));
+      expect(details, contains('清理=rejected_video_negative_memory'));
+      expect(details, contains('slim 88 chars / 2条（重复 1 / 纯视觉 1）'));
     },
   );
 
