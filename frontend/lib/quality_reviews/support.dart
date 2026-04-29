@@ -72,10 +72,25 @@ String _joinBucketListWithCounts(
   Map<String, int> counts,
 ) {
   if (buckets.isEmpty) return '';
-  return buckets.map((bucket) {
-    final count = counts[bucket];
-    return count == null || count <= 1 ? bucket : '$bucket$count次';
-  }).join('/');
+  return buckets
+      .map((bucket) {
+        final count = counts[bucket];
+        return count == null || count <= 1 ? bucket : '$bucket$count次';
+      })
+      .join('/');
+}
+
+String _formatQualityScopeLabel(QualityReview row) {
+  if (row.projectId != null && row.scriptId != null) {
+    return 'P${row.projectId}/S${row.scriptId}';
+  }
+  if (row.projectId != null) {
+    return 'P${row.projectId}';
+  }
+  if (row.targetId != null && row.targetId!.isNotEmpty) {
+    return row.targetId!;
+  }
+  return row.targetType;
 }
 
 String? summarizeTokenEfficiencyFromQualityReviews(
@@ -187,7 +202,11 @@ String? summarizePromptDiagnosticsFromQualityReviews(
       }
     } else {
       for (final bucket in _diagnosticStringList(sample, 'memoryHitBuckets')) {
-        memoryHitBuckets.update(bucket, (count) => count + 1, ifAbsent: () => 1);
+        memoryHitBuckets.update(
+          bucket,
+          (count) => count + 1,
+          ifAbsent: () => 1,
+        );
       }
     }
     final suppressedCounts = _diagnosticStringIntMap(
@@ -289,7 +308,9 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
     'memoryHitBuckets',
   );
   if (memoryHitBuckets.isNotEmpty) {
-    parts.add('命中=${_joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts)}');
+    parts.add(
+      '命中=${_joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts)}',
+    );
   }
   final memorySuppressedBucketCounts = _diagnosticStringIntMap(
     diagnostics,
@@ -317,6 +338,91 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
     parts.add('参考帧');
   }
   return parts.join(' · ');
+}
+
+String? summarizeMemoryScopePressureFromQualityReviews(
+  Iterable<QualityReview> rows, {
+  int maxScopes = 3,
+}) {
+  final scopes =
+      <
+        String,
+        ({int reviews, Map<String, int> hits, Map<String, int> suppressed})
+      >{};
+  for (final row in rows.where((item) => item.source == 'auto')) {
+    final diagnostics = _qualityDiagnosticsMap(row);
+    if (diagnostics == null) continue;
+    final scope = _formatQualityScopeLabel(row);
+    final current =
+        scopes[scope] ??
+        (reviews: 0, hits: <String, int>{}, suppressed: <String, int>{});
+    final nextReviews = current.reviews + 1;
+    final nextHits = Map<String, int>.from(current.hits);
+    final nextSuppressed = Map<String, int>.from(current.suppressed);
+
+    final hitCounts = _diagnosticStringIntMap(
+      diagnostics,
+      'memoryHitBucketCounts',
+    );
+    if (hitCounts.isNotEmpty) {
+      for (final entry in hitCounts.entries) {
+        nextHits.update(
+          entry.key,
+          (count) => count + entry.value,
+          ifAbsent: () => entry.value,
+        );
+      }
+    }
+    final suppressedCounts = _diagnosticStringIntMap(
+      diagnostics,
+      'memorySuppressedBucketCounts',
+    );
+    if (suppressedCounts.isNotEmpty) {
+      for (final entry in suppressedCounts.entries) {
+        nextSuppressed.update(
+          entry.key,
+          (count) => count + entry.value,
+          ifAbsent: () => entry.value,
+        );
+      }
+    }
+    if (hitCounts.isEmpty && suppressedCounts.isEmpty) continue;
+    scopes[scope] = (
+      reviews: nextReviews,
+      hits: nextHits,
+      suppressed: nextSuppressed,
+    );
+  }
+
+  if (scopes.isEmpty) return null;
+  final items = scopes.entries.toList()
+    ..sort((a, b) {
+      final aPressure =
+          a.value.hits.values.fold<int>(0, (sum, count) => sum + count) +
+          a.value.suppressed.values.fold<int>(0, (sum, count) => sum + count);
+      final bPressure =
+          b.value.hits.values.fold<int>(0, (sum, count) => sum + count) +
+          b.value.suppressed.values.fold<int>(0, (sum, count) => sum + count);
+      return bPressure.compareTo(aPressure);
+    });
+  return items
+      .take(maxScopes)
+      .map((entry) {
+        final hitSummary = _joinTopBucketCounts(entry.value.hits, maxItems: 2);
+        final suppressedSummary = _joinTopBucketCounts(
+          entry.value.suppressed,
+          maxItems: 2,
+        );
+        final parts = <String>['${entry.key} ${entry.value.reviews}条'];
+        if (hitSummary.isNotEmpty) {
+          parts.add('命中 $hitSummary');
+        }
+        if (suppressedSummary.isNotEmpty) {
+          parts.add('压缩 $suppressedSummary');
+        }
+        return parts.join(' · ');
+      })
+      .join(' | ');
 }
 
 String summarizeQualityTokenEfficiencyRows(
@@ -447,6 +553,8 @@ String formatQualityReviewCoreDetails(QualityReview row) {
     row.id,
     row.targetType,
     row.source,
+    if (row.projectId != null) 'project=${row.projectId}',
+    if (row.scriptId != null) 'script=${row.scriptId}',
     if (row.memoryDeliveryPriorityApplied != null)
       'delivery_priority=${row.memoryDeliveryPriorityApplied}',
     if (row.targetId != null && row.targetId!.isNotEmpty)

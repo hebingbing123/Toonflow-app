@@ -118,6 +118,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
     );
     final promptDiagnosticsSummary =
         summarizePromptDiagnosticsFromQualityReviews(model.reviews);
+    final memoryScopePressureSummary =
+        summarizeMemoryScopePressureFromQualityReviews(model.reviews);
     final activeFilters = [
       if (model.filterBadCasesOnly) '坏例',
       if (model.filterDeliveryPriorityOnly) '命中表演/语气优先',
@@ -385,6 +387,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (promptDiagnosticsSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('Prompt诊断：$promptDiagnosticsSummary'),
+              ],
+              if (memoryScopePressureSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('Scope压力：$memoryScopePressureSummary'),
               ],
               if (tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),

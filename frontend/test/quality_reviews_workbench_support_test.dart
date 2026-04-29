@@ -189,6 +189,68 @@ void main() {
   });
 
   test(
+    'summarizeMemoryScopePressureFromQualityReviews groups bucket pressure by scope',
+    () {
+      final summary = summarizeMemoryScopePressureFromQualityReviews(const [
+        QualityReview(
+          id: 'r1',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          projectId: 12,
+          scriptId: 7,
+          targetType: 'storyboard',
+          source: 'auto',
+          isBadCase: false,
+          modelParams: {
+            'diagnostics': {
+              'memoryHitBucketCounts': {'表演': 2, '语气': 1},
+              'memorySuppressedBucketCounts': {'动作': 3},
+            },
+          },
+        ),
+        QualityReview(
+          id: 'r2',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          projectId: 12,
+          scriptId: 7,
+          targetType: 'storyboard',
+          source: 'auto',
+          isBadCase: false,
+          modelParams: {
+            'diagnostics': {
+              'memoryHitBucketCounts': {'表演': 1},
+              'memorySuppressedBucketCounts': {'动作': 1, '光影': 1},
+            },
+          },
+        ),
+        QualityReview(
+          id: 'r3',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          projectId: 30,
+          targetType: 'storyboard',
+          source: 'auto',
+          isBadCase: false,
+          modelParams: {
+            'diagnostics': {
+              'memoryHitBucketCounts': {'口型': 1},
+            },
+          },
+        ),
+      ]);
+
+      expect(summary, contains('P12/S7 2条'));
+      expect(summary, contains('命中 表演3次 / 语气1次'));
+      expect(summary, contains('压缩 动作4次 / 光影1次'));
+      expect(summary, contains('P30 1条'));
+    },
+  );
+
+  test(
     'summarizeQualityTokenEfficiencyRows formats prompt and memory shares',
     () {
       final summary = summarizeQualityTokenEfficiencyRows(const [
