@@ -3974,6 +3974,8 @@ fn generate_video_prompt_response_serializes_observation_note() {
             memory_style_chars: 0,
             memory_visual_chars: 0,
             memory_delivery_chars: 0,
+            memory_hit_buckets: vec!["表演".into(), "语气".into()],
+            memory_suppressed_buckets: vec!["动作".into()],
             director_manual_yielded_to_memory: false,
             director_manual_yielded_chars: 0,
             director_performance_trimmed_chars: 0,
@@ -3993,6 +3995,22 @@ fn generate_video_prompt_response_serializes_observation_note() {
             .get("observationNote")
             .and_then(serde_json::Value::as_str),
         Some("待观察失败倾向：avoid shaky handheld motion")
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryHitBuckets"))
+            .and_then(serde_json::Value::as_array)
+            .map(|items| items.len()),
+        Some(2)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memorySuppressedBuckets"))
+            .and_then(serde_json::Value::as_array)
+            .map(|items| items.len()),
+        Some(1)
     );
     assert_eq!(
         value

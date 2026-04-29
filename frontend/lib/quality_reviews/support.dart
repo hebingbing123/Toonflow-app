@@ -22,6 +22,12 @@ String? _diagnosticString(Map<String, dynamic> map, String key) {
 
 bool _diagnosticBool(Map<String, dynamic> map, String key) => map[key] == true;
 
+List<String> _diagnosticStringList(Map<String, dynamic> map, String key) {
+  final value = map[key];
+  if (value is! List) return const <String>[];
+  return value.whereType<String>().where((item) => item.isNotEmpty).toList();
+}
+
 String _describeAutoNegativeSource(String source) {
   switch (source) {
     case 'review+rejected_memory':
@@ -37,6 +43,14 @@ String _describeAutoNegativeSource(String source) {
     default:
       return '负向约束=$source';
   }
+}
+
+String _joinTopBucketCounts(Map<String, int> counts, {int maxItems = 3}) {
+  if (counts.isEmpty) return '';
+  return (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
+      .take(maxItems)
+      .map((entry) => '${entry.key}${entry.value}次')
+      .join(' / ');
 }
 
 String? summarizeTokenEfficiencyFromQualityReviews(
@@ -113,6 +127,8 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   var referenceFrameHits = 0;
   var continuityHits = 0;
   final negativeSources = <String, int>{};
+  final memoryHitBuckets = <String, int>{};
+  final suppressedBuckets = <String, int>{};
 
   for (final sample in samples) {
     totalPrompt += _diagnosticInt(sample, 'promptChars');
@@ -134,6 +150,15 @@ String? summarizePromptDiagnosticsFromQualityReviews(
     final source = _diagnosticString(sample, 'autoNegativeSource');
     if (source != null) {
       negativeSources.update(source, (count) => count + 1, ifAbsent: () => 1);
+    }
+    for (final bucket in _diagnosticStringList(sample, 'memoryHitBuckets')) {
+      memoryHitBuckets.update(bucket, (count) => count + 1, ifAbsent: () => 1);
+    }
+    for (final bucket in _diagnosticStringList(
+      sample,
+      'memorySuppressedBuckets',
+    )) {
+      suppressedBuckets.update(bucket, (count) => count + 1, ifAbsent: () => 1);
     }
   }
 
@@ -158,6 +183,14 @@ String? summarizePromptDiagnosticsFromQualityReviews(
     parts.add(
       '${_describeAutoNegativeSource(topNegativeSource.key)} ${topNegativeSource.value} 次',
     );
+  }
+  final hitBucketSummary = _joinTopBucketCounts(memoryHitBuckets);
+  if (hitBucketSummary.isNotEmpty) {
+    parts.add('命中记忆 $hitBucketSummary');
+  }
+  final suppressedBucketSummary = _joinTopBucketCounts(suppressedBuckets);
+  if (suppressedBucketSummary.isNotEmpty) {
+    parts.add('压缩桶 $suppressedBucketSummary');
   }
   if (directorYieldHits > 0) {
     parts.add('导演让位 $directorYieldHits/${samples.length}');
@@ -192,6 +225,20 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   }
   if (_diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
     parts.add('delivery优先');
+  }
+  final memoryHitBuckets = _diagnosticStringList(
+    diagnostics,
+    'memoryHitBuckets',
+  );
+  if (memoryHitBuckets.isNotEmpty) {
+    parts.add('命中=${memoryHitBuckets.join("/")}');
+  }
+  final memorySuppressedBuckets = _diagnosticStringList(
+    diagnostics,
+    'memorySuppressedBuckets',
+  );
+  if (memorySuppressedBuckets.isNotEmpty) {
+    parts.add('压缩=${memorySuppressedBuckets.join("/")}');
   }
   if (_diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
     parts.add('导演让位');

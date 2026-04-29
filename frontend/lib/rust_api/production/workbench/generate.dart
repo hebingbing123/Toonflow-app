@@ -27,6 +27,8 @@ class GenerateVideoPromptDiagnostics {
     required this.memoryStyleChars,
     required this.memoryVisualChars,
     required this.memoryDeliveryChars,
+    required this.memoryHitBuckets,
+    required this.memorySuppressedBuckets,
     required this.continuityNoteCount,
     required this.continuityNoteChars,
     required this.usesReferenceFrame,
@@ -51,6 +53,8 @@ class GenerateVideoPromptDiagnostics {
   final int memoryStyleChars;
   final int memoryVisualChars;
   final int memoryDeliveryChars;
+  final List<String> memoryHitBuckets;
+  final List<String> memorySuppressedBuckets;
   final int continuityNoteCount;
   final int continuityNoteChars;
   final bool usesReferenceFrame;
@@ -83,6 +87,13 @@ class GenerateVideoPromptDiagnostics {
       memoryStyleChars: (json['memoryStyleChars'] as num?)?.toInt() ?? 0,
       memoryVisualChars: (json['memoryVisualChars'] as num?)?.toInt() ?? 0,
       memoryDeliveryChars: (json['memoryDeliveryChars'] as num?)?.toInt() ?? 0,
+      memoryHitBuckets: (json['memoryHitBuckets'] as List<dynamic>? ?? const [])
+          .whereType<String>()
+          .toList(growable: false),
+      memorySuppressedBuckets:
+          (json['memorySuppressedBuckets'] as List<dynamic>? ?? const [])
+              .whereType<String>()
+              .toList(growable: false),
       continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
       continuityNoteChars: (json['continuityNoteChars'] as num?)?.toInt() ?? 0,
       usesReferenceFrame: json['usesReferenceFrame'] == true,

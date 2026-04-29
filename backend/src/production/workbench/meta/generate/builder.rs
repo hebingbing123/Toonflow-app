@@ -252,6 +252,8 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
             memory_style_chars,
             memory_visual_chars,
             memory_delivery_chars,
+            memory_hit_buckets: style_anchor_build.memory_hit_buckets,
+            memory_suppressed_buckets: style_anchor_build.memory_suppressed_buckets,
             director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
             director_manual_yielded_chars: style_anchor_build.director_manual_yielded_chars,
             director_performance_trimmed_chars: style_anchor_build
@@ -893,6 +895,12 @@ pub(super) fn build_project_visual_anchors(
     let mut memory_anchor_count = 0usize;
     let mut memory_delivery_anchor_count = 0usize;
     let mut memory_delivery_priority_applied = false;
+    let raw_memory_bucket_counts = count_memory_style_buckets(
+        ctx.memory_style_notes
+            .iter()
+            .map(std::string::String::as_str),
+    );
+    let mut selected_memory_bucket_counts = std::collections::BTreeMap::new();
     let mut director_manual_yielded_to_memory = false;
     let mut director_manual_yielded_chars = 0usize;
     let mut director_performance_trimmed_chars = 0usize;
@@ -1064,6 +1072,7 @@ pub(super) fn build_project_visual_anchors(
             if is_delivery {
                 memory_delivery_anchor_count += 1;
             }
+            accumulate_memory_style_bucket_counts(&mut selected_memory_bucket_counts, &note);
             anchors.push(note);
             selected_memory_anchor_kinds.push(is_delivery);
             memory_anchor_count += 1;
@@ -1084,19 +1093,89 @@ pub(super) fn build_project_visual_anchors(
         if is_delivery {
             memory_delivery_anchor_count += 1;
         }
+        accumulate_memory_style_bucket_counts(&mut selected_memory_bucket_counts, &note);
         anchors.push(note);
         selected_memory_anchor_kinds.push(is_delivery);
         memory_anchor_count += 1;
     }
+    let memory_hit_buckets = flatten_memory_style_bucket_counts(&selected_memory_bucket_counts);
+    let memory_suppressed_buckets = flatten_suppressed_memory_style_bucket_counts(
+        &raw_memory_bucket_counts,
+        &selected_memory_bucket_counts,
+    );
     VideoPromptStyleAnchorBuild {
         anchors,
         memory_style_anchor_count: memory_anchor_count,
         memory_delivery_anchor_count,
         memory_delivery_priority_applied,
+        memory_hit_buckets,
+        memory_suppressed_buckets,
         director_manual_yielded_to_memory,
         director_manual_yielded_chars,
         director_performance_trimmed_chars,
     }
+}
+
+fn memory_style_bucket(fragment: &str) -> Option<&'static str> {
+    [
+        ("表演", "表演"),
+        ("语气", "语气"),
+        ("情绪", "情绪"),
+        ("动作", "动作"),
+        ("镜头", "镜头"),
+        ("光影", "光影"),
+        ("环境", "环境"),
+        ("声场", "声场"),
+    ]
+    .into_iter()
+    .find_map(|(prefix, bucket)| fragment.starts_with(prefix).then_some(bucket))
+}
+
+fn count_memory_style_buckets<'a>(
+    notes: impl Iterator<Item = &'a str>,
+) -> std::collections::BTreeMap<String, usize> {
+    let mut counts = std::collections::BTreeMap::new();
+    for note in notes {
+        accumulate_memory_style_bucket_counts(&mut counts, note);
+    }
+    counts
+}
+
+fn accumulate_memory_style_bucket_counts(
+    counts: &mut std::collections::BTreeMap<String, usize>,
+    note: &str,
+) {
+    for fragment in split_prompt_note_fragments(note) {
+        let Some(bucket) = memory_style_bucket(&fragment) else {
+            continue;
+        };
+        counts
+            .entry(bucket.to_string())
+            .and_modify(|count| *count += 1)
+            .or_insert(1);
+    }
+}
+
+fn flatten_memory_style_bucket_counts(
+    counts: &std::collections::BTreeMap<String, usize>,
+) -> Vec<String> {
+    counts
+        .iter()
+        .filter(|(_, count)| **count > 0)
+        .map(|(bucket, _)| bucket.clone())
+        .collect()
+}
+
+fn flatten_suppressed_memory_style_bucket_counts(
+    raw: &std::collections::BTreeMap<String, usize>,
+    selected: &std::collections::BTreeMap<String, usize>,
+) -> Vec<String> {
+    raw.iter()
+        .filter_map(|(bucket, raw_count)| {
+            let selected_count = selected.get(bucket).copied().unwrap_or(0);
+            (raw_count > &selected_count).then_some(bucket.clone())
+        })
+        .collect()
 }
 
 pub(super) fn should_compact_decorative_style_anchors(
