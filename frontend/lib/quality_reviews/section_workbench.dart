@@ -27,11 +27,13 @@ class _QualityReviewsWorkbenchDialogState
 
   List<QualityReview> _reviews = const <QualityReview>[];
   String? _statsSummary;
+  String? _scopeInsightsSummary;
   String? _stagePassRateSummary;
   String? _reviewDetails;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
   bool _loadingStats = false;
+  bool _loadingScopeInsights = false;
   bool _loadingStagePassRate = false;
   bool _loadingReviewById = false;
   bool _creatingReview = false;
@@ -171,6 +173,33 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
+  Future<void> _loadScopeInsights() async {
+    setState(() {
+      _loadingScopeInsights = true;
+      _statusLine = null;
+    });
+    try {
+      final rows = await fetchQualityScopeInsights(
+        widget.accessToken,
+        projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
+        scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
+        limit: 5,
+      );
+      if (!mounted) return;
+      setState(() {
+        _scopeInsightsSummary = summarizeQualityScopeInsightRows(rows);
+        _statusLine = '已刷新 scope 榜单';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _statusLine = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _loadingScopeInsights = false);
+      }
+    }
+  }
+
   Future<void> _loadStagePassRate() async {
     setState(() {
       _loadingStagePassRate = true;
@@ -292,6 +321,7 @@ class _QualityReviewsWorkbenchDialogState
       model: QualityReviewsWorkbenchDialogViewModel(
         reviews: _reviews,
         statsSummary: _statsSummary,
+        scopeInsightsSummary: _scopeInsightsSummary,
         stagePassRateSummary: _stagePassRateSummary,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
@@ -305,6 +335,7 @@ class _QualityReviewsWorkbenchDialogState
         loadingReviews: _loadingReviews,
         loadingBadCases: _loadingBadCases,
         loadingStats: _loadingStats,
+        loadingScopeInsights: _loadingScopeInsights,
         loadingStagePassRate: _loadingStagePassRate,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
@@ -350,6 +381,9 @@ class _QualityReviewsWorkbenchDialogState
         },
         onLoadStats: () {
           _loadStats();
+        },
+        onLoadScopeInsights: () {
+          _loadScopeInsights();
         },
         onLoadStagePassRate: () {
           _loadStagePassRate();

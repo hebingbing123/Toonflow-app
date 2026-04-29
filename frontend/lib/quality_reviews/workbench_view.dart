@@ -8,6 +8,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   const QualityReviewsWorkbenchDialogViewModel({
     required this.reviews,
     required this.statsSummary,
+    required this.scopeInsightsSummary,
     required this.stagePassRateSummary,
     required this.reviewDetails,
     required this.statusLine,
@@ -21,6 +22,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingReviews,
     required this.loadingBadCases,
     required this.loadingStats,
+    required this.loadingScopeInsights,
     required this.loadingStagePassRate,
     required this.loadingReviewById,
     required this.creatingReview,
@@ -42,6 +44,7 @@ class QualityReviewsWorkbenchDialogViewModel {
 
   final List<QualityReview> reviews;
   final String? statsSummary;
+  final String? scopeInsightsSummary;
   final String? stagePassRateSummary;
   final String? reviewDetails;
   final String? statusLine;
@@ -55,6 +58,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingReviews;
   final bool loadingBadCases;
   final bool loadingStats;
+  final bool loadingScopeInsights;
   final bool loadingStagePassRate;
   final bool loadingReviewById;
   final bool creatingReview;
@@ -81,6 +85,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onLoadDeliveryPriorityReviews,
     required this.onLoadAutoSourceReviews,
     required this.onLoadStats,
+    required this.onLoadScopeInsights,
     required this.onLoadStagePassRate,
     required this.onLoadReviewById,
     required this.onCreateReview,
@@ -95,6 +100,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadDeliveryPriorityReviews;
   final VoidCallback onLoadAutoSourceReviews;
   final VoidCallback onLoadStats;
+  final VoidCallback onLoadScopeInsights;
   final VoidCallback onLoadStagePassRate;
   final VoidCallback onLoadReviewById;
   final VoidCallback onCreateReview;
@@ -297,6 +303,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: Text(model.loadingStats ? '统计中…' : '读取质量统计'),
                   ),
                   OutlinedButton(
+                    onPressed: model.loadingScopeInsights
+                        ? null
+                        : callbacks.onLoadScopeInsights,
+                    child: Text(
+                      model.loadingScopeInsights ? '汇总中…' : '读取Scope榜单',
+                    ),
+                  ),
+                  OutlinedButton(
                     onPressed: model.loadingStagePassRate
                         ? null
                         : callbacks.onLoadStagePassRate,
@@ -415,6 +429,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.statsSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('质量统计：${model.statsSummary}'),
+              ],
+              if (model.scopeInsightsSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('Scope榜单：${model.scopeInsightsSummary}'),
               ],
               if (model.stagePassRateSummary != null) ...[
                 const SizedBox(height: 12),

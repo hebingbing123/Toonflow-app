@@ -857,6 +857,47 @@ String summarizeQualityStatsRows(
   return '$visible$suffix';
 }
 
+String summarizeQualityScopeInsightRows(
+  Iterable<QualityScopeInsightRow> rows, {
+  int maxItems = 3,
+}) {
+  final items = rows.toList(growable: false);
+  if (items.isEmpty) {
+    return '当前没有 scope 榜单';
+  }
+  final visible = items
+      .take(maxItems)
+      .map((row) {
+        final parts = <String>[
+          '${row.scopeLabel} ${row.totalReviews}条',
+          'pass=${row.passRatePercent.toStringAsFixed(1)}%',
+        ];
+        if (row.badCaseCount > 0) {
+          parts.add('坏例${row.badCaseCount}');
+        }
+        if (row.dialogueRiskCount > 0) {
+          parts.add('情绪${row.dialogueRiskCount}');
+        }
+        if (row.visualRiskCount > 0) {
+          parts.add('真实感${row.visualRiskCount}');
+        }
+        if (row.autoReviews > 0) {
+          parts.add(
+            'auto=${row.avgPromptChars.toStringAsFixed(0)}/${row.avgMemoryChars.toStringAsFixed(0)}/${row.avgMemoryDeliveryChars.toStringAsFixed(0)}',
+          );
+          if (row.memoryRemovedChars > 0 || row.memoryRemovedRows > 0) {
+            parts.add(
+              'slim ${row.memoryRemovedChars}c/${row.memoryRemovedRows}条',
+            );
+          }
+        }
+        return parts.join(' · ');
+      })
+      .join(' | ');
+  final suffix = items.length > maxItems ? ' | …' : '';
+  return visible + suffix;
+}
+
 String summarizeStagePassRateRows(
   Iterable<StagePassRateRow> rows, {
   int maxItems = 4,

@@ -70,6 +70,70 @@ class QualityStatsRow {
   }
 }
 
+class QualityScopeInsightRow {
+  const QualityScopeInsightRow({
+    required this.scopeLabel,
+    required this.projectId,
+    required this.scriptId,
+    required this.totalReviews,
+    required this.autoReviews,
+    required this.passedCount,
+    required this.badCaseCount,
+    required this.passRatePercent,
+    required this.avgOverallScore,
+    required this.dialogueRiskCount,
+    required this.visualRiskCount,
+    required this.avgPromptChars,
+    required this.avgMemoryChars,
+    required this.avgMemoryDeliveryChars,
+    required this.deliveryPriorityHitRatePercent,
+    required this.memoryRemovedChars,
+    required this.memoryRemovedRows,
+  });
+
+  final String scopeLabel;
+  final int? projectId;
+  final int? scriptId;
+  final int totalReviews;
+  final int autoReviews;
+  final int passedCount;
+  final int badCaseCount;
+  final double passRatePercent;
+  final double avgOverallScore;
+  final int dialogueRiskCount;
+  final int visualRiskCount;
+  final double avgPromptChars;
+  final double avgMemoryChars;
+  final double avgMemoryDeliveryChars;
+  final double deliveryPriorityHitRatePercent;
+  final int memoryRemovedChars;
+  final int memoryRemovedRows;
+
+  factory QualityScopeInsightRow.fromJson(Map<String, dynamic> json) {
+    return QualityScopeInsightRow(
+      scopeLabel: json['scopeLabel'] as String,
+      projectId: (json['projectId'] as num?)?.toInt(),
+      scriptId: (json['scriptId'] as num?)?.toInt(),
+      totalReviews: (json['totalReviews'] as num?)?.toInt() ?? 0,
+      autoReviews: (json['autoReviews'] as num?)?.toInt() ?? 0,
+      passedCount: (json['passedCount'] as num?)?.toInt() ?? 0,
+      badCaseCount: (json['badCaseCount'] as num?)?.toInt() ?? 0,
+      passRatePercent: (json['passRatePercent'] as num?)?.toDouble() ?? 0,
+      avgOverallScore: (json['avgOverallScore'] as num?)?.toDouble() ?? 0,
+      dialogueRiskCount: (json['dialogueRiskCount'] as num?)?.toInt() ?? 0,
+      visualRiskCount: (json['visualRiskCount'] as num?)?.toInt() ?? 0,
+      avgPromptChars: (json['avgPromptChars'] as num?)?.toDouble() ?? 0,
+      avgMemoryChars: (json['avgMemoryChars'] as num?)?.toDouble() ?? 0,
+      avgMemoryDeliveryChars:
+          (json['avgMemoryDeliveryChars'] as num?)?.toDouble() ?? 0,
+      deliveryPriorityHitRatePercent:
+          (json['deliveryPriorityHitRatePercent'] as num?)?.toDouble() ?? 0,
+      memoryRemovedChars: (json['memoryRemovedChars'] as num?)?.toInt() ?? 0,
+      memoryRemovedRows: (json['memoryRemovedRows'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class StagePassRateRow {
   const StagePassRateRow({
     required this.targetType,
@@ -239,6 +303,34 @@ Future<List<QualityStatsRow>> fetchQualityStats(String accessToken) async {
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => QualityStatsRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+Future<List<QualityScopeInsightRow>> fetchQualityScopeInsights(
+  String accessToken, {
+  int? projectId,
+  int? scriptId,
+  int? limit,
+}) async {
+  final query = <String, String>{};
+  if (projectId != null) query['projectId'] = '$projectId';
+  if (scriptId != null) query['scriptId'] = '$scriptId';
+  if (limit != null) query['limit'] = '$limit';
+  final res = await http
+      .get(
+        qualityUri(
+          '/api/v1/quality/scope-insights',
+          queryParameters: query.isEmpty ? null : query,
+        ),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => QualityScopeInsightRow.fromJson(e as Map<String, dynamic>))
       .toList();
 }
 

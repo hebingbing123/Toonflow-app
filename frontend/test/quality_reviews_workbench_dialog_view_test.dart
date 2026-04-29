@@ -39,6 +39,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   bool loadingReviews = false,
   bool loadingBadCases = false,
   bool loadingStats = false,
+  bool loadingScopeInsights = false,
   bool loadingStagePassRate = false,
   bool loadingReviewById = false,
   bool creatingReview = false,
@@ -46,6 +47,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   return QualityReviewsWorkbenchDialogViewModel(
     reviews: reviews,
     statsSummary: 'output: total=1, pass=100%',
+    scopeInsightsSummary: 'P7/S11 2条 · pass=50.0% · 坏例1',
     stagePassRateSummary: 'storyboard: 100%',
     reviewDetails: 'review-1 · output · manual',
     statusLine: '已读取评审详情',
@@ -59,6 +61,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     loadingReviews: loadingReviews,
     loadingBadCases: loadingBadCases,
     loadingStats: loadingStats,
+    loadingScopeInsights: loadingScopeInsights,
     loadingStagePassRate: loadingStagePassRate,
     loadingReviewById: loadingReviewById,
     creatingReview: creatingReview,
@@ -85,6 +88,7 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
   VoidCallback? onLoadDeliveryPriorityReviews = noop,
   VoidCallback? onLoadAutoSourceReviews = noop,
   VoidCallback? onLoadStats = noop,
+  VoidCallback? onLoadScopeInsights = noop,
   VoidCallback? onLoadStagePassRate = noop,
   VoidCallback? onLoadReviewById = noop,
   VoidCallback? onCreateReview = noop,
@@ -99,6 +103,7 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onLoadDeliveryPriorityReviews: onLoadDeliveryPriorityReviews ?? noop,
     onLoadAutoSourceReviews: onLoadAutoSourceReviews ?? noop,
     onLoadStats: onLoadStats ?? noop,
+    onLoadScopeInsights: onLoadScopeInsights ?? noop,
     onLoadStagePassRate: onLoadStagePassRate ?? noop,
     onLoadReviewById: onLoadReviewById ?? noop,
     onCreateReview: onCreateReview ?? noop,
@@ -195,6 +200,7 @@ void main() {
     expect(find.widgetWithText(TextField, '7'), findsNWidgets(2));
     expect(find.widgetWithText(TextField, '11'), findsNWidgets(2));
     expect(find.text('质量统计：output: total=1, pass=100%'), findsOneWidget);
+    expect(find.text('Scope榜单：P7/S11 2条 · pass=50.0% · 坏例1'), findsOneWidget);
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
     expect(find.textContaining('Token效率：'), findsNothing);
     expect(find.text('评审 1 条'), findsOneWidget);
@@ -229,6 +235,7 @@ void main() {
               loadingReviews: true,
               loadingBadCases: true,
               loadingStats: true,
+              loadingScopeInsights: true,
               loadingStagePassRate: true,
               loadingReviewById: true,
               creatingReview: true,

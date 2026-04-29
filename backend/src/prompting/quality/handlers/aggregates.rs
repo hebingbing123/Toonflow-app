@@ -7,8 +7,8 @@ use crate::state::AppState;
 use axum::extract::Query;
 
 use super::super::types::{
-    QualityStatsResponse, QualityTokenEfficiencyResponse, QualityTokenEfficiencySample,
-    StagePassRateItem,
+    QualityScopeInsightResponse, QualityStatsResponse, QualityTokenEfficiencyResponse,
+    QualityTokenEfficiencySample, StagePassRateItem,
 };
 
 /// GET /api/v1/quality/stats - 获取质量统计
@@ -84,6 +84,164 @@ pub(crate) async fn get_stats(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(stats))
+}
+
+#[derive(Debug, serde::Deserialize, utoipa::IntoParams)]
+#[serde(rename_all = "camelCase")]
+#[into_params(parameter_in = Query, rename_all = "camelCase")]
+pub struct ScopeInsightsQuery {
+    pub project_id: Option<i32>,
+    pub script_id: Option<i32>,
+    pub limit: Option<i64>,
+}
+
+/// GET /api/v1/quality/scope-insights - scope aggregated quality hotspots for project/script triage.
+#[utoipa::path(
+    get,
+    path = "/api/v1/quality/scope-insights",
+    operation_id = "getQualityScopeInsightsV1",
+    tag = "quality",
+    params(ScopeInsightsQuery),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_scope_insights(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(query): Query<ScopeInsightsQuery>,
+) -> Result<Json<Vec<QualityScopeInsightResponse>>, ApiError> {
+    let user_id = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let limit = query.limit.unwrap_or(5).clamp(1, 20);
+
+    let rows = sqlx::query_as::<_, QualityScopeInsightResponse>(
+        r#"
+        SELECT
+            CASE
+                WHEN project_id IS NOT NULL AND script_id IS NOT NULL THEN 'P' || project_id::text || '/S' || script_id::text
+                WHEN project_id IS NOT NULL THEN 'P' || project_id::text
+                WHEN script_id IS NOT NULL THEN 'S' || script_id::text
+                ELSE target_type
+            END as scope_label,
+            project_id,
+            script_id,
+            COUNT(*) as total_reviews,
+            COUNT(*) FILTER (WHERE source = 'auto') as auto_reviews,
+            COUNT(*) FILTER (WHERE passed = true) as passed_count,
+            COUNT(*) FILTER (WHERE is_bad_case = true) as bad_case_count,
+            COALESCE(ROUND(
+                COUNT(*) FILTER (WHERE passed = true) * 100.0 / NULLIF(COUNT(*), 0),
+                2
+            ), 0) as pass_rate_percent,
+            COALESCE(AVG(overall_score), 0) as avg_overall_score,
+            COUNT(*) FILTER (
+                WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                   OR comments ILIKE '%生硬%'
+                   OR comments ILIKE '%朗读%'
+                   OR comments ILIKE '%没情绪%'
+                   OR comments ILIKE '%无情绪%'
+            ) as dialogue_risk_count,
+            COUNT(*) FILTER (
+                WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                   OR comments ILIKE '%穿帮%'
+                   OR comments ILIKE '%不自然%'
+                   OR comments ILIKE '%ai%'
+                   OR comments ILIKE '%假%'
+            ) as visual_risk_count,
+            COALESCE(AVG(
+                CASE
+                    WHEN source = 'auto' AND model_params ? 'diagnostics'
+                    THEN COALESCE((model_params->'diagnostics'->>'promptChars')::int, 0)
+                    ELSE NULL
+                END
+            ), 0) as avg_prompt_chars,
+            COALESCE(AVG(
+                CASE
+                    WHEN source = 'auto' AND model_params ? 'diagnostics'
+                    THEN COALESCE((model_params->'diagnostics'->>'memoryStyleChars')::int, 0)
+                    ELSE NULL
+                END
+            ), 0) as avg_memory_chars,
+            COALESCE(AVG(
+                CASE
+                    WHEN source = 'auto' AND model_params ? 'diagnostics'
+                    THEN COALESCE((model_params->'diagnostics'->>'memoryDeliveryChars')::int, 0)
+                    ELSE NULL
+                END
+            ), 0) as avg_memory_delivery_chars,
+            COALESCE(ROUND(AVG(
+                CASE
+                    WHEN source = 'auto' AND model_params ? 'diagnostics'
+                    THEN CASE
+                        WHEN COALESCE((model_params->'diagnostics'->>'memoryDeliveryPriorityApplied')::boolean, false) THEN 1
+                        ELSE 0
+                    END
+                    ELSE NULL
+                END
+            ) * 100.0, 2), 0) as delivery_priority_hit_rate_percent,
+            COALESCE(SUM(
+                CASE
+                    WHEN source = 'auto' AND model_params ? 'diagnostics'
+                    THEN COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedChars')::int, 0)
+                    ELSE 0
+                END
+            ), 0) as memory_removed_chars,
+            COALESCE(SUM(
+                CASE
+                    WHEN source = 'auto' AND model_params ? 'diagnostics'
+                    THEN COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedRows')::int, 0)
+                    ELSE 0
+                END
+            ), 0) as memory_removed_rows
+        FROM app_quality_review
+        WHERE user_id = $1
+          AND (project_id IS NOT NULL OR script_id IS NOT NULL)
+          AND ($2::int IS NULL OR project_id = $2)
+          AND ($3::int IS NULL OR script_id = $3)
+        GROUP BY project_id, script_id, target_type
+        ORDER BY
+            (
+                COUNT(*) FILTER (WHERE is_bad_case = true) * 100
+                + COUNT(*) FILTER (
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                       OR comments ILIKE '%生硬%'
+                       OR comments ILIKE '%朗读%'
+                       OR comments ILIKE '%没情绪%'
+                       OR comments ILIKE '%无情绪%'
+                ) * 30
+                + COUNT(*) FILTER (
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                       OR comments ILIKE '%穿帮%'
+                       OR comments ILIKE '%不自然%'
+                       OR comments ILIKE '%ai%'
+                       OR comments ILIKE '%假%'
+                ) * 30
+                + COALESCE(SUM(
+                    CASE
+                        WHEN source = 'auto' AND model_params ? 'diagnostics'
+                        THEN COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedChars')::int, 0)
+                        ELSE 0
+                    END
+                ), 0)
+            ) DESC,
+            COUNT(*) DESC,
+            MAX(created_at) DESC
+        LIMIT $4
+        "#,
+    )
+    .bind(user_id)
+    .bind(query.project_id)
+    .bind(query.script_id)
+    .bind(limit)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(rows))
 }
 
 /// GET /api/v1/quality/stage-pass-rate - 分环节通过率（按日期聚合）

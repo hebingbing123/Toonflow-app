@@ -101,6 +101,29 @@ pub struct QualityStatsResponse {
     pub non_delivery_priority_pass_rate_percent: f64,
 }
 
+/// Scope-level quality insight row aggregated by project/script scope.
+#[derive(Debug, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityScopeInsightResponse {
+    pub scope_label: String,
+    pub project_id: Option<i32>,
+    pub script_id: Option<i32>,
+    pub total_reviews: i64,
+    pub auto_reviews: i64,
+    pub passed_count: i64,
+    pub bad_case_count: i64,
+    pub pass_rate_percent: f64,
+    pub avg_overall_score: f64,
+    pub dialogue_risk_count: i64,
+    pub visual_risk_count: i64,
+    pub avg_prompt_chars: f64,
+    pub avg_memory_chars: f64,
+    pub avg_memory_delivery_chars: f64,
+    pub delivery_priority_hit_rate_percent: f64,
+    pub memory_removed_chars: i64,
+    pub memory_removed_rows: i64,
+}
+
 /// 分环节通过率条目
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]

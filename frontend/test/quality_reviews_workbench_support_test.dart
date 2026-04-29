@@ -57,6 +57,35 @@ void main() {
     expect(summary, 'output: total=12, pass=75.0% (delivery=75.0%, non=75.0%)');
   });
 
+  test('summarizeQualityScopeInsightRows formats scope triage preview', () {
+    final summary = summarizeQualityScopeInsightRows(const [
+      QualityScopeInsightRow(
+        scopeLabel: 'P12/S7',
+        projectId: 12,
+        scriptId: 7,
+        totalReviews: 4,
+        autoReviews: 3,
+        passedCount: 2,
+        badCaseCount: 2,
+        passRatePercent: 50.0,
+        avgOverallScore: 73.5,
+        dialogueRiskCount: 2,
+        visualRiskCount: 1,
+        avgPromptChars: 480,
+        avgMemoryChars: 92,
+        avgMemoryDeliveryChars: 38,
+        deliveryPriorityHitRatePercent: 66.7,
+        memoryRemovedChars: 140,
+        memoryRemovedRows: 3,
+      ),
+    ]);
+
+    expect(
+      summary,
+      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条',
+    );
+  });
+
   test('formatQualityReviewDetails includes core fields', () {
     final details = formatQualityReviewDetails(
       const QualityReview(
