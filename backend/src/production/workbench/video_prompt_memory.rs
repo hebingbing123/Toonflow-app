@@ -7288,30 +7288,33 @@ fn score_selected_video_memory_style_fragment(fragment: String) -> i32 {
 
     let mut score = 6;
     if fragment.starts_with("镜头") {
-        score += 8;
-    }
-    if fragment.starts_with("情绪") {
-        score += 6;
-    }
-    if fragment.starts_with("光影") {
-        score += 6;
-    }
-    if fragment.starts_with("动作") {
         score += 5;
     }
+    if fragment.starts_with("情绪") {
+        score += 7;
+    }
+    if fragment.starts_with("光影") {
+        score += 5;
+    }
+    if fragment.starts_with("动作") {
+        score += 3;
+    }
     if fragment.starts_with("表演") {
-        score += 6;
+        score += 10;
     }
     if fragment.starts_with("环境") {
         score += 4;
     }
     if fragment.starts_with("语气") {
-        score += 5;
+        score += 9;
     }
     if fragment.starts_with("声场") {
-        score += 5;
+        score += 4;
     }
     if fragment.starts_with("场景") {
+        score += 2;
+    }
+    if fragment.starts_with("表演") || fragment.starts_with("语气") {
         score += 2;
     }
     score + fragment.chars().count().min(18) as i32 / 3
@@ -8904,6 +8907,22 @@ mod tests {
         assert!(!selected_video_memory_update_would_reduce_quality(
             "storyboardIds=12 | promptSeed=seed-12 | style=动作从容克制，表演抬眼停顿，语气低声克制，情绪克制，光影冷蓝窗光，声场雨声回响",
             "storyboardIds=12 | promptSeed=seed-12 | style=表演抬眼停顿，光影冷蓝窗光，声场雨声回响"
+        ));
+    }
+
+    #[test]
+    fn selected_video_memory_quality_score_prefers_delivery_rich_style_over_visual_only_style() {
+        let visual_only = "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光";
+        let delivery_rich =
+            "storyboardIds=12 | promptSeed=seed-12 | style=表演喉结滚动，语气低声尾音发颤，情绪强忍泪意";
+
+        assert!(
+            selected_video_memory_quality_score(delivery_rich)
+                > selected_video_memory_quality_score(visual_only)
+        );
+        assert!(!selected_video_memory_update_would_reduce_quality(
+            visual_only,
+            delivery_rich
         ));
     }
 
