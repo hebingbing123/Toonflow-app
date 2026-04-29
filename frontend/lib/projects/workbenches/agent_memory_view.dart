@@ -14,6 +14,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
     required this.appendingMemory,
     required this.clearingMemory,
     required this.optimizingMemory,
+    required this.canOptimizeVideoMemory,
     required this.queryType,
     required this.clearType,
     required this.queryTypeOptions,
@@ -36,6 +37,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
   final bool appendingMemory;
   final bool clearingMemory;
   final bool optimizingMemory;
+  final bool canOptimizeVideoMemory;
   final String queryType;
   final String clearType;
   final List<String> queryTypeOptions;
@@ -89,6 +91,8 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
+    final optimizeEnabled =
+        model.canOptimizeVideoMemory && !model.optimizingMemory;
     final memoryInsights = _buildAgentMemoryInsights(model.memoryRows);
     return AlertDialog(
       title: const Text('Agent 记忆工作台'),
@@ -123,9 +127,9 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     child: Text(model.loadingMemory ? '…' : '查询记忆'),
                   ),
                   FilledButton.tonal(
-                    onPressed: model.optimizingMemory
-                        ? null
-                        : callbacks.onOptimizeVideoMemory,
+                    onPressed: optimizeEnabled
+                        ? callbacks.onOptimizeVideoMemory
+                        : null,
                     child: Text(model.optimizingMemory ? '…' : '自动优化视频记忆'),
                   ),
                 ],
@@ -201,6 +205,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
               ),
+              if (!model.canOptimizeVideoMemory) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '要启用自动优化，请把 agent type 设为 productionAgent，并填写 episodes id。',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
               if (model.memorySummary != null) ...[
                 const SizedBox(height: 8),
                 Text(

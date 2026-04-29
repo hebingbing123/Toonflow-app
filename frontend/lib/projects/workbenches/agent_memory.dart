@@ -72,6 +72,8 @@ class _ProjectsAgentMemoryWorkbenchDialogState
 
   int? get _projectId => int.tryParse(_projectIdCtrl.text.trim());
   int? get _episodesId => int.tryParse(_episodesIdCtrl.text.trim());
+  bool get _canOptimizeVideoMemory =>
+      _agentTypeCtrl.text.trim() == 'productionAgent' && _episodesId != null;
   String get _queryType => _normalizedSelection(
     _queryTypeCtrl.text,
     supported: _queryTypes,
@@ -306,6 +308,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         appendingMemory: _appendingMemory,
         clearingMemory: _clearingMemory,
         optimizingMemory: _optimizingMemory,
+        canOptimizeVideoMemory: _canOptimizeVideoMemory,
         queryType: _queryType,
         clearType: _clearType,
         queryTypeOptions: _queryTypes,

@@ -24,6 +24,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
   bool appendingMemory = false,
   bool clearingMemory = false,
   bool optimizingMemory = false,
+  bool canOptimizeVideoMemory = true,
 }) {
   return ProjectsAgentMemoryWorkbenchDialogViewModel(
     projects:
@@ -64,6 +65,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
     appendingMemory: appendingMemory,
     clearingMemory: clearingMemory,
     optimizingMemory: optimizingMemory,
+    canOptimizeVideoMemory: canOptimizeVideoMemory,
     queryType: queryTypeCtrl.text,
     clearType: clearTypeCtrl.text,
     queryTypeOptions: const <String>['summary', 'message', 'all'],
@@ -630,6 +632,37 @@ void main() {
 
     expect(disabledButtonWithText('…'), findsNWidgets(5));
   });
+
+  testWidgets(
+    'agent memory workbench view gates optimize action to scoped production memory',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ProjectsAgentMemoryWorkbenchDialogView(
+              model: buildModel(
+                projectIdCtrl: projectIdCtrl,
+                agentTypeCtrl: agentTypeCtrl,
+                episodesIdCtrl: episodesIdCtrl,
+                queryTypeCtrl: queryTypeCtrl,
+                appendContentCtrl: appendContentCtrl,
+                appendRoleCtrl: appendRoleCtrl,
+                clearTypeCtrl: clearTypeCtrl,
+                canOptimizeVideoMemory: false,
+              ),
+              callbacks: buildCallbacks(),
+            ),
+          ),
+        ),
+      );
+
+      expect(disabledButtonWithText('自动优化视频记忆'), findsOneWidget);
+      expect(
+        find.textContaining('要启用自动优化，请把 agent type 设为 productionAgent'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('agent memory workbench view forwards action callbacks', (
     WidgetTester tester,
