@@ -9,6 +9,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.reviews,
     required this.statsSummary,
     required this.scopeInsightsSummary,
+    required this.tokenEfficiencySummary,
+    required this.tokenEfficiencySamplesSummary,
     required this.stagePassRateSummary,
     required this.reviewDetails,
     required this.statusLine,
@@ -23,6 +25,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingBadCases,
     required this.loadingStats,
     required this.loadingScopeInsights,
+    required this.loadingTokenEfficiency,
+    required this.loadingTokenEfficiencySamples,
     required this.loadingStagePassRate,
     required this.loadingReviewById,
     required this.creatingReview,
@@ -45,6 +49,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final List<QualityReview> reviews;
   final String? statsSummary;
   final String? scopeInsightsSummary;
+  final String? tokenEfficiencySummary;
+  final String? tokenEfficiencySamplesSummary;
   final String? stagePassRateSummary;
   final String? reviewDetails;
   final String? statusLine;
@@ -59,6 +65,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingBadCases;
   final bool loadingStats;
   final bool loadingScopeInsights;
+  final bool loadingTokenEfficiency;
+  final bool loadingTokenEfficiencySamples;
   final bool loadingStagePassRate;
   final bool loadingReviewById;
   final bool creatingReview;
@@ -86,6 +94,8 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onLoadAutoSourceReviews,
     required this.onLoadStats,
     required this.onLoadScopeInsights,
+    required this.onLoadTokenEfficiency,
+    required this.onLoadTokenEfficiencySamples,
     required this.onLoadStagePassRate,
     required this.onLoadReviewById,
     required this.onCreateReview,
@@ -101,6 +111,8 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadAutoSourceReviews;
   final VoidCallback onLoadStats;
   final VoidCallback onLoadScopeInsights;
+  final VoidCallback onLoadTokenEfficiency;
+  final VoidCallback onLoadTokenEfficiencySamples;
   final VoidCallback onLoadStagePassRate;
   final VoidCallback onLoadReviewById;
   final VoidCallback onCreateReview;
@@ -311,6 +323,24 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    onPressed: model.loadingTokenEfficiency
+                        ? null
+                        : callbacks.onLoadTokenEfficiency,
+                    child: Text(
+                      model.loadingTokenEfficiency ? '读取中…' : '读取Token效率',
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: model.loadingTokenEfficiencySamples
+                        ? null
+                        : callbacks.onLoadTokenEfficiencySamples,
+                    child: Text(
+                      model.loadingTokenEfficiencySamples
+                          ? '读取中…'
+                          : '读取省Token样本',
+                    ),
+                  ),
+                  OutlinedButton(
                     onPressed: model.loadingStagePassRate
                         ? null
                         : callbacks.onLoadStagePassRate,
@@ -433,6 +463,16 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.scopeInsightsSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('Scope榜单：${model.scopeInsightsSummary}'),
+              ],
+              if (model.tokenEfficiencySummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('Token聚合：${model.tokenEfficiencySummary}'),
+              ],
+              if (model.tokenEfficiencySamplesSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText(
+                  '省Token样本：${model.tokenEfficiencySamplesSummary}',
+                ),
               ],
               if (model.stagePassRateSummary != null) ...[
                 const SizedBox(height: 12),

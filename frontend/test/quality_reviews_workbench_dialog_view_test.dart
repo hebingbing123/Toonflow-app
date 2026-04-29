@@ -40,6 +40,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   bool loadingBadCases = false,
   bool loadingStats = false,
   bool loadingScopeInsights = false,
+  bool loadingTokenEfficiency = false,
+  bool loadingTokenEfficiencySamples = false,
   bool loadingStagePassRate = false,
   bool loadingReviewById = false,
   bool creatingReview = false,
@@ -48,6 +50,9 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     reviews: reviews,
     statsSummary: 'output: total=1, pass=100%',
     scopeInsightsSummary: 'P7/S11 2条 · pass=50.0% · 坏例1',
+    tokenEfficiencySummary: 'output: samples=2, prompt=420, memory=88',
+    tokenEfficiencySamplesSummary:
+        '04-14 08:00 output: prompt=430, base=340, memory=90 (20.9%, delivery优先)',
     stagePassRateSummary: 'storyboard: 100%',
     reviewDetails: 'review-1 · output · manual',
     statusLine: '已读取评审详情',
@@ -62,6 +67,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     loadingBadCases: loadingBadCases,
     loadingStats: loadingStats,
     loadingScopeInsights: loadingScopeInsights,
+    loadingTokenEfficiency: loadingTokenEfficiency,
+    loadingTokenEfficiencySamples: loadingTokenEfficiencySamples,
     loadingStagePassRate: loadingStagePassRate,
     loadingReviewById: loadingReviewById,
     creatingReview: creatingReview,
@@ -89,6 +96,8 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
   VoidCallback? onLoadAutoSourceReviews = noop,
   VoidCallback? onLoadStats = noop,
   VoidCallback? onLoadScopeInsights = noop,
+  VoidCallback? onLoadTokenEfficiency = noop,
+  VoidCallback? onLoadTokenEfficiencySamples = noop,
   VoidCallback? onLoadStagePassRate = noop,
   VoidCallback? onLoadReviewById = noop,
   VoidCallback? onCreateReview = noop,
@@ -104,6 +113,8 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onLoadAutoSourceReviews: onLoadAutoSourceReviews ?? noop,
     onLoadStats: onLoadStats ?? noop,
     onLoadScopeInsights: onLoadScopeInsights ?? noop,
+    onLoadTokenEfficiency: onLoadTokenEfficiency ?? noop,
+    onLoadTokenEfficiencySamples: onLoadTokenEfficiencySamples ?? noop,
     onLoadStagePassRate: onLoadStagePassRate ?? noop,
     onLoadReviewById: onLoadReviewById ?? noop,
     onCreateReview: onCreateReview ?? noop,
@@ -201,8 +212,15 @@ void main() {
     expect(find.widgetWithText(TextField, '11'), findsNWidgets(2));
     expect(find.text('质量统计：output: total=1, pass=100%'), findsOneWidget);
     expect(find.text('Scope榜单：P7/S11 2条 · pass=50.0% · 坏例1'), findsOneWidget);
+    expect(
+      find.text('Token聚合：output: samples=2, prompt=420, memory=88'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('省Token样本：04-14 08:00 output: prompt=430'),
+      findsOneWidget,
+    );
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
-    expect(find.textContaining('Token效率：'), findsNothing);
     expect(find.text('评审 1 条'), findsOneWidget);
     expect(
       find.widgetWithText(ListTile, 'output · manual · score=82'),
@@ -236,6 +254,8 @@ void main() {
               loadingBadCases: true,
               loadingStats: true,
               loadingScopeInsights: true,
+              loadingTokenEfficiency: true,
+              loadingTokenEfficiencySamples: true,
               loadingStagePassRate: true,
               loadingReviewById: true,
               creatingReview: true,

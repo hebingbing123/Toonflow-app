@@ -28,12 +28,16 @@ class _QualityReviewsWorkbenchDialogState
   List<QualityReview> _reviews = const <QualityReview>[];
   String? _statsSummary;
   String? _scopeInsightsSummary;
+  String? _tokenEfficiencySummary;
+  String? _tokenEfficiencySamplesSummary;
   String? _stagePassRateSummary;
   String? _reviewDetails;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
   bool _loadingStats = false;
   bool _loadingScopeInsights = false;
+  bool _loadingTokenEfficiency = false;
+  bool _loadingTokenEfficiencySamples = false;
   bool _loadingStagePassRate = false;
   bool _loadingReviewById = false;
   bool _creatingReview = false;
@@ -222,6 +226,59 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
+  Future<void> _loadTokenEfficiency() async {
+    setState(() {
+      _loadingTokenEfficiency = true;
+      _statusLine = null;
+    });
+    try {
+      final rows = await fetchQualityTokenEfficiency(widget.accessToken);
+      if (!mounted) return;
+      setState(() {
+        _tokenEfficiencySummary = summarizeQualityTokenEfficiencyRows(rows);
+        _statusLine = '已刷新 token 聚合';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _statusLine = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _loadingTokenEfficiency = false);
+      }
+    }
+  }
+
+  Future<void> _loadTokenEfficiencySamples() async {
+    setState(() {
+      _loadingTokenEfficiencySamples = true;
+      _statusLine = null;
+    });
+    try {
+      final rows = await fetchQualityTokenEfficiencySamples(
+        widget.accessToken,
+        limit: 4,
+        targetType: _ctrls.targetTypeFilterCtrl.text.trim(),
+        memoryDeliveryPriorityApplied: _filterDeliveryPriorityOnly
+            ? true
+            : null,
+      );
+      if (!mounted) return;
+      setState(() {
+        _tokenEfficiencySamplesSummary = summarizeQualityTokenEfficiencySamples(
+          rows,
+        );
+        _statusLine = '已刷新省 token 样本';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _statusLine = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _loadingTokenEfficiencySamples = false);
+      }
+    }
+  }
+
   Future<void> _loadReviewById() async {
     final reviewId = _ctrls.reviewIdCtrl.text.trim();
     if (reviewId.isEmpty) {
@@ -322,6 +379,8 @@ class _QualityReviewsWorkbenchDialogState
         reviews: _reviews,
         statsSummary: _statsSummary,
         scopeInsightsSummary: _scopeInsightsSummary,
+        tokenEfficiencySummary: _tokenEfficiencySummary,
+        tokenEfficiencySamplesSummary: _tokenEfficiencySamplesSummary,
         stagePassRateSummary: _stagePassRateSummary,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
@@ -336,6 +395,8 @@ class _QualityReviewsWorkbenchDialogState
         loadingBadCases: _loadingBadCases,
         loadingStats: _loadingStats,
         loadingScopeInsights: _loadingScopeInsights,
+        loadingTokenEfficiency: _loadingTokenEfficiency,
+        loadingTokenEfficiencySamples: _loadingTokenEfficiencySamples,
         loadingStagePassRate: _loadingStagePassRate,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
@@ -384,6 +445,12 @@ class _QualityReviewsWorkbenchDialogState
         },
         onLoadScopeInsights: () {
           _loadScopeInsights();
+        },
+        onLoadTokenEfficiency: () {
+          _loadTokenEfficiency();
+        },
+        onLoadTokenEfficiencySamples: () {
+          _loadTokenEfficiencySamples();
         },
         onLoadStagePassRate: () {
           _loadStagePassRate();
