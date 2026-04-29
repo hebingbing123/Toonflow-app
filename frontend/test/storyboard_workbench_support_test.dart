@@ -628,6 +628,99 @@ void main() {
   );
 
   test(
+    'applyStoryboardVideoPromptRepairs trims duplicate generic prompt fragments and repeated negative constraints',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 540,
+        negativePromptChars: 44,
+        negativeConstraintCount: 2,
+        negativeBudgetTier: 'expanded',
+        autoNegativeSource: 'review+rejected_memory',
+        autoNegativeReviewFragmentCount: 1,
+        autoNegativeMemoryFragmentCount: 2,
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 0,
+        styleAnchorCount: 1,
+        memoryStyleAnchorCount: 2,
+        memoryDeliveryAnchorCount: 1,
+        memoryDeliveryPriorityApplied: true,
+        memoryStyleChars: 104,
+        memoryVisualChars: 48,
+        memoryDeliveryChars: 28,
+        memoryHitBuckets: ['表演'],
+        memorySuppressedBuckets: ['动作'],
+        memoryHitBucketCounts: {'表演': 2},
+        memorySuppressedBucketCounts: {'动作': 3},
+        continuityNoteCount: 1,
+        continuityNoteChars: 24,
+        usesReferenceFrame: true,
+        memoryBudgetTier: 'expanded',
+      );
+
+      final repaired = applyStoryboardVideoPromptRepairs(
+        diagnostics: diagnostics,
+        prompt: '人物压着怒意盯住对手，镜头缓慢跟拍，光影层次丰富，镜头缓慢跟拍，微表情压着爆发前的停顿',
+        negativePrompt:
+            'avoid blur, avoid blank expression, avoid face distortion',
+        automaticNegativePrompt:
+            'avoid blur, avoid face distortion or identity drift',
+      );
+
+      expect(repaired.prompt, '人物压着怒意盯住对手，微表情压着爆发前的停顿');
+      expect(repaired.negativePrompt, 'avoid blank expression');
+      expect(repaired.removedPromptFragmentCount, 3);
+      expect(repaired.removedNegativeFragmentCount, 2);
+      expect(repaired.changed, isTrue);
+    },
+  );
+
+  test(
+    'applyStoryboardVideoPromptRepairs preserves performance-heavy prompt fragments when budget is healthy',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 280,
+        negativePromptChars: 0,
+        negativeConstraintCount: 0,
+        negativeBudgetTier: 'lean',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 0,
+        styleAnchorCount: 1,
+        memoryStyleAnchorCount: 1,
+        memoryDeliveryAnchorCount: 1,
+        memoryDeliveryPriorityApplied: true,
+        memoryStyleChars: 40,
+        memoryVisualChars: 20,
+        memoryDeliveryChars: 24,
+        memoryHitBuckets: ['表演'],
+        memorySuppressedBuckets: const [],
+        continuityNoteCount: 0,
+        continuityNoteChars: 0,
+        usesReferenceFrame: true,
+        memoryBudgetTier: 'lean',
+      );
+
+      final repaired = applyStoryboardVideoPromptRepairs(
+        diagnostics: diagnostics,
+        prompt: '人物强忍眼泪开口，短暂停顿后继续说完台词',
+        negativePrompt: '',
+      );
+
+      expect(repaired.prompt, '人物强忍眼泪开口，短暂停顿后继续说完台词');
+      expect(repaired.negativePrompt, '');
+      expect(repaired.removedPromptFragmentCount, 0);
+      expect(repaired.removedNegativeFragmentCount, 0);
+      expect(repaired.changed, isFalse);
+    },
+  );
+
+  test(
     'buildStoryboardVideoPromptBudgetHint preserves expanded memory on risky shots',
     () {
       const diagnostics = GenerateVideoPromptDiagnostics(

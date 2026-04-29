@@ -79,6 +79,43 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     _videoPromptEditedAfterAutoGenerate = false;
   }
 
+  StoryboardVideoPromptRepairResult? _repairCurrentPromptFromDiagnostics() {
+    final diagnostics = _visiblePromptDiagnostics();
+    if (diagnostics == null) {
+      return null;
+    }
+    final repaired = applyStoryboardVideoPromptRepairs(
+      diagnostics: diagnostics,
+      prompt: _videoPromptCtrl.text,
+      negativePrompt: _negativeVideoPromptCtrl.text,
+      automaticNegativePrompt: _lastGeneratedAutoNegativePrompt,
+    );
+    _syncingGeneratedVideoPrompt = true;
+    _videoPromptCtrl.text = repaired.prompt;
+    _negativeVideoPromptCtrl.text = repaired.negativePrompt;
+    _syncingGeneratedVideoPrompt = false;
+    _lastGeneratedVideoPromptDiagnostics = null;
+    _videoPromptEditedAfterAutoGenerate = true;
+    return repaired;
+  }
+
+  void _applyPromptRepairSuggestions() {
+    final repaired = _repairCurrentPromptFromDiagnostics();
+    if (repaired == null) {
+      return;
+    }
+    _applyWorkbenchState(() {
+      _setWorkbenchActionNotice(
+        actionSummary: repaired.changed ? '已应用当前生成前建议。' : '当前建议已经基本落实，无需再裁剪。',
+        recommendedAction:
+            StoryboardWorkbenchRecommendedAction.submitVideoGeneration,
+        detail: repaired.changed
+            ? '本次精简了 ${repaired.removedPromptFragmentCount} 条低收益提示词片段，并去掉 ${repaired.removedNegativeFragmentCount} 条重复负向约束。'
+            : '当前分镜的 prompt/negative prompt 已经比较精简，可直接继续生成。',
+      );
+    });
+  }
+
   Future<void> _refreshVideoPromptBeforeSubmitIfNeeded() async {
     final currentPrompt = _videoPromptCtrl.text.trim();
     final request = _buildCurrentVideoPromptRequest();
@@ -156,6 +193,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
       throw const FormatException('视频时长必须是正整数');
     }
     await _refreshVideoPromptBeforeSubmitIfNeeded();
+    final repairedBeforeSubmit = _repairCurrentPromptFromDiagnostics();
     final prompt = _videoPromptCtrl.text.trim();
     if (prompt.isEmpty) {
       throw const FormatException('视频提示词不能为空');
@@ -193,9 +231,13 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     _applyWorkbenchState(() {
       _setWorkbenchFollowUp(
         appliedNegativePrompt.isEmpty
-            ? compactedManualNegative.removedFragmentCount > 0
+            ? repairedBeforeSubmit != null && repairedBeforeSubmit.changed
+                  ? '已提交 ${response.total} 条视频任务，并在提交前自动精简 ${repairedBeforeSubmit.removedPromptFragmentCount} 条低收益 prompt 片段与 ${repairedBeforeSubmit.removedNegativeFragmentCount} 条重复负向约束。'
+                  : compactedManualNegative.removedFragmentCount > 0
                   ? '已提交 ${response.total} 条视频任务，并自动剔除 ${compactedManualNegative.removedFragmentCount} 条重复负向约束。'
                   : '已提交 ${response.total} 条视频任务。'
+            : repairedBeforeSubmit != null && repairedBeforeSubmit.changed
+            ? '已提交 ${response.total} 条视频任务，提交前自动精简了 ${repairedBeforeSubmit.removedPromptFragmentCount} 条低收益 prompt 片段、${repairedBeforeSubmit.removedNegativeFragmentCount} 条重复负向约束，并回填最终负向提示词。'
             : compactedManualNegative.removedFragmentCount > 0
             ? '已提交 ${response.total} 条视频任务，自动剔除 ${compactedManualNegative.removedFragmentCount} 条重复负向约束，并回填最终负向提示词。'
             : '已提交 ${response.total} 条视频任务，并回填最终负向提示词。',

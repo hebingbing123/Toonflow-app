@@ -10,6 +10,23 @@ class StoryboardNegativePromptCompression {
   final int removedFragmentCount;
 }
 
+class StoryboardVideoPromptRepairResult {
+  const StoryboardVideoPromptRepairResult({
+    required this.prompt,
+    required this.negativePrompt,
+    required this.removedPromptFragmentCount,
+    required this.removedNegativeFragmentCount,
+  });
+
+  final String prompt;
+  final String negativePrompt;
+  final int removedPromptFragmentCount;
+  final int removedNegativeFragmentCount;
+
+  bool get changed =>
+      removedPromptFragmentCount > 0 || removedNegativeFragmentCount > 0;
+}
+
 StoryboardNegativePromptCompression compactStoryboardManualNegativePrompt({
   required String manualPrompt,
   String? automaticPrompt,
@@ -82,6 +99,147 @@ bool _storyboardNegativeFragmentCoveredByAutomatic(
 String _normalizeStoryboardNegativePromptText(String text) {
   return text.trim().replaceAll(RegExp(r'\s+'), ' ');
 }
+
+StoryboardVideoPromptRepairResult applyStoryboardVideoPromptRepairs({
+  required GenerateVideoPromptDiagnostics diagnostics,
+  required String prompt,
+  required String negativePrompt,
+  String? automaticNegativePrompt,
+}) {
+  final promptCompression = _compactStoryboardPrompt(
+    prompt: prompt,
+    diagnostics: diagnostics,
+  );
+  final negativeCompression = compactStoryboardManualNegativePrompt(
+    manualPrompt: negativePrompt,
+    automaticPrompt: automaticNegativePrompt,
+  );
+  return StoryboardVideoPromptRepairResult(
+    prompt: promptCompression.prompt,
+    negativePrompt: negativeCompression.manualPrompt,
+    removedPromptFragmentCount: promptCompression.removedFragmentCount,
+    removedNegativeFragmentCount: negativeCompression.removedFragmentCount,
+  );
+}
+
+class _StoryboardPromptCompression {
+  const _StoryboardPromptCompression({
+    required this.prompt,
+    required this.removedFragmentCount,
+  });
+
+  final String prompt;
+  final int removedFragmentCount;
+}
+
+_StoryboardPromptCompression _compactStoryboardPrompt({
+  required String prompt,
+  required GenerateVideoPromptDiagnostics diagnostics,
+}) {
+  final fragments = _splitStoryboardPromptFragments(prompt);
+  if (fragments.isEmpty) {
+    return const _StoryboardPromptCompression(
+      prompt: '',
+      removedFragmentCount: 0,
+    );
+  }
+
+  final trimmed = <String>[];
+  final seen = <String>{};
+  var removed = 0;
+  final canTrimGeneric =
+      diagnostics.promptChars >= 520 ||
+      diagnostics.memoryStyleChars >= 96 ||
+      diagnostics.memorySuppressedBucketCounts['动作'] != null ||
+      diagnostics.memorySuppressedBucketCounts['光影'] != null;
+
+  for (final fragment in fragments) {
+    final normalized = _normalizeStoryboardPromptText(fragment).toLowerCase();
+    if (normalized.isEmpty) continue;
+    if (!seen.add(normalized)) {
+      removed += 1;
+      continue;
+    }
+    if (canTrimGeneric &&
+        _isLowValueStoryboardPromptFragment(fragment) &&
+        fragments.length - removed > 3) {
+      removed += 1;
+      continue;
+    }
+    trimmed.add(fragment.trim());
+  }
+
+  return _StoryboardPromptCompression(
+    prompt: trimmed.join('，'),
+    removedFragmentCount: removed,
+  );
+}
+
+List<String> _splitStoryboardPromptFragments(String prompt) {
+  return prompt
+      .split(RegExp(r'[，,；;。\n]+'))
+      .map((fragment) => fragment.trim())
+      .where((fragment) => fragment.isNotEmpty)
+      .toList(growable: false);
+}
+
+String _normalizeStoryboardPromptText(String text) {
+  return text.trim().replaceAll(RegExp(r'\s+'), ' ');
+}
+
+bool _isLowValueStoryboardPromptFragment(String fragment) {
+  final normalized = _normalizeStoryboardPromptText(fragment).toLowerCase();
+  if (normalized.isEmpty) return false;
+  final hasPerformanceSignal = _storyboardPromptKeywords.any(
+    (keyword) => normalized.contains(keyword),
+  );
+  if (hasPerformanceSignal) {
+    return false;
+  }
+  return _storyboardGenericTrimKeywords.any(
+    (keyword) => normalized.contains(keyword),
+  );
+}
+
+const List<String> _storyboardPromptKeywords = <String>[
+  '表情',
+  '情绪',
+  '眼神',
+  '口型',
+  '微表情',
+  '呼吸',
+  '停顿',
+  '台词',
+  '语气',
+  '人物',
+  '角色',
+  'identity',
+  'expression',
+  'emotion',
+  'lip',
+  'face',
+];
+
+const List<String> _storyboardGenericTrimKeywords = <String>[
+  '光影',
+  '光线',
+  '镜头',
+  '运镜',
+  '跟拍',
+  '推拉',
+  '摇镜',
+  '氛围',
+  '节奏',
+  '动作',
+  '缓慢',
+  '唯美',
+  'cinematic',
+  'lighting',
+  'camera',
+  'tracking shot',
+  'moody',
+  'atmosphere',
+];
 
 String buildStoryboardVideoPromptDiagnosticsLine(
   GenerateVideoPromptDiagnostics diagnostics,

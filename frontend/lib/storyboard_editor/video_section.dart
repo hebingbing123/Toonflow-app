@@ -30,6 +30,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onAddTrack,
     required this.onDeleteTrack,
     required this.onGenerateVideoPrompt,
+    required this.onApplyPromptRepairs,
     required this.onRefreshVideoData,
     required this.loadingExportJob,
     required this.latestExportJob,
@@ -67,6 +68,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final VoidCallback onAddTrack;
   final VoidCallback onDeleteTrack;
   final VoidCallback onGenerateVideoPrompt;
+  final VoidCallback onApplyPromptRepairs;
   final VoidCallback onRefreshVideoData;
   final bool loadingExportJob;
   final JobRow? latestExportJob;
@@ -127,6 +129,12 @@ class _StoryboardVideoSection extends StatelessWidget {
             TextButton(
               onPressed: saving ? null : onGenerateVideoPrompt,
               child: const Text('生成默认视频提示词'),
+            ),
+            TextButton(
+              onPressed: saving || promptDiagnostics == null
+                  ? null
+                  : onApplyPromptRepairs,
+              child: const Text('应用生成前建议'),
             ),
             TextButton(
               onPressed: saving || loadingWorkbench ? null : onRefreshVideoData,

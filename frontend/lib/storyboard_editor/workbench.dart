@@ -263,6 +263,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onAddTrack: () => _runDialogAction(_addTrack),
           onDeleteTrack: () => _runDialogAction(_deleteTrack),
           onGenerateVideoPrompt: () => _runDialogAction(_generateVideoPrompt),
+          onApplyPromptRepairs: _applyPromptRepairSuggestions,
           onRefreshVideoData: _refreshWorkbenchData,
           loadingExportJob: _loadingExportJob,
           latestExportJob: _latestExportJob,
