@@ -434,7 +434,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _selectVideo(VideoItem video) async {
-    await postWorkbenchSelectVideoV1(
+    final response = await postWorkbenchSelectVideoV1(
       widget.token,
       projectId: widget.projectNumericId,
       scriptId: widget.scriptNumericId,
@@ -443,12 +443,15 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     );
     await _refreshProductionData(syncTrackId: true);
     if (!mounted) return;
-    _applyWorkbenchState(() => _setWorkbenchFollowUp('已将当前候选视频设为分镜视频。'));
+    final memorySummary = response.selectedMemory == null
+        ? '已将当前候选视频设为分镜视频。'
+        : '已将当前候选视频设为分镜视频。${describeStoryboardSelectedMemoryFeedback(response.selectedMemory!)}';
+    _applyWorkbenchState(() => _setWorkbenchFollowUp(memorySummary));
     await _notifyStoryboardMutated();
   }
 
   Future<void> _deleteCurrentVideo() async {
-    await postWorkbenchDeleteVideoV1(
+    final response = await postWorkbenchDeleteVideoV1(
       widget.token,
       projectId: widget.projectNumericId,
       scriptId: widget.scriptNumericId,
@@ -457,7 +460,10 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     await _refreshProductionData(syncTrackId: true);
     await _refreshWorkbenchData();
     if (!mounted) return;
-    _applyWorkbenchState(() => _setWorkbenchFollowUp('已删除当前分镜已选视频。'));
+    final followUp = response.negativeMemory == null
+        ? '已删除当前分镜已选视频。'
+        : '已删除当前分镜已选视频。${describeStoryboardRejectedMemoryFeedback(response.negativeMemory!)}';
+    _applyWorkbenchState(() => _setWorkbenchFollowUp(followUp));
     await _notifyStoryboardMutated();
   }
 

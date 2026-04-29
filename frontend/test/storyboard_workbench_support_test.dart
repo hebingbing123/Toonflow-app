@@ -34,6 +34,49 @@ void main() {
     },
   );
 
+  test(
+    'describeStoryboardSelectedMemoryFeedback explains isolated reusable memory',
+    () {
+      final line = describeStoryboardSelectedMemoryFeedback(
+        const WorkbenchVideoMemoryFeedback(
+          kind: 'selected',
+          scope: 'user-project-script',
+          subject: '林晚',
+          style: '表演喉结滚动，语气低声尾音发颤',
+          note: '克制停顿后再开口',
+          charCount: 72,
+        ),
+      );
+
+      expect(line, contains('已提炼私有记忆：林晚 / 表演喉结滚动，语气低声尾音发颤 / 克制停顿后再开口。'));
+      expect(line, contains('仅作用于当前用户、项目、剧本'));
+    },
+  );
+
+  test(
+    'describeStoryboardRejectedMemoryFeedback explains isolated negative reuse',
+    () {
+      final line = describeStoryboardRejectedMemoryFeedback(
+        const WorkbenchVideoMemoryFeedback(
+          kind: 'rejected',
+          scope: 'user-project-script',
+          avoid: 'avoid flat cold lighting, avoid blank expression',
+          riskTags: <String>['emotion', 'lighting'],
+          rejectionCount: 3,
+          charCount: 64,
+        ),
+      );
+
+      expect(
+        line,
+        contains('已回写私有坏例约束：avoid flat cold lighting, avoid blank expression。'),
+      );
+      expect(line, contains('累计失败 3 次'));
+      expect(line, contains('重点风险 emotion / lighting'));
+      expect(line, contains('后续生成会优先复用当前用户、项目、剧本下的负向记忆'));
+    },
+  );
+
   test('diagnoseStoryboardList requests creation when there are no boards', () {
     final diagnosis = diagnoseStoryboardList(
       boards: const <StoryboardRow>[],

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::ApiError;
 use crate::production::workbench::video_prompt_memory::{
     build_rejected_video_negative_memory, build_selected_video_memory,
-    clear_rejected_video_negative_memory, clear_selected_video_memory,
+    clear_rejected_video_negative_memory, clear_selected_video_memory, extract_key_value,
     persist_rejected_video_negative_memory, persist_selected_video_memory,
     refresh_project_video_style_memory, refresh_script_video_style_memory, StoryboardPromptSeedRow,
 };
@@ -30,7 +30,74 @@ pub(in crate::production) struct DeleteVideoBody {
 #[serde(rename_all = "camelCase")]
 pub(in crate::production) struct DeleteVideoResponse {
     storyboard_id: i32,
+    negative_memory: Option<WorkbenchVideoMemoryFeedback>,
     message: &'static str,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(in crate::production) struct WorkbenchVideoMemoryFeedback {
+    kind: &'static str,
+    scope: &'static str,
+    subject: Option<String>,
+    style: Option<String>,
+    note: Option<String>,
+    avoid: Option<String>,
+    risk_tags: Vec<String>,
+    rejection_count: Option<u32>,
+    char_count: usize,
+}
+
+fn selected_video_memory_feedback(content: &str) -> Option<WorkbenchVideoMemoryFeedback> {
+    let subject = extract_key_value(content, "subject");
+    let style = extract_key_value(content, "style");
+    let note = extract_key_value(content, "note");
+    if subject.is_none() && style.is_none() && note.is_none() {
+        return None;
+    }
+    Some(WorkbenchVideoMemoryFeedback {
+        kind: "selected",
+        scope: "user-project-script",
+        subject,
+        style,
+        note,
+        avoid: None,
+        risk_tags: Vec::new(),
+        rejection_count: None,
+        char_count: content.chars().count(),
+    })
+}
+
+fn rejected_video_memory_feedback(content: &str) -> Option<WorkbenchVideoMemoryFeedback> {
+    let avoid = extract_key_value(content, "avoid");
+    if avoid.is_none() {
+        return None;
+    }
+    let subject = extract_key_value(content, "subject");
+    let risk_tags = extract_key_value(content, "riskTags")
+        .map(|value| {
+            value
+                .split(['/', ',', '，', ';', '；'])
+                .map(str::trim)
+                .filter(|tag| !tag.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let rejection_count = extract_key_value(content, "rejectionCount")
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|count| *count > 0);
+    Some(WorkbenchVideoMemoryFeedback {
+        kind: "rejected",
+        scope: "user-project-script",
+        subject,
+        style: None,
+        note: None,
+        avoid,
+        risk_tags,
+        rejection_count,
+        char_count: content.chars().count(),
+    })
 }
 
 #[utoipa::path(
@@ -93,10 +160,12 @@ pub(in crate::production) async fn post_workbench_delete_video(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let mut negative_memory = None;
     if let Some(prompt_seed) = prompt_seed {
         if let Some(memory_content) =
             build_rejected_video_negative_memory(body.storyboard_id, &prompt_seed)
         {
+            negative_memory = rejected_video_memory_feedback(&memory_content);
             persist_rejected_video_negative_memory(
                 pool,
                 user_id,
@@ -120,6 +189,7 @@ pub(in crate::production) async fn post_workbench_delete_video(
 
     Ok(JsonResponse(DeleteVideoResponse {
         storyboard_id: body.storyboard_id,
+        negative_memory,
         message: "Video deleted from storyboard",
     }))
 }
@@ -138,6 +208,7 @@ pub(in crate::production) struct SelectVideoBody {
 pub(in crate::production) struct SelectVideoResponse {
     storyboard_id: i32,
     video_url: String,
+    selected_memory: Option<WorkbenchVideoMemoryFeedback>,
     message: &'static str,
 }
 
@@ -214,9 +285,11 @@ pub(in crate::production) async fn post_workbench_select_video(
         body.storyboard_id,
     )
     .await?;
+    let mut selected_memory = None;
     if let Some(prompt_seed) = prompt_seed {
         if let Some(memory_content) = build_selected_video_memory(body.storyboard_id, &prompt_seed)
         {
+            selected_memory = selected_video_memory_feedback(&memory_content);
             persist_selected_video_memory(
                 pool,
                 user_id,
@@ -234,6 +307,7 @@ pub(in crate::production) async fn post_workbench_select_video(
     Ok(JsonResponse(SelectVideoResponse {
         storyboard_id: body.storyboard_id,
         video_url: body.video_url.trim().to_string(),
+        selected_memory,
         message: "Video selected for storyboard",
     }))
 }

@@ -258,6 +258,46 @@ String buildStoryboardVideoPromptDiagnosticsLine(
   return parts.join(' · ');
 }
 
+String describeStoryboardSelectedMemoryFeedback(
+  WorkbenchVideoMemoryFeedback feedback,
+) {
+  final parts = <String>[];
+  final subject = feedback.subject?.trim();
+  if (subject != null && subject.isNotEmpty) {
+    parts.add(subject);
+  }
+  final style = feedback.style?.trim();
+  if (style != null && style.isNotEmpty) {
+    parts.add(style);
+  }
+  final note = feedback.note?.trim();
+  if (note != null && note.isNotEmpty) {
+    parts.add(note);
+  }
+  final summary = parts.isEmpty
+      ? '已提炼当前分镜的私有表演记忆。'
+      : '已提炼私有记忆：${parts.join(' / ')}。';
+  return '$summary 仅作用于当前用户、项目、剧本，后续会优先复用而不串别的短剧。';
+}
+
+String describeStoryboardRejectedMemoryFeedback(
+  WorkbenchVideoMemoryFeedback feedback,
+) {
+  final avoid = feedback.avoid?.trim();
+  final rejectionCount = feedback.rejectionCount;
+  final riskTags = feedback.riskTags;
+  final head = (avoid == null || avoid.isEmpty)
+      ? '已回写当前分镜的私有坏例约束。'
+      : '已回写私有坏例约束：$avoid。';
+  final tail = <String>[
+    if (rejectionCount != null && rejectionCount > 1) '累计失败 $rejectionCount 次',
+    if (riskTags.isNotEmpty) '重点风险 ${riskTags.join(" / ")}',
+  ].join('，');
+  return tail.isEmpty
+      ? '$head 后续生成会优先复用当前用户、项目、剧本下的负向记忆。'
+      : '$head $tail；后续生成会优先复用当前用户、项目、剧本下的负向记忆。';
+}
+
 String describeStoryboardAutoNegativeSource(
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
