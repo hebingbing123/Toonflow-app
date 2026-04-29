@@ -6,20 +6,20 @@ use crate::production::workbench::video::generate::AutoNegativePromptSelection;
 use super::{observation_note_budget_family, VideoPromptObservationFamily};
 
 #[derive(Debug, Clone, Copy, Default)]
-pub(super) struct VideoPromptConstraintPressure {
-    pub(super) has_identity_guardrail: bool,
-    pub(super) has_dialogue_guardrail: bool,
-    pub(super) has_blocking_guardrail: bool,
-    pub(super) has_lighting_guardrail: bool,
-    pub(super) has_motion_guardrail: bool,
-    pub(super) has_emotion_guardrail: bool,
-    pub(super) forces_compact_memory: bool,
-    pub(super) prefer_delivery_memory_recall: bool,
-    pub(super) prefer_visual_continuity_memory_recall: bool,
+pub(crate) struct VideoPromptConstraintPressure {
+    pub(crate) has_identity_guardrail: bool,
+    pub(crate) has_dialogue_guardrail: bool,
+    pub(crate) has_blocking_guardrail: bool,
+    pub(crate) has_lighting_guardrail: bool,
+    pub(crate) has_motion_guardrail: bool,
+    pub(crate) has_emotion_guardrail: bool,
+    pub(crate) forces_compact_memory: bool,
+    pub(crate) prefer_delivery_memory_recall: bool,
+    pub(crate) prefer_visual_continuity_memory_recall: bool,
 }
 
 impl VideoPromptConstraintPressure {
-    pub(super) fn from_runtime_constraints(
+    pub(crate) fn from_runtime_constraints(
         selection: Option<&AutoNegativePromptSelection>,
         observation_note: Option<&str>,
     ) -> Option<Self> {
@@ -47,7 +47,7 @@ impl VideoPromptConstraintPressure {
         pressure.has_active_guardrail().then_some(pressure)
     }
 
-    pub(super) fn has_active_guardrail(self) -> bool {
+    pub(crate) fn has_active_guardrail(self) -> bool {
         self.has_identity_guardrail
             || self.has_dialogue_guardrail
             || self.has_blocking_guardrail
@@ -56,7 +56,7 @@ impl VideoPromptConstraintPressure {
             || self.has_emotion_guardrail
     }
 
-    pub(super) fn merge(self, other: Option<Self>) -> Self {
+    pub(crate) fn merge(self, other: Option<Self>) -> Self {
         match other {
             Some(other) => Self {
                 has_identity_guardrail: self.has_identity_guardrail || other.has_identity_guardrail,
@@ -75,7 +75,7 @@ impl VideoPromptConstraintPressure {
         }
     }
 
-    pub(super) fn memory_recall_biases(self) -> Vec<String> {
+    pub(crate) fn memory_recall_biases(self) -> Vec<String> {
         let mut biases = Vec::new();
         if self.prefer_delivery_memory_recall {
             biases.push("delivery".to_string());
@@ -99,7 +99,7 @@ impl VideoPromptConstraintPressure {
     }
 }
 
-pub(super) fn split_runtime_negative_constraint_fragments(value: Option<&str>) -> Vec<String> {
+pub(crate) fn split_runtime_negative_constraint_fragments(value: Option<&str>) -> Vec<String> {
     value
         .into_iter()
         .flat_map(|text| text.split([',', ';', '，', '；', '\n']))
@@ -109,19 +109,19 @@ pub(super) fn split_runtime_negative_constraint_fragments(value: Option<&str>) -
 }
 
 #[derive(Debug, Clone)]
-pub(super) struct RecentQualitySignalRow {
-    pub(super) passed: Option<bool>,
-    pub(super) overall_score: Option<i16>,
-    pub(super) dialogue_naturalness: Option<i16>,
-    pub(super) character_consistency: Option<i16>,
-    pub(super) visual_quality: Option<i16>,
-    pub(super) memory_delivery_priority_applied: Option<bool>,
-    pub(super) is_bad_case: bool,
-    pub(super) bad_case_category: Option<String>,
-    pub(super) comments: Option<String>,
+pub(crate) struct RecentQualitySignalRow {
+    pub(crate) passed: Option<bool>,
+    pub(crate) overall_score: Option<i16>,
+    pub(crate) dialogue_naturalness: Option<i16>,
+    pub(crate) character_consistency: Option<i16>,
+    pub(crate) visual_quality: Option<i16>,
+    pub(crate) memory_delivery_priority_applied: Option<bool>,
+    pub(crate) is_bad_case: bool,
+    pub(crate) bad_case_category: Option<String>,
+    pub(crate) comments: Option<String>,
 }
 
-pub(super) fn derive_recent_quality_constraint_pressure(
+pub(crate) fn derive_recent_quality_constraint_pressure(
     rows: &[RecentQualitySignalRow],
 ) -> Option<VideoPromptConstraintPressure> {
     let mut pressure = VideoPromptConstraintPressure::default();

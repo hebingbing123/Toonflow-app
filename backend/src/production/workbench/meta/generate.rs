@@ -31,7 +31,7 @@ use crate::scope::http::require_owned_numeric_script_scope_user_pool;
 use crate::state::AppState;
 
 mod builder;
-mod constraints;
+pub(crate) mod constraints;
 mod context;
 mod director;
 mod handlers;

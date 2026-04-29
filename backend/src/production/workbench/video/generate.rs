@@ -13,16 +13,20 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::meta::common::negative_constraint_conflicts_with_storyboard_style;
+use crate::production::workbench::meta::generate::constraints::{
+    derive_recent_quality_constraint_pressure, RecentQualitySignalRow,
+    VideoPromptConstraintPressure,
+};
 use crate::production::workbench::video_prompt_memory::{
     clip_prompt_fragment, compact_video_style_prompt_note, extract_key_value,
     normalize_prompt_text, optimize_scoped_video_memory, parse_structured_storyboard_description,
     select_prioritized_video_style_note, select_project_video_style_memory_notes_for_storyboard,
-    select_rejected_video_memory_notes_and_observation_candidates_for_subject,
+    select_rejected_video_memory_notes_and_observation_candidates_for_subject_with_bias,
     select_script_video_style_memory_notes_for_storyboard,
     select_selected_video_memory_notes_for_storyboard,
     select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
-    StructuredStoryboardDescription,
+    StructuredStoryboardDescription, VideoPromptMemorySelectionBias,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
@@ -58,6 +62,21 @@ struct QualityReviewSeedRow {
     comments: Option<String>,
 }
 
+#[derive(Debug, Clone, sqlx::FromRow)]
+struct RecentQualitySignalSeedRow {
+    target_type: Option<String>,
+    target_id: Option<String>,
+    passed: Option<bool>,
+    overall_score: Option<i16>,
+    dialogue_naturalness: Option<i16>,
+    character_consistency: Option<i16>,
+    visual_quality: Option<i16>,
+    memory_delivery_priority_applied: Option<bool>,
+    is_bad_case: bool,
+    bad_case_category: Option<String>,
+    comments: Option<String>,
+}
+
 #[derive(Debug)]
 struct ScoredNegativeFragment {
     score: i32,
@@ -86,6 +105,7 @@ pub(crate) struct AutoNegativePromptSelection {
 struct StoryboardNegativePromptContext {
     storyboard_id: i32,
     storyboard_review_rows: Vec<QualityReviewSeedRow>,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
     selected_rows: Vec<AgentMemoryRow>,
     storyboard_row: Option<StoryboardPromptSeedRow>,
     current_prompt_seed: Option<String>,
@@ -471,6 +491,14 @@ pub(crate) async fn load_auto_negative_prompt_details(
         review_row_limit,
     )
     .await?;
+    let recent_quality_rows = load_recent_quality_signal_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids,
+    )
+    .await?;
     let rejected_rows = load_rejected_video_negative_memory_rows(
         pool,
         user_id,
@@ -502,6 +530,7 @@ pub(crate) async fn load_auto_negative_prompt_details(
         &rejected_rows,
         &selected_rows,
         &storyboard_seed_rows,
+        &recent_quality_rows,
     ))
 }
 
@@ -519,6 +548,14 @@ pub(crate) async fn load_storyboard_negative_prompt_runtime(
         script_numeric_id,
         &[storyboard_id],
         negative_review_fetch_limit(1),
+    )
+    .await?;
+    let recent_quality_rows = load_recent_quality_signal_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        &[storyboard_id],
     )
     .await?;
     let rejected_rows = load_rejected_video_negative_memory_rows(
@@ -543,6 +580,7 @@ pub(crate) async fn load_storyboard_negative_prompt_runtime(
     let mut contexts = build_storyboard_negative_prompt_contexts(
         &[storyboard_id],
         &review_rows,
+        &recent_quality_rows,
         &selected_rows,
         storyboard_seed_rows,
     );
@@ -620,6 +658,58 @@ async fn load_negative_review_rows(
     .bind(script_numeric_id)
     .bind(&storyboard_target_ids)
     .bind(review_row_limit)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
+async fn load_recent_quality_signal_rows(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<Vec<RecentQualitySignalSeedRow>, ApiError> {
+    let storyboard_target_ids = storyboard_ids
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
+    sqlx::query_as::<_, RecentQualitySignalSeedRow>(
+        r#"
+        SELECT
+          target_type,
+          target_id,
+          passed,
+          overall_score,
+          dialogue_naturalness,
+          character_consistency,
+          visual_quality,
+          memory_delivery_priority_applied,
+          is_bad_case,
+          bad_case_category,
+          comments
+        FROM app_quality_review
+        WHERE user_id = $1
+          AND project_id = $2
+          AND script_id = $3
+          AND target_type IN ('storyboard', 'output', 'video', 'asset')
+          AND (
+            target_id IS NULL
+            OR target_id = ANY($4)
+          )
+        ORDER BY
+          CASE
+            WHEN target_type = 'storyboard' AND target_id = ANY($4) THEN 0
+            ELSE 1
+          END,
+          created_at DESC
+        LIMIT 24
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(&storyboard_target_ids)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
@@ -884,9 +974,28 @@ fn build_storyboard_negative_prompts(
     selected_rows: &[AgentMemoryRow],
     storyboard_seed_rows: &HashMap<i32, StoryboardPromptSeedRow>,
 ) -> HashMap<i32, AutoNegativePromptSelection> {
+    build_storyboard_negative_prompts_with_recent_quality(
+        storyboard_ids,
+        review_rows,
+        rejected_rows,
+        selected_rows,
+        storyboard_seed_rows,
+        &[],
+    )
+}
+
+fn build_storyboard_negative_prompts_with_recent_quality(
+    storyboard_ids: &[i32],
+    review_rows: &[QualityReviewSeedRow],
+    rejected_rows: &[AgentMemoryRow],
+    selected_rows: &[AgentMemoryRow],
+    storyboard_seed_rows: &HashMap<i32, StoryboardPromptSeedRow>,
+    recent_quality_rows: &[RecentQualitySignalSeedRow],
+) -> HashMap<i32, AutoNegativePromptSelection> {
     let contexts = build_storyboard_negative_prompt_contexts(
         storyboard_ids,
         review_rows,
+        recent_quality_rows,
         selected_rows,
         storyboard_seed_rows.clone(),
     );
@@ -903,6 +1012,7 @@ fn build_storyboard_negative_prompts(
                         &StoryboardNegativePromptContext {
                             storyboard_id,
                             storyboard_review_rows: Vec::new(),
+                            recent_quality_pressure: None,
                             selected_rows: selected_rows.to_vec(),
                             storyboard_row: None,
                             current_prompt_seed: None,
@@ -920,6 +1030,7 @@ fn build_storyboard_negative_prompts(
 fn build_storyboard_negative_prompt_contexts(
     storyboard_ids: &[i32],
     review_rows: &[QualityReviewSeedRow],
+    recent_quality_rows: &[RecentQualitySignalSeedRow],
     selected_rows: &[AgentMemoryRow],
     mut storyboard_seed_rows: HashMap<i32, StoryboardPromptSeedRow>,
 ) -> HashMap<i32, StoryboardNegativePromptContext> {
@@ -936,6 +1047,23 @@ fn build_storyboard_negative_prompt_contexts(
     for row in review_rows {
         if let Some(storyboard_id) = quality_review_storyboard_target_id(row) {
             if let Some(group) = storyboard_review_rows.get_mut(&storyboard_id) {
+                group.push(row.clone());
+            }
+        }
+    }
+    let mut storyboard_quality_rows = storyboard_ids
+        .iter()
+        .copied()
+        .map(|storyboard_id| (storyboard_id, Vec::new()))
+        .collect::<HashMap<_, _>>();
+    let global_quality_rows = recent_quality_rows
+        .iter()
+        .filter(|row| recent_quality_storyboard_target_id(row).is_none())
+        .cloned()
+        .collect::<Vec<_>>();
+    for row in recent_quality_rows {
+        if let Some(storyboard_id) = recent_quality_storyboard_target_id(row) {
+            if let Some(group) = storyboard_quality_rows.get_mut(&storyboard_id) {
                 group.push(row.clone());
             }
         }
@@ -963,11 +1091,21 @@ fn build_storyboard_negative_prompt_contexts(
                 .into_iter()
                 .chain(global_review_rows.iter().cloned())
                 .collect::<Vec<_>>();
+            let recent_quality_pressure = derive_recent_quality_constraint_pressure(
+                &storyboard_quality_rows
+                    .remove(&storyboard_id)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .chain(global_quality_rows.iter().cloned())
+                    .map(RecentQualitySignalRow::from)
+                    .collect::<Vec<_>>(),
+            );
             (
                 storyboard_id,
                 StoryboardNegativePromptContext {
                     storyboard_id,
                     storyboard_review_rows: review_rows,
+                    recent_quality_pressure,
                     selected_rows: storyboard_selected_rows,
                     storyboard_row,
                     current_prompt_seed,
@@ -999,17 +1137,22 @@ fn build_storyboard_negative_prompt_selection(
         &context.subject_candidates,
     );
     let review_fragments = filter_conflicting_review_fragments(
-        collect_negative_review_fragments(&context.storyboard_review_rows, context.storyboard_id),
+        collect_negative_review_fragments(
+            &context.storyboard_review_rows,
+            context.storyboard_id,
+            context.recent_quality_pressure,
+        ),
         prioritized_style_note.as_deref(),
         context.storyboard_row.as_ref(),
     );
     let rejected_memory_selection =
-        select_rejected_video_memory_notes_and_observation_candidates_for_subject(
+        select_rejected_video_memory_notes_and_observation_candidates_for_subject_with_bias(
             rejected_rows,
             context.storyboard_id,
             context.current_prompt_seed.as_deref(),
             &context.subject_candidates,
             context.storyboard_row.as_ref(),
+            recent_quality_memory_selection_bias(context.recent_quality_pressure),
         );
     let negative_memory_notes = rejected_memory_selection.negative_notes;
     let pending_observation_candidates = rejected_memory_selection.observation_notes;
@@ -1089,6 +1232,34 @@ fn build_storyboard_observation_negative_fragments(
         storyboard_row,
     );
     prune_storyboard_negative_fragments(observation_fragments, storyboard_row)
+}
+
+impl From<RecentQualitySignalSeedRow> for RecentQualitySignalRow {
+    fn from(value: RecentQualitySignalSeedRow) -> Self {
+        Self {
+            passed: value.passed,
+            overall_score: value.overall_score,
+            dialogue_naturalness: value.dialogue_naturalness,
+            character_consistency: value.character_consistency,
+            visual_quality: value.visual_quality,
+            memory_delivery_priority_applied: value.memory_delivery_priority_applied,
+            is_bad_case: value.is_bad_case,
+            bad_case_category: value.bad_case_category,
+            comments: value.comments,
+        }
+    }
+}
+
+fn recent_quality_memory_selection_bias(
+    pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<VideoPromptMemorySelectionBias> {
+    pressure.and_then(|pressure| {
+        let bias = VideoPromptMemorySelectionBias {
+            prefer_delivery: pressure.prefer_delivery_memory_recall,
+            prefer_visual_continuity: pressure.prefer_visual_continuity_memory_recall,
+        };
+        (bias.prefer_delivery || bias.prefer_visual_continuity).then_some(bias)
+    })
 }
 
 fn resolve_negative_prompt_budget_tier(
@@ -2176,23 +2347,29 @@ fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_
 }
 
 fn quality_review_storyboard_target_id(row: &QualityReviewSeedRow) -> Option<i32> {
-    match row.target_type.as_deref().map(str::trim) {
-        Some("storyboard") => row
-            .target_id
-            .as_deref()
-            .and_then(|value| value.trim().parse::<i32>().ok()),
+    storyboard_target_id_parts(row.target_type.as_deref(), row.target_id.as_deref())
+}
+
+fn recent_quality_storyboard_target_id(row: &RecentQualitySignalSeedRow) -> Option<i32> {
+    storyboard_target_id_parts(row.target_type.as_deref(), row.target_id.as_deref())
+}
+
+fn storyboard_target_id_parts(target_type: Option<&str>, target_id: Option<&str>) -> Option<i32> {
+    match target_type.map(str::trim) {
+        Some("storyboard") => target_id.and_then(|value| value.trim().parse::<i32>().ok()),
         _ => None,
     }
 }
 
 #[cfg_attr(not(test), allow(dead_code))]
 fn compact_negative_review_constraints(rows: &[QualityReviewSeedRow]) -> Option<String> {
-    merge_negative_prompt_fragment_groups(&[collect_negative_review_fragments(rows, 0)])
+    merge_negative_prompt_fragment_groups(&[collect_negative_review_fragments(rows, 0, None)])
 }
 
 fn collect_negative_review_fragments(
     rows: &[QualityReviewSeedRow],
     storyboard_id: i32,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Vec<String> {
     let mut candidates = Vec::new();
     let mut order = 0usize;
@@ -2207,6 +2384,7 @@ fn collect_negative_review_fragments(
                 map_bad_case_category_with_comments(category, row.comments.as_deref()),
                 true,
                 false,
+                recent_quality_pressure,
             );
         }
     }
@@ -2222,6 +2400,7 @@ fn collect_negative_review_fragments(
                     Some(fragment),
                     true,
                     true,
+                    recent_quality_pressure,
                 );
             }
         }
@@ -2237,6 +2416,7 @@ fn collect_negative_review_fragments(
                 map_bad_case_category_with_comments(category, row.comments.as_deref()),
                 false,
                 false,
+                recent_quality_pressure,
             );
         }
     }
@@ -2252,6 +2432,7 @@ fn collect_negative_review_fragments(
                     Some(fragment),
                     false,
                     true,
+                    recent_quality_pressure,
                 );
             }
         }
@@ -2290,12 +2471,18 @@ fn push_scored_negative_fragment(
     candidate: Option<&'static str>,
     storyboard_scoped: bool,
     from_comments: bool,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) {
     let Some(fragment) = candidate else {
         return;
     };
     target.push(ScoredNegativeFragment {
-        score: score_review_negative_fragment(fragment, storyboard_scoped, from_comments),
+        score: score_review_negative_fragment(
+            fragment,
+            storyboard_scoped,
+            from_comments,
+            recent_quality_pressure,
+        ),
         order: *order,
         fragment: fragment.to_string(),
     });
@@ -2525,6 +2712,7 @@ fn score_review_negative_fragment(
     fragment: &str,
     storyboard_scoped: bool,
     from_comments: bool,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) -> i32 {
     let source_score = if storyboard_scoped { 48 } else { 0 };
     let detail_score = if from_comments { 8 } else { 0 };
@@ -2564,8 +2752,57 @@ fn score_review_negative_fragment(
     .filter(|present| *present)
     .count() as i32
         * 4;
-    source_score + detail_score + family_score + breadth_score
+    let bias_score = score_review_negative_fragment_bias(fragment, recent_quality_pressure);
+    source_score + detail_score + family_score + breadth_score + bias_score
         - negative_fragment_information_score(fragment) as i32 / 6
+}
+
+fn score_review_negative_fragment_bias(
+    fragment: &str,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    let Some(pressure) = recent_quality_pressure else {
+        return 0;
+    };
+
+    match negative_fragment_family(fragment) {
+        "performance_delivery" | "lip_sync_mismatch" => {
+            if pressure.prefer_delivery_memory_recall {
+                12
+            } else {
+                0
+            }
+        }
+        "character_consistency" => {
+            if pressure.prefer_visual_continuity_memory_recall {
+                12
+            } else {
+                0
+            }
+        }
+        "lighting_backlight" | "lighting_reflection" => {
+            if pressure.prefer_visual_continuity_memory_recall {
+                10
+            } else {
+                0
+            }
+        }
+        "flicker_motion_jitter" | "shot_change_framing" | "camera_framing" | "rushed_motion" => {
+            if pressure.prefer_visual_continuity_memory_recall {
+                8
+            } else {
+                0
+            }
+        }
+        "mood_tone" => {
+            if pressure.prefer_delivery_memory_recall {
+                6
+            } else {
+                0
+            }
+        }
+        _ => 0,
+    }
 }
 
 fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Option<String> {
@@ -3358,8 +3595,9 @@ fn infer_video_provider(model: &str) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::{
-        build_storyboard_negative_prompts, clip_negative_prompt, collect_negative_review_fragments,
-        compact_negative_constraint_against_storyboard_style,
+        build_storyboard_negative_prompt_contexts, build_storyboard_negative_prompts,
+        build_storyboard_negative_prompts_with_recent_quality, clip_negative_prompt,
+        collect_negative_review_fragments, compact_negative_constraint_against_storyboard_style,
         compact_negative_fragment_against_storyboard_risk, compact_negative_review_constraints,
         compact_review_fragments_against_rejected_memory, compact_video_ratio,
         filter_selected_rows_for_subject, infer_negative_fragments_from_comments,
@@ -3371,9 +3609,11 @@ mod tests {
         review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
         selected_memory_fetch_limit, storyboard_dialogue_is_empty,
         storyboard_mismatch_category_is_redundant, visual_error_category_is_redundant,
-        QualityReviewSeedRow, VideoNegativePromptBudgetTier, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        QualityReviewSeedRow, RecentQualitySignalSeedRow, VideoNegativePromptBudgetTier,
+        VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
+    use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
     use crate::production::workbench::video_prompt_memory::{
         select_rejected_video_negative_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
         StoryboardPromptSeedRow,
@@ -3677,6 +3917,7 @@ mod tests {
                 },
             ],
             12,
+            None,
         );
 
         assert_eq!(
@@ -3697,6 +3938,7 @@ mod tests {
                 comments: Some("手指变形、画面模糊还有闪烁".into()),
             }],
             12,
+            None,
         );
 
         assert!(fragments.contains(&"avoid warped hands or limbs".to_string()));
@@ -3715,6 +3957,7 @@ mod tests {
                 comments: Some("霓虹反光太脏，玻璃反射抢戏".into()),
             }],
             12,
+            None,
         );
 
         assert!(fragments.contains(&"avoid distracting neon reflections".to_string()));
@@ -3739,6 +3982,7 @@ mod tests {
                 },
             ],
             12,
+            None,
         );
 
         assert!(fragments.contains(&"avoid unnecessary shot changes".to_string()));
@@ -3748,6 +3992,85 @@ mod tests {
         assert!(fragments.contains(&"avoid flicker or motion jitter".to_string()));
         assert!(!fragments.contains(&"avoid extra shot changes or wrong framing".to_string()));
         assert!(!fragments.contains(&"avoid rushed or jerky motion".to_string()));
+    }
+
+    #[test]
+    fn collect_negative_review_fragments_prefers_delivery_axis_when_recent_quality_bias_requests_it(
+    ) {
+        let fragments = collect_negative_review_fragments(
+            &[
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: Some("visual_error".into()),
+                    comments: Some("手指有点变形".into()),
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: None,
+                    comments: Some("台词像读文章，表情发木没情绪".into()),
+                },
+            ],
+            12,
+            Some(VideoPromptConstraintPressure {
+                prefer_delivery_memory_recall: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert_eq!(
+            fragments.first().map(String::as_str),
+            Some("avoid blank expression or monotone delivery")
+        );
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_with_recent_quality_bias_prefers_delivery_rejected_memory()
+    {
+        let prompts = build_storyboard_negative_prompts_with_recent_quality(
+            &[12],
+            &[],
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=3 | avoid=avoid flat cold lighting"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=3 | avoid=avoid blank expression or monotone delivery"
+                            .into(),
+                },
+            ],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚低声开口"),
+                Some("（晚晚低声开口、医院走廊、晚晚/林晚、5秒、中景、静止、停顿后低声开口、克制、夜间中性光、别再问了、空调低鸣、A12）"),
+                Some("5s"),
+            )]),
+            &[RecentQualitySignalSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                passed: Some(false),
+                overall_score: Some(5),
+                dialogue_naturalness: Some(5),
+                character_consistency: Some(8),
+                visual_quality: Some(7),
+                memory_delivery_priority_applied: Some(false),
+                is_bad_case: true,
+                bad_case_category: Some("dialogue".into()),
+                comments: Some("台词像读文章，没情绪".into()),
+            }],
+        );
+
+        assert_eq!(
+            prompts.get(&12).and_then(|value| value.as_deref()),
+            Some("avoid blank expression or monotone delivery")
+        );
     }
 
     #[test]
