@@ -4070,6 +4070,11 @@ fn generate_video_prompt_response_serializes_observation_note() {
                 .into_iter()
                 .collect(),
             memory_suppressed_bucket_counts: [("动作".into(), 3usize)].into_iter().collect(),
+            memory_optimization_applied: true,
+            memory_optimization_removed_rows: 2,
+            memory_optimization_removed_chars: 88,
+            memory_optimization_removed_visual_rows: 1,
+            memory_optimization_removed_duplicate_rows: 1,
             director_manual_yielded_to_memory: false,
             director_manual_yielded_chars: 0,
             director_performance_trimmed_chars: 0,
@@ -4170,6 +4175,20 @@ fn generate_video_prompt_response_serializes_observation_note() {
             .and_then(|item| item.get("memoryDeliveryPriorityApplied"))
             .and_then(serde_json::Value::as_bool),
         Some(false)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryOptimizationApplied"))
+            .and_then(serde_json::Value::as_bool),
+        Some(true)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryOptimizationRemovedChars"))
+            .and_then(serde_json::Value::as_u64),
+        Some(88)
     );
     assert_eq!(
         value

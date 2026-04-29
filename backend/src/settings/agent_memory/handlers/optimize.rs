@@ -3,7 +3,7 @@ use axum::{extract::State, http::HeaderMap, Json};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::harness::observe;
-use crate::production::workbench::video_prompt_memory::optimize_scoped_video_memory;
+use crate::production::optimize_scoped_video_memory;
 use crate::state::AppState;
 
 use super::super::storage::{ensure_project_owned, parse_agent_type};

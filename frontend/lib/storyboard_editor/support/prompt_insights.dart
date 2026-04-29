@@ -252,6 +252,9 @@ String buildStoryboardVideoPromptDiagnosticsLine(
       'Observation ${diagnostics.observationNoteChars}',
     if (diagnostics.memoryStyleChars > 0)
       'Memory ${diagnostics.memoryStyleChars}',
+    if (diagnostics.memoryOptimizationApplied &&
+        diagnostics.memoryOptimizationRemovedChars > 0)
+      'Memory slim -${diagnostics.memoryOptimizationRemovedChars}',
     if (diagnostics.memoryDeliveryPriorityApplied) 'Delivery-priority ✅',
     'Memory tier ${diagnostics.memoryBudgetTier}',
   ];
@@ -321,6 +324,13 @@ String buildStoryboardVideoPromptSourceSummary(
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
   final parts = <String>[describeStoryboardAutoNegativeSource(diagnostics)];
+  if (diagnostics.memoryOptimizationApplied &&
+      diagnostics.memoryOptimizationRemovedRows > 0) {
+    parts.add(
+      '自动瘦身 ${diagnostics.memoryOptimizationRemovedRows} 条'
+      '（重复 ${diagnostics.memoryOptimizationRemovedDuplicateRows} / 纯视觉 ${diagnostics.memoryOptimizationRemovedVisualRows}）',
+    );
+  }
   if (diagnostics.autoNegativeReviewFragmentCount > 0) {
     parts.add('评审 ${diagnostics.autoNegativeReviewFragmentCount} 条');
   }
@@ -354,6 +364,11 @@ String buildStoryboardVideoPromptBudgetHint(
 ) {
   if (!diagnostics.usesReferenceFrame) {
     return '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。';
+  }
+  if (diagnostics.memoryOptimizationApplied &&
+      diagnostics.memoryOptimizationRemovedRows > 0 &&
+      diagnostics.memoryDeliveryChars > 0) {
+    return '本次生成前已自动清掉重复/纯视觉私有记忆，优先保住了表演和语气锚点；继续补词时先别把这些省下来的预算又填回泛风格句。';
   }
   if (diagnostics.memoryDeliveryPriorityApplied &&
       diagnostics.memoryDeliveryChars > 0 &&

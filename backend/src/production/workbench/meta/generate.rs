@@ -20,7 +20,7 @@ use crate::production::workbench::video::generate::{
 };
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
-    contextual_style_memory_value_for_storyboard,
+    contextual_style_memory_value_for_storyboard, optimize_scoped_video_memory,
     select_pending_rejected_video_observation_candidates_for_subject,
     select_prioritized_video_style_note, select_selected_video_memory_notes_for_storyboard,
     select_subject_role_video_style_memory_notes,
@@ -181,6 +181,11 @@ fn build_auto_quality_review_model_params(
             "memoryDeliveryPriorityApplied": diagnostics.memory_delivery_priority_applied,
             "memoryStyleAnchorCount": diagnostics.memory_style_anchor_count,
             "memoryDeliveryAnchorCount": diagnostics.memory_delivery_anchor_count,
+            "memoryOptimizationApplied": diagnostics.memory_optimization_applied,
+            "memoryOptimizationRemovedRows": diagnostics.memory_optimization_removed_rows,
+            "memoryOptimizationRemovedChars": diagnostics.memory_optimization_removed_chars,
+            "memoryOptimizationRemovedVisualRows": diagnostics.memory_optimization_removed_visual_rows,
+            "memoryOptimizationRemovedDuplicateRows": diagnostics.memory_optimization_removed_duplicate_rows,
             "directorManualYieldedToMemory": diagnostics.director_manual_yielded_to_memory,
             "directorManualYieldedChars": diagnostics.director_manual_yielded_chars,
             "directorPerformanceTrimmedChars": diagnostics.director_performance_trimmed_chars,
@@ -222,6 +227,11 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         body.script_id,
     )
     .await?;
+    let memory_optimization = if body.storyboard_id.is_some_and(|id| id > 0) {
+        Some(optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?)
+    } else {
+        None
+    };
     let single_storyboard_runtime =
         if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
             Some(
@@ -286,10 +296,13 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         context.as_ref(),
     );
 
-    let diagnostics = prompt_result.diagnostics.with_runtime_notes(
-        negative_prompt_selection.as_ref(),
-        observation_note.as_deref(),
-    );
+    let diagnostics = prompt_result
+        .diagnostics
+        .with_runtime_notes(
+            negative_prompt_selection.as_ref(),
+            observation_note.as_deref(),
+        )
+        .with_memory_optimization(memory_optimization.as_ref());
 
     if body.auto_quality_review {
         let pool = pool.clone();

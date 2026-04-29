@@ -129,6 +129,23 @@ impl GenerateVideoPromptDiagnostics {
             .unwrap_or(0);
         self
     }
+
+    pub(super) fn with_memory_optimization(
+        mut self,
+        result: Option<
+            &crate::production::workbench::video_prompt_memory::VideoMemoryOptimizationResult,
+        >,
+    ) -> Self {
+        let Some(result) = result else {
+            return self;
+        };
+        self.memory_optimization_applied = result.removed_rows > 0;
+        self.memory_optimization_removed_rows = result.removed_rows;
+        self.memory_optimization_removed_chars = result.removed_chars;
+        self.memory_optimization_removed_visual_rows = result.removed_visual_rows;
+        self.memory_optimization_removed_duplicate_rows = result.removed_duplicate_rows;
+        self
+    }
 }
 
 pub(super) fn art_style_director_profile(

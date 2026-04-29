@@ -31,6 +31,11 @@ class GenerateVideoPromptDiagnostics {
     required this.memorySuppressedBuckets,
     this.memoryHitBucketCounts = const <String, int>{},
     this.memorySuppressedBucketCounts = const <String, int>{},
+    this.memoryOptimizationApplied = false,
+    this.memoryOptimizationRemovedRows = 0,
+    this.memoryOptimizationRemovedChars = 0,
+    this.memoryOptimizationRemovedVisualRows = 0,
+    this.memoryOptimizationRemovedDuplicateRows = 0,
     required this.continuityNoteCount,
     required this.continuityNoteChars,
     required this.usesReferenceFrame,
@@ -59,6 +64,11 @@ class GenerateVideoPromptDiagnostics {
   final List<String> memorySuppressedBuckets;
   final Map<String, int> memoryHitBucketCounts;
   final Map<String, int> memorySuppressedBucketCounts;
+  final bool memoryOptimizationApplied;
+  final int memoryOptimizationRemovedRows;
+  final int memoryOptimizationRemovedChars;
+  final int memoryOptimizationRemovedVisualRows;
+  final int memoryOptimizationRemovedDuplicateRows;
   final int continuityNoteCount;
   final int continuityNoteChars;
   final bool usesReferenceFrame;
@@ -115,6 +125,16 @@ class GenerateVideoPromptDiagnostics {
       memorySuppressedBucketCounts: _bucketCounts(
         json['memorySuppressedBucketCounts'],
       ),
+      memoryOptimizationApplied: json['memoryOptimizationApplied'] == true,
+      memoryOptimizationRemovedRows:
+          (json['memoryOptimizationRemovedRows'] as num?)?.toInt() ?? 0,
+      memoryOptimizationRemovedChars:
+          (json['memoryOptimizationRemovedChars'] as num?)?.toInt() ?? 0,
+      memoryOptimizationRemovedVisualRows:
+          (json['memoryOptimizationRemovedVisualRows'] as num?)?.toInt() ?? 0,
+      memoryOptimizationRemovedDuplicateRows:
+          (json['memoryOptimizationRemovedDuplicateRows'] as num?)?.toInt() ??
+          0,
       continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
       continuityNoteChars: (json['continuityNoteChars'] as num?)?.toInt() ?? 0,
       usesReferenceFrame: json['usesReferenceFrame'] == true,

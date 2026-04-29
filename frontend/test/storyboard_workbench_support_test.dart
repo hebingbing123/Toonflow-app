@@ -34,6 +34,53 @@ void main() {
     },
   );
 
+  test('video prompt diagnostics line shows auto memory slimming result', () {
+    const diagnostics = GenerateVideoPromptDiagnostics(
+      promptChars: 412,
+      negativePromptChars: 56,
+      negativeConstraintCount: 2,
+      negativeBudgetTier: 'lean',
+      autoNegativeSource: 'rejected_memory',
+      autoNegativeReviewFragmentCount: 0,
+      autoNegativeMemoryFragmentCount: 2,
+      observationNoteChars: 0,
+      roleAnchorCount: 1,
+      sceneAnchorCount: 1,
+      toolAnchorCount: 0,
+      styleAnchorCount: 1,
+      memoryStyleAnchorCount: 1,
+      memoryDeliveryAnchorCount: 1,
+      memoryDeliveryPriorityApplied: true,
+      memoryStyleChars: 64,
+      memoryVisualChars: 18,
+      memoryDeliveryChars: 32,
+      memoryHitBuckets: <String>['表演'],
+      memorySuppressedBuckets: <String>['动作'],
+      memoryOptimizationApplied: true,
+      memoryOptimizationRemovedRows: 2,
+      memoryOptimizationRemovedChars: 88,
+      memoryOptimizationRemovedVisualRows: 1,
+      memoryOptimizationRemovedDuplicateRows: 1,
+      continuityNoteCount: 1,
+      continuityNoteChars: 20,
+      usesReferenceFrame: true,
+      memoryBudgetTier: 'expanded',
+    );
+
+    expect(
+      buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
+      contains('Memory slim -88'),
+    );
+    expect(
+      buildStoryboardVideoPromptSourceSummary(diagnostics),
+      contains('自动瘦身 2 条（重复 1 / 纯视觉 1）'),
+    );
+    expect(
+      buildStoryboardVideoPromptBudgetHint(diagnostics),
+      contains('已自动清掉重复/纯视觉私有记忆'),
+    );
+  });
+
   test(
     'describeStoryboardSelectedMemoryFeedback explains isolated reusable memory',
     () {

@@ -15,7 +15,7 @@ use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::meta::common::negative_constraint_conflicts_with_storyboard_style;
 use crate::production::workbench::video_prompt_memory::{
     clip_prompt_fragment, compact_video_style_prompt_note, extract_key_value,
-    normalize_prompt_text, parse_structured_storyboard_description,
+    normalize_prompt_text, optimize_scoped_video_memory, parse_structured_storyboard_description,
     select_prioritized_video_style_note, select_project_video_style_memory_notes_for_storyboard,
     select_rejected_video_memory_notes_and_observation_candidates_for_subject,
     select_script_video_style_memory_notes_for_storyboard,
@@ -201,6 +201,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
     )
     .await?;
     ensure_storyboards_in_scope(pool, scope_row.script_id, &storyboard_ids).await?;
+    optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?;
 
     let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
         .await?

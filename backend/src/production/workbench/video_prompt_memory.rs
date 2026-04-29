@@ -1277,12 +1277,13 @@ fn selected_video_memory_semantic_dedupe_key(content: &str) -> String {
     .into_iter()
     .flatten()
     .find(|value| !normalize_prompt_text(value).is_empty())
-    .unwrap_or(content);
-    normalize_prompt_text(semantic)
+    .unwrap_or_else(|| content.to_string());
+    normalize_prompt_text(&semantic)
 }
 
 fn selected_video_memory_has_delivery_anchor(content: &str) -> bool {
     extract_key_value(content, "delivery")
+        .as_ref()
         .map(|value| !normalize_prompt_text(value).is_empty())
         .unwrap_or(false)
         || selected_video_memory_delivery_signal_count(content) > 0
@@ -8263,8 +8264,8 @@ mod tests {
         compact_selected_memory_setting, compact_selected_memory_subject,
         compact_video_continuity_note, compact_video_style_prompt_note,
         merge_rejected_video_negative_memory, merge_selected_memory_subject_action,
-        parse_structured_storyboard_description, rejected_video_negative_rejection_count,
-        select_neighbor_selected_video_memory_notes,
+        parse_structured_storyboard_description, plan_selected_video_memory_optimization,
+        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_candidates_for_subject,
         select_pending_rejected_video_observation_note, select_prioritized_video_style_note,
@@ -8275,12 +8276,14 @@ mod tests {
         select_rejected_video_negative_memory_notes_for_subject,
         select_script_video_style_memory_notes,
         select_script_video_style_memory_notes_for_storyboard, select_selected_video_memory_notes,
+        select_selected_video_memory_notes_for_storyboard,
         select_subject_role_video_style_memory_notes,
         select_subject_role_video_style_memory_notes_for_storyboard,
         selected_memory_subject_aliases, selected_memory_subject_identity,
         selected_video_memory_quality_score, selected_video_memory_scope,
         selected_video_memory_update_would_reduce_quality, storyboard_prompt_seed, AgentMemoryRow,
-        ScopedAgentMemoryRow, SelectedVideoMemoryScope, StoryboardPromptSeedRow,
+        ScopedAgentMemoryRow, SelectedVideoMemoryOptimizationCandidate, SelectedVideoMemoryScope,
+        StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;

@@ -256,6 +256,11 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
             memory_suppressed_buckets: style_anchor_build.memory_suppressed_buckets,
             memory_hit_bucket_counts: style_anchor_build.memory_hit_bucket_counts,
             memory_suppressed_bucket_counts: style_anchor_build.memory_suppressed_bucket_counts,
+            memory_optimization_applied: false,
+            memory_optimization_removed_rows: 0,
+            memory_optimization_removed_chars: 0,
+            memory_optimization_removed_visual_rows: 0,
+            memory_optimization_removed_duplicate_rows: 0,
             director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
             director_manual_yielded_chars: style_anchor_build.director_manual_yielded_chars,
             director_performance_trimmed_chars: style_anchor_build
