@@ -2515,20 +2515,7 @@ pub(crate) fn select_selected_video_memory_notes_for_storyboard(
     if storyboard_numeric_id <= 0 {
         return Vec::new();
     }
-    let should_prefer_delivery = storyboard_row
-        .and_then(|storyboard_row| {
-            storyboard_row
-                .video_desc
-                .as_deref()
-                .and_then(parse_structured_storyboard_description)
-                .map(|fields| {
-                    selected_memory_has_visible_speech_performance_risk(
-                        &fields,
-                        storyboard_row.prompt.as_deref(),
-                    ) || storyboard_is_fragile_emotional_turn(&fields)
-                })
-        })
-        .unwrap_or(false);
+    let should_prefer_delivery = should_prefer_selected_delivery_for_storyboard(storyboard_row);
     let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
         rows,
         storyboard_numeric_id,
@@ -5035,7 +5022,7 @@ fn collect_ranked_video_style_note_candidates(
                 if !memory_row_is_neighbor_selected_style(row, storyboard_numeric_id) {
                     continue;
                 }
-                let note = extract_style_note_value(row);
+                let note = extract_selected_memory_style_note_for_storyboard(row, storyboard_row);
                 (120, note.clone(), note)
             }
             SCRIPT_VIDEO_STYLE_MEMORY_NAME => {
@@ -5091,6 +5078,18 @@ fn memory_row_is_neighbor_selected_style(row: &AgentMemoryRow, storyboard_numeri
 
 fn extract_style_note_value(row: &AgentMemoryRow) -> Option<String> {
     selected_video_style_value_from_content(&row.content)
+}
+
+fn extract_selected_memory_style_note_for_storyboard(
+    row: &AgentMemoryRow,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    if should_prefer_selected_delivery_for_storyboard(storyboard_row) {
+        if let Some(delivery) = selected_video_delivery_value_from_content(&row.content) {
+            return Some(delivery);
+        }
+    }
+    selected_video_style_value(row)
 }
 
 fn selected_video_style_value_from_content(content: &str) -> Option<String> {
@@ -7181,6 +7180,25 @@ fn selected_video_delivery_value_from_content(content: &str) -> Option<String> {
         .filter(|value| !value.is_empty())
 }
 
+fn should_prefer_selected_delivery_for_storyboard(
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> bool {
+    storyboard_row
+        .and_then(|storyboard_row| {
+            storyboard_row
+                .video_desc
+                .as_deref()
+                .and_then(parse_structured_storyboard_description)
+                .map(|fields| {
+                    selected_memory_has_visible_speech_performance_risk(
+                        &fields,
+                        storyboard_row.prompt.as_deref(),
+                    ) || storyboard_is_fragile_emotional_turn(&fields)
+                })
+        })
+        .unwrap_or(false)
+}
+
 fn summary_style_memory_value_for_storyboard(
     row: &AgentMemoryRow,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
@@ -9153,6 +9171,26 @@ mod tests {
             &[AgentMemoryRow {
                 name: "script_role_video_style_memory".into(),
                 content: "subject=女主 | sampleCount=4 | style=表演喉结滚动，语气低声尾音发颤，声场雨声回响 | delivery=表演喉结滚动低声尾音发颤".into(),
+            }],
+            12,
+            Some("current-seed-9999"),
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(note, Some("表演喉结滚动低声尾音发颤".to_string()));
+    }
+
+    #[test]
+    fn select_prioritized_video_style_note_prefers_neighbor_selected_delivery_for_dialogue_scene() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主低声开口".into()),
+            video_desc: Some("（女主低声开口、旧宅走廊、女主、5秒、近景、稳定跟拍、喉结滚动后低声说你先走、克制、冷调逆光、你先走、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let note = select_prioritized_video_style_note(
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | promptSeed=neighbor-seed-0001 | style=表演喉结滚动，语气低声尾音发颤，光影冷调逆光 | delivery=表演喉结滚动低声尾音发颤 | note=...".into(),
             }],
             12,
             Some("current-seed-9999"),
