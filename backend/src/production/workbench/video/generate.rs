@@ -96,7 +96,9 @@ pub(crate) struct StoryboardNegativePromptRuntime {
     pub(crate) storyboard_id: i32,
     pub(crate) selection: AutoNegativePromptSelection,
     pub(crate) pending_observation_candidates: Vec<String>,
+    #[allow(dead_code)]
     pub(crate) rejected_rows: Vec<AgentMemoryRow>,
+    #[allow(dead_code)]
     pub(crate) selected_rows: Vec<AgentMemoryRow>,
     pub(crate) prompt_support_rows: Vec<AgentMemoryRow>,
     pub(crate) storyboard_row: Option<StoryboardPromptSeedRow>,
@@ -105,14 +107,13 @@ pub(crate) struct StoryboardNegativePromptRuntime {
 }
 
 impl AutoNegativePromptSelection {
+    #[allow(dead_code)]
     fn as_deref(&self) -> Option<&str> {
         self.prompt.as_deref()
     }
 
     pub(crate) fn source_label(&self) -> Option<&'static str> {
-        if self.prompt.is_none() {
-            return None;
-        }
+        self.prompt.as_ref()?;
         if self.used_pending_observation_fallback {
             return Some("pending_rejected_observation");
         }
@@ -405,6 +406,7 @@ fn compact_video_ratio(value: &str) -> Option<String> {
     None
 }
 
+#[allow(dead_code)]
 pub(crate) async fn load_auto_negative_prompt(
     pool: &PgPool,
     user_id: Uuid,
@@ -1986,6 +1988,7 @@ fn compact_rejected_overlap_pair(
     }
 }
 
+#[allow(dead_code)]
 fn review_fragment_conflicts_with_selected_style(
     fragment: &str,
     selected_style_note: Option<&str>,
@@ -2031,6 +2034,7 @@ fn storyboard_dialogue_is_empty(dialogue: &str) -> bool {
         .any(|marker| normalized_ascii == marker)
 }
 
+#[allow(dead_code)]
 fn compact_negative_constraint_against_storyboard_style(
     fragment: &str,
     selected_style_note: Option<&str>,
@@ -2161,6 +2165,7 @@ fn render_mood_tone_constraint_fragments(
     fragments
 }
 
+#[allow(dead_code)]
 fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
     quality_review_storyboard_target_id(row)
         .map(|value| value == storyboard_id)

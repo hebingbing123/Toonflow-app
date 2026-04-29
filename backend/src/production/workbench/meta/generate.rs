@@ -156,6 +156,38 @@ impl VideoPromptMemoryBudgetTier {
     }
 }
 
+fn build_auto_quality_review_model_params(
+    diagnostics: &GenerateVideoPromptDiagnostics,
+) -> serde_json::Value {
+    json!({
+        "source": "production.workbench.generate-video-prompt",
+        "diagnostics": {
+            "promptChars": diagnostics.prompt_chars,
+            "negativePromptChars": diagnostics.negative_prompt_chars,
+            "negativeConstraintCount": diagnostics.negative_constraint_count,
+            "negativeBudgetTier": diagnostics.negative_budget_tier,
+            "autoNegativeSource": diagnostics.auto_negative_source,
+            "autoNegativeReviewFragmentCount": diagnostics.auto_negative_review_fragment_count,
+            "autoNegativeMemoryFragmentCount": diagnostics.auto_negative_memory_fragment_count,
+            "observationNoteChars": diagnostics.observation_note_chars,
+            "memoryBudgetTier": diagnostics.memory_budget_tier,
+            "memoryStyleChars": diagnostics.memory_style_chars,
+            "memoryVisualChars": diagnostics.memory_visual_chars,
+            "memoryDeliveryChars": diagnostics.memory_delivery_chars,
+            "memoryDeliveryPriorityApplied": diagnostics.memory_delivery_priority_applied,
+            "memoryStyleAnchorCount": diagnostics.memory_style_anchor_count,
+            "memoryDeliveryAnchorCount": diagnostics.memory_delivery_anchor_count,
+            "directorManualYieldedToMemory": diagnostics.director_manual_yielded_to_memory,
+            "directorManualYieldedChars": diagnostics.director_manual_yielded_chars,
+            "directorPerformanceTrimmedChars": diagnostics.director_performance_trimmed_chars,
+            "directorAnchorSavedChars": diagnostics.director_anchor_saved_chars,
+            "continuityNoteCount": diagnostics.continuity_note_count,
+            "continuityNoteChars": diagnostics.continuity_note_chars,
+            "usesReferenceFrame": diagnostics.uses_reference_frame,
+        }
+    })
+}
+
 #[utoipa::path(
     post,
     path = "/api/v1/production/workbench/generate-video-prompt",
@@ -270,19 +302,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
             .filter(|id| *id > 0)
             .map(|id| id.to_string());
         let memory_delivery_priority_applied = diagnostics.memory_delivery_priority_applied;
-        let model_params = json!({
-            "source": "production.workbench.generate-video-prompt",
-            "diagnostics": {
-                "promptChars": diagnostics.prompt_chars,
-                "memoryBudgetTier": diagnostics.memory_budget_tier,
-                "memoryStyleChars": diagnostics.memory_style_chars,
-                "memoryVisualChars": diagnostics.memory_visual_chars,
-                "memoryDeliveryChars": diagnostics.memory_delivery_chars,
-                "memoryDeliveryPriorityApplied": diagnostics.memory_delivery_priority_applied,
-                "memoryStyleAnchorCount": diagnostics.memory_style_anchor_count,
-                "memoryDeliveryAnchorCount": diagnostics.memory_delivery_anchor_count,
-            }
-        });
+        let model_params = build_auto_quality_review_model_params(&diagnostics);
         tokio::spawn(async move {
             let _ = sqlx::query(
                 r#"

@@ -1,5 +1,44 @@
 import '../../rust_api.dart';
 
+Map<String, dynamic>? _qualityDiagnosticsMap(QualityReview row) {
+  final params = row.modelParams;
+  if (params == null) return null;
+  final diagnostics = params['diagnostics'];
+  if (diagnostics is! Map) return null;
+  return Map<String, dynamic>.from(diagnostics);
+}
+
+int _diagnosticInt(Map<String, dynamic> map, String key) {
+  final value = map[key];
+  if (value is num) return value.toInt();
+  return 0;
+}
+
+String? _diagnosticString(Map<String, dynamic> map, String key) {
+  final value = map[key];
+  if (value is String && value.isNotEmpty) return value;
+  return null;
+}
+
+bool _diagnosticBool(Map<String, dynamic> map, String key) => map[key] == true;
+
+String _describeAutoNegativeSource(String source) {
+  switch (source) {
+    case 'review+rejected_memory':
+      return '负向约束=评审+坏例记忆';
+    case 'review':
+      return '负向约束=近期评审';
+    case 'rejected_memory':
+      return '负向约束=坏例记忆';
+    case 'pending_observation_note':
+      return '负向约束=待观察坏例';
+    case 'pending_rejected_observation':
+      return '负向约束=待观察拒绝项';
+    default:
+      return '负向约束=$source';
+  }
+}
+
 String? summarizeTokenEfficiencyFromQualityReviews(
   Iterable<QualityReview> rows, {
   int maxSamples = 40,
@@ -51,6 +90,122 @@ String? summarizeTokenEfficiencyFromQualityReviews(
   final avgDelivery = (sumDelivery / parsed).toStringAsFixed(0);
   final hitRate = (deliveryPriorityHits * 100.0 / parsed).toStringAsFixed(1);
   return 'auto样本 $parsed 条 · 平均 prompt=$avgPrompt chars · memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery) · delivery优先命中 $hitRate%';
+}
+
+String? summarizePromptDiagnosticsFromQualityReviews(
+  Iterable<QualityReview> rows, {
+  int maxSamples = 16,
+}) {
+  final samples = rows
+      .where((row) => row.source == 'auto')
+      .map((row) => _qualityDiagnosticsMap(row))
+      .whereType<Map<String, dynamic>>()
+      .take(maxSamples)
+      .toList(growable: false);
+  if (samples.isEmpty) return null;
+
+  var totalPrompt = 0;
+  var totalMemory = 0;
+  var totalVisual = 0;
+  var totalDelivery = 0;
+  var deliveryPriorityHits = 0;
+  var directorYieldHits = 0;
+  var referenceFrameHits = 0;
+  var continuityHits = 0;
+  final negativeSources = <String, int>{};
+
+  for (final sample in samples) {
+    totalPrompt += _diagnosticInt(sample, 'promptChars');
+    totalMemory += _diagnosticInt(sample, 'memoryStyleChars');
+    totalVisual += _diagnosticInt(sample, 'memoryVisualChars');
+    totalDelivery += _diagnosticInt(sample, 'memoryDeliveryChars');
+    if (_diagnosticBool(sample, 'memoryDeliveryPriorityApplied')) {
+      deliveryPriorityHits += 1;
+    }
+    if (_diagnosticBool(sample, 'directorManualYieldedToMemory')) {
+      directorYieldHits += 1;
+    }
+    if (_diagnosticBool(sample, 'usesReferenceFrame')) {
+      referenceFrameHits += 1;
+    }
+    if (_diagnosticInt(sample, 'continuityNoteCount') > 0) {
+      continuityHits += 1;
+    }
+    final source = _diagnosticString(sample, 'autoNegativeSource');
+    if (source != null) {
+      negativeSources.update(source, (count) => count + 1, ifAbsent: () => 1);
+    }
+  }
+
+  final topNegativeSource = negativeSources.entries.isEmpty
+      ? null
+      : (negativeSources.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value)))
+            .first;
+  final avgPrompt = (totalPrompt / samples.length).toStringAsFixed(0);
+  final avgMemory = (totalMemory / samples.length).toStringAsFixed(0);
+  final avgVisual = (totalVisual / samples.length).toStringAsFixed(0);
+  final avgDelivery = (totalDelivery / samples.length).toStringAsFixed(0);
+  final deliveryHitRate = (deliveryPriorityHits * 100.0 / samples.length)
+      .toStringAsFixed(1);
+  final parts = <String>[
+    'auto诊断 ${samples.length} 条',
+    '平均 prompt=$avgPrompt chars',
+    'memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery)',
+    'delivery优先 $deliveryHitRate%',
+  ];
+  if (topNegativeSource != null) {
+    parts.add(
+      '${_describeAutoNegativeSource(topNegativeSource.key)} ${topNegativeSource.value} 次',
+    );
+  }
+  if (directorYieldHits > 0) {
+    parts.add('导演让位 $directorYieldHits/${samples.length}');
+  }
+  if (continuityHits > 0) {
+    parts.add('连续性约束 $continuityHits/${samples.length}');
+  }
+  if (referenceFrameHits > 0) {
+    parts.add('参考帧 $referenceFrameHits/${samples.length}');
+  }
+  return parts.join(' · ');
+}
+
+String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
+  final diagnostics = _qualityDiagnosticsMap(row);
+  if (diagnostics == null) return null;
+
+  final promptChars = _diagnosticInt(diagnostics, 'promptChars');
+  final memoryChars = _diagnosticInt(diagnostics, 'memoryStyleChars');
+  final visualChars = _diagnosticInt(diagnostics, 'memoryVisualChars');
+  final deliveryChars = _diagnosticInt(diagnostics, 'memoryDeliveryChars');
+  final directorSaved = _diagnosticInt(diagnostics, 'directorAnchorSavedChars');
+  final continuityCount = _diagnosticInt(diagnostics, 'continuityNoteCount');
+  final parts = <String>[
+    'prompt=$promptChars',
+    'memory=$memoryChars(v=$visualChars,d=$deliveryChars)',
+  ];
+
+  final negativeSource = _diagnosticString(diagnostics, 'autoNegativeSource');
+  if (negativeSource != null) {
+    parts.add(_describeAutoNegativeSource(negativeSource));
+  }
+  if (_diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
+    parts.add('delivery优先');
+  }
+  if (_diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
+    parts.add('导演让位');
+  }
+  if (directorSaved > 0) {
+    parts.add('省下$directorSaved chars');
+  }
+  if (continuityCount > 0) {
+    parts.add('连续性$continuityCount');
+  }
+  if (_diagnosticBool(diagnostics, 'usesReferenceFrame')) {
+    parts.add('参考帧');
+  }
+  return parts.join(' · ');
 }
 
 String summarizeQualityTokenEfficiencyRows(
@@ -176,7 +331,7 @@ String summarizeStagePassRateRows(
   return '$visible$suffix';
 }
 
-String formatQualityReviewDetails(QualityReview row) {
+String formatQualityReviewCoreDetails(QualityReview row) {
   return [
     row.id,
     row.targetType,
@@ -190,4 +345,13 @@ String formatQualityReviewDetails(QualityReview row) {
     if (row.isBadCase) 'bad_case',
     if (row.badCaseCategory != null) 'category=${row.badCaseCategory}',
   ].join(' · ');
+}
+
+String formatQualityReviewDetails(QualityReview row) {
+  final parts = [formatQualityReviewCoreDetails(row)];
+  final diagnosticSummary = summarizeQualityReviewPromptDiagnostics(row);
+  if (diagnosticSummary != null) {
+    parts.add('诊断=$diagnosticSummary');
+  }
+  return parts.join(' · ');
 }

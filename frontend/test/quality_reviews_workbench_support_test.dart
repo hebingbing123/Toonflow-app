@@ -81,6 +81,98 @@ void main() {
   });
 
   test(
+    'formatQualityReviewDetails appends prompt diagnostics when present',
+    () {
+      final details = formatQualityReviewDetails(
+        const QualityReview(
+          id: 'r2',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'storyboard',
+          source: 'auto',
+          overallScore: 91,
+          isBadCase: false,
+          modelParams: {
+            'diagnostics': {
+              'promptChars': 420,
+              'memoryStyleChars': 72,
+              'memoryVisualChars': 30,
+              'memoryDeliveryChars': 42,
+              'memoryDeliveryPriorityApplied': true,
+              'autoNegativeSource': 'review+rejected_memory',
+              'directorManualYieldedToMemory': true,
+              'directorAnchorSavedChars': 28,
+              'continuityNoteCount': 1,
+              'usesReferenceFrame': true,
+            },
+          },
+        ),
+      );
+
+      expect(details, contains('诊断=prompt=420'));
+      expect(details, contains('负向约束=评审+坏例记忆'));
+      expect(details, contains('导演让位'));
+      expect(details, contains('参考帧'));
+    },
+  );
+
+  test('summarizePromptDiagnosticsFromQualityReviews aggregates auto rows', () {
+    final summary = summarizePromptDiagnosticsFromQualityReviews(const [
+      QualityReview(
+        id: 'r1',
+        createdAt: '2026-04-10T00:00:00Z',
+        updatedAt: '2026-04-10T00:00:00Z',
+        userId: 'u1',
+        targetType: 'storyboard',
+        source: 'auto',
+        isBadCase: false,
+        modelParams: {
+          'diagnostics': {
+            'promptChars': 400,
+            'memoryStyleChars': 80,
+            'memoryVisualChars': 24,
+            'memoryDeliveryChars': 32,
+            'memoryDeliveryPriorityApplied': true,
+            'autoNegativeSource': 'review+rejected_memory',
+            'directorManualYieldedToMemory': true,
+            'continuityNoteCount': 1,
+            'usesReferenceFrame': true,
+          },
+        },
+      ),
+      QualityReview(
+        id: 'r2',
+        createdAt: '2026-04-10T00:00:00Z',
+        updatedAt: '2026-04-10T00:00:00Z',
+        userId: 'u1',
+        targetType: 'storyboard',
+        source: 'auto',
+        isBadCase: false,
+        modelParams: {
+          'diagnostics': {
+            'promptChars': 500,
+            'memoryStyleChars': 100,
+            'memoryVisualChars': 40,
+            'memoryDeliveryChars': 50,
+            'memoryDeliveryPriorityApplied': false,
+            'autoNegativeSource': 'review+rejected_memory',
+            'directorManualYieldedToMemory': false,
+            'continuityNoteCount': 0,
+            'usesReferenceFrame': false,
+          },
+        },
+      ),
+    ]);
+
+    expect(summary, contains('auto诊断 2 条'));
+    expect(summary, contains('平均 prompt=450 chars'));
+    expect(summary, contains('delivery优先 50.0%'));
+    expect(summary, contains('负向约束=评审+坏例记忆 2 次'));
+    expect(summary, contains('导演让位 1/2'));
+  });
+
+  test(
     'summarizeQualityTokenEfficiencyRows formats prompt and memory shares',
     () {
       final summary = summarizeQualityTokenEfficiencyRows(const [

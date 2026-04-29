@@ -66,6 +66,8 @@ pub(crate) async fn delete_all_agent_memory_rows(
 
 /// Append a single memory row to app_agent_memory.
 /// Used internally by quality feedback and other automated systems.
+#[allow(dead_code)]
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn append_agent_memory(
     pool: &PgPool,
     user_id: Uuid,
@@ -109,6 +111,7 @@ pub(crate) async fn append_agent_memory(
 
 /// Replace a named summary memory within the exact user/project/script/agent scope.
 /// This keeps automated summary memories bounded instead of appending indefinitely.
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn replace_named_summary_memory(
     pool: &PgPool,
     user_id: Uuid,

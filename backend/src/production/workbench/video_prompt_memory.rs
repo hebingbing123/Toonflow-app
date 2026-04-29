@@ -6070,7 +6070,9 @@ fn compact_global_visual_style_fragments(
     if delivery.is_none() {
         return fragments.to_vec();
     }
-    let has_performance_signal = fragments.iter().any(|fragment| fragment.starts_with("表演"));
+    let has_performance_signal = fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"));
     let has_visual_signal = fragments.iter().any(|fragment| {
         fragment.starts_with("光影") || fragment.starts_with("环境") || fragment.starts_with("镜头")
     });

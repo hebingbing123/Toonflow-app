@@ -4,6 +4,7 @@
 //! `rejected_video_negative_memory` chain so the next generation can directly
 //! reuse them without extra LLM calls. Non-video targets still fall back to a
 //! compact generic summary memory.
+#![allow(dead_code)]
 
 use std::collections::BTreeSet;
 

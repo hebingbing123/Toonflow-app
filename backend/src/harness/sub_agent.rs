@@ -323,9 +323,11 @@ fn parse_storyboard_prompt_seed_scope(scope: Option<&str>) -> Vec<(i64, String)>
     };
     if let Some(prompt_seed) = scope.strip_prefix("promptSeed=") {
         let prompt_seed = prompt_seed.trim();
-        return (!prompt_seed.is_empty())
-            .then(|| vec![(0_i64, prompt_seed.to_string())])
-            .unwrap_or_default();
+        return if !prompt_seed.is_empty() {
+            vec![(0_i64, prompt_seed.to_string())]
+        } else {
+            Vec::new()
+        };
     }
 
     let Some(mapped) = scope.strip_prefix("storyboardPromptSeeds=") else {
@@ -587,7 +589,7 @@ fn select_auto_memory_entries(
     scored
         .into_iter()
         .filter(|(score, _, candidate_scope, _)| {
-            if *score <= 0 {
+            if *score == 0 {
                 return false;
             }
             if has_matching_prompt_seed_storyboards.is_empty() {

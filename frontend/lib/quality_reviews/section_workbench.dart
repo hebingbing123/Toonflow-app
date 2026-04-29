@@ -257,7 +257,13 @@ class _QualityReviewsWorkbenchDialogState
       setState(() {
         _ctrls.reviewIdCtrl.text = created.id;
         _reviewDetails = formatQualityReviewDetails(created);
-        _statusLine = '已创建评审 ${created.id}';
+        final writesScopedMemory =
+            (projectId != null && scriptId != null) &&
+            (_createBadCase ||
+                (_createPassed == false && (score == null || score < 70)));
+        _statusLine = writesScopedMemory
+            ? '已创建评审 ${created.id}，本条会回写项目/剧本隔离记忆'
+            : '已创建评审 ${created.id}';
       });
       await _loadReviews(
         onlyBadCases: _filterBadCasesOnly,

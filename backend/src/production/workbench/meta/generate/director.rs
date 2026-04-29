@@ -3,23 +3,23 @@
 use super::*;
 
 pub(super) struct ArtStyleDirectorProfile {
-    aliases: &'static [&'static str],
-    director_storyboard: &'static str,
-    director_storyboard_table_style: &'static str,
+    pub(super) aliases: &'static [&'static str],
+    pub(super) director_storyboard: &'static str,
+    pub(super) director_storyboard_table_style: &'static str,
 }
 
 #[derive(Debug, Clone)]
 pub(super) struct DirectorEmotionCue {
-    emotion_terms: Vec<String>,
-    face: String,
-    eyes: String,
-    micro_expression: String,
+    pub(super) emotion_terms: Vec<String>,
+    pub(super) face: String,
+    pub(super) eyes: String,
+    pub(super) micro_expression: String,
 }
 
 #[derive(Debug, Clone)]
 pub(super) struct DirectorEnvironmentTextureCue {
-    cue: String,
-    match_terms: Vec<String>,
+    pub(super) cue: String,
+    pub(super) match_terms: Vec<String>,
 }
 
 pub(super) const ART_STYLE_DIRECTOR_PROFILES: &[ArtStyleDirectorProfile] = &[

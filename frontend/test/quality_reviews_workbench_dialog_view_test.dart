@@ -288,6 +288,64 @@ void main() {
     expect(selectedReview?.id, 'review-1');
     expect(selectedReview?.targetType, 'output');
   });
+
+  testWidgets(
+    'quality reviews workbench view shows prompt diagnostics for auto reviews',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: QualityReviewsWorkbenchDialogView(
+              model: buildDialogModel(
+                targetTypeFilterCtrl: targetTypeFilterCtrl,
+                targetIdFilterCtrl: targetIdFilterCtrl,
+                jobIdFilterCtrl: jobIdFilterCtrl,
+                reviewIdCtrl: reviewIdCtrl,
+                createProjectIdCtrl: createProjectIdCtrl,
+                createScriptIdCtrl: createScriptIdCtrl,
+                createTargetTypeCtrl: createTargetTypeCtrl,
+                createTargetIdCtrl: createTargetIdCtrl,
+                createSourceCtrl: createSourceCtrl,
+                createScoreCtrl: createScoreCtrl,
+                createCommentsCtrl: createCommentsCtrl,
+                createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
+                reviews: const [
+                  QualityReview(
+                    id: 'review-auto-1',
+                    createdAt: '2026-04-14T08:00:00Z',
+                    updatedAt: '2026-04-14T08:00:00Z',
+                    userId: 'user-1',
+                    targetType: 'storyboard',
+                    source: 'auto',
+                    overallScore: 93,
+                    passed: true,
+                    isBadCase: false,
+                    memoryDeliveryPriorityApplied: true,
+                    modelParams: {
+                      'diagnostics': {
+                        'promptChars': 430,
+                        'memoryStyleChars': 90,
+                        'memoryVisualChars': 26,
+                        'memoryDeliveryChars': 44,
+                        'memoryDeliveryPriorityApplied': true,
+                        'autoNegativeSource': 'review+rejected_memory',
+                        'directorManualYieldedToMemory': true,
+                      },
+                    },
+                  ),
+                ],
+              ),
+              callbacks: buildDialogCallbacks(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('Prompt诊断：auto诊断 1 条'), findsOneWidget);
+      expect(find.textContaining('负向约束=评审+坏例记忆'), findsNWidgets(2));
+      expect(find.textContaining('导演让位'), findsNWidgets(2));
+    },
+  );
 }
 
 void noop() {}

@@ -116,6 +116,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
     final tokenEfficiencySummary = summarizeTokenEfficiencyFromQualityReviews(
       model.reviews,
     );
+    final promptDiagnosticsSummary =
+        summarizePromptDiagnosticsFromQualityReviews(model.reviews);
     final activeFilters = [
       if (model.filterBadCasesOnly) '坏例',
       if (model.filterDeliveryPriorityOnly) '命中表演/语气优先',
@@ -380,6 +382,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 12),
                 SelectableText('阶段通过率：${model.stagePassRateSummary}'),
               ],
+              if (promptDiagnosticsSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('Prompt诊断：$promptDiagnosticsSummary'),
+              ],
               if (tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('Token效率：$tokenEfficiencySummary'),
@@ -393,41 +399,53 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 const SizedBox(height: 8),
-                ...model.reviews
-                    .take(8)
-                    .map(
-                      (review) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
-                        ),
-                        subtitle: Text(formatQualityReviewDetails(review)),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (review.memoryDeliveryPriorityApplied == true)
-                              const Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: Chip(
-                                  label: Text('delivery'),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                              ),
-                            if (review.source == 'auto')
-                              const Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: Chip(
-                                  label: Text('auto'),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                              ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                        onTap: () => callbacks.onSelectReview(review),
-                      ),
+                ...model.reviews.take(8).map((review) {
+                  final diagnosticSummary =
+                      summarizeQualityReviewPromptDiagnostics(review);
+                  return ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
                     ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(formatQualityReviewCoreDetails(review)),
+                        if (diagnosticSummary != null)
+                          Text(
+                            diagnosticSummary,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: outline),
+                          ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (review.memoryDeliveryPriorityApplied == true)
+                          const Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: Chip(
+                              label: Text('delivery'),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        if (review.source == 'auto')
+                          const Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: Chip(
+                              label: Text('auto'),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                    onTap: () => callbacks.onSelectReview(review),
+                  );
+                }),
               ],
             ],
           ),

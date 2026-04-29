@@ -10,6 +10,7 @@ use uuid::Uuid;
 use crate::llm::openai::TokenUsage;
 
 /// Best-effort insert into `app_llm_usage_log`. Errors are logged only.
+#[allow(clippy::too_many_arguments)]
 pub async fn record_llm_usage(
     pool: &PgPool,
     user_id: Uuid,
