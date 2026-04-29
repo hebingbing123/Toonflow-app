@@ -82,12 +82,16 @@ void main() {
         feedbackSummaryMemoryWrites: 0,
         feedbackMemoryRemovedChars: 88,
         feedbackMemoryRemovedRows: 2,
+        memoryAction: 'keep_delivery_memory',
+        memoryFocus: 'selected_video_memory',
+        memoryReason:
+            'Keep scoped acting memory and keep trimming generic style first.',
       ),
     ]);
 
     expect(
       summary,
-      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条 · 晋升2 · 坏例回写1 · 回写slim 88c/2条',
+      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条 · 晋升2 · 坏例回写1 · 回写slim 88c/2条 · 动作=保留表演记忆 · 焦点=selected_video_memory · Keep scoped acting memory and keep trimming generic style first.',
     );
   });
 

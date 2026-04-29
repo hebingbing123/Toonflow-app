@@ -219,7 +219,166 @@ pub(crate) async fn get_scope_insights(
                     THEN COALESCE((model_params->'diagnostics'->'feedbackMemory'->>'removedRows')::int, 0)
                     ELSE 0
                 END
-            ), 0) as feedback_memory_removed_rows
+            ), 0) as feedback_memory_removed_rows,
+            CASE
+                WHEN COUNT(*) FILTER (
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                       OR comments ILIKE '%生硬%'
+                       OR comments ILIKE '%朗读%'
+                       OR comments ILIKE '%没情绪%'
+                       OR comments ILIKE '%无情绪%'
+                ) > 0
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                ) > 0
+                THEN 'keep_delivery_memory'
+                WHEN COUNT(*) FILTER (
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                       OR comments ILIKE '%穿帮%'
+                       OR comments ILIKE '%不自然%'
+                       OR comments ILIKE '%ai%'
+                       OR comments ILIKE '%假%'
+                ) > 0
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'persisted_rejected_memory'
+                ) > 0
+                THEN 'reuse_negative_memory'
+                WHEN COALESCE(AVG(
+                    CASE
+                        WHEN source = 'auto' AND model_params ? 'diagnostics'
+                        THEN COALESCE((model_params->'diagnostics'->>'memoryStyleChars')::int, 0)
+                        ELSE NULL
+                    END
+                ), 0) >= 96
+                OR COALESCE(SUM(
+                    CASE
+                        WHEN source = 'auto' AND model_params ? 'diagnostics'
+                        THEN COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedChars')::int, 0)
+                        ELSE 0
+                    END
+                ), 0) >= 80
+                OR COALESCE(SUM(
+                    CASE
+                        WHEN model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                        THEN COALESCE((model_params->'diagnostics'->'feedbackMemory'->>'removedChars')::int, 0)
+                        ELSE 0
+                    END
+                ), 0) >= 80
+                THEN 'trim_generic_style_memory'
+                WHEN COUNT(*) FILTER (WHERE passed = true) > 0
+                AND COALESCE(AVG(overall_score), 0) >= 85
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                ) = 0
+                THEN 'promote_selected_memory'
+                ELSE 'observe'
+            END as memory_action,
+            CASE
+                WHEN COUNT(*) FILTER (
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                       OR comments ILIKE '%生硬%'
+                       OR comments ILIKE '%朗读%'
+                       OR comments ILIKE '%没情绪%'
+                       OR comments ILIKE '%无情绪%'
+                ) > 0
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                ) > 0
+                THEN 'selected_video_memory'
+                WHEN COUNT(*) FILTER (
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                       OR comments ILIKE '%穿帮%'
+                       OR comments ILIKE '%不自然%'
+                       OR comments ILIKE '%ai%'
+                       OR comments ILIKE '%假%'
+                ) > 0
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'persisted_rejected_memory'
+                ) > 0
+                THEN 'rejected_video_negative_memory'
+                WHEN COALESCE(AVG(
+                    CASE
+                        WHEN source = 'auto' AND model_params ? 'diagnostics'
+                        THEN COALESCE((model_params->'diagnostics'->>'memoryStyleChars')::int, 0)
+                        ELSE NULL
+                    END
+                ), 0) >= 96
+                OR COALESCE(SUM(
+                    CASE
+                        WHEN source = 'auto' AND model_params ? 'diagnostics'
+                        THEN COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedChars')::int, 0)
+                        ELSE 0
+                    END
+                ), 0) >= 80
+                OR COALESCE(SUM(
+                    CASE
+                        WHEN model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                        THEN COALESCE((model_params->'diagnostics'->'feedbackMemory'->>'removedChars')::int, 0)
+                        ELSE 0
+                    END
+                ), 0) >= 80
+                THEN 'project_video_style_memory'
+                WHEN COUNT(*) FILTER (WHERE passed = true) > 0
+                AND COALESCE(AVG(overall_score), 0) >= 85
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                ) = 0
+                THEN 'selected_video_memory'
+                ELSE 'observe'
+            END as memory_focus,
+            CASE
+                WHEN COUNT(*) FILTER (
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                       OR comments ILIKE '%生硬%'
+                       OR comments ILIKE '%朗读%'
+                       OR comments ILIKE '%没情绪%'
+                       OR comments ILIKE '%无情绪%'
+                ) > 0
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                ) > 0
+                THEN 'Keep scoped acting memory and keep trimming generic style first.'
+                WHEN COUNT(*) FILTER (
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                       OR comments ILIKE '%穿帮%'
+                       OR comments ILIKE '%不自然%'
+                       OR comments ILIKE '%ai%'
+                       OR comments ILIKE '%假%'
+                ) > 0
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'persisted_rejected_memory'
+                ) > 0
+                THEN 'Reuse isolated bad-case constraints before adding more prompt text.'
+                WHEN COALESCE(AVG(
+                    CASE
+                        WHEN source = 'auto' AND model_params ? 'diagnostics'
+                        THEN COALESCE((model_params->'diagnostics'->>'memoryStyleChars')::int, 0)
+                        ELSE NULL
+                    END
+                ), 0) >= 96
+                OR COALESCE(SUM(
+                    CASE
+                        WHEN source = 'auto' AND model_params ? 'diagnostics'
+                        THEN COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedChars')::int, 0)
+                        ELSE 0
+                    END
+                ), 0) >= 80
+                OR COALESCE(SUM(
+                    CASE
+                        WHEN model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                        THEN COALESCE((model_params->'diagnostics'->'feedbackMemory'->>'removedChars')::int, 0)
+                        ELSE 0
+                    END
+                ), 0) >= 80
+                THEN 'Project-wide style memory is eating budget; trim generic visual/style lines first.'
+                WHEN COUNT(*) FILTER (WHERE passed = true) > 0
+                AND COALESCE(AVG(overall_score), 0) >= 85
+                AND COUNT(*) FILTER (
+                    WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
+                ) = 0
+                THEN 'Promote one approved scoped sample into selected memory for later reuse.'
+                ELSE 'Memory is already scoped; keep observing review quality before changing it.'
+            END as memory_reason
         FROM app_quality_review
         WHERE user_id = $1
           AND (project_id IS NOT NULL OR script_id IS NOT NULL)

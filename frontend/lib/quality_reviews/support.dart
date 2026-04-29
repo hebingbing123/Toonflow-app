@@ -1013,11 +1013,46 @@ String summarizeQualityScopeInsightRows(
             '回写slim ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}条',
           );
         }
+        final memoryAction = _qualityScopeInsightMemoryActionSummary(row);
+        if (memoryAction != null) {
+          parts.add(memoryAction);
+        }
         return parts.join(' · ');
       })
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
   return visible + suffix;
+}
+
+String? _qualityScopeInsightMemoryActionSummary(QualityScopeInsightRow row) {
+  String? label;
+  switch (row.memoryAction) {
+    case 'keep_delivery_memory':
+      label = '动作=保留表演记忆';
+      break;
+    case 'reuse_negative_memory':
+      label = '动作=复用坏例约束';
+      break;
+    case 'trim_generic_style_memory':
+      label = '动作=压项目泛风格';
+      break;
+    case 'promote_selected_memory':
+      label = '动作=晋升优质镜头';
+      break;
+    default:
+      label = null;
+  }
+  if (label == null) return null;
+  final reason = row.memoryReason.trim();
+  final focus = row.memoryFocus.trim();
+  final parts = <String>[label];
+  if (focus.isNotEmpty && focus != 'observe') {
+    parts.add('焦点=$focus');
+  }
+  if (reason.isNotEmpty) {
+    parts.add(reason);
+  }
+  return parts.join(' · ');
 }
 
 String summarizeStagePassRateRows(

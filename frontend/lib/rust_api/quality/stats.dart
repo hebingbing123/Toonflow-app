@@ -94,6 +94,9 @@ class QualityScopeInsightRow {
     required this.feedbackSummaryMemoryWrites,
     required this.feedbackMemoryRemovedChars,
     required this.feedbackMemoryRemovedRows,
+    required this.memoryAction,
+    required this.memoryFocus,
+    required this.memoryReason,
   });
 
   final String scopeLabel;
@@ -118,6 +121,9 @@ class QualityScopeInsightRow {
   final int feedbackSummaryMemoryWrites;
   final int feedbackMemoryRemovedChars;
   final int feedbackMemoryRemovedRows;
+  final String memoryAction;
+  final String memoryFocus;
+  final String memoryReason;
 
   factory QualityScopeInsightRow.fromJson(Map<String, dynamic> json) {
     return QualityScopeInsightRow(
@@ -150,6 +156,9 @@ class QualityScopeInsightRow {
           (json['feedbackMemoryRemovedChars'] as num?)?.toInt() ?? 0,
       feedbackMemoryRemovedRows:
           (json['feedbackMemoryRemovedRows'] as num?)?.toInt() ?? 0,
+      memoryAction: json['memoryAction'] as String? ?? 'observe',
+      memoryFocus: json['memoryFocus'] as String? ?? 'observe',
+      memoryReason: json['memoryReason'] as String? ?? '',
     );
   }
 }
