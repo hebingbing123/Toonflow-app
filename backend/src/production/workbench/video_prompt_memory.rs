@@ -2560,21 +2560,35 @@ fn score_selected_video_style_note(note: &str) -> i32 {
 
     let mut score = 0i32;
     for fragment in &fragments {
-        if fragment.starts_with("情绪") {
-            score += 6;
+        if fragment.starts_with("表演") {
+            score += 10;
+        } else if fragment.starts_with("语气") {
+            score += 9;
+        } else if fragment.starts_with("情绪") {
+            score += 7;
         } else if fragment.starts_with("光影") {
-            score += 6;
+            score += 5;
         } else if fragment.starts_with("镜头") {
             score += if is_local_framing_only_fragment(fragment) {
                 1
             } else {
-                4
+                3
             };
+        } else if fragment.starts_with("声场") {
+            score += 4;
+        } else if fragment.starts_with("动作") {
+            score += 3;
         } else {
             score += 2;
         }
     }
     if count_selected_video_style_axes(note) >= 2 {
+        score += 2;
+    }
+    if note_contains_selected_video_delivery_signal(&fragments) {
+        score += 4;
+    }
+    if note_contains_selected_video_emotion_signal(&fragments) {
         score += 2;
     }
     score
@@ -2592,10 +2606,31 @@ fn count_selected_video_style_axes(note: &str) -> usize {
         fragments
             .iter()
             .any(|fragment| fragment.starts_with("光影")),
+        fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("表演")),
+        fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("语气")),
+        fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("声场")),
     ]
     .into_iter()
     .filter(|present| *present)
     .count()
+}
+
+fn note_contains_selected_video_delivery_signal(fragments: &[String]) -> bool {
+    fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演") || fragment.starts_with("语气"))
+}
+
+fn note_contains_selected_video_emotion_signal(fragments: &[String]) -> bool {
+    fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("情绪") || fragment.starts_with("表演"))
 }
 
 fn is_local_framing_only_fragment(fragment: &str) -> bool {
@@ -11802,6 +11837,33 @@ mod tests {
         );
 
         assert_eq!(notes, vec!["镜头近景".to_string()]);
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_prefers_delivery_rich_style_over_visual_only_style() {
+        let notes = select_selected_video_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content:
+                        "storyboardIds=12 | style=镜头稳定跟拍，情绪冷峻压迫，光影阴天冷光 | note=..."
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content:
+                        "storyboardIds=12 | style=表演喉结滚动，语气低声尾音发颤，情绪强忍泪意 | note=..."
+                            .into(),
+                },
+            ],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["表演喉结滚动，语气低声尾音发颤，情绪强忍泪意".to_string()]
+        );
     }
 
     #[test]
