@@ -1,19 +1,19 @@
 //! Unit tests for workbench meta prompt generation.
 
 use super::{
-    art_style_director_profile, build_pending_video_observation_note_from_runtime,
-    build_video_prompt, build_video_prompt_memory_notes,
-    build_video_prompt_with_constraint_pressure, build_video_prompt_with_diagnostics,
-    compact_camera_clause, compact_contextual_video_style_note,
-    compact_director_emotion_fragment_group, compact_guardrail_sensitive_style_note,
-    compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
-    exact_style_notes_should_yield_to_role_memory, observation_style_note_context_evidence,
-    parse_director_emotion_cues, parse_director_environment_cues,
-    parse_director_environment_texture_cues, parse_director_motion_cue,
-    parse_structured_storyboard_description, prefer_role_memory_only_for_silent_identity_scene,
-    prune_low_signal_observation_candidates, prune_storyboard_observation_candidates,
-    resolve_observation_filter_style_note, resolve_video_prompt_duration,
-    score_compacted_style_note_against_constraint_pressure,
+    art_style_director_profile, build_auto_quality_review_model_params,
+    build_pending_video_observation_note_from_runtime, build_video_prompt,
+    build_video_prompt_memory_notes, build_video_prompt_with_constraint_pressure,
+    build_video_prompt_with_diagnostics, compact_camera_clause,
+    compact_contextual_video_style_note, compact_director_emotion_fragment_group,
+    compact_guardrail_sensitive_style_note, compact_negative_constraint_against_storyboard_style,
+    compact_script_asset_anchor, exact_style_notes_should_yield_to_role_memory,
+    observation_style_note_context_evidence, parse_director_emotion_cues,
+    parse_director_environment_cues, parse_director_environment_texture_cues,
+    parse_director_motion_cue, parse_structured_storyboard_description,
+    prefer_role_memory_only_for_silent_identity_scene, prune_low_signal_observation_candidates,
+    prune_storyboard_observation_candidates, resolve_observation_filter_style_note,
+    resolve_video_prompt_duration, score_compacted_style_note_against_constraint_pressure,
     score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
     select_contextual_observation_summary_style_note,
     select_pressure_prioritized_style_note_candidate, select_script_asset_anchors,
@@ -4263,6 +4263,72 @@ fn generate_video_prompt_response_serializes_observation_note() {
             .and_then(|item| item.get("directorAnchorSavedChars"))
             .and_then(serde_json::Value::as_u64),
         Some(0)
+    );
+}
+
+#[test]
+fn build_auto_quality_review_model_params_includes_memory_diagnostics() {
+    let diagnostics = GenerateVideoPromptDiagnostics {
+        prompt_chars: 120,
+        negative_prompt_chars: 24,
+        negative_constraint_count: 1,
+        negative_budget_tier: "lean".into(),
+        auto_negative_source: Some("rejected_memory".into()),
+        auto_negative_review_fragment_count: 1,
+        auto_negative_memory_fragment_count: 1,
+        observation_note_chars: 18,
+        role_anchor_count: 1,
+        scene_anchor_count: 1,
+        tool_anchor_count: 0,
+        style_anchor_count: 2,
+        memory_style_anchor_count: 1,
+        memory_delivery_anchor_count: 1,
+        memory_delivery_priority_applied: true,
+        recent_quality_memory_biases: vec!["delivery".into()],
+        memory_top_candidate_score: 17,
+        memory_selected_primary_bucket: Some("表演".into()),
+        memory_low_value_candidate_skipped: true,
+        memory_style_chars: 22,
+        memory_visual_chars: 0,
+        memory_delivery_chars: 22,
+        memory_hit_buckets: vec!["表演".into()],
+        memory_suppressed_buckets: vec!["环境".into()],
+        memory_hit_bucket_counts: [("表演".into(), 1usize)].into_iter().collect(),
+        memory_suppressed_bucket_counts: [("环境".into(), 1usize)].into_iter().collect(),
+        memory_optimization_applied: false,
+        memory_optimization_removed_rows: 0,
+        memory_optimization_removed_chars: 0,
+        memory_optimization_removed_visual_rows: 0,
+        memory_optimization_removed_duplicate_rows: 0,
+        director_manual_yielded_to_memory: false,
+        director_manual_yielded_chars: 0,
+        director_performance_trimmed_chars: 0,
+        director_anchor_saved_chars: 0,
+        continuity_note_count: 0,
+        continuity_note_chars: 0,
+        uses_reference_frame: true,
+        memory_budget_tier: "lean".into(),
+    };
+
+    let value = build_auto_quality_review_model_params(&diagnostics);
+
+    assert_eq!(
+        value
+            .pointer("/diagnostics/memoryTopCandidateScore")
+            .and_then(serde_json::Value::as_i64),
+        Some(17)
+    );
+    assert_eq!(
+        value
+            .pointer("/diagnostics/memorySelectedPrimaryBucket")
+            .and_then(serde_json::Value::as_str),
+        Some("表演")
+    );
+    assert_eq!(
+        value
+            .pointer("/diagnostics/memoryLowValueCandidateSkipped")
+            .and_then(serde_json::Value::as_bool),
+        Some(true)
     );
 }
 
