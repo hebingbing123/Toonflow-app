@@ -36,6 +36,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
         <dynamic>[
           <String, Object?>{
             'id': 'memory-1',
+            'name': 'selected_video_memory',
             'role': 'user',
             'content': <Map<String, String>>[
               <String, String>{'data': '先补齐第一幕的角色动机和冲突。'},
@@ -43,6 +44,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
           },
           <String, Object?>{
             'id': 'memory-2',
+            'name': 'quality_feedback_memory',
             'role': 'assistant',
             'content': <Map<String, String>>[
               <String, String>{
@@ -158,11 +160,19 @@ void main() {
       find.text('自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。'),
       findsOneWidget,
     );
-    expect(find.textContaining('角色分布：user 1 / assistant 1'), findsOneWidget);
+    expect(
+      find.textContaining(
+        '角色分布：user 1 / assistant 1 · 类型 selected_video_memory 1 / quality_feedback_memory 1',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('2 条记忆'), findsOneWidget);
     expect(find.text('追加记忆'), findsNWidgets(2));
     expect(find.text('清理记忆'), findsOneWidget);
-    expect(find.textContaining('user · '), findsOneWidget);
+    expect(
+      find.textContaining('selected_video_memory · user · '),
+      findsOneWidget,
+    );
     expect(find.textContaining('memory-1'), findsOneWidget);
     expect(find.textContaining('先补齐第一幕的角色动机和冲突'), findsOneWidget);
   });
@@ -185,6 +195,7 @@ void main() {
               memoryRows: <dynamic>[
                 <String, Object?>{
                   'id': 'memory-1',
+                  'name': 'selected_video_memory',
                   'role': 'assistant',
                   'content': <Map<String, String>>[
                     <String, String>{'data': '保持女主语气克制且情绪压迫感持续存在，避免读稿腔。'},
@@ -192,6 +203,7 @@ void main() {
                 },
                 <String, Object?>{
                   'id': 'memory-2',
+                  'name': 'selected_video_memory',
                   'role': 'assistant',
                   'content': <Map<String, String>>[
                     <String, String>{'data': '保持女主语气克制且情绪压迫感持续存在，同时保留冷感停顿。'},
@@ -207,6 +219,44 @@ void main() {
 
     expect(find.textContaining('建议：检测到重复表述'), findsOneWidget);
     expect(find.widgetWithText(Chip, '重复'), findsNWidgets(2));
+  });
+
+  testWidgets('agent memory workbench view surfaces dominant memory bucket', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsAgentMemoryWorkbenchDialogView(
+            model: buildModel(
+              projectIdCtrl: projectIdCtrl,
+              agentTypeCtrl: agentTypeCtrl,
+              episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
+              appendContentCtrl: appendContentCtrl,
+              appendRoleCtrl: appendRoleCtrl,
+              clearTypeCtrl: clearTypeCtrl,
+              memoryRows: List<dynamic>.generate(6, (index) {
+                return <String, Object?>{
+                  'id': 'memory-$index',
+                  'name': 'selected_video_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{'data': '第 $index 条镜头表演记忆，保留强停顿与真实呼吸。'},
+                  ],
+                };
+              }),
+            ),
+            callbacks: buildCallbacks(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.textContaining('建议：selected_video_memory 已累计 6 条'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('agent memory workbench view disables busy actions', (

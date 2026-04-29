@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
@@ -218,10 +217,13 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 ...memoryInsights.previews.take(8).map((preview) {
+                  final title = preview.memoryName.isEmpty
+                      ? '${preview.role} · ${preview.charCount} chars'
+                      : '${preview.memoryName} · ${preview.role} · ${preview.charCount} chars';
                   return ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: Text('${preview.role} · ${preview.charCount} chars'),
+                    title: Text(title),
                     subtitle: Text(
                       '${preview.memoryId.isEmpty ? '' : '${preview.memoryId} · '}${preview.shortContent}',
                     ),
@@ -336,6 +338,7 @@ class _AgentMemoryInsights {
 class _AgentMemoryPreview {
   const _AgentMemoryPreview({
     required this.memoryId,
+    required this.memoryName,
     required this.role,
     required this.shortContent,
     required this.charCount,
@@ -344,6 +347,7 @@ class _AgentMemoryPreview {
   });
 
   final String memoryId;
+  final String memoryName;
   final String role;
   final String shortContent;
   final int charCount;
@@ -365,6 +369,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
 
   final prefixCounts = <String, int>{};
   final roleCounts = <String, int>{};
+  final memoryNameCounts = <String, int>{};
   var totalChars = 0;
   var longestChars = 0;
   for (final preview in rawPreviews) {
@@ -373,6 +378,13 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
       longestChars = preview.charCount;
     }
     roleCounts.update(preview.role, (value) => value + 1, ifAbsent: () => 1);
+    if (preview.memoryName.isNotEmpty) {
+      memoryNameCounts.update(
+        preview.memoryName,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
     if (preview.normalizedPrefix.isNotEmpty) {
       prefixCounts.update(
         preview.normalizedPrefix,
@@ -386,6 +398,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
       .map(
         (preview) => _AgentMemoryPreview(
           memoryId: preview.memoryId,
+          memoryName: preview.memoryName,
           role: preview.role,
           shortContent: preview.shortContent,
           charCount: preview.charCount,
@@ -402,11 +415,23 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
   final rolesSummary = roleCounts.entries
       .map((entry) => '${entry.key} ${entry.value}')
       .join(' / ');
+  final memoryNamesSummary = memoryNameCounts.entries.toList(growable: false)
+    ..sort((a, b) => b.value.compareTo(a.value));
+  final typeSummary = memoryNamesSummary.isEmpty
+      ? null
+      : memoryNamesSummary
+            .take(3)
+            .map((entry) => '${entry.key} ${entry.value}')
+            .join(' / ');
   final summary =
-      '角色分布：$rolesSummary · 约 $totalChars chars · 最长 $longestChars chars${duplicateCount > 0 ? ' · 重复 $duplicateCount 条' : ''}';
+      '角色分布：$rolesSummary${typeSummary == null ? '' : ' · 类型 $typeSummary'} · 约 $totalChars chars · 最长 $longestChars chars${duplicateCount > 0 ? ' · 重复 $duplicateCount 条' : ''}';
   String? recommendation;
   if (duplicateCount >= 2) {
     recommendation = '检测到重复表述，先去重旧记忆，避免同一约束反复注入。';
+  } else if (memoryNamesSummary.isNotEmpty &&
+      memoryNamesSummary.first.value >= 6) {
+    recommendation =
+        '${memoryNamesSummary.first.key} 已累计 ${memoryNamesSummary.first.value} 条，先压缩这个记忆桶，避免它单独吃掉预算。';
   } else if (totalChars >= 1600 || longestChars >= 420) {
     recommendation = '当前记忆偏长，优先压缩长记忆，再决定是否继续追加。';
   } else if (rows.length >= 12) {
@@ -425,6 +450,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
 
 _AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
   final map = row is Map ? Map<String, dynamic>.from(row) : <String, dynamic>{};
+  final memoryName = map['name']?.toString() ?? '';
   final role = map['role']?.toString() ?? 'unknown';
   final rawContent = map['content'];
   final blocks = rawContent is List ? rawContent : const <dynamic>[];
@@ -437,6 +463,7 @@ _AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
   final normalizedPrefix = content.replaceAll(RegExp(r'\s+'), '').toLowerCase();
   return _AgentMemoryPreview(
     memoryId: map['id']?.toString() ?? '',
+    memoryName: memoryName,
     role: role,
     shortContent: shortContent,
     charCount: content.characters.length,
