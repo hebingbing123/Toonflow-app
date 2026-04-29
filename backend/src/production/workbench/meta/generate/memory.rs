@@ -751,11 +751,20 @@ pub(super) fn trim_video_prompt_memory_rows_with_context(
     {
         kept.insert(*idx);
     }
-    for (idx, _) in project_style_candidates
-        .iter()
-        .take(VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT)
-    {
-        kept.insert(*idx);
+    if should_keep_project_style_summary_rows(
+        &script_style_candidates,
+        &script_role_style_candidates,
+        &project_style_candidates,
+        subject_candidates,
+        storyboard_row,
+        constraint_pressure,
+    ) {
+        for (idx, _) in project_style_candidates
+            .iter()
+            .take(VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT)
+        {
+            kept.insert(*idx);
+        }
     }
     keep_matching_role_style_rows(
         &mut kept,
@@ -1186,11 +1195,20 @@ pub(super) fn trim_video_prompt_observation_rows(
     ) {
         kept.insert(idx);
     }
-    for (idx, _) in project_style_candidates
-        .iter()
-        .take(VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT)
-    {
-        kept.insert(*idx);
+    if should_keep_project_style_summary_rows(
+        &script_style_candidates,
+        &script_role_style_candidates,
+        &project_style_candidates,
+        subject_candidates,
+        storyboard_row,
+        None,
+    ) {
+        for (idx, _) in project_style_candidates
+            .iter()
+            .take(VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT)
+        {
+            kept.insert(*idx);
+        }
     }
     keep_prioritized_observation_summary_rows(
         &mut kept,
@@ -1222,6 +1240,254 @@ pub(super) fn trim_video_prompt_observation_rows(
         .into_iter()
         .filter_map(|(idx, row)| kept.contains(&idx).then_some(row))
         .collect()
+}
+
+fn should_keep_project_style_summary_rows(
+    script_style_candidates: &[(usize, AgentMemoryRow)],
+    script_role_style_candidates: &[(usize, AgentMemoryRow)],
+    project_style_candidates: &[(usize, AgentMemoryRow)],
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    if project_style_candidates.is_empty() {
+        return false;
+    }
+
+    let Some(storyboard_row) = storyboard_row else {
+        return true;
+    };
+    let Some(fields) = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return true;
+    };
+    let pressure = constraint_pressure.unwrap_or_default();
+    if pressure.prefer_visual_continuity_memory_recall || pressure.has_lighting_guardrail {
+        return true;
+    }
+
+    let scene_prefers_precise_subject_memory = (!subject_candidates.is_empty()
+        && video_prompt_scene_needs_identity_memory(&fields))
+        || video_prompt_scene_needs_emotional_memory(&fields)
+        || storyboard_has_visible_speech_performance_risk(
+            &fields,
+            storyboard_row.prompt.as_deref(),
+        )
+        || pressure.prefer_delivery_memory_recall
+        || pressure.has_dialogue_guardrail
+        || pressure.has_emotion_guardrail
+        || pressure.has_identity_guardrail;
+    if !scene_prefers_precise_subject_memory {
+        return true;
+    }
+    if constraint_pressure.is_none() && !script_role_style_candidates.is_empty() {
+        return false;
+    }
+    if !script_role_style_candidates.is_empty()
+        && project_style_candidates.iter().all(|(_, row)| {
+            project_style_note_is_low_gain_global_fill(row, &fields, Some(pressure))
+        })
+    {
+        return false;
+    }
+
+    let best_script_locked_score = script_style_candidates
+        .iter()
+        .chain(script_role_style_candidates.iter())
+        .filter_map(|(_, row)| {
+            project_style_memory_trim_note_score(
+                row,
+                storyboard_row,
+                Some(pressure),
+                subject_candidates,
+            )
+        })
+        .max()
+        .unwrap_or(i32::MIN);
+    if best_script_locked_score < 18 {
+        return true;
+    }
+
+    let project_scores = project_style_candidates
+        .iter()
+        .filter_map(|(_, row)| {
+            project_style_memory_trim_note_score(
+                row,
+                storyboard_row,
+                Some(pressure),
+                subject_candidates,
+            )
+            .map(|score| (score, row))
+        })
+        .collect::<Vec<_>>();
+    if project_scores.is_empty() {
+        return false;
+    }
+    if project_scores.iter().any(|(score, row)| {
+        *score + 4 >= best_script_locked_score
+            && !project_style_note_is_low_gain_global_fill(row, &fields, Some(pressure))
+    }) {
+        return true;
+    }
+
+    project_scores
+        .iter()
+        .any(|(_, row)| !project_style_note_is_low_gain_global_fill(row, &fields, Some(pressure)))
+}
+
+fn project_style_memory_trim_note_score(
+    row: &AgentMemoryRow,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+    subject_candidates: &[String],
+) -> Option<i32> {
+    if row.name == "project_role_video_style_memory"
+        && !subject_candidates.is_empty()
+        && !memory_content_matches_subject_candidates(&row.content, subject_candidates)
+    {
+        return None;
+    }
+
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    let note = contextual_style_memory_value_for_storyboard(row, Some(storyboard_row))
+        .or_else(|| extract_key_value(&row.content, "style"))
+        .or_else(|| extract_key_value(&row.content, "note"))?;
+    let compacted =
+        compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
+            .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+
+    Some(score_compacted_style_note_against_constraint_pressure(
+        &compacted,
+        &fields,
+        constraint_pressure.unwrap_or_default(),
+    ))
+}
+
+fn project_style_note_is_low_gain_global_fill(
+    row: &AgentMemoryRow,
+    fields: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: None,
+        video_desc: None,
+        duration: None,
+    };
+    let note = extract_key_value(&row.content, "style")
+        .or_else(|| extract_key_value(&row.content, "note"));
+    let Some(note) = note else {
+        return true;
+    };
+    let compacted =
+        compact_guardrail_sensitive_style_note(&note, &storyboard_row, constraint_pressure)
+            .or_else(|| compact_video_style_prompt_note(&note))
+            .unwrap_or(note);
+    let fragments = split_prompt_note_fragments(&compacted).collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return true;
+    }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("表演")
+            || fragment
+                .strip_prefix("语气")
+                .map(normalize_prompt_text)
+                .is_some_and(|voice| memory_fragment_has_high_signal_voice_detail(&voice))
+    }) {
+        return false;
+    }
+
+    let generic_visual_fill = fragments.iter().all(|fragment| {
+        matches!(
+            style_note_fragment_family(fragment),
+            Some("镜头") | Some("情绪") | Some("光影") | Some("动作") | Some("环境") | Some("声场")
+        )
+    });
+    if !generic_visual_fill {
+        return false;
+    }
+    if fragments
+        .iter()
+        .all(|fragment| storyboard_style_already_covers_project_fill_fragment(fragment, fields))
+    {
+        return true;
+    }
+
+    let total_score = fragments
+        .iter()
+        .map(|fragment| {
+            score_memory_style_fragment_for_lean_tier(fragment, Some(fields), constraint_pressure)
+        })
+        .sum::<i32>();
+    total_score <= 18
+}
+
+fn storyboard_style_already_covers_project_fill_fragment(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    let normalized_fragment = normalize_prompt_text(fragment);
+    if normalized_fragment.is_empty() {
+        return true;
+    }
+
+    let family = style_note_fragment_family(&normalized_fragment);
+    let core = family
+        .and_then(|prefix| normalized_fragment.strip_prefix(prefix))
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| normalized_fragment.clone());
+
+    let coverage_fields = match family {
+        Some("镜头") => vec![fields.shot.as_str(), fields.camera_move.as_str(), fields.action.as_str()],
+        Some("情绪") => vec![fields.mood.as_str(), fields.action.as_str(), fields.dialogue.as_str()],
+        Some("光影") => vec![fields.lighting.as_str(), fields.setting.as_str()],
+        Some("动作") => vec![fields.action.as_str(), fields.camera_move.as_str()],
+        Some("环境") => vec![fields.setting.as_str(), fields.sound.as_str()],
+        Some("声场") => vec![fields.sound.as_str(), fields.dialogue.as_str()],
+        _ => vec![
+            fields.shot.as_str(),
+            fields.camera_move.as_str(),
+            fields.mood.as_str(),
+            fields.lighting.as_str(),
+            fields.setting.as_str(),
+            fields.action.as_str(),
+            fields.sound.as_str(),
+        ],
+    };
+
+    coverage_fields.into_iter().any(|field| {
+        let normalized_field = normalize_prompt_text(field);
+        !normalized_field.is_empty()
+            && (normalized_field.contains(&core)
+                || core.contains(&normalized_field)
+                || shared_style_keyword(&normalized_field, &core))
+    })
+}
+
+fn shared_style_keyword(left: &str, right: &str) -> bool {
+    [
+        "稳定跟拍",
+        "手持跟拍",
+        "慢推",
+        "推进",
+        "拉远",
+        "压抑",
+        "克制",
+        "冷蓝窗光",
+        "冷调逆光",
+        "霓虹反光",
+        "雨声",
+        "回响",
+        "潮湿",
+    ]
+    .iter()
+    .any(|keyword| left.contains(keyword) && right.contains(keyword))
 }
 
 pub(super) fn keep_prioritized_observation_summary_rows(
