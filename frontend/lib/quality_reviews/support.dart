@@ -287,6 +287,20 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   final deliveryChars = _diagnosticInt(diagnostics, 'memoryDeliveryChars');
   final directorSaved = _diagnosticInt(diagnostics, 'directorAnchorSavedChars');
   final continuityCount = _diagnosticInt(diagnostics, 'continuityNoteCount');
+  final negativeSavedChars = _diagnosticInt(diagnostics, 'negativeSavedChars');
+  final negativeSavedFragments = _diagnosticInt(
+    diagnostics,
+    'negativeSavedFragmentCount',
+  );
+  final projectScopeRows = _diagnosticInt(
+    diagnostics,
+    'memoryProjectScopeRowCount',
+  );
+  final scriptScopeRows = _diagnosticInt(
+    diagnostics,
+    'memoryScriptScopeRowCount',
+  );
+  final roleScopeRows = _diagnosticInt(diagnostics, 'memoryRoleScopeRowCount');
   final parts = <String>[
     'prompt=$promptChars',
     'memory=$memoryChars(v=$visualChars,d=$deliveryChars)',
@@ -330,6 +344,17 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   }
   if (directorSaved > 0) {
     parts.add('省下$directorSaved chars');
+  }
+  if (negativeSavedChars > 0 || negativeSavedFragments > 0) {
+    parts.add('负向精简=${negativeSavedFragments}条/$negativeSavedChars chars');
+  }
+  final scopeSummary = _describeMemoryScopeRows(
+    projectScopeRows: projectScopeRows,
+    scriptScopeRows: scriptScopeRows,
+    roleScopeRows: roleScopeRows,
+  );
+  if (scopeSummary != null) {
+    parts.add('记忆层级=$scopeSummary');
   }
   if (continuityCount > 0) {
     parts.add('连续性$continuityCount');
@@ -663,6 +688,18 @@ List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
       diagnostics,
       'directorAnchorSavedChars',
     );
+    final projectScopeRows = _diagnosticInt(
+      diagnostics,
+      'memoryProjectScopeRowCount',
+    );
+    final scriptScopeRows = _diagnosticInt(
+      diagnostics,
+      'memoryScriptScopeRowCount',
+    );
+    final roleScopeRows = _diagnosticInt(
+      diagnostics,
+      'memoryRoleScopeRowCount',
+    );
     final hitCounts = _diagnosticStringIntMap(
       diagnostics,
       'memoryHitBucketCounts',
@@ -715,6 +752,17 @@ List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
     if (_diagnosticBool(diagnostics, 'directorManualYieldedToMemory') ||
         directorSaved > 0) {
       addTagged('director_trim', '导演描述已经让位给记忆，优先回收重复导演句，不动关键表演锚点。');
+    }
+    if (projectScopeRows > 0 &&
+        scriptScopeRows == 0 &&
+        roleScopeRows == 0 &&
+        memoryStyleChars >= 48) {
+      addTagged('project_scope_trim', '当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。');
+    }
+    if (roleScopeRows > 0 &&
+        dialogueNaturalness < 85 &&
+        comments.contains('情绪')) {
+      addTagged('role_scope_keep', '已经命中角色级记忆，优先加强角色表演动作，不要回退成泛项目描述。');
     }
   }
 
@@ -955,4 +1003,18 @@ String formatQualityReviewDetails(QualityReview row) {
     parts.add('建议=${repairSuggestions.join(" / ")}');
   }
   return parts.join(' · ');
+}
+
+String? _describeMemoryScopeRows({
+  required int projectScopeRows,
+  required int scriptScopeRows,
+  required int roleScopeRows,
+}) {
+  final parts = <String>[
+    if (projectScopeRows > 0) '项目$projectScopeRows',
+    if (scriptScopeRows > 0) '剧本$scriptScopeRows',
+    if (roleScopeRows > 0) '角色$roleScopeRows',
+  ];
+  if (parts.isEmpty) return null;
+  return parts.join('/');
 }

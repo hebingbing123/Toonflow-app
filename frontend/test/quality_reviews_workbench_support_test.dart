@@ -136,6 +136,11 @@ void main() {
               'autoNegativeSource': 'review+rejected_memory',
               'directorManualYieldedToMemory': true,
               'directorAnchorSavedChars': 28,
+              'negativeSavedFragmentCount': 2,
+              'negativeSavedChars': 34,
+              'memoryProjectScopeRowCount': 1,
+              'memoryScriptScopeRowCount': 2,
+              'memoryRoleScopeRowCount': 1,
               'continuityNoteCount': 1,
               'usesReferenceFrame': true,
             },
@@ -149,7 +154,43 @@ void main() {
       expect(details, contains('压缩=动作2次'));
       expect(details, contains('导演让位'));
       expect(details, contains('参考帧'));
+      expect(details, contains('负向精简=2条/34 chars'));
+      expect(details, contains('记忆层级=项目1/剧本2/角色1'));
       expect(details, contains('建议='));
+    },
+  );
+
+  test(
+    'buildQualityReviewRepairSuggestions flags project-only memory pressure before trimming delivery',
+    () {
+      final suggestions = buildQualityReviewRepairSuggestions(
+        const QualityReview(
+          id: 'r3',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'storyboard',
+          source: 'auto',
+          overallScore: 78,
+          isBadCase: false,
+          comments: '情绪还不够自然，有点生硬',
+          modelParams: {
+            'diagnostics': {
+              'promptChars': 430,
+              'memoryStyleChars': 72,
+              'memoryVisualChars': 30,
+              'memoryDeliveryChars': 18,
+              'memoryProjectScopeRowCount': 3,
+              'memoryScriptScopeRowCount': 0,
+              'memoryRoleScopeRowCount': 0,
+              'memoryHitBuckets': ['表演'],
+            },
+          },
+        ),
+      );
+
+      expect(suggestions, contains('当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。'));
+      expect(suggestions, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。'));
     },
   );
 

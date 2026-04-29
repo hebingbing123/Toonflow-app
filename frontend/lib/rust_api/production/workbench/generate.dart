@@ -12,6 +12,9 @@ class GenerateVideoPromptDiagnostics {
     required this.promptChars,
     required this.negativePromptChars,
     required this.negativeConstraintCount,
+    this.negativeCandidateFragmentCount = 0,
+    this.negativeSavedFragmentCount = 0,
+    this.negativeSavedChars = 0,
     required this.negativeBudgetTier,
     required this.autoNegativeSource,
     required this.autoNegativeReviewFragmentCount,
@@ -27,6 +30,9 @@ class GenerateVideoPromptDiagnostics {
     required this.memoryStyleChars,
     required this.memoryVisualChars,
     required this.memoryDeliveryChars,
+    this.memoryTopCandidateScore = 0,
+    this.memorySelectedPrimaryBucket,
+    this.memoryLowValueCandidateSkipped = false,
     required this.memoryHitBuckets,
     required this.memorySuppressedBuckets,
     this.memoryHitBucketCounts = const <String, int>{},
@@ -36,15 +42,26 @@ class GenerateVideoPromptDiagnostics {
     this.memoryOptimizationRemovedChars = 0,
     this.memoryOptimizationRemovedVisualRows = 0,
     this.memoryOptimizationRemovedDuplicateRows = 0,
+    this.directorManualYieldedToMemory = false,
+    this.directorManualYieldedChars = 0,
+    this.directorPerformanceTrimmedChars = 0,
+    this.directorAnchorSavedChars = 0,
     required this.continuityNoteCount,
     required this.continuityNoteChars,
     required this.usesReferenceFrame,
     required this.memoryBudgetTier,
+    this.recentQualityMemoryBiases = const <String>[],
+    this.memoryProjectScopeRowCount = 0,
+    this.memoryScriptScopeRowCount = 0,
+    this.memoryRoleScopeRowCount = 0,
   });
 
   final int promptChars;
   final int negativePromptChars;
   final int negativeConstraintCount;
+  final int negativeCandidateFragmentCount;
+  final int negativeSavedFragmentCount;
+  final int negativeSavedChars;
   final String negativeBudgetTier;
   final String? autoNegativeSource;
   final int autoNegativeReviewFragmentCount;
@@ -60,6 +77,9 @@ class GenerateVideoPromptDiagnostics {
   final int memoryStyleChars;
   final int memoryVisualChars;
   final int memoryDeliveryChars;
+  final double memoryTopCandidateScore;
+  final String? memorySelectedPrimaryBucket;
+  final bool memoryLowValueCandidateSkipped;
   final List<String> memoryHitBuckets;
   final List<String> memorySuppressedBuckets;
   final Map<String, int> memoryHitBucketCounts;
@@ -69,10 +89,18 @@ class GenerateVideoPromptDiagnostics {
   final int memoryOptimizationRemovedChars;
   final int memoryOptimizationRemovedVisualRows;
   final int memoryOptimizationRemovedDuplicateRows;
+  final bool directorManualYieldedToMemory;
+  final int directorManualYieldedChars;
+  final int directorPerformanceTrimmedChars;
+  final int directorAnchorSavedChars;
   final int continuityNoteCount;
   final int continuityNoteChars;
   final bool usesReferenceFrame;
   final String memoryBudgetTier;
+  final List<String> recentQualityMemoryBiases;
+  final int memoryProjectScopeRowCount;
+  final int memoryScriptScopeRowCount;
+  final int memoryRoleScopeRowCount;
 
   static Map<String, int> _bucketCounts(dynamic value) {
     if (value is! Map) return const <String, int>{};
@@ -93,6 +121,11 @@ class GenerateVideoPromptDiagnostics {
       negativePromptChars: (json['negativePromptChars'] as num?)?.toInt() ?? 0,
       negativeConstraintCount:
           (json['negativeConstraintCount'] as num?)?.toInt() ?? 0,
+      negativeCandidateFragmentCount:
+          (json['negativeCandidateFragmentCount'] as num?)?.toInt() ?? 0,
+      negativeSavedFragmentCount:
+          (json['negativeSavedFragmentCount'] as num?)?.toInt() ?? 0,
+      negativeSavedChars: (json['negativeSavedChars'] as num?)?.toInt() ?? 0,
       negativeBudgetTier: json['negativeBudgetTier'] as String? ?? 'lean',
       autoNegativeSource: json['autoNegativeSource'] as String?,
       autoNegativeReviewFragmentCount:
@@ -114,6 +147,12 @@ class GenerateVideoPromptDiagnostics {
       memoryStyleChars: (json['memoryStyleChars'] as num?)?.toInt() ?? 0,
       memoryVisualChars: (json['memoryVisualChars'] as num?)?.toInt() ?? 0,
       memoryDeliveryChars: (json['memoryDeliveryChars'] as num?)?.toInt() ?? 0,
+      memoryTopCandidateScore:
+          (json['memoryTopCandidateScore'] as num?)?.toDouble() ?? 0,
+      memorySelectedPrimaryBucket:
+          json['memorySelectedPrimaryBucket'] as String?,
+      memoryLowValueCandidateSkipped:
+          json['memoryLowValueCandidateSkipped'] == true,
       memoryHitBuckets: (json['memoryHitBuckets'] as List<dynamic>? ?? const [])
           .whereType<String>()
           .toList(growable: false),
@@ -135,10 +174,28 @@ class GenerateVideoPromptDiagnostics {
       memoryOptimizationRemovedDuplicateRows:
           (json['memoryOptimizationRemovedDuplicateRows'] as num?)?.toInt() ??
           0,
+      directorManualYieldedToMemory:
+          json['directorManualYieldedToMemory'] == true,
+      directorManualYieldedChars:
+          (json['directorManualYieldedChars'] as num?)?.toInt() ?? 0,
+      directorPerformanceTrimmedChars:
+          (json['directorPerformanceTrimmedChars'] as num?)?.toInt() ?? 0,
+      directorAnchorSavedChars:
+          (json['directorAnchorSavedChars'] as num?)?.toInt() ?? 0,
       continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
       continuityNoteChars: (json['continuityNoteChars'] as num?)?.toInt() ?? 0,
       usesReferenceFrame: json['usesReferenceFrame'] == true,
       memoryBudgetTier: json['memoryBudgetTier'] as String? ?? 'expanded',
+      recentQualityMemoryBiases:
+          (json['recentQualityMemoryBiases'] as List<dynamic>? ?? const [])
+              .whereType<String>()
+              .toList(growable: false),
+      memoryProjectScopeRowCount:
+          (json['memoryProjectScopeRowCount'] as num?)?.toInt() ?? 0,
+      memoryScriptScopeRowCount:
+          (json['memoryScriptScopeRowCount'] as num?)?.toInt() ?? 0,
+      memoryRoleScopeRowCount:
+          (json['memoryRoleScopeRowCount'] as num?)?.toInt() ?? 0,
     );
   }
 }

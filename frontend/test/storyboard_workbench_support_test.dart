@@ -39,6 +39,8 @@ void main() {
       promptChars: 412,
       negativePromptChars: 56,
       negativeConstraintCount: 2,
+      negativeSavedFragmentCount: 2,
+      negativeSavedChars: 34,
       negativeBudgetTier: 'lean',
       autoNegativeSource: 'rejected_memory',
       autoNegativeReviewFragmentCount: 0,
@@ -61,6 +63,9 @@ void main() {
       memoryOptimizationRemovedChars: 88,
       memoryOptimizationRemovedVisualRows: 1,
       memoryOptimizationRemovedDuplicateRows: 1,
+      memoryProjectScopeRowCount: 2,
+      memoryScriptScopeRowCount: 1,
+      memoryRoleScopeRowCount: 1,
       continuityNoteCount: 1,
       continuityNoteChars: 20,
       usesReferenceFrame: true,
@@ -72,14 +77,67 @@ void main() {
       contains('Memory slim -88'),
     );
     expect(
+      buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
+      contains('Negative slim -34'),
+    );
+    expect(
       buildStoryboardVideoPromptSourceSummary(diagnostics),
       contains('自动瘦身 2 条（重复 1 / 纯视觉 1）'),
+    );
+    expect(
+      buildStoryboardVideoPromptSourceSummary(diagnostics),
+      contains('负向精简 2 条 / 34 chars'),
+    );
+    expect(
+      buildStoryboardVideoPromptAnchorSummary(diagnostics),
+      contains('记忆命中 项目 2 / 剧本 1 / 角色 1'),
     );
     expect(
       buildStoryboardVideoPromptBudgetHint(diagnostics),
       contains('已自动清掉重复/纯视觉私有记忆'),
     );
   });
+
+  test(
+    'buildStoryboardVideoPromptBudgetHint warns when prompt mostly leans on project memory',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 396,
+        negativePromptChars: 22,
+        negativeConstraintCount: 1,
+        negativeBudgetTier: 'lean',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 0,
+        styleAnchorCount: 1,
+        memoryStyleAnchorCount: 2,
+        memoryDeliveryAnchorCount: 0,
+        memoryDeliveryPriorityApplied: false,
+        memoryStyleChars: 62,
+        memoryVisualChars: 30,
+        memoryDeliveryChars: 0,
+        memoryHitBuckets: const [],
+        memorySuppressedBuckets: const [],
+        continuityNoteCount: 0,
+        continuityNoteChars: 0,
+        usesReferenceFrame: true,
+        memoryBudgetTier: 'expanded',
+        memoryProjectScopeRowCount: 3,
+      );
+
+      expect(
+        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        '这次主要命中项目级记忆，先把通用风格句收短一点，预算优先留给人物表演和当前镜头连续性。',
+      );
+      expect(buildStoryboardVideoPromptRepairSuggestions(diagnostics), [
+        '这轮主要靠项目级通用记忆在撑，继续压词时优先缩短泛风格句。',
+      ]);
+    },
+  );
 
   test(
     'describeStoryboardSelectedMemoryFeedback explains isolated reusable memory',

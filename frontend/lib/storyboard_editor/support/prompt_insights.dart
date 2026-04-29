@@ -252,6 +252,8 @@ String buildStoryboardVideoPromptDiagnosticsLine(
       'Observation ${diagnostics.observationNoteChars}',
     if (diagnostics.memoryStyleChars > 0)
       'Memory ${diagnostics.memoryStyleChars}',
+    if (diagnostics.negativeSavedChars > 0)
+      'Negative slim -${diagnostics.negativeSavedChars}',
     if (diagnostics.memoryOptimizationApplied &&
         diagnostics.memoryOptimizationRemovedChars > 0)
       'Memory slim -${diagnostics.memoryOptimizationRemovedChars}',
@@ -331,6 +333,13 @@ String buildStoryboardVideoPromptSourceSummary(
       '（重复 ${diagnostics.memoryOptimizationRemovedDuplicateRows} / 纯视觉 ${diagnostics.memoryOptimizationRemovedVisualRows}）',
     );
   }
+  if (diagnostics.negativeSavedFragmentCount > 0 ||
+      diagnostics.negativeSavedChars > 0) {
+    parts.add(
+      '负向精简 ${diagnostics.negativeSavedFragmentCount} 条'
+      ' / ${diagnostics.negativeSavedChars} chars',
+    );
+  }
   if (diagnostics.autoNegativeReviewFragmentCount > 0) {
     parts.add('评审 ${diagnostics.autoNegativeReviewFragmentCount} 条');
   }
@@ -352,6 +361,8 @@ String buildStoryboardVideoPromptAnchorSummary(
       '风格锚点 ${diagnostics.styleAnchorCount}',
     if (diagnostics.memoryStyleAnchorCount > 0)
       '私有记忆 ${diagnostics.memoryStyleAnchorCount}',
+    if (_hasScopedMemoryRows(diagnostics))
+      '记忆命中 ${_describeStoryboardMemoryScopeRows(diagnostics)}',
     if (diagnostics.continuityNoteCount > 0)
       '连续性记忆 ${diagnostics.continuityNoteCount}',
     if (diagnostics.usesReferenceFrame) '已引用当前画面',
@@ -369,6 +380,19 @@ String buildStoryboardVideoPromptBudgetHint(
       diagnostics.memoryOptimizationRemovedRows > 0 &&
       diagnostics.memoryDeliveryChars > 0) {
     return '本次生成前已自动清掉重复/纯视觉私有记忆，优先保住了表演和语气锚点；继续补词时先别把这些省下来的预算又填回泛风格句。';
+  }
+  if (_hasScopedMemoryRows(diagnostics) &&
+      diagnostics.memoryProjectScopeRowCount > 0 &&
+      diagnostics.memoryScriptScopeRowCount == 0 &&
+      diagnostics.memoryRoleScopeRowCount == 0 &&
+      diagnostics.memoryStyleChars >= 48) {
+    return '这次主要命中项目级记忆，先把通用风格句收短一点，预算优先留给人物表演和当前镜头连续性。';
+  }
+  if (diagnostics.memoryRoleScopeRowCount > 0 &&
+      diagnostics.memoryDeliveryChars > 0 &&
+      diagnostics.memoryProjectScopeRowCount >
+          diagnostics.memoryRoleScopeRowCount) {
+    return '角色级记忆已经命中，继续压缩时先动项目级泛化描述，别把角色表演和情绪锚点一起删掉。';
   }
   if (diagnostics.memoryDeliveryPriorityApplied &&
       diagnostics.memoryDeliveryChars > 0 &&
@@ -478,6 +502,16 @@ List<String> buildStoryboardVideoPromptRepairSuggestions(
       diagnostics.autoNegativeMemoryFragmentCount >= 2) {
     addTagged('memory_reuse', '这次已经命中项目/剧本私有坏例记忆，先复用它，别再堆一层共享长记忆。');
   }
+  if (diagnostics.memoryProjectScopeRowCount > 0 &&
+      diagnostics.memoryScriptScopeRowCount == 0 &&
+      diagnostics.memoryRoleScopeRowCount == 0 &&
+      diagnostics.memoryStyleChars >= 48) {
+    addTagged('project_memory_trim', '这轮主要靠项目级通用记忆在撑，继续压词时优先缩短泛风格句。');
+  }
+  if (diagnostics.memoryRoleScopeRowCount > 0 &&
+      diagnostics.memoryDeliveryChars > 0) {
+    addTagged('role_memory_keep', '已经命中角色级私有记忆，优先保住角色情绪和口型，别被项目级描述盖掉。');
+  }
   if (diagnostics.roleAnchorCount == 0 &&
       diagnostics.sceneAnchorCount == 0 &&
       diagnostics.styleAnchorCount == 0) {
@@ -487,4 +521,24 @@ List<String> buildStoryboardVideoPromptRepairSuggestions(
     addTagged('healthy', '当前预算可控，继续保留人物表演、关键道具和情绪细节。');
   }
   return suggestions;
+}
+
+bool _hasScopedMemoryRows(GenerateVideoPromptDiagnostics diagnostics) {
+  return diagnostics.memoryProjectScopeRowCount > 0 ||
+      diagnostics.memoryScriptScopeRowCount > 0 ||
+      diagnostics.memoryRoleScopeRowCount > 0;
+}
+
+String _describeStoryboardMemoryScopeRows(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  final parts = <String>[
+    if (diagnostics.memoryProjectScopeRowCount > 0)
+      '项目 ${diagnostics.memoryProjectScopeRowCount}',
+    if (diagnostics.memoryScriptScopeRowCount > 0)
+      '剧本 ${diagnostics.memoryScriptScopeRowCount}',
+    if (diagnostics.memoryRoleScopeRowCount > 0)
+      '角色 ${diagnostics.memoryRoleScopeRowCount}',
+  ];
+  return parts.join(' / ');
 }
