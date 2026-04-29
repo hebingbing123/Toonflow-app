@@ -75,11 +75,13 @@ pub(super) fn build_video_prompt_memory_notes_with_pressure(
         .and_then(parse_structured_storyboard_description)
         .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
         .unwrap_or_default();
-    let rows = trim_video_prompt_memory_rows(
+    let rows = trim_video_prompt_memory_rows_with_context(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
         &subject_candidates,
+        Some(storyboard_row),
+        constraint_pressure,
     );
     let style_notes = compact_guardrail_sensitive_style_notes(
         select_video_prompt_style_notes(
@@ -665,6 +667,24 @@ pub(super) fn trim_video_prompt_memory_rows(
     current_prompt_seed: Option<&str>,
     subject_candidates: &[String],
 ) -> Vec<AgentMemoryRow> {
+    trim_video_prompt_memory_rows_with_context(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        subject_candidates,
+        None,
+        None,
+    )
+}
+
+pub(super) fn trim_video_prompt_memory_rows_with_context(
+    rows: Vec<AgentMemoryRow>,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Vec<AgentMemoryRow> {
     let mut selected_candidates = Vec::new();
     let mut auto_scope_candidates = Vec::new();
     let mut script_style_candidates = Vec::new();
@@ -689,19 +709,23 @@ pub(super) fn trim_video_prompt_memory_rows(
     }
 
     let mut kept = std::collections::HashSet::new();
-    for idx in prioritize_storyboard_memory_indices(
+    for idx in prioritize_storyboard_memory_indices_with_context(
         &selected_candidates,
         storyboard_numeric_id,
         current_prompt_seed,
         VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT,
+        storyboard_row,
+        constraint_pressure,
     ) {
         kept.insert(idx);
     }
-    for idx in prioritize_storyboard_memory_indices(
+    for idx in prioritize_storyboard_memory_indices_with_context(
         &auto_scope_candidates,
         storyboard_numeric_id,
         current_prompt_seed,
         VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT,
+        storyboard_row,
+        constraint_pressure,
     ) {
         kept.insert(idx);
     }
@@ -790,6 +814,24 @@ pub(super) fn prioritize_storyboard_memory_indices(
     current_prompt_seed: Option<&str>,
     limit: usize,
 ) -> Vec<usize> {
+    prioritize_storyboard_memory_indices_with_context(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        limit,
+        None,
+        None,
+    )
+}
+
+pub(super) fn prioritize_storyboard_memory_indices_with_context(
+    rows: &[(usize, AgentMemoryRow)],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    limit: usize,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Vec<usize> {
     let mut scored = rows
         .iter()
         .map(|(idx, row)| {
@@ -806,11 +848,14 @@ pub(super) fn prioritize_storyboard_memory_indices(
             let storyboard_distance =
                 storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
                     .unwrap_or(i32::MAX);
+            let trim_quality =
+                storyboard_memory_trim_quality_score(row, storyboard_row, constraint_pressure);
             (
                 *idx,
                 exact_storyboard_match,
                 prompt_seed_match,
                 prompt_seed_present,
+                trim_quality,
                 storyboard_distance,
             )
         })
@@ -819,14 +864,128 @@ pub(super) fn prioritize_storyboard_memory_indices(
         b.1.cmp(&a.1)
             .then(b.2.cmp(&a.2))
             .then(a.3.cmp(&b.3))
-            .then(a.4.cmp(&b.4))
+            .then(b.4.cmp(&a.4))
+            .then(a.5.cmp(&b.5))
             .then(a.0.cmp(&b.0))
     });
     scored
         .into_iter()
         .take(limit)
-        .map(|(idx, _, _, _, _)| idx)
+        .map(|(idx, _, _, _, _, _)| idx)
         .collect()
+}
+
+fn storyboard_memory_trim_quality_score(
+    row: &AgentMemoryRow,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    if row.name != "selected_video_memory" {
+        return 0;
+    }
+
+    let should_prefer_delivery =
+        storyboard_trim_prefers_delivery_memory(storyboard_row, constraint_pressure);
+    let style = extract_key_value(&row.content, "style")
+        .or_else(|| extract_key_value(&row.content, "note"))
+        .unwrap_or_default();
+    let fragments = split_prompt_note_fragments(&style).collect::<Vec<_>>();
+    let mut score = 0;
+    let has_delivery = extract_key_value(&row.content, "delivery")
+        .is_some_and(|value| !normalize_prompt_text(&value).is_empty());
+    let has_performance = fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演") || fragment.starts_with("语气"));
+    let has_emotion = fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("情绪"));
+    let visual_only = !fragments.is_empty()
+        && fragments.iter().all(|fragment| {
+            fragment.starts_with("镜头")
+                || fragment.starts_with("光影")
+                || fragment.starts_with("环境")
+                || fragment.starts_with("动作")
+                || fragment.starts_with("声场")
+        });
+    let local_framing_only = !fragments.is_empty()
+        && fragments.iter().all(|fragment| {
+            fragment.starts_with("镜头")
+                && matches!(
+                    normalize_prompt_text(fragment).as_str(),
+                    "镜头近景" | "镜头中景" | "镜头远景" | "镜头特写" | "镜头全景"
+                )
+        });
+
+    if has_delivery {
+        score += 12;
+    }
+    if has_performance {
+        score += 10;
+    }
+    if has_emotion {
+        score += 6;
+    }
+    if should_prefer_delivery {
+        if has_delivery {
+            score += 26;
+        }
+        if has_performance {
+            score += 18;
+        }
+        if has_emotion {
+            score += 10;
+        }
+        if visual_only {
+            score -= 18;
+        }
+        if local_framing_only {
+            score -= 14;
+        }
+    } else if constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory) {
+        if visual_only {
+            score -= 8;
+        }
+        if local_framing_only {
+            score -= 8;
+        }
+    }
+
+    score
+}
+
+fn storyboard_trim_prefers_delivery_memory(
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    if constraint_pressure.is_some_and(|pressure| {
+        pressure.has_dialogue_guardrail
+            || pressure.has_emotion_guardrail
+            || pressure.has_identity_guardrail
+    }) {
+        return true;
+    }
+
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return false;
+    };
+    let dialogue = normalize_prompt_text(&fields.dialogue);
+    if !dialogue.is_empty() && dialogue != "无台词" {
+        return true;
+    }
+
+    let expressive_context = [
+        normalize_prompt_text(&fields.action),
+        normalize_prompt_text(&fields.mood),
+    ]
+    .join(" ");
+    [
+        "停顿", "抬眼", "垂眼", "低声", "轻声", "哽咽", "克制", "压抑", "悲", "紧张", "发颤",
+    ]
+    .iter()
+    .any(|keyword| expressive_context.contains(keyword))
 }
 
 pub(super) fn memory_prompt_seed_matches(

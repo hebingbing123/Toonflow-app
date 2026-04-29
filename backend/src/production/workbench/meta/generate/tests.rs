@@ -19,7 +19,8 @@ use super::{
     select_pressure_prioritized_style_note_candidate, select_script_asset_anchors,
     select_video_prompt_asset_seed_rows, select_video_prompt_memory_notes,
     select_video_prompt_style_notes, trim_video_prompt_memory_rows,
-    trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
+    trim_video_prompt_memory_rows_with_context, trim_video_prompt_observation_rows,
+    video_prompt_observation_conflicts_with_style,
     video_prompt_observation_is_irrelevant_to_storyboard, DirectorEmotionFragmentGroup,
     GenerateVideoPromptBody, GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse,
     ScriptRolePromptSeedRow, VideoPromptConstraintPressure, VideoPromptContext,
@@ -3263,6 +3264,95 @@ fn trim_video_prompt_memory_rows_prefers_matching_role_style_rows_for_current_su
     assert!(!trimmed
         .iter()
         .any(|row| row.content.contains("subject=沈知遥")));
+}
+
+#[test]
+fn trim_video_prompt_memory_rows_with_context_prefers_delivery_rich_selected_rows_on_fragile_turn()
+{
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: None,
+        video_desc: Some(
+            "（林晚停顿后看向顾承泽、雨夜走廊、林晚/顾承泽、5秒、近景、静止、林晚抬眼停顿后低声开口、压抑、冷调逆光、你终于来了、雨声压过呼吸声、A12）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let mut rows = vec![AgentMemoryRow {
+        name: "selected_video_memory".into(),
+        content: "storyboardIds=12 | promptSeed=seed-12-current | style=表演喉结滚动，语气低声尾音发颤，光影冷蓝窗光 | delivery=表演喉结滚动低声尾音发颤".into(),
+    }];
+    for id in (13..=18).rev() {
+        rows.push(AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: format!(
+                "storyboardIds={id} | promptSeed=seed-{id} | style=镜头中景稳定跟拍，光影冷蓝窗光"
+            ),
+        });
+    }
+
+    let trimmed = trim_video_prompt_memory_rows_with_context(
+        rows,
+        12,
+        Some("seed-12-current"),
+        &["林晚".to_string(), "顾承泽".to_string()],
+        Some(&storyboard_row),
+        Some(VideoPromptConstraintPressure {
+            has_dialogue_guardrail: true,
+            has_emotion_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        }),
+    );
+
+    let selected = trimmed
+        .iter()
+        .filter(|row| row.name == "selected_video_memory")
+        .map(|row| row.content.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(selected.len(), 6);
+    assert!(selected.iter().any(|row| {
+        row.contains("storyboardIds=12") && row.contains("delivery=表演喉结滚动低声尾音发颤")
+    }));
+}
+
+#[test]
+fn trim_video_prompt_memory_rows_with_context_keeps_visual_selected_rows_when_scene_is_not_fragile()
+{
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: None,
+        video_desc: Some(
+            "（主角走过空旷厂房、旧厂房、主角、5秒、远景、缓推、继续前行、冷峻、冷调逆光、无台词、风声回响、A12）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let rows = vec![
+        AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=12 | promptSeed=seed-12-current | style=镜头中景稳定跟拍，光影冷蓝窗光".into(),
+        },
+        AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=11 | promptSeed=seed-11 | style=镜头远景稳定跟拍，光影冷调逆光".into(),
+        },
+    ];
+
+    let trimmed = trim_video_prompt_memory_rows_with_context(
+        rows,
+        12,
+        Some("seed-12-current"),
+        &["主角".to_string()],
+        Some(&storyboard_row),
+        None,
+    );
+
+    assert_eq!(
+        trimmed
+            .iter()
+            .filter(|row| row.name == "selected_video_memory")
+            .count(),
+        2
+    );
 }
 
 #[test]
