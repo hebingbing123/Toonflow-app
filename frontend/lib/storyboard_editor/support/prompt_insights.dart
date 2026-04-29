@@ -322,6 +322,31 @@ String describeStoryboardAutoNegativeSource(
   }
 }
 
+String buildStoryboardPromptGenerationFollowUp(
+  GenerateVideoPromptDiagnostics diagnostics, {
+  String? observationNote,
+}) {
+  final parts = <String>[
+    '已生成默认视频提示词并回填时长',
+    describeStoryboardAutoNegativeSource(diagnostics),
+  ];
+  final scopeSummary = _describeStoryboardMemoryScopeRowsIfAny(diagnostics);
+  if (scopeSummary != null) {
+    parts.add('命中$scopeSummary记忆');
+  }
+  if (diagnostics.negativeSavedChars > 0 ||
+      diagnostics.negativeSavedFragmentCount > 0) {
+    parts.add(
+      '自动精简 ${diagnostics.negativeSavedFragmentCount} 条负向约束 / ${diagnostics.negativeSavedChars} chars',
+    );
+  }
+  final note = observationNote?.trim();
+  if (note != null && note.isNotEmpty) {
+    parts.add(note);
+  }
+  return '${parts.join('；')}。';
+}
+
 String buildStoryboardVideoPromptSourceSummary(
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
@@ -527,6 +552,15 @@ bool _hasScopedMemoryRows(GenerateVideoPromptDiagnostics diagnostics) {
   return diagnostics.memoryProjectScopeRowCount > 0 ||
       diagnostics.memoryScriptScopeRowCount > 0 ||
       diagnostics.memoryRoleScopeRowCount > 0;
+}
+
+String? _describeStoryboardMemoryScopeRowsIfAny(
+  GenerateVideoPromptDiagnostics diagnostics,
+) {
+  if (!_hasScopedMemoryRows(diagnostics)) {
+    return null;
+  }
+  return _describeStoryboardMemoryScopeRows(diagnostics);
 }
 
 String _describeStoryboardMemoryScopeRows(

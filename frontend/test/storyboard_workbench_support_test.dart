@@ -96,6 +96,13 @@ void main() {
       buildStoryboardVideoPromptBudgetHint(diagnostics),
       contains('已自动清掉重复/纯视觉私有记忆'),
     );
+    expect(
+      buildStoryboardPromptGenerationFollowUp(
+        diagnostics,
+        observationNote: '观察到上一轮嘴型偏僵',
+      ),
+      '已生成默认视频提示词并回填时长；自动负向来自私有坏例记忆；命中项目 2 / 剧本 1 / 角色 1记忆；自动精简 2 条负向约束 / 34 chars；观察到上一轮嘴型偏僵。',
+    );
   });
 
   test(
