@@ -8,6 +8,8 @@ import 'index.dart';
 /// Quality review REST queries and mutations.
 Future<List<QualityReview>> fetchQualityReviews(
   String accessToken, {
+  int? projectId,
+  int? scriptId,
   String? targetType,
   String? targetId,
   String? jobId,
@@ -18,6 +20,12 @@ Future<List<QualityReview>> fetchQualityReviews(
   int? offset,
 }) async {
   final query = <String, String>{};
+  if (projectId != null) {
+    query['projectId'] = '$projectId';
+  }
+  if (scriptId != null) {
+    query['scriptId'] = '$scriptId';
+  }
   if (targetType != null && targetType.isNotEmpty) {
     query['targetType'] = targetType;
   }
@@ -34,7 +42,8 @@ Future<List<QualityReview>> fetchQualityReviews(
     query['isBadCase'] = isBadCase.toString();
   }
   if (memoryDeliveryPriorityApplied != null) {
-    query['memoryDeliveryPriorityApplied'] = memoryDeliveryPriorityApplied.toString();
+    query['memoryDeliveryPriorityApplied'] = memoryDeliveryPriorityApplied
+        .toString();
   }
   if (limit != null) {
     query['limit'] = '$limit';

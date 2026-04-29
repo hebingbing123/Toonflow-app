@@ -24,6 +24,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingStagePassRate,
     required this.loadingReviewById,
     required this.creatingReview,
+    required this.projectIdFilterCtrl,
+    required this.scriptIdFilterCtrl,
     required this.targetTypeFilterCtrl,
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
@@ -56,6 +58,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingStagePassRate;
   final bool loadingReviewById;
   final bool creatingReview;
+  final TextEditingController projectIdFilterCtrl;
+  final TextEditingController scriptIdFilterCtrl;
   final TextEditingController targetTypeFilterCtrl;
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
@@ -120,6 +124,11 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
         summarizePromptDiagnosticsFromQualityReviews(model.reviews);
     final memoryScopePressureSummary =
         summarizeMemoryScopePressureFromQualityReviews(model.reviews);
+    final memoryOptimizationSavingsSummary =
+        summarizeMemoryOptimizationSavingsFromQualityReviews(model.reviews);
+    final scopeRepairQueueSummary = summarizeScopeRepairQueueFromQualityReviews(
+      model.reviews,
+    );
     final repairPlanSummary = summarizeQualityRepairPlanFromReviews(
       model.reviews,
     );
@@ -207,6 +216,30 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ],
               const SizedBox(height: 12),
               Text('筛选与读取', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: model.projectIdFilterCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: '筛选 projectId',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: model.scriptIdFilterCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: '筛选 scriptId',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.targetTypeFilterCtrl,
@@ -395,6 +428,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 12),
                 SelectableText('Scope压力：$memoryScopePressureSummary'),
               ],
+              if (memoryOptimizationSavingsSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('记忆瘦身：$memoryOptimizationSavingsSummary'),
+              ],
+              if (scopeRepairQueueSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('优先修复：$scopeRepairQueueSummary'),
+              ],
               if (repairPlanSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('修复建议：$repairPlanSummary'),
@@ -415,8 +456,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ...model.reviews.take(8).map((review) {
                   final diagnosticSummary =
                       summarizeQualityReviewPromptDiagnostics(review);
-                  final repairSuggestions =
-                      buildQualityReviewRepairSuggestions(review);
+                  final repairSuggestions = buildQualityReviewRepairSuggestions(
+                    review,
+                  );
                   return ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,

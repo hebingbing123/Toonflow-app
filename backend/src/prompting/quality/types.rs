@@ -68,6 +68,8 @@ pub struct CreateQualityReviewBody {
 #[serde(rename_all = "camelCase")]
 #[into_params(parameter_in = Query, rename_all = "camelCase")]
 pub struct ListQualityReviewsQuery {
+    pub project_id: Option<i32>,
+    pub script_id: Option<i32>,
     pub target_type: Option<String>,
     pub target_id: Option<String>,
     pub job_id: Option<Uuid>,

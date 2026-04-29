@@ -2,6 +2,8 @@ part of 'section.dart';
 
 class _QualityReviewsWorkbenchControllers {
   _QualityReviewsWorkbenchControllers({
+    required this.projectIdFilterCtrl,
+    required this.scriptIdFilterCtrl,
     required this.targetTypeFilterCtrl,
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
@@ -18,6 +20,8 @@ class _QualityReviewsWorkbenchControllers {
 
   factory _QualityReviewsWorkbenchControllers.create() {
     return _QualityReviewsWorkbenchControllers(
+      projectIdFilterCtrl: TextEditingController(),
+      scriptIdFilterCtrl: TextEditingController(),
       targetTypeFilterCtrl: TextEditingController(),
       targetIdFilterCtrl: TextEditingController(),
       jobIdFilterCtrl: TextEditingController(),
@@ -37,6 +41,8 @@ class _QualityReviewsWorkbenchControllers {
     );
   }
 
+  final TextEditingController projectIdFilterCtrl;
+  final TextEditingController scriptIdFilterCtrl;
   final TextEditingController targetTypeFilterCtrl;
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
@@ -51,6 +57,8 @@ class _QualityReviewsWorkbenchControllers {
   final TextEditingController createBadCaseCategoryCtrl;
 
   void dispose() {
+    projectIdFilterCtrl.dispose();
+    scriptIdFilterCtrl.dispose();
     targetTypeFilterCtrl.dispose();
     targetIdFilterCtrl.dispose();
     jobIdFilterCtrl.dispose();

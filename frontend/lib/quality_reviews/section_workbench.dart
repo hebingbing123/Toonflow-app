@@ -44,9 +44,13 @@ class _QualityReviewsWorkbenchDialogState
 
   String? _activeFilterQuerySummary() {
     final query = <String, String>{};
+    final projectId = _ctrls.projectIdFilterCtrl.text.trim();
+    final scriptId = _ctrls.scriptIdFilterCtrl.text.trim();
     final targetType = _ctrls.targetTypeFilterCtrl.text.trim();
     final targetId = _ctrls.targetIdFilterCtrl.text.trim();
     final jobId = _ctrls.jobIdFilterCtrl.text.trim();
+    if (projectId.isNotEmpty) query['projectId'] = projectId;
+    if (scriptId.isNotEmpty) query['scriptId'] = scriptId;
     if (targetType.isNotEmpty) query['targetType'] = targetType;
     if (targetId.isNotEmpty) query['targetId'] = targetId;
     if (jobId.isNotEmpty) query['jobId'] = jobId;
@@ -102,6 +106,8 @@ class _QualityReviewsWorkbenchDialogState
     try {
       final rows = await fetchQualityReviews(
         widget.accessToken,
+        projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
+        scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
         targetType: _ctrls.targetTypeFilterCtrl.text.trim(),
         targetId: _ctrls.targetIdFilterCtrl.text.trim(),
         jobId: _ctrls.jobIdFilterCtrl.text.trim(),
@@ -302,6 +308,8 @@ class _QualityReviewsWorkbenchDialogState
         loadingStagePassRate: _loadingStagePassRate,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
+        projectIdFilterCtrl: _ctrls.projectIdFilterCtrl,
+        scriptIdFilterCtrl: _ctrls.scriptIdFilterCtrl,
         targetTypeFilterCtrl: _ctrls.targetTypeFilterCtrl,
         targetIdFilterCtrl: _ctrls.targetIdFilterCtrl,
         jobIdFilterCtrl: _ctrls.jobIdFilterCtrl,

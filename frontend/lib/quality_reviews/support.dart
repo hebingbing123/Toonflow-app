@@ -425,6 +425,213 @@ String? summarizeMemoryScopePressureFromQualityReviews(
       .join(' | ');
 }
 
+String? summarizeMemoryOptimizationSavingsFromQualityReviews(
+  Iterable<QualityReview> rows, {
+  int maxScopes = 3,
+}) {
+  final scopes =
+      <
+        String,
+        ({
+          int reviews,
+          int removedRows,
+          int removedChars,
+          int removedVisualRows,
+          int removedDuplicateRows,
+        })
+      >{};
+  for (final row in rows.where((item) => item.source == 'auto')) {
+    final diagnostics = _qualityDiagnosticsMap(row);
+    if (diagnostics == null) continue;
+    final removedChars = _diagnosticInt(
+      diagnostics,
+      'memoryOptimizationRemovedChars',
+    );
+    final removedRows = _diagnosticInt(
+      diagnostics,
+      'memoryOptimizationRemovedRows',
+    );
+    final removedVisualRows = _diagnosticInt(
+      diagnostics,
+      'memoryOptimizationRemovedVisualRows',
+    );
+    final removedDuplicateRows = _diagnosticInt(
+      diagnostics,
+      'memoryOptimizationRemovedDuplicateRows',
+    );
+    if (removedChars <= 0 && removedRows <= 0) continue;
+    final scope = _formatQualityScopeLabel(row);
+    final current =
+        scopes[scope] ??
+        (
+          reviews: 0,
+          removedRows: 0,
+          removedChars: 0,
+          removedVisualRows: 0,
+          removedDuplicateRows: 0,
+        );
+    scopes[scope] = (
+      reviews: current.reviews + 1,
+      removedRows: current.removedRows + removedRows,
+      removedChars: current.removedChars + removedChars,
+      removedVisualRows: current.removedVisualRows + removedVisualRows,
+      removedDuplicateRows: current.removedDuplicateRows + removedDuplicateRows,
+    );
+  }
+
+  if (scopes.isEmpty) return null;
+  final items = scopes.entries.toList()
+    ..sort((a, b) {
+      final byChars = b.value.removedChars.compareTo(a.value.removedChars);
+      if (byChars != 0) return byChars;
+      return b.value.removedRows.compareTo(a.value.removedRows);
+    });
+  return items
+      .take(maxScopes)
+      .map((entry) {
+        final value = entry.value;
+        return '${entry.key} ${value.reviews}条 · slim ${value.removedChars} chars / ${value.removedRows}条'
+            '（重复 ${value.removedDuplicateRows} / 纯视觉 ${value.removedVisualRows}）';
+      })
+      .join(' | ');
+}
+
+String? summarizeScopeRepairQueueFromQualityReviews(
+  Iterable<QualityReview> rows, {
+  int maxScopes = 3,
+  int maxSuggestionsPerScope = 2,
+}) {
+  final scopes =
+      <
+        String,
+        ({
+          int reviews,
+          int badCases,
+          int dialogueRiskHits,
+          int visualRiskHits,
+          int removedChars,
+          Map<String, int> suggestions,
+        })
+      >{};
+
+  bool hasDialogueRisk(QualityReview row) {
+    final comments = (row.comments ?? '').toLowerCase();
+    return (row.dialogueNaturalness != null && row.dialogueNaturalness! < 80) ||
+        comments.contains('生硬') ||
+        comments.contains('朗读') ||
+        comments.contains('没情绪') ||
+        comments.contains('无情绪');
+  }
+
+  bool hasVisualRisk(QualityReview row) {
+    final comments = (row.comments ?? '').toLowerCase();
+    return (row.visualQuality != null && row.visualQuality! < 80) ||
+        comments.contains('穿帮') ||
+        comments.contains('不自然') ||
+        comments.contains('ai') ||
+        comments.contains('假');
+  }
+
+  for (final row in rows) {
+    final scope = _formatQualityScopeLabel(row);
+    final diagnostics = _qualityDiagnosticsMap(row);
+    final removedChars = diagnostics == null
+        ? 0
+        : _diagnosticInt(diagnostics, 'memoryOptimizationRemovedChars');
+    final suggestions = buildQualityReviewRepairSuggestions(row);
+    final dialogueRisk = hasDialogueRisk(row);
+    final visualRisk = hasVisualRisk(row);
+    if (!row.isBadCase &&
+        suggestions.isEmpty &&
+        !dialogueRisk &&
+        !visualRisk &&
+        removedChars <= 0) {
+      continue;
+    }
+    final current =
+        scopes[scope] ??
+        (
+          reviews: 0,
+          badCases: 0,
+          dialogueRiskHits: 0,
+          visualRiskHits: 0,
+          removedChars: 0,
+          suggestions: <String, int>{},
+        );
+    final nextSuggestions = Map<String, int>.from(current.suggestions);
+    for (final suggestion in suggestions) {
+      nextSuggestions.update(
+        suggestion,
+        (count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    scopes[scope] = (
+      reviews: current.reviews + 1,
+      badCases: current.badCases + (row.isBadCase ? 1 : 0),
+      dialogueRiskHits: current.dialogueRiskHits + (dialogueRisk ? 1 : 0),
+      visualRiskHits: current.visualRiskHits + (visualRisk ? 1 : 0),
+      removedChars: current.removedChars + removedChars,
+      suggestions: nextSuggestions,
+    );
+  }
+
+  if (scopes.isEmpty) return null;
+  final items = scopes.entries.toList()
+    ..sort((a, b) {
+      int pressureScore(
+        ({
+          int reviews,
+          int badCases,
+          int dialogueRiskHits,
+          int visualRiskHits,
+          int removedChars,
+          Map<String, int> suggestions,
+        })
+        value,
+      ) {
+        final suggestionHits = value.suggestions.values.fold<int>(
+          0,
+          (sum, count) => sum + count,
+        );
+        return value.badCases * 100 +
+            value.dialogueRiskHits * 30 +
+            value.visualRiskHits * 30 +
+            suggestionHits * 10 +
+            value.removedChars;
+      }
+
+      return pressureScore(b.value).compareTo(pressureScore(a.value));
+    });
+  return items
+      .take(maxScopes)
+      .map((entry) {
+        final value = entry.value;
+        final rankedSuggestions = value.suggestions.entries.toList()
+          ..sort((a, b) {
+            final byCount = b.value.compareTo(a.value);
+            if (byCount != 0) return byCount;
+            return a.key.compareTo(b.key);
+          });
+        final nextStep = rankedSuggestions
+            .take(maxSuggestionsPerScope)
+            .map((item) => item.key)
+            .join(' / ');
+        final parts = <String>[
+          '${entry.key} ${value.reviews}条',
+          if (value.badCases > 0) '坏例 ${value.badCases}',
+          if (value.dialogueRiskHits > 0) '情绪/台词 ${value.dialogueRiskHits}',
+          if (value.visualRiskHits > 0) '真实感 ${value.visualRiskHits}',
+          if (value.removedChars > 0) 'slim ${value.removedChars} chars',
+        ];
+        if (nextStep.isNotEmpty) {
+          parts.add('下一步 $nextStep');
+        }
+        return parts.join(' · ');
+      })
+      .join(' | ');
+}
+
 List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
   final diagnostics = _qualityDiagnosticsMap(row);
   final suggestions = <String>[];
@@ -441,18 +648,33 @@ List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
   final visualQuality = row.visualQuality ?? overallScore;
 
   if (diagnostics != null) {
-    final usesReferenceFrame = _diagnosticBool(diagnostics, 'usesReferenceFrame');
+    final usesReferenceFrame = _diagnosticBool(
+      diagnostics,
+      'usesReferenceFrame',
+    );
     final continuityCount = _diagnosticInt(diagnostics, 'continuityNoteCount');
     final promptChars = _diagnosticInt(diagnostics, 'promptChars');
     final memoryStyleChars = _diagnosticInt(diagnostics, 'memoryStyleChars');
-    final negativePromptChars = _diagnosticInt(diagnostics, 'negativePromptChars');
-    final directorSaved = _diagnosticInt(diagnostics, 'directorAnchorSavedChars');
-    final hitCounts = _diagnosticStringIntMap(diagnostics, 'memoryHitBucketCounts');
+    final negativePromptChars = _diagnosticInt(
+      diagnostics,
+      'negativePromptChars',
+    );
+    final directorSaved = _diagnosticInt(
+      diagnostics,
+      'directorAnchorSavedChars',
+    );
+    final hitCounts = _diagnosticStringIntMap(
+      diagnostics,
+      'memoryHitBucketCounts',
+    );
     final suppressedCounts = _diagnosticStringIntMap(
       diagnostics,
       'memorySuppressedBucketCounts',
     );
-    final autoNegativeSource = _diagnosticString(diagnostics, 'autoNegativeSource');
+    final autoNegativeSource = _diagnosticString(
+      diagnostics,
+      'autoNegativeSource',
+    );
 
     final hitBuckets = {
       ..._diagnosticStringList(diagnostics, 'memoryHitBuckets'),

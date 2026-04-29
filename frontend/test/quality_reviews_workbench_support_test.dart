@@ -252,6 +252,131 @@ void main() {
   );
 
   test(
+    'summarizeMemoryOptimizationSavingsFromQualityReviews groups saved chars by scope',
+    () {
+      final summary = summarizeMemoryOptimizationSavingsFromQualityReviews(
+        const [
+          QualityReview(
+            id: 'r1',
+            createdAt: '2026-04-10T00:00:00Z',
+            updatedAt: '2026-04-10T00:00:00Z',
+            userId: 'u1',
+            projectId: 12,
+            scriptId: 7,
+            targetType: 'storyboard',
+            source: 'auto',
+            isBadCase: false,
+            modelParams: {
+              'diagnostics': {
+                'memoryOptimizationRemovedChars': 88,
+                'memoryOptimizationRemovedRows': 2,
+                'memoryOptimizationRemovedVisualRows': 1,
+                'memoryOptimizationRemovedDuplicateRows': 1,
+              },
+            },
+          ),
+          QualityReview(
+            id: 'r2',
+            createdAt: '2026-04-10T00:00:00Z',
+            updatedAt: '2026-04-10T00:00:00Z',
+            userId: 'u1',
+            projectId: 12,
+            scriptId: 7,
+            targetType: 'storyboard',
+            source: 'auto',
+            isBadCase: false,
+            modelParams: {
+              'diagnostics': {
+                'memoryOptimizationRemovedChars': 42,
+                'memoryOptimizationRemovedRows': 1,
+                'memoryOptimizationRemovedVisualRows': 0,
+                'memoryOptimizationRemovedDuplicateRows': 1,
+              },
+            },
+          ),
+          QualityReview(
+            id: 'r3',
+            createdAt: '2026-04-10T00:00:00Z',
+            updatedAt: '2026-04-10T00:00:00Z',
+            userId: 'u1',
+            projectId: 30,
+            targetType: 'storyboard',
+            source: 'auto',
+            isBadCase: false,
+            modelParams: {
+              'diagnostics': {
+                'memoryOptimizationRemovedChars': 24,
+                'memoryOptimizationRemovedRows': 1,
+                'memoryOptimizationRemovedVisualRows': 1,
+                'memoryOptimizationRemovedDuplicateRows': 0,
+              },
+            },
+          ),
+        ],
+      );
+
+      expect(
+        summary,
+        contains('P12/S7 2条 · slim 130 chars / 3条（重复 2 / 纯视觉 1）'),
+      );
+      expect(summary, contains('P30 1条 · slim 24 chars / 1条（重复 0 / 纯视觉 1）'));
+    },
+  );
+
+  test(
+    'summarizeScopeRepairQueueFromQualityReviews ranks scope next steps',
+    () {
+      final summary = summarizeScopeRepairQueueFromQualityReviews(const [
+        QualityReview(
+          id: 'r1',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          projectId: 12,
+          scriptId: 7,
+          targetType: 'storyboard',
+          source: 'auto',
+          overallScore: 68,
+          dialogueNaturalness: 69,
+          visualQuality: 74,
+          isBadCase: true,
+          badCaseCategory: 'continuity',
+          comments: '台词生硬，没情绪，镜头穿帮',
+          modelParams: {
+            'diagnostics': {
+              'memoryOptimizationRemovedChars': 88,
+              'continuityNoteCount': 2,
+              'usesReferenceFrame': false,
+              'memoryHitBucketCounts': {'表演': 1},
+              'memorySuppressedBucketCounts': {'动作': 1},
+            },
+          },
+        ),
+        QualityReview(
+          id: 'r2',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          projectId: 30,
+          targetType: 'storyboard',
+          source: 'manual',
+          overallScore: 82,
+          visualQuality: 78,
+          isBadCase: false,
+          comments: '画面有点假',
+        ),
+      ]);
+
+      expect(
+        summary,
+        contains('P12/S7 1条 · 坏例 1 · 情绪/台词 1 · 真实感 1 · slim 88 chars'),
+      );
+      expect(summary, contains('下一步'));
+      expect(summary, contains('P30 1条 · 真实感 1'));
+    },
+  );
+
+  test(
     'buildQualityReviewRepairSuggestions prioritizes acting, continuity and token-saving fixes',
     () {
       final suggestions = buildQualityReviewRepairSuggestions(
@@ -284,22 +409,10 @@ void main() {
         ),
       );
 
-      expect(
-        suggestions,
-        contains('先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。'),
-      );
-      expect(
-        suggestions,
-        contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。'),
-      );
-      expect(
-        suggestions,
-        contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。'),
-      );
-      expect(
-        suggestions,
-        contains('沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。'),
-      );
+      expect(suggestions, contains('先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。'));
+      expect(suggestions, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。'));
+      expect(suggestions, contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。'));
+      expect(suggestions, contains('沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。'));
     },
   );
 
@@ -346,14 +459,8 @@ void main() {
         ),
       ]);
 
-      expect(
-        summary,
-        contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。 2次'),
-      );
-      expect(
-        summary,
-        contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。 2次'),
-      );
+      expect(summary, contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。 2次'));
+      expect(summary, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。 2次'));
     },
   );
 

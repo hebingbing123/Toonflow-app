@@ -96,6 +96,8 @@ fn validate_create_review_body_rejects_out_of_range_scores() {
 #[test]
 fn validate_list_reviews_query_rejects_invalid_target_type() {
     let query = ListQualityReviewsQuery {
+        project_id: None,
+        script_id: None,
         target_type: Some("chapter".to_string()),
         target_id: None,
         job_id: None,
@@ -107,4 +109,17 @@ fn validate_list_reviews_query_rejects_invalid_target_type() {
     };
     let err = validate_list_reviews_query(&query).expect_err("invalid target type");
     assert!(matches!(err, ApiError::BadRequest(_)));
+}
+
+#[test]
+fn list_quality_reviews_query_deserializes_scope_filters() {
+    let json = json!({
+        "projectId": 12,
+        "scriptId": 7,
+        "targetType": "storyboard"
+    });
+    let query: ListQualityReviewsQuery = serde_json::from_value(json).unwrap();
+    assert_eq!(query.project_id, Some(12));
+    assert_eq!(query.script_id, Some(7));
+    assert_eq!(query.target_type.as_deref(), Some("storyboard"));
 }

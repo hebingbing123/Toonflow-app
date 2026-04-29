@@ -4,6 +4,8 @@ import 'package:openflow_app/quality_reviews/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
 QualityReviewsWorkbenchDialogViewModel buildDialogModel({
+  required TextEditingController projectIdFilterCtrl,
+  required TextEditingController scriptIdFilterCtrl,
   required TextEditingController targetTypeFilterCtrl,
   required TextEditingController targetIdFilterCtrl,
   required TextEditingController jobIdFilterCtrl,
@@ -60,6 +62,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     loadingStagePassRate: loadingStagePassRate,
     loadingReviewById: loadingReviewById,
     creatingReview: creatingReview,
+    projectIdFilterCtrl: projectIdFilterCtrl,
+    scriptIdFilterCtrl: scriptIdFilterCtrl,
     targetTypeFilterCtrl: targetTypeFilterCtrl,
     targetIdFilterCtrl: targetIdFilterCtrl,
     jobIdFilterCtrl: jobIdFilterCtrl,
@@ -109,6 +113,8 @@ void main() {
   late TextEditingController targetTypeFilterCtrl;
   late TextEditingController targetIdFilterCtrl;
   late TextEditingController jobIdFilterCtrl;
+  late TextEditingController projectIdFilterCtrl;
+  late TextEditingController scriptIdFilterCtrl;
   late TextEditingController reviewIdCtrl;
   late TextEditingController createProjectIdCtrl;
   late TextEditingController createScriptIdCtrl;
@@ -120,6 +126,8 @@ void main() {
   late TextEditingController createBadCaseCategoryCtrl;
 
   setUp(() {
+    projectIdFilterCtrl = TextEditingController(text: '7');
+    scriptIdFilterCtrl = TextEditingController(text: '11');
     targetTypeFilterCtrl = TextEditingController(text: 'output');
     targetIdFilterCtrl = TextEditingController(text: 'storyboard-1');
     jobIdFilterCtrl = TextEditingController(text: 'job-1');
@@ -135,6 +143,8 @@ void main() {
   });
 
   tearDown(() {
+    projectIdFilterCtrl.dispose();
+    scriptIdFilterCtrl.dispose();
     targetTypeFilterCtrl.dispose();
     targetIdFilterCtrl.dispose();
     jobIdFilterCtrl.dispose();
@@ -157,6 +167,8 @@ void main() {
         home: Scaffold(
           body: QualityReviewsWorkbenchDialogView(
             model: buildDialogModel(
+              projectIdFilterCtrl: projectIdFilterCtrl,
+              scriptIdFilterCtrl: scriptIdFilterCtrl,
               targetTypeFilterCtrl: targetTypeFilterCtrl,
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
@@ -180,11 +192,11 @@ void main() {
     expect(find.text('筛选与读取'), findsOneWidget);
     expect(find.text('详情查询'), findsOneWidget);
     expect(find.text('创建评审'), findsNWidgets(2));
+    expect(find.widgetWithText(TextField, '7'), findsNWidgets(2));
+    expect(find.widgetWithText(TextField, '11'), findsNWidgets(2));
     expect(find.text('质量统计：output: total=1, pass=100%'), findsOneWidget);
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
     expect(find.textContaining('Token效率：'), findsNothing);
-    expect(find.widgetWithText(TextField, '7'), findsOneWidget);
-    expect(find.widgetWithText(TextField, '11'), findsOneWidget);
     expect(find.text('评审 1 条'), findsOneWidget);
     expect(
       find.widgetWithText(ListTile, 'output · manual · score=82'),
@@ -200,6 +212,8 @@ void main() {
         home: Scaffold(
           body: QualityReviewsWorkbenchDialogView(
             model: buildDialogModel(
+              projectIdFilterCtrl: projectIdFilterCtrl,
+              scriptIdFilterCtrl: scriptIdFilterCtrl,
               targetTypeFilterCtrl: targetTypeFilterCtrl,
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
@@ -257,6 +271,8 @@ void main() {
         home: Scaffold(
           body: QualityReviewsWorkbenchDialogView(
             model: buildDialogModel(
+              projectIdFilterCtrl: projectIdFilterCtrl,
+              scriptIdFilterCtrl: scriptIdFilterCtrl,
               targetTypeFilterCtrl: targetTypeFilterCtrl,
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
@@ -297,6 +313,8 @@ void main() {
           home: Scaffold(
             body: QualityReviewsWorkbenchDialogView(
               model: buildDialogModel(
+                projectIdFilterCtrl: projectIdFilterCtrl,
+                scriptIdFilterCtrl: scriptIdFilterCtrl,
                 targetTypeFilterCtrl: targetTypeFilterCtrl,
                 targetIdFilterCtrl: targetIdFilterCtrl,
                 jobIdFilterCtrl: jobIdFilterCtrl,
@@ -315,11 +333,16 @@ void main() {
                     createdAt: '2026-04-14T08:00:00Z',
                     updatedAt: '2026-04-14T08:00:00Z',
                     userId: 'user-1',
+                    projectId: 7,
+                    scriptId: 11,
                     targetType: 'storyboard',
                     source: 'auto',
                     overallScore: 93,
+                    dialogueNaturalness: 76,
+                    visualQuality: 78,
                     passed: true,
                     isBadCase: false,
+                    comments: '台词略生硬，画面有点不自然',
                     memoryDeliveryPriorityApplied: true,
                     modelParams: {
                       'diagnostics': {
@@ -327,6 +350,11 @@ void main() {
                         'memoryStyleChars': 90,
                         'memoryVisualChars': 26,
                         'memoryDeliveryChars': 44,
+                        'memoryOptimizationApplied': true,
+                        'memoryOptimizationRemovedChars': 96,
+                        'memoryOptimizationRemovedRows': 2,
+                        'memoryOptimizationRemovedVisualRows': 1,
+                        'memoryOptimizationRemovedDuplicateRows': 1,
                         'memoryDeliveryPriorityApplied': true,
                         'autoNegativeSource': 'review+rejected_memory',
                         'directorManualYieldedToMemory': true,
@@ -342,6 +370,14 @@ void main() {
       );
 
       expect(find.textContaining('Prompt诊断：auto诊断 1 条'), findsOneWidget);
+      expect(
+        find.textContaining('记忆瘦身：P7/S11 1条 · slim 96 chars / 2条'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('优先修复：P7/S11 1条 · 情绪/台词 1 · 真实感 1'),
+        findsOneWidget,
+      );
       expect(find.textContaining('修复建议：'), findsOneWidget);
       expect(find.textContaining('负向约束=评审+坏例记忆'), findsNWidgets(2));
       expect(find.textContaining('导演让位'), findsNWidgets(2));

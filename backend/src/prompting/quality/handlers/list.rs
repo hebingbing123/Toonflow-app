@@ -41,6 +41,14 @@ pub(crate) async fn list_reviews(
 
     let mut qb = QueryBuilder::<Postgres>::new("SELECT * FROM app_quality_review WHERE user_id = ");
     qb.push_bind(user_id);
+    if let Some(project_id) = query.project_id {
+        qb.push(" AND project_id = ");
+        qb.push_bind(project_id);
+    }
+    if let Some(script_id) = query.script_id {
+        qb.push(" AND script_id = ");
+        qb.push_bind(script_id);
+    }
     if let Some(target_type) = &query.target_type {
         qb.push(" AND target_type = ");
         qb.push_bind(target_type);
