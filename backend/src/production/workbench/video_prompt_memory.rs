@@ -243,6 +243,38 @@ struct ScopedAgentMemoryRow {
     episodes_id: Option<i32>,
 }
 
+#[derive(Debug, Clone, sqlx::FromRow)]
+struct OptimizableAgentMemoryRow {
+    id: i64,
+    content: String,
+    create_time_ms: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct VideoMemoryOptimizationResult {
+    pub(crate) removed_rows: usize,
+    pub(crate) removed_chars: usize,
+    pub(crate) removed_visual_rows: usize,
+    pub(crate) removed_duplicate_rows: usize,
+    pub(crate) refreshed_script_summary: bool,
+    pub(crate) refreshed_project_summary: bool,
+}
+
+#[derive(Debug, Clone)]
+struct SelectedVideoMemoryOptimizationCandidate {
+    id: i64,
+    content: String,
+    create_time_ms: i64,
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+struct SelectedVideoMemoryOptimizationPlan {
+    delete_ids: Vec<i64>,
+    removed_chars: usize,
+    removed_visual_rows: usize,
+    removed_duplicate_rows: usize,
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct StructuredStoryboardDescription {
     pub(crate) subject: String,
@@ -997,6 +1029,78 @@ pub(crate) async fn clear_rejected_video_negative_memory(
     Ok(())
 }
 
+pub(crate) async fn optimize_scoped_video_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<VideoMemoryOptimizationResult, ApiError> {
+    let rows = sqlx::query_as::<_, OptimizableAgentMemoryRow>(
+        r#"
+        SELECT id, content, create_time_ms
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        ORDER BY create_time_ms DESC, id DESC
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(SELECTED_VIDEO_MEMORY_NAME)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let plan = plan_selected_video_memory_optimization(
+        &rows
+            .into_iter()
+            .map(|row| SelectedVideoMemoryOptimizationCandidate {
+                id: row.id,
+                content: row.content,
+                create_time_ms: row.create_time_ms,
+            })
+            .collect::<Vec<_>>(),
+    );
+    if plan.delete_ids.is_empty() {
+        return Ok(VideoMemoryOptimizationResult {
+            removed_rows: 0,
+            removed_chars: 0,
+            removed_visual_rows: 0,
+            removed_duplicate_rows: 0,
+            refreshed_script_summary: false,
+            refreshed_project_summary: false,
+        });
+    }
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE id = ANY($1)
+        "#,
+    )
+    .bind(&plan.delete_ids)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    refresh_script_video_style_memory(pool, user_id, project_numeric_id, script_numeric_id).await?;
+    refresh_project_video_style_memory(pool, user_id, project_numeric_id).await?;
+
+    Ok(VideoMemoryOptimizationResult {
+        removed_rows: plan.delete_ids.len(),
+        removed_chars: plan.removed_chars,
+        removed_visual_rows: plan.removed_visual_rows,
+        removed_duplicate_rows: plan.removed_duplicate_rows,
+        refreshed_script_summary: true,
+        refreshed_project_summary: true,
+    })
+}
+
 pub(crate) async fn refresh_script_video_style_memory(
     pool: &PgPool,
     user_id: Uuid,
@@ -1093,6 +1197,131 @@ pub(crate) async fn refresh_script_video_style_memory(
         SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
     )
     .await
+}
+
+fn plan_selected_video_memory_optimization(
+    rows: &[SelectedVideoMemoryOptimizationCandidate],
+) -> SelectedVideoMemoryOptimizationPlan {
+    if rows.is_empty() {
+        return SelectedVideoMemoryOptimizationPlan::default();
+    }
+
+    let mut delete_ids = Vec::<i64>::new();
+    let mut delete_chars = 0usize;
+    let mut removed_duplicate_rows = 0usize;
+    let mut seen_keys = std::collections::HashSet::<String>::new();
+    let mut kept_rows = Vec::<&SelectedVideoMemoryOptimizationCandidate>::new();
+
+    for row in rows {
+        let dedupe_key = selected_video_memory_semantic_dedupe_key(&row.content);
+        if !dedupe_key.is_empty() && !seen_keys.insert(dedupe_key) {
+            delete_ids.push(row.id);
+            delete_chars += row.content.chars().count();
+            removed_duplicate_rows += 1;
+            continue;
+        }
+        kept_rows.push(row);
+    }
+
+    let delivery_rows = kept_rows
+        .iter()
+        .filter(|row| selected_video_memory_has_delivery_anchor(&row.content))
+        .count();
+    if delivery_rows > 0 {
+        let mut visual_rows = kept_rows
+            .iter()
+            .filter(|row| selected_video_memory_is_visual_only(&row.content))
+            .copied()
+            .collect::<Vec<_>>();
+        visual_rows.sort_by(|left, right| {
+            right
+                .create_time_ms
+                .cmp(&left.create_time_ms)
+                .then(right.id.cmp(&left.id))
+        });
+        for row in visual_rows.into_iter().skip(1) {
+            if delete_ids.contains(&row.id) {
+                continue;
+            }
+            delete_ids.push(row.id);
+            delete_chars += row.content.chars().count();
+        }
+    }
+
+    delete_ids.sort_unstable();
+    delete_ids.dedup();
+    let removed_visual_rows = delete_ids
+        .iter()
+        .filter(|id| {
+            rows.iter()
+                .any(|row| row.id == **id && selected_video_memory_is_visual_only(&row.content))
+        })
+        .count()
+        .saturating_sub(removed_duplicate_rows);
+
+    SelectedVideoMemoryOptimizationPlan {
+        delete_ids,
+        removed_chars: delete_chars,
+        removed_visual_rows,
+        removed_duplicate_rows,
+    }
+}
+
+fn selected_video_memory_semantic_dedupe_key(content: &str) -> String {
+    let semantic = [
+        extract_key_value(content, "delivery"),
+        extract_key_value(content, "note"),
+        extract_key_value(content, "avoid"),
+        extract_key_value(content, "style"),
+    ]
+    .into_iter()
+    .flatten()
+    .find(|value| !normalize_prompt_text(value).is_empty())
+    .unwrap_or(content);
+    normalize_prompt_text(semantic)
+}
+
+fn selected_video_memory_has_delivery_anchor(content: &str) -> bool {
+    extract_key_value(content, "delivery")
+        .map(|value| !normalize_prompt_text(value).is_empty())
+        .unwrap_or(false)
+        || selected_video_memory_delivery_signal_count(content) > 0
+}
+
+fn selected_video_memory_is_visual_only(content: &str) -> bool {
+    !selected_video_memory_has_delivery_anchor(content)
+        && selected_video_memory_visual_signal_count(content) > 0
+}
+
+fn selected_video_memory_delivery_signal_count(content: &str) -> usize {
+    [
+        "表演",
+        "语气",
+        "情绪",
+        "呼吸",
+        "停顿",
+        "眼神",
+        "微表情",
+        "哽咽",
+        "喉结",
+        "尾音",
+        "delivery",
+        "emotion",
+        "expression",
+    ]
+    .into_iter()
+    .filter(|keyword| content.contains(keyword))
+    .count()
+}
+
+fn selected_video_memory_visual_signal_count(content: &str) -> usize {
+    [
+        "镜头", "光影", "光线", "逆光", "暖光", "冷光", "运镜", "构图", "机位", "近景", "中景",
+        "远景", "camera", "lighting", "framing",
+    ]
+    .into_iter()
+    .filter(|keyword| content.contains(keyword))
+    .count()
 }
 
 pub(crate) async fn refresh_project_video_style_memory(
@@ -12083,5 +12312,64 @@ mod tests {
         let result = clear_rejected_video_negative_memory(&pool, Uuid::nil(), 1, 2, 0).await;
 
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn plan_selected_video_memory_optimization_removes_duplicates_and_old_visual_only_rows() {
+        let plan = plan_selected_video_memory_optimization(&[
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 41,
+                content:
+                    "storyboardIds=12 | delivery=表演喉结滚动低声克制 | style=表演喉结滚动，语气低声克制"
+                        .into(),
+                create_time_ms: 500,
+            },
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 42,
+                content:
+                    "storyboardIds=12 | style=镜头近景，光影冷调逆光，机位压迫 | note=镜头近景，光影冷调逆光，机位压迫"
+                        .into(),
+                create_time_ms: 400,
+            },
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 43,
+                content:
+                    "storyboardIds=18 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫"
+                        .into(),
+                create_time_ms: 300,
+            },
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 44,
+                content:
+                    "storyboardIds=18 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫"
+                        .into(),
+                create_time_ms: 200,
+            },
+        ]);
+
+        assert_eq!(plan.delete_ids, vec![43, 44]);
+        assert_eq!(plan.removed_visual_rows, 1);
+        assert_eq!(plan.removed_duplicate_rows, 1);
+        assert!(plan.removed_chars > 0);
+    }
+
+    #[test]
+    fn plan_selected_video_memory_optimization_keeps_latest_visual_when_no_delivery_exists() {
+        let plan = plan_selected_video_memory_optimization(&[
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 51,
+                content: "storyboardIds=12 | style=镜头近景，光影冷调逆光".into(),
+                create_time_ms: 500,
+            },
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 52,
+                content: "storyboardIds=13 | style=镜头稳定跟拍，光影阴天冷光".into(),
+                create_time_ms: 400,
+            },
+        ]);
+
+        assert!(plan.delete_ids.is_empty());
+        assert_eq!(plan.removed_visual_rows, 0);
+        assert_eq!(plan.removed_duplicate_rows, 0);
     }
 }

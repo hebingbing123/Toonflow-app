@@ -36,6 +36,15 @@ fn default_clear_kind() -> String {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub(crate) struct OptimizeMemoryBody {
+    pub(crate) project_id: i32,
+    pub(crate) agent_type: String,
+    #[serde(default)]
+    pub(crate) episodes_id: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct AppendMemoryBody {
     pub(crate) project_id: i32,
     pub(crate) agent_type: String,
@@ -99,6 +108,17 @@ pub(crate) struct AppendMemoryResponse {
 #[derive(Serialize)]
 pub(crate) struct ClearMemoryResponse {
     pub(crate) ok: bool,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct OptimizeMemoryResponse {
+    pub(crate) removed_rows: usize,
+    pub(crate) removed_chars: usize,
+    pub(crate) removed_visual_rows: usize,
+    pub(crate) removed_duplicate_rows: usize,
+    pub(crate) refreshed_script_summary: bool,
+    pub(crate) refreshed_project_summary: bool,
 }
 
 pub(crate) fn normalize_role(role: Option<String>) -> String {

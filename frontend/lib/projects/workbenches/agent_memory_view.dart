@@ -13,6 +13,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
     required this.loadingMemory,
     required this.appendingMemory,
     required this.clearingMemory,
+    required this.optimizingMemory,
     required this.queryType,
     required this.clearType,
     required this.queryTypeOptions,
@@ -34,6 +35,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
   final bool loadingMemory;
   final bool appendingMemory;
   final bool clearingMemory;
+  final bool optimizingMemory;
   final String queryType;
   final String clearType;
   final List<String> queryTypeOptions;
@@ -53,6 +55,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
     required this.onQueryMemory,
     required this.onAppendMemory,
     required this.onClearMemory,
+    required this.onOptimizeVideoMemory,
     required this.onQueryTypeChanged,
     required this.onClearTypeChanged,
     required this.onClose,
@@ -62,6 +65,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
   final Future<void> Function() onQueryMemory;
   final Future<void> Function() onAppendMemory;
   final Future<void> Function() onClearMemory;
+  final Future<void> Function() onOptimizeVideoMemory;
   final ValueChanged<String> onQueryTypeChanged;
   final ValueChanged<String> onClearTypeChanged;
   final VoidCallback onClose;
@@ -117,6 +121,12 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                         ? null
                         : callbacks.onQueryMemory,
                     child: Text(model.loadingMemory ? '…' : '查询记忆'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: model.optimizingMemory
+                        ? null
+                        : callbacks.onOptimizeVideoMemory,
+                    child: Text(model.optimizingMemory ? '…' : '自动优化视频记忆'),
                   ),
                 ],
               ),
@@ -180,6 +190,13 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '自动优化只处理 productionAgent + episodes id 范围内的 selected video memory，不共享到别的用户、项目或短剧。',
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),

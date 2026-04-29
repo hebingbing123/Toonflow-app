@@ -39,6 +39,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   bool _loadingMemory = false;
   bool _appendingMemory = false;
   bool _clearingMemory = false;
+  bool _optimizingMemory = false;
 
   @override
   void initState() {
@@ -251,6 +252,47 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     }
   }
 
+  Future<void> _optimizeVideoMemory() async {
+    final projectId = _projectId;
+    final agentType = _agentTypeCtrl.text.trim();
+    final episodesId = _episodesId;
+    if (projectId == null || agentType.isEmpty || episodesId == null) {
+      setState(() => _statusLine = '自动优化前请填写项目、agent type 和 episodes id。');
+      return;
+    }
+    setState(() {
+      _optimizingMemory = true;
+      _statusLine = null;
+    });
+    try {
+      final result = await optimizeAgentMemory(
+        widget.accessToken,
+        projectId: projectId,
+        agentType: agentType,
+        episodesId: episodesId,
+      );
+      await _queryMemory();
+      if (!mounted) return;
+      setState(() {
+        _statusLine =
+            '已自动优化视频记忆：删除 ${result['removedRows'] ?? 0} 条 / ${(result['removedChars'] ?? 0)} chars，其中重复 ${(result['removedDuplicateRows'] ?? 0)} 条、纯视觉 ${(result['removedVisualRows'] ?? 0)} 条。';
+        _optimizingMemory = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = e.toString();
+        _optimizingMemory = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = e.toString();
+        _optimizingMemory = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ProjectsAgentMemoryWorkbenchDialogView(
@@ -263,6 +305,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         loadingMemory: _loadingMemory,
         appendingMemory: _appendingMemory,
         clearingMemory: _clearingMemory,
+        optimizingMemory: _optimizingMemory,
         queryType: _queryType,
         clearType: _clearType,
         queryTypeOptions: _queryTypes,
@@ -280,6 +323,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         onQueryMemory: _queryMemory,
         onAppendMemory: _appendMemory,
         onClearMemory: _clearMemory,
+        onOptimizeVideoMemory: _optimizeVideoMemory,
         onQueryTypeChanged: (value) => _queryTypeCtrl.text = value,
         onClearTypeChanged: (value) => _clearTypeCtrl.text = value,
         onClose: () => Navigator.of(context).pop(),

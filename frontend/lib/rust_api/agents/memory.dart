@@ -74,6 +74,38 @@ Future<bool> clearAgentMemory(
   return map['ok'] == true;
 }
 
+/// `POST /api/v1/agents/memory/optimize` — optimize scoped production video memories without crossing project/script boundaries.
+Future<Map<String, dynamic>> optimizeAgentMemory(
+  String accessToken, {
+  required int projectId,
+  required String agentType,
+  required int episodesId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/optimize');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'agentType': agentType,
+    'episodesId': episodesId,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return jsonDecode(res.body) as Map<String, dynamic>;
+}
+
 /// `POST /api/v1/agents/memory/append` — OpenAPI `appendAgentMemoryV1`; returns new message UUID.
 Future<String> appendAgentMemory(
   String accessToken, {

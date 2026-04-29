@@ -12,8 +12,8 @@ use axum::{routing::post, Router};
 use crate::state::AppState;
 
 pub(crate) use handlers::{
-    __path_append_memory, __path_clear_memory, __path_query_memory, append_memory, clear_memory,
-    query_memory,
+    __path_append_memory, __path_clear_memory, __path_optimize_memory, __path_query_memory,
+    append_memory, clear_memory, optimize_memory, query_memory,
 };
 pub(crate) use storage::{
     delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,
@@ -26,11 +26,12 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/agents/memory/query", post(query_memory))
         .route("/api/v1/agents/memory/clear", post(clear_memory))
         .route("/api/v1/agents/memory/append", post(append_memory))
+        .route("/api/v1/agents/memory/optimize", post(optimize_memory))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::types::{AppendMemoryBody, ClearMemoryBody, QueryMemoryBody};
+    use super::types::{AppendMemoryBody, ClearMemoryBody, OptimizeMemoryBody, QueryMemoryBody};
 
     #[test]
     fn query_body_accepts_camel_case() {
@@ -83,5 +84,15 @@ mod tests {
         .unwrap();
         assert_eq!(body.memory_type, "summary");
         assert_eq!(body.role, "assistant");
+    }
+
+    #[test]
+    fn optimize_body_accepts_camel_case() {
+        let body: OptimizeMemoryBody =
+            serde_json::from_str(r#"{"projectId":1,"agentType":"productionAgent","episodesId":2}"#)
+                .unwrap();
+        assert_eq!(body.project_id, 1);
+        assert_eq!(body.agent_type, "productionAgent");
+        assert_eq!(body.episodes_id, Some(2));
     }
 }

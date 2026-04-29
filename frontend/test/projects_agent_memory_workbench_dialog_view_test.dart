@@ -23,6 +23,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
   bool loadingMemory = false,
   bool appendingMemory = false,
   bool clearingMemory = false,
+  bool optimizingMemory = false,
 }) {
   return ProjectsAgentMemoryWorkbenchDialogViewModel(
     projects:
@@ -62,6 +63,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
     loadingMemory: loadingMemory,
     appendingMemory: appendingMemory,
     clearingMemory: clearingMemory,
+    optimizingMemory: optimizingMemory,
     queryType: queryTypeCtrl.text,
     clearType: clearTypeCtrl.text,
     queryTypeOptions: const <String>['summary', 'message', 'all'],
@@ -81,6 +83,7 @@ ProjectsAgentMemoryWorkbenchDialogViewCallbacks buildCallbacks({
   Future<void> Function()? onQueryMemory,
   Future<void> Function()? onAppendMemory,
   Future<void> Function()? onClearMemory,
+  Future<void> Function()? onOptimizeVideoMemory,
   VoidCallback? onClose,
 }) {
   return ProjectsAgentMemoryWorkbenchDialogViewCallbacks(
@@ -88,6 +91,7 @@ ProjectsAgentMemoryWorkbenchDialogViewCallbacks buildCallbacks({
     onQueryMemory: onQueryMemory ?? () async {},
     onAppendMemory: onAppendMemory ?? () async {},
     onClearMemory: onClearMemory ?? () async {},
+    onOptimizeVideoMemory: onOptimizeVideoMemory ?? () async {},
     onQueryTypeChanged: (_) {},
     onClearTypeChanged: (_) {},
     onClose: onClose ?? () {},
@@ -161,6 +165,11 @@ void main() {
     expect(find.text('summary / message / all'), findsNWidgets(2));
     expect(
       find.text('自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。'),
+      findsOneWidget,
+    );
+    expect(find.text('自动优化视频记忆'), findsOneWidget);
+    expect(
+      find.textContaining('自动优化只处理 productionAgent + episodes id 范围内'),
       findsOneWidget,
     );
     expect(
@@ -611,6 +620,7 @@ void main() {
               loadingMemory: true,
               appendingMemory: true,
               clearingMemory: true,
+              optimizingMemory: true,
             ),
             callbacks: buildCallbacks(),
           ),
@@ -618,7 +628,7 @@ void main() {
       ),
     );
 
-    expect(disabledButtonWithText('…'), findsNWidgets(4));
+    expect(disabledButtonWithText('…'), findsNWidgets(5));
   });
 
   testWidgets('agent memory workbench view forwards action callbacks', (
@@ -628,6 +638,7 @@ void main() {
     var queryCalls = 0;
     var appendCalls = 0;
     var clearCalls = 0;
+    var optimizeCalls = 0;
     var closeCalls = 0;
 
     await tester.pumpWidget(
@@ -648,6 +659,7 @@ void main() {
               onQueryMemory: () async => queryCalls += 1,
               onAppendMemory: () async => appendCalls += 1,
               onClearMemory: () async => clearCalls += 1,
+              onOptimizeVideoMemory: () async => optimizeCalls += 1,
               onClose: () => closeCalls += 1,
             ),
           ),
@@ -661,6 +673,9 @@ void main() {
     await tester.ensureVisible(find.widgetWithText(FilledButton, '查询记忆'));
     await tester.tap(find.widgetWithText(FilledButton, '查询记忆'));
     await tester.pump();
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '自动优化视频记忆'));
+    await tester.tap(find.widgetWithText(FilledButton, '自动优化视频记忆'));
+    await tester.pump();
     await tester.ensureVisible(find.widgetWithText(FilledButton, '追加记忆'));
     await tester.tap(find.widgetWithText(FilledButton, '追加记忆'));
     await tester.pump();
@@ -672,6 +687,7 @@ void main() {
 
     expect(reloadCalls, 1);
     expect(queryCalls, 1);
+    expect(optimizeCalls, 1);
     expect(appendCalls, 1);
     expect(clearCalls, 1);
     expect(closeCalls, 1);
