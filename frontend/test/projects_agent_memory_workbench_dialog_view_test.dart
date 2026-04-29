@@ -175,6 +175,10 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.textContaining('处理建议：保留 1/74 chars · 压缩 0/0 chars · 合并坏例 0/0 chars'),
+      findsOneWidget,
+    );
     expect(find.text('2 条记忆'), findsOneWidget);
     expect(find.text('追加记忆'), findsNWidgets(2));
     expect(find.text('清理记忆'), findsOneWidget);
@@ -182,9 +186,10 @@ void main() {
       find.textContaining('selected_video_memory · user · '),
       findsOneWidget,
     );
-    expect(find.textContaining('表演优先'), findsOneWidget);
+    expect(find.textContaining('表演优先 · 优先保留'), findsOneWidget);
     expect(find.textContaining('memory-1'), findsOneWidget);
     expect(find.textContaining('subject 沈青禾'), findsOneWidget);
+    expect(find.textContaining('signals 人物/情绪'), findsOneWidget);
     expect(find.textContaining('语气克制，情绪压迫，保留停顿'), findsOneWidget);
   });
 
@@ -338,11 +343,18 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.textContaining(
+        '处理建议：保留 1/86 chars · 压缩 2/131 chars · 合并坏例 0/0 chars',
+      ),
+      findsOneWidget,
+    );
     expect(find.textContaining('建议：视觉偏重记忆吃掉了更多预算'), findsOneWidget);
-    expect(find.textContaining('· 视觉偏重'), findsNWidgets(2));
+    expect(find.textContaining('· 视觉偏重 · 待压缩'), findsNWidgets(2));
     expect(find.textContaining('storyboard 12'), findsNWidgets(2));
     expect(find.textContaining('samples 4'), findsOneWidget);
     expect(find.textContaining('subject 林晚'), findsOneWidget);
+    expect(find.textContaining('signals 人物/情绪'), findsOneWidget);
   });
 
   testWidgets('agent memory workbench view highlights rejected video constraints', (
@@ -408,11 +420,18 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.textContaining(
+        '处理建议：保留 0/0 chars · 压缩 0/0 chars · 合并坏例 3/338 chars',
+      ),
+      findsOneWidget,
+    );
     expect(find.textContaining('建议：坏例约束累计较多'), findsOneWidget);
     expect(
       find.textContaining('rejected_video_negative_memory · assistant ·'),
       findsNWidgets(3),
     );
+    expect(find.textContaining('坏例约束 · 合并坏例'), findsNWidgets(3));
   });
 
   testWidgets('agent memory workbench view highlights missing delivery anchors', (
@@ -467,8 +486,60 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.textContaining(
+        '处理建议：保留 0/0 chars · 压缩 2/131 chars · 合并坏例 0/0 chars',
+      ),
+      findsOneWidget,
+    );
     expect(find.textContaining('建议：当前视频记忆几乎只有镜头/光影'), findsOneWidget);
   });
+
+  testWidgets(
+    'agent memory workbench view highlights keep-worthy delivery anchors',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ProjectsAgentMemoryWorkbenchDialogView(
+              model: buildModel(
+                projectIdCtrl: projectIdCtrl,
+                agentTypeCtrl: agentTypeCtrl,
+                episodesIdCtrl: episodesIdCtrl,
+                queryTypeCtrl: queryTypeCtrl,
+                appendContentCtrl: appendContentCtrl,
+                appendRoleCtrl: appendRoleCtrl,
+                clearTypeCtrl: clearTypeCtrl,
+                memoryRows: <dynamic>[
+                  <String, Object?>{
+                    'id': 'memory-1',
+                    'name': 'selected_video_memory',
+                    'role': 'assistant',
+                    'content': <Map<String, String>>[
+                      <String, String>{
+                        'data':
+                            'storyboardIds=15 | subject=林晚 | riskTags=identity/dialogue/performance | style=表演呼吸发颤，语气低声克制，光影冷蓝窗光 | delivery=表演呼吸发颤低声克制',
+                      },
+                    ],
+                  },
+                ],
+              ),
+              callbacks: buildCallbacks(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('表演+视觉 · 优先保留'), findsOneWidget);
+      expect(find.textContaining('signals 人物/情绪/镜头/身份/台词/表演'), findsOneWidget);
+      expect(
+        find.textContaining(
+          '处理建议：保留 1/121 chars · 压缩 0/0 chars · 合并坏例 0/0 chars',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('agent memory workbench view disables busy actions', (
     WidgetTester tester,

@@ -211,6 +211,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ).textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],
+              if (memoryInsights.efficiencySummary != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  memoryInsights.efficiencySummary!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
               if (memoryInsights.recommendation != null) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -233,12 +242,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     '${preview.charCount} chars',
                     if (preview.classificationLabel.isNotEmpty)
                       preview.classificationLabel,
+                    if (preview.actionLabel.isNotEmpty) preview.actionLabel,
                   ];
                   final subtitleSegments = <String>[
                     if (preview.memoryId.isNotEmpty) preview.memoryId,
                     if (preview.scopeLabel.isNotEmpty) preview.scopeLabel,
                     if (preview.subjectLabel.isNotEmpty)
                       'subject ${preview.subjectLabel}',
+                    if (preview.signalLabel.isNotEmpty)
+                      'signals ${preview.signalLabel}',
                     preview.shortContent,
                   ];
                   return ListTile(
@@ -347,12 +359,14 @@ class _AgentMemoryInsights {
     required this.previews,
     required this.summary,
     required this.videoSummary,
+    required this.efficiencySummary,
     required this.recommendation,
   });
 
   final List<_AgentMemoryPreview> previews;
   final String? summary;
   final String? videoSummary;
+  final String? efficiencySummary;
   final String? recommendation;
 }
 
@@ -366,8 +380,10 @@ class _AgentMemoryPreview {
     required this.normalizedPrefix,
     required this.isDuplicated,
     required this.classificationLabel,
+    required this.actionLabel,
     required this.scopeLabel,
     required this.subjectLabel,
+    required this.signalLabel,
   });
 
   final String memoryId;
@@ -378,8 +394,10 @@ class _AgentMemoryPreview {
   final String normalizedPrefix;
   final bool isDuplicated;
   final String classificationLabel;
+  final String actionLabel;
   final String scopeLabel;
   final String subjectLabel;
+  final String signalLabel;
 }
 
 _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
@@ -391,6 +409,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
       previews: <_AgentMemoryPreview>[],
       summary: null,
       videoSummary: null,
+      efficiencySummary: null,
       recommendation: null,
     );
   }
@@ -406,6 +425,12 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
   var visualChars = 0;
   var rejectedRows = 0;
   var rejectedChars = 0;
+  var keepRows = 0;
+  var keepChars = 0;
+  var trimRows = 0;
+  var trimChars = 0;
+  var mergeRows = 0;
+  var mergeChars = 0;
   for (final preview in rawPreviews) {
     totalChars += preview.charCount;
     if (preview.charCount > longestChars) {
@@ -441,6 +466,20 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
         rejectedChars += preview.charCount;
         break;
     }
+    switch (preview.actionLabel) {
+      case '优先保留':
+        keepRows += 1;
+        keepChars += preview.charCount;
+        break;
+      case '待压缩':
+        trimRows += 1;
+        trimChars += preview.charCount;
+        break;
+      case '合并坏例':
+        mergeRows += 1;
+        mergeChars += preview.charCount;
+        break;
+    }
   }
 
   final previews = rawPreviews
@@ -456,8 +495,10 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
               preview.normalizedPrefix.isNotEmpty &&
               (prefixCounts[preview.normalizedPrefix] ?? 0) > 1,
           classificationLabel: preview.classificationLabel,
+          actionLabel: preview.actionLabel,
           scopeLabel: preview.scopeLabel,
           subjectLabel: preview.subjectLabel,
+          signalLabel: preview.signalLabel,
         ),
       )
       .toList(growable: false);
@@ -481,6 +522,10 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
       deliveryRows > 0 || visualRows > 0 || rejectedRows > 0;
   final videoSummary = hasVideoMemorySummary
       ? '视频记忆：delivery $deliveryRows/$deliveryChars chars · visual $visualRows/$visualChars chars · negative $rejectedRows/$rejectedChars chars'
+      : null;
+  final hasEfficiencySummary = keepRows > 0 || trimRows > 0 || mergeRows > 0;
+  final efficiencySummary = hasEfficiencySummary
+      ? '处理建议：保留 $keepRows/$keepChars chars · 压缩 $trimRows/$trimChars chars · 合并坏例 $mergeRows/$mergeChars chars'
       : null;
   String? recommendation;
   if (duplicateCount >= 2) {
@@ -510,6 +555,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
     previews: previews,
     summary: summary,
     videoSummary: videoSummary,
+    efficiencySummary: efficiencySummary,
     recommendation: recommendation,
   );
 }
@@ -528,8 +574,14 @@ _AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
       : content;
   final normalizedPrefix = _memorySemanticDedupKey(content);
   final classificationLabel = _memoryClassificationLabel(memoryName, content);
+  final actionLabel = _memoryActionLabel(
+    memoryName,
+    content,
+    classificationLabel,
+  );
   final scopeLabel = _memoryScopeLabel(content);
   final subjectLabel = _extractMemoryKeyValue(content, 'subject') ?? '';
+  final signalLabel = _memorySignalLabel(content, classificationLabel);
   return _AgentMemoryPreview(
     memoryId: map['id']?.toString() ?? '',
     memoryName: memoryName,
@@ -541,8 +593,10 @@ _AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
         : normalizedPrefix,
     isDuplicated: false,
     classificationLabel: classificationLabel,
+    actionLabel: actionLabel,
     scopeLabel: scopeLabel,
     subjectLabel: subjectLabel,
+    signalLabel: signalLabel,
   );
 }
 
@@ -570,16 +624,93 @@ String _memoryClassificationLabel(String memoryName, String content) {
   return '视频记忆';
 }
 
+String _memoryActionLabel(
+  String memoryName,
+  String content,
+  String classificationLabel,
+) {
+  if (memoryName == 'rejected_video_negative_memory') {
+    final rejectionCount = int.tryParse(
+      _extractMemoryKeyValue(content, 'rejectionCount') ?? '',
+    );
+    final riskTags = _extractMemoryKeyValue(content, 'riskTags') ?? '';
+    if ((rejectionCount ?? 0) >= 2 || riskTags.isNotEmpty) {
+      return '合并坏例';
+    }
+    return '待观察';
+  }
+  if (!_isVideoStyleMemory(memoryName)) {
+    return '';
+  }
+  final hasSubject =
+      (_extractMemoryKeyValue(content, 'subject') ?? '').isNotEmpty;
+  final hasDelivery =
+      _extractMemoryKeyValue(content, 'delivery')?.isNotEmpty == true ||
+      _countKeywordMatches(content, _deliveryMemoryKeywords) > 0;
+  final riskTags = (_extractMemoryKeyValue(content, 'riskTags') ?? '')
+      .toLowerCase();
+  final hasHighValueRisk =
+      riskTags.contains('identity') ||
+      riskTags.contains('dialogue') ||
+      riskTags.contains('performance');
+  if (classificationLabel == '视觉偏重') {
+    return '待压缩';
+  }
+  if (hasDelivery && (hasSubject || hasHighValueRisk)) {
+    return '优先保留';
+  }
+  if (classificationLabel == '表演优先' || classificationLabel == '表演+视觉') {
+    return '优先保留';
+  }
+  return '待观察';
+}
+
 bool _isVideoStyleMemory(String memoryName) {
   return memoryName == 'selected_video_memory' ||
       memoryName == 'script_role_video_style_memory' ||
       memoryName == 'script_video_style_memory' ||
+      memoryName == 'project_video_style_memory' ||
       memoryName == 'project_role_video_style_memory';
 }
 
 int _countKeywordMatches(String content, List<String> keywords) {
   final normalized = content.toLowerCase();
   return keywords.where((keyword) => normalized.contains(keyword)).length;
+}
+
+String _memorySignalLabel(String content, String classificationLabel) {
+  final tags = <String>{};
+  final subject = _extractMemoryKeyValue(content, 'subject') ?? '';
+  final delivery = _extractMemoryKeyValue(content, 'delivery') ?? '';
+  final riskTags = _extractMemoryKeyValue(content, 'riskTags') ?? '';
+  final rejectionCount =
+      _extractMemoryKeyValue(content, 'rejectionCount') ?? '';
+  if (subject.isNotEmpty) {
+    tags.add('人物');
+  }
+  if (delivery.isNotEmpty ||
+      classificationLabel == '表演优先' ||
+      classificationLabel == '表演+视觉') {
+    tags.add('情绪');
+  }
+  if (classificationLabel == '表演+视觉') {
+    tags.add('镜头');
+  } else if (classificationLabel == '视觉偏重') {
+    tags.add('视觉');
+  }
+  if (riskTags.contains('identity')) {
+    tags.add('身份');
+  }
+  if (riskTags.contains('dialogue')) {
+    tags.add('台词');
+  }
+  if (riskTags.contains('performance')) {
+    tags.add('表演');
+  }
+  if (rejectionCount.isNotEmpty) {
+    tags.add('坏例$rejectionCount');
+  }
+  return tags.join('/');
 }
 
 String _memoryScopeLabel(String content) {
