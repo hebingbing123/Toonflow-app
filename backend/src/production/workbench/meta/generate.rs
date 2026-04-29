@@ -21,12 +21,10 @@ use crate::production::workbench::video::generate::{
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
     contextual_style_memory_value_for_storyboard, optimize_scoped_video_memory,
-    select_pending_rejected_video_observation_candidates_for_subject_with_bias,
     select_prioritized_video_style_note, select_selected_video_memory_notes_for_storyboard,
     select_subject_role_video_style_memory_notes,
     select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
-    VideoPromptMemorySelectionBias,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;

@@ -2646,6 +2646,8 @@ fn score_rejected_video_memory_bias_for_fragment(
     fragment: &str,
     bias: Option<VideoPromptMemorySelectionBias>,
 ) -> i32 {
+    const MEMORY_BIAS_PRIORITY_SCORE: i32 = 36;
+
     let Some(bias) = bias else {
         return 0;
     };
@@ -2656,14 +2658,14 @@ fn score_rejected_video_memory_bias_for_fragment(
             .iter()
             .any(|tag| matches!(*tag, "dialogue" | "performance" | "emotion"))
     {
-        score += 18;
+        score += MEMORY_BIAS_PRIORITY_SCORE;
     }
     if bias.prefer_visual_continuity
         && tags
             .iter()
             .any(|tag| matches!(*tag, "identity" | "lighting" | "motion" | "framing"))
     {
-        score += 18;
+        score += MEMORY_BIAS_PRIORITY_SCORE;
     }
     score
 }
@@ -6433,13 +6435,27 @@ fn single_sample_role_style_memory_seed(note: &str) -> Option<(String, Option<St
 fn single_sample_role_style_seed_is_high_signal(note: &str) -> bool {
     split_prompt_note_fragments(note).any(|fragment| {
         if fragment.starts_with("表演") {
-            score_memory_fragment_human_performance_detail(&fragment, Some("表演")) >= 3
-                || [
-                    "抬眼", "垂眼", "眼神", "喉结", "唇线", "眉心", "嘴角", "下颌", "呼吸", "停顿",
-                    "发颤",
-                ]
-                .iter()
-                .any(|keyword| fragment.contains(keyword))
+            [
+                "抬眼",
+                "垂眼",
+                "眼神",
+                "目光",
+                "喉结",
+                "唇线",
+                "眉心",
+                "嘴角",
+                "下颌",
+                "呼吸",
+                "停顿",
+                "发颤",
+                "欲言又止",
+                "强忍",
+                "哽咽",
+            ]
+            .iter()
+            .filter(|keyword| fragment.contains(**keyword))
+            .count()
+                >= 2
         } else if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
             !role_voice_variant_is_low_gain_carryover(&voice)
         } else if let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) {
