@@ -12,9 +12,10 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::production::{
+    build_selected_video_memory, clear_rejected_video_negative_memory,
     infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
-    persist_rejected_video_negative_memory, refresh_project_video_style_memory,
-    refresh_script_video_style_memory,
+    persist_rejected_video_negative_memory, persist_selected_video_memory,
+    refresh_project_video_style_memory, refresh_script_video_style_memory, StoryboardPromptSeedRow,
 };
 use crate::settings::agent_memory::replace_named_summary_memory;
 
@@ -23,6 +24,7 @@ use super::types::QualityReview;
 const QUALITY_FEEDBACK_MEMORY_NAME: &str = "quality_feedback_memory";
 const LOW_SCORE_THRESHOLD: i16 = 6;
 const SEVERE_SCORE_THRESHOLD: i16 = 4;
+const SELECTED_MEMORY_PROMOTION_SCORE_THRESHOLD: i16 = 8;
 
 /// Automatically write quality feedback to agent memory if the review indicates issues.
 pub async fn maybe_write_quality_feedback_to_memory(
@@ -32,6 +34,12 @@ pub async fn maybe_write_quality_feedback_to_memory(
     script_id: i32,
     review: &QualityReview,
 ) -> Result<(), String> {
+    if should_promote_quality_review_selected_video_memory(review) {
+        promote_quality_review_selected_video_memory(pool, user_id, project_id, script_id, review)
+            .await?;
+        return Ok(());
+    }
+
     let should_write = review.is_bad_case
         || review
             .overall_score
@@ -88,6 +96,91 @@ pub async fn maybe_write_quality_feedback_to_memory(
     .map_err(|e| format!("Failed to write quality feedback summary memory: {e:?}"))?;
 
     Ok(())
+}
+
+async fn promote_quality_review_selected_video_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    script_id: i32,
+    review: &QualityReview,
+) -> Result<(), String> {
+    let Some(storyboard_id) = quality_review_storyboard_target_id(review) else {
+        return Ok(());
+    };
+
+    let prompt_seed = sqlx::query_as::<_, StoryboardPromptSeedRow>(
+        r#"
+        SELECT sb.prompt, sb.video_desc, sb.duration
+        FROM app_storyboard sb
+        JOIN app_script sc ON sc.id = sb.script_id
+        JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND sc.numeric_id = $3
+          AND sb.numeric_id = $4
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .bind(script_id)
+    .bind(storyboard_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| format!("Failed to load storyboard prompt seed for quality memory: {e}"))?;
+
+    let Some(prompt_seed) = prompt_seed else {
+        return Ok(());
+    };
+    let Some(memory_content) = build_selected_video_memory(storyboard_id, &prompt_seed) else {
+        return Ok(());
+    };
+
+    clear_rejected_video_negative_memory(pool, user_id, project_id, script_id, storyboard_id)
+        .await
+        .map_err(|e| format!("Failed to clear stale rejected video feedback memory: {e:?}"))?;
+    persist_selected_video_memory(pool, user_id, project_id, script_id, &memory_content)
+        .await
+        .map_err(|e| format!("Failed to persist selected video quality memory: {e:?}"))?;
+    refresh_script_video_style_memory(pool, user_id, project_id, script_id)
+        .await
+        .map_err(|e| format!("Failed to refresh script selected video memory: {e:?}"))?;
+    refresh_project_video_style_memory(pool, user_id, project_id)
+        .await
+        .map_err(|e| format!("Failed to refresh project selected video memory: {e:?}"))?;
+
+    tracing::info!(
+        review_id = %review.id,
+        project_id,
+        script_id,
+        storyboard_id,
+        "Quality feedback promoted approved storyboard/video into isolated selected memory"
+    );
+
+    Ok(())
+}
+
+fn should_promote_quality_review_selected_video_memory(review: &QualityReview) -> bool {
+    quality_review_storyboard_target_id(review).is_some()
+        && !review.is_bad_case
+        && review.passed == Some(true)
+        && review
+            .overall_score
+            .is_some_and(|score| score >= SELECTED_MEMORY_PROMOTION_SCORE_THRESHOLD)
+}
+
+fn quality_review_storyboard_target_id(review: &QualityReview) -> Option<i32> {
+    matches!(
+        review.target_type.as_str(),
+        "storyboard" | "video" | "output" | "asset"
+    )
+    .then(|| {
+        review
+            .target_id
+            .as_deref()
+            .and_then(|value| value.parse::<i32>().ok())
+            .filter(|id| *id > 0)
+    })?
 }
 
 fn build_quality_review_rejected_video_memory(review: &QualityReview) -> Option<String> {
@@ -271,7 +364,7 @@ fn build_generic_quality_feedback_content(review: &QualityReview) -> String {
 mod tests {
     use super::{
         build_generic_quality_feedback_content, build_quality_review_rejected_video_memory,
-        QUALITY_FEEDBACK_MEMORY_NAME,
+        should_promote_quality_review_selected_video_memory, QUALITY_FEEDBACK_MEMORY_NAME,
     };
     use crate::prompting::quality::types::QualityReview;
     use serde_json::json;
@@ -379,5 +472,33 @@ mod tests {
     #[test]
     fn generic_feedback_summary_memory_stays_named_for_scope_replacement() {
         assert_eq!(QUALITY_FEEDBACK_MEMORY_NAME, "quality_feedback_memory");
+    }
+
+    #[test]
+    fn successful_storyboard_review_qualifies_for_selected_video_memory_promotion() {
+        let mut review = sample_review();
+        review.is_bad_case = false;
+        review.passed = Some(true);
+        review.overall_score = Some(9);
+        review.comments = Some("人物状态自然，情绪和镜头都稳定".into());
+
+        assert!(should_promote_quality_review_selected_video_memory(&review));
+    }
+
+    #[test]
+    fn failed_or_low_score_storyboard_review_does_not_promote_selected_video_memory() {
+        let mut review = sample_review();
+        review.is_bad_case = false;
+        review.passed = Some(true);
+        review.overall_score = Some(7);
+        assert!(!should_promote_quality_review_selected_video_memory(
+            &review
+        ));
+
+        review.overall_score = Some(9);
+        review.passed = Some(false);
+        assert!(!should_promote_quality_review_selected_video_memory(
+            &review
+        ));
     }
 }
