@@ -306,6 +306,11 @@ pub(crate) fn build_selected_video_memory(
     let style = style_only_note(&note);
     if let Some(style) = style.as_ref() {
         parts.push(format!("style={style}"));
+        if let Some(delivery) =
+            selected_video_delivery_value_from_note(style).filter(|value| value != style)
+        {
+            parts.push(format!("delivery={delivery}"));
+        }
     }
     let residual_note = if style.is_some() {
         non_style_note(&note)
@@ -2493,9 +2498,37 @@ pub(crate) fn select_selected_video_memory_notes(
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
 ) -> Vec<String> {
+    select_selected_video_memory_notes_for_storyboard(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        None,
+    )
+}
+
+pub(crate) fn select_selected_video_memory_notes_for_storyboard(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
     if storyboard_numeric_id <= 0 {
         return Vec::new();
     }
+    let should_prefer_delivery = storyboard_row
+        .and_then(|storyboard_row| {
+            storyboard_row
+                .video_desc
+                .as_deref()
+                .and_then(parse_structured_storyboard_description)
+                .map(|fields| {
+                    selected_memory_has_visible_speech_performance_risk(
+                        &fields,
+                        storyboard_row.prompt.as_deref(),
+                    ) || storyboard_is_fragile_emotional_turn(&fields)
+                })
+        })
+        .unwrap_or(false);
     let allow_unseeded_fallback = !has_exact_prompt_seed_memory_match(
         rows,
         storyboard_numeric_id,
@@ -2517,6 +2550,14 @@ pub(crate) fn select_selected_video_memory_notes(
             allow_unseeded_fallback,
         ) {
             continue;
+        }
+        if should_prefer_delivery {
+            if let Some(note) = selected_video_delivery_value_from_content(&row.content) {
+                if style_notes.iter().all(|existing| existing != &note) {
+                    style_notes.push(note);
+                }
+                continue;
+            }
         }
         if let Some(note) = selected_video_style_value(row) {
             if style_notes.iter().all(|existing| existing != &note) {
@@ -7096,9 +7137,47 @@ fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
     })
 }
 
+fn selected_video_delivery_value_from_note(note: &str) -> Option<String> {
+    let mut performance = None;
+    let mut voice = None;
+    for fragment in split_prompt_note_fragments(note) {
+        if performance.is_none() && fragment.starts_with("表演") {
+            performance = Some(fragment);
+            continue;
+        }
+        if voice.is_none() && fragment.starts_with("语气") {
+            voice = Some(fragment);
+        }
+    }
+
+    match (performance.as_deref(), voice.as_deref()) {
+        (Some(performance), Some(voice)) => {
+            compact_selected_memory_delivery_style(Some(performance), Some(voice))
+                .or_else(|| Some(performance.to_string()))
+                .or_else(|| Some(voice.to_string()))
+        }
+        (Some(_), None) => performance,
+        (None, Some(_)) => voice,
+        (None, None) => None,
+    }
+}
+
 fn delivery_style_value_from_content(content: &str) -> Option<String> {
     extract_key_value(content, "delivery")
         .and_then(|value| compact_video_style_prompt_note(&value))
+        .filter(|value| !value.is_empty())
+}
+
+fn selected_video_delivery_value_from_content(content: &str) -> Option<String> {
+    delivery_style_value_from_content(content)
+        .or_else(|| {
+            extract_key_value(content, "style")
+                .and_then(|value| selected_video_delivery_value_from_note(&value))
+        })
+        .or_else(|| {
+            extract_key_value(content, "note")
+                .and_then(|value| selected_video_delivery_value_from_note(&value))
+        })
         .filter(|value| !value.is_empty())
 }
 
@@ -8151,6 +8230,28 @@ mod tests {
         assert!(content.contains("声场雨声回响"), "{content}");
         assert!(!content.contains("迟迟没有开口"), "{content}");
         assert!(!content.contains("低声开口"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_persists_delivery_separately_when_visual_style_remains() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚看着窗外低声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、喉结滚动后低声开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains("style=表演喉结滚动，语气低声克制，光影冷蓝窗光，声场雨声回响"),
+            "{content}"
+        );
+        assert!(
+            content.contains("delivery=表演喉结滚动低声克制"),
+            "{content}"
+        );
     }
 
     #[test]
@@ -11883,6 +11984,26 @@ mod tests {
             notes,
             vec!["表演喉结滚动，语气低声尾音发颤，情绪强忍泪意".to_string()]
         );
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_for_storyboard_prefers_delivery_on_fragile_turn() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚喉头发紧后低声开口".into()),
+            video_desc: Some("（林晚喉头发紧后低声开口、咖啡厅窗边、林晚、4秒、近景、缓推、喉结滚动后低声开口、克制、夜间冷蓝窗光、你终于来了、轻微环境声、A21）".into()),
+            duration: Some("4".into()),
+        };
+        let notes = select_selected_video_memory_notes_for_storyboard(
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=21 | style=表演喉结滚动，语气低声克制，光影冷蓝窗光 | delivery=表演喉结滚动低声克制 | note=...".into(),
+            }],
+            21,
+            None,
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(notes, vec!["表演喉结滚动低声克制".to_string()]);
     }
 
     #[test]

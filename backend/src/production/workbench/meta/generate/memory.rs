@@ -125,11 +125,15 @@ pub(super) fn select_video_prompt_style_notes(
     .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
     .take(1)
     .collect::<Vec<_>>();
-    let exact =
-        select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed)
-            .into_iter()
-            .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
-            .collect::<Vec<_>>();
+    let exact = select_selected_video_memory_notes_for_storyboard(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        Some(storyboard_row),
+    )
+    .into_iter()
+    .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+    .collect::<Vec<_>>();
     let role_only = prefer_role_memory_only_for_silent_identity_scene(
         &exact,
         &role_memory_notes,

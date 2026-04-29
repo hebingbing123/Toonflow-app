@@ -18,7 +18,8 @@ use crate::production::workbench::video_prompt_memory::{
     normalize_prompt_text, parse_structured_storyboard_description,
     select_prioritized_video_style_note, select_project_video_style_memory_notes_for_storyboard,
     select_rejected_video_memory_notes_and_observation_candidates_for_subject,
-    select_script_video_style_memory_notes_for_storyboard, select_selected_video_memory_notes,
+    select_script_video_style_memory_notes_for_storyboard,
+    select_selected_video_memory_notes_for_storyboard,
     select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
     StructuredStoryboardDescription,
@@ -980,10 +981,11 @@ fn build_storyboard_negative_prompt_selection(
     context: &StoryboardNegativePromptContext,
     rejected_rows: &[AgentMemoryRow],
 ) -> (AutoNegativePromptSelection, Vec<String>) {
-    let selected_style_note = select_selected_video_memory_notes(
+    let selected_style_note = select_selected_video_memory_notes_for_storyboard(
         &context.selected_rows,
         context.storyboard_id,
         context.current_prompt_seed.as_deref(),
+        context.storyboard_row.as_ref(),
     )
     .into_iter()
     .next();
