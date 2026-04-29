@@ -512,6 +512,44 @@ void main() {
   );
 
   test(
+    'buildStoryboardVideoPromptBudgetHint keeps trimming repeated suppressed bucket before delivery memory',
+    () {
+      const diagnostics = GenerateVideoPromptDiagnostics(
+        promptChars: 426,
+        negativePromptChars: 24,
+        negativeConstraintCount: 1,
+        negativeBudgetTier: 'lean',
+        autoNegativeSource: null,
+        autoNegativeReviewFragmentCount: 0,
+        autoNegativeMemoryFragmentCount: 0,
+        observationNoteChars: 0,
+        roleAnchorCount: 1,
+        sceneAnchorCount: 1,
+        toolAnchorCount: 0,
+        styleAnchorCount: 1,
+        memoryStyleAnchorCount: 2,
+        memoryDeliveryAnchorCount: 1,
+        memoryDeliveryPriorityApplied: false,
+        memoryStyleChars: 58,
+        memoryVisualChars: 26,
+        memoryDeliveryChars: 18,
+        memoryHitBuckets: const ['表演'],
+        memorySuppressedBuckets: const ['动作'],
+        memorySuppressedBucketCounts: const {'动作': 3},
+        continuityNoteCount: 1,
+        continuityNoteChars: 16,
+        usesReferenceFrame: true,
+        memoryBudgetTier: 'expanded',
+      );
+
+      expect(
+        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        '当前私有记忆里已压掉较多动作类重复片段，继续先收这类泛句，别先删角色表演记忆。',
+      );
+    },
+  );
+
+  test(
     'buildStoryboardVideoPromptBudgetHint preserves expanded memory on risky shots',
     () {
       const diagnostics = GenerateVideoPromptDiagnostics(

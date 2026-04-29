@@ -53,6 +53,8 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     pub(super) memory_delivery_chars: usize,
     pub(super) memory_hit_buckets: Vec<String>,
     pub(super) memory_suppressed_buckets: Vec<String>,
+    pub(super) memory_hit_bucket_counts: std::collections::BTreeMap<String, usize>,
+    pub(super) memory_suppressed_bucket_counts: std::collections::BTreeMap<String, usize>,
     pub(super) director_manual_yielded_to_memory: bool,
     pub(super) director_manual_yielded_chars: usize,
     pub(super) director_performance_trimmed_chars: usize,

@@ -3976,6 +3976,10 @@ fn generate_video_prompt_response_serializes_observation_note() {
             memory_delivery_chars: 0,
             memory_hit_buckets: vec!["表演".into(), "语气".into()],
             memory_suppressed_buckets: vec!["动作".into()],
+            memory_hit_bucket_counts: [("表演".into(), 2usize), ("语气".into(), 1usize)]
+                .into_iter()
+                .collect(),
+            memory_suppressed_bucket_counts: [("动作".into(), 3usize)].into_iter().collect(),
             director_manual_yielded_to_memory: false,
             director_manual_yielded_chars: 0,
             director_performance_trimmed_chars: 0,
@@ -4011,6 +4015,22 @@ fn generate_video_prompt_response_serializes_observation_note() {
             .and_then(serde_json::Value::as_array)
             .map(|items| items.len()),
         Some(1)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memoryHitBucketCounts"))
+            .and_then(|item| item.get("表演"))
+            .and_then(serde_json::Value::as_u64),
+        Some(2)
+    );
+    assert_eq!(
+        value
+            .get("diagnostics")
+            .and_then(|item| item.get("memorySuppressedBucketCounts"))
+            .and_then(|item| item.get("动作"))
+            .and_then(serde_json::Value::as_u64),
+        Some(3)
     );
     assert_eq!(
         value

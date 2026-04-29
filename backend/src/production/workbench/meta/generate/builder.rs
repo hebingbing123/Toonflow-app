@@ -254,6 +254,8 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
             memory_delivery_chars,
             memory_hit_buckets: style_anchor_build.memory_hit_buckets,
             memory_suppressed_buckets: style_anchor_build.memory_suppressed_buckets,
+            memory_hit_bucket_counts: style_anchor_build.memory_hit_bucket_counts,
+            memory_suppressed_bucket_counts: style_anchor_build.memory_suppressed_bucket_counts,
             director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
             director_manual_yielded_chars: style_anchor_build.director_manual_yielded_chars,
             director_performance_trimmed_chars: style_anchor_build
@@ -1103,6 +1105,10 @@ pub(super) fn build_project_visual_anchors(
         &raw_memory_bucket_counts,
         &selected_memory_bucket_counts,
     );
+    let memory_suppressed_bucket_counts = collect_suppressed_memory_style_bucket_counts(
+        &raw_memory_bucket_counts,
+        &selected_memory_bucket_counts,
+    );
     VideoPromptStyleAnchorBuild {
         anchors,
         memory_style_anchor_count: memory_anchor_count,
@@ -1110,6 +1116,8 @@ pub(super) fn build_project_visual_anchors(
         memory_delivery_priority_applied,
         memory_hit_buckets,
         memory_suppressed_buckets,
+        memory_hit_bucket_counts: selected_memory_bucket_counts,
+        memory_suppressed_bucket_counts,
         director_manual_yielded_to_memory,
         director_manual_yielded_chars,
         director_performance_trimmed_chars,
@@ -1174,6 +1182,21 @@ fn flatten_suppressed_memory_style_bucket_counts(
         .filter_map(|(bucket, raw_count)| {
             let selected_count = selected.get(bucket).copied().unwrap_or(0);
             (raw_count > &selected_count).then_some(bucket.clone())
+        })
+        .collect()
+}
+
+fn collect_suppressed_memory_style_bucket_counts(
+    raw: &std::collections::BTreeMap<String, usize>,
+    selected: &std::collections::BTreeMap<String, usize>,
+) -> std::collections::BTreeMap<String, usize> {
+    raw.iter()
+        .filter_map(|(bucket, raw_count)| {
+            let selected_count = selected.get(bucket).copied().unwrap_or(0);
+            raw_count
+                .checked_sub(selected_count)
+                .filter(|remaining| *remaining > 0)
+                .map(|remaining| (bucket.clone(), remaining))
         })
         .collect()
 }

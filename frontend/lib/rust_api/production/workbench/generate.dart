@@ -29,6 +29,8 @@ class GenerateVideoPromptDiagnostics {
     required this.memoryDeliveryChars,
     required this.memoryHitBuckets,
     required this.memorySuppressedBuckets,
+    this.memoryHitBucketCounts = const <String, int>{},
+    this.memorySuppressedBucketCounts = const <String, int>{},
     required this.continuityNoteCount,
     required this.continuityNoteChars,
     required this.usesReferenceFrame,
@@ -55,10 +57,25 @@ class GenerateVideoPromptDiagnostics {
   final int memoryDeliveryChars;
   final List<String> memoryHitBuckets;
   final List<String> memorySuppressedBuckets;
+  final Map<String, int> memoryHitBucketCounts;
+  final Map<String, int> memorySuppressedBucketCounts;
   final int continuityNoteCount;
   final int continuityNoteChars;
   final bool usesReferenceFrame;
   final String memoryBudgetTier;
+
+  static Map<String, int> _bucketCounts(dynamic value) {
+    if (value is! Map) return const <String, int>{};
+    final result = <String, int>{};
+    for (final entry in value.entries) {
+      final key = entry.key;
+      final count = entry.value;
+      if (key is String && key.isNotEmpty && count is num && count > 0) {
+        result[key] = count.toInt();
+      }
+    }
+    return Map.unmodifiable(result);
+  }
 
   factory GenerateVideoPromptDiagnostics.fromJson(Map<String, dynamic> json) {
     return GenerateVideoPromptDiagnostics(
@@ -94,6 +111,10 @@ class GenerateVideoPromptDiagnostics {
           (json['memorySuppressedBuckets'] as List<dynamic>? ?? const [])
               .whereType<String>()
               .toList(growable: false),
+      memoryHitBucketCounts: _bucketCounts(json['memoryHitBucketCounts']),
+      memorySuppressedBucketCounts: _bucketCounts(
+        json['memorySuppressedBucketCounts'],
+      ),
       continuityNoteCount: (json['continuityNoteCount'] as num?)?.toInt() ?? 0,
       continuityNoteChars: (json['continuityNoteChars'] as num?)?.toInt() ?? 0,
       usesReferenceFrame: json['usesReferenceFrame'] == true,

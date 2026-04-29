@@ -101,6 +101,8 @@ void main() {
               'memoryDeliveryChars': 42,
               'memoryHitBuckets': ['表演', '语气'],
               'memorySuppressedBuckets': ['动作'],
+              'memoryHitBucketCounts': {'表演': 2, '语气': 1},
+              'memorySuppressedBucketCounts': {'动作': 2},
               'memoryDeliveryPriorityApplied': true,
               'autoNegativeSource': 'review+rejected_memory',
               'directorManualYieldedToMemory': true,
@@ -114,8 +116,8 @@ void main() {
 
       expect(details, contains('诊断=prompt=420'));
       expect(details, contains('负向约束=评审+坏例记忆'));
-      expect(details, contains('命中=表演/语气'));
-      expect(details, contains('压缩=动作'));
+      expect(details, contains('命中=表演2次/语气'));
+      expect(details, contains('压缩=动作2次'));
       expect(details, contains('导演让位'));
       expect(details, contains('参考帧'));
     },
@@ -139,6 +141,8 @@ void main() {
             'memoryDeliveryChars': 32,
             'memoryHitBuckets': ['表演', '语气'],
             'memorySuppressedBuckets': ['动作'],
+            'memoryHitBucketCounts': {'表演': 1, '语气': 1},
+            'memorySuppressedBucketCounts': {'动作': 1},
             'memoryDeliveryPriorityApplied': true,
             'autoNegativeSource': 'review+rejected_memory',
             'directorManualYieldedToMemory': true,
@@ -163,6 +167,8 @@ void main() {
             'memoryDeliveryChars': 50,
             'memoryHitBuckets': ['表演'],
             'memorySuppressedBuckets': ['动作', '光影'],
+            'memoryHitBucketCounts': {'表演': 1},
+            'memorySuppressedBucketCounts': {'动作': 1, '光影': 1},
             'memoryDeliveryPriorityApplied': false,
             'autoNegativeSource': 'review+rejected_memory',
             'directorManualYieldedToMemory': false,

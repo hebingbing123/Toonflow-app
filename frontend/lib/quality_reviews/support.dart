@@ -28,6 +28,20 @@ List<String> _diagnosticStringList(Map<String, dynamic> map, String key) {
   return value.whereType<String>().where((item) => item.isNotEmpty).toList();
 }
 
+Map<String, int> _diagnosticStringIntMap(Map<String, dynamic> map, String key) {
+  final value = map[key];
+  if (value is! Map) return const <String, int>{};
+  final result = <String, int>{};
+  for (final entry in value.entries) {
+    final bucket = entry.key;
+    final count = entry.value;
+    if (bucket is String && bucket.isNotEmpty && count is num && count > 0) {
+      result[bucket] = count.toInt();
+    }
+  }
+  return result;
+}
+
 String _describeAutoNegativeSource(String source) {
   switch (source) {
     case 'review+rejected_memory':
@@ -51,6 +65,17 @@ String _joinTopBucketCounts(Map<String, int> counts, {int maxItems = 3}) {
       .take(maxItems)
       .map((entry) => '${entry.key}${entry.value}次')
       .join(' / ');
+}
+
+String _joinBucketListWithCounts(
+  List<String> buckets,
+  Map<String, int> counts,
+) {
+  if (buckets.isEmpty) return '';
+  return buckets.map((bucket) {
+    final count = counts[bucket];
+    return count == null || count <= 1 ? bucket : '$bucket$count次';
+  }).join('/');
 }
 
 String? summarizeTokenEfficiencyFromQualityReviews(
@@ -151,14 +176,43 @@ String? summarizePromptDiagnosticsFromQualityReviews(
     if (source != null) {
       negativeSources.update(source, (count) => count + 1, ifAbsent: () => 1);
     }
-    for (final bucket in _diagnosticStringList(sample, 'memoryHitBuckets')) {
-      memoryHitBuckets.update(bucket, (count) => count + 1, ifAbsent: () => 1);
+    final hitCounts = _diagnosticStringIntMap(sample, 'memoryHitBucketCounts');
+    if (hitCounts.isNotEmpty) {
+      for (final entry in hitCounts.entries) {
+        memoryHitBuckets.update(
+          entry.key,
+          (count) => count + entry.value,
+          ifAbsent: () => entry.value,
+        );
+      }
+    } else {
+      for (final bucket in _diagnosticStringList(sample, 'memoryHitBuckets')) {
+        memoryHitBuckets.update(bucket, (count) => count + 1, ifAbsent: () => 1);
+      }
     }
-    for (final bucket in _diagnosticStringList(
+    final suppressedCounts = _diagnosticStringIntMap(
       sample,
-      'memorySuppressedBuckets',
-    )) {
-      suppressedBuckets.update(bucket, (count) => count + 1, ifAbsent: () => 1);
+      'memorySuppressedBucketCounts',
+    );
+    if (suppressedCounts.isNotEmpty) {
+      for (final entry in suppressedCounts.entries) {
+        suppressedBuckets.update(
+          entry.key,
+          (count) => count + entry.value,
+          ifAbsent: () => entry.value,
+        );
+      }
+    } else {
+      for (final bucket in _diagnosticStringList(
+        sample,
+        'memorySuppressedBuckets',
+      )) {
+        suppressedBuckets.update(
+          bucket,
+          (count) => count + 1,
+          ifAbsent: () => 1,
+        );
+      }
     }
   }
 
@@ -226,19 +280,29 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   if (_diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
     parts.add('delivery优先');
   }
+  final memoryHitBucketCounts = _diagnosticStringIntMap(
+    diagnostics,
+    'memoryHitBucketCounts',
+  );
   final memoryHitBuckets = _diagnosticStringList(
     diagnostics,
     'memoryHitBuckets',
   );
   if (memoryHitBuckets.isNotEmpty) {
-    parts.add('命中=${memoryHitBuckets.join("/")}');
+    parts.add('命中=${_joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts)}');
   }
+  final memorySuppressedBucketCounts = _diagnosticStringIntMap(
+    diagnostics,
+    'memorySuppressedBucketCounts',
+  );
   final memorySuppressedBuckets = _diagnosticStringList(
     diagnostics,
     'memorySuppressedBuckets',
   );
   if (memorySuppressedBuckets.isNotEmpty) {
-    parts.add('压缩=${memorySuppressedBuckets.join("/")}');
+    parts.add(
+      '压缩=${_joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts)}',
+    );
   }
   if (_diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
     parts.add('导演让位');

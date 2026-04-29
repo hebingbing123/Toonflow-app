@@ -154,6 +154,13 @@ String buildStoryboardVideoPromptAnchorSummary(
 String buildStoryboardVideoPromptBudgetHint(
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
+  String? topBucket(Map<String, int> counts) {
+    if (counts.isEmpty) return null;
+    return (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
+        .first
+        .key;
+  }
+
   if (!diagnostics.usesReferenceFrame) {
     return '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。';
   }
@@ -161,6 +168,12 @@ String buildStoryboardVideoPromptBudgetHint(
       diagnostics.memoryDeliveryChars > 0 &&
       diagnostics.memoryBudgetTier == 'expanded') {
     return '已命中表演/语气优先记忆，先别删这段；优先压缩重复的场景/风格与连续性泛句，避免又回到“读稿腔”。';
+  }
+  final topSuppressedBucket = topBucket(diagnostics.memorySuppressedBucketCounts);
+  if (topSuppressedBucket != null &&
+      diagnostics.promptChars >= 380 &&
+      diagnostics.memoryStyleChars >= 48) {
+    return '当前私有记忆里已压掉较多$topSuppressedBucket类重复片段，继续先收这类泛句，别先删角色表演记忆。';
   }
   final anchorCount =
       diagnostics.roleAnchorCount +
