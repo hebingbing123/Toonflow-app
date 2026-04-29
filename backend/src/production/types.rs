@@ -9,6 +9,10 @@ use sqlx::FromRow;
 pub(crate) struct GenerateVideoUploadItem {
     pub(crate) id: i32,
     pub(crate) sources: String,
+    #[serde(default)]
+    pub(crate) prompt: Option<String>,
+    #[serde(default)]
+    pub(crate) negative_prompt: Option<String>,
 }
 
 #[allow(dead_code)]

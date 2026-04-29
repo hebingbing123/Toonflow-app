@@ -45,6 +45,14 @@ const VIDEO_NEGATIVE_SELECTED_MEMORY_PER_STORYBOARD_ROWS: i64 = 2;
 const VIDEO_NEGATIVE_SELECTED_MEMORY_SUMMARY_ROWS: i64 = 2;
 const VIDEO_NEGATIVE_SELECTED_MEMORY_MAX_LIMIT: i64 = 14;
 
+#[derive(Debug, Clone)]
+struct NormalizedGenerateVideoUploadItem {
+    storyboard_id: i32,
+    source_url: String,
+    prompt: Option<String>,
+    negative_prompt: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(in crate::production) struct WorkbenchGenerateVideoResponse {
@@ -196,9 +204,6 @@ pub(in crate::production) async fn post_workbench_generate_video(
     if body.upload_data.is_empty() {
         return Err(ApiError::BadRequest("uploadData must not be empty".into()));
     }
-    if body.prompt.trim().is_empty() {
-        return Err(ApiError::BadRequest("prompt must not be empty".into()));
-    }
     if body.model.trim().is_empty() {
         return Err(ApiError::BadRequest("model must not be empty".into()));
     }
@@ -211,8 +216,11 @@ pub(in crate::production) async fn post_workbench_generate_video(
     let (user_id, pool, scope_row) =
         require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
             .await?;
-    let upload_sources = normalize_upload_sources(&body.upload_data)?;
-    let storyboard_ids = upload_sources.keys().copied().collect::<Vec<_>>();
+    let upload_items = normalize_upload_sources(&body.upload_data)?;
+    let storyboard_ids = upload_items
+        .iter()
+        .map(|item| item.storyboard_id)
+        .collect::<Vec<_>>();
     ensure_track_in_scope(
         pool,
         scope_row.project_id,
@@ -236,18 +244,23 @@ pub(in crate::production) async fn post_workbench_generate_video(
     .await?;
     let provider = infer_video_provider(&body.model);
     let duration_label = format!("{}s", body.duration);
-    let prompt = body.prompt.trim().to_string();
+    let default_prompt = body.prompt.trim().to_string();
     let model = body.model.trim().to_string();
     let resolution = body.resolution.trim().to_string();
     let mode = body.mode.trim().to_string();
 
-    let mut enqueued = Vec::with_capacity(upload_sources.len());
+    let mut enqueued = Vec::with_capacity(upload_items.len());
     let mut response_negative_prompts = Vec::with_capacity(storyboard_ids.len());
-    for (storyboard_numeric_id, source_url) in upload_sources {
+    for item in upload_items {
+        let prompt = resolve_storyboard_prompt(&item, &default_prompt)?;
         let merged_negative_prompt = merge_negative_prompts(
-            body.negative_prompt.as_deref(),
+            merge_negative_prompts(
+                body.negative_prompt.as_deref(),
+                item.negative_prompt.as_deref(),
+            )
+            .as_deref(),
             storyboard_negative_prompts
-                .get(&storyboard_numeric_id)
+                .get(&item.storyboard_id)
                 .and_then(|value| value.as_deref()),
         );
         sqlx::query(
@@ -266,7 +279,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
         .bind(&prompt)
         .bind(&duration_label)
         .bind(body.track_id)
-        .bind(storyboard_numeric_id)
+        .bind(item.storyboard_id)
         .execute(pool)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -275,7 +288,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
             "source": "production.workbench.generate-video",
             "project_numeric_id": body.project_id,
             "script_id": body.script_id,
-            "storyboard_numeric_id": storyboard_numeric_id,
+            "storyboard_numeric_id": item.storyboard_id,
             "provider": provider,
             "model": &model,
             "mode": &mode,
@@ -286,12 +299,12 @@ pub(in crate::production) async fn post_workbench_generate_video(
             "aspect_ratio": &aspect_ratio,
             "audio": body.audio,
             "track_id": body.track_id,
-            "image_url": source_url,
+            "image_url": item.source_url,
         });
         let row = enqueue_generation_job(pool, user_id, JOB_KIND_VIDEO_GENERATE, payload).await?;
         enqueued.push(row);
         response_negative_prompts.push(StoryboardNegativePrompt {
-            storyboard_id: storyboard_numeric_id,
+            storyboard_id: item.storyboard_id,
             negative_prompt: merged_negative_prompt,
         });
     }
@@ -307,9 +320,9 @@ pub(in crate::production) async fn post_workbench_generate_video(
 
 fn normalize_upload_sources(
     items: &[GenerateVideoUploadItem],
-) -> Result<HashMap<i32, String>, ApiError> {
+) -> Result<Vec<NormalizedGenerateVideoUploadItem>, ApiError> {
     let mut seen = BTreeSet::new();
-    let mut normalized = HashMap::with_capacity(items.len());
+    let mut normalized = Vec::with_capacity(items.len());
     for item in items {
         if item.id <= 0 {
             return Err(ApiError::BadRequest(
@@ -337,9 +350,42 @@ fn normalize_upload_sources(
                 )));
             }
         }
-        normalized.insert(item.id, source.to_string());
+        normalized.push(NormalizedGenerateVideoUploadItem {
+            storyboard_id: item.id,
+            source_url: source.to_string(),
+            prompt: item
+                .prompt
+                .as_deref()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string),
+            negative_prompt: item
+                .negative_prompt
+                .as_deref()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string),
+        });
     }
     Ok(normalized)
+}
+
+fn resolve_storyboard_prompt(
+    item: &NormalizedGenerateVideoUploadItem,
+    default_prompt: &str,
+) -> Result<String, ApiError> {
+    item.prompt
+        .as_deref()
+        .or_else(|| (!default_prompt.is_empty()).then_some(default_prompt))
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .ok_or_else(|| {
+            ApiError::BadRequest(format!(
+                "prompt must not be empty for storyboard {}",
+                item.storyboard_id
+            ))
+        })
 }
 
 async fn ensure_track_in_scope(
@@ -524,7 +570,7 @@ pub(crate) async fn load_auto_negative_prompt_details(
     )
     .await?;
 
-    Ok(build_storyboard_negative_prompts(
+    Ok(build_storyboard_negative_prompts_with_recent_quality(
         storyboard_ids,
         &rows,
         &rejected_rows,
@@ -590,6 +636,7 @@ pub(crate) async fn load_storyboard_negative_prompt_runtime(
             .unwrap_or_else(|| StoryboardNegativePromptContext {
                 storyboard_id,
                 storyboard_review_rows: Vec::new(),
+                recent_quality_pressure: None,
                 selected_rows: selected_rows.clone(),
                 storyboard_row: None,
                 current_prompt_seed: None,
@@ -1202,6 +1249,7 @@ fn build_storyboard_negative_prompt_selection(
     let prompt = merge_prioritized_negative_prompt_fragment_groups(
         &[effective_rejected_fragments, review_fragments],
         budget_tier,
+        context.recent_quality_pressure,
     );
     let fragment_count = prompt
         .as_deref()
@@ -2871,12 +2919,16 @@ fn prioritize_negative_prompt_fragments_for_budget(fragments: Vec<String>) -> Ve
 fn merge_prioritized_negative_prompt_fragment_groups(
     groups: &[Vec<String>],
     budget_tier: VideoNegativePromptBudgetTier,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let mut candidates = Vec::new();
     for (group_idx, group) in groups.iter().enumerate() {
         for (fragment_idx, fragment) in group.iter().enumerate() {
             candidates.push(PrioritizedNegativePromptFragment {
-                score: score_negative_prompt_budget_fragment(fragment),
+                score: score_negative_prompt_budget_fragment_with_pressure(
+                    fragment,
+                    recent_quality_pressure,
+                ),
                 char_len: negative_fragment_information_score(fragment),
                 group_idx,
                 fragment_idx,
@@ -2898,9 +2950,14 @@ fn merge_prioritized_negative_prompt_fragment_groups(
         push_negative_fragment_without_budget(&mut fragments, &candidate.fragment);
     }
     fragments = compact_negative_fragment_families(fragments);
+    fragments =
+        prune_negative_prompt_fragments_for_recent_quality(fragments, recent_quality_pressure);
     fragments.sort_by(|left, right| {
-        score_negative_prompt_budget_fragment(right)
-            .cmp(&score_negative_prompt_budget_fragment(left))
+        score_negative_prompt_budget_fragment_with_pressure(right, recent_quality_pressure)
+            .cmp(&score_negative_prompt_budget_fragment_with_pressure(
+                left,
+                recent_quality_pressure,
+            ))
             .then(
                 negative_fragment_information_score(left)
                     .cmp(&negative_fragment_information_score(right)),
@@ -2919,6 +2976,68 @@ fn merge_prioritized_negative_prompt_fragment_groups(
     }
 }
 
+fn prune_negative_prompt_fragments_for_recent_quality(
+    fragments: Vec<String>,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+) -> Vec<String> {
+    let Some(pressure) = recent_quality_pressure else {
+        return fragments;
+    };
+    if fragments.len() <= 1 {
+        return fragments;
+    }
+
+    let has_performance_guard = fragments
+        .iter()
+        .any(|fragment| negative_fragment_family(fragment) == "performance_delivery");
+    let has_visual_continuity_guard = fragments.iter().any(|fragment| {
+        matches!(
+            negative_fragment_family(fragment),
+            "character_consistency"
+                | "lighting_backlight"
+                | "lighting_reflection"
+                | "shot_change_only"
+                | "shot_change_framing"
+                | "camera_framing"
+                | "rushed_motion"
+                | "flicker_motion_jitter"
+        )
+    });
+    let has_specific_framing_guard = fragments.iter().any(|fragment| {
+        matches!(
+            negative_fragment_family(fragment),
+            "shot_change_framing" | "camera_framing"
+        )
+    });
+
+    let pruned = fragments
+        .into_iter()
+        .filter(|fragment| {
+            let family = negative_fragment_family(fragment);
+            if family == "mood_tone"
+                && ((pressure.prefer_delivery_memory_recall && has_performance_guard)
+                    || (pressure.prefer_visual_continuity_memory_recall
+                        && has_visual_continuity_guard))
+            {
+                return false;
+            }
+            if family == "shot_change_only"
+                && pressure.prefer_visual_continuity_memory_recall
+                && has_specific_framing_guard
+            {
+                return false;
+            }
+            true
+        })
+        .collect::<Vec<_>>();
+
+    if pruned.is_empty() {
+        Vec::new()
+    } else {
+        pruned
+    }
+}
+
 #[derive(Debug)]
 struct PrioritizedNegativePromptFragment {
     score: i32,
@@ -2929,6 +3048,13 @@ struct PrioritizedNegativePromptFragment {
 }
 
 fn score_negative_prompt_budget_fragment(fragment: &str) -> i32 {
+    score_negative_prompt_budget_fragment_with_pressure(fragment, None)
+}
+
+fn score_negative_prompt_budget_fragment_with_pressure(
+    fragment: &str,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
     let canonical = canonical_negative_fragment(fragment);
     let family_score = match negative_fragment_family(fragment) {
         "flicker_motion_jitter" => 36,
@@ -2965,7 +3091,10 @@ fn score_negative_prompt_budget_fragment(fragment: &str) -> i32 {
     .filter(|present| *present)
     .count() as i32
         * 4;
-    family_score + detail_score + breadth_score
+    family_score
+        + detail_score
+        + breadth_score
+        + score_review_negative_fragment_bias(fragment, recent_quality_pressure)
         - negative_fragment_information_score(fragment) as i32 / 8
 }
 
@@ -3595,23 +3724,25 @@ fn infer_video_provider(model: &str) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::{
-        build_storyboard_negative_prompt_contexts, build_storyboard_negative_prompts,
-        build_storyboard_negative_prompts_with_recent_quality, clip_negative_prompt,
-        collect_negative_review_fragments, compact_negative_constraint_against_storyboard_style,
+        build_storyboard_negative_prompts, build_storyboard_negative_prompts_with_recent_quality,
+        clip_negative_prompt, collect_negative_review_fragments,
+        compact_negative_constraint_against_storyboard_style,
         compact_negative_fragment_against_storyboard_risk, compact_negative_review_constraints,
         compact_review_fragments_against_rejected_memory, compact_video_ratio,
         filter_selected_rows_for_subject, infer_negative_fragments_from_comments,
         infer_video_provider, load_auto_negative_prompts, map_bad_case_category_with_comments,
         merge_negative_prompts, negative_fragment_matches_storyboard_risk,
         negative_review_fetch_limit, normalize_upload_sources, pacing_issue_category_is_redundant,
-        prune_storyboard_negative_fragments, quality_review_row_matches_storyboard,
-        rejected_negative_memory_fetch_limit, resolve_negative_filter_style_note,
+        prune_negative_prompt_fragments_for_recent_quality, prune_storyboard_negative_fragments,
+        quality_review_row_matches_storyboard, rejected_negative_memory_fetch_limit,
+        resolve_negative_filter_style_note, resolve_storyboard_prompt,
         review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
         selected_memory_fetch_limit, storyboard_dialogue_is_empty,
         storyboard_mismatch_category_is_redundant, visual_error_category_is_redundant,
-        QualityReviewSeedRow, RecentQualitySignalSeedRow, VideoNegativePromptBudgetTier,
-        VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        NormalizedGenerateVideoUploadItem, QualityReviewSeedRow, RecentQualitySignalSeedRow,
+        VideoNegativePromptBudgetTier, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
+    use crate::error::ApiError;
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
     use crate::production::workbench::video_prompt_memory::{
@@ -3645,10 +3776,14 @@ mod tests {
             GenerateVideoUploadItem {
                 id: 3,
                 sources: "https://example.com/a.png".into(),
+                prompt: None,
+                negative_prompt: None,
             },
             GenerateVideoUploadItem {
                 id: 3,
                 sources: "https://example.com/b.png".into(),
+                prompt: None,
+                negative_prompt: None,
             },
         ])
         .unwrap_err();
@@ -4074,6 +4209,51 @@ mod tests {
     }
 
     #[test]
+    fn build_storyboard_negative_prompts_with_recent_quality_bias_drops_generic_mood_tail_when_delivery_guard_exists(
+    ) {
+        let prompts = build_storyboard_negative_prompts_with_recent_quality(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("像读稿，情绪平".into()),
+            }],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=2 | avoid=avoid blank expression or monotone delivery, avoid oppressive or frantic mood"
+                        .into(),
+            }],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("晚晚低声开口"),
+                Some("（晚晚低声开口、医院走廊、晚晚/林晚、5秒、中景、静止、停顿后低声开口、克制、夜间中性光、别再问了、空调低鸣、A12）"),
+                Some("5s"),
+            )]),
+            &[RecentQualitySignalSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                passed: Some(false),
+                overall_score: Some(5),
+                dialogue_naturalness: Some(5),
+                character_consistency: Some(8),
+                visual_quality: Some(7),
+                memory_delivery_priority_applied: Some(false),
+                is_bad_case: true,
+                bad_case_category: Some("dialogue".into()),
+                comments: Some("台词像读文章，没情绪".into()),
+            }],
+        );
+
+        assert_eq!(
+            prompts.get(&12).and_then(|value| value.as_deref()),
+            Some("avoid blank expression or monotone delivery")
+        );
+    }
+
+    #[test]
     fn compact_negative_constraint_against_storyboard_style_keeps_non_conflicting_half() {
         let close_up_storyboard = StoryboardPromptSeedRow {
             prompt: Some("门口逼视".into()),
@@ -4226,6 +4406,46 @@ mod tests {
         assert_eq!(
             merged,
             "avoid extreme camera angle or overly tight close-up framing, avoid flat cold lighting or harsh backlight silhouette"
+        );
+    }
+
+    #[test]
+    fn prune_negative_prompt_fragments_for_recent_quality_prefers_specific_delivery_guard() {
+        let fragments = prune_negative_prompt_fragments_for_recent_quality(
+            vec![
+                "avoid oppressive or frantic mood".to_string(),
+                "avoid blank expression or monotone delivery".to_string(),
+            ],
+            Some(VideoPromptConstraintPressure {
+                prefer_delivery_memory_recall: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert_eq!(
+            fragments,
+            vec!["avoid blank expression or monotone delivery".to_string()]
+        );
+    }
+
+    #[test]
+    fn prune_negative_prompt_fragments_for_recent_quality_prefers_specific_visual_continuity_guard()
+    {
+        let fragments = prune_negative_prompt_fragments_for_recent_quality(
+            vec![
+                "avoid unnecessary shot changes".to_string(),
+                "avoid extreme camera angle or overly tight close-up framing".to_string(),
+                "avoid oppressive or frantic mood".to_string(),
+            ],
+            Some(VideoPromptConstraintPressure {
+                prefer_visual_continuity_memory_recall: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        );
+
+        assert_eq!(
+            fragments,
+            vec!["avoid extreme camera angle or overly tight close-up framing".to_string()]
         );
     }
 
@@ -5452,6 +5672,39 @@ mod tests {
             Some("镜头近景，情绪冷峻压迫，光影冷调逆光"),
             None,
         ));
+    }
+
+    #[test]
+    fn resolve_storyboard_prompt_prefers_storyboard_override() {
+        let item = NormalizedGenerateVideoUploadItem {
+            storyboard_id: 12,
+            source_url: "https://example.com/frame.png".into(),
+            prompt: Some("storyboard prompt".into()),
+            negative_prompt: None,
+        };
+
+        let prompt = resolve_storyboard_prompt(&item, "global prompt").expect("prompt");
+
+        assert_eq!(prompt, "storyboard prompt");
+    }
+
+    #[test]
+    fn resolve_storyboard_prompt_requires_storyboard_or_global_prompt() {
+        let item = NormalizedGenerateVideoUploadItem {
+            storyboard_id: 12,
+            source_url: "https://example.com/frame.png".into(),
+            prompt: None,
+            negative_prompt: None,
+        };
+
+        let err = resolve_storyboard_prompt(&item, "").expect_err("missing prompt should fail");
+
+        match err {
+            ApiError::BadRequest(message) => {
+                assert_eq!(message, "prompt must not be empty for storyboard 12");
+            }
+            other => panic!("unexpected error: {other:?}"),
+        }
     }
 
     #[test]
