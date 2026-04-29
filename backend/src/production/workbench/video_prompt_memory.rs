@@ -1,3 +1,16 @@
+#![allow(
+    clippy::manual_contains,
+    clippy::manual_find,
+    clippy::map_flatten,
+    clippy::needless_range_loop,
+    clippy::nonminimal_bool,
+    clippy::obfuscated_if_else,
+    clippy::question_mark,
+    clippy::type_complexity,
+    clippy::unnecessary_to_owned,
+    clippy::if_same_then_else
+)]
+
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
@@ -1364,6 +1377,13 @@ fn merge_subject_role_style_memory_notes(
             {
                 continue;
             }
+            if has_script_scope
+                && scope_priority > 0
+                && role_style_fragments_have_high_value_signal(&merged_fragments)
+                && role_style_fragment_is_low_gain_carryover(fragment.as_str())
+            {
+                continue;
+            }
             if !role_memory_fragment_is_character_signal(fragment.as_str())
                 || merged_fragments
                     .iter()
@@ -1479,6 +1499,37 @@ fn role_style_fragment_prefers_strong_support(fragment: &str) -> bool {
     false
 }
 
+fn role_style_fragment_is_low_gain_carryover(fragment: &str) -> bool {
+    if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
+        return selected_style_fragment_is_low_gain_voice(&voice);
+    }
+    if let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) {
+        return selected_style_fragment_is_generic_restrained_mood(&mood);
+    }
+    if let Some(action) = fragment.strip_prefix("动作").map(normalize_prompt_text) {
+        return selected_style_fragment_is_low_gain_motion(&action);
+    }
+    false
+}
+
+fn role_style_fragments_have_high_value_signal(fragments: &[String]) -> bool {
+    fragments.iter().any(|fragment| {
+        fragment.starts_with("表演")
+            || fragment
+                .strip_prefix("语气")
+                .map(normalize_prompt_text)
+                .is_some_and(|voice| !selected_style_fragment_is_low_gain_voice(&voice))
+            || fragment
+                .strip_prefix("情绪")
+                .map(normalize_prompt_text)
+                .is_some_and(|mood| !selected_style_fragment_is_generic_restrained_mood(&mood))
+            || fragment
+                .strip_prefix("动作")
+                .map(normalize_prompt_text)
+                .is_some_and(|action| !selected_style_fragment_is_low_gain_motion(&action))
+    })
+}
+
 pub(crate) fn select_prioritized_video_style_note(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -1533,6 +1584,7 @@ pub(crate) fn select_prioritized_video_style_note(
     })
 }
 
+#[allow(dead_code)]
 pub(crate) fn select_rejected_video_negative_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -1794,6 +1846,7 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn select_rejected_video_negative_memory_notes_for_subject(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -1944,6 +1997,7 @@ pub(crate) fn select_pending_rejected_video_observation_note(
     .next()
 }
 
+#[allow(dead_code)]
 pub(crate) fn select_pending_rejected_video_observation_candidates(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -2817,6 +2871,7 @@ fn render_observation_visual_style_constraint_fragments(
     fragments
 }
 
+#[allow(dead_code)]
 pub(crate) fn select_neighbor_selected_video_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -10678,10 +10733,7 @@ mod tests {
             &["林晚".to_string()],
         );
 
-        assert_eq!(
-            notes,
-            vec!["表演抬眼停顿，语气轻声克制，动作从容克制".to_string()]
-        );
+        assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
     }
 
     #[test]
@@ -10703,10 +10755,7 @@ mod tests {
             &["林晚".to_string()],
         );
 
-        assert_eq!(
-            notes,
-            vec!["表演抬眼停顿，语气轻声克制，动作从容克制，光影冷蓝窗光".to_string()]
-        );
+        assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
     }
 
     #[test]
@@ -10727,14 +10776,12 @@ mod tests {
             &["林晚".to_string()],
         );
 
-        assert_eq!(
-            notes,
-            vec!["表演抬眼停顿，语气轻声克制，光影冷蓝窗光".to_string()]
-        );
+        assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
     }
 
     #[test]
-    fn select_subject_role_video_style_memory_notes_keeps_supported_generic_project_fill() {
+    fn select_subject_role_video_style_memory_notes_skips_supported_generic_project_fill_when_script_scope_already_has_richer_signal(
+    ) {
         let notes = select_subject_role_video_style_memory_notes(
             &[
                 AgentMemoryRow {
@@ -10750,10 +10797,28 @@ mod tests {
             &["林晚".to_string()],
         );
 
-        assert_eq!(
-            notes,
-            vec!["表演抬眼停顿，动作从容克制，语气低声克制".to_string()]
+        assert_eq!(notes, vec!["表演抬眼停顿".to_string()]);
+    }
+
+    #[test]
+    fn select_subject_role_video_style_memory_notes_keeps_supported_generic_project_fill_for_weak_script_signal(
+    ) {
+        let notes = select_subject_role_video_style_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "script_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=2 | style=语气轻声克制".into(),
+                },
+                AgentMemoryRow {
+                    name: "project_role_video_style_memory".into(),
+                    content: "subject=林晚 | sampleCount=4 | style=动作从容克制，语气低声克制"
+                        .into(),
+                },
+            ],
+            &["林晚".to_string()],
         );
+
+        assert_eq!(notes, vec!["语气轻声克制，动作从容克制".to_string()]);
     }
 
     #[test]
