@@ -425,6 +425,121 @@ String? summarizeMemoryScopePressureFromQualityReviews(
       .join(' | ');
 }
 
+List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
+  final diagnostics = _qualityDiagnosticsMap(row);
+  final suggestions = <String>[];
+  final tags = <String>{};
+
+  void addTagged(String tag, String suggestion) {
+    if (tags.add(tag)) suggestions.add(suggestion);
+  }
+
+  final badCaseCategory = (row.badCaseCategory ?? '').toLowerCase();
+  final comments = (row.comments ?? '').toLowerCase();
+  final overallScore = row.overallScore ?? 100;
+  final dialogueNaturalness = row.dialogueNaturalness ?? overallScore;
+  final visualQuality = row.visualQuality ?? overallScore;
+
+  if (diagnostics != null) {
+    final usesReferenceFrame = _diagnosticBool(diagnostics, 'usesReferenceFrame');
+    final continuityCount = _diagnosticInt(diagnostics, 'continuityNoteCount');
+    final promptChars = _diagnosticInt(diagnostics, 'promptChars');
+    final memoryStyleChars = _diagnosticInt(diagnostics, 'memoryStyleChars');
+    final negativePromptChars = _diagnosticInt(diagnostics, 'negativePromptChars');
+    final directorSaved = _diagnosticInt(diagnostics, 'directorAnchorSavedChars');
+    final hitCounts = _diagnosticStringIntMap(diagnostics, 'memoryHitBucketCounts');
+    final suppressedCounts = _diagnosticStringIntMap(
+      diagnostics,
+      'memorySuppressedBucketCounts',
+    );
+    final autoNegativeSource = _diagnosticString(diagnostics, 'autoNegativeSource');
+
+    final hitBuckets = {
+      ..._diagnosticStringList(diagnostics, 'memoryHitBuckets'),
+      ...hitCounts.keys,
+    };
+    final suppressedBuckets = {
+      ..._diagnosticStringList(diagnostics, 'memorySuppressedBuckets'),
+      ...suppressedCounts.keys,
+    };
+
+    if (!usesReferenceFrame &&
+        (visualQuality < 80 ||
+            continuityCount > 0 ||
+            badCaseCategory.contains('continuity'))) {
+      addTagged('reference_frame', '先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。');
+    }
+    if (continuityCount > 0 || badCaseCategory.contains('continuity')) {
+      addTagged('continuity', '把连续性约束压成 1-2 条硬规则，只留机位、服化道和角色位置。');
+    }
+    if (hitBuckets.contains('表演') ||
+        hitBuckets.contains('语气') ||
+        dialogueNaturalness < 80 ||
+        comments.contains('生硬') ||
+        comments.contains('朗读') ||
+        comments.contains('没情绪') ||
+        comments.contains('无情绪')) {
+      addTagged('delivery', '保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。');
+    }
+    if (suppressedBuckets.contains('动作') ||
+        suppressedBuckets.contains('光影') ||
+        promptChars >= 520 ||
+        memoryStyleChars >= 96) {
+      addTagged('trim_generic', '继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。');
+    }
+    if (autoNegativeSource != null && negativePromptChars > 0) {
+      addTagged('negative_reuse', '沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。');
+    }
+    if (_diagnosticBool(diagnostics, 'directorManualYieldedToMemory') ||
+        directorSaved > 0) {
+      addTagged('director_trim', '导演描述已经让位给记忆，优先回收重复导演句，不动关键表演锚点。');
+    }
+  }
+
+  if (row.isBadCase &&
+      (badCaseCategory.contains('emotion') ||
+          badCaseCategory.contains('dialogue') ||
+          badCaseCategory.contains('performance') ||
+          comments.contains('情绪') ||
+          comments.contains('台词'))) {
+    addTagged('emotion', '下一轮把情绪弧线写成可观察动作，避免只剩解释性台词。');
+  }
+  if (row.isBadCase &&
+      (badCaseCategory.contains('visual') ||
+          badCaseCategory.contains('consistency') ||
+          comments.contains('穿帮') ||
+          comments.contains('不自然'))) {
+    addTagged('visual', '优先补人物外观和镜头真实感约束，再决定是否继续加风格描述。');
+  }
+  if (overallScore < 70 && suggestions.isEmpty) {
+    addTagged('general', '先锁定人物情绪、连续性和坏例约束，再做下一轮生成。');
+  }
+  return suggestions;
+}
+
+String? summarizeQualityRepairPlanFromReviews(
+  Iterable<QualityReview> rows, {
+  int maxItems = 3,
+}) {
+  final counts = <String, int>{};
+  for (final row in rows) {
+    for (final suggestion in buildQualityReviewRepairSuggestions(row)) {
+      counts.update(suggestion, (count) => count + 1, ifAbsent: () => 1);
+    }
+  }
+  if (counts.isEmpty) return null;
+  final ranked = counts.entries.toList()
+    ..sort((a, b) {
+      final byCount = b.value.compareTo(a.value);
+      if (byCount != 0) return byCount;
+      return a.key.compareTo(b.key);
+    });
+  return ranked
+      .take(maxItems)
+      .map((entry) => '${entry.key} ${entry.value}次')
+      .join(' | ');
+}
+
 String summarizeQualityTokenEfficiencyRows(
   Iterable<QualityTokenEfficiencyRow> rows, {
   int maxItems = 3,
@@ -571,6 +686,10 @@ String formatQualityReviewDetails(QualityReview row) {
   final diagnosticSummary = summarizeQualityReviewPromptDiagnostics(row);
   if (diagnosticSummary != null) {
     parts.add('诊断=$diagnosticSummary');
+  }
+  final repairSuggestions = buildQualityReviewRepairSuggestions(row);
+  if (repairSuggestions.isNotEmpty) {
+    parts.add('建议=${repairSuggestions.join(" / ")}');
   }
   return parts.join(' · ');
 }

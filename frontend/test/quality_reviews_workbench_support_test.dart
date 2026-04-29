@@ -120,6 +120,7 @@ void main() {
       expect(details, contains('压缩=动作2次'));
       expect(details, contains('导演让位'));
       expect(details, contains('参考帧'));
+      expect(details, contains('建议='));
     },
   );
 
@@ -247,6 +248,112 @@ void main() {
       expect(summary, contains('命中 表演3次 / 语气1次'));
       expect(summary, contains('压缩 动作4次 / 光影1次'));
       expect(summary, contains('P30 1条'));
+    },
+  );
+
+  test(
+    'buildQualityReviewRepairSuggestions prioritizes acting, continuity and token-saving fixes',
+    () {
+      final suggestions = buildQualityReviewRepairSuggestions(
+        const QualityReview(
+          id: 'r-fix',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'storyboard',
+          source: 'auto',
+          overallScore: 66,
+          dialogueNaturalness: 68,
+          visualQuality: 72,
+          isBadCase: true,
+          badCaseCategory: 'continuity',
+          comments: '台词有点生硬，情绪也比较平，镜头有穿帮',
+          modelParams: {
+            'diagnostics': {
+              'promptChars': 560,
+              'memoryStyleChars': 112,
+              'negativePromptChars': 62,
+              'continuityNoteCount': 2,
+              'usesReferenceFrame': false,
+              'autoNegativeSource': 'review+rejected_memory',
+              'directorManualYieldedToMemory': true,
+              'memoryHitBucketCounts': {'表演': 2, '语气': 1},
+              'memorySuppressedBucketCounts': {'动作': 2, '光影': 1},
+            },
+          },
+        ),
+      );
+
+      expect(
+        suggestions,
+        contains('先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。'),
+      );
+      expect(
+        suggestions,
+        contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。'),
+      );
+      expect(
+        suggestions,
+        contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。'),
+      );
+      expect(
+        suggestions,
+        contains('沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。'),
+      );
+    },
+  );
+
+  test(
+    'summarizeQualityRepairPlanFromReviews ranks repeated repairs across reviews',
+    () {
+      final summary = summarizeQualityRepairPlanFromReviews(const [
+        QualityReview(
+          id: 'r1',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'storyboard',
+          source: 'auto',
+          overallScore: 70,
+          dialogueNaturalness: 69,
+          isBadCase: true,
+          comments: '台词生硬，没情绪',
+          modelParams: {
+            'diagnostics': {
+              'memoryHitBucketCounts': {'表演': 1},
+              'memorySuppressedBucketCounts': {'动作': 1},
+            },
+          },
+        ),
+        QualityReview(
+          id: 'r2',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'storyboard',
+          source: 'auto',
+          overallScore: 68,
+          visualQuality: 70,
+          isBadCase: true,
+          badCaseCategory: 'continuity',
+          modelParams: {
+            'diagnostics': {
+              'continuityNoteCount': 1,
+              'usesReferenceFrame': false,
+              'memorySuppressedBucketCounts': {'动作': 2},
+            },
+          },
+        ),
+      ]);
+
+      expect(
+        summary,
+        contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。 2次'),
+      );
+      expect(
+        summary,
+        contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。 2次'),
+      );
     },
   );
 

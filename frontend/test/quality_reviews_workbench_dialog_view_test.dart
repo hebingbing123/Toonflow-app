@@ -342,8 +342,10 @@ void main() {
       );
 
       expect(find.textContaining('Prompt诊断：auto诊断 1 条'), findsOneWidget);
+      expect(find.textContaining('修复建议：'), findsOneWidget);
       expect(find.textContaining('负向约束=评审+坏例记忆'), findsNWidgets(2));
       expect(find.textContaining('导演让位'), findsNWidgets(2));
+      expect(find.textContaining('建议：'), findsNWidgets(2));
     },
   );
 }

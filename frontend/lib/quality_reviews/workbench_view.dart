@@ -120,6 +120,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
         summarizePromptDiagnosticsFromQualityReviews(model.reviews);
     final memoryScopePressureSummary =
         summarizeMemoryScopePressureFromQualityReviews(model.reviews);
+    final repairPlanSummary = summarizeQualityRepairPlanFromReviews(
+      model.reviews,
+    );
     final activeFilters = [
       if (model.filterBadCasesOnly) '坏例',
       if (model.filterDeliveryPriorityOnly) '命中表演/语气优先',
@@ -392,6 +395,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 12),
                 SelectableText('Scope压力：$memoryScopePressureSummary'),
               ],
+              if (repairPlanSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('修复建议：$repairPlanSummary'),
+              ],
               if (tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('Token效率：$tokenEfficiencySummary'),
@@ -408,6 +415,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ...model.reviews.take(8).map((review) {
                   final diagnosticSummary =
                       summarizeQualityReviewPromptDiagnostics(review);
+                  final repairSuggestions =
+                      buildQualityReviewRepairSuggestions(review);
                   return ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
@@ -421,6 +430,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         if (diagnosticSummary != null)
                           Text(
                             diagnosticSummary,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: outline),
+                          ),
+                        if (repairSuggestions.isNotEmpty)
+                          Text(
+                            '建议：${repairSuggestions.join(' / ')}',
                             style: Theme.of(
                               context,
                             ).textTheme.bodySmall?.copyWith(color: outline),
