@@ -786,6 +786,7 @@ async fn load_storyboard_prompt_support_rows(
                 'rejected_video_negative_memory',
                 'selected_video_memory',
                 'script_video_style_memory',
+                'script_video_generation_brief_memory',
                 'script_role_video_style_memory',
                 'script_video_observation_memory',
                 'script_role_video_observation_memory',
@@ -793,6 +794,7 @@ async fn load_storyboard_prompt_support_rows(
             ))
             OR (episodes_id IS NULL AND name IN (
                 'project_video_style_memory',
+                'project_video_generation_brief_memory',
                 'project_role_video_style_memory',
                 'project_video_observation_memory',
                 'project_role_video_observation_memory'
@@ -923,10 +925,12 @@ async fn load_selected_video_memory_rows(
             (episodes_id = $3 AND name IN (
                 'selected_video_memory',
                 'script_video_style_memory',
+                'script_video_generation_brief_memory',
                 'script_role_video_style_memory'
             ))
             OR (episodes_id IS NULL AND name IN (
                 'project_video_style_memory',
+                'project_video_generation_brief_memory',
                 'project_role_video_style_memory'
             ))
           )

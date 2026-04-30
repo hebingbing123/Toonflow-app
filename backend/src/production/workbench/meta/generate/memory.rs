@@ -38,8 +38,8 @@ pub(super) async fn load_video_prompt_memory_notes(
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
           AND (
-            (episodes_id = $3 AND name IN ('selected_video_memory', 'script_video_style_memory', 'script_role_video_style_memory', 'auto_scope_memory'))
-            OR (episodes_id IS NULL AND name IN ('project_video_style_memory', 'project_role_video_style_memory'))
+            (episodes_id = $3 AND name IN ('selected_video_memory', 'script_video_style_memory', 'script_video_generation_brief_memory', 'script_role_video_style_memory', 'auto_scope_memory'))
+            OR (episodes_id IS NULL AND name IN ('project_video_style_memory', 'project_video_generation_brief_memory', 'project_role_video_style_memory'))
           )
         ORDER BY create_time_ms DESC
         LIMIT $4
