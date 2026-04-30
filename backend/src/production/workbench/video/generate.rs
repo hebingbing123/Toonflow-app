@@ -1191,6 +1191,7 @@ fn build_storyboard_negative_prompt_selection(
         context.storyboard_row.as_ref(),
         selected_style_note,
         &context.subject_candidates,
+        context.recent_quality_pressure,
     );
     let review_fragments = filter_conflicting_review_fragments(
         collect_negative_review_fragments(
@@ -1864,6 +1865,7 @@ fn resolve_negative_filter_style_note(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     selected_style_note: Option<String>,
     subject_candidates: &[String],
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let role_style_note = select_subject_role_video_style_memory_notes_for_storyboard(
         selected_rows,
@@ -1891,7 +1893,12 @@ fn resolve_negative_filter_style_note(
             .and_then(|note| compact_contextual_negative_style_note(&note, storyboard_row))
         })
         .or_else(|| {
-            select_contextual_summary_style_note(selected_rows, storyboard_row, subject_candidates)
+            select_contextual_summary_style_note(
+                selected_rows,
+                storyboard_row,
+                subject_candidates,
+                recent_quality_pressure,
+            )
         })
 }
 
@@ -1953,6 +1960,7 @@ fn select_contextual_summary_style_note(
     selected_rows: &[AgentMemoryRow],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     subject_candidates: &[String],
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
     let context = storyboard_row
         .and_then(|row| row.video_desc.as_deref())
@@ -1974,15 +1982,124 @@ fn select_contextual_summary_style_note(
     ))
     .filter_map(|note| {
         let evidence = style_note_context_evidence(&note, &context);
-        let compacted = compact_contextual_negative_style_note(&note, storyboard_row)?;
-        (evidence >= 2).then_some((evidence, compacted))
+        let compacted =
+            compact_contextual_negative_style_note(&note, storyboard_row).or_else(|| {
+                let fallback = compact_video_style_prompt_note(&note)?;
+                (evidence >= 2
+                    && score_contextual_negative_style_note_bias(
+                        &fallback,
+                        recent_quality_pressure,
+                    ) > 0)
+                    .then_some(fallback)
+            })?;
+        let bias = score_contextual_negative_style_note_bias(&compacted, recent_quality_pressure);
+        (evidence >= 2).then_some((evidence, bias, compacted))
     })
-    .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
-        left_evidence
-            .cmp(right_evidence)
-            .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
+    .max_by(
+        |(left_evidence, left_bias, left_note), (right_evidence, right_bias, right_note)| {
+            left_evidence
+                .cmp(right_evidence)
+                .then(left_bias.cmp(right_bias))
+                .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
+        },
+    )
+    .map(|(_, _, note)| note)
+}
+
+fn score_contextual_negative_style_note_bias(
+    note: &str,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    let Some(pressure) = recent_quality_pressure else {
+        return 0;
+    };
+
+    split_prompt_note_fragments(note).fold(0, |score, fragment| {
+        score
+            + score_contextual_negative_style_fragment_bias(&fragment, pressure)
+            + if pressure.has_emotion_guardrail
+                && matches!(
+                    negative_style_fragment_axis(&fragment),
+                    "performance" | "voice" | "emotion"
+                )
+            {
+                2
+            } else {
+                0
+            }
     })
-    .map(|(_, note)| note)
+}
+
+fn score_contextual_negative_style_fragment_bias(
+    fragment: &str,
+    pressure: VideoPromptConstraintPressure,
+) -> i32 {
+    match negative_style_fragment_axis(fragment) {
+        "performance" => {
+            if pressure.prefer_delivery_memory_recall {
+                12
+            } else {
+                2
+            }
+        }
+        "voice" => {
+            if pressure.prefer_delivery_memory_recall {
+                10
+            } else {
+                1
+            }
+        }
+        "emotion" => {
+            if pressure.prefer_delivery_memory_recall {
+                8
+            } else {
+                1
+            }
+        }
+        "lighting" | "environment" | "sound" => {
+            if pressure.prefer_visual_continuity_memory_recall {
+                9
+            } else {
+                1
+            }
+        }
+        "camera" | "motion" => {
+            if pressure.prefer_visual_continuity_memory_recall {
+                5
+            } else {
+                0
+            }
+        }
+        _ => 0,
+    }
+}
+
+fn negative_style_fragment_axis(fragment: &str) -> &'static str {
+    if fragment.starts_with("表演") {
+        return "performance";
+    }
+    if fragment.starts_with("语气") {
+        return "voice";
+    }
+    if fragment.starts_with("情绪") {
+        return "emotion";
+    }
+    if fragment.starts_with("光影") {
+        return "lighting";
+    }
+    if fragment.starts_with("环境") {
+        return "environment";
+    }
+    if fragment.starts_with("声场") {
+        return "sound";
+    }
+    if fragment.starts_with("镜头") {
+        return "camera";
+    }
+    if fragment.starts_with("动作") {
+        return "motion";
+    }
+    "other"
 }
 
 fn compact_contextual_negative_style_note(
@@ -4591,7 +4708,15 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None, &[]),
+            resolve_negative_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                None,
+                &[],
+                None,
+            ),
             None
         );
     }
@@ -4609,7 +4734,15 @@ mod tests {
         };
 
         assert_eq!(
-            resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None, &[]),
+            resolve_negative_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                None,
+                &[],
+                None,
+            ),
             None
         );
     }
@@ -4640,6 +4773,7 @@ mod tests {
                 Some(&storyboard_row),
                 None,
                 &["女主".into(), "苏晚".into()],
+                None,
             ),
             Some("表演欲言又止，语气轻声克制".to_string())
         );
@@ -4665,6 +4799,7 @@ mod tests {
                 Some(&storyboard_row),
                 Some("镜头稳定跟拍".to_string()),
                 &["女主".into(), "苏晚".into()],
+                None,
             ),
             Some("表演欲言又止，语气轻声克制".to_string())
         );
@@ -4690,8 +4825,44 @@ mod tests {
                 Some(&storyboard_row),
                 Some("镜头稳定跟拍，情绪克制停顿".to_string()),
                 &["女主".into(), "苏晚".into()],
+                None,
             ),
             Some("镜头稳定跟拍，情绪克制停顿".to_string())
+        );
+    }
+
+    #[test]
+    fn negative_filter_style_note_prefers_visual_summary_when_recent_quality_needs_continuity() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_video_generation_brief_memory".into(),
+                content: "style=表演抬眼停顿后再低声开口，语气克制 | avoid=避免口型僵硬 | riskTags=dialogue/performance | focusTags=delivery_realism".into(),
+            },
+            AgentMemoryRow {
+                name: "project_video_generation_brief_memory".into(),
+                content: "style=镜头稳定跟拍，光影潮湿路灯反光里保持脸侧轮廓，环境玻璃水痕保持连贯 | avoid=避免冷光铺平 | riskTags=identity/lighting | focusTags=identity_continuity/lighting_realism".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边看向门外".into()),
+            video_desc: Some("（林晚站在窗边看向门外、雨夜门厅、林晚、5秒、近景、稳定跟拍、停步抬眼看向门外、克制、潮湿路灯反光、无台词、雨声回响、A12）".into()),
+            duration: Some("5".into()),
+        };
+
+        assert_eq!(
+            resolve_negative_filter_style_note(
+                &rows,
+                12,
+                None,
+                Some(&storyboard_row),
+                None,
+                &["林晚".into()],
+                Some(VideoPromptConstraintPressure {
+                    prefer_visual_continuity_memory_recall: true,
+                    ..VideoPromptConstraintPressure::default()
+                }),
+            ),
+            Some("光影里保持脸侧轮廓".to_string())
         );
     }
 
