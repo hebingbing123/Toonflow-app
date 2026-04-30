@@ -1223,6 +1223,43 @@ fn plan_selected_video_memory_optimization(
         kept_rows.push(row);
     }
 
+    let mut scope_groups =
+        std::collections::HashMap::<String, Vec<&SelectedVideoMemoryOptimizationCandidate>>::new();
+    for row in &kept_rows {
+        let key = selected_video_memory_storyboard_scope_key(&row.content);
+        if key.is_empty() {
+            continue;
+        }
+        scope_groups.entry(key).or_default().push(*row);
+    }
+    for group in scope_groups.into_values() {
+        if group.len() < 2 {
+            continue;
+        }
+        let mut ranked = group
+            .into_iter()
+            .map(|row| {
+                (
+                    selected_video_memory_quality_score(&row.content),
+                    row.create_time_ms,
+                    row.id,
+                    row,
+                )
+            })
+            .collect::<Vec<_>>();
+        ranked.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)).then(b.2.cmp(&a.2)));
+        let best_score = ranked.first().map(|entry| entry.0).unwrap_or_default();
+        for (score, _, _, row) in ranked.into_iter().skip(1) {
+            if delete_ids.contains(&row.id) {
+                continue;
+            }
+            if selected_video_memory_is_scope_filler(&row.content) && best_score >= score + 14 {
+                delete_ids.push(row.id);
+                delete_chars += row.content.chars().count();
+            }
+        }
+    }
+
     let delivery_rows = kept_rows
         .iter()
         .filter(|row| selected_video_memory_has_delivery_anchor(&row.content))
@@ -1281,6 +1318,17 @@ fn selected_video_memory_semantic_dedupe_key(content: &str) -> String {
     normalize_prompt_text(&semantic)
 }
 
+fn selected_video_memory_storyboard_scope_key(content: &str) -> String {
+    let ids = extract_storyboard_ids(content);
+    if ids.is_empty() {
+        return String::new();
+    }
+    ids.into_iter()
+        .map(|id| id.to_string())
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
 fn selected_video_memory_has_delivery_anchor(content: &str) -> bool {
     extract_key_value(content, "delivery")
         .as_ref()
@@ -1323,6 +1371,49 @@ fn selected_video_memory_visual_signal_count(content: &str) -> usize {
     .into_iter()
     .filter(|keyword| content.contains(keyword))
     .count()
+}
+
+fn selected_video_memory_is_scope_filler(content: &str) -> bool {
+    let Some(style) = selected_video_style_value_from_content(content) else {
+        return match extract_key_value(content, "note")
+            .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        {
+            Some(note) => is_low_signal_selected_memory_note(&note),
+            None => true,
+        };
+    };
+
+    let fragments = split_prompt_note_fragments(&style).collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return true;
+    }
+
+    let has_specific_signal = fragments.iter().any(|fragment| {
+        fragment.starts_with("表演")
+            || fragment.starts_with("光影")
+            || fragment.starts_with("环境")
+            || fragment.starts_with("声场")
+            || (fragment.starts_with("镜头") && !local_shot_framing_fragment(fragment))
+    });
+    if has_specific_signal {
+        return false;
+    }
+
+    fragments.iter().all(|fragment| {
+        fragment
+            .strip_prefix("语气")
+            .map(normalize_prompt_text)
+            .is_some_and(|voice| selected_style_fragment_is_low_gain_voice(&voice))
+            || fragment
+                .strip_prefix("情绪")
+                .map(normalize_prompt_text)
+                .is_some_and(|mood| selected_style_fragment_is_generic_restrained_mood(&mood))
+            || fragment
+                .strip_prefix("动作")
+                .map(normalize_prompt_text)
+                .is_some_and(|action| selected_style_fragment_is_low_gain_motion(&action))
+            || is_local_framing_only_fragment(fragment)
+    })
 }
 
 pub(crate) async fn refresh_project_video_style_memory(
@@ -12724,5 +12815,52 @@ mod tests {
         assert!(plan.delete_ids.is_empty());
         assert_eq!(plan.removed_visual_rows, 0);
         assert_eq!(plan.removed_duplicate_rows, 0);
+    }
+
+    #[test]
+    fn plan_selected_video_memory_optimization_drops_scope_filler_when_richer_same_storyboard_exists(
+    ) {
+        let plan = plan_selected_video_memory_optimization(&[
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 61,
+                content:
+                    "storyboardIds=12 | style=动作从容克制，语气低声克制，情绪克制 | note=保持克制"
+                        .into(),
+                create_time_ms: 600,
+            },
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 62,
+                content:
+                    "storyboardIds=12 | style=表演喉结滚动，语气压低气息尾音发颤，光影冷蓝窗光 | note=强忍泪意"
+                        .into(),
+                create_time_ms: 500,
+            },
+        ]);
+
+        assert_eq!(plan.delete_ids, vec![61]);
+        assert_eq!(plan.removed_visual_rows, 0);
+        assert_eq!(plan.removed_duplicate_rows, 0);
+        assert!(plan.removed_chars > 0);
+    }
+
+    #[test]
+    fn plan_selected_video_memory_optimization_keeps_scope_filler_when_no_richer_same_storyboard_exists(
+    ) {
+        let plan = plan_selected_video_memory_optimization(&[
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 71,
+                content:
+                    "storyboardIds=12 | style=动作从容克制，语气低声克制，情绪克制 | note=保持克制"
+                        .into(),
+                create_time_ms: 600,
+            },
+            SelectedVideoMemoryOptimizationCandidate {
+                id: 72,
+                content: "storyboardIds=13 | style=镜头稳定跟拍，光影阴天冷光".into(),
+                create_time_ms: 500,
+            },
+        ]);
+
+        assert!(plan.delete_ids.is_empty());
     }
 }
