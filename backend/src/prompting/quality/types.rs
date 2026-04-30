@@ -127,6 +127,7 @@ pub struct QualityScopeInsightResponse {
     pub feedback_summary_memory_writes: i64,
     pub feedback_memory_removed_chars: i64,
     pub feedback_memory_removed_rows: i64,
+    pub feedback_focus_tags: Vec<String>,
     pub memory_action: String,
     pub memory_focus: String,
     pub memory_reason: String,

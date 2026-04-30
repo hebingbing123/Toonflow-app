@@ -598,7 +598,8 @@ fn build_generic_quality_feedback_content(review: &QualityReview) -> String {
 mod tests {
     use super::{
         build_generic_quality_feedback_content, build_quality_review_rejected_video_memory,
-        should_promote_quality_review_selected_video_memory, QUALITY_FEEDBACK_MEMORY_NAME,
+        infer_quality_feedback_focus_tags, should_promote_quality_review_selected_video_memory,
+        QUALITY_FEEDBACK_MEMORY_NAME,
     };
     use crate::prompting::quality::types::QualityReview;
     use serde_json::json;
@@ -734,5 +735,43 @@ mod tests {
         assert!(!should_promote_quality_review_selected_video_memory(
             &review
         ));
+    }
+
+    #[test]
+    fn negative_feedback_focus_tags_capture_delivery_identity_and_lighting() {
+        let tags = infer_quality_feedback_focus_tags(&sample_review(), false);
+
+        assert_eq!(
+            tags,
+            vec![
+                "delivery_realism".to_string(),
+                "identity_continuity".to_string(),
+                "lighting_realism".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn positive_feedback_focus_tags_capture_emotion_and_identity() {
+        let mut review = sample_review();
+        review.is_bad_case = false;
+        review.passed = Some(true);
+        review.overall_score = Some(9);
+        review.dialogue_naturalness = Some(9);
+        review.character_consistency = Some(9);
+        review.visual_quality = Some(8);
+        review.comments = Some("情绪递进自然，角色一致，光影真实自然".into());
+
+        let tags = infer_quality_feedback_focus_tags(&review, true);
+
+        assert_eq!(
+            tags,
+            vec![
+                "delivery_realism".to_string(),
+                "emotion_arc".to_string(),
+                "identity_continuity".to_string(),
+                "lighting_realism".to_string(),
+            ]
+        );
     }
 }

@@ -94,6 +94,7 @@ class QualityScopeInsightRow {
     required this.feedbackSummaryMemoryWrites,
     required this.feedbackMemoryRemovedChars,
     required this.feedbackMemoryRemovedRows,
+    required this.feedbackFocusTags,
     required this.memoryAction,
     required this.memoryFocus,
     required this.memoryReason,
@@ -121,6 +122,7 @@ class QualityScopeInsightRow {
   final int feedbackSummaryMemoryWrites;
   final int feedbackMemoryRemovedChars;
   final int feedbackMemoryRemovedRows;
+  final List<String> feedbackFocusTags;
   final String memoryAction;
   final String memoryFocus;
   final String memoryReason;
@@ -156,6 +158,11 @@ class QualityScopeInsightRow {
           (json['feedbackMemoryRemovedChars'] as num?)?.toInt() ?? 0,
       feedbackMemoryRemovedRows:
           (json['feedbackMemoryRemovedRows'] as num?)?.toInt() ?? 0,
+      feedbackFocusTags:
+          (json['feedbackFocusTags'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<String>()
+              .where((item) => item.isNotEmpty)
+              .toList(growable: false),
       memoryAction: json['memoryAction'] as String? ?? 'observe',
       memoryFocus: json['memoryFocus'] as String? ?? 'observe',
       memoryReason: json['memoryReason'] as String? ?? '',

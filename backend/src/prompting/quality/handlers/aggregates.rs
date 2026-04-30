@@ -122,13 +122,13 @@ pub(crate) async fn get_scope_insights(
         r#"
         SELECT
             CASE
-                WHEN project_id IS NOT NULL AND script_id IS NOT NULL THEN 'P' || project_id::text || '/S' || script_id::text
-                WHEN project_id IS NOT NULL THEN 'P' || project_id::text
-                WHEN script_id IS NOT NULL THEN 'S' || script_id::text
-                ELSE target_type
+                WHEN qr.project_id IS NOT NULL AND qr.script_id IS NOT NULL THEN 'P' || qr.project_id::text || '/S' || qr.script_id::text
+                WHEN qr.project_id IS NOT NULL THEN 'P' || qr.project_id::text
+                WHEN qr.script_id IS NOT NULL THEN 'S' || qr.script_id::text
+                ELSE qr.target_type
             END as scope_label,
-            project_id,
-            script_id,
+            qr.project_id,
+            qr.script_id,
             COUNT(*) as total_reviews,
             COUNT(*) FILTER (WHERE source = 'auto') as auto_reviews,
             COUNT(*) FILTER (WHERE passed = true) as passed_count,
@@ -220,6 +220,28 @@ pub(crate) async fn get_scope_insights(
                     ELSE 0
                 END
             ), 0) as feedback_memory_removed_rows,
+            COALESCE((
+                SELECT ARRAY_AGG(ranked.tag ORDER BY ranked.tag_count DESC, ranked.tag)
+                FROM (
+                    SELECT feedback_tags.tag, COUNT(*) as tag_count
+                    FROM (
+                        SELECT jsonb_array_elements_text(
+                            COALESCE(
+                                qr_feedback.model_params->'diagnostics'->'feedbackMemory'->'focusTags',
+                                '[]'::jsonb
+                            )
+                        ) as tag
+                        FROM app_quality_review qr_feedback
+                        WHERE qr_feedback.user_id = $1
+                          AND qr_feedback.project_id IS NOT DISTINCT FROM qr.project_id
+                          AND qr_feedback.script_id IS NOT DISTINCT FROM qr.script_id
+                          AND qr_feedback.target_type = qr.target_type
+                    ) feedback_tags
+                    GROUP BY feedback_tags.tag
+                    ORDER BY tag_count DESC, feedback_tags.tag
+                    LIMIT 3
+                ) ranked
+            ), ARRAY[]::text[]) as feedback_focus_tags,
             CASE
                 WHEN COUNT(*) FILTER (
                     WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
@@ -379,12 +401,12 @@ pub(crate) async fn get_scope_insights(
                 THEN 'Promote one approved scoped sample into selected memory for later reuse.'
                 ELSE 'Memory is already scoped; keep observing review quality before changing it.'
             END as memory_reason
-        FROM app_quality_review
-        WHERE user_id = $1
-          AND (project_id IS NOT NULL OR script_id IS NOT NULL)
-          AND ($2::int IS NULL OR project_id = $2)
-          AND ($3::int IS NULL OR script_id = $3)
-        GROUP BY project_id, script_id, target_type
+        FROM app_quality_review qr
+        WHERE qr.user_id = $1
+          AND (qr.project_id IS NOT NULL OR qr.script_id IS NOT NULL)
+          AND ($2::int IS NULL OR qr.project_id = $2)
+          AND ($3::int IS NULL OR qr.script_id = $3)
+        GROUP BY qr.project_id, qr.script_id, qr.target_type
         ORDER BY
             (
                 COUNT(*) FILTER (WHERE is_bad_case = true) * 100

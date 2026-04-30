@@ -90,6 +90,29 @@ String _joinBucketListWithCounts(
       .join('/');
 }
 
+String _describeFeedbackFocusTag(String tag) {
+  switch (tag) {
+    case 'delivery_realism':
+      return '台词真实';
+    case 'emotion_arc':
+      return '情绪层次';
+    case 'identity_continuity':
+      return '人物一致';
+    case 'lighting_realism':
+      return '光影真实';
+    default:
+      return tag;
+  }
+}
+
+String? _summarizeFeedbackFocusTags(Iterable<String> tags) {
+  final values = LinkedHashSet<String>.from(
+    tags.map((tag) => tag.trim()).where((tag) => tag.isNotEmpty),
+  ).toList(growable: false);
+  if (values.isEmpty) return null;
+  return values.map(_describeFeedbackFocusTag).join('/');
+}
+
 String _formatQualityScopeLabel(QualityReview row) {
   if (row.projectId != null && row.scriptId != null) {
     return 'P${row.projectId}/S${row.scriptId}';
@@ -387,6 +410,7 @@ String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
   final removedChars = _diagnosticInt(feedback, 'removedChars');
   final removedVisualRows = _diagnosticInt(feedback, 'removedVisualRows');
   final removedDuplicateRows = _diagnosticInt(feedback, 'removedDuplicateRows');
+  final focusTags = _diagnosticStringList(feedback, 'focusTags');
 
   final parts = <String>[];
   switch (action) {
@@ -422,6 +446,10 @@ String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
       'slim ${removedChars} chars / ${removedRows}条'
       '（重复 $removedDuplicateRows / 纯视觉 $removedVisualRows）',
     );
+  }
+  final focusSummary = _summarizeFeedbackFocusTags(focusTags);
+  if (focusSummary != null) {
+    parts.add('关注=$focusSummary');
   }
   return parts.isEmpty ? null : parts.join(' · ');
 }
@@ -1197,6 +1225,10 @@ String summarizeQualityScopeInsightRows(
           parts.add(
             '回写slim ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}条',
           );
+        }
+        final focusSummary = _summarizeFeedbackFocusTags(row.feedbackFocusTags);
+        if (focusSummary != null) {
+          parts.add('关注=$focusSummary');
         }
         final memoryAction = _qualityScopeInsightMemoryActionSummary(row);
         if (memoryAction != null) {

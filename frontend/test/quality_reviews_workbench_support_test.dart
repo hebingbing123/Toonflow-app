@@ -82,6 +82,7 @@ void main() {
         feedbackSummaryMemoryWrites: 0,
         feedbackMemoryRemovedChars: 88,
         feedbackMemoryRemovedRows: 2,
+        feedbackFocusTags: ['delivery_realism', 'emotion_arc'],
         memoryAction: 'keep_delivery_memory',
         memoryFocus: 'selected_video_memory',
         memoryReason:
@@ -91,7 +92,7 @@ void main() {
 
     expect(
       summary,
-      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条 · 晋升2 · 坏例回写1 · 回写slim 88c/2条 · 动作=保留表演记忆 · 焦点=selected_video_memory · Keep scoped acting memory and keep trimming generic style first.',
+      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条 · 晋升2 · 坏例回写1 · 回写slim 88c/2条 · 关注=台词真实/情绪层次 · 动作=保留表演记忆 · 焦点=selected_video_memory · Keep scoped acting memory and keep trimming generic style first.',
     );
   });
 
@@ -197,6 +198,7 @@ void main() {
                 'removedChars': 88,
                 'removedVisualRows': 1,
                 'removedDuplicateRows': 1,
+                'focusTags': ['delivery_realism', 'lighting_realism'],
               },
             },
           },
@@ -208,6 +210,7 @@ void main() {
       expect(details, contains('写入=selected_video_memory'));
       expect(details, contains('清理=rejected_video_negative_memory'));
       expect(details, contains('slim 88 chars / 2条（重复 1 / 纯视觉 1）'));
+      expect(details, contains('关注=台词真实/光影真实'));
     },
   );
 
