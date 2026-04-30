@@ -1,5 +1,6 @@
 import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../rust_api.dart';
 
@@ -94,6 +95,10 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
     final optimizeEnabled =
         model.canOptimizeVideoMemory && !model.optimizingMemory;
     final memoryInsights = _buildAgentMemoryInsights(model.memoryRows);
+    final executionChecklist = _buildScopedExecutionChecklist(
+      model,
+      memoryInsights,
+    );
     return AlertDialog(
       title: const Text('Agent 记忆工作台'),
       content: SizedBox(
@@ -250,6 +255,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ).textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],
+              if (memoryInsights.bucketPrioritySummary != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  memoryInsights.bucketPrioritySummary!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
               if (memoryInsights.recommendation != null) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -257,6 +271,35 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
+              if (executionChecklist != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SelectableText(
+                        executionChecklist,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: outline),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: '复制记忆执行清单',
+                      onPressed: () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: executionChecklist),
+                        );
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('已复制记忆执行清单')),
+                        );
+                      },
+                      icon: const Icon(Icons.copy_all_rounded),
+                    ),
+                  ],
                 ),
               ],
               if (model.memoryRows.isNotEmpty) ...[
@@ -387,16 +430,20 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
 class _AgentMemoryInsights {
   const _AgentMemoryInsights({
     required this.previews,
+    required this.topBuckets,
     required this.summary,
     required this.videoSummary,
     required this.efficiencySummary,
+    required this.bucketPrioritySummary,
     required this.recommendation,
   });
 
   final List<_AgentMemoryPreview> previews;
+  final List<_MemoryBucketStats> topBuckets;
   final String? summary;
   final String? videoSummary;
   final String? efficiencySummary;
+  final String? bucketPrioritySummary;
   final String? recommendation;
 }
 
@@ -437,9 +484,11 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
   if (rawPreviews.isEmpty) {
     return const _AgentMemoryInsights(
       previews: <_AgentMemoryPreview>[],
+      topBuckets: <_MemoryBucketStats>[],
       summary: null,
       videoSummary: null,
       efficiencySummary: null,
+      bucketPrioritySummary: null,
       recommendation: null,
     );
   }
@@ -542,6 +591,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
       .join(' / ');
   final memoryNamesSummary = memoryNameCounts.entries.toList(growable: false)
     ..sort((a, b) => b.value.compareTo(a.value));
+  final bucketStats = <String, _MemoryBucketStats>{};
   final typeSummary = memoryNamesSummary.isEmpty
       ? null
       : memoryNamesSummary
@@ -559,6 +609,18 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
   final efficiencySummary = hasEfficiencySummary
       ? '处理建议：保留 $keepRows/$keepChars chars · 压缩 $trimRows/$trimChars chars · 合并坏例 $mergeRows/$mergeChars chars'
       : null;
+  for (final preview in previews) {
+    if (preview.memoryName.isEmpty || preview.actionLabel.isEmpty) {
+      continue;
+    }
+    bucketStats.update(
+      preview.memoryName,
+      (existing) => existing.merge(preview),
+      ifAbsent: () => _MemoryBucketStats.fromPreview(preview),
+    );
+  }
+  final bucketPrioritySummary = _buildBucketPrioritySummary(bucketStats);
+  final rankedBuckets = _rankMemoryBuckets(bucketStats);
   String? recommendation;
   if (duplicateCount >= 2) {
     recommendation = '检测到重复表述，先去重旧记忆，避免同一约束反复注入。';
@@ -585,11 +647,103 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
 
   return _AgentMemoryInsights(
     previews: previews,
+    topBuckets: rankedBuckets.take(3).toList(growable: false),
     summary: summary,
     videoSummary: videoSummary,
     efficiencySummary: efficiencySummary,
+    bucketPrioritySummary: bucketPrioritySummary,
     recommendation: recommendation,
   );
+}
+
+class _MemoryBucketStats {
+  const _MemoryBucketStats({
+    required this.memoryName,
+    required this.rowCount,
+    required this.charCount,
+    required this.actionLabel,
+  });
+
+  factory _MemoryBucketStats.fromPreview(_AgentMemoryPreview preview) {
+    return _MemoryBucketStats(
+      memoryName: preview.memoryName,
+      rowCount: 1,
+      charCount: preview.charCount,
+      actionLabel: preview.actionLabel,
+    );
+  }
+
+  final String memoryName;
+  final int rowCount;
+  final int charCount;
+  final String actionLabel;
+
+  _MemoryBucketStats merge(_AgentMemoryPreview preview) {
+    final mergedAction = _actionPriority(preview.actionLabel) >
+            _actionPriority(actionLabel)
+        ? preview.actionLabel
+        : actionLabel;
+    return _MemoryBucketStats(
+      memoryName: memoryName,
+      rowCount: rowCount + 1,
+      charCount: charCount + preview.charCount,
+      actionLabel: mergedAction,
+    );
+  }
+}
+
+String? _buildBucketPrioritySummary(Map<String, _MemoryBucketStats> bucketStats) {
+  if (bucketStats.isEmpty) return null;
+  final ranked = _rankMemoryBuckets(bucketStats);
+  return '记忆桶优先级：${ranked.take(3).map((bucket) => '${bucket.actionLabel} ${bucket.memoryName} ${bucket.rowCount}条/${bucket.charCount} chars').join(' | ')}';
+}
+
+List<_MemoryBucketStats> _rankMemoryBuckets(Map<String, _MemoryBucketStats> bucketStats) {
+  final ranked = bucketStats.values.toList(growable: false)
+    ..sort((left, right) {
+      final byAction = _actionPriority(
+        right.actionLabel,
+      ).compareTo(_actionPriority(left.actionLabel));
+      if (byAction != 0) return byAction;
+      final byChars = right.charCount.compareTo(left.charCount);
+      if (byChars != 0) return byChars;
+      return left.memoryName.compareTo(right.memoryName);
+    });
+  return ranked;
+}
+
+String? _buildScopedExecutionChecklist(
+  ProjectsAgentMemoryWorkbenchDialogViewModel model,
+  _AgentMemoryInsights insights,
+) {
+  if (insights.previews.isEmpty) return null;
+  final projectId = model.projectIdCtrl.text.trim();
+  final agentType = model.agentTypeCtrl.text.trim();
+  final episodesId = model.episodesIdCtrl.text.trim();
+  final scopeLabel = [
+    if (projectId.isNotEmpty) 'P$projectId',
+    if (agentType.isNotEmpty) agentType,
+    if (episodesId.isNotEmpty) 'E$episodesId',
+  ].join(' / ');
+  final steps = <String>[
+    '范围：只处理 ${scopeLabel.isEmpty ? "当前查询 scope" : scopeLabel} 的记忆，不跨用户、项目或短剧复用。',
+  ];
+  for (final bucket in insights.topBuckets) {
+    final action = switch (bucket.actionLabel) {
+      '待压缩' =>
+        '压缩 ${bucket.memoryName} 的镜头/光影/氛围套话，优先保留表演、语气、情绪和人物一致性片段。',
+      '合并坏例' =>
+        '合并 ${bucket.memoryName} 的重复 risk/avoid 约束，保留最能防止穿帮、口型僵硬和身份漂移的坏例。',
+      '优先保留' =>
+        '保留 ${bucket.memoryName} 里最具体的表演/情绪锚点，避免删掉能让人物不读稿、不木的 delivery 记忆。',
+      _ => '观察 ${bucket.memoryName} 的新增条目，避免继续堆重复记忆。',
+    };
+    steps.add(action);
+  }
+  if (insights.recommendation != null) {
+    steps.add('当前提醒：${insights.recommendation}');
+  }
+  return '记忆执行清单：${steps.join(' ')}';
 }
 
 int _compareAgentMemoryPreviewPriority(

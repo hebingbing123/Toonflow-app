@@ -190,6 +190,20 @@ void main() {
       find.textContaining('处理建议：保留 1/74 chars · 压缩 0/0 chars · 合并坏例 0/0 chars'),
       findsOneWidget,
     );
+    expect(find.textContaining('记忆桶优先级：优先保留 selected_video_memory'), findsOneWidget);
+    expect(find.byTooltip('复制记忆执行清单'), findsOneWidget);
+    expect(
+      find.textContaining(
+        '记忆执行清单：范围：只处理 P11 / scriptAgent / E3 的记忆，不跨用户、项目或短剧复用。',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining(
+        '保留 selected_video_memory 里最具体的表演/情绪锚点',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('2 条记忆'), findsOneWidget);
     expect(find.text('追加记忆'), findsNWidgets(2));
     expect(find.text('清理记忆'), findsOneWidget);
@@ -360,6 +374,11 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(find.textContaining('记忆桶优先级：待压缩 selected_video_memory'), findsOneWidget);
+    expect(
+      find.textContaining('待压缩 script_role_video_style_memory'),
+      findsOneWidget,
+    );
     expect(find.textContaining('建议：视觉偏重记忆吃掉了更多预算'), findsOneWidget);
     expect(find.textContaining('· 视觉偏重 · 待压缩'), findsNWidgets(2));
     expect(find.textContaining('storyboard 12'), findsNWidgets(2));
@@ -434,6 +453,12 @@ void main() {
     expect(
       find.textContaining(
         '处理建议：保留 0/0 chars · 压缩 0/0 chars · 合并坏例 3/338 chars',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining(
+        '记忆桶优先级：合并坏例 rejected_video_negative_memory 3条/338 chars',
       ),
       findsOneWidget,
     );
