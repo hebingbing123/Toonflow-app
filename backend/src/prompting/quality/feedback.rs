@@ -28,6 +28,7 @@ const QUALITY_FEEDBACK_MEMORY_NAME: &str = "quality_feedback_memory";
 const LOW_SCORE_THRESHOLD: i16 = 6;
 const SEVERE_SCORE_THRESHOLD: i16 = 4;
 const SELECTED_MEMORY_PROMOTION_SCORE_THRESHOLD: i16 = 8;
+const QUALITY_FEEDBACK_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
 
 fn fit_i32(value: usize) -> i32 {
     i32::try_from(value).unwrap_or(i32::MAX)
@@ -330,7 +331,9 @@ fn build_quality_review_rejected_video_memory(review: &QualityReview) -> Option<
         .and_then(|value| value.parse::<i32>().ok())
         .filter(|id| *id > 0)?;
 
-    let fragments = collect_negative_fragments(review);
+    let focus_tags = infer_quality_feedback_focus_tags(review, false);
+    let fragments =
+        compact_quality_review_negative_fragments(collect_negative_fragments(review), &focus_tags);
     if fragments.is_empty() {
         return None;
     }
@@ -380,6 +383,94 @@ fn collect_negative_fragments(review: &QualityReview) -> Vec<String> {
     }
 
     fragments
+}
+
+fn compact_quality_review_negative_fragments(
+    fragments: Vec<String>,
+    focus_tags: &[String],
+) -> Vec<String> {
+    if fragments.len() <= QUALITY_FEEDBACK_NEGATIVE_FRAGMENT_LIMIT {
+        return fragments;
+    }
+
+    let mut scored = fragments
+        .into_iter()
+        .enumerate()
+        .map(|(idx, fragment)| {
+            (
+                score_quality_review_negative_fragment_for_focus(&fragment, focus_tags),
+                idx,
+                fragment,
+            )
+        })
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+    scored
+        .into_iter()
+        .map(|(_, _, fragment)| fragment)
+        .take(QUALITY_FEEDBACK_NEGATIVE_FRAGMENT_LIMIT)
+        .collect()
+}
+
+fn score_quality_review_negative_fragment_for_focus(fragment: &str, focus_tags: &[String]) -> i32 {
+    let normalized = fragment.to_ascii_lowercase();
+    let mut score = 0;
+
+    for tag in focus_tags {
+        match tag.as_str() {
+            "delivery_realism" => {
+                if normalized.contains("lip-sync")
+                    || normalized.contains("delivery")
+                    || normalized.contains("expression")
+                    || normalized.contains("monotone")
+                {
+                    score += 40;
+                }
+            }
+            "emotion_arc" => {
+                if normalized.contains("expression")
+                    || normalized.contains("emotion")
+                    || normalized.contains("mood")
+                    || normalized.contains("frantic")
+                    || normalized.contains("oppressive")
+                {
+                    score += 34;
+                }
+            }
+            "identity_continuity" => {
+                if normalized.contains("face")
+                    || normalized.contains("identity")
+                    || normalized.contains("costume")
+                    || normalized.contains("character")
+                {
+                    score += 38;
+                }
+            }
+            "lighting_realism" => {
+                if normalized.contains("light")
+                    || normalized.contains("backlight")
+                    || normalized.contains("silhouette")
+                    || normalized.contains("neon")
+                    || normalized.contains("reflection")
+                {
+                    score += 36;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if normalized.contains("lip-sync")
+        || normalized.contains("delivery")
+        || normalized.contains("expression")
+        || normalized.contains("face")
+        || normalized.contains("identity")
+        || normalized.contains("light")
+    {
+        score += 8;
+    }
+
+    score - normalized.chars().count() as i32 / 12
 }
 
 fn infer_risk_tags(fragments: &[String]) -> Vec<&'static str> {
@@ -623,7 +714,8 @@ fn build_generic_quality_feedback_content(review: &QualityReview) -> String {
 mod tests {
     use super::{
         build_generic_quality_feedback_content, build_quality_review_rejected_video_memory,
-        infer_quality_feedback_focus_tags, prepare_selected_video_memory_for_promotion,
+        compact_quality_review_negative_fragments, infer_quality_feedback_focus_tags,
+        prepare_selected_video_memory_for_promotion,
         should_promote_quality_review_selected_video_memory, QUALITY_FEEDBACK_MEMORY_NAME,
     };
     use crate::prompting::quality::types::QualityReview;
@@ -825,5 +917,43 @@ mod tests {
         );
 
         assert!(prepared.is_none());
+    }
+
+    #[test]
+    fn rejected_memory_compaction_prefers_focus_aligned_fragments() {
+        let compacted = compact_quality_review_negative_fragments(
+            vec![
+                "avoid face distortion or identity drift".into(),
+                "avoid harsh backlight silhouette".into(),
+                "avoid lip-sync mismatch".into(),
+            ],
+            &["identity_continuity".into(), "lighting_realism".into()],
+        );
+
+        assert_eq!(
+            compacted,
+            vec![
+                "avoid face distortion or identity drift".to_string(),
+                "avoid harsh backlight silhouette".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn severe_storyboard_review_uses_focus_tags_to_drop_lower_priority_negative_fragment() {
+        let mut review = sample_review();
+        review.comments = Some("串脸明显，逆光太硬，嘴型偶尔没对上".into());
+        review.bad_case_category = Some("identity_issue".into());
+
+        let content = build_quality_review_rejected_video_memory(&review)
+            .expect("focused rejected video memory");
+
+        assert!(
+            content.contains(
+                "avoid=avoid face distortion or identity drift, avoid harsh backlight silhouette"
+            ),
+            "{content}"
+        );
+        assert!(!content.contains("avoid lip-sync mismatch"), "{content}");
     }
 }
