@@ -313,6 +313,12 @@ struct SelectedVideoMemoryOptimizationCandidate {
     create_time_ms: i64,
 }
 
+#[derive(Debug, Clone)]
+struct EffectiveSelectedVideoMemoryOptimizationCandidate<'a> {
+    row: &'a SelectedVideoMemoryOptimizationCandidate,
+    content: String,
+}
+
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 struct SelectedVideoMemoryOptimizationBias {
     prefer_delivery: bool,
@@ -416,6 +422,10 @@ pub(crate) fn build_selected_video_memory(
         )
     }) {
         parts.push(format!("note={note}"));
+    }
+    let focus_tags = selected_video_memory_focus_tags_from_content_parts(&parts);
+    if !focus_tags.is_empty() {
+        parts.push(format!("focusTags={}", focus_tags.join("/")));
     }
     Some(parts.join(" | "))
 }
@@ -571,11 +581,28 @@ fn prepare_selected_video_memory_for_storage(
 ) -> Option<String> {
     let focus_tags = selected_video_memory_focus_tags_from_bias(bias);
     let compacted = if focus_tags.is_empty() {
-        content.to_string()
+        strip_key_from_memory_content(content, "focusTags")
     } else {
         compact_selected_video_memory_for_focus(content, &focus_tags)
     };
-    (!selected_video_memory_is_low_signal(&compacted)).then_some(compacted)
+    if selected_video_memory_is_low_signal(&compacted) {
+        return None;
+    }
+
+    let stripped = strip_key_from_memory_content(&compacted, "focusTags");
+    let rebuilt_focus_tags = selected_video_memory_focus_tags_from_content_parts(
+        &stripped
+            .split('|')
+            .map(str::trim)
+            .filter(|part| !part.is_empty())
+            .map(ToString::to_string)
+            .collect::<Vec<_>>(),
+    );
+
+    Some(rebuild_memory_content_with_focus_tags(
+        &stripped,
+        &rebuilt_focus_tags,
+    ))
 }
 
 async fn load_latest_selected_video_memory_for_scope(
@@ -1034,27 +1061,38 @@ fn plan_selected_video_memory_optimization(
     let mut delete_chars = 0usize;
     let mut removed_duplicate_rows = 0usize;
     let mut seen_keys = std::collections::HashSet::<String>::new();
-    let mut kept_rows = Vec::<&SelectedVideoMemoryOptimizationCandidate>::new();
+    let mut kept_rows = Vec::<EffectiveSelectedVideoMemoryOptimizationCandidate>::new();
 
     for row in rows {
-        let dedupe_key = selected_video_memory_semantic_dedupe_key(&row.content);
+        let Some(effective_content) = prepare_selected_video_memory_for_storage(&row.content, bias)
+        else {
+            delete_ids.push(row.id);
+            delete_chars += row.content.chars().count();
+            continue;
+        };
+        let dedupe_key = selected_video_memory_semantic_dedupe_key(&effective_content);
         if !dedupe_key.is_empty() && !seen_keys.insert(dedupe_key) {
             delete_ids.push(row.id);
             delete_chars += row.content.chars().count();
             removed_duplicate_rows += 1;
             continue;
         }
-        kept_rows.push(row);
+        kept_rows.push(EffectiveSelectedVideoMemoryOptimizationCandidate {
+            row,
+            content: effective_content,
+        });
     }
 
-    let mut scope_groups =
-        std::collections::HashMap::<String, Vec<&SelectedVideoMemoryOptimizationCandidate>>::new();
+    let mut scope_groups = std::collections::HashMap::<
+        String,
+        Vec<&EffectiveSelectedVideoMemoryOptimizationCandidate>,
+    >::new();
     for row in &kept_rows {
         let key = selected_video_memory_storyboard_scope_key(&row.content);
         if key.is_empty() {
             continue;
         }
-        scope_groups.entry(key).or_default().push(*row);
+        scope_groups.entry(key).or_default().push(row);
     }
     for group in scope_groups.into_values() {
         if group.len() < 2 {
@@ -1066,8 +1104,8 @@ fn plan_selected_video_memory_optimization(
                 (
                     selected_video_memory_bias_alignment_score(&row.content, bias),
                     selected_video_memory_quality_score(&row.content),
-                    row.create_time_ms,
-                    row.id,
+                    row.row.create_time_ms,
+                    row.row.id,
                     row,
                 )
             })
@@ -1081,7 +1119,7 @@ fn plan_selected_video_memory_optimization(
         let best_score = ranked.first().map(|entry| entry.1).unwrap_or_default();
         let best_is_focus_aligned = ranked.first().is_some_and(|entry| entry.0 > 0);
         for (alignment_score, score, _, _, row) in ranked.into_iter().skip(1) {
-            if delete_ids.contains(&row.id) {
+            if delete_ids.contains(&row.row.id) {
                 continue;
             }
             let threshold = if best_is_focus_aligned && alignment_score == 0 {
@@ -1092,8 +1130,8 @@ fn plan_selected_video_memory_optimization(
             if selected_video_memory_is_scope_filler(&row.content)
                 && best_score >= score + threshold
             {
-                delete_ids.push(row.id);
-                delete_chars += row.content.chars().count();
+                delete_ids.push(row.row.id);
+                delete_chars += row.row.content.chars().count();
             }
         }
     }
@@ -1102,33 +1140,67 @@ fn plan_selected_video_memory_optimization(
         .iter()
         .filter(|row| selected_video_memory_has_delivery_anchor(&row.content))
         .count();
-    if delivery_rows > 0 {
-        let visual_rows = kept_rows
-            .iter()
-            .filter(|row| selected_video_memory_is_visual_only(&row.content))
-            .copied()
-            .collect::<Vec<_>>();
-        let keep_visual_id = visual_rows
-            .iter()
-            .max_by(|left, right| {
-                selected_visual_only_memory_keep_priority(&left.content, bias)
-                    .cmp(&selected_visual_only_memory_keep_priority(
-                        &right.content,
-                        bias,
-                    ))
-                    .then(left.create_time_ms.cmp(&right.create_time_ms))
-                    .then(left.id.cmp(&right.id))
-            })
-            .map(|row| row.id);
+    let visual_rows = kept_rows
+        .iter()
+        .filter(|row| selected_video_memory_is_visual_only(&row.content))
+        .collect::<Vec<_>>();
+    let keep_visual_ids = selected_visual_only_memory_keep_ids(&visual_rows, bias);
+    let should_prune_visual_rows = delivery_rows > 0
+        || visual_focus_bias_is_hot(bias)
+        || visual_rows.len() > keep_visual_ids.len().saturating_add(1);
+    if should_prune_visual_rows {
         for row in visual_rows {
-            if delete_ids.contains(&row.id) {
+            if delete_ids.contains(&row.row.id) || keep_visual_ids.contains(&row.row.id) {
                 continue;
             }
-            if Some(row.id) == keep_visual_id {
-                continue;
+            delete_ids.push(row.row.id);
+            delete_chars += row.row.content.chars().count();
+        }
+    }
+
+    if let Some(active_bias) =
+        bias.filter(|value| *value != SelectedVideoMemoryOptimizationBias::default())
+    {
+        let surviving_rows = kept_rows
+            .iter()
+            .filter(|row| !delete_ids.contains(&row.row.id))
+            .collect::<Vec<_>>();
+        let focus_anchor_count = surviving_rows
+            .iter()
+            .filter(|row| {
+                selected_video_memory_bias_alignment_score(&row.content, Some(active_bias)) > 0
+                    && !selected_video_memory_is_scope_filler(&row.content)
+            })
+            .count();
+        let best_focus_priority = surviving_rows
+            .iter()
+            .filter_map(|row| {
+                let alignment =
+                    selected_video_memory_bias_alignment_score(&row.content, Some(active_bias));
+                (alignment > 0)
+                    .then_some(alignment + selected_video_memory_quality_score(&row.content))
+            })
+            .max()
+            .unwrap_or_default();
+        let best_focus_coverage = surviving_rows
+            .iter()
+            .map(|row| selected_video_memory_focus_coverage_score(&row.content, active_bias))
+            .max()
+            .unwrap_or_default();
+
+        if (focus_anchor_count >= 2 || best_focus_coverage >= 2) && best_focus_priority > 0 {
+            for row in surviving_rows {
+                if selected_video_memory_bias_alignment_score(&row.content, Some(active_bias)) > 0
+                    || !selected_video_memory_is_scope_filler(&row.content)
+                {
+                    continue;
+                }
+                let row_quality = selected_video_memory_quality_score(&row.content);
+                if best_focus_priority >= row_quality + 18 {
+                    delete_ids.push(row.row.id);
+                    delete_chars += row.row.content.chars().count();
+                }
             }
-            delete_ids.push(row.id);
-            delete_chars += row.content.chars().count();
         }
     }
 
@@ -1161,6 +1233,70 @@ fn selected_visual_only_memory_keep_priority(
     )
 }
 
+fn selected_visual_only_memory_keep_ids(
+    rows: &[&SelectedVideoMemoryOptimizationCandidate],
+    bias: Option<SelectedVideoMemoryOptimizationBias>,
+) -> std::collections::HashSet<i64> {
+    let mut keep_ids = std::collections::HashSet::new();
+    let Some(bias) = bias else {
+        if let Some(best) = select_best_visual_only_memory_row(rows, None, None) {
+            keep_ids.insert(best.id);
+        }
+        return keep_ids;
+    };
+
+    if bias.prefer_identity {
+        if let Some(best) = select_best_visual_only_memory_row(
+            rows,
+            Some(selected_video_memory_has_identity_anchor),
+            Some(bias),
+        ) {
+            keep_ids.insert(best.id);
+        }
+    }
+    if bias.prefer_lighting {
+        if let Some(best) = select_best_visual_only_memory_row(
+            rows,
+            Some(selected_video_memory_has_lighting_anchor),
+            Some(bias),
+        ) {
+            keep_ids.insert(best.id);
+        }
+    }
+    if keep_ids.is_empty() {
+        if let Some(best) = select_best_visual_only_memory_row(rows, None, Some(bias)) {
+            keep_ids.insert(best.id);
+        }
+    }
+    keep_ids
+}
+
+fn select_best_visual_only_memory_row<'a>(
+    rows: &'a [&SelectedVideoMemoryOptimizationCandidate],
+    predicate: Option<fn(&str) -> bool>,
+    bias: Option<SelectedVideoMemoryOptimizationBias>,
+) -> Option<&'a SelectedVideoMemoryOptimizationCandidate> {
+    rows.iter()
+        .copied()
+        .filter(|row| match predicate {
+            Some(check) => check(&row.content),
+            None => true,
+        })
+        .max_by(|left, right| {
+            selected_visual_only_memory_keep_priority(&left.content, bias)
+                .cmp(&selected_visual_only_memory_keep_priority(
+                    &right.content,
+                    bias,
+                ))
+                .then(left.create_time_ms.cmp(&right.create_time_ms))
+                .then(left.id.cmp(&right.id))
+        })
+}
+
+fn visual_focus_bias_is_hot(bias: Option<SelectedVideoMemoryOptimizationBias>) -> bool {
+    bias.is_some_and(|bias| bias.prefer_identity || bias.prefer_lighting)
+}
+
 fn selected_video_memory_bias_alignment_score(
     content: &str,
     bias: Option<SelectedVideoMemoryOptimizationBias>,
@@ -1170,18 +1306,107 @@ fn selected_video_memory_bias_alignment_score(
     };
 
     let mut score = 0;
-    if bias.prefer_delivery && selected_video_memory_has_delivery_anchor(content) {
+    let focus_tags = selected_video_memory_focus_tags_from_content(content);
+    if bias.prefer_delivery
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "delivery_realism",
+            selected_video_memory_has_delivery_anchor,
+        )
+    {
         score += 16;
     }
-    if bias.prefer_emotion && selected_video_memory_has_emotion_anchor(content) {
+    if bias.prefer_emotion
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "emotion_arc",
+            selected_video_memory_has_emotion_anchor,
+        )
+    {
         score += 14;
     }
-    if bias.prefer_identity && selected_video_memory_has_identity_anchor(content) {
+    if bias.prefer_identity
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "identity_continuity",
+            selected_video_memory_has_identity_anchor,
+        )
+    {
         score += 12;
     }
-    if bias.prefer_lighting && selected_video_memory_has_lighting_anchor(content) {
+    if bias.prefer_lighting
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "lighting_realism",
+            selected_video_memory_has_lighting_anchor,
+        )
+    {
         score += 12;
     }
+    score
+}
+
+fn selected_video_memory_tag_or_anchor_matches(
+    focus_tags: &[String],
+    content: &str,
+    tag: &str,
+    anchor_check: fn(&str) -> bool,
+) -> bool {
+    focus_tags.iter().any(|value| value == tag) || anchor_check(content)
+}
+
+fn selected_video_memory_focus_coverage_score(
+    content: &str,
+    bias: SelectedVideoMemoryOptimizationBias,
+) -> usize {
+    let focus_tags = selected_video_memory_focus_tags_from_content(content);
+    let mut score = 0usize;
+
+    if bias.prefer_delivery
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "delivery_realism",
+            selected_video_memory_has_delivery_anchor,
+        )
+    {
+        score += 1;
+    }
+    if bias.prefer_emotion
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "emotion_arc",
+            selected_video_memory_has_emotion_anchor,
+        )
+    {
+        score += 1;
+    }
+    if bias.prefer_identity
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "identity_continuity",
+            selected_video_memory_has_identity_anchor,
+        )
+    {
+        score += 1;
+    }
+    if bias.prefer_lighting
+        && selected_video_memory_tag_or_anchor_matches(
+            &focus_tags,
+            content,
+            "lighting_realism",
+            selected_video_memory_has_lighting_anchor,
+        )
+    {
+        score += 1;
+    }
+
     score
 }
 
@@ -1221,6 +1446,92 @@ fn selected_video_memory_focus_tags_from_bias(
         tags.push("lighting_realism".to_string());
     }
     tags
+}
+
+fn selected_video_memory_focus_tags_from_content(content: &str) -> Vec<String> {
+    extract_key_value(content, "focusTags")
+        .map(|value| {
+            value
+                .split('/')
+                .map(normalize_prompt_text)
+                .filter(|tag| !tag.is_empty())
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default()
+}
+
+fn selected_video_memory_focus_tags_from_content_parts(parts: &[String]) -> Vec<String> {
+    let style = parts
+        .iter()
+        .find_map(|part| part.strip_prefix("style="))
+        .map(normalize_prompt_text)
+        .unwrap_or_default();
+    let delivery = parts
+        .iter()
+        .find_map(|part| part.strip_prefix("delivery="))
+        .map(normalize_prompt_text)
+        .unwrap_or_default();
+    let note = parts
+        .iter()
+        .find_map(|part| part.strip_prefix("note="))
+        .map(normalize_prompt_text)
+        .unwrap_or_default();
+    let subject_present = parts.iter().any(|part| {
+        part.strip_prefix("subject=")
+            .map(normalize_prompt_text)
+            .filter(|value| !value.is_empty())
+            .is_some()
+            || part
+                .strip_prefix("subjectAliases=")
+                .map(normalize_prompt_text)
+                .filter(|value| !value.is_empty())
+                .is_some()
+    });
+
+    let combined = [style.as_str(), delivery.as_str(), note.as_str()].join(" ");
+    let mut tags = Vec::new();
+    let mut push_tag = |tag: &str| {
+        if !tags.iter().any(|existing| existing == tag) {
+            tags.push(tag.to_string());
+        }
+    };
+
+    if selected_video_memory_has_delivery_anchor(&combined) {
+        push_tag("delivery_realism");
+    }
+    if selected_video_memory_has_emotion_anchor(&combined) {
+        push_tag("emotion_arc");
+    }
+    if subject_present || selected_video_memory_has_identity_anchor(&combined) {
+        push_tag("identity_continuity");
+    }
+    if selected_video_memory_has_lighting_anchor(&combined) {
+        push_tag("lighting_realism");
+    }
+
+    tags
+}
+
+fn strip_key_from_memory_content(content: &str, key: &str) -> String {
+    content
+        .split('|')
+        .map(str::trim)
+        .filter(|part| !part.is_empty() && !part.starts_with(&format!("{key}=")))
+        .collect::<Vec<_>>()
+        .join(" | ")
+}
+
+fn rebuild_memory_content_with_focus_tags(content: &str, focus_tags: &[String]) -> String {
+    let mut parts = content
+        .split('|')
+        .map(str::trim)
+        .filter(|part| !part.is_empty() && !part.starts_with("focusTags="))
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
+    if !focus_tags.is_empty() {
+        parts.push(format!("focusTags={}", focus_tags.join("/")));
+    }
+    parts.join(" | ")
 }
 
 fn selected_video_memory_has_emotion_anchor(content: &str) -> bool {
@@ -7025,7 +7336,31 @@ mod tests {
 
         assert!(content.contains("光影暖金逆光"), "{content}");
         assert!(content.contains("声场静场留白"), "{content}");
+        assert!(
+            content.contains("focusTags=identity_continuity/lighting_realism"),
+            "{content}"
+        );
         assert!(!content.contains("style=表演"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_persists_focus_tags_for_delivery_identity_and_lighting() {
+        let content = build_selected_video_memory(
+            22,
+            &StoryboardPromptSeedRow {
+                prompt: Some("林晚抬眼后低声开口".into()),
+                video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、缓缓抬眼后停顿片刻、隐忍 / 克制、冷蓝窗光、低声说：你终于来了、雨声在玻璃边回响、A22）".into()),
+                duration: Some("4".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains(
+                "focusTags=delivery_realism/emotion_arc/identity_continuity/lighting_realism"
+            ),
+            "{content}"
+        );
     }
 
     #[test]
@@ -7056,6 +7391,29 @@ mod tests {
             "{content}"
         );
         assert!(!content.contains("镜头近景"), "{content}");
+    }
+
+    #[test]
+    fn prepare_selected_video_memory_for_storage_rebuilds_focus_tags_after_compaction() {
+        let content = prepare_selected_video_memory_for_storage(
+            "storyboardIds=12 | subject=林晚 | style=表演喉结滚动，语气低声克制，情绪克制，动作从容克制，光影冷蓝窗光 | delivery=表演喉结滚动低声克制 | note=强忍泪意",
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: true,
+                prefer_emotion: true,
+                prefer_identity: false,
+                prefer_lighting: true,
+            }),
+        )
+        .expect("content");
+
+        assert!(
+            content.contains(
+                "focusTags=delivery_realism/emotion_arc/identity_continuity/lighting_realism"
+            ),
+            "{content}"
+        );
+        assert!(!content.contains("语气低声克制"), "{content}");
+        assert!(!content.contains("动作从容克制"), "{content}");
     }
 
     #[test]
@@ -11269,5 +11627,111 @@ mod tests {
         );
 
         assert_eq!(plan.delete_ids, vec![92]);
+    }
+
+    #[test]
+    fn plan_selected_video_memory_optimization_drops_cross_scope_fillers_when_focus_bias_has_multiple_strong_anchors(
+    ) {
+        let plan = plan_selected_video_memory_optimization(
+            &[
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 101,
+                    content:
+                        "storyboardIds=12 | style=动作从容克制，语气低声克制，情绪克制，镜头近景 | note=保持克制"
+                            .into(),
+                    create_time_ms: 900,
+                },
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 102,
+                    content:
+                        "storyboardIds=13 | subject=林晚 | style=表演眼眶发红，语气压低气息尾音发颤，光影冷蓝窗光 | note=强忍泪意"
+                            .into(),
+                    create_time_ms: 800,
+                },
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 103,
+                    content:
+                        "storyboardIds=14 | subject=顾承泽 | style=镜头稳定跟拍，光影暖金逆光，环境玻璃水痕连贯 | note=保持角色光线一致"
+                            .into(),
+                    create_time_ms: 700,
+                },
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 104,
+                    content:
+                        "storyboardIds=15 | style=动作缓慢，语气轻声克制，情绪克制 | note=保持克制"
+                            .into(),
+                    create_time_ms: 600,
+                },
+            ],
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: true,
+                prefer_emotion: true,
+                prefer_identity: true,
+                prefer_lighting: true,
+            }),
+        );
+
+        assert_eq!(plan.delete_ids, vec![101, 104]);
+    }
+
+    #[test]
+    fn plan_selected_video_memory_optimization_keeps_cross_scope_fillers_when_focus_anchor_is_not_yet_dense(
+    ) {
+        let plan = plan_selected_video_memory_optimization(
+            &[
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 111,
+                    content:
+                        "storyboardIds=12 | style=动作从容克制，语气低声克制，情绪克制，镜头近景 | note=保持克制"
+                            .into(),
+                    create_time_ms: 900,
+                },
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 112,
+                    content:
+                        "storyboardIds=13 | subject=林晚 | style=表演眼眶发红，语气压低气息尾音发颤，光影冷蓝窗光 | note=强忍泪意"
+                            .into(),
+                    create_time_ms: 800,
+                },
+            ],
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: true,
+                prefer_emotion: true,
+                prefer_identity: false,
+                prefer_lighting: false,
+            }),
+        );
+
+        assert!(plan.delete_ids.is_empty());
+    }
+
+    #[test]
+    fn plan_selected_video_memory_optimization_prefers_focus_tagged_identity_lighting_row() {
+        let plan = plan_selected_video_memory_optimization(
+            &[
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 121,
+                    content:
+                        "storyboardIds=12 | style=镜头近景，构图压迫 | note=保持克制 | focusTags=emotion_arc"
+                            .into(),
+                    create_time_ms: 650,
+                },
+                SelectedVideoMemoryOptimizationCandidate {
+                    id: 122,
+                    content:
+                        "storyboardIds=12 | subject=林晚 | style=光影暖金逆光，声场静场留白 | note=保持角色光线一致 | focusTags=identity_continuity/lighting_realism"
+                            .into(),
+                    create_time_ms: 500,
+                },
+            ],
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: false,
+                prefer_emotion: false,
+                prefer_identity: true,
+                prefer_lighting: true,
+            }),
+        );
+
+        assert_eq!(plan.delete_ids, vec![121]);
     }
 }
