@@ -21,7 +21,8 @@ pub(crate) use workbench::video::generate::{
 };
 pub(crate) use workbench::video_prompt_memory::{
     build_selected_video_memory, clear_rejected_video_negative_memory,
-    optimize_scoped_video_memory, persist_rejected_video_negative_memory,
-    persist_selected_video_memory, refresh_project_video_style_memory,
-    refresh_script_video_style_memory, storyboard_prompt_seed, StoryboardPromptSeedRow,
+    compact_selected_video_memory_for_focus, optimize_scoped_video_memory,
+    persist_rejected_video_negative_memory, persist_selected_video_memory,
+    refresh_project_video_style_memory, refresh_script_video_style_memory,
+    selected_video_memory_is_low_signal, storyboard_prompt_seed, StoryboardPromptSeedRow,
 };

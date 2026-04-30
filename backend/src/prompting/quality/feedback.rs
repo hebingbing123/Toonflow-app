@@ -14,10 +14,11 @@ use uuid::Uuid;
 
 use crate::production::{
     build_selected_video_memory, clear_rejected_video_negative_memory,
-    infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
-    optimize_scoped_video_memory, persist_rejected_video_negative_memory,
-    persist_selected_video_memory, refresh_project_video_style_memory,
-    refresh_script_video_style_memory, StoryboardPromptSeedRow,
+    compact_selected_video_memory_for_focus, infer_negative_fragments_from_comments,
+    map_bad_case_category_with_comments, optimize_scoped_video_memory,
+    persist_rejected_video_negative_memory, persist_selected_video_memory,
+    refresh_project_video_style_memory, refresh_script_video_style_memory,
+    selected_video_memory_is_low_signal, StoryboardPromptSeedRow,
 };
 use crate::settings::agent_memory::replace_named_summary_memory;
 
@@ -159,6 +160,7 @@ async fn promote_quality_review_selected_video_memory(
     script_id: i32,
     review: &QualityReview,
 ) -> Result<QualityFeedbackMemoryOutcome, String> {
+    let focus_tags = infer_quality_feedback_focus_tags(review, true);
     let Some(storyboard_id) = quality_review_storyboard_target_id(review) else {
         return Ok(QualityFeedbackMemoryOutcome {
             action: "promoted_selected_memory_skipped".into(),
@@ -170,7 +172,7 @@ async fn promote_quality_review_selected_video_memory(
             removed_chars: None,
             removed_visual_rows: None,
             removed_duplicate_rows: None,
-            focus_tags: infer_quality_feedback_focus_tags(review, true),
+            focus_tags: focus_tags.clone(),
         });
     };
 
@@ -205,7 +207,7 @@ async fn promote_quality_review_selected_video_memory(
             removed_chars: None,
             removed_visual_rows: None,
             removed_duplicate_rows: None,
-            focus_tags: infer_quality_feedback_focus_tags(review, true),
+            focus_tags: focus_tags.clone(),
         });
     };
     let Some(memory_content) = build_selected_video_memory(storyboard_id, &prompt_seed) else {
@@ -219,7 +221,22 @@ async fn promote_quality_review_selected_video_memory(
             removed_chars: None,
             removed_visual_rows: None,
             removed_duplicate_rows: None,
-            focus_tags: infer_quality_feedback_focus_tags(review, true),
+            focus_tags: focus_tags.clone(),
+        });
+    };
+    let memory_content = prepare_selected_video_memory_for_promotion(&memory_content, &focus_tags);
+    let Some(memory_content) = memory_content else {
+        return Ok(QualityFeedbackMemoryOutcome {
+            action: "promoted_selected_memory_low_signal".into(),
+            agent_type: Some("productionAgent".into()),
+            storyboard_id: Some(storyboard_id),
+            memory_name: Some("selected_video_memory".into()),
+            cleared_memory_name: None,
+            removed_rows: None,
+            removed_chars: None,
+            removed_visual_rows: None,
+            removed_duplicate_rows: None,
+            focus_tags: focus_tags.clone(),
         });
     };
 
@@ -265,8 +282,16 @@ async fn promote_quality_review_selected_video_memory(
         removed_chars: Some(fit_i32(optimization.removed_chars)),
         removed_visual_rows: Some(fit_i32(optimization.removed_visual_rows)),
         removed_duplicate_rows: Some(fit_i32(optimization.removed_duplicate_rows)),
-        focus_tags: infer_quality_feedback_focus_tags(review, true),
+        focus_tags,
     })
+}
+
+fn prepare_selected_video_memory_for_promotion(
+    memory_content: &str,
+    focus_tags: &[String],
+) -> Option<String> {
+    let compacted = compact_selected_video_memory_for_focus(memory_content, focus_tags);
+    (!selected_video_memory_is_low_signal(&compacted)).then_some(compacted)
 }
 
 fn should_promote_quality_review_selected_video_memory(review: &QualityReview) -> bool {
@@ -598,8 +623,8 @@ fn build_generic_quality_feedback_content(review: &QualityReview) -> String {
 mod tests {
     use super::{
         build_generic_quality_feedback_content, build_quality_review_rejected_video_memory,
-        infer_quality_feedback_focus_tags, should_promote_quality_review_selected_video_memory,
-        QUALITY_FEEDBACK_MEMORY_NAME,
+        infer_quality_feedback_focus_tags, prepare_selected_video_memory_for_promotion,
+        should_promote_quality_review_selected_video_memory, QUALITY_FEEDBACK_MEMORY_NAME,
     };
     use crate::prompting::quality::types::QualityReview;
     use serde_json::json;
@@ -773,5 +798,32 @@ mod tests {
                 "lighting_realism".to_string(),
             ]
         );
+    }
+
+    #[test]
+    fn selected_memory_promotion_compacts_generic_delivery_fillers_when_focus_is_hot() {
+        let prepared = prepare_selected_video_memory_for_promotion(
+            "storyboardIds=12 | subject=林晚 | style=表演喉结滚动，语气低声克制，情绪克制，动作从容克制，光影冷蓝窗光 | delivery=表演喉结滚动低声克制 | note=强忍泪意",
+            &["delivery_realism".into(), "emotion_arc".into()],
+        )
+        .expect("prepared memory");
+
+        assert!(
+            prepared.contains("style=表演喉结滚动，光影冷蓝窗光"),
+            "{prepared}"
+        );
+        assert!(!prepared.contains("语气低声克制"), "{prepared}");
+        assert!(!prepared.contains("情绪克制"), "{prepared}");
+        assert!(!prepared.contains("动作从容克制"), "{prepared}");
+    }
+
+    #[test]
+    fn selected_memory_promotion_skips_low_signal_selected_memory() {
+        let prepared = prepare_selected_video_memory_for_promotion(
+            "storyboardIds=12 | style=动作从容克制，语气低声克制，情绪克制 | note=保持克制",
+            &["delivery_realism".into(), "emotion_arc".into()],
+        );
+
+        assert!(prepared.is_none());
     }
 }

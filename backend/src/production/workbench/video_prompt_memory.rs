@@ -379,6 +379,55 @@ pub(crate) fn build_selected_video_memory(
     Some(parts.join(" | "))
 }
 
+pub(crate) fn compact_selected_video_memory_for_focus(
+    content: &str,
+    focus_tags: &[String],
+) -> String {
+    let bias = selected_video_memory_focus_bias_from_tags(focus_tags);
+    if bias == SelectedVideoMemoryOptimizationBias::default() {
+        return content.to_string();
+    }
+
+    let style = extract_key_value(content, "style");
+    let delivery = extract_key_value(content, "delivery");
+    let subject_present = extract_key_value(content, "subject")
+        .map(|value| !normalize_prompt_text(&value).is_empty())
+        .unwrap_or(false)
+        || extract_key_value(content, "subjectAliases")
+            .map(|value| !normalize_prompt_text(&value).is_empty())
+            .unwrap_or(false);
+
+    let compacted_style = style.as_deref().and_then(|style| {
+        compact_selected_video_memory_style_for_focus(
+            style,
+            delivery.as_deref(),
+            bias,
+            subject_present,
+        )
+    });
+    let mut rebuilt = Vec::new();
+
+    for part in content.split('|') {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
+        }
+        if part.starts_with("style=") {
+            if let Some(style) = compacted_style.as_deref() {
+                rebuilt.push(format!("style={style}"));
+            }
+            continue;
+        }
+        rebuilt.push(part.to_string());
+    }
+
+    rebuilt.join(" | ")
+}
+
+pub(crate) fn selected_video_memory_is_low_signal(content: &str) -> bool {
+    selected_video_memory_is_scope_filler(content)
+}
+
 pub(crate) fn build_rejected_video_negative_memory(
     storyboard_numeric_id: i32,
     row: &StoryboardPromptSeedRow,
@@ -1435,6 +1484,22 @@ fn selected_video_memory_bias_alignment_score(
     score
 }
 
+fn selected_video_memory_focus_bias_from_tags(
+    focus_tags: &[String],
+) -> SelectedVideoMemoryOptimizationBias {
+    let mut bias = SelectedVideoMemoryOptimizationBias::default();
+    for tag in focus_tags {
+        match tag.as_str() {
+            "delivery_realism" => bias.prefer_delivery = true,
+            "emotion_arc" => bias.prefer_emotion = true,
+            "identity_continuity" => bias.prefer_identity = true,
+            "lighting_realism" => bias.prefer_lighting = true,
+            _ => {}
+        }
+    }
+    bias
+}
+
 fn selected_video_memory_has_emotion_anchor(content: &str) -> bool {
     [
         "情绪",
@@ -1589,6 +1654,56 @@ fn selected_video_memory_is_scope_filler(content: &str) -> bool {
                 .is_some_and(|action| selected_style_fragment_is_low_gain_motion(&action))
             || is_local_framing_only_fragment(fragment)
     })
+}
+
+fn compact_selected_video_memory_style_for_focus(
+    style: &str,
+    delivery: Option<&str>,
+    bias: SelectedVideoMemoryOptimizationBias,
+    subject_present: bool,
+) -> Option<String> {
+    let mut fragments = split_prompt_note_fragments(style).collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+
+    let has_specific_performance = fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"));
+    let has_lighting_or_environment = fragments.iter().any(|fragment| {
+        fragment.starts_with("光影") || fragment.starts_with("环境") || fragment.starts_with("声场")
+    });
+    let has_delivery_anchor = delivery
+        .is_some_and(|value| !normalize_prompt_text(value).is_empty())
+        || has_specific_performance;
+
+    if (bias.prefer_delivery || bias.prefer_emotion) && has_delivery_anchor {
+        fragments.retain(|fragment| {
+            if let Some(voice) = fragment.strip_prefix("语气").map(normalize_prompt_text) {
+                return !selected_style_fragment_is_low_gain_voice(&voice);
+            }
+            if let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) {
+                return !selected_style_fragment_is_generic_restrained_mood(&mood);
+            }
+            if let Some(action) = fragment.strip_prefix("动作").map(normalize_prompt_text) {
+                return !selected_style_fragment_is_low_gain_motion(&action);
+            }
+            true
+        });
+    }
+
+    if (bias.prefer_lighting || bias.prefer_identity) && has_lighting_or_environment {
+        fragments.retain(|fragment| {
+            !(is_local_framing_only_fragment(fragment)
+                && (bias.prefer_lighting || (bias.prefer_identity && subject_present)))
+        });
+    }
+
+    if fragments.is_empty() {
+        return None;
+    }
+
+    compact_video_style_prompt_note(&fragments.join("，"))
 }
 
 pub(crate) async fn refresh_project_video_style_memory(
@@ -8736,10 +8851,11 @@ mod tests {
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
         compact_selected_memory_setting, compact_selected_memory_subject,
-        compact_video_continuity_note, compact_video_style_prompt_note,
-        merge_rejected_video_negative_memory, merge_selected_memory_subject_action,
-        parse_structured_storyboard_description, plan_selected_video_memory_optimization,
-        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
+        compact_selected_video_memory_for_focus, compact_video_continuity_note,
+        compact_video_style_prompt_note, merge_rejected_video_negative_memory,
+        merge_selected_memory_subject_action, parse_structured_storyboard_description,
+        plan_selected_video_memory_optimization, rejected_video_negative_rejection_count,
+        select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_candidates_for_subject,
         select_pending_rejected_video_observation_candidates_for_subject_with_bias,
@@ -8755,10 +8871,11 @@ mod tests {
         select_subject_role_video_style_memory_notes,
         select_subject_role_video_style_memory_notes_for_storyboard,
         selected_memory_subject_aliases, selected_memory_subject_identity,
-        selected_video_memory_quality_score, selected_video_memory_scope,
-        selected_video_memory_update_would_reduce_quality, storyboard_prompt_seed, AgentMemoryRow,
-        ScopedAgentMemoryRow, SelectedVideoMemoryOptimizationCandidate, SelectedVideoMemoryScope,
-        StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
+        selected_video_memory_is_low_signal, selected_video_memory_quality_score,
+        selected_video_memory_scope, selected_video_memory_update_would_reduce_quality,
+        storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow,
+        SelectedVideoMemoryOptimizationBias, SelectedVideoMemoryOptimizationCandidate,
+        SelectedVideoMemoryScope, StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -9072,6 +9189,46 @@ mod tests {
         assert!(content.contains("光影暖金逆光"), "{content}");
         assert!(content.contains("声场静场留白"), "{content}");
         assert!(!content.contains("style=表演"), "{content}");
+    }
+
+    #[test]
+    fn compact_selected_video_memory_for_focus_drops_generic_delivery_fillers() {
+        let content = compact_selected_video_memory_for_focus(
+            "storyboardIds=12 | subject=林晚 | style=表演喉结滚动，语气低声克制，情绪克制，动作从容克制，光影冷蓝窗光 | delivery=表演喉结滚动低声克制 | note=强忍泪意",
+            &["delivery_realism".into(), "emotion_arc".into()],
+        );
+
+        assert!(
+            content.contains("style=表演喉结滚动，光影冷蓝窗光"),
+            "{content}"
+        );
+        assert!(!content.contains("语气低声克制"), "{content}");
+        assert!(!content.contains("情绪克制"), "{content}");
+        assert!(!content.contains("动作从容克制"), "{content}");
+    }
+
+    #[test]
+    fn compact_selected_video_memory_for_focus_drops_local_framing_when_lighting_is_priority() {
+        let content = compact_selected_video_memory_for_focus(
+            "storyboardIds=12 | subject=林晚 | style=镜头近景，光影暖金逆光，声场静场留白 | note=保持角色光线一致",
+            &["lighting_realism".into(), "identity_continuity".into()],
+        );
+
+        assert!(
+            content.contains("style=光影暖金逆光，声场静场留白"),
+            "{content}"
+        );
+        assert!(!content.contains("镜头近景"), "{content}");
+    }
+
+    #[test]
+    fn selected_video_memory_is_low_signal_flags_generic_restrained_style() {
+        assert!(selected_video_memory_is_low_signal(
+            "storyboardIds=12 | style=动作从容克制，语气低声克制，情绪克制 | note=保持克制"
+        ));
+        assert!(!selected_video_memory_is_low_signal(
+            "storyboardIds=12 | style=表演喉结滚动，光影冷蓝窗光 | note=强忍泪意"
+        ));
     }
 
     #[test]
