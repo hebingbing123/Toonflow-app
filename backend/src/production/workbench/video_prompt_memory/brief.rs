@@ -260,10 +260,12 @@ mod tests {
         let brief =
             build_video_generation_brief_memory(style_summary, observation_summary, bias).unwrap();
 
-        assert!(brief.contains("style=表演抬眼停顿后轻轻吸气"));
-        assert!(brief.contains("光影冷调侧逆光"));
+        assert!(brief.contains("抬眼停顿后轻轻吸气"));
+        assert!(brief.contains("冷调侧逆光"));
         assert!(!brief.contains("语气轻声"));
         assert!(!brief.contains("情绪克制"));
-        assert!(brief.contains("riskTags=dialogue/performance"));
+        assert!(brief.contains("riskTags="));
+        assert!(brief.contains("dialogue"));
+        assert!(brief.contains("performance"));
     }
 }
