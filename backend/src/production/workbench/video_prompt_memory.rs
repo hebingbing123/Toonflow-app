@@ -8187,10 +8187,6 @@ fn is_low_signal_selected_memory_note(note: &str) -> bool {
         && normalized.chars().count() <= 10)
 }
 
-fn selected_video_memory_update_would_reduce_quality(existing: &str, incoming: &str) -> bool {
-    selected_video_memory_update_would_reduce_quality_with_bias(existing, incoming, None)
-}
-
 fn selected_video_memory_update_would_reduce_quality_with_bias(
     existing: &str,
     incoming: &str,
@@ -8931,11 +8927,10 @@ mod tests {
         select_subject_role_video_style_memory_notes_for_storyboard,
         selected_memory_subject_aliases, selected_memory_subject_identity,
         selected_video_memory_is_low_signal, selected_video_memory_quality_score,
-        selected_video_memory_scope, selected_video_memory_update_would_reduce_quality,
-        selected_video_memory_update_would_reduce_quality_with_bias, storyboard_prompt_seed,
-        AgentMemoryRow, ScopedAgentMemoryRow, SelectedVideoMemoryOptimizationBias,
-        SelectedVideoMemoryOptimizationCandidate, SelectedVideoMemoryScope,
-        StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
+        selected_video_memory_scope, selected_video_memory_update_would_reduce_quality_with_bias,
+        storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow,
+        SelectedVideoMemoryOptimizationBias, SelectedVideoMemoryOptimizationCandidate,
+        SelectedVideoMemoryScope, StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -9944,18 +9939,20 @@ mod tests {
 
     #[test]
     fn selected_video_memory_update_would_reduce_quality_when_incoming_drops_style_signal() {
-        assert!(selected_video_memory_update_would_reduce_quality(
+        assert!(selected_video_memory_update_would_reduce_quality_with_bias(
             "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=主角贴墙前行",
-            "storyboardIds=12 | promptSeed=seed-12 | note=当前镜头已确认"
+            "storyboardIds=12 | promptSeed=seed-12 | note=当前镜头已确认",
+            None,
         ));
     }
 
     #[test]
     fn selected_video_memory_update_would_reduce_quality_when_incoming_keeps_style_but_loses_useful_note(
     ) {
-        assert!(selected_video_memory_update_would_reduce_quality(
+        assert!(selected_video_memory_update_would_reduce_quality_with_bias(
             "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=主角贴墙前行",
-            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=当前镜头已确认"
+            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=当前镜头已确认",
+            None,
         ));
     }
 
@@ -9968,9 +9965,10 @@ mod tests {
                 "storyboardIds=12 | promptSeed=seed-12 | note=主角贴墙前行"
             )
         );
-        assert!(!selected_video_memory_update_would_reduce_quality(
+        assert!(!selected_video_memory_update_would_reduce_quality_with_bias(
             "storyboardIds=12 | promptSeed=seed-12 | note=主角贴墙前行",
-            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=主角贴墙前行"
+            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=主角贴墙前行",
+            None,
         ));
     }
 
@@ -9984,9 +9982,10 @@ mod tests {
                 "storyboardIds=12 | promptSeed=seed-12 | style=表演抬眼停顿，光影冷蓝窗光，声场雨声回响"
             )
         );
-        assert!(!selected_video_memory_update_would_reduce_quality(
+        assert!(!selected_video_memory_update_would_reduce_quality_with_bias(
             "storyboardIds=12 | promptSeed=seed-12 | style=动作从容克制，表演抬眼停顿，语气低声克制，情绪克制，光影冷蓝窗光，声场雨声回响",
-            "storyboardIds=12 | promptSeed=seed-12 | style=表演抬眼停顿，光影冷蓝窗光，声场雨声回响"
+            "storyboardIds=12 | promptSeed=seed-12 | style=表演抬眼停顿，光影冷蓝窗光，声场雨声回响",
+            None,
         ));
     }
 
@@ -10000,10 +9999,13 @@ mod tests {
             selected_video_memory_quality_score(delivery_rich)
                 > selected_video_memory_quality_score(visual_only)
         );
-        assert!(!selected_video_memory_update_would_reduce_quality(
-            visual_only,
-            delivery_rich
-        ));
+        assert!(
+            !selected_video_memory_update_would_reduce_quality_with_bias(
+                visual_only,
+                delivery_rich,
+                None,
+            )
+        );
     }
 
     #[test]

@@ -8,6 +8,7 @@ description = "Toonflow API (Harness-oriented Rust backend; work in progress)"
 [[bin]]
 name = "toonflow-sqlite-import"
 path = "src/bin/sqlite_import.rs"
+test = false
 
 [dependencies]
 anyhow = "1"
@@ -53,6 +54,7 @@ tower = { version = "0.5", features = ["util"] }
 [[bin]]
 name = "export-openapi"
 path = "src/bin/export_openapi.rs"
+test = false
 
 [features]
 redis = []
