@@ -716,19 +716,75 @@ fn compact_rejected_negative_memory_fragments(fragments: Vec<String>) -> Vec<Str
 }
 
 fn compact_rejected_negative_memory_fragments_for_storage(fragments: Vec<String>) -> Vec<String> {
-    let mut scored = compact_rejected_negative_memory_fragments(
+    compact_rejected_negative_memory_fragments_for_storage_with_bias(fragments, None)
+}
+
+fn compact_rejected_negative_memory_fragments_for_storage_with_bias(
+    fragments: Vec<String>,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> Vec<String> {
+    let mut ranked = compact_rejected_negative_memory_fragments(
         compact_rejected_negative_fragment_families(fragments),
     )
     .into_iter()
     .enumerate()
-    .map(|(idx, fragment)| (score_rejected_negative_fragment(&fragment), idx, fragment))
+    .map(|(idx, fragment)| {
+        (
+            score_rejected_negative_fragment(&fragment)
+                + score_rejected_video_memory_bias_for_fragment(&fragment, bias),
+            idx,
+            fragment,
+        )
+    })
     .collect::<Vec<_>>();
-    scored.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
-    scored
+    ranked.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+    let ordered = ranked
         .into_iter()
         .map(|(_, _, fragment)| fragment)
+        .collect::<Vec<_>>();
+    prioritize_rejected_negative_fragments_for_bias(ordered, bias)
+        .into_iter()
         .take(REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT)
         .collect()
+}
+
+fn prioritize_rejected_negative_fragments_for_bias(
+    ordered: Vec<String>,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> Vec<String> {
+    let Some(bias) = bias else {
+        return ordered;
+    };
+    let focus_match = |fragment: &String| {
+        let tags = negative_fragment_storyboard_risk_tags(fragment);
+        if bias.prefer_delivery && !bias.prefer_visual_continuity {
+            return tags
+                .iter()
+                .any(|tag| matches!(*tag, "dialogue" | "performance" | "emotion"));
+        }
+        if bias.prefer_visual_continuity && !bias.prefer_delivery {
+            return tags
+                .iter()
+                .any(|tag| matches!(*tag, "identity" | "lighting" | "motion" | "framing"));
+        }
+        false
+    };
+
+    let mut prioritized = ordered.into_iter().partition::<Vec<_>, _>(focus_match);
+    prioritized.0.extend(prioritized.1);
+    prioritized.0
+}
+
+fn selected_optimization_bias_to_rejected_selection_bias(
+    bias: Option<SelectedVideoMemoryOptimizationBias>,
+) -> Option<VideoPromptMemorySelectionBias> {
+    let Some(bias) = bias else {
+        return None;
+    };
+    Some(VideoPromptMemorySelectionBias {
+        prefer_delivery: bias.prefer_delivery || bias.prefer_emotion,
+        prefer_visual_continuity: bias.prefer_identity || bias.prefer_lighting,
+    })
 }
 
 fn storyboard_memory_key(storyboard_numeric_id: i32) -> Option<String> {
@@ -986,7 +1042,20 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     script_numeric_id: i32,
     content: &str,
 ) -> Result<(), ApiError> {
-    let Some(storyboard_numeric_id) = extract_key_value(content, "storyboardIds")
+    let selection_bias = selected_optimization_bias_to_rejected_selection_bias(
+        load_selected_video_memory_optimization_bias(
+            pool,
+            user_id,
+            project_numeric_id,
+            script_numeric_id,
+        )
+        .await?,
+    );
+    let Some(content) = prepare_rejected_video_negative_memory_for_storage(content, selection_bias)
+    else {
+        return Ok(());
+    };
+    let Some(storyboard_numeric_id) = extract_key_value(&content, "storyboardIds")
         .and_then(|value| value.parse::<i32>().ok())
         .filter(|id| *id > 0)
     else {
@@ -1018,9 +1087,9 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_content = if let Some(latest) = latest.as_deref() {
-        merge_rejected_video_negative_memory(latest, content)
+        merge_rejected_video_negative_memory_with_bias(latest, &content, selection_bias)
     } else {
-        content.to_string()
+        content
     };
 
     if latest.as_deref() == Some(next_content.as_str()) {
@@ -4050,10 +4119,19 @@ fn merged_subject_aliases(existing: &str, incoming: &str, subject: &str) -> Stri
 }
 
 fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> String {
+    merge_rejected_video_negative_memory_with_bias(existing, incoming, None)
+}
+
+fn merge_rejected_video_negative_memory_with_bias(
+    existing: &str,
+    incoming: &str,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> String {
     let incoming_prompt_seed = rejected_video_memory_prompt_seed(incoming);
     let existing_prompt_seed = rejected_video_memory_prompt_seed(existing);
     if incoming_prompt_seed != existing_prompt_seed {
-        return incoming.to_string();
+        return prepare_rejected_video_negative_memory_for_storage(incoming, bias)
+            .unwrap_or_else(|| incoming.to_string());
     }
 
     let storyboard_numeric_id = extract_key_value(incoming, "storyboardIds")
@@ -4067,11 +4145,12 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
         .unwrap_or_default();
     let subject_aliases = merged_subject_aliases(existing, incoming, &subject);
     let rejection_count = rejected_video_negative_rejection_count(existing).saturating_add(1);
-    let risk_tags = merged_rejected_video_risk_tags(existing, incoming);
-    let avoid = merge_rejected_negative_avoid(
+    let avoid = merge_rejected_negative_avoid_with_bias(
         extract_key_value(existing, "avoid").as_deref(),
         extract_key_value(incoming, "avoid").as_deref(),
+        bias,
     );
+    let risk_tags = rejected_video_risk_tags_from_avoid(&avoid);
 
     let mut parts = Vec::new();
     if !storyboard_numeric_id.is_empty() {
@@ -4094,14 +4173,6 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
         parts.push(format!("avoid={avoid}"));
     }
     parts.join(" | ")
-}
-
-fn merged_rejected_video_risk_tags(existing: &str, incoming: &str) -> Vec<String> {
-    let mut tags = extract_rejected_video_risk_tags(existing);
-    tags.extend(extract_rejected_video_risk_tags(incoming));
-    tags.sort();
-    tags.dedup();
-    tags
 }
 
 fn memory_matches_subject_candidates(content: &str, subject_candidates: &[String]) -> bool {
@@ -4133,7 +4204,11 @@ fn memory_subject_match_priority(content: &str, subject_candidates: &[String]) -
         .unwrap_or(usize::MAX)
 }
 
-fn merge_rejected_negative_avoid(existing: Option<&str>, incoming: Option<&str>) -> String {
+fn merge_rejected_negative_avoid_with_bias(
+    existing: Option<&str>,
+    incoming: Option<&str>,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> String {
     let mut fragments = Vec::new();
     for value in [existing, incoming].into_iter().flatten() {
         for fragment in split_prompt_note_fragments(value) {
@@ -4143,7 +4218,53 @@ fn merge_rejected_negative_avoid(existing: Option<&str>, incoming: Option<&str>)
             fragments.push(fragment);
         }
     }
-    compact_rejected_negative_memory_fragments_for_storage(fragments).join(", ")
+    compact_rejected_negative_memory_fragments_for_storage_with_bias(fragments, bias).join(", ")
+}
+
+fn rejected_video_risk_tags_from_avoid(avoid: &str) -> Vec<String> {
+    let mut tags = split_prompt_note_fragments(avoid)
+        .flat_map(|fragment| {
+            negative_fragment_storyboard_risk_tags(&fragment)
+                .iter()
+                .map(|tag| (*tag).to_string())
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    tags.sort();
+    tags.dedup();
+    tags
+}
+
+fn prepare_rejected_video_negative_memory_for_storage(
+    content: &str,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> Option<String> {
+    let avoid = extract_key_value(content, "avoid")?;
+    let fragments = split_prompt_note_fragments(&avoid).collect::<Vec<_>>();
+    let compacted =
+        compact_rejected_negative_memory_fragments_for_storage_with_bias(fragments, bias);
+    if compacted.is_empty() {
+        return None;
+    }
+
+    let risk_tags = rejected_video_risk_tags_from_avoid(&compacted.join(", "));
+    let mut parts = Vec::new();
+    for key in [
+        "storyboardIds",
+        "promptSeed",
+        "subject",
+        "subjectAliases",
+        "rejectionCount",
+    ] {
+        if let Some(value) = extract_key_value(content, key).filter(|value| !value.is_empty()) {
+            parts.push(format!("{key}={value}"));
+        }
+    }
+    if !risk_tags.is_empty() {
+        parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
+    parts.push(format!("avoid={}", compacted.join(", ")));
+    Some(parts.join(" | "))
 }
 
 fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
@@ -8907,10 +9028,12 @@ mod tests {
         compact_rejected_negative_avoid, compact_selected_memory_action,
         compact_selected_memory_setting, compact_selected_memory_subject,
         compact_selected_video_memory_for_focus, compact_video_continuity_note,
-        compact_video_style_prompt_note, merge_rejected_video_negative_memory,
-        merge_selected_memory_subject_action, parse_structured_storyboard_description,
-        plan_selected_video_memory_optimization, prepare_selected_video_memory_for_storage,
-        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
+        compact_video_style_prompt_note, merge_rejected_negative_avoid_with_bias,
+        merge_rejected_video_negative_memory, merge_selected_memory_subject_action,
+        parse_structured_storyboard_description, plan_selected_video_memory_optimization,
+        prepare_rejected_video_negative_memory_for_storage,
+        prepare_selected_video_memory_for_storage, rejected_video_negative_rejection_count,
+        select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_candidates_for_subject,
         select_pending_rejected_video_observation_candidates_for_subject_with_bias,
@@ -9857,6 +9980,52 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("riskTags=identity"), "{content}");
+    }
+
+    #[test]
+    fn prepare_rejected_video_negative_memory_for_storage_prefers_delivery_guards_when_bias_is_hot()
+    {
+        let prepared = prepare_rejected_video_negative_memory_for_storage(
+            "storyboardIds=12 | rejectionCount=1 | riskTags=lighting/dialogue/performance | avoid=avoid flat cold lighting, avoid blank expression or monotone delivery, avoid lip-sync mismatch",
+            Some(VideoPromptMemorySelectionBias {
+                prefer_delivery: true,
+                prefer_visual_continuity: false,
+            }),
+        )
+        .expect("prepared");
+
+        assert!(
+            prepared.contains(
+                "avoid=avoid blank expression or monotone delivery, avoid lip-sync mismatch"
+            ) || prepared.contains(
+                "avoid=avoid lip-sync mismatch, avoid blank expression or monotone delivery"
+            ),
+            "{prepared}"
+        );
+        assert!(!prepared.contains("avoid flat cold lighting"), "{prepared}");
+        assert!(
+            prepared.contains("riskTags=dialogue/emotion/performance"),
+            "{prepared}"
+        );
+    }
+
+    #[test]
+    fn merge_rejected_negative_avoid_with_bias_prefers_visual_guards_when_visual_bias_is_hot() {
+        let merged = merge_rejected_negative_avoid_with_bias(
+            Some("avoid blank expression or monotone delivery, avoid flat cold lighting"),
+            Some("avoid extreme camera angle"),
+            Some(VideoPromptMemorySelectionBias {
+                prefer_delivery: false,
+                prefer_visual_continuity: true,
+            }),
+        );
+
+        assert!(
+            merged == "avoid extreme camera angle, avoid flat cold lighting"
+                || merged == "avoid flat cold lighting, avoid extreme camera angle",
+            "{merged}"
+        );
+        assert!(!merged.contains("avoid blank expression or monotone delivery"));
     }
 
     #[test]
