@@ -1789,25 +1789,39 @@ pub(super) fn select_best_memory_style_note_for_lean_tier(
         return Some(best_single);
     };
 
-    let pair_focus = if video_prompt_scene_needs_emotional_memory(fields) {
-        Some(LeanMemoryPairFocus::Emotional)
-    } else if video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure) {
-        Some(LeanMemoryPairFocus::Dialogue)
-    } else if video_prompt_scene_needs_identity_lighting_pair_memory(fields, constraint_pressure) {
-        Some(LeanMemoryPairFocus::IdentityLighting)
-    } else {
-        None
-    };
-    let Some(pair_focus) = pair_focus else {
+    let pair_focuses =
+        collect_lean_memory_pair_focuses(fields, constraint_pressure).collect::<Vec<_>>();
+    if pair_focuses.is_empty() {
         return Some(best_single);
-    };
+    }
 
-    let best_pair = select_best_expressive_memory_pair_for_lean_tier(
-        fragments,
-        fields,
-        constraint_pressure,
-        pair_focus,
-    );
+    let best_pair = pair_focuses
+        .into_iter()
+        .filter_map(|pair_focus| {
+            select_best_expressive_memory_pair_for_lean_tier(
+                fragments,
+                fields,
+                constraint_pressure,
+                pair_focus,
+            )
+            .map(|(pair, score)| {
+                let focus_rank = match pair_focus {
+                    LeanMemoryPairFocus::Dialogue => 3,
+                    LeanMemoryPairFocus::DeliveryLighting => 2,
+                    LeanMemoryPairFocus::IdentityLighting => 1,
+                    LeanMemoryPairFocus::Emotional => 0,
+                };
+                (pair, score, focus_rank)
+            })
+        })
+        .max_by(|left, right| {
+            left.1
+                .cmp(&right.1)
+                .then_with(|| left.2.cmp(&right.2))
+                .then_with(|| right.0.chars().count().cmp(&left.0.chars().count()))
+                .then_with(|| right.0.cmp(&left.0))
+        })
+        .map(|(pair, score, _)| (pair, score));
     match best_pair {
         Some((pair, pair_score)) => {
             let single_score = score_memory_style_fragment_for_lean_tier(
@@ -1829,7 +1843,28 @@ pub(super) fn select_best_memory_style_note_for_lean_tier(
 pub(super) enum LeanMemoryPairFocus {
     Emotional,
     Dialogue,
+    DeliveryLighting,
     IdentityLighting,
+}
+
+pub(super) fn collect_lean_memory_pair_focuses(
+    fields: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> impl Iterator<Item = LeanMemoryPairFocus> {
+    let mut focuses = Vec::new();
+    if video_prompt_scene_needs_emotional_memory(fields) {
+        focuses.push(LeanMemoryPairFocus::Emotional);
+    }
+    if video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure) {
+        focuses.push(LeanMemoryPairFocus::Dialogue);
+    }
+    if video_prompt_scene_needs_delivery_lighting_pair_memory(fields, constraint_pressure) {
+        focuses.push(LeanMemoryPairFocus::DeliveryLighting);
+    }
+    if video_prompt_scene_needs_identity_lighting_pair_memory(fields, constraint_pressure) {
+        focuses.push(LeanMemoryPairFocus::IdentityLighting);
+    }
+    focuses.into_iter()
 }
 
 pub(super) fn video_prompt_scene_needs_dialogue_performance_memory(
@@ -1853,6 +1888,21 @@ pub(super) fn video_prompt_scene_needs_identity_lighting_pair_memory(
         && video_prompt_scene_has_lighting_risk(fields)
         && constraint_pressure.is_some_and(|pressure| {
             pressure.has_identity_guardrail || pressure.has_lighting_guardrail
+        })
+}
+
+pub(super) fn video_prompt_scene_needs_delivery_lighting_pair_memory(
+    fields: &StructuredStoryboardDescription,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    video_prompt_scene_has_lighting_risk(fields)
+        && (video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+            || current_storyboard_is_fragile_emotional_turn(fields))
+        && constraint_pressure.is_some_and(|pressure| {
+            pressure.has_lighting_guardrail
+                || pressure.has_dialogue_guardrail
+                || pressure.has_emotion_guardrail
+                || pressure.prefer_visual_continuity_memory_recall
         })
 }
 
@@ -2292,6 +2342,23 @@ pub(super) fn select_best_expressive_memory_pair_for_lean_tier(
                                 )
                         })
                 }
+                LeanMemoryPairFocus::DeliveryLighting => {
+                    families.contains(&Some("光影"))
+                        && [left.as_str(), right.as_str()].into_iter().any(|fragment| {
+                            match style_note_fragment_family(fragment) {
+                                Some("表演") => {
+                                    score_memory_fragment_human_performance_detail(
+                                        fragment,
+                                        Some("表演"),
+                                    ) >= 3
+                                }
+                                Some("语气") => memory_fragment_has_high_signal_voice_detail(
+                                    normalize_prompt_text(fragment).as_str(),
+                                ),
+                                _ => false,
+                            }
+                        })
+                }
                 LeanMemoryPairFocus::Emotional => {
                     families.contains(&Some("语气"))
                         || families.contains(&Some("情绪"))
@@ -2324,9 +2391,19 @@ pub(super) fn select_best_expressive_memory_pair_for_lean_tier(
             if families.contains(&Some("语气")) {
                 score += match pair_focus {
                     LeanMemoryPairFocus::Dialogue => 10,
+                    LeanMemoryPairFocus::DeliveryLighting => 4,
                     LeanMemoryPairFocus::Emotional => 8,
                     LeanMemoryPairFocus::IdentityLighting => 0,
                 };
+            }
+            if pair_focus == LeanMemoryPairFocus::DeliveryLighting {
+                score += 12;
+                if families.contains(&Some("光影")) {
+                    score += 5;
+                }
+                if families.contains(&Some("表演")) {
+                    score += 4;
+                }
             }
             if pair_focus == LeanMemoryPairFocus::Emotional && families.contains(&Some("情绪")) {
                 score += 5;

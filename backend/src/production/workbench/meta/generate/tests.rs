@@ -5937,6 +5937,55 @@ fn build_video_prompt_constraint_pressure_keeps_micro_performance_and_lighting_p
 }
 
 #[test]
+fn build_video_prompt_constraint_pressure_keeps_delivery_and_lighting_pair_for_fragile_dialogue_turn(
+) {
+    let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（林晚含泪低声说别走、雨夜窗边、林晚、4秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光夹霓虹反光、别走、雨声压住呼吸、A18）".into()),
+            storyboard_duration: Some("4s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("真人都市写实".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["林晚: 深灰针织外套".into()],
+            script_scene_anchors: vec!["雨夜窗边: 玻璃有潮湿反光".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["表演呼吸发颤，语气低声尾音发颤，光影冷蓝反光层次".into()],
+            continuity_notes: Vec::new(),
+        };
+
+    let result = build_video_prompt_with_constraint_pressure(
+        None,
+        Some("https://example.com/frame.png"),
+        Some(&context),
+        Some(VideoPromptConstraintPressure {
+            has_dialogue_guardrail: true,
+            has_emotion_guardrail: true,
+            has_lighting_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        }),
+    );
+
+    assert_eq!(result.diagnostics.memory_budget_tier, "lean");
+    assert!(result.prompt.contains("表演呼吸发颤"), "{}", result.prompt);
+    assert!(
+        result.prompt.contains("光影冷蓝反光层次"),
+        "{}",
+        result.prompt
+    );
+    assert!(
+        !result.prompt.contains("语气低声尾音发颤"),
+        "{}",
+        result.prompt
+    );
+    assert!(
+        result.diagnostics.memory_style_chars <= VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
+        "{:?}",
+        result.diagnostics
+    );
+}
+
+#[test]
 fn build_video_prompt_with_diagnostics_prefers_motion_fragment_in_lean_memory_tier_for_follow_shot()
 {
     let context = VideoPromptContext {
