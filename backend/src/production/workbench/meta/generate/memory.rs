@@ -171,20 +171,29 @@ pub(super) fn select_video_prompt_style_notes(
     .into_iter()
     .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
     .collect::<Vec<_>>();
-    let summary = crate::production::workbench::video_prompt_memory::select_script_video_style_memory_notes_for_storyboard(
-        rows,
-        Some(storyboard_row),
-    )
-    .into_iter()
-    .chain(
-        crate::production::workbench::video_prompt_memory::select_project_video_style_memory_notes_for_storyboard(
+    let summary = [
+        select_scoped_contextual_summary_style_note(
             rows,
-            Some(storyboard_row),
-        )
-        .into_iter(),
-    )
-        .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
-        .collect::<Vec<_>>();
+            storyboard_row,
+            constraint_pressure,
+            &[
+                "script_video_style_memory",
+                "script_video_generation_brief_memory",
+            ],
+        ),
+        select_scoped_contextual_summary_style_note(
+            rows,
+            storyboard_row,
+            constraint_pressure,
+            &[
+                "project_video_style_memory",
+                "project_video_generation_brief_memory",
+            ],
+        ),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>();
     let neighbor = collect_neighbor_video_prompt_style_notes(
         rows,
         storyboard_numeric_id,
@@ -228,6 +237,60 @@ pub(super) fn select_video_prompt_style_notes(
         return summary;
     }
     neighbor
+}
+
+fn select_scoped_contextual_summary_style_note(
+    rows: &[AgentMemoryRow],
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+    allowed_names: &[&str],
+) -> Option<String> {
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description);
+
+    rows.iter()
+        .filter(|row| allowed_names.contains(&row.name.as_str()))
+        .filter_map(|row| {
+            let note = contextual_style_memory_value_for_storyboard(row, Some(storyboard_row))
+                .or_else(|| extract_key_value(&row.content, "style"))
+                .or_else(|| extract_key_value(&row.content, "note"))?;
+            let compacted =
+                compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
+                    .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+            let evidence = fields
+                .as_ref()
+                .map(|fields| observation_style_note_context_evidence(&compacted, fields) as i32)
+                .unwrap_or(0);
+            let score = fields
+                .as_ref()
+                .map(|fields| {
+                    score_compacted_style_note_against_constraint_pressure(
+                        &compacted,
+                        fields,
+                        constraint_pressure.unwrap_or_default(),
+                    )
+                })
+                .unwrap_or(0);
+            let brief_priority = i32::from(row.name.contains("generation_brief"));
+            Some((
+                score,
+                evidence,
+                brief_priority,
+                compacted.chars().count(),
+                compacted,
+            ))
+        })
+        .max_by(|left, right| {
+            left.0
+                .cmp(&right.0)
+                .then(left.1.cmp(&right.1))
+                .then(left.2.cmp(&right.2))
+                .then_with(|| right.3.cmp(&left.3))
+                .then_with(|| right.4.cmp(&left.4))
+        })
+        .map(|(_, _, _, _, note)| note)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

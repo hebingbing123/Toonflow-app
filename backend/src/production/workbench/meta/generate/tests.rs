@@ -2914,7 +2914,7 @@ fn select_video_prompt_style_notes_uses_pressure_to_yield_exact_camera_template_
         },
         AgentMemoryRow {
             name: "project_video_generation_brief_memory".into(),
-            content: "sampleCount=5 | style=光影冷蓝反光层次，表演抬眼停顿，环境雨丝玻璃".into(),
+            content: "sampleCount=5 | style=光影冷蓝反光层次，环境雨丝玻璃".into(),
         },
     ];
     let storyboard_row = StoryboardPromptSeedRow {
@@ -2937,6 +2937,78 @@ fn select_video_prompt_style_notes_uses_pressure_to_yield_exact_camera_template_
             }),
         ),
         vec!["光影冷蓝反光层次".to_string()]
+    );
+}
+
+#[test]
+fn select_video_prompt_style_notes_prefers_script_generation_brief_for_fragile_dialogue_turn() {
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=6 | style=镜头稳定跟拍，光影冷蓝窗光，环境雨丝回响".into(),
+        },
+        AgentMemoryRow {
+            name: "script_video_generation_brief_memory".into(),
+            content: "sampleCount=4 | style=表演呼吸发颤后停顿，语气压低哽咽尾音 | riskTags=dialogue/performance | focusTags=delivery_realism/emotion_arc".into(),
+        },
+    ];
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚含泪低声说别走".into()),
+        video_desc: Some("（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）".into()),
+        duration: Some("5s".into()),
+    };
+
+    assert_eq!(
+        select_video_prompt_style_notes(
+            &rows,
+            18,
+            None,
+            &storyboard_row,
+            Some(VideoPromptConstraintPressure {
+                has_dialogue_guardrail: true,
+                has_emotion_guardrail: true,
+                prefer_delivery_memory_recall: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        ),
+        vec!["表演呼吸发颤后停顿，语气压低哽咽尾音".to_string()]
+    );
+}
+
+#[test]
+fn select_video_prompt_style_notes_prefers_project_generation_brief_for_visual_continuity() {
+    let rows = vec![
+        AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=8 | style=镜头稳定跟拍，情绪克制，光影冷蓝反光，环境玻璃雨痕".into(),
+        },
+        AgentMemoryRow {
+            name: "project_video_generation_brief_memory".into(),
+            content: "sampleCount=5 | style=光影冷蓝反光里保住脸侧轮廓，环境玻璃雨痕连续 | riskTags=identity/lighting | focusTags=identity_continuity/lighting_realism".into(),
+        },
+    ];
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚站在窗边看向门外".into()),
+        video_desc: Some("（林晚站在窗边看向门外、雨夜门厅、林晚、5秒、近景、稳定跟拍、停步抬眼看向门外、克制、潮湿路灯反光、无台词、雨声回响、A12）".into()),
+        duration: Some("5秒".into()),
+    };
+
+    assert_eq!(
+        select_video_prompt_style_notes(
+            &rows,
+            12,
+            None,
+            &storyboard_row,
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                has_lighting_guardrail: true,
+                prefer_visual_continuity_memory_recall: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        ),
+        vec!["光影里保住脸侧轮廓，环境玻璃雨痕连续".to_string()]
     );
 }
 
