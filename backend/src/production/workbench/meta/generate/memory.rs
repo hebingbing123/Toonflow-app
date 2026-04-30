@@ -171,6 +171,20 @@ pub(super) fn select_video_prompt_style_notes(
     .into_iter()
     .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
     .collect::<Vec<_>>();
+    let summary = crate::production::workbench::video_prompt_memory::select_script_video_style_memory_notes_for_storyboard(
+        rows,
+        Some(storyboard_row),
+    )
+    .into_iter()
+    .chain(
+        crate::production::workbench::video_prompt_memory::select_project_video_style_memory_notes_for_storyboard(
+            rows,
+            Some(storyboard_row),
+        )
+        .into_iter(),
+    )
+        .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+        .collect::<Vec<_>>();
     let neighbor = collect_neighbor_video_prompt_style_notes(
         rows,
         storyboard_numeric_id,
@@ -191,6 +205,7 @@ pub(super) fn select_video_prompt_style_notes(
         &exact,
         &role_memory_notes,
         &prioritized,
+        &summary,
         &neighbor,
         storyboard_row,
         constraint_pressure,
@@ -209,12 +224,16 @@ pub(super) fn select_video_prompt_style_notes(
     if !prioritized.is_empty() {
         return prioritized;
     }
+    if !summary.is_empty() {
+        return summary;
+    }
     neighbor
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) enum PressureStyleCandidateSource {
     Neighbor,
+    Summary,
     Prioritized,
     Role,
     Exact,
@@ -224,12 +243,12 @@ pub(super) fn select_pressure_prioritized_style_note_candidate(
     exact_notes: &[String],
     role_memory_notes: &[String],
     prioritized_notes: &[String],
+    summary_notes: &[String],
     neighbor_notes: &[String],
     storyboard_row: &StoryboardPromptSeedRow,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
-    let pressure = constraint_pressure
-        .filter(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())?;
+    let pressure = constraint_pressure.filter(|pressure| pressure.has_active_guardrail())?;
     let fields = storyboard_row
         .video_desc
         .as_deref()
@@ -249,6 +268,7 @@ pub(super) fn select_pressure_prioritized_style_note_candidate(
                     PressureStyleCandidateSource::Exact => 2,
                     PressureStyleCandidateSource::Role => 1,
                     PressureStyleCandidateSource::Prioritized => 0,
+                    PressureStyleCandidateSource::Summary => 0,
                     PressureStyleCandidateSource::Neighbor => -1,
                 };
         let len = compacted.chars().count();
@@ -273,6 +293,9 @@ pub(super) fn select_pressure_prioritized_style_note_candidate(
     }
     for note in prioritized_notes {
         consider(note, PressureStyleCandidateSource::Prioritized);
+    }
+    for note in summary_notes {
+        consider(note, PressureStyleCandidateSource::Summary);
     }
     for note in neighbor_notes {
         consider(note, PressureStyleCandidateSource::Neighbor);

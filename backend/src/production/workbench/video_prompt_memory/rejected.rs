@@ -1796,7 +1796,7 @@ fn render_observation_visual_style_constraint_fragments(
     fragments
 }
 
-pub(super) fn rejected_video_negative_rejection_count(content: &str) -> u32 {
+pub(crate) fn rejected_video_negative_rejection_count(content: &str) -> u32 {
     extract_key_value(content, "rejectionCount")
         .and_then(|value| value.parse::<u32>().ok())
         .filter(|count| *count > 0)

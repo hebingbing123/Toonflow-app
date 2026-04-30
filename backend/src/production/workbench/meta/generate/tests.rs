@@ -2866,6 +2866,7 @@ fn pressure_style_note_selection_prefers_micro_performance_for_dialogue_guardrai
             &["表演喉结滚动，语气压低气息尾音发颤".into()],
             &[],
             &[],
+            &[],
             &storyboard_row,
             Some(VideoPromptConstraintPressure {
                 has_dialogue_guardrail: true,
@@ -2892,6 +2893,7 @@ fn pressure_style_note_selection_keeps_lighting_when_only_lighting_guardrail_is_
             &["表演眼神放松".into()],
             &[],
             &[],
+            &[],
             &storyboard_row,
             Some(VideoPromptConstraintPressure {
                 has_lighting_guardrail: true,
@@ -2900,6 +2902,41 @@ fn pressure_style_note_selection_keeps_lighting_when_only_lighting_guardrail_is_
             }),
         ),
         Some("光影层次".to_string())
+    );
+}
+
+#[test]
+fn select_video_prompt_style_notes_uses_pressure_to_yield_exact_camera_template_to_summary() {
+    let rows = vec![
+        AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=18 | style=镜头中景稳定跟拍 | note=镜头中景稳定跟拍".into(),
+        },
+        AgentMemoryRow {
+            name: "project_video_generation_brief_memory".into(),
+            content: "sampleCount=5 | style=光影冷蓝反光层次，表演抬眼停顿，环境雨丝玻璃".into(),
+        },
+    ];
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚站在窗边看着雨丝划过玻璃".into()),
+        video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、静止、看着雨丝划过玻璃后迟疑抬眼、隐忍 / 克制、冷蓝窗光与路灯反射、无台词、雨声、A18）".into()),
+        duration: Some("4s".into()),
+    };
+
+    assert_eq!(
+        select_video_prompt_style_notes(
+            &rows,
+            18,
+            None,
+            &storyboard_row,
+            Some(VideoPromptConstraintPressure {
+                has_identity_guardrail: true,
+                has_lighting_guardrail: true,
+                prefer_visual_continuity_memory_recall: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        ),
+        vec!["光影冷蓝反光层次".to_string()]
     );
 }
 
