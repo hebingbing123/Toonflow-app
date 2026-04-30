@@ -7666,6 +7666,10 @@ mod tests {
             prepared.contains("riskTags=dialogue/emotion/performance"),
             "{prepared}"
         );
+        assert!(
+            prepared.contains("focusTags=delivery_realism"),
+            "{prepared}"
+        );
     }
 
     #[test]
@@ -8867,8 +8871,49 @@ mod tests {
         assert!(merged.contains("subject=晚晚"));
         assert!(merged.contains("subjectAliases=林晚"));
         assert!(merged.contains("riskTags=emotion/lighting/motion"));
+        assert!(merged.contains("focusTags=delivery_realism/identity_continuity/lighting_realism"));
         assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting"));
         assert!(!merged.contains("avoid oppressive or frantic mood"));
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_prefers_focus_tag_aligned_row_when_bias_is_hot()
+    {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚忍着眼泪低声开口".into()),
+            video_desc: Some(
+                "（林晚忍着眼泪低声开口、雨夜走廊、林晚/晚晚、5秒、近景、静止、抬眼停顿后低声开口、隐忍、冷蓝窗光、你先别说、雨声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+        let rows = vec![
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=9 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=identity/dialogue/performance | focusTags=identity_continuity | avoid=avoid face distortion or identity drift".into(),
+            },
+            AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=7 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=3 | riskTags=identity/dialogue/performance | focusTags=delivery_realism | avoid=avoid blank expression or monotone delivery".into(),
+            },
+        ];
+
+        let notes = select_rejected_video_negative_memory_notes_for_subject_with_bias(
+            &rows,
+            12,
+            None,
+            &["林晚".into(), "晚晚".into()],
+            Some(&storyboard_row),
+            Some(VideoPromptMemorySelectionBias {
+                prefer_delivery: true,
+                prefer_visual_continuity: false,
+            }),
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid blank expression or monotone delivery".to_string()]
+        );
     }
 
     #[test]

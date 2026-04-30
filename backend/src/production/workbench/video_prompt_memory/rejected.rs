@@ -37,6 +37,7 @@ pub(crate) fn build_rejected_video_negative_memory(
         return None;
     }
     let risk_tags = rejected_video_negative_risk_tags(&fields, &fragments);
+    let focus_tags = rejected_video_focus_tags_from_avoid(&fragments.join(", "));
 
     let mut parts = vec![format!("storyboardIds={storyboard_numeric_id}")];
     if let Some(prompt_seed) = storyboard_prompt_seed(row) {
@@ -56,6 +57,9 @@ pub(crate) fn build_rejected_video_negative_memory(
     parts.push("rejectionCount=1".to_string());
     if !risk_tags.is_empty() {
         parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
+    if !focus_tags.is_empty() {
+        parts.push(format!("focusTags={}", focus_tags.join("/")));
     }
     parts.push(format!("avoid={}", fragments.join(", ")));
     Some(parts.join(" | "))
@@ -703,6 +707,7 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             storyboard_numeric_id,
             allow_subject_scoped_negative_fallback,
         );
+        let focus_bias_score = score_rejected_video_memory_bias_for_content(&row.content, bias);
         let storyboard_distance =
             storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
                 .unwrap_or(i32::MAX);
@@ -712,7 +717,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
             negative_scored.push((
                 score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags)
-                    + score_rejected_video_memory_bias_for_fragment(&note, bias),
+                    + score_rejected_video_memory_bias_for_fragment(&note, bias)
+                    + focus_bias_score,
                 subject_priority,
                 idx,
                 overlap_priority,
@@ -725,7 +731,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             negative_scored.extend(ranked.into_iter().enumerate().map(|(fragment_idx, note)| {
                 (
                     score_rejected_negative_fragment_for_storyboard(&note, &storyboard_tags)
-                        + score_rejected_video_memory_bias_for_fragment(&note, bias),
+                        + score_rejected_video_memory_bias_for_fragment(&note, bias)
+                        + focus_bias_score,
                     subject_priority,
                     idx,
                     overlap_priority,
@@ -750,6 +757,7 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             storyboard_numeric_id,
             allow_subject_scoped_observation_fallback,
         );
+        let focus_bias_score = score_rejected_video_memory_bias_for_content(&row.content, bias);
         let storyboard_distance =
             storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
                 .unwrap_or(i32::MAX);
@@ -766,7 +774,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
             observation_scored.push((
                 score_pending_observation_note_for_storyboard(&note, &storyboard_tags)
-                    + score_rejected_video_memory_bias_for_fragment(&note, bias),
+                    + score_rejected_video_memory_bias_for_fragment(&note, bias)
+                    + focus_bias_score,
                 subject_priority,
                 idx,
                 overlap_priority,
@@ -780,7 +789,8 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
                 |(fragment_idx, note)| {
                     (
                         score_pending_observation_note_for_storyboard(&note, &storyboard_tags)
-                            + score_rejected_video_memory_bias_for_fragment(&note, bias),
+                            + score_rejected_video_memory_bias_for_fragment(&note, bias)
+                            + focus_bias_score,
                         subject_priority,
                         idx,
                         overlap_priority,
@@ -899,6 +909,7 @@ fn select_rejected_video_observation_summary_notes(
             let sample_count = observation_summary_sample_count(&row.content);
             let scope_priority = rejected_observation_summary_scope_priority(row.name.as_str());
             let subject_priority = memory_subject_match_priority(&row.content, subject_candidates);
+            let focus_bias_score = score_rejected_video_memory_bias_for_content(&row.content, bias);
             let Some(avoid) = extract_key_value(&row.content, "avoid") else {
                 return Vec::new();
             };
@@ -911,7 +922,8 @@ fn select_rejected_video_observation_summary_notes(
                         score_rejected_observation_summary_fragment_for_storyboard(
                             &fragment,
                             &storyboard_tags,
-                        ) + score_rejected_video_memory_bias_for_fragment(&fragment, bias),
+                        ) + score_rejected_video_memory_bias_for_fragment(&fragment, bias)
+                            + focus_bias_score,
                         subject_priority,
                         fragment_storyboard_risk_overlap(&fragment, &storyboard_tags),
                         row_overlap,
@@ -1370,6 +1382,43 @@ pub(super) fn score_rejected_video_memory_bias_for_fragment(
             "motion" if bias.prefer_visual_continuity => 18,
             _ => 0,
         };
+    }
+    score
+}
+
+fn score_rejected_video_memory_bias_for_content(
+    content: &str,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> i32 {
+    let Some(bias) = bias else {
+        return 0;
+    };
+    let tags = extract_rejected_video_focus_tags(content);
+    if tags.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0;
+    if bias.prefer_delivery
+        && tags
+            .iter()
+            .any(|tag| matches!(tag.as_str(), "delivery_realism"))
+    {
+        score += 28;
+    }
+    if bias.prefer_visual_continuity
+        && tags
+            .iter()
+            .any(|tag| matches!(tag.as_str(), "identity_continuity"))
+    {
+        score += 24;
+    }
+    if bias.prefer_visual_continuity
+        && tags
+            .iter()
+            .any(|tag| matches!(tag.as_str(), "lighting_realism"))
+    {
+        score += 20;
     }
     score
 }
@@ -2028,6 +2077,7 @@ fn merge_rejected_video_negative_memory_with_bias(
         bias,
     );
     let risk_tags = rejected_video_risk_tags_from_avoid(&avoid);
+    let focus_tags = rejected_video_focus_tags_from_avoid(&avoid);
 
     let mut parts = Vec::new();
     if !storyboard_numeric_id.is_empty() {
@@ -2045,6 +2095,9 @@ fn merge_rejected_video_negative_memory_with_bias(
     parts.push(format!("rejectionCount={rejection_count}"));
     if !risk_tags.is_empty() {
         parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
+    if !focus_tags.is_empty() {
+        parts.push(format!("focusTags={}", focus_tags.join("/")));
     }
     if !avoid.is_empty() {
         parts.push(format!("avoid={avoid}"));
@@ -2112,6 +2165,54 @@ fn rejected_video_risk_tags_from_avoid(avoid: &str) -> Vec<String> {
     tags
 }
 
+fn rejected_video_focus_tags_from_avoid(avoid: &str) -> Vec<String> {
+    let mut tags = Vec::new();
+    let mut push_tag = |candidate: &str| {
+        if !tags.iter().any(|existing| existing == candidate) {
+            tags.push(candidate.to_string());
+        }
+    };
+
+    for fragment in split_prompt_note_fragments(avoid) {
+        match negative_fragment_family(&fragment) {
+            "performance_delivery" | "lip_sync_mismatch" | "mood_tone" => {
+                push_tag("delivery_realism");
+            }
+            "character_consistency"
+            | "shot_change_only"
+            | "shot_change_framing"
+            | "camera_framing"
+            | "rushed_motion"
+            | "flicker_motion_jitter" => {
+                push_tag("identity_continuity");
+            }
+            "lighting_backlight" | "lighting_reflection" => {
+                push_tag("lighting_realism");
+            }
+            _ => {}
+        }
+    }
+
+    tags
+}
+
+fn extract_rejected_video_focus_tags(content: &str) -> Vec<String> {
+    extract_key_value(content, "focusTags")
+        .map(|value| {
+            value
+                .split(['/', ',', ';', '，', '；'])
+                .map(normalize_prompt_text)
+                .filter(|tag| !tag.is_empty())
+                .collect::<Vec<_>>()
+        })
+        .filter(|tags| !tags.is_empty())
+        .unwrap_or_else(|| {
+            extract_key_value(content, "avoid")
+                .map(|avoid| rejected_video_focus_tags_from_avoid(&avoid))
+                .unwrap_or_default()
+        })
+}
+
 pub(super) fn prepare_rejected_video_negative_memory_for_storage(
     content: &str,
     bias: Option<VideoPromptMemorySelectionBias>,
@@ -2125,6 +2226,7 @@ pub(super) fn prepare_rejected_video_negative_memory_for_storage(
     }
 
     let risk_tags = rejected_video_risk_tags_from_avoid(&compacted.join(", "));
+    let focus_tags = rejected_video_focus_tags_from_avoid(&compacted.join(", "));
     let mut parts = Vec::new();
     for key in [
         "storyboardIds",
@@ -2139,6 +2241,9 @@ pub(super) fn prepare_rejected_video_negative_memory_for_storage(
     }
     if !risk_tags.is_empty() {
         parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
+    if !focus_tags.is_empty() {
+        parts.push(format!("focusTags={}", focus_tags.join("/")));
     }
     parts.push(format!("avoid={}", compacted.join(", ")));
     Some(parts.join(" | "))
