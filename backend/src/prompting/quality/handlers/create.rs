@@ -182,6 +182,7 @@ mod tests {
                 removed_chars: Some(88),
                 removed_visual_rows: Some(1),
                 removed_duplicate_rows: Some(1),
+                focus_tags: vec!["delivery_realism".into(), "emotion_arc".into()],
             },
         );
 
@@ -192,6 +193,10 @@ mod tests {
             "promoted_selected_memory"
         );
         assert_eq!(merged["diagnostics"]["feedbackMemory"]["removedChars"], 88);
+        assert_eq!(
+            merged["diagnostics"]["feedbackMemory"]["focusTags"],
+            json!(["delivery_realism", "emotion_arc"])
+        );
     }
 
     #[test]
@@ -208,6 +213,7 @@ mod tests {
                 removed_chars: None,
                 removed_visual_rows: None,
                 removed_duplicate_rows: None,
+                focus_tags: vec!["identity_continuity".into()],
             },
         );
 

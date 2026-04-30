@@ -83,6 +83,7 @@ struct RecentQualitySignalSeedRow {
     is_bad_case: bool,
     bad_case_category: Option<String>,
     comments: Option<String>,
+    feedback_memory_focus_tags: Option<serde_json::Value>,
 }
 
 #[derive(Debug)]
@@ -737,7 +738,8 @@ async fn load_recent_quality_signal_rows(
           memory_delivery_priority_applied,
           is_bad_case,
           bad_case_category,
-          comments
+          comments,
+          model_params->'diagnostics'->'feedbackMemory'->'focusTags' as feedback_memory_focus_tags
         FROM app_quality_review
         WHERE user_id = $1
           AND project_id = $2
@@ -1313,6 +1315,14 @@ impl From<RecentQualitySignalSeedRow> for RecentQualitySignalRow {
             is_bad_case: value.is_bad_case,
             bad_case_category: value.bad_case_category,
             comments: value.comments,
+            feedback_memory_focus_tags: value
+                .feedback_memory_focus_tags
+                .as_ref()
+                .and_then(serde_json::Value::as_array)
+                .into_iter()
+                .flat_map(|items| items.iter())
+                .filter_map(|item| item.as_str().map(str::to_string))
+                .collect(),
         }
     }
 }
@@ -4218,6 +4228,7 @@ mod tests {
                 is_bad_case: true,
                 bad_case_category: Some("dialogue".into()),
                 comments: Some("台词像读文章，没情绪".into()),
+                feedback_memory_focus_tags: None,
             }],
         );
 
@@ -4263,6 +4274,7 @@ mod tests {
                 is_bad_case: true,
                 bad_case_category: Some("dialogue".into()),
                 comments: Some("台词像读文章，没情绪".into()),
+                feedback_memory_focus_tags: None,
             }],
         );
 

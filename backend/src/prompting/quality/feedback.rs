@@ -52,6 +52,8 @@ pub struct QualityFeedbackMemoryOutcome {
     pub removed_visual_rows: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub removed_duplicate_rows: Option<i32>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub focus_tags: Vec<String>,
 }
 
 /// Automatically write quality feedback to agent memory if the review indicates issues.
@@ -107,6 +109,7 @@ pub async fn maybe_write_quality_feedback_to_memory(
             removed_chars: None,
             removed_visual_rows: None,
             removed_duplicate_rows: None,
+            focus_tags: infer_quality_feedback_focus_tags(review, false),
         }));
     }
 
@@ -145,6 +148,7 @@ pub async fn maybe_write_quality_feedback_to_memory(
         removed_chars: None,
         removed_visual_rows: None,
         removed_duplicate_rows: None,
+        focus_tags: infer_quality_feedback_focus_tags(review, false),
     }))
 }
 
@@ -166,6 +170,7 @@ async fn promote_quality_review_selected_video_memory(
             removed_chars: None,
             removed_visual_rows: None,
             removed_duplicate_rows: None,
+            focus_tags: infer_quality_feedback_focus_tags(review, true),
         });
     };
 
@@ -200,6 +205,7 @@ async fn promote_quality_review_selected_video_memory(
             removed_chars: None,
             removed_visual_rows: None,
             removed_duplicate_rows: None,
+            focus_tags: infer_quality_feedback_focus_tags(review, true),
         });
     };
     let Some(memory_content) = build_selected_video_memory(storyboard_id, &prompt_seed) else {
@@ -213,6 +219,7 @@ async fn promote_quality_review_selected_video_memory(
             removed_chars: None,
             removed_visual_rows: None,
             removed_duplicate_rows: None,
+            focus_tags: infer_quality_feedback_focus_tags(review, true),
         });
     };
 
@@ -258,6 +265,7 @@ async fn promote_quality_review_selected_video_memory(
         removed_chars: Some(fit_i32(optimization.removed_chars)),
         removed_visual_rows: Some(fit_i32(optimization.removed_visual_rows)),
         removed_duplicate_rows: Some(fit_i32(optimization.removed_duplicate_rows)),
+        focus_tags: infer_quality_feedback_focus_tags(review, true),
     })
 }
 
@@ -384,6 +392,131 @@ fn infer_risk_tags(fragments: &[String]) -> Vec<&'static str> {
     }
 
     tags
+}
+
+fn infer_quality_feedback_focus_tags(
+    review: &QualityReview,
+    positive_outcome: bool,
+) -> Vec<String> {
+    let comment = review
+        .comments
+        .as_deref()
+        .map(str::to_lowercase)
+        .unwrap_or_default();
+    let category = review
+        .bad_case_category
+        .as_deref()
+        .map(str::to_lowercase)
+        .unwrap_or_default();
+    let mut tags = BTreeSet::new();
+
+    let dialogue_good = review.dialogue_naturalness.is_some_and(|score| score >= 8);
+    let dialogue_bad = review.dialogue_naturalness.is_some_and(|score| score <= 7);
+    let identity_good = review.character_consistency.is_some_and(|score| score >= 8);
+    let identity_bad = review.character_consistency.is_some_and(|score| score <= 6);
+    let visual_good = review.visual_quality.is_some_and(|score| score >= 8);
+    let visual_bad = review.visual_quality.is_some_and(|score| score <= 6);
+
+    if (positive_outcome
+        && (dialogue_good
+            || contains_any(
+                &comment,
+                &[
+                    "情绪递进",
+                    "口型自然",
+                    "台词自然",
+                    "不生硬",
+                    "有起伏",
+                    "会呼吸",
+                ],
+            )))
+        || (!positive_outcome
+            && (dialogue_bad
+                || contains_any(
+                    &comment,
+                    &[
+                        "读文章",
+                        "生硬",
+                        "没情绪",
+                        "单一状态",
+                        "平平淡淡",
+                        "干念",
+                        "口型",
+                    ],
+                )
+                || contains_any(&category, &["dialogue", "delivery", "lip", "voice"])))
+    {
+        tags.insert("delivery_realism".to_string());
+    }
+
+    if (positive_outcome
+        && contains_any(&comment, &["情绪递进", "情绪层次", "自然流动", "表演细腻"]))
+        || (!positive_outcome
+            && (contains_any(
+                &comment,
+                &[
+                    "没情绪",
+                    "情绪平",
+                    "木",
+                    "僵",
+                    "没有起伏",
+                    "blank expression",
+                    "emotionless",
+                ],
+            ) || contains_any(&category, &["emotion", "performance"])))
+    {
+        tags.insert("emotion_arc".to_string());
+    }
+
+    if (positive_outcome
+        && (identity_good || contains_any(&comment, &["人物稳定", "角色一致", "脸稳", "造型稳定"])))
+        || (!positive_outcome
+            && (identity_bad
+                || contains_any(
+                    &comment,
+                    &[
+                        "穿帮",
+                        "串脸",
+                        "脸崩",
+                        "角色不一致",
+                        "服装不一致",
+                        "五官不一致",
+                    ],
+                )
+                || contains_any(&category, &["identity", "character", "consistency", "face"])))
+    {
+        tags.insert("identity_continuity".to_string());
+    }
+
+    if (positive_outcome
+        && (visual_good
+            || contains_any(&comment, &["真实自然", "光影自然", "反光真实", "质感稳定"])))
+        || (!positive_outcome
+            && (visual_bad
+                || contains_any(
+                    &comment,
+                    &[
+                        "不自然",
+                        "很假",
+                        "假脸",
+                        "ai感",
+                        "像ai",
+                        "出戏",
+                        "闪烁",
+                        "塑料",
+                        "光影假",
+                    ],
+                )
+                || contains_any(&category, &["visual", "lighting", "continuity", "motion"])))
+    {
+        tags.insert("lighting_realism".to_string());
+    }
+
+    tags.into_iter().collect()
+}
+
+fn contains_any(value: &str, needles: &[&str]) -> bool {
+    needles.iter().any(|needle| value.contains(needle))
 }
 
 fn build_generic_quality_feedback_content(review: &QualityReview) -> String {

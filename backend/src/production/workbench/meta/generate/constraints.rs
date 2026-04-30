@@ -119,6 +119,7 @@ pub(crate) struct RecentQualitySignalRow {
     pub(crate) is_bad_case: bool,
     pub(crate) bad_case_category: Option<String>,
     pub(crate) comments: Option<String>,
+    pub(crate) feedback_memory_focus_tags: Vec<String>,
 }
 
 pub(crate) fn derive_recent_quality_constraint_pressure(
@@ -153,6 +154,28 @@ pub(crate) fn derive_recent_quality_constraint_pressure(
             && !row.is_bad_case
         {
             saw_delivery_success = true;
+        }
+
+        for tag in &row.feedback_memory_focus_tags {
+            match tag.as_str() {
+                "delivery_realism" => {
+                    pressure.has_dialogue_guardrail = true;
+                    pressure.prefer_delivery_memory_recall = true;
+                }
+                "emotion_arc" => {
+                    pressure.has_emotion_guardrail = true;
+                    pressure.prefer_delivery_memory_recall = true;
+                }
+                "identity_continuity" => {
+                    pressure.has_identity_guardrail = true;
+                    pressure.prefer_visual_continuity_memory_recall = true;
+                }
+                "lighting_realism" => {
+                    pressure.has_lighting_guardrail = true;
+                    pressure.prefer_visual_continuity_memory_recall = true;
+                }
+                _ => {}
+            }
         }
 
         if severe
@@ -295,6 +318,7 @@ mod tests {
             is_bad_case: true,
             bad_case_category: Some("identity".into()),
             comments: Some("人物穿帮，口型生硬，没情绪像读文章".into()),
+            feedback_memory_focus_tags: Vec::new(),
         }])
         .expect("pressure");
 
@@ -318,6 +342,7 @@ mod tests {
             is_bad_case: false,
             bad_case_category: None,
             comments: Some("情绪递进自然".into()),
+            feedback_memory_focus_tags: Vec::new(),
         }])
         .expect("pressure");
 
@@ -339,10 +364,39 @@ mod tests {
             is_bad_case: true,
             bad_case_category: Some("visual".into()),
             comments: Some("画面不自然而且有穿帮，像 AI 假脸".into()),
+            feedback_memory_focus_tags: Vec::new(),
         }])
         .expect("pressure");
 
         assert!(pressure.prefer_visual_continuity_memory_recall);
+    }
+
+    #[test]
+    fn derive_recent_quality_constraint_pressure_uses_feedback_memory_focus_tags() {
+        let pressure = derive_recent_quality_constraint_pressure(&[RecentQualitySignalRow {
+            passed: Some(true),
+            overall_score: Some(8),
+            dialogue_naturalness: Some(8),
+            character_consistency: Some(8),
+            visual_quality: Some(8),
+            memory_delivery_priority_applied: Some(false),
+            is_bad_case: false,
+            bad_case_category: None,
+            comments: None,
+            feedback_memory_focus_tags: vec![
+                "delivery_realism".into(),
+                "identity_continuity".into(),
+                "lighting_realism".into(),
+            ],
+        }])
+        .expect("pressure");
+
+        assert!(pressure.has_dialogue_guardrail);
+        assert!(pressure.has_identity_guardrail);
+        assert!(pressure.has_lighting_guardrail);
+        assert!(pressure.prefer_delivery_memory_recall);
+        assert!(pressure.prefer_visual_continuity_memory_recall);
+        assert!(pressure.forces_compact_memory);
     }
 
     #[test]
