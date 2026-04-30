@@ -1274,6 +1274,13 @@ pub(crate) async fn refresh_script_video_style_memory(
     project_numeric_id: i32,
     script_numeric_id: i32,
 ) -> Result<(), ApiError> {
+    let optimization_bias = load_selected_video_memory_optimization_bias(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+    )
+    .await?;
     let selected_rows = sqlx::query_as::<_, AgentMemoryRow>(
         r#"
         SELECT name, content
@@ -1320,7 +1327,11 @@ pub(crate) async fn refresh_script_video_style_memory(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let summarized = build_script_video_style_memory(&selected_rows, &rejected_rows);
+    let summarized = build_script_video_style_memory_with_bias(
+        &selected_rows,
+        &rejected_rows,
+        optimization_bias,
+    );
     replace_summary_memory(
         pool,
         user_id,
@@ -1387,6 +1398,55 @@ async fn load_selected_video_memory_optimization_bias(
     .bind(user_id)
     .bind(project_numeric_id)
     .bind(script_numeric_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut bias = SelectedVideoMemoryOptimizationBias::default();
+    for row in rows {
+        for tag in row
+            .feedback_memory_focus_tags
+            .as_ref()
+            .and_then(serde_json::Value::as_array)
+            .into_iter()
+            .flat_map(|items| items.iter())
+            .filter_map(serde_json::Value::as_str)
+        {
+            match tag {
+                "delivery_realism" => bias.prefer_delivery = true,
+                "emotion_arc" => bias.prefer_emotion = true,
+                "identity_continuity" => bias.prefer_identity = true,
+                "lighting_realism" => bias.prefer_lighting = true,
+                _ => {}
+            }
+        }
+    }
+
+    Ok((bias.prefer_delivery
+        || bias.prefer_emotion
+        || bias.prefer_identity
+        || bias.prefer_lighting)
+        .then_some(bias))
+}
+
+async fn load_project_video_memory_optimization_bias(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+) -> Result<Option<SelectedVideoMemoryOptimizationBias>, ApiError> {
+    let rows = sqlx::query_as::<_, OptimizationQualityFocusDbRow>(
+        r#"
+        SELECT model_params->'diagnostics'->'feedbackMemory'->'focusTags' as feedback_memory_focus_tags
+        FROM app_quality_review
+        WHERE user_id = $1
+          AND project_id = $2
+          AND target_type IN ('storyboard', 'output', 'video', 'asset')
+        ORDER BY created_at DESC
+        LIMIT 32
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -1825,11 +1885,45 @@ fn compact_selected_video_memory_style_for_focus(
     compact_video_style_prompt_note(&fragments.join("，"))
 }
 
+fn compact_summary_video_style_memory_for_focus(
+    content: &str,
+    bias: Option<SelectedVideoMemoryOptimizationBias>,
+) -> Option<String> {
+    let Some(bias) = bias else {
+        return Some(content.to_string());
+    };
+    if bias == SelectedVideoMemoryOptimizationBias::default() {
+        return Some(content.to_string());
+    }
+
+    let style = extract_key_value(content, "style")?;
+    let delivery = extract_key_value(content, "delivery");
+    let style =
+        compact_selected_video_memory_style_for_focus(&style, delivery.as_deref(), bias, false)?;
+
+    let mut parts = Vec::new();
+    if let Some(sample_count) =
+        extract_key_value(content, "sampleCount").filter(|value| !value.is_empty())
+    {
+        parts.push(format!("sampleCount={sample_count}"));
+    }
+    parts.push(format!("style={style}"));
+    if let Some(delivery) = delivery
+        .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .filter(|value| !value.is_empty() && value != &style)
+    {
+        parts.push(format!("delivery={delivery}"));
+    }
+    Some(parts.join(" | "))
+}
+
 pub(crate) async fn refresh_project_video_style_memory(
     pool: &PgPool,
     user_id: Uuid,
     project_numeric_id: i32,
 ) -> Result<(), ApiError> {
+    let optimization_bias =
+        load_project_video_memory_optimization_bias(pool, user_id, project_numeric_id).await?;
     let selected_rows = sqlx::query_as::<_, ScopedAgentMemoryRow>(
         r#"
         SELECT name, content, episodes_id
@@ -1872,7 +1966,11 @@ pub(crate) async fn refresh_project_video_style_memory(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let summarized = build_project_video_style_memory(&selected_rows, &rejected_rows);
+    let summarized = build_project_video_style_memory_with_bias(
+        &selected_rows,
+        &rejected_rows,
+        optimization_bias,
+    );
     replace_project_summary_memory(
         pool,
         user_id,
@@ -6266,9 +6364,18 @@ fn local_shot_framing_fragment(fragment: &str) -> bool {
         .any(|keyword| fragment.contains(keyword))
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 fn build_script_video_style_memory(
     rows: &[AgentMemoryRow],
     rejected_rows: &[AgentMemoryRow],
+) -> Option<String> {
+    build_script_video_style_memory_with_bias(rows, rejected_rows, None)
+}
+
+fn build_script_video_style_memory_with_bias(
+    rows: &[AgentMemoryRow],
+    rejected_rows: &[AgentMemoryRow],
+    optimization_bias: Option<SelectedVideoMemoryOptimizationBias>,
 ) -> Option<String> {
     let notes = distinct_selected_video_style_notes(rows);
     if notes.len() < 2 {
@@ -6327,12 +6434,21 @@ fn build_script_video_style_memory(
     if let Some(delivery) = delivery.filter(|value| value != &style) {
         parts.push(format!("delivery={delivery}"));
     }
-    Some(parts.join(" | "))
+    compact_summary_video_style_memory_for_focus(&parts.join(" | "), optimization_bias)
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 fn build_project_video_style_memory(
     rows: &[ScopedAgentMemoryRow],
     rejected_rows: &[ScopedAgentMemoryRow],
+) -> Option<String> {
+    build_project_video_style_memory_with_bias(rows, rejected_rows, None)
+}
+
+fn build_project_video_style_memory_with_bias(
+    rows: &[ScopedAgentMemoryRow],
+    rejected_rows: &[ScopedAgentMemoryRow],
+    optimization_bias: Option<SelectedVideoMemoryOptimizationBias>,
 ) -> Option<String> {
     let notes = distinct_project_selected_video_style_notes(rows);
     if notes.len() < 3 {
@@ -6397,7 +6513,7 @@ fn build_project_video_style_memory(
     if let Some(delivery) = delivery.filter(|value| value != &style) {
         parts.push(format!("delivery={delivery}"));
     }
-    Some(parts.join(" | "))
+    compact_summary_video_style_memory_for_focus(&parts.join(" | "), optimization_bias)
 }
 
 fn build_script_role_video_style_memories(rows: &[AgentMemoryRow]) -> Vec<String> {
@@ -9021,9 +9137,10 @@ async fn replace_project_summary_memories(
 mod tests {
     use super::{
         build_project_role_video_style_memories, build_project_video_style_memory,
-        build_rejected_video_negative_memory, build_script_role_video_observation_memories,
-        build_script_role_video_style_memories, build_script_video_observation_memory,
-        build_script_video_style_memory, build_selected_video_memory,
+        build_project_video_style_memory_with_bias, build_rejected_video_negative_memory,
+        build_script_role_video_observation_memories, build_script_role_video_style_memories,
+        build_script_video_observation_memory, build_script_video_style_memory,
+        build_script_video_style_memory_with_bias, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
         compact_selected_memory_setting, compact_selected_memory_subject,
@@ -13034,6 +13151,46 @@ mod tests {
     }
 
     #[test]
+    fn build_project_video_style_memory_with_bias_prefers_identity_and_lighting_fragments() {
+        let summary = build_project_video_style_memory_with_bias(
+            &[
+                ScopedAgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=3 | subject=林晚 | subjectAliases=林晚/晚晚 | style=镜头稳定跟拍，表演抬眼停顿，语气轻声克制，情绪克制，光影暖金逆光，环境窗帘轻摆 | note=...".into(),
+                    episodes_id: Some(1),
+                },
+                ScopedAgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=9 | subject=顾承泽 | subjectAliases=顾承泽/顾总 | style=镜头近景稳定跟拍，表演抬眼停顿，语气轻声克制，情绪隐忍，光影暖金逆光，环境窗帘轻摆 | note=...".into(),
+                    episodes_id: Some(2),
+                },
+                ScopedAgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=17 | subject=苏蔓 | subjectAliases=苏蔓/阿蔓 | style=镜头稳定跟拍，表演抬眼停顿，语气轻声克制，情绪克制，光影暖金逆光，环境窗帘轻摆 | note=...".into(),
+                    episodes_id: Some(3),
+                },
+            ],
+            &[],
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: false,
+                prefer_emotion: false,
+                prefer_identity: true,
+                prefer_lighting: true,
+            }),
+        )
+        .expect("summary");
+
+        assert!(
+            summary.contains("style=镜头稳定跟拍，光影暖金逆光，环境窗帘轻摆"),
+            "{summary}"
+        );
+        assert!(!summary.contains("表演抬眼停顿"), "{summary}");
+        assert!(!summary.contains("语气轻声克制"), "{summary}");
+        assert!(!summary.contains("情绪克制"), "{summary}");
+        assert!(!summary.contains("情绪隐忍"), "{summary}");
+    }
+
+    #[test]
     fn build_script_video_style_memory_drops_generic_cold_mood_if_specific_cold_lighting_already_carries_it(
     ) {
         let summary = build_script_video_style_memory(
@@ -13054,6 +13211,44 @@ mod tests {
         assert!(summary.contains("sampleCount=2"));
         assert!(summary.contains("style=光影阴天冷光"));
         assert!(!summary.contains("情绪冷调"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_with_bias_prefers_delivery_and_lighting_fragments() {
+        let summary = build_script_video_style_memory_with_bias(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=11 | style=镜头稳定跟拍，表演喉结滚动，语气低声克制，情绪克制，动作从容克制，光影冷蓝窗光，环境雨丝玻璃 | note=...".into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | style=镜头近景稳定跟拍，表演喉结滚动，语气低声克制，情绪隐忍，动作从容克制，光影冷蓝窗光，环境雨丝玻璃 | note=...".into(),
+                },
+            ],
+            &[],
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: true,
+                prefer_emotion: true,
+                prefer_identity: false,
+                prefer_lighting: true,
+            }),
+        )
+        .expect("summary");
+
+        assert!(
+            summary.contains("style=镜头稳定跟拍，光影冷蓝窗光，环境雨丝玻璃"),
+            "{summary}"
+        );
+        assert!(summary.contains("delivery=表演喉结滚动"), "{summary}");
+        assert!(
+            !summary.contains("style=镜头稳定跟拍，表演喉结滚动"),
+            "{summary}"
+        );
+        assert!(!summary.contains("语气低声克制"), "{summary}");
+        assert!(!summary.contains("情绪克制"), "{summary}");
+        assert!(!summary.contains("情绪隐忍"), "{summary}");
+        assert!(!summary.contains("动作从容克制"), "{summary}");
     }
 
     #[test]
