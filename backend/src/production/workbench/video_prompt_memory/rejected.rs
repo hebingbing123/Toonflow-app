@@ -2174,7 +2174,7 @@ fn rejected_video_focus_tags_from_avoid(avoid: &str) -> Vec<String> {
     };
 
     for fragment in split_prompt_note_fragments(avoid) {
-        match negative_fragment_family(&fragment) {
+        match observation_note_family(&fragment) {
             "performance_delivery" | "lip_sync_mismatch" | "mood_tone" => {
                 push_tag("delivery_realism");
             }
@@ -2211,6 +2211,52 @@ fn extract_rejected_video_focus_tags(content: &str) -> Vec<String> {
                 .map(|avoid| rejected_video_focus_tags_from_avoid(&avoid))
                 .unwrap_or_default()
         })
+}
+
+fn negative_fragment_family(value: &str) -> &'static str {
+    let canonical = canonical_negative_fragment(value);
+    match canonical.as_str() {
+        "avoid flicker" | "avoid flicker or motion jitter" => "flicker_motion_jitter",
+        "avoid unnecessary shot changes" => "shot_change_only",
+        "avoid extra shot changes or wrong framing" => "shot_change_framing",
+        "avoid rushed motion" | "avoid rushed or jerky motion" => "rushed_motion",
+        "avoid blank expression"
+        | "avoid monotone delivery"
+        | "avoid blank expression or monotone delivery" => "performance_delivery",
+        "avoid extreme camera angle"
+        | "avoid overly tight close-up framing"
+        | "avoid extreme camera angle or overly tight close-up framing" => "camera_framing",
+        "avoid oppressive mood"
+        | "avoid frantic mood"
+        | "avoid oppressive or frantic mood"
+        | "avoid overly cold emotional tone"
+        | "avoid overly cold, oppressive, or frantic mood" => "mood_tone",
+        "avoid flat cold lighting"
+        | "avoid harsh backlight silhouette"
+        | "avoid flat cold lighting or harsh backlight silhouette" => "lighting_backlight",
+        "avoid distracting neon reflections" => "lighting_reflection",
+        "avoid lip-sync mismatch" => "lip_sync_mismatch",
+        "avoid face distortion"
+        | "avoid identity drift"
+        | "avoid costume drift"
+        | "avoid face distortion or identity drift"
+        | "avoid costume or character drift"
+        | "avoid face drift or costume inconsistency"
+        | "avoid face distortion, identity drift, costume drift" => "character_consistency",
+        _ => "",
+    }
+}
+
+fn canonical_negative_fragment(value: &str) -> String {
+    value
+        .trim()
+        .trim_matches(|ch: char| {
+            ch.is_whitespace() || matches!(ch, ',' | ';' | '，' | '；' | '.' | '。' | ':' | '：')
+        })
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_ascii_lowercase()
 }
 
 pub(super) fn prepare_rejected_video_negative_memory_for_storage(

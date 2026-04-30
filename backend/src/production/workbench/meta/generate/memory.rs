@@ -997,6 +997,8 @@ fn storyboard_memory_trim_quality_score(
 
     let should_prefer_delivery =
         storyboard_trim_prefers_delivery_memory(storyboard_row, constraint_pressure);
+    let should_prefer_visual_continuity =
+        storyboard_trim_prefers_visual_continuity_memory(constraint_pressure);
     let style = extract_key_value(&row.content, "style")
         .or_else(|| extract_key_value(&row.content, "note"))
         .unwrap_or_default();
@@ -1010,6 +1012,8 @@ fn storyboard_memory_trim_quality_score(
     let has_emotion = fragments
         .iter()
         .any(|fragment| fragment.starts_with("情绪"));
+    let has_identity = selected_memory_content_has_identity_anchor(&row.content, &fragments);
+    let has_lighting = selected_memory_fragments_have_visual_continuity_anchor(&fragments);
     let visual_only = !fragments.is_empty()
         && fragments.iter().all(|fragment| {
             fragment.starts_with("镜头")
@@ -1036,6 +1040,12 @@ fn storyboard_memory_trim_quality_score(
     if has_emotion {
         score += 6;
     }
+    if has_identity {
+        score += 6;
+    }
+    if has_lighting {
+        score += 6;
+    }
     if should_prefer_delivery {
         if has_delivery {
             score += 26;
@@ -1051,6 +1061,20 @@ fn storyboard_memory_trim_quality_score(
         }
         if local_framing_only {
             score -= 14;
+        }
+    }
+    if should_prefer_visual_continuity {
+        if has_identity {
+            score += 24;
+        }
+        if has_lighting {
+            score += 22;
+        }
+        if visual_only && !has_identity && !has_lighting {
+            score -= 10;
+        }
+        if local_framing_only && !has_identity && !has_lighting {
+            score -= 12;
         }
     } else if constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory) {
         if visual_only {
@@ -1098,6 +1122,53 @@ fn storyboard_trim_prefers_delivery_memory(
     ]
     .iter()
     .any(|keyword| expressive_context.contains(keyword))
+}
+
+fn storyboard_trim_prefers_visual_continuity_memory(
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    constraint_pressure.is_some_and(|pressure| {
+        pressure.prefer_visual_continuity_memory_recall
+            || pressure.has_identity_guardrail
+            || pressure.has_lighting_guardrail
+    })
+}
+
+fn selected_memory_content_has_identity_anchor(content: &str, fragments: &[String]) -> bool {
+    extract_key_value(content, "subject")
+        .is_some_and(|value| !normalize_prompt_text(&value).is_empty())
+        || extract_key_value(content, "subjectAliases")
+            .is_some_and(|value| !normalize_prompt_text(&value).is_empty())
+        || fragments.iter().any(|fragment| {
+            fragment.starts_with("表演")
+                && [
+                    "眼神", "抬眼", "回头", "面部", "脸", "喉结", "唇", "眉", "泪",
+                ]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+        })
+}
+
+fn selected_memory_fragments_have_visual_continuity_anchor(fragments: &[String]) -> bool {
+    fragments.iter().any(|fragment| {
+        fragment.starts_with("光影")
+            || fragment.starts_with("环境")
+            || fragment.starts_with("声场")
+            || (fragment.starts_with("镜头")
+                && [
+                    "逆光",
+                    "反光",
+                    "低机位",
+                    "压迫",
+                    "跟拍",
+                    "推进",
+                    "拉远",
+                    "摇镜",
+                    "霓虹",
+                ]
+                .iter()
+                .any(|keyword| fragment.contains(keyword)))
+    })
 }
 
 pub(super) fn memory_prompt_seed_matches(

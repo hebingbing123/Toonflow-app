@@ -3492,6 +3492,64 @@ fn trim_video_prompt_memory_rows_with_context_keeps_visual_selected_rows_when_sc
 }
 
 #[test]
+fn trim_video_prompt_memory_rows_with_context_prioritizes_identity_and_lighting_selected_rows_when_visual_pressure_is_hot(
+) {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚在雨夜窗边慢慢回头".into()),
+        video_desc: Some(
+            "（林晚在雨夜窗边慢慢回头、雨夜窗边、林晚、5秒、近景、缓推、停步后回头看向窗外、隐忍、冷蓝窗光与玻璃反射、无台词、雨声、A31）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let mut rows = vec![AgentMemoryRow {
+        name: "selected_video_memory".into(),
+        content: "storyboardIds=31 | promptSeed=seed-31-current | subject=林晚 | style=表演回头前眼神停顿，光影冷蓝窗光映脸，环境玻璃反射 | note=保持林晚脸部窗光和回头停顿一致".into(),
+    }];
+    for id in 32..=37 {
+        rows.push(AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: format!(
+                "storyboardIds={id} | promptSeed=seed-{id} | style=镜头近景稳定跟拍，构图压迫"
+            ),
+        });
+    }
+    rows.push(AgentMemoryRow {
+        name: "selected_video_memory".into(),
+        content: "storyboardIds=38 | promptSeed=seed-38 | style=镜头中景稳定跟拍，光影冷调反光"
+            .into(),
+    });
+
+    let trimmed = trim_video_prompt_memory_rows_with_context(
+        rows,
+        31,
+        Some("seed-31-current"),
+        &["林晚".to_string()],
+        Some(&storyboard_row),
+        Some(VideoPromptConstraintPressure {
+            prefer_visual_continuity_memory_recall: true,
+            has_identity_guardrail: true,
+            has_lighting_guardrail: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        }),
+    );
+
+    let selected = trimmed
+        .iter()
+        .filter(|row| row.name == "selected_video_memory")
+        .map(|row| row.content.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(selected.len(), 6);
+    assert!(selected
+        .iter()
+        .any(|row| { row.contains("storyboardIds=31") && row.contains("subject=林晚") }));
+    assert!(!selected
+        .iter()
+        .any(|row| row.contains("storyboardIds=38") && row.contains("镜头中景稳定跟拍")));
+}
+
+#[test]
 fn trim_video_prompt_memory_rows_with_context_drops_project_style_fill_when_script_memory_is_precise(
 ) {
     let storyboard_row = StoryboardPromptSeedRow {
