@@ -48,7 +48,7 @@ fn build_video_prompt_compacts_structured_storyboard_description() {
     assert!(prompt.contains("Single cinematic shot."));
     assert!(prompt.contains("Subject: 主角独立城楼远眺苍茫大地."));
     assert!(prompt.contains("Camera: 全景, 缓慢推进."));
-    assert!(prompt.contains("Use the supplied frame as the visual reference."));
+    assert!(prompt.contains("Use the supplied frame as reference."));
     assert!(!prompt.contains("A001/A003"));
 }
 
