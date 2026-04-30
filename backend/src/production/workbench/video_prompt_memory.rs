@@ -21,6 +21,8 @@ use crate::error::ApiError;
 const SELECTED_VIDEO_MEMORY_NAME: &str = "selected_video_memory";
 const SCRIPT_VIDEO_STYLE_MEMORY_NAME: &str = "script_video_style_memory";
 const PROJECT_VIDEO_STYLE_MEMORY_NAME: &str = "project_video_style_memory";
+const SCRIPT_VIDEO_GENERATION_BRIEF_MEMORY_NAME: &str = "script_video_generation_brief_memory";
+const PROJECT_VIDEO_GENERATION_BRIEF_MEMORY_NAME: &str = "project_video_generation_brief_memory";
 const SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME: &str = "script_role_video_style_memory";
 const PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME: &str = "project_role_video_style_memory";
 const REJECTED_VIDEO_NEGATIVE_MEMORY_NAME: &str = "rejected_video_negative_memory";
@@ -31,6 +33,8 @@ const PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME: &str = "project_role_video_obs
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
+const SCRIPT_VIDEO_GENERATION_BRIEF_MEMORY_KEEP_ROWS: i64 = 1;
+const PROJECT_VIDEO_GENERATION_BRIEF_MEMORY_KEEP_ROWS: i64 = 1;
 const SCRIPT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 6;
 const PROJECT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 8;
 const PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT: usize = 2;
@@ -1332,6 +1336,10 @@ pub(crate) async fn refresh_script_video_style_memory(
         &rejected_rows,
         optimization_bias,
     );
+    let observation_summary = build_script_video_observation_memory_with_bias(
+        &rejected_rows,
+        selected_optimization_bias_to_rejected_selection_bias(optimization_bias),
+    );
     replace_summary_memory(
         pool,
         user_id,
@@ -1359,12 +1367,24 @@ pub(crate) async fn refresh_script_video_style_memory(
         user_id,
         project_numeric_id,
         script_numeric_id,
-        SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME,
-        build_script_video_observation_memory_with_bias(
-            &rejected_rows,
-            selected_optimization_bias_to_rejected_selection_bias(optimization_bias),
+        SCRIPT_VIDEO_GENERATION_BRIEF_MEMORY_NAME,
+        build_video_generation_brief_memory(
+            summarized.as_deref(),
+            observation_summary.as_deref(),
+            optimization_bias,
         )
         .as_deref(),
+        SCRIPT_VIDEO_GENERATION_BRIEF_MEMORY_KEEP_ROWS,
+    )
+    .await?;
+
+    replace_summary_memory(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME,
+        observation_summary.as_deref(),
         SCRIPT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
     )
     .await?;
@@ -1978,6 +1998,10 @@ pub(crate) async fn refresh_project_video_style_memory(
         &rejected_rows,
         optimization_bias,
     );
+    let observation_summary = build_project_video_observation_memory_with_bias(
+        &rejected_rows,
+        selected_optimization_bias_to_rejected_selection_bias(optimization_bias),
+    );
     replace_project_summary_memory(
         pool,
         user_id,
@@ -2002,12 +2026,23 @@ pub(crate) async fn refresh_project_video_style_memory(
         pool,
         user_id,
         project_numeric_id,
-        PROJECT_VIDEO_OBSERVATION_MEMORY_NAME,
-        build_project_video_observation_memory_with_bias(
-            &rejected_rows,
-            selected_optimization_bias_to_rejected_selection_bias(optimization_bias),
+        PROJECT_VIDEO_GENERATION_BRIEF_MEMORY_NAME,
+        build_video_generation_brief_memory(
+            summarized.as_deref(),
+            observation_summary.as_deref(),
+            optimization_bias,
         )
         .as_deref(),
+        PROJECT_VIDEO_GENERATION_BRIEF_MEMORY_KEEP_ROWS,
+    )
+    .await?;
+
+    replace_project_summary_memory(
+        pool,
+        user_id,
+        project_numeric_id,
+        PROJECT_VIDEO_OBSERVATION_MEMORY_NAME,
+        observation_summary.as_deref(),
         PROJECT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
     )
     .await?;
@@ -3258,26 +3293,21 @@ fn score_rejected_video_memory_bias_for_fragment(
     fragment: &str,
     bias: Option<VideoPromptMemorySelectionBias>,
 ) -> i32 {
-    const MEMORY_BIAS_PRIORITY_SCORE: i32 = 36;
-
     let Some(bias) = bias else {
         return 0;
     };
     let tags = negative_fragment_storyboard_risk_tags(fragment);
     let mut score = 0;
-    if bias.prefer_delivery
-        && tags
-            .iter()
-            .any(|tag| matches!(*tag, "dialogue" | "performance" | "emotion"))
-    {
-        score += MEMORY_BIAS_PRIORITY_SCORE;
-    }
-    if bias.prefer_visual_continuity
-        && tags
-            .iter()
-            .any(|tag| matches!(*tag, "identity" | "lighting" | "motion" | "framing"))
-    {
-        score += MEMORY_BIAS_PRIORITY_SCORE;
+    for tag in tags {
+        score += match *tag {
+            "performance" if bias.prefer_delivery => 42,
+            "dialogue" | "emotion" if bias.prefer_delivery => 36,
+            "identity" if bias.prefer_visual_continuity => 42,
+            "lighting" if bias.prefer_visual_continuity => 36,
+            "framing" if bias.prefer_visual_continuity => 24,
+            "motion" if bias.prefer_visual_continuity => 18,
+            _ => 0,
+        };
     }
     score
 }
@@ -7090,8 +7120,12 @@ fn observation_risk_tag_bias_score(tag: &str, bias: Option<VideoPromptMemorySele
         return 0;
     };
     match tag {
-        "dialogue" | "performance" | "emotion" if bias.prefer_delivery => 2,
-        "identity" | "lighting" | "motion" | "framing" if bias.prefer_visual_continuity => 2,
+        "performance" if bias.prefer_delivery => 5,
+        "dialogue" | "emotion" if bias.prefer_delivery => 4,
+        "identity" if bias.prefer_visual_continuity => 5,
+        "lighting" if bias.prefer_visual_continuity => 4,
+        "framing" if bias.prefer_visual_continuity => 3,
+        "motion" if bias.prefer_visual_continuity => 2,
         _ => 0,
     }
 }
@@ -11959,7 +11993,7 @@ mod tests {
         )
         .expect("summary");
 
-        assert!(summary.contains("riskTags=dialogue/lighting"), "{summary}");
+        assert!(summary.contains("riskTags=dialogue/performance"), "{summary}");
         assert!(
             summary.contains("avoid blank expression or monotone delivery"),
             "{summary}"
@@ -12056,7 +12090,7 @@ mod tests {
                 },
                 AgentMemoryRow {
                     name: "rejected_video_negative_memory".into(),
-                    content: "storyboardIds=10 | subject=晚晚 | subjectAliases=林晚/晚晚 | rejectionCount=2 | riskTags=identity/dialogue | avoid=avoid costume or character drift, avoid blank expression or monotone delivery".into(),
+                    content: "storyboardIds=10 | subject=晚晚 | subjectAliases=林晚/晚晚 | rejectionCount=2 | riskTags=identity/dialogue | avoid=avoid face distortion or identity drift, avoid blank expression or monotone delivery".into(),
                 },
                 AgentMemoryRow {
                     name: "rejected_video_negative_memory".into(),
