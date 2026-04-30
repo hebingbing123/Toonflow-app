@@ -746,20 +746,35 @@ pub(crate) async fn persist_selected_video_memory(
     script_numeric_id: i32,
     content: &str,
 ) -> Result<(), ApiError> {
+    let optimization_bias = load_selected_video_memory_optimization_bias(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+    )
+    .await?;
+    let Some(content) = prepare_selected_video_memory_for_storage(content, optimization_bias)
+    else {
+        return Ok(());
+    };
     let latest_same_scope = load_latest_selected_video_memory_for_scope(
         pool,
         user_id,
         project_numeric_id,
         script_numeric_id,
-        content,
+        &content,
     )
     .await?;
 
-    if latest_same_scope.as_deref() == Some(content) {
+    if latest_same_scope.as_deref() == Some(content.as_str()) {
         return Ok(());
     }
     if latest_same_scope.as_deref().is_some_and(|existing| {
-        selected_video_memory_update_would_reduce_quality(existing, content)
+        selected_video_memory_update_would_reduce_quality_with_bias(
+            existing,
+            &content,
+            optimization_bias,
+        )
     }) {
         return Ok(());
     }
@@ -769,7 +784,7 @@ pub(crate) async fn persist_selected_video_memory(
         user_id,
         project_numeric_id,
         script_numeric_id,
-        content,
+        &content,
     )
     .await?;
 
@@ -786,7 +801,7 @@ pub(crate) async fn persist_selected_video_memory(
     .bind(project_numeric_id)
     .bind(script_numeric_id)
     .bind(SELECTED_VIDEO_MEMORY_NAME)
-    .bind(content)
+    .bind(&content)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -818,6 +833,19 @@ pub(crate) async fn persist_selected_video_memory(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(())
+}
+
+fn prepare_selected_video_memory_for_storage(
+    content: &str,
+    bias: Option<SelectedVideoMemoryOptimizationBias>,
+) -> Option<String> {
+    let focus_tags = selected_video_memory_focus_tags_from_bias(bias);
+    let compacted = if focus_tags.is_empty() {
+        content.to_string()
+    } else {
+        compact_selected_video_memory_for_focus(content, &focus_tags)
+    };
+    (!selected_video_memory_is_low_signal(&compacted)).then_some(compacted)
 }
 
 async fn load_latest_selected_video_memory_for_scope(
@@ -1498,6 +1526,28 @@ fn selected_video_memory_focus_bias_from_tags(
         }
     }
     bias
+}
+
+fn selected_video_memory_focus_tags_from_bias(
+    bias: Option<SelectedVideoMemoryOptimizationBias>,
+) -> Vec<String> {
+    let Some(bias) = bias else {
+        return Vec::new();
+    };
+    let mut tags = Vec::new();
+    if bias.prefer_delivery {
+        tags.push("delivery_realism".to_string());
+    }
+    if bias.prefer_emotion {
+        tags.push("emotion_arc".to_string());
+    }
+    if bias.prefer_identity {
+        tags.push("identity_continuity".to_string());
+    }
+    if bias.prefer_lighting {
+        tags.push("lighting_realism".to_string());
+    }
+    tags
 }
 
 fn selected_video_memory_has_emotion_anchor(content: &str) -> bool {
@@ -8138,7 +8188,16 @@ fn is_low_signal_selected_memory_note(note: &str) -> bool {
 }
 
 fn selected_video_memory_update_would_reduce_quality(existing: &str, incoming: &str) -> bool {
-    selected_video_memory_quality_score(existing) > selected_video_memory_quality_score(incoming)
+    selected_video_memory_update_would_reduce_quality_with_bias(existing, incoming, None)
+}
+
+fn selected_video_memory_update_would_reduce_quality_with_bias(
+    existing: &str,
+    incoming: &str,
+    bias: Option<SelectedVideoMemoryOptimizationBias>,
+) -> bool {
+    selected_visual_only_memory_keep_priority(existing, bias)
+        > selected_visual_only_memory_keep_priority(incoming, bias)
 }
 
 fn selected_video_memory_quality_score(content: &str) -> i32 {
@@ -8854,8 +8913,8 @@ mod tests {
         compact_selected_video_memory_for_focus, compact_video_continuity_note,
         compact_video_style_prompt_note, merge_rejected_video_negative_memory,
         merge_selected_memory_subject_action, parse_structured_storyboard_description,
-        plan_selected_video_memory_optimization, rejected_video_negative_rejection_count,
-        select_neighbor_selected_video_memory_notes,
+        plan_selected_video_memory_optimization, prepare_selected_video_memory_for_storage,
+        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_candidates_for_subject,
         select_pending_rejected_video_observation_candidates_for_subject_with_bias,
@@ -8873,9 +8932,10 @@ mod tests {
         selected_memory_subject_aliases, selected_memory_subject_identity,
         selected_video_memory_is_low_signal, selected_video_memory_quality_score,
         selected_video_memory_scope, selected_video_memory_update_would_reduce_quality,
-        storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow,
-        SelectedVideoMemoryOptimizationBias, SelectedVideoMemoryOptimizationCandidate,
-        SelectedVideoMemoryScope, StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
+        selected_video_memory_update_would_reduce_quality_with_bias, storyboard_prompt_seed,
+        AgentMemoryRow, ScopedAgentMemoryRow, SelectedVideoMemoryOptimizationBias,
+        SelectedVideoMemoryOptimizationCandidate, SelectedVideoMemoryScope,
+        StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -9229,6 +9289,43 @@ mod tests {
         assert!(!selected_video_memory_is_low_signal(
             "storyboardIds=12 | style=表演喉结滚动，光影冷蓝窗光 | note=强忍泪意"
         ));
+    }
+
+    #[test]
+    fn prepare_selected_video_memory_for_storage_compacts_focus_fillers_before_persisting() {
+        let prepared = prepare_selected_video_memory_for_storage(
+            "storyboardIds=12 | subject=林晚 | style=表演喉结滚动，语气低声克制，情绪克制，动作从容克制，光影冷蓝窗光 | delivery=表演喉结滚动低声克制 | note=强忍泪意",
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: true,
+                prefer_emotion: true,
+                prefer_identity: false,
+                prefer_lighting: false,
+            }),
+        )
+        .expect("prepared");
+
+        assert!(
+            prepared.contains("style=表演喉结滚动，光影冷蓝窗光"),
+            "{prepared}"
+        );
+        assert!(!prepared.contains("语气低声克制"), "{prepared}");
+        assert!(!prepared.contains("情绪克制"), "{prepared}");
+        assert!(!prepared.contains("动作从容克制"), "{prepared}");
+    }
+
+    #[test]
+    fn prepare_selected_video_memory_for_storage_drops_low_signal_after_focus_compaction() {
+        let prepared = prepare_selected_video_memory_for_storage(
+            "storyboardIds=12 | style=动作从容克制，语气低声克制，情绪克制 | note=保持克制",
+            Some(SelectedVideoMemoryOptimizationBias {
+                prefer_delivery: true,
+                prefer_emotion: true,
+                prefer_identity: false,
+                prefer_lighting: false,
+            }),
+        );
+
+        assert!(prepared.is_none());
     }
 
     #[test]
@@ -9907,6 +10004,32 @@ mod tests {
             visual_only,
             delivery_rich
         ));
+    }
+
+    #[test]
+    fn selected_video_memory_update_with_bias_prefers_focus_aligned_delivery_anchor() {
+        let visual_only =
+            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，光影冷调逆光";
+        let delivery_rich = "storyboardIds=12 | promptSeed=seed-12 | style=表演喉结滚动，语气低声尾音发颤，情绪强忍泪意";
+        let bias = Some(SelectedVideoMemoryOptimizationBias {
+            prefer_delivery: true,
+            prefer_emotion: true,
+            prefer_identity: false,
+            prefer_lighting: false,
+        });
+
+        assert!(selected_video_memory_update_would_reduce_quality_with_bias(
+            delivery_rich,
+            visual_only,
+            bias,
+        ));
+        assert!(
+            !selected_video_memory_update_would_reduce_quality_with_bias(
+                visual_only,
+                delivery_rich,
+                bias,
+            )
+        );
     }
 
     #[test]
