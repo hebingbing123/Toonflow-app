@@ -7,6 +7,7 @@ use crate::error::ApiError;
 use crate::harness::observe;
 use crate::state::AppState;
 
+use super::super::memory_tier::MemoryTier;
 use super::super::storage::{ensure_project_owned, parse_agent_type};
 use super::super::summarize::maybe_summarize_messages;
 use super::super::types::{AppendMemoryBody, AppendMemoryResponse};
@@ -39,6 +40,15 @@ pub(crate) async fn append_memory(
             "memoryType must be message or summary".into(),
         ));
     }
+    // 验证 memory_tier（如果提供）
+    if let Some(ref tier) = body.memory_tier {
+        if !MemoryTier::is_valid(tier.as_str()) {
+            return Err(ApiError::BadRequest(
+                "memoryTier must be one of: style_bible, stage_summary, delta_memory, message"
+                    .into(),
+            ));
+        }
+    }
     let agent_type = parse_agent_type(&body.agent_type)?;
     let pool = state.require_pool()?;
 
@@ -50,13 +60,17 @@ pub(crate) async fn append_memory(
         .unwrap_or_else(|| Utc::now().timestamp_millis());
 
     let summarized = if body.memory_type == "summary" { 1 } else { 0 };
+    // 默认 memory_tier 为 "message"
+    let memory_tier = body.memory_tier.as_deref().unwrap_or("message");
+
     let id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO app_agent_memory (
           owner_user_id, numeric_project_id, episodes_id, agent_type,
-          memory_type, role, name, content, summarized, create_time_ms
+          memory_type, role, name, content, summarized, create_time_ms,
+          memory_tier, scope_signature
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id
         "#,
     )
@@ -70,6 +84,8 @@ pub(crate) async fn append_memory(
     .bind(&body.content)
     .bind(summarized)
     .bind(create_time_ms)
+    .bind(memory_tier)
+    .bind(&body.scope_signature)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

@@ -12,6 +12,9 @@ pub(crate) struct QueryMemoryBody {
     /// `message` | `summary` | `all` — default `message` to preserve Electron-era query behavior.
     #[serde(default = "default_query_memory_type")]
     pub(crate) memory_type: String,
+    /// 可选过滤字段：`style_bible` | `stage_summary` | `delta_memory` | `message`
+    #[serde(default)]
+    pub(crate) memory_tier: Option<String>,
 }
 
 fn default_query_memory_type() -> String {
@@ -59,6 +62,12 @@ pub(crate) struct AppendMemoryBody {
     pub(crate) name: Option<String>,
     #[serde(default)]
     pub(crate) create_time: Option<i64>,
+    /// 记忆分层：`style_bible` | `stage_summary` | `delta_memory` | `message`（默认 `message`）
+    #[serde(default)]
+    pub(crate) memory_tier: Option<String>,
+    /// 范围签名，用于标记记忆的作用范围（如 storyboardIds、assetIds 等）
+    #[serde(default)]
+    pub(crate) scope_signature: Option<serde_json::Value>,
 }
 
 fn default_role() -> String {

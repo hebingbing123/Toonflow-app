@@ -40,6 +40,15 @@ pub(crate) async fn query_memory(
             )));
         }
     };
+    // 验证 memory_tier 过滤字段（如果提供）
+    if let Some(ref tier) = body.memory_tier {
+        if !crate::settings::agent_memory::memory_tier::MemoryTier::is_valid(tier.as_str()) {
+            return Err(ApiError::BadRequest(
+                "memoryTier must be one of: style_bible, stage_summary, delta_memory, message"
+                    .into(),
+            ));
+        }
+    }
 
     ensure_project_owned(pool, uid, body.project_id).await?;
     observe::memory_http(uid, body.project_id, "query");
@@ -53,6 +62,7 @@ pub(crate) async fn query_memory(
           AND agent_type = $3
           AND episodes_id IS NOT DISTINCT FROM $4
           AND ($5 = 'all' OR memory_type = $5)
+          AND ($6::text IS NULL OR memory_tier = $6)
         ORDER BY create_time_ms ASC
         "#,
     )
@@ -61,6 +71,7 @@ pub(crate) async fn query_memory(
     .bind(agent_type)
     .bind(body.episodes_id)
     .bind(memory_type)
+    .bind(&body.memory_tier)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
