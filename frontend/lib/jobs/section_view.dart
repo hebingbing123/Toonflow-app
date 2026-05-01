@@ -226,6 +226,9 @@ class JobsSectionView extends StatelessWidget {
                   subtitle: Text(
                     [
                       job.id,
+                      if (job.errorMessage != null &&
+                          job.errorMessage!.isNotEmpty)
+                        '失败原因=${job.errorMessage}',
                       if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
                         'claimed_by=${job.claimedBy}',
                     ].join(' · '),

@@ -21,8 +21,9 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
       id: 'job-11',
       ownerUserId: 'user-1',
       kind: 'storyboard',
-      status: 'queued',
+      status: 'failed',
       payload: <String, dynamic>{'project_id': 7},
+      errorMessage: 'provider timeout',
       createdAt: '2026-04-14T12:00:00Z',
       updatedAt: '2026-04-14T12:05:00Z',
     ),
@@ -32,6 +33,9 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
   bool loadingTasks = false,
   bool loadingNumericIdTaskDetail = false,
   bool loadingUuidDetails = false,
+  bool liveUpdatesConnected = true,
+  String? retryingJobId,
+  String? cancellingJobId,
   String? categoriesSummary = '分类 2 个 · storyboard, render',
   String? numericIdTaskDetailText,
   String? uuidDetails,
@@ -39,7 +43,7 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
 }) {
   return TaskCenterWorkbenchDialogViewModel(
     projectSummary: '项目 1 个 · #7 春季短剧',
-    jobSummary: '任务 1 条 · #11 storyboard:queued',
+    jobSummary: '任务 1 条 · #11 storyboard:failed',
     pageCtrl: pageCtrl,
     limitCtrl: limitCtrl,
     stateCtrl: stateCtrl,
@@ -51,14 +55,17 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
     jobs: jobs,
     categoriesSummary: categoriesSummary,
     numericIdTaskDetailText:
-        numericIdTaskDetailText ?? '#11 · storyboard · queued · uuid=job-11',
-    uuidDetails: uuidDetails ?? '#11 · storyboard · queued · uuid=job-11',
+        numericIdTaskDetailText ?? '#11 · storyboard · failed · uuid=job-11',
+    uuidDetails: uuidDetails ?? '#11 · storyboard · failed · uuid=job-11',
     statusLine: statusLine,
     loadingProjects: loadingProjects,
     loadingCategories: loadingCategories,
     loadingTasks: loadingTasks,
     loadingNumericIdTaskDetail: loadingNumericIdTaskDetail,
     loadingUuidDetails: loadingUuidDetails,
+    retryingJobId: retryingJobId,
+    cancellingJobId: cancellingJobId,
+    liveUpdatesConnected: liveUpdatesConnected,
   );
 }
 
@@ -70,6 +77,8 @@ TaskCenterWorkbenchDialogViewCallbacks buildDialogCallbacks({
   VoidCallback? onLoadUuidDetails = noop,
   ValueChanged<String>? onPickCategory,
   ValueChanged<JobRow>? onPickJob,
+  ValueChanged<JobRow>? onRetryFailedJob,
+  ValueChanged<JobRow>? onCancelQueuedJob,
   VoidCallback? onClose = noop,
 }) {
   return TaskCenterWorkbenchDialogViewCallbacks(
@@ -80,6 +89,8 @@ TaskCenterWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onLoadUuidDetails: onLoadUuidDetails ?? noop,
     onPickCategory: onPickCategory ?? (_) {},
     onPickJob: onPickJob ?? (_) {},
+    onRetryFailedJob: onRetryFailedJob ?? (_) {},
+    onCancelQueuedJob: onCancelQueuedJob ?? (_) {},
     onClose: onClose ?? noop,
   );
 }
@@ -138,6 +149,7 @@ void main() {
     expect(find.text('任务工作台'), findsOneWidget);
     expect(find.text('刷新任务项目'), findsOneWidget);
     expect(find.text('按筛选加载任务'), findsOneWidget);
+    expect(find.textContaining('当前已接入实时任务更新'), findsOneWidget);
     expect(find.text('项目 1 个 · #7 春季短剧'), findsOneWidget);
     expect(find.text('分类 2 个 · storyboard, render'), findsOneWidget);
     expect(find.text('1 条任务'), findsOneWidget);
@@ -182,6 +194,7 @@ void main() {
   ) async {
     String? pickedCategory;
     JobRow? pickedJob;
+    JobRow? retriedJob;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -199,6 +212,7 @@ void main() {
             callbacks: buildDialogCallbacks(
               onPickCategory: (value) => pickedCategory = value,
               onPickJob: (job) => pickedJob = job,
+              onRetryFailedJob: (job) => retriedJob = job,
             ),
           ),
         ),
@@ -208,6 +222,9 @@ void main() {
     await tester.ensureVisible(find.widgetWithText(ActionChip, 'storyboard'));
     await tester.tap(find.widgetWithText(ActionChip, 'storyboard'));
     await tester.pump();
+    await tester.ensureVisible(find.widgetWithText(TextButton, '重试'));
+    await tester.tap(find.widgetWithText(TextButton, '重试'));
+    await tester.pump();
     await tester.ensureVisible(find.byType(ListTile).first);
     await tester.tap(find.byType(ListTile).first);
     await tester.pump();
@@ -215,6 +232,7 @@ void main() {
     expect(pickedCategory, 'storyboard');
     expect(pickedJob?.numericTaskId, 11);
     expect(pickedJob?.id, 'job-11');
+    expect(retriedJob?.id, 'job-11');
   });
 }
 

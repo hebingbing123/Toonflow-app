@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '../config.dart';
 import '../../rust_api.dart';
 
 typedef JobsAccessTokenProvider = String? Function();
@@ -14,6 +19,9 @@ class JobsController extends ChangeNotifier {
 
   final JobsAccessTokenProvider _accessTokenProvider;
   final JobsErrorSink _onErrorChanged;
+  WebSocketChannel? _ws;
+  StreamSubscription<dynamic>? _wsSub;
+  String? _wsToken;
 
   final TextEditingController jobIdController = TextEditingController();
 
@@ -30,6 +38,8 @@ class JobsController extends ChangeNotifier {
   String? jobKindsLine;
   String? jobKindSummaryLine;
   String? jobStatusSummaryLine;
+  String? _lastKindFilter;
+  String? _lastStatusFilter;
 
   String? get _accessToken => _accessTokenProvider();
 
@@ -43,6 +53,7 @@ class JobsController extends ChangeNotifier {
   }
 
   void reset() {
+    unawaited(closeLiveUpdates());
     loadingJobs = false;
     loadingJobKinds = false;
     loadingJobKindSummary = false;
@@ -56,6 +67,8 @@ class JobsController extends ChangeNotifier {
     jobKindsLine = null;
     jobKindSummaryLine = null;
     jobStatusSummaryLine = null;
+    _lastKindFilter = null;
+    _lastStatusFilter = null;
     jobIdController.clear();
     notifyListeners();
   }
@@ -83,14 +96,17 @@ class JobsController extends ChangeNotifier {
   Future<void> _loadJobsList({String? kind, String? status}) async {
     final token = _accessToken;
     if (token == null) return;
+    await _ensureLiveUpdates(token);
     loadingJobs = true;
     jobs = null;
+    _lastKindFilter = kind;
+    _lastStatusFilter = status;
     _setError(null);
     notifyListeners();
     try {
       jobs = await fetchJobs(token, kind: kind, status: status);
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -110,7 +126,7 @@ class JobsController extends ChangeNotifier {
       final kinds = await fetchJobKinds(token);
       jobKindsLine = kinds.isEmpty ? '(empty)' : kinds.join(', ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -132,7 +148,7 @@ class JobsController extends ChangeNotifier {
           ? '(empty)'
           : rows.map((r) => '${r.kind}: ${r.jobCount}').join(', ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -154,7 +170,7 @@ class JobsController extends ChangeNotifier {
           ? '(empty)'
           : rows.map((r) => '${r.status}: ${r.jobCount}').join(', ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -181,9 +197,12 @@ class JobsController extends ChangeNotifier {
       if (job.claimedBy != null && job.claimedBy!.isNotEmpty) {
         parts.add('claimed_by=${job.claimedBy}');
       }
+      if (job.errorMessage != null && job.errorMessage!.isNotEmpty) {
+        parts.add('error=${job.errorMessage}');
+      }
       jobByIdLine = parts.join(' · ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -201,10 +220,10 @@ class JobsController extends ChangeNotifier {
     _setError(null);
     notifyListeners();
     try {
-      await cancelJob(token, job.id);
-      await loadJobs();
+      final updated = await cancelJob(token, job.id);
+      _upsertJob(updated);
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -220,10 +239,10 @@ class JobsController extends ChangeNotifier {
     _setError(null);
     notifyListeners();
     try {
-      await retryJob(token, job.id);
-      await loadJobs();
+      final updated = await retryJob(token, job.id);
+      _upsertJob(updated);
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -257,12 +276,9 @@ class JobsController extends ChangeNotifier {
         );
         return;
       }
-      creatingJob = false;
-      notifyListeners();
-      await loadJobs();
-      return;
+      _upsertJob(secondJob);
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setError(formatRustApiException(e));
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -271,8 +287,109 @@ class JobsController extends ChangeNotifier {
     }
   }
 
+  Future<void> _ensureLiveUpdates(String token) async {
+    if (_ws != null && _wsToken == token) {
+      return;
+    }
+    await closeLiveUpdates();
+    try {
+      final channel = WebSocketChannel.connect(
+        rustWebSocketUri(kApiBaseUrl, accessToken: token),
+      );
+      _ws = channel;
+      _wsToken = token;
+      _wsSub = channel.stream.listen(
+        (message) => _handleWsMessage(message.toString()),
+        onError: (_) {
+          _ws = null;
+          _wsSub = null;
+          _wsToken = null;
+        },
+        onDone: () {
+          _ws = null;
+          _wsSub = null;
+          _wsToken = null;
+        },
+      );
+    } catch (_) {
+      _ws = null;
+      _wsSub = null;
+      _wsToken = null;
+    }
+  }
+
+  void _handleWsMessage(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) {
+        return;
+      }
+      if (decoded['type'] != 'generation.job.updated') {
+        return;
+      }
+      final payload = decoded['payload'];
+      if (payload is! Map<String, dynamic>) {
+        return;
+      }
+      _upsertJob(JobRow.fromJson(payload));
+    } catch (_) {
+      // Ignore unrelated WS envelopes.
+    }
+  }
+
+  void _upsertJob(JobRow updated) {
+    if (jobs != null) {
+      final next = List<JobRow>.from(jobs!);
+      final index = next.indexWhere((job) => job.id == updated.id);
+      final matchesFilter = _matchesCurrentFilters(updated);
+      if (index >= 0 && matchesFilter) {
+        next[index] = updated;
+      } else if (index >= 0 && !matchesFilter) {
+        next.removeAt(index);
+      } else if (matchesFilter) {
+        next.insert(0, updated);
+      }
+      jobs = next;
+    }
+    if (jobIdController.text.trim() == updated.id) {
+      final parts = <String>[
+        '${updated.kind} · ${updated.status}',
+        'updated ${updated.updatedAt}',
+      ];
+      if (updated.claimedBy != null && updated.claimedBy!.isNotEmpty) {
+        parts.add('claimed_by=${updated.claimedBy}');
+      }
+      if (updated.errorMessage != null && updated.errorMessage!.isNotEmpty) {
+        parts.add('error=${updated.errorMessage}');
+      }
+      jobByIdLine = parts.join(' · ');
+    }
+    notifyListeners();
+  }
+
+  bool _matchesCurrentFilters(JobRow row) {
+    final matchesKind =
+        _lastKindFilter == null ||
+        _lastKindFilter!.trim().isEmpty ||
+        row.kind == _lastKindFilter;
+    final matchesStatus =
+        _lastStatusFilter == null ||
+        _lastStatusFilter!.trim().isEmpty ||
+        row.status == _lastStatusFilter;
+    return matchesKind && matchesStatus;
+  }
+
+  Future<void> closeLiveUpdates() async {
+    await _wsSub?.cancel();
+    await _ws?.sink.close();
+    _ws = null;
+    _wsSub = null;
+    _wsToken = null;
+  }
+
   @override
   void dispose() {
+    unawaited(closeLiveUpdates());
     jobIdController.dispose();
     super.dispose();
   }

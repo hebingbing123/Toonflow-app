@@ -24,6 +24,9 @@ class TaskCenterWorkbenchDialogViewModel {
     required this.loadingTasks,
     required this.loadingNumericIdTaskDetail,
     required this.loadingUuidDetails,
+    required this.retryingJobId,
+    required this.cancellingJobId,
+    required this.liveUpdatesConnected,
   });
 
   final String projectSummary;
@@ -46,6 +49,9 @@ class TaskCenterWorkbenchDialogViewModel {
   final bool loadingTasks;
   final bool loadingNumericIdTaskDetail;
   final bool loadingUuidDetails;
+  final String? retryingJobId;
+  final String? cancellingJobId;
+  final bool liveUpdatesConnected;
 }
 
 class TaskCenterWorkbenchDialogViewCallbacks {
@@ -57,6 +63,8 @@ class TaskCenterWorkbenchDialogViewCallbacks {
     required this.onLoadUuidDetails,
     required this.onPickCategory,
     required this.onPickJob,
+    required this.onRetryFailedJob,
+    required this.onCancelQueuedJob,
     required this.onClose,
   });
 
@@ -67,6 +75,8 @@ class TaskCenterWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadUuidDetails;
   final ValueChanged<String> onPickCategory;
   final ValueChanged<JobRow> onPickJob;
+  final ValueChanged<JobRow> onRetryFailedJob;
+  final ValueChanged<JobRow> onCancelQueuedJob;
   final VoidCallback onClose;
 }
 
@@ -97,7 +107,8 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 numeric task id 或 UUID 查看详情。',
+                '在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 numeric task id 或 UUID 查看详情。'
+                '${model.liveUpdatesConnected ? ' 当前已接入实时任务更新。' : ''}',
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
@@ -225,8 +236,50 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                         title: Text('${job.kind} · ${job.status}'),
-                        subtitle: Text('#${job.numericTaskId} · ${job.id}'),
-                        trailing: const Icon(Icons.chevron_right),
+                        subtitle: Text(
+                          [
+                            '#${job.numericTaskId} · ${job.id}',
+                            if (job.errorMessage != null &&
+                                job.errorMessage!.isNotEmpty)
+                              '失败原因=${job.errorMessage}',
+                          ].join('\n'),
+                        ),
+                        trailing:
+                            (job.status == 'failed' ||
+                                job.status == 'queued' ||
+                                job.status == 'running')
+                            ? Wrap(
+                                spacing: 4,
+                                children: [
+                                  if (job.status == 'failed')
+                                    TextButton(
+                                      onPressed: model.retryingJobId == job.id
+                                          ? null
+                                          : () =>
+                                                callbacks.onRetryFailedJob(job),
+                                      child: Text(
+                                        model.retryingJobId == job.id
+                                            ? '…'
+                                            : '重试',
+                                      ),
+                                    ),
+                                  if (job.status == 'queued' ||
+                                      job.status == 'running')
+                                    TextButton(
+                                      onPressed: model.cancellingJobId == job.id
+                                          ? null
+                                          : () => callbacks.onCancelQueuedJob(
+                                              job,
+                                            ),
+                                      child: Text(
+                                        model.cancellingJobId == job.id
+                                            ? '…'
+                                            : '取消',
+                                      ),
+                                    ),
+                                ],
+                              )
+                            : const Icon(Icons.chevron_right),
                         onTap: () => callbacks.onPickJob(job),
                       ),
                     ),

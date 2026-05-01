@@ -28,6 +28,8 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
 class _TaskCenterWorkbenchDialogState
     extends State<_TaskCenterWorkbenchDialog> {
   late final _TaskCenterWorkbenchControllers _ctrls;
+  WebSocketChannel? _ws;
+  StreamSubscription<dynamic>? _wsSub;
 
   List<TaskCenterProjectItem> _projects = const <TaskCenterProjectItem>[];
   List<TaskCenterTaskClassRow> _categories = const <TaskCenterTaskClassRow>[];
@@ -42,6 +44,9 @@ class _TaskCenterWorkbenchDialogState
   bool _loadingTasks = false;
   bool _loadingNumericIdTaskDetail = false;
   bool _loadingUuidDetails = false;
+  bool _liveUpdatesConnected = false;
+  String? _retryingJobId;
+  String? _cancellingJobId;
 
   @override
   void initState() {
@@ -56,10 +61,12 @@ class _TaskCenterWorkbenchDialogState
     _categoriesSummary = widget.initialCategoriesSummary;
     _numericIdTaskDetailText = widget.initialNumericIdTaskDetail;
     _uuidDetails = widget.initialUuidDetails;
+    unawaited(_openLiveUpdates());
   }
 
   @override
   void dispose() {
+    unawaited(_closeLiveUpdates());
     _ctrls.dispose();
     super.dispose();
   }
@@ -83,7 +90,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = formatRustApiException(e);
         _loadingProjects = false;
       });
     } catch (e) {
@@ -112,7 +119,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = formatRustApiException(e);
         _loadingCategories = false;
       });
     } catch (e) {
@@ -135,6 +142,7 @@ class _TaskCenterWorkbenchDialogState
       _statusLine = null;
     });
     try {
+      await _openLiveUpdates();
       final rows = await postTasksGetTaskApi(
         widget.accessToken,
         page: page < 1 ? 1 : page,
@@ -163,7 +171,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = formatRustApiException(e);
         _loadingTasks = false;
       });
     } catch (e) {
@@ -196,7 +204,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = formatRustApiException(e);
         _loadingNumericIdTaskDetail = false;
       });
     } catch (e) {
@@ -229,7 +237,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = formatRustApiException(e);
         _loadingUuidDetails = false;
       });
     } catch (e) {
@@ -239,6 +247,189 @@ class _TaskCenterWorkbenchDialogState
         _loadingUuidDetails = false;
       });
     }
+  }
+
+  Future<void> _retryFailedJob(JobRow job) async {
+    if (job.status != 'failed') {
+      return;
+    }
+    setState(() {
+      _retryingJobId = job.id;
+      _statusLine = null;
+    });
+    try {
+      final updated = await retryJob(widget.accessToken, job.id);
+      if (!mounted) return;
+      setState(() {
+        _mergeJobUpdate(updated, origin: '已提交重试');
+        _retryingJobId = null;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = formatRustApiException(e);
+        _retryingJobId = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = e.toString();
+        _retryingJobId = null;
+      });
+    }
+  }
+
+  Future<void> _cancelQueuedJob(JobRow job) async {
+    if (job.status != 'queued' && job.status != 'running') {
+      return;
+    }
+    setState(() {
+      _cancellingJobId = job.id;
+      _statusLine = null;
+    });
+    try {
+      final updated = await cancelJob(widget.accessToken, job.id);
+      if (!mounted) return;
+      setState(() {
+        _mergeJobUpdate(updated, origin: '已取消任务');
+        _cancellingJobId = null;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = formatRustApiException(e);
+        _cancellingJobId = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = e.toString();
+        _cancellingJobId = null;
+      });
+    }
+  }
+
+  Future<void> _openLiveUpdates() async {
+    if (_ws != null) {
+      return;
+    }
+    try {
+      final channel = WebSocketChannel.connect(
+        rustWebSocketUri(kApiBaseUrl, accessToken: widget.accessToken),
+      );
+      _ws = channel;
+      _wsSub = channel.stream.listen(
+        (message) => _handleWsMessage(message.toString()),
+        onError: (_) {
+          if (!mounted) return;
+          setState(() {
+            _liveUpdatesConnected = false;
+            _ws = null;
+            _wsSub = null;
+          });
+        },
+        onDone: () {
+          if (!mounted) return;
+          setState(() {
+            _liveUpdatesConnected = false;
+            _ws = null;
+            _wsSub = null;
+          });
+        },
+      );
+      if (!mounted) return;
+      setState(() {
+        _liveUpdatesConnected = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _liveUpdatesConnected = false;
+      });
+    }
+  }
+
+  Future<void> _closeLiveUpdates() async {
+    await _wsSub?.cancel();
+    await _ws?.sink.close();
+    _wsSub = null;
+    _ws = null;
+  }
+
+  void _handleWsMessage(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic> ||
+          decoded['type'] != 'generation.job.updated') {
+        return;
+      }
+      final payload = decoded['payload'];
+      if (payload is! Map<String, dynamic> || !mounted) {
+        return;
+      }
+      final row = JobRow.fromJson(payload);
+      setState(() {
+        _mergeJobUpdate(row, origin: '收到实时更新');
+      });
+    } catch (_) {
+      // Ignore unrelated frames.
+    }
+  }
+
+  void _mergeJobUpdate(JobRow row, {required String origin}) {
+    final nextJobs = List<JobRow>.from(_jobs);
+    final index = nextJobs.indexWhere((item) => item.id == row.id);
+    final matchesFilters = _matchesCurrentFilters(row);
+    if (index >= 0 && matchesFilters) {
+      nextJobs[index] = row;
+    } else if (index >= 0 && !matchesFilters) {
+      nextJobs.removeAt(index);
+    } else if (matchesFilters) {
+      nextJobs.insert(0, row);
+    }
+    _jobs = nextJobs;
+
+    if (_ctrls.numericTaskIdCtrl.text.trim() == row.numericTaskId.toString()) {
+      _numericIdTaskDetailText = formatTaskJobDetails(row);
+    }
+    if (_ctrls.uuidCtrl.text.trim() == row.id) {
+      _uuidDetails = formatTaskJobDetails(row);
+    }
+    _statusLine = '$origin：#${row.numericTaskId} ${row.kind} -> ${row.status}';
+  }
+
+  bool _matchesCurrentFilters(JobRow row) {
+    final taskClass = _ctrls.taskClassCtrl.text.trim();
+    final state = _ctrls.stateCtrl.text.trim();
+    final projectId = int.tryParse(_ctrls.projectIdCtrl.text.trim());
+    final rowProjectId = _jobProjectId(row);
+    final matchesTaskClass = taskClass.isEmpty || row.kind == taskClass;
+    final matchesState = state.isEmpty || row.status == state;
+    final matchesProject =
+        projectId == null || rowProjectId == null || rowProjectId == projectId;
+    return matchesTaskClass && matchesState && matchesProject;
+  }
+
+  int? _jobProjectId(JobRow row) {
+    final payload = row.payload;
+    final candidates = <Object?>[
+      payload['project_id'],
+      payload['projectId'],
+      payload['project_numeric_id'],
+      payload['projectNumericId'],
+    ];
+    for (final value in candidates) {
+      if (value is num) {
+        return value.toInt();
+      }
+      if (value is String) {
+        final parsed = int.tryParse(value);
+        if (parsed != null) {
+          return parsed;
+        }
+      }
+    }
+    return null;
   }
 
   @override
@@ -269,6 +460,9 @@ class _TaskCenterWorkbenchDialogState
         loadingTasks: _loadingTasks,
         loadingNumericIdTaskDetail: _loadingNumericIdTaskDetail,
         loadingUuidDetails: _loadingUuidDetails,
+        retryingJobId: _retryingJobId,
+        cancellingJobId: _cancellingJobId,
+        liveUpdatesConnected: _liveUpdatesConnected,
       ),
       callbacks: TaskCenterWorkbenchDialogViewCallbacks(
         onLoadProjects: () {
@@ -294,9 +488,14 @@ class _TaskCenterWorkbenchDialogState
             _ctrls.uuidCtrl.text = job.id;
           });
         },
+        onRetryFailedJob: (job) {
+          _retryFailedJob(job);
+        },
+        onCancelQueuedJob: (job) {
+          _cancelQueuedJob(job);
+        },
         onClose: () => Navigator.of(context).pop(),
       ),
     );
   }
 }
-

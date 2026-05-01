@@ -9,6 +9,7 @@ JobRow buildJob({
   required String id,
   required String status,
   String? claimedBy,
+  String? errorMessage,
 }) {
   return JobRow(
     numericTaskId: 7,
@@ -17,6 +18,7 @@ JobRow buildJob({
     kind: 'flutter.probe',
     status: status,
     payload: const <String, dynamic>{'probe': true},
+    errorMessage: errorMessage,
     claimedBy: claimedBy,
     createdAt: '2026-04-14T08:00:00Z',
     updatedAt: '2026-04-14T08:00:00Z',
@@ -50,7 +52,11 @@ JobsSectionViewModel buildModel({
     jobs:
         jobs ??
         <JobRow>[
-          buildJob(id: 'job-1', status: 'failed'),
+          buildJob(
+            id: 'job-1',
+            status: 'failed',
+            errorMessage: 'provider timeout',
+          ),
           buildJob(id: 'job-2', status: 'queued', claimedBy: 'worker-a'),
         ],
     jobByIdLine: jobByIdLine,
@@ -137,6 +143,7 @@ void main() {
       find.widgetWithText(ListTile, 'flutter.probe · queued'),
       findsOneWidget,
     );
+    expect(find.textContaining('失败原因=provider timeout'), findsOneWidget);
     expect(find.textContaining('claimed_by=worker-a'), findsOneWidget);
     expect(find.widgetWithText(TextButton, '重试'), findsOneWidget);
     expect(find.widgetWithText(TextButton, '取消'), findsOneWidget);
