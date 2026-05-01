@@ -5,7 +5,7 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::storage::ensure_project_owned;
+use super::super::storage::{ensure_project_owned, parse_agent_type};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -17,6 +17,10 @@ pub(crate) struct MemoryCostOverview {
     pub(crate) message_count: i64,
     /// 近30次任务平均注入字数（近似：取最近30条记忆的平均 content 长度）
     pub(crate) avg_injected_chars_last30: i64,
+    /// 近30条记忆涉及的平均命中层级数（近似：取最近30条内的 distinct tier 数）
+    pub(crate) avg_hit_tier_count_last30: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) last_injected_at: Option<String>,
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -49,6 +53,7 @@ pub(crate) async fn get_memory_cost_overview(
 ) -> Result<Json<MemoryCostOverview>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let agent_type = parse_agent_type(&params.agent_type)?;
 
     ensure_project_owned(pool, uid, params.project_id).await?;
 
@@ -65,7 +70,7 @@ pub(crate) async fn get_memory_cost_overview(
     )
     .bind(uid)
     .bind(params.project_id)
-    .bind(&params.agent_type)
+    .bind(agent_type)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -101,7 +106,47 @@ pub(crate) async fn get_memory_cost_overview(
     )
     .bind(uid)
     .bind(params.project_id)
-    .bind(&params.agent_type)
+    .bind(agent_type)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let distinct_tier_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(DISTINCT COALESCE(memory_tier, 'message'))::bigint
+        FROM (
+            SELECT memory_tier
+            FROM app_agent_memory
+            WHERE owner_user_id = $1
+              AND numeric_project_id = $2
+              AND agent_type = $3
+            ORDER BY create_time_ms DESC
+            LIMIT 30
+        ) sub
+        "#,
+    )
+    .bind(uid)
+    .bind(params.project_id)
+    .bind(agent_type)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let last_injected_at: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT to_char(
+            to_timestamp(MAX(create_time_ms) / 1000.0) AT TIME ZONE 'UTC',
+            'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+        )
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND agent_type = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(params.project_id)
+    .bind(agent_type)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -113,5 +158,7 @@ pub(crate) async fn get_memory_cost_overview(
         delta_memory_count,
         message_count,
         avg_injected_chars_last30: avg_chars.unwrap_or(0),
+        avg_hit_tier_count_last30: distinct_tier_count,
+        last_injected_at,
     }))
 }

@@ -22,21 +22,31 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     extends State<ProjectsAgentMemoryWorkbenchDialog> {
   static const List<String> _queryTypes = <String>['summary', 'message', 'all'];
   static const List<String> _clearTypes = <String>['summary', 'message', 'all'];
+  static const List<String> _memoryTierOptions = <String>[
+    'all',
+    'style_bible',
+    'stage_summary',
+    'delta_memory',
+    'message',
+  ];
 
   late final TextEditingController _projectIdCtrl;
   late final TextEditingController _agentTypeCtrl;
   late final TextEditingController _episodesIdCtrl;
   late final TextEditingController _queryTypeCtrl;
+  late final TextEditingController _memoryTierCtrl;
   late final TextEditingController _appendContentCtrl;
   late final TextEditingController _appendRoleCtrl;
   late final TextEditingController _clearTypeCtrl;
 
   List<ProjectRow> _projects = const <ProjectRow>[];
-  List<dynamic> _memoryRows = const <dynamic>[];
+  List<AgentMemoryHistoryItem> _memoryRows = const <AgentMemoryHistoryItem>[];
+  AgentMemoryCostOverview? _costOverview;
   String? _memorySummary;
   String? _statusLine;
   bool _loadingProjects = false;
   bool _loadingMemory = false;
+  bool _loadingCostOverview = false;
   bool _appendingMemory = false;
   bool _clearingMemory = false;
   bool _optimizingMemory = false;
@@ -52,6 +62,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     _agentTypeCtrl = TextEditingController(text: 'scriptAgent');
     _episodesIdCtrl = TextEditingController();
     _queryTypeCtrl = TextEditingController(text: 'summary');
+    _memoryTierCtrl = TextEditingController(text: 'all');
     _appendContentCtrl = TextEditingController();
     _appendRoleCtrl = TextEditingController(text: 'user');
     _clearTypeCtrl = TextEditingController(text: 'summary');
@@ -64,6 +75,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     _agentTypeCtrl.dispose();
     _episodesIdCtrl.dispose();
     _queryTypeCtrl.dispose();
+    _memoryTierCtrl.dispose();
     _appendContentCtrl.dispose();
     _appendRoleCtrl.dispose();
     _clearTypeCtrl.dispose();
@@ -83,6 +95,11 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     _clearTypeCtrl.text,
     supported: _clearTypes,
     fallback: 'summary',
+  );
+  String get _memoryTier => _normalizedSelection(
+    _memoryTierCtrl.text,
+    supported: _memoryTierOptions,
+    fallback: 'all',
   );
 
   String _normalizedSelection(
@@ -144,11 +161,14 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         agentType: agentType,
         episodesId: _episodesId,
         memoryType: memoryType,
+        memoryTier: _memoryTier == 'all' ? null : _memoryTier,
       );
       if (!mounted) return;
       setState(() {
         _memoryRows = rows;
-        _memorySummary = '已读取 ${rows.length} 条 $memoryType 记忆。';
+        final tierSummary = _memoryTier == 'all' ? '全部层级' : _memoryTier;
+        _memorySummary =
+            '已读取 ${rows.length} 条 $memoryType 记忆 · 层级 $tierSummary。';
         _loadingMemory = false;
       });
     } on RustApiException catch (e) {
@@ -162,6 +182,44 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       setState(() {
         _statusLine = e.toString();
         _loadingMemory = false;
+      });
+    }
+  }
+
+  Future<void> _loadCostOverview() async {
+    final projectId = _projectId;
+    final agentType = _agentTypeCtrl.text.trim();
+    if (projectId == null || agentType.isEmpty) {
+      setState(() => _statusLine = '加载成本概览前请填写合法的项目 numeric ID 和 agent type。');
+      return;
+    }
+    setState(() {
+      _loadingCostOverview = true;
+      _statusLine = null;
+    });
+    try {
+      final overview = await getMemoryCostOverview(
+        widget.accessToken,
+        projectId: projectId,
+        agentType: agentType,
+      );
+      if (!mounted) return;
+      setState(() {
+        _costOverview = overview;
+        _statusLine = '已加载记忆成本概览。';
+        _loadingCostOverview = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = e.toString();
+        _loadingCostOverview = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statusLine = e.toString();
+        _loadingCostOverview = false;
       });
     }
   }
@@ -301,22 +359,27 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       model: ProjectsAgentMemoryWorkbenchDialogViewModel(
         projects: _projects,
         memoryRows: _memoryRows,
+        costOverview: _costOverview,
         memorySummary: _memorySummary,
         statusLine: _statusLine,
         loadingProjects: _loadingProjects,
         loadingMemory: _loadingMemory,
+        loadingCostOverview: _loadingCostOverview,
         appendingMemory: _appendingMemory,
         clearingMemory: _clearingMemory,
         optimizingMemory: _optimizingMemory,
         canOptimizeVideoMemory: _canOptimizeVideoMemory,
         queryType: _queryType,
         clearType: _clearType,
+        memoryTier: _memoryTier,
         queryTypeOptions: _queryTypes,
         clearTypeOptions: _clearTypes,
+        memoryTierOptions: _memoryTierOptions,
         projectIdCtrl: _projectIdCtrl,
         agentTypeCtrl: _agentTypeCtrl,
         episodesIdCtrl: _episodesIdCtrl,
         queryTypeCtrl: _queryTypeCtrl,
+        memoryTierCtrl: _memoryTierCtrl,
         appendContentCtrl: _appendContentCtrl,
         appendRoleCtrl: _appendRoleCtrl,
         clearTypeCtrl: _clearTypeCtrl,
@@ -324,10 +387,12 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       callbacks: ProjectsAgentMemoryWorkbenchDialogViewCallbacks(
         onReloadProjects: _reloadProjects,
         onQueryMemory: _queryMemory,
+        onLoadCostOverview: _loadCostOverview,
         onAppendMemory: _appendMemory,
         onClearMemory: _clearMemory,
         onOptimizeVideoMemory: _optimizeVideoMemory,
         onQueryTypeChanged: (value) => _queryTypeCtrl.text = value,
+        onMemoryTierChanged: (value) => _memoryTierCtrl.text = value,
         onClearTypeChanged: (value) => _clearTypeCtrl.text = value,
         onClose: () => Navigator.of(context).pop(),
       ),

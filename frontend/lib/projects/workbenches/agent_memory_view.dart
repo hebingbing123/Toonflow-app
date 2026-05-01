@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,45 +7,55 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
   const ProjectsAgentMemoryWorkbenchDialogViewModel({
     required this.projects,
     required this.memoryRows,
+    required this.costOverview,
     required this.memorySummary,
     required this.statusLine,
     required this.loadingProjects,
     required this.loadingMemory,
+    required this.loadingCostOverview,
     required this.appendingMemory,
     required this.clearingMemory,
     required this.optimizingMemory,
     required this.canOptimizeVideoMemory,
     required this.queryType,
     required this.clearType,
+    required this.memoryTier,
     required this.queryTypeOptions,
     required this.clearTypeOptions,
+    required this.memoryTierOptions,
     required this.projectIdCtrl,
     required this.agentTypeCtrl,
     required this.episodesIdCtrl,
     required this.queryTypeCtrl,
+    required this.memoryTierCtrl,
     required this.appendContentCtrl,
     required this.appendRoleCtrl,
     required this.clearTypeCtrl,
   });
 
   final List<ProjectRow> projects;
-  final List<dynamic> memoryRows;
+  final List<AgentMemoryHistoryItem> memoryRows;
+  final AgentMemoryCostOverview? costOverview;
   final String? memorySummary;
   final String? statusLine;
   final bool loadingProjects;
   final bool loadingMemory;
+  final bool loadingCostOverview;
   final bool appendingMemory;
   final bool clearingMemory;
   final bool optimizingMemory;
   final bool canOptimizeVideoMemory;
   final String queryType;
   final String clearType;
+  final String memoryTier;
   final List<String> queryTypeOptions;
   final List<String> clearTypeOptions;
+  final List<String> memoryTierOptions;
   final TextEditingController projectIdCtrl;
   final TextEditingController agentTypeCtrl;
   final TextEditingController episodesIdCtrl;
   final TextEditingController queryTypeCtrl;
+  final TextEditingController memoryTierCtrl;
   final TextEditingController appendContentCtrl;
   final TextEditingController appendRoleCtrl;
   final TextEditingController clearTypeCtrl;
@@ -56,20 +65,24 @@ class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
   const ProjectsAgentMemoryWorkbenchDialogViewCallbacks({
     required this.onReloadProjects,
     required this.onQueryMemory,
+    required this.onLoadCostOverview,
     required this.onAppendMemory,
     required this.onClearMemory,
     required this.onOptimizeVideoMemory,
     required this.onQueryTypeChanged,
+    required this.onMemoryTierChanged,
     required this.onClearTypeChanged,
     required this.onClose,
   });
 
   final Future<void> Function() onReloadProjects;
   final Future<void> Function() onQueryMemory;
+  final Future<void> Function() onLoadCostOverview;
   final Future<void> Function() onAppendMemory;
   final Future<void> Function() onClearMemory;
   final Future<void> Function() onOptimizeVideoMemory;
   final ValueChanged<String> onQueryTypeChanged;
+  final ValueChanged<String> onMemoryTierChanged;
   final ValueChanged<String> onClearTypeChanged;
   final VoidCallback onClose;
 }
@@ -95,6 +108,8 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
     final optimizeEnabled =
         model.canOptimizeVideoMemory && !model.optimizingMemory;
     final memoryInsights = _buildAgentMemoryInsights(model.memoryRows);
+    final memoryTierGroups = _buildMemoryTierGroups(model.memoryRows);
+    final costOverviewLine = _buildCostOverviewLine(model.costOverview);
     final executionChecklist = _buildScopedExecutionChecklist(
       model,
       memoryInsights,
@@ -130,6 +145,12 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                         ? null
                         : callbacks.onQueryMemory,
                     child: Text(model.loadingMemory ? '…' : '查询记忆'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: model.loadingCostOverview
+                        ? null
+                        : callbacks.onLoadCostOverview,
+                    child: Text(model.loadingCostOverview ? '…' : '加载成本概览'),
                   ),
                   FilledButton.tonal(
                     onPressed: optimizeEnabled
@@ -196,6 +217,28 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   }
                 },
               ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: model.memoryTier,
+                decoration: const InputDecoration(
+                  labelText: 'memory tier',
+                  helperText:
+                      'all / style_bible / stage_summary / delta_memory / message',
+                ),
+                items: model.memoryTierOptions
+                    .map(
+                      (value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(_memoryTierLabel(value)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    callbacks.onMemoryTierChanged(value);
+                  }
+                },
+              ),
               const SizedBox(height: 4),
               Text(
                 '自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。',
@@ -223,6 +266,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   model.memorySummary!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
+              if (costOverviewLine != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  costOverviewLine,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -308,35 +360,49 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   '${model.memoryRows.length} 条记忆',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                ...memoryInsights.previews.take(8).map((preview) {
-                  final titleSegments = <String>[
-                    if (preview.memoryName.isNotEmpty) preview.memoryName,
-                    preview.role,
-                    '${preview.charCount} chars',
-                    if (preview.classificationLabel.isNotEmpty)
-                      preview.classificationLabel,
-                    if (preview.actionLabel.isNotEmpty) preview.actionLabel,
-                  ];
-                  final subtitleSegments = <String>[
-                    if (preview.memoryId.isNotEmpty) preview.memoryId,
-                    if (preview.scopeLabel.isNotEmpty) preview.scopeLabel,
-                    if (preview.subjectLabel.isNotEmpty)
-                      'subject ${preview.subjectLabel}',
-                    if (preview.signalLabel.isNotEmpty)
-                      'signals ${preview.signalLabel}',
-                    preview.shortContent,
-                  ];
-                  return ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(titleSegments.join(' · ')),
-                    subtitle: Text(subtitleSegments.join(' · ')),
-                    trailing: preview.isDuplicated
-                        ? const Chip(
-                            label: Text('重复'),
-                            visualDensity: VisualDensity.compact,
-                          )
-                        : null,
+                ...memoryTierGroups.map((group) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      Text(
+                        '${group.label} · ${group.rows.length} 条 · 最近注入 ${group.lastInjectedLabel}',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      ...group.rows.take(6).map((item) {
+                        final preview = _buildAgentMemoryPreview(item);
+                        final titleSegments = <String>[
+                          if (preview.memoryName.isNotEmpty) preview.memoryName,
+                          preview.role,
+                          '${preview.charCount} chars',
+                          if (preview.classificationLabel.isNotEmpty)
+                            preview.classificationLabel,
+                          if (preview.actionLabel.isNotEmpty)
+                            preview.actionLabel,
+                        ];
+                        final subtitleSegments = <String>[
+                          if (preview.memoryId.isNotEmpty) preview.memoryId,
+                          if (preview.scopeLabel.isNotEmpty) preview.scopeLabel,
+                          if (preview.subjectLabel.isNotEmpty)
+                            'subject ${preview.subjectLabel}',
+                          if (preview.signalLabel.isNotEmpty)
+                            'signals ${preview.signalLabel}',
+                          preview.shortContent,
+                        ];
+                        return ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(titleSegments.join(' · ')),
+                          subtitle: Text(subtitleSegments.join(' · ')),
+                          trailing: preview.isDuplicated
+                              ? const Chip(
+                                  label: Text('重复'),
+                                  visualDensity: VisualDensity.compact,
+                                )
+                              : null,
+                        );
+                      }),
+                    ],
                   );
                 }),
               ],
@@ -477,7 +543,9 @@ class _AgentMemoryPreview {
   final String signalLabel;
 }
 
-_AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
+_AgentMemoryInsights _buildAgentMemoryInsights(
+  List<AgentMemoryHistoryItem> rows,
+) {
   final rawPreviews = rows
       .map(_buildAgentMemoryPreview)
       .toList(growable: false);
@@ -656,6 +724,93 @@ _AgentMemoryInsights _buildAgentMemoryInsights(List<dynamic> rows) {
   );
 }
 
+class _MemoryTierGroup {
+  const _MemoryTierGroup({
+    required this.tier,
+    required this.label,
+    required this.rows,
+    required this.lastInjectedLabel,
+  });
+
+  final String tier;
+  final String label;
+  final List<AgentMemoryHistoryItem> rows;
+  final String lastInjectedLabel;
+}
+
+List<_MemoryTierGroup> _buildMemoryTierGroups(
+  List<AgentMemoryHistoryItem> rows,
+) {
+  if (rows.isEmpty) {
+    return const <_MemoryTierGroup>[];
+  }
+  final grouped = <String, List<AgentMemoryHistoryItem>>{};
+  for (final row in rows) {
+    grouped
+        .putIfAbsent(row.memoryTier, () => <AgentMemoryHistoryItem>[])
+        .add(row);
+  }
+  return _memoryTierOrder
+      .where(grouped.containsKey)
+      .map((tier) {
+        final groupRows = grouped[tier]!
+          ..sort((left, right) => right.createTime.compareTo(left.createTime));
+        return _MemoryTierGroup(
+          tier: tier,
+          label: _memoryTierLabel(tier),
+          rows: groupRows,
+          lastInjectedLabel: _formatMemoryTimestamp(groupRows.first.datetime),
+        );
+      })
+      .toList(growable: false);
+}
+
+String? _buildCostOverviewLine(AgentMemoryCostOverview? overview) {
+  if (overview == null) {
+    return null;
+  }
+  final lastInjected = overview.lastInjectedAt == null
+      ? '暂无'
+      : _formatMemoryTimestamp(overview.lastInjectedAt!);
+  return '成本概览：风格圣经 ${overview.styleBibleCount} 条 · 阶段摘要 ${overview.stageSummaryCount} 条 · 增量记忆 ${overview.deltaMemoryCount} 条 · 普通消息 ${overview.messageCount} 条 · 近 30 次平均注入 ${overview.avgInjectedCharsLast30} 字 · 近 30 次平均命中层级 ${overview.avgHitTierCountLast30} 个 · 最近注入 $lastInjected';
+}
+
+String _memoryTierLabel(String tier) {
+  switch (tier) {
+    case 'all':
+      return '全部';
+    case 'style_bible':
+      return '风格圣经';
+    case 'stage_summary':
+      return '阶段摘要';
+    case 'delta_memory':
+      return '增量记忆';
+    case 'message':
+    default:
+      return '普通消息';
+  }
+}
+
+String _formatMemoryTimestamp(String raw) {
+  try {
+    final parsed = DateTime.parse(raw).toLocal();
+    final mm = parsed.month.toString().padLeft(2, '0');
+    final dd = parsed.day.toString().padLeft(2, '0');
+    final hh = parsed.hour.toString().padLeft(2, '0');
+    final min = parsed.minute.toString().padLeft(2, '0');
+    return '$mm-$dd $hh:$min';
+  } catch (_) {
+    return raw;
+  }
+}
+
+const List<String> _memoryTierOrder = <String>[
+  'style_bible',
+  'stage_summary',
+  'delta_memory',
+  'message',
+];
+
 class _MemoryBucketStats {
   const _MemoryBucketStats({
     required this.memoryName,
@@ -679,8 +834,8 @@ class _MemoryBucketStats {
   final String actionLabel;
 
   _MemoryBucketStats merge(_AgentMemoryPreview preview) {
-    final mergedAction = _actionPriority(preview.actionLabel) >
-            _actionPriority(actionLabel)
+    final mergedAction =
+        _actionPriority(preview.actionLabel) > _actionPriority(actionLabel)
         ? preview.actionLabel
         : actionLabel;
     return _MemoryBucketStats(
@@ -692,13 +847,17 @@ class _MemoryBucketStats {
   }
 }
 
-String? _buildBucketPrioritySummary(Map<String, _MemoryBucketStats> bucketStats) {
+String? _buildBucketPrioritySummary(
+  Map<String, _MemoryBucketStats> bucketStats,
+) {
   if (bucketStats.isEmpty) return null;
   final ranked = _rankMemoryBuckets(bucketStats);
   return '记忆桶优先级：${ranked.take(3).map((bucket) => '${bucket.actionLabel} ${bucket.memoryName} ${bucket.rowCount}条/${bucket.charCount} chars').join(' | ')}';
 }
 
-List<_MemoryBucketStats> _rankMemoryBuckets(Map<String, _MemoryBucketStats> bucketStats) {
+List<_MemoryBucketStats> _rankMemoryBuckets(
+  Map<String, _MemoryBucketStats> bucketStats,
+) {
   final ranked = bucketStats.values.toList(growable: false)
     ..sort((left, right) {
       final byAction = _actionPriority(
@@ -730,8 +889,7 @@ String? _buildScopedExecutionChecklist(
   ];
   for (final bucket in insights.topBuckets) {
     final action = switch (bucket.actionLabel) {
-      '待压缩' =>
-        '压缩 ${bucket.memoryName} 的镜头/光影/氛围套话，优先保留表演、语气、情绪和人物一致性片段。',
+      '待压缩' => '压缩 ${bucket.memoryName} 的镜头/光影/氛围套话，优先保留表演、语气、情绪和人物一致性片段。',
       '合并坏例' =>
         '合并 ${bucket.memoryName} 的重复 risk/avoid 约束，保留最能防止穿帮、口型僵硬和身份漂移的坏例。',
       '优先保留' =>
@@ -784,15 +942,10 @@ int _actionPriority(String actionLabel) {
   }
 }
 
-_AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
-  final map = row is Map ? Map<String, dynamic>.from(row) : <String, dynamic>{};
-  final memoryName = map['name']?.toString() ?? '';
-  final role = map['role']?.toString() ?? 'unknown';
-  final rawContent = map['content'];
-  final blocks = rawContent is List ? rawContent : const <dynamic>[];
-  final content = blocks.isNotEmpty && blocks.first is Map
-      ? (blocks.first as Map)['data']?.toString() ?? ''
-      : rawContent?.toString() ?? '';
+_AgentMemoryPreview _buildAgentMemoryPreview(AgentMemoryHistoryItem row) {
+  final memoryName = row.name ?? '';
+  final role = row.role;
+  final content = row.plainTextContent;
   final shortContent = content.length > 60
       ? '${content.substring(0, 60)}…'
       : content;
@@ -807,7 +960,7 @@ _AgentMemoryPreview _buildAgentMemoryPreview(dynamic row) {
   final subjectLabel = _extractMemoryKeyValue(content, 'subject') ?? '';
   final signalLabel = _memorySignalLabel(content, classificationLabel);
   return _AgentMemoryPreview(
-    memoryId: map['id']?.toString() ?? '',
+    memoryId: row.id,
     memoryName: memoryName,
     role: role,
     shortContent: shortContent,

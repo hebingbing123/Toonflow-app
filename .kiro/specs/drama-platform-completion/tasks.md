@@ -19,7 +19,7 @@
   - 处理保存失败后的错误提示与状态保留
   - _需求: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7_
 
-- [ ] 2. 前端：记忆工作台分层展示与成本概览
+- [x] 2. 前端：记忆工作台分层展示与成本概览
   - 在 `frontend/lib/agent_workspaces/` 中增加 `memory_tier` 分组展示
   - 增加分层过滤选项（全部 / StyleBible / StageSummary / DeltaMemory / Message）
   - 接入 `GET /api/v1/agents/memory/cost-overview`

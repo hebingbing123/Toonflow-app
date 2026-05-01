@@ -83,6 +83,7 @@ pub(crate) struct MessageRow {
     pub(crate) id: Uuid,
     pub(crate) role: Option<String>,
     pub(crate) name: Option<String>,
+    pub(crate) memory_tier: Option<String>,
     pub(crate) content: String,
     pub(crate) create_time_ms: i64,
 }
@@ -103,6 +104,7 @@ pub(crate) struct MemoryHistoryItem {
     pub(crate) role: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) name: Option<String>,
+    pub(crate) memory_tier: String,
     pub(crate) status: &'static str,
     pub(crate) datetime: String,
     pub(crate) content: Vec<ContentBlock>,
@@ -142,10 +144,12 @@ pub(crate) fn to_memory_history_item(row: MessageRow) -> MemoryHistoryItem {
         .timestamp_millis_opt(row.create_time_ms)
         .single()
         .unwrap_or_else(Utc::now);
+    let memory_tier = row.memory_tier.unwrap_or_else(|| "message".to_string());
     MemoryHistoryItem {
         id: row.id.to_string(),
         role: normalize_role(row.role),
         name: row.name,
+        memory_tier,
         status: "complete",
         datetime: dt.to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
         content: vec![ContentBlock {
