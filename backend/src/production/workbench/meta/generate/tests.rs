@@ -14,7 +14,8 @@ use super::{
     parse_director_motion_cue, parse_structured_storyboard_description,
     prefer_role_memory_only_for_silent_identity_scene, prune_low_signal_observation_candidates,
     prune_storyboard_observation_candidates, resolve_observation_filter_style_note,
-    resolve_video_prompt_duration, score_compacted_style_note_against_constraint_pressure,
+    resolve_video_prompt_duration, resolve_video_prompt_memory_budget_tier,
+    score_compacted_style_note_against_constraint_pressure,
     score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
     select_contextual_observation_summary_style_note,
     select_pressure_prioritized_style_note_candidate, select_script_asset_anchors,
@@ -25,6 +26,7 @@ use super::{
     video_prompt_observation_is_irrelevant_to_storyboard, DirectorEmotionFragmentGroup,
     GenerateVideoPromptBody, GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse,
     ScriptRolePromptSeedRow, VideoPromptConstraintPressure, VideoPromptContext,
+    VideoPromptMemoryBudgetTier,
     VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
 };
 use crate::production::workbench::video::generate::{
@@ -37,6 +39,39 @@ use crate::production::workbench::video_prompt_memory::{
     select_script_video_style_memory_notes, selected_memory_subject_aliases, AgentMemoryRow,
     StoryboardPromptSeedRow, StructuredStoryboardDescription,
 };
+use proptest::prelude::*;
+
+fn grounded_low_risk_fields(subject: String, setting: String) -> StructuredStoryboardDescription {
+    StructuredStoryboardDescription {
+        subject,
+        setting,
+        subject_refs: String::new(),
+        duration_seconds: Some(4),
+        shot: "中景".into(),
+        camera_move: "缓推".into(),
+        action: "看向窗外".into(),
+        mood: "平静".into(),
+        lighting: "夜间暖光".into(),
+        dialogue: "无台词".into(),
+        sound: "轻微环境声".into(),
+    }
+}
+
+fn elevated_risk_fields(subject: String, setting: String) -> StructuredStoryboardDescription {
+    StructuredStoryboardDescription {
+        subject,
+        setting,
+        subject_refs: String::new(),
+        duration_seconds: Some(5),
+        shot: "近景".into(),
+        camera_move: "手持跟拍".into(),
+        action: "喉头滚动后强忍泪意".into(),
+        mood: "隐忍压抑".into(),
+        lighting: "冷蓝逆光".into(),
+        dialogue: "你终于来了".into(),
+        sound: "雨声".into(),
+    }
+}
 
 #[test]
 fn build_video_prompt_compacts_structured_storyboard_description() {
@@ -51,6 +86,66 @@ fn build_video_prompt_compacts_structured_storyboard_description() {
     assert!(prompt.contains("Camera: 全景, 缓慢推进."));
     assert!(prompt.contains("Use the supplied frame as reference."));
     assert!(!prompt.contains("A001/A003"));
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(20))]
+
+    // Feature: drama-platform-completion, Property 8: 低风险镜头 lean 预算约束
+    // 验证：需求 15.3
+    #[test]
+    fn prop_grounded_low_risk_shot_stays_in_lean_budget(
+        subject in "[A-Za-z]{2,8}",
+        setting in "[A-Za-z]{2,10}",
+        has_reference_frame in any::<bool>(),
+        use_scene_anchor in any::<bool>(),
+        use_tool_anchor in any::<bool>(),
+    ) {
+        prop_assume!(use_scene_anchor || use_tool_anchor);
+
+        let fields = grounded_low_risk_fields(subject.clone(), setting.clone());
+        let role_anchors = vec![format!("{subject}: 黑色针织外套")];
+        let scene_anchors = use_scene_anchor
+            .then_some(vec![format!("{setting}: 木桌与雨痕玻璃")])
+            .unwrap_or_default();
+        let tool_anchors = use_tool_anchor
+            .then_some(vec!["咖啡杯: 陶瓷白杯".to_string()])
+            .unwrap_or_default();
+        let image_url = has_reference_frame.then_some("https://example.com/frame.png");
+
+        let tier = resolve_video_prompt_memory_budget_tier(
+            image_url,
+            None,
+            Some(&fields),
+            &role_anchors,
+            &scene_anchors,
+            &tool_anchors,
+            None,
+        );
+
+        prop_assert_eq!(tier, VideoPromptMemoryBudgetTier::Lean);
+    }
+
+    // Feature: drama-platform-completion, Property 9: 高风险镜头 expanded 预算约束
+    // 验证：需求 15.4
+    #[test]
+    fn prop_high_risk_shot_escalates_to_expanded_budget(
+        subject in "[A-Za-z]{2,8}",
+        setting in "[A-Za-z]{2,10}",
+    ) {
+        let fields = elevated_risk_fields(subject, setting);
+        let tier = resolve_video_prompt_memory_budget_tier(
+            None,
+            None,
+            Some(&fields),
+            &[],
+            &[],
+            &[],
+            None,
+        );
+
+        prop_assert_eq!(tier, VideoPromptMemoryBudgetTier::Expanded);
+    }
 }
 
 #[test]
