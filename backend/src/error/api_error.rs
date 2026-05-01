@@ -146,7 +146,20 @@ impl IntoResponse for ApiError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use axum::body::to_bytes;
     use axum::response::IntoResponse;
+    use proptest::prelude::*;
+
+    fn decode_error_body(resp: Response) -> serde_json::Value {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("runtime");
+        let bytes = runtime
+            .block_on(to_bytes(resp.into_body(), 16 * 1024))
+            .expect("body bytes");
+        serde_json::from_slice(&bytes).expect("json body")
+    }
 
     #[test]
     fn quota_exceeded_has_retry_after_header_and_body_ms() {
@@ -164,5 +177,38 @@ mod tests {
     fn other_errors_have_no_retry_after_header() {
         let resp = ApiError::NotFound.into_response();
         assert!(resp.headers().get(header::RETRY_AFTER).is_none());
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(20))]
+
+        // Feature: drama-platform-completion, Property 14: 429 等待信息完整性
+        // 验证：需求 18.5
+        #[test]
+        fn prop_quota_exceeded_response_keeps_retry_header_and_body_in_sync(
+            message in ".{1,48}",
+        ) {
+            let resp = ApiError::QuotaExceeded(message).into_response();
+            let retry_hdr = resp
+                .headers()
+                .get(header::RETRY_AFTER)
+                .expect("Retry-After header present")
+                .to_str()
+                .expect("header str")
+                .parse::<u64>()
+                .expect("numeric retry-after");
+            let body = decode_error_body(resp);
+            let retry_after_ms = body
+                .get("retry_after_ms")
+                .and_then(serde_json::Value::as_u64)
+                .expect("retry_after_ms present");
+
+            prop_assert!(retry_hdr > 0 && retry_hdr <= 86_400);
+            prop_assert_eq!(retry_after_ms, retry_hdr * 1_000);
+            prop_assert_eq!(
+                body.get("code").and_then(serde_json::Value::as_str),
+                Some("quota_exceeded")
+            );
+        }
     }
 }
