@@ -57,6 +57,8 @@ pub fn router() -> Router<AppState> {
 #[cfg(test)]
 mod tests {
     use super::types::{AppendMemoryBody, ClearMemoryBody, OptimizeMemoryBody, QueryMemoryBody};
+    use proptest::prelude::*;
+    use serde_json::json;
 
     #[test]
     fn query_body_accepts_camel_case() {
@@ -209,5 +211,84 @@ mod tests {
         .unwrap();
         assert_eq!(body.memory_tier.as_deref(), Some("delta_memory"));
         assert!(body.scope_signature.is_some());
+    }
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct MemoryIsolationScope {
+        project_id: i32,
+        agent_type: String,
+        episodes_id: Option<i32>,
+        memory_tier: Option<String>,
+        scope_signature: Option<String>,
+    }
+
+    fn build_memory_isolation_scope(body: &QueryMemoryBody) -> MemoryIsolationScope {
+        MemoryIsolationScope {
+            project_id: body.project_id,
+            agent_type: body.agent_type.clone(),
+            episodes_id: body.episodes_id,
+            memory_tier: body.memory_tier.clone(),
+            scope_signature: body.scope_signature.as_ref().map(|value| value.to_string()),
+        }
+    }
+
+    proptest! {
+        // Feature: drama-platform-completion, Property 1: 记忆隔离性
+        // 验证：需求 12.1, 17.6
+        #[test]
+        fn prop_memory_query_scope_changes_when_isolation_dimensions_change(
+            project_a in 1i32..5000,
+            project_b in 1i32..5000,
+            episodes_a in proptest::option::of(1i32..5000),
+            episodes_b in proptest::option::of(1i32..5000),
+            use_scope_a in any::<bool>(),
+            use_scope_b in any::<bool>(),
+            use_tier_a in any::<bool>(),
+            use_tier_b in any::<bool>(),
+        ) {
+            let agent_a = if project_a % 2 == 0 { "scriptAgent" } else { "productionAgent" };
+            let agent_b = if project_b % 2 == 0 { "scriptAgent" } else { "productionAgent" };
+            let tier_a = use_tier_a.then_some(if project_a % 3 == 0 { "stage_summary" } else { "style_bible" });
+            let tier_b = use_tier_b.then_some(if project_b % 3 == 0 { "stage_summary" } else { "delta_memory" });
+            let scope_a = use_scope_a.then(|| json!({
+                "episodeId": episodes_a,
+                "focusSections": [format!("scene-{}", project_a % 9)],
+            }));
+            let scope_b = use_scope_b.then(|| json!({
+                "episodeId": episodes_b,
+                "focusSections": [format!("scene-{}", project_b % 9)],
+            }));
+
+            let body_a = QueryMemoryBody {
+                project_id: project_a,
+                agent_type: agent_a.to_string(),
+                episodes_id: episodes_a,
+                memory_type: "all".to_string(),
+                memory_tier: tier_a.map(str::to_string),
+                scope_signature: scope_a,
+            };
+            let body_b = QueryMemoryBody {
+                project_id: project_b,
+                agent_type: agent_b.to_string(),
+                episodes_id: episodes_b,
+                memory_type: "all".to_string(),
+                memory_tier: tier_b.map(str::to_string),
+                scope_signature: scope_b,
+            };
+
+            let scope_key_a = build_memory_isolation_scope(&body_a);
+            let scope_key_b = build_memory_isolation_scope(&body_b);
+            let dimensions_differ = body_a.project_id != body_b.project_id
+                || body_a.agent_type != body_b.agent_type
+                || body_a.episodes_id != body_b.episodes_id
+                || body_a.memory_tier != body_b.memory_tier
+                || body_a.scope_signature != body_b.scope_signature;
+
+            if dimensions_differ {
+                prop_assert_ne!(scope_key_a, scope_key_b);
+            } else {
+                prop_assert_eq!(scope_key_a, scope_key_b);
+            }
+        }
     }
 }

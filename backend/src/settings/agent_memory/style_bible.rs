@@ -436,6 +436,7 @@ mod tests {
         build_style_bible_fill, empty_style_bible_value, parse_style_bible_character_anchors,
         style_bible_has_meaningful_content, style_bible_scope_signature, StyleBibleRoleSeed,
     };
+    use proptest::prelude::*;
     use serde_json::json;
 
     #[test]
@@ -526,5 +527,38 @@ mod tests {
             "林晚与顾承泽长期对抗又彼此试探"
         );
         assert_eq!(anchors[0].body_habits, vec!["抿唇", "指尖收紧"]);
+    }
+
+    proptest! {
+        // Feature: drama-platform-completion, Property 3: StyleBible 非覆盖原则
+        // 验证：需求 7.5
+        #[test]
+        fn prop_style_bible_non_empty_detection_blocks_reinit_override(
+            name in "[^\\n]{1,16}",
+            appearance in "[^\\n]{1,32}",
+            temperament in "[^\\n]{1,32}",
+            rhythm in "[^\\n]{1,32}",
+        ) {
+            let candidate = json!({
+                "characters": [
+                    {
+                        "name": name,
+                        "fixed_appearance": appearance,
+                        "default_temperament": temperament,
+                        "emotion_expression": "",
+                        "body_habits": []
+                    }
+                ],
+                "visual_taboos": [],
+                "narrative_taboos": [],
+                "world_constraints": [],
+                "platform_rhythm": rhythm,
+                "core_relationships": "",
+                "emotion_baseline": ""
+            });
+
+            prop_assert!(style_bible_has_meaningful_content(&candidate));
+            prop_assert!(!style_bible_has_meaningful_content(&empty_style_bible_value()));
+        }
     }
 }

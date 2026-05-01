@@ -1856,10 +1856,26 @@ mod tests {
         filter_auto_scope_memory_rows, format_storyboard_prompt_seed_scope, parse_review_summary,
         parse_scope_signature, parse_storyboard_prompt_seed_scope, parse_tag_attributes,
         scope_signature_from_args, scope_signature_json, select_auto_memory_entries,
-        sub_agent_prompt_from_args, AutoMemoryRow,
+        stage_label_for_tool, stage_summary_name_for_tool, sub_agent_prompt_from_args,
+        AutoMemoryRow,
     };
     use crate::harness::invoke::InvokeError;
+    use proptest::prelude::*;
     use serde_json::json;
+
+    const STAGE_SUMMARY_TOOLS: &[&str] = &[
+        "run_sub_agent_storySkeleton",
+        "run_sub_agent_adaptationStrategy",
+        "run_sub_agent_script",
+        "run_supervision_agent",
+        "run_sub_agent_derive_assets",
+        "run_sub_agent_generate_assets",
+        "run_sub_agent_director_plan",
+        "run_sub_agent_storyboard_gen",
+        "run_sub_agent_storyboard_panel",
+        "run_sub_agent_storyboard_table",
+        "run_sub_agent_production_supervision",
+    ];
 
     #[test]
     fn parse_tag_attributes_reads_xml_style_summary_line() {
@@ -1919,6 +1935,38 @@ mod tests {
         assert_eq!(review["target"].as_str(), Some("script"));
         assert_eq!(review["grade"].as_str(), Some("C"));
         assert_eq!(review["nextAction"].as_str(), Some("revise_script"));
+    }
+
+    proptest! {
+        // Feature: drama-platform-completion, Property 2: 阶段摘要唯一性
+        // 验证：需求 6.4
+        #[test]
+        fn prop_stage_summary_mapping_stays_unique_and_aligned(
+            tool_a_idx in 0usize..STAGE_SUMMARY_TOOLS.len(),
+            tool_b_idx in 0usize..STAGE_SUMMARY_TOOLS.len(),
+        ) {
+            let tool_a = STAGE_SUMMARY_TOOLS[tool_a_idx];
+            let tool_b = STAGE_SUMMARY_TOOLS[tool_b_idx];
+            let summary_a = stage_summary_name_for_tool(tool_a).expect("summary name");
+            let label_a = stage_label_for_tool(tool_a).expect("stage label");
+            let suffix_a = summary_a.strip_prefix("stage_summary:").expect("summary prefix");
+
+            prop_assert_eq!(suffix_a, label_a);
+
+            let summary_b = stage_summary_name_for_tool(tool_b).expect("summary name");
+            let label_b = stage_label_for_tool(tool_b).expect("stage label");
+            let suffix_b = summary_b.strip_prefix("stage_summary:").expect("summary prefix");
+
+            prop_assert_eq!(suffix_b, label_b);
+
+            if tool_a == tool_b {
+                prop_assert_eq!(summary_a, summary_b);
+                prop_assert_eq!(label_a, label_b);
+            } else {
+                prop_assert_ne!(summary_a, summary_b);
+                prop_assert_ne!(label_a, label_b);
+            }
+        }
     }
 
     #[test]
