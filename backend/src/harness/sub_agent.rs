@@ -2,9 +2,13 @@ use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::error::ApiError;
 use crate::harness::HarnessContext;
 use crate::llm::chat_completion_assistant_text;
-use crate::production::{storyboard_prompt_seed, StoryboardPromptSeedRow};
+use crate::production::{
+    enforce_quality_gate, run_quality_gate, storyboard_prompt_seed, QualityGateStage,
+    StoryboardPromptSeedRow,
+};
 use crate::prompting::skills::{read_skill_markdown, read_skill_markdown_section};
 use crate::settings::agent_memory::replace_named_summary_memory_with_scope;
 
@@ -1642,6 +1646,31 @@ pub async fn invoke_sub_agent_tool(
     let execution_note = spec.execution_hint.unwrap_or(
         "Use the narrowest tool call that can solve the task before requesting broader context.",
     );
+    if tool_name == "run_sub_agent_storyboard_panel" {
+        if let (Some(pool), Some(project_numeric_id), Some(script_numeric_id)) = (
+            ctx.pool.as_ref(),
+            ctx.project_numeric_id,
+            ctx.script_numeric_id,
+        ) {
+            let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds")
+                .into_iter()
+                .filter_map(|value| i32::try_from(value).ok())
+                .collect::<Vec<_>>();
+            let gate = run_quality_gate(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                script_numeric_id,
+                QualityGateStage::StoryboardPanel,
+                &storyboard_ids,
+                std::slice::from_ref(&prompt),
+            )
+            .await
+            .map_err(api_error_to_invoke_error)?;
+            enforce_quality_gate(QualityGateStage::StoryboardPanel, &gate)
+                .map_err(api_error_to_invoke_error)?;
+        }
+    }
     let mut messages = vec![
         json!({"role":"system","content":system}),
         json!({"role":"assistant","content":context_note}),
@@ -1729,6 +1758,25 @@ pub async fn invoke_sub_agent_tool(
         "result": text,
         "review": review,
     }))
+}
+
+fn error_message(error: ApiError) -> String {
+    match error {
+        ApiError::Conflict(message)
+        | ApiError::BadRequest(message)
+        | ApiError::DatabaseError(message)
+        | ApiError::NotImplemented(message)
+        | ApiError::QuotaExceeded(message)
+        | ApiError::Forbidden(message) => message,
+        other => format!("{other:?}"),
+    }
+}
+
+fn api_error_to_invoke_error(error: ApiError) -> InvokeError {
+    match error {
+        ApiError::DatabaseError(message) => InvokeError::DatabaseError(message),
+        other => InvokeError::InvalidArgs(error_message(other)),
+    }
 }
 
 #[cfg(test)]

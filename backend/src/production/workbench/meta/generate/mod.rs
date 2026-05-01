@@ -26,6 +26,7 @@ use crate::production::workbench::video_prompt_memory::{
     select_subject_role_video_style_memory_notes_for_storyboard, selected_memory_subject_aliases,
     storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
 };
+use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
 use crate::state::AppState;
@@ -247,6 +248,23 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         body.script_id,
     )
     .await?;
+    let storyboard_ids = body
+        .storyboard_id
+        .filter(|id| *id > 0)
+        .into_iter()
+        .collect::<Vec<_>>();
+    let text_inputs = body.description.iter().cloned().collect::<Vec<_>>();
+    let gate = run_quality_gate(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        QualityGateStage::VideoPrompt,
+        &storyboard_ids,
+        &text_inputs,
+    )
+    .await?;
+    enforce_quality_gate(QualityGateStage::VideoPrompt, &gate)?;
     let memory_optimization = if body.storyboard_id.is_some_and(|id| id > 0) {
         Some(optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?)
     } else {

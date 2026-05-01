@@ -28,6 +28,7 @@ use crate::production::workbench::video_prompt_memory::{
     split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
     StructuredStoryboardDescription, VideoPromptMemorySelectionBias,
 };
+use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
@@ -233,6 +234,24 @@ pub(in crate::production) async fn post_workbench_generate_video(
     )
     .await?;
     ensure_storyboards_in_scope(pool, scope_row.script_id, &storyboard_ids).await?;
+    let mut text_inputs = upload_items
+        .iter()
+        .filter_map(|item| item.prompt.clone())
+        .collect::<Vec<_>>();
+    if !body.prompt.trim().is_empty() {
+        text_inputs.push(body.prompt.clone());
+    }
+    let gate = run_quality_gate(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        QualityGateStage::VideoGenerate,
+        &storyboard_ids,
+        &text_inputs,
+    )
+    .await?;
+    enforce_quality_gate(QualityGateStage::VideoGenerate, &gate)?;
     optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?;
 
     let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)

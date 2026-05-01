@@ -7,6 +7,7 @@
 pub(crate) mod flow_data;
 mod openapi;
 pub(crate) mod patch;
+mod quality_gate;
 mod router;
 mod types;
 mod workbench;
@@ -15,6 +16,7 @@ mod workbench;
 mod tests;
 
 pub use openapi::ProductionApi;
+pub(crate) use quality_gate::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 pub use router::router;
 pub(crate) use types::{VideoItem, WorkbenchGenerateVideoBody};
 pub(crate) use workbench::video::generate::{
