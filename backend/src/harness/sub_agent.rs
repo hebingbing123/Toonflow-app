@@ -24,9 +24,11 @@ struct SubAgentSpec {
 
 const AUTO_MEMORY_SUMMARY_LIMIT: i64 = 3;
 const AUTO_MEMORY_FALLBACK_LIMIT: usize = 1;
+const AUTO_MEMORY_REWORK_LIMIT: usize = 2;
 const AUTO_MEMORY_KEEP_ROWS: i64 = 8;
 const AUTO_MEMORY_MAX_CHARS: usize = 320;
 const AUTO_MEMORY_FETCH_LIMIT: i64 = AUTO_MEMORY_KEEP_ROWS;
+const REWORK_REASON_MAX_CHARS: usize = 120;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct ScopeSignature {
@@ -579,10 +581,15 @@ fn select_auto_memory_entries(
     }
 
     let current_scope = scope_signature_from_args(arguments, prompt_seed_scope);
+    let rework_mode = has_rework_reason(arguments);
     if !has_scope(&current_scope) {
         return rows
             .into_iter()
-            .take(AUTO_MEMORY_FALLBACK_LIMIT)
+            .take(if rework_mode {
+                AUTO_MEMORY_REWORK_LIMIT.min(AUTO_MEMORY_FALLBACK_LIMIT.max(1))
+            } else {
+                AUTO_MEMORY_FALLBACK_LIMIT
+            })
             .collect::<Vec<_>>();
     }
 
@@ -605,7 +612,11 @@ fn select_auto_memory_entries(
         return scored
             .into_iter()
             .map(|(_, _, _, row)| row)
-            .take(AUTO_MEMORY_FALLBACK_LIMIT)
+            .take(if rework_mode {
+                AUTO_MEMORY_REWORK_LIMIT.min(AUTO_MEMORY_FALLBACK_LIMIT.max(1))
+            } else {
+                AUTO_MEMORY_FALLBACK_LIMIT
+            })
             .collect::<Vec<_>>();
     }
 
@@ -644,7 +655,11 @@ fn select_auto_memory_entries(
                     has_matching_prompt_seed_storyboards.contains(storyboard_id)
                 })
         })
-        .take(AUTO_MEMORY_SUMMARY_LIMIT as usize)
+        .take(if rework_mode {
+            AUTO_MEMORY_REWORK_LIMIT
+        } else {
+            AUTO_MEMORY_SUMMARY_LIMIT as usize
+        })
         .map(|(_, _, _, row)| row)
         .collect::<Vec<_>>()
 }
@@ -690,6 +705,47 @@ fn dedupe_auto_memory_entries(entries: Vec<String>) -> Vec<String> {
         deduped.push(normalized.to_string());
     }
     deduped
+}
+
+fn contains_any(text: &str, needles: &[&str]) -> bool {
+    needles.iter().any(|needle| text.contains(needle))
+}
+
+fn has_rework_reason(arguments: &Value) -> bool {
+    arguments
+        .get("reason")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .is_some_and(|value| !value.is_empty())
+}
+
+fn infer_rework_goal(reason: &str) -> &'static str {
+    if contains_any(reason, &["穿帮", "串脸", "长相", "服装", "身份", "视线"]) {
+        "修正人物一致性与镜头连续性"
+    } else if contains_any(reason, &["情绪", "朗读", "台词", "表演", "没情绪"]) {
+        "补强情绪表达与台词表演"
+    } else if contains_any(reason, &["节奏", "重复", "动作", "平"]) {
+        "打破重复动作并拉开镜头节奏"
+    } else if contains_any(reason, &["格式", "字段", "缺失", "编号"]) {
+        "完成结构修复并补齐缺失字段"
+    } else {
+        "只修当前失败点，不重写无关内容"
+    }
+}
+
+fn compact_rework_reason(reason: &str) -> Option<String> {
+    let compact = truncate_chars(&normalize_whitespace(reason), REWORK_REASON_MAX_CHARS);
+    (!compact.is_empty()).then_some(compact)
+}
+
+fn build_rework_context_note(arguments: &Value) -> Option<String> {
+    let reason = arguments.get("reason").and_then(Value::as_str)?;
+    let reason = compact_rework_reason(reason)?;
+    let goal = infer_rework_goal(&reason);
+    let scope = scope_summary(arguments).unwrap_or_else(|| "只读当前对象的局部上下文".to_string());
+    Some(format!(
+        "Repair brief: failure_reason={reason}; fix_goal={goal}; local_scope={scope}. 只围绕这个范围补读与修复，不要把整个项目上下文重新拉满。"
+    ))
 }
 
 fn script_scope_note(arguments: &Value) -> Option<String> {
@@ -1431,9 +1487,18 @@ async fn load_auto_memory_note(
         return Ok(None);
     }
 
+    let mut chars = 0usize;
     let items = rows
         .into_iter()
         .map(|entry| format!("- {}", truncate_chars(entry.trim(), AUTO_MEMORY_MAX_CHARS)))
+        .filter(|entry| {
+            let next = chars + entry.chars().count();
+            if next > AUTO_MEMORY_MAX_CHARS * AUTO_MEMORY_REWORK_LIMIT {
+                return false;
+            }
+            chars = next;
+            true
+        })
         .collect::<Vec<_>>()
         .join("\n");
     Ok(Some(format!(
@@ -1646,6 +1711,7 @@ pub async fn invoke_sub_agent_tool(
     let execution_note = spec.execution_hint.unwrap_or(
         "Use the narrowest tool call that can solve the task before requesting broader context.",
     );
+    let rework_context_note = build_rework_context_note(arguments);
     if tool_name == "run_sub_agent_storyboard_panel" {
         if let (Some(pool), Some(project_numeric_id), Some(script_numeric_id)) = (
             ctx.pool.as_ref(),
@@ -1677,6 +1743,9 @@ pub async fn invoke_sub_agent_tool(
     ];
     if let Some(memory_note) = memory_note {
         messages.push(json!({"role":"assistant","content":memory_note}));
+    }
+    if let Some(rework_context_note) = rework_context_note {
+        messages.push(json!({"role":"assistant","content":rework_context_note}));
     }
     messages
         .push(json!({"role":"assistant","content":format!("Execution hint: {execution_note}")}));
@@ -1782,7 +1851,7 @@ fn api_error_to_invoke_error(error: ApiError) -> InvokeError {
 #[cfg(test)]
 mod tests {
     use super::{
-        build_auto_memory_snapshot, build_stage_summary_content,
+        build_auto_memory_snapshot, build_rework_context_note, build_stage_summary_content,
         compact_auto_memory_entry_for_scope, dedupe_auto_memory_entries,
         filter_auto_scope_memory_rows, format_storyboard_prompt_seed_scope, parse_review_summary,
         parse_scope_signature, parse_storyboard_prompt_seed_scope, parse_tag_attributes,
@@ -2153,6 +2222,39 @@ mod tests {
         );
 
         assert_eq!(compacted, "supervision: 角色站位不要跳轴");
+    }
+
+    #[test]
+    fn build_rework_context_note_compacts_reason_and_scope() {
+        let note = build_rework_context_note(&json!({
+            "storyboardIds": [12, 13],
+            "reason": "人物有点像念稿，情绪递进也不够，镜头还稍微有点重复，需要只修这两条分镜。"
+        }))
+        .expect("note");
+        assert!(note.contains("failure_reason="));
+        assert!(note.contains("fix_goal=补强情绪表达与台词表演"));
+        assert!(note.contains("storyboardIds=12,13"));
+    }
+
+    #[test]
+    fn select_auto_memory_entries_rework_mode_keeps_compact_top_two_matches() {
+        let rows = select_auto_memory_entries(
+            &json!({
+                "storyboardIds": [12],
+                "reason": "情绪不够"
+            }),
+            Some("promptSeed=seed-12-current"),
+            vec![
+                "tool=a | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=匹配1"
+                    .to_string(),
+                "tool=b | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=匹配2"
+                    .to_string(),
+                "tool=c | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=匹配3"
+                    .to_string(),
+            ],
+        );
+        assert_eq!(rows.len(), 2);
+        assert!(rows.iter().all(|row| row.contains("storyboardIds=12")));
     }
 
     #[test]

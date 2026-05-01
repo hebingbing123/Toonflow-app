@@ -581,6 +581,14 @@ pub(crate) async fn get_token_efficiency(
           COALESCE(AVG(((model_params->'diagnostics'->>'memoryStyleChars')::int)), 0) as avg_memory_style_chars,
           COALESCE(AVG(((model_params->'diagnostics'->>'memoryVisualChars')::int)), 0) as avg_memory_visual_chars,
           COALESCE(AVG(((model_params->'diagnostics'->>'memoryDeliveryChars')::int)), 0) as avg_memory_delivery_chars,
+          COALESCE(AVG(COALESCE((model_params->'diagnostics'->>'memoryOptimizationRemovedChars')::int, 0)), 0)
+            as avg_memory_optimization_removed_chars,
+          COALESCE(AVG(COALESCE((model_params->'diagnostics'->>'memoryProjectScopeRowCount')::int, 0)), 0)
+            as avg_project_scope_row_count,
+          COALESCE(AVG(COALESCE((model_params->'diagnostics'->>'memoryScriptScopeRowCount')::int, 0)), 0)
+            as avg_script_scope_row_count,
+          COALESCE(AVG(COALESCE((model_params->'diagnostics'->>'memoryRoleScopeRowCount')::int, 0)), 0)
+            as avg_role_scope_row_count,
           COALESCE(ROUND(AVG(
             CASE
               WHEN ((model_params->'diagnostics'->>'promptChars')::int) > 0 THEN
@@ -785,6 +793,14 @@ pub(crate) async fn get_token_efficiency_samples(
           COALESCE(((model_params->'diagnostics'->>'memoryStyleChars')::int), 0) as memory_style_chars,
           COALESCE(((model_params->'diagnostics'->>'memoryVisualChars')::int), 0) as memory_visual_chars,
           COALESCE(((model_params->'diagnostics'->>'memoryDeliveryChars')::int), 0) as memory_delivery_chars,
+          COALESCE(((model_params->'diagnostics'->>'memoryOptimizationRemovedChars')::int), 0)
+            as memory_optimization_removed_chars,
+          COALESCE(((model_params->'diagnostics'->>'memoryProjectScopeRowCount')::int), 0)
+            as project_scope_row_count,
+          COALESCE(((model_params->'diagnostics'->>'memoryScriptScopeRowCount')::int), 0)
+            as script_scope_row_count,
+          COALESCE(((model_params->'diagnostics'->>'memoryRoleScopeRowCount')::int), 0)
+            as role_scope_row_count,
           COALESCE(
             ROUND(
               CASE

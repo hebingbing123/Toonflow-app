@@ -91,21 +91,41 @@ pub(super) async fn load_video_prompt_context(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let script_role_rows = sqlx::query_as::<_, ScriptRolePromptSeedRow>(
         r#"
-        SELECT a.asset_type, a.name, a.describe
-        FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
-        INNER JOIN app_script_asset sa ON sa.asset_id = a.id
-        INNER JOIN app_script sc ON sc.id = sa.script_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND sc.numeric_id = $3
-          AND a.asset_type IN ('role', 'scene', 'tool')
-        ORDER BY a.created_at DESC
+        WITH ranked_assets AS (
+          SELECT
+            a.asset_type,
+            a.name,
+            a.describe,
+            ROW_NUMBER() OVER (PARTITION BY a.asset_type ORDER BY a.created_at DESC) AS row_no
+          FROM app_asset a
+          INNER JOIN app_project p ON p.id = a.project_id
+          INNER JOIN app_script_asset sa ON sa.asset_id = a.id
+          INNER JOIN app_script sc ON sc.id = sa.script_id
+          WHERE p.owner_user_id = $1
+            AND p.numeric_id = $2
+            AND sc.numeric_id = $3
+            AND a.asset_type IN ('role', 'scene', 'tool')
+        )
+        SELECT asset_type, name, describe
+        FROM ranked_assets
+        WHERE (asset_type = 'role' AND row_no <= $4)
+           OR (asset_type = 'scene' AND row_no <= $5)
+           OR (asset_type = 'tool' AND row_no <= $6)
+        ORDER BY
+          CASE asset_type
+            WHEN 'role' THEN 0
+            WHEN 'scene' THEN 1
+            ELSE 2
+          END,
+          row_no ASC
         "#,
     )
     .bind(user_id)
     .bind(project_id)
     .bind(script_id)
+    .bind(VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT as i64)
+    .bind(VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT as i64)
+    .bind(VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT as i64)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
