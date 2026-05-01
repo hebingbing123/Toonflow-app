@@ -74,10 +74,24 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
             : () async {
                 setDialogState(() => dialogState.saving[0] = true);
                 try {
+                  final currentProject = dialogState;
+                  final selectedArtStylePack =
+                      currentProject.selectedArtStylePackRef[0];
+                  final selectedStoryStylePack =
+                      currentProject.selectedStoryStylePackRef[0];
                   await updateProjectByProjectId(token, p.id, {
                     'name': nameCtrl.text.isEmpty ? null : nameCtrl.text,
                     'intro': introCtrl.text.isEmpty ? null : introCtrl.text,
                   });
+                  if (selectedArtStylePack != p.artStylePack ||
+                      selectedStoryStylePack != p.storyStylePack) {
+                    await patchProjectStyleConfigByProjectId(
+                      token,
+                      p.id,
+                      artStylePack: selectedArtStylePack,
+                      storyStylePack: selectedStoryStylePack,
+                    );
+                  }
                   if (!ctx.mounted) return;
                   Navigator.of(ctx).pop();
                   if (!mounted) return;

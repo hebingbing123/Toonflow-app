@@ -20,6 +20,8 @@ class ProjectRow {
     this.mode,
     this.videoRatio,
     this.createTimeMs,
+    this.artStylePack,
+    this.storyStylePack,
   });
 
   final String id;
@@ -35,6 +37,8 @@ class ProjectRow {
   final String? mode;
   final String? videoRatio;
   final int? createTimeMs;
+  final String? artStylePack;
+  final String? storyStylePack;
 
   factory ProjectRow.fromJson(Map<String, dynamic> json) {
     return ProjectRow(
@@ -53,6 +57,8 @@ class ProjectRow {
       createTimeMs: json['create_time_ms'] == null
           ? null
           : (json['create_time_ms'] as num).toInt(),
+      artStylePack: json['art_style_pack'] as String?,
+      storyStylePack: json['story_style_pack'] as String?,
     );
   }
 }

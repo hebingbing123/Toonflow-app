@@ -78,7 +78,7 @@ pub(super) struct ProjectsSummaryResponse {
 }
 
 #[derive(Debug, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct PatchProjectBody {
     #[serde(default)]
     pub(super) name: Option<Value>,
@@ -114,15 +114,15 @@ pub(super) struct PatchProjectBody {
 pub(super) struct PatchStyleConfigBody {
     /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`），传 null 清除
     #[serde(default)]
-    pub(super) art_style_pack: Option<String>,
+    pub(super) art_style_pack: Option<Value>,
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`），传 null 清除
     #[serde(default)]
-    pub(super) story_style_pack: Option<String>,
+    pub(super) story_style_pack: Option<Value>,
 }
 
-/// JSON body for `POST /api/v1/projects` (snake_case; all fields optional).
+/// JSON body for `POST /api/v1/projects` (camelCase from frontend; all fields optional).
 #[derive(Debug, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct CreateProjectBody {
     #[serde(default)]
     pub(super) name: Option<String>,

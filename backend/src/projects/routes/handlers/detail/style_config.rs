@@ -9,8 +9,10 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
+use super::super::super::common::merge_text_patch;
 use super::super::super::types::{PatchStyleConfigBody, ProjectRow};
 
 /// `PATCH /api/v1/projects/{project_id}/style-config`
@@ -31,6 +33,12 @@ pub(crate) async fn patch_style_config(
             "expected at least one field: artStylePack or storyStylePack".into(),
         ));
     }
+    let has_art_style_pack = body.art_style_pack.is_some();
+    let has_story_style_pack = body.story_style_pack.is_some();
+
+    let art_style_pack_patch = parse_optional_text_field(body.art_style_pack, "art_style_pack")?;
+    let story_style_pack_patch =
+        parse_optional_text_field(body.story_style_pack, "story_style_pack")?;
 
     // 先读取当前记录（确认存在且属于当前用户）
     let current = sqlx::query_as::<_, ProjectRow>(
@@ -51,16 +59,22 @@ pub(crate) async fn patch_style_config(
     .ok_or(ApiError::NotFound)?;
 
     // 合并：body 中提供的字段覆盖当前值，未提供的字段保持不变
-    let new_art_style_pack = if body.art_style_pack.is_some() {
-        body.art_style_pack
-    } else {
-        current.art_style_pack
-    };
-    let new_story_style_pack = if body.story_style_pack.is_some() {
-        body.story_style_pack
-    } else {
-        current.story_style_pack
-    };
+    let new_art_style_pack = merge_text_patch(
+        &current.art_style_pack,
+        if has_art_style_pack {
+            art_style_pack_patch
+        } else {
+            FieldPatch::Absent
+        },
+    );
+    let new_story_style_pack = merge_text_patch(
+        &current.story_style_pack,
+        if has_story_style_pack {
+            story_style_pack_patch
+        } else {
+            FieldPatch::Absent
+        },
+    );
 
     let row = sqlx::query_as::<_, ProjectRow>(
         r#"

@@ -6,6 +6,8 @@ import '../../config.dart';
 import '../core.dart';
 import 'overview.dart';
 
+const _unsetProjectStyleConfigField = Object();
+
 /// Primary project REST endpoints and summary payloads.
 /// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
@@ -139,8 +141,49 @@ Future<ProjectRow> updateProjectByProjectId(
   return ProjectRow.fromJson(map);
 }
 
+/// `PATCH /api/v1/projects/{project_id}/style-config` — update style-pack selections.
+Future<ProjectRow> patchProjectStyleConfigByProjectId(
+  String accessToken,
+  String projectId, {
+  Object? artStylePack = _unsetProjectStyleConfigField,
+  Object? storyStylePack = _unsetProjectStyleConfigField,
+}) async {
+  final body = <String, dynamic>{};
+  if (!identical(artStylePack, _unsetProjectStyleConfigField)) {
+    body['artStylePack'] = artStylePack;
+  }
+  if (!identical(storyStylePack, _unsetProjectStyleConfigField)) {
+    body['storyStylePack'] = storyStylePack;
+  }
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/style-config');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectRow.fromJson(map);
+}
+
 /// `DELETE /api/v1/projects/{project_id}` — see `deleteProjectByProjectIdV1`.
-Future<void> deleteProjectByProjectId(String accessToken, String projectId) async {
+Future<void> deleteProjectByProjectId(
+  String accessToken,
+  String projectId,
+) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId');
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})

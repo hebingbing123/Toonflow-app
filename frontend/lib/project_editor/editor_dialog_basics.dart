@@ -1,6 +1,60 @@
 part of '../../home_page.dart';
 
 extension _HomePageProjectEditorDialogBasics on _HomePageState {
+  Widget _buildStylePackPickerField({
+    required BuildContext ctx,
+    required String label,
+    required List<_StylePackOption> options,
+    required String? selectedPath,
+    required ValueChanged<String?> onChanged,
+  }) {
+    _StylePackOption? selected;
+    for (final option in options) {
+      if (option.path == selectedPath) {
+        selected = option;
+        break;
+      }
+    }
+    final hasSelectedOutsideList =
+        selectedPath != null && selected == null && selectedPath.isNotEmpty;
+    final items = <DropdownMenuItem<String>>[
+      const DropdownMenuItem<String>(value: '', child: Text('未选择')),
+      ...options.map(
+        (option) => DropdownMenuItem<String>(
+          value: option.path,
+          child: Text('${option.name} · ${option.tag}'),
+        ),
+      ),
+      if (hasSelectedOutsideList)
+        DropdownMenuItem<String>(
+          value: selectedPath,
+          child: Text('$selectedPath · 当前配置'),
+        ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          initialValue: selectedPath ?? '',
+          decoration: InputDecoration(labelText: label),
+          isExpanded: true,
+          items: items,
+          onChanged: (value) =>
+              onChanged((value == null || value.isEmpty) ? null : value),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          selected?.description ??
+              (hasSelectedOutsideList ? '当前项目已配置旧路径或未收录风格包。' : '未选择'),
+          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+            color: Theme.of(ctx).colorScheme.outline,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildProjectEditorBasicsSection({
     required BuildContext ctx,
     required StateSetter setDialogState,
@@ -24,6 +78,30 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           controller: introCtrl,
           maxLines: 3,
           decoration: const InputDecoration(labelText: 'Intro (empty = clear)'),
+        ),
+        const SizedBox(height: 12),
+        _buildStylePackPickerField(
+          ctx: ctx,
+          label: '画风技能包',
+          options: dialogState.artStylePackOptionsRef[0],
+          selectedPath: dialogState.selectedArtStylePackRef[0],
+          onChanged: (value) {
+            setDialogState(
+              () => dialogState.selectedArtStylePackRef[0] = value,
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        _buildStylePackPickerField(
+          ctx: ctx,
+          label: '故事风格包',
+          options: dialogState.storyStylePackOptionsRef[0],
+          selectedPath: dialogState.selectedStoryStylePackRef[0],
+          onChanged: (value) {
+            setDialogState(
+              () => dialogState.selectedStoryStylePackRef[0] = value,
+            );
+          },
         ),
         const SizedBox(height: 8),
         ExpansionTile(

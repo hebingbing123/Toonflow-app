@@ -8,6 +8,18 @@ extension _HomePageProjectEditor on _HomePageState {
     final introCtrl = TextEditingController(text: p.intro ?? '');
     try {
       final detail = await fetchProjectByProjectId(token, p.id);
+      _StylePackCatalog stylePackCatalog = const _StylePackCatalog(
+        artPacks: <_StylePackOption>[],
+        storyPacks: <_StylePackOption>[],
+      );
+      try {
+        stylePackCatalog = await _loadProjectStylePackCatalog(token);
+      } catch (_) {
+        stylePackCatalog = const _StylePackCatalog(
+          artPacks: <_StylePackOption>[],
+          storyPacks: <_StylePackOption>[],
+        );
+      }
       if (!mounted) return;
       nameCtrl.text = detail.project.name ?? '';
       introCtrl.text = detail.project.intro ?? '';
@@ -35,6 +47,10 @@ extension _HomePageProjectEditor on _HomePageState {
         initialStats: statsSnap,
         initialAssets: assetsSnap,
         initialNovels: novelsSnap,
+        artStylePackOptions: stylePackCatalog.artPacks,
+        storyStylePackOptions: stylePackCatalog.storyPacks,
+        selectedArtStylePack: detail.project.artStylePack,
+        selectedStoryStylePack: detail.project.storyStylePack,
       );
       await showDialog<void>(
         context: context,
@@ -83,14 +99,45 @@ extension _HomePageProjectEditor on _HomePageState {
   }
 }
 
+class _StylePackOption {
+  const _StylePackOption({
+    required this.path,
+    required this.name,
+    required this.description,
+    required this.tag,
+  });
+
+  final String path;
+  final String name;
+  final String description;
+  final String tag;
+}
+
+class _StylePackCatalog {
+  const _StylePackCatalog({required this.artPacks, required this.storyPacks});
+
+  final List<_StylePackOption> artPacks;
+  final List<_StylePackOption> storyPacks;
+}
+
 class _ProjectEditorDialogState {
   _ProjectEditorDialogState({
     ProjectStats? initialStats,
     ListAssetsResponse? initialAssets,
     ListNovelsResponse? initialNovels,
+    List<_StylePackOption> artStylePackOptions = const <_StylePackOption>[],
+    List<_StylePackOption> storyStylePackOptions = const <_StylePackOption>[],
+    String? selectedArtStylePack,
+    String? selectedStoryStylePack,
   }) : statsRef = <ProjectStats?>[initialStats],
        assetsRef = <ListAssetsResponse?>[initialAssets],
-       novelsRef = <ListNovelsResponse?>[initialNovels];
+       novelsRef = <ListNovelsResponse?>[initialNovels],
+       artStylePackOptionsRef = <List<_StylePackOption>>[artStylePackOptions],
+       storyStylePackOptionsRef = <List<_StylePackOption>>[
+         storyStylePackOptions,
+       ],
+       selectedArtStylePackRef = <String?>[selectedArtStylePack],
+       selectedStoryStylePackRef = <String?>[selectedStoryStylePack];
 
   final List<ProjectStats?> statsRef;
   final List<ListAssetsResponse?> assetsRef;
@@ -114,6 +161,10 @@ class _ProjectEditorDialogState {
   final List<bool> generalProbeBusy = <bool>[false];
   final List<bool> tasksProbeBusy = <bool>[false];
   final List<bool> projectProbeBusy = <bool>[false];
+  final List<List<_StylePackOption>> artStylePackOptionsRef;
+  final List<List<_StylePackOption>> storyStylePackOptionsRef;
+  final List<String?> selectedArtStylePackRef;
+  final List<String?> selectedStoryStylePackRef;
 
   Future<void> reloadAssetsAndStats(
     String token,
@@ -159,6 +210,64 @@ class _ProjectEditorDialogState {
       novelEventsRef[0] = null;
     }
   }
+}
+
+Future<_StylePackCatalog> _loadProjectStylePackCatalog(String token) async {
+  final visualManual = await fetchVisualManualV1(token);
+  final directorManual = await postProjectQueryDirectorManual(token);
+
+  final artPacks =
+      visualManual.styles
+          .map(
+            (style) => _StylePackOption(
+              path: style.stylePath,
+              name: style.name,
+              description: _stylePackDescriptionFromSlots(
+                style.data.map((slot) => slot.data),
+              ),
+              tag: '画风',
+            ),
+          )
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+
+  final storyPacks =
+      directorManual.data
+          .map(
+            (style) => _StylePackOption(
+              path: 'story_skills/${style.directorManual}',
+              name: style.name,
+              description: _stylePackDescriptionFromSlots(
+                style.data.map((slot) => slot.data),
+              ),
+              tag: '故事',
+            ),
+          )
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+
+  return _StylePackCatalog(artPacks: artPacks, storyPacks: storyPacks);
+}
+
+String _stylePackDescriptionFromSlots(Iterable<String> slots) {
+  for (final raw in slots) {
+    final lines = raw
+        .split('\n')
+        .map((line) => line.trim())
+        .where(
+          (line) =>
+              line.isNotEmpty &&
+              !line.startsWith('#') &&
+              !line.startsWith('|') &&
+              !line.startsWith('```') &&
+              !line.startsWith('- ') &&
+              !line.startsWith('* '),
+        );
+    for (final line in lines) {
+      return line.length <= 48 ? line : '${line.substring(0, 48)}...';
+    }
+  }
+  return '暂无简介';
 }
 
 // Project detail dialog widgets live in `editor_dialog_*.dart` parts to keep this file small.
