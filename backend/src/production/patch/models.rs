@@ -61,6 +61,11 @@ impl ModelTier {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PatchRequest {
+    /// 项目 ID（用于权限校验、记忆写入与返工历史隔离）
+    pub project_id: i32,
+    /// 剧本/集 ID（用于同项目不同剧集的返工历史隔离）
+    #[serde(default)]
+    pub episodes_id: Option<i32>,
     /// 返工粒度
     pub scope: PatchScope,
     /// 需要返工的对象 ID 列表（分镜 ID、资产 ID 等）
@@ -91,10 +96,23 @@ pub struct PatchResponse {
     pub attribution_mode: bool,
     /// 归因分析结果（仅在 attribution_mode=true 时填充）
     pub attribution_summary: Option<String>,
+    /// 失败归因分类
+    pub attribution_category: Option<String>,
+    /// 最小必要上游回退阶段
+    pub suggested_upstream_stage: Option<String>,
+    /// 最小必要上游回退粒度
+    pub suggested_upstream_scope: Option<PatchScope>,
+    /// 前端可直接展示的返工优先级建议
+    pub repair_priority: Vec<String>,
+    /// 相比整段重跑节省的 token 估算值
+    pub saved_token_estimate: u32,
+    /// 高价值归因是否已写入自动记忆
+    pub memory_written: bool,
 }
 
 /// 返工历史记录（用于追踪连续失败次数，需求 35.7）
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct PatchAttempt {
     pub scope: PatchScope,
     pub ids: Vec<i64>,

@@ -65,12 +65,16 @@ class WorkbenchGenerateVideoResponse {
 
 class ProductionPatchRequest {
   const ProductionPatchRequest({
+    required this.projectId,
+    required this.episodesId,
     required this.scope,
     required this.ids,
     required this.reason,
     required this.modelTier,
   });
 
+  final int projectId;
+  final int episodesId;
   final String scope;
   final List<int> ids;
   final String reason;
@@ -78,6 +82,8 @@ class ProductionPatchRequest {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'projectId': projectId,
+      'episodesId': episodesId,
       'scope': scope,
       'ids': ids,
       'reason': reason,
@@ -96,10 +102,17 @@ class ProductionPatchResponse {
     required this.consecutiveFailures,
     required this.attributionMode,
     required this.attributionSummary,
+    required this.attributionCategory,
+    required this.suggestedUpstreamStage,
+    required this.suggestedUpstreamScope,
+    required this.repairPriority,
+    required this.savedTokenEstimate,
+    required this.memoryWritten,
   });
 
   factory ProductionPatchResponse.fromJson(Map<String, dynamic> json) {
     final rawIds = json['processedIds'] as List<dynamic>? ?? const [];
+    final rawPriority = json['repairPriority'] as List<dynamic>? ?? const [];
     return ProductionPatchResponse(
       patchId: json['patchId']?.toString() ?? '',
       scope: json['scope']?.toString() ?? '',
@@ -109,6 +122,12 @@ class ProductionPatchResponse {
       consecutiveFailures: (json['consecutiveFailures'] as num?)?.toInt() ?? 0,
       attributionMode: json['attributionMode'] == true,
       attributionSummary: json['attributionSummary']?.toString(),
+      attributionCategory: json['attributionCategory']?.toString(),
+      suggestedUpstreamStage: json['suggestedUpstreamStage']?.toString(),
+      suggestedUpstreamScope: json['suggestedUpstreamScope']?.toString(),
+      repairPriority: rawPriority.map((item) => item.toString()).toList(),
+      savedTokenEstimate: (json['savedTokenEstimate'] as num?)?.toInt() ?? 0,
+      memoryWritten: json['memoryWritten'] == true,
     );
   }
 
@@ -120,6 +139,12 @@ class ProductionPatchResponse {
   final int consecutiveFailures;
   final bool attributionMode;
   final String? attributionSummary;
+  final String? attributionCategory;
+  final String? suggestedUpstreamStage;
+  final String? suggestedUpstreamScope;
+  final List<String> repairPriority;
+  final int savedTokenEstimate;
+  final bool memoryWritten;
 }
 
 Future<int> postProductionGetProductionDataV1(

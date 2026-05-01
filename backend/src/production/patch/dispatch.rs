@@ -3,6 +3,50 @@
 
 use super::models::{ModelTier, PatchAttempt, PatchRequest, PatchResponse, PatchScope};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AttributionCategory {
+    MissingSetup,
+    EmotionError,
+    CameraLanguageError,
+    VisualContinuityError,
+    PromptExpressionGap,
+    UpstreamDataError,
+}
+
+impl AttributionCategory {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::MissingSetup => "missing_setup",
+            Self::EmotionError => "emotion_error",
+            Self::CameraLanguageError => "camera_language_error",
+            Self::VisualContinuityError => "visual_continuity_error",
+            Self::PromptExpressionGap => "prompt_expression_gap",
+            Self::UpstreamDataError => "upstream_data_error",
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::MissingSetup => "设定缺失",
+            Self::EmotionError => "情绪错误",
+            Self::CameraLanguageError => "镜头语言错误",
+            Self::VisualContinuityError => "视觉连续性错误",
+            Self::PromptExpressionGap => "提示词表达不足",
+            Self::UpstreamDataError => "上游数据错误",
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AttributionPlan {
+    pub category: AttributionCategory,
+    pub suggested_upstream_stage: Option<&'static str>,
+    pub suggested_upstream_scope: Option<PatchScope>,
+    pub repair_priority: Vec<String>,
+    pub saved_token_estimate: u32,
+    pub summary: String,
+}
+
 /// 根据返工粒度和原因，判断最小修复范围（需求 35.2）
 ///
 /// 规则：
@@ -54,12 +98,21 @@ pub fn resolve_minimal_scope(request: &PatchRequest) -> Result<Vec<i64>, String>
 pub fn recommend_model_tier(scope: &PatchScope, reason: &str) -> ModelTier {
     // 关键词匹配：结构性问题 → Low
     let structural_keywords = [
-        "格式", "编号", "字段", "缺失", "空值", "重复", "顺序", "连续性",
-        "format", "missing", "empty", "duplicate", "order",
+        "格式",
+        "编号",
+        "字段",
+        "缺失",
+        "空值",
+        "重复",
+        "顺序",
+        "连续性",
+        "format",
+        "missing",
+        "empty",
+        "duplicate",
+        "order",
     ];
-    let is_structural = structural_keywords
-        .iter()
-        .any(|kw| reason.contains(kw));
+    let is_structural = structural_keywords.iter().any(|kw| reason.contains(kw));
 
     if is_structural {
         return ModelTier::Low;
@@ -92,43 +145,240 @@ pub fn should_enter_attribution_mode(history: &[PatchAttempt], current: &PatchRe
     relevant_failures.len() >= 2
 }
 
-/// 生成归因分析摘要（需求 35.7）
-///
-/// 当连续 2 次局部返工未达标时，分析失败原因并给出分类建议。
-pub fn generate_attribution_summary(
+fn classify_attribution_category(
     history: &[PatchAttempt],
     current: &PatchRequest,
-) -> String {
+) -> AttributionCategory {
+    let mut corpus = history
+        .iter()
+        .filter(|attempt| attempt.scope == current.scope && !attempt.succeeded)
+        .map(|attempt| attempt.reason.as_str())
+        .collect::<Vec<_>>()
+        .join("；");
+    if !corpus.is_empty() {
+        corpus.push('；');
+    }
+    corpus.push_str(&current.reason);
+
+    let matches = |keywords: &[&str]| keywords.iter().any(|kw| corpus.contains(kw));
+
+    if matches(&[
+        "上游",
+        "脚本错",
+        "剧本错",
+        "原著",
+        "素材错误",
+        "资产错误",
+        "数据错误",
+        "参考图错误",
+        "source",
+        "upstream",
+    ]) {
+        return AttributionCategory::UpstreamDataError;
+    }
+    if matches(&[
+        "设定",
+        "人设",
+        "角色锚点",
+        "锚点",
+        "风格包",
+        "故事风格",
+        "参考图缺失",
+        "资产缺失",
+        "信息不全",
+        "背景缺失",
+    ]) {
+        return AttributionCategory::MissingSetup;
+    }
+    if matches(&[
+        "情绪",
+        "表情",
+        "语气",
+        "表演",
+        "台词生硬",
+        "没情绪",
+        "情感",
+        "呼吸感",
+    ]) {
+        return AttributionCategory::EmotionError;
+    }
+    if matches(&[
+        "镜头",
+        "景别",
+        "运镜",
+        "构图",
+        "轴线",
+        "机位",
+        "视角",
+        "镜头语言",
+    ]) {
+        return AttributionCategory::CameraLanguageError;
+    }
+    if matches(&[
+        "连续性",
+        "穿帮",
+        "服装",
+        "站位",
+        "视线",
+        "动作",
+        "长相漂移",
+        "一致性",
+        "肢体",
+        "空间关系",
+        "表演状态重复",
+    ]) {
+        return AttributionCategory::VisualContinuityError;
+    }
+    AttributionCategory::PromptExpressionGap
+}
+
+fn local_repair_scope(current_scope: &PatchScope, category: AttributionCategory) -> PatchScope {
+    match (current_scope, category) {
+        (PatchScope::Episode, _) => PatchScope::Scene,
+        (PatchScope::Scene, AttributionCategory::PromptExpressionGap) => PatchScope::StoryboardItem,
+        (PatchScope::Scene, _) => PatchScope::Scene,
+        (PatchScope::StoryboardItem, AttributionCategory::PromptExpressionGap) => {
+            PatchScope::VideoPrompt
+        }
+        (PatchScope::StoryboardItem, _) => PatchScope::StoryboardItem,
+        (PatchScope::VideoPrompt, _) => PatchScope::VideoPrompt,
+        (PatchScope::DeriveAsset, _) => PatchScope::DeriveAsset,
+    }
+}
+
+fn suggested_upstream_recovery(
+    current_scope: &PatchScope,
+    category: AttributionCategory,
+) -> (Option<&'static str>, Option<PatchScope>) {
+    match category {
+        AttributionCategory::MissingSetup => (Some("derive_assets"), Some(PatchScope::DeriveAsset)),
+        AttributionCategory::EmotionError => (Some("script"), Some(PatchScope::Scene)),
+        AttributionCategory::CameraLanguageError => {
+            (Some("director_plan"), Some(PatchScope::Scene))
+        }
+        AttributionCategory::VisualContinuityError => {
+            (Some("storyboard_panel"), Some(PatchScope::StoryboardItem))
+        }
+        AttributionCategory::PromptExpressionGap => match current_scope {
+            PatchScope::VideoPrompt => (None, None),
+            _ => (Some("video_prompt"), Some(PatchScope::VideoPrompt)),
+        },
+        AttributionCategory::UpstreamDataError => match current_scope {
+            PatchScope::DeriveAsset => (Some("derive_assets"), Some(PatchScope::DeriveAsset)),
+            PatchScope::Episode | PatchScope::Scene => (Some("script"), Some(PatchScope::Scene)),
+            PatchScope::StoryboardItem | PatchScope::VideoPrompt => {
+                (Some("script"), Some(PatchScope::Scene))
+            }
+        },
+    }
+}
+
+fn estimated_full_rerun_tokens(scope: &PatchScope) -> u32 {
+    match scope {
+        PatchScope::Episode => 12_000,
+        PatchScope::Scene => 5_400,
+        PatchScope::StoryboardItem => 2_100,
+        PatchScope::VideoPrompt => 1_300,
+        PatchScope::DeriveAsset => 1_700,
+    }
+}
+
+fn estimated_targeted_fix_tokens(scope: &PatchScope) -> u32 {
+    match scope {
+        PatchScope::Episode => 6_800,
+        PatchScope::Scene => 2_400,
+        PatchScope::StoryboardItem => 620,
+        PatchScope::VideoPrompt => 340,
+        PatchScope::DeriveAsset => 450,
+    }
+}
+
+fn estimate_saved_tokens(current_scope: &PatchScope, local_scope: &PatchScope) -> u32 {
+    estimated_full_rerun_tokens(current_scope)
+        .saturating_sub(estimated_targeted_fix_tokens(local_scope))
+}
+
+fn build_repair_priority(
+    current_scope: &PatchScope,
+    category: AttributionCategory,
+    upstream_stage: Option<&'static str>,
+    upstream_scope: Option<PatchScope>,
+) -> Vec<String> {
+    let local_scope = local_repair_scope(current_scope, category);
+    let mut items = vec![format!(
+        "P1 先局部修复：优先按 {} 粒度修当前对象，避免直接整段重跑。",
+        local_scope.label()
+    )];
+    if let (Some(stage), Some(scope)) = (upstream_stage, upstream_scope) {
+        items.push(format!(
+            "P2 如局部修复仍失败，最小回退到 {} 阶段，按 {} 粒度补上游信息。",
+            stage,
+            scope.label()
+        ));
+    }
+    items.push(format!(
+        "P3 最后才考虑放大到 {} 或更大范围重跑，只有当 {} 持续无法消除时再升级。",
+        current_scope.label(),
+        category.label()
+    ));
+    items
+}
+
+pub fn build_attribution_plan(history: &[PatchAttempt], current: &PatchRequest) -> AttributionPlan {
+    let category = classify_attribution_category(history, current);
+    let (suggested_upstream_stage, suggested_upstream_scope) =
+        suggested_upstream_recovery(&current.scope, category);
+    let local_scope = local_repair_scope(&current.scope, category);
+    let repair_priority = build_repair_priority(
+        &current.scope,
+        category,
+        suggested_upstream_stage,
+        suggested_upstream_scope.clone(),
+    );
+    let saved_token_estimate = estimate_saved_tokens(&current.scope, &local_scope);
+
     let failure_reasons: Vec<&str> = history
         .iter()
         .filter(|a| a.scope == current.scope && !a.succeeded)
         .map(|a| a.reason.as_str())
         .collect();
-
-    let scope_label = current.scope.label();
-    let reason_list = failure_reasons.join("；");
-
-    // 根据失败原因分类给出建议
-    let suggestion = if current.scope == PatchScope::StoryboardItem
-        || current.scope == PatchScope::VideoPrompt
-    {
-        "建议升级到 Scene 粒度重新生成，或检查上游剧本/资产数据是否存在根本性问题。"
-    } else if current.scope == PatchScope::Scene {
-        "建议升级到 Episode 粒度重新生成，或检查故事骨架设计是否存在结构性问题。"
+    let reason_list = if failure_reasons.is_empty() {
+        "（无记录）".to_string()
     } else {
-        "建议检查原著章节数据和项目配置，确认资产包和风格技能包是否完整。"
+        failure_reasons.join("；")
     };
-
-    format!(
-        "【问题归因模式】{} 粒度连续 2 次返工未达标。\n\
-         历史失败原因：{}\n\
-         当前失败原因：{}\n\
-         建议：{}",
-        scope_label,
-        if reason_list.is_empty() { "（无记录）" } else { &reason_list },
+    let upstream_line = if let (Some(stage), Some(scope)) =
+        (suggested_upstream_stage, suggested_upstream_scope.as_ref())
+    {
+        format!("最小上游回退建议：{} / {}", stage, scope.label())
+    } else {
+        "最小上游回退建议：当前先不要回退上游，继续做局部修复。".to_string()
+    };
+    let summary = format!(
+        "【问题归因模式】{} 粒度连续返工未达标。\n失败归因：{}。\n历史失败原因：{}\n当前失败原因：{}\n{}\n节省 token 估算：约 {}。",
+        current.scope.label(),
+        category.label(),
+        reason_list,
         current.reason,
-        suggestion
-    )
+        upstream_line,
+        saved_token_estimate
+    );
+
+    AttributionPlan {
+        category,
+        suggested_upstream_stage,
+        suggested_upstream_scope,
+        repair_priority,
+        saved_token_estimate,
+        summary,
+    }
+}
+
+/// 生成归因分析摘要（需求 35.7）
+///
+/// 当连续 2 次局部返工未达标时，分析失败原因并给出分类建议。
+pub fn generate_attribution_summary(history: &[PatchAttempt], current: &PatchRequest) -> String {
+    build_attribution_plan(history, current).summary
 }
 
 /// 构建 PatchResponse（整合所有派发逻辑）
@@ -146,6 +396,7 @@ pub fn build_patch_response(
     } else {
         None
     };
+    let attribution_plan = attribution_mode.then(|| build_attribution_plan(history, request));
 
     // 3. 确定实际使用的模型层级（请求中指定的优先，否则推荐）
     let model_tier = request.model_tier.clone();
@@ -166,6 +417,29 @@ pub fn build_patch_response(
         consecutive_failures,
         attribution_mode,
         attribution_summary,
+        attribution_category: attribution_plan
+            .as_ref()
+            .map(|plan| plan.category.as_str().to_string()),
+        suggested_upstream_stage: attribution_plan
+            .as_ref()
+            .and_then(|plan| plan.suggested_upstream_stage.map(str::to_string)),
+        suggested_upstream_scope: attribution_plan
+            .as_ref()
+            .and_then(|plan| plan.suggested_upstream_scope.clone()),
+        repair_priority: attribution_plan
+            .as_ref()
+            .map(|plan| plan.repair_priority.clone())
+            .unwrap_or_else(|| {
+                vec![format!(
+                    "P1 先按 {} 粒度做最小修复，确认问题是否只存在当前对象。",
+                    request.scope.label()
+                )]
+            }),
+        saved_token_estimate: attribution_plan
+            .as_ref()
+            .map(|plan| plan.saved_token_estimate)
+            .unwrap_or_else(|| estimate_saved_tokens(&request.scope, &request.scope)),
+        memory_written: false,
     })
 }
 
@@ -175,6 +449,8 @@ mod tests {
 
     fn make_request(scope: PatchScope, ids: Vec<i64>, reason: &str) -> PatchRequest {
         PatchRequest {
+            project_id: 1,
+            episodes_id: Some(2),
             scope,
             ids,
             reason: reason.to_string(),
@@ -277,5 +553,63 @@ mod tests {
         // 不同 scope → 不触发
         let req = make_request(PatchScope::StoryboardItem, vec![1], "失败");
         assert!(!should_enter_attribution_mode(&history, &req));
+    }
+
+    #[test]
+    fn attribution_summary_classifies_emotion_error_and_prefers_local_fix_first() {
+        let history = vec![
+            PatchAttempt {
+                scope: PatchScope::StoryboardItem,
+                ids: vec![7],
+                reason: "表情不对，情绪没有起伏".to_string(),
+                model_tier: ModelTier::High,
+                succeeded: false,
+            },
+            PatchAttempt {
+                scope: PatchScope::StoryboardItem,
+                ids: vec![7],
+                reason: "台词很生硬，角色没情绪".to_string(),
+                model_tier: ModelTier::High,
+                succeeded: false,
+            },
+        ];
+        let req = make_request(
+            PatchScope::StoryboardItem,
+            vec![7],
+            "第三次返工，还是情绪不对",
+        );
+        let response = build_patch_response(&req, &history).unwrap();
+        assert_eq!(
+            response.attribution_category.as_deref(),
+            Some("emotion_error")
+        );
+        assert_eq!(response.suggested_upstream_stage.as_deref(), Some("script"));
+        assert_eq!(response.repair_priority.len(), 3);
+        assert!(response.repair_priority[0].contains("先局部修复"));
+        assert!(response.saved_token_estimate > 0);
+    }
+
+    #[test]
+    fn attribution_summary_classifies_visual_continuity() {
+        let history = vec![
+            PatchAttempt {
+                scope: PatchScope::VideoPrompt,
+                ids: vec![11],
+                reason: "服装连续性穿帮，站位和视线也乱了".to_string(),
+                model_tier: ModelTier::High,
+                succeeded: false,
+            },
+            PatchAttempt {
+                scope: PatchScope::VideoPrompt,
+                ids: vec![11],
+                reason: "角色长相漂移，动作衔接不连贯".to_string(),
+                model_tier: ModelTier::High,
+                succeeded: false,
+            },
+        ];
+        let req = make_request(PatchScope::VideoPrompt, vec![11], "继续修复角色连续性");
+        let summary = generate_attribution_summary(&history, &req);
+        assert!(summary.contains("视觉连续性错误"));
+        assert!(summary.contains("storyboard_panel"));
     }
 }

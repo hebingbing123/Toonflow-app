@@ -29,6 +29,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
           var submitting = false;
           String? submitSummary;
           String? attributionSummary;
+          List<String> repairPriority = const [];
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               return AlertDialog(
@@ -128,6 +129,27 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
                                 ),
                           ),
                         ],
+                        if (repairPriority.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            '返工优先级：',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 4),
+                          for (final item in repairPriority)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                item,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.outline,
+                                    ),
+                              ),
+                            ),
+                        ],
                       ],
                     ),
                   ),
@@ -166,11 +188,14 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
                               submitting = true;
                               submitSummary = null;
                               attributionSummary = null;
+                              repairPriority = const [];
                             });
                             try {
                               final response = await postProductionPatchV1(
                                 widget.token,
                                 request: ProductionPatchRequest(
+                                  projectId: widget.projectNumericId,
+                                  episodesId: widget.scriptNumericId,
                                   scope: scopeCtrl.text,
                                   ids: ids,
                                   reason: reasonCtrl.text.trim(),
@@ -183,17 +208,18 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
                                   : response.patchId;
                               setDialogState(() {
                                 submitSummary =
-                                    '已提交 patch #$shortPatchId · scope=${response.scope} · ids=${response.processedIds.join(",")} · model=${response.modelTier} · status=${response.status} · 连续失败 ${response.consecutiveFailures} 次';
+                                    '已提交 patch #$shortPatchId · scope=${response.scope} · ids=${response.processedIds.join(",")} · model=${response.modelTier} · status=${response.status} · 连续失败 ${response.consecutiveFailures} 次 · 预计节省 ${response.savedTokenEstimate} token${response.memoryWritten ? " · 已写入归因记忆" : ""}';
                                 attributionSummary = response.attributionMode
                                     ? (response.attributionSummary ??
                                           '当前请求已进入问题归因模式，请先处理上游原因。')
                                     : null;
+                                repairPriority = response.repairPriority;
                                 submitting = false;
                               });
                               _applyWorkbenchState(() {
                                 _setWorkbenchFollowUp(
                                   response.attributionMode
-                                      ? '局部返工已提交，并进入 attribution mode。建议先处理归因提示，再继续放大返工范围。'
+                                      ? '局部返工已提交，并进入 attribution mode。优先按面板里的 P1/P2 顺序处理，不要直接整段重跑。'
                                       : '局部返工已提交，当前按最小范围排队处理。',
                                 );
                               });
