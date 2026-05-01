@@ -1,4 +1,4 @@
-use serde_json::json;
+use serde_json::{json, Value};
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
@@ -124,6 +124,38 @@ pub(crate) async fn replace_named_summary_memory(
     content: &str,
     create_time_ms: Option<i64>,
 ) -> Result<(), ApiError> {
+    replace_named_summary_memory_with_scope(
+        pool,
+        user_id,
+        project_id,
+        episodes_id,
+        agent_type,
+        role,
+        name,
+        content,
+        "message",
+        None,
+        create_time_ms,
+    )
+    .await
+}
+
+/// Replace a named summary memory and persist optional tier/scope metadata.
+/// This is used by automated stage/style summaries that need upsert semantics.
+#[allow(clippy::too_many_arguments)]
+pub(crate) async fn replace_named_summary_memory_with_scope(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    episodes_id: Option<i32>,
+    agent_type: &str,
+    role: &str,
+    name: &str,
+    content: &str,
+    memory_tier: &str,
+    scope_signature: Option<&Value>,
+    create_time_ms: Option<i64>,
+) -> Result<(), ApiError> {
     let time_ms = create_time_ms.unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
 
     sqlx::query(
@@ -150,9 +182,10 @@ pub(crate) async fn replace_named_summary_memory(
         r#"
         INSERT INTO app_agent_memory (
             owner_user_id, numeric_project_id, episodes_id, agent_type,
-            memory_type, role, name, content, summarized, create_time_ms
+            memory_type, role, name, content, summarized, create_time_ms,
+            memory_tier, scope_signature
         )
-        VALUES ($1, $2, $3, $4, 'summary', $5, $6, $7, 1, $8)
+        VALUES ($1, $2, $3, $4, 'summary', $5, $6, $7, 1, $8, $9, $10)
         "#,
     )
     .bind(user_id)
@@ -163,6 +196,8 @@ pub(crate) async fn replace_named_summary_memory(
     .bind(name)
     .bind(content)
     .bind(time_ms)
+    .bind(memory_tier)
+    .bind(scope_signature)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

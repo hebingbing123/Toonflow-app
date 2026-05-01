@@ -6,6 +6,7 @@ use crate::harness::HarnessContext;
 use crate::llm::chat_completion_assistant_text;
 use crate::production::{storyboard_prompt_seed, StoryboardPromptSeedRow};
 use crate::prompting::skills::{read_skill_markdown, read_skill_markdown_section};
+use crate::settings::agent_memory::replace_named_summary_memory_with_scope;
 
 use super::invoke::InvokeError;
 
@@ -253,6 +254,40 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
                 "审核必须基于工具实读的数据，优先读取 storyboardTable/script/assets 的必要字段或窗口；审核 scriptPlan 时，assets 默认先读 role/scene，再按需要补 tool 或精确 ids；若问题只涉及部分资产，下一步给出 check_assets 时优先回填真实 assetIds，做不到精确 id 也必须回填最小 assetTypes 范围；若只涉及部分缺帧或待核对镜头，下一步给出 check_storyboard、generate_storyboard 或 check_script 时都应沿用同一批真实 storyboardIds，避免无差别全量读取 storyboard 或剧本。",
             ),
         }),
+        _ => None,
+    }
+}
+
+fn stage_summary_name_for_tool(tool_name: &str) -> Option<&'static str> {
+    match tool_name {
+        "run_sub_agent_storySkeleton" => Some("stage_summary:story_skeleton"),
+        "run_sub_agent_adaptationStrategy" => Some("stage_summary:adaptation_strategy"),
+        "run_sub_agent_script" => Some("stage_summary:script"),
+        "run_supervision_agent" => Some("stage_summary:script_supervision"),
+        "run_sub_agent_derive_assets" => Some("stage_summary:derive_assets"),
+        "run_sub_agent_generate_assets" => Some("stage_summary:generate_assets"),
+        "run_sub_agent_director_plan" => Some("stage_summary:director_plan"),
+        "run_sub_agent_storyboard_gen" => Some("stage_summary:storyboard_gen"),
+        "run_sub_agent_storyboard_panel" => Some("stage_summary:storyboard_panel"),
+        "run_sub_agent_storyboard_table" => Some("stage_summary:storyboard_table"),
+        "run_sub_agent_production_supervision" => Some("stage_summary:production_supervision"),
+        _ => None,
+    }
+}
+
+fn stage_label_for_tool(tool_name: &str) -> Option<&'static str> {
+    match tool_name {
+        "run_sub_agent_storySkeleton" => Some("story_skeleton"),
+        "run_sub_agent_adaptationStrategy" => Some("adaptation_strategy"),
+        "run_sub_agent_script" => Some("script"),
+        "run_supervision_agent" => Some("script_supervision"),
+        "run_sub_agent_derive_assets" => Some("derive_assets"),
+        "run_sub_agent_generate_assets" => Some("generate_assets"),
+        "run_sub_agent_director_plan" => Some("director_plan"),
+        "run_sub_agent_storyboard_gen" => Some("storyboard_gen"),
+        "run_sub_agent_storyboard_panel" => Some("storyboard_panel"),
+        "run_sub_agent_storyboard_table" => Some("storyboard_table"),
+        "run_sub_agent_production_supervision" => Some("production_supervision"),
         _ => None,
     }
 }
@@ -795,6 +830,144 @@ fn compact_auto_memory_result_fragment(fragment: &str) -> String {
     }
 
     compact_auto_memory_result_clause_group(&compacted)
+}
+
+fn scope_signature_json(episode_id: Option<i32>, signature: &ScopeSignature) -> Option<Value> {
+    let mut map = serde_json::Map::new();
+    if let Some(episode_id) = episode_id.filter(|value| *value > 0) {
+        map.insert("episodeId".to_string(), json!(episode_id));
+    }
+    if !signature.storyboard_ids.is_empty() {
+        map.insert("storyboardIds".to_string(), json!(signature.storyboard_ids));
+    }
+    if !signature.asset_ids.is_empty() {
+        map.insert("assetIds".to_string(), json!(signature.asset_ids));
+    }
+    if !signature.asset_types.is_empty() {
+        map.insert("assetTypes".to_string(), json!(signature.asset_types));
+    }
+    if !signature.focus_sections.is_empty() {
+        map.insert("focusSections".to_string(), json!(signature.focus_sections));
+    }
+    if !signature.novel_ids.is_empty() {
+        map.insert("novelIds".to_string(), json!(signature.novel_ids));
+    }
+    if let Some(offset) = signature.relative_script_offset {
+        map.insert("relativeScriptOffset".to_string(), json!(offset));
+    }
+    (!map.is_empty()).then_some(Value::Object(map))
+}
+
+fn summarize_stage_failure(error: &InvokeError) -> String {
+    truncate_chars(&normalize_whitespace(&error.message()), 120)
+}
+
+fn summarize_stage_key_decision(review: Option<&Value>, text: Option<&str>) -> Option<String> {
+    if let Some(review) = review {
+        let mut parts = Vec::new();
+        if let Some(target) = review.get("target").and_then(Value::as_str) {
+            parts.push(format!("target={target}"));
+        }
+        if let Some(grade) = review.get("grade").and_then(Value::as_str) {
+            parts.push(format!("grade={grade}"));
+        }
+        if let Some(next_action) = review
+            .get("nextAction")
+            .or_else(|| review.get("next_action"))
+            .and_then(Value::as_str)
+        {
+            parts.push(format!("next={next_action}"));
+        }
+        if let Some(summary) = review.get("summary").and_then(Value::as_str) {
+            let compact = compact_auto_memory_result_fragment(summary);
+            if !compact.is_empty() {
+                parts.push(compact);
+            }
+        }
+        let merged = normalize_whitespace(&parts.join("; "));
+        if !merged.is_empty() {
+            return Some(truncate_chars(&merged, 180));
+        }
+    }
+    text.and_then(summarize_result_excerpt)
+}
+
+fn build_stage_summary_content(
+    tool_name: &str,
+    review: Option<&Value>,
+    result_text: Option<&str>,
+    error: Option<&InvokeError>,
+) -> Option<String> {
+    let stage = stage_label_for_tool(tool_name)?;
+    let status = if error.is_some() {
+        "failed"
+    } else {
+        "completed"
+    };
+    let mut parts = vec![format!("stage={stage}"), format!("status={status}")];
+    if let Some(key) = summarize_stage_key_decision(review, result_text) {
+        parts.push(format!("key={key}"));
+    }
+    if let Some(error) = error {
+        parts.push(format!("reason={}", summarize_stage_failure(error)));
+    }
+    Some(truncate_chars(&parts.join(" | "), 320))
+}
+
+fn persist_stage_summary_async(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    episodes_id: Option<i32>,
+    agent_type: &'static str,
+    tool_name: &str,
+    arguments: &Value,
+    prompt_seed_scope: Option<&str>,
+    review: Option<&Value>,
+    result_text: Option<&str>,
+    error: Option<&InvokeError>,
+) {
+    let Some(name) = stage_summary_name_for_tool(tool_name) else {
+        return;
+    };
+    let Some(content) = build_stage_summary_content(tool_name, review, result_text, error) else {
+        return;
+    };
+    let scope = scope_signature_json(
+        episodes_id,
+        &scope_signature_from_args(arguments, prompt_seed_scope),
+    );
+    let Some(scope_signature) = scope else {
+        return;
+    };
+    let pool = pool.clone();
+    let tool_name = tool_name.to_string();
+    let scope_signature = scope_signature.clone();
+    tokio::spawn(async move {
+        if let Err(error) = replace_named_summary_memory_with_scope(
+            &pool,
+            user_id,
+            project_numeric_id,
+            episodes_id,
+            agent_type,
+            "assistant",
+            name,
+            &content,
+            "stage_summary",
+            Some(&scope_signature),
+            None,
+        )
+        .await
+        {
+            tracing::warn!(
+                tool = tool_name.as_str(),
+                project_id = project_numeric_id,
+                agent_type,
+                error = ?error,
+                "stage summary auto-write failed"
+            );
+        }
+    });
 }
 
 fn is_low_signal_auto_memory_result_fragment(fragment: &str) -> bool {
@@ -1479,9 +1652,32 @@ pub async fn invoke_sub_agent_tool(
     messages
         .push(json!({"role":"assistant","content":format!("Execution hint: {execution_note}")}));
     messages.push(json!({"role":"user","content":prompt}));
-    let text = chat_completion_assistant_text(cfg, client, messages)
-        .await
-        .map_err(InvokeError::LlmError)?;
+    let text = match chat_completion_assistant_text(cfg, client, messages).await {
+        Ok(text) => text,
+        Err(error) => {
+            if let (Some(pool), Some(project_numeric_id), Some(agent_type)) = (
+                ctx.pool.as_ref(),
+                ctx.project_numeric_id,
+                agent_memory_type_for_tool(tool_name),
+            ) {
+                let invoke_error = InvokeError::LlmError(error.clone());
+                persist_stage_summary_async(
+                    pool,
+                    ctx.user_id,
+                    project_numeric_id,
+                    ctx.script_numeric_id,
+                    agent_type,
+                    tool_name,
+                    arguments,
+                    prompt_seed_scope.as_deref(),
+                    None,
+                    None,
+                    Some(&invoke_error),
+                );
+            }
+            return Err(InvokeError::LlmError(error));
+        }
+    };
 
     let review = match tool_name {
         "run_supervision_agent" | "run_sub_agent_production_supervision" => {
@@ -1512,6 +1708,19 @@ pub async fn invoke_sub_agent_tool(
             )
             .await?;
         }
+        persist_stage_summary_async(
+            pool,
+            ctx.user_id,
+            project_numeric_id,
+            ctx.script_numeric_id,
+            agent_type,
+            tool_name,
+            arguments,
+            prompt_seed_scope.as_deref(),
+            review.as_ref(),
+            Some(&text),
+            None,
+        );
     }
 
     Ok(json!({
@@ -1525,12 +1734,14 @@ pub async fn invoke_sub_agent_tool(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_auto_memory_snapshot, compact_auto_memory_entry_for_scope,
-        dedupe_auto_memory_entries, filter_auto_scope_memory_rows,
-        format_storyboard_prompt_seed_scope, parse_review_summary, parse_scope_signature,
-        parse_storyboard_prompt_seed_scope, parse_tag_attributes, scope_signature_from_args,
-        select_auto_memory_entries, sub_agent_prompt_from_args, AutoMemoryRow,
+        build_auto_memory_snapshot, build_stage_summary_content,
+        compact_auto_memory_entry_for_scope, dedupe_auto_memory_entries,
+        filter_auto_scope_memory_rows, format_storyboard_prompt_seed_scope, parse_review_summary,
+        parse_scope_signature, parse_storyboard_prompt_seed_scope, parse_tag_attributes,
+        scope_signature_from_args, scope_signature_json, select_auto_memory_entries,
+        sub_agent_prompt_from_args, AutoMemoryRow,
     };
+    use crate::harness::invoke::InvokeError;
     use serde_json::json;
 
     #[test]
@@ -2032,5 +2243,60 @@ mod tests {
 
         assert!(snapshot.contains("summary=人物站位不要跳轴"));
         assert!(!snapshot.contains("风格统一"));
+    }
+
+    #[test]
+    fn build_stage_summary_content_uses_review_summary_for_success() {
+        let summary = build_stage_summary_content(
+            "run_sub_agent_production_supervision",
+            Some(&json!({
+                "target": "storyboardTable",
+                "grade": "B",
+                "nextAction": "refresh",
+                "summary": "当前镜头角色站位不要跳轴"
+            })),
+            Some("unused"),
+            None,
+        )
+        .expect("summary");
+
+        assert!(summary.contains("stage=production_supervision"));
+        assert!(summary.contains("status=completed"));
+        assert!(summary.contains("target=storyboardTable"));
+        assert!(summary.contains("grade=B"));
+        assert!(summary.contains("角色站位不要跳轴"));
+        assert!(summary.chars().count() <= 320);
+    }
+
+    #[test]
+    fn build_stage_summary_content_records_failure_reason() {
+        let error = InvokeError::LlmError(" upstream timeout while generating ".to_string());
+        let summary =
+            build_stage_summary_content("run_sub_agent_storyboard_panel", None, None, Some(&error))
+                .expect("summary");
+
+        assert!(summary.contains("stage=storyboard_panel"));
+        assert!(summary.contains("status=failed"));
+        assert!(summary.contains("reason=upstream timeout while generating"));
+        assert!(summary.chars().count() <= 320);
+    }
+
+    #[test]
+    fn scope_signature_json_keeps_required_scope_dimensions() {
+        let scope = scope_signature_json(
+            Some(7),
+            &scope_signature_from_args(
+                &json!({
+                    "storyboardIds": [9, 3, 9],
+                    "focusSections": ["script", "storySkeleton", "script"]
+                }),
+                None,
+            ),
+        )
+        .expect("scope");
+
+        assert_eq!(scope["episodeId"].as_i64(), Some(7));
+        assert_eq!(scope["storyboardIds"], json!([3, 9]));
+        assert_eq!(scope["focusSections"], json!(["script", "storySkeleton"]));
     }
 }
