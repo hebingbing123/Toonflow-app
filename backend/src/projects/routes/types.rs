@@ -151,3 +151,33 @@ pub(super) struct CreateProjectBody {
     #[serde(default)]
     pub(super) story_style_pack: Option<String>,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::PatchStyleConfigBody;
+    use serde_json::json;
+
+    #[test]
+    fn patch_style_config_body_accepts_clear_and_partial_updates() {
+        let body: PatchStyleConfigBody = serde_json::from_value(json!({
+            "artStylePack": "art_skills/realpeople_ancient_chinese",
+            "storyStylePack": null
+        }))
+        .expect("deserialize patch style config");
+
+        assert_eq!(
+            body.art_style_pack,
+            Some(json!("art_skills/realpeople_ancient_chinese"))
+        );
+        assert_eq!(body.story_style_pack, None);
+    }
+
+    #[test]
+    fn patch_style_config_body_rejects_unknown_fields() {
+        let body: Result<PatchStyleConfigBody, _> = serde_json::from_value(json!({
+            "artStylePack": "art_skills/realpeople_ancient_chinese",
+            "unexpected": true
+        }));
+        assert!(body.is_err());
+    }
+}

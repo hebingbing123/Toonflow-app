@@ -10,7 +10,7 @@ use crate::error::ApiError;
 use crate::jobs::dto::JobRow;
 use crate::state::AppState;
 
-use super::super::common::require_pool;
+use super::super::common::{fetch_job_by_id, job_status_allows_retry, require_pool};
 use super::outcome::resolve_job_mutation_outcome;
 
 #[utoipa::path(
@@ -39,6 +39,13 @@ pub(crate) async fn retry_job(
 ) -> Result<Json<JobRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = require_pool(&state)?;
+    let current = fetch_job_by_id(pool, uid, id).await?;
+
+    if !job_status_allows_retry(&current.status) {
+        return Err(ApiError::Conflict(
+            "only failed jobs can be retried (re-queue)".into(),
+        ));
+    }
 
     let updated = sqlx::query_as::<_, JobRow>(
         r#"

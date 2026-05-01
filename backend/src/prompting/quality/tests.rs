@@ -1,10 +1,15 @@
 //! prompting/quality 单元测试。
 
 use crate::error::ApiError;
+use chrono::{TimeZone, Utc};
+use proptest::prelude::*;
 use serde_json::json;
 
 use super::handlers::aggregates::{TokenEfficiencyQuery, TokenEfficiencySamplesQuery};
-use super::types::{CreateQualityReviewBody, ListQualityReviewsQuery};
+use super::types::{
+    CreateQualityReviewBody, ListQualityReviewsQuery, QualityTokenEfficiencyResponse,
+    QualityTokenEfficiencySample,
+};
 use super::validate::{validate_create_review_body, validate_list_reviews_query};
 
 #[test]
@@ -257,4 +262,121 @@ fn list_reviews_query_accepts_stage_and_grade_filters() {
     let query: ListQualityReviewsQuery = serde_json::from_value(json).unwrap();
     assert_eq!(query.stage.as_deref(), Some("director_planning"));
     assert_eq!(query.grade.as_deref(), Some("B"));
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(20))]
+
+    // Feature: drama-platform-completion, Property 13: token-质量关联显式性
+    // 验证：需求 17.2, 17.6
+    #[test]
+    fn prop_token_efficiency_response_serializes_explicit_roi_fields(
+        sample_count in 1i64..50,
+        high_token_low_quality_count in 0i64..20,
+        stage in prop::option::of(prop_oneof![
+            Just("storyboard_panel".to_string()),
+            Just("video_prompt".to_string()),
+        ]),
+        model_name in prop::option::of("[a-z0-9._-]{3,16}"),
+        call_type in prop::option::of(prop_oneof![
+            Just("quality_review".to_string()),
+            Just("video_generate".to_string()),
+        ]),
+    ) {
+        let response = QualityTokenEfficiencyResponse {
+            target_type: "storyboard".into(),
+            stage: stage.clone(),
+            review_model_name: model_name.clone(),
+            call_type: call_type.clone(),
+            sample_count,
+            avg_total_tokens: 4321.0,
+            avg_prompt_tokens: 2100.0,
+            avg_completion_tokens: 2221.0,
+            avg_overall_score: 86.5,
+            pass_rate_percent: 78.4,
+            high_token_low_quality_sample_count: high_token_low_quality_count,
+            high_token_low_quality_rate_percent: 33.3,
+            roi_band: if high_token_low_quality_count > 0 {
+                "high_token_low_quality".into()
+            } else {
+                "efficient".into()
+            },
+            avg_prompt_chars: 640.0,
+            avg_non_memory_prompt_chars: 510.0,
+            avg_memory_style_chars: 96.0,
+            avg_memory_visual_chars: 24.0,
+            avg_memory_delivery_chars: 48.0,
+            avg_memory_optimization_removed_chars: 72.0,
+            avg_project_scope_row_count: 2.0,
+            avg_script_scope_row_count: 3.0,
+            avg_role_scope_row_count: 1.0,
+            avg_memory_share_percent: 15.0,
+            avg_delivery_memory_share_percent: 7.5,
+            delivery_priority_hit_rate_percent: 55.0,
+            memory_action: "keep_delivery_memory".into(),
+            memory_focus: "delivery".into(),
+            memory_reason: "dialogue_naturalness".into(),
+        };
+
+        let value = serde_json::to_value(&response).expect("serialize aggregate");
+
+        prop_assert_eq!(value["sampleCount"].as_i64(), Some(sample_count));
+        prop_assert_eq!(value["highTokenLowQualitySampleCount"].as_i64(), Some(high_token_low_quality_count));
+        prop_assert_eq!(value["roiBand"].as_str(), Some(response.roi_band.as_str()));
+        prop_assert_eq!(value["avgMemorySharePercent"].as_f64(), Some(15.0));
+        prop_assert_eq!(value["deliveryPriorityHitRatePercent"].as_f64(), Some(55.0));
+        prop_assert_eq!(value["memoryAction"].as_str(), Some("keep_delivery_memory"));
+        prop_assert_eq!(value["memoryFocus"].as_str(), Some("delivery"));
+        prop_assert_eq!(value["memoryReason"].as_str(), Some("dialogue_naturalness"));
+        prop_assert_eq!(value.get("stage").and_then(serde_json::Value::as_str), stage.as_deref());
+        prop_assert_eq!(value.get("reviewModelName").and_then(serde_json::Value::as_str), model_name.as_deref());
+        prop_assert_eq!(value.get("callType").and_then(serde_json::Value::as_str), call_type.as_deref());
+    }
+
+    #[test]
+    fn prop_token_efficiency_sample_serializes_explicit_cost_quality_dimensions(
+        total_tokens in 1i32..10000,
+        memory_style_chars in 0i32..2000,
+        delivery_priority_applied in any::<bool>(),
+        budget_tier in prop::option::of(prop_oneof![
+            Just("lean".to_string()),
+            Just("expanded".to_string()),
+        ]),
+    ) {
+        let sample = QualityTokenEfficiencySample {
+            created_at: Utc.timestamp_opt(1_715_000_000, 0).single().unwrap(),
+            target_type: "storyboard".into(),
+            stage: Some("video_prompt".into()),
+            review_model_name: Some("gpt-4.1".into()),
+            call_type: "quality_review".into(),
+            total_tokens,
+            prompt_tokens: total_tokens / 2,
+            completion_tokens: total_tokens - (total_tokens / 2),
+            overall_score: Some(88),
+            memory_budget_tier: budget_tier.clone(),
+            auto_negative_source: Some("rejected_memory".into()),
+            prompt_chars: 640,
+            non_memory_prompt_chars: 510,
+            memory_style_chars,
+            memory_visual_chars: 24,
+            memory_delivery_chars: 48,
+            memory_optimization_removed_chars: 72,
+            project_scope_row_count: 2,
+            script_scope_row_count: 3,
+            role_scope_row_count: 1,
+            memory_share_percent: 15.0,
+            delivery_memory_share_percent: 7.5,
+            memory_delivery_priority_applied: delivery_priority_applied,
+        };
+
+        let value = serde_json::to_value(&sample).expect("serialize sample");
+
+        prop_assert_eq!(value["totalTokens"].as_i64(), Some(total_tokens.into()));
+        prop_assert_eq!(value["memoryStyleChars"].as_i64(), Some(memory_style_chars.into()));
+        prop_assert_eq!(value["memorySharePercent"].as_f64(), Some(15.0));
+        prop_assert_eq!(value["deliveryMemorySharePercent"].as_f64(), Some(7.5));
+        prop_assert_eq!(value["memoryDeliveryPriorityApplied"].as_bool(), Some(delivery_priority_applied));
+        prop_assert_eq!(value["autoNegativeSource"].as_str(), Some("rejected_memory"));
+        prop_assert_eq!(value.get("memoryBudgetTier").and_then(serde_json::Value::as_str), budget_tier.as_deref());
+    }
 }

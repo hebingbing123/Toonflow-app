@@ -225,4 +225,37 @@ void main() {
     expect(retriedJob?.id, 'job-1');
     expect(cancelledJob?.id, 'job-2');
   });
+
+  testWidgets('jobs section view only exposes retry for failed jobs', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final model = buildModel(
+      jobIdController: jobIdController,
+      jobs: <JobRow>[
+        buildJob(id: 'job-failed', status: 'failed', errorMessage: 'timeout'),
+        buildJob(id: 'job-running', status: 'running', claimedBy: 'worker-a'),
+        buildJob(id: 'job-success', status: 'succeeded'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: JobsSectionView(
+            model: model,
+            callbacks: buildCallbacks(),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.widgetWithText(ListTile, 'flutter.probe · failed'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'flutter.probe · running'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'flutter.probe · succeeded'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '重试'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '取消'), findsOneWidget);
+  });
 }

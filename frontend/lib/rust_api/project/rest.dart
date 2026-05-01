@@ -8,6 +8,20 @@ import 'overview.dart';
 
 const _unsetProjectStyleConfigField = Object();
 
+Map<String, dynamic> buildProjectStyleConfigPatchBody({
+  Object? artStylePack = _unsetProjectStyleConfigField,
+  Object? storyStylePack = _unsetProjectStyleConfigField,
+}) {
+  final body = <String, dynamic>{};
+  if (!identical(artStylePack, _unsetProjectStyleConfigField)) {
+    body['artStylePack'] = artStylePack;
+  }
+  if (!identical(storyStylePack, _unsetProjectStyleConfigField)) {
+    body['storyStylePack'] = storyStylePack;
+  }
+  return body;
+}
+
 /// Primary project REST endpoints and summary payloads.
 /// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
@@ -148,13 +162,10 @@ Future<ProjectRow> patchProjectStyleConfigByProjectId(
   Object? artStylePack = _unsetProjectStyleConfigField,
   Object? storyStylePack = _unsetProjectStyleConfigField,
 }) async {
-  final body = <String, dynamic>{};
-  if (!identical(artStylePack, _unsetProjectStyleConfigField)) {
-    body['artStylePack'] = artStylePack;
-  }
-  if (!identical(storyStylePack, _unsetProjectStyleConfigField)) {
-    body['storyStylePack'] = storyStylePack;
-  }
+  final body = buildProjectStyleConfigPatchBody(
+    artStylePack: artStylePack,
+    storyStylePack: storyStylePack,
+  );
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/style-config');
   final res = await http
       .patch(

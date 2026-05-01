@@ -63,3 +63,55 @@ pub struct RollbackResponse {
     pub rolled_back_to: Uuid,
     pub hash_after: String,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{ListSkillVersionsQuery, RollbackRequest, RollbackResponse};
+    use serde_json::json;
+    use uuid::Uuid;
+
+    #[test]
+    fn list_skill_versions_query_defaults_limit_and_offset() {
+        let query: ListSkillVersionsQuery = serde_json::from_value(json!({
+            "path": "story_skills/sweet_romance.md"
+        }))
+        .expect("deserialize query");
+        assert_eq!(query.limit, 20);
+        assert_eq!(query.offset, 0);
+    }
+
+    #[test]
+    fn rollback_request_accepts_camel_case_payload() {
+        let target_version_id = Uuid::new_v4();
+        let request: RollbackRequest = serde_json::from_value(json!({
+            "filePath": "story_skills/sweet_romance.md",
+            "targetVersionId": target_version_id,
+            "summary": "回滚到稳定版本"
+        }))
+        .expect("deserialize rollback request");
+        assert_eq!(request.file_path, "story_skills/sweet_romance.md");
+        assert_eq!(request.target_version_id, target_version_id);
+        assert_eq!(request.summary.as_deref(), Some("回滚到稳定版本"));
+    }
+
+    #[test]
+    fn rollback_response_serializes_camel_case_fields() {
+        let response = RollbackResponse {
+            new_version_id: Uuid::new_v4(),
+            file_path: "story_skills/sweet_romance.md".into(),
+            rolled_back_from: Uuid::new_v4(),
+            rolled_back_to: Uuid::new_v4(),
+            hash_after: "abc123".into(),
+        };
+        let value = serde_json::to_value(&response).expect("serialize rollback response");
+        assert!(value.get("newVersionId").is_some());
+        assert_eq!(
+            value.get("filePath").and_then(serde_json::Value::as_str),
+            Some("story_skills/sweet_romance.md")
+        );
+        assert_eq!(
+            value.get("hashAfter").and_then(serde_json::Value::as_str),
+            Some("abc123")
+        );
+    }
+}

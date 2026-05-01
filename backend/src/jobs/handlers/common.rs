@@ -82,6 +82,10 @@ pub(crate) fn normalize_task_page_project_filter(project_id: Option<i32>) -> Opt
         .filter(|s| !s.is_empty())
 }
 
+pub(crate) fn job_status_allows_retry(status: &str) -> bool {
+    status.eq_ignore_ascii_case("failed")
+}
+
 pub(crate) fn compute_task_page_offset(page: i32, limit: i32) -> i64 {
     i64::from(page - 1) * i64::from(limit)
 }
@@ -124,4 +128,35 @@ pub(crate) async fn fetch_job_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::job_status_allows_retry;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(20))]
+
+        // Feature: drama-platform-completion, Property 15: 失败任务重试资格
+        // 验证：需求 18.3
+        #[test]
+        fn prop_only_failed_jobs_are_retry_eligible(
+            failed_variant in prop_oneof![
+                Just("failed".to_string()),
+                Just("FAILED".to_string()),
+                Just("Failed".to_string()),
+            ],
+            other_status in prop_oneof![
+                Just("queued".to_string()),
+                Just("running".to_string()),
+                Just("succeeded".to_string()),
+                Just("cancelled".to_string()),
+                "[a-z_]{3,16}".prop_filter("exclude failed", |value| !value.eq_ignore_ascii_case("failed")),
+            ],
+        ) {
+            prop_assert!(job_status_allows_retry(&failed_variant));
+            prop_assert!(!job_status_allows_retry(&other_status));
+        }
+    }
 }
