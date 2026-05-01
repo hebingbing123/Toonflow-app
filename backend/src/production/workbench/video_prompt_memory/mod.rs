@@ -7096,6 +7096,7 @@ mod tests {
         SelectedVideoMemoryOptimizationBias, SelectedVideoMemoryOptimizationCandidate,
         SelectedVideoMemoryScope, StoryboardPromptSeedRow, VideoPromptMemorySelectionBias,
     };
+    use proptest::prelude::*;
     use sqlx::PgPool;
     use uuid::Uuid;
 
@@ -10626,6 +10627,56 @@ mod tests {
         );
 
         assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(20))]
+
+        // Feature: drama-platform-completion, Property 7: 角色级记忆优先级
+        // 验证：需求 15.2
+        #[test]
+        fn prop_storyboard_role_memory_prefers_primary_subject_in_multi_role_scene(
+            primary in "[A-Za-z]{2,8}",
+            secondary in "[A-Za-z]{2,8}",
+            primary_alias in "[A-Za-z]{2,8}",
+            secondary_alias in "[A-Za-z]{2,8}",
+        ) {
+            prop_assume!(primary != secondary);
+            prop_assume!(primary != primary_alias);
+            prop_assume!(secondary != secondary_alias);
+            prop_assume!(primary_alias != secondary_alias);
+            prop_assume!(primary_alias != secondary);
+            prop_assume!(secondary_alias != primary);
+
+            let storyboard_row = StoryboardPromptSeedRow {
+                prompt: Some(format!("{primary}与{secondary}擦肩后强忍泪意")),
+                video_desc: Some(format!(
+                    "（{primary}与{secondary}擦肩后强忍泪意、雨夜门厅、{primary}/{secondary}、5秒、近景、稳定跟拍、{primary}抬眼停顿后侧身让开、克制、冷调逆光、无台词、雨声回响、A13）"
+                )),
+                duration: Some("5s".into()),
+            };
+
+            let notes = select_subject_role_video_style_memory_notes_for_storyboard(
+                &[
+                    AgentMemoryRow {
+                        name: "script_role_video_style_memory".into(),
+                        content: format!(
+                            "subject={primary} | subjectAliases={primary_alias} | sampleCount=4 | style=表演抬眼停顿，语气轻声克制"
+                        ),
+                    },
+                    AgentMemoryRow {
+                        name: "script_role_video_style_memory".into(),
+                        content: format!(
+                            "subject={secondary} | subjectAliases={secondary_alias} | sampleCount=9 | style=表演冷眼逼视，语气低声压迫"
+                        ),
+                    },
+                ],
+                &[primary.clone(), secondary.clone()],
+                Some(&storyboard_row),
+            );
+
+            prop_assert_eq!(notes, vec!["表演抬眼停顿，语气轻声克制".to_string()]);
+        }
     }
 
     #[test]

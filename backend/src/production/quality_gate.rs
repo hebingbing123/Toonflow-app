@@ -1101,7 +1101,11 @@ pub(crate) fn enforce_quality_gate(
     stage: QualityGateStage,
     decision: &QualityGateDecision,
 ) -> Result<(), ApiError> {
-    if decision.blocked {
+    let severe_detected = decision
+        .issues
+        .iter()
+        .any(|issue| issue.severity == QualityGateSeverity::Severe);
+    if decision.blocked || severe_detected {
         return Err(ApiError::Conflict(decision_message(stage, decision)));
     }
     Ok(())
@@ -1116,6 +1120,15 @@ mod tests {
         QualityGateSeverity, QualityGateStage, StoryboardQualityState,
     };
     use crate::error::ApiError;
+    use proptest::prelude::*;
+
+    fn quality_gate_stage_strategy() -> impl Strategy<Value = QualityGateStage> {
+        prop_oneof![
+            Just(QualityGateStage::StoryboardPanel),
+            Just(QualityGateStage::VideoPrompt),
+            Just(QualityGateStage::VideoGenerate),
+        ]
+    }
 
     #[test]
     fn scope_label_compacts_storyboard_ids() {
@@ -1202,5 +1215,51 @@ mod tests {
         assert!(issues
             .iter()
             .any(|issue| issue.issue_type == "performance_state_repeat"));
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(20))]
+
+        // Feature: drama-platform-completion, Property 6: 高成本阶段预检阻断
+        // 验证：需求 9.3
+        #[test]
+        fn prop_high_cost_stage_precheck_blocks_on_severe_issues(
+            stage in quality_gate_stage_strategy(),
+            severities in proptest::collection::vec(prop_oneof![
+                Just(QualityGateSeverity::Severe),
+                Just(QualityGateSeverity::Minor),
+            ], 1..8usize),
+            blocked_flag in any::<bool>(),
+        ) {
+            let has_severe = severities.iter().any(|severity| *severity == QualityGateSeverity::Severe);
+            let issues = severities
+                .iter()
+                .enumerate()
+                .map(|(index, severity)| {
+                    issue(
+                        *severity,
+                        if *severity == QualityGateSeverity::Severe {
+                            "visual_conflict"
+                        } else {
+                            "emotion_flat"
+                        },
+                        "测试建议",
+                        &format!("storyboardId={}", index + 1),
+                    )
+                })
+                .collect::<Vec<_>>();
+            let decision = QualityGateDecision {
+                blocked: blocked_flag && !has_severe,
+                issues,
+            };
+
+            let result = enforce_quality_gate(stage, &decision);
+
+            if has_severe || decision.blocked {
+                prop_assert!(matches!(result, Err(ApiError::Conflict(_))));
+            } else {
+                prop_assert!(result.is_ok());
+            }
+        }
     }
 }
