@@ -25,6 +25,7 @@ const MAX_SKILL_BYTES: u64 = 2_000_000;
 const MAX_SKILL_BINARY_BYTES: u64 = 25_000_000;
 const MAX_SKILL_FILES: usize = 20_000;
 
+mod change_notify;
 mod storage;
 
 use storage::{create_skill_markdown, delete_skill_markdown, write_skill_markdown};
@@ -209,6 +210,7 @@ async fn put_skill_content(
         let path = doc.path.clone();
         let content = doc.content.clone();
         let old = old_content;
+        let changed_at_ms = chrono::Utc::now().timestamp_millis();
         tokio::spawn(async move {
             if let Err(e) = crate::prompting::skill_versions::record_skill_version(
                 &pool,
@@ -221,6 +223,9 @@ async fn put_skill_content(
             .await
             {
                 tracing::warn!(error = %e, path = %path, "failed to record skill version");
+            }
+            if let Err(e) = change_notify::notify_skill_change(&pool, &path, changed_at_ms).await {
+                tracing::warn!(error = ?e, path = %path, "failed to notify skill change");
             }
         });
     }
@@ -242,6 +247,7 @@ async fn post_skill_content(
         let pool = pool.clone();
         let path = doc.path.clone();
         let content = doc.content.clone();
+        let changed_at_ms = chrono::Utc::now().timestamp_millis();
         tokio::spawn(async move {
             if let Err(e) = crate::prompting::skill_versions::record_skill_version(
                 &pool,
@@ -254,6 +260,9 @@ async fn post_skill_content(
             .await
             {
                 tracing::warn!(error = %e, path = %path, "failed to record skill version on create");
+            }
+            if let Err(e) = change_notify::notify_skill_change(&pool, &path, changed_at_ms).await {
+                tracing::warn!(error = ?e, path = %path, "failed to notify created skill change");
             }
         });
     }
