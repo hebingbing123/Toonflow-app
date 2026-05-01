@@ -52,6 +52,67 @@ class SkillContentResponse {
   }
 }
 
+class SkillVersion {
+  const SkillVersion({
+    required this.id,
+    required this.filePath,
+    required this.changedAt,
+    required this.summary,
+    required this.hashBefore,
+    required this.hashAfter,
+    required this.rollbackOf,
+    required this.contentSnapshot,
+  });
+
+  factory SkillVersion.fromJson(Map<String, dynamic> json) {
+    return SkillVersion(
+      id: json['id']?.toString() ?? '',
+      filePath: json['filePath']?.toString() ?? '',
+      changedAt: json['changedAt']?.toString() ?? '',
+      summary: json['summary']?.toString(),
+      hashBefore: json['hashBefore']?.toString(),
+      hashAfter: json['hashAfter']?.toString() ?? '',
+      rollbackOf: json['rollbackOf']?.toString(),
+      contentSnapshot: json['contentSnapshot']?.toString(),
+    );
+  }
+
+  final String id;
+  final String filePath;
+  final String changedAt;
+  final String? summary;
+  final String? hashBefore;
+  final String hashAfter;
+  final String? rollbackOf;
+  final String? contentSnapshot;
+}
+
+class RollbackSkillVersionResponse {
+  const RollbackSkillVersionResponse({
+    required this.newVersionId,
+    required this.filePath,
+    required this.rolledBackFrom,
+    required this.rolledBackTo,
+    required this.hashAfter,
+  });
+
+  factory RollbackSkillVersionResponse.fromJson(Map<String, dynamic> json) {
+    return RollbackSkillVersionResponse(
+      newVersionId: json['newVersionId']?.toString() ?? '',
+      filePath: json['filePath']?.toString() ?? '',
+      rolledBackFrom: json['rolledBackFrom']?.toString() ?? '',
+      rolledBackTo: json['rolledBackTo']?.toString() ?? '',
+      hashAfter: json['hashAfter']?.toString() ?? '',
+    );
+  }
+
+  final String newVersionId;
+  final String filePath;
+  final String rolledBackFrom;
+  final String rolledBackTo;
+  final String hashAfter;
+}
+
 /// `GET /api/v1/skills/summary`. See `getSkillsSummaryV1`.
 Future<SkillsSummary> fetchSkillsSummary(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/skills/summary');
@@ -99,6 +160,71 @@ Future<SkillContentResponse> fetchSkillContent(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SkillContentResponse.fromJson(map);
+}
+
+Future<List<SkillVersion>> fetchSkillVersions(
+  String accessToken,
+  String relativePath, {
+  int limit = 20,
+  int offset = 0,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skill-versions').replace(
+    queryParameters: {
+      'path': relativePath,
+      'limit': '$limit',
+      'offset': '$offset',
+    },
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final decoded = jsonDecode(res.body);
+  if (decoded is! List) {
+    throw RustApiException('Unexpected response: ${res.body}');
+  }
+  return decoded
+      .whereType<Map>()
+      .map((item) => SkillVersion.fromJson(Map<String, dynamic>.from(item)))
+      .toList(growable: false);
+}
+
+Future<RollbackSkillVersionResponse> rollbackSkillVersion(
+  String accessToken, {
+  required String filePath,
+  required String targetVersionId,
+  String? summary,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skill-versions/rollback');
+  final body = <String, dynamic>{
+    'filePath': filePath,
+    'targetVersionId': targetVersionId,
+  };
+  if (summary != null && summary.trim().isNotEmpty) {
+    body['summary'] = summary.trim();
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final decoded = jsonDecode(res.body);
+  if (decoded is! Map) {
+    throw RustApiException('Unexpected response: ${res.body}');
+  }
+  return RollbackSkillVersionResponse.fromJson(
+    Map<String, dynamic>.from(decoded),
+  );
 }
 
 /// `PUT /api/v1/skills/content` — overwrites an **existing** file only (prior `saveSkillContent`).

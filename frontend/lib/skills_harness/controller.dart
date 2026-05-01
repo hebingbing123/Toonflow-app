@@ -45,9 +45,11 @@ class SkillsHarnessController extends ChangeNotifier {
   bool loadingSkillsSummary = false;
   bool loadingSkillList = false;
   bool loadingSkillPreview = false;
+  bool loadingSkillVersions = false;
   bool loadingSkillPut = false;
   bool loadingSkillPost = false;
   bool loadingSkillDelete = false;
+  bool rollingBackSkillVersion = false;
   bool loadingWs = false;
   bool loadingWsHarness = false;
   bool loadingWsIsolatedEcho = false;

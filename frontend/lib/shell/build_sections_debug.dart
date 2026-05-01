@@ -9,9 +9,11 @@ extension _HomePageBuildDebugSections on _HomePageState {
       loadingSkillsSummary: _skillsHarnessController.loadingSkillsSummary,
       loadingSkillList: _skillsHarnessController.loadingSkillList,
       loadingSkillPreview: _skillsHarnessController.loadingSkillPreview,
+      loadingSkillVersions: _skillsHarnessController.loadingSkillVersions,
       loadingSkillPut: _skillsHarnessController.loadingSkillPut,
       loadingSkillPost: _skillsHarnessController.loadingSkillPost,
       loadingSkillDelete: _skillsHarnessController.loadingSkillDelete,
+      rollingBackSkillVersion: _skillsHarnessController.rollingBackSkillVersion,
       wsProbesBusy: _workspaceWsEventController.wsProbesBusy,
       loadingWs: _loadingWs,
       loadingWsHarness: _loadingWsHarness,
@@ -31,6 +33,8 @@ extension _HomePageBuildDebugSections on _HomePageState {
       onLoadSkillList: _skillsHarnessController.loadSkillList,
       onPreviewSkillFile: () =>
           _skillsHarnessController.previewSkillFile(context),
+      onShowSkillVersionHistory: () =>
+          _skillsHarnessController.showSkillVersionHistory(context),
       onPutSkillProbe: _skillsHarnessController.putSkillProbe,
       onPostSkillProbe: _skillsHarnessController.postSkillProbe,
       onDeleteSkillProbe: _skillsHarnessController.deleteSkillProbe,
@@ -48,4 +52,3 @@ extension _HomePageBuildDebugSections on _HomePageState {
     ),
   ];
 }
-

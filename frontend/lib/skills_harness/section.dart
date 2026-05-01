@@ -7,9 +7,11 @@ class HarnessSection extends StatelessWidget {
     required this.loadingSkillsSummary,
     required this.loadingSkillList,
     required this.loadingSkillPreview,
+    required this.loadingSkillVersions,
     required this.loadingSkillPut,
     required this.loadingSkillPost,
     required this.loadingSkillDelete,
+    required this.rollingBackSkillVersion,
     required this.wsProbesBusy,
     required this.loadingWs,
     required this.loadingWsHarness,
@@ -28,6 +30,7 @@ class HarnessSection extends StatelessWidget {
     required this.onLoadSkillsAggregate,
     required this.onLoadSkillList,
     required this.onPreviewSkillFile,
+    required this.onShowSkillVersionHistory,
     required this.onPutSkillProbe,
     required this.onPostSkillProbe,
     required this.onDeleteSkillProbe,
@@ -43,9 +46,11 @@ class HarnessSection extends StatelessWidget {
   final bool loadingSkillsSummary;
   final bool loadingSkillList;
   final bool loadingSkillPreview;
+  final bool loadingSkillVersions;
   final bool loadingSkillPut;
   final bool loadingSkillPost;
   final bool loadingSkillDelete;
+  final bool rollingBackSkillVersion;
   final bool wsProbesBusy;
   final bool loadingWs;
   final bool loadingWsHarness;
@@ -64,6 +69,7 @@ class HarnessSection extends StatelessWidget {
   final VoidCallback onLoadSkillsAggregate;
   final VoidCallback onLoadSkillList;
   final VoidCallback onPreviewSkillFile;
+  final VoidCallback onShowSkillVersionHistory;
   final VoidCallback onPutSkillProbe;
   final VoidCallback onPostSkillProbe;
   final VoidCallback onDeleteSkillProbe;
@@ -149,6 +155,18 @@ class HarnessSection extends StatelessWidget {
               onPressed: loadingSkillPreview ? null : onPreviewSkillFile,
               child: Text(
                 loadingSkillPreview ? '…' : 'GET /api/v1/skills/content',
+              ),
+            ),
+            FilledButton.tonal(
+              onPressed: loadingSkillVersions || rollingBackSkillVersion
+                  ? null
+                  : onShowSkillVersionHistory,
+              child: Text(
+                loadingSkillVersions
+                    ? '…'
+                    : rollingBackSkillVersion
+                    ? '回滚中…'
+                    : '版本历史 / 回滚',
               ),
             ),
             FilledButton.tonal(
