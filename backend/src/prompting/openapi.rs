@@ -23,5 +23,7 @@ use utoipa::OpenApi;
     crate::prompting::benchmark::experiments::get_experiment,
     crate::prompting::benchmark::experiments::start_experiment,
     crate::prompting::benchmark::experiments::cancel_experiment,
+    crate::prompting::benchmark::judge::get_rubrics,
+    crate::prompting::benchmark::judge::score_preview,
 ))]
 pub struct PromptingHttpOpenApi;

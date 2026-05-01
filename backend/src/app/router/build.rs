@@ -77,6 +77,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(prompting::quality::routes())
         .merge(prompting::benchmark::registry_routes())
         .merge(prompting::benchmark::experiments_routes())
+        .merge(prompting::benchmark::judge_routes())
         .merge(settings::about::router())
         .merge(settings::agent_deploy::router())
         .merge(settings::danger::router())

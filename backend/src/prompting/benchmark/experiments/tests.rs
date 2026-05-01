@@ -2,6 +2,10 @@
 
 #[cfg(test)]
 mod tests {
+    use super::super::cost_optimization::{
+        calculate_full_replay_cost, calculate_stage_scope_savings, calculate_tier_savings,
+        estimate_artifact_reuse_savings, ArtifactReuse, SampleTier, Stage, TokenSavingsEstimate,
+    };
     use super::super::types::*;
     use super::super::validation::*;
 
@@ -217,5 +221,182 @@ mod tests {
         assert!(result.is_err());
         let err_msg = result.unwrap_err().to_string();
         assert!(err_msg.contains("observation_policy_snapshot.observation_note_limit"));
+    }
+
+    // ========== 成本优化测试 ==========
+
+    #[test]
+    fn test_sample_tier_parsing() {
+        assert_eq!("smoke".parse::<SampleTier>().unwrap(), SampleTier::Smoke);
+        assert_eq!("core".parse::<SampleTier>().unwrap(), SampleTier::Core);
+        assert_eq!("full".parse::<SampleTier>().unwrap(), SampleTier::Full);
+        assert!("invalid".parse::<SampleTier>().is_err());
+    }
+
+    #[test]
+    fn test_sample_tier_ratios() {
+        assert_eq!(SampleTier::Smoke.sample_ratio(), 0.05);
+        assert_eq!(SampleTier::Core.sample_ratio(), 0.20);
+        assert_eq!(SampleTier::Full.sample_ratio(), 1.0);
+    }
+
+    #[test]
+    fn test_sample_tier_suggested_counts() {
+        assert_eq!(SampleTier::Smoke.suggested_sample_count(), 5);
+        assert_eq!(SampleTier::Core.suggested_sample_count(), 20);
+        assert_eq!(SampleTier::Full.suggested_sample_count(), 100);
+    }
+
+    #[test]
+    fn test_stage_parsing() {
+        assert_eq!(
+            "story_skeleton".parse::<Stage>().unwrap(),
+            Stage::StorySkeleton
+        );
+        assert_eq!("video_prompt".parse::<Stage>().unwrap(), Stage::VideoPrompt);
+        assert!("invalid_stage".parse::<Stage>().is_err());
+    }
+
+    #[test]
+    fn test_stage_order() {
+        assert_eq!(Stage::StorySkeleton.order_index(), 0);
+        assert_eq!(Stage::AdaptationStrategy.order_index(), 1);
+        assert_eq!(Stage::VideoPrompt.order_index(), 5);
+    }
+
+    #[test]
+    fn test_stage_token_costs() {
+        assert!(
+            Stage::VideoPrompt.estimated_token_cost() > Stage::StorySkeleton.estimated_token_cost()
+        );
+        assert!(
+            Stage::StoryboardPanel.estimated_token_cost()
+                > Stage::StoryboardTable.estimated_token_cost()
+        );
+    }
+
+    #[test]
+    fn test_calculate_tier_savings() {
+        let stages = vec![Stage::StoryboardTable, Stage::VideoPrompt];
+        let total_samples = 100;
+
+        let smoke_savings = calculate_tier_savings(&SampleTier::Smoke, total_samples, &stages);
+        let core_savings = calculate_tier_savings(&SampleTier::Core, total_samples, &stages);
+        let full_savings = calculate_tier_savings(&SampleTier::Full, total_samples, &stages);
+
+        // Smoke 应该比 Core 节省更多
+        assert!(smoke_savings > core_savings);
+        // Full 不应该有节省
+        assert_eq!(full_savings, 0);
+        // 所有节省都应该是非负数
+        assert!(smoke_savings > 0);
+        assert!(core_savings > 0);
+    }
+
+    #[test]
+    fn test_calculate_stage_scope_savings() {
+        let selected_stages = vec![Stage::VideoPrompt];
+        let sample_count = 10;
+
+        let savings = calculate_stage_scope_savings(&selected_stages, sample_count);
+
+        // 只选一个阶段应该比全阶段节省很多
+        assert!(savings > 0);
+
+        // 选择所有阶段应该没有节省
+        let all_stages = vec![
+            Stage::StorySkeleton,
+            Stage::AdaptationStrategy,
+            Stage::DirectorPlanning,
+            Stage::StoryboardTable,
+            Stage::StoryboardPanel,
+            Stage::VideoPrompt,
+        ];
+        let no_savings = calculate_stage_scope_savings(&all_stages, sample_count);
+        assert_eq!(no_savings, 0);
+    }
+
+    #[test]
+    fn test_calculate_full_replay_cost() {
+        let stages = vec![Stage::StoryboardTable, Stage::VideoPrompt];
+        let total_samples = 10;
+
+        let cost = calculate_full_replay_cost(total_samples, &stages);
+
+        let expected_cost = (Stage::StoryboardTable.estimated_token_cost()
+            + Stage::VideoPrompt.estimated_token_cost())
+            * total_samples as u64;
+
+        assert_eq!(cost, expected_cost);
+    }
+
+    #[test]
+    fn test_estimate_artifact_reuse_savings() {
+        let stages = vec![Stage::StoryboardTable];
+        let sample_count = 10;
+        let reuse_ratio = 0.3;
+
+        let savings = estimate_artifact_reuse_savings(sample_count, &stages, reuse_ratio);
+
+        let total_cost = Stage::StoryboardTable.estimated_token_cost() * sample_count as u64;
+        let expected_savings = (total_cost as f64 * reuse_ratio) as u64;
+
+        assert_eq!(savings, expected_savings);
+    }
+
+    #[test]
+    fn test_token_savings_estimate_calculation() {
+        use uuid::Uuid;
+
+        let mut estimate = TokenSavingsEstimate::new(Uuid::new_v4(), Uuid::new_v4());
+
+        estimate.full_replay_tokens = 1000000;
+        estimate.tier_savings = 500000;
+        estimate.stage_scope_savings = 200000;
+        estimate.artifact_reuse_savings = 100000;
+
+        estimate.update_total_savings();
+
+        assert_eq!(estimate.tokens_saved, 800000);
+        assert_eq!(estimate.savings_ratio, 0.8);
+    }
+
+    #[test]
+    fn test_token_savings_estimate_with_reuse_details() {
+        use uuid::Uuid;
+
+        let mut estimate = TokenSavingsEstimate::new(Uuid::new_v4(), Uuid::new_v4());
+
+        let reuse1 = ArtifactReuse {
+            benchmark_case_id: Uuid::new_v4(),
+            stage: "storyboard_table".to_string(),
+            reused: true,
+            reuse_source: Some("previous_run".to_string()),
+            tokens_saved: 15000,
+        };
+
+        let reuse2 = ArtifactReuse {
+            benchmark_case_id: Uuid::new_v4(),
+            stage: "video_prompt".to_string(),
+            reused: false,
+            reuse_source: None,
+            tokens_saved: 0,
+        };
+
+        estimate.add_reuse_detail(reuse1);
+        estimate.add_reuse_detail(reuse2);
+        estimate.update_total_savings();
+
+        assert_eq!(estimate.artifact_reuse_savings, 15000);
+        assert_eq!(estimate.reuse_details.len(), 2);
+    }
+
+    #[test]
+    fn test_cost_optimization_config_default() {
+        let config = super::super::cost_optimization::CostOptimizationConfig::default();
+
+        assert!(config.enable_artifact_reuse);
+        assert!(config.enable_snapshot_reuse);
+        assert_eq!(config.max_reuse_window_hours, 72);
     }
 }

@@ -12,6 +12,10 @@ use uuid::Uuid;
 use crate::{auth::require_user_uuid, error::ApiError, state::AppState};
 
 use super::{
+    cost_optimization::{
+        calculate_full_replay_cost, calculate_stage_scope_savings, calculate_tier_savings,
+        estimate_artifact_reuse_savings, SampleTier, Stage, TokenSavingsEstimate,
+    },
     types::{
         CreateExperimentBody, ExperimentDetail, ExperimentRun, ExperimentVariant,
         ListExperimentsQuery,
@@ -442,4 +446,123 @@ pub async fn cancel_experiment(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(experiment))
+}
+
+/// 估算实验成本与节省
+#[utoipa::path(
+    get,
+    path = "/api/v1/benchmark/experiments/{id}/cost-estimate",
+    params(
+        ("id" = Uuid, Path, description = "Experiment ID")
+    ),
+    responses(
+        (status = 200, description = "Cost estimate", body = TokenSavingsEstimate),
+        (status = 401, description = "Unauthorized"),
+        (status = 404, description = "Experiment not found"),
+    ),
+    tag = "benchmark",
+    security(("bearerAuth" = []))
+)]
+pub async fn estimate_cost(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(id): Path<Uuid>,
+) -> Result<Json<TokenSavingsEstimate>, ApiError> {
+    let user_id = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+
+    // 获取实验信息
+    let experiment = sqlx::query_as::<_, ExperimentRun>(
+        r#"
+        SELECT id, owner_user_id, name, status, sample_tier, stage_scope,
+               baseline_variant_id, created_at, started_at, completed_at
+        FROM app_experiment_run
+        WHERE id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(id)
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    // 解析样本分层
+    let sample_tier: SampleTier = experiment
+        .sample_tier
+        .parse()
+        .map_err(|e: String| ApiError::BadRequest(e))?;
+
+    // 解析阶段范围
+    let stage_scope: Vec<String> = serde_json::from_value(experiment.stage_scope.clone())
+        .map_err(|e| ApiError::BadRequest(format!("Invalid stage_scope: {}", e)))?;
+
+    let stages: Result<Vec<Stage>, _> = stage_scope.iter().map(|s| s.parse::<Stage>()).collect();
+
+    let stages = stages.map_err(|e: String| ApiError::BadRequest(e))?;
+
+    // 获取样本总数（假设从 benchmark_case 表查询）
+    let total_samples: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)
+        FROM app_benchmark_case
+        WHERE owner_user_id = $1
+        "#,
+    )
+    .bind(user_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let total_samples = total_samples as usize;
+
+    // 计算全量重跑成本
+    let full_replay_tokens = calculate_full_replay_cost(total_samples, &stages);
+
+    // 计算样本分层节省
+    let tier_savings = calculate_tier_savings(&sample_tier, total_samples, &stages);
+
+    // 计算阶段范围节省
+    let suggested_sample_count = (total_samples as f64 * sample_tier.sample_ratio()) as usize;
+    let stage_scope_savings = calculate_stage_scope_savings(&stages, suggested_sample_count);
+
+    // 估算中间产物复用节省（假设 30% 复用率）
+    let artifact_reuse_savings =
+        estimate_artifact_reuse_savings(suggested_sample_count, &stages, 0.3);
+
+    // 获取变体（用于生成每个变体的估算）
+    let variants = sqlx::query_as::<_, ExperimentVariant>(
+        r#"
+        SELECT id, experiment_run_id, label, is_baseline,
+               skill_snapshot, prompt_snapshot, memory_budget_snapshot,
+               observation_policy_snapshot, model_route_snapshot, notes
+        FROM app_experiment_variant
+        WHERE experiment_run_id = $1
+        ORDER BY is_baseline DESC, label ASC
+        LIMIT 1
+        "#,
+    )
+    .bind(id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let variant_id = variants.map(|v| v.id).unwrap_or_else(Uuid::new_v4);
+
+    // 构建估算结果
+    let mut estimate = TokenSavingsEstimate::new(id, variant_id);
+    estimate.full_replay_tokens = full_replay_tokens;
+    estimate.tier_savings = tier_savings;
+    estimate.stage_scope_savings = stage_scope_savings;
+    estimate.artifact_reuse_savings = artifact_reuse_savings;
+
+    // 计算实际 token 消耗（全量 - 所有节省）
+    estimate.actual_tokens = full_replay_tokens
+        .saturating_sub(tier_savings)
+        .saturating_sub(stage_scope_savings)
+        .saturating_sub(artifact_reuse_savings);
+
+    estimate.update_total_savings();
+
+    Ok(Json(estimate))
 }
