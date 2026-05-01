@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::llm::LlmConfig;
 use crate::scope;
+use crate::settings::agent_memory::maybe_fill_project_style_bible_from_assets;
 
 use super::super::persist::persist_group;
 use super::super::tool::{call_extract_tool, filter_tool_existing, filter_tool_new_assets};
@@ -16,6 +17,7 @@ pub(super) async fn process_one_group(
     cfg: &LlmConfig,
     client: &reqwest::Client,
     system: &str,
+    project_numeric_id: i32,
     project_uuid: Uuid,
     uid: Uuid,
     chunk: &[i32],
@@ -155,6 +157,20 @@ pub(super) async fn process_one_group(
     .execute(pool)
     .await
     .map_err(|e| e.to_string())?;
+
+    let pool_clone = pool.clone();
+    tokio::spawn(async move {
+        if let Err(error) =
+            maybe_fill_project_style_bible_from_assets(&pool_clone, uid, project_numeric_id).await
+        {
+            tracing::warn!(
+                project_id = project_numeric_id,
+                user_id = %uid,
+                error = ?error,
+                "style bible asset fill failed"
+            );
+        }
+    });
 
     Ok(())
 }

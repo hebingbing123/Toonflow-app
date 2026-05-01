@@ -5,6 +5,7 @@
 mod handlers;
 pub(crate) mod memory_tier;
 mod storage;
+mod style_bible;
 mod summarize;
 mod types;
 
@@ -27,6 +28,9 @@ pub(crate) use handlers::{
 pub(crate) use storage::{
     delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,
     replace_named_summary_memory, replace_named_summary_memory_with_scope,
+};
+pub(crate) use style_bible::{
+    ensure_project_style_bible_template, maybe_fill_project_style_bible_from_assets,
 };
 pub(crate) use types::ClearMemoryResponse;
 

@@ -73,6 +73,7 @@ pub(crate) async fn run_extract_job(
             &cfg,
             &client,
             &system,
+            project_numeric_id,
             project_uuid,
             uid,
             chunk,

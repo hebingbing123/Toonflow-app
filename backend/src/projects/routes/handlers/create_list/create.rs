@@ -6,6 +6,7 @@ use axum::{
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::settings::agent_memory::ensure_project_style_bible_template;
 use crate::state::AppState;
 
 use super::super::super::common::{trim_opt, ADV_LOCK_PROJECT_NUMERIC_ID};
@@ -79,6 +80,18 @@ pub(crate) async fn create_project(
     tx.commit()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let pool = pool.clone();
+    tokio::spawn(async move {
+        if let Err(error) = ensure_project_style_bible_template(&pool, uid, row.numeric_id).await {
+            tracing::warn!(
+                project_id = row.numeric_id,
+                user_id = %uid,
+                error = ?error,
+                "style bible template auto-init failed"
+            );
+        }
+    });
 
     Ok((StatusCode::CREATED, Json(row)))
 }
