@@ -131,18 +131,23 @@ pub fn recommend_model_tier(scope: &PatchScope, reason: &str) -> ModelTier {
 /// 规则：同一对象（相同 scope + ids 交集非空）连续 2 次局部返工未达标，
 /// 升级为「问题归因模式」，输出失败原因分类。
 pub fn should_enter_attribution_mode(history: &[PatchAttempt], current: &PatchRequest) -> bool {
-    // 找出与当前请求 scope 相同且 ids 有交集的历史记录
-    let relevant_failures: Vec<&PatchAttempt> = history
-        .iter()
-        .filter(|attempt| {
-            attempt.scope == current.scope
-                && !attempt.succeeded
-                && attempt.ids.iter().any(|id| current.ids.contains(id))
-        })
-        .collect();
+    consecutive_relevant_failures(history, current) >= 2
+}
 
-    // 连续 2 次失败 → 进入归因模式
-    relevant_failures.len() >= 2
+fn consecutive_relevant_failures(history: &[PatchAttempt], current: &PatchRequest) -> usize {
+    let mut failures = 0usize;
+    for attempt in history.iter().rev() {
+        let is_relevant =
+            attempt.scope == current.scope && attempt.ids.iter().any(|id| current.ids.contains(id));
+        if !is_relevant {
+            continue;
+        }
+        if attempt.succeeded {
+            break;
+        }
+        failures += 1;
+    }
+    failures
 }
 
 fn classify_attribution_category(
@@ -402,11 +407,7 @@ pub fn build_patch_response(
     let model_tier = request.model_tier.clone();
 
     // 4. 统计连续失败次数
-    let consecutive_failures = history
-        .iter()
-        .rev()
-        .take_while(|a| a.scope == request.scope && !a.succeeded)
-        .count() as u32;
+    let consecutive_failures = consecutive_relevant_failures(history, request) as u32;
 
     Ok(PatchResponse {
         patch_id: uuid::Uuid::new_v4(),
@@ -446,6 +447,7 @@ pub fn build_patch_response(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proptest::prelude::*;
 
     fn make_request(scope: PatchScope, ids: Vec<i64>, reason: &str) -> PatchRequest {
         PatchRequest {
@@ -456,6 +458,26 @@ mod tests {
             reason: reason.to_string(),
             model_tier: ModelTier::Low,
         }
+    }
+
+    fn scope_limit(scope: &PatchScope) -> usize {
+        match scope {
+            PatchScope::Episode => 3,
+            PatchScope::Scene => 10,
+            PatchScope::StoryboardItem => 20,
+            PatchScope::VideoPrompt => 20,
+            PatchScope::DeriveAsset => 10,
+        }
+    }
+
+    fn patch_scope_strategy() -> impl Strategy<Value = PatchScope> {
+        prop_oneof![
+            Just(PatchScope::Episode),
+            Just(PatchScope::Scene),
+            Just(PatchScope::StoryboardItem),
+            Just(PatchScope::VideoPrompt),
+            Just(PatchScope::DeriveAsset),
+        ]
     }
 
     #[test]
@@ -556,6 +578,36 @@ mod tests {
     }
 
     #[test]
+    fn should_not_enter_attribution_mode_when_relevant_success_resets_streak() {
+        let history = vec![
+            PatchAttempt {
+                scope: PatchScope::StoryboardItem,
+                ids: vec![1],
+                reason: "第一次失败".to_string(),
+                model_tier: ModelTier::Low,
+                succeeded: false,
+            },
+            PatchAttempt {
+                scope: PatchScope::StoryboardItem,
+                ids: vec![1],
+                reason: "第二次已修复".to_string(),
+                model_tier: ModelTier::Low,
+                succeeded: true,
+            },
+            PatchAttempt {
+                scope: PatchScope::StoryboardItem,
+                ids: vec![1],
+                reason: "第三次又失败".to_string(),
+                model_tier: ModelTier::Low,
+                succeeded: false,
+            },
+        ];
+        let req = make_request(PatchScope::StoryboardItem, vec![1], "当前返工");
+        assert!(!should_enter_attribution_mode(&history, &req));
+        assert_eq!(consecutive_relevant_failures(&history, &req), 1);
+    }
+
+    #[test]
     fn attribution_summary_classifies_emotion_error_and_prefers_local_fix_first() {
         let history = vec![
             PatchAttempt {
@@ -611,5 +663,83 @@ mod tests {
         let summary = generate_attribution_summary(&history, &req);
         assert!(summary.contains("视觉连续性错误"));
         assert!(summary.contains("storyboard_panel"));
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(20))]
+
+        // Feature: drama-platform-completion, Property 4: 局部返工对象上限约束
+        // 验证：需求 4.2, 13.4
+        #[test]
+        fn prop_patch_scope_respects_object_limit(
+            scope in patch_scope_strategy(),
+            ids in proptest::collection::vec(1i64..40, 0..35usize),
+        ) {
+            let req = make_request(scope.clone(), ids.clone(), "局部返工测试");
+            let unique_ids = {
+                let mut deduped = ids;
+                deduped.sort_unstable();
+                deduped.dedup();
+                deduped
+            };
+            let result = resolve_minimal_scope(&req);
+
+            if unique_ids.is_empty() || unique_ids.len() > scope_limit(&scope) {
+                prop_assert!(result.is_err());
+            } else {
+                let processed = result.expect("expected valid local patch scope");
+                prop_assert_eq!(processed.as_slice(), unique_ids.as_slice());
+                prop_assert!(processed.len() <= scope_limit(&scope));
+            }
+        }
+
+        // Feature: drama-platform-completion, Property 5: 连续失败进入归因模式
+        // 验证：需求 13.1
+        #[test]
+        fn prop_consecutive_relevant_failures_trigger_attribution_mode(
+            scope in patch_scope_strategy(),
+            current_ids in proptest::collection::vec(1i64..30, 1..6usize),
+            noise_ids in proptest::collection::vec(31i64..60, 1..4usize),
+            trailing_noise_count in 0usize..3usize,
+        ) {
+            let current_ids = {
+                let mut ids = current_ids;
+                ids.sort_unstable();
+                ids.dedup();
+                ids
+            };
+            let overlap_id = current_ids[0];
+            let req = make_request(scope.clone(), current_ids.clone(), "角色情绪仍然生硬");
+
+            let mut history = vec![
+                PatchAttempt {
+                    scope: scope.clone(),
+                    ids: vec![overlap_id],
+                    reason: "第一次相关失败".to_string(),
+                    model_tier: ModelTier::Low,
+                    succeeded: false,
+                },
+                PatchAttempt {
+                    scope: scope.clone(),
+                    ids: vec![overlap_id, current_ids[current_ids.len() - 1]],
+                    reason: "第二次相关失败".to_string(),
+                    model_tier: ModelTier::High,
+                    succeeded: false,
+                },
+            ];
+
+            for index in 0..trailing_noise_count {
+                history.push(PatchAttempt {
+                    scope: PatchScope::Episode,
+                    ids: vec![noise_ids[index % noise_ids.len()]],
+                    reason: format!("无关噪声 {}", index),
+                    model_tier: ModelTier::Low,
+                    succeeded: index % 2 == 0,
+                });
+            }
+
+            prop_assert_eq!(consecutive_relevant_failures(&history, &req), 2);
+            prop_assert!(should_enter_attribution_mode(&history, &req));
+        }
     }
 }
