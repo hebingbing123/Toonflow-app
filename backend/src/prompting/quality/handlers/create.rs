@@ -147,8 +147,7 @@ pub(crate) async fn create_review(
         pool,
         user_id,
         review.job_id,
-        review.id,
-        review.overall_score,
+        &review,
     )
     .await;
     if linked > 0 {
