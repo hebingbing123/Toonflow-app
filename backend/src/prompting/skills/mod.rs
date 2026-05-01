@@ -192,9 +192,39 @@ async fn put_skill_content(
     headers: HeaderMap,
     Json(body): Json<SkillContentBody>,
 ) -> Result<Json<SkillContentResponse>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    // 读取旧内容（用于版本记录的 hash_before）
+    let old_content = read_skill_markdown(body.path.trim())
+        .ok()
+        .map(|d| d.content);
+
     let doc =
         write_skill_markdown(&body.path, &body.content).map_err(SkillWriteError::into_api_error)?;
+
+    // 写入成功后自动记录版本（需求 24.1, 24.2）
+    // pool.clone() 是 Arc 内部 clone，开销极低
+    if let Ok(pool) = state.require_pool() {
+        let pool = pool.clone();
+        let path = doc.path.clone();
+        let content = doc.content.clone();
+        let old = old_content;
+        tokio::spawn(async move {
+            if let Err(e) = crate::prompting::skill_versions::record_skill_version(
+                &pool,
+                &path,
+                old.as_deref(),
+                &content,
+                Some(uid),
+                None,
+            )
+            .await
+            {
+                tracing::warn!(error = %e, path = %path, "failed to record skill version");
+            }
+        });
+    }
+
     Ok(Json(doc))
 }
 
@@ -203,9 +233,31 @@ async fn post_skill_content(
     headers: HeaderMap,
     Json(body): Json<SkillContentBody>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
+    let uid = require_user_uuid(&state, &headers)?;
     let doc = create_skill_markdown(&body.path, &body.content)
         .map_err(SkillCreateError::into_api_error)?;
+
+    // 新建文件后自动记录版本（需求 24.1, 24.2）
+    if let Ok(pool) = state.require_pool() {
+        let pool = pool.clone();
+        let path = doc.path.clone();
+        let content = doc.content.clone();
+        tokio::spawn(async move {
+            if let Err(e) = crate::prompting::skill_versions::record_skill_version(
+                &pool,
+                &path,
+                None, // 新建文件，无旧内容
+                &content,
+                Some(uid),
+                Some("新建技能文件"),
+            )
+            .await
+            {
+                tracing::warn!(error = %e, path = %path, "failed to record skill version on create");
+            }
+        });
+    }
+
     Ok((StatusCode::CREATED, Json(doc)))
 }
 
