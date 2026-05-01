@@ -34,6 +34,15 @@ pub struct QualityReview {
     pub reviewer_id: Option<Uuid>,
     pub is_bad_case: bool,
     pub bad_case_category: Option<String>,
+    /// 生成阶段（需求 6.3）：story_skeleton / adaptation_strategy / director_planning /
+    /// storyboard_table / storyboard_panel / video_prompt
+    pub stage: Option<String>,
+    /// 监督层评分等级（需求 6.3）：A / B / C / D
+    pub grade: Option<String>,
+    /// 评审时使用的技能文件路径（需求 6.5）
+    pub skill_file_path: Option<String>,
+    /// 评审时使用的技能文件 SHA256 哈希（需求 6.5）
+    pub skill_version_hash: Option<String>,
 }
 
 /// 创建质量评估请求体
@@ -61,6 +70,14 @@ pub struct CreateQualityReviewBody {
     pub memory_delivery_priority_applied: Option<bool>,
     pub is_bad_case: Option<bool>,
     pub bad_case_category: Option<String>,
+    /// 生成阶段（需求 6.3）
+    pub stage: Option<String>,
+    /// 监督层评分等级（需求 6.3）：A / B / C / D
+    pub grade: Option<String>,
+    /// 评审时使用的技能文件路径（需求 6.5）
+    pub skill_file_path: Option<String>,
+    /// 评审时使用的技能文件 SHA256 哈希（需求 6.5）
+    pub skill_version_hash: Option<String>,
 }
 
 /// 质量评估列表查询参数

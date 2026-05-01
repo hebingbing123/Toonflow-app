@@ -4,10 +4,15 @@ use axum::{routing::post, Router};
 
 use crate::state::AppState;
 
+use super::patch;
 use super::workbench;
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route(
+            "/api/v1/production/patch",
+            post(patch::post_production_patch),
+        )
         .route(
             "/api/v1/production/get-production-data",
             post(workbench::storyboard_ops::post_get_production_data),

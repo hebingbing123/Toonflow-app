@@ -73,8 +73,9 @@ pub(crate) async fn create_review(
             source, plot_coherence, character_consistency, dialogue_naturalness,
             pacing, faithfulness, visual_quality, overall_score, passed,
             comments, skill_version, model_name, model_params, memory_delivery_priority_applied,
-            is_bad_case, bad_case_category
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+            is_bad_case, bad_case_category,
+            stage, grade, skill_file_path, skill_version_hash
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
         RETURNING *
         "#,
     )
@@ -100,6 +101,10 @@ pub(crate) async fn create_review(
     .bind(body.memory_delivery_priority_applied)
     .bind(is_bad_case)
     .bind(&body.bad_case_category)
+    .bind(&body.stage)
+    .bind(&body.grade)
+    .bind(&body.skill_file_path)
+    .bind(&body.skill_version_hash)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

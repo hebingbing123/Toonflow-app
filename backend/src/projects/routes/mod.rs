@@ -12,7 +12,7 @@ use crate::state::AppState;
 
 use handlers::{
     create_project, delete_project_by_id, get_project_by_id, list_projects, patch_project_by_id,
-    project_stats_by_id, projects_summary,
+    patch_style_config, project_stats_by_id, projects_summary,
 };
 
 pub fn router() -> Router<AppState> {
@@ -22,6 +22,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/stats",
             get(project_stats_by_id),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/style-config",
+            axum::routing::patch(patch_style_config),
         )
         .route(
             "/api/v1/projects/{project_id}",

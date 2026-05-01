@@ -25,7 +25,8 @@ pub(crate) async fn list_projects(
         r#"
         SELECT id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
-               director_manual, mode, video_ratio, create_time_ms
+               director_manual, mode, video_ratio, create_time_ms,
+               art_style_pack, story_style_pack
         FROM app_project
         WHERE owner_user_id = $1
         ORDER BY create_time_ms DESC NULLS LAST, numeric_id DESC

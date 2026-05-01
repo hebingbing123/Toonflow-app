@@ -30,6 +30,10 @@ pub(super) struct ProjectRow {
     pub(super) mode: Option<String>,
     pub(super) video_ratio: Option<String>,
     pub(super) create_time_ms: Option<i64>,
+    /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
+    pub(super) art_style_pack: Option<String>,
+    /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
+    pub(super) story_style_pack: Option<String>,
 }
 
 #[derive(Debug, FromRow, Serialize)]
@@ -96,6 +100,24 @@ pub(super) struct PatchProjectBody {
     pub(super) mode: Option<Value>,
     #[serde(default)]
     pub(super) video_ratio: Option<Value>,
+    /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
+    #[serde(default)]
+    pub(super) art_style_pack: Option<Value>,
+    /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
+    #[serde(default)]
+    pub(super) story_style_pack: Option<Value>,
+}
+
+/// `PATCH /api/v1/projects/{id}/style-config` 请求体
+#[derive(Debug, Deserialize, Default)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct PatchStyleConfigBody {
+    /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`），传 null 清除
+    #[serde(default)]
+    pub(super) art_style_pack: Option<String>,
+    /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`），传 null 清除
+    #[serde(default)]
+    pub(super) story_style_pack: Option<String>,
 }
 
 /// JSON body for `POST /api/v1/projects` (snake_case; all fields optional).
@@ -122,4 +144,10 @@ pub(super) struct CreateProjectBody {
     pub(super) mode: Option<String>,
     #[serde(default)]
     pub(super) video_ratio: Option<String>,
+    /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
+    #[serde(default)]
+    pub(super) art_style_pack: Option<String>,
+    /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
+    #[serde(default)]
+    pub(super) story_style_pack: Option<String>,
 }

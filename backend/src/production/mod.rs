@@ -6,6 +6,7 @@
 
 pub(crate) mod flow_data;
 mod openapi;
+pub(crate) mod patch;
 mod router;
 mod types;
 mod workbench;

@@ -35,6 +35,10 @@ pub(crate) async fn patch_project_by_id(
     let mode_patch = parse_optional_text_field(body.mode, "mode")?;
     let video_ratio_patch = parse_optional_text_field(body.video_ratio, "video_ratio")?;
 
+    let art_style_pack_patch = parse_optional_text_field(body.art_style_pack, "art_style_pack")?;
+    let story_style_pack_patch =
+        parse_optional_text_field(body.story_style_pack, "story_style_pack")?;
+
     let patches = [
         &name_patch,
         &intro_patch,
@@ -46,10 +50,12 @@ pub(crate) async fn patch_project_by_id(
         &director_manual_patch,
         &mode_patch,
         &video_ratio_patch,
+        &art_style_pack_patch,
+        &story_style_pack_patch,
     ];
     if !patches.iter().any(|p| !matches!(**p, FieldPatch::Absent)) {
         return Err(ApiError::BadRequest(
-            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio)".into(),
+            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio, art_style_pack, story_style_pack)".into(),
         ));
     }
 
@@ -57,7 +63,8 @@ pub(crate) async fn patch_project_by_id(
         r#"
         SELECT id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
-               director_manual, mode, video_ratio, create_time_ms
+               director_manual, mode, video_ratio, create_time_ms,
+               art_style_pack, story_style_pack
         FROM app_project
         WHERE id = $1 AND owner_user_id = $2
         "#,
@@ -79,6 +86,8 @@ pub(crate) async fn patch_project_by_id(
     let new_director_manual = merge_text_patch(&current.director_manual, director_manual_patch);
     let new_mode = merge_text_patch(&current.mode, mode_patch);
     let new_video_ratio = merge_text_patch(&current.video_ratio, video_ratio_patch);
+    let new_art_style_pack = merge_text_patch(&current.art_style_pack, art_style_pack_patch);
+    let new_story_style_pack = merge_text_patch(&current.story_style_pack, story_style_pack_patch);
 
     let row = sqlx::query_as::<_, ProjectRow>(
         r#"
@@ -86,11 +95,13 @@ pub(crate) async fn patch_project_by_id(
         SET name = $1, intro = $2, project_type = $3,
             image_model = $4, image_quality = $5, video_model = $6,
             art_style = $7, director_manual = $8, mode = $9, video_ratio = $10,
+            art_style_pack = $11, story_style_pack = $12,
             updated_at = NOW()
-        WHERE id = $11 AND owner_user_id = $12
+        WHERE id = $13 AND owner_user_id = $14
         RETURNING id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
-                  director_manual, mode, video_ratio, create_time_ms
+                  director_manual, mode, video_ratio, create_time_ms,
+                  art_style_pack, story_style_pack
         "#,
     )
     .bind(&new_name)
@@ -103,6 +114,8 @@ pub(crate) async fn patch_project_by_id(
     .bind(&new_director_manual)
     .bind(&new_mode)
     .bind(&new_video_ratio)
+    .bind(&new_art_style_pack)
+    .bind(&new_story_style_pack)
     .bind(current.id)
     .bind(uid)
     .fetch_one(pool)

@@ -47,12 +47,14 @@ pub(crate) async fn create_project(
         INSERT INTO app_project (
           owner_user_id, numeric_id, name, intro, project_type,
           image_model, image_quality, video_model, art_style,
-          director_manual, mode, video_ratio, create_time_ms, metadata
+          director_manual, mode, video_ratio, create_time_ms, metadata,
+          art_style_pack, story_style_pack
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, '{}'::jsonb)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, '{}'::jsonb, $14, $15)
         RETURNING id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
-                  director_manual, mode, video_ratio, create_time_ms
+                  director_manual, mode, video_ratio, create_time_ms,
+                  art_style_pack, story_style_pack
         "#,
     )
     .bind(uid)
@@ -68,6 +70,8 @@ pub(crate) async fn create_project(
     .bind(trim_opt(body.mode))
     .bind(trim_opt(body.video_ratio))
     .bind(now_ms)
+    .bind(trim_opt(body.art_style_pack))
+    .bind(trim_opt(body.story_style_pack))
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

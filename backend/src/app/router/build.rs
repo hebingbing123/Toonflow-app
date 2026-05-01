@@ -70,6 +70,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(scripting::asset_extract::router())
         .merge(narrative::storyboards::router())
         .merge(prompting::skills::router())
+        .merge(prompting::skill_versions::router())
         .merge(manuals::visual::router())
         .merge(metering::usage::router())
         .merge(prompting::prompts::router())

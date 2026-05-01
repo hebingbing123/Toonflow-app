@@ -3,7 +3,8 @@ mod detail;
 
 pub(crate) use create_list::{create_project, list_projects, projects_summary};
 pub(crate) use detail::{
-    delete_project_by_id, get_project_by_id, patch_project_by_id, project_stats_by_id,
+    delete_project_by_id, get_project_by_id, patch_project_by_id, patch_style_config,
+    project_stats_by_id,
 };
 
 #[cfg(test)]
