@@ -23,6 +23,7 @@ pub enum PatchScope {
 
 impl PatchScope {
     /// 返回该粒度的中文描述（用于日志和错误消息）
+    #[allow(dead_code)]
     pub fn label(&self) -> &'static str {
         match self {
             PatchScope::Episode => "单集",
@@ -47,6 +48,7 @@ pub enum ModelTier {
 
 impl ModelTier {
     /// 返回该层级的中文描述
+    #[allow(dead_code)]
     pub fn label(&self) -> &'static str {
         match self {
             ModelTier::Low => "低成本模型（格式修复/范围压缩）",

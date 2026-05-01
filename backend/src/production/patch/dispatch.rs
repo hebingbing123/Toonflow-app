@@ -50,6 +50,7 @@ pub fn resolve_minimal_scope(request: &PatchRequest) -> Result<Vec<i64>, String>
 ///   适用场景：格式错误、字段缺失、编号不连续等结构性问题
 /// - `High`（高能力模型）：剧情改写、情绪强化、关键镜头提示词
 ///   适用场景：内容质量问题、情绪不符、视觉连续性违规等
+#[allow(dead_code)]
 pub fn recommend_model_tier(scope: &PatchScope, reason: &str) -> ModelTier {
     // 关键词匹配：结构性问题 → Low
     let structural_keywords = [
