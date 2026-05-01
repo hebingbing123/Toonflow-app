@@ -62,7 +62,14 @@ redis = []
 
 [profile.test]
 debug = 0
-incremental = true
-# `toonflow-server` 的测试目标很大，256 会把编译切得过碎，长时间停在
-# `Compiling toonflow-server` 且几乎没有可见进度。保留并行，但避免过度切分。
+# 关闭增量编译，避免 target 无限膨胀（与根 .cargo/config.toml 保持一致）
+incremental = false
 codegen-units = 64
+
+[profile.dev]
+# 关闭增量编译，避免 target 无限膨胀
+incremental = false
+# 减少调试信息级别，大幅缩小 .d 文件和 target 体积
+debug = 1
+# 适当提高 codegen-units 加快编译速度
+codegen-units = 256

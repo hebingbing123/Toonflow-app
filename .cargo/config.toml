@@ -1,3 +1,19 @@
 [alias]
 backend-test = "test --manifest-path backend/Cargo.toml --lib"
 backend-test-nocapture = "test --manifest-path backend/Cargo.toml --lib -- --nocapture"
+
+[build]
+# 使用 sccache 共享编译缓存（如已安装），否则注释掉这行
+# rustc-wrapper = "sccache"
+
+# 限制并行编译 job 数，避免内存/IO 过载（按机器核心数调整，M 系列建议 4-6）
+jobs = 4
+
+[profile.dev]
+# 关闭增量编译：增量编译会产生大量 .d / fingerprint 文件，是 target 膨胀的主因
+# 对于频繁改动的项目，关闭后首次编译慢一点，但 target 体积可控
+incremental = false
+
+[profile.test]
+# 测试 profile 同样关闭增量编译
+incremental = false
