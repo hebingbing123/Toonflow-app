@@ -11,6 +11,16 @@ const STYLE_BIBLE_NAME: &str = "style_bible:project";
 const STYLE_BIBLE_MAX_CHARS: usize = 800;
 const STYLE_BIBLE_MAX_CHARACTERS: usize = 4;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct StyleBibleCharacterAnchor {
+    pub(crate) name: String,
+    pub(crate) fixed_appearance: String,
+    pub(crate) default_temperament: String,
+    pub(crate) emotion_expression: String,
+    pub(crate) relationship_positioning: String,
+    pub(crate) body_habits: Vec<String>,
+}
+
 #[derive(Debug, Clone)]
 struct StyleBibleRoleSeed {
     name: String,
@@ -166,6 +176,68 @@ fn style_bible_has_meaningful_content(value: &Value) -> bool {
     })
 }
 
+fn parse_string_array(value: Option<&Value>) -> Vec<String> {
+    value
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .map(normalize_text)
+        .filter(|value| !value.is_empty())
+        .collect()
+}
+
+fn parse_style_bible_character_anchors(value: &Value) -> Vec<StyleBibleCharacterAnchor> {
+    let relationship_positioning = value
+        .get("core_relationships")
+        .and_then(Value::as_str)
+        .map(normalize_text)
+        .unwrap_or_default();
+    value
+        .get("characters")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|character| {
+            let name = character
+                .get("name")
+                .and_then(Value::as_str)
+                .map(normalize_text)
+                .unwrap_or_default();
+            let fixed_appearance = character
+                .get("fixed_appearance")
+                .and_then(Value::as_str)
+                .map(normalize_text)
+                .unwrap_or_default();
+            let default_temperament = character
+                .get("default_temperament")
+                .and_then(Value::as_str)
+                .map(normalize_text)
+                .unwrap_or_default();
+            let emotion_expression = character
+                .get("emotion_expression")
+                .and_then(Value::as_str)
+                .map(normalize_text)
+                .unwrap_or_default();
+            if name.is_empty()
+                && fixed_appearance.is_empty()
+                && default_temperament.is_empty()
+                && emotion_expression.is_empty()
+            {
+                return None;
+            }
+            Some(StyleBibleCharacterAnchor {
+                name,
+                fixed_appearance,
+                default_temperament,
+                emotion_expression,
+                relationship_positioning: relationship_positioning.clone(),
+                body_habits: parse_string_array(character.get("body_habits")),
+            })
+        })
+        .collect()
+}
+
 fn build_style_bible_fill(
     project_intro: Option<&str>,
     roles: &[StyleBibleRoleSeed],
@@ -226,6 +298,21 @@ async fn fetch_existing_style_bible(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
+pub(crate) async fn load_project_style_bible_character_anchors(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+) -> Result<Vec<StyleBibleCharacterAnchor>, ApiError> {
+    let Some(content) = fetch_existing_style_bible(pool, user_id, project_id).await? else {
+        return Ok(Vec::new());
+    };
+    let anchors = serde_json::from_str::<Value>(&content)
+        .ok()
+        .map(|value| parse_style_bible_character_anchors(&value))
+        .unwrap_or_default();
+    Ok(anchors)
 }
 
 pub(crate) async fn ensure_project_style_bible_template(
@@ -346,8 +433,8 @@ pub(crate) async fn maybe_fill_project_style_bible_from_assets(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_style_bible_fill, empty_style_bible_value, style_bible_has_meaningful_content,
-        style_bible_scope_signature, StyleBibleRoleSeed,
+        build_style_bible_fill, empty_style_bible_value, parse_style_bible_character_anchors,
+        style_bible_has_meaningful_content, style_bible_scope_signature, StyleBibleRoleSeed,
     };
     use serde_json::json;
 
@@ -416,5 +503,28 @@ mod tests {
     #[test]
     fn style_bible_scope_signature_marks_project_scope() {
         assert_eq!(style_bible_scope_signature(12), json!({ "projectId": 12 }));
+    }
+
+    #[test]
+    fn style_bible_character_anchor_parser_keeps_relationship_and_habits() {
+        let anchors = parse_style_bible_character_anchors(&json!({
+            "characters": [
+                {
+                    "name": "林晚",
+                    "fixed_appearance": "黑长发，米白风衣",
+                    "default_temperament": "克制隐忍",
+                    "emotion_expression": "先抿唇再低声开口",
+                    "body_habits": ["抿唇", "指尖收紧"]
+                }
+            ],
+            "core_relationships": "林晚与顾承泽长期对抗又彼此试探"
+        }));
+        assert_eq!(anchors.len(), 1);
+        assert_eq!(anchors[0].name, "林晚");
+        assert_eq!(
+            anchors[0].relationship_positioning,
+            "林晚与顾承泽长期对抗又彼此试探"
+        );
+        assert_eq!(anchors[0].body_habits, vec!["抿唇", "指尖收紧"]);
     }
 }

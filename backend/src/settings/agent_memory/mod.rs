@@ -30,7 +30,8 @@ pub(crate) use storage::{
     replace_named_summary_memory, replace_named_summary_memory_with_scope,
 };
 pub(crate) use style_bible::{
-    ensure_project_style_bible_template, maybe_fill_project_style_bible_from_assets,
+    ensure_project_style_bible_template, load_project_style_bible_character_anchors,
+    maybe_fill_project_style_bible_from_assets, StyleBibleCharacterAnchor,
 };
 pub(crate) use types::ClearMemoryResponse;
 
