@@ -2,7 +2,8 @@
 
 use super::{
     art_style_director_profile, build_auto_quality_review_model_params,
-    build_pending_video_observation_note_from_runtime, build_video_prompt,
+    build_pending_video_observation_note_from_runtime,
+    build_pending_video_observation_selection_from_runtime, build_video_prompt,
     build_video_prompt_memory_notes, build_video_prompt_with_constraint_pressure,
     build_video_prompt_with_diagnostics, compact_camera_clause,
     compact_contextual_video_style_note, compact_director_emotion_fragment_group,
@@ -4153,6 +4154,99 @@ fn build_pending_video_observation_note_from_runtime_can_use_role_observation_su
         build_pending_video_observation_note_from_runtime(&runtime),
         Some("待观察失败倾向：avoid blank expression or monotone delivery".to_string())
     );
+}
+
+#[test]
+fn build_pending_video_observation_selection_from_runtime_reports_rejected_observation_source() {
+    let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("晚晚强忍泪意看向门外".into()),
+            video_desc: Some("（晚晚强忍泪意看向门外、雨夜门厅、晚晚/林晚、5秒、近景、稳定跟拍、抬眼停顿后低声吸气、克制、冷调逆光、无台词、雨声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+    let subject_candidates = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
+    let runtime = StoryboardNegativePromptRuntime {
+            storyboard_id: 12,
+            selection: AutoNegativePromptSelection {
+                prompt: None,
+                fragment_count: 0,
+                candidate_fragment_count: 0,
+                saved_fragment_count: 0,
+                saved_chars: 0,
+                budget_tier: "lean",
+                review_fragment_count: 0,
+                rejected_memory_fragment_count: 0,
+                used_pending_observation_fallback: false,
+            },
+            pending_observation_candidates: vec!["avoid identity drift".into()],
+            rejected_rows: Vec::new(),
+            selected_rows: Vec::new(),
+            prompt_support_rows: vec![AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | avoid=avoid identity drift".into(),
+            }],
+            storyboard_row: Some(storyboard_row),
+            current_prompt_seed: None,
+            subject_candidates,
+        };
+
+    let selection = build_pending_video_observation_selection_from_runtime(&runtime)
+        .expect("pending observation selection");
+
+    assert_eq!(selection.note, "待观察失败倾向：avoid identity drift");
+    assert_eq!(selection.source, "pending_rejected_observation");
+}
+
+#[test]
+fn build_pending_video_observation_selection_from_runtime_can_use_patch_attribution_source() {
+    let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚与顾承泽门厅对峙".into()),
+            video_desc: Some("（林晚与顾承泽对峙、旧宅门厅、林晚/顾承泽、5秒、中景、稳定跟拍、林晚侧身让开后顾承泽逼近一步、压迫、冷调逆光、别过来、风声回响、A22）".into()),
+            duration: Some("5s".into()),
+        };
+    let subject_candidates = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
+        .unwrap_or_default();
+    let runtime = StoryboardNegativePromptRuntime {
+            storyboard_id: 22,
+            selection: AutoNegativePromptSelection {
+                prompt: None,
+                fragment_count: 0,
+                candidate_fragment_count: 0,
+                saved_fragment_count: 0,
+                saved_chars: 0,
+                budget_tier: "lean",
+                review_fragment_count: 0,
+                rejected_memory_fragment_count: 0,
+                used_pending_observation_fallback: false,
+            },
+            pending_observation_candidates: Vec::new(),
+            rejected_rows: Vec::new(),
+            selected_rows: Vec::new(),
+            prompt_support_rows: vec![AgentMemoryRow {
+                name: "patch_attribution:visual_continuity_error:22".into(),
+                content: r#"{"category":"visual_continuity_error","summary":"视觉连续性错误，建议先回到 storyboard_panel 修连续性。"}"#.into(),
+            }],
+            storyboard_row: Some(storyboard_row),
+            current_prompt_seed: None,
+            subject_candidates,
+        };
+
+    let selection = build_pending_video_observation_selection_from_runtime(&runtime)
+        .expect("patch attribution observation");
+
+    assert_eq!(
+        selection.note,
+        "待观察失败倾向：avoid face drift or costume inconsistency"
+    );
+    assert_eq!(selection.source, "patch_attribution");
 }
 
 #[test]

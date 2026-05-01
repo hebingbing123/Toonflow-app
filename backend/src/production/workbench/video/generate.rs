@@ -811,6 +811,7 @@ async fn load_storyboard_prompt_support_rows(
                 'script_role_video_observation_memory',
                 'auto_scope_memory'
             ))
+            OR (episodes_id = $3 AND name LIKE 'patch_attribution:%')
             OR (episodes_id IS NULL AND name IN (
                 'project_video_style_memory',
                 'project_video_generation_brief_memory',

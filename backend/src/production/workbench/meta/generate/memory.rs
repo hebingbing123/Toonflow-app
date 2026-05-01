@@ -1221,12 +1221,23 @@ pub(super) fn storyboard_distance_from_memory_content(
         .min()
 }
 
+pub(super) struct PendingVideoObservationSelection {
+    pub(super) note: String,
+    pub(super) source: &'static str,
+}
+
 pub(super) fn build_pending_video_observation_note_from_runtime(
     runtime: &StoryboardNegativePromptRuntime,
 ) -> Option<String> {
+    build_pending_video_observation_selection_from_runtime(runtime).map(|selection| selection.note)
+}
+
+pub(super) fn build_pending_video_observation_selection_from_runtime(
+    runtime: &StoryboardNegativePromptRuntime,
+) -> Option<PendingVideoObservationSelection> {
     let constraint_pressure =
         VideoPromptConstraintPressure::from_runtime_constraints(Some(&runtime.selection), None);
-    build_pending_video_observation_note(
+    build_pending_video_observation_selection(
         runtime.prompt_support_rows.clone(),
         runtime.storyboard_id,
         runtime.current_prompt_seed.as_deref(),
@@ -1246,6 +1257,29 @@ pub(super) fn build_pending_video_observation_note(
     preselected_candidates: Option<Vec<String>>,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
+    build_pending_video_observation_selection(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        storyboard_row,
+        subject_candidates,
+        preselected_candidates,
+        constraint_pressure,
+    )
+    .map(|selection| selection.note)
+}
+
+pub(super) fn build_pending_video_observation_selection(
+    rows: Vec<AgentMemoryRow>,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    subject_candidates: &[String],
+    preselected_candidates: Option<Vec<String>>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<PendingVideoObservationSelection> {
+    let patch_attribution_candidates =
+        collect_patch_attribution_observation_candidates(&rows, storyboard_row);
     let rows = trim_video_prompt_observation_rows(
         rows,
         storyboard_numeric_id,
@@ -1271,24 +1305,164 @@ pub(super) fn build_pending_video_observation_note(
             rejected_video_memory_selection_bias(constraint_pressure),
         )
     });
-    let note = select_best_video_prompt_observation_note(prune_storyboard_observation_candidates(
-        pending_observation_candidates
+    let mut candidate_sources = pending_observation_candidates
+        .into_iter()
+        .map(|note| (note, "pending_rejected_observation"))
+        .collect::<Vec<_>>();
+    candidate_sources.extend(
+        patch_attribution_candidates
             .into_iter()
-            .filter_map(|note| {
-                compact_negative_constraint_against_storyboard_style(
-                    &note,
-                    prioritized_style_note.as_deref(),
-                    storyboard_row,
-                )
-            })
-            .filter(|note| {
-                !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row)
-            })
-            .collect::<Vec<_>>(),
+            .map(|note| (note, "patch_attribution")),
+    );
+    let compacted_candidates = candidate_sources
+        .into_iter()
+        .filter_map(|(note, source)| {
+            compact_negative_constraint_against_storyboard_style(
+                &note,
+                prioritized_style_note.as_deref(),
+                storyboard_row,
+            )
+            .map(|compacted| (compacted, source))
+        })
+        .filter(|(note, _)| !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row))
+        .collect::<Vec<_>>();
+    let selected = select_best_storyboard_observation_note(
+        prune_storyboard_observation_candidates(
+            compacted_candidates
+                .iter()
+                .map(|(note, _)| note.clone())
+                .collect::<Vec<_>>(),
+            storyboard_row,
+        ),
         storyboard_row,
-    ));
+        constraint_pressure,
+    )?;
+    let source = compacted_candidates
+        .into_iter()
+        .find_map(|(note, source)| (note == selected).then_some(source))
+        .unwrap_or("pending_observation_note");
 
-    note.map(|note| format!("待观察失败倾向：{note}"))
+    Some(PendingVideoObservationSelection {
+        note: format!("待观察失败倾向：{selected}"),
+        source,
+    })
+}
+
+fn select_best_storyboard_observation_note(
+    candidates: Vec<String>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    candidates.into_iter().max_by(|a, b| {
+        score_storyboard_observation_note_candidate(a, storyboard_row, constraint_pressure)
+            .cmp(&score_storyboard_observation_note_candidate(
+                b,
+                storyboard_row,
+                constraint_pressure,
+            ))
+            .then(
+                score_video_prompt_observation_specificity(a)
+                    .cmp(&score_video_prompt_observation_specificity(b)),
+            )
+            .then(
+                score_video_prompt_observation_quality(a)
+                    .cmp(&score_video_prompt_observation_quality(b)),
+            )
+            .then(b.chars().count().cmp(&a.chars().count()))
+            .then(b.cmp(a))
+    })
+}
+
+fn score_storyboard_observation_note_candidate(
+    note: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> i32 {
+    let mut score = 0;
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return score;
+    };
+
+    match observation_note_budget_family(note) {
+        VideoPromptObservationFamily::Dialogue => {
+            if storyboard_has_visible_speech_performance_risk(&fields, None)
+                || current_storyboard_is_fragile_emotional_turn(&fields)
+            {
+                score += 24;
+            }
+            if constraint_pressure.is_some_and(|pressure| pressure.prefer_delivery_memory_recall) {
+                score += 12;
+            }
+        }
+        VideoPromptObservationFamily::Identity => {
+            if video_prompt_scene_needs_identity_memory(&fields) {
+                score += 10;
+            }
+        }
+        VideoPromptObservationFamily::Lighting => {
+            if video_prompt_scene_has_lighting_risk(&fields) {
+                score += 10;
+            }
+        }
+        VideoPromptObservationFamily::Motion => {
+            if video_prompt_scene_has_motion_risk(&fields) {
+                score += 10;
+            }
+        }
+        VideoPromptObservationFamily::Blocking => {
+            if video_prompt_scene_has_blocking_risk(&fields) {
+                score += 10;
+            }
+        }
+        VideoPromptObservationFamily::Emotion => {
+            if video_prompt_scene_needs_emotional_memory(&fields) {
+                score += 8;
+            }
+        }
+        VideoPromptObservationFamily::Generic => {}
+    }
+
+    score
+}
+
+fn collect_patch_attribution_observation_candidates(
+    rows: &[AgentMemoryRow],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let mut candidates = Vec::new();
+    for row in rows
+        .iter()
+        .filter(|row| row.name.starts_with("patch_attribution:"))
+    {
+        let Ok(value) = serde_json::from_str::<serde_json::Value>(&row.content) else {
+            continue;
+        };
+        let Some(category) = value.get("category").and_then(serde_json::Value::as_str) else {
+            continue;
+        };
+        let candidate = match category {
+            "emotion_error" | "prompt_expression_gap" => {
+                Some("avoid blank expression or monotone delivery")
+            }
+            "camera_language_error" => Some("avoid extra shot changes or wrong framing"),
+            "visual_continuity_error" => Some("avoid face drift or costume inconsistency"),
+            _ => None,
+        };
+        let Some(candidate) = candidate else {
+            continue;
+        };
+        if video_prompt_observation_is_irrelevant_to_storyboard(candidate, storyboard_row) {
+            continue;
+        }
+        if candidates.iter().any(|existing| existing == candidate) {
+            continue;
+        }
+        candidates.push(candidate.to_string());
+    }
+    candidates
 }
 
 pub(super) fn trim_video_prompt_observation_rows(
@@ -2713,6 +2887,8 @@ pub(super) fn observation_note_budget_family(note: &str) -> VideoPromptObservati
     }
     if [
         "lip-sync",
+        "blank expression",
+        "monotone delivery",
         "口型",
         "dialogue",
         "voice-over",
@@ -2833,6 +3009,8 @@ pub(super) fn score_video_prompt_observation_specificity(note: &str) -> i32 {
         "costume drift",
         "costume inconsistency",
         "lip-sync",
+        "blank expression",
+        "monotone delivery",
         "口型",
         "脸",
         "身份",
@@ -2904,6 +3082,8 @@ pub(super) fn score_video_prompt_observation_quality(note: &str) -> i32 {
         "costume drift",
         "costume inconsistency",
         "lip-sync",
+        "blank expression",
+        "monotone delivery",
         "jump axis",
         "axis",
         "eyeline",

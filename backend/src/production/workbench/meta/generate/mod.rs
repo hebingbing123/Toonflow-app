@@ -292,10 +292,13 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     let negative_prompt_selection = single_storyboard_runtime
         .as_ref()
         .map(|runtime| runtime.selection.clone());
-    let observation_note = single_storyboard_runtime
+    let observation_selection = single_storyboard_runtime
         .as_ref()
         .filter(|runtime| runtime.selection.prompt.is_none())
-        .and_then(build_pending_video_observation_note_from_runtime);
+        .and_then(build_pending_video_observation_selection_from_runtime);
+    let observation_note = observation_selection
+        .as_ref()
+        .map(|selection| selection.note.clone());
     let constraint_pressure = VideoPromptConstraintPressure::from_runtime_constraints(
         negative_prompt_selection.as_ref(),
         observation_note.as_deref(),
@@ -343,6 +346,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         .with_runtime_notes(
             negative_prompt_selection.as_ref(),
             observation_note.as_deref(),
+            observation_selection.as_ref().map(|selection| selection.source),
             single_storyboard_runtime.as_ref(),
         )
         .with_memory_optimization(memory_optimization.as_ref());

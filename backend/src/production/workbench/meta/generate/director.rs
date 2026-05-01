@@ -96,6 +96,7 @@ impl GenerateVideoPromptDiagnostics {
         mut self,
         selection: Option<&AutoNegativePromptSelection>,
         observation_note: Option<&str>,
+        observation_source: Option<&str>,
         runtime: Option<&StoryboardNegativePromptRuntime>,
     ) -> Self {
         let negative_prompt = selection.and_then(|value| value.prompt.as_deref());
@@ -105,9 +106,10 @@ impl GenerateVideoPromptDiagnostics {
             .and_then(AutoNegativePromptSelection::source_label)
             .map(str::to_string)
             .or_else(|| {
-                observation_note
-                    .filter(|note| !normalize_prompt_text(note).is_empty())
-                    .map(|_| "pending_observation_note".to_string())
+                observation_note.and_then(|note| {
+                    (!normalize_prompt_text(note).is_empty())
+                        .then(|| observation_source.unwrap_or("pending_observation_note").to_string())
+                })
             });
         let auto_negative_review_fragment_count = selection
             .map(|value| value.review_fragment_count)
