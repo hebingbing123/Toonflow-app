@@ -40,7 +40,7 @@
   - 展示 `attribution_mode` 警告和任务提交结果
   - _需求: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
 
-- [ ] 5. 前端：质量评审筛选与分布展示
+- [x] 5. 前端：质量评审筛选与分布展示
   - 在 `frontend/lib/quality_reviews/` 中增加阶段筛选和等级筛选
   - 将 `stage` 与 `grade` 传给后端查询
   - 接入 `GET /api/v1/quality/stage-pass-rate`

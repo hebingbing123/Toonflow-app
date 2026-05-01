@@ -14,6 +14,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.tokenEfficiencyExecutionChecklist,
     required this.tokenEfficiencySamplesSummary,
     required this.stagePassRateSummary,
+    required this.stageGradeRows,
     required this.reviewDetails,
     required this.statusLine,
     required this.activeFilterQuerySummary,
@@ -37,6 +38,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.targetTypeFilterCtrl,
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
+    required this.stageFilterCtrl,
+    required this.gradeFilterCtrl,
     required this.reviewIdCtrl,
     required this.createProjectIdCtrl,
     required this.createScriptIdCtrl,
@@ -56,6 +59,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? tokenEfficiencyExecutionChecklist;
   final String? tokenEfficiencySamplesSummary;
   final String? stagePassRateSummary;
+  final List<StageGradeDistributionRow> stageGradeRows;
   final String? reviewDetails;
   final String? statusLine;
   final String? activeFilterQuerySummary;
@@ -79,6 +83,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final TextEditingController targetTypeFilterCtrl;
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
+  final TextEditingController stageFilterCtrl;
+  final TextEditingController gradeFilterCtrl;
   final TextEditingController reviewIdCtrl;
   final TextEditingController createProjectIdCtrl;
   final TextEditingController createScriptIdCtrl;
@@ -158,6 +164,12 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
       if (model.filterBadCasesOnly) '坏例',
       if (model.filterDeliveryPriorityOnly) '命中表演/语气优先',
       if (model.filterAutoSourceOnly) 'auto 样本',
+      if (model.stageFilterCtrl.text.trim().isNotEmpty &&
+          model.stageFilterCtrl.text.trim() != 'all')
+        '阶段 ${_qualityStageLabel(model.stageFilterCtrl.text.trim())}',
+      if (model.gradeFilterCtrl.text.trim().isNotEmpty &&
+          model.gradeFilterCtrl.text.trim() != 'all')
+        '等级 ${model.gradeFilterCtrl.text.trim()}',
     ];
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
@@ -276,6 +288,54 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               TextField(
                 controller: model.jobIdFilterCtrl,
                 decoration: const InputDecoration(labelText: '筛选 jobId'),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: model.stageFilterCtrl.text.trim().isEmpty
+                          ? 'all'
+                          : model.stageFilterCtrl.text.trim(),
+                      decoration: const InputDecoration(labelText: '阶段筛选'),
+                      items: _qualityStageOptions
+                          .map(
+                            (value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(_qualityStageLabel(value)),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: (value) {
+                        if (value != null) {
+                          model.stageFilterCtrl.text = value;
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: model.gradeFilterCtrl.text.trim().isEmpty
+                          ? 'all'
+                          : model.gradeFilterCtrl.text.trim(),
+                      decoration: const InputDecoration(labelText: '等级筛选'),
+                      items: _qualityGradeOptions
+                          .map(
+                            (value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value == 'all' ? '全部' : value),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: (value) {
+                        if (value != null) {
+                          model.gradeFilterCtrl.text = value;
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -513,6 +573,23 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 12),
                 SelectableText('阶段通过率：${model.stagePassRateSummary}'),
               ],
+              if (model.stageGradeRows.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text('等级分布', style: Theme.of(context).textTheme.labelLarge),
+                const SizedBox(height: 6),
+                ...model.stageGradeRows.map(
+                  (row) => ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      '${_qualityStageLabel(row.stage)} · A ${row.gradeACount} / B ${row.gradeBCount} / C ${row.gradeCCount} / D ${row.gradeDCount}',
+                    ),
+                    subtitle: Text(
+                      '总计 ${row.totalCount} · A+B 通过率 ${row.passRatePercent.toStringAsFixed(1)}%',
+                    ),
+                  ),
+                ),
+              ],
               if (promptDiagnosticsSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('Prompt诊断：$promptDiagnosticsSummary'),
@@ -563,6 +640,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          [
+                            if ((review.stage ?? '').trim().isNotEmpty)
+                              '阶段 ${_qualityStageLabel(review.stage!.trim())}',
+                            if ((review.grade ?? '').trim().isNotEmpty)
+                              '等级 ${review.grade}',
+                          ].join(' · '),
+                        ),
                         Text(formatQualityReviewCoreDetails(review)),
                         if (diagnosticSummary != null)
                           Text(
@@ -606,6 +691,18 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                               visualDensity: VisualDensity.compact,
                             ),
                           ),
+                        if ((review.grade ?? '').trim().isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Chip(
+                              label: Text(review.grade!.trim()),
+                              backgroundColor: _qualityGradeColor(
+                                context,
+                                review.grade!.trim(),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
                         if (writebackSummary != null)
                           const Padding(
                             padding: EdgeInsets.only(right: 8),
@@ -620,6 +717,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     onTap: () => callbacks.onSelectReview(review),
                   );
                 }),
+              ] else if (activeFilters.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '当前筛选条件下无评审记录',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: outline),
+                ),
               ],
             ],
           ),
@@ -629,5 +734,54 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
         TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
       ],
     );
+  }
+}
+
+const List<String> _qualityStageOptions = <String>[
+  'all',
+  'story_skeleton',
+  'adaptation_strategy',
+  'director_planning',
+  'storyboard_table',
+  'storyboard_panel',
+  'video_prompt',
+];
+
+const List<String> _qualityGradeOptions = <String>['all', 'A', 'B', 'C', 'D'];
+
+String _qualityStageLabel(String stage) {
+  switch (stage) {
+    case 'all':
+      return '全部';
+    case 'story_skeleton':
+      return '故事骨架';
+    case 'adaptation_strategy':
+      return '改编策略';
+    case 'director_planning':
+      return '导演规划';
+    case 'storyboard_table':
+      return '分镜表';
+    case 'storyboard_panel':
+      return '分镜面板';
+    case 'video_prompt':
+      return '视频提示词';
+    default:
+      return stage;
+  }
+}
+
+Color _qualityGradeColor(BuildContext context, String grade) {
+  final scheme = Theme.of(context).colorScheme;
+  switch (grade) {
+    case 'A':
+      return scheme.primaryContainer;
+    case 'B':
+      return scheme.secondaryContainer;
+    case 'C':
+      return scheme.tertiaryContainer;
+    case 'D':
+      return scheme.errorContainer;
+    default:
+      return scheme.surfaceContainerHighest;
   }
 }

@@ -29,6 +29,8 @@ class QualityReview {
     this.reviewerId,
     required this.isBadCase,
     this.badCaseCategory,
+    this.stage,
+    this.grade,
   });
 
   final String id;
@@ -57,6 +59,8 @@ class QualityReview {
   final String? reviewerId;
   final bool isBadCase;
   final String? badCaseCategory;
+  final String? stage;
+  final String? grade;
 
   factory QualityReview.fromJson(Map<String, dynamic> json) {
     int? asInt(String key) =>
@@ -92,6 +96,8 @@ class QualityReview {
       reviewerId: json['reviewerId'] as String?,
       isBadCase: json['isBadCase'] as bool? ?? false,
       badCaseCategory: json['badCaseCategory'] as String?,
+      stage: json['stage'] as String?,
+      grade: json['grade'] as String?,
     );
   }
 }

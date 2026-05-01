@@ -234,6 +234,38 @@ class StagePassRateRow {
   }
 }
 
+class StageGradeDistributionRow {
+  const StageGradeDistributionRow({
+    required this.stage,
+    required this.gradeACount,
+    required this.gradeBCount,
+    required this.gradeCCount,
+    required this.gradeDCount,
+    required this.totalCount,
+    required this.passRatePercent,
+  });
+
+  final String stage;
+  final int gradeACount;
+  final int gradeBCount;
+  final int gradeCCount;
+  final int gradeDCount;
+  final int totalCount;
+  final double passRatePercent;
+
+  factory StageGradeDistributionRow.fromJson(Map<String, dynamic> json) {
+    return StageGradeDistributionRow(
+      stage: json['stage'] as String,
+      gradeACount: (json['gradeACount'] as num?)?.toInt() ?? 0,
+      gradeBCount: (json['gradeBCount'] as num?)?.toInt() ?? 0,
+      gradeCCount: (json['gradeCCount'] as num?)?.toInt() ?? 0,
+      gradeDCount: (json['gradeDCount'] as num?)?.toInt() ?? 0,
+      totalCount: (json['totalCount'] as num?)?.toInt() ?? 0,
+      passRatePercent: (json['passRatePercent'] as num?)?.toDouble() ?? 0,
+    );
+  }
+}
+
 class QualityTokenEfficiencyRow {
   const QualityTokenEfficiencyRow({
     required this.targetType,
@@ -394,6 +426,24 @@ Future<List<StagePassRateRow>> fetchQualityStagePassRate(
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => StagePassRateRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+Future<List<StageGradeDistributionRow>> fetchQualityStageGradeDistribution(
+  String accessToken,
+) async {
+  final res = await http
+      .get(
+        qualityUri('/api/v1/quality/stage-grade-distribution'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => StageGradeDistributionRow.fromJson(e as Map<String, dynamic>))
       .toList();
 }
 

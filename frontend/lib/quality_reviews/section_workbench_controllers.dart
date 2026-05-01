@@ -7,6 +7,8 @@ class _QualityReviewsWorkbenchControllers {
     required this.targetTypeFilterCtrl,
     required this.targetIdFilterCtrl,
     required this.jobIdFilterCtrl,
+    required this.stageFilterCtrl,
+    required this.gradeFilterCtrl,
     required this.reviewIdCtrl,
     required this.createProjectIdCtrl,
     required this.createScriptIdCtrl,
@@ -25,6 +27,8 @@ class _QualityReviewsWorkbenchControllers {
       targetTypeFilterCtrl: TextEditingController(),
       targetIdFilterCtrl: TextEditingController(),
       jobIdFilterCtrl: TextEditingController(),
+      stageFilterCtrl: TextEditingController(text: 'all'),
+      gradeFilterCtrl: TextEditingController(text: 'all'),
       reviewIdCtrl: TextEditingController(),
       createProjectIdCtrl: TextEditingController(),
       createScriptIdCtrl: TextEditingController(),
@@ -46,6 +50,8 @@ class _QualityReviewsWorkbenchControllers {
   final TextEditingController targetTypeFilterCtrl;
   final TextEditingController targetIdFilterCtrl;
   final TextEditingController jobIdFilterCtrl;
+  final TextEditingController stageFilterCtrl;
+  final TextEditingController gradeFilterCtrl;
   final TextEditingController reviewIdCtrl;
   final TextEditingController createProjectIdCtrl;
   final TextEditingController createScriptIdCtrl;
@@ -62,6 +68,8 @@ class _QualityReviewsWorkbenchControllers {
     targetTypeFilterCtrl.dispose();
     targetIdFilterCtrl.dispose();
     jobIdFilterCtrl.dispose();
+    stageFilterCtrl.dispose();
+    gradeFilterCtrl.dispose();
     reviewIdCtrl.dispose();
     createProjectIdCtrl.dispose();
     createScriptIdCtrl.dispose();

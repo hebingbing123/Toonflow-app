@@ -26,6 +26,8 @@ class _QualityReviewsWorkbenchDialogState
   late final _QualityReviewsWorkbenchControllers _ctrls;
 
   List<QualityReview> _reviews = const <QualityReview>[];
+  List<StageGradeDistributionRow> _stageGradeRows =
+      const <StageGradeDistributionRow>[];
   List<QualityTokenEfficiencyRow> _tokenEfficiencyRows =
       const <QualityTokenEfficiencyRow>[];
   String? _statsSummary;
@@ -52,6 +54,16 @@ class _QualityReviewsWorkbenchDialogState
   bool _createBadCase = false;
   String? _statusLine;
 
+  String? get _stageFilterValue {
+    final value = _ctrls.stageFilterCtrl.text.trim();
+    return value.isEmpty || value == 'all' ? null : value;
+  }
+
+  String? get _gradeFilterValue {
+    final value = _ctrls.gradeFilterCtrl.text.trim();
+    return value.isEmpty || value == 'all' ? null : value;
+  }
+
   String? _activeFilterQuerySummary() {
     final query = <String, String>{};
     final projectId = _ctrls.projectIdFilterCtrl.text.trim();
@@ -64,6 +76,8 @@ class _QualityReviewsWorkbenchDialogState
     if (targetType.isNotEmpty) query['targetType'] = targetType;
     if (targetId.isNotEmpty) query['targetId'] = targetId;
     if (jobId.isNotEmpty) query['jobId'] = jobId;
+    if (_stageFilterValue != null) query['stage'] = _stageFilterValue!;
+    if (_gradeFilterValue != null) query['grade'] = _gradeFilterValue!;
     if (_filterBadCasesOnly) query['isBadCase'] = 'true';
     if (_filterDeliveryPriorityOnly) {
       query['memoryDeliveryPriorityApplied'] = 'true';
@@ -134,6 +148,8 @@ class _QualityReviewsWorkbenchDialogState
         source: onlyAutoSource ? 'auto' : null,
         isBadCase: onlyBadCases ? true : null,
         memoryDeliveryPriorityApplied: onlyDeliveryPriority ? true : null,
+        stage: _stageFilterValue,
+        grade: _gradeFilterValue,
         limit: 20,
       );
       if (!mounted) return;
@@ -147,6 +163,8 @@ class _QualityReviewsWorkbenchDialogState
         if (onlyBadCases) labels.add('坏例');
         if (onlyDeliveryPriority) labels.add('命中表演/语气优先');
         if (onlyAutoSource) labels.add('auto');
+        if (_stageFilterValue != null) labels.add('阶段 ${_stageFilterValue!}');
+        if (_gradeFilterValue != null) labels.add('等级 ${_gradeFilterValue!}');
         _statusLine = labels.isEmpty
             ? '已加载 ${rows.length} 条评审'
             : '已加载 ${rows.length} 条${labels.join(" + ")}评审';
@@ -226,10 +244,14 @@ class _QualityReviewsWorkbenchDialogState
     });
     try {
       final rows = await fetchQualityStagePassRate(widget.accessToken);
+      final gradeRows = await fetchQualityStageGradeDistribution(
+        widget.accessToken,
+      );
       if (!mounted) return;
       setState(() {
         _stagePassRateSummary = summarizeStagePassRateRows(rows);
-        _statusLine = '已刷新阶段通过率';
+        _stageGradeRows = gradeRows;
+        _statusLine = '已刷新阶段通过率与等级分布';
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -412,6 +434,7 @@ class _QualityReviewsWorkbenchDialogState
         tokenEfficiencyExecutionChecklist: _tokenEfficiencyExecutionChecklist,
         tokenEfficiencySamplesSummary: _tokenEfficiencySamplesSummary,
         stagePassRateSummary: _stagePassRateSummary,
+        stageGradeRows: _stageGradeRows,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
         activeFilterQuerySummary: _activeFilterQuerySummary(),
@@ -435,6 +458,8 @@ class _QualityReviewsWorkbenchDialogState
         targetTypeFilterCtrl: _ctrls.targetTypeFilterCtrl,
         targetIdFilterCtrl: _ctrls.targetIdFilterCtrl,
         jobIdFilterCtrl: _ctrls.jobIdFilterCtrl,
+        stageFilterCtrl: _ctrls.stageFilterCtrl,
+        gradeFilterCtrl: _ctrls.gradeFilterCtrl,
         reviewIdCtrl: _ctrls.reviewIdCtrl,
         createProjectIdCtrl: _ctrls.createProjectIdCtrl,
         createScriptIdCtrl: _ctrls.createScriptIdCtrl,
