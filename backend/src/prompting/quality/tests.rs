@@ -105,6 +105,8 @@ fn validate_list_reviews_query_rejects_invalid_target_type() {
         source: None,
         is_bad_case: None,
         memory_delivery_priority_applied: None,
+        stage: None,
+        grade: None,
         limit: None,
         offset: None,
     };
@@ -129,11 +131,17 @@ fn list_quality_reviews_query_deserializes_scope_filters() {
 fn token_efficiency_query_deserializes_scope_filters() {
     let json = json!({
         "projectId": 12,
-        "scriptId": 7
+        "scriptId": 7,
+        "stage": "video_prompt",
+        "modelName": "gpt-4.1",
+        "callType": "quality_review"
     });
     let query: TokenEfficiencyQuery = serde_json::from_value(json).unwrap();
     assert_eq!(query.project_id, Some(12));
     assert_eq!(query.script_id, Some(7));
+    assert_eq!(query.stage.as_deref(), Some("video_prompt"));
+    assert_eq!(query.model_name.as_deref(), Some("gpt-4.1"));
+    assert_eq!(query.call_type.as_deref(), Some("quality_review"));
 }
 
 #[test]
@@ -142,6 +150,9 @@ fn token_efficiency_samples_query_deserializes_scope_and_priority_filters() {
         "projectId": 12,
         "scriptId": 7,
         "targetType": "storyboard",
+        "stage": "video_prompt",
+        "modelName": "gpt-4.1",
+        "callType": "quality_review",
         "memoryDeliveryPriorityApplied": true,
         "limit": 4
     });
@@ -149,6 +160,9 @@ fn token_efficiency_samples_query_deserializes_scope_and_priority_filters() {
     assert_eq!(query.project_id, Some(12));
     assert_eq!(query.script_id, Some(7));
     assert_eq!(query.target_type.as_deref(), Some("storyboard"));
+    assert_eq!(query.stage.as_deref(), Some("video_prompt"));
+    assert_eq!(query.model_name.as_deref(), Some("gpt-4.1"));
+    assert_eq!(query.call_type.as_deref(), Some("quality_review"));
     assert_eq!(query.memory_delivery_priority_applied, Some(true));
     assert_eq!(query.limit, Some(4));
 }
@@ -167,7 +181,10 @@ fn create_quality_review_body_accepts_stage_and_grade() {
     let body: CreateQualityReviewBody = serde_json::from_value(json).unwrap();
     assert_eq!(body.stage.as_deref(), Some("storyboard_table"));
     assert_eq!(body.grade.as_deref(), Some("A"));
-    assert_eq!(body.skill_file_path.as_deref(), Some("production_agent_execution.md"));
+    assert_eq!(
+        body.skill_file_path.as_deref(),
+        Some("production_agent_execution.md")
+    );
     assert_eq!(body.skill_version_hash.as_deref(), Some("abc123"));
 }
 
@@ -201,7 +218,10 @@ fn validate_create_review_body_accepts_all_valid_grades() {
             grade: Some(grade.to_string()),
             ..Default::default()
         };
-        assert!(validate_create_review_body(&body).is_ok(), "grade {grade} should be valid");
+        assert!(
+            validate_create_review_body(&body).is_ok(),
+            "grade {grade} should be valid"
+        );
     }
 }
 
@@ -220,7 +240,10 @@ fn validate_create_review_body_accepts_all_valid_stages() {
             stage: Some(stage.to_string()),
             ..Default::default()
         };
-        assert!(validate_create_review_body(&body).is_ok(), "stage {stage} should be valid");
+        assert!(
+            validate_create_review_body(&body).is_ok(),
+            "stage {stage} should be valid"
+        );
     }
 }
 

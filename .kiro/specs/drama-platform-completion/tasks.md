@@ -134,7 +134,7 @@
   - 输出 `negative_budget_tier`、`observation_note_chars`
   - _需求: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7_
 
-- [ ] 19. 后端：token-质量 ROI 分析
+- [x] 19. 后端：token-质量 ROI 分析
   - 在 `app_llm_usage_log` 的 `meta` 中补记忆预算、返工模式、观察笔记来源等关键信息
   - 完善 `link_quality_review_to_job_usage` 使用链路
   - 新增聚合查询或内部分析接口，输出阶段 / 模型 / 调用类型的 token 与质量关系
