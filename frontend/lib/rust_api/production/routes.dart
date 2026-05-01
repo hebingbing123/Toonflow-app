@@ -63,6 +63,65 @@ class WorkbenchGenerateVideoResponse {
   }
 }
 
+class ProductionPatchRequest {
+  const ProductionPatchRequest({
+    required this.scope,
+    required this.ids,
+    required this.reason,
+    required this.modelTier,
+  });
+
+  final String scope;
+  final List<int> ids;
+  final String reason;
+  final String modelTier;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'scope': scope,
+      'ids': ids,
+      'reason': reason,
+      'modelTier': modelTier,
+    };
+  }
+}
+
+class ProductionPatchResponse {
+  const ProductionPatchResponse({
+    required this.patchId,
+    required this.scope,
+    required this.processedIds,
+    required this.modelTier,
+    required this.status,
+    required this.consecutiveFailures,
+    required this.attributionMode,
+    required this.attributionSummary,
+  });
+
+  factory ProductionPatchResponse.fromJson(Map<String, dynamic> json) {
+    final rawIds = json['processedIds'] as List<dynamic>? ?? const [];
+    return ProductionPatchResponse(
+      patchId: json['patchId']?.toString() ?? '',
+      scope: json['scope']?.toString() ?? '',
+      processedIds: rawIds.map((item) => (item as num).toInt()).toList(),
+      modelTier: json['modelTier']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      consecutiveFailures: (json['consecutiveFailures'] as num?)?.toInt() ?? 0,
+      attributionMode: json['attributionMode'] == true,
+      attributionSummary: json['attributionSummary']?.toString(),
+    );
+  }
+
+  final String patchId;
+  final String scope;
+  final List<int> processedIds;
+  final String modelTier;
+  final String status;
+  final int consecutiveFailures;
+  final bool attributionMode;
+  final String? attributionSummary;
+}
+
 Future<int> postProductionGetProductionDataV1(
   String accessToken, {
   required int projectId,
@@ -85,6 +144,31 @@ Future<int> postProductionGetProductionDataV1(
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
+}
+
+Future<ProductionPatchResponse> postProductionPatchV1(
+  String accessToken, {
+  required ProductionPatchRequest request,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/production/patch');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(request.toJson()),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final decoded = jsonDecode(res.body);
+  if (decoded is! Map<String, dynamic>) {
+    throw RustApiException('invalid production patch payload');
+  }
+  return ProductionPatchResponse.fromJson(decoded);
 }
 
 /// `POST /api/v1/production/get-flow-data` — OpenAPI `postProductionGetFlowDataV1`

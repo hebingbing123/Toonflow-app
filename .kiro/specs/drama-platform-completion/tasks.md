@@ -33,7 +33,7 @@
   - 接入 `POST /api/v1/skill-versions/rollback` 和确认弹窗
   - _需求: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [ ] 4. 前端：分镜编辑器局部返工面板
+- [x] 4. 前端：分镜编辑器局部返工面板
   - 在 `frontend/lib/storyboard_editor/` 中增加局部返工按钮和配置面板
   - 支持 `scope`、`model_tier`、`reason` 配置
   - 接入 `POST /api/v1/production/patch`

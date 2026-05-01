@@ -30,6 +30,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onAddTrack,
     required this.onDeleteTrack,
     required this.onGenerateVideoPrompt,
+    required this.onOpenPatchRegeneration,
     required this.onApplyPromptRepairs,
     required this.onRefreshVideoData,
     required this.loadingExportJob,
@@ -68,6 +69,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final VoidCallback onAddTrack;
   final VoidCallback onDeleteTrack;
   final VoidCallback onGenerateVideoPrompt;
+  final VoidCallback onOpenPatchRegeneration;
   final VoidCallback onApplyPromptRepairs;
   final VoidCallback onRefreshVideoData;
   final bool loadingExportJob;
@@ -131,6 +133,10 @@ class _StoryboardVideoSection extends StatelessWidget {
               child: const Text('生成默认视频提示词'),
             ),
             TextButton(
+              onPressed: saving ? null : onOpenPatchRegeneration,
+              child: const Text('局部返工'),
+            ),
+            TextButton(
               onPressed: saving || promptDiagnostics == null
                   ? null
                   : onApplyPromptRepairs,
@@ -141,6 +147,13 @@ class _StoryboardVideoSection extends StatelessWidget {
               child: Text(loadingWorkbench ? '刷新中…' : '刷新视频数据'),
             ),
           ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '局部返工只提交最小修复范围；若命中 attribution mode，会返回归因提示，避免把单点问题误当全量重跑。',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
+          ),
         ),
         const SizedBox(height: 4),
         CheckboxListTile(
