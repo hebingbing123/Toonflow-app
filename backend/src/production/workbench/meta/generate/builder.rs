@@ -1,5 +1,6 @@
 //! Prompt builder and diagnostics logic.
 
+use super::budget::resolve_video_prompt_memory_budget;
 use super::builder_parts::continuity::compact::{
     compact_continuity_fragment_wording, compact_continuity_note, continuity_fragment_core,
     trim_continuity_fragment_against_storyboard_fields,
@@ -72,15 +73,18 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
     extend_prompt_coverage(&mut prompt_coverage, &role_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &scene_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
-    let memory_budget_tier = resolve_video_prompt_memory_budget_tier(
+    let budget_decision = resolve_video_prompt_memory_budget(
         image_url,
-        context,
+        context
+            .map(|ctx| ctx.continuity_notes.as_slice())
+            .unwrap_or(&[]),
         structured_fields.as_ref(),
         &role_anchors,
         &scene_anchors,
         &tool_anchors,
         constraint_pressure,
     );
+    let memory_budget_tier = budget_decision.tier;
     let compact_labels = should_use_compact_prompt_labels(
         structured_fields.as_ref(),
         image_url.is_some(),
@@ -310,6 +314,9 @@ pub(super) fn build_video_prompt_with_constraint_pressure(
             continuity_note_chars,
             uses_reference_frame: image_url.is_some(),
             memory_budget_tier: memory_budget_tier.as_str().to_string(),
+            memory_budget_risk_score: budget_decision.risk_score,
+            memory_budget_reasons: budget_decision.reasons,
+            memory_budget_compact_mode: budget_decision.compact_silent_low_risk,
             memory_project_scope_row_count: 0,
             memory_script_scope_row_count: 0,
             memory_role_scope_row_count: 0,
@@ -797,6 +804,7 @@ pub(super) fn resolve_video_prompt_description(
     })
 }
 
+#[allow(dead_code)]
 pub(super) fn resolve_video_prompt_memory_budget_tier(
     image_url: Option<&str>,
     context: Option<&VideoPromptContext>,
@@ -1009,8 +1017,16 @@ pub(super) fn build_project_visual_anchors(
         &style_coverage,
         constraint_pressure,
     ) {
-        anchors.push(guardrail_performance_anchor);
-        extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        let compacted = compact_director_performance_anchor_against_memory_style(
+            &guardrail_performance_anchor,
+            &ctx.memory_style_notes,
+            structured_fields,
+            constraint_pressure,
+        );
+        if let Some(compacted_anchor) = compacted {
+            anchors.push(compacted_anchor);
+            extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+        }
     }
     if !compact_decorative_style_anchors
         || structured_fields
@@ -1141,6 +1157,8 @@ pub(super) fn build_project_visual_anchors(
             && structured_fields.is_some_and(|fields| {
                 video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
                     || current_storyboard_is_fragile_emotional_turn(fields)
+                    || (memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
+                        && video_prompt_scene_needs_emotional_memory(fields))
             })
         {
             memory_delivery_priority_applied = true;
@@ -1432,6 +1450,7 @@ pub(super) fn compact_director_performance_anchor_against_memory_style(
     };
     if !video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
         && !current_storyboard_is_fragile_emotional_turn(fields)
+        && !storyboard_has_visible_speech_performance_risk(fields, None)
     {
         return Some(anchor.to_string());
     }
@@ -1449,9 +1468,16 @@ pub(super) fn compact_director_performance_anchor_against_memory_style(
         .iter()
         .map(String::as_str)
         .collect::<Vec<_>>();
+    let memory_has_high_value_expressive_detail = expressive_memory_fragments.iter().any(|fragment| {
+        let family = style_note_fragment_family(fragment);
+        memory_style_anchor_has_delivery_signal(fragment)
+            || score_memory_fragment_human_performance_detail(fragment, family) >= 3
+    });
     let retained = split_prompt_note_fragments(anchor)
         .filter(|fragment| {
             !prompt_fragment_is_covered(fragment, &expressive_memory_fragments)
+                && !(memory_has_high_value_expressive_detail
+                    && director_performance_fragment_is_generic_proactive_hint(fragment))
                 && !style_note_matches_shared_keyword_family(
                     fragment,
                     &expressive_memory_refs,
@@ -1467,6 +1493,17 @@ pub(super) fn compact_director_performance_anchor_against_memory_style(
         &retained.join(", "),
         VIDEO_PROMPT_PERFORMANCE_ANCHOR_MAX_CHARS,
     ))
+}
+
+pub(super) fn director_performance_fragment_is_generic_proactive_hint(fragment: &str) -> bool {
+    matches!(
+        normalize_prompt_text(fragment).as_str(),
+        "眼神先动再开口"
+            | "开口前先压住气息"
+            | "尾音带轻颤"
+            | "气息带情绪起伏"
+            | "眼神嘴角细微递进"
+    )
 }
 
 pub(super) fn project_director_note_has_unique_visual_signal(note: &str) -> bool {
@@ -1522,9 +1559,11 @@ pub(super) fn memory_style_anchor_has_delivery_signal(note: &str) -> bool {
         ]
         .iter()
         .any(|keyword| note.contains(keyword));
-    let has_voice_signal = ["轻声", "低声", "哽咽", "呢喃", "短促", "颤声", "鼻音"]
-        .iter()
-        .any(|keyword| note.contains(keyword));
+    let has_voice_signal = [
+        "轻声", "低声", "压低", "尾音", "发颤", "哽咽", "呢喃", "短促", "颤声", "鼻音",
+    ]
+    .iter()
+    .any(|keyword| note.contains(keyword));
 
     has_performance_signal && has_voice_signal
 }
@@ -1653,11 +1692,27 @@ pub(super) fn compact_memory_style_anchor(
         .filter(|fragment| style_fragment_prefix(fragment))
         .filter_map(|fragment| {
             if let Some(fields) = structured_fields {
+                if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
+                    && (fragment.starts_with("光影") || fragment.starts_with("环境"))
+                    && (video_prompt_scene_has_lighting_risk(fields)
+                        || video_prompt_scene_needs_emotional_memory(fields))
+                {
+                    return Some(fragment);
+                }
                 return trim_style_fragment_against_storyboard_fields(&fragment, fields);
             }
             Some(fragment)
         })
         .filter_map(|fragment| {
+            let keep_expanded_visual_memory_fragment = structured_fields.is_some_and(|fields| {
+                memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
+                    && (fragment.starts_with("光影") || fragment.starts_with("环境"))
+                    && (video_prompt_scene_has_lighting_risk(fields)
+                        || video_prompt_scene_needs_emotional_memory(fields))
+            });
+            if keep_expanded_visual_memory_fragment {
+                return Some(fragment);
+            }
             trim_style_fragment_against_prompt_coverage(&fragment, prompt_coverage)
         })
         .filter(|fragment| {
@@ -1681,10 +1736,17 @@ pub(super) fn compact_memory_style_anchor(
                 && generic_motion_style_fragment(fragment))
         })
         .filter(|fragment| {
+            let keep_expanded_visual_memory_fragment = structured_fields.is_some_and(|fields| {
+                memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
+                    && (fragment.starts_with("光影") || fragment.starts_with("环境"))
+                    && (video_prompt_scene_has_lighting_risk(fields)
+                        || video_prompt_scene_needs_emotional_memory(fields))
+            });
             if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
                 if continuity_fragment_matches_fields(fragment, fields, camera)
                     && !(allow_prompt_covered_style_fragments
                         && style_fragment_matches_prompt_style_field(fragment, fields))
+                    && !keep_expanded_visual_memory_fragment
                 {
                     return false;
                 }
@@ -1694,6 +1756,7 @@ pub(super) fn compact_memory_style_anchor(
                     allow_prompt_covered_style_fragments
                         && style_fragment_matches_prompt_style_field(fragment, fields)
                 })
+                || keep_expanded_visual_memory_fragment
         })
         .collect::<Vec<_>>();
     if fragments.is_empty() {

@@ -31,6 +31,7 @@ use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
 use crate::state::AppState;
 
+mod budget;
 mod builder;
 mod builder_parts;
 pub(crate) mod constraints;
@@ -199,6 +200,9 @@ fn build_auto_quality_review_model_params(
             "recentQualityMemoryBiases": diagnostics.recent_quality_memory_biases,
             "memoryStyleAnchorCount": diagnostics.memory_style_anchor_count,
             "memoryDeliveryAnchorCount": diagnostics.memory_delivery_anchor_count,
+            "memoryBudgetRiskScore": diagnostics.memory_budget_risk_score,
+            "memoryBudgetReasons": diagnostics.memory_budget_reasons,
+            "memoryBudgetCompactMode": diagnostics.memory_budget_compact_mode,
             "memoryOptimizationApplied": diagnostics.memory_optimization_applied,
             "memoryOptimizationRemovedRows": diagnostics.memory_optimization_removed_rows,
             "memoryOptimizationRemovedChars": diagnostics.memory_optimization_removed_chars,
