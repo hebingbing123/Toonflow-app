@@ -73,6 +73,63 @@ fn elevated_risk_fields(subject: String, setting: String) -> StructuredStoryboar
     }
 }
 
+fn sample_generate_video_prompt_diagnostics(
+    auto_negative_source: Option<String>,
+) -> GenerateVideoPromptDiagnostics {
+    GenerateVideoPromptDiagnostics {
+        prompt_chars: 22,
+        negative_prompt_chars: 0,
+        negative_constraint_count: 0,
+        negative_candidate_fragment_count: 2,
+        negative_saved_fragment_count: 2,
+        negative_saved_chars: 34,
+        negative_budget_tier: "lean".into(),
+        auto_negative_source,
+        auto_negative_review_fragment_count: 0,
+        auto_negative_memory_fragment_count: 0,
+        observation_note_chars: 40,
+        role_anchor_count: 1,
+        scene_anchor_count: 1,
+        tool_anchor_count: 0,
+        style_anchor_count: 1,
+        memory_style_anchor_count: 0,
+        memory_delivery_anchor_count: 0,
+        memory_delivery_priority_applied: false,
+        recent_quality_memory_biases: vec!["delivery".into(), "visual_continuity".into()],
+        memory_top_candidate_score: 11,
+        memory_selected_primary_bucket: Some("表演".into()),
+        memory_low_value_candidate_skipped: false,
+        memory_style_chars: 0,
+        memory_visual_chars: 0,
+        memory_delivery_chars: 0,
+        memory_hit_buckets: vec!["表演".into(), "语气".into()],
+        memory_suppressed_buckets: vec!["动作".into()],
+        memory_hit_bucket_counts: [("表演".into(), 2usize), ("语气".into(), 1usize)]
+            .into_iter()
+            .collect(),
+        memory_suppressed_bucket_counts: [("动作".into(), 3usize)].into_iter().collect(),
+        memory_optimization_applied: true,
+        memory_optimization_removed_rows: 2,
+        memory_optimization_removed_chars: 88,
+        memory_optimization_removed_visual_rows: 1,
+        memory_optimization_removed_duplicate_rows: 1,
+        director_manual_yielded_to_memory: false,
+        director_manual_yielded_chars: 0,
+        director_performance_trimmed_chars: 0,
+        director_anchor_saved_chars: 0,
+        continuity_note_count: 0,
+        continuity_note_chars: 0,
+        uses_reference_frame: false,
+        memory_budget_tier: "lean".into(),
+        memory_budget_risk_score: 0,
+        memory_budget_reasons: Vec::new(),
+        memory_budget_compact_mode: false,
+        memory_project_scope_row_count: 1,
+        memory_script_scope_row_count: 2,
+        memory_role_scope_row_count: 1,
+    }
+}
+
 #[test]
 fn build_video_prompt_compacts_structured_storyboard_description() {
     let prompt = build_video_prompt(
@@ -145,6 +202,80 @@ proptest! {
         );
 
         prop_assert_eq!(tier, VideoPromptMemoryBudgetTier::Expanded);
+    }
+
+    // Feature: drama-platform-completion, Property 10: 低信号观察笔记淘汰
+    // 验证：需求 16.2
+    #[test]
+    fn prop_low_signal_observation_notes_are_pruned(
+        generic_notes in proptest::collection::vec(prop_oneof![
+            Just("avoid repeating stable follow camera".to_string()),
+            Just("avoid oppressive or frantic mood".to_string()),
+            Just("avoid overly cold emotional tone".to_string()),
+            Just("avoid heavy tragic mood".to_string()),
+        ], 1..6usize),
+        specific_suffix in "[A-Za-z ]{3,18}",
+    ) {
+        let specific_note = format!("avoid extreme camera angle {}", specific_suffix.trim());
+        let mut candidates = generic_notes;
+        candidates.push(specific_note.clone());
+
+        let kept = prune_low_signal_observation_candidates(candidates);
+
+        prop_assert_eq!(kept, vec![specific_note]);
+    }
+
+    // Feature: drama-platform-completion, Property 11: 观察笔记冲突过滤
+    // 验证：需求 16.3
+    #[test]
+    fn prop_observation_notes_conflicting_with_style_are_filtered(
+        pair in prop_oneof![
+            Just((
+                "avoid flat cold lighting".to_string(),
+                "镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string(),
+            )),
+            Just((
+                "avoid oppressive or frantic mood".to_string(),
+                "镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string(),
+            )),
+        ],
+        safe_note in prop_oneof![
+            Just("avoid face drift or costume inconsistency".to_string()),
+            Just("avoid shaky handheld motion".to_string()),
+        ],
+    ) {
+        prop_assert!(video_prompt_observation_conflicts_with_style(
+            &pair.0,
+            Some(&pair.1),
+            None,
+        ));
+        prop_assert!(!video_prompt_observation_conflicts_with_style(
+            &safe_note,
+            Some(&pair.1),
+            None,
+        ));
+    }
+
+    // Feature: drama-platform-completion, Property 12: 自动负向约束可追踪
+    // 验证：需求 16.5, 16.7
+    #[test]
+    fn prop_auto_negative_source_remains_traceable_in_review_params(
+        source in prop_oneof![
+            Just("pending_observation_note".to_string()),
+            Just("rejected_memory".to_string()),
+            Just("quality_review".to_string()),
+        ],
+    ) {
+        let diagnostics = sample_generate_video_prompt_diagnostics(Some(source.clone()));
+        let params = build_auto_quality_review_model_params(&diagnostics);
+
+        prop_assert_eq!(
+            params
+                .get("diagnostics")
+                .and_then(|item| item.get("autoNegativeSource"))
+                .and_then(serde_json::Value::as_str),
+            Some(source.as_str())
+        );
     }
 }
 
