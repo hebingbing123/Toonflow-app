@@ -15,6 +15,17 @@ const VALID_BAD_CASE_CATEGORIES: &[&str] = &[
     "pacing_issue",
     "other",
 ];
+/// 生成阶段合法值（需求 6.3）
+const VALID_STAGES: &[&str] = &[
+    "story_skeleton",
+    "adaptation_strategy",
+    "director_planning",
+    "storyboard_table",
+    "storyboard_panel",
+    "video_prompt",
+];
+/// 评分等级合法值（需求 6.3）
+const VALID_GRADES: &[&str] = &["A", "B", "C", "D"];
 const SCORE_FIELD_RANGE: std::ops::RangeInclusive<i16> = 1..=10;
 
 pub(super) fn validate_list_reviews_query(query: &ListQualityReviewsQuery) -> Result<(), ApiError> {
@@ -31,6 +42,21 @@ pub(super) fn validate_list_reviews_query(query: &ListQualityReviewsQuery) -> Re
             return Err(ApiError::BadRequest(format!(
                 "Invalid source: {}, must be one of {:?}",
                 source, VALID_SOURCES
+            )));
+        }
+    }
+    if let Some(stage) = query.stage.as_deref() {
+        if !VALID_STAGES.contains(&stage) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid stage: {}, must be one of {:?}",
+                stage, VALID_STAGES
+            )));
+        }
+    }
+    if let Some(grade) = query.grade.as_deref() {
+        if !VALID_GRADES.contains(&grade) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid grade: {grade}, must be one of A, B, C, D"
             )));
         }
     }
@@ -60,6 +86,24 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
             return Err(ApiError::BadRequest(format!(
                 "Invalid bad_case_category: {}, must be one of {:?}",
                 cat, VALID_BAD_CASE_CATEGORIES
+            )));
+        }
+    }
+
+    // 验证新增字段（需求 6.3）
+    if let Some(stage) = body.stage.as_deref() {
+        if !VALID_STAGES.contains(&stage) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid stage: {}, must be one of {:?}",
+                stage, VALID_STAGES
+            )));
+        }
+    }
+
+    if let Some(grade) = body.grade.as_deref() {
+        if !VALID_GRADES.contains(&grade) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid grade: {grade}, must be one of A, B, C, D"
             )));
         }
     }

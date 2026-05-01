@@ -93,6 +93,10 @@ pub struct ListQualityReviewsQuery {
     pub source: Option<String>,
     pub is_bad_case: Option<bool>,
     pub memory_delivery_priority_applied: Option<bool>,
+    /// 按生成阶段过滤（需求 6.6）
+    pub stage: Option<String>,
+    /// 按评分等级过滤（需求 6.6）：A / B / C / D
+    pub grade: Option<String>,
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }

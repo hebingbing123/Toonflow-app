@@ -152,3 +152,86 @@ fn token_efficiency_samples_query_deserializes_scope_and_priority_filters() {
     assert_eq!(query.memory_delivery_priority_applied, Some(true));
     assert_eq!(query.limit, Some(4));
 }
+
+// Feature: ai-drama-quality-optimization, Property 14: 质量评审筛选一致性
+// 验证：需求 6.6
+#[test]
+fn create_quality_review_body_accepts_stage_and_grade() {
+    let json = json!({
+        "targetType": "storyboard",
+        "stage": "storyboard_table",
+        "grade": "A",
+        "skillFilePath": "production_agent_execution.md",
+        "skillVersionHash": "abc123"
+    });
+    let body: CreateQualityReviewBody = serde_json::from_value(json).unwrap();
+    assert_eq!(body.stage.as_deref(), Some("storyboard_table"));
+    assert_eq!(body.grade.as_deref(), Some("A"));
+    assert_eq!(body.skill_file_path.as_deref(), Some("production_agent_execution.md"));
+    assert_eq!(body.skill_version_hash.as_deref(), Some("abc123"));
+}
+
+#[test]
+fn validate_create_review_body_rejects_invalid_stage() {
+    let body = CreateQualityReviewBody {
+        target_type: "storyboard".to_string(),
+        stage: Some("invalid_stage".to_string()),
+        ..Default::default()
+    };
+    let err = validate_create_review_body(&body).expect_err("invalid stage");
+    assert!(matches!(err, ApiError::BadRequest(_)));
+}
+
+#[test]
+fn validate_create_review_body_rejects_invalid_grade() {
+    let body = CreateQualityReviewBody {
+        target_type: "storyboard".to_string(),
+        grade: Some("E".to_string()),
+        ..Default::default()
+    };
+    let err = validate_create_review_body(&body).expect_err("invalid grade");
+    assert!(matches!(err, ApiError::BadRequest(_)));
+}
+
+#[test]
+fn validate_create_review_body_accepts_all_valid_grades() {
+    for grade in &["A", "B", "C", "D"] {
+        let body = CreateQualityReviewBody {
+            target_type: "storyboard".to_string(),
+            grade: Some(grade.to_string()),
+            ..Default::default()
+        };
+        assert!(validate_create_review_body(&body).is_ok(), "grade {grade} should be valid");
+    }
+}
+
+#[test]
+fn validate_create_review_body_accepts_all_valid_stages() {
+    for stage in &[
+        "story_skeleton",
+        "adaptation_strategy",
+        "director_planning",
+        "storyboard_table",
+        "storyboard_panel",
+        "video_prompt",
+    ] {
+        let body = CreateQualityReviewBody {
+            target_type: "storyboard".to_string(),
+            stage: Some(stage.to_string()),
+            ..Default::default()
+        };
+        assert!(validate_create_review_body(&body).is_ok(), "stage {stage} should be valid");
+    }
+}
+
+#[test]
+fn list_reviews_query_accepts_stage_and_grade_filters() {
+    let json = json!({
+        "projectId": 1,
+        "stage": "director_planning",
+        "grade": "B"
+    });
+    let query: ListQualityReviewsQuery = serde_json::from_value(json).unwrap();
+    assert_eq!(query.stage.as_deref(), Some("director_planning"));
+    assert_eq!(query.grade.as_deref(), Some("B"));
+}

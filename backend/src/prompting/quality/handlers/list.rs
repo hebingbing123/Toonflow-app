@@ -73,6 +73,15 @@ pub(crate) async fn list_reviews(
         qb.push(" AND memory_delivery_priority_applied = ");
         qb.push_bind(memory_delivery_priority_applied);
     }
+    // 按阶段和评分等级过滤（需求 6.6）
+    if let Some(stage) = &query.stage {
+        qb.push(" AND stage = ");
+        qb.push_bind(stage);
+    }
+    if let Some(grade) = &query.grade {
+        qb.push(" AND grade = ");
+        qb.push_bind(grade);
+    }
     qb.push(" ORDER BY created_at DESC LIMIT ");
     qb.push_bind(limit);
     qb.push(" OFFSET ");
