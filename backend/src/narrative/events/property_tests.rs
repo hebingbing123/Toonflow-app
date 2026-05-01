@@ -24,9 +24,7 @@ mod tests {
     }
 
     fn is_valid_event_line(line: &str) -> bool {
-        line.starts_with('|')
-            && line.ends_with('|')
-            && count_fields(line) == 7
+        line.starts_with('|') && line.ends_with('|') && count_fields(line) == 7
     }
 
     fn duration_field_uses_seconds(field: &str) -> bool {

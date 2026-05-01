@@ -1,4 +1,4 @@
-//! OpenAPI fragment for prompt templates and quality review HTTP routes.
+//! OpenAPI fragment for prompt templates, quality review, and benchmark HTTP routes.
 
 use utoipa::OpenApi;
 
@@ -14,5 +14,9 @@ use utoipa::OpenApi;
     crate::prompting::quality::get_token_efficiency,
     crate::prompting::quality::get_token_efficiency_samples,
     crate::prompting::quality::get_stage_pass_rate,
+    crate::prompting::benchmark::registry::create_benchmark_case,
+    crate::prompting::benchmark::registry::list_benchmark_cases,
+    crate::prompting::benchmark::registry::update_benchmark_case,
+    crate::prompting::benchmark::registry::promote_from_quality_review,
 ))]
 pub struct PromptingHttpOpenApi;

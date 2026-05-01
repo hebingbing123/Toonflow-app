@@ -28,6 +28,7 @@ use observation::{
     build_script_role_video_observation_memories_with_bias,
     build_script_video_observation_memory_with_bias,
 };
+#[cfg_attr(not(test), allow(unused_imports))]
 pub(crate) use rejected::{
     build_rejected_video_negative_memory, clear_rejected_video_negative_memory,
     persist_rejected_video_negative_memory, rejected_video_negative_rejection_count,
@@ -40,18 +41,16 @@ pub(crate) use rejected::{
     select_rejected_video_negative_memory_notes,
     select_rejected_video_negative_memory_notes_for_subject,
     select_rejected_video_negative_memory_notes_for_subject_with_bias,
-    RejectedVideoMemorySelection, VideoPromptMemorySelectionBias,
+    VideoPromptMemorySelectionBias,
 };
+#[cfg_attr(not(test), allow(unused_imports))]
 use rejected::{
-    canonical_observation_note, compact_rejected_negative_avoid,
+    compact_rejected_negative_avoid,
     compact_rejected_negative_memory_fragments_for_storage_with_bias,
     memory_subject_match_priority, merge_rejected_negative_avoid_with_bias,
     merge_rejected_video_negative_memory, observation_note_covers, observation_note_is_covered,
     prepare_rejected_video_negative_memory_for_storage, ranked_rejected_negative_fragments,
-    rejected_negative_scene_has_dialogue_guard, rejected_negative_scene_has_framing_risk,
-    rejected_negative_scene_has_lighting_risk, rejected_negative_scene_needs_emotional_guard,
-    rejected_negative_scene_needs_expressive_performance_guard, score_rejected_negative_fragment,
-    score_rejected_video_memory_bias_for_fragment,
+    score_rejected_negative_fragment, score_rejected_video_memory_bias_for_fragment,
     selected_optimization_bias_to_rejected_selection_bias,
 };
 
@@ -2374,6 +2373,7 @@ pub(crate) fn select_prioritized_video_style_note(
     })
 }
 
+#[allow(dead_code)]
 pub(crate) fn select_selected_video_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -2719,6 +2719,7 @@ fn extract_rejected_video_risk_tags(content: &str) -> Vec<String> {
         .unwrap_or_default()
 }
 
+#[allow(dead_code)]
 fn memory_matches_rejected_video_risk_tags(content: &str, storyboard_tags: &[String]) -> bool {
     if storyboard_tags.is_empty() {
         return false;

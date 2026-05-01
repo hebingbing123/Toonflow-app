@@ -2044,6 +2044,7 @@ fn merged_subject_aliases(existing: &str, incoming: &str, subject: &str) -> Stri
     aliases.join("/")
 }
 
+#[allow(dead_code)]
 pub(super) fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> String {
     merge_rejected_video_negative_memory_with_bias(existing, incoming, None)
 }
@@ -2213,6 +2214,7 @@ fn extract_rejected_video_focus_tags(content: &str) -> Vec<String> {
         })
 }
 
+#[allow(dead_code)]
 fn negative_fragment_family(value: &str) -> &'static str {
     let canonical = canonical_negative_fragment(value);
     match canonical.as_str() {
@@ -2247,6 +2249,7 @@ fn negative_fragment_family(value: &str) -> &'static str {
     }
 }
 
+#[allow(dead_code)]
 fn canonical_negative_fragment(value: &str) -> String {
     value
         .trim()

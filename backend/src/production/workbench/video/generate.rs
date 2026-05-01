@@ -1043,6 +1043,7 @@ fn filter_selected_rows_for_subject(
         .collect()
 }
 
+#[allow(dead_code)]
 fn build_storyboard_negative_prompts(
     storyboard_ids: &[i32],
     review_rows: &[QualityReviewSeedRow],

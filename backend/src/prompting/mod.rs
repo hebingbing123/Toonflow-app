@@ -5,7 +5,9 @@
 //! - `quality` — 质量审查
 //! - `skills` — 磁盘技能
 //! - `skill_versions` — 技能文件版本管理
+//! - `benchmark` — 基线样本与实验运营
 
+pub mod benchmark;
 mod openapi;
 pub mod prompts;
 pub mod quality;

@@ -763,6 +763,7 @@ pub(super) fn extract_storyboard_ids_from_memory_content(content: &str) -> Vec<i
         .unwrap_or_default()
 }
 
+#[allow(dead_code)]
 pub(super) fn trim_video_prompt_memory_rows(
     rows: Vec<AgentMemoryRow>,
     storyboard_numeric_id: i32,
@@ -1226,6 +1227,7 @@ pub(super) struct PendingVideoObservationSelection {
     pub(super) source: &'static str,
 }
 
+#[allow(dead_code)]
 pub(super) fn build_pending_video_observation_note_from_runtime(
     runtime: &StoryboardNegativePromptRuntime,
 ) -> Option<String> {
@@ -1248,6 +1250,7 @@ pub(super) fn build_pending_video_observation_selection_from_runtime(
     )
 }
 
+#[allow(dead_code)]
 pub(super) fn build_pending_video_observation_note(
     rows: Vec<AgentMemoryRow>,
     storyboard_numeric_id: i32,
@@ -1324,7 +1327,9 @@ pub(super) fn build_pending_video_observation_selection(
             )
             .map(|compacted| (compacted, source))
         })
-        .filter(|(note, _)| !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row))
+        .filter(|(note, _)| {
+            !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row)
+        })
         .collect::<Vec<_>>();
     let selected = select_best_storyboard_observation_note(
         prune_storyboard_observation_candidates(
@@ -2765,6 +2770,7 @@ pub(super) fn compact_conflicting_negative_pair(
     }
 }
 
+#[allow(dead_code)]
 pub(super) fn select_best_video_prompt_observation_note(candidates: Vec<String>) -> Option<String> {
     candidates.into_iter().max_by(|a, b| {
         score_video_prompt_observation_specificity(a)

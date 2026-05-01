@@ -71,9 +71,7 @@ fn selected_video_memory_feedback(content: &str) -> Option<WorkbenchVideoMemoryF
 
 fn rejected_video_memory_feedback(content: &str) -> Option<WorkbenchVideoMemoryFeedback> {
     let avoid = extract_key_value(content, "avoid");
-    if avoid.is_none() {
-        return None;
-    }
+    avoid.as_ref()?;
     let subject = extract_key_value(content, "subject");
     let risk_tags = extract_key_value(content, "riskTags")
         .map(|value| {

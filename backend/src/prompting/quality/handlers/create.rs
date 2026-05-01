@@ -143,13 +143,7 @@ pub(crate) async fn create_review(
         }
     }
 
-    let linked = link_quality_review_to_job_usage(
-        pool,
-        user_id,
-        review.job_id,
-        &review,
-    )
-    .await;
+    let linked = link_quality_review_to_job_usage(pool, user_id, review.job_id, &review).await;
     if linked > 0 {
         tracing::info!(
             quality_review_id = %review.id,

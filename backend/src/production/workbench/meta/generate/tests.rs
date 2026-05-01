@@ -26,8 +26,8 @@ use super::{
     video_prompt_observation_is_irrelevant_to_storyboard, DirectorEmotionFragmentGroup,
     GenerateVideoPromptBody, GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse,
     ScriptRolePromptSeedRow, VideoPromptConstraintPressure, VideoPromptContext,
-    VideoPromptMemoryBudgetTier,
-    VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
+    VideoPromptMemoryBudgetTier, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS,
+    VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
 };
 use crate::production::workbench::video::generate::{
     AutoNegativePromptSelection, StoryboardNegativePromptRuntime,

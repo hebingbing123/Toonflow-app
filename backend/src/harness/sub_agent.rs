@@ -974,6 +974,7 @@ fn build_stage_summary_content(
     Some(truncate_chars(&parts.join(" | "), 320))
 }
 
+#[allow(clippy::too_many_arguments)]
 fn persist_stage_summary_async(
     pool: &PgPool,
     user_id: Uuid,

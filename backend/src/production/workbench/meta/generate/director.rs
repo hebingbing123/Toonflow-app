@@ -107,8 +107,11 @@ impl GenerateVideoPromptDiagnostics {
             .map(str::to_string)
             .or_else(|| {
                 observation_note.and_then(|note| {
-                    (!normalize_prompt_text(note).is_empty())
-                        .then(|| observation_source.unwrap_or("pending_observation_note").to_string())
+                    (!normalize_prompt_text(note).is_empty()).then(|| {
+                        observation_source
+                            .unwrap_or("pending_observation_note")
+                            .to_string()
+                    })
                 })
             });
         let auto_negative_review_fragment_count = selection

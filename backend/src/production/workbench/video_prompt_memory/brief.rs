@@ -59,7 +59,7 @@ fn build_video_generation_brief_style(
             (score, axis, fragment)
         })
         .collect::<Vec<_>>();
-    ranked.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+    ranked.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(b.1)).then(a.2.cmp(&b.2)));
 
     let mut kept = Vec::<String>::new();
     let mut seen_axes = std::collections::HashSet::<&'static str>::new();

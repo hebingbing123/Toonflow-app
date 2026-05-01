@@ -88,6 +88,8 @@ struct MemoryGovernanceRow {
     scope_signature: Option<Value>,
 }
 
+type MemoryQueryRow = (Option<String>, Option<String>, String, Option<Value>);
+
 impl MemoryBudgetSnapshot {
     pub(crate) fn low_value_ratio_percent(&self) -> f64 {
         if self.total_rows <= 0 {
@@ -241,7 +243,7 @@ pub(crate) async fn load_project_memory_budget_snapshot(
     project_id: i32,
     agent_type: &str,
 ) -> Result<MemoryBudgetSnapshot, ApiError> {
-    let rows: Vec<(Option<String>, Option<String>, String, Option<Value>)> = sqlx::query_as(
+    let rows: Vec<MemoryQueryRow> = sqlx::query_as(
         r#"
         SELECT memory_tier, name, content, scope_signature
         FROM app_agent_memory
@@ -344,11 +346,11 @@ pub(crate) async fn optimize_project_memory_budget(
             row.name.as_deref(),
             &row.content,
             row.scope_signature.as_ref(),
-        ) {
-            if tier != "style_bible" && row.name.as_deref() != Some(MEMORY_POLICY_NAME) {
-                low_value_ids.push(row.id);
-                removed_chars += row.content.chars().count();
-            }
+        ) && tier != "style_bible"
+            && row.name.as_deref() != Some(MEMORY_POLICY_NAME)
+        {
+            low_value_ids.push(row.id);
+            removed_chars += row.content.chars().count();
         }
     }
 

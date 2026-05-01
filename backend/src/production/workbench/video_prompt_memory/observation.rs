@@ -96,6 +96,7 @@ fn build_project_video_observation_memory(rows: &[ScopedAgentMemoryRow]) -> Opti
     build_project_video_observation_memory_with_bias(rows, None)
 }
 
+#[allow(dead_code)]
 fn build_script_role_video_observation_memories(rows: &[AgentMemoryRow]) -> Vec<String> {
     build_script_role_video_observation_memories_with_bias(rows, None)
 }

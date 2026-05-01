@@ -1468,21 +1468,22 @@ pub(super) fn compact_director_performance_anchor_against_memory_style(
         .iter()
         .map(String::as_str)
         .collect::<Vec<_>>();
-    let memory_has_high_value_expressive_detail = expressive_memory_fragments.iter().any(|fragment| {
-        let family = style_note_fragment_family(fragment);
-        memory_style_anchor_has_delivery_signal(fragment)
-            || score_memory_fragment_human_performance_detail(fragment, family) >= 3
-    });
+    let memory_has_high_value_expressive_detail =
+        expressive_memory_fragments.iter().any(|fragment| {
+            let family = style_note_fragment_family(fragment);
+            memory_style_anchor_has_delivery_signal(fragment)
+                || score_memory_fragment_human_performance_detail(fragment, family) >= 3
+        });
     let retained = split_prompt_note_fragments(anchor)
         .filter(|fragment| {
-            !prompt_fragment_is_covered(fragment, &expressive_memory_fragments)
-                && !(memory_has_high_value_expressive_detail
-                    && director_performance_fragment_is_generic_proactive_hint(fragment))
-                && !style_note_matches_shared_keyword_family(
+            !(prompt_fragment_is_covered(fragment, &expressive_memory_fragments)
+                || style_note_matches_shared_keyword_family(
                     fragment,
                     &expressive_memory_refs,
                     PERFORMANCE_SHARED_KEYWORD_FAMILIES,
                 )
+                || memory_has_high_value_expressive_detail
+                    && director_performance_fragment_is_generic_proactive_hint(fragment))
         })
         .collect::<Vec<_>>();
     if retained.is_empty() {

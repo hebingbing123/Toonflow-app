@@ -346,7 +346,9 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         .with_runtime_notes(
             negative_prompt_selection.as_ref(),
             observation_note.as_deref(),
-            observation_selection.as_ref().map(|selection| selection.source),
+            observation_selection
+                .as_ref()
+                .map(|selection| selection.source),
             single_storyboard_runtime.as_ref(),
         )
         .with_memory_optimization(memory_optimization.as_ref());
