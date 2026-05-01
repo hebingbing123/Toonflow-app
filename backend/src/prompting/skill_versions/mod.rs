@@ -114,10 +114,9 @@ async fn post_skill_version_rollback(
             RollbackError::AlreadyAtTargetVersion => {
                 ApiError::BadRequest("当前文件内容已与目标版本一致，无需回滚".into())
             }
-            RollbackError::FilePathMismatch { .. } => {
-                ApiError::BadRequest(e.to_string())
-            }
-            RollbackError::FileRead(msg) => ApiError::BadRequest(msg),
+            RollbackError::FilePathMismatch { .. } => ApiError::BadRequest(e.to_string()),
+            RollbackError::NoContentSnapshot(_) => ApiError::BadRequest(e.to_string()),
+            RollbackError::FileWrite(msg) => ApiError::BadRequest(msg),
             RollbackError::Database(e) => ApiError::DatabaseError(e.to_string()),
         })
 }

@@ -44,8 +44,8 @@ pub async fn record_skill_version(
 
     let version = sqlx::query_as::<_, SkillVersion>(
         r#"
-        INSERT INTO app_skill_versions (file_path, summary, hash_before, hash_after, changed_by)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO app_skill_versions (file_path, summary, hash_before, hash_after, changed_by, content_snapshot)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
         "#,
     )
@@ -54,6 +54,7 @@ pub async fn record_skill_version(
     .bind(hash_before)
     .bind(&hash_after)
     .bind(changed_by)
+    .bind(new_content)  // 存储内容快照，支持回滚（需求 24.4）
     .fetch_one(pool)
     .await?;
 

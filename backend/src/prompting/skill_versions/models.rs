@@ -18,6 +18,10 @@ pub struct SkillVersion {
     pub hash_after: String,
     pub changed_by: Option<Uuid>,
     pub rollback_of: Option<Uuid>,
+    /// 版本对应的文件内容快照（需求 24.4：支持真正的文件内容回滚）
+    /// `None` 表示旧版本记录（迁移前写入，无内容快照）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content_snapshot: Option<String>,
 }
 
 /// `GET /api/v1/skill-versions` 查询参数

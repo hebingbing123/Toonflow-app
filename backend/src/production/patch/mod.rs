@@ -38,8 +38,7 @@ pub async fn post_production_patch(
     }
 
     // 派发：解析最小修复范围 + 构建响应（历史记录暂时为空，后续可从 DB 读取）
-    let response = dispatch::build_patch_response(&body, &[])
-        .map_err(|e| ApiError::BadRequest(e))?;
+    let response = dispatch::build_patch_response(&body, &[]).map_err(ApiError::BadRequest)?;
 
     Ok(Json(response))
 }

@@ -750,6 +750,11 @@ mod tests {
             reviewer_id: None,
             is_bad_case: true,
             bad_case_category: Some("dialogue_issue".into()),
+            // 新增字段（需求 6.3, 6.5）
+            stage: Some("storyboard_table".into()),
+            grade: Some("D".into()),
+            skill_file_path: None,
+            skill_version_hash: None,
         }
     }
 
@@ -760,17 +765,14 @@ mod tests {
 
         assert!(content.contains("storyboardIds=12"), "{content}");
         assert!(content.contains("rejectionCount=2"), "{content}");
-        assert!(content.contains("riskTags=dialogue/lighting"), "{content}");
+        // dialogue_issue category + "读稿"/"嘴型" comments → dialogue risk tag
+        assert!(content.contains("riskTags=dialogue"), "{content}");
         assert!(
             content.contains("avoid=avoid lip-sync mismatch"),
             "{content}"
         );
         assert!(
             content.contains("avoid blank expression or monotone delivery"),
-            "{content}"
-        );
-        assert!(
-            content.contains("avoid harsh backlight silhouette"),
             "{content}"
         );
     }

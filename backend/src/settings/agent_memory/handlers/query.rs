@@ -5,7 +5,7 @@ use crate::error::ApiError;
 use crate::harness::observe;
 use crate::state::AppState;
 
-use super::super::storage::{ensure_project_owned, parse_agent_type};
+use super::super::storage::{compress_memory_results, ensure_project_owned, parse_agent_type};
 use super::super::types::{to_memory_history_item, MemoryHistoryItem, MessageRow, QueryMemoryBody};
 
 #[utoipa::path(
@@ -76,5 +76,45 @@ pub(crate) async fn query_memory(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(rows.into_iter().map(to_memory_history_item).collect()))
+    let items: Vec<MemoryHistoryItem> = rows.into_iter().map(to_memory_history_item).collect();
+
+    // 需求 33.7：命中条目 > 3 条时压缩为结构化摘要，减少注入 token 消耗
+    // 压缩后直接替换原始列表，避免 Agent 处理过多历史上下文
+    if items.len() > 3 {
+        let contents: Vec<String> = items
+            .iter()
+            .map(|i| {
+                i.content
+                    .first()
+                    .map(|b| b.data.clone())
+                    .unwrap_or_default()
+            })
+            .collect();
+        if let Some(compressed) = compress_memory_results(contents) {
+            let compressed_str = serde_json::to_string_pretty(&compressed).unwrap_or_default();
+            tracing::debug!(
+                user_id = %uid,
+                project_id = %body.project_id,
+                original_count = items.len(),
+                "memory results compressed to reduce token injection"
+            );
+            // 返回单条压缩摘要，替换原始列表
+            let summary_item = MemoryHistoryItem {
+                id: "compressed_summary".to_string(),
+                role: "assistant".to_string(),
+                name: Some("memory_compression".to_string()),
+                status: "complete",
+                datetime: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+                content: vec![super::super::types::ContentBlock {
+                    block_type: "markdown",
+                    status: "complete",
+                    data: format!("[记忆压缩摘要 - 原始{}条]\n{}", items.len(), compressed_str),
+                }],
+                create_time: chrono::Utc::now().timestamp_millis(),
+            };
+            return Ok(Json(vec![summary_item]));
+        }
+    }
+
+    Ok(Json(items))
 }
