@@ -18,5 +18,10 @@ use utoipa::OpenApi;
     crate::prompting::benchmark::registry::list_benchmark_cases,
     crate::prompting::benchmark::registry::update_benchmark_case,
     crate::prompting::benchmark::registry::promote_from_quality_review,
+    crate::prompting::benchmark::experiments::create_experiment,
+    crate::prompting::benchmark::experiments::list_experiments,
+    crate::prompting::benchmark::experiments::get_experiment,
+    crate::prompting::benchmark::experiments::start_experiment,
+    crate::prompting::benchmark::experiments::cancel_experiment,
 ))]
 pub struct PromptingHttpOpenApi;

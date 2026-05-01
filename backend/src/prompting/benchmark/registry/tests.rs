@@ -2,9 +2,7 @@
 
 #[cfg(test)]
 mod tests {
-    use super::super::handlers::{
-        validate_case_type, validate_source_kind, validate_stage,
-    };
+    use super::super::handlers::{validate_case_type, validate_source_kind, validate_stage};
 
     #[test]
     fn test_validate_stage_accepts_valid_stages() {
