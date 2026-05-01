@@ -130,7 +130,6 @@ mod tests {
         let body3: QueryMemoryBody =
             serde_json::from_str(r#"{"projectId":1,"agentType":"productionAgent"}"#).unwrap();
         assert_ne!(body1.agent_type, body3.agent_type);
-        let _ = proptest::prop_assert_eq!(1, 1); // satisfy import
     }
 
     // Feature: ai-drama-quality-optimization, Property 8: 记忆范围签名完整性

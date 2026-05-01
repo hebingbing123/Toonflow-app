@@ -25,3 +25,6 @@ pub(in crate::production) use preview::{
 #[allow(unused_imports)]
 pub(crate) use query::{__path_post_get_storyboard_data, __path_post_storyboard_get_data};
 pub(in crate::production) use query::{post_get_storyboard_data, post_storyboard_get_data};
+
+#[cfg(test)]
+mod property_tests;

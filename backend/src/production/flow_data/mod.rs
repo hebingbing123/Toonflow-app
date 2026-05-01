@@ -13,6 +13,9 @@ use crate::scope;
 mod compose;
 mod rows;
 
+#[cfg(test)]
+mod property_tests;
+
 /// Resolve caller-owned project + script UUIDs from stable integer ids (Electron-era keys).
 pub(crate) async fn resolve_owned_production_scope(
     pool: &sqlx::PgPool,

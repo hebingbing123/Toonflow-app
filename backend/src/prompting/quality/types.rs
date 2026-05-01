@@ -175,6 +175,26 @@ pub struct StagePassRateItem {
     pub non_delivery_priority_pass_rate_percent: f64,
 }
 
+/// 按 stage + grade 分布的统计条目（需求 6.4）
+#[derive(Debug, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct StageGradeDistributionItem {
+    /// 生成阶段（story_skeleton / adaptation_strategy / director_planning / storyboard_table / storyboard_panel / video_prompt）
+    pub stage: String,
+    /// A 级数量
+    pub grade_a_count: i64,
+    /// B 级数量
+    pub grade_b_count: i64,
+    /// C 级数量
+    pub grade_c_count: i64,
+    /// D 级数量
+    pub grade_d_count: i64,
+    /// 总数
+    pub total_count: i64,
+    /// A+B 通过率（百分比）
+    pub pass_rate_percent: f64,
+}
+
 /// Token efficiency aggregate response (derived from auto quality reviews).
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]

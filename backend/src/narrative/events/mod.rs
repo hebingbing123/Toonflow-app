@@ -41,4 +41,7 @@ pub fn router() -> Router<AppState> {
 }
 
 #[cfg(test)]
+mod property_tests;
+
+#[cfg(test)]
 mod tests;

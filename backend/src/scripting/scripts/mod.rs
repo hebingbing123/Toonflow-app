@@ -46,6 +46,9 @@ pub fn router() -> Router<AppState> {
 }
 
 #[cfg(test)]
+mod property_tests;
+
+#[cfg(test)]
 mod tests {
     use super::export_poll::helpers::{build_scripts_zip, zip_entry_name};
     use super::types::{

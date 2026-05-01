@@ -840,3 +840,65 @@ pub(crate) async fn get_token_efficiency_samples(
 
     Ok(Json(rows))
 }
+
+/// GET /api/v1/quality/stage-grade-distribution - 按 stage + grade 分布统计（需求 6.4）
+///
+/// 返回各生成阶段（story_skeleton / adaptation_strategy / director_planning /
+/// storyboard_table / storyboard_panel / video_prompt）的 A/B/C/D 评分分布和通过率（A+B 占比）。
+#[utoipa::path(
+    get,
+    path = "/api/v1/quality/stage-grade-distribution",
+    operation_id = "getQualityStageGradeDistributionV1",
+    tag = "quality",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_stage_grade_distribution(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<super::super::types::StageGradeDistributionItem>>, ApiError> {
+    let user_id = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+
+    let items = sqlx::query_as::<_, super::super::types::StageGradeDistributionItem>(
+        r#"
+        SELECT
+            stage,
+            COUNT(*) FILTER (WHERE grade = 'A') as grade_a_count,
+            COUNT(*) FILTER (WHERE grade = 'B') as grade_b_count,
+            COUNT(*) FILTER (WHERE grade = 'C') as grade_c_count,
+            COUNT(*) FILTER (WHERE grade = 'D') as grade_d_count,
+            COUNT(*) as total_count,
+            COALESCE(ROUND(
+                (COUNT(*) FILTER (WHERE grade IN ('A', 'B'))) * 100.0
+                / NULLIF(COUNT(*), 0),
+                2
+            ), 0) as pass_rate_percent
+        FROM app_quality_review
+        WHERE user_id = $1
+          AND stage IS NOT NULL
+          AND grade IS NOT NULL
+        GROUP BY stage
+        ORDER BY
+            CASE stage
+                WHEN 'story_skeleton' THEN 1
+                WHEN 'adaptation_strategy' THEN 2
+                WHEN 'director_planning' THEN 3
+                WHEN 'storyboard_table' THEN 4
+                WHEN 'storyboard_panel' THEN 5
+                WHEN 'video_prompt' THEN 6
+                ELSE 7
+            END
+        "#,
+    )
+    .bind(user_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(items))
+}
