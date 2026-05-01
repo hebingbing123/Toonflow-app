@@ -53,28 +53,82 @@ pub(crate) async fn query_memory(
     ensure_project_owned(pool, uid, body.project_id).await?;
     observe::memory_http(uid, body.project_id, "query");
 
-    let rows = sqlx::query_as::<_, MessageRow>(
-        r#"
-        SELECT id, role, name, memory_tier, content, create_time_ms
-        FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
-          AND agent_type = $3
-          AND episodes_id IS NOT DISTINCT FROM $4
-          AND ($5 = 'all' OR memory_type = $5)
-          AND ($6::text IS NULL OR memory_tier = $6)
-        ORDER BY create_time_ms ASC
-        "#,
-    )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(agent_type)
-    .bind(body.episodes_id)
-    .bind(memory_type)
-    .bind(&body.memory_tier)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let rows = if let Some(scope_signature) = body.scope_signature.as_ref() {
+        let exact_rows = sqlx::query_as::<_, MessageRow>(
+            r#"
+            SELECT id, role, name, memory_tier, content, create_time_ms
+            FROM app_agent_memory
+            WHERE owner_user_id = $1
+              AND numeric_project_id = $2
+              AND agent_type = $3
+              AND episodes_id IS NOT DISTINCT FROM $4
+              AND ($5 = 'all' OR memory_type = $5)
+              AND ($6::text IS NULL OR memory_tier = $6)
+              AND scope_signature = $7
+            ORDER BY create_time_ms ASC
+            "#,
+        )
+        .bind(uid)
+        .bind(body.project_id)
+        .bind(agent_type)
+        .bind(body.episodes_id)
+        .bind(memory_type)
+        .bind(&body.memory_tier)
+        .bind(scope_signature)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        if !exact_rows.is_empty() {
+            exact_rows
+        } else {
+            sqlx::query_as::<_, MessageRow>(
+                r#"
+                SELECT id, role, name, memory_tier, content, create_time_ms
+                FROM app_agent_memory
+                WHERE owner_user_id = $1
+                  AND numeric_project_id = $2
+                  AND agent_type = $3
+                  AND episodes_id IS NOT DISTINCT FROM $4
+                  AND ($5 = 'all' OR memory_type = $5)
+                  AND ($6::text IS NULL OR memory_tier = $6)
+                ORDER BY create_time_ms ASC
+                "#,
+            )
+            .bind(uid)
+            .bind(body.project_id)
+            .bind(agent_type)
+            .bind(body.episodes_id)
+            .bind(memory_type)
+            .bind(&body.memory_tier)
+            .fetch_all(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        }
+    } else {
+        sqlx::query_as::<_, MessageRow>(
+            r#"
+            SELECT id, role, name, memory_tier, content, create_time_ms
+            FROM app_agent_memory
+            WHERE owner_user_id = $1
+              AND numeric_project_id = $2
+              AND agent_type = $3
+              AND episodes_id IS NOT DISTINCT FROM $4
+              AND ($5 = 'all' OR memory_type = $5)
+              AND ($6::text IS NULL OR memory_tier = $6)
+            ORDER BY create_time_ms ASC
+            "#,
+        )
+        .bind(uid)
+        .bind(body.project_id)
+        .bind(agent_type)
+        .bind(body.episodes_id)
+        .bind(memory_type)
+        .bind(&body.memory_tier)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    };
 
     let items: Vec<MemoryHistoryItem> = rows.into_iter().map(to_memory_history_item).collect();
 

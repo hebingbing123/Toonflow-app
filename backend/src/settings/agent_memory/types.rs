@@ -15,6 +15,9 @@ pub(crate) struct QueryMemoryBody {
     /// 可选过滤字段：`style_bible` | `stage_summary` | `delta_memory` | `message`
     #[serde(default)]
     pub(crate) memory_tier: Option<String>,
+    /// 可选精确作用域过滤；若命中则优先返回 exact scope 结果
+    #[serde(default)]
+    pub(crate) scope_signature: Option<serde_json::Value>,
 }
 
 fn default_query_memory_type() -> String {
@@ -44,6 +47,8 @@ pub(crate) struct OptimizeMemoryBody {
     pub(crate) agent_type: String,
     #[serde(default)]
     pub(crate) episodes_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) automation_mode: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -124,10 +129,12 @@ pub(crate) struct ClearMemoryResponse {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct OptimizeMemoryResponse {
+    pub(crate) automation_mode: String,
     pub(crate) removed_rows: usize,
     pub(crate) removed_chars: usize,
     pub(crate) removed_visual_rows: usize,
     pub(crate) removed_duplicate_rows: usize,
+    pub(crate) removed_low_value_rows: usize,
     pub(crate) refreshed_script_summary: bool,
     pub(crate) refreshed_project_summary: bool,
 }

@@ -4,6 +4,10 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 
+use super::{
+    load_project_automation_memory_policy, policy_allows_automated_memory, MEMORY_POLICY_NAME,
+};
+
 pub(crate) fn parse_agent_type(raw: &str) -> Result<&'static str, ApiError> {
     match raw {
         "scriptAgent" => Ok("scriptAgent"),
@@ -156,6 +160,19 @@ pub(crate) async fn replace_named_summary_memory_with_scope(
     scope_signature: Option<&Value>,
     create_time_ms: Option<i64>,
 ) -> Result<(), ApiError> {
+    if name != MEMORY_POLICY_NAME {
+        let policy =
+            load_project_automation_memory_policy(pool, user_id, project_id, agent_type).await?;
+        if !policy_allows_automated_memory(
+            &policy,
+            memory_tier,
+            Some(name),
+            content,
+            scope_signature,
+        ) {
+            return Ok(());
+        }
+    }
     let time_ms = create_time_ms.unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
 
     sqlx::query(

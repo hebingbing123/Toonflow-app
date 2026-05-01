@@ -5,12 +5,16 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::storage::{ensure_project_owned, parse_agent_type};
+use super::super::{
+    load_project_automation_memory_policy, load_project_memory_budget_snapshot,
+    storage::{ensure_project_owned, parse_agent_type},
+};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct MemoryCostOverview {
     pub(crate) project_id: i32,
+    pub(crate) automation_mode: String,
     pub(crate) style_bible_count: i64,
     pub(crate) stage_summary_count: i64,
     pub(crate) delta_memory_count: i64,
@@ -19,6 +23,7 @@ pub(crate) struct MemoryCostOverview {
     pub(crate) avg_injected_chars_last30: i64,
     /// 近30条记忆涉及的平均命中层级数（近似：取最近30条内的 distinct tier 数）
     pub(crate) avg_hit_tier_count_last30: i64,
+    pub(crate) low_value_memory_ratio_percent: f64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) last_injected_at: Option<String>,
 }
@@ -56,6 +61,10 @@ pub(crate) async fn get_memory_cost_overview(
     let agent_type = parse_agent_type(&params.agent_type)?;
 
     ensure_project_owned(pool, uid, params.project_id).await?;
+    let policy =
+        load_project_automation_memory_policy(pool, uid, params.project_id, agent_type).await?;
+    let budget_snapshot =
+        load_project_memory_budget_snapshot(pool, uid, params.project_id, agent_type).await?;
 
     // 各层记忆条目数
     let counts: Vec<(String, i64)> = sqlx::query_as(
@@ -153,12 +162,14 @@ pub(crate) async fn get_memory_cost_overview(
 
     Ok(Json(MemoryCostOverview {
         project_id: params.project_id,
+        automation_mode: policy.mode.as_str().to_string(),
         style_bible_count,
         stage_summary_count,
         delta_memory_count,
         message_count,
         avg_injected_chars_last30: avg_chars.unwrap_or(0),
         avg_hit_tier_count_last30: distinct_tier_count,
+        low_value_memory_ratio_percent: budget_snapshot.low_value_ratio_percent(),
         last_injected_at,
     }))
 }

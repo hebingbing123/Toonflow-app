@@ -4,6 +4,7 @@
 
 mod handlers;
 pub(crate) mod memory_tier;
+mod policy;
 mod storage;
 mod style_bible;
 mod summarize;
@@ -24,6 +25,12 @@ pub(crate) use handlers::{
 pub(crate) use handlers::{
     __path_append_memory, __path_clear_memory, __path_get_memory_cost_overview,
     __path_optimize_memory, __path_query_memory,
+};
+pub(crate) use policy::{
+    load_project_automation_memory_policy, load_project_memory_budget_snapshot,
+    optimize_project_memory_budget, policy_allows_automated_memory,
+    save_project_automation_memory_policy, AutomationMemoryMode, ProjectAutomationMemoryPolicy,
+    MEMORY_POLICY_NAME,
 };
 pub(crate) use storage::{
     delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,
@@ -61,6 +68,18 @@ mod tests {
         assert_eq!(b.agent_type, "scriptAgent");
         assert_eq!(b.episodes_id, Some(2));
         assert_eq!(b.memory_type, "summary");
+    }
+
+    #[test]
+    fn query_body_accepts_scope_signature() {
+        let body: QueryMemoryBody = serde_json::from_str(
+            r#"{"projectId":1,"agentType":"scriptAgent","scopeSignature":{"episodeId":2,"shotId":"ep2-s3"}}"#,
+        )
+        .unwrap();
+        assert_eq!(
+            body.scope_signature,
+            Some(serde_json::json!({"episodeId": 2, "shotId": "ep2-s3"}))
+        );
     }
 
     #[test]
@@ -114,13 +133,21 @@ mod tests {
         assert_eq!(body.episodes_id, Some(2));
     }
 
+    #[test]
+    fn optimize_body_accepts_automation_mode() {
+        let body: OptimizeMemoryBody = serde_json::from_str(
+            r#"{"projectId":1,"agentType":"productionAgent","automationMode":"lean"}"#,
+        )
+        .unwrap();
+        assert_eq!(body.automation_mode.as_deref(), Some("lean"));
+    }
+
     // Feature: ai-drama-quality-optimization, Property 7: 记忆隔离性
     // 验证：需求 4.1, 4.2
     // 隔离性通过 SQL WHERE 子句保证（owner_user_id + numeric_project_id + agent_type）
     // 此处验证请求体的隔离维度字段均存在且可正确解析
     #[test]
     fn prop_memory_isolation_fields_present() {
-        use proptest::prelude::*;
         // 不同 project_id 的请求体应各自独立
         let body1: QueryMemoryBody =
             serde_json::from_str(r#"{"projectId":1,"agentType":"scriptAgent","episodesId":10}"#)
