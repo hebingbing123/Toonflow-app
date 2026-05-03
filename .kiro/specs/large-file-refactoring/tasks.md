@@ -282,27 +282,27 @@
 
 - [ ] 5. Phase 3: Backend Remaining Files (Lower Priority)
 
-  - [ ] 5.1 Split backend/src/production/workbench/meta/generate/director.rs (1,089 lines → ~2 files)
+  - [x] 5.1 Split backend/src/production/workbench/meta/generate/director.rs (1,089 lines → 2 files)
     
-    - [~] 5.1.1 Analyze and create structure
+    - [x] 5.1.1 Analyze and create structure
       - Read file, identify public APIs
       - Create `meta/generate/director/` directory
       - Create mod.rs and cues.rs
       - _Requirements: 2.8_
     
-    - [~] 5.1.2 Migrate code
-      - Move core director logic to mod.rs (~400 lines)
-      - Move director cues handling to cues.rs (~600 lines)
+    - [x] 5.1.2 Migrate code
+      - Move core director logic to `mod.rs` (457 lines)
+      - Move director cues handling to `cues.rs` (644 lines)
       - _Bug_Condition: isBugCondition(file) where lineCount(file) > 800_
       - _Expected_Behavior: All submodules ≤800 lines, director functionality preserved_
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.8, 3.1, 3.2, 3.3, 3.7, 3.9_
     
-    - [~] 5.1.3 Update mod.rs and verify
-      - Add re-exports, run cargo checks
+    - [x] 5.1.3 Update mod.rs and verify
+      - Add re-exports, run `cargo fmt`, `cargo check -q`, targeted `cargo test`, and `yarn refactor:check`
       - _Requirements: 2.8, 3.3, 3.4, 3.5, 3.7_
     
-    - [~] 5.1.4 Commit
+    - [x] 5.1.4 Commit
       - `git commit -m "refactor: split meta/generate/director.rs into 2 modules (≤800 lines each)"`
       - _Requirements: 2.8_
 
