@@ -513,3 +513,49 @@ fetchQualityTokenEfficiencySamples(
       )
       .toList();
 }
+
+class BadCaseStatItem {
+  const BadCaseStatItem({
+    required this.badCaseCategory,
+    required this.count,
+    required this.passRatePercent,
+    required this.avgScore,
+  });
+
+  final String? badCaseCategory;
+  final int count;
+  final double passRatePercent;
+  final double avgScore;
+
+  factory BadCaseStatItem.fromJson(Map<String, dynamic> json) =>
+      BadCaseStatItem(
+        badCaseCategory: json['badCaseCategory'] as String?,
+        count: (json['count'] as num).toInt(),
+        passRatePercent: (json['passRatePercent'] as num).toDouble(),
+        avgScore: (json['avgScore'] as num).toDouble(),
+      );
+}
+
+Future<List<BadCaseStatItem>> fetchBadCaseStats(
+  String accessToken, {
+  int? projectId,
+  int? scriptId,
+  int limit = 5,
+}) async {
+  final query = <String, String>{'limit': '$limit'};
+  if (projectId != null) query['projectId'] = '$projectId';
+  if (scriptId != null) query['scriptId'] = '$scriptId';
+  final res = await http
+      .get(
+        qualityUri('/api/v1/quality/bad-case-stats', queryParameters: query),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => BadCaseStatItem.fromJson(e as Map<String, dynamic>))
+      .toList();
+}

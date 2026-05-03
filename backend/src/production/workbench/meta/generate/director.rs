@@ -777,6 +777,12 @@ pub(super) fn score_director_emotion_fragment(
             };
         }
     }
+    if matches!(group, DirectorEmotionFragmentGroup::Eyes)
+        && normalized.contains("眼底")
+        && normalized.contains("情绪")
+    {
+        score -= 3;
+    }
     if normalized.contains("有") {
         score -= 1;
     }
@@ -838,8 +844,8 @@ pub(super) fn resolve_guardrail_performance_anchor(
     });
     let has_fragile_turn = current_storyboard_is_fragile_emotional_turn(fields);
     let has_visible_dialogue_risk = storyboard_has_visible_speech_performance_risk(fields, None);
-    let should_add_proactive_anchor = has_visible_dialogue_risk
-        || (has_fragile_turn && video_prompt_scene_needs_identity_memory(fields));
+    let should_add_proactive_anchor = has_fragile_turn
+        && (has_visible_dialogue_risk || video_prompt_scene_needs_identity_memory(fields));
 
     if pressure.is_none() && !should_add_proactive_anchor {
         return None;
@@ -850,28 +856,32 @@ pub(super) fn resolve_guardrail_performance_anchor(
         .map(|fragment| normalize_prompt_text(fragment))
         .collect::<Vec<_>>();
     let has_face_signal = normalized_coverage.iter().any(|fragment| {
-        ["眼神", "目光", "眼底", "眼尾", "喉结", "嘴角", "唇线"]
-            .iter()
-            .any(|keyword| fragment.contains(keyword))
+        guardrail_coverage_fragment_is_style_like(fragment)
+            && coverage_has_specific_guardrail_face_signal(fragment)
     });
     let has_delivery_signal = normalized_coverage.iter().any(|fragment| {
-        ["气息", "换气", "尾音", "发颤"]
-            .iter()
-            .any(|keyword| fragment.contains(keyword))
+        guardrail_coverage_fragment_is_style_like(fragment)
+            && coverage_has_specific_guardrail_delivery_signal(fragment)
     });
+    let storyboard_already_has_face_signal =
+        coverage_has_specific_guardrail_face_signal(&fields.action)
+            || coverage_has_specific_guardrail_face_signal(&fields.dialogue);
+    let storyboard_already_has_delivery_signal =
+        coverage_has_specific_guardrail_delivery_signal(&fields.action)
+            || coverage_has_specific_guardrail_delivery_signal(&fields.dialogue);
 
     let mut fragments = Vec::new();
     if !storyboard_dialogue_is_empty(&fields.dialogue)
         && pressure.is_some_and(|pressure| pressure.has_dialogue_guardrail)
     {
-        if !has_face_signal {
+        if !has_face_signal && !storyboard_already_has_face_signal {
             fragments.push(if has_fragile_turn {
                 "开口前先压住气息".to_string()
             } else {
                 "眼神先动再开口".to_string()
             });
         }
-        if !has_delivery_signal {
+        if !has_delivery_signal && !storyboard_already_has_delivery_signal {
             fragments.push(if has_fragile_turn {
                 "尾音带轻颤".to_string()
             } else {
@@ -882,22 +892,23 @@ pub(super) fn resolve_guardrail_performance_anchor(
         pressure.has_emotion_guardrail
             || (pressure.has_identity_guardrail && video_prompt_scene_needs_identity_memory(fields))
     }) {
-        if has_face_signal {
+        if has_face_signal || storyboard_already_has_face_signal {
             return None;
         }
         fragments.push("眼神嘴角细微递进".to_string());
     } else if has_visible_dialogue_risk {
-        if !has_face_signal {
+        if !has_face_signal && (!storyboard_already_has_face_signal || has_fragile_turn) {
             fragments.push(if has_fragile_turn {
                 "开口前先压住气息".to_string()
             } else {
                 "眼神先动再开口".to_string()
             });
-        } else if !has_delivery_signal && has_fragile_turn {
+        }
+        if !has_delivery_signal && has_fragile_turn {
             fragments.push("尾音带轻颤".to_string());
         }
     } else if has_fragile_turn && video_prompt_scene_needs_identity_memory(fields) {
-        if has_face_signal {
+        if has_face_signal || storyboard_already_has_face_signal {
             return None;
         }
         fragments.push("眼神嘴角细微递进".to_string());
@@ -911,6 +922,71 @@ pub(super) fn resolve_guardrail_performance_anchor(
         &fragments.join(", "),
         VIDEO_PROMPT_GUARDRAIL_PERFORMANCE_ANCHOR_MAX_CHARS,
     ))
+}
+
+fn coverage_has_specific_guardrail_face_signal(fragment: &str) -> bool {
+    [
+        "抬眼",
+        "垂眼",
+        "喉结",
+        "呼吸",
+        "发颤",
+        "停顿",
+        "欲言又止",
+        "哽咽",
+        "抽气",
+        "眼眶发红",
+        "指尖发颤",
+        "嘴角发僵",
+    ]
+    .iter()
+    .any(|keyword| fragment.contains(keyword))
+}
+
+fn coverage_has_specific_guardrail_delivery_signal(fragment: &str) -> bool {
+    ["气息", "换气", "尾音", "发颤", "哽咽", "抽气", "失声"]
+        .iter()
+        .any(|keyword| fragment.contains(keyword))
+}
+
+fn guardrail_coverage_fragment_is_style_like(fragment: &str) -> bool {
+    [
+        "表演", "语气", "情绪", "动作", "神情", "眼神", "目光", "眼底", "眉心", "嘴角", "唇线",
+    ]
+    .iter()
+    .any(|prefix| fragment.starts_with(prefix))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn guardrail_performance_anchor_keeps_fragile_dialogue_cues_without_pressure() {
+        let fields = StructuredStoryboardDescription {
+            subject: "林晚".to_string(),
+            setting: "病房门口".to_string(),
+            subject_refs: "林晚".to_string(),
+            duration_seconds: Some(4),
+            shot: "近景".to_string(),
+            camera_move: "缓推".to_string(),
+            action: "抽气后低声说我没事".to_string(),
+            mood: "压抑".to_string(),
+            lighting: "冷白侧光".to_string(),
+            dialogue: "我没事".to_string(),
+            sound: "空调低鸣".to_string(),
+        };
+
+        let anchor = resolve_guardrail_performance_anchor(
+            Some(&fields),
+            &["神情低落, 眼神黯淡, 眉心轻蹙".to_string()],
+            None,
+        )
+        .expect("anchor");
+
+        assert!(anchor.contains("开口前先压住气息"), "{anchor}");
+        assert!(anchor.contains("尾音带轻颤"), "{anchor}");
+    }
 }
 
 pub(super) fn resolve_environment_texture_style_anchor(

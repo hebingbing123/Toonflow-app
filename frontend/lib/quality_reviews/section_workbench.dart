@@ -37,6 +37,7 @@ class _QualityReviewsWorkbenchDialogState
   String? _tokenEfficiencyExecutionChecklist;
   String? _tokenEfficiencySamplesSummary;
   String? _stagePassRateSummary;
+  String? _badCaseStatsSummary;
   String? _reviewDetails;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
@@ -45,6 +46,7 @@ class _QualityReviewsWorkbenchDialogState
   bool _loadingTokenEfficiency = false;
   bool _loadingTokenEfficiencySamples = false;
   bool _loadingStagePassRate = false;
+  bool _loadingBadCaseStats = false;
   bool _loadingReviewById = false;
   bool _creatingReview = false;
   bool _filterBadCasesOnly = false;
@@ -263,6 +265,31 @@ class _QualityReviewsWorkbenchDialogState
     }
   }
 
+  Future<void> _loadBadCaseStats() async {
+    setState(() {
+      _loadingBadCaseStats = true;
+      _statusLine = null;
+    });
+    try {
+      final items = await fetchBadCaseStats(widget.accessToken, limit: 5);
+      if (!mounted) return;
+      setState(() {
+        _badCaseStatsSummary = items.isEmpty
+            ? '暂无坏例数据'
+            : items
+                .map((e) =>
+                    '${e.badCaseCategory ?? "未分类"} ${e.count}条 pass=${e.passRatePercent.toStringAsFixed(1)}%')
+                .join(' | ');
+        _statusLine = '已刷新坏例分布';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _statusLine = e.toString());
+    } finally {
+      if (mounted) setState(() => _loadingBadCaseStats = false);
+    }
+  }
+
   Future<void> _loadTokenEfficiency() async {
     setState(() {
       _loadingTokenEfficiency = true;
@@ -435,6 +462,7 @@ class _QualityReviewsWorkbenchDialogState
         tokenEfficiencySamplesSummary: _tokenEfficiencySamplesSummary,
         stagePassRateSummary: _stagePassRateSummary,
         stageGradeRows: _stageGradeRows,
+        badCaseStatsSummary: _badCaseStatsSummary,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
         activeFilterQuerySummary: _activeFilterQuerySummary(),
@@ -451,6 +479,7 @@ class _QualityReviewsWorkbenchDialogState
         loadingTokenEfficiency: _loadingTokenEfficiency,
         loadingTokenEfficiencySamples: _loadingTokenEfficiencySamples,
         loadingStagePassRate: _loadingStagePassRate,
+        loadingBadCaseStats: _loadingBadCaseStats,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
         projectIdFilterCtrl: _ctrls.projectIdFilterCtrl,
@@ -509,6 +538,9 @@ class _QualityReviewsWorkbenchDialogState
         },
         onLoadStagePassRate: () {
           _loadStagePassRate();
+        },
+        onLoadBadCaseStats: () {
+          _loadBadCaseStats();
         },
         onLoadReviewById: () {
           _loadReviewById();

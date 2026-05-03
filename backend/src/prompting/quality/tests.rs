@@ -380,3 +380,264 @@ proptest! {
         prop_assert_eq!(value.get("memoryBudgetTier").and_then(serde_json::Value::as_str), budget_tier.as_deref());
     }
 }
+
+// Feature: drama-platform-completion, Task 15: quality-review-driven optimization
+
+#[cfg(test)]
+mod task15_tests {
+    use chrono::Utc;
+    use serde_json::json;
+    use uuid::Uuid;
+
+    use super::super::issue_type::{infer_issue_types, IssueType};
+    use super::super::next_action::{infer_next_action, NextAction};
+    use super::super::types::{BadCaseFrequencyItem, QualityReview, SkillVersionComparisonItem};
+
+    fn base_review() -> QualityReview {
+        QualityReview {
+            id: Uuid::new_v4(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            user_id: Uuid::new_v4(),
+            project_id: Some(1),
+            script_id: Some(1),
+            job_id: None,
+            target_type: "storyboard".into(),
+            target_id: None,
+            source: "manual".into(),
+            plot_coherence: None,
+            character_consistency: None,
+            dialogue_naturalness: None,
+            pacing: None,
+            faithfulness: None,
+            visual_quality: None,
+            overall_score: None,
+            passed: None,
+            comments: None,
+            skill_version: None,
+            model_name: None,
+            model_params: None,
+            memory_delivery_priority_applied: None,
+            reviewer_id: None,
+            is_bad_case: false,
+            bad_case_category: None,
+            stage: None,
+            grade: None,
+            skill_file_path: None,
+            skill_version_hash: None,
+        }
+    }
+
+    // infer_issue_types: CharacterConsistency via score
+    #[test]
+    fn infer_issue_types_character_consistency_from_score() {
+        let review = QualityReview {
+            character_consistency: Some(4),
+            ..base_review()
+        };
+        let types = infer_issue_types(&review);
+        assert!(types.contains(&IssueType::CharacterConsistency));
+    }
+
+    // infer_issue_types: EmotionExpression via comment
+    #[test]
+    fn infer_issue_types_emotion_expression_from_comment() {
+        let review = QualityReview {
+            comments: Some("整体情绪平，没有起伏".into()),
+            ..base_review()
+        };
+        let types = infer_issue_types(&review);
+        assert!(types.contains(&IssueType::EmotionExpression));
+    }
+
+    // infer_issue_types: DialogueStiffness via category
+    #[test]
+    fn infer_issue_types_dialogue_stiffness_from_category() {
+        let review = QualityReview {
+            bad_case_category: Some("dialogue_issue".into()),
+            is_bad_case: true,
+            ..base_review()
+        };
+        let types = infer_issue_types(&review);
+        assert!(types.contains(&IssueType::DialogueStiffness));
+    }
+
+    // infer_issue_types: AiArtifact via comment
+    #[test]
+    fn infer_issue_types_ai_artifact_from_comment() {
+        let review = QualityReview {
+            comments: Some("一眼AI，塑料感很强".into()),
+            ..base_review()
+        };
+        let types = infer_issue_types(&review);
+        assert!(types.contains(&IssueType::AiArtifact));
+    }
+
+    // infer_issue_types: ShotRhythm via pacing_issue category
+    #[test]
+    fn infer_issue_types_shot_rhythm_from_category() {
+        let review = QualityReview {
+            bad_case_category: Some("pacing_issue".into()),
+            is_bad_case: true,
+            ..base_review()
+        };
+        let types = infer_issue_types(&review);
+        assert!(types.contains(&IssueType::ShotRhythm));
+    }
+
+    // infer_issue_types: VisualContinuity via visual_quality score
+    #[test]
+    fn infer_issue_types_visual_continuity_from_score() {
+        let review = QualityReview {
+            visual_quality: Some(3),
+            ..base_review()
+        };
+        let types = infer_issue_types(&review);
+        assert!(types.contains(&IssueType::VisualContinuity));
+    }
+
+    // infer_next_action: RollbackToDirectorPlanning for grade D
+    #[test]
+    fn infer_next_action_rollback_for_grade_d() {
+        let review = QualityReview {
+            grade: Some("D".into()),
+            ..base_review()
+        };
+        let action = infer_next_action(&review, &[]);
+        assert_eq!(action, NextAction::RollbackToDirectorPlanning);
+    }
+
+    // infer_next_action: RollbackToDirectorPlanning for severe score
+    #[test]
+    fn infer_next_action_rollback_for_severe_score() {
+        let review = QualityReview {
+            overall_score: Some(3),
+            ..base_review()
+        };
+        let action = infer_next_action(&review, &[]);
+        assert_eq!(action, NextAction::RollbackToDirectorPlanning);
+    }
+
+    // infer_next_action: UpdateCharacterAnchor when CharacterConsistency issue
+    #[test]
+    fn infer_next_action_update_character_anchor() {
+        let review = base_review();
+        let action = infer_next_action(&review, &[IssueType::CharacterConsistency]);
+        assert_eq!(action, NextAction::UpdateCharacterAnchor);
+    }
+
+    // infer_next_action: PatchStoryboardItems for bad case
+    #[test]
+    fn infer_next_action_patch_for_bad_case() {
+        let review = QualityReview {
+            is_bad_case: true,
+            ..base_review()
+        };
+        let action = infer_next_action(&review, &[IssueType::EmotionExpression]);
+        assert_eq!(action, NextAction::PatchStoryboardItems);
+    }
+
+    // infer_next_action: Observe for passing review
+    #[test]
+    fn infer_next_action_observe_for_passing_review() {
+        let review = QualityReview {
+            overall_score: Some(8),
+            passed: Some(true),
+            grade: Some("A".into()),
+            ..base_review()
+        };
+        let action = infer_next_action(&review, &[]);
+        assert_eq!(action, NextAction::Observe);
+    }
+
+    // BadCaseFrequencyItem serializes correctly
+    #[test]
+    fn bad_case_frequency_item_serializes() {
+        let item = BadCaseFrequencyItem {
+            issue_type: "dialogue_stiffness".into(),
+            raw_category: Some("dialogue_issue".into()),
+            count: 4,
+            is_high_frequency: true,
+            sample_comments: vec!["读文章感很强".into()],
+        };
+        let v = serde_json::to_value(&item).unwrap();
+        assert_eq!(v["issueType"], "dialogue_stiffness");
+        assert_eq!(v["count"], 4);
+        assert_eq!(v["isHighFrequency"], true);
+        assert_eq!(v["rawCategory"], "dialogue_issue");
+    }
+
+    // SkillVersionComparisonItem serializes correctly
+    #[test]
+    fn skill_version_comparison_item_serializes() {
+        let item = SkillVersionComparisonItem {
+            skill_file_path: "art_skills/2D_90s_japanese_anime/art_prompt/art_storyboard_video.md"
+                .into(),
+            skill_version_hash: "abc12345".into(),
+            total_count: 10,
+            pass_rate_percent: 80.0,
+            avg_score: 7.5,
+            bad_case_rate_percent: 10.0,
+            grade_a_count: 3,
+            grade_b_count: 5,
+            grade_c_count: 1,
+            grade_d_count: 1,
+        };
+        let v = serde_json::to_value(&item).unwrap();
+        assert_eq!(v["skillVersionHash"], "abc12345");
+        assert_eq!(v["passRatePercent"], 80.0);
+        assert_eq!(v["gradeACount"], 3);
+        assert_eq!(v["badCaseRatePercent"], 10.0);
+    }
+
+    // IssueType as_str round-trips
+    #[test]
+    fn issue_type_as_str_covers_all_variants() {
+        let all = [
+            (IssueType::CharacterConsistency, "character_consistency"),
+            (IssueType::EmotionExpression, "emotion_expression"),
+            (IssueType::ShotRhythm, "shot_rhythm"),
+            (IssueType::VisualContinuity, "visual_continuity"),
+            (IssueType::DialogueStiffness, "dialogue_stiffness"),
+            (IssueType::AiArtifact, "ai_artifact"),
+        ];
+        for (variant, expected) in all {
+            assert_eq!(variant.as_str(), expected);
+        }
+    }
+
+    // NextAction as_str round-trips
+    #[test]
+    fn next_action_as_str_covers_all_variants() {
+        let all = [
+            (NextAction::PatchStoryboardItems, "patch_storyboard_items"),
+            (
+                NextAction::RollbackToDirectorPlanning,
+                "rollback_to_director_planning",
+            ),
+            (NextAction::UpdateCharacterAnchor, "update_character_anchor"),
+            (NextAction::Observe, "observe"),
+        ];
+        for (variant, expected) in all {
+            assert_eq!(variant.as_str(), expected);
+        }
+    }
+
+    // merge_issue_diagnostics preserves existing diagnostics fields
+    #[test]
+    fn merge_issue_diagnostics_preserves_existing_fields() {
+        use super::super::handlers::create::tests::call_merge_issue_diagnostics;
+        let merged = call_merge_issue_diagnostics(
+            Some(json!({"diagnostics": {"promptChars": 512}})),
+            &[IssueType::DialogueStiffness],
+            &NextAction::PatchStoryboardItems,
+        );
+        assert_eq!(merged["diagnostics"]["promptChars"], 512);
+        assert_eq!(
+            merged["diagnostics"]["nextAction"],
+            "patch_storyboard_items"
+        );
+        let issue_types = merged["diagnostics"]["issueTypes"].as_array().unwrap();
+        assert_eq!(issue_types[0], "dialogue_stiffness");
+    }
+}

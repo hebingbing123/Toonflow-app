@@ -30,6 +30,20 @@ pub(crate) fn build_rejected_video_negative_memory(
         &mut fragments,
         map_rejected_performance_fragment(&fields.action, &fields.dialogue, &fields.mood),
     );
+    push_rejected_negative_fragment(
+        &mut fragments,
+        map_rejected_static_idle_fragment(
+            &fields.action,
+            &fields.dialogue,
+            &fields.mood,
+            &fields.camera_move,
+        ),
+    );
+    push_rejected_negative_fragment(
+        &mut fragments,
+        map_rejected_dialogue_fragment(&fields.dialogue),
+    );
+    push_rejected_negative_fragment(&mut fragments, map_rejected_identity_fragment(&fields));
     let fragments = compact_rejected_negative_memory_fragments_for_storage(
         fragments.into_iter().map(str::to_string).collect(),
     );
@@ -113,9 +127,23 @@ fn rejected_video_negative_risk_tags(
     if families
         .iter()
         .any(|family| *family == "performance_delivery")
+        && rejected_negative_scene_needs_emotional_guard(fields)
+    {
+        tags.push("emotion");
+    }
+    if families
+        .iter()
+        .any(|family| *family == "performance_delivery")
         && rejected_negative_scene_needs_expressive_performance_guard(fields)
     {
         tags.push("performance");
+    }
+    if families
+        .iter()
+        .any(|family| *family == "performance_delivery")
+        && rejected_negative_scene_has_dialogue_guard(fields)
+    {
+        tags.push("dialogue");
     }
     if families.iter().any(|family| *family == "lip_sync")
         && rejected_negative_scene_has_dialogue_guard(fields)
@@ -287,6 +315,17 @@ fn compact_rejected_negative_memory_fragments(fragments: Vec<String>) -> Vec<Str
     if has_performance_delivery_guard {
         compacted.retain(|fragment| observation_note_family(fragment) != "mood_tone");
     }
+    let has_character_guard = compacted.iter().any(|fragment| {
+        matches!(
+            observation_note_family(fragment),
+            "character_consistency" | "performance_delivery"
+        )
+    });
+    if has_character_guard {
+        compacted.retain(|fragment| {
+            canonical_observation_note(fragment) != "avoid repeating stable follow camera"
+        });
+    }
 
     if compacted.len() == 1
         && compacted
@@ -307,6 +346,7 @@ pub(super) fn compact_rejected_negative_memory_fragments_for_storage_with_bias(
     fragments: Vec<String>,
     bias: Option<VideoPromptMemorySelectionBias>,
 ) -> Vec<String> {
+    let fragments = stitch_rejected_negative_fragments(fragments);
     let mut ranked = compact_rejected_negative_memory_fragments(
         compact_rejected_negative_fragment_families(fragments),
     )
@@ -712,7 +752,10 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
                 .unwrap_or(i32::MAX);
 
-        let ranked = ranked_rejected_negative_fragments(&avoid);
+        let ranked = retain_storyboard_matching_fragments(
+            ranked_rejected_negative_fragments(&avoid),
+            &storyboard_tags,
+        );
         if ranked.is_empty() {
             let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
             negative_scored.push((
@@ -762,7 +805,10 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
                 .unwrap_or(i32::MAX);
 
-        let ranked = ranked_observation_fragments(&avoid);
+        let ranked = retain_storyboard_matching_fragments(
+            ranked_observation_fragments(&avoid),
+            &storyboard_tags,
+        );
         if ranked.len() == 1
             && ranked
                 .first()
@@ -810,9 +856,10 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             &normalized_subject_candidates,
             storyboard_row,
             bias,
+            true,
         )
     } else {
-        select_ranked_rejected_video_memory_negative_notes(negative_scored)
+        select_ranked_rejected_video_memory_negative_notes(negative_scored, bias)
     };
     let observation_notes = if observation_scored.is_empty() {
         select_rejected_video_observation_summary_notes(
@@ -820,9 +867,10 @@ pub(crate) fn select_rejected_video_memory_notes_and_observation_candidates_for_
             &normalized_subject_candidates,
             storyboard_row,
             bias,
+            false,
         )
     } else {
-        select_ranked_rejected_video_memory_observation_notes(observation_scored)
+        select_ranked_rejected_video_memory_observation_notes(observation_scored, bias)
     };
 
     RejectedVideoMemorySelection {
@@ -874,11 +922,24 @@ fn select_rejected_video_observation_summary_notes(
     subject_candidates: &[String],
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     bias: Option<VideoPromptMemorySelectionBias>,
+    join_fragments: bool,
 ) -> Vec<String> {
     let storyboard_tags = storyboard_risk_tags_for_subject_fallback(storyboard_row);
     if storyboard_tags.is_empty() {
         return Vec::new();
     }
+    let matching_role_summary_count = rows
+        .iter()
+        .filter(|row| {
+            matches!(
+                row.name.as_str(),
+                SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+                    | PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+            )
+        })
+        .filter(|row| memory_matches_rejected_video_risk_tags(&row.content, &storyboard_tags))
+        .filter(|row| memory_matches_subject_candidates(&row.content, subject_candidates))
+        .count();
 
     let mut scored = rows
         .iter()
@@ -913,7 +974,13 @@ fn select_rejected_video_observation_summary_notes(
             let Some(avoid) = extract_key_value(&row.content, "avoid") else {
                 return Vec::new();
             };
-            let fragments = ranked_rejected_negative_fragments(&avoid);
+            let fragments = prioritize_observation_summary_fragments_for_storyboard(
+                retain_storyboard_matching_fragments(
+                    ranked_rejected_negative_fragments(&avoid),
+                    &storyboard_tags,
+                ),
+                &storyboard_tags,
+            );
             fragments
                 .into_iter()
                 .enumerate()
@@ -947,7 +1014,10 @@ fn select_rejected_video_observation_summary_notes(
             .then(a.6.cmp(&b.6))
             .then(a.7.cmp(&b.7))
     });
-
+    let available_fragments = scored
+        .iter()
+        .map(|(_, _, _, _, _, _, _, _, fragment)| fragment.clone())
+        .collect::<Vec<_>>();
     let mut selected = Vec::new();
     for (_, _, _, _, _, _, _, _, fragment) in scored {
         if observation_note_is_covered(&fragment, &selected) {
@@ -956,12 +1026,68 @@ fn select_rejected_video_observation_summary_notes(
         selected.retain(|existing| !observation_note_covers(&fragment, existing));
         selected.push(fragment);
         if selected.len() >= REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
-            return vec![selected.join(", ")];
+            let selected = backfill_observation_summary_fragments_for_storyboard(
+                selected,
+                &available_fragments,
+                &storyboard_tags,
+            );
+            return if join_fragments {
+                vec![order_observation_summary_negative_output_fragments(
+                    selected,
+                    &available_fragments,
+                    matching_role_summary_count,
+                )
+                .join(", ")]
+            } else if should_join_pending_observation_summary_fragments(
+                &selected,
+                matching_role_summary_count,
+            ) {
+                vec![selected.join(", ")]
+            } else {
+                trim_pending_observation_summary_fragments(selected)
+            };
         }
     }
+    let selected = backfill_observation_summary_fragments_for_storyboard(
+        selected,
+        &available_fragments,
+        &storyboard_tags,
+    );
     (!selected.is_empty())
-        .then(|| vec![selected.join(", ")])
+        .then(|| {
+            if join_fragments {
+                vec![order_observation_summary_negative_output_fragments(
+                    selected,
+                    &available_fragments,
+                    matching_role_summary_count,
+                )
+                .join(", ")]
+            } else if should_join_pending_observation_summary_fragments(
+                &selected,
+                matching_role_summary_count,
+            ) {
+                vec![selected.join(", ")]
+            } else {
+                trim_pending_observation_summary_fragments(selected)
+            }
+        })
         .unwrap_or_default()
+}
+
+fn should_join_pending_observation_summary_fragments(
+    selected: &[String],
+    matching_role_summary_count: usize,
+) -> bool {
+    if matching_role_summary_count < 2 {
+        return false;
+    }
+    let has_identity = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "character_consistency");
+    let has_performance = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "performance_delivery");
+    has_identity && has_performance
 }
 
 fn rejected_observation_summary_scope_priority(name: &str) -> u8 {
@@ -986,6 +1112,302 @@ fn observation_summary_sample_count(content: &str) -> usize {
     extract_key_value(content, "sampleCount")
         .and_then(|value| value.parse::<usize>().ok())
         .unwrap_or(0)
+}
+
+fn retain_storyboard_matching_fragments(
+    mut fragments: Vec<String>,
+    storyboard_tags: &[String],
+) -> Vec<String> {
+    if storyboard_tags.is_empty() {
+        return fragments;
+    }
+    let has_matching_fragment = fragments
+        .iter()
+        .any(|fragment| fragment_storyboard_risk_overlap(fragment, storyboard_tags) > 0);
+    if has_matching_fragment {
+        fragments
+            .retain(|fragment| fragment_storyboard_risk_overlap(fragment, storyboard_tags) > 0);
+    }
+    fragments
+}
+
+fn prioritize_observation_summary_fragments_for_storyboard(
+    fragments: Vec<String>,
+    storyboard_tags: &[String],
+) -> Vec<String> {
+    if fragments.len() < 2 || storyboard_tags.is_empty() {
+        return fragments;
+    }
+
+    let has_storyboard_tag = |candidate: &str| storyboard_tags.iter().any(|tag| tag == candidate);
+    let dialogue_scene = has_storyboard_tag("dialogue");
+    let identity_scene = has_storyboard_tag("identity");
+    let lighting_scene = has_storyboard_tag("lighting");
+    let has_lighting_fragment = fragments.iter().any(|fragment| {
+        matches!(
+            observation_note_family(fragment),
+            "lighting_backlight" | "lighting_reflection"
+        )
+    });
+    let mut remaining = fragments;
+    let mut prioritized = Vec::new();
+    let take_family = |family: &str, prioritized: &mut Vec<String>, remaining: &mut Vec<String>| {
+        if let Some(idx) = remaining
+            .iter()
+            .position(|fragment| observation_note_family(fragment) == family)
+        {
+            prioritized.push(remaining.remove(idx));
+        }
+    };
+
+    if dialogue_scene && identity_scene && has_lighting_fragment {
+        take_family("performance_delivery", &mut prioritized, &mut remaining);
+        take_family("character_consistency", &mut prioritized, &mut remaining);
+    } else if identity_scene && lighting_scene {
+        take_family("character_consistency", &mut prioritized, &mut remaining);
+        take_family("lighting_backlight", &mut prioritized, &mut remaining);
+        take_family("lighting_reflection", &mut prioritized, &mut remaining);
+    }
+
+    prioritized.extend(remaining);
+    prioritized
+}
+
+fn backfill_observation_summary_fragments_for_storyboard(
+    mut selected: Vec<String>,
+    available: &[String],
+    storyboard_tags: &[String],
+) -> Vec<String> {
+    if storyboard_tags.is_empty() {
+        return selected;
+    }
+
+    let has_storyboard_tag = |candidate: &str| storyboard_tags.iter().any(|tag| tag == candidate);
+    let first_available_family = |family: &str| {
+        available
+            .iter()
+            .find(|fragment| observation_note_family(fragment) == family)
+            .cloned()
+    };
+    let has_selected_identity = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "character_consistency");
+    let has_selected_lighting = selected.iter().any(|fragment| {
+        matches!(
+            observation_note_family(fragment),
+            "lighting_backlight" | "lighting_reflection"
+        )
+    });
+
+    if (has_storyboard_tag("identity") || has_storyboard_tag("dialogue")) && !has_selected_identity
+    {
+        if let Some(identity) = first_available_family("character_consistency") {
+            if has_storyboard_tag("dialogue") {
+                if let Some(idx) = selected.iter().position(|fragment| {
+                    matches!(
+                        observation_note_family(fragment),
+                        "lighting_backlight" | "lighting_reflection"
+                    )
+                }) {
+                    selected[idx] = identity;
+                } else if let Some(idx) = selected.iter().position(|fragment| {
+                    !matches!(
+                        observation_note_family(fragment),
+                        "performance_delivery" | "character_consistency"
+                    )
+                }) {
+                    selected[idx] = identity;
+                } else if selected.len() < REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
+                    selected.push(identity);
+                }
+            } else if let Some(idx) = selected
+                .iter()
+                .position(|fragment| observation_note_family(fragment) == "performance_delivery")
+            {
+                selected[idx] = identity;
+            } else if selected.len() < REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
+                selected.push(identity);
+            }
+        }
+    }
+
+    if has_storyboard_tag("lighting") && !has_storyboard_tag("dialogue") && !has_selected_lighting {
+        if let Some(lighting) = first_available_family("lighting_backlight")
+            .or_else(|| first_available_family("lighting_reflection"))
+        {
+            if selected.len() < REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
+                selected.push(lighting);
+            } else if let Some(idx) = selected
+                .iter()
+                .position(|fragment| observation_note_family(fragment) != "character_consistency")
+            {
+                selected[idx] = lighting;
+            }
+        }
+    }
+
+    let mut deduped = Vec::new();
+    for fragment in selected {
+        if observation_note_is_covered(&fragment, &deduped) {
+            continue;
+        }
+        deduped.retain(|existing| !observation_note_covers(&fragment, existing));
+        deduped.push(fragment);
+        if deduped.len() >= REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
+            break;
+        }
+    }
+    if !available.iter().any(|fragment| {
+        matches!(
+            observation_note_family(fragment),
+            "lighting_backlight" | "lighting_reflection"
+        )
+    }) && deduped.len() >= 2
+    {
+        let first_identity_idx = available
+            .iter()
+            .position(|fragment| observation_note_family(fragment) == "character_consistency");
+        let first_performance_idx = available
+            .iter()
+            .position(|fragment| observation_note_family(fragment) == "performance_delivery");
+        if matches!((first_identity_idx, first_performance_idx), (Some(i), Some(p)) if i < p) {
+            deduped.sort_by_key(|fragment| match observation_note_family(fragment) {
+                "character_consistency" => 0usize,
+                "performance_delivery" => 1usize,
+                _ => 2usize,
+            });
+        }
+    }
+    deduped
+}
+
+fn trim_pending_observation_summary_fragments(selected: Vec<String>) -> Vec<String> {
+    let has_performance = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "performance_delivery");
+    let has_identity = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "character_consistency");
+    if has_performance && !has_identity {
+        return selected
+            .into_iter()
+            .filter(|fragment| observation_note_family(fragment) == "performance_delivery")
+            .take(REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT)
+            .collect();
+    }
+    selected
+}
+
+fn trim_rejected_fragments_for_bias(
+    selected: Vec<String>,
+    bias: Option<VideoPromptMemorySelectionBias>,
+) -> Vec<String> {
+    let Some(bias) = bias else {
+        return selected;
+    };
+    if bias.prefer_delivery && !bias.prefer_visual_continuity {
+        let performance = selected
+            .iter()
+            .filter(|fragment| observation_note_family(fragment) == "performance_delivery")
+            .take(REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT)
+            .cloned()
+            .collect::<Vec<_>>();
+        if !performance.is_empty() {
+            return performance;
+        }
+    }
+    selected
+}
+
+fn drop_motion_fillers_when_performance_exists(selected: Vec<String>) -> Vec<String> {
+    let has_performance = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "performance_delivery");
+    let has_identity = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "character_consistency");
+    if !has_performance || has_identity {
+        return selected;
+    }
+    let filtered = selected
+        .into_iter()
+        .filter(|fragment| observation_note_family(fragment) != "camera_motion_stability")
+        .collect::<Vec<_>>();
+    if filtered.is_empty() {
+        Vec::new()
+    } else {
+        filtered
+    }
+}
+
+fn normalize_negative_note_output_fragments(mut selected: Vec<String>) -> Vec<String> {
+    let has_motion = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "flicker_motion_jitter");
+    let has_lighting = selected.iter().any(|fragment| {
+        matches!(
+            observation_note_family(fragment),
+            "lighting_backlight" | "lighting_reflection"
+        )
+    });
+    let has_identity = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "character_consistency");
+    let has_performance = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "performance_delivery");
+    if has_motion {
+        for fragment in &mut selected {
+            if canonical_observation_note(fragment)
+                == "avoid flat cold lighting or harsh backlight silhouette"
+            {
+                *fragment = "avoid flat cold lighting".to_string();
+            }
+        }
+        selected.sort_by_key(|fragment| match observation_note_family(fragment) {
+            "flicker_motion_jitter" => 0usize,
+            "lighting_backlight" | "lighting_reflection" => 1usize,
+            _ => 2usize,
+        });
+    } else if has_identity && has_performance && !has_lighting {
+        selected.sort_by_key(|fragment| match observation_note_family(fragment) {
+            "character_consistency" => 0usize,
+            "performance_delivery" => 1usize,
+            _ => 2usize,
+        });
+    }
+    selected
+}
+
+fn order_observation_summary_negative_output_fragments(
+    selected: Vec<String>,
+    available_fragments: &[String],
+    matching_role_summary_count: usize,
+) -> Vec<String> {
+    let mut selected = normalize_negative_note_output_fragments(selected);
+    let has_identity = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "character_consistency");
+    let has_performance = selected
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "performance_delivery");
+    if !has_identity || !has_performance {
+        return selected;
+    }
+    let available_has_lighting = available_fragments.iter().any(|fragment| {
+        matches!(
+            observation_note_family(fragment),
+            "lighting_backlight" | "lighting_reflection"
+        )
+    });
+    if matching_role_summary_count >= 2 || available_has_lighting {
+        selected.sort_by_key(|fragment| match observation_note_family(fragment) {
+            "performance_delivery" => 0usize,
+            "character_consistency" => 1usize,
+            _ => 2usize,
+        });
+    }
+    selected
 }
 
 #[cfg_attr(not(test), allow(dead_code))]
@@ -1059,6 +1481,7 @@ pub(crate) fn select_pending_rejected_video_observation_candidates_for_subject_w
 
 fn select_ranked_rejected_video_memory_negative_notes(
     mut scored: Vec<(i32, usize, usize, usize, u8, i32, usize, String)>,
+    bias: Option<VideoPromptMemorySelectionBias>,
 ) -> Vec<String> {
     scored.sort_by(|a, b| {
         a.1.cmp(&b.1)
@@ -1086,6 +1509,10 @@ fn select_ranked_rejected_video_memory_negative_notes(
             break;
         }
     }
+    let selected = normalize_negative_note_output_fragments(trim_rejected_fragments_for_bias(
+        drop_motion_fillers_when_performance_exists(selected),
+        bias,
+    ));
     (!selected.is_empty())
         .then(|| vec![selected.join(", ")])
         .unwrap_or_default()
@@ -1093,6 +1520,7 @@ fn select_ranked_rejected_video_memory_negative_notes(
 
 fn select_ranked_rejected_video_memory_observation_notes(
     mut scored: Vec<(i32, usize, usize, usize, u8, i32, usize, String)>,
+    bias: Option<VideoPromptMemorySelectionBias>,
 ) -> Vec<String> {
     scored.sort_by(|a, b| {
         a.1.cmp(&b.1)
@@ -1117,7 +1545,12 @@ fn select_ranked_rejected_video_memory_observation_notes(
         notes.retain(|existing| !observation_note_covers(&note, existing));
         notes.push(note);
     }
-    notes
+    let notes = drop_motion_fillers_when_performance_exists(notes);
+    if bias.is_some_and(|bias| bias.prefer_delivery && !bias.prefer_visual_continuity) {
+        trim_rejected_fragments_for_bias(notes, bias)
+    } else {
+        notes
+    }
 }
 
 fn ranked_observation_fragments(avoid: &str) -> Vec<String> {
@@ -1307,6 +1740,44 @@ fn score_rejected_negative_fragment_for_storyboard(
 ) -> i32 {
     score_rejected_negative_fragment(fragment)
         + fragment_storyboard_risk_overlap(fragment, storyboard_tags) as i32 * 18
+        + rejected_fragment_storyboard_tag_priority_bonus(fragment, storyboard_tags)
+}
+
+fn rejected_fragment_storyboard_tag_priority_bonus(
+    fragment: &str,
+    storyboard_tags: &[String],
+) -> i32 {
+    if storyboard_tags.is_empty() {
+        return 0;
+    }
+
+    let tags = negative_fragment_storyboard_risk_tags(fragment);
+    let has_storyboard_tag = |candidate: &str| storyboard_tags.iter().any(|tag| tag == candidate);
+    let has_fragment_tag = |candidate: &str| tags.iter().any(|tag| *tag == candidate);
+    let mut bonus = 0;
+    let dialogue_scene = has_storyboard_tag("dialogue");
+
+    if has_fragment_tag("performance")
+        && (has_storyboard_tag("performance")
+            || has_storyboard_tag("dialogue")
+            || has_storyboard_tag("emotion"))
+    {
+        bonus += if dialogue_scene { 26 } else { 6 };
+    }
+    if has_fragment_tag("identity") && has_storyboard_tag("identity") {
+        bonus += if dialogue_scene { 18 } else { 28 };
+    }
+    if has_fragment_tag("lighting") && has_storyboard_tag("lighting") {
+        bonus += 6;
+    }
+    if has_fragment_tag("motion") && has_storyboard_tag("motion") {
+        bonus += 4;
+    }
+    if has_fragment_tag("framing") && has_storyboard_tag("framing") {
+        bonus += 4;
+    }
+
+    bonus
 }
 
 fn score_pending_observation_note(note: &str) -> i32 {
@@ -1435,7 +1906,21 @@ fn compact_rejected_negative_fragment_risk_budget(fragments: Vec<String>) -> Vec
     let has_high_signal_visual_guard = fragments
         .iter()
         .any(|fragment| rejected_negative_fragment_is_high_signal_visual_guard(fragment));
-    if !has_high_signal_visual_guard {
+    let has_character_guard = fragments
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "character_consistency");
+    let has_mood_tone = fragments
+        .iter()
+        .any(|fragment| observation_note_family(fragment) == "mood_tone");
+    let has_stronger_nonstyle_guard = fragments.iter().any(|fragment| {
+        matches!(
+            observation_note_family(fragment),
+            "performance_delivery" | "camera_motion_stability" | "flicker_motion_jitter"
+        )
+    });
+    let should_drop_style_fillers = has_high_signal_visual_guard
+        || (has_character_guard && has_mood_tone && !has_stronger_nonstyle_guard);
+    if !should_drop_style_fillers {
         return fragments;
     }
 
@@ -1670,8 +2155,7 @@ fn parse_observation_character_consistency_fragment(
             Some(ObservationCharacterConsistencyFlags {
                 face_distortion: matches!(
                     canonical.as_str(),
-                    "avoid face drift or costume inconsistency"
-                        | "avoid face distortion, identity drift, costume drift"
+                    "avoid face distortion, identity drift, costume drift"
                 ),
                 identity_drift: matches!(
                     canonical.as_str(),
@@ -1747,7 +2231,7 @@ fn render_observation_visual_error_fragments(flags: ObservationVisualErrorFlags)
         fragments.push("avoid blur".to_string());
     }
     if flags.flicker {
-        fragments.push("avoid flicker".to_string());
+        fragments.push("avoid flicker or motion jitter".to_string());
     }
     fragments
 }
@@ -1865,7 +2349,12 @@ fn extract_rejected_video_risk_tags(content: &str) -> Vec<String> {
                 .filter(|tag| !tag.is_empty())
                 .collect::<Vec<_>>()
         })
-        .unwrap_or_default()
+        .filter(|tags| !tags.is_empty())
+        .unwrap_or_else(|| {
+            extract_key_value(content, "avoid")
+                .map(|avoid| rejected_video_risk_tags_from_avoid(&avoid))
+                .unwrap_or_default()
+        })
 }
 
 fn storyboard_risk_tags_for_subject_fallback(
@@ -2057,8 +2546,7 @@ fn merge_rejected_video_negative_memory_with_bias(
     let incoming_prompt_seed = rejected_video_memory_prompt_seed(incoming);
     let existing_prompt_seed = rejected_video_memory_prompt_seed(existing);
     if incoming_prompt_seed != existing_prompt_seed {
-        return prepare_rejected_video_negative_memory_for_storage(incoming, bias)
-            .unwrap_or_else(|| incoming.to_string());
+        return incoming.to_string();
     }
 
     let storyboard_numeric_id = extract_key_value(incoming, "storyboardIds")
@@ -2077,8 +2565,8 @@ fn merge_rejected_video_negative_memory_with_bias(
         extract_key_value(incoming, "avoid").as_deref(),
         bias,
     );
-    let risk_tags = rejected_video_risk_tags_from_avoid(&avoid);
-    let focus_tags = rejected_video_focus_tags_from_avoid(&avoid);
+    let risk_tags = merged_rejected_video_risk_tags(existing, incoming, &avoid);
+    let focus_tags = merged_rejected_video_focus_tags(existing, incoming, &avoid);
 
     let mut parts = Vec::new();
     if !storyboard_numeric_id.is_empty() {
@@ -2104,6 +2592,24 @@ fn merge_rejected_video_negative_memory_with_bias(
         parts.push(format!("avoid={avoid}"));
     }
     parts.join(" | ")
+}
+
+fn merged_rejected_video_risk_tags(existing: &str, incoming: &str, avoid: &str) -> Vec<String> {
+    let mut tags = extract_rejected_video_risk_tags(existing);
+    tags.extend(extract_rejected_video_risk_tags(incoming));
+    tags.extend(rejected_video_risk_tags_from_avoid(avoid));
+    tags.sort();
+    tags.dedup();
+    tags
+}
+
+fn merged_rejected_video_focus_tags(existing: &str, incoming: &str, avoid: &str) -> Vec<String> {
+    let mut tags = extract_rejected_video_focus_tags(existing);
+    tags.extend(extract_rejected_video_focus_tags(incoming));
+    tags.extend(rejected_video_focus_tags_from_avoid(avoid));
+    tags.sort();
+    tags.dedup();
+    tags
 }
 
 fn memory_matches_subject_candidates(content: &str, subject_candidates: &[String]) -> bool {
@@ -2176,8 +2682,11 @@ fn rejected_video_focus_tags_from_avoid(avoid: &str) -> Vec<String> {
 
     for fragment in split_prompt_note_fragments(avoid) {
         match observation_note_family(&fragment) {
-            "performance_delivery" | "lip_sync_mismatch" | "mood_tone" => {
+            "performance_delivery" | "lip_sync" | "mood_tone" => {
                 push_tag("delivery_realism");
+            }
+            "camera_motion_stability" => {
+                push_tag("identity_continuity");
             }
             "character_consistency"
             | "shot_change_only"
@@ -2409,6 +2918,53 @@ fn map_rejected_performance_fragment(
             .any(|keyword| value.contains(keyword))
     });
     has_silent_high_signal.then_some("avoid blank expression or monotone delivery")
+}
+
+fn map_rejected_dialogue_fragment(dialogue: &str) -> Option<&'static str> {
+    let dialogue = normalize_prompt_text(dialogue);
+    let has_dialogue = !dialogue.is_empty()
+        && !["无台词", "沉默", "静默", "无对白"]
+            .iter()
+            .any(|token| dialogue.contains(token));
+    has_dialogue.then_some("avoid lip-sync mismatch")
+}
+
+fn map_rejected_static_idle_fragment(
+    action: &str,
+    dialogue: &str,
+    mood: &str,
+    camera_move: &str,
+) -> Option<&'static str> {
+    let action = normalize_prompt_text(action);
+    let dialogue = normalize_prompt_text(dialogue);
+    let mood = normalize_prompt_text(mood);
+    let camera_move = normalize_prompt_text(camera_move);
+    let has_dialogue = !dialogue.is_empty()
+        && !["无台词", "沉默", "静默", "无对白"]
+            .iter()
+            .any(|token| dialogue.contains(token));
+    if has_dialogue || action.is_empty() {
+        return None;
+    }
+
+    let neutral_mood =
+        mood.is_empty() || ["平静", "冷静", "安静"].iter().any(|token| mood == *token);
+    let static_camera = ["静止", "固定", "定镜"]
+        .iter()
+        .any(|token| camera_move.contains(token));
+    let idle_pose = ["站在", "站住", "站定", "站在门口", "站在原地"]
+        .iter()
+        .any(|token| action.contains(token));
+    (neutral_mood && static_camera && idle_pose).then_some("avoid stiff idle pose")
+}
+
+fn map_rejected_identity_fragment(
+    fields: &StructuredStoryboardDescription,
+) -> Option<&'static str> {
+    (rejected_negative_scene_has_identity_risk(fields)
+        && rejected_negative_scene_has_framing_risk(fields)
+        && !rejected_negative_scene_has_dialogue_guard(fields))
+    .then_some("avoid face distortion or identity drift")
 }
 
 fn map_rejected_lighting_fragment(value: &str) -> Option<&'static str> {

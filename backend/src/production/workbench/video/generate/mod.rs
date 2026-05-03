@@ -125,6 +125,7 @@ pub(crate) struct StoryboardNegativePromptRuntime {
 }
 
 impl AutoNegativePromptSelection {
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(in crate::production::workbench::video::generate) fn as_deref(&self) -> Option<&str> {
         self.prompt.as_deref()
     }

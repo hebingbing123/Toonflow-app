@@ -5,6 +5,9 @@
 //! 视频提示词或衍生资产做定点重生成，不整段重跑。
 
 pub mod dispatch;
+pub mod dispatch_attribution;
+pub mod dispatch_model;
+pub mod dispatch_scope;
 pub mod models;
 
 use axum::{extract::State, http::HeaderMap, Json};

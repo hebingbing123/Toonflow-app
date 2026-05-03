@@ -8,6 +8,7 @@ mod tests {
     };
     use super::super::types::*;
     use super::super::validation::*;
+    use proptest::prelude::*;
 
     #[test]
     fn test_validate_sample_tier_valid() {
@@ -221,6 +222,59 @@ mod tests {
         assert!(result.is_err());
         let err_msg = result.unwrap_err().to_string();
         assert!(err_msg.contains("observation_policy_snapshot.observation_note_limit"));
+    }
+
+    proptest! {
+        #[test]
+        fn prop_variant_snapshot_with_required_payload_is_complete(
+            skill_path in "[a-z]{3,8}\\.md",
+            skill_hash in "[a-f0-9]{6,12}",
+            prompt_hash in "[a-f0-9]{6,12}",
+            observation_limit in 1i32..=500,
+            max_tokens in 128i32..=4096,
+        ) {
+            let variant = CreateVariantBody {
+                label: "candidate".to_string(),
+                skill_snapshot: SkillSnapshot {
+                    skill_files: vec![SkillFileSnapshot {
+                        path: skill_path,
+                        hash: skill_hash,
+                        content: None,
+                    }],
+                    version_tag: Some("v-prop".to_string()),
+                },
+                prompt_snapshot: PromptSnapshot {
+                    templates: vec![PromptTemplateSnapshot {
+                        stage: "video_prompt".to_string(),
+                        template_content: "template".to_string(),
+                        hash: prompt_hash,
+                    }],
+                    version_tag: Some("p-prop".to_string()),
+                },
+                memory_budget_snapshot: MemoryBudgetSnapshot {
+                    budget_tier: "lean".to_string(),
+                    compression_rules: serde_json::json!({}),
+                    retention_buckets: serde_json::json!({}),
+                    observation_note_limit: Some(observation_limit),
+                    character_memory_priority: None,
+                },
+                observation_policy_snapshot: ObservationPolicySnapshot {
+                    negative_constraints: vec!["keep emotion natural".to_string()],
+                    observation_note_limit: observation_limit,
+                    auto_negative_source: Some("prop".to_string()),
+                    policy_version: Some("v-prop".to_string()),
+                },
+                model_route_snapshot: ModelRouteSnapshot {
+                    model_name: "gpt-4o-mini".to_string(),
+                    temperature: Some(0.5),
+                    max_tokens: Some(max_tokens),
+                    routing_rules: None,
+                },
+                notes: None,
+            };
+
+            prop_assert!(validate_variant_snapshot(&variant).is_ok());
+        }
     }
 
     // ========== 成本优化测试 ==========

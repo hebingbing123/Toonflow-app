@@ -485,6 +485,7 @@ pub(in crate::production::workbench::meta::generate) fn strip_dialogue_covered_a
         "说出",
         "说",
         "喊道",
+        "喊",
         "喊出",
         "大喊",
         "呼喊",
@@ -577,6 +578,23 @@ pub(in crate::production::workbench::meta::generate) fn strip_low_visibility_dia
         }
     }
 
+    if normalized_action.ends_with(canonical_dialogue) {
+        for (prefix, replacement) in [
+            ("喊", "急喊示意"),
+            ("大喊", "急喊示意"),
+            ("呼喊", "急喊示意"),
+            ("叫喊", "急喊示意"),
+            ("低声说", "低声开口"),
+            ("轻声说", "轻声开口"),
+            ("喃喃说", "呢喃开口"),
+            ("呢喃", "呢喃开口"),
+        ] {
+            if normalized_action.starts_with(prefix) {
+                return Some(replacement.to_string());
+            }
+        }
+    }
+
     None
 }
 
@@ -658,8 +676,30 @@ pub(in crate::production::workbench::meta::generate) fn compact_subject_clause(
 ) -> Option<String> {
     let subject = trim_subject_action_overlap(subject, action).unwrap_or_else(|| subject.into());
     let compacted =
-        compact_prompt_clause(&subject, asset_coverage, None, PromptClauseKind::Subject)?;
+        compact_prompt_clause(&subject, asset_coverage, None, PromptClauseKind::Subject)
+            .and_then(|subject| trim_subject_gaze_suffix(&subject, action).or(Some(subject)))?;
     (!prompt_clause_key_is_covered_by_anchor(&compacted, asset_coverage)).then_some(compacted)
+}
+
+fn trim_subject_gaze_suffix(subject: &str, action: Option<&str>) -> Option<String> {
+    action?;
+
+    let normalized = normalize_prompt_text(subject);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    for marker in ["看向", "望向", "看着", "望着", "注视", "凝视"] {
+        let Some((head, _)) = normalized.split_once(marker) else {
+            continue;
+        };
+        let head = normalize_prompt_clause_compaction(head, PromptClauseKind::Subject);
+        if head.chars().count() >= 2 {
+            return Some(head);
+        }
+    }
+
+    None
 }
 
 pub(in crate::production::workbench::meta::generate) fn compact_setting_clause(
@@ -678,8 +718,29 @@ pub(in crate::production::workbench::meta::generate) fn compact_setting_clause(
     (!compacted.is_empty()
         && !prompt_clause_key_is_covered_by_anchor(&compacted, asset_coverage)
         && !prompt_fragment_has_direct_coverage(&compacted, asset_coverage)
-        && !prompt_fragment_has_direct_coverage(&compacted, prompt_coverage))
+        && !setting_fragment_is_redundant_after_prompt_compaction(
+            &compacted,
+            setting,
+            prompt_coverage,
+        ))
     .then_some(compacted)
+}
+
+fn setting_fragment_is_redundant_after_prompt_compaction(
+    compacted: &str,
+    raw_setting: &str,
+    prompt_coverage: &[String],
+) -> bool {
+    let compacted = canonical_prompt_fragment(compacted);
+    let raw_setting = canonical_prompt_fragment(raw_setting);
+    if compacted.is_empty() || raw_setting.is_empty() {
+        return false;
+    }
+    if compacted == raw_setting {
+        return raw_setting.contains('的');
+    }
+
+    prompt_fragment_has_direct_coverage(&compacted, prompt_coverage)
 }
 
 pub(in crate::production::workbench::meta::generate) fn compact_action_clause(

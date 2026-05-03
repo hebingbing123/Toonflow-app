@@ -7,6 +7,7 @@ enum ProductWorkspacePane {
   scriptWorkspace,
   productionWorkspace,
   workspaceActivity,
+  benchmark,
   tasks,
   jobs,
   quality,

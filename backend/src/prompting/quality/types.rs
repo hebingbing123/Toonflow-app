@@ -257,3 +257,35 @@ pub struct QualityTokenEfficiencySample {
     pub delivery_memory_share_percent: f64,
     pub memory_delivery_priority_applied: bool,
 }
+
+/// 高频 bad case 统计条目（需求 14.3）
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BadCaseFrequencyItem {
+    /// 规范化问题类型（snake_case）
+    pub issue_type: String,
+    /// 原始 bad_case_category 值
+    pub raw_category: Option<String>,
+    /// 近 20 条 bad case 中出现次数
+    pub count: i64,
+    /// 是否高频（count >= 3）
+    pub is_high_frequency: bool,
+    /// 最多 3 条样本评论（截断到 80 字）
+    pub sample_comments: Vec<String>,
+}
+
+/// 技能版本变更前后评审分布对比条目（需求 14.4）
+#[derive(Debug, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillVersionComparisonItem {
+    pub skill_file_path: String,
+    pub skill_version_hash: String,
+    pub total_count: i64,
+    pub pass_rate_percent: f64,
+    pub avg_score: f64,
+    pub bad_case_rate_percent: f64,
+    pub grade_a_count: i64,
+    pub grade_b_count: i64,
+    pub grade_c_count: i64,
+    pub grade_d_count: i64,
+}

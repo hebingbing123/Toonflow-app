@@ -186,9 +186,16 @@ mod tests {
             ]),
         );
 
-        assert_eq!(prompts.get(&12).and_then(|value| value.as_deref()), None);
         assert_eq!(
-            prompts.get(&13).and_then(|value| value.as_deref()),
+            prompts
+                .get(&12)
+                .and_then(|value: &AutoNegativePromptSelection| value.as_deref()),
+            None
+        );
+        assert_eq!(
+            prompts
+                .get(&13)
+                .and_then(|value: &AutoNegativePromptSelection| value.as_deref()),
             Some("avoid lip-sync mismatch")
         );
     }
@@ -222,7 +229,7 @@ mod tests {
 
         let prompt = prompts
             .get(&12)
-            .and_then(|value| value.as_deref())
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref())
             .expect("storyboard 12 prompt");
 
         assert!(prompt.contains("avoid flat cold lighting"));
@@ -259,7 +266,7 @@ mod tests {
 
         let prompt = prompts
             .get(&12)
-            .and_then(|value| value.as_deref())
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref())
             .expect("storyboard 12 prompt");
 
         assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
@@ -341,7 +348,7 @@ mod tests {
         );
 
         assert_eq!(
-            prompts.get(&12).and_then(|value| value.as_deref()),
+            prompts.get(&12).and_then(|value: &AutoNegativePromptSelection| value.as_deref()),
             Some("avoid flicker or motion jitter, avoid flat cold lighting or harsh backlight silhouette")
         );
     }
@@ -369,7 +376,9 @@ mod tests {
             )]),
         );
 
-        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref());
         assert_eq!(prompt, None);
     }
 
@@ -393,7 +402,9 @@ mod tests {
             )]),
         );
 
-        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref());
         assert_eq!(prompt, None);
     }
 
@@ -449,7 +460,9 @@ mod tests {
             &HashMap::new(),
         );
 
-        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref());
         assert_eq!(prompt, None);
     }
 
@@ -480,7 +493,9 @@ mod tests {
             &storyboard_rows,
         );
 
-        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref());
         assert_eq!(prompt, None);
     }
 
@@ -504,7 +519,9 @@ mod tests {
             &HashMap::new(),
         );
 
-        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref());
         assert_eq!(prompt, None);
     }
 
@@ -530,7 +547,7 @@ mod tests {
 
         let prompt = prompts
             .get(&12)
-            .and_then(|value| value.as_deref())
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref())
             .expect("storyboard 12 prompt");
         assert_eq!(prompt, "avoid face drift or costume inconsistency");
     }
@@ -559,7 +576,7 @@ mod tests {
         );
         let prompt = prompts
             .get(&12)
-            .and_then(|value| value.as_deref())
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref())
             .expect("storyboard 12 prompt");
         assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
     }
@@ -595,7 +612,7 @@ mod tests {
 
         let prompt = prompts
             .get(&12)
-            .and_then(|value| value.as_deref())
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref())
             .expect("storyboard 12 prompt");
         assert!(prompt.contains("avoid oppressive or frantic mood"));
     }
@@ -628,7 +645,9 @@ mod tests {
             &storyboard_rows,
         );
 
-        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value: &AutoNegativePromptSelection| value.as_deref());
         assert_eq!(prompt, None);
     }
 

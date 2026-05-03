@@ -15,6 +15,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.tokenEfficiencySamplesSummary,
     required this.stagePassRateSummary,
     required this.stageGradeRows,
+    required this.badCaseStatsSummary,
     required this.reviewDetails,
     required this.statusLine,
     required this.activeFilterQuerySummary,
@@ -31,6 +32,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.loadingTokenEfficiency,
     required this.loadingTokenEfficiencySamples,
     required this.loadingStagePassRate,
+    required this.loadingBadCaseStats,
     required this.loadingReviewById,
     required this.creatingReview,
     required this.projectIdFilterCtrl,
@@ -60,6 +62,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? tokenEfficiencySamplesSummary;
   final String? stagePassRateSummary;
   final List<StageGradeDistributionRow> stageGradeRows;
+  final String? badCaseStatsSummary;
   final String? reviewDetails;
   final String? statusLine;
   final String? activeFilterQuerySummary;
@@ -76,6 +79,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final bool loadingTokenEfficiency;
   final bool loadingTokenEfficiencySamples;
   final bool loadingStagePassRate;
+  final bool loadingBadCaseStats;
   final bool loadingReviewById;
   final bool creatingReview;
   final TextEditingController projectIdFilterCtrl;
@@ -107,6 +111,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onLoadTokenEfficiency,
     required this.onLoadTokenEfficiencySamples,
     required this.onLoadStagePassRate,
+    required this.onLoadBadCaseStats,
     required this.onLoadReviewById,
     required this.onCreateReview,
     required this.onCreatePassedChanged,
@@ -124,6 +129,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadTokenEfficiency;
   final VoidCallback onLoadTokenEfficiencySamples;
   final VoidCallback onLoadStagePassRate;
+  final VoidCallback onLoadBadCaseStats;
   final VoidCallback onLoadReviewById;
   final VoidCallback onCreateReview;
   final ValueChanged<bool> onCreatePassedChanged;
@@ -412,6 +418,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       model.loadingStagePassRate ? '读取中…' : '读取阶段通过率',
                     ),
                   ),
+                  OutlinedButton(
+                    onPressed: model.loadingBadCaseStats
+                        ? null
+                        : callbacks.onLoadBadCaseStats,
+                    child: Text(
+                      model.loadingBadCaseStats ? '读取中…' : '读取坏例分布',
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -572,6 +586,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.stagePassRateSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText('阶段通过率：${model.stagePassRateSummary}'),
+              ],
+              if (model.badCaseStatsSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText('坏例分布：${model.badCaseStatsSummary}'),
               ],
               if (model.stageGradeRows.isNotEmpty) ...[
                 const SizedBox(height: 12),

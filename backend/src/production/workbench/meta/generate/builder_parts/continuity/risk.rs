@@ -10,11 +10,12 @@ pub(in crate::production::workbench::meta::generate) fn video_prompt_scene_has_a
 ) -> bool {
     let has_dialogue = storyboard_has_meaningful_spoken_dialogue(fields);
     let subject_count = video_prompt_scene_subject_count(fields);
-    if has_dialogue && subject_count > 1 {
+    let low_gain_dialogue = dialogue_fragment_is_low_gain_utterance(&fields.dialogue);
+    if has_dialogue && !low_gain_dialogue && subject_count > 1 {
         return true;
     }
 
-    [
+    let has_relational_staging = [
         fields.action.as_str(),
         fields.mood.as_str(),
         fields.sound.as_str(),
@@ -29,7 +30,26 @@ pub(in crate::production::workbench::meta::generate) fn video_prompt_scene_has_a
             ]
             .iter()
             .any(|keyword| value.contains(keyword))
-    })
+    });
+    if !has_relational_staging {
+        return false;
+    }
+
+    if subject_count > 1
+        && low_gain_dialogue
+        && !video_prompt_scene_has_motion_risk(fields)
+        && !normalize_prompt_text(&fields.action)
+            .split(['，', ',', '；', ';', '。', '\n'])
+            .any(|fragment| {
+                ["停步", "回头", "侧身", "让开", "逼近", "后退", "绕过"]
+                    .iter()
+                    .any(|keyword| fragment.contains(keyword))
+            })
+    {
+        return false;
+    }
+
+    true
 }
 
 pub(in crate::production::workbench::meta::generate) fn video_prompt_scene_subject_count(
@@ -84,7 +104,9 @@ pub(in crate::production::workbench::meta::generate) fn continuity_note_matches_
         return true;
     };
     if continuity_note_mentions_axis_risk(&normalized) {
-        return video_prompt_scene_has_axis_risk(fields);
+        return video_prompt_scene_has_axis_risk(fields)
+            || (continuity_note_mentions_blocking_risk(&normalized)
+                && video_prompt_scene_has_blocking_risk(fields));
     }
     if continuity_note_mentions_blocking_risk(&normalized) {
         return video_prompt_scene_has_blocking_risk(fields);
@@ -92,7 +114,21 @@ pub(in crate::production::workbench::meta::generate) fn continuity_note_matches_
     if super::super::super::builder::continuity_note_adds_specific_guidance(&normalized) {
         return video_prompt_scene_has_motion_risk(fields)
             || video_prompt_scene_has_axis_risk(fields)
-            || video_prompt_scene_has_blocking_risk(fields);
+            || video_prompt_scene_has_blocking_risk(fields)
+            || (normalized.contains("视线") || normalized.contains("方向"))
+                && [
+                    fields.subject.as_str(),
+                    fields.action.as_str(),
+                    fields.dialogue.as_str(),
+                ]
+                .into_iter()
+                .map(normalize_prompt_text)
+                .any(|value| {
+                    !value.is_empty()
+                        && ["对视", "看向", "望向", "抬眼", "回头"]
+                            .iter()
+                            .any(|keyword| value.contains(keyword))
+                });
     }
     if continuity_note_mentions_dialogue_risk(&normalized) {
         return storyboard_has_meaningful_spoken_dialogue(fields);

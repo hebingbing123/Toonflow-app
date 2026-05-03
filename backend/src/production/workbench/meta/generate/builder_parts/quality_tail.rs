@@ -11,11 +11,11 @@ pub(in crate::production::workbench::meta::generate) fn build_video_prompt_quali
         return "No extra shot changes.".to_string();
     }
 
-    let performance_needed = structured_fields.is_some_and(|fields| {
-        video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
-            || current_storyboard_is_fragile_emotional_turn(fields)
-    }) || constraint_pressure
-        .is_some_and(|pressure| pressure.has_dialogue_guardrail || pressure.has_emotion_guardrail);
+    let performance_needed = structured_fields
+        .is_some_and(current_storyboard_is_fragile_emotional_turn)
+        || constraint_pressure.is_some_and(|pressure| {
+            pressure.has_dialogue_guardrail || pressure.has_emotion_guardrail
+        });
 
     let camera = structured_fields
         .map(|fields| {

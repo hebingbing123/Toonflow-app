@@ -134,15 +134,11 @@ pub(super) fn select_video_prompt_style_notes(
         .and_then(parse_structured_storyboard_description)
         .map(|fields| selected_memory_subject_aliases(&fields.subject, &fields.subject_refs))
         .unwrap_or_default();
-    let role_memory_notes = select_subject_role_video_style_memory_notes_for_storyboard(
+    let role_memory_candidates = select_subject_role_video_style_memory_notes_for_storyboard(
         rows,
         &current_subject_candidates,
         Some(storyboard_row),
-    )
-    .into_iter()
-    .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
-    .take(1)
-    .collect::<Vec<_>>();
+    );
     let exact = select_selected_video_memory_notes_for_storyboard(
         rows,
         storyboard_numeric_id,
@@ -150,8 +146,48 @@ pub(super) fn select_video_prompt_style_notes(
         Some(storyboard_row),
     )
     .into_iter()
-    .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+    .map(|note| expand_compacted_delivery_style_note(&note))
+    .filter_map(|note| {
+        compact_contextual_video_style_note(&note, Some(storyboard_row))
+            .map(|compacted| supplement_compacted_voice_note(&note, &compacted, storyboard_row))
+    })
     .collect::<Vec<_>>();
+    let mut role_memory_notes = role_memory_candidates
+        .iter()
+        .map(|note| expand_compacted_delivery_style_note(note))
+        .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+        .take(1)
+        .collect::<Vec<_>>();
+    let exact_has_high_signal_style = exact.iter().any(|note| {
+        split_prompt_note_fragments(note).any(|fragment| {
+            fragment.starts_with("镜头")
+                || fragment.starts_with("情绪")
+                || fragment.starts_with("光影")
+        })
+    });
+    if !role_memory_notes
+        .iter()
+        .any(|note| split_prompt_note_fragments(note).any(|fragment| fragment.starts_with("语气")))
+        && (!role_memory_notes.is_empty() || exact_has_high_signal_style)
+    {
+        if let Some(voice_note) = collect_subject_role_voice_support_notes(
+            rows,
+            &current_subject_candidates,
+            storyboard_row,
+        )
+        .into_iter()
+        .find(|note| !note.is_empty())
+        {
+            role_memory_notes.push(voice_note);
+        } else if let Some(voice_note) = role_memory_candidates
+            .iter()
+            .filter_map(|note| extract_compactable_role_voice_note(note, storyboard_row))
+            .find(|note| !note.is_empty())
+        {
+            role_memory_notes.push(voice_note);
+        }
+    }
+    role_memory_notes = collapse_role_style_notes(role_memory_notes);
     let role_only = prefer_role_memory_only_for_silent_identity_scene(
         &exact,
         &role_memory_notes,
@@ -169,6 +205,7 @@ pub(super) fn select_video_prompt_style_notes(
         Some(storyboard_row),
     )
     .into_iter()
+    .map(|note| expand_compacted_delivery_style_note(&note))
     .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
     .collect::<Vec<_>>();
     let summary = [
@@ -200,10 +237,13 @@ pub(super) fn select_video_prompt_style_notes(
         &current_subject_candidates,
     )
     .into_iter()
-    .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+    .map(|note| expand_compacted_delivery_style_note(&note))
+    .filter_map(|note| {
+        compact_neighbor_video_style_note(&note, Some(storyboard_row))
+            .map(|compacted| supplement_compacted_voice_note(&note, &compacted, storyboard_row))
+    })
     .take(1)
     .collect::<Vec<_>>();
-
     if let Some(role_only) = role_only {
         return vec![role_only];
     }
@@ -230,6 +270,15 @@ pub(super) fn select_video_prompt_style_notes(
     if !role_memory_notes.is_empty() {
         return role_memory_notes;
     }
+    if !prioritized.is_empty()
+        && neighbor.first().zip(prioritized.first()).is_some_and(
+            |(neighbor_note, prioritized_note)| {
+                style_note_fragments_subset_of(prioritized_note, neighbor_note)
+            },
+        )
+    {
+        return neighbor;
+    }
     if !prioritized.is_empty() {
         return prioritized;
     }
@@ -253,12 +302,32 @@ fn select_scoped_contextual_summary_style_note(
     rows.iter()
         .filter(|row| allowed_names.contains(&row.name.as_str()))
         .filter_map(|row| {
-            let note = contextual_style_memory_value_for_storyboard(row, Some(storyboard_row))
-                .or_else(|| extract_key_value(&row.content, "style"))
-                .or_else(|| extract_key_value(&row.content, "note"))?;
-            let compacted =
+            let note = if row.name.contains("generation_brief") {
+                extract_key_value(&row.content, "style")
+                    .map(|value| expand_compacted_delivery_style_note(&value))
+            } else {
+                contextual_style_memory_value_for_storyboard(row, Some(storyboard_row))
+                    .map(|value| expand_compacted_delivery_style_note(&value))
+            }
+            .or_else(|| extract_key_value(&row.content, "style"))
+            .or_else(|| extract_key_value(&row.content, "note"))?;
+            let compacted = if row.name.contains("generation_brief") {
+                compact_generation_brief_style_note_for_storyboard(
+                    &note,
+                    storyboard_row,
+                    constraint_pressure,
+                )
+            } else {
                 compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
-                    .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+                    .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+            }?;
+            if !row.name.contains("generation_brief")
+                && fields.as_ref().is_some_and(|fields| {
+                    summary_style_note_only_repeats_storyboard_fields(&compacted, fields)
+                })
+            {
+                return None;
+            }
             let evidence = fields
                 .as_ref()
                 .map(|fields| observation_style_note_context_evidence(&compacted, fields) as i32)
@@ -293,6 +362,177 @@ fn select_scoped_contextual_summary_style_note(
         .map(|(_, _, _, _, note)| note)
 }
 
+fn compact_generation_brief_style_note_for_storyboard(
+    note: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    let expanded = expand_compacted_delivery_style_note(note);
+    let mut fragments = split_prompt_note_fragments(&expanded)
+        .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| match style_note_fragment_family(fragment) {
+            Some("表演") => true,
+            Some("语气") => storyboard_supports_voice_style(&fields),
+            Some("光影") => true,
+            Some("环境") => {
+                fragment.contains("连续")
+                    || fragment.contains("轮廓")
+                    || fragment.contains("保住")
+                    || observation_style_note_context_evidence(fragment, &fields) > 0
+            }
+            _ => observation_style_note_context_evidence(fragment, &fields) > 0,
+        })
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        fragments = split_prompt_note_fragments(&expanded).collect::<Vec<_>>();
+    }
+
+    let pressure = constraint_pressure.unwrap_or_default();
+    if pressure.prefer_visual_continuity_memory_recall || pressure.has_lighting_guardrail {
+        fragments.retain(|fragment| {
+            fragment.starts_with("光影")
+                || (fragment.starts_with("环境")
+                    && (fragment.contains("连续")
+                        || fragment.contains("轮廓")
+                        || fragment.contains("保住")))
+        });
+    } else if pressure.prefer_delivery_memory_recall
+        || pressure.has_dialogue_guardrail
+        || pressure.has_emotion_guardrail
+    {
+        fragments.retain(|fragment| fragment.starts_with("表演") || fragment.starts_with("语气"));
+    }
+
+    if fragments.is_empty() {
+        return None;
+    }
+
+    fragments = fragments
+        .into_iter()
+        .map(|fragment| {
+            if let Some(body) = fragment.strip_prefix("光影") {
+                if let Some(idx) = body.find("里保住") {
+                    return format!("光影{}", &body[idx..]);
+                }
+            }
+            fragment
+        })
+        .collect();
+
+    let joined = sort_style_note_fragments_for_output(&fragments.join("，"))?;
+    Some(supplement_compacted_voice_note(
+        &expanded,
+        &joined,
+        storyboard_row,
+    ))
+}
+
+fn summary_style_note_only_repeats_storyboard_fields(
+    note: &str,
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    !fragments.is_empty()
+        && fragments
+            .iter()
+            .all(|fragment| match style_note_fragment_family(fragment) {
+                Some("镜头") => {
+                    prompt_style_fragment_overlaps_field(fragment, &fields.shot)
+                        || prompt_style_fragment_overlaps_field(fragment, &fields.camera_move)
+                        || low_signal_local_camera_style_fragment(fragment)
+                }
+                Some("情绪") => prompt_style_fragment_overlaps_field(fragment, &fields.mood),
+                Some("光影") => prompt_style_fragment_overlaps_field(fragment, &fields.lighting),
+                Some("动作") => prompt_style_fragment_overlaps_field(fragment, &fields.action),
+                Some("环境") => {
+                    prompt_style_fragment_overlaps_field(fragment, &fields.setting)
+                        || prompt_style_fragment_overlaps_field(fragment, &fields.sound)
+                }
+                _ => false,
+            })
+}
+
+fn supplement_compacted_voice_note(
+    source_note: &str,
+    compacted_note: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> String {
+    let has_voice =
+        split_prompt_note_fragments(compacted_note).any(|fragment| fragment.starts_with("语气"));
+    if has_voice {
+        return compacted_note.to_string();
+    }
+    let has_performance =
+        split_prompt_note_fragments(compacted_note).any(|fragment| fragment.starts_with("表演"));
+    if !has_performance {
+        return compacted_note.to_string();
+    }
+    let Some(voice_note) = extract_visible_voice_fragment_from_note(source_note, storyboard_row)
+    else {
+        return compacted_note.to_string();
+    };
+    sort_style_note_fragments_for_output(&format!("{compacted_note}，{voice_note}"))
+        .unwrap_or_else(|| compacted_note.to_string())
+}
+
+fn extract_visible_voice_fragment_from_note(
+    source_note: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Option<String> {
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    if !storyboard_supports_voice_style(&fields) {
+        return None;
+    }
+
+    let visible_speech = [
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+        storyboard_row.prompt.as_deref().unwrap_or_default(),
+    ]
+    .into_iter()
+    .any(|field| {
+        ["开口", "说", "低声", "轻声", "压低", "呢喃", "哽咽"]
+            .iter()
+            .any(|keyword| field.contains(keyword))
+    });
+    if !visible_speech && storyboard_dialogue_is_empty(&fields.dialogue) {
+        return None;
+    }
+
+    let normalized = normalize_prompt_text(source_note);
+    [
+        "压低气息尾音发颤",
+        "压低哽咽尾音",
+        "低声哽咽尾音",
+        "轻声哽咽尾音",
+        "低声尾音发颤",
+        "轻声尾音发颤",
+        "哽咽克制",
+        "轻声克制",
+        "低声克制",
+        "轻声",
+        "低声",
+        "呢喃",
+        "哽咽",
+        "短促",
+    ]
+    .into_iter()
+    .find(|marker| normalized.contains(marker))
+    .map(|marker| match marker {
+        "轻声克制" => "语气轻声".to_string(),
+        "低声克制" => "语气低声".to_string(),
+        "哽咽克制" => "语气哽咽".to_string(),
+        other => format!("语气{other}"),
+    })
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) enum PressureStyleCandidateSource {
     Neighbor,
@@ -325,8 +565,14 @@ pub(super) fn select_pressure_prioritized_style_note_candidate(
         let Some(compacted) = compacted else {
             return;
         };
+        let chosen_note =
+            if pressure.has_dialogue_guardrail || pressure.prefer_delivery_memory_recall {
+                preserve_delivery_pair_if_compaction_overtrims(note, &compacted)
+            } else {
+                compacted
+            };
         let score =
-            score_compacted_style_note_against_constraint_pressure(&compacted, &fields, pressure)
+            score_compacted_style_note_against_constraint_pressure(&chosen_note, &fields, pressure)
                 + match source {
                     PressureStyleCandidateSource::Exact => 2,
                     PressureStyleCandidateSource::Role => 1,
@@ -334,7 +580,7 @@ pub(super) fn select_pressure_prioritized_style_note_candidate(
                     PressureStyleCandidateSource::Summary => 0,
                     PressureStyleCandidateSource::Neighbor => -1,
                 };
-        let len = compacted.chars().count();
+        let len = chosen_note.chars().count();
 
         match &best {
             Some((best_score, best_len, best_source, best_note))
@@ -343,8 +589,9 @@ pub(super) fn select_pressure_prioritized_style_note_candidate(
                         && (*best_len < len
                             || (*best_len == len
                                 && (*best_source > source
-                                    || (*best_source == source && best_note <= &compacted))))) => {}
-            _ => best = Some((score, len, source, compacted)),
+                                    || (*best_source == source
+                                        && best_note <= &chosen_note))))) => {}
+            _ => best = Some((score, len, source, chosen_note)),
         }
     };
 
@@ -365,6 +612,33 @@ pub(super) fn select_pressure_prioritized_style_note_candidate(
     }
 
     best.map(|(_, _, _, note)| note)
+}
+
+fn preserve_delivery_pair_if_compaction_overtrims(original: &str, compacted: &str) -> String {
+    let original_has_pair = split_prompt_note_fragments(original)
+        .any(|fragment| fragment.starts_with("表演"))
+        && split_prompt_note_fragments(original).any(|fragment| fragment.starts_with("语气"));
+    let compacted_lost_voice = split_prompt_note_fragments(compacted)
+        .any(|fragment| fragment.starts_with("表演"))
+        && !split_prompt_note_fragments(compacted).any(|fragment| fragment.starts_with("语气"));
+    if original_has_pair && compacted_lost_voice {
+        original.to_string()
+    } else {
+        compacted.to_string()
+    }
+}
+
+fn style_note_fragments_subset_of(left: &str, right: &str) -> bool {
+    let left_fragments = split_prompt_note_fragments(left).collect::<Vec<_>>();
+    let right_fragments = split_prompt_note_fragments(right).collect::<Vec<_>>();
+    !left_fragments.is_empty()
+        && left_fragments.iter().all(|left_fragment| {
+            right_fragments.iter().any(|right_fragment| {
+                left_fragment == right_fragment
+                    || right_fragment.contains(left_fragment)
+                    || left_fragment.contains(right_fragment)
+            })
+        })
 }
 
 pub(super) fn compact_guardrail_sensitive_style_notes(
@@ -610,11 +884,181 @@ pub(super) fn merge_complementary_style_note_pair(
         return None;
     }
 
-    let merged = compact_video_style_prompt_note(&merged_fragments.join("，"))?;
-    let exact = compact_video_style_prompt_note(exact_note)?;
+    let merged = sort_style_note_fragments_for_output(&compact_video_style_prompt_note(
+        &merged_fragments.join("，"),
+    )?)?;
+    let exact =
+        sort_style_note_fragments_for_output(&compact_video_style_prompt_note(exact_note)?)?;
     let merged_score = merged_style_note_signal_score(&merged);
     let exact_score = merged_style_note_signal_score(&exact);
     (merged != exact && merged_score > exact_score).then_some(merged)
+}
+
+fn extract_compactable_role_voice_note(
+    note: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Option<String> {
+    split_prompt_note_fragments(note)
+        .find(|fragment| fragment.starts_with("语气"))
+        .and_then(|fragment| compact_role_voice_fragment_for_storyboard(&fragment, storyboard_row))
+}
+
+fn collect_subject_role_voice_support_notes(
+    rows: &[AgentMemoryRow],
+    subject_candidates: &[String],
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Vec<String> {
+    rows.iter()
+        .filter(|row| {
+            matches!(
+                row.name.as_str(),
+                "script_role_video_style_memory" | "project_role_video_style_memory"
+            ) && memory_content_matches_subject_candidates(&row.content, subject_candidates)
+        })
+        .filter_map(|row| {
+            extract_key_value(&row.content, "style")
+                .or_else(|| extract_key_value(&row.content, "note"))
+        })
+        .filter_map(|note| extract_compactable_role_voice_note(&note, storyboard_row))
+        .collect()
+}
+
+fn expand_compacted_delivery_style_note(note: &str) -> String {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    if fragments.len() != 1 {
+        return note.to_string();
+    }
+
+    let fragment = &fragments[0];
+    if !fragment.starts_with("表演") || fragment.contains("语气") {
+        return note.to_string();
+    }
+
+    let body = fragment.trim_start_matches("表演");
+    let voice_markers = [
+        "压低气息尾音发颤",
+        "低声尾音发颤",
+        "轻声尾音发颤",
+        "压低哽咽尾音",
+        "低声哽咽尾音",
+        "轻声哽咽尾音",
+        "轻声克制",
+        "低声克制",
+        "哽咽克制",
+        "轻声",
+        "低声",
+        "呢喃",
+        "哽咽",
+        "短促",
+    ];
+    let Some((marker_idx, _)) = voice_markers
+        .iter()
+        .filter_map(|marker| body.find(marker).map(|idx| (idx, *marker)))
+        .min_by_key(|(idx, _)| *idx)
+    else {
+        return note.to_string();
+    };
+
+    let performance = normalize_prompt_text(&body[..marker_idx]);
+    let voice = normalize_prompt_text(&body[marker_idx..]);
+    if performance.is_empty() || voice.is_empty() {
+        return note.to_string();
+    }
+
+    format!("表演{performance}，语气{voice}")
+}
+
+fn collapse_role_style_notes(notes: Vec<String>) -> Vec<String> {
+    if notes.len() <= 1 {
+        return notes;
+    }
+
+    let mut merged_fragments = Vec::<String>::new();
+    for note in notes {
+        for fragment in split_prompt_note_fragments(&note) {
+            if merged_fragments
+                .iter()
+                .any(|existing| style_note_fragment_conflicts_or_overlaps(existing, &fragment))
+            {
+                continue;
+            }
+            merged_fragments.push(fragment);
+        }
+    }
+    sort_style_note_fragments_for_output(&merged_fragments.join("，"))
+        .map(|note| vec![note])
+        .unwrap_or_default()
+}
+
+fn compact_role_voice_fragment_for_storyboard(
+    fragment: &str,
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Option<String> {
+    let fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    if !storyboard_supports_voice_style(&fields) {
+        return None;
+    }
+
+    let mut body = normalize_prompt_text(fragment.trim_start_matches("语气"));
+    if body.is_empty() {
+        return None;
+    }
+
+    for keyword in ["克制", "隐忍", "压抑", "沉静", "冷静"] {
+        if fields.mood.contains(keyword) && body.contains(keyword) {
+            let trimmed = normalize_prompt_text(&body.replace(keyword, ""));
+            if trimmed.chars().count() >= 2 {
+                body = trimmed;
+            }
+        }
+    }
+
+    let speech_context = [
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+        storyboard_row.prompt.as_deref().unwrap_or_default(),
+    ]
+    .into_iter()
+    .any(|field| {
+        ["开口", "说", "低声", "轻声", "压低", "呢喃", "哽咽"]
+            .iter()
+            .any(|keyword| field.contains(keyword))
+    });
+    if !speech_context && storyboard_dialogue_is_empty(&fields.dialogue) {
+        return None;
+    }
+
+    Some(format!("语气{body}"))
+}
+
+fn sort_style_note_fragments_for_output(note: &str) -> Option<String> {
+    let mut fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+    fragments.sort_by(|left, right| {
+        style_note_fragment_output_rank(left)
+            .cmp(&style_note_fragment_output_rank(right))
+            .then(left.cmp(right))
+    });
+    Some(fragments.join("，"))
+}
+
+fn style_note_fragment_output_rank(fragment: &str) -> usize {
+    match style_note_fragment_family(fragment) {
+        Some("镜头") => 0,
+        Some("情绪") => 1,
+        Some("光影") => 2,
+        Some("动作") => 3,
+        Some("表演") => 4,
+        Some("环境") => 5,
+        Some("语气") => 6,
+        Some("声场") => 7,
+        _ => usize::MAX,
+    }
 }
 
 pub(super) fn role_memory_fragment_is_high_value(fragment: &str) -> bool {

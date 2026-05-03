@@ -1,5 +1,6 @@
 export '../agent_workspaces/section.dart';
 export '../auth/section.dart';
+export '../benchmark/section.dart';
 export '../jobs/section.dart';
 export '../overview/section.dart';
 export '../projects/section.dart';

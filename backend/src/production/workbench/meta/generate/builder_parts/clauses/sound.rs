@@ -9,7 +9,10 @@ pub(in crate::production::workbench::meta::generate) fn compact_sound_clause(
     action: Option<&str>,
 ) -> Option<String> {
     let normalized = normalize_prompt_text(sound);
-    if normalized.is_empty() || looks_like_silence(&normalized) {
+    if normalized.is_empty()
+        || looks_like_silence(&normalized)
+        || sound_fragment_is_storyboard_tail_marker(&normalized)
+    {
         return None;
     }
 
@@ -22,7 +25,10 @@ pub(in crate::production::workbench::meta::generate) fn compact_sound_clause(
             continue;
         }
         let fragment = compact_sound_fragment(&fragment);
-        if fragment.is_empty() || looks_like_silence(&fragment) {
+        if fragment.is_empty()
+            || looks_like_silence(&fragment)
+            || sound_fragment_is_storyboard_tail_marker(&fragment)
+        {
             continue;
         }
         if sound_fragment_is_low_signal_ambient(&fragment) {
@@ -48,6 +54,24 @@ pub(in crate::production::workbench::meta::generate) fn compact_sound_clause(
     } else {
         Some(kept.join("，"))
     }
+}
+
+fn sound_fragment_is_storyboard_tail_marker(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return false;
+    }
+
+    let mut chars = normalized.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    if !first.is_ascii_alphabetic() {
+        return false;
+    }
+
+    let rest = chars.collect::<String>();
+    !rest.is_empty() && rest.chars().all(|ch| ch.is_ascii_digit())
 }
 
 pub(in crate::production::workbench::meta::generate) fn compact_sound_fragment(

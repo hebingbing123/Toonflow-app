@@ -341,7 +341,37 @@ pub(super) fn compact_neighbor_video_style_note(
     note: &str,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Option<String> {
-    compact_contextual_video_style_note(note, storyboard_row)
+    let compacted = compact_contextual_video_style_note(note, storyboard_row)?;
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return Some(compacted);
+    };
+    let expected_camera = [fields.shot.as_str(), fields.camera_move.as_str()]
+        .into_iter()
+        .filter(|part| !part.is_empty())
+        .collect::<String>();
+    let has_non_camera_match = note
+        .split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .any(|fragment| {
+            !fragment.starts_with("镜头")
+                && neighbor_style_fragment_matches_storyboard(&fragment, &fields, &expected_camera)
+        });
+    if has_non_camera_match {
+        return Some(compacted);
+    }
+
+    let camera_only = split_prompt_note_fragments(&compacted)
+        .filter(|fragment| fragment.starts_with("镜头"))
+        .collect::<Vec<_>>();
+    if camera_only.is_empty() {
+        Some(compacted)
+    } else {
+        Some(camera_only.join("，"))
+    }
 }
 
 pub(super) fn compact_contextual_video_style_note(
@@ -391,14 +421,64 @@ pub(super) fn compact_contextual_video_style_note(
             fragments.push(fragment);
         }
     }
+    let high_signal_fallbacks =
+        fallback_high_signal_contextual_style_fragments(&normalized, &fields);
+    if fragments.is_empty() {
+        fragments = high_signal_fallbacks;
+    } else {
+        for fallback in high_signal_fallbacks {
+            let same_family_exists = fragments.iter().any(|existing| {
+                style_note_fragment_family(existing) == style_note_fragment_family(&fallback)
+            });
+            if !same_family_exists {
+                fragments.push(fallback);
+            }
+        }
+    }
     if fragments.is_empty() {
         return None;
     }
-
     Some(clip_prompt_fragment(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn fallback_high_signal_contextual_style_fragments(
+    note: &str,
+    fields: &StructuredStoryboardDescription,
+) -> Vec<String> {
+    let mut fragments = Vec::new();
+    for fragment in note
+        .split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+    {
+        if fragment.starts_with("镜头")
+            && fragment.contains("压迫感")
+            && !fragments.iter().any(|existing| existing == &fragment)
+        {
+            fragments.push(clip_prompt_fragment(
+                &fragment,
+                VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+            ));
+            continue;
+        }
+        if fragment.starts_with("情绪")
+            && fragment.contains("压迫")
+            && video_prompt_scene_needs_emotional_memory(fields)
+        {
+            let compacted = if fragment.contains("压迫感") {
+                "情绪压迫感".to_string()
+            } else {
+                "情绪压迫".to_string()
+            };
+            if !fragments.iter().any(|existing| existing == &compacted) {
+                fragments.push(compacted);
+            }
+        }
+    }
+    fragments
 }
 
 pub(super) fn fallback_contextual_performance_fragment(
@@ -594,9 +674,11 @@ pub(super) fn current_storyboard_is_fragile_emotional_turn(
     ]
     .into_iter()
     .any(|field| {
-        ["哽咽", "发哽", "含泪", "泪", "哭", "发颤", "颤声", "鼻音"]
-            .iter()
-            .any(|keyword| field.contains(keyword))
+        [
+            "哽咽", "发哽", "含泪", "泪", "哭", "发颤", "颤声", "鼻音", "抽气", "强忍",
+        ]
+        .iter()
+        .any(|keyword| field.contains(keyword))
     })
 }
 
@@ -646,9 +728,9 @@ pub(super) fn should_use_compact_prompt_labels(
     structured_fields: Option<&StructuredStoryboardDescription>,
     has_reference_frame: bool,
     context: Option<&VideoPromptContext>,
-    role_anchors: &[String],
-    scene_anchors: &[String],
-    tool_anchors: &[String],
+    _role_anchors: &[String],
+    _scene_anchors: &[String],
+    _tool_anchors: &[String],
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> bool {
     if should_use_compact_opening_clause(structured_fields) {
@@ -662,16 +744,21 @@ pub(super) fn should_use_compact_prompt_labels(
         return false;
     }
 
-    let explicit_anchor_groups = [
-        !role_anchors.is_empty(),
-        !scene_anchors.is_empty(),
-        !tool_anchors.is_empty(),
-    ]
-    .into_iter()
-    .filter(|present| *present)
-    .count();
+    let has_any_continuity_note = context.is_some_and(|ctx| {
+        ctx.continuity_notes
+            .iter()
+            .any(|note| !normalize_prompt_text(note).is_empty())
+    });
     let has_effective_continuity_note = context.is_some_and(|ctx| {
         video_prompt_has_effective_continuity_note_for_budget(&ctx.continuity_notes, Some(fields))
+    });
+    let has_axis_specific_continuity_note = context.is_some_and(|ctx| {
+        ctx.continuity_notes.iter().any(|note| {
+            let normalized = normalize_prompt_text(note);
+            normalized.contains("跳轴")
+                || normalized.contains("站位")
+                || normalized.contains("视线方向")
+        })
     });
     let has_delivery_memory = context.is_some_and(|ctx| {
         ctx.memory_style_notes
@@ -679,7 +766,13 @@ pub(super) fn should_use_compact_prompt_labels(
             .any(|note| memory_style_anchor_has_delivery_signal(note))
     });
 
-    (explicit_anchor_groups >= 2 || has_effective_continuity_note)
+    if has_axis_specific_continuity_note {
+        return false;
+    }
+
+    (has_any_continuity_note
+        || has_effective_continuity_note
+        || constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory))
         && (video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
             || (has_delivery_memory && !storyboard_dialogue_is_empty(&fields.dialogue))
             || current_storyboard_is_fragile_emotional_turn(fields)
@@ -966,26 +1059,39 @@ pub(super) fn build_project_visual_anchors(
         structured_fields,
         &style_coverage,
     );
-    if let Some(note) = ctx.project_director_manual.as_deref().and_then(|value| {
-        compact_project_director_note(
-            value,
-            structured_fields,
-            &style_coverage,
-            &reserved_art_style_anchors,
-        )
-    }) {
-        let should_yield = project_director_note_should_yield_to_memory_style(
-            &note,
+    if let Some(raw_director_manual) = ctx.project_director_manual.as_deref() {
+        let should_yield_raw_director_manual = raw_director_manual_should_yield_to_memory_style(
+            raw_director_manual,
             &ctx.memory_style_notes,
             structured_fields,
             constraint_pressure,
         );
-        if !should_yield {
-            anchors.push(note);
-            extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
-        } else {
+        if should_yield_raw_director_manual {
             director_manual_yielded_to_memory = true;
-            director_manual_yielded_chars += note.chars().count();
+            director_manual_yielded_chars +=
+                normalize_prompt_text(raw_director_manual).chars().count();
+        } else {
+            let compacted_director_manual = compact_project_director_note(
+                raw_director_manual,
+                structured_fields,
+                &style_coverage,
+                &reserved_art_style_anchors,
+            );
+            if let Some(note) = compacted_director_manual {
+                let should_yield = project_director_note_should_yield_to_memory_style(
+                    &note,
+                    &ctx.memory_style_notes,
+                    structured_fields,
+                    constraint_pressure,
+                );
+                if !should_yield {
+                    anchors.push(note);
+                    extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
+                } else {
+                    director_manual_yielded_to_memory = true;
+                    director_manual_yielded_chars += note.chars().count();
+                }
+            }
         }
     }
     if let Some(performance_anchor) = resolve_performance_style_anchor(
@@ -1439,6 +1545,32 @@ pub(super) fn project_director_note_should_yield_to_memory_style(
     })
 }
 
+fn raw_director_manual_should_yield_to_memory_style(
+    director_note: &str,
+    memory_style_notes: &[String],
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    let normalized = normalize_prompt_text(director_note);
+    if normalized.is_empty() {
+        return false;
+    }
+    let has_high_value_memory_fragment = memory_style_notes.iter().any(|note| {
+        split_prompt_note_fragments(note)
+            .any(|fragment| role_memory_fragment_is_high_value(&fragment))
+    });
+    if !has_high_value_memory_fragment {
+        return false;
+    }
+
+    project_director_note_should_yield_to_memory_style(
+        &normalized,
+        memory_style_notes,
+        structured_fields,
+        constraint_pressure,
+    ) || normalized.starts_with("情绪")
+}
+
 pub(super) fn compact_director_performance_anchor_against_memory_style(
     anchor: &str,
     memory_style_notes: &[String],
@@ -1631,6 +1763,7 @@ pub(super) fn compact_project_art_style_note(
     if normalized.is_empty() {
         return None;
     }
+    let normalized = compact_project_art_style_label(&normalized, structured_fields);
 
     let mut fragments = normalized
         .split(['，', ',', '；', ';', '。', '\n'])
@@ -1665,6 +1798,20 @@ pub(super) fn compact_project_art_style_note(
     Some(clip_prompt_fragment(&fragments.join(", "), 32))
 }
 
+fn compact_project_art_style_label(
+    normalized: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> String {
+    if normalized == "成熟都市言情二次元动画"
+        && structured_fields
+            .is_some_and(|fields| !current_storyboard_is_fragile_emotional_turn(fields))
+    {
+        return "成熟都市言情动画风格".to_string();
+    }
+
+    normalized.to_string()
+}
+
 pub(super) fn compact_memory_style_anchor(
     note: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -1693,11 +1840,16 @@ pub(super) fn compact_memory_style_anchor(
         .filter(|fragment| style_fragment_prefix(fragment))
         .filter_map(|fragment| {
             if let Some(fields) = structured_fields {
-                if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
-                    && (fragment.starts_with("光影") || fragment.starts_with("环境"))
-                    && (video_prompt_scene_has_lighting_risk(fields)
-                        || video_prompt_scene_needs_emotional_memory(fields))
+                if let Some(compacted_visual_fragment) =
+                    compact_expanded_visual_memory_fragment(&fragment, fields, memory_budget_tier)
                 {
+                    return Some(compacted_visual_fragment);
+                }
+                if expanded_visual_memory_fragment_should_bypass_storyboard_trim(
+                    &fragment,
+                    fields,
+                    memory_budget_tier,
+                ) {
                     return Some(fragment);
                 }
                 return trim_style_fragment_against_storyboard_fields(&fragment, fields);
@@ -1706,10 +1858,11 @@ pub(super) fn compact_memory_style_anchor(
         })
         .filter_map(|fragment| {
             let keep_expanded_visual_memory_fragment = structured_fields.is_some_and(|fields| {
-                memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
-                    && (fragment.starts_with("光影") || fragment.starts_with("环境"))
-                    && (video_prompt_scene_has_lighting_risk(fields)
-                        || video_prompt_scene_needs_emotional_memory(fields))
+                expanded_visual_memory_fragment_should_bypass_storyboard_trim(
+                    &fragment,
+                    fields,
+                    memory_budget_tier,
+                )
             });
             if keep_expanded_visual_memory_fragment {
                 return Some(fragment);
@@ -1738,25 +1891,30 @@ pub(super) fn compact_memory_style_anchor(
         })
         .filter(|fragment| {
             let keep_expanded_visual_memory_fragment = structured_fields.is_some_and(|fields| {
-                memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
-                    && (fragment.starts_with("光影") || fragment.starts_with("环境"))
-                    && (video_prompt_scene_has_lighting_risk(fields)
-                        || video_prompt_scene_needs_emotional_memory(fields))
+                expanded_visual_memory_fragment_should_bypass_storyboard_trim(
+                    fragment,
+                    fields,
+                    memory_budget_tier,
+                )
+            });
+            let keep_storyboard_matched_fragment = structured_fields.is_some_and(|fields| {
+                allow_prompt_covered_style_fragments
+                    && style_fragment_matches_prompt_style_field(fragment, fields)
+                    && matches!(
+                        style_note_fragment_family(fragment),
+                        Some("表演") | Some("语气")
+                    )
             });
             if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
                 if continuity_fragment_matches_fields(fragment, fields, camera)
-                    && !(allow_prompt_covered_style_fragments
-                        && style_fragment_matches_prompt_style_field(fragment, fields))
+                    && !keep_storyboard_matched_fragment
                     && !keep_expanded_visual_memory_fragment
                 {
                     return false;
                 }
             }
             !style_fragment_or_body_is_semantically_covered(fragment, prompt_coverage)
-                || structured_fields.is_some_and(|fields| {
-                    allow_prompt_covered_style_fragments
-                        && style_fragment_matches_prompt_style_field(fragment, fields)
-                })
+                || keep_storyboard_matched_fragment
                 || keep_expanded_visual_memory_fragment
         })
         .collect::<Vec<_>>();
@@ -1775,7 +1933,114 @@ pub(super) fn compact_memory_style_anchor(
             clip_prompt_fragment(&fragments.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
         }
     };
-    Some(note)
+    Some(restore_reference_guardrail_style_detail(
+        &note,
+        &normalized,
+        structured_fields,
+        constraint_pressure,
+    ))
+}
+
+fn restore_reference_guardrail_style_detail(
+    compacted_note: &str,
+    original_note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> String {
+    let Some(fields) = structured_fields else {
+        return compacted_note.to_string();
+    };
+    let Some(pressure) = constraint_pressure else {
+        return compacted_note.to_string();
+    };
+    if !pressure.has_lighting_guardrail {
+        return compacted_note.to_string();
+    }
+
+    let Some(original_lighting) = split_prompt_note_fragments(original_note)
+        .find(|fragment| {
+            fragment.starts_with("光影")
+                && fragment.contains(&fields.lighting)
+                && lighting_fragment_retains_specific_detail(fragment, &fields.lighting)
+        })
+        .map(|fragment| fragment.to_string())
+    else {
+        return compacted_note.to_string();
+    };
+
+    let restored = split_prompt_note_fragments(compacted_note)
+        .map(|fragment| {
+            if fragment.starts_with("光影")
+                && low_signal_compacted_lighting_fragment(&fragment)
+                && fragment != original_lighting
+            {
+                original_lighting.clone()
+            } else {
+                fragment
+            }
+        })
+        .collect::<Vec<_>>();
+
+    if restored.is_empty() {
+        compacted_note.to_string()
+    } else {
+        restored.join("，")
+    }
+}
+
+fn lighting_fragment_retains_specific_detail(fragment: &str, lighting: &str) -> bool {
+    let body = normalize_prompt_text(fragment.trim_start_matches("光影"));
+    let lighting = normalize_prompt_text(lighting);
+    body.contains(&lighting)
+        && normalize_prompt_text(&body.replace(&lighting, ""))
+            .chars()
+            .count()
+            >= 2
+}
+
+fn low_signal_compacted_lighting_fragment(fragment: &str) -> bool {
+    matches!(
+        normalize_prompt_text(fragment).as_str(),
+        "光影层次" | "光影质感" | "光影氛围"
+    )
+}
+
+fn expanded_visual_memory_fragment_should_bypass_storyboard_trim(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+    memory_budget_tier: VideoPromptMemoryBudgetTier,
+) -> bool {
+    if memory_budget_tier != VideoPromptMemoryBudgetTier::Expanded
+        || !(video_prompt_scene_has_lighting_risk(fields)
+            || video_prompt_scene_needs_emotional_memory(fields))
+    {
+        return false;
+    }
+
+    if fragment.starts_with("光影") {
+        return lighting_fragment_retains_specific_detail(fragment, &fields.lighting);
+    }
+
+    fragment.starts_with("环境")
+}
+
+fn compact_expanded_visual_memory_fragment(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+    memory_budget_tier: VideoPromptMemoryBudgetTier,
+) -> Option<String> {
+    if memory_budget_tier != VideoPromptMemoryBudgetTier::Expanded {
+        return None;
+    }
+
+    if fragment.starts_with("光影") {
+        let trimmed = trim_style_fragment_against_storyboard_fields(fragment, fields)?;
+        return (trimmed != fragment
+            && lighting_fragment_retains_specific_detail(fragment, &fields.lighting))
+        .then_some(trimmed);
+    }
+
+    None
 }
 
 pub(super) fn select_best_memory_style_note_for_lean_tier(
@@ -1863,6 +2128,13 @@ pub(super) fn collect_lean_memory_pair_focuses(
     fields: &StructuredStoryboardDescription,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> impl Iterator<Item = LeanMemoryPairFocus> {
+    if video_prompt_scene_has_motion_risk(fields)
+        && storyboard_dialogue_is_empty(&fields.dialogue)
+        && !current_storyboard_is_fragile_emotional_turn(fields)
+    {
+        return Vec::new().into_iter();
+    }
+
     let mut focuses = Vec::new();
     if video_prompt_scene_needs_emotional_memory(fields) {
         focuses.push(LeanMemoryPairFocus::Emotional);
@@ -1962,6 +2234,17 @@ pub(super) fn score_memory_style_fragment_for_lean_tier(
         }
         if storyboard_dialogue_is_empty(&fields.dialogue) && family == Some("语气") {
             score -= 2;
+        }
+        if video_prompt_scene_has_motion_risk(fields)
+            && storyboard_dialogue_is_empty(&fields.dialogue)
+            && !current_storyboard_is_fragile_emotional_turn(fields)
+        {
+            score += match family {
+                Some("动作") => 5,
+                Some("镜头") => 4,
+                Some("表演") => -6,
+                _ => 0,
+            };
         }
     }
     if let Some(pressure) = constraint_pressure {
@@ -2236,11 +2519,21 @@ pub(super) fn score_memory_fragment_human_performance_detail(
                     score += 3;
                 }
             }
+            for keyword in ["眼神", "目光"] {
+                if normalized.contains(keyword) {
+                    score += 2;
+                }
+            }
             for keyword in [
                 "气息", "换气", "哽咽", "发颤", "尾音", "压低", "轻声", "低声",
             ] {
                 if normalized.contains(keyword) {
                     score += 2;
+                }
+            }
+            for keyword in ["迟疑", "犹疑", "犹豫"] {
+                if normalized.contains(keyword) {
+                    score += 1;
                 }
             }
             for keyword in ["自然", "克制", "平静", "沉静", "放松"] {
@@ -2462,7 +2755,8 @@ pub(super) fn trim_style_fragment_against_storyboard_fields(
         return trim_prefixed_style_fragment(fragment, "情绪", &[fields.mood.as_str()]);
     }
     if fragment.starts_with("光影") {
-        return trim_prefixed_style_fragment(fragment, "光影", &[fields.lighting.as_str()]);
+        let trimmed = trim_prefixed_style_fragment(fragment, "光影", &[fields.lighting.as_str()]);
+        return trim_pure_storyboard_lighting_residue(trimmed, "光影", &fields.lighting);
     }
     if fragment.starts_with("环境") {
         return trim_prefixed_style_fragment(
@@ -2484,6 +2778,7 @@ pub(super) fn trim_style_fragment_against_storyboard_fields(
         return trim_style_fragment_by_shared_mood_keywords(trimmed, "动作", &fields.mood);
     }
     if fragment.starts_with("表演") {
+        let original_fragment = fragment.to_string();
         let trimmed = trim_prefixed_style_fragment(
             fragment,
             "表演",
@@ -2498,8 +2793,10 @@ pub(super) fn trim_style_fragment_against_storyboard_fields(
             "表演",
             &[fields.action.as_str(), fields.dialogue.as_str()],
         );
+        let trimmed = preserve_high_signal_performance_fragment(trimmed, &original_fragment);
         let trimmed = if trimmed.is_none()
             && video_prompt_scene_needs_identity_memory(fields)
+            && performance_fragment_has_unique_micro_detail(fragment)
             && style_note_matches_shared_keyword_family(
                 fragment,
                 &[fields.action.as_str(), fields.dialogue.as_str()],
@@ -2676,6 +2973,52 @@ pub(super) fn trim_style_fragment_by_shared_mood_keywords(
     }
 }
 
+fn trim_pure_storyboard_lighting_residue(
+    fragment: Option<String>,
+    prefix: &str,
+    lighting: &str,
+) -> Option<String> {
+    let fragment = fragment?;
+    let body = fragment
+        .strip_prefix(prefix)
+        .unwrap_or(fragment.as_str())
+        .trim();
+    if body.is_empty() {
+        return None;
+    }
+
+    let normalized_lighting = normalize_prompt_text(lighting);
+    if normalized_lighting.is_empty() {
+        return Some(fragment);
+    }
+
+    let mut trimmed = body.to_string();
+    for keyword in normalized_lighting
+        .split(['，', ',', '；', ';', '、', '/', ' '])
+        .map(normalize_prompt_text)
+        .filter(|part| !part.is_empty())
+    {
+        if !trimmed.contains(&keyword) {
+            continue;
+        }
+        let candidate = normalize_prompt_text(&trimmed.replace(&keyword, ""));
+        if candidate.chars().count() >= 2 {
+            trimmed = candidate;
+        } else if candidate.is_empty() {
+            return None;
+        }
+    }
+
+    if trimmed == body {
+        return Some(fragment);
+    }
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(format!("{prefix}{trimmed}"))
+    }
+}
+
 pub(super) const VOICE_SHARED_KEYWORD_FAMILIES: &[&[&str]] = &[
     &["低声", "压低声音", "低低开口"],
     &["轻声", "轻轻开口", "轻轻说道"],
@@ -2716,6 +3059,39 @@ pub(super) fn trim_style_fragment_by_shared_performance_keywords(
         fields,
         PERFORMANCE_SHARED_KEYWORD_FAMILIES,
     )
+}
+
+fn preserve_high_signal_performance_fragment(
+    trimmed: Option<String>,
+    original_fragment: &str,
+) -> Option<String> {
+    let Some(trimmed) = trimmed else {
+        return performance_fragment_has_unique_micro_detail(original_fragment)
+            .then(|| original_fragment.to_string());
+    };
+
+    let original_body = original_fragment.trim_start_matches("表演");
+    let trimmed_body = trimmed.trim_start_matches("表演");
+    if PERFORMANCE_SHARED_KEYWORD_FAMILIES.iter().any(|family| {
+        family.iter().any(|keyword| original_body.contains(keyword))
+            && !family.iter().any(|keyword| trimmed_body.contains(keyword))
+    }) && !performance_fragment_has_unique_micro_detail(&trimmed)
+    {
+        performance_fragment_has_unique_micro_detail(original_fragment)
+            .then(|| original_fragment.to_string())
+    } else {
+        Some(trimmed)
+    }
+}
+
+fn performance_fragment_has_unique_micro_detail(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    [
+        "喉结", "吞咽", "呼吸", "鼻息", "眼尾", "眼眶", "眼睫", "嘴角", "眉心", "眉梢", "唇线",
+        "唇角", "眨眼", "下颌",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
 }
 
 pub(super) const PERFORMANCE_SHARED_KEYWORD_FAMILIES: &[&[&str]] = &[
@@ -2929,7 +3305,9 @@ pub(super) fn build_script_role_anchors(
     let subject_refs = structured_fields
         .map(structured_subject_ref_names)
         .unwrap_or_default();
-    let role_anchor_limit = if subject_refs.len() > 1 {
+    let role_anchor_limit = if subject_refs.len() > 1
+        && structured_fields.is_some_and(video_prompt_scene_supports_multi_role_anchors)
+    {
         VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT.min(subject_refs.len())
     } else {
         1
@@ -2983,7 +3361,7 @@ pub(super) fn build_script_scene_anchors(
         .map(|fields| normalize_prompt_text(&fields.action))
         .unwrap_or_default();
     let mut scored = Vec::new();
-    let mut directly_referenced_anchor_count = 0usize;
+    let mut directly_referenced_anchor_names = Vec::new();
     for (idx, anchor) in ctx.script_scene_anchors.iter().enumerate() {
         let Some((name, note)) = anchor.split_once(':') else {
             continue;
@@ -3006,12 +3384,18 @@ pub(super) fn build_script_scene_anchors(
             continue;
         }
         if ref_match_score > 0 {
-            directly_referenced_anchor_count += 1;
+            directly_referenced_anchor_names.push(name.clone());
         }
         scored.push((score, idx, anchor));
     }
-    let scene_anchor_limit = if directly_referenced_anchor_count > 1 {
-        VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT.min(directly_referenced_anchor_count)
+    let allows_multi_scene_anchors = directly_referenced_anchor_names.len() > 1
+        && directly_referenced_anchor_names
+            .iter()
+            .filter(|name| !scene_anchor_name_is_generic_location(name))
+            .count()
+            > 1;
+    let scene_anchor_limit = if allows_multi_scene_anchors {
+        VIDEO_PROMPT_MULTI_SCENE_ANCHOR_LIMIT.min(directly_referenced_anchor_names.len())
     } else {
         1
     };
@@ -3239,6 +3623,34 @@ pub(super) fn structured_setting_ref_names(
             }
             refs
         })
+}
+
+fn video_prompt_scene_supports_multi_role_anchors(
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    [
+        fields.subject.as_str(),
+        fields.action.as_str(),
+        fields.dialogue.as_str(),
+        fields.mood.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .any(|value| {
+        !value.is_empty()
+            && [
+                "两人", "二人", "对峙", "对视", "互相", "相望", "对话", "争执", "擦肩", "并肩",
+            ]
+            .iter()
+            .any(|keyword| value.contains(keyword))
+    })
+}
+
+fn scene_anchor_name_is_generic_location(name: &str) -> bool {
+    matches!(
+        normalize_prompt_text(name).as_str(),
+        "门厅" | "走廊" | "街口" | "门口" | "楼梯口" | "巷口" | "客厅" | "卧室"
+    )
 }
 
 pub(super) fn select_script_asset_anchors(
@@ -3490,10 +3902,19 @@ pub(super) fn project_director_fragment_is_redundant_with_reserved_style_anchors
         .filter(|value| !value.is_empty())
         .is_some_and(|mood| {
             project_director_mood_fragment_is_generic_carryover(&mood)
-                && reserved_style_anchors
-                    .iter()
-                    .any(|anchor| anchor.starts_with("表演"))
+                && reserved_style_anchors.iter().any(|anchor| {
+                    project_director_reserved_anchor_already_carries_performance(anchor)
+                })
         })
+}
+
+fn project_director_reserved_anchor_already_carries_performance(anchor: &str) -> bool {
+    anchor.starts_with("表演")
+        || [
+            "神情", "眼神", "目光", "眼底", "眼尾", "眼眶", "唇线", "嘴角", "喉结", "眉心",
+        ]
+        .iter()
+        .any(|keyword| anchor.contains(keyword))
 }
 
 pub(super) fn project_director_mood_fragment_is_generic_carryover(mood: &str) -> bool {

@@ -450,6 +450,23 @@ pub(super) fn validate_source_kind(source_kind: &str) -> Result<(), ApiError> {
     Ok(())
 }
 
+pub(super) fn benchmark_case_scope_key(
+    owner_user_id: Uuid,
+    project_id: i32,
+    script_id: Option<i32>,
+    stage: &str,
+) -> String {
+    format!(
+        "{}:{}:{}:{}",
+        owner_user_id,
+        project_id,
+        script_id
+            .map(|value| value.to_string())
+            .unwrap_or_else(|| "none".to_string()),
+        stage
+    )
+}
+
 /// 检查重复样本（需求 1.6）
 async fn check_duplicate_case(
     pool: &sqlx::PgPool,
@@ -458,6 +475,7 @@ async fn check_duplicate_case(
     script_id: Option<i32>,
     stage: &str,
 ) -> Result<(), ApiError> {
+    let scope_key = benchmark_case_scope_key(user_id, project_id, script_id, stage);
     let count = sqlx::query_scalar::<_, i64>(
         r#"
         SELECT COUNT(*)
@@ -478,8 +496,8 @@ async fn check_duplicate_case(
 
     if count > 0 {
         return Err(ApiError::BadRequest(format!(
-            "Duplicate benchmark case detected: project_id={}, script_id={:?}, stage={}. Consider updating existing case instead.",
-            project_id, script_id, stage
+            "Duplicate benchmark case detected for scope {}. Consider updating existing case instead.",
+            scope_key
         )));
     }
 
@@ -489,6 +507,7 @@ async fn check_duplicate_case(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proptest::prelude::*;
 
     #[test]
     fn test_validate_stage() {
@@ -510,5 +529,24 @@ mod tests {
         assert!(validate_source_kind("quality_review").is_ok());
         assert!(validate_source_kind("manual").is_ok());
         assert!(validate_source_kind("invalid_source").is_err());
+    }
+
+    proptest! {
+        #[test]
+        fn prop_benchmark_cases_are_isolated_by_scope(
+            project_id_a in 1i32..1000,
+            project_id_b in 1001i32..2000,
+            script_id in proptest::option::of(1i32..1000),
+            stage in prop_oneof![
+                Just("story_skeleton".to_string()),
+                Just("storyboard_table".to_string()),
+                Just("video_prompt".to_string()),
+            ],
+        ) {
+            let owner = Uuid::from_u128(7);
+            let key_a = benchmark_case_scope_key(owner, project_id_a, script_id, &stage);
+            let key_b = benchmark_case_scope_key(owner, project_id_b, script_id, &stage);
+            prop_assert_ne!(key_a, key_b);
+        }
     }
 }

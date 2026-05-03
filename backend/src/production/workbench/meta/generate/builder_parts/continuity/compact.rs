@@ -15,6 +15,23 @@ pub(in crate::production::workbench::meta::generate) fn compact_continuity_note(
         let clipped = clip_prompt_fragment(&normalized, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
         return (!prompt_fragment_is_covered(&clipped, prompt_coverage)).then_some(clipped);
     };
+    if normalized.contains("视线方向一致")
+        && [
+            fields.subject.as_str(),
+            fields.action.as_str(),
+            fields.dialogue.as_str(),
+        ]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .any(|value| {
+            !value.is_empty()
+                && ["对视", "看向", "望向", "抬眼", "回头"]
+                    .iter()
+                    .any(|keyword| value.contains(keyword))
+        })
+    {
+        return Some("视线方向一致".to_string());
+    }
 
     let expected_camera = [fields.shot.as_str(), fields.camera_move.as_str()]
         .into_iter()
@@ -50,16 +67,35 @@ pub(in crate::production::workbench::meta::generate) fn compact_continuity_note(
                 )
             })
         })
+        .filter(|fragment| {
+            !matches!(
+                normalize_prompt_text(fragment).as_str(),
+                "衔接统一" | "镜头衔接统一" | "上一镜头衔接统一"
+            )
+        })
         .collect::<Vec<_>>();
 
     if fragments.is_empty() {
-        return None;
+        return fallback_high_signal_continuity_fragment(&normalized);
     }
 
     Some(clip_prompt_fragment(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn fallback_high_signal_continuity_fragment(note: &str) -> Option<String> {
+    note.split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .map(|fragment| compact_continuity_fragment_wording(&fragment))
+        .find(|fragment| {
+            ["视线", "方向", "站位", "走位", "跳轴", "构图"]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+        })
+        .map(|fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
 }
 
 pub(in crate::production::workbench::meta::generate) fn compact_continuity_fragment_wording(
@@ -71,6 +107,12 @@ pub(in crate::production::workbench::meta::generate) fn compact_continuity_fragm
     }
 
     for (from, to) in [
+        ("保持上一镜头衔接统一", "衔接统一"),
+        ("保留上一镜头衔接统一", "衔接统一"),
+        ("延续上一镜头衔接统一", "衔接统一"),
+        ("保持上一镜头动作节奏连续", "动作节奏连续"),
+        ("保留上一镜头动作节奏连续", "动作节奏连续"),
+        ("延续上一镜头动作节奏连续", "动作节奏连续"),
         ("人物站位不要跳轴", "站位不要跳轴"),
         ("角色站位不要跳轴", "站位不要跳轴"),
         ("人物站位连续", "站位连续"),

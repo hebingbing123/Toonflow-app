@@ -1,6 +1,7 @@
 export 'core.dart';
 export 'agents/index.dart';
 export 'assets/index.dart';
+export 'benchmark/index.dart';
 export 'catalog/index.dart';
 export 'harness/index.dart';
 export 'jobs/index.dart';

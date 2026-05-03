@@ -147,6 +147,8 @@ fn build_quality_review_usage_meta(review: &QualityReview) -> serde_json::Value 
         "feedbackMemoryAction": diagnostics
             .and_then(|value: &serde_json::Value| value.get("feedbackMemory"))
             .and_then(|value: &serde_json::Value| value.get("action")),
+        "contextCharsInjected": diagnostics.and_then(|value: &serde_json::Value| value.get("contextCharsInjected")),
+        "reworkMode": diagnostics.and_then(|value: &serde_json::Value| value.get("reworkMode")),
     })
 }
 

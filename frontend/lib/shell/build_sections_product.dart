@@ -9,6 +9,7 @@ extension _HomePageBuildProductSections on _HomePageState {
       (ProductWorkspacePane.scriptWorkspace, '脚本工作区'),
       (ProductWorkspacePane.productionWorkspace, '制作工作区'),
       (ProductWorkspacePane.workspaceActivity, '工作区动态'),
+      (ProductWorkspacePane.benchmark, '评测基线'),
       (ProductWorkspacePane.tasks, '任务中心'),
       (ProductWorkspacePane.jobs, '任务作业'),
       (ProductWorkspacePane.quality, '质量评审'),
@@ -165,6 +166,9 @@ extension _HomePageBuildProductSections on _HomePageState {
         sectionTitle: '执行动态',
         sectionDescription: '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。',
       ),
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.benchmark)
+      BenchmarkSection(accessToken: _session?.accessToken),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.tasks)
       TaskCenterSection(

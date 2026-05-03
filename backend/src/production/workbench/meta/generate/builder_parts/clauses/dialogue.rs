@@ -39,6 +39,9 @@ pub(in crate::production::workbench::meta::generate) fn compact_dialogue_clause(
     if dialogue_fragment_is_non_semantic_vocalization(&selected) {
         return None;
     }
+    if dialogue_fragment_looks_like_nonspoken_sound(&selected) {
+        return None;
+    }
 
     let prompt = context
         .and_then(|value| value.storyboard_prompt.as_deref())
@@ -71,7 +74,15 @@ pub(in crate::production::workbench::meta::generate) fn dialogue_clause_is_low_g
     }
 
     let char_count = normalized.chars().count();
-    if char_count <= 4 {
+    let shot = normalize_prompt_text(&fields.shot);
+    let has_wide_or_far_shot = ["远景", "全景"]
+        .iter()
+        .any(|keyword| shot.contains(keyword));
+    if char_count <= 4 && !dialogue_fragment_has_high_semantic_density(&normalized) {
+        return true;
+    }
+
+    if has_wide_or_far_shot && video_prompt_scene_has_motion_risk(fields) && char_count <= 4 {
         return true;
     }
 
@@ -95,6 +106,7 @@ pub(in crate::production::workbench::meta::generate) fn dialogue_fragment_has_hi
     }
 
     [
+        "别",
         "为什么",
         "怎么",
         "不能",
@@ -111,6 +123,27 @@ pub(in crate::production::workbench::meta::generate) fn dialogue_fragment_has_hi
     ]
     .iter()
     .any(|keyword| normalized.contains(keyword))
+}
+
+pub(in crate::production::workbench::meta::generate) fn dialogue_fragment_looks_like_nonspoken_sound(
+    dialogue: &str,
+) -> bool {
+    let normalized = canonical_dialogue_fragment(dialogue);
+    !normalized.is_empty()
+        && [
+            "脚步声",
+            "足音",
+            "风声",
+            "雨声",
+            "门响",
+            "门轴",
+            "回响",
+            "回荡",
+            "低鸣",
+            "滴答",
+        ]
+        .iter()
+        .any(|keyword| normalized.contains(keyword))
 }
 
 pub(in crate::production::workbench::meta::generate) fn dialogue_fragment_is_non_semantic_vocalization(

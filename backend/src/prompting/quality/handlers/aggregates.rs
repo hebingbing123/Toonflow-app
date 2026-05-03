@@ -448,6 +448,14 @@ pub(crate) async fn get_scope_insights(
     Ok(Json(rows))
 }
 
+#[derive(Debug, serde::Deserialize, utoipa::IntoParams)]
+#[serde(rename_all = "camelCase")]
+#[into_params(parameter_in = Query, rename_all = "camelCase")]
+pub struct StagePassRateQuery {
+    /// 按技能版本哈希过滤（可选，用于版本变更前后对比）
+    pub skill_version_hash: Option<String>,
+}
+
 /// GET /api/v1/quality/stage-pass-rate - 分环节通过率（按日期聚合）
 #[utoipa::path(
     get,
@@ -464,6 +472,7 @@ pub(crate) async fn get_scope_insights(
 pub(crate) async fn get_stage_pass_rate(
     State(state): State<AppState>,
     headers: HeaderMap,
+    Query(query): Query<StagePassRateQuery>,
 ) -> Result<Json<Vec<StagePassRateItem>>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
@@ -512,11 +521,13 @@ pub(crate) async fn get_stage_pass_rate(
             ), 0) as non_delivery_priority_pass_rate_percent
         FROM app_quality_review
         WHERE user_id = $1
+          AND ($2::text IS NULL OR skill_version_hash = $2)
         GROUP BY target_type, DATE_TRUNC('day', created_at)
         ORDER BY review_date DESC
         "#,
     )
     .bind(user_id)
+    .bind(query.skill_version_hash.as_deref())
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

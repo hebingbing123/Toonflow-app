@@ -9,6 +9,8 @@ use crate::state::AppState;
 use super::super::feedback::{
     maybe_write_quality_feedback_to_memory, QualityFeedbackMemoryOutcome,
 };
+use super::super::issue_type::infer_issue_types;
+use super::super::next_action::infer_next_action;
 use super::super::types::{CreateQualityReviewBody, QualityReview};
 use super::super::validate::validate_create_review_body;
 
@@ -36,6 +38,35 @@ fn merge_feedback_outcome_into_model_params(
         .as_object_mut()
         .expect("diagnostics forced to object");
     diagnostics_obj.insert("feedbackMemory".into(), json!(outcome));
+    Value::Object(root)
+}
+
+fn merge_issue_diagnostics_into_model_params(
+    model_params: Option<serde_json::Value>,
+    issue_types: &[super::super::issue_type::IssueType],
+    next_action: &super::super::next_action::NextAction,
+) -> Value {
+    let mut root = match model_params {
+        Some(Value::Object(map)) => map,
+        Some(other) => {
+            let mut map = Map::new();
+            map.insert("legacyModelParams".into(), other);
+            map
+        }
+        None => Map::new(),
+    };
+    let diagnostics = root
+        .entry("diagnostics".to_string())
+        .or_insert_with(|| Value::Object(Map::new()));
+    if !diagnostics.is_object() {
+        *diagnostics = Value::Object(Map::new());
+    }
+    let d = diagnostics.as_object_mut().expect("diagnostics is object");
+    d.insert(
+        "issueTypes".into(),
+        json!(issue_types.iter().map(|t| t.as_str()).collect::<Vec<_>>()),
+    );
+    d.insert("nextAction".into(), json!(next_action.as_str()));
     Value::Object(root)
 }
 
@@ -152,14 +183,45 @@ pub(crate) async fn create_review(
         );
     }
 
+    // 附加结构化问题类型和下一步动作建议到 diagnostics（需求 14.1, 14.2, 14.5）
+    let issue_types = infer_issue_types(&review);
+    let next_action = infer_next_action(&review, &issue_types);
+    let merged = merge_issue_diagnostics_into_model_params(
+        review.model_params.clone(),
+        &issue_types,
+        &next_action,
+    );
+    review = sqlx::query_as::<_, QualityReview>(
+        r#"UPDATE app_quality_review SET model_params = $2, updated_at = NOW() WHERE id = $1 RETURNING *"#,
+    )
+    .bind(review.id)
+    .bind(merged)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(review))
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use serde_json::json;
 
-    use super::{merge_feedback_outcome_into_model_params, QualityFeedbackMemoryOutcome};
+    use super::{
+        merge_feedback_outcome_into_model_params, merge_issue_diagnostics_into_model_params,
+        QualityFeedbackMemoryOutcome,
+    };
+    use crate::prompting::quality::issue_type::IssueType;
+    use crate::prompting::quality::next_action::NextAction;
+
+    /// Test helper: exposes merge_issue_diagnostics_into_model_params for cross-module tests.
+    pub fn call_merge_issue_diagnostics(
+        model_params: Option<serde_json::Value>,
+        issue_types: &[IssueType],
+        next_action: &NextAction,
+    ) -> serde_json::Value {
+        merge_issue_diagnostics_into_model_params(model_params, issue_types, next_action)
+    }
 
     #[test]
     fn merge_feedback_outcome_preserves_existing_diagnostics() {

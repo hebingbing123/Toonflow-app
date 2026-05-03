@@ -1,7 +1,8 @@
 use super::builder_parts::continuity::compact::compact_continuity_note;
 use super::{
-    continuity_note_matches_storyboard_risk, StructuredStoryboardDescription,
-    VideoPromptConstraintPressure, VideoPromptMemoryBudgetTier,
+    continuity_note_matches_storyboard_risk, current_storyboard_is_fragile_emotional_turn,
+    storyboard_dialogue_is_empty, video_prompt_scene_has_motion_risk,
+    StructuredStoryboardDescription, VideoPromptConstraintPressure, VideoPromptMemoryBudgetTier,
 };
 
 #[derive(Debug, Clone)]
@@ -68,6 +69,19 @@ pub(super) fn resolve_video_prompt_memory_budget(
     {
         risk_score = risk_score.saturating_sub(2);
         reasons.push("grounded_anchor_credit".to_string());
+    }
+    let anchored_follow_shot_credit = structured_fields.is_some_and(|fields| {
+        image_url.is_none()
+            && !role_anchors.is_empty()
+            && !scene_anchors.is_empty()
+            && storyboard_dialogue_is_empty(&fields.dialogue)
+            && video_prompt_scene_has_motion_risk(fields)
+            && !current_storyboard_is_fragile_emotional_turn(fields)
+            && !has_effective_continuity_note
+    });
+    if anchored_follow_shot_credit {
+        risk_score = risk_score.saturating_sub(2);
+        reasons.push("anchored_follow_shot_credit".to_string());
     }
 
     if constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory) {

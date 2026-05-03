@@ -1,0 +1,258 @@
+//! Sub-agent orchestration: routes tool calls to LLM with skill docs, memory, and quality gates.
+
+mod memory;
+mod scope;
+mod spec;
+
+#[cfg(test)]
+mod tests;
+
+use serde_json::{json, Value};
+
+use crate::error::ApiError;
+use crate::harness::HarnessContext;
+use crate::llm::chat_completion_assistant_text;
+use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
+use crate::prompting::skills::{read_skill_markdown, read_skill_markdown_section};
+
+use super::invoke::InvokeError;
+
+use memory::{
+    build_auto_memory_snapshot, load_auto_memory_note, parse_review_summary,
+    persist_auto_memory_snapshot, persist_stage_summary_async,
+    resolve_storyboard_prompt_seed_scope,
+};
+use scope::{
+    build_rework_context_note, parse_positive_id_list, production_scope_note, script_scope_note,
+};
+use spec::{agent_memory_type_for_tool, sub_agent_spec};
+
+pub async fn invoke_sub_agent_tool(
+    ctx: &HarnessContext,
+    tool_name: &str,
+    arguments: &Value,
+) -> Result<Value, InvokeError> {
+    let spec =
+        sub_agent_spec(tool_name).ok_or_else(|| InvokeError::UnknownTool(tool_name.into()))?;
+    let prompt = sub_agent_prompt_from_args(tool_name, arguments)?;
+    let cfg = ctx.llm.as_ref().ok_or(InvokeError::LlmNotConfigured)?;
+    let client = ctx
+        .http_client
+        .as_ref()
+        .ok_or_else(|| InvokeError::LlmError("llm http client is unavailable".into()))?;
+    let skill_doc = match spec.skill_section {
+        Some(section) => read_skill_markdown_section(spec.skill_path, section)?,
+        None => read_skill_markdown(spec.skill_path)?,
+    };
+    let system = match spec.format_hint {
+        Some(hint) => format!("{}\n\n{}", skill_doc.content, hint),
+        None => skill_doc.content,
+    };
+    let project_hint = ctx
+        .project_numeric_id
+        .map(|id| format!("project_numeric_id={id}"))
+        .unwrap_or_else(|| "project_numeric_id=unset".into());
+    let script_hint = ctx
+        .script_numeric_id
+        .map(|id| format!("script_numeric_id={id}"))
+        .unwrap_or_else(|| "script_numeric_id=unset".into());
+    let context_note = format!(
+        "Harness context: {project_hint}, {script_hint}. Keep answer concise and actionable."
+    );
+    let mut prompt_seed_scope = None;
+    let memory_note = match (
+        ctx.pool.as_ref(),
+        ctx.project_numeric_id,
+        agent_memory_type_for_tool(tool_name),
+    ) {
+        (Some(pool), Some(project_numeric_id), Some(agent_type)) => {
+            prompt_seed_scope = resolve_storyboard_prompt_seed_scope(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                ctx.script_numeric_id,
+                arguments,
+            )
+            .await?;
+            load_auto_memory_note(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                ctx.script_numeric_id,
+                agent_type,
+                arguments,
+                prompt_seed_scope.as_deref(),
+            )
+            .await?
+        }
+        _ => None,
+    };
+    let execution_note = spec.execution_hint.unwrap_or(
+        "Use the narrowest tool call that can solve the task before requesting broader context.",
+    );
+    let rework_context_note = build_rework_context_note(arguments);
+    if tool_name == "run_sub_agent_storyboard_panel" {
+        if let (Some(pool), Some(project_numeric_id), Some(script_numeric_id)) = (
+            ctx.pool.as_ref(),
+            ctx.project_numeric_id,
+            ctx.script_numeric_id,
+        ) {
+            let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds")
+                .into_iter()
+                .filter_map(|value| i32::try_from(value).ok())
+                .collect::<Vec<_>>();
+            let gate = run_quality_gate(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                script_numeric_id,
+                QualityGateStage::StoryboardPanel,
+                &storyboard_ids,
+                std::slice::from_ref(&prompt),
+            )
+            .await
+            .map_err(api_error_to_invoke_error)?;
+            enforce_quality_gate(QualityGateStage::StoryboardPanel, &gate)
+                .map_err(api_error_to_invoke_error)?;
+        }
+    }
+    let mut messages = vec![
+        json!({"role":"system","content":system}),
+        json!({"role":"assistant","content":context_note}),
+    ];
+    if let Some(memory_note) = memory_note {
+        messages.push(json!({"role":"assistant","content":memory_note}));
+    }
+    if let Some(rework_context_note) = rework_context_note {
+        messages.push(json!({"role":"assistant","content":rework_context_note}));
+    }
+    messages
+        .push(json!({"role":"assistant","content":format!("Execution hint: {execution_note}")}));
+    messages.push(json!({"role":"user","content":prompt}));
+    let text = match chat_completion_assistant_text(cfg, client, messages).await {
+        Ok(text) => text,
+        Err(error) => {
+            if let (Some(pool), Some(project_numeric_id), Some(agent_type)) = (
+                ctx.pool.as_ref(),
+                ctx.project_numeric_id,
+                agent_memory_type_for_tool(tool_name),
+            ) {
+                let invoke_error = InvokeError::LlmError(error.clone());
+                persist_stage_summary_async(
+                    pool,
+                    ctx.user_id,
+                    project_numeric_id,
+                    ctx.script_numeric_id,
+                    agent_type,
+                    tool_name,
+                    arguments,
+                    prompt_seed_scope.as_deref(),
+                    None,
+                    None,
+                    Some(&invoke_error),
+                );
+            }
+            return Err(InvokeError::LlmError(error));
+        }
+    };
+    let review = match tool_name {
+        "run_supervision_agent" | "run_sub_agent_production_supervision" => {
+            parse_review_summary(&text)
+        }
+        _ => None,
+    };
+    if let (Some(pool), Some(project_numeric_id), Some(agent_type)) = (
+        ctx.pool.as_ref(),
+        ctx.project_numeric_id,
+        agent_memory_type_for_tool(tool_name),
+    ) {
+        if let Some(snapshot) = build_auto_memory_snapshot(
+            tool_name,
+            arguments,
+            &text,
+            review.as_ref(),
+            prompt_seed_scope.as_deref(),
+        ) {
+            persist_auto_memory_snapshot(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                ctx.script_numeric_id,
+                agent_type,
+                &snapshot,
+            )
+            .await?;
+        }
+        persist_stage_summary_async(
+            pool,
+            ctx.user_id,
+            project_numeric_id,
+            ctx.script_numeric_id,
+            agent_type,
+            tool_name,
+            arguments,
+            prompt_seed_scope.as_deref(),
+            review.as_ref(),
+            Some(&text),
+            None,
+        );
+    }
+    Ok(json!({
+        "tool": tool_name,
+        "agent_role": spec.role_name,
+        "result": text,
+        "review": review,
+    }))
+}
+
+fn sub_agent_prompt_from_args(tool_name: &str, arguments: &Value) -> Result<String, InvokeError> {
+    let prompt = arguments
+        .get("prompt")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|v| !v.is_empty())
+        .ok_or_else(|| InvokeError::InvalidArgs("prompt must be a non-empty string".into()))?;
+    if prompt.chars().count() > 2_000 {
+        return Err(InvokeError::InvalidArgs(
+            "prompt must be <= 2000 characters".into(),
+        ));
+    }
+    let scoped_prompt = match tool_name {
+        "run_sub_agent_storySkeleton"
+        | "run_sub_agent_adaptationStrategy"
+        | "run_sub_agent_script"
+        | "run_supervision_agent" => script_scope_note(arguments)
+            .map(|note| format!("{prompt}\n\n{note}"))
+            .unwrap_or_else(|| prompt.to_string()),
+        "run_sub_agent_derive_assets"
+        | "run_sub_agent_generate_assets"
+        | "run_sub_agent_director_plan"
+        | "run_sub_agent_storyboard_gen"
+        | "run_sub_agent_storyboard_panel"
+        | "run_sub_agent_storyboard_table"
+        | "run_sub_agent_production_supervision" => production_scope_note(arguments)
+            .map(|note| format!("{prompt}\n\n{note}"))
+            .unwrap_or_else(|| prompt.to_string()),
+        _ => prompt.to_string(),
+    };
+    Ok(scoped_prompt)
+}
+
+fn error_message(error: ApiError) -> String {
+    match error {
+        ApiError::Conflict(message)
+        | ApiError::BadRequest(message)
+        | ApiError::DatabaseError(message)
+        | ApiError::NotImplemented(message)
+        | ApiError::QuotaExceeded(message)
+        | ApiError::Forbidden(message) => message,
+        other => format!("{other:?}"),
+    }
+}
+
+fn api_error_to_invoke_error(error: ApiError) -> InvokeError {
+    match error {
+        ApiError::DatabaseError(message) => InvokeError::DatabaseError(message),
+        other => InvokeError::InvalidArgs(error_message(other)),
+    }
+}

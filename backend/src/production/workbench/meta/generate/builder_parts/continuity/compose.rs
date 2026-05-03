@@ -21,6 +21,17 @@ pub(in crate::production::workbench::meta::generate) fn build_continuity_notes(
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
+    if notes.is_empty() {
+        if let (Some(ctx), Some(fields)) = (context, structured_fields) {
+            if let Some(fallback) = ctx
+                .continuity_notes
+                .iter()
+                .find_map(|note| fallback_high_signal_continuity_note(note, fields))
+            {
+                notes.push(fallback);
+            }
+        }
+    }
     notes.sort_by(|a, b| {
         continuity_note_pressure_score(b, constraint_pressure)
             .cmp(&continuity_note_pressure_score(a, constraint_pressure))
@@ -57,6 +68,40 @@ pub(in crate::production::workbench::meta::generate) fn build_continuity_notes(
         }
     }
     notes
+}
+
+fn fallback_high_signal_continuity_note(
+    note: &str,
+    fields: &StructuredStoryboardDescription,
+) -> Option<String> {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    if normalized.contains("视线方向一致")
+        && [
+            fields.subject.as_str(),
+            fields.action.as_str(),
+            fields.dialogue.as_str(),
+        ]
+        .into_iter()
+        .any(|value| {
+            ["对视", "看向", "望向", "抬眼", "回头"]
+                .iter()
+                .any(|keyword| value.contains(keyword))
+        })
+    {
+        return Some("视线方向一致".to_string());
+    }
+    if normalized.contains("站位")
+        && normalized.contains("跳轴")
+        && continuity_note_matches_storyboard_risk("站位不要跳轴", Some(fields))
+    {
+        return Some("站位不要跳轴".to_string());
+    }
+
+    None
 }
 
 pub(in crate::production::workbench::meta::generate) fn continuity_note_is_lean_critical(

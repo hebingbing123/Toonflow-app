@@ -9,6 +9,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController targetTypeFilterCtrl,
   required TextEditingController targetIdFilterCtrl,
   required TextEditingController jobIdFilterCtrl,
+  required TextEditingController stageFilterCtrl,
+  required TextEditingController gradeFilterCtrl,
   required TextEditingController reviewIdCtrl,
   required TextEditingController createProjectIdCtrl,
   required TextEditingController createScriptIdCtrl,
@@ -58,6 +60,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     tokenEfficiencySamplesSummary:
         '04-14 08:00 output: prompt=430, base=340, memory=90 (20.9%, delivery优先)',
     stagePassRateSummary: 'storyboard: 100%',
+    stageGradeRows: const [],
+    badCaseStatsSummary: null,
     reviewDetails: 'review-1 · output · manual',
     statusLine: '已读取评审详情',
     activeFilterQuerySummary: null,
@@ -74,6 +78,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     loadingTokenEfficiency: loadingTokenEfficiency,
     loadingTokenEfficiencySamples: loadingTokenEfficiencySamples,
     loadingStagePassRate: loadingStagePassRate,
+    loadingBadCaseStats: false,
     loadingReviewById: loadingReviewById,
     creatingReview: creatingReview,
     projectIdFilterCtrl: projectIdFilterCtrl,
@@ -81,6 +86,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     targetTypeFilterCtrl: targetTypeFilterCtrl,
     targetIdFilterCtrl: targetIdFilterCtrl,
     jobIdFilterCtrl: jobIdFilterCtrl,
+    stageFilterCtrl: stageFilterCtrl,
+    gradeFilterCtrl: gradeFilterCtrl,
     reviewIdCtrl: reviewIdCtrl,
     createProjectIdCtrl: createProjectIdCtrl,
     createScriptIdCtrl: createScriptIdCtrl,
@@ -120,6 +127,7 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onLoadTokenEfficiency: onLoadTokenEfficiency ?? noop,
     onLoadTokenEfficiencySamples: onLoadTokenEfficiencySamples ?? noop,
     onLoadStagePassRate: onLoadStagePassRate ?? noop,
+    onLoadBadCaseStats: noop,
     onLoadReviewById: onLoadReviewById ?? noop,
     onCreateReview: onCreateReview ?? noop,
     onCreatePassedChanged: onCreatePassedChanged ?? (_) {},
@@ -133,6 +141,8 @@ void main() {
   late TextEditingController targetTypeFilterCtrl;
   late TextEditingController targetIdFilterCtrl;
   late TextEditingController jobIdFilterCtrl;
+  late TextEditingController stageFilterCtrl;
+  late TextEditingController gradeFilterCtrl;
   late TextEditingController projectIdFilterCtrl;
   late TextEditingController scriptIdFilterCtrl;
   late TextEditingController reviewIdCtrl;
@@ -151,6 +161,8 @@ void main() {
     targetTypeFilterCtrl = TextEditingController(text: 'output');
     targetIdFilterCtrl = TextEditingController(text: 'storyboard-1');
     jobIdFilterCtrl = TextEditingController(text: 'job-1');
+    stageFilterCtrl = TextEditingController();
+    gradeFilterCtrl = TextEditingController();
     reviewIdCtrl = TextEditingController(text: 'review-1');
     createProjectIdCtrl = TextEditingController(text: '7');
     createScriptIdCtrl = TextEditingController(text: '11');
@@ -168,6 +180,8 @@ void main() {
     targetTypeFilterCtrl.dispose();
     targetIdFilterCtrl.dispose();
     jobIdFilterCtrl.dispose();
+    stageFilterCtrl.dispose();
+    gradeFilterCtrl.dispose();
     reviewIdCtrl.dispose();
     createProjectIdCtrl.dispose();
     createScriptIdCtrl.dispose();
@@ -192,6 +206,8 @@ void main() {
               targetTypeFilterCtrl: targetTypeFilterCtrl,
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
+              stageFilterCtrl: stageFilterCtrl,
+              gradeFilterCtrl: gradeFilterCtrl,
               reviewIdCtrl: reviewIdCtrl,
               createProjectIdCtrl: createProjectIdCtrl,
               createScriptIdCtrl: createScriptIdCtrl,
@@ -248,6 +264,8 @@ void main() {
               targetTypeFilterCtrl: targetTypeFilterCtrl,
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
+              stageFilterCtrl: stageFilterCtrl,
+              gradeFilterCtrl: gradeFilterCtrl,
               reviewIdCtrl: reviewIdCtrl,
               createProjectIdCtrl: createProjectIdCtrl,
               createScriptIdCtrl: createScriptIdCtrl,
@@ -310,6 +328,8 @@ void main() {
               targetTypeFilterCtrl: targetTypeFilterCtrl,
               targetIdFilterCtrl: targetIdFilterCtrl,
               jobIdFilterCtrl: jobIdFilterCtrl,
+              stageFilterCtrl: stageFilterCtrl,
+              gradeFilterCtrl: gradeFilterCtrl,
               reviewIdCtrl: reviewIdCtrl,
               createProjectIdCtrl: createProjectIdCtrl,
               createScriptIdCtrl: createScriptIdCtrl,
@@ -352,6 +372,8 @@ void main() {
                 targetTypeFilterCtrl: targetTypeFilterCtrl,
                 targetIdFilterCtrl: targetIdFilterCtrl,
                 jobIdFilterCtrl: jobIdFilterCtrl,
+                stageFilterCtrl: stageFilterCtrl,
+                gradeFilterCtrl: gradeFilterCtrl,
                 reviewIdCtrl: reviewIdCtrl,
                 createProjectIdCtrl: createProjectIdCtrl,
                 createScriptIdCtrl: createScriptIdCtrl,

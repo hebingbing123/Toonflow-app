@@ -1,0 +1,598 @@
+=== Categorization Report ===
+
+
+============================================================
+Category: BUILDER
+============================================================
+
+  371-  376: pub(crate)           fn         build_selected_video_memory
+ 1698- 1709: private              fn         rebuild_memory_content_with_focus_tags
+ 4306- 4328: private              fn         build_selected_memory_setting_prefix_candidates
+ 4527- 4543: private              fn         build_style_note_selection_context
+ 7586- 7607: private              fn         build_selected_video_memory_prefers_compact_structured_note
+ 7610- 7627: private              fn         build_selected_video_memory_drops_duplicate_subject_and_scene_fragments
+ 7630- 7647: private              fn         build_selected_video_memory_trims_subject_and_pace_prefix_from_action_when_mood_exists
+ 7650- 7666: private              fn         build_selected_video_memory_trims_subject_action_overlap_when_identity_remains
+ 7669- 7683: private              fn         build_selected_video_memory_trims_object_prefix_from_action_when_subject_lists_prop
+ 7686- 7698: private              fn         build_selected_video_memory_trims_subject_lead_in_from_setting_when_scene_suffix_remains
+ 7701- 7715: private              fn         build_selected_video_memory_trims_setting_lead_in_repeated_by_action_context
+ 7718- 7731: private              fn         build_selected_video_memory_prefers_environment_fragment_over_raw_scene_suffix
+ 7789- 7804: private              fn         build_selected_video_memory_compacts_visible_speech_delivery_into_single_fragment
+ 7807- 7824: private              fn         build_selected_video_memory_keeps_high_signal_tail_tremble_delivery
+ 7827- 7845: private              fn         build_selected_video_memory_drops_low_gain_voice_mood_and_motion_when_performance_exists
+ 7848- 7863: private              fn         build_selected_video_memory_identity_silent_scene_prefers_micro_performance_only
+ 7866- 7876: private              fn         build_selected_video_memory_identity_scene_keeps_visual_carryover_when_no_micro_performance_exists
+ 7888- 7905: private              fn         build_selected_video_memory_persists_focus_tags_for_delivery_identity_and_lighting
+ 8008- 8022: private              fn         build_selected_video_memory_skips_voice_memory_for_wide_moving_low_visibility_dialogue
+ 8058- 8073: private              fn         build_selected_video_memory_drops_descriptive_or_prop_subject_alias_noise
+ 8076- 8091: private              fn         build_selected_video_memory_drops_dialogue_shaped_subject_alias_noise
+ 8111- 8124: private              fn         build_selected_video_memory_extracts_throat_motion_performance_fragment
+ 8127- 8140: private              fn         build_selected_video_memory_extracts_stiff_smile_performance_fragment
+ 8143- 8156: private              fn         build_selected_video_memory_extracts_finger_tremble_performance_fragment
+ 8159- 8172: private              fn         build_selected_video_memory_extracts_tight_jaw_performance_fragment
+ 8211- 8224: private              fn         build_selected_video_memory_keeps_generic_restrained_mood_without_character_signal
+ 8227- 8244: private              fn         build_selected_video_memory_drops_subject_only_note_when_identity_is_stored
+
+============================================================
+Category: COMPACTION
+============================================================
+
+  486-  490: pub(crate)           fn         compact_selected_video_memory_for_focus
+ 1868- 1875: private              fn         compact_selected_video_memory_style_for_focus
+ 1926- 1931: private              fn         compact_summary_video_style_memory_for_focus
+ 2266- 2269: private              fn         merge_subject_role_style_memory_notes
+ 3245- 3253: private              fn         compact_selected_memory_identity_scene_style_fragments
+ 3333- 3337: private              fn         compact_selected_memory_note_fragments
+ 3357- 3362: private              fn         compact_selected_memory_style_fragments
+ 3364- 3374: private              fn         compact_selected_memory_subject
+ 3376- 3424: private              fn         compact_selected_memory_motion_style
+ 3426- 3518: private              fn         compact_selected_memory_voice_style
+ 3520- 3526: private              fn         compact_selected_memory_delivery_style
+ 3564- 3569: private              fn         compact_selected_memory_performance_style
+ 3816- 3858: private              fn         compact_selected_memory_sound_style
+ 3897- 3901: private              fn         merge_selected_memory_subject_action
+ 3961- 3969: private              fn         compact_selected_memory_action
+ 4185- 4191: private              fn         compact_selected_memory_setting
+ 5490- 5495: private              fn         compact_global_recurring_style_fragments
+ 5508- 5538: private              fn         compact_global_character_style_redundancy
+ 5540- 5545: private              fn         compact_global_visual_style_fragments
+ 5622- 5626: private              fn         compact_role_recurring_style_fragments
+ 5847- 5880: private              fn         compact_role_character_mood_redundancy
+ 6056- 6089: pub(crate)           fn         compact_video_style_prompt_note
+ 6099- 6159: private              fn         compact_prompt_style_fragment
+ 6171- 6252: private              fn         compact_cross_fragment_style_redundancy
+ 6286- 6291: private              fn         compact_prefixed_style_fragment_with_keywords
+ 6303- 6341: private              fn         compact_style_body_by_keywords
+ 6343- 6352: private              fn         compact_prompt_shot_style_fragment
+ 6386- 6395: private              fn         compact_selected_memory_residual_note
+ 6549- 6575: private              fn         compact_selected_memory_residual_fragments
+ 7082- 7101: pub(crate)           fn         compact_video_continuity_note
+ 7236- 7275: private              fn         compact_selected_memory_environment
+ 7908- 7921: private              fn         compact_selected_video_memory_for_focus_drops_generic_delivery_fillers
+ 8247- 8259: private              fn         compact_selected_memory_action_keeps_pace_prefix_when_mood_is_missing
+ 8262- 8274: private              fn         compact_selected_memory_action_strips_setting_prefix_when_followup_motion_remains
+ 8277- 8289: private              fn         compact_selected_memory_action_strips_subject_motion_overlap_before_followup_suffix
+ 8292- 8297: private              fn         merge_selected_memory_subject_action_merges_shared_motion_tail
+ 8300- 8305: private              fn         compact_selected_memory_subject_trims_shared_action_overlap
+ 8308- 8313: private              fn         merge_selected_memory_subject_action_skips_locative_subjects
+ 8316- 8326: private              fn         compact_selected_memory_setting_strips_prop_or_subject_lead_in
+ 8329- 8339: private              fn         compact_selected_memory_setting_strips_locative_lead_in_when_subject_or_action_covers_it
+ 8575- 8591: private              fn         merge_rejected_negative_avoid_with_bias_prefers_visual_guards_when_visual_bias_is_hot
+ 9762- 9776: private              fn         merge_rejected_video_negative_memory_accumulates_rejection_count_and_deduplicates
+ 9820- 9832: private              fn         merge_rejected_video_negative_memory_resets_when_prompt_seed_changes
+10191-10199: private              fn         merge_rejected_video_negative_memory_compacts_family_fragments
+10202-10210: private              fn         merge_rejected_video_negative_memory_compacts_visual_error_family_fragments
+10213-10222: private              fn         merge_rejected_video_negative_memory_keeps_only_top_storage_fragments
+10225-10235: private              fn         merge_rejected_video_negative_memory_prioritizes_character_consistency_over_mood
+10238-10243: private              fn         merge_rejected_video_negative_memory_drops_generic_style_budget_fillers_when_high_signal_visual_guard_exists
+10252-10257: private              fn         merge_rejected_video_negative_memory_keeps_performance_guard_when_high_signal_visual_guard_exists
+10266-10275: private              fn         merge_rejected_video_negative_memory_prefers_performance_guard_over_generic_mood_tone
+10278-10287: private              fn         merge_rejected_video_negative_memory_parses_ascii_and_cjk_delimiters
+11184-11189: private              fn         compact_video_style_prompt_note_trims_keyword_covered_mood_and_lighting_suffix_noise
+11192-11195: private              fn         compact_video_style_prompt_note_keeps_partial_lighting_context_when_keyword_coverage_is_weak
+11201-11205: private              fn         compact_video_style_prompt_note_drops_generic_cold_mood_when_lighting_already_covers_it
+11208-11213: private              fn         compact_video_style_prompt_note_keeps_distinct_mood_when_lighting_is_cold
+11216-11221: private              fn         compact_video_style_prompt_note_supports_ascii_delimiters
+11224-11226: private              fn         compact_video_style_prompt_note_drops_generic_cold_mood_when_cold_lighting_is_more_specific
+12005-12013: private              fn         compact_video_continuity_note_keeps_only_style_and_continuity_fragments
+12016-12025: private              fn         compact_video_continuity_note_supports_ascii_delimiters_and_drops_unrelated_fragments
+
+============================================================
+Category: DELIVERY_MEMORY
+============================================================
+
+  465-  484: private              fn         selected_video_memory_delivery_from_row
+ 1795- 1813: private              fn         selected_video_memory_delivery_signal_count
+ 5322- 5361: private              fn         delivery_fragment_conflicts_with_rejected_signals
+ 5662- 5678: private              fn         summarize_role_delivery_fragment
+ 6748- 6771: private              fn         selected_video_delivery_value_from_note
+ 6773- 6777: private              fn         delivery_style_value_from_content
+ 6779- 6790: private              fn         selected_video_delivery_value_from_content
+ 6792- 6819: private              fn         should_prefer_selected_delivery_for_storyboard
+12085-12105: private              fn         plan_selected_video_memory_optimization_keeps_latest_visual_when_no_delivery_exists
+
+============================================================
+Category: FOCUS
+============================================================
+
+ 1463- 1468: private              fn         selected_video_memory_focus_coverage_score
+ 1517- 1521: private              fn         selected_video_memory_tag_coverage_score
+ 1538- 1542: private              fn         selected_video_memory_active_focus_mask
+ 1561- 1576: private              fn         selected_video_memory_focus_mask
+ 1578- 1590: private              fn         selected_video_memory_tag_or_anchor_matches
+ 1603- 1607: private              fn         selected_video_memory_focus_tags_from_bias
+ 1625- 1635: private              fn         selected_video_memory_focus_tags_from_content
+ 1637- 1687: private              fn         selected_video_memory_focus_tags_from_content_parts
+ 2225- 2230: private              fn         role_style_storyboard_focus_score
+ 7938- 7958: private              fn         prepare_selected_video_memory_for_storage_rebuilds_focus_tags_after_compaction
+ 7971- 7990: private              fn         prepare_selected_video_memory_for_storage_compacts_focus_fillers_before_persisting
+ 7993- 8005: private              fn         prepare_selected_video_memory_for_storage_drops_low_signal_after_focus_compaction
+ 8743- 8766: private              fn         selected_video_memory_update_with_bias_prefers_focus_aligned_delivery_anchor
+12155-12172: private              fn         plan_selected_video_memory_optimization_drops_scope_filler_when_delivery_bias_makes_richer_anchor_more_valuable
+12190-12206: private              fn         plan_selected_video_memory_optimization_drops_row_that_turns_low_signal_after_focus_compaction
+12356-12383: private              fn         plan_selected_video_memory_optimization_prefers_focus_tagged_identity_lighting_row
+12386-12411: private              fn         plan_selected_video_memory_optimization_drops_cross_scope_fillers_when_single_anchor_covers_multiple_hot_focuses
+12417-12442: private              fn         plan_selected_video_memory_optimization_keeps_cross_scope_fillers_when_single_anchor_only_covers_one_hot_focus
+12448-12468: private              fn         plan_selected_video_memory_optimization_drops_same_scope_focus_redundant_row_when_stronger_anchor_exists
+
+============================================================
+Category: OBSERVATION
+============================================================
+
+ 9134- 9161: private              fn         select_rejected_video_memory_notes_and_observation_candidates_for_subject_splits_confidence_paths
+ 9396- 9407: private              fn         select_pending_rejected_video_observation_note_reads_single_rejection_noise
+ 9410- 9422: private              fn         select_pending_rejected_video_observation_note_skips_promoted_noise
+ 9526- 9535: private              fn         select_pending_rejected_video_observation_candidates_prioritizes_matching_fragment_for_scene_risk
+ 9557- 9585: private              fn         select_pending_rejected_video_observation_candidates_bias_prefers_delivery_fragments
+ 9588- 9597: private              fn         select_pending_rejected_video_observation_candidates_bias_prefers_visual_continuity_fragments
+ 9648- 9657: private              fn         select_pending_rejected_video_observation_candidates_summary_prefers_performance_guard_over_higher_sample_lighting
+ 9893- 9904: private              fn         select_pending_rejected_video_observation_note_skips_stale_prompt_seed
+ 9907- 9925: private              fn         select_pending_rejected_video_observation_note_falls_back_to_unseeded_when_current_seed_has_no_match
+ 9955- 9975: private              fn         select_pending_rejected_video_observation_note_prefers_stronger_camera_warning
+ 9978- 9991: private              fn         select_pending_rejected_video_observation_note_skips_single_low_signal_mood_retry
+ 9994-10026: private              fn         select_pending_rejected_video_observation_candidates_orders_by_strength
+10029-10040: private              fn         select_pending_rejected_video_observation_candidates_keeps_secondary_fragment_from_same_row
+10052-10082: private              fn         select_pending_rejected_video_observation_candidates_deduplicates_weaker_family_member
+10085-10109: private              fn         select_pending_rejected_video_observation_candidates_drops_repeat_follow_when_handheld_warning_exists
+10152-10168: private              fn         select_pending_rejected_video_observation_candidates_compacts_visual_error_family
+10171-10188: private              fn         select_pending_rejected_video_observation_candidates_parse_mixed_delimiters
+
+============================================================
+Category: OPTIMIZER
+============================================================
+
+  793-  818: pub(crate)           fn         optimize_scoped_video_memory
+ 1106- 1111: private              fn         plan_selected_video_memory_optimization
+12046-12082: private              fn         plan_selected_video_memory_optimization_removes_duplicates_and_old_visual_only_rows
+12108-12125: private              fn         plan_selected_video_memory_optimization_drops_scope_filler_when_richer_same_storyboard_exists
+12134-12149: private              fn         plan_selected_video_memory_optimization_keeps_scope_filler_when_no_richer_same_storyboard_exists
+12214-12242: private              fn         plan_selected_video_memory_optimization_uses_compacted_content_for_bias_aware_dedup
+
+============================================================
+Category: PARSING
+============================================================
+
+ 2753- 2760: pub(crate)           fn         parse_structured_storyboard_description
+ 2787- 2797: pub(crate)           fn         parse_positive_int
+ 2799- 2813: pub(crate)           fn         extract_key_value
+ 2829- 2839: private              fn         extract_rejected_video_risk_tags
+ 4660- 4662: private              fn         extract_style_note_value
+ 4664- 4670: private              fn         extract_selected_memory_style_note_for_storyboard
+ 7214- 7219: private              fn         extract_style_keywords
+ 7573- 7583: private              fn         parse_structured_storyboard_description_extracts_fields
+
+============================================================
+Category: PERSISTENCE
+============================================================
+
+  536-  549: pub(crate)           fn         persist_selected_video_memory
+  632-  636: private              fn         prepare_selected_video_memory_for_storage
+  662-  670: private              fn         load_latest_selected_video_memory_for_scope
+  701-  709: private              fn         delete_selected_video_memory_for_scope
+  759-  767: pub(crate)           fn         clear_selected_video_memory
+ 1005- 1028: private              fn         load_selected_video_memory_optimization_bias
+ 1057- 1077: private              fn         load_project_video_memory_optimization_bias
+ 5432- 5443: private              fn         role_style_memory_should_persist_delivery
+12028-12034: private              fn         clear_selected_video_memory_ignores_invalid_storyboard_id
+12037-12043: private              fn         clear_rejected_video_negative_memory_ignores_invalid_storyboard_id
+
+============================================================
+Category: REJECTED
+============================================================
+
+ 8342- 8360: private              fn         build_rejected_video_negative_memory_extracts_short_retry_constraints
+ 8363- 8379: private              fn         build_rejected_video_negative_memory_compacts_same_family_fragments
+ 8382- 8395: private              fn         build_rejected_video_negative_memory_prefers_handheld_warning_for_handheld_follow_camera
+ 8398- 8412: private              fn         build_rejected_video_negative_memory_skips_low_signal_mood_only_memory
+ 8415- 8429: private              fn         build_rejected_video_negative_memory_skips_repeat_follow_camera_only_memory
+ 8432- 8448: private              fn         build_rejected_video_negative_memory_drops_cold_mood_when_cold_lighting_already_exists
+ 8451- 8466: private              fn         build_rejected_video_negative_memory_adds_performance_guard_for_restrained_dialogue_scene
+ 8469- 8484: private              fn         build_rejected_video_negative_memory_adds_performance_guard_for_high_signal_silent_scene
+ 8487- 8502: private              fn         build_rejected_video_negative_memory_skips_performance_guard_for_low_signal_silent_scene
+ 8505- 8523: private              fn         build_rejected_video_negative_memory_persists_compact_risk_tags
+ 8526- 8541: private              fn         build_rejected_video_negative_memory_persists_identity_risk_tag_for_face_visible_shot
+ 8981- 9003: private              fn         select_rejected_video_negative_memory_notes_keeps_matching_storyboard_only
+ 9006- 9018: private              fn         select_rejected_video_negative_memory_notes_skips_single_rejection_noise
+ 9021- 9035: private              fn         select_rejected_video_negative_memory_notes_keeps_two_strongest_fragments
+ 9038- 9067: private              fn         select_rejected_video_negative_memory_notes_combines_multiple_rows_without_extra_budget
+ 9208- 9217: private              fn         select_rejected_video_negative_memory_notes_for_subject_keeps_risk_fallback_when_exact_row_is_only_pending
+ 9242- 9251: private              fn         select_rejected_video_negative_memory_notes_for_subject_prioritizes_matching_fragment_for_scene_risk
+ 9298- 9325: private              fn         select_rejected_video_negative_memory_notes_deduplicates_weaker_family_across_rows
+ 9328- 9352: private              fn         select_rejected_video_negative_memory_notes_drops_repeat_follow_when_handheld_warning_exists
+ 9379- 9393: private              fn         select_rejected_video_negative_memory_notes_parses_ascii_and_cjk_delimiters
+ 9779- 9788: private              fn         select_rejected_video_negative_memory_notes_prefers_focus_tag_aligned_row_when_bias_is_hot
+ 9931- 9949: private              fn         select_rejected_video_negative_memory_notes_falls_back_to_unseeded_when_current_seed_has_no_match
+
+============================================================
+Category: ROLE_MEMORY
+============================================================
+
+ 5172- 5182: private              fn         build_script_role_video_style_memories
+ 5971- 5990: private              fn         role_memory_subject_candidates
+ 8025- 8037: private              fn         build_selected_video_memory_persists_subject_identity_for_role_memory
+ 8040- 8055: private              fn         build_selected_video_memory_persists_subject_aliases_for_role_memory
+ 9070- 9089: private              fn         select_rejected_video_negative_memory_notes_for_subject_prefers_matching_role
+ 9092- 9118: private              fn         select_rejected_video_negative_memory_notes_for_subject_prefers_primary_subject_when_multiple_roles_match
+ 9174- 9183: private              fn         select_rejected_video_negative_memory_notes_for_subject_can_fallback_to_same_role_matching_risk
+ 9270- 9279: private              fn         select_rejected_video_negative_memory_notes_for_subject_can_fallback_to_same_role_identity_risk
+ 9425- 9444: private              fn         select_pending_rejected_video_observation_candidates_for_subject_prefers_matching_role
+ 9447- 9473: private              fn         select_pending_rejected_video_observation_candidates_prefers_primary_subject_when_multiple_roles_match
+ 9492- 9501: private              fn         select_pending_rejected_video_observation_candidates_can_fallback_to_same_role_matching_risk
+ 9620- 9629: private              fn         select_pending_rejected_video_observation_candidates_can_fallback_to_same_role_identity_risk
+ 9683- 9692: private              fn         select_pending_rejected_video_observation_candidates_summary_prefers_role_summary_over_project_generic_fill
+ 9720- 9729: private              fn         select_pending_rejected_video_observation_candidates_summary_prefers_primary_subject_role_summary_when_multiple_roles_match
+10290-10317: private              fn         select_rejected_video_negative_memory_notes_can_fallback_to_role_observation_summary
+10320-10329: private              fn         select_rejected_video_negative_memory_notes_role_observation_summary_prioritizes_dialogue_guard_fragment_for_dialogue_scene
+10351-10360: private              fn         select_rejected_video_negative_memory_notes_role_observation_summary_prioritizes_identity_guard_fragment_for_identity_scene
+10379-10388: private              fn         select_rejected_video_negative_memory_notes_role_observation_summary_prefers_primary_subject_when_multiple_roles_match
+10641-10666: private              fn         build_script_role_video_style_memories_groups_persona_by_subject
+10669-10697: private              fn         build_project_role_video_style_memories_keep_subjects_isolated_across_scripts
+10700-10723: private              fn         build_script_role_video_style_memories_prefers_most_supported_voice_variant
+10726-10744: private              fn         build_script_role_video_style_memories_keep_fragile_voice_when_it_carries_emotional_turn
+10747-10765: private              fn         build_script_role_video_style_memories_keep_high_signal_tail_tremble_voice_variant
+10768-10786: private              fn         build_script_role_video_style_memories_drop_camera_shell_when_character_signal_exists
+10805-10820: private              fn         build_script_role_video_style_memories_skip_scene_shell_without_character_signal
+10823-10834: private              fn         build_script_role_video_style_memories_drop_generic_restrained_mood_when_performance_exists
+10843-10861: private              fn         build_script_role_video_style_memories_keep_distinct_intense_mood_when_performance_exists
+10864-10874: private              fn         build_script_role_video_style_memories_seed_single_high_signal_sample
+10877-10884: private              fn         build_script_role_video_style_memories_skip_single_generic_soft_sample
+11107-11113: private              fn         prop_storyboard_role_memory_prefers_primary_subject_in_multi_role_scene
+11176-11181: private              fn         selected_memory_subject_aliases_keep_generic_role_when_followed_by_action
+
+============================================================
+Category: SCORING
+============================================================
+
+ 1323- 1338: private              fn         selected_visual_only_memory_keep_priority
+ 2211- 2217: private              fn         role_style_memory_scope_priority
+ 2331- 2337: private              fn         score_role_style_note_context_evidence
+ 2583- 2623: private              fn         score_selected_video_style_note
+ 3315- 3331: private              fn         score_selected_identity_micro_performance_fragment
+ 4685- 4733: private              fn         score_ranked_style_note
+ 4915- 4919: private              fn         score_style_note_context_evidence
+ 5833- 5845: private              fn         role_voice_variant_priority
+ 7010- 7064: private              fn         score_selected_video_memory_style_fragment
+ 7066- 7080: private              fn         score_selected_video_memory_note_fragment
+ 7924- 7935: private              fn         compact_selected_video_memory_for_focus_drops_local_framing_when_lighting_is_priority
+ 8691- 8704: private              fn         selected_video_memory_quality_score_prefers_incoming_when_it_adds_style_signal
+ 8707- 8715: private              fn         selected_video_memory_quality_score_penalizes_low_gain_style_redundancy_when_performance_exists
+ 8724- 8740: private              fn         selected_video_memory_quality_score_prefers_delivery_rich_style_over_visual_only_style
+10121-10130: private              fn         compact_rejected_negative_avoid_preserves_original_order_for_same_priority
+
+============================================================
+Category: SELECTOR
+============================================================
+
+ 1372- 1415: private              fn         select_best_visual_only_memory_row
+ 2496- 2516: pub(crate)           fn         select_selected_video_memory_notes
+ 2673- 2679: pub(crate)           fn         select_neighbor_selected_video_memory_notes
+ 8594- 8615: private              fn         select_selected_video_memory_notes_keeps_latest_matching_storyboard
+ 8802- 8833: private              fn         select_neighbor_selected_video_memory_notes_prefers_nearest_storyboards
+ 9853- 9864: private              fn         select_selected_video_memory_notes_skips_stale_prompt_seed
+ 9867- 9890: private              fn         select_selected_video_memory_notes_falls_back_to_unseeded_when_current_seed_has_no_match
+11985-12002: private              fn         select_selected_video_memory_notes_for_storyboard_prefers_delivery_on_fragile_turn
+
+============================================================
+Category: STYLE_MEMORY
+============================================================
+
+  873-  885: pub(crate)           fn         refresh_script_video_style_memory
+ 1963- 1969: pub(crate)           fn         refresh_project_video_style_memory
+ 2081- 2083: pub(crate)           fn         select_script_video_style_memory_notes
+ 2085- 2138: pub(crate)           fn         select_script_video_style_memory_notes_for_storyboard
+ 2219- 2223: private              fn         role_style_memory_sample_count
+ 2316- 2321: private              fn         role_style_memory_min_context_evidence
+ 2441- 2447: pub(crate)           fn         select_prioritized_video_style_note
+ 2573- 2581: private              fn         select_best_selected_video_style_note
+ 5021- 5033: private              fn         build_script_video_style_memory
+ 5094- 5106: private              fn         build_project_video_style_memory
+ 5445- 5454: private              fn         single_sample_role_style_memory_seed
+ 6849- 6853: private              fn         generation_brief_style_memory_value
+ 6869- 6873: private              fn         role_style_memory_value_for_storyboard
+ 6905- 6926: pub(crate)           fn         contextual_style_memory_value_for_storyboard
+ 6982- 7008: private              fn         selected_video_memory_style_redundancy_penalty
+ 7734- 7746: private              fn         build_selected_video_memory_extracts_motion_style_fragment
+ 7749- 7764: private              fn         build_selected_video_memory_extracts_voice_and_sound_style_fragments
+ 7767- 7786: private              fn         build_selected_video_memory_persists_delivery_separately_when_visual_style_remains
+ 8094- 8108: private              fn         build_selected_video_memory_extracts_performance_style_fragment
+ 8175- 8188: private              fn         build_selected_video_memory_keeps_action_note_not_covered_by_style
+ 8191- 8208: private              fn         build_selected_video_memory_drops_local_framing_when_other_style_signal_exists
+ 8618- 8635: private              fn         select_selected_video_memory_notes_prefers_older_style_over_newer_confirmation_note
+ 8638- 8655: private              fn         select_selected_video_memory_notes_prefers_richer_older_style_over_newer_single_axis_note
+ 8658- 8669: private              fn         select_selected_video_memory_notes_skips_confirmation_note_without_style
+ 8672- 8678: private              fn         selected_video_memory_update_would_reduce_quality_when_incoming_drops_style_signal
+ 8681- 8687: private              fn         selected_video_memory_update_would_reduce_quality_when_incoming_keeps_style_but_loses_useful_note
+ 8836- 8842: private              fn         select_prioritized_video_style_note_keeps_neighbor_selected_style_when_current_seed_differs
+ 8857- 8863: private              fn         select_prioritized_video_style_note_prefers_role_summary_when_neighbor_style_is_only_adjacent_carryover
+ 8884- 8901: private              fn         select_prioritized_video_style_note_prefers_role_delivery_profile_for_dialogue_scene
+ 8904- 8921: private              fn         select_prioritized_video_style_note_prefers_neighbor_selected_delivery_for_dialogue_scene
+ 8924- 8947: private              fn         select_prioritized_video_style_note_prefers_fragile_role_summary_for_broken_breath_turn
+ 8950- 8956: private              fn         select_prioritized_video_style_note_prefers_primary_subject_role_summary_when_multiple_roles_match
+ 9361- 9370: private              fn         select_rejected_video_negative_memory_notes_drops_generic_style_fillers_for_high_signal_visual_guard
+10133-10149: private              fn         select_pending_rejected_video_observation_candidates_compacts_visual_style_family
+10421-10445: private              fn         build_script_video_style_memory_extracts_recurring_style_fragments
+10448-10472: private              fn         build_script_video_style_memory_drops_fragments_that_recent_rejections_keep_hitting
+10475-10490: private              fn         build_script_video_style_memory_extracts_recurring_style_fragments_from_ascii_delimiters
+10493-10510: private              fn         build_script_video_style_memory_keeps_recurring_environment_fragment
+10513-10530: private              fn         build_script_video_style_memory_keeps_recurring_motion_fragment
+10533-10550: private              fn         build_script_video_style_memory_keeps_recurring_voice_and_sound_fragments
+10553-10570: private              fn         build_script_video_style_memory_keeps_recurring_performance_fragment
+10573-10587: private              fn         build_script_video_style_memory_drops_low_gain_voice_mood_and_motion_when_performance_exists
+10598-10612: private              fn         build_script_video_style_memory_drops_ambient_sound_when_visual_and_performance_fragments_exist
+10621-10638: private              fn         build_script_video_style_memory_drops_character_signature_fragments_when_subjects_mix
+10789-10802: private              fn         build_script_role_video_style_memories_skip_camera_only_role_memory
+10887-10905: private              fn         select_subject_role_video_style_memory_notes_matches_subject_aliases
+10908-10926: private              fn         select_subject_role_video_style_memory_notes_prefers_script_scope_over_project_scope
+10929-10945: private              fn         select_subject_role_video_style_memory_notes_merges_project_fill_only_when_axis_is_missing
+10951-10969: private              fn         select_subject_role_video_style_memory_notes_skips_low_support_generic_project_fill
+10972-10987: private              fn         select_subject_role_video_style_memory_notes_skips_supported_generic_project_fill_when_script_scope_already_has_richer_signal
+10993-11008: private              fn         select_subject_role_video_style_memory_notes_keeps_supported_generic_project_fill_for_weak_script_signal
+11014-11037: private              fn         select_subject_role_video_style_memory_notes_for_storyboard_drops_mismatched_soft_voice
+11040-11046: private              fn         select_subject_role_video_style_memory_notes_for_storyboard_prefers_delivery_profile_for_visible_speech
+11061-11072: private              fn         select_subject_role_video_style_memory_notes_for_storyboard_keeps_no_context_behavior
+11075-11081: private              fn         select_subject_role_video_style_memory_notes_for_storyboard_prefers_primary_subject_when_multiple_roles_match
+11232-11248: private              fn         select_script_video_style_memory_notes_reads_summary_note
+11251-11257: private              fn         select_script_video_style_memory_notes_for_storyboard_prefers_delivery_profile_for_dialogue_scene
+11270-11294: private              fn         build_project_video_style_memory_extracts_cross_script_recurring_style
+11297-11321: private              fn         build_script_video_style_memory_splits_visual_style_and_delivery_for_single_subject
+11324-11345: private              fn         build_script_video_style_memory_keeps_high_signal_delivery_across_mixed_subjects
+11348-11372: private              fn         build_project_video_style_memory_drops_character_signature_fragments_when_subjects_mix
+11375-11403: private              fn         build_project_video_style_memory_keeps_high_signal_delivery_across_mixed_subjects
+11406-11428: private              fn         build_project_video_style_memory_drops_low_gain_voice_mood_and_motion_when_performance_exists
+11439-11465: private              fn         build_project_video_style_memory_drops_recurring_sound_when_subjects_mix
+11468-11507: private              fn         build_project_video_style_memory_requires_majority_support_when_samples_are_dense
+11510-11538: private              fn         build_project_video_style_memory_prefers_latest_prompt_seed_within_each_script_storyboard
+11541-11585: private              fn         build_project_video_style_memory_caps_samples_per_script_to_reduce_single_script_bias
+11588-11614: private              fn         build_project_video_style_memory_drops_generic_cold_mood_if_lighting_already_carries_it
+11617-11654: private              fn         build_project_video_style_memory_with_bias_prefers_identity_and_lighting_fragments
+11657-11672: private              fn         build_script_video_style_memory_drops_generic_cold_mood_if_specific_cold_lighting_already_carries_it
+11680-11715: private              fn         build_script_video_style_memory_with_bias_prefers_delivery_and_lighting_fragments
+11718-11741: private              fn         build_script_video_style_memory_summarizes_recurring_keywords_from_variant_notes
+11744-11769: private              fn         build_script_video_style_memory_drops_recurring_local_framing_without_stable_shot_language
+11777-11797: private              fn         build_script_video_style_memory_deduplicates_same_storyboard_prompt_seed_samples
+11800-11820: private              fn         build_script_video_style_memory_prefers_latest_prompt_seed_per_storyboard
+11823-11853: private              fn         build_script_video_style_memory_skips_low_support_keywords_when_note_pool_is_large
+11856-11875: private              fn         build_script_video_style_memory_drops_generic_cold_mood_if_lighting_already_carries_it
+11878-11891: private              fn         select_project_video_style_memory_notes_reads_summary_note
+11894-11909: private              fn         select_project_video_style_memory_notes_for_storyboard_prefers_delivery_on_fragile_turn
+11912-11926: private              fn         select_selected_video_memory_notes_drop_scene_fragments_from_prompt_style_memory
+11929-11941: private              fn         select_selected_video_memory_notes_drop_local_framing_when_other_style_fragments_exist
+11944-11955: private              fn         select_selected_video_memory_notes_keep_local_framing_when_it_is_only_style_signal
+11958-11982: private              fn         select_selected_video_memory_notes_prefers_delivery_rich_style_over_visual_only_style
+
+============================================================
+Category: TYPES
+============================================================
+
+   57-   57: private              const      SELECTED_VIDEO_MEMORY_NAME
+   58-   58: private              const      SCRIPT_VIDEO_STYLE_MEMORY_NAME
+   59-   59: private              const      PROJECT_VIDEO_STYLE_MEMORY_NAME
+   60-   60: private              const      SCRIPT_VIDEO_GENERATION_BRIEF_MEMORY_NAME
+   61-   61: private              const      PROJECT_VIDEO_GENERATION_BRIEF_MEMORY_NAME
+   62-   62: private              const      SCRIPT_ROLE_VIDEO_STYLE_MEMORY_NAME
+   63-   63: private              const      PROJECT_ROLE_VIDEO_STYLE_MEMORY_NAME
+   64-   64: private              const      REJECTED_VIDEO_NEGATIVE_MEMORY_NAME
+   65-   65: private              const      SCRIPT_VIDEO_OBSERVATION_MEMORY_NAME
+   66-   66: private              const      PROJECT_VIDEO_OBSERVATION_MEMORY_NAME
+   67-   67: private              const      SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+   68-   68: private              const      PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_NAME
+   69-   69: private              const      SELECTED_VIDEO_MEMORY_KEEP_ROWS
+   70-   70: private              const      SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS
+   71-   71: private              const      PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS
+   72-   72: private              const      SCRIPT_VIDEO_GENERATION_BRIEF_MEMORY_KEEP_ROWS
+   73-   73: private              const      PROJECT_VIDEO_GENERATION_BRIEF_MEMORY_KEEP_ROWS
+   74-   74: private              const      SCRIPT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS
+   75-   75: private              const      PROJECT_ROLE_VIDEO_STYLE_MEMORY_KEEP_ROWS
+   76-   76: private              const      PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT
+   77-   77: private              const      REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS
+   78-   78: private              const      REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
+   79-   79: private              const      REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT
+   80-   80: private              const      SCRIPT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS
+   81-   81: private              const      PROJECT_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS
+   82-   82: private              const      SCRIPT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS
+   83-   83: private              const      PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS
+   84-   84: private              const      PROJECT_VIDEO_OBSERVATION_MEMORY_MAX_SAMPLES_PER_SCRIPT
+   85-   85: private              const      VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS
+   86-   86: private              const      STYLE_NOTE_PREFIXES
+   89-   89: private              const      STYLE_PROMPT_PREFIXES
+   92-   92: private              const      STABLE_PROMPT_SHOT_KEYWORDS
+  103-  103: private              const      CONTINUITY_NOTE_KEYWORDS
+  106-  106: private              const      SHOT_STYLE_KEYWORDS
+  117-  117: private              const      MOOD_STYLE_KEYWORDS
+  130-  130: private              const      LIGHTING_STYLE_KEYWORDS
+  144-  144: private              const      ENVIRONMENT_STYLE_KEYWORDS
+  159-  159: private              const      MOTION_STYLE_KEYWORDS
+  169-  169: private              const      PERFORMANCE_STYLE_KEYWORDS
+  183-  183: private              const      VOICE_STYLE_KEYWORDS
+  196-  196: private              const      SOUND_STAGE_STYLE_KEYWORDS
+  207-  207: private              const      ACTION_PACE_PREFIXES
+  210-  210: private              const      ACTION_OBJECT_PREFIX_VERBS
+  213-  213: private              const      ACTION_SUBJECT_PREFIXES
+  216-  216: private              const      GENERIC_SUBJECT_ACTION_LEADERS
+  220-  220: private              const      SETTING_SUBJECT_LEAD_IN_SUFFIXES
+  232-  232: private              const      PROMPT_LEADING_BRIDGES
+  233-  233: private              const      SUBJECT_IDENTITY_TAIL_MARKERS
+  239-  239: private              const      LOW_SIGNAL_SUBJECT_POSE_PREFIXES
+  255-  255: private              const      NON_CHARACTER_ALIAS_SUFFIXES
+  281-  285: pub(crate)           struct     StoryboardPromptSeedRow
+  288-  291: pub(crate)           struct     AgentMemoryRow
+  294-  298: private              struct     ScopedAgentMemoryRow
+  301-  305: private              struct     OptimizableAgentMemoryRow
+  308-  310: private              struct     OptimizationQualityFocusDbRow
+  313-  320: pub(crate)           struct     VideoMemoryOptimizationResult
+  323-  327: private              struct     SelectedVideoMemoryOptimizationCandidate
+  330-  333: private              struct     EffectiveSelectedVideoMemoryOptimizationCandidate
+  336-  341: private              struct     SelectedVideoMemoryOptimizationBias
+  344-  349: private              struct     SelectedVideoMemoryOptimizationPlan
+  351-  351: private              const      SELECTED_VIDEO_MEMORY_FOCUS_DELIVERY
+  352-  352: private              const      SELECTED_VIDEO_MEMORY_FOCUS_EMOTION
+  353-  353: private              const      SELECTED_VIDEO_MEMORY_FOCUS_IDENTITY
+  354-  354: private              const      SELECTED_VIDEO_MEMORY_FOCUS_LIGHTING
+  357-  369: pub(crate)           struct     StructuredStoryboardDescription
+ 2816- 2819: private              struct     SelectedVideoMemoryScope
+ 4503- 4513: private              struct     StyleNoteSelectionContext
+ 4516- 4525: private              struct     RankedStyleNote
+ 4820- 4826: private              const      ROLE_STYLE_VOICE_SHARED_KEYWORD_FAMILIES
+ 4828- 4837: private              const      ROLE_STYLE_PERFORMANCE_SHARED_KEYWORD_FAMILIES
+ 5185- 5194: private              struct     RejectedStyleSignals
+
+============================================================
+Category: UTILS
+============================================================
+
+  274-  278: pub(crate)           fn         split_prompt_note_fragments
+ 1689- 1696: private              fn         strip_key_from_memory_content
+ 1757- 1769: private              fn         selected_video_memory_semantic_dedupe_key
+ 1771- 1780: private              fn         selected_video_memory_storyboard_scope_key
+ 1815- 1823: private              fn         selected_video_memory_visual_signal_count
+ 2353- 2365: private              fn         role_style_fragment_conflicts_or_overlaps
+ 2367- 2376: private              fn         role_style_fragment_family
+ 2382- 2408: private              fn         role_style_fragment_prefers_strong_support
+ 2423- 2439: private              fn         role_style_fragments_have_high_value_signal
+ 2625- 2650: private              fn         count_selected_video_style_axes
+ 2664- 2670: private              fn         is_local_framing_only_fragment
+ 2738- 2740: pub(crate)           fn         normalize_prompt_text
+ 2742- 2751: pub(crate)           fn         clip_prompt_fragment
+ 2821- 2827: private              fn         selected_video_memory_scope
+ 2853- 3012: private              fn         selected_video_memory_note
+ 3108- 3129: private              fn         selected_memory_explicitly_signals_speech
+ 3150- 3168: private              fn         selected_memory_subject_count
+ 3291- 3297: private              fn         selected_identity_scene_low_gain_fragment_family
+ 3668- 3678: pub(crate)           fn         selected_memory_subject_identity
+ 3714- 3743: private              fn         selected_memory_identity_source
+ 3756- 3758: private              fn         normalize_selected_memory_identity_candidate
+ 3760- 3764: private              fn         normalize_selected_memory_identity_candidate_with_hint
+ 3860- 3895: private              fn         trim_selected_memory_subject_action_overlap
+ 4030- 4034: private              fn         strip_selected_memory_action_subject_overlap
+ 4087- 4091: private              fn         strip_selected_memory_action_object_prefix
+ 4144- 4183: private              fn         strip_selected_memory_action_setting_prefix
+ 4207- 4211: private              fn         strip_selected_memory_setting_subject_prefix
+ 4262- 4267: private              fn         strip_selected_memory_setting_context_prefix
+ 4330- 4336: private              fn         selected_memory_setting_locative_lead_in
+ 4338- 4346: private              fn         strip_selected_memory_setting_descriptive_lead_in
+ 4348- 4367: private              fn         selected_memory_context_variants
+ 4369- 4378: private              fn         strip_selected_memory_subject_role_prefix
+ 4380- 4391: private              fn         strip_selected_memory_prefix_candidate
+ 4397- 4406: private              fn         prompt_fragments_substantially_overlap
+ 4408- 4436: pub(crate)           fn         storyboard_prompt_seed
+ 4464- 4494: private              fn         has_exact_prompt_seed_memory_match
+ 4584- 4591: private              fn         collect_ranked_video_style_note_candidates
+ 4676- 4683: private              fn         selected_video_style_value_from_content
+ 4735- 4742: private              fn         neighbor_selected_style_distance_penalty
+ 4744- 4748: private              fn         neighbor_selected_character_state_mismatch_penalty
+ 4762- 4767: private              fn         selected_voice_family_conflicts_with_context
+ 4773- 4777: private              fn         current_context_voice_family
+ 4796- 4818: private              fn         style_voice_family
+ 4862- 4887: private              fn         selected_generic_restrained_mood_lags_fragile_scene
+ 5014- 5018: private              fn         local_shot_framing_fragment
+ 5196- 5199: private              fn         summarize_rejected_style_signals
+ 5247- 5252: private              fn         style_fragment_conflicts_with_rejected_signals
+ 5605- 5608: private              fn         distinct_selected_video_subject_group_count
+ 5658- 5660: private              fn         role_style_supplement_fragments
+ 5753- 5789: private              fn         summarize_role_voice_fragment
+ 5791- 5797: private              fn         summarize_recurring_role_performance_fragment
+ 5803- 5831: private              fn         summarize_role_voice_variant
+ 5882- 5895: private              fn         distinct_selected_video_style_notes
+ 5897- 5916: private              fn         distinct_project_selected_video_style_notes
+ 5918- 5921: private              fn         distinct_selected_video_style_notes_with_subject
+ 5992- 5996: private              fn         distinct_selected_video_style_notes_by_scope
+ 6040- 6054: private              fn         recurring_style_fragments
+ 6091- 6097: private              fn         selected_memory_high_signal_camera_fragment
+ 6254- 6261: private              fn         lighting_fragment_covers_generic_mood_tone
+ 6354- 6366: private              fn         style_only_note
+ 6368- 6384: private              fn         non_style_note
+ 6577- 6581: private              fn         low_signal_subject_pose_fragment
+ 6583- 6594: private              fn         low_signal_object_hold_fragment
+ 6596- 6601: private              fn         low_signal_action_residue_fragment
+ 6603- 6723: private              fn         trim_selected_memory_fragment_covered_by_style
+ 6725- 6731: private              fn         remove_fragment_phrases
+ 6733- 6746: private              fn         selected_video_style_value
+ 6941- 6951: private              fn         selected_video_memory_update_would_reduce_quality_with_bias
+ 7103- 7125: private              fn         pick_recurring_prefixed_fragment
+ 7127- 7142: private              fn         summarize_recurring_prefixed_fragment
+ 7151- 7165: private              fn         summarize_recurring_style_keywords
+ 7206- 7212: private              fn         recurring_fragment_support_threshold
+ 7277- 7303: private              fn         replace_summary_memory
+ 7356- 7382: private              fn         replace_summary_memories
+ 7407- 7431: private              fn         replace_project_summary_memory
+ 7482- 7506: private              fn         replace_project_summary_memories
+ 8769- 8782: private              fn         selected_video_memory_scope_uses_storyboard_and_prompt_seed
+ 8785- 8799: private              fn         selected_video_memory_scope_distinguishes_prompt_seed_variants
+ 9835- 9850: private              fn         storyboard_prompt_seed_changes_with_storyboard_version
+11152-11157: private              fn         selected_memory_subject_identity_prefers_subject_refs_name
+11160-11165: private              fn         selected_memory_subject_aliases_trim_descriptive_subject_and_drop_prop_refs
+11168-11173: private              fn         selected_memory_subject_aliases_trim_dialogue_or_action_tails
+
+============================================================
+Category: VALIDATION
+============================================================
+
+  532-  534: pub(crate)           fn         selected_video_memory_is_low_signal
+ 1711- 1727: private              fn         selected_video_memory_has_emotion_anchor
+ 1729- 1739: private              fn         selected_video_memory_has_identity_anchor
+ 1741- 1755: private              fn         selected_video_memory_has_lighting_anchor
+ 1782- 1788: private              fn         selected_video_memory_has_delivery_anchor
+ 1790- 1793: private              fn         selected_video_memory_is_visual_only
+ 1825- 1866: private              fn         selected_video_memory_is_scope_filler
+ 2378- 2380: private              fn         role_style_project_fill_fragment_is_low_support
+ 2410- 2421: private              fn         role_style_fragment_is_low_gain_carryover
+ 2652- 2656: private              fn         note_contains_selected_video_delivery_signal
+ 2658- 2662: private              fn         note_contains_selected_video_emotion_signal
+ 2842- 2851: private              fn         memory_matches_rejected_video_risk_tags
+ 3014- 3021: private              fn         selected_memory_field_looks_silent
+ 3023- 3028: private              fn         selected_memory_has_visible_speech_performance_risk
+ 3085- 3106: private              fn         selected_memory_dialogue_is_low_gain_utterance
+ 3131- 3148: private              fn         selected_memory_scene_has_motion_risk
+ 3170- 3207: private              fn         selected_memory_has_high_signal_visual_performance_cue
+ 3209- 3243: private              fn         selected_memory_needs_identity_continuity
+ 3299- 3313: private              fn         selected_memory_is_strong_identity_close_up
+ 3541- 3549: private              fn         selected_memory_voice_fragment_is_redundant_with_performance
+ 3745- 3754: private              fn         generic_subject_role_is_followed_by_actionish_fragment
+ 3791- 3797: private              fn         selected_memory_identity_looks_like_non_character_fragment
+ 4438- 4440: private              fn         memory_matches_storyboard
+ 4442- 4449: private              fn         memory_matches_prompt_seed
+ 4451- 4457: private              fn         memory_matches_prompt_seed_with_fallback
+ 4655- 4658: private              fn         memory_row_is_neighbor_selected_style
+ 4779- 4794: private              fn         context_is_fragile_voice_turn
+ 4839- 4844: private              fn         role_style_note_matches_shared_keyword_family
+ 4901- 4913: private              fn         style_note_selection_context_is_empty
+ 5456- 5488: private              fn         single_sample_role_style_seed_is_high_signal
+ 5589- 5591: private              fn         global_voice_fragment_is_low_gain_carryover
+ 5593- 5595: private              fn         global_mood_fragment_is_generic_restrained
+ 5597- 5599: private              fn         global_motion_fragment_is_low_gain_carryover
+ 5601- 5603: private              fn         global_sound_fragment_is_low_gain_ambience
+ 5652- 5656: private              fn         role_memory_fragment_is_character_signal
+ 5680- 5685: private              fn         global_delivery_fragment_is_worth_persisting
+ 5694- 5704: private              fn         global_delivery_fragment_is_cross_subject_worth_persisting
+ 5706- 5751: private              fn         global_delivery_fragment_is_high_signal
+ 5799- 5801: private              fn         role_voice_variant_is_low_gain_carryover
+ 6161- 6169: private              fn         performance_fragment_contains_voice_delivery
+ 6263- 6276: private              fn         selected_style_fragment_is_generic_restrained_mood
+ 6278- 6280: private              fn         selected_style_fragment_is_low_gain_voice
+ 6282- 6284: private              fn         selected_style_fragment_is_low_gain_motion
+ 6855- 6867: private              fn         storyboard_is_fragile_emotional_turn
+ 7961- 7968: private              fn         selected_video_memory_is_low_signal_flags_generic_restrained_style
+ 8544- 8553: private              fn         prepare_rejected_video_negative_memory_for_storage_prefers_delivery_guards_when_bias_is_hot
+12245-12277: private              fn         plan_selected_video_memory_optimization_keeps_best_lighting_row_when_visual_focus_is_hot
+12280-12319: private              fn         plan_selected_video_memory_optimization_drops_cross_scope_fillers_when_focus_bias_has_multiple_strong_anchors
+12325-12350: private              fn         plan_selected_video_memory_optimization_keeps_cross_scope_fillers_when_focus_anchor_is_not_yet_dense

@@ -60,7 +60,9 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
         ],
     memorySummary: memorySummary,
     statusLine: statusLine,
+    costOverview: null,
     loadingProjects: loadingProjects,
+    loadingCostOverview: false,
     loadingMemory: loadingMemory,
     appendingMemory: appendingMemory,
     clearingMemory: clearingMemory,
@@ -93,9 +95,11 @@ ProjectsAgentMemoryWorkbenchDialogViewCallbacks buildCallbacks({
     onQueryMemory: onQueryMemory ?? () async {},
     onAppendMemory: onAppendMemory ?? () async {},
     onClearMemory: onClearMemory ?? () async {},
+    onLoadCostOverview: () async {},
     onOptimizeVideoMemory: onOptimizeVideoMemory ?? () async {},
     onQueryTypeChanged: (_) {},
     onClearTypeChanged: (_) {},
+    onMemoryTierChanged: (_) {},
     onClose: onClose ?? () {},
   );
 }
