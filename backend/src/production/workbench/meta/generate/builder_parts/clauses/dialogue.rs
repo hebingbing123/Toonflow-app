@@ -1,6 +1,7 @@
 //! Dialogue clause compaction and filtering.
 
 use super::super::super::*;
+use super::super::continuity::risk::video_prompt_scene_subject_count;
 
 pub(in crate::production::workbench::meta::generate) fn looks_like_silence(text: &str) -> bool {
     let normalized = text.trim().to_lowercase();
