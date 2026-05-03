@@ -247,29 +247,32 @@
       - `git commit -m "refactor: split meta/generate/memory.rs into 5 modules (≤800 lines each)"`
       - _Requirements: 2.6_
 
-  - [ ] 4.3 Split backend/src/production/workbench/video_prompt_memory/rejected.rs (2,996 lines → ~4 files)
+  - [x] 4.3 Split backend/src/production/workbench/video_prompt_memory/rejected.rs (2,996 lines → 7 files)
     
-    - [~] 4.3.1 Analyze and create structure
+    - [x] 4.3.1 Analyze and create structure
       - Read file, identify public APIs
       - Create `video_prompt_memory/rejected/` directory
-      - Create mod.rs and 3 submodules: builder.rs, selector.rs, merger.rs
+      - Create `mod.rs` and focused submodules: `build.rs`, `normalization.rs`, `persist.rs`, `scoring.rs`, `selection.rs`, `summary.rs`
       - _Requirements: 2.7_
     
-    - [~] 4.3.2 Migrate code
-      - Move rejected memory building to builder.rs (~800 lines)
-      - Move rejected memory selection to selector.rs (~800 lines)
-      - Move rejected memory merging to merger.rs (~700 lines)
+    - [x] 4.3.2 Migrate code
+      - Move rejected memory building to `build.rs` (636 lines)
+      - Move normalization and canonicalization helpers to `normalization.rs` (281 lines)
+      - Move rejected memory persistence and merging to `persist.rs` (609 lines)
+      - Move scoring helpers to `scoring.rs` (427 lines)
+      - Move selection helpers to `selection.rs` (489 lines)
+      - Move summary and compaction helpers to `summary.rs` (563 lines)
       - _Bug_Condition: isBugCondition(file) where lineCount(file) > 800_
       - _Expected_Behavior: All submodules ≤800 lines, rejected handling preserved_
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.7, 3.1, 3.2, 3.3, 3.7, 3.9_
     
-    - [~] 4.3.3 Update mod.rs and verify
-      - Add re-exports, run cargo checks
+    - [x] 4.3.3 Update mod.rs and verify
+      - Add re-exports, run `cargo fmt`, `cargo check -q`, and `yarn refactor:check`
       - _Requirements: 2.7, 3.3, 3.4, 3.5, 3.7_
     
-    - [~] 4.3.4 Commit
-      - `git commit -m "refactor: split video_prompt_memory/rejected.rs into 4 modules (≤800 lines each)"`
+    - [x] 4.3.4 Commit
+      - `git commit -m "refactor: split video_prompt_memory/rejected.rs into focused submodules (≤800 lines each)"`
       - _Requirements: 2.7_
 
   - [~] 4.4 Phase 2 Gate Check
