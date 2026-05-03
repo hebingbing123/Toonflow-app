@@ -1,0 +1,356 @@
+use axum::{
+    extract::{Json, State},
+    http::HeaderMap,
+    Json as JsonResponse,
+};
+use serde::Serialize;
+
+use super::WorkbenchGenerateVideoBody;
+use crate::error::ApiError;
+use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
+use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
+use crate::production::workbench::video_prompt_memory::{
+    optimize_scoped_video_memory, AgentMemoryRow, StoryboardPromptSeedRow,
+};
+use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
+use crate::scope::http::require_owned_numeric_script_scope;
+use crate::state::AppState;
+
+const VIDEO_NEGATIVE_PROMPT_MAX_CHARS: usize = 120;
+const VIDEO_NEGATIVE_PROMPT_LEAN_MAX_CHARS: usize = 84;
+const VIDEO_NEGATIVE_PROMPT_LEAN_FRAGMENT_LIMIT: usize = 2;
+const VIDEO_NEGATIVE_REVIEW_BASE_LIMIT: i64 = 8;
+const VIDEO_NEGATIVE_REVIEW_PER_STORYBOARD_ROWS: i64 = 4;
+const VIDEO_NEGATIVE_REVIEW_MAX_LIMIT: i64 = 24;
+const VIDEO_NEGATIVE_REJECTED_MEMORY_BASE_LIMIT: i64 = 8;
+const VIDEO_NEGATIVE_REJECTED_MEMORY_PER_STORYBOARD_ROWS: i64 = 2;
+const VIDEO_NEGATIVE_REJECTED_MEMORY_MAX_LIMIT: i64 = 12;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_BASE_LIMIT: i64 = 8;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_PER_STORYBOARD_ROWS: i64 = 2;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_SUMMARY_ROWS: i64 = 2;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_MAX_LIMIT: i64 = 14;
+
+#[derive(Debug, Clone)]
+struct NormalizedGenerateVideoUploadItem {
+    storyboard_id: i32,
+    source_url: String,
+    prompt: Option<String>,
+    negative_prompt: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(in crate::production) struct WorkbenchGenerateVideoResponse {
+    enqueued: Vec<JobRow>,
+    total: usize,
+    negative_prompt: Option<String>,
+    storyboard_negative_prompts: Vec<StoryboardNegativePrompt>,
+}
+
+#[derive(Debug, Clone, sqlx::FromRow)]
+struct QualityReviewSeedRow {
+    target_type: Option<String>,
+    target_id: Option<String>,
+    bad_case_category: Option<String>,
+    comments: Option<String>,
+}
+
+#[derive(Debug, Clone, sqlx::FromRow)]
+struct RecentQualitySignalSeedRow {
+    target_type: Option<String>,
+    target_id: Option<String>,
+    passed: Option<bool>,
+    overall_score: Option<i16>,
+    dialogue_naturalness: Option<i16>,
+    character_consistency: Option<i16>,
+    visual_quality: Option<i16>,
+    memory_delivery_priority_applied: Option<bool>,
+    is_bad_case: bool,
+    bad_case_category: Option<String>,
+    comments: Option<String>,
+    feedback_memory_focus_tags: Option<serde_json::Value>,
+}
+
+#[derive(Debug)]
+struct ScoredNegativeFragment {
+    score: i32,
+    order: usize,
+    fragment: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct StoryboardNegativePrompt {
+    storyboard_id: i32,
+    negative_prompt: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct AutoNegativePromptSelection {
+    pub(crate) prompt: Option<String>,
+    pub(crate) fragment_count: usize,
+    pub(crate) candidate_fragment_count: usize,
+    pub(crate) saved_fragment_count: usize,
+    pub(crate) saved_chars: usize,
+    pub(crate) budget_tier: &'static str,
+    pub(crate) review_fragment_count: usize,
+    pub(crate) rejected_memory_fragment_count: usize,
+    pub(crate) used_pending_observation_fallback: bool,
+}
+
+#[derive(Debug, Clone)]
+struct StoryboardNegativePromptContext {
+    storyboard_id: i32,
+    storyboard_review_rows: Vec<QualityReviewSeedRow>,
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+    selected_rows: Vec<AgentMemoryRow>,
+    storyboard_row: Option<StoryboardPromptSeedRow>,
+    current_prompt_seed: Option<String>,
+    subject_candidates: Vec<String>,
+}
+
+#[derive(Debug)]
+pub(crate) struct StoryboardNegativePromptRuntime {
+    pub(crate) storyboard_id: i32,
+    pub(crate) selection: AutoNegativePromptSelection,
+    pub(crate) pending_observation_candidates: Vec<String>,
+    #[allow(dead_code)]
+    pub(crate) rejected_rows: Vec<AgentMemoryRow>,
+    #[allow(dead_code)]
+    pub(crate) selected_rows: Vec<AgentMemoryRow>,
+    pub(crate) prompt_support_rows: Vec<AgentMemoryRow>,
+    pub(crate) storyboard_row: Option<StoryboardPromptSeedRow>,
+    pub(crate) current_prompt_seed: Option<String>,
+    pub(crate) subject_candidates: Vec<String>,
+}
+
+impl AutoNegativePromptSelection {
+    pub(in crate::production::workbench::video::generate) fn as_deref(&self) -> Option<&str> {
+        self.prompt.as_deref()
+    }
+
+    pub(crate) fn source_label(&self) -> Option<&'static str> {
+        self.prompt.as_ref()?;
+        if self.used_pending_observation_fallback {
+            return Some("pending_rejected_observation");
+        }
+        match (
+            self.review_fragment_count > 0,
+            self.rejected_memory_fragment_count > 0,
+        ) {
+            (true, true) => Some("review+rejected_memory"),
+            (true, false) => Some("review"),
+            (false, true) => Some("rejected_memory"),
+            (false, false) => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum VideoNegativePromptBudgetTier {
+    Lean,
+    Expanded,
+}
+
+impl VideoNegativePromptBudgetTier {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Lean => "lean",
+            Self::Expanded => "expanded",
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/generate-video",
+    operation_id = "postProductionWorkbenchGenerateVideoV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(in crate::production) async fn post_workbench_generate_video(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<WorkbenchGenerateVideoBody>,
+) -> Result<JsonResponse<WorkbenchGenerateVideoResponse>, ApiError> {
+    if body.track_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "trackId must be a positive integer".into(),
+        ));
+    }
+    if body.upload_data.is_empty() {
+        return Err(ApiError::BadRequest("uploadData must not be empty".into()));
+    }
+    if body.model.trim().is_empty() {
+        return Err(ApiError::BadRequest("model must not be empty".into()));
+    }
+    if body.duration <= 0 {
+        return Err(ApiError::BadRequest(
+            "duration must be a positive integer".into(),
+        ));
+    }
+
+    let (user_id, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+    let upload_items = normalize_upload_sources(&body.upload_data)?;
+    let storyboard_ids = upload_items
+        .iter()
+        .map(|item| item.storyboard_id)
+        .collect::<Vec<_>>();
+    ensure_track_in_scope(
+        pool,
+        scope_row.project_id,
+        scope_row.script_id,
+        body.track_id,
+    )
+    .await?;
+    ensure_storyboards_in_scope(pool, scope_row.script_id, &storyboard_ids).await?;
+    let mut text_inputs = upload_items
+        .iter()
+        .filter_map(|item| item.prompt.clone())
+        .collect::<Vec<_>>();
+    if !body.prompt.trim().is_empty() {
+        text_inputs.push(body.prompt.clone());
+    }
+    let gate = run_quality_gate(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        QualityGateStage::VideoGenerate,
+        &storyboard_ids,
+        &text_inputs,
+    )
+    .await?;
+    enforce_quality_gate(QualityGateStage::VideoGenerate, &gate)?;
+    optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?;
+
+    let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
+        .await?
+        .unwrap_or_else(|| "16:9".to_string());
+    let storyboard_negative_prompts = load_auto_negative_prompts(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        &storyboard_ids,
+    )
+    .await?;
+    let provider = infer_video_provider(&body.model);
+    let duration_label = format!("{}s", body.duration);
+    let default_prompt = body.prompt.trim().to_string();
+    let model = body.model.trim().to_string();
+    let resolution = body.resolution.trim().to_string();
+    let mode = body.mode.trim().to_string();
+
+    let mut enqueued = Vec::with_capacity(upload_items.len());
+    let mut response_negative_prompts = Vec::with_capacity(storyboard_ids.len());
+    for item in upload_items {
+        let prompt = resolve_storyboard_prompt(&item, &default_prompt)?;
+        let merged_negative_prompt = merge_negative_prompts(
+            merge_negative_prompts(
+                body.negative_prompt.as_deref(),
+                item.negative_prompt.as_deref(),
+            )
+            .as_deref(),
+            storyboard_negative_prompts
+                .get(&item.storyboard_id)
+                .and_then(|value| value.as_deref()),
+        );
+        sqlx::query(
+            r#"
+            UPDATE app_storyboard
+            SET prompt = $2,
+                duration = $3,
+                track_id = $4,
+                state = '生成中',
+                updated_at = NOW()
+            WHERE script_id = $1
+              AND numeric_id = $5
+            "#,
+        )
+        .bind(scope_row.script_id)
+        .bind(&prompt)
+        .bind(&duration_label)
+        .bind(body.track_id)
+        .bind(item.storyboard_id)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        let payload = serde_json::json!({
+            "source": "production.workbench.generate-video",
+            "project_numeric_id": body.project_id,
+            "script_id": body.script_id,
+            "storyboard_numeric_id": item.storyboard_id,
+            "provider": provider,
+            "model": &model,
+            "mode": &mode,
+            "prompt": &prompt,
+            "negative_prompt": merged_negative_prompt.clone(),
+            "duration": body.duration,
+            "resolution": &resolution,
+            "aspect_ratio": &aspect_ratio,
+            "audio": body.audio,
+            "track_id": body.track_id,
+            "image_url": item.source_url,
+        });
+        let row = enqueue_generation_job(pool, user_id, JOB_KIND_VIDEO_GENERATE, payload).await?;
+        enqueued.push(row);
+        response_negative_prompts.push(StoryboardNegativePrompt {
+            storyboard_id: item.storyboard_id,
+            negative_prompt: merged_negative_prompt,
+        });
+    }
+
+    let total = enqueued.len();
+    Ok(JsonResponse(WorkbenchGenerateVideoResponse {
+        enqueued,
+        total,
+        negative_prompt: body.negative_prompt.clone(),
+        storyboard_negative_prompts: response_negative_prompts,
+    }))
+}
+
+// Module declarations
+mod fragment_operations;
+mod fragment_parsing;
+mod memory_integration;
+mod negative_prompt_analysis;
+mod negative_prompt_builder;
+mod negative_prompt_core;
+mod negative_prompt_risk;
+mod quality_control;
+mod scene_diagnostics;
+mod utils;
+
+#[cfg(test)]
+mod tests;
+
+// Re-exports
+pub(crate) use memory_integration::{
+    load_auto_negative_prompts, load_storyboard_negative_prompt_runtime,
+};
+pub(crate) use quality_control::{
+    infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
+};
+
+// Internal imports for handler
+use fragment_operations::merge_negative_prompts;
+use memory_integration::{
+    ensure_storyboards_in_scope, ensure_track_in_scope, load_project_aspect_ratio,
+    normalize_upload_sources, resolve_storyboard_prompt,
+};
+use utils::infer_video_provider;
