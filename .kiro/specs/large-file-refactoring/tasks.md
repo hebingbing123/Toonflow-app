@@ -35,7 +35,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1-3.10_
 
-- [-] 3. Phase 1: Backend Core Files (High Priority)
+- [x] 3. Phase 1: Backend Core Files (High Priority)
 
   - [x] 3.1 Split backend/src/production/workbench/video_prompt_memory/mod.rs (12,497 lines → ~16 files)
     
@@ -186,23 +186,23 @@
       - `git commit -m "refactor: split video/generate.rs into 8 modules (≤800 lines each)"`
       - _Requirements: 2.3_
 
-  - [-] 3.4 Phase 1 Gate Check
+  - [x] 3.4 Phase 1 Gate Check
     - Run `yarn refactor:check` at repository root
     - Ensure all checks pass (OpenAPI parsing, cargo fmt, clippy, test, flutter analyze, test)
     - If failures occur, fix them before proceeding to Phase 2
     - _Requirements: 3.3, 3.4, 3.5, 3.7, 3.10_
 
-- [ ] 4. Phase 2: Backend Supporting Files (Medium Priority)
+- [-] 4. Phase 2: Backend Supporting Files (Medium Priority)
 
-  - [ ] 4.1 Split backend/src/production/workbench/meta/generate/builder.rs (4,644 lines → ~6 files)
+  - [x] 4.1 Split backend/src/production/workbench/meta/generate/builder.rs (4,644 lines → ~6 files)
     
-    - [~] 4.1.1 Analyze and create structure
+    - [x] 4.1.1 Analyze and create structure
       - Read file, identify public APIs, determine boundaries
       - Create `meta/generate/builder/` directory
       - Create mod.rs and 5 submodules: core.rs, fields.rs, validation.rs, transformation.rs, utils.rs
       - _Requirements: 2.5_
     
-    - [~] 4.1.2 Migrate code
+    - [x] 4.1.2 Migrate code
       - Move core building logic to core.rs (~800 lines)
       - Move field processing to fields.rs (~800 lines)
       - Move validation logic to validation.rs (~700 lines)
@@ -213,23 +213,23 @@
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.5, 3.1, 3.2, 3.3, 3.7, 3.9_
     
-    - [~] 4.1.3 Update mod.rs and verify
+    - [x] 4.1.3 Update mod.rs and verify
       - Add re-exports, run cargo checks, verify line counts
       - _Requirements: 2.5, 3.3, 3.4, 3.5, 3.7_
     
-    - [~] 4.1.4 Commit
+    - [x] 4.1.4 Commit
       - `git commit -m "refactor: split meta/generate/builder.rs into 6 modules (≤800 lines each)"`
       - _Requirements: 2.5_
 
-  - [ ] 4.2 Split backend/src/production/workbench/meta/generate/memory.rs (3,603 lines → ~5 files)
+  - [x] 4.2 Split backend/src/production/workbench/meta/generate/memory.rs (3,603 lines → ~5 files)
     
-    - [~] 4.2.1 Analyze and create structure
+    - [x] 4.2.1 Analyze and create structure
       - Read file, identify public APIs
       - Create `meta/generate/memory/` directory
       - Create mod.rs and 4 submodules: loader.rs, selector.rs, processor.rs, utils.rs
       - _Requirements: 2.6_
     
-    - [~] 4.2.2 Migrate code
+    - [x] 4.2.2 Migrate code
       - Move memory loading to loader.rs (~800 lines)
       - Move memory selection to selector.rs (~800 lines)
       - Move memory processing to processor.rs (~800 lines)
@@ -239,11 +239,11 @@
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.6, 3.1, 3.2, 3.3, 3.7, 3.9_
     
-    - [~] 4.2.3 Update mod.rs and verify
+    - [x] 4.2.3 Update mod.rs and verify
       - Add re-exports, run cargo checks
       - _Requirements: 2.6, 3.3, 3.4, 3.5, 3.7_
     
-    - [~] 4.2.4 Commit
+    - [x] 4.2.4 Commit
       - `git commit -m "refactor: split meta/generate/memory.rs into 5 modules (≤800 lines each)"`
       - _Requirements: 2.6_
 
