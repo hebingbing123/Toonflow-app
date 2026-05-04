@@ -108,6 +108,14 @@
       - Current state after this slice: `mod.rs` is 5,745 lines and `tests.rs` is 4,965 lines, so the next backend work should keep splitting both files
       - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
+    - [x] 3.1.9 Split `video_prompt_memory/tests.rs` into focused test submodules
+      - Create `backend/src/production/workbench/video_prompt_memory/tests/`
+      - Break the giant test file into focused modules: `selected_memory.rs`, `rejected_memory.rs`, `selected_selection.rs`, `rejected_notes.rs`, `rejected_pending.rs`, `rejected_merge.rs`, `style_memory.rs`, `style_compaction.rs`, `project_style.rs`, and `continuity_optimization.rs`
+      - Keep `tests.rs` as the shared import surface plus `mod` declarations only
+      - Run targeted backend verification again: `cargo check -q` and `cargo test -q production::workbench::video_prompt_memory::tests:: --lib` (`226 passed; 0 failed`)
+      - Current state after this slice: `tests.rs` is 48 lines and every new test submodule is under 800 lines; `mod.rs` still needs more extraction work
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
+
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
     - [x] 3.2.1 Analyze test file structure
