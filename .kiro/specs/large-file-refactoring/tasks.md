@@ -35,9 +35,9 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1-3.10_
 
-- [x] 3. Phase 1: Backend Core Files (High Priority)
+- [~] 3. Phase 1: Backend Core Files (High Priority)
 
-  - [x] 3.1 Split backend/src/production/workbench/video_prompt_memory/mod.rs (12,497 lines → ~16 files)
+  - [~] 3.1 Split backend/src/production/workbench/video_prompt_memory/mod.rs (12,497 lines → ~16 files)
     
     - [x] 3.1.1 Analyze file structure
       - Read complete file content
@@ -92,6 +92,14 @@
       - `git add` all modified files
       - `git commit -m "refactor: split video_prompt_memory/mod.rs into 16 modules (≤800 lines each)"`
       - _Requirements: 2.1_
+
+    - [x] 3.1.7 Continue the unfinished split discovered during later verification
+      - `2026-05-04`: rechecked the large-file property and found `video_prompt_memory/mod.rs` was still 12,293 lines, so the earlier phase was not actually complete
+      - Extract the selected-memory construction / persistence / optimization slice into `backend/src/production/workbench/video_prompt_memory/selected.rs`
+      - Preserve the existing `video_prompt_memory` import surface via module re-exports and shared helper imports
+      - Run targeted backend verification: `cargo check -q` and `cargo test -q production::workbench::video_prompt_memory::tests:: --lib` (`226 passed; 0 failed`)
+      - Current state after this slice: `selected.rs` is 1,599 lines, `mod.rs` is 10,705 lines, so more backend extraction is still required
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
@@ -471,8 +479,8 @@
       - Run `flutter test test/quality_reviews_workbench_dialog_view_test.dart` (`All tests passed!`)
       - _Requirements: 2.14, 3.3, 3.6, 3.8_
     
-    - [~] 6.4.4 Commit
-      - `git commit -m "refactor: split quality_reviews/workbench_view.dart into 2 modules (≤800 lines each)"`
+    - [x] 6.4.4 Commit
+      - `git commit -m "AI decision: keep quality_reviews/workbench_view.dart as the public dialog entrypoint and move display helpers into review_widgets.dart, because that trims the file under the line limit without scattering the review workflow across too many files. Completed the quality reviews workbench split and recorded the current gate blocker."` (`e1a617d3`)
       - _Requirements: 2.14_
 
   - [~] 6.5 Phase 4 Gate Check
