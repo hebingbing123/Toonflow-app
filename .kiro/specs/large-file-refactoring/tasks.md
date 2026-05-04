@@ -422,7 +422,7 @@
     - Ensure checks return to the current branch baseline (`1662 passed; 50 failed; 37 ignored`)
     - _Requirements: 3.3, 3.4, 3.5, 3.7, 3.10_
 
-- [ ] 6. Phase 4: Frontend Files (Lower Priority)
+- [x] 6. Phase 4: Frontend Files (Lower Priority)
 
   - [x] 6.1 Split frontend/lib/agent_workspaces/contexts/production/support.dart (1,675 lines → ~3 files)
     
@@ -538,9 +538,9 @@
       - `git commit -m "AI decision: keep quality_reviews/workbench_view.dart as the public dialog entrypoint and move display helpers into review_widgets.dart, because that trims the file under the line limit without scattering the review workflow across too many files. Completed the quality reviews workbench split and recorded the current gate blocker."` (`e1a617d3`)
       - _Requirements: 2.14_
 
-  - [~] 6.5 Phase 4 Gate Check
+  - [x] 6.5 Phase 4 Gate Check
     - Run `yarn refactor:check` at repository root
-    - `2026-05-04`: reran gate after 6.4; frontend-targeted checks passed, but full gate is still blocked by existing backend style-memory / negative-prompt failures (`1664 passed; 48 failed; 37 ignored`) outside this frontend slice
+    - `2026-05-04`: reran gate after the follow-up backend prompt-memory / negative-prompt fixes and the frontend analyzer cleanup; the full repository gate now passes again end to end
     - _Requirements: 3.3, 3.6, 3.8, 3.10_
 
 - [ ] 7. Final Verification
@@ -565,21 +565,22 @@
     - Full gate and full-suite verification remain tracked separately in 7.3 / 7.4 because the dirty worktree still contains unrelated existing failures outside this large-file refactoring slice
     - _Requirements: 3.1-3.10_
 
-  - [~] 7.3 Run complete test suite
+  - [x] 7.3 Run complete test suite
     - Run `cargo test` in backend/ - ensure all tests pass
     - Run `flutter test` in frontend/ - ensure all tests pass
     - `2026-05-04`: fixed `cargo test -q scripting::scripts::property_tests::tests::prop2_emotion_curve_coverage --lib` so the property now passes again
     - `2026-05-04`: preserved subject-locked `表演抬眼停顿` role memory across contextual trimming / role ranking, which reduced the backend full-suite failure count from `48` to `42`
     - `2026-05-04`: after tightening contextual negative-style fallback, review-only residual-axis filtering, exact-prompt-seed rejected-memory pruning, and single-fragment character-family rendering, backend full suite improved again to `1681 passed; 32 failed; 37 ignored`
-    - Current remaining backend blockers are now concentrated in meta prompt style-summary / prompt-memory selection plus a smaller video negative-prompt ordering cluster, so this checkpoint remains open until those are resolved too
+    - `2026-05-04`: after the remaining meta prompt-memory / style-selection / continuity / negative-prompt ordering fixes plus the frontend analyzer cleanup, the full suite now passes via `yarn refactor:check` (`backend cargo test`, `frontend flutter test`, plus gate checks all green)
     - _Requirements: 3.3_
 
-  - [~] 7.4 Run final gate check
+  - [x] 7.4 Run final gate check
     - Run `yarn refactor:check` at repository root
     - Ensure all checks pass (OpenAPI, cargo fmt, clippy, test, flutter analyze, test)
     - `2026-05-04`: after fixing the scripting property regression, the dirty-worktree baseline returned to `1664 passed; 48 failed; 37 ignored`
     - `2026-05-04`: after preserving hesitant / subject-locked role-performance fragments, `yarn refactor:check` improved to `1671 passed; 42 failed; 37 ignored`; gate still open because the remaining failures cluster around observation-style summary selection and negative-prompt suppression
     - `2026-05-04`: after fixing the observation-style pressure path plus the `merge_budget_tests` negative-prompt suppression / merge regressions, `yarn refactor:check` now reaches `1681 passed; 32 failed; 37 ignored`; gate is still open because the remaining failures are concentrated in meta prompt-memory/style selection and a smaller video negative-prompt ordering cluster
+    - `2026-05-04`: final rerun now passes completely; merged OpenAPI export, backend `fmt` / `clippy -D warnings` / `cargo test`, frontend `flutter analyze`, and frontend `flutter test` are all green
     - _Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.10_
 
   - [~] 7.5 Final commit
@@ -587,8 +588,8 @@
     - `git commit -m "refactor: complete large file refactoring - all files now ≤800 lines"`
     - _Requirements: 2.1-2.14_
 
-- [~] 8. Checkpoint - Ensure all tests pass
-  - Ensure all tests pass, ask the user if questions arise.
+- [x] 8. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass; `yarn refactor:check` now passes end to end on `2026-05-04`.
   - _Requirements: 3.3, 3.10_
 
 ## Notes
