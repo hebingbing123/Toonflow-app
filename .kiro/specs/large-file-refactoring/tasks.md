@@ -101,6 +101,13 @@
       - Current state after this slice: `selected.rs` is 1,599 lines, `mod.rs` is 10,705 lines, so more backend extraction is still required
       - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
+    - [x] 3.1.8 Externalize the inline `video_prompt_memory` tests from `mod.rs`
+      - Move the inline `#[cfg(test)] mod tests { ... }` body into `backend/src/production/workbench/video_prompt_memory/tests.rs`
+      - Keep `mod.rs` as a thin `#[cfg(test)] mod tests;` declaration so the runtime module stops carrying test code
+      - Run targeted backend verification again: `cargo test -q production::workbench::video_prompt_memory::tests:: --lib` (`226 passed; 0 failed`)
+      - Current state after this slice: `mod.rs` is 5,745 lines and `tests.rs` is 4,965 lines, so the next backend work should keep splitting both files
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
+
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
     - [x] 3.2.1 Analyze test file structure
