@@ -277,9 +277,11 @@ class _QualityReviewsWorkbenchDialogState
         _badCaseStatsSummary = items.isEmpty
             ? '暂无坏例数据'
             : items
-                .map((e) =>
-                    '${e.badCaseCategory ?? "未分类"} ${e.count}条 pass=${e.passRatePercent.toStringAsFixed(1)}%')
-                .join(' | ');
+                  .map(
+                    (e) =>
+                        '${e.badCaseCategory ?? "未分类"} ${e.count}条 pass=${e.passRatePercent.toStringAsFixed(1)}%',
+                  )
+                  .join(' | ');
         _statusLine = '已刷新坏例分布';
       });
     } on RustApiException catch (e) {
@@ -429,7 +431,7 @@ class _QualityReviewsWorkbenchDialogState
         final writesScopedMemory =
             (projectId != null && scriptId != null) &&
             (_createBadCase ||
-                (_createPassed == false && (score == null || score < 70)));
+                (_createPassed == false && (score == null || score < 7)));
         _statusLine = writesScopedMemory
             ? '已创建评审 ${created.id}，本条会回写项目/剧本隔离记忆'
             : '已创建评审 ${created.id}';

@@ -11,9 +11,15 @@ List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
 
   final badCaseCategory = (row.badCaseCategory ?? '').toLowerCase();
   final comments = (row.comments ?? '').toLowerCase();
-  final overallScore = row.overallScore ?? 100;
-  final dialogueNaturalness = row.dialogueNaturalness ?? overallScore;
-  final visualQuality = row.visualQuality ?? overallScore;
+  final overallScore = _qualityScorePercent(row.overallScore);
+  final dialogueNaturalness = _qualityScorePercent(
+    row.dialogueNaturalness,
+    fallback: row.overallScore ?? 10,
+  );
+  final visualQuality = _qualityScorePercent(
+    row.visualQuality,
+    fallback: row.overallScore ?? 10,
+  );
 
   if (diagnostics != null) {
     final usesReferenceFrame = _diagnosticBool(

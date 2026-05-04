@@ -31,6 +31,8 @@ class QualityReview {
     this.badCaseCategory,
     this.stage,
     this.grade,
+    this.skillFilePath,
+    this.skillVersionHash,
   });
 
   final String id;
@@ -61,6 +63,8 @@ class QualityReview {
   final String? badCaseCategory;
   final String? stage;
   final String? grade;
+  final String? skillFilePath;
+  final String? skillVersionHash;
 
   factory QualityReview.fromJson(Map<String, dynamic> json) {
     int? asInt(String key) =>
@@ -98,6 +102,8 @@ class QualityReview {
       badCaseCategory: json['badCaseCategory'] as String?,
       stage: json['stage'] as String?,
       grade: json['grade'] as String?,
+      skillFilePath: json['skillFilePath'] as String?,
+      skillVersionHash: json['skillVersionHash'] as String?,
     );
   }
 }
@@ -125,6 +131,10 @@ class CreateQualityReviewBody {
     this.memoryDeliveryPriorityApplied,
     this.isBadCase,
     this.badCaseCategory,
+    this.stage,
+    this.grade,
+    this.skillFilePath,
+    this.skillVersionHash,
   });
 
   final int? projectId;
@@ -148,6 +158,10 @@ class CreateQualityReviewBody {
   final bool? memoryDeliveryPriorityApplied;
   final bool? isBadCase;
   final String? badCaseCategory;
+  final String? stage;
+  final String? grade;
+  final String? skillFilePath;
+  final String? skillVersionHash;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{'targetType': targetType};
@@ -177,6 +191,10 @@ class CreateQualityReviewBody {
     put('memoryDeliveryPriorityApplied', memoryDeliveryPriorityApplied);
     put('isBadCase', isBadCase);
     put('badCaseCategory', badCaseCategory);
+    put('stage', stage);
+    put('grade', grade);
+    put('skillFilePath', skillFilePath);
+    put('skillVersionHash', skillVersionHash);
     return map;
   }
 }

@@ -1,4 +1,4 @@
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{Json, extract::State, http::HeaderMap};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -59,24 +59,6 @@ pub(crate) async fn clear_memory(
                   AND agent_type = $3
                   AND episodes_id IS NOT DISTINCT FROM $4
                   AND memory_type = 'message'
-                "#,
-            )
-            .bind(uid)
-            .bind(body.project_id)
-            .bind(agent_type)
-            .bind(body.episodes_id)
-            .execute(&mut *tx)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-            sqlx::query(
-                r#"
-                DELETE FROM app_agent_memory
-                WHERE owner_user_id = $1
-                  AND numeric_project_id = $2
-                  AND agent_type = $3
-                  AND episodes_id IS NOT DISTINCT FROM $4
-                  AND memory_type = 'summary'
                 "#,
             )
             .bind(uid)

@@ -504,7 +504,8 @@ String? summarizeScopeRepairQueueFromQualityReviews(
 
   bool hasDialogueRisk(QualityReview row) {
     final comments = (row.comments ?? '').toLowerCase();
-    return (row.dialogueNaturalness != null && row.dialogueNaturalness! < 80) ||
+    return (row.dialogueNaturalness != null &&
+            _qualityScorePercent(row.dialogueNaturalness) < 80) ||
         comments.contains('生硬') ||
         comments.contains('朗读') ||
         comments.contains('没情绪') ||
@@ -513,7 +514,8 @@ String? summarizeScopeRepairQueueFromQualityReviews(
 
   bool hasVisualRisk(QualityReview row) {
     final comments = (row.comments ?? '').toLowerCase();
-    return (row.visualQuality != null && row.visualQuality! < 80) ||
+    return (row.visualQuality != null &&
+            _qualityScorePercent(row.visualQuality) < 80) ||
         comments.contains('穿帮') ||
         comments.contains('不自然') ||
         comments.contains('ai') ||
@@ -619,4 +621,3 @@ String? summarizeScopeRepairQueueFromQualityReviews(
       })
       .join(' | ');
 }
-

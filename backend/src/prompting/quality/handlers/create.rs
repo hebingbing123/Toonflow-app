@@ -1,5 +1,7 @@
-use axum::{extract::State, http::HeaderMap, Json};
-use serde_json::{json, Map, Value};
+use axum::{Json, extract::State, http::HeaderMap};
+use serde_json::{Map, Value, json};
+use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -7,7 +9,7 @@ use crate::metering::llm_usage::link_quality_review_to_job_usage;
 use crate::state::AppState;
 
 use super::super::feedback::{
-    maybe_write_quality_feedback_to_memory, QualityFeedbackMemoryOutcome,
+    QualityFeedbackMemoryOutcome, maybe_write_quality_feedback_to_memory,
 };
 use super::super::issue_type::infer_issue_types;
 use super::super::next_action::infer_next_action;
@@ -70,6 +72,83 @@ fn merge_issue_diagnostics_into_model_params(
     Value::Object(root)
 }
 
+async fn validate_review_scope_ownership(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: Option<i32>,
+    script_id: Option<i32>,
+) -> Result<(), ApiError> {
+    match (project_id, script_id) {
+        (Some(project_id), Some(script_id)) => {
+            let ok: bool = sqlx::query_scalar(
+                r#"
+                SELECT EXISTS(
+                  SELECT 1
+                  FROM app_script sc
+                  INNER JOIN app_project p ON p.id = sc.project_id
+                  WHERE p.owner_user_id = $1
+                    AND p.numeric_id = $2
+                    AND sc.numeric_id = $3
+                )
+                "#,
+            )
+            .bind(user_id)
+            .bind(project_id)
+            .bind(script_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            if !ok {
+                return Err(ApiError::NotFound);
+            }
+        }
+        (Some(project_id), None) => {
+            let ok: bool = sqlx::query_scalar(
+                r#"
+                SELECT EXISTS(
+                  SELECT 1
+                  FROM app_project
+                  WHERE owner_user_id = $1
+                    AND numeric_id = $2
+                )
+                "#,
+            )
+            .bind(user_id)
+            .bind(project_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            if !ok {
+                return Err(ApiError::NotFound);
+            }
+        }
+        (None, Some(script_id)) => {
+            let ok: bool = sqlx::query_scalar(
+                r#"
+                SELECT EXISTS(
+                  SELECT 1
+                  FROM app_script sc
+                  INNER JOIN app_project p ON p.id = sc.project_id
+                  WHERE p.owner_user_id = $1
+                    AND sc.numeric_id = $2
+                )
+                "#,
+            )
+            .bind(user_id)
+            .bind(script_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            if !ok {
+                return Err(ApiError::NotFound);
+            }
+        }
+        (None, None) => {}
+    }
+
+    Ok(())
+}
+
 /// POST /api/v1/quality/reviews - 创建质量评估
 #[utoipa::path(
     post,
@@ -93,6 +172,7 @@ pub(crate) async fn create_review(
     let user_id = require_user_uuid(&state, &headers)?;
     validate_create_review_body(&body)?;
     let pool = state.require_pool()?;
+    validate_review_scope_ownership(pool, user_id, body.project_id, body.script_id).await?;
 
     let source = body.source.as_deref().unwrap_or("manual");
     let is_bad_case = body.is_bad_case.unwrap_or(false);
@@ -208,8 +288,8 @@ pub(crate) mod tests {
     use serde_json::json;
 
     use super::{
-        merge_feedback_outcome_into_model_params, merge_issue_diagnostics_into_model_params,
-        QualityFeedbackMemoryOutcome,
+        QualityFeedbackMemoryOutcome, merge_feedback_outcome_into_model_params,
+        merge_issue_diagnostics_into_model_params,
     };
     use crate::prompting::quality::issue_type::IssueType;
     use crate::prompting::quality::next_action::NextAction;

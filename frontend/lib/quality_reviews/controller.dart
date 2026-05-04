@@ -111,7 +111,7 @@ class QualityReviewsController extends ChangeNotifier {
           targetType: 'output',
           targetId: 'flutter-probe-${DateTime.now().millisecondsSinceEpoch}',
           source: 'manual',
-          overallScore: 82,
+          overallScore: 8,
           passed: true,
           comments: 'flutter quality probe',
           skillVersion: 'flutter.probe',

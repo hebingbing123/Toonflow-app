@@ -1,4 +1,4 @@
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{Json, extract::State, http::HeaderMap};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -6,7 +6,7 @@ use crate::harness::observe;
 use crate::state::AppState;
 
 use super::super::storage::{ensure_project_owned, parse_agent_type};
-use super::super::types::{to_memory_history_item, MemoryHistoryItem, MessageRow, QueryMemoryBody};
+use super::super::types::{MemoryHistoryItem, MessageRow, QueryMemoryBody, to_memory_history_item};
 
 #[utoipa::path(
     post,
@@ -54,7 +54,7 @@ pub(crate) async fn query_memory(
     observe::memory_http(uid, body.project_id, "query");
 
     let rows = if let Some(scope_signature) = body.scope_signature.as_ref() {
-        let exact_rows = sqlx::query_as::<_, MessageRow>(
+        sqlx::query_as::<_, MessageRow>(
             r#"
             SELECT id, role, name, memory_tier, content, create_time_ms
             FROM app_agent_memory
@@ -77,34 +77,7 @@ pub(crate) async fn query_memory(
         .bind(scope_signature)
         .fetch_all(pool)
         .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-        if !exact_rows.is_empty() {
-            exact_rows
-        } else {
-            sqlx::query_as::<_, MessageRow>(
-                r#"
-                SELECT id, role, name, memory_tier, content, create_time_ms
-                FROM app_agent_memory
-                WHERE owner_user_id = $1
-                  AND numeric_project_id = $2
-                  AND agent_type = $3
-                  AND episodes_id IS NOT DISTINCT FROM $4
-                  AND ($5 = 'all' OR memory_type = $5)
-                  AND ($6::text IS NULL OR memory_tier = $6)
-                ORDER BY create_time_ms ASC
-                "#,
-            )
-            .bind(uid)
-            .bind(body.project_id)
-            .bind(agent_type)
-            .bind(body.episodes_id)
-            .bind(memory_type)
-            .bind(&body.memory_tier)
-            .fetch_all(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-        }
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     } else {
         sqlx::query_as::<_, MessageRow>(
             r#"

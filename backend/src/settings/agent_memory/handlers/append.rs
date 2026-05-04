@@ -1,4 +1,4 @@
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{Json, extract::State, http::HeaderMap};
 use chrono::Utc;
 use uuid::Uuid;
 
@@ -11,6 +11,24 @@ use super::super::memory_tier::MemoryTier;
 use super::super::storage::{ensure_project_owned, parse_agent_type};
 use super::super::summarize::maybe_summarize_messages;
 use super::super::types::{AppendMemoryBody, AppendMemoryResponse};
+
+fn scope_signature_has_any_dimension(scope_signature: &serde_json::Value) -> bool {
+    let Some(object) = scope_signature.as_object() else {
+        return false;
+    };
+    object.values().any(|value| match value {
+        serde_json::Value::Null => false,
+        serde_json::Value::String(text) => !text.trim().is_empty(),
+        serde_json::Value::Array(items) => !items.is_empty(),
+        serde_json::Value::Object(map) => !map.is_empty(),
+        serde_json::Value::Bool(flag) => *flag,
+        serde_json::Value::Number(_) => true,
+    })
+}
+
+fn memory_tier_requires_scope(memory_tier: &str) -> bool {
+    matches!(memory_tier, "stage_summary" | "delta_memory")
+}
 
 #[utoipa::path(
     post,
@@ -62,6 +80,16 @@ pub(crate) async fn append_memory(
     let summarized = if body.memory_type == "summary" { 1 } else { 0 };
     // 默认 memory_tier 为 "message"
     let memory_tier = body.memory_tier.as_deref().unwrap_or("message");
+    if memory_tier_requires_scope(memory_tier)
+        && !body
+            .scope_signature
+            .as_ref()
+            .is_some_and(scope_signature_has_any_dimension)
+    {
+        return Err(ApiError::BadRequest(format!(
+            "memoryTier {memory_tier} requires a non-empty scopeSignature"
+        )));
+    }
 
     let id: Uuid = sqlx::query_scalar(
         r#"
@@ -116,4 +144,30 @@ pub(crate) async fn append_memory(
     }
 
     Ok(Json(AppendMemoryResponse { id: id.to_string() }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{memory_tier_requires_scope, scope_signature_has_any_dimension};
+    use serde_json::json;
+
+    #[test]
+    fn scoped_tiers_require_scope_signature() {
+        assert!(memory_tier_requires_scope("stage_summary"));
+        assert!(memory_tier_requires_scope("delta_memory"));
+        assert!(!memory_tier_requires_scope("style_bible"));
+        assert!(!memory_tier_requires_scope("message"));
+    }
+
+    #[test]
+    fn scope_signature_requires_meaningful_dimension() {
+        assert!(scope_signature_has_any_dimension(
+            &json!({"episodeId": 3, "focusSections": ["ep3-sc2"]})
+        ));
+        assert!(!scope_signature_has_any_dimension(&json!({})));
+        assert!(!scope_signature_has_any_dimension(
+            &json!({"episodeId": null, "focusSections": []})
+        ));
+        assert!(!scope_signature_has_any_dimension(&json!("ep3")));
+    }
 }
