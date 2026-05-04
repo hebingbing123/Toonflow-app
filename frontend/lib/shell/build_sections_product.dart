@@ -5,6 +5,7 @@ part of '../../home_page.dart';
 extension _HomePageBuildProductSections on _HomePageState {
   Widget _buildProductPaneSelector(BuildContext context) {
     final paneEntries = <(ProductWorkspacePane, String)>[
+      (ProductWorkspacePane.shortVideoSpace, '短视频 Space'),
       (ProductWorkspacePane.projects, '项目'),
       (ProductWorkspacePane.scriptWorkspace, '脚本工作区'),
       (ProductWorkspacePane.productionWorkspace, '制作工作区'),
@@ -138,6 +139,35 @@ extension _HomePageBuildProductSections on _HomePageState {
 
   List<Widget> _buildProductSections(BuildContext context) => [
     _buildProductPaneSelector(context),
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.shortVideoSpace)
+      ShortVideoSpaceSection(
+        onOpenProjects: () {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.projects,
+          );
+        },
+        onOpenScriptWorkspace: () {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.scriptWorkspace,
+          );
+        },
+        onOpenProductionWorkspace: () {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.productionWorkspace,
+          );
+        },
+        onOpenTasks: () {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.tasks,
+          );
+        },
+        onOpenQuality: () {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.quality,
+          );
+        },
+      ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.projects)
       ProjectsSection(

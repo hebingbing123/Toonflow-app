@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 enum HomeSectionMode { product, debug }
 
 enum ProductWorkspacePane {
+  shortVideoSpace,
   projects,
   scriptWorkspace,
   productionWorkspace,
