@@ -249,6 +249,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           modelDetail: _modelDetail,
           generateData: _generateData,
           productionRow: _productionRow,
+          currentSelectedVideoUrl: widget.scriptStoryboard.filePath,
           workbenchLine: _workbenchLine,
           promptDiagnostics: _visiblePromptDiagnostics(),
           knownTrackIds: viewState.knownTrackIds,

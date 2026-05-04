@@ -19,6 +19,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.modelDetail,
     required this.generateData,
     required this.productionRow,
+    required this.currentSelectedVideoUrl,
     required this.workbenchLine,
     required this.promptDiagnostics,
     required this.knownTrackIds,
@@ -58,6 +59,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final VideoModelDetail? modelDetail;
   final GetGenerateDataResponse? generateData;
   final ProductionStoryboardItemV1? productionRow;
+  final String? currentSelectedVideoUrl;
   final String? workbenchLine;
   final GenerateVideoPromptDiagnostics? promptDiagnostics;
   final List<int> knownTrackIds;
@@ -92,6 +94,8 @@ class _StoryboardVideoSection extends StatelessWidget {
     final repairSuggestions = promptDiagnostics == null
         ? const <String>[]
         : buildStoryboardVideoPromptRepairSuggestions(promptDiagnostics!);
+    final selectedVideoUrl = currentSelectedVideoUrl?.trim() ?? '';
+    final hasSelectedVideo = selectedVideoUrl.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -380,12 +384,53 @@ class _StoryboardVideoSection extends StatelessWidget {
           Text(workbenchLine!, style: Theme.of(context).textTheme.bodySmall),
         ],
         const SizedBox(height: 12),
+        Text('当前已选视频', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 4),
+        Text(
+          hasSelectedVideo
+              ? '这条是当前分镜真正会继续导出和复用的视频版本。'
+              : '当前还没有已选视频；可先从候选里设为当前，再继续返工或导出。',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (hasSelectedVideo) ...[
+          SelectableText(
+            selectedVideoUrl,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: saving ? null : onExportCurrentVideo,
+                child: const Text('导出当前视频'),
+              ),
+              TextButton(
+                onPressed: saving ? null : onOpenPatchRegeneration,
+                child: const Text('继续局部返工'),
+              ),
+              TextButton(
+                onPressed: saving ? null : onDeleteCurrentVideo,
+                child: const Text('删除当前已选视频'),
+              ),
+            ],
+          ),
+        ] else
+          Text(
+            '先从下面的视频候选里选一条更满意的版本，后续返工会更聚焦。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        const SizedBox(height: 12),
         Text('当前分镜的视频候选', style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 4),
         Text(
           storyboardVideos.isEmpty
               ? '还没有与当前 storyboard 关联的已生成视频。'
-              : '优先展示当前 storyboard 的视频结果，可一键设为当前选中视频。',
+              : '优先展示当前 storyboard 的视频结果；可直接设为当前，或继续局部返工。',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.outline,
           ),
@@ -394,36 +439,56 @@ class _StoryboardVideoSection extends StatelessWidget {
         ...storyboardVideos.take(3).map((video) {
           final state = video.state ?? '';
           final duration = video.duration ?? '';
-          return ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              video.videoUrl ?? '视频 URL 缺失',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              [
-                if (state.trim().isNotEmpty) '状态 $state',
-                if (video.trackId != null) '轨道 ${video.trackId}',
-                if (duration.trim().isNotEmpty) '时长 $duration',
-              ].join(' · '),
-            ),
-            trailing: TextButton(
-              onPressed: saving || (video.videoUrl ?? '').trim().isEmpty
-                  ? null
-                  : () => onSelectVideo(video),
-              child: const Text('设为当前视频'),
-            ),
+          final videoUrl = video.videoUrl?.trim() ?? '';
+          final isCurrent = hasSelectedVideo && videoUrl == selectedVideoUrl;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                video.videoUrl ?? '视频 URL 缺失',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                [
+                  if (isCurrent) '当前生效中',
+                  if (state.trim().isNotEmpty) '状态 $state',
+                  if (video.trackId != null) '轨道 ${video.trackId}',
+                  if (duration.trim().isNotEmpty) '时长 $duration',
+                ].join(' · '),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (isCurrent)
+                    FilledButton.tonal(
+                      onPressed: null,
+                      child: const Text('当前已选'),
+                    )
+                  else
+                    TextButton(
+                      onPressed: saving || videoUrl.isEmpty
+                          ? null
+                          : () => onSelectVideo(video),
+                      child: const Text('设为当前视频'),
+                    ),
+                  TextButton(
+                    onPressed: saving ? null : onOpenPatchRegeneration,
+                    child: Text(isCurrent ? '继续局部返工' : '局部返工'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+            ],
           );
         }),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: saving ? null : onDeleteCurrentVideo,
-            child: const Text('删除当前已选视频'),
-          ),
-        ),
         if ((generateData?.generatingJobs.isNotEmpty ?? false)) ...[
           const SizedBox(height: 8),
           Text('进行中的视频任务', style: Theme.of(context).textTheme.labelLarge),
