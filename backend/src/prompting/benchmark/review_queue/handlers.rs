@@ -312,23 +312,34 @@ async fn write_back_to_experiment_result(
     result_id: Uuid,
     submitted_score: &serde_json::Value,
 ) -> Result<(), ApiError> {
+    let merged_score_summary = merged_human_review_score_summary(submitted_score);
+
     // 更新实验结果的 score_summary，合并人工复核分数
     sqlx::query(
         r#"
         UPDATE app_experiment_result
-        SET score_summary = COALESCE(score_summary, '{}'::jsonb) || jsonb_build_object('humanReview', $1),
+        SET score_summary = COALESCE(score_summary, '{}'::jsonb) || $1::jsonb,
             requires_human_review = FALSE,
             updated_at = NOW()
         WHERE id = $2
         "#,
     )
-    .bind(submitted_score)
+    .bind(merged_score_summary)
     .bind(result_id)
     .execute(&mut **tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(())
+}
+
+fn merged_human_review_score_summary(submitted_score: &serde_json::Value) -> serde_json::Value {
+    let mut merged = submitted_score
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+    merged.insert("humanReview".into(), submitted_score.clone());
+    serde_json::Value::Object(merged)
 }
 
 /// 检查是否存在等价的未完成复核项（需求 5.4）
@@ -405,5 +416,22 @@ mod tests {
             submitted_score: serde_json::json!({"overallScore": 101, "passed": true}),
         };
         assert!(validate_submit_body(&invalid_score_range).is_err());
+    }
+
+    #[test]
+    fn test_merged_human_review_score_summary_promotes_top_level_fields() {
+        let merged = merged_human_review_score_summary(&serde_json::json!({
+            "overallScore": 91,
+            "passed": true,
+            "requiresRework": false,
+            "recommendation": "approved"
+        }));
+
+        assert_eq!(merged["overallScore"].as_i64(), Some(91));
+        assert_eq!(merged["passed"].as_bool(), Some(true));
+        assert_eq!(merged["requiresRework"].as_bool(), Some(false));
+        assert_eq!(merged["recommendation"].as_str(), Some("approved"));
+        assert_eq!(merged["humanReview"]["overallScore"].as_i64(), Some(91));
+        assert_eq!(merged["humanReview"]["passed"].as_bool(), Some(true));
     }
 }
