@@ -12,6 +12,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
   required TextEditingController agentTypeCtrl,
   required TextEditingController episodesIdCtrl,
   required TextEditingController queryTypeCtrl,
+  TextEditingController? memoryTierCtrl,
   required TextEditingController appendContentCtrl,
   required TextEditingController appendRoleCtrl,
   required TextEditingController clearTypeCtrl,
@@ -26,6 +27,8 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
   bool optimizingMemory = false,
   bool canOptimizeVideoMemory = true,
 }) {
+  final resolvedMemoryTierCtrl =
+      memoryTierCtrl ?? TextEditingController(text: 'message');
   return ProjectsAgentMemoryWorkbenchDialogViewModel(
     projects:
         projects ??
@@ -34,29 +37,49 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
           buildProject(numericId: 12, name: '海雾迷城'),
         ],
     memoryRows:
-        memoryRows ??
-        <dynamic>[
-          <String, Object?>{
-            'id': 'memory-1',
-            'name': 'selected_video_memory',
-            'role': 'user',
-            'content': <Map<String, String>>[
-              <String, String>{
-                'data':
+        (memoryRows
+            ?.map(
+              (row) => row is AgentMemoryHistoryItem
+                  ? row
+                  : AgentMemoryHistoryItem.fromJson(
+                      Map<String, dynamic>.from(row as Map),
+                    ),
+            )
+            .toList(growable: false)) ??
+        <AgentMemoryHistoryItem>[
+          const AgentMemoryHistoryItem(
+            id: 'memory-1',
+            name: 'selected_video_memory',
+            role: 'user',
+            memoryTier: 'message',
+            status: 'complete',
+            datetime: '2026-05-04T12:00:00Z',
+            createTime: 1,
+            content: <AgentMemoryContentBlock>[
+              AgentMemoryContentBlock(
+                blockType: 'markdown',
+                status: 'complete',
+                data:
                     'storyboardIds=3 | subject=沈青禾 | style=语气克制，情绪压迫，保留停顿 | note=语气克制，情绪压迫，保留停顿',
-              },
+              ),
             ],
-          },
-          <String, Object?>{
-            'id': 'memory-2',
-            'name': 'quality_feedback_memory',
-            'role': 'assistant',
-            'content': <Map<String, String>>[
-              <String, String>{
-                'data': 'production agent 建议先刷新 storyboardTable 再补镜头。',
-              },
+          ),
+          const AgentMemoryHistoryItem(
+            id: 'memory-2',
+            name: 'quality_feedback_memory',
+            role: 'assistant',
+            memoryTier: 'message',
+            status: 'complete',
+            datetime: '2026-05-04T12:05:00Z',
+            createTime: 2,
+            content: <AgentMemoryContentBlock>[
+              AgentMemoryContentBlock(
+                blockType: 'markdown',
+                status: 'complete',
+                data: 'production agent 建议先刷新 storyboardTable 再补镜头。',
+              ),
             ],
-          },
+          ),
         ],
     memorySummary: memorySummary,
     statusLine: statusLine,
@@ -70,12 +93,21 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
     canOptimizeVideoMemory: canOptimizeVideoMemory,
     queryType: queryTypeCtrl.text,
     clearType: clearTypeCtrl.text,
+    memoryTier: resolvedMemoryTierCtrl.text,
     queryTypeOptions: const <String>['summary', 'message', 'all'],
     clearTypeOptions: const <String>['summary', 'message', 'all'],
+    memoryTierOptions: const <String>[
+      'all',
+      'style_bible',
+      'stage_summary',
+      'delta_memory',
+      'message',
+    ],
     projectIdCtrl: projectIdCtrl,
     agentTypeCtrl: agentTypeCtrl,
     episodesIdCtrl: episodesIdCtrl,
     queryTypeCtrl: queryTypeCtrl,
+    memoryTierCtrl: resolvedMemoryTierCtrl,
     appendContentCtrl: appendContentCtrl,
     appendRoleCtrl: appendRoleCtrl,
     clearTypeCtrl: clearTypeCtrl,
@@ -119,6 +151,7 @@ void main() {
   late TextEditingController agentTypeCtrl;
   late TextEditingController episodesIdCtrl;
   late TextEditingController queryTypeCtrl;
+  late TextEditingController memoryTierCtrl;
   late TextEditingController appendContentCtrl;
   late TextEditingController appendRoleCtrl;
   late TextEditingController clearTypeCtrl;
@@ -128,6 +161,7 @@ void main() {
     agentTypeCtrl = TextEditingController(text: 'scriptAgent');
     episodesIdCtrl = TextEditingController(text: '3');
     queryTypeCtrl = TextEditingController(text: 'summary');
+    memoryTierCtrl = TextEditingController(text: 'message');
     appendContentCtrl = TextEditingController(text: '需要补一个反转伏笔。');
     appendRoleCtrl = TextEditingController(text: 'user');
     clearTypeCtrl = TextEditingController(text: 'summary');
@@ -138,6 +172,7 @@ void main() {
     agentTypeCtrl.dispose();
     episodesIdCtrl.dispose();
     queryTypeCtrl.dispose();
+    memoryTierCtrl.dispose();
     appendContentCtrl.dispose();
     appendRoleCtrl.dispose();
     clearTypeCtrl.dispose();
@@ -155,6 +190,7 @@ void main() {
               agentTypeCtrl: agentTypeCtrl,
               episodesIdCtrl: episodesIdCtrl,
               queryTypeCtrl: queryTypeCtrl,
+              memoryTierCtrl: memoryTierCtrl,
               appendContentCtrl: appendContentCtrl,
               appendRoleCtrl: appendRoleCtrl,
               clearTypeCtrl: clearTypeCtrl,
@@ -194,7 +230,10 @@ void main() {
       find.textContaining('处理建议：保留 1/74 chars · 压缩 0/0 chars · 合并坏例 0/0 chars'),
       findsOneWidget,
     );
-    expect(find.textContaining('记忆桶优先级：优先保留 selected_video_memory'), findsOneWidget);
+    expect(
+      find.textContaining('记忆桶优先级：优先保留 selected_video_memory'),
+      findsOneWidget,
+    );
     expect(find.byTooltip('复制记忆执行清单'), findsOneWidget);
     expect(
       find.textContaining(
@@ -203,9 +242,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.textContaining(
-        '保留 selected_video_memory 里最具体的表演/情绪锚点',
-      ),
+      find.textContaining('保留 selected_video_memory 里最具体的表演/情绪锚点'),
       findsOneWidget,
     );
     expect(find.text('2 条记忆'), findsOneWidget);
@@ -244,7 +281,8 @@ void main() {
                   'role': 'assistant',
                   'content': <Map<String, String>>[
                     <String, String>{
-                      'data': 'storyboardIds=12 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
+                      'data':
+                          'storyboardIds=12 | delivery=表演克制压抑，避免读稿腔，保留真实停顿与呼吸 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
                     },
                   ],
                 },
@@ -255,7 +293,7 @@ void main() {
                   'content': <Map<String, String>>[
                     <String, String>{
                       'data':
-                          'storyboardIds=15 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸，再加一点冷感尾音',
+                          'storyboardIds=15 | delivery=表演克制压抑，避免读稿腔，保留真实停顿与呼吸 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
                     },
                   ],
                 },
@@ -378,7 +416,10 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.textContaining('记忆桶优先级：待压缩 selected_video_memory'), findsOneWidget);
+    expect(
+      find.textContaining('记忆桶优先级：待压缩 selected_video_memory'),
+      findsOneWidget,
+    );
     expect(
       find.textContaining('待压缩 script_role_video_style_memory'),
       findsOneWidget,

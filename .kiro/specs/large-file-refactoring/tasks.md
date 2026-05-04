@@ -361,7 +361,7 @@
 
 - [ ] 6. Phase 4: Frontend Files (Lower Priority)
 
-  - [~] 6.1 Split frontend/lib/agent_workspaces/contexts/production/support.dart (1,675 lines → ~3 files)
+  - [x] 6.1 Split frontend/lib/agent_workspaces/contexts/production/support.dart (1,675 lines → ~3 files)
     
     - [x] 6.1.1 Analyze and create structure
       - Read file, identify public classes and functions
@@ -382,27 +382,26 @@
       - Convert `support.dart` into the library entrypoint with `part` directives for `support/support.dart`, `support/helpers.dart`, and `support/recipes.dart`
       - _Requirements: 2.11, 3.2_
     
-    - [~] 6.1.4 Verify refactoring
+    - [x] 6.1.4 Verify refactoring
       - Verified all split files are ≤800 lines (`3`, `504`, `539`, `636`)
-      - Run `HOME=/private/tmp /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart format` on the split files
-      - Run targeted `dart analyze` on `lib/agent_workspaces/contexts/production/support.dart` and `lib/agent_workspaces/contexts/production/support/` (`No issues found!`)
-      - Full `flutter analyze` still reports pre-existing frontend errors in `test/projects_agent_memory_workbench_dialog_view_test.dart`
-      - Full `flutter test` / `yarn refactor:check` remain blocked in this environment because the Homebrew Flutter SDK cannot write `/opt/homebrew/share/flutter/bin/cache/lockfile`
+      - Run `dart format` on the split files
+      - Run targeted `flutter analyze` on `frontend/lib/agent_workspaces/contexts/production/support.dart` and `frontend/lib/agent_workspaces/contexts/production/support/` (`No issues found!`)
+      - Run targeted `flutter test test/production_workspace_support_test.dart` (`All tests passed!`)
       - _Requirements: 2.11, 3.3, 3.6, 3.8_
     
-    - [~] 6.1.5 Commit
+    - [x] 6.1.5 Commit
       - `git commit -m "refactor: split production/support.dart into 3 modules (≤800 lines each)"`
       - _Requirements: 2.11_
 
-  - [ ] 6.2 Split frontend/lib/projects/workbenches/agent_memory_view.dart (1,161 lines → ~2 files)
+  - [x] 6.2 Split frontend/lib/projects/workbenches/agent_memory_view.dart (1,161 lines → ~2 files)
     
-    - [~] 6.2.1 Analyze and create structure
+    - [x] 6.2.1 Analyze and create structure
       - Read file, identify widgets
       - Create `projects/workbenches/agent_memory_view/` directory
       - Create agent_memory_view.dart and memory_widgets.dart
       - _Requirements: 2.12_
     
-    - [~] 6.2.2 Migrate code
+    - [x] 6.2.2 Migrate code
       - Move main widget to agent_memory_view.dart (~600 lines)
       - Move sub-widgets to memory_widgets.dart (~600 lines)
       - _Bug_Condition: isBugCondition(file) where lineCount(file) > 800_
@@ -410,8 +409,12 @@
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.12, 3.1, 3.2, 3.3, 3.8, 3.9_
     
-    - [~] 6.2.3 Update and verify
-      - Add exports, run flutter checks
+    - [x] 6.2.3 Update and verify
+      - Keep `agent_memory_view.dart` as the public entrypoint and move helper models/logic into `agent_memory_view/memory_widgets.dart`
+      - Run `dart format` on the split files and targeted test
+      - Run targeted `flutter analyze` on `frontend/lib/projects/workbenches/agent_memory_view.dart`, `frontend/lib/projects/workbenches/agent_memory_view/memory_widgets.dart`, and `frontend/test/projects_agent_memory_workbench_dialog_view_test.dart` (`No issues found!`)
+      - Run `flutter test test/projects_agent_memory_workbench_dialog_view_test.dart` (`All tests passed!`)
+      - Fix a real UI regression uncovered by the test run: duplicate memory chips now reuse the dedupe-aware preview map instead of recomputing rows without `isDuplicated`
       - _Requirements: 2.12, 3.3, 3.6, 3.8_
     
     - [~] 6.2.4 Commit
