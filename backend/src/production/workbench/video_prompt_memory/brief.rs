@@ -1,3 +1,7 @@
+use super::style_compact::{
+    selected_style_fragment_is_generic_restrained_mood, selected_style_fragment_is_low_gain_motion,
+    selected_style_fragment_is_low_gain_voice,
+};
 use super::*;
 
 pub(super) fn build_video_generation_brief_memory(

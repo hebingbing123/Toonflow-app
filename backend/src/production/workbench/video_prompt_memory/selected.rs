@@ -1,3 +1,7 @@
+use super::style_compact::{
+    selected_style_fragment_is_generic_restrained_mood, selected_style_fragment_is_low_gain_motion,
+    selected_style_fragment_is_low_gain_voice,
+};
 use super::*;
 
 pub(crate) fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {

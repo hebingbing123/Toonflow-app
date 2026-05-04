@@ -116,6 +116,13 @@
       - Current state after this slice: `tests.rs` is 48 lines and every new test submodule is under 800 lines; `mod.rs` still needs more extraction work
       - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
+    - [x] 3.1.10 Extract style / continuity runtime helpers from `video_prompt_memory/mod.rs`
+      - `2026-05-04`: moved the remaining style-summary and continuity helper cluster into `style_build.rs`, `style_compact.rs`, `style_context.rs`, `style_notes.rs`, `style_role.rs`, and `continuity.rs`
+      - Reconnected the split with explicit sibling imports and `pub(super)` helper visibility so the extracted modules compile cleanly without changing the external `video_prompt_memory` API
+      - Run targeted backend verification again: `cargo check -q` and `cargo test -q production::workbench::video_prompt_memory::tests:: --lib` (`226 passed; 0 failed`)
+      - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 3,534 lines; every new helper module is under 800 lines, but `mod.rs` still requires further extraction
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
+
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
     - [x] 3.2.1 Analyze test file structure
