@@ -53,6 +53,7 @@
 | **`backend/`** | Rust（Axum）API，默认端口 **8666**；技能 Markdown 在 **`backend/data/skills/`** |
 | **`frontend/`** | Flutter 桌面 + Web；`API_BASE_URL` + 可选 `SUPABASE_URL` / `SUPABASE_ANON_KEY`（见 `frontend/README.md`） |
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
+| **`space/`** | 产品专题空间：短视频 Space 的能力借鉴与自动发布方案见 [`space/short-video/`](space/short-video/) |
 | **`backend/src/openapi_spec/`** | OpenAPI：`shell.rs` + 已提交的 `generated/` 路径桩；运行时合并 **不含** 后端路径 YAML（桩重生成输入见 `scripts/fixtures/openapi_stub_input.yaml`） |
 | **`docs/websocket-events.md`** | WebSocket 稳定链接入口（正文见合并后的 OpenAPI **`/api/v1/ws`**） |
 | **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
