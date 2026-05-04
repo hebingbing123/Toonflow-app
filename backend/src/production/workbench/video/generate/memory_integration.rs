@@ -435,7 +435,7 @@ pub(super) async fn load_recent_quality_signal_rows(
         WHERE user_id = $1
           AND project_id = $2
           AND script_id = $3
-          AND target_type IN ('storyboard', 'output', 'video', 'asset')
+          AND target_type IN ('storyboard', 'output', 'video')
           AND (
             target_id IS NULL
             OR target_id = ANY($4)

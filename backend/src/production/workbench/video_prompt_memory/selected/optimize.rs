@@ -102,7 +102,7 @@ pub(super) async fn load_selected_video_memory_optimization_bias(
         WHERE user_id = $1
           AND project_id = $2
           AND script_id = $3
-          AND target_type IN ('storyboard', 'output', 'video', 'asset')
+          AND target_type IN ('storyboard', 'output', 'video')
         ORDER BY created_at DESC
         LIMIT 16
         "#,
@@ -128,7 +128,7 @@ pub(super) async fn load_project_video_memory_optimization_bias(
         FROM app_quality_review
         WHERE user_id = $1
           AND project_id = $2
-          AND target_type IN ('storyboard', 'output', 'video', 'asset')
+          AND target_type IN ('storyboard', 'output', 'video')
         ORDER BY created_at DESC
         LIMIT 32
         "#,

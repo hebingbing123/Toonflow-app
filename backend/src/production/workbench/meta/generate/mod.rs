@@ -120,7 +120,7 @@ async fn load_recent_quality_constraint_pressure(
         WHERE user_id = $1
           AND project_id = $2
           AND script_id = $3
-          AND target_type IN ('storyboard', 'output', 'video', 'asset')
+          AND target_type IN ('storyboard', 'output', 'video')
           AND (
             $4::text IS NULL
             OR target_id = $4
