@@ -9,39 +9,60 @@
 
 ## Phase A - Workflow Gap Review
 
-- [ ] 盘点当前“生成 -> review -> 返工 -> 回写记忆”链路还缺哪些环节
-- [ ] 标注每个缺口对“人物稳定 / 情绪自然 / 穿帮率 / token 成本”的影响
-- [ ] 选出第一个最高 ROI 竖切，不等候额外确认直接开做
+- [x] 盘点当前“生成 -> review -> 返工 -> 回写记忆”链路还缺哪些环节
+- [x] 标注每个缺口对“人物稳定 / 情绪自然 / 穿帮率 / token 成本”的影响
+- [x] 选出第一个最高 ROI 竖切，不等候额外确认直接开做
 
 ## Phase B - Quality Loop Closure
 
-- [ ] 检查质量 review 结果是否能稳定回写到视频专用记忆
-- [ ] 检查坏例分类是否足够支撑自动负向约束
-- [ ] 检查连续失败镜头是否已有明确“局部返工 / 归因模式”
-- [ ] 若缺失，补一条最影响出片质量的闭环能力
+- [x] 检查质量 review 结果是否能稳定回写到视频专用记忆
+- [x] 检查坏例分类是否足够支撑自动负向约束
+- [x] 检查连续失败镜头是否已有明确“局部返工 / 归因模式”
+- [x] 若缺失，补一条最影响出片质量的闭环能力
 
 ## Phase C - Memory Governance
 
-- [ ] 梳理 `agent_memory` 与 `video_prompt_memory` 的职责边界
-- [ ] 明确哪些信号允许自动写入，哪些必须拒绝或淘汰
-- [ ] 检查项目 / 用户 / agent / scope 隔离是否贯穿所有自动写入路径
+- [x] 梳理 `agent_memory` 与 `video_prompt_memory` 的职责边界
+- [x] 明确哪些信号允许自动写入，哪些必须拒绝或淘汰
+- [x] 检查项目 / 用户 / agent / scope 隔离是否贯穿所有自动写入路径
 - [ ] 压缩低信号记忆，避免重复注入上下文
 
 ## Phase D - Token ROI Optimization
 
-- [ ] 盘点当前生成链路里最浪费 token 的重复上下文
+- [x] 盘点当前生成链路里最浪费 token 的重复上下文
 - [ ] 优先压缩导演手册、角色锚点、阶段历史的重复注入
-- [ ] 检查低风险 / 高风险镜头预算分流是否还可继续细化
+- [x] 检查低风险 / 高风险镜头预算分流是否还可继续细化
 - [ ] 验证 token 压缩后是否出现质量回退
 
 ## Phase E - Missing Feature Completion
 
-- [ ] 如果现有功能已基本无缺口，再 review 是否还缺少应有能力
+- [x] 如果现有功能已基本无缺口，再 review 是否还缺少应有能力
 - [ ] 优先补能直接提升短剧质量而不是增加表面功能复杂度的能力
 - [ ] 完成后再次 review，决定是否继续深挖当前方向或切换到新高收益点
 
 ## 交付节奏
 
-- [ ] 每完成一个主要阶段，提交一次小步 commit
-- [ ] 每轮提交前只运行本次改动对应的最小必要验证
+- [x] 每完成一个主要阶段，提交一次小步 commit
+- [x] 每轮提交前只运行本次改动对应的最小必要验证
 - [ ] 全部功能与质量优化阶段接近完成后，再统一执行一次全量检查
+
+## 已完成进展记录
+
+- [x] 修复 `quality review` 建单所有权与范围校验：
+  - storyboard 目标必须落在用户拥有的 project/script scope 内
+  - scoped `video/output` 目标必须解析到真实 storyboard numeric id
+  - `jobId` 必须属于当前用户
+- [x] 修复 benchmark 人工复核写回不影响下游放行门 / ROI 的问题：
+  - 人工复核结果提升到 `score_summary` 顶层
+  - `skip review` 会同步解除 `requires_human_review`
+  - `submit/skip` 增加 pending 状态并发保护
+- [x] 修复 benchmark 聚合统计误差：
+  - stage ROI 基线均值改为使用自己的样本数
+  - 未评分结果不再被当作 0 分 / 未通过污染 gate 与 ROI
+- [x] 修复 agent memory 隔离与清理语义：
+  - `clearType=message` 不再误删 summary
+  - scoped tier 写入与查询都要求有效 `scopeSignature`
+  - scoped 查询不再回落到更宽 project 记忆
+- [x] 修复 quality review 聚合口径：
+  - placeholder / diagnostics-only 评审不再污染 scored aggregates
+  - storyboard review 必须带 project scope
