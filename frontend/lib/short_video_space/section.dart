@@ -479,6 +479,102 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  String _nextStepTitle() {
+    final project = _selectedProject;
+    if (project == null) {
+      return '先选一个短剧项目';
+    }
+    if (_countTasksByStatus('failed') > 0) {
+      return '先处理失败任务';
+    }
+    if ((_qualityScopeInsight?.badCaseCount ?? 0) > 0) {
+      return '先看坏例和质检反馈';
+    }
+    final stats = _projectStats;
+    if (stats == null || stats.scriptCount <= 0) {
+      return '先生成第一版剧本';
+    }
+    if (stats.storyboardCount <= 0) {
+      return '先补分镜和镜头结构';
+    }
+    if (stats.roleCount <= 0) {
+      return _isAnimated ? '先补角色与画风资产' : '先补真人参考与角色设定';
+    }
+    return '可以直接推进制作与出片';
+  }
+
+  String _nextStepDetail() {
+    final project = _selectedProject;
+    if (project == null) {
+      return '选中项目后，Space 才能把模式、任务、质检和工作区上下文收成同一条主链路。';
+    }
+    if (_countTasksByStatus('failed') > 0) {
+      return '最近已有失败任务，先去任务中心确认是脚本、素材、出图还是出片环节卡住。';
+    }
+    if ((_qualityScopeInsight?.badCaseCount ?? 0) > 0) {
+      return _isAnimated
+          ? '当前更适合先看角色一致性、画面连续性和镜头节奏的坏例，再决定返工脚本还是分镜。'
+          : '当前更适合先看表演自然度、场景真实感和口播镜头质感的坏例，再决定返工脚本还是镜头。';
+    }
+    final stats = _projectStats;
+    if (stats == null || stats.scriptCount <= 0) {
+      return _isAnimated
+          ? '先在脚本工作区把动漫短剧的情绪节奏、角色关系和章节改编跑起来。'
+          : '先在脚本工作区把真人短剧的对白自然度、口播感和场景调度跑起来。';
+    }
+    if (stats.storyboardCount <= 0) {
+      return '剧本已经有了，但还没拆到分镜层；下一步适合继续脚本/分镜规划，再进制作。';
+    }
+    if (stats.roleCount <= 0) {
+      return _isAnimated
+          ? '分镜已经起步，但角色资产偏少，先补角色、画风和参考图会更稳。'
+          : '分镜已经起步，但真人参考、角色设定和镜头参考还不够，先补这些会更稳。';
+    }
+    return _isAnimated
+        ? '当前项目已经具备脚本、分镜和角色基础，可以继续进制作工作区出图、出视频和复核。'
+        : '当前项目已经具备脚本、分镜和角色基础，可以继续进制作工作区推进真人镜头、视频生成和复核。';
+  }
+
+  VoidCallback _nextStepAction() {
+    final stats = _projectStats;
+    if (_selectedProject == null) {
+      return widget.onOpenProjects;
+    }
+    if (_countTasksByStatus('failed') > 0) {
+      return widget.onOpenTasks;
+    }
+    if ((_qualityScopeInsight?.badCaseCount ?? 0) > 0) {
+      return widget.onOpenQuality;
+    }
+    if (stats == null || stats.scriptCount <= 0 || stats.storyboardCount <= 0) {
+      return () {
+        _syncSelectedProjectContext();
+        widget.onOpenScriptWorkspace();
+      };
+    }
+    return () {
+      _syncSelectedProjectContext();
+      widget.onOpenProductionWorkspace();
+    };
+  }
+
+  String _nextStepButtonLabel() {
+    final stats = _projectStats;
+    if (_selectedProject == null) {
+      return '先去项目区';
+    }
+    if (_countTasksByStatus('failed') > 0) {
+      return '打开任务中心';
+    }
+    if ((_qualityScopeInsight?.badCaseCount ?? 0) > 0) {
+      return '打开质量评审';
+    }
+    if (stats == null || stats.scriptCount <= 0 || stats.storyboardCount <= 0) {
+      return '打开脚本工作区';
+    }
+    return '打开制作工作区';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -801,6 +897,33 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     ),
                   ),
               ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: outline),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('建议下一步', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Text(_nextStepTitle(), style: theme.textTheme.titleMedium),
+              const SizedBox(height: 6),
+              Text(
+                _nextStepDetail(),
+                style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: _nextStepAction(),
+                icon: const Icon(Icons.arrow_forward_outlined),
+                label: Text(_nextStepButtonLabel()),
+              ),
             ],
           ),
         ),
