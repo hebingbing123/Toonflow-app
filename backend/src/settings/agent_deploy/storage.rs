@@ -60,7 +60,7 @@ pub(super) fn static_agent_deploy_item_by_id(id: i32) -> Option<AgentDeployListI
         .find(|item| item.id == id)
 }
 
-pub(super) async fn load_agent_deploy_config(
+pub(crate) async fn load_agent_deploy_config(
     pool: &sqlx::PgPool,
     uid: Uuid,
 ) -> Result<AgentDeployConfig, ApiError> {

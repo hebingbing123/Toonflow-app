@@ -49,7 +49,7 @@ pub(super) async fn ensure_owned_storyboards(
     Ok(())
 }
 
-pub(super) async fn require_owned_normalized_storyboards_scope<'a>(
+pub(crate) async fn require_owned_normalized_storyboards_scope<'a>(
     state: &'a AppState,
     headers: &HeaderMap,
     project_id: i32,

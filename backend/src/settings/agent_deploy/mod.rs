@@ -17,6 +17,7 @@ pub(crate) use handlers::{
     __path_post_agent_deploy_list, __path_post_agent_set_key, __path_post_deploy_agent_model,
 };
 pub(crate) use handlers::{post_agent_deploy_list, post_agent_set_key, post_deploy_agent_model};
+pub(crate) use storage::load_agent_deploy_config;
 
 pub fn router() -> Router<AppState> {
     Router::new()

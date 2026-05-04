@@ -40,6 +40,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   TaskCenterGetTaskApiResult? _recentProjectTasks;
   QualityScopeInsightRow? _qualityScopeInsight;
   List<BadCaseStatItem> _badCaseStats = const <BadCaseStatItem>[];
+  int _sceneAssetCount = 0;
+  int _clipAssetCount = 0;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -179,6 +181,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _recentProjectTasks = null;
           _qualityScopeInsight = null;
           _badCaseStats = const <BadCaseStatItem>[];
+          _sceneAssetCount = 0;
+          _clipAssetCount = 0;
         });
       }
       return;
@@ -189,6 +193,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _recentProjectTasks = null;
       _qualityScopeInsight = null;
       _badCaseStats = const <BadCaseStatItem>[];
+      _sceneAssetCount = 0;
+      _clipAssetCount = 0;
     });
     try {
       final results = await Future.wait<Object>([
@@ -205,6 +211,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           limit: 1,
         ),
         fetchBadCaseStats(token, projectId: project.numericId, limit: 3),
+        fetchProjectAssetsByProjectId(
+          token,
+          project.id,
+          assetType: 'scene',
+          page: 1,
+          limit: 1,
+        ),
+        fetchProjectAssetsByProjectId(
+          token,
+          project.id,
+          assetType: 'clip',
+          page: 1,
+          limit: 1,
+        ),
       ]);
       if (!mounted) {
         return;
@@ -218,6 +238,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         final scopeRows = results[2] as List<QualityScopeInsightRow>;
         _qualityScopeInsight = scopeRows.isEmpty ? null : scopeRows.first;
         _badCaseStats = results[3] as List<BadCaseStatItem>;
+        _sceneAssetCount = (results[4] as ListAssetsResponse).total;
+        _clipAssetCount = (results[5] as ListAssetsResponse).total;
       });
     } on RustApiException catch (_) {
       if (!mounted) {
@@ -228,6 +250,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _recentProjectTasks = null;
         _qualityScopeInsight = null;
         _badCaseStats = const <BadCaseStatItem>[];
+        _sceneAssetCount = 0;
+        _clipAssetCount = 0;
       });
     } catch (_) {
       if (!mounted) {
@@ -238,6 +262,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _recentProjectTasks = null;
         _qualityScopeInsight = null;
         _badCaseStats = const <BadCaseStatItem>[];
+        _sceneAssetCount = 0;
+        _clipAssetCount = 0;
       });
     } finally {
       if (mounted) {
@@ -479,6 +505,164 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  bool _hasVisualStyleSignal(ProjectRow? project) {
+    if (project == null) {
+      return false;
+    }
+    return (project.artStyle ?? '').trim().isNotEmpty ||
+        (project.artStylePack ?? '').trim().isNotEmpty;
+  }
+
+  bool _hasDirectionSignal(ProjectRow? project) {
+    if (project == null) {
+      return false;
+    }
+    return (project.directorManual ?? '').trim().isNotEmpty ||
+        (project.storyStylePack ?? '').trim().isNotEmpty;
+  }
+
+  String? _visualStyleLabel(ProjectRow? project) {
+    if (project == null) {
+      return null;
+    }
+    final pack = (project.artStylePack ?? '').trim();
+    if (pack.isNotEmpty) {
+      return '风格包 $pack';
+    }
+    final style = (project.artStyle ?? '').trim();
+    if (style.isNotEmpty) {
+      return '画风 $style';
+    }
+    return null;
+  }
+
+  String? _directionLabel(ProjectRow? project) {
+    if (project == null) {
+      return null;
+    }
+    final pack = (project.storyStylePack ?? '').trim();
+    if (pack.isNotEmpty) {
+      return '故事包 $pack';
+    }
+    final manual = (project.directorManual ?? '').trim();
+    if (manual.isNotEmpty) {
+      return '手册 $manual';
+    }
+    return null;
+  }
+
+  List<_ReadinessItem> _buildReadinessItems() {
+    final project = _selectedProject;
+    final stats = _projectStats;
+    final hasVisualStyle = _hasVisualStyleSignal(project);
+    final hasDirection = _hasDirectionSignal(project);
+    final visualLabel = _visualStyleLabel(project);
+    final directionLabel = _directionLabel(project);
+    final roleCount = stats?.roleCount ?? 0;
+    final scriptCount = stats?.scriptCount ?? 0;
+    final storyboardCount = stats?.storyboardCount ?? 0;
+    if (_isAnimated) {
+      return <_ReadinessItem>[
+        _ReadinessItem(
+          label: '剧本基础',
+          ready: scriptCount > 0,
+          detail: scriptCount > 0 ? '已有 $scriptCount 份剧本' : '还没有第一版剧本',
+        ),
+        _ReadinessItem(
+          label: '角色资产',
+          ready: roleCount > 0,
+          detail: roleCount > 0 ? '已有 $roleCount 个角色资产' : '还缺角色资产',
+        ),
+        _ReadinessItem(
+          label: '场景资产',
+          ready: _sceneAssetCount > 0,
+          detail: _sceneAssetCount > 0
+              ? '已有 $_sceneAssetCount 个场景资产'
+              : '还缺场景资产',
+        ),
+        _ReadinessItem(
+          label: '画风信号',
+          ready: hasVisualStyle,
+          detail: hasVisualStyle
+              ? '已配置 ${visualLabel ?? "画风或风格包"}'
+              : '还没收口画风 / 视觉风格',
+        ),
+        _ReadinessItem(
+          label: '导演手册',
+          ready: hasDirection,
+          detail: hasDirection
+              ? '已配置 ${directionLabel ?? "导演手册或故事风格包"}'
+              : '还没收口导演手册',
+        ),
+        _ReadinessItem(
+          label: '分镜基础',
+          ready: storyboardCount > 0,
+          detail: storyboardCount > 0 ? '已有 $storyboardCount 条分镜' : '还没有分镜结构',
+        ),
+      ];
+    }
+    return <_ReadinessItem>[
+      _ReadinessItem(
+        label: '剧本基础',
+        ready: scriptCount > 0,
+        detail: scriptCount > 0 ? '已有 $scriptCount 份剧本' : '还没有第一版剧本',
+      ),
+      _ReadinessItem(
+        label: '角色设定',
+        ready: roleCount > 0,
+        detail: roleCount > 0 ? '已有 $roleCount 个角色资产' : '还缺角色设定 / 角色资产',
+      ),
+      _ReadinessItem(
+        label: '场景参考',
+        ready: _sceneAssetCount > 0,
+        detail: _sceneAssetCount > 0
+            ? '已有 $_sceneAssetCount 个场景资产'
+            : '还缺真人场景参考',
+      ),
+      _ReadinessItem(
+        label: '镜头素材',
+        ready: _clipAssetCount > 0,
+        detail: _clipAssetCount > 0
+            ? '已有 $_clipAssetCount 份 clip 参考'
+            : '还缺真人镜头 / clip 参考',
+      ),
+      _ReadinessItem(
+        label: '视觉手册',
+        ready: hasVisualStyle,
+        detail: hasVisualStyle
+            ? '已配置 ${visualLabel ?? "视觉风格或风格包"}'
+            : '还没收口真人视觉风格',
+      ),
+      _ReadinessItem(
+        label: '表演 / 口播手册',
+        ready: hasDirection,
+        detail: hasDirection
+            ? '已配置 ${directionLabel ?? "导演手册或故事风格包"}'
+            : '还没收口口播语气 / 导演手册',
+      ),
+    ];
+  }
+
+  int _readyItemCount() {
+    return _buildReadinessItems().where((item) => item.ready).length;
+  }
+
+  List<_ReadinessItem> _missingReadinessItems() {
+    return _buildReadinessItems().where((item) => !item.ready).toList();
+  }
+
+  String _readinessGapSummary() {
+    final missing = _missingReadinessItems();
+    if (missing.isEmpty) {
+      return _isAnimated
+          ? '动漫短剧的基础准备项已经齐了，可以直接推进脚本、制作和质检闭环。'
+          : '真人短剧的基础准备项已经齐了，可以继续推进镜头生成、口播和成片复核。';
+    }
+    final labels = missing.take(3).map((item) => item.label).join('、');
+    final suffix = missing.length > 3 ? ' 等 ${missing.length} 项' : '';
+    return '当前还缺 $labels$suffix，建议先回项目区把这些准备项补齐。';
+  }
+
   String _nextStepTitle() {
     final project = _selectedProject;
     if (project == null) {
@@ -491,6 +675,18 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       return '先看坏例和质检反馈';
     }
     final stats = _projectStats;
+    if (_isAnimated && !_hasVisualStyleSignal(project)) {
+      return '先收口画风与视觉风格';
+    }
+    if (!_isAnimated && _sceneAssetCount <= 0) {
+      return '先补真人场景参考';
+    }
+    if (!_isAnimated && _clipAssetCount <= 0) {
+      return '先补真人镜头参考';
+    }
+    if (!_isAnimated && !_hasDirectionSignal(project)) {
+      return '先收口表演与口播手册';
+    }
     if (stats == null || stats.scriptCount <= 0) {
       return '先生成第一版剧本';
     }
@@ -517,6 +713,18 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           : '当前更适合先看表演自然度、场景真实感和口播镜头质感的坏例，再决定返工脚本还是镜头。';
     }
     final stats = _projectStats;
+    if (_isAnimated && !_hasVisualStyleSignal(project)) {
+      return '动漫模式先把画风、视觉手册或风格包收口，后面的角色一致性和出图连续性会更稳。';
+    }
+    if (!_isAnimated && _sceneAssetCount <= 0) {
+      return '真人模式先补场景参考，后面的人物走位、真实空间感和镜头衔接会更稳。';
+    }
+    if (!_isAnimated && _clipAssetCount <= 0) {
+      return '真人模式更依赖 clip / 镜头参考。先补镜头素材，后面的人物表演、景别和口播质感会更稳。';
+    }
+    if (!_isAnimated && !_hasDirectionSignal(project)) {
+      return '真人模式最好先把口播语气、表演节奏和导演手册收口，后面的配音和镜头演绎会更稳。';
+    }
     if (stats == null || stats.scriptCount <= 0) {
       return _isAnimated
           ? '先在脚本工作区把动漫短剧的情绪节奏、角色关系和章节改编跑起来。'
@@ -537,6 +745,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
 
   VoidCallback _nextStepAction() {
     final stats = _projectStats;
+    final project = _selectedProject;
     if (_selectedProject == null) {
       return widget.onOpenProjects;
     }
@@ -545,6 +754,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
     if ((_qualityScopeInsight?.badCaseCount ?? 0) > 0) {
       return widget.onOpenQuality;
+    }
+    if ((_isAnimated && !_hasVisualStyleSignal(project)) ||
+        (!_isAnimated && _sceneAssetCount <= 0) ||
+        (!_isAnimated && !_hasDirectionSignal(project)) ||
+        (!_isAnimated && _clipAssetCount <= 0)) {
+      return widget.onOpenProjects;
     }
     if (stats == null || stats.scriptCount <= 0 || stats.storyboardCount <= 0) {
       return () {
@@ -560,6 +775,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
 
   String _nextStepButtonLabel() {
     final stats = _projectStats;
+    final project = _selectedProject;
     if (_selectedProject == null) {
       return '先去项目区';
     }
@@ -568,6 +784,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
     if ((_qualityScopeInsight?.badCaseCount ?? 0) > 0) {
       return '打开质量评审';
+    }
+    if ((_isAnimated && !_hasVisualStyleSignal(project)) ||
+        (!_isAnimated && _sceneAssetCount <= 0) ||
+        (!_isAnimated && !_hasDirectionSignal(project)) ||
+        (!_isAnimated && _clipAssetCount <= 0)) {
+      return '打开项目区补准备项';
     }
     if (stats == null || stats.scriptCount <= 0 || stats.storyboardCount <= 0) {
       return '打开脚本工作区';
@@ -579,6 +801,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
+    final project = _selectedProject;
+    final visualLabel = _visualStyleLabel(project);
+    final directionLabel = _directionLabel(project);
     final modeTitle = _isAnimated ? '动漫短剧' : '真人短剧';
     final modeSummary = _isAnimated
         ? '当前主链路更贴近动漫短剧，所以会优先强调画风、角色一致性、分镜出图和连续性。'
@@ -775,6 +1000,19 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     : _projectReadinessSummary(_projectStats),
                 style: theme.textTheme.bodySmall?.copyWith(color: outline),
               ),
+              if (visualLabel != null || directionLabel != null) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    if (visualLabel != null)
+                      _MetricChip(label: '视觉', value: visualLabel),
+                    if (directionLabel != null)
+                      _MetricChip(label: '手册', value: directionLabel),
+                  ],
+                ),
+              ],
               if (_projectStats != null) ...[
                 const SizedBox(height: 8),
                 Wrap(
@@ -849,6 +1087,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     value:
                         '${(_qualityScopeInsight?.passRatePercent ?? 0).toStringAsFixed(0)}%',
                   ),
+                  _MetricChip(label: '场景', value: _sceneAssetCount.toString()),
+                  _MetricChip(label: 'clip', value: _clipAssetCount.toString()),
                 ],
               ),
               const SizedBox(height: 12),
@@ -897,6 +1137,50 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     ),
                   ),
               ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: outline),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('模式准备度', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Text(
+                _isAnimated
+                    ? '动漫短剧更看重画风、角色和分镜连续性。'
+                    : '真人短剧更看重角色设定、场景参考、clip 镜头素材和口播手册。',
+                style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _MetricChip(
+                    label: '已就绪',
+                    value:
+                        '${_readyItemCount()}/${_buildReadinessItems().length}',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _readinessGapSummary(),
+                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 12),
+              for (final item in _buildReadinessItems())
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _ReadinessRow(item: item),
+                ),
             ],
           ),
         ),
@@ -1085,6 +1369,60 @@ class _MetricChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text('$label $value', style: theme.textTheme.labelMedium),
+    );
+  }
+}
+
+class _ReadinessItem {
+  const _ReadinessItem({
+    required this.label,
+    required this.ready,
+    required this.detail,
+  });
+
+  final String label;
+  final bool ready;
+  final String detail;
+}
+
+class _ReadinessRow extends StatelessWidget {
+  const _ReadinessRow({required this.item});
+
+  final _ReadinessItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = item.ready
+        ? theme.colorScheme.primary
+        : theme.colorScheme.outline;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          item.ready
+              ? Icons.check_circle_outline
+              : Icons.radio_button_unchecked,
+          size: 18,
+          color: color,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(item.label, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 2),
+              Text(
+                item.detail,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
