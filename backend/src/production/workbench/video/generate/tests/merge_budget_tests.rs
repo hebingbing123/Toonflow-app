@@ -7,7 +7,8 @@ mod tests {
     use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
     use crate::production::workbench::video::generate::fragment_operations::merge_negative_prompts;
     use crate::production::workbench::video::generate::memory_integration::{
-        compact_video_ratio, filter_selected_rows_for_subject, normalize_upload_sources,
+        apply_project_mode_prompt_preset, compact_project_mode, compact_video_ratio,
+        filter_selected_rows_for_subject, normalize_upload_sources,
         rejected_negative_memory_fetch_limit, resolve_storyboard_prompt,
         selected_memory_fetch_limit,
     };
@@ -713,6 +714,50 @@ mod tests {
         assert_eq!(compact_video_ratio("horizontal"), Some("16:9".into()));
         assert_eq!(compact_video_ratio("square 1:1"), Some("1:1".into()));
         assert_eq!(compact_video_ratio(""), None);
+    }
+
+    #[test]
+    fn compact_project_mode_recognizes_supported_modes() {
+        assert_eq!(
+            compact_project_mode("live_action.short_drama"),
+            Some("live_action.short_drama".into())
+        );
+        assert_eq!(
+            compact_project_mode("animated.short_drama"),
+            Some("animated.short_drama".into())
+        );
+        assert_eq!(compact_project_mode(""), None);
+    }
+
+    #[test]
+    fn apply_project_mode_prompt_preset_adds_live_action_direction() {
+        let prompt = apply_project_mode_prompt_preset(
+            "夜晚巷口对峙，角色压低声音说话",
+            Some("live_action.short_drama"),
+        );
+        assert!(prompt.contains("真人短剧质感"));
+        assert!(prompt.contains("真实演员表演"));
+        assert!(prompt.contains("避免二次元卡通渲染"));
+    }
+
+    #[test]
+    fn apply_project_mode_prompt_preset_adds_animated_direction() {
+        let prompt = apply_project_mode_prompt_preset(
+            "夜晚巷口对峙，角色压低声音说话",
+            Some("animated.short_drama"),
+        );
+        assert!(prompt.contains("动漫短剧风格"));
+        assert!(prompt.contains("二次元角色造型"));
+        assert!(prompt.contains("避免真人写实质感过强"));
+    }
+
+    #[test]
+    fn apply_project_mode_prompt_preset_avoids_duplicate_live_action_hint() {
+        let prompt = apply_project_mode_prompt_preset(
+            "真人短剧风格，夜晚巷口对峙",
+            Some("live_action.short_drama"),
+        );
+        assert_eq!(prompt, "真人短剧风格，夜晚巷口对峙");
     }
 
     #[test]

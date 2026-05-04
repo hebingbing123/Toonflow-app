@@ -241,6 +241,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
     let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
         .await?
         .unwrap_or_else(|| "16:9".to_string());
+    let project_mode = load_project_mode(pool, scope_row.project_id).await?;
     let storyboard_negative_prompts = load_auto_negative_prompts(
         pool,
         user_id,
@@ -259,7 +260,8 @@ pub(in crate::production) async fn post_workbench_generate_video(
     let mut enqueued = Vec::with_capacity(upload_items.len());
     let mut response_negative_prompts = Vec::with_capacity(storyboard_ids.len());
     for item in upload_items {
-        let prompt = resolve_storyboard_prompt(&item, &default_prompt)?;
+        let prompt_seed = resolve_storyboard_prompt(&item, &default_prompt)?;
+        let prompt = apply_project_mode_prompt_preset(&prompt_seed, project_mode.as_deref());
         let merged_negative_prompt = merge_negative_prompts(
             merge_negative_prompts(
                 body.negative_prompt.as_deref(),
@@ -351,7 +353,8 @@ pub(crate) use quality_control::{
 // Internal imports for handler
 use fragment_operations::merge_negative_prompts;
 use memory_integration::{
-    ensure_storyboards_in_scope, ensure_track_in_scope, load_project_aspect_ratio,
-    normalize_upload_sources, resolve_storyboard_prompt,
+    apply_project_mode_prompt_preset, ensure_storyboards_in_scope, ensure_track_in_scope,
+    load_project_aspect_ratio, load_project_mode, normalize_upload_sources,
+    resolve_storyboard_prompt,
 };
 use utils::infer_video_provider;

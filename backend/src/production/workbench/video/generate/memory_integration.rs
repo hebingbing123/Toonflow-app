@@ -152,6 +152,18 @@ pub(super) async fn load_project_aspect_ratio(
     Ok(raw.and_then(|value| compact_video_ratio(&value)))
 }
 
+pub(super) async fn load_project_mode(
+    pool: &PgPool,
+    project_id: Uuid,
+) -> Result<Option<String>, ApiError> {
+    let raw = sqlx::query_scalar::<_, Option<String>>("SELECT mode FROM app_project WHERE id = $1")
+        .bind(project_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(raw.and_then(|value| compact_project_mode(&value)))
+}
+
 pub(super) fn compact_video_ratio(value: &str) -> Option<String> {
     let normalized = value.trim().to_ascii_lowercase();
     if normalized.is_empty() {
@@ -167,6 +179,58 @@ pub(super) fn compact_video_ratio(value: &str) -> Option<String> {
         return Some("16:9".to_string());
     }
     None
+}
+
+pub(super) fn compact_project_mode(value: &str) -> Option<String> {
+    let normalized = value.trim().to_ascii_lowercase();
+    if normalized.is_empty() {
+        return None;
+    }
+    if normalized.contains("live_action") || normalized.contains("live-action") {
+        return Some("live_action.short_drama".to_string());
+    }
+    if normalized.contains("animated") {
+        return Some("animated.short_drama".to_string());
+    }
+    None
+}
+
+pub(super) fn apply_project_mode_prompt_preset(prompt: &str, project_mode: Option<&str>) -> String {
+    let trimmed = prompt.trim();
+    if trimmed.is_empty() {
+        return String::new();
+    }
+    let Some(mode) = project_mode else {
+        return trimmed.to_string();
+    };
+    let normalized_prompt = trimmed.to_ascii_lowercase();
+    match mode {
+        "live_action.short_drama" => {
+            if normalized_prompt.contains("live action")
+                || trimmed.contains("真人")
+                || trimmed.contains("真实演员")
+            {
+                trimmed.to_string()
+            } else {
+                format!(
+                    "{trimmed}；真人短剧质感，真实演员表演，自然口型与口播同步，真实摄影与镜头语言，避免二次元卡通渲染"
+                )
+            }
+        }
+        "animated.short_drama" => {
+            if normalized_prompt.contains("anime")
+                || trimmed.contains("动漫")
+                || trimmed.contains("二次元")
+            {
+                trimmed.to_string()
+            } else {
+                format!(
+                    "{trimmed}；动漫短剧风格，二次元角色造型，画面表达可以适度风格化，避免真人写实质感过强"
+                )
+            }
+        }
+        _ => trimmed.to_string(),
+    }
 }
 
 #[allow(dead_code)]
