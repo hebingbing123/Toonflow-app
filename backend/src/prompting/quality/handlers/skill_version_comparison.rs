@@ -70,6 +70,13 @@ pub(crate) async fn get_skill_version_comparison(
           AND ($2::text IS NULL OR skill_file_path = $2)
           AND ($3::int IS NULL OR project_id = $3)
           AND ($4::int IS NULL OR script_id = $4)
+          AND (
+            passed IS NOT NULL
+            OR overall_score IS NOT NULL
+            OR is_bad_case = true
+            OR bad_case_category IS NOT NULL
+            OR grade IS NOT NULL
+          )
         GROUP BY skill_file_path, skill_version_hash
         ORDER BY skill_file_path, MAX(created_at) DESC
         "#,

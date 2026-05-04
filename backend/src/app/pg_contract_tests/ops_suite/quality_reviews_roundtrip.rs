@@ -222,6 +222,67 @@ async fn quality_reviews_roundtrip() {
     .unwrap();
     created_review_ids.push(owned_scope_review_id);
 
+    let output_target_id = format!("pg_quality_output_{}", Uuid::new_v4());
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/quality/reviews")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{owned_project_id},"scriptId":{owned_script_id},"targetType":"output","targetId":"{output_target_id}","source":"auto","modelName":"runway-gen-2","modelParams":{{"diagnostics":{{"promptChars":321}}}}}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, placeholder_auto_review) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "placeholder_auto_review={placeholder_auto_review}"
+    );
+    let placeholder_auto_review_id = Uuid::parse_str(
+        placeholder_auto_review["id"]
+            .as_str()
+            .expect("placeholder auto review id"),
+    )
+    .unwrap();
+    created_review_ids.push(placeholder_auto_review_id);
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/quality/reviews")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{owned_project_id},"scriptId":{owned_script_id},"targetType":"output","targetId":"{output_target_id}-scored","source":"auto","overallScore":9,"passed":true,"skillFilePath":"skills/video_prompt/reviewer.md","skillVersionHash":"hash-scored-output","comments":"scored output review"}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, scored_output_review) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "scored_output_review={scored_output_review}"
+    );
+    let scored_output_review_id = Uuid::parse_str(
+        scored_output_review["id"]
+            .as_str()
+            .expect("scored output review id"),
+    )
+    .unwrap();
+    created_review_ids.push(scored_output_review_id);
+
     let res = app
         .clone()
         .oneshot(
@@ -482,6 +543,10 @@ async fn quality_reviews_roundtrip() {
         "asset stats={asset_stats}"
     );
     assert!(
+        stats.iter().all(|row| row["targetType"].as_str() != Some("output")),
+        "placeholder auto output review should not skew scored stats: {stats:?}"
+    );
+    assert!(
         asset_stats["failedCount"].as_i64().unwrap_or_default() >= 1,
         "asset stats={asset_stats}"
     );
@@ -529,6 +594,48 @@ async fn quality_reviews_roundtrip() {
                     >= 1
         }),
         "stage rows should include asset aggregate: {stage_rows:?}"
+    );
+    assert!(
+        stage_rows
+            .iter()
+            .all(|row| row["targetType"].as_str() != Some("output")),
+        "placeholder auto output review should not skew stage pass rate: {stage_rows:?}"
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/quality/skill-version-comparison")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, skill_version_rows) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "skill_version_rows={skill_version_rows}"
+    );
+    let skill_version_rows = skill_version_rows
+        .as_array()
+        .expect("skill version comparison rows");
+    let scored_output_row = skill_version_rows
+        .iter()
+        .find(|row| row["skillVersionHash"].as_str() == Some("hash-scored-output"))
+        .expect("scored output skill-version row");
+    assert_eq!(
+        scored_output_row["totalCount"].as_i64(),
+        Some(1),
+        "scored skill-version row should ignore placeholder auto reviews: {skill_version_rows:?}"
+    );
+    assert_eq!(
+        scored_output_row["passRatePercent"].as_f64(),
+        Some(100.0),
+        "placeholder auto reviews should not dilute skill-version pass rate: {skill_version_rows:?}"
     );
 
     cleanup_quality_reviews(&pool, &created_review_ids).await;

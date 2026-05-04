@@ -80,6 +80,13 @@ pub(crate) async fn get_stats(
             ), 0) as non_delivery_priority_pass_rate_percent
         FROM app_quality_review
         WHERE user_id = $1
+          AND (
+            passed IS NOT NULL
+            OR overall_score IS NOT NULL
+            OR is_bad_case = true
+            OR bad_case_category IS NOT NULL
+            OR grade IS NOT NULL
+          )
         GROUP BY target_type
         "#,
     )
@@ -165,6 +172,13 @@ pub(crate) async fn get_stage_pass_rate(
         FROM app_quality_review
         WHERE user_id = $1
           AND ($2::text IS NULL OR skill_version_hash = $2)
+          AND (
+            passed IS NOT NULL
+            OR overall_score IS NOT NULL
+            OR is_bad_case = true
+            OR bad_case_category IS NOT NULL
+            OR grade IS NOT NULL
+          )
         GROUP BY target_type, DATE_TRUNC('day', created_at)
         ORDER BY review_date DESC
         "#,

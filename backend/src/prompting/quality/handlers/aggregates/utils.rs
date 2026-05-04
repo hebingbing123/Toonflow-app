@@ -329,6 +329,13 @@ pub(crate) async fn get_scope_insights(
           AND (qr.project_id IS NOT NULL OR qr.script_id IS NOT NULL)
           AND ($2::int IS NULL OR qr.project_id = $2)
           AND ($3::int IS NULL OR qr.script_id = $3)
+          AND (
+            qr.passed IS NOT NULL
+            OR qr.overall_score IS NOT NULL
+            OR qr.is_bad_case = true
+            OR qr.bad_case_category IS NOT NULL
+            OR qr.grade IS NOT NULL
+          )
         GROUP BY qr.project_id, qr.script_id, qr.target_type
         ORDER BY
             (
