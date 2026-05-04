@@ -567,13 +567,14 @@
   - [~] 7.3 Run complete test suite
     - Run `cargo test` in backend/ - ensure all tests pass
     - Run `flutter test` in frontend/ - ensure all tests pass
-    - `2026-05-04`: isolated rerun confirms `cargo test -q scripting::scripts::property_tests::tests::prop2_emotion_curve_coverage --lib` currently fails in the dirty worktree, separate from the large-file verification and preservation-property checks
+    - `2026-05-04`: fixed `cargo test -q scripting::scripts::property_tests::tests::prop2_emotion_curve_coverage --lib` so the property now passes again
+    - Full backend suite still has existing unrelated failures in the dirty worktree, so this checkpoint remains open until those are resolved as well
     - _Requirements: 3.3_
 
   - [~] 7.4 Run final gate check
     - Run `yarn refactor:check` at repository root
     - Ensure all checks pass (OpenAPI, cargo fmt, clippy, test, flutter analyze, test)
-    - `2026-05-04`: current dirty-worktree baseline is `1663 passed; 49 failed; 37 ignored`, including an unrelated scripting property failure outside this refactoring slice
+    - `2026-05-04`: after fixing the scripting property regression, the dirty-worktree baseline returned to `1664 passed; 48 failed; 37 ignored`
     - _Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.10_
 
   - [~] 7.5 Final commit

@@ -60,26 +60,11 @@ mod tests {
                 }
             }
 
-            // Ensure all 3 levels exist somewhere.
-            let has_low = fixed.iter().any(|&x| x == 0);
-            let has_mid = fixed.iter().any(|&x| x == 1);
-            let has_high = fixed[boundary..].iter().any(|&x| x == 2);
-
-            // Insert missing levels at specific safe positions to avoid clobbering each other.
-            // Use the last 3 positions (all guaranteed to be after boundary since n >= 5).
-            if !has_high && boundary < n {
-                fixed[n - 1] = 2;
-            }
-            if !has_mid {
-                // Use second-to-last if available and not already set to high.
-                let idx = if n >= 2 && fixed[n - 1] == 2 { n - 2 } else { n - 1 };
-                fixed[idx] = 1;
-            }
-            if !has_low {
-                // Use third-to-last if available.
-                let idx = if n >= 3 { n - 3 } else { 0 };
-                fixed[idx] = 0;
-            }
+            // Use the last three safe positions (all after the first-20% boundary
+            // because n >= 5) so the fix for one level cannot erase another.
+            fixed[n - 3] = 0;
+            fixed[n - 2] = 1;
+            fixed[n - 1] = 2;
 
             // Verify constraint 1: at least 3 distinct intensity levels.
             let distinct_levels: std::collections::HashSet<u8> = fixed.iter().cloned().collect();
