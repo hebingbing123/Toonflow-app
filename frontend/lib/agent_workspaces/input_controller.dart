@@ -31,6 +31,17 @@ class WorkspaceInputController {
   final TextEditingController productionSubAgentArgsController =
       TextEditingController(text: '{}');
 
+  void applyProjectScope(int projectNumericId, {int? scriptNumericId}) {
+    projectIdController.text = projectNumericId.toString();
+    if (scriptNumericId != null && scriptNumericId > 0) {
+      scriptIdController.text = scriptNumericId.toString();
+    }
+  }
+
+  void clearScriptScope() {
+    scriptIdController.clear();
+  }
+
   void applySuggestedProductionFlowKey(String? flowKey) {
     final normalized = flowKey?.trim();
     if (normalized == null || normalized.isEmpty) {

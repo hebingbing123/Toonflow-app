@@ -148,6 +148,10 @@ extension _HomePageBuildProductSections on _HomePageState {
             ProductWorkspacePane.projects,
           );
         },
+        onSyncProjectContext: (projectNumericId) {
+          _workspaceInputController.applyProjectScope(projectNumericId);
+          _workspaceInputController.clearScriptScope();
+        },
         onOpenScriptWorkspace: () {
           _shellNavigationController.selectProductWorkspacePane(
             ProductWorkspacePane.scriptWorkspace,

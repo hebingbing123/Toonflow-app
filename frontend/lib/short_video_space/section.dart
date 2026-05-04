@@ -9,6 +9,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
     super.key,
     required this.accessToken,
     required this.onOpenProjects,
+    required this.onSyncProjectContext,
     required this.onOpenScriptWorkspace,
     required this.onOpenProductionWorkspace,
     required this.onOpenTasks,
@@ -17,6 +18,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
 
   final String? accessToken;
   final VoidCallback onOpenProjects;
+  final ValueChanged<int> onSyncProjectContext;
   final VoidCallback onOpenScriptWorkspace;
   final VoidCallback onOpenProductionWorkspace;
   final VoidCallback onOpenTasks;
@@ -30,8 +32,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ShortVideoMode _mode = ShortVideoMode.animated;
   String _videoRatio = '9:16';
   bool _loadingProjects = false;
+  bool _loadingProjectStats = false;
+  bool _creatingProject = false;
   bool _savingProjectConfig = false;
   List<ProjectRow> _projects = const <ProjectRow>[];
+  ProjectStats? _projectStats;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -83,6 +88,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _selectedProjectId = selectedId;
       });
       _applyProjectPreset(_selectedProject);
+      _syncSelectedProjectContext();
+      _loadProjectStats();
       if (projects.isEmpty) {
         setState(() {
           _projectConfigLine = '还没有项目，可先去项目区创建一个短剧项目。';
@@ -133,6 +140,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     });
   }
 
+  void _syncSelectedProjectContext() {
+    final project = _selectedProject;
+    if (project == null) {
+      return;
+    }
+    widget.onSyncProjectContext(project.numericId);
+  }
+
   ShortVideoMode _modeFromProject(ProjectRow project) {
     final value = (project.mode ?? '').trim().toLowerCase();
     if (value.contains('live') ||
@@ -149,6 +164,115 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       return trimmed;
     }
     return '9:16';
+  }
+
+  Future<void> _loadProjectStats() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      if (mounted) {
+        setState(() {
+          _projectStats = null;
+        });
+      }
+      return;
+    }
+    setState(() {
+      _loadingProjectStats = true;
+      _projectStats = null;
+    });
+    try {
+      final stats = await fetchProjectStatsByProjectId(token, project.id);
+      if (!mounted) {
+        return;
+      }
+      if (_selectedProjectId != project.id) {
+        return;
+      }
+      setState(() {
+        _projectStats = stats;
+      });
+    } on RustApiException catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectStats = null;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectStats = null;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingProjectStats = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _createProjectFromSpace() async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _projectConfigLine = '请先登录后再创建短剧项目。';
+      });
+      return;
+    }
+    setState(() {
+      _creatingProject = true;
+      _projectConfigLine = null;
+    });
+    final defaultName = _isAnimated ? '动漫短剧项目' : '真人短剧项目';
+    final storedMode = _isAnimated
+        ? 'animated.short_drama'
+        : 'live_action.short_drama';
+    try {
+      final created = await createProject(
+        token,
+        fields: {
+          'name': defaultName,
+          'projectType': 'short_drama',
+          'mode': storedMode,
+          'videoRatio': _videoRatio,
+        },
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projects = [created, ..._projects].toList(growable: false);
+        _selectedProjectId = created.id;
+        _projectConfigLine =
+            '已新建项目 #${created.numericId}，并写入 ${_modeLabel(_mode)} · ${_videoRatioLabel(_videoRatio)}。';
+      });
+      _syncSelectedProjectContext();
+      await _loadProjectStats();
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectConfigLine = '新建项目失败：${e.statusCode ?? '-'}';
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectConfigLine = '新建项目失败：$e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _creatingProject = false;
+        });
+      }
+    }
   }
 
   Future<void> _saveProjectConfig() async {
@@ -184,6 +308,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _projectConfigLine =
             '已写回项目 #${updated.numericId}：${_modeLabel(_mode)} · ${_videoRatioLabel(_videoRatio)}';
       });
+      _syncSelectedProjectContext();
+      _loadProjectStats();
     } on RustApiException catch (e) {
       if (!mounted) {
         return;
@@ -220,6 +346,22 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       default:
         return '竖屏 9:16';
     }
+  }
+
+  String _projectReadinessSummary(ProjectStats? stats) {
+    if (stats == null) {
+      return '读取项目统计后，会在这里提示你更适合先去脚本还是制作。';
+    }
+    if (stats.scriptCount <= 0) {
+      return '当前项目还没有剧本，建议先去脚本工作区生成第一版。';
+    }
+    if (stats.storyboardCount <= 0) {
+      return '已有剧本但还缺分镜，建议先继续脚本/分镜规划，再进入制作。';
+    }
+    if (stats.roleCount <= 0) {
+      return '已有脚本和分镜，但角色资产还少，建议先补角色与参考素材。';
+    }
+    return '脚本、分镜和角色资产都已有基础，可以直接进入制作工作区继续出图和出片。';
   }
 
   @override
@@ -333,6 +475,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                                 _selectedProjectId = value;
                               });
                               _applyProjectPreset(_selectedProject);
+                              _syncSelectedProjectContext();
+                              _loadProjectStats();
                             },
                     ),
                   ),
@@ -390,6 +534,13 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  FilledButton.tonalIcon(
+                    onPressed: _creatingProject
+                        ? null
+                        : _createProjectFromSpace,
+                    icon: const Icon(Icons.add_circle_outline),
+                    label: Text(_creatingProject ? '新建中' : '直接新建短剧项目'),
+                  ),
                   FilledButton.icon(
                     onPressed: _savingProjectConfig ? null : _saveProjectConfig,
                     icon: const Icon(Icons.save_outlined),
@@ -405,6 +556,42 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               if (_projectConfigLine != null) ...[
                 const SizedBox(height: 10),
                 Text(_projectConfigLine!, style: theme.textTheme.bodySmall),
+              ],
+              const SizedBox(height: 10),
+              Text(
+                _loadingProjectStats
+                    ? '正在读取当前项目准备度…'
+                    : _projectReadinessSummary(_projectStats),
+                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              ),
+              if (_projectStats != null) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _MetricChip(
+                      label: '剧本',
+                      value: _projectStats!.scriptCount.toString(),
+                    ),
+                    _MetricChip(
+                      label: '分镜',
+                      value: _projectStats!.storyboardCount.toString(),
+                    ),
+                    _MetricChip(
+                      label: '角色',
+                      value: _projectStats!.roleCount.toString(),
+                    ),
+                    _MetricChip(
+                      label: '小说',
+                      value: _projectStats!.novelCount.toString(),
+                    ),
+                    _MetricChip(
+                      label: '视频',
+                      value: _projectStats!.videoCount.toString(),
+                    ),
+                  ],
+                ),
               ],
             ],
           ),
@@ -473,12 +660,18 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     label: const Text('项目'),
                   ),
                   OutlinedButton.icon(
-                    onPressed: widget.onOpenScriptWorkspace,
+                    onPressed: () {
+                      _syncSelectedProjectContext();
+                      widget.onOpenScriptWorkspace();
+                    },
                     icon: const Icon(Icons.edit_note_outlined),
                     label: const Text('脚本工作区'),
                   ),
                   OutlinedButton.icon(
-                    onPressed: widget.onOpenProductionWorkspace,
+                    onPressed: () {
+                      _syncSelectedProjectContext();
+                      widget.onOpenProductionWorkspace();
+                    },
                     icon: const Icon(Icons.movie_creation_outlined),
                     label: const Text('制作工作区'),
                   ),
@@ -541,6 +734,26 @@ class _StageCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MetricChip extends StatelessWidget {
+  const _MetricChip({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outline),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text('$label $value', style: theme.textTheme.labelMedium),
     );
   }
 }

@@ -30,4 +30,20 @@ void main() {
     controller.applySuggestedProductionFlowKey('   ');
     expect(controller.productionFlowKeyController.text, 'storyboard');
   });
+
+  test('workspace input controller can sync and clear project scope', () {
+    final controller = WorkspaceInputController();
+    addTearDown(controller.dispose);
+
+    controller.applyProjectScope(23);
+    expect(controller.projectIdController.text, '23');
+    expect(controller.scriptIdController.text, '1');
+
+    controller.applyProjectScope(23, scriptNumericId: 7);
+    expect(controller.projectIdController.text, '23');
+    expect(controller.scriptIdController.text, '7');
+
+    controller.clearScriptScope();
+    expect(controller.scriptIdController.text, isEmpty);
+  });
 }
