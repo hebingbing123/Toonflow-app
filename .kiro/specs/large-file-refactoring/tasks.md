@@ -123,6 +123,14 @@
       - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 3,534 lines; every new helper module is under 800 lines, but `mod.rs` still requires further extraction
       - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
+    - [x] 3.1.11 Extract style-note recall / ranking logic from `video_prompt_memory/mod.rs`
+      - `2026-05-04`: moved summary-note recall and contextual ranking into `style_role_select.rs` and `style_rank.rs`
+      - Keep the public selection API (`select_*_video_style_memory_notes`, `select_prioritized_video_style_note`, `select_selected_video_memory_notes`, `select_neighbor_selected_video_memory_notes`) stable via `mod.rs` re-exports
+      - Rewire sibling modules to import the moved note-scoring helpers without changing style-selection behavior
+      - Run targeted backend verification again: `cargo check -q` and `cargo test -q production::workbench::video_prompt_memory::tests:: --lib`
+      - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 2,401 lines; the new `style_rank.rs` stays under the 800-line threshold at 788 lines
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
+
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
     - [x] 3.2.1 Analyze test file structure

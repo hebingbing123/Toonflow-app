@@ -1,4 +1,5 @@
 use super::continuity::summarize_recurring_prefixed_fragment;
+use super::style_rank::selected_video_style_value_from_content;
 use super::*;
 
 pub(super) fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {

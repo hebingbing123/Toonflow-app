@@ -2,6 +2,9 @@ use super::style_compact::{
     selected_style_fragment_is_generic_restrained_mood, selected_style_fragment_is_low_gain_motion,
     selected_style_fragment_is_low_gain_voice,
 };
+use super::style_rank::{
+    extract_selected_memory_style_note_for_storyboard, selected_video_style_value_from_content,
+};
 use super::*;
 
 pub(super) fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {

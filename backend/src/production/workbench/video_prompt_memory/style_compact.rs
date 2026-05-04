@@ -1,4 +1,5 @@
 use super::continuity::extract_style_keywords;
+use super::style_rank::is_local_framing_only_fragment;
 use super::*;
 
 pub(crate) fn compact_video_style_prompt_note(note: &str) -> Option<String> {
