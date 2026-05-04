@@ -59,7 +59,8 @@ pub(crate) async fn optimize_memory(
     };
 
     let budget_result =
-        optimize_project_memory_budget(pool, uid, body.project_id, agent_type).await?;
+        optimize_project_memory_budget(pool, uid, body.project_id, body.episodes_id, agent_type)
+            .await?;
     let scoped_video_result = if agent_type == "productionAgent" {
         if let Some(script_numeric_id) = body.episodes_id {
             Some(optimize_scoped_video_memory(pool, uid, body.project_id, script_numeric_id).await?)

@@ -75,7 +75,9 @@ class QualityReviewsSummaryPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       reviewSummary,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: outlineColor),
+      style: Theme.of(
+        context,
+      ).textTheme.bodySmall?.copyWith(color: outlineColor),
     );
   }
 }
@@ -100,7 +102,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
       childrenPadding: EdgeInsets.zero,
       title: const Text('兼容性检查'),
       subtitle: Text(
-        '保留质量评审回归创建入口，默认折叠',
+        '保留只读回归入口，确认评审列表与详情查询仍可正常工作',
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: outlineColor),
@@ -109,7 +111,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Quality review probe',
+            'Quality review read probe',
             style: Theme.of(
               context,
             ).textTheme.labelSmall?.copyWith(color: outlineColor),
@@ -121,8 +123,10 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
           runSpacing: 8,
           children: [
             FilledButton.tonal(
-              onPressed: creatingQualityReview ? null : onCreateQualityReviewProbe,
-              child: Text(creatingQualityReview ? '…' : '创建回归评审'),
+              onPressed: creatingQualityReview
+                  ? null
+                  : onCreateQualityReviewProbe,
+              child: Text(creatingQualityReview ? '…' : '运行只读回归检查'),
             ),
           ],
         ),
@@ -148,27 +152,32 @@ class QualityReviewsListPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Text('${reviews.length} 条评审', style: Theme.of(context).textTheme.labelLarge),
-        ...reviews.take(8).map(
-          (review) => ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
-            ),
-            subtitle: Text(
-              [
-                review.id,
-                if (review.targetId != null && review.targetId!.isNotEmpty)
-                  'target=${review.targetId}',
-                if (review.passed != null) 'passed=${review.passed}',
-                if (review.isBadCase) 'bad_case',
-              ].join(' · '),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => onSelectQualityReview(review),
-          ),
+        Text(
+          '${reviews.length} 条评审',
+          style: Theme.of(context).textTheme.labelLarge,
         ),
+        ...reviews
+            .take(8)
+            .map(
+              (review) => ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
+                ),
+                subtitle: Text(
+                  [
+                    review.id,
+                    if (review.targetId != null && review.targetId!.isNotEmpty)
+                      'target=${review.targetId}',
+                    if (review.passed != null) 'passed=${review.passed}',
+                    if (review.isBadCase) 'bad_case',
+                  ].join(' · '),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => onSelectQualityReview(review),
+              ),
+            ),
       ],
     );
   }

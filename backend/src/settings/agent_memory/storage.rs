@@ -184,6 +184,8 @@ pub(crate) async fn replace_named_summary_memory_with_scope(
           AND agent_type = $4
           AND memory_type = 'summary'
           AND name = $5
+          AND memory_tier = $6
+          AND scope_signature IS NOT DISTINCT FROM $7
         "#,
     )
     .bind(user_id)
@@ -191,6 +193,8 @@ pub(crate) async fn replace_named_summary_memory_with_scope(
     .bind(episodes_id)
     .bind(agent_type)
     .bind(name)
+    .bind(memory_tier)
+    .bind(scope_signature)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

@@ -92,15 +92,21 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
             .filter(|value| !value.is_empty())
             .and_then(|value| value.parse::<i32>().ok())
             .filter(|value| *value > 0);
-        if body.target_type == "storyboard" && body.project_id.is_none() {
-            return Err(ApiError::BadRequest(
-                "projectId is required when targetType is storyboard".into(),
-            ));
+        if matches!(body.target_type.as_str(), "storyboard" | "video" | "output")
+            && body.project_id.is_none()
+        {
+            return Err(ApiError::BadRequest(format!(
+                "projectId is required when targetType is {}",
+                body.target_type
+            )));
         }
-        if body.target_type == "storyboard" && storyboard_id.is_none() {
-            return Err(ApiError::BadRequest(
-                "targetId must be a positive storyboard id when targetType is storyboard".into(),
-            ));
+        if matches!(body.target_type.as_str(), "storyboard" | "video" | "output")
+            && storyboard_id.is_none()
+        {
+            return Err(ApiError::BadRequest(format!(
+                "targetId must be a positive storyboard id when targetType is {}",
+                body.target_type
+            )));
         }
         if (body.project_id.is_some() || body.script_id.is_some()) && storyboard_id.is_none() {
             return Err(ApiError::BadRequest(format!(

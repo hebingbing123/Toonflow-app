@@ -186,7 +186,11 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
     generatedVideos: generatedVideos,
   );
   final selectedTrackId = int.tryParse(trackIdText.trim());
-  if (selectedTrackId == null || selectedTrackId <= 0) {
+  final canAutoFillSingleTrack =
+      (selectedTrackId == null || selectedTrackId <= 0) &&
+      knownTrackIds.length == 1;
+  if ((selectedTrackId == null || selectedTrackId <= 0) &&
+      !canAutoFillSingleTrack) {
     return StoryboardWorkbenchDiagnosis(
       summary: knownTrackIds.isEmpty ? '当前分镜还没有可用视频轨道。' : '当前分镜还没有选定视频轨道。',
       detail: knownTrackIds.isEmpty

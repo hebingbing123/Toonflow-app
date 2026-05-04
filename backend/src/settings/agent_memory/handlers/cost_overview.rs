@@ -64,7 +64,7 @@ pub(crate) async fn get_memory_cost_overview(
     let policy =
         load_project_automation_memory_policy(pool, uid, params.project_id, agent_type).await?;
     let budget_snapshot =
-        load_project_memory_budget_snapshot(pool, uid, params.project_id, agent_type).await?;
+        load_project_memory_budget_snapshot(pool, uid, params.project_id, None, agent_type).await?;
 
     // 各层记忆条目数
     let counts: Vec<(String, i64)> = sqlx::query_as(

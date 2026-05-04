@@ -271,8 +271,14 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     )
     .await?;
     enforce_quality_gate(QualityGateStage::VideoPrompt, &gate)?;
-    let project_memory_optimization =
-        optimize_project_memory_budget(pool, user_id, body.project_id, "productionAgent").await?;
+    let project_memory_optimization = optimize_project_memory_budget(
+        pool,
+        user_id,
+        body.project_id,
+        Some(body.script_id),
+        "productionAgent",
+    )
+    .await?;
     let memory_optimization = if body.storyboard_id.is_some_and(|id| id > 0) {
         Some(optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?)
     } else {

@@ -105,28 +105,12 @@ class QualityReviewsController extends ChangeNotifier {
     _setError(null);
     notifyListeners();
     try {
-      final created = await createQualityReview(
-        token,
-        CreateQualityReviewBody(
-          targetType: 'output',
-          targetId: 'flutter-probe-${DateTime.now().millisecondsSinceEpoch}',
-          source: 'manual',
-          overallScore: 8,
-          passed: true,
-          comments: 'flutter quality probe',
-          skillVersion: 'flutter.probe',
-          modelName: 'manual',
-          modelParams: const {'surface': 'home_page'},
-          isBadCase: false,
-        ),
-      );
-      qualityReviewIdController.text = created.id;
-      qualityReviewByIdLine =
-          '${created.id} · ${created.targetType} · ${created.source} · score=${created.overallScore ?? "n/a"}';
-      creatingQualityReview = false;
-      notifyListeners();
       await loadQualityReviews();
-      return;
+      await loadQualityStats();
+      if ((qualityReviews ?? const <QualityReview>[]).isNotEmpty) {
+        qualityReviewIdController.text = qualityReviews!.first.id;
+        await fetchSelectedQualityReview();
+      }
     } on RustApiException catch (e) {
       _setError(e.toString());
     } catch (e) {

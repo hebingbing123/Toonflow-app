@@ -387,33 +387,36 @@ void main() {
     },
   );
 
-  test('diagnoseStoryboardWorkbench requests track preparation first', () {
-    final diagnosis = diagnoseStoryboardWorkbench(
-      scriptStoryboard: const StoryboardRow(
-        id: '1',
-        numericId: 11,
-        scriptId: '3',
-        prompt: '镜头一',
-        trackId: 4,
-      ),
-      productionStoryboard: const ProductionStoryboardItemV1(
-        id: 11,
-        url: 'https://example.com/frame.png',
-      ),
-      productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
-      generatedVideos: const [],
-      generatingJobs: const [],
-      draftImageUrl: null,
-      trackIdText: '',
-      videoPromptText: 'prompt',
-      videoDurationText: '5',
-    );
+  test(
+    'diagnoseStoryboardWorkbench allows one-click generation when a single track can auto-fill',
+    () {
+      final diagnosis = diagnoseStoryboardWorkbench(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+          prompt: '镜头一',
+          trackId: 4,
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          url: 'https://example.com/frame.png',
+        ),
+        productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
+        generatedVideos: const [],
+        generatingJobs: const [],
+        draftImageUrl: null,
+        trackIdText: '',
+        videoPromptText: 'prompt',
+        videoDurationText: '5',
+      );
 
-    expect(
-      diagnosis.recommendedAction,
-      StoryboardWorkbenchRecommendedAction.prepareVideoTrack,
-    );
-  });
+      expect(
+        diagnosis.recommendedAction,
+        StoryboardWorkbenchRecommendedAction.submitVideoGeneration,
+      );
+    },
+  );
 
   test(
     'diagnoseStoryboardWorkbench requests default prompt when video params are incomplete',

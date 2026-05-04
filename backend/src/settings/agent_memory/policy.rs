@@ -241,6 +241,7 @@ pub(crate) async fn load_project_memory_budget_snapshot(
     pool: &PgPool,
     user_id: Uuid,
     project_id: i32,
+    episodes_id: Option<i32>,
     agent_type: &str,
 ) -> Result<MemoryBudgetSnapshot, ApiError> {
     let rows: Vec<MemoryQueryRow> = sqlx::query_as(
@@ -249,13 +250,15 @@ pub(crate) async fn load_project_memory_budget_snapshot(
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
-          AND agent_type = $3
+          AND episodes_id IS NOT DISTINCT FROM $3
+          AND agent_type = $4
         ORDER BY create_time_ms DESC
         LIMIT 120
         "#,
     )
     .bind(user_id)
     .bind(project_id)
+    .bind(episodes_id)
     .bind(agent_type)
     .fetch_all(pool)
     .await
@@ -291,10 +294,12 @@ pub(crate) async fn optimize_project_memory_budget(
     pool: &PgPool,
     user_id: Uuid,
     project_id: i32,
+    episodes_id: Option<i32>,
     agent_type: &str,
 ) -> Result<MemoryBudgetOptimizeResult, ApiError> {
     let snapshot =
-        load_project_memory_budget_snapshot(pool, user_id, project_id, agent_type).await?;
+        load_project_memory_budget_snapshot(pool, user_id, project_id, episodes_id, agent_type)
+            .await?;
     if !snapshot.exceeds_budget() {
         return Ok(MemoryBudgetOptimizeResult::default());
     }
@@ -305,13 +310,15 @@ pub(crate) async fn optimize_project_memory_budget(
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
-          AND agent_type = $3
+          AND episodes_id IS NOT DISTINCT FROM $3
+          AND agent_type = $4
         ORDER BY create_time_ms DESC
         LIMIT 200
         "#,
     )
     .bind(user_id)
     .bind(project_id)
+    .bind(episodes_id)
     .bind(agent_type)
     .fetch_all(pool)
     .await
@@ -367,12 +374,14 @@ pub(crate) async fn optimize_project_memory_budget(
             DELETE FROM app_agent_memory
             WHERE owner_user_id = $1
               AND numeric_project_id = $2
-              AND agent_type = $3
-              AND id = ANY($4)
+              AND episodes_id IS NOT DISTINCT FROM $3
+              AND agent_type = $4
+              AND id = ANY($5)
             "#,
         )
         .bind(user_id)
         .bind(project_id)
+        .bind(episodes_id)
         .bind(agent_type)
         .bind(&all_ids)
         .execute(pool)

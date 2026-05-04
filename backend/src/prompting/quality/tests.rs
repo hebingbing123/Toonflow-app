@@ -149,13 +149,15 @@ fn validate_create_review_body_requires_storyboard_numeric_target_for_scoped_out
 }
 
 #[test]
-fn validate_create_review_body_accepts_unscoped_output_probe_without_numeric_target() {
+fn validate_create_review_body_requires_project_scope_for_output_reviews() {
     let body = CreateQualityReviewBody {
         target_type: "output".to_string(),
-        target_id: Some("flutter-probe-123".to_string()),
+        target_id: Some("12".to_string()),
         ..Default::default()
     };
-    assert!(validate_create_review_body(&body).is_ok());
+    let err =
+        validate_create_review_body(&body).expect_err("output review must carry project scope");
+    assert!(matches!(err, ApiError::BadRequest(_)));
 }
 
 #[test]
