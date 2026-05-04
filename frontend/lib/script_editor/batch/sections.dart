@@ -74,33 +74,49 @@ extension _StoryboardBatchWorkbenchSections
     required List<int> selected,
     required int? singleSelectedId,
   }) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    final canQuickGenerate =
+        _selectedIds.isNotEmpty || _readyStoryboardIds().isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FilledButton(
-          onPressed: _busyMutation || _selectedIds.isEmpty
-              ? null
-              : () => _runMutation(_batchGenerate),
-          child: Text(_busyMutation ? '处理中…' : '批量发起出图'),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton(
+              onPressed: _busyMutation || !canQuickGenerate
+                  ? null
+                  : () => _runMutation(_batchGenerate),
+              child: Text(_busyMutation ? '处理中…' : '一键批量出图'),
+            ),
+            TextButton(
+              onPressed: _busyMutation || singleSelectedId == null
+                  ? null
+                  : () =>
+                        _runMutation(() => _loadCurrentPreview(singleSelectedId)),
+              child: const Text('读取当前预览'),
+            ),
+            TextButton(
+              onPressed: _busyMutation || singleSelectedId == null
+                  ? null
+                  : () =>
+                        _runMutation(() => _loadDownloadUrl(singleSelectedId)),
+              child: const Text('读取下载链接'),
+            ),
+            TextButton(
+              onPressed: _busyMutation || _selectedIds.isEmpty
+                  ? null
+                  : () => _runMutation(() => _exportSelectedZip(selected)),
+              child: const Text('导出所选 ZIP'),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: _busyMutation || singleSelectedId == null
-              ? null
-              : () => _runMutation(() => _loadCurrentPreview(singleSelectedId)),
-          child: const Text('读取当前预览'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || singleSelectedId == null
-              ? null
-              : () => _runMutation(() => _loadDownloadUrl(singleSelectedId)),
-          child: const Text('读取下载链接'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || _selectedIds.isEmpty
-              ? null
-              : () => _runMutation(() => _exportSelectedZip(selected)),
-          child: const Text('导出所选 ZIP'),
+        const SizedBox(height: 4),
+        Text(
+          '未手动选择分镜时，一键批量出图会自动挑出已具备可用提示词的分镜直接入队；只有预览和导出这类精确动作仍需要你明确选择。',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
+          ),
         ),
       ],
     );

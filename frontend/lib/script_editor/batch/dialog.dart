@@ -64,6 +64,20 @@ class _StoryboardBatchWorkbenchDialogState
     return values;
   }
 
+  List<int> _readyStoryboardIds() {
+    final productionMap = _productionById();
+    return widget.boardsList
+        .where(
+          (row) => resolveStoryboardGenerationPrompt(
+                scriptStoryboard: row,
+                productionStoryboard: productionMap[row.numericId],
+              ) !=
+              null,
+        )
+        .map((row) => row.numericId)
+        .toList(growable: false);
+  }
+
   StoryboardRow? _findScriptRow(int numericId) {
     for (final row in widget.boardsList) {
       if (row.numericId == numericId) return row;
@@ -189,7 +203,9 @@ class _StoryboardBatchWorkbenchDialogState
               diagnosis.recommendedAction,
             );
       case StoryboardBatchWorkbenchRecommendedAction.generateSelected:
-        recommendedAction = _busyMutation || _selectedIds.isEmpty
+        recommendedAction =
+            _busyMutation ||
+                (_selectedIds.isEmpty && _readyStoryboardIds().isEmpty)
             ? null
             : () => _runMutation(_batchGenerate);
         recommendedActionLabel =

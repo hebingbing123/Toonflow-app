@@ -22,10 +22,11 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _batchGenerate() async {
     final productionMap = _productionById();
     final selected = _sortedSelection();
+    final effectiveSelected = selected.isEmpty ? _readyStoryboardIds() : selected;
     final suffix = _ctrls.promptSuffixCtrl.text.trim();
     final negativePrompt = _ctrls.negativePromptCtrl.text.trim();
     final items = <BatchGenerateImageItem>[];
-    for (final numericId in selected) {
+    for (final numericId in effectiveSelected) {
       final scriptRow = _findScriptRow(numericId);
       final prompt = resolveStoryboardGenerationPrompt(
         scriptStoryboard: scriptRow,
@@ -67,7 +68,9 @@ extension _StoryboardBatchWorkbenchActions
       _applyBatchWorkbenchState(() {
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
           actionSummary:
-              '已为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。',
+              selected.isEmpty
+                  ? '已自动选中 ${effectiveSelected.length} 条可出图分镜，并为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。'
+                  : '已为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。',
           diagnosis: _currentDiagnosis(),
         );
       });

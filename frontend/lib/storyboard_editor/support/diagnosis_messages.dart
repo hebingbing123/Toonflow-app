@@ -84,7 +84,7 @@ String describeStoryboardBatchWorkbenchRecommendedAction(
     case StoryboardBatchWorkbenchRecommendedAction.selectReadyStoryboards:
       return '全选可出图分镜';
     case StoryboardBatchWorkbenchRecommendedAction.generateSelected:
-      return '批量发起出图';
+      return '一键批量出图';
     case StoryboardBatchWorkbenchRecommendedAction.previewSelected:
       return '读取当前预览';
     case StoryboardBatchWorkbenchRecommendedAction.exportSelected:
