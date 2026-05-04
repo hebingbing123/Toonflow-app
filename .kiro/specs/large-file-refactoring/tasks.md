@@ -139,6 +139,14 @@
       - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 2,058 lines; both new helper modules are under 300 lines
       - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
+    - [x] 3.1.13 Extract selected-memory note / style / identity helpers from `video_prompt_memory/mod.rs`
+      - `2026-05-04`: moved the remaining selected-memory helper chain into `selected_note.rs`, `selected_style.rs`, and `selected_identity.rs`
+      - Kept the external `video_prompt_memory` API stable by re-exporting subject identity helpers from `mod.rs` and promoting sibling-only helpers to `pub(super)` where rejected-memory and selected-memory modules still depend on them
+      - Run targeted backend verification again: `cargo check -q` and `cargo test -q production::workbench::video_prompt_memory::tests:: --lib` (`226 passed; 0 failed`)
+      - Run the full refactor gate and confirm it remains on the existing backend baseline (`1664 passed; 48 failed; 37 ignored`)
+      - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 525 lines; the new helper modules stay under 800 lines, but `selected.rs` still needs further splitting at 1,604 lines
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
+
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
     - [x] 3.2.1 Analyze test file structure
