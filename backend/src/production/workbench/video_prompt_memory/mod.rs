@@ -16,7 +16,9 @@ mod continuity;
 mod observation;
 mod parsing;
 mod rejected;
+mod scope;
 mod selected;
+mod storage;
 mod style_build;
 mod style_compact;
 mod style_context;
@@ -150,6 +152,17 @@ use rejected::{
     prepare_rejected_video_negative_memory_for_storage, ranked_rejected_negative_fragments,
     score_rejected_negative_fragment, score_rejected_video_memory_bias_for_fragment,
     selected_optimization_bias_to_rejected_selection_bias,
+};
+#[cfg_attr(not(test), allow(unused_imports))]
+pub(crate) use scope::storyboard_prompt_seed;
+use scope::{
+    has_exact_prompt_seed_memory_match, memory_matches_prompt_seed_with_fallback,
+    memory_matches_storyboard, selected_video_memory_scope,
+    storyboard_distance_from_memory_content,
+};
+use storage::{
+    replace_project_summary_memories, replace_project_summary_memory, replace_summary_memories,
+    replace_summary_memory,
 };
 
 const SELECTED_VIDEO_MEMORY_NAME: &str = "selected_video_memory";
@@ -484,26 +497,6 @@ pub(crate) async fn refresh_project_video_style_memory(
         PROJECT_ROLE_VIDEO_OBSERVATION_MEMORY_KEEP_ROWS,
     )
     .await
-}
-
-fn selected_video_memory_scope(content: &str) -> Option<SelectedVideoMemoryScope> {
-    let storyboard_ids = extract_key_value(content, "storyboardIds")?;
-    Some(SelectedVideoMemoryScope {
-        storyboard_ids,
-        prompt_seed: extract_key_value(content, "promptSeed"),
-    })
-}
-
-#[allow(dead_code)]
-fn memory_matches_rejected_video_risk_tags(content: &str, storyboard_tags: &[String]) -> bool {
-    if storyboard_tags.is_empty() {
-        return false;
-    }
-    let memory_tags = extract_rejected_video_risk_tags(content);
-    !memory_tags.is_empty()
-        && memory_tags
-            .iter()
-            .any(|memory_tag| storyboard_tags.iter().any(|tag| tag == memory_tag))
 }
 
 fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
@@ -2059,342 +2052,6 @@ fn prompt_fragments_substantially_overlap(lhs: &str, rhs: &str) -> bool {
     lhs == rhs
         || (lhs.chars().count() >= 6 && rhs.contains(&lhs))
         || (rhs.chars().count() >= 6 && lhs.contains(&rhs))
-}
-
-pub(crate) fn storyboard_prompt_seed(row: &StoryboardPromptSeedRow) -> Option<String> {
-    let prompt = row
-        .prompt
-        .as_deref()
-        .map(normalize_prompt_text)
-        .filter(|value| !value.is_empty())
-        .unwrap_or_default();
-    let video_desc = row
-        .video_desc
-        .as_deref()
-        .map(normalize_prompt_text)
-        .filter(|value| !value.is_empty())
-        .unwrap_or_default();
-    let duration = row
-        .duration
-        .as_deref()
-        .map(normalize_prompt_text)
-        .filter(|value| !value.is_empty())
-        .unwrap_or_default();
-    let source = [prompt, video_desc, duration].join("\n");
-    if source.trim().is_empty() {
-        return None;
-    }
-
-    let mut hasher = Sha256::new();
-    hasher.update(source.as_bytes());
-    let hex = format!("{:x}", hasher.finalize());
-    Some(hex[..12].to_string())
-}
-
-fn memory_matches_storyboard(content: &str, storyboard_numeric_id: i32) -> bool {
-    extract_storyboard_ids(content).contains(&storyboard_numeric_id)
-}
-
-fn memory_matches_prompt_seed(content: &str, current_prompt_seed: Option<&str>) -> bool {
-    match current_prompt_seed {
-        Some(seed) if !seed.is_empty() => {
-            extract_key_value(content, "promptSeed").as_deref() == Some(seed)
-        }
-        _ => true,
-    }
-}
-
-fn memory_matches_prompt_seed_with_fallback(
-    content: &str,
-    current_prompt_seed: Option<&str>,
-    allow_unseeded_fallback: bool,
-) -> bool {
-    if memory_matches_prompt_seed(content, current_prompt_seed) {
-        return true;
-    }
-    allow_unseeded_fallback
-        && matches!(current_prompt_seed, Some(seed) if !seed.is_empty())
-        && extract_key_value(content, "promptSeed").is_none()
-}
-
-fn has_exact_prompt_seed_memory_match(
-    rows: &[AgentMemoryRow],
-    storyboard_numeric_id: i32,
-    current_prompt_seed: Option<&str>,
-    names: &[&str],
-) -> bool {
-    matches!(current_prompt_seed, Some(seed) if !seed.is_empty())
-        && rows.iter().any(|row| {
-            names.iter().any(|name| row.name == *name)
-                && memory_matches_storyboard(&row.content, storyboard_numeric_id)
-                && memory_matches_prompt_seed(&row.content, current_prompt_seed)
-        })
-}
-
-fn storyboard_distance_from_memory_content(
-    content: &str,
-    storyboard_numeric_id: i32,
-) -> Option<i32> {
-    if storyboard_numeric_id <= 0 {
-        return None;
-    }
-    extract_storyboard_ids(content)
-        .into_iter()
-        .map(|id| (storyboard_numeric_id - id).abs())
-        .min()
-}
-
-async fn replace_summary_memory(
-    pool: &PgPool,
-    user_id: Uuid,
-    project_numeric_id: i32,
-    script_numeric_id: i32,
-    name: &str,
-    content: Option<&str>,
-    keep_rows: i64,
-) -> Result<(), ApiError> {
-    sqlx::query(
-        r#"
-        DELETE FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
-          AND episodes_id = $3
-          AND agent_type = 'productionAgent'
-          AND memory_type = 'summary'
-          AND name = $4
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .bind(name)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let Some(content) = content else {
-        return Ok(());
-    };
-
-    sqlx::query(
-        r#"
-        INSERT INTO app_agent_memory (
-          owner_user_id, numeric_project_id, episodes_id, agent_type,
-          memory_type, role, name, content, summarized, create_time_ms
-        )
-        VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .bind(name)
-    .bind(content)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    sqlx::query(
-        r#"
-        DELETE FROM app_agent_memory
-        WHERE id IN (
-          SELECT id
-          FROM app_agent_memory
-          WHERE owner_user_id = $1
-            AND numeric_project_id = $2
-            AND episodes_id = $3
-            AND agent_type = 'productionAgent'
-            AND memory_type = 'summary'
-            AND name = $4
-          ORDER BY create_time_ms DESC
-          OFFSET $5
-        )
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .bind(name)
-    .bind(keep_rows)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok(())
-}
-
-async fn replace_summary_memories(
-    pool: &PgPool,
-    user_id: Uuid,
-    project_numeric_id: i32,
-    script_numeric_id: i32,
-    name: &str,
-    contents: Vec<String>,
-    keep_rows: i64,
-) -> Result<(), ApiError> {
-    sqlx::query(
-        r#"
-        DELETE FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
-          AND episodes_id = $3
-          AND agent_type = 'productionAgent'
-          AND memory_type = 'summary'
-          AND name = $4
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .bind(name)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    for content in contents.into_iter().take(keep_rows as usize) {
-        sqlx::query(
-            r#"
-            INSERT INTO app_agent_memory (
-              owner_user_id, numeric_project_id, episodes_id, agent_type,
-              memory_type, role, name, content, summarized, create_time_ms
-            )
-            VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
-            "#,
-        )
-        .bind(user_id)
-        .bind(project_numeric_id)
-        .bind(script_numeric_id)
-        .bind(name)
-        .bind(content)
-        .execute(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    }
-
-    Ok(())
-}
-
-async fn replace_project_summary_memory(
-    pool: &PgPool,
-    user_id: Uuid,
-    project_numeric_id: i32,
-    name: &str,
-    content: Option<&str>,
-    keep_rows: i64,
-) -> Result<(), ApiError> {
-    sqlx::query(
-        r#"
-        DELETE FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
-          AND episodes_id IS NULL
-          AND agent_type = 'productionAgent'
-          AND memory_type = 'summary'
-          AND name = $3
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(name)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let Some(content) = content else {
-        return Ok(());
-    };
-
-    sqlx::query(
-        r#"
-        INSERT INTO app_agent_memory (
-          owner_user_id, numeric_project_id, episodes_id, agent_type,
-          memory_type, role, name, content, summarized, create_time_ms
-        )
-        VALUES ($1, $2, NULL, 'productionAgent', 'summary', 'assistant', $3, $4, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(name)
-    .bind(content)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    sqlx::query(
-        r#"
-        DELETE FROM app_agent_memory
-        WHERE id IN (
-          SELECT id
-          FROM app_agent_memory
-          WHERE owner_user_id = $1
-            AND numeric_project_id = $2
-            AND episodes_id IS NULL
-            AND agent_type = 'productionAgent'
-            AND memory_type = 'summary'
-            AND name = $3
-          ORDER BY create_time_ms DESC
-          OFFSET $4
-        )
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(name)
-    .bind(keep_rows)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok(())
-}
-
-async fn replace_project_summary_memories(
-    pool: &PgPool,
-    user_id: Uuid,
-    project_numeric_id: i32,
-    name: &str,
-    contents: Vec<String>,
-    keep_rows: i64,
-) -> Result<(), ApiError> {
-    sqlx::query(
-        r#"
-        DELETE FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
-          AND episodes_id IS NULL
-          AND agent_type = 'productionAgent'
-          AND memory_type = 'summary'
-          AND name = $3
-        "#,
-    )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(name)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    for content in contents.into_iter().take(keep_rows as usize) {
-        sqlx::query(
-            r#"
-            INSERT INTO app_agent_memory (
-              owner_user_id, numeric_project_id, episodes_id, agent_type,
-              memory_type, role, name, content, summarized, create_time_ms
-            )
-            VALUES ($1, $2, NULL, 'productionAgent', 'summary', 'assistant', $3, $4, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
-            "#,
-        )
-        .bind(user_id)
-        .bind(project_numeric_id)
-        .bind(name)
-        .bind(content)
-        .execute(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    }
-
-    Ok(())
 }
 
 #[cfg(test)]

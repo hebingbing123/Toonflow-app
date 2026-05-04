@@ -131,6 +131,14 @@
       - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 2,401 lines; the new `style_rank.rs` stays under the 800-line threshold at 788 lines
       - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
+    - [x] 3.1.12 Extract scope / storage utilities from `video_prompt_memory/mod.rs`
+      - `2026-05-04`: moved prompt-seed / storyboard matching helpers into `scope.rs` and summary-row replacement helpers into `storage.rs`
+      - Keep selected-memory persistence and style-selection callers on the same API surface through shared imports from `mod.rs`
+      - Run targeted backend verification again: `cargo check -q` and `cargo test -q production::workbench::video_prompt_memory::tests:: --lib` (`226 passed; 0 failed`)
+      - Run the full refactor gate and confirm it remains on the existing backend baseline (`1664 passed; 48 failed; 37 ignored`)
+      - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 2,058 lines; both new helper modules are under 300 lines
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
+
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
     - [x] 3.2.1 Analyze test file structure
