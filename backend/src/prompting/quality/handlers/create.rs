@@ -77,6 +77,8 @@ async fn validate_review_scope_ownership(
     user_id: Uuid,
     project_id: Option<i32>,
     script_id: Option<i32>,
+    target_type: &str,
+    target_id: Option<&str>,
 ) -> Result<(), ApiError> {
     match (project_id, script_id) {
         (Some(project_id), Some(script_id)) => {
@@ -146,6 +148,46 @@ async fn validate_review_scope_ownership(
         (None, None) => {}
     }
 
+    if target_type == "storyboard" {
+        let Some(project_id) = project_id else {
+            return Ok(());
+        };
+        let Some(script_id) = script_id else {
+            return Ok(());
+        };
+        let Some(storyboard_id) = target_id
+            .map(str::trim)
+            .and_then(|value| value.parse::<i32>().ok())
+            .filter(|value| *value > 0)
+        else {
+            return Ok(());
+        };
+        let ok: bool = sqlx::query_scalar(
+            r#"
+            SELECT EXISTS(
+              SELECT 1
+              FROM app_storyboard sb
+              INNER JOIN app_script sc ON sc.id = sb.script_id
+              INNER JOIN app_project p ON p.id = sc.project_id
+              WHERE p.owner_user_id = $1
+                AND p.numeric_id = $2
+                AND sc.numeric_id = $3
+                AND sb.numeric_id = $4
+            )
+            "#,
+        )
+        .bind(user_id)
+        .bind(project_id)
+        .bind(script_id)
+        .bind(storyboard_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        if !ok {
+            return Err(ApiError::NotFound);
+        }
+    }
+
     Ok(())
 }
 
@@ -172,7 +214,15 @@ pub(crate) async fn create_review(
     let user_id = require_user_uuid(&state, &headers)?;
     validate_create_review_body(&body)?;
     let pool = state.require_pool()?;
-    validate_review_scope_ownership(pool, user_id, body.project_id, body.script_id).await?;
+    validate_review_scope_ownership(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        &body.target_type,
+        body.target_id.as_deref(),
+    )
+    .await?;
 
     let source = body.source.as_deref().unwrap_or("manual");
     let is_bad_case = body.is_bad_case.unwrap_or(false);

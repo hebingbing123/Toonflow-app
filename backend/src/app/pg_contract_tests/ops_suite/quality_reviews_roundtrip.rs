@@ -226,6 +226,29 @@ async fn quality_reviews_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/quality/reviews")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{owned_project_id},"scriptId":{owned_script_id},"targetType":"storyboard","targetId":"99999999","overallScore":8,"passed":true}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, invalid_storyboard_scope) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::NOT_FOUND,
+        "invalid_storyboard_scope={invalid_storyboard_scope}"
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
                 .uri(format!(
                     "/api/v1/quality/reviews?targetType=script&targetId={script_target_id}"
                 ))

@@ -391,12 +391,18 @@ class _QualityReviewsWorkbenchDialogState
     final projectId = int.tryParse(_ctrls.createProjectIdCtrl.text.trim());
     final scriptId = int.tryParse(_ctrls.createScriptIdCtrl.text.trim());
     final score = int.tryParse(_ctrls.createScoreCtrl.text.trim());
+    final rawTargetId = _ctrls.createTargetIdCtrl.text.trim();
     if (targetType.isEmpty || source.isEmpty) {
       setState(() => _statusLine = 'targetType 和 source 不能为空');
       return;
     }
     if (scriptId != null && projectId == null) {
       setState(() => _statusLine = '填写 scriptId 时必须同时填写 projectId');
+      return;
+    }
+    if (targetType == 'storyboard' &&
+        (int.tryParse(rawTargetId) == null || (int.tryParse(rawTargetId) ?? 0) <= 0)) {
+      setState(() => _statusLine = '创建 storyboard 评审时，targetId 必须是正整数镜头 ID');
       return;
     }
     setState(() {
@@ -410,9 +416,9 @@ class _QualityReviewsWorkbenchDialogState
           projectId: projectId,
           scriptId: scriptId,
           targetType: targetType,
-          targetId: _ctrls.createTargetIdCtrl.text.trim().isEmpty
+          targetId: rawTargetId.isEmpty
               ? null
-              : _ctrls.createTargetIdCtrl.text.trim(),
+              : rawTargetId,
           source: source,
           overallScore: score,
           stage: _ctrls.createStageCtrl.text.trim().isEmpty

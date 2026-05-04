@@ -78,6 +78,21 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
         ));
     }
 
+    if body.target_type == "storyboard" {
+        let storyboard_id = body
+            .target_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .and_then(|value| value.parse::<i32>().ok())
+            .filter(|value| *value > 0);
+        if storyboard_id.is_none() {
+            return Err(ApiError::BadRequest(
+                "targetId must be a positive storyboard id when targetType is storyboard".into(),
+            ));
+        }
+    }
+
     if let Some(source) = body.source.as_deref() {
         if !VALID_SOURCES.contains(&source) {
             return Err(ApiError::BadRequest(format!(
