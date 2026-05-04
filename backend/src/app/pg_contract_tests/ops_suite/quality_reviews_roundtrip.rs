@@ -543,7 +543,9 @@ async fn quality_reviews_roundtrip() {
         "asset stats={asset_stats}"
     );
     assert!(
-        stats.iter().all(|row| row["targetType"].as_str() != Some("output")),
+        stats
+            .iter()
+            .all(|row| row["targetType"].as_str() != Some("output")),
         "placeholder auto output review should not skew scored stats: {stats:?}"
     );
     assert!(

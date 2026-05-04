@@ -1,5 +1,5 @@
-use axum::{Json, extract::State, http::HeaderMap};
-use serde_json::{Map, Value, json};
+use axum::{extract::State, http::HeaderMap, Json};
+use serde_json::{json, Map, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -9,7 +9,7 @@ use crate::metering::llm_usage::link_quality_review_to_job_usage;
 use crate::state::AppState;
 
 use super::super::feedback::{
-    QualityFeedbackMemoryOutcome, maybe_write_quality_feedback_to_memory,
+    maybe_write_quality_feedback_to_memory, QualityFeedbackMemoryOutcome,
 };
 use super::super::issue_type::infer_issue_types;
 use super::super::next_action::infer_next_action;
@@ -356,8 +356,8 @@ pub(crate) mod tests {
     use serde_json::json;
 
     use super::{
-        QualityFeedbackMemoryOutcome, merge_feedback_outcome_into_model_params,
-        merge_issue_diagnostics_into_model_params,
+        merge_feedback_outcome_into_model_params, merge_issue_diagnostics_into_model_params,
+        QualityFeedbackMemoryOutcome,
     };
     use crate::prompting::quality::issue_type::IssueType;
     use crate::prompting::quality::next_action::NextAction;

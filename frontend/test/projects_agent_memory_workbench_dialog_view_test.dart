@@ -13,9 +13,14 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
   required TextEditingController episodesIdCtrl,
   required TextEditingController queryTypeCtrl,
   TextEditingController? memoryTierCtrl,
+  TextEditingController? scopeSignatureCtrl,
   required TextEditingController appendContentCtrl,
   required TextEditingController appendRoleCtrl,
+  TextEditingController? appendTypeCtrl,
+  TextEditingController? appendMemoryTierCtrl,
+  TextEditingController? appendNameCtrl,
   required TextEditingController clearTypeCtrl,
+  TextEditingController? automationModeCtrl,
   List<ProjectRow>? projects,
   List<dynamic>? memoryRows,
   String? memorySummary = '已读取 2 条记忆。',
@@ -29,6 +34,14 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
 }) {
   final resolvedMemoryTierCtrl =
       memoryTierCtrl ?? TextEditingController(text: 'message');
+  final resolvedScopeSignatureCtrl = scopeSignatureCtrl ?? TextEditingController();
+  final resolvedAppendTypeCtrl =
+      appendTypeCtrl ?? TextEditingController(text: 'summary');
+  final resolvedAppendMemoryTierCtrl =
+      appendMemoryTierCtrl ?? TextEditingController(text: 'message');
+  final resolvedAppendNameCtrl = appendNameCtrl ?? TextEditingController();
+  final resolvedAutomationModeCtrl =
+      automationModeCtrl ?? TextEditingController(text: 'manual');
   return ProjectsAgentMemoryWorkbenchDialogViewModel(
     projects:
         projects ??
@@ -103,14 +116,24 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
       'delta_memory',
       'message',
     ],
+    appendTypeOptions: const <String>['summary', 'message'],
+    automationModeOptions: const <String>['manual', 'auto'],
     projectIdCtrl: projectIdCtrl,
     agentTypeCtrl: agentTypeCtrl,
     episodesIdCtrl: episodesIdCtrl,
     queryTypeCtrl: queryTypeCtrl,
     memoryTierCtrl: resolvedMemoryTierCtrl,
+    scopeSignatureCtrl: resolvedScopeSignatureCtrl,
     appendContentCtrl: appendContentCtrl,
     appendRoleCtrl: appendRoleCtrl,
+    appendTypeCtrl: resolvedAppendTypeCtrl,
+    appendMemoryTierCtrl: resolvedAppendMemoryTierCtrl,
+    appendNameCtrl: resolvedAppendNameCtrl,
     clearTypeCtrl: clearTypeCtrl,
+    automationModeCtrl: resolvedAutomationModeCtrl,
+    appendType: resolvedAppendTypeCtrl.text,
+    appendMemoryTier: resolvedAppendMemoryTierCtrl.text,
+    automationMode: resolvedAutomationModeCtrl.text,
   );
 }
 
@@ -132,6 +155,9 @@ ProjectsAgentMemoryWorkbenchDialogViewCallbacks buildCallbacks({
     onQueryTypeChanged: (_) {},
     onClearTypeChanged: (_) {},
     onMemoryTierChanged: (_) {},
+    onAppendTypeChanged: (_) {},
+    onAppendMemoryTierChanged: (_) {},
+    onAutomationModeChanged: (_) {},
     onClose: onClose ?? () {},
   );
 }
@@ -152,9 +178,14 @@ void main() {
   late TextEditingController episodesIdCtrl;
   late TextEditingController queryTypeCtrl;
   late TextEditingController memoryTierCtrl;
+  late TextEditingController scopeSignatureCtrl;
   late TextEditingController appendContentCtrl;
   late TextEditingController appendRoleCtrl;
+  late TextEditingController appendTypeCtrl;
+  late TextEditingController appendMemoryTierCtrl;
+  late TextEditingController appendNameCtrl;
   late TextEditingController clearTypeCtrl;
+  late TextEditingController automationModeCtrl;
 
   setUp(() {
     projectIdCtrl = TextEditingController(text: '11');
@@ -162,9 +193,14 @@ void main() {
     episodesIdCtrl = TextEditingController(text: '3');
     queryTypeCtrl = TextEditingController(text: 'summary');
     memoryTierCtrl = TextEditingController(text: 'message');
+    scopeSignatureCtrl = TextEditingController(text: '{"episodeId":3}');
     appendContentCtrl = TextEditingController(text: '需要补一个反转伏笔。');
     appendRoleCtrl = TextEditingController(text: 'user');
+    appendTypeCtrl = TextEditingController(text: 'summary');
+    appendMemoryTierCtrl = TextEditingController(text: 'message');
+    appendNameCtrl = TextEditingController(text: 'quality_feedback_memory');
     clearTypeCtrl = TextEditingController(text: 'summary');
+    automationModeCtrl = TextEditingController(text: 'manual');
   });
 
   tearDown(() {
@@ -173,9 +209,14 @@ void main() {
     episodesIdCtrl.dispose();
     queryTypeCtrl.dispose();
     memoryTierCtrl.dispose();
+    scopeSignatureCtrl.dispose();
     appendContentCtrl.dispose();
     appendRoleCtrl.dispose();
+    appendTypeCtrl.dispose();
+    appendMemoryTierCtrl.dispose();
+    appendNameCtrl.dispose();
     clearTypeCtrl.dispose();
+    automationModeCtrl.dispose();
   });
 
   testWidgets('agent memory workbench view renders summary and rows', (
@@ -191,9 +232,14 @@ void main() {
               episodesIdCtrl: episodesIdCtrl,
               queryTypeCtrl: queryTypeCtrl,
               memoryTierCtrl: memoryTierCtrl,
+              scopeSignatureCtrl: scopeSignatureCtrl,
               appendContentCtrl: appendContentCtrl,
               appendRoleCtrl: appendRoleCtrl,
+              appendTypeCtrl: appendTypeCtrl,
+              appendMemoryTierCtrl: appendMemoryTierCtrl,
+              appendNameCtrl: appendNameCtrl,
               clearTypeCtrl: clearTypeCtrl,
+              automationModeCtrl: automationModeCtrl,
             ),
             callbacks: buildCallbacks(),
           ),
@@ -246,7 +292,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('2 条记忆'), findsOneWidget);
-    expect(find.text('追加记忆'), findsNWidgets(2));
+    expect(find.text('追加记忆'), findsOneWidget);
+    expect(find.text('按当前 scope 追加记忆'), findsOneWidget);
     expect(find.text('清理记忆'), findsOneWidget);
     expect(
       find.textContaining('selected_video_memory · user · '),
@@ -779,8 +826,8 @@ void main() {
     await tester.ensureVisible(find.widgetWithText(FilledButton, '自动优化视频记忆'));
     await tester.tap(find.widgetWithText(FilledButton, '自动优化视频记忆'));
     await tester.pump();
-    await tester.ensureVisible(find.widgetWithText(FilledButton, '追加记忆'));
-    await tester.tap(find.widgetWithText(FilledButton, '追加记忆'));
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '按当前 scope 追加记忆'));
+    await tester.tap(find.widgetWithText(FilledButton, '按当前 scope 追加记忆'));
     await tester.pump();
     await tester.ensureVisible(find.widgetWithText(FilledButton, '执行清理'));
     await tester.tap(find.widgetWithText(FilledButton, '执行清理'));

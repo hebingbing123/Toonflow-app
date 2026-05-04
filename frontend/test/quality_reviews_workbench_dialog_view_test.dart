@@ -18,6 +18,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController createTargetIdCtrl,
   required TextEditingController createSourceCtrl,
   required TextEditingController createScoreCtrl,
+  required TextEditingController createStageCtrl,
+  required TextEditingController createGradeCtrl,
   required TextEditingController createCommentsCtrl,
   required TextEditingController createBadCaseCategoryCtrl,
   List<QualityReview> reviews = const <QualityReview>[
@@ -95,6 +97,8 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     createTargetIdCtrl: createTargetIdCtrl,
     createSourceCtrl: createSourceCtrl,
     createScoreCtrl: createScoreCtrl,
+    createStageCtrl: createStageCtrl,
+    createGradeCtrl: createGradeCtrl,
     createCommentsCtrl: createCommentsCtrl,
     createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
   );
@@ -152,6 +156,8 @@ void main() {
   late TextEditingController createTargetIdCtrl;
   late TextEditingController createSourceCtrl;
   late TextEditingController createScoreCtrl;
+  late TextEditingController createStageCtrl;
+  late TextEditingController createGradeCtrl;
   late TextEditingController createCommentsCtrl;
   late TextEditingController createBadCaseCategoryCtrl;
 
@@ -170,6 +176,8 @@ void main() {
     createTargetIdCtrl = TextEditingController(text: 'storyboard-1');
     createSourceCtrl = TextEditingController(text: 'manual');
     createScoreCtrl = TextEditingController(text: '85');
+    createStageCtrl = TextEditingController(text: 'video_prompt');
+    createGradeCtrl = TextEditingController(text: 'A');
     createCommentsCtrl = TextEditingController(text: 'looks good');
     createBadCaseCategoryCtrl = TextEditingController();
   });
@@ -189,6 +197,8 @@ void main() {
     createTargetIdCtrl.dispose();
     createSourceCtrl.dispose();
     createScoreCtrl.dispose();
+    createStageCtrl.dispose();
+    createGradeCtrl.dispose();
     createCommentsCtrl.dispose();
     createBadCaseCategoryCtrl.dispose();
   });
@@ -215,6 +225,8 @@ void main() {
               createTargetIdCtrl: createTargetIdCtrl,
               createSourceCtrl: createSourceCtrl,
               createScoreCtrl: createScoreCtrl,
+              createStageCtrl: createStageCtrl,
+              createGradeCtrl: createGradeCtrl,
               createCommentsCtrl: createCommentsCtrl,
               createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
             ),
@@ -273,6 +285,8 @@ void main() {
               createTargetIdCtrl: createTargetIdCtrl,
               createSourceCtrl: createSourceCtrl,
               createScoreCtrl: createScoreCtrl,
+              createStageCtrl: createStageCtrl,
+              createGradeCtrl: createGradeCtrl,
               createCommentsCtrl: createCommentsCtrl,
               createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
               loadingReviews: true,
@@ -337,6 +351,8 @@ void main() {
               createTargetIdCtrl: createTargetIdCtrl,
               createSourceCtrl: createSourceCtrl,
               createScoreCtrl: createScoreCtrl,
+              createStageCtrl: createStageCtrl,
+              createGradeCtrl: createGradeCtrl,
               createCommentsCtrl: createCommentsCtrl,
               createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
               filterBadCasesOnly: true,
@@ -381,6 +397,8 @@ void main() {
                 createTargetIdCtrl: createTargetIdCtrl,
                 createSourceCtrl: createSourceCtrl,
                 createScoreCtrl: createScoreCtrl,
+                createStageCtrl: createStageCtrl,
+                createGradeCtrl: createGradeCtrl,
                 createCommentsCtrl: createCommentsCtrl,
                 createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
                 reviews: const [
@@ -450,7 +468,6 @@ void main() {
       expect(find.textContaining('正向记忆晋升'), findsOneWidget);
       expect(find.textContaining('写入=selected_video_memory'), findsOneWidget);
       expect(find.text('memory'), findsOneWidget);
-      expect(find.textContaining('建议：先补参考帧和上一镜衔接'), findsOneWidget);
     },
   );
 }

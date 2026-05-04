@@ -1,4 +1,4 @@
-use axum::{Json, extract::State, http::HeaderMap};
+use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -6,7 +6,7 @@ use crate::harness::observe;
 use crate::state::AppState;
 
 use super::super::storage::{ensure_project_owned, parse_agent_type};
-use super::super::types::{MemoryHistoryItem, MessageRow, QueryMemoryBody, to_memory_history_item};
+use super::super::types::{to_memory_history_item, MemoryHistoryItem, MessageRow, QueryMemoryBody};
 
 fn memory_tier_requires_scope(memory_tier: &str) -> bool {
     matches!(memory_tier, "stage_summary" | "delta_memory")

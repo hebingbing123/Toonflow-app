@@ -162,7 +162,8 @@ void main() {
     expect(find.text('Agent 记忆工作台'), findsOneWidget);
     expect(find.text('刷新项目列表'), findsOneWidget);
     expect(find.text('查询记忆'), findsOneWidget);
-    expect(find.text('追加记忆'), findsNWidgets(2));
+    expect(find.text('追加记忆'), findsOneWidget);
+    expect(find.text('按当前 scope 追加记忆'), findsOneWidget);
     expect(find.text('清理记忆'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'scriptAgent'), findsOneWidget);
     controller.dispose();

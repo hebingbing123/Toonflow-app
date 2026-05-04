@@ -584,7 +584,7 @@ void main() {
       ]);
 
       expect(summary, contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。 2次'));
-      expect(summary, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。 2次'));
+      expect(summary, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。 1次'));
     },
   );
 

@@ -130,8 +130,8 @@ fn validate_create_review_body_requires_project_for_storyboard_target() {
         target_id: Some("12".to_string()),
         ..Default::default()
     };
-    let err = validate_create_review_body(&body)
-        .expect_err("storyboard review must carry project scope");
+    let err =
+        validate_create_review_body(&body).expect_err("storyboard review must carry project scope");
     assert!(matches!(err, ApiError::BadRequest(_)));
 }
 
@@ -256,6 +256,8 @@ fn validate_create_review_body_accepts_all_valid_grades() {
     for grade in &["A", "B", "C", "D"] {
         let body = CreateQualityReviewBody {
             target_type: "storyboard".to_string(),
+            project_id: Some(12),
+            target_id: Some("7".to_string()),
             grade: Some(grade.to_string()),
             ..Default::default()
         };
@@ -278,6 +280,8 @@ fn validate_create_review_body_accepts_all_valid_stages() {
     ] {
         let body = CreateQualityReviewBody {
             target_type: "storyboard".to_string(),
+            project_id: Some(12),
+            target_id: Some("7".to_string()),
             stage: Some(stage.to_string()),
             ..Default::default()
         };

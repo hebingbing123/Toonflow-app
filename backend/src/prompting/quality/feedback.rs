@@ -98,7 +98,9 @@ mod tests {
         review.target_type = "asset".into();
         review.target_id = Some("12".into());
         assert!(build_quality_review_rejected_video_memory(&review).is_none());
-        assert!(!should_promote_quality_review_selected_video_memory(&review));
+        assert!(!should_promote_quality_review_selected_video_memory(
+            &review
+        ));
     }
 
     #[test]

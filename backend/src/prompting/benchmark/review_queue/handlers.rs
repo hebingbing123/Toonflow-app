@@ -241,7 +241,10 @@ pub(super) fn validate_submit_body(body: &SubmitReviewBody) -> Result<(), ApiErr
         ));
     };
 
-    let Some(overall_score) = score_obj.get("overallScore").and_then(|value| value.as_f64()) else {
+    let Some(overall_score) = score_obj
+        .get("overallScore")
+        .and_then(|value| value.as_f64())
+    else {
         return Err(ApiError::BadRequest(
             "submitted_score.overallScore must be a number between 0 and 100".into(),
         ));
@@ -252,7 +255,11 @@ pub(super) fn validate_submit_body(body: &SubmitReviewBody) -> Result<(), ApiErr
         ));
     }
 
-    if score_obj.get("passed").and_then(|value| value.as_bool()).is_none() {
+    if score_obj
+        .get("passed")
+        .and_then(|value| value.as_bool())
+        .is_none()
+    {
         return Err(ApiError::BadRequest(
             "submitted_score.passed must be a boolean".into(),
         ));
