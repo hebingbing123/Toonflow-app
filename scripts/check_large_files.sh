@@ -44,8 +44,29 @@ declare -a COUNTEREXAMPLES
 echo "Checking 14 files against 800-line limit..."
 echo ""
 
+resolve_file_path() {
+    local file="$1"
+    if [ -f "$file" ]; then
+        echo "$file"
+        return 0
+    fi
+
+    case "$file" in
+        *.rs)
+            local mod_candidate="${file%.rs}/mod.rs"
+            if [ -f "$mod_candidate" ]; then
+                echo "$mod_candidate"
+                return 0
+            fi
+            ;;
+    esac
+
+    return 1
+}
+
 for FILE in "${FILES[@]}"; do
-    if [ ! -f "$FILE" ]; then
+    RESOLVED_FILE="$(resolve_file_path "$FILE")"
+    if [ -z "$RESOLVED_FILE" ]; then
         echo -e "${RED}✗ MISSING: $FILE${NC}"
         echo "  File does not exist"
         FAILED_COUNT=$((FAILED_COUNT + 1))
@@ -54,18 +75,23 @@ for FILE in "${FILES[@]}"; do
     fi
     
     # Count lines in the file
-    ACTUAL_LINES=$(wc -l < "$FILE" | tr -d ' ')
+    ACTUAL_LINES=$(wc -l < "$RESOLVED_FILE" | tr -d ' ')
     
     # Calculate how many times it exceeds the limit
     MULTIPLIER=$(awk "BEGIN {printf \"%.1f\", $ACTUAL_LINES/$LIMIT}")
+    if [ "$RESOLVED_FILE" != "$FILE" ]; then
+        RESOLVED_NOTE=" -> $RESOLVED_FILE"
+    else
+        RESOLVED_NOTE=""
+    fi
     
     if [ "$ACTUAL_LINES" -gt "$LIMIT" ]; then
-        echo -e "${RED}✗ EXCEEDS LIMIT: $FILE${NC}"
+        echo -e "${RED}✗ EXCEEDS LIMIT: $FILE${RESOLVED_NOTE}${NC}"
         echo "  Actual: $ACTUAL_LINES lines (exceeds limit by ${MULTIPLIER}x)"
         FAILED_COUNT=$((FAILED_COUNT + 1))
-        COUNTEREXAMPLES+=("$FILE: $ACTUAL_LINES lines (exceeds limit by ${MULTIPLIER}x)")
+        COUNTEREXAMPLES+=("$FILE${RESOLVED_NOTE}: $ACTUAL_LINES lines (exceeds limit by ${MULTIPLIER}x)")
     else
-        echo -e "${GREEN}✓ COMPLIANT: $FILE${NC}"
+        echo -e "${GREEN}✓ COMPLIANT: $FILE${RESOLVED_NOTE}${NC}"
         echo "  Actual: $ACTUAL_LINES lines (within limit)"
         PASSED_COUNT=$((PASSED_COUNT + 1))
     fi
