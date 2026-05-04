@@ -2,107 +2,241 @@
 
 ## 概述
 
-按 `space/short-video/implementation-breakdown.md` 的 Wave 顺序推进；P0 竖切优先：**项目级短视频目标配置 + 分镜 readiness 摘要 + 发布准备状态占位**，使 Space 成为可调度入口。测试范围遵循仓库 AGENTS.md：涉及 `backend/` 与 `frontend/` 时在提交前跑 `bash scripts/refactor-check.sh`。
+先前版本把多份文档的能力**过度合并**为少量粗任务，易遗漏验收项。本版按 `implementation-breakdown.md` 的 Wave 拆解，并把 `auto-publishing-platforms.md` 与 `open-source-borrowing.md` 中的**显式能力**落到独立任务；多条任务可并行（同 Wave 内标注「可并行」）。
 
-## 任务
+**测试原则**：后端改动提交前 `bash scripts/refactor-check.sh`；单任务优先最小测试面（单测 / 单模块 / widget smoke）。
 
-- [ ] 1. Wave 1 — 项目级短视频目标配置（后端模型 + API）
-  - 项目扩展或等价存储：读写 `mode`、`video_ratio`、`target_market`、`target_platforms`、`duration_strategy`、`voice_profile`、`subtitle_style`、`bgm_strategy`
-  - 供脚本、分镜、导出、发布读取的单一配置源
-  - 测试：对应模块 `cargo test` 或契约 smoke（按实际落点选择最小集）
+## 溯源表（文档 → 需求编号）
+
+| 文档 | 主要对应需求 |
+|------|----------------|
+| `implementation-breakdown.md` | 2–5、10 |
+| `auto-publishing-platforms.md` | 5–7、12、6 |
+| `open-source-borrowing.md` | 1、3–4、11、9.2、14 |
+
+---
+
+## A. Space 壳层：主链、下一步、生产概览（开源「单入口」）
+
+- [ ] A1. Space 首页**主链 UI**（脚本 → 准备/分镜 → 旁白字幕 → 成片 → 导出 → 发布）：阶段枚举、完成/阻塞态、深链到各工作台  
+  - _需求: 1.3_
+
+- [ ] A2. **下一步**计算规则 v1（可先规则引擎：聚合 readiness、导出检查、发布校验的阻塞源，输出 Top-1～Top-3 建议动作）  
+  - _需求: 1.3_
+
+- [ ] A3. **项目生产概览**后端：只读聚合（各段进度计数、当前阻塞摘要），供 Space 首页与概览卡片共用  
+  - _需求: 1.4_
+
+- [ ] A4. **项目生产概览**前端：一屏汇总 + 与主链联动跳转  
+  - _需求: 1.4_
+
+- [ ] A5. **阶段标签**映射（preparation / candidate confirmation / ready for generation / export ready）到内部状态或只读派生字段，供概览与主链展示  
+  - _需求: 1.4, 3_
+
+---
+
+## B. Wave 1：项目级短视频目标配置
+
+- [ ] B1. 后端：项目扩展（或等价）持久化 `mode`、`video_ratio`、`target_market`、`target_platforms`、`duration_strategy`、`voice_profile`、`subtitle_style`、`bgm_strategy`  
   - _需求: 2_
 
-- [ ] 2. Wave 1 — 项目级短视频目标配置（前端 Space 面板）
-  - 配置表单、校验、保存；展示创作模式摘要与默认市场/平台
-  - 测试：`flutter test` 最小 widget / golden（若有）
+- [ ] B2. 后端：配置 **GET/PATCH**（或 POST）API + 校验（枚举、数组非空等）  
+  - _需求: 2_
+
+- [ ] B3. 后端：**消费方只读接入**至少两处（例：分镜生成参数读取、导出默认画幅），证明「单一配置源」  
+  - _需求: 2_
+
+- [ ] B4. 前端：目标配置表单、保存、错误提示；**创作模式摘要** + **默认市场/平台**展示  
   - _需求: 2, 9.4_
 
-- [ ] 3. Wave 2 — 分镜 readiness 聚合接口
-  - 聚合检查项：基础信息、脚本/提示词上下文、参考图或关键帧、候选确认、进行中任务等（与现有字段映射）
-  - 测试：聚合逻辑单元测试 + API smoke
-  - _需求: 3_
-
-- [ ] 4. Wave 2 — 候选资产状态 `pending` / `linked` / `ignored`
-  - 若现有模型可承载则扩展枚举/字段；否则增量迁移
-  - 测试：状态迁移与 readiness 联动单测
-  - _需求: 3_
-
-- [ ] 5. Wave 2 — 前端 readiness 与候选摘要
-  - 项目级 readiness 摘要；分镜工作区未就绪原因；候选确认摘要卡
-  - 测试：widget / 导航 smoke
-  - _需求: 3, 9.4_
-
-- [ ] 6. Wave 3 — 成片装配域与导出前检查（后端）
-  - 读取已选视频、旁白、字幕、BGM；导出前缺失项与版本确认检查
-  - 测试：导出检查单元测试
-  - _需求: 4_
-
-- [ ] 7. Wave 3 — 成片装配入口与检查摘要（前端）
-  - Space 入口、按剧本顺序缺失列表、任务失败可行动原因与回跳
-  - 测试：widget smoke
-  - _需求: 4_
-
-- [ ] 8. Wave 4 — 发布域数据模型与迁移
-  - `publish_profiles`、`publish_drafts`、`publish_targets`、`publish_jobs`、`publish_attempts`（可按竖切分步合并迁移）
-  - 测试：迁移 + repository smoke
-  - _需求: 5_
-
-- [ ] 9. Wave 4 — 发布准备校验与 `publish` 任务状态机
-  - 校验：比例、时长、标题、封面、标签、必填字段
-  - 状态：`queued` → `validating` → `uploading` → `platform_processing` → 终态（含 `partial_failed`、`retrying`）
-  - 测试：状态机单元测试
-  - _需求: 5_
-
-- [ ] 10. Wave 4 — 发布 API、adapter 抽象与 worker 骨架
-  - 独立 `publish` 路由；`publish adapter` trait/模块；worker 消费 `publish_jobs`（首轮可 mock 上传）
-  - 测试：adapter mock 集成测试
-  - _需求: 5, 7_
-
-- [ ] 11. Wave 4 — 前端发布准备占位与发布单列表
-  - 发布准备面板、发布单列表、平台状态视图（半自动/自动说明）
-  - 测试：widget smoke
-  - _需求: 5, 9.4_
-
-- [ ] 12. Wave 5 — 首批平台 adapter（2–3 个代表平台）
-  - 建议首轮：YouTube Shorts、TikTok、哔哩哔哩、抖音中择 2–3 个验证竖屏工作流
-  - 字段映射、约束校验、错误归一化
-  - 测试：各 adapter 契约单测（不上传真实生产）
-  - _需求: 7_
-
-- [ ] 13. Wave 5 — 多平台文案改写与排程
-  - Agent 生成差异化标题/简介/标签/时间建议；adapter 校验；定时与多平台串行发布
-  - 测试：文案生成 mock + 排程数据 roundtrip
-  - _需求: 6_
-
-- [ ] 14. Wave 6 — 发布结果回流
-  - 回写平台 id、链接、时间、失败原因、重试历史；项目级发布概览 API
-  - 测试：回流写入与查询 smoke
-  - _需求: 6_
-
-- [ ] 15. OpenAPI / 前端 rust_api 与 Space 注册
-  - 导出新端点；Dart 模型与调用；`shell` 或等价处注册 Section（按仓库现有模式）
-  - 测试：`refactor-check.sh` 内 OpenAPI 与 analyze
+- [ ] B5. OpenAPI / `rust_api`：项目短视频配置模型与调用（可与 B2 同 PR，但独立验收）  
   - _需求: 10_
 
-- [ ] 16. Review — 对照 `space/short-video` 四文档核对缺口
-  - 确认 P0/P1/P2 与边界（不做清单）仍与代码计划一致；更新本 tasks 勾选
-  - 测试：无自动化
-  - _需求: 8, 9_
+---
 
-- [ ] 17. 全量门禁
-  - `bash scripts/refactor-check.sh`
-  - _需求: 设计文档测试策略_
+## C. Wave 2：readiness、Jellyfish 扩展项、候选、资产总览
 
-## 依赖与顺序说明
+- [ ] C1. 后端：分镜级 **readiness 检查项**实现（最小集：基础信息、脚本/提示词上下文、参考图或关键帧、候选确认、进行中任务）  
+  - _需求: 3_
 
-- Task 2 依赖 Task 1（配置先有 API）。
-- Task 5 依赖 Task 3–4（readiness 与候选状态）。
-- Task 7 依赖 Task 6。
-- Task 9–11 依赖 Task 8；Task 12 依赖 Task 10。
-- Task 13 依赖 Task 9–12 中的发布与 adapter 骨架。
-- Task 15 随各 Wave 端点增量更新，或在 Wave 4 后集中补契约。
+- [ ] C2. 后端：**Jellyfish 扩展检查项**逐项落地或显式记「无字段/缺口」清单（语义默认、action beats、prompt 可渲染、模型/provider、待确认候选清空等）— 必须在代码或附文档中可审计，不得静默省略  
+  - _需求: 3, 13_
+
+- [ ] C3. 后端：项目级 **readiness 聚合**（rollup：多少分镜阻塞、按原因分组）  
+  - _需求: 3_
+
+- [ ] C4. 后端：候选资产状态 `pending` / `linked` / `ignored`（迁移或枚举扩展）+ 状态变更 API  
+  - _需求: 3_
+
+- [ ] C5. 后端：**统一资产总览**只读 API（已确认 + 候选，按分镜/类型分组；与现有 asset 表关联）  
+  - _需求: 3.4_
+
+- [ ] C6. 前端：项目级 readiness 摘要面板 + **从摘要跳分镜/资产**  
+  - _需求: 3_
+
+- [ ] C7. 前端：分镜工作区 **未就绪原因**（消费分镜级 readiness）  
+  - _需求: 3_
+
+- [ ] C8. 前端：**候选确认摘要卡**（与 C4 API 联动）  
+  - _需求: 3_
+
+- [ ] C9. 前端：**统一资产总览**（Space 内嵌或链到资产工作台，与 C5 对齐）  
+  - _需求: 3.4_
+
+- [ ] C10. 校验：readiness **依赖**候选清空逻辑（未确认候选则相关项不通过）— 单测锁定  
+  - _需求: 3.4_
+
+---
+
+## D. Wave 3：成片装配、导出检查、质量钩子、任务错误
+
+- [ ] D1. 后端：成片装配**读模型**（已选视频、旁白文案/音频、字幕源、BGM）统一聚合 API  
+  - _需求: 4_
+
+- [ ] D2. 后端：**导出前检查**引擎（缺视频、缺字幕、缺旁白、时长异常、版本未确认等），可返回结构化阻塞列表  
+  - _需求: 4_
+
+- [ ] D3. 后端：**导出前质量检查钩子**（占位：读取质量评审/门槛结论的接口；阻断/警告策略可配置或二期）  
+  - _需求: 4.3_
+
+- [ ] D4. 前端：Space **成片装配**入口 + 按剧本顺序缺失列表 + 导出前检查摘要  
+  - _需求: 4_
+
+- [ ] D5. 导出类任务：**失败原因结构化**（缺字段/缺素材/缺版本）+ **深链**回项目/剧本/分镜  
+  - _需求: 4, 11_
+
+- [ ] D6. OpenAPI / `rust_api`：assembly + export-check 相关类型与调用  
+  - _需求: 10_
+
+---
+
+## E. Wave 4：发布域模型、校验、状态机、半自动、worker、前端
+
+- [ ] E1. 数据：`publish_profiles` 迁移 + CRUD（目标市场、默认平台集合、标题风格、标签策略、简介模板、发布时间策略）  
+  - _需求: 5, 5.2a_
+
+- [ ] E2. 数据：`publish_drafts` 迁移 + CRUD，字段覆盖来源剧本/分镜/成片、媒体引用、标题/简介/标签、差异化文案占位、计划时间、状态  
+  - _需求: 5, 5.2b_
+
+- [ ] E3. 数据：`publish_targets`（每草稿每平台一行或多 job 引用）+ `publish_jobs` + `publish_attempts` 迁移  
+  - _需求: 5, 6_
+
+- [ ] E4. 后端：**发布准备校验**服务（比例、时长、标题长度、封面、标签、平台必填字段）— 与 adapter 约束元数据共用  
+  - _需求: 5, 12_
+
+- [ ] E5. 后端：`publish` **状态机**（`queued` → `validating` → `uploading` → `platform_processing` → 终态；含 `partial_failed`、`failed`、`retrying`）单元测试全覆盖迁移路径  
+  - _需求: 5_
+
+- [ ] E6. 后端：**半自动确认** gate（确认前不得 `uploading`；记录确认人/时间于 attempts 或 draft 子字段）  
+  - _需求: 5.6_
+
+- [ ] E7. 后端：`publish_jobs` **worker** 骨架（出队、mock upload、写 attempts、失败重试策略占位）  
+  - _需求: 5, 10_
+
+- [ ] E8. 后端：**取消 / 重试** API（任务与业务一致）  
+  - _需求: 5, 11_
+
+- [ ] E9. 后端：`publish` **HTTP 路由**（draft/target/job 查询、创建、触发校验、触发发布、确认半自动）  
+  - _需求: 5, 10_
+
+- [ ] E10. 前端：**发布准备**逐项 checklist（与 E4 结果绑定）  
+  - _需求: 5_
+
+- [ ] E11. 前端：**发布单列表** + draft 编辑（标题/简介/标签/封面/时间）  
+  - _需求: 5, 5.2b_
+
+- [ ] E12. 前端：**平台能力矩阵**（自动/半自动/未接入；与平台注册表真源一致）  
+  - _需求: 5, 12_
+
+- [ ] E13. 前端：从**成片/导出完成态**一键进入发布准备（入口与路由）  
+  - _需求: 5.7_
+
+---
+
+## F. Wave 5：多平台文案、排程、首批 adapter、stub 矩阵
+
+- [ ] F1. 后端：Agent **多平台文案**生成（国内/海外/平台版标题、简介、标签、发布时间建议）+ 写入 draft 子结构  
+  - _需求: 6, 8.1_
+
+- [ ] F2. 后端：文案写入后走 **adapter 约束校验**，失败返回可编辑字段级错误  
+  - _需求: 6, 12_
+
+- [ ] F3. 后端：**定时发布**与**多平台排程**（数据模型 + API；串行执行策略与 E7 衔接）  
+  - _需求: 6, 8.1_
+
+- [ ] F4. 前端：发布单内 **国内版 / 海外版 / 平台版** 文案切换、编辑、再校验  
+  - _需求: 6_
+
+- [ ] F5. 前端：**立即发布**与**定时发布** UI + 多平台排程展示  
+  - _需求: 6_
+
+- [ ] F6. 后端：**首批 2–3 个真 adapter**（建议 YouTube Shorts、TikTok、抖音/哔哩哔哩择二）— 非生产环境 mock 或 sandbox  
+  - _需求: 7_
+
+- [ ] F7. 后端：**其余平台 adapter stub** + `PlatformId` **注册表**（automation 级别 + 约束元数据，上传返回 `not_implemented` 类清晰错误）  
+  - _需求: 12_
+
+---
+
+## G. Wave 6：回流、审计、概览、表现占位
+
+- [ ] G1. 后端：发布成功/失败 **回写** draft/target（平台 id、链接、发布时间、失败原因）  
+  - _需求: 6_
+
+- [ ] G2. 后端：**重试历史**完整写入 `publish_attempts`（含请求 id、归一化错误、重试次数）  
+  - _需求: 6, 5_
+
+- [ ] G3. 后端：**发布结果审计**查询 API（按项目/draft/平台过滤）  
+  - _需求: 6_
+
+- [ ] G4. 前端：项目级 **发布概览** + 按平台成功/失败/待重试 + **排障入口**跳回发布单  
+  - _需求: 6_
+
+- [ ] G5. 后端/数据：**表现数据**占位（表或外部 id 映射）+ 可选同步 stub（播放量等）— 不接全量大盘  
+  - _需求: 6.2a, 8.2_
+
+---
+
+## H. 任务中心与失败回路（可与 C–G 穿插，但须在发布前完成深链）
+
+- [ ] H1. 任务列表支持 **project / script / storyboard / publish** 深链参数与路由目标  
+  - _需求: 11_
+
+- [ ] H2. **短视频阶段过滤**或标签视图（生成 / 导出 / 发布）  
+  - _需求: 11.3, 9.2_
+
+- [ ] H3. 任务失败卡片 **返工入口**（映射到现有局部返工/重新生成/发布单修复）  
+  - _需求: 11.2_
+
+---
+
+## I. 契约、注册、全量验收
+
+- [ ] I1. OpenAPI 导出 + `rust_api`：**publish** 全套端点与模型（可分 PR，任务完成定义：analyze 通过）  
+  - _需求: 10_
+
+- [ ] I2. Shell / `build_sections_product`（或当前等价处）：注册/串联 **short_video_space** 各子面板与任务入口  
+  - _需求: 10_
+
+- [ ] I3. **Review**：对照 `space/short-video` 四文档走查，更新缺口清单与本文勾选；**Jellyfish 无映射项**单列  
+  - _需求: 13, 8_
+
+- [ ] I4. **全量门禁**：`bash scripts/refactor-check.sh`  
+  - _需求: 设计文档 — 测试策略_
+
+---
+
+## 依赖说明（简）
+
+- A* 依赖 C3/D2/E4 中至少一项有占位数据时可先做 UI mock，合并前需接真实 API。
+- B* 为 Wave 2–3 前置。
+- C10 依赖 C1+C4。
+- E* 中 E1→E3 可并行 schema，E5 依赖 E3；E7 依赖 E5；E6 与 E5 紧耦合。
+- F6–F7 依赖 E7 + E4。
+- G* 依赖 F6 或 mock upload 路径。
+- H* 可与 E9 并行，但 H1 的 `publish` 深链需 E9 路由存在。
 
 ## 备注
 
-- 开源参考仅作产品路径约束，**不**引入 `MoneyPrinterTurbo` / `Jellyfish` 源码依赖。
-- 平台 API 权限与限流差异大，adapter 与文案层需预留「半自动确认」钩子。
+- 任务数量多于「17 个大包」是刻意的：每个 **bullet/段落级** 产品能力在 `auto-publishing-platforms` / `implementation-breakdown` / `open-source-borrowing` 中均有对应任务或 C2/I3 的缺口审计承接。
+- P2 **轻量粗剪**、**候选版本对比** 未拆独立任务线；在 I3 Review 中决策是纳入新 wave 还是单独 spec，避免本文件无限膨胀。

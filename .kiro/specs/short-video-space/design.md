@@ -9,11 +9,15 @@
 ```mermaid
 graph TB
     subgraph "Space 编排层 Frontend"
+        PIPE[主链 + 下一步]
+        OV[项目生产概览]
         CFG[项目级短视频目标配置]
         RSUM[项目级 readiness 摘要]
         CCAND[候选确认摘要卡]
+        AOV[统一资产总览]
         ASM[成片装配 + 导出前检查]
         PPREP[发布准备 + 发布单列表]
+        TC[任务中心入口 / 过滤 / 深链]
     end
 
     subgraph "生产域 复用"
@@ -23,28 +27,43 @@ graph TB
     subgraph "Backend"
         SVAPI[short_video_space 项目配置 API]
         RDAPI[storyboard readiness 聚合 API]
+        AST[资产与候选聚合只读 API]
         PUB[publish 域: profiles / drafts / targets / jobs / attempts]
-        ADP[publish adapter 按平台]
+        ADP[publish adapter 注册表 + 按平台实现]
+        VAL[发布准备校验 + 半自动确认 gate]
         WK[publish jobs worker]
+        AUD[发布审计 / attempts 查询]
     end
 
     subgraph "数据"
-        PROJ[(项目扩展 / 配置)]
+        PROJ[(项目扩展 / 创作配置)]
         SB[(分镜与资产状态)]
         PUBDB[(发布相关表)]
     end
 
+    PIPE --> RDAPI
+    PIPE --> PUB
+    OV --> RDAPI
+    OV --> PUB
     CFG --> SVAPI
     RSUM --> RDAPI
     CCAND --> RDAPI
+    AOV --> AST
+    AOV --> RDAPI
     ASM --> SW
     PPREP --> PUB
+    TC --> SW
+    TC --> PUB
     SVAPI --> PROJ
     RDAPI --> SB
+    AST --> SB
     PUB --> PUBDB
+    PUB --> VAL
     PUB --> ADP
     PUB --> WK
+    PUB --> AUD
     WK --> ADP
+    WK --> VAL
 ```
 
 ## 关键设计决策
@@ -73,14 +92,28 @@ graph TB
 
 Wave 1 配置优先项目扩展字段；发布域（Wave 4+）引入独立表 `publish_*`；分镜与候选若现有模型不足再增量迁移，避免过早拆表阻塞竖切。
 
+### 发布审计与半自动 gate
+
+`publish_attempts` 记录每次平台调用的请求摘要、归一化错误、重试链；半自动平台在 `validating` 通过后写入「待用户确认」状态，用户确认事件写入审计字段再进入 `uploading`，避免与全自动路径混淆。
+
+### 任务中心与 Space 双入口
+
+任务列表仍为全局能力；Space 通过「阶段过滤 + 深链参数」收敛短视频上下文，失败卡片携带 `rework_route`（前端路由或 deep link 约定），复用现有返工与局部修补页面。
+
+### 平台注册表
+
+后端维护 `PlatformId` → `{ automation: full|semi|none, constraints: ..., adapter: Option<impl> }`，UI 与发布准备共用同一真源，避免「文档里有八个平台、代码里只写三个」的漂移。
+
 ## 与现有仓库模块的对应关系
 
 | 能力 | 建议落点（随实现可微调） |
 |------|-------------------------|
 | 项目短视频配置 | `short_video_space` API + 项目存储扩展 |
 | Readiness 聚合 | storyboard 相关 read 层 + 新聚合端点 |
+| 资产与候选总览 | production/asset 或 storyboard 读模型 + 聚合只读 API |
 | 成片装配 | production / export 相关域扩展 |
 | 发布 | 新 `publish` 路由模块 + worker + OpenAPI 契约 |
+| 任务过滤与深链 | 现有 jobs 列表 API 扩展 query + 前端 `short_video_space` / shell |
 
 ## 测试策略
 
