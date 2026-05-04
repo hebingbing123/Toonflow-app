@@ -142,6 +142,7 @@ extension _HomePageBuildProductSections on _HomePageState {
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.shortVideoSpace)
       ShortVideoSpaceSection(
+        accessToken: _session?.accessToken,
         onOpenProjects: () {
           _shellNavigationController.selectProductWorkspacePane(
             ProductWorkspacePane.projects,

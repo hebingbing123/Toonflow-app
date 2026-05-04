@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../rust_api.dart';
+
 enum ShortVideoMode { animated, liveAction }
 
 class ShortVideoSpaceSection extends StatefulWidget {
   const ShortVideoSpaceSection({
     super.key,
+    required this.accessToken,
     required this.onOpenProjects,
     required this.onOpenScriptWorkspace,
     required this.onOpenProductionWorkspace,
@@ -12,6 +15,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
     required this.onOpenQuality,
   });
 
+  final String? accessToken;
   final VoidCallback onOpenProjects;
   final VoidCallback onOpenScriptWorkspace;
   final VoidCallback onOpenProductionWorkspace;
@@ -24,8 +28,199 @@ class ShortVideoSpaceSection extends StatefulWidget {
 
 class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ShortVideoMode _mode = ShortVideoMode.animated;
+  String _videoRatio = '9:16';
+  bool _loadingProjects = false;
+  bool _savingProjectConfig = false;
+  List<ProjectRow> _projects = const <ProjectRow>[];
+  String? _selectedProjectId;
+  String? _projectConfigLine;
 
   bool get _isAnimated => _mode == ShortVideoMode.animated;
+
+  ProjectRow? get _selectedProject {
+    final projectId = _selectedProjectId;
+    if (projectId == null) {
+      return null;
+    }
+    for (final project in _projects) {
+      if (project.id == projectId) {
+        return project;
+      }
+    }
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProjects();
+    });
+  }
+
+  Future<void> _loadProjects() async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _projects = const <ProjectRow>[];
+        _selectedProjectId = null;
+        _projectConfigLine = '当前未登录，暂时无法把短视频模式写回项目。';
+      });
+      return;
+    }
+    setState(() {
+      _loadingProjects = true;
+      _projectConfigLine = null;
+    });
+    try {
+      final projects = await fetchProjects(token);
+      if (!mounted) {
+        return;
+      }
+      final selectedId = _resolveProjectIdAfterReload(projects);
+      setState(() {
+        _projects = projects;
+        _selectedProjectId = selectedId;
+      });
+      _applyProjectPreset(_selectedProject);
+      if (projects.isEmpty) {
+        setState(() {
+          _projectConfigLine = '还没有项目，可先去项目区创建一个短剧项目。';
+        });
+      }
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectConfigLine = '读取项目失败：${e.statusCode ?? '-'}';
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectConfigLine = '读取项目失败：$e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingProjects = false;
+        });
+      }
+    }
+  }
+
+  String? _resolveProjectIdAfterReload(List<ProjectRow> projects) {
+    if (projects.isEmpty) {
+      return null;
+    }
+    final currentId = _selectedProjectId;
+    if (currentId != null &&
+        projects.any((project) => project.id == currentId)) {
+      return currentId;
+    }
+    return projects.first.id;
+  }
+
+  void _applyProjectPreset(ProjectRow? project) {
+    if (project == null) {
+      return;
+    }
+    setState(() {
+      _mode = _modeFromProject(project);
+      _videoRatio = _normalizeVideoRatio(project.videoRatio);
+    });
+  }
+
+  ShortVideoMode _modeFromProject(ProjectRow project) {
+    final value = (project.mode ?? '').trim().toLowerCase();
+    if (value.contains('live') ||
+        value.contains('real') ||
+        value.contains('真人')) {
+      return ShortVideoMode.liveAction;
+    }
+    return ShortVideoMode.animated;
+  }
+
+  String _normalizeVideoRatio(String? value) {
+    final trimmed = (value ?? '').trim();
+    if (trimmed == '16:9' || trimmed == '1:1') {
+      return trimmed;
+    }
+    return '9:16';
+  }
+
+  Future<void> _saveProjectConfig() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      setState(() {
+        _projectConfigLine = '请先登录并选择项目。';
+      });
+      return;
+    }
+    setState(() {
+      _savingProjectConfig = true;
+      _projectConfigLine = null;
+    });
+    final storedMode = _mode == ShortVideoMode.animated
+        ? 'animated.short_drama'
+        : 'live_action.short_drama';
+    try {
+      final updated = await updateProjectByProjectId(token, project.id, {
+        'projectType': 'short_drama',
+        'mode': storedMode,
+        'videoRatio': _videoRatio,
+      });
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projects = _projects
+            .map((row) => row.id == updated.id ? updated : row)
+            .toList(growable: false);
+        _selectedProjectId = updated.id;
+        _projectConfigLine =
+            '已写回项目 #${updated.numericId}：${_modeLabel(_mode)} · ${_videoRatioLabel(_videoRatio)}';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectConfigLine = '保存失败：${e.statusCode ?? '-'}';
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _projectConfigLine = '保存失败：$e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingProjectConfig = false;
+        });
+      }
+    }
+  }
+
+  String _modeLabel(ShortVideoMode mode) {
+    return mode == ShortVideoMode.animated ? '动漫短剧' : '真人短剧';
+  }
+
+  String _videoRatioLabel(String ratio) {
+    switch (ratio) {
+      case '16:9':
+        return '横屏 16:9';
+      case '1:1':
+        return '方屏 1:1';
+      default:
+        return '竖屏 9:16';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +287,125 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               ),
               const SizedBox(height: 8),
               Text(modeAdvice, style: theme.textTheme.bodySmall),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: outline),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('短视频目标配置', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Text(
+                '把创作模式和画幅直接写回项目，后面的脚本与制作流程就能基于同一份项目配置继续工作。',
+                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _selectedProjectId,
+                      decoration: const InputDecoration(
+                        labelText: '目标项目',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _projects
+                          .map(
+                            (project) => DropdownMenuItem<String>(
+                              value: project.id,
+                              child: Text(
+                                '#${project.numericId} ${project.name?.trim().isNotEmpty == true ? project.name!.trim() : "未命名项目"}',
+                              ),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: _loadingProjects
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _selectedProjectId = value;
+                              });
+                              _applyProjectPreset(_selectedProject);
+                            },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: _loadingProjects ? null : _loadProjects,
+                    icon: const Icon(Icons.refresh_outlined),
+                    label: Text(_loadingProjects ? '读取中' : '刷新项目'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SegmentedButton<ShortVideoMode>(
+                segments: const [
+                  ButtonSegment(
+                    value: ShortVideoMode.animated,
+                    icon: Icon(Icons.auto_awesome_outlined),
+                    label: Text('动漫短剧'),
+                  ),
+                  ButtonSegment(
+                    value: ShortVideoMode.liveAction,
+                    icon: Icon(Icons.person_outline),
+                    label: Text('真人短剧'),
+                  ),
+                ],
+                selected: {_mode},
+                onSelectionChanged: (selection) {
+                  if (selection.isEmpty) {
+                    return;
+                  }
+                  setState(() {
+                    _mode = selection.first;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: '9:16', label: Text('竖屏 9:16')),
+                  ButtonSegment(value: '16:9', label: Text('横屏 16:9')),
+                  ButtonSegment(value: '1:1', label: Text('方屏 1:1')),
+                ],
+                selected: {_videoRatio},
+                onSelectionChanged: (selection) {
+                  if (selection.isEmpty) {
+                    return;
+                  }
+                  setState(() {
+                    _videoRatio = selection.first;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.icon(
+                    onPressed: _savingProjectConfig ? null : _saveProjectConfig,
+                    icon: const Icon(Icons.save_outlined),
+                    label: Text(_savingProjectConfig ? '保存中' : '写回项目配置'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: widget.onOpenProjects,
+                    icon: const Icon(Icons.tune_outlined),
+                    label: const Text('打开项目区继续细化'),
+                  ),
+                ],
+              ),
+              if (_projectConfigLine != null) ...[
+                const SizedBox(height: 10),
+                Text(_projectConfigLine!, style: theme.textTheme.bodySmall),
+              ],
             ],
           ),
         ),

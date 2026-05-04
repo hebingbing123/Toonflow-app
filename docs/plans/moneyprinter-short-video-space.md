@@ -51,6 +51,7 @@ Space 第一屏就应该让用户显式选择：
 
 - 新增 `短视频 Space`
 - 支持用户切换 `动漫短剧 / 真人短剧`
+- 支持在 Space 内选择项目，并将 `projectType=short_drama`、`mode`、`videoRatio` 写回项目
 - 从 Space 跳转到：
   - 项目
   - 脚本工作区
