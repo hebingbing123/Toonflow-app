@@ -147,11 +147,28 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     if (decoded is! Map) {
       throw const FormatException('scopeSignature 必须是 JSON 对象');
     }
-    return Map<String, dynamic>.from(decoded);
+    final scopeSignature = Map<String, dynamic>.from(decoded);
+    if (!_scopeSignatureHasMeaningfulDimension(scopeSignature)) {
+      throw const FormatException('scopeSignature 至少需要一个非空范围维度');
+    }
+    return scopeSignature;
   }
 
   bool _memoryTierRequiresScope(String tier) =>
       tier == 'stage_summary' || tier == 'delta_memory';
+
+  bool _scopeSignatureHasMeaningfulDimension(Map<String, dynamic> signature) {
+    bool hasValue(Object? value) {
+      if (value == null) return false;
+      if (value is bool || value is num) return true;
+      if (value is String) return value.trim().isNotEmpty;
+      if (value is List) return value.isNotEmpty;
+      if (value is Map) return value.isNotEmpty;
+      return true;
+    }
+
+    return signature.values.any(hasValue);
+  }
 
   Map<String, dynamic>? _validatedScopeSignatureForTier(
     String tier, {

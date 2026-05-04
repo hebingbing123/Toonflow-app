@@ -93,6 +93,15 @@ mod tests {
     }
 
     #[test]
+    fn asset_review_does_not_pretend_to_be_storyboard_scoped_video_memory() {
+        let mut review = sample_review();
+        review.target_type = "asset".into();
+        review.target_id = Some("12".into());
+        assert!(build_quality_review_rejected_video_memory(&review).is_none());
+        assert!(!should_promote_quality_review_selected_video_memory(&review));
+    }
+
+    #[test]
     fn generic_feedback_content_truncates_long_comments() {
         let mut review = sample_review();
         review.target_type = "script".into();

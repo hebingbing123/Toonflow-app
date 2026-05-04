@@ -30,7 +30,7 @@ pub(super) fn should_promote_quality_review_selected_video_memory(review: &Quali
 pub(super) fn quality_review_storyboard_target_id(review: &QualityReview) -> Option<i32> {
     matches!(
         review.target_type.as_str(),
-        "storyboard" | "video" | "output" | "asset"
+        "storyboard" | "video" | "output"
     )
     .then(|| {
         review
@@ -44,7 +44,7 @@ pub(super) fn quality_review_storyboard_target_id(review: &QualityReview) -> Opt
 pub(super) fn build_quality_review_rejected_video_memory(review: &QualityReview) -> Option<String> {
     if !matches!(
         review.target_type.as_str(),
-        "storyboard" | "video" | "output" | "asset"
+        "storyboard" | "video" | "output"
     ) {
         return None;
     }
