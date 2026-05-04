@@ -73,7 +73,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   final _reviewQueueIdCtrl = TextEditingController();
   final _reviewScoreJsonCtrl = TextEditingController(
     text: const JsonEncoder.withIndent('  ').convert({
-      'overallScore': 82,
+      'overallScore': 8,
       'passed': true,
       'recommendation': 'approved',
     }),

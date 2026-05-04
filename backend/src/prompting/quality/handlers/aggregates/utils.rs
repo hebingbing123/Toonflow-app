@@ -62,14 +62,14 @@ pub(crate) async fn get_scope_insights(
             ), 0) as pass_rate_percent,
             COALESCE(AVG(overall_score), 0) as avg_overall_score,
             COUNT(*) FILTER (
-                WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 8)
                    OR comments ILIKE '%生硬%'
                    OR comments ILIKE '%朗读%'
                    OR comments ILIKE '%没情绪%'
                    OR comments ILIKE '%无情绪%'
             ) as dialogue_risk_count,
             COUNT(*) FILTER (
-                WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                WHERE (visual_quality IS NOT NULL AND visual_quality < 8)
                    OR comments ILIKE '%穿帮%'
                    OR comments ILIKE '%不自然%'
                    OR comments ILIKE '%ai%'
@@ -167,7 +167,7 @@ pub(crate) async fn get_scope_insights(
             ), ARRAY[]::text[]) as feedback_focus_tags,
             CASE
                 WHEN COUNT(*) FILTER (
-                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 8)
                        OR comments ILIKE '%生硬%'
                        OR comments ILIKE '%朗读%'
                        OR comments ILIKE '%没情绪%'
@@ -178,7 +178,7 @@ pub(crate) async fn get_scope_insights(
                 ) > 0
                 THEN 'keep_delivery_memory'
                 WHEN COUNT(*) FILTER (
-                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 8)
                        OR comments ILIKE '%穿帮%'
                        OR comments ILIKE '%不自然%'
                        OR comments ILIKE '%ai%'
@@ -211,7 +211,7 @@ pub(crate) async fn get_scope_insights(
                 ), 0) >= 80
                 THEN 'trim_generic_style_memory'
                 WHEN COUNT(*) FILTER (WHERE passed = true) > 0
-                AND COALESCE(AVG(overall_score), 0) >= 85
+                AND COALESCE(AVG(overall_score), 0) >= 8
                 AND COUNT(*) FILTER (
                     WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
                 ) = 0
@@ -220,7 +220,7 @@ pub(crate) async fn get_scope_insights(
             END as memory_action,
             CASE
                 WHEN COUNT(*) FILTER (
-                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 8)
                        OR comments ILIKE '%生硬%'
                        OR comments ILIKE '%朗读%'
                        OR comments ILIKE '%没情绪%'
@@ -231,7 +231,7 @@ pub(crate) async fn get_scope_insights(
                 ) > 0
                 THEN 'selected_video_memory'
                 WHEN COUNT(*) FILTER (
-                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 8)
                        OR comments ILIKE '%穿帮%'
                        OR comments ILIKE '%不自然%'
                        OR comments ILIKE '%ai%'
@@ -264,7 +264,7 @@ pub(crate) async fn get_scope_insights(
                 ), 0) >= 80
                 THEN 'project_video_style_memory'
                 WHEN COUNT(*) FILTER (WHERE passed = true) > 0
-                AND COALESCE(AVG(overall_score), 0) >= 85
+                AND COALESCE(AVG(overall_score), 0) >= 8
                 AND COUNT(*) FILTER (
                     WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
                 ) = 0
@@ -273,7 +273,7 @@ pub(crate) async fn get_scope_insights(
             END as memory_focus,
             CASE
                 WHEN COUNT(*) FILTER (
-                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 8)
                        OR comments ILIKE '%生硬%'
                        OR comments ILIKE '%朗读%'
                        OR comments ILIKE '%没情绪%'
@@ -284,7 +284,7 @@ pub(crate) async fn get_scope_insights(
                 ) > 0
                 THEN 'Keep scoped acting memory and keep trimming generic style first.'
                 WHEN COUNT(*) FILTER (
-                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 8)
                        OR comments ILIKE '%穿帮%'
                        OR comments ILIKE '%不自然%'
                        OR comments ILIKE '%ai%'
@@ -317,7 +317,7 @@ pub(crate) async fn get_scope_insights(
                 ), 0) >= 80
                 THEN 'Project-wide style memory is eating budget; trim generic visual/style lines first.'
                 WHEN COUNT(*) FILTER (WHERE passed = true) > 0
-                AND COALESCE(AVG(overall_score), 0) >= 85
+                AND COALESCE(AVG(overall_score), 0) >= 8
                 AND COUNT(*) FILTER (
                     WHERE model_params->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
                 ) = 0
@@ -334,14 +334,14 @@ pub(crate) async fn get_scope_insights(
             (
                 COUNT(*) FILTER (WHERE is_bad_case = true) * 100
                 + COUNT(*) FILTER (
-                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 80)
+                    WHERE (dialogue_naturalness IS NOT NULL AND dialogue_naturalness < 8)
                        OR comments ILIKE '%生硬%'
                        OR comments ILIKE '%朗读%'
                        OR comments ILIKE '%没情绪%'
                        OR comments ILIKE '%无情绪%'
                 ) * 30
                 + COUNT(*) FILTER (
-                    WHERE (visual_quality IS NOT NULL AND visual_quality < 80)
+                    WHERE (visual_quality IS NOT NULL AND visual_quality < 8)
                        OR comments ILIKE '%穿帮%'
                        OR comments ILIKE '%不自然%'
                        OR comments ILIKE '%ai%'
@@ -437,7 +437,7 @@ pub(crate) async fn get_token_efficiency(
           COUNT(*) FILTER (
             WHERE COALESCE(usage.total_tokens, 0) >= 4000
               AND (
-                COALESCE(qr.overall_score, 0) < 80
+                COALESCE(qr.overall_score, 0) < 8
                 OR COALESCE(qr.passed, false) = false
               )
           ) as high_token_low_quality_sample_count,
@@ -447,7 +447,7 @@ pub(crate) async fn get_token_efficiency(
                 COUNT(*) FILTER (
                   WHERE COALESCE(usage.total_tokens, 0) >= 4000
                     AND (
-                      COALESCE(qr.overall_score, 0) < 80
+                      COALESCE(qr.overall_score, 0) < 8
                       OR COALESCE(qr.passed, false) = false
                     )
                 ) * 100.0
@@ -460,12 +460,12 @@ pub(crate) async fn get_token_efficiency(
             WHEN COUNT(*) FILTER (
               WHERE COALESCE(usage.total_tokens, 0) >= 4000
                 AND (
-                  COALESCE(qr.overall_score, 0) < 80
+                  COALESCE(qr.overall_score, 0) < 8
                   OR COALESCE(qr.passed, false) = false
                 )
             ) > 0
             THEN 'high_token_low_quality'
-            WHEN COALESCE(AVG(COALESCE(qr.overall_score, 0)), 0) >= 85
+            WHEN COALESCE(AVG(COALESCE(qr.overall_score, 0)), 0) >= 8
               AND COALESCE(AVG(CASE WHEN qr.passed = true THEN 1 ELSE 0 END), 0) >= 0.8
             THEN 'efficient'
             ELSE 'observe'
@@ -509,7 +509,7 @@ pub(crate) async fn get_token_efficiency(
             as delivery_priority_hit_rate_percent,
           CASE
             WHEN COUNT(*) FILTER (
-              WHERE (qr.dialogue_naturalness IS NOT NULL AND qr.dialogue_naturalness < 80)
+              WHERE (qr.dialogue_naturalness IS NOT NULL AND qr.dialogue_naturalness < 8)
                  OR qr.comments ILIKE '%生硬%'
                  OR qr.comments ILIKE '%朗读%'
                  OR qr.comments ILIKE '%没情绪%'
@@ -520,7 +520,7 @@ pub(crate) async fn get_token_efficiency(
             ) > 0
             THEN 'keep_delivery_memory'
             WHEN COUNT(*) FILTER (
-              WHERE (qr.visual_quality IS NOT NULL AND qr.visual_quality < 80)
+              WHERE (qr.visual_quality IS NOT NULL AND qr.visual_quality < 8)
                  OR qr.comments ILIKE '%穿帮%'
                  OR qr.comments ILIKE '%不自然%'
                  OR qr.comments ILIKE '%ai%'
@@ -543,7 +543,7 @@ pub(crate) async fn get_token_efficiency(
               ), 0) >= 80
             THEN 'trim_generic_style_memory'
             WHEN COUNT(*) FILTER (WHERE qr.passed = true) > 0
-            AND COALESCE(AVG(qr.overall_score), 0) >= 85
+            AND COALESCE(AVG(qr.overall_score), 0) >= 8
             AND COUNT(*) FILTER (
               WHERE COALESCE(qr.model_params, '{}'::jsonb)->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
             ) = 0
@@ -552,7 +552,7 @@ pub(crate) async fn get_token_efficiency(
           END as memory_action,
           CASE
             WHEN COUNT(*) FILTER (
-              WHERE (qr.dialogue_naturalness IS NOT NULL AND qr.dialogue_naturalness < 80)
+              WHERE (qr.dialogue_naturalness IS NOT NULL AND qr.dialogue_naturalness < 8)
                  OR qr.comments ILIKE '%生硬%'
                  OR qr.comments ILIKE '%朗读%'
                  OR qr.comments ILIKE '%没情绪%'
@@ -563,7 +563,7 @@ pub(crate) async fn get_token_efficiency(
             ) > 0
             THEN 'selected_video_memory'
             WHEN COUNT(*) FILTER (
-              WHERE (qr.visual_quality IS NOT NULL AND qr.visual_quality < 80)
+              WHERE (qr.visual_quality IS NOT NULL AND qr.visual_quality < 8)
                  OR qr.comments ILIKE '%穿帮%'
                  OR qr.comments ILIKE '%不自然%'
                  OR qr.comments ILIKE '%ai%'
@@ -586,7 +586,7 @@ pub(crate) async fn get_token_efficiency(
               ), 0) >= 80
             THEN 'project_video_style_memory'
             WHEN COUNT(*) FILTER (WHERE qr.passed = true) > 0
-            AND COALESCE(AVG(qr.overall_score), 0) >= 85
+            AND COALESCE(AVG(qr.overall_score), 0) >= 8
             AND COUNT(*) FILTER (
               WHERE COALESCE(qr.model_params, '{}'::jsonb)->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
             ) = 0
@@ -595,7 +595,7 @@ pub(crate) async fn get_token_efficiency(
           END as memory_focus,
           CASE
             WHEN COUNT(*) FILTER (
-              WHERE (qr.dialogue_naturalness IS NOT NULL AND qr.dialogue_naturalness < 80)
+              WHERE (qr.dialogue_naturalness IS NOT NULL AND qr.dialogue_naturalness < 8)
                  OR qr.comments ILIKE '%生硬%'
                  OR qr.comments ILIKE '%朗读%'
                  OR qr.comments ILIKE '%没情绪%'
@@ -606,7 +606,7 @@ pub(crate) async fn get_token_efficiency(
             ) > 0
             THEN 'Keep scoped acting memory and keep trimming generic style first.'
             WHEN COUNT(*) FILTER (
-              WHERE (qr.visual_quality IS NOT NULL AND qr.visual_quality < 80)
+              WHERE (qr.visual_quality IS NOT NULL AND qr.visual_quality < 8)
                  OR qr.comments ILIKE '%穿帮%'
                  OR qr.comments ILIKE '%不自然%'
                  OR qr.comments ILIKE '%ai%'
@@ -629,7 +629,7 @@ pub(crate) async fn get_token_efficiency(
               ), 0) >= 80
             THEN 'Project-wide style memory is eating budget; trim generic visual/style lines first.'
             WHEN COUNT(*) FILTER (WHERE qr.passed = true) > 0
-            AND COALESCE(AVG(qr.overall_score), 0) >= 85
+            AND COALESCE(AVG(qr.overall_score), 0) >= 8
             AND COUNT(*) FILTER (
               WHERE COALESCE(qr.model_params, '{}'::jsonb)->'diagnostics'->'feedbackMemory'->>'action' = 'promoted_selected_memory'
             ) = 0
