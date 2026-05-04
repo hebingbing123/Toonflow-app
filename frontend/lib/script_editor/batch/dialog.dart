@@ -146,9 +146,6 @@ class _StoryboardBatchWorkbenchDialogState
       final nextSelectedIds = <int>{
         ..._selectedIds.where((id) => ids.contains(id)),
       };
-      if (nextSelectedIds.isEmpty && widget.boardsList.isNotEmpty) {
-        nextSelectedIds.add(widget.boardsList.first.numericId);
-      }
       final nextSingleSelectedId = nextSelectedIds.length == 1
           ? nextSelectedIds.first
           : null;
