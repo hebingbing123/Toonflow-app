@@ -8,7 +8,7 @@ use super::scope::{
     scope_signature_json, select_auto_memory_entries,
 };
 use super::spec::{stage_label_for_tool, stage_summary_name_for_tool};
-use super::sub_agent_prompt_from_args;
+use super::{project_mode_note_from_value, sub_agent_prompt_from_args};
 use crate::harness::invoke::InvokeError;
 use proptest::prelude::*;
 use serde_json::json;
@@ -148,6 +148,28 @@ fn sub_agent_prompt_from_args_appends_compact_scope_for_script_tools() {
     assert!(prompt.contains(
         r#"<scope focusSections="adaptationStrategy,storySkeleton" novelIds="7,12" relativeScriptOffset="-1" />"#
     ));
+}
+
+#[test]
+fn project_mode_note_from_value_supports_live_action_short_drama() {
+    let note = project_mode_note_from_value(Some("live_action.short_drama")).expect("note");
+    assert!(note.contains("Project mode: live_action.short_drama"));
+    assert!(note.contains("natural spoken dialogue"));
+    assert!(note.contains("Avoid anime-styled exaggeration"));
+}
+
+#[test]
+fn project_mode_note_from_value_supports_animated_short_drama_aliases() {
+    let note = project_mode_note_from_value(Some("Animated")).expect("note");
+    assert!(note.contains("Project mode: animated.short_drama"));
+    assert!(note.contains("animation-friendly visual action"));
+    assert!(note.contains("Avoid overly documentary live-action realism"));
+}
+
+#[test]
+fn project_mode_note_from_value_ignores_unknown_modes() {
+    assert_eq!(project_mode_note_from_value(Some("novel.long_form")), None);
+    assert_eq!(project_mode_note_from_value(None), None);
 }
 
 #[test]

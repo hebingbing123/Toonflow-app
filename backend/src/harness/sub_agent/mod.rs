@@ -8,6 +8,7 @@ mod spec;
 mod tests;
 
 use serde_json::{json, Value};
+use sqlx::PgPool;
 
 use crate::error::ApiError;
 use crate::harness::HarnessContext;
@@ -59,6 +60,12 @@ pub async fn invoke_sub_agent_tool(
     let context_note = format!(
         "Harness context: {project_hint}, {script_hint}. Keep answer concise and actionable."
     );
+    let project_mode_note = match (ctx.pool.as_ref(), ctx.project_numeric_id) {
+        (Some(pool), Some(project_numeric_id)) => {
+            load_script_project_mode_note(pool, project_numeric_id, tool_name).await?
+        }
+        _ => None,
+    };
     let mut prompt_seed_scope = None;
     let memory_note = match (
         ctx.pool.as_ref(),
@@ -122,6 +129,9 @@ pub async fn invoke_sub_agent_tool(
     ];
     if let Some(memory_note) = memory_note {
         messages.push(json!({"role":"assistant","content":memory_note}));
+    }
+    if let Some(project_mode_note) = project_mode_note {
+        messages.push(json!({"role":"assistant","content":project_mode_note}));
     }
     if let Some(rework_context_note) = rework_context_note {
         messages.push(json!({"role":"assistant","content":rework_context_note}));
@@ -236,6 +246,61 @@ fn sub_agent_prompt_from_args(tool_name: &str, arguments: &Value) -> Result<Stri
         _ => prompt.to_string(),
     };
     Ok(scoped_prompt)
+}
+
+async fn load_script_project_mode_note(
+    pool: &PgPool,
+    project_numeric_id: i32,
+    tool_name: &str,
+) -> Result<Option<String>, InvokeError> {
+    if !is_script_generation_tool(tool_name) {
+        return Ok(None);
+    }
+    let raw = sqlx::query_scalar::<_, Option<String>>(
+        "SELECT mode FROM app_project WHERE numeric_id = $1",
+    )
+    .bind(project_numeric_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|error| InvokeError::DatabaseError(error.to_string()))?
+    .flatten();
+    Ok(project_mode_note_from_value(raw.as_deref()))
+}
+
+fn is_script_generation_tool(tool_name: &str) -> bool {
+    matches!(
+        tool_name,
+        "run_sub_agent_storySkeleton"
+            | "run_sub_agent_adaptationStrategy"
+            | "run_sub_agent_script"
+            | "run_supervision_agent"
+    )
+}
+
+fn project_mode_note_from_value(raw_mode: Option<&str>) -> Option<String> {
+    match raw_mode.and_then(compact_short_drama_project_mode) {
+        Some(mode) if mode == "live_action.short_drama" => Some(
+            "Project mode: live_action.short_drama. Favor natural spoken dialogue, grounded actor performance, realistic blocking, and plausible live-action scene detail. Avoid anime-styled exaggeration unless the prompt explicitly asks for it.".to_string(),
+        ),
+        Some(mode) if mode == "animated.short_drama" => Some(
+            "Project mode: animated.short_drama. Favor stylized dramatic beats, animation-friendly visual action, expressive emotion, and stronger visual exaggeration. Avoid overly documentary live-action realism unless the prompt explicitly asks for it.".to_string(),
+        ),
+        _ => None,
+    }
+}
+
+fn compact_short_drama_project_mode(value: &str) -> Option<String> {
+    let normalized = value.trim().to_ascii_lowercase();
+    if normalized.is_empty() {
+        return None;
+    }
+    if normalized.contains("live_action") || normalized.contains("live-action") {
+        return Some("live_action.short_drama".to_string());
+    }
+    if normalized.contains("animated") {
+        return Some("animated.short_drama".to_string());
+    }
+    None
 }
 
 fn error_message(error: ApiError) -> String {
