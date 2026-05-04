@@ -361,15 +361,15 @@
 
 - [ ] 6. Phase 4: Frontend Files (Lower Priority)
 
-  - [ ] 6.1 Split frontend/lib/agent_workspaces/contexts/production/support.dart (1,675 lines → ~3 files)
+  - [~] 6.1 Split frontend/lib/agent_workspaces/contexts/production/support.dart (1,675 lines → ~3 files)
     
-    - [~] 6.1.1 Analyze and create structure
+    - [x] 6.1.1 Analyze and create structure
       - Read file, identify public classes and functions
       - Create `agent_workspaces/contexts/production/support/` directory
       - Create support.dart, recipes.dart, helpers.dart
       - _Requirements: 2.11_
     
-    - [~] 6.1.2 Migrate code
+    - [x] 6.1.2 Migrate code
       - Move core data classes to support.dart (~600 lines)
       - Move recipe logic to recipes.dart (~600 lines)
       - Move helper functions to helpers.dart (~500 lines)
@@ -378,15 +378,16 @@
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.11, 3.1, 3.2, 3.3, 3.8, 3.9_
     
-    - [~] 6.1.3 Update support.dart with exports
-      - Export public classes and functions from other files
+    - [x] 6.1.3 Update support.dart with exports
+      - Convert `support.dart` into the library entrypoint with `part` directives for `support/support.dart`, `support/helpers.dart`, and `support/recipes.dart`
       - _Requirements: 2.11, 3.2_
     
     - [~] 6.1.4 Verify refactoring
-      - Run `flutter pub get` in frontend/
-      - Run `flutter analyze` in frontend/
-      - Run `flutter test` in frontend/
-      - Verify all files ≤800 lines
+      - Verified all split files are ≤800 lines (`3`, `504`, `539`, `636`)
+      - Run `HOME=/private/tmp /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart format` on the split files
+      - Run targeted `dart analyze` on `lib/agent_workspaces/contexts/production/support.dart` and `lib/agent_workspaces/contexts/production/support/` (`No issues found!`)
+      - Full `flutter analyze` still reports pre-existing frontend errors in `test/projects_agent_memory_workbench_dialog_view_test.dart`
+      - Full `flutter test` / `yarn refactor:check` remain blocked in this environment because the Homebrew Flutter SDK cannot write `/opt/homebrew/share/flutter/bin/cache/lockfile`
       - _Requirements: 2.11, 3.3, 3.6, 3.8_
     
     - [~] 6.1.5 Commit
