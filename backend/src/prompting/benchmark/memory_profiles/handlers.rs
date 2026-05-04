@@ -434,7 +434,7 @@ fn calculate_stage_breakdown(
     use std::collections::HashMap;
 
     let mut stage_map: HashMap<String, (i64, f64, i32)> = HashMap::new();
-    let mut baseline_stage_map: HashMap<String, (i64, f64)> = HashMap::new();
+    let mut baseline_stage_map: HashMap<String, (i64, f64, i32)> = HashMap::new();
 
     // 收集基线数据
     for result in baseline_results {
@@ -453,9 +453,10 @@ fn calculate_stage_breakdown(
                 .and_then(|v| v.as_f64())
                 .unwrap_or(0.0);
 
-            let entry = baseline_stage_map.entry(stage.clone()).or_insert((0, 0.0));
+            let entry = baseline_stage_map.entry(stage.clone()).or_insert((0, 0.0, 0));
             entry.0 += tokens;
             entry.1 += score;
+            entry.2 += 1;
         }
     }
 
@@ -487,11 +488,20 @@ fn calculate_stage_breakdown(
     stage_map
         .into_iter()
         .map(|(stage, (tokens, total_score, count))| {
-            let baseline_tokens = baseline_stage_map.get(&stage).map(|(t, _)| *t).unwrap_or(0);
+            let baseline_tokens = baseline_stage_map
+                .get(&stage)
+                .map(|(t, _, _)| *t)
+                .unwrap_or(0);
 
             let baseline_score = baseline_stage_map
                 .get(&stage)
-                .map(|(_, s)| *s / count as f64)
+                .map(|(_, s, baseline_count)| {
+                    if *baseline_count > 0 {
+                        *s / *baseline_count as f64
+                    } else {
+                        0.0
+                    }
+                })
                 .unwrap_or(0.0);
 
             let avg_score = if count > 0 {
@@ -679,6 +689,37 @@ mod tests {
             stage: Some(stage.to_string()),
             issue_tags: None,
         }
+    }
+
+    fn build_scored_result_row(stage: &str, score: f64, tokens: i64) -> ExperimentResultRow {
+        ExperimentResultRow {
+            id: Uuid::new_v4(),
+            variant_id: Uuid::new_v4(),
+            benchmark_case_id: Uuid::new_v4(),
+            score_summary: Some(serde_json::json!({ "overallScore": score })),
+            roi_summary: Some(serde_json::json!({ "tokensUsed": tokens })),
+            case_type: Some("golden".into()),
+            weight: Some(1),
+            stage: Some(stage.into()),
+            issue_tags: None,
+        }
+    }
+
+    #[test]
+    fn stage_breakdown_uses_baseline_stage_sample_count_for_average() {
+        let baseline_a = build_scored_result_row("video_prompt", 10.0, 100);
+        let baseline_b = build_scored_result_row("video_prompt", 6.0, 120);
+        let variant = build_scored_result_row("video_prompt", 9.0, 140);
+
+        let breakdown = calculate_stage_breakdown(&[&variant], &[&baseline_a, &baseline_b]);
+        let video_prompt = breakdown
+            .iter()
+            .find(|row| row.stage == "video_prompt")
+            .expect("video_prompt breakdown");
+
+        assert!((video_prompt.avg_quality_score - 9.0).abs() < f64::EPSILON);
+        assert!((video_prompt.quality_score_delta - 1.0).abs() < f64::EPSILON);
+        assert_eq!(video_prompt.token_delta, -80);
     }
 
     proptest! {
