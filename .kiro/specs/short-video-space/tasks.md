@@ -20,8 +20,8 @@
 |------|----------------|
 | `implementation-breakdown.md` | 2–5、10 |
 | `auto-publishing-platforms.md` | 5–7、12、6 |
-| `open-source-borrowing.md` | 1、3–4、11、9、14 |
-| `docs/plans/moneyprinter-short-video-space.md` | 1、15（MP-W1～MP-W7） |
+| `open-source-borrowing.md` | 1、3–4、11、9、15（边界）；与 14 中 MP 段落交叉 |
+| `docs/plans/moneyprinter-short-video-space.md` | 1、14（MP-W1～MP-W7）；与 2/9/11 交叉 |
 
 ---
 
