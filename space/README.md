@@ -7,3 +7,4 @@
 - [`short-video/README.md`](./short-video/README.md)：短视频 Space 总览
 - [`short-video/open-source-borrowing.md`](./short-video/open-source-borrowing.md)：开源项目可借鉴功能清单
 - [`short-video/auto-publishing-platforms.md`](./short-video/auto-publishing-platforms.md)：国内/海外视频平台自动发布方案
+- [`short-video/implementation-breakdown.md`](./short-video/implementation-breakdown.md)：短视频 Space 分阶段实施拆分

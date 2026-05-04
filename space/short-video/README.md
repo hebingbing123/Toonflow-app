@@ -24,3 +24,4 @@
 
 - [`open-source-borrowing.md`](./open-source-borrowing.md)：已补充 `MoneyPrinterTurbo` 与 `Jellyfish` 的源码核对结论
 - [`auto-publishing-platforms.md`](./auto-publishing-platforms.md)
+- [`implementation-breakdown.md`](./implementation-breakdown.md)：把借鉴结论和自动发布方案拆成可执行实施项
