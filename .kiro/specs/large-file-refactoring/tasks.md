@@ -147,6 +147,14 @@
       - Large-file probe after this slice: `video_prompt_memory/mod.rs` is down to 525 lines; the new helper modules stay under 800 lines, but `selected.rs` still needs further splitting at 1,604 lines
       - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
 
+    - [x] 3.1.14 Split `video_prompt_memory/selected.rs` into focused submodules
+      - `2026-05-04`: turned `selected.rs` into a thin entry layer and moved the heavy logic into `selected/focus.rs`, `selected/optimize.rs`, and `selected/store.rs`
+      - Kept the existing selected-memory API stable for sibling modules and tests by routing the same helper surface through thin wrappers in `selected.rs`
+      - Run targeted backend verification again: `cargo check -q` and `cargo test -q production::workbench::video_prompt_memory::tests:: --lib` (`226 passed; 0 failed`)
+      - Run the full refactor gate and confirm it remains on the existing backend baseline (`1664 passed; 48 failed; 37 ignored`)
+      - Large-file probe after this slice: `selected.rs` is down to 193 lines, `selected/focus.rs` is 652 lines, `selected/optimize.rs` is 466 lines, `selected/store.rs` is 361 lines, and `video_prompt_memory/mod.rs` remains 525 lines
+      - _Requirements: 2.1, 3.1, 3.2, 3.3, 3.7, 3.9_
+
   - [x] 3.2 Split backend/src/production/workbench/meta/generate/tests.rs (8,131 lines → ~11 files)
     
     - [x] 3.2.1 Analyze test file structure
