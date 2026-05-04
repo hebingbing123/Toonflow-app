@@ -133,16 +133,17 @@ pub(crate) async fn submit_review(
         SET status = 'submitted',
             submitted_score = $1,
             submitted_at = NOW()
-        WHERE id = $2 AND owner_user_id = $3
+        WHERE id = $2 AND owner_user_id = $3 AND status = 'pending'
         RETURNING *
         "#,
     )
     .bind(&body.submitted_score)
     .bind(id)
     .bind(user_id)
-    .fetch_one(&mut *tx)
+    .fetch_optional(&mut *tx)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or_else(|| ApiError::BadRequest("Review queue item is no longer pending".into()))?;
 
     // 回写实验结果（需求 5.5）
     if let Some(result_id) = updated.experiment_result_id {
@@ -202,20 +203,34 @@ pub(crate) async fn skip_review(
         )));
     }
 
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     // 更新状态为 skipped
     let updated = sqlx::query_as::<_, ReviewQueueItem>(
         r#"
         UPDATE app_review_queue
         SET status = 'skipped'
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1 AND owner_user_id = $2 AND status = 'pending'
         RETURNING *
         "#,
     )
     .bind(id)
     .bind(user_id)
-    .fetch_one(pool)
+    .fetch_optional(&mut *tx)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or_else(|| ApiError::BadRequest("Review queue item is no longer pending".into()))?;
+
+    if let Some(result_id) = updated.experiment_result_id {
+        clear_experiment_result_human_review_requirement(&mut tx, result_id).await?;
+    }
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(updated))
 }
@@ -325,6 +340,26 @@ async fn write_back_to_experiment_result(
         "#,
     )
     .bind(merged_score_summary)
+    .bind(result_id)
+    .execute(&mut **tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
+
+async fn clear_experiment_result_human_review_requirement(
+    tx: &mut sqlx::Transaction<'_, Postgres>,
+    result_id: Uuid,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        UPDATE app_experiment_result
+        SET requires_human_review = FALSE,
+            updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
     .bind(result_id)
     .execute(&mut **tx)
     .await
