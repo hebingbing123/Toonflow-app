@@ -32,11 +32,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ShortVideoMode _mode = ShortVideoMode.animated;
   String _videoRatio = '9:16';
   bool _loadingProjects = false;
-  bool _loadingProjectStats = false;
+  bool _loadingProjectOverview = false;
   bool _creatingProject = false;
   bool _savingProjectConfig = false;
   List<ProjectRow> _projects = const <ProjectRow>[];
   ProjectStats? _projectStats;
+  TaskCenterGetTaskApiResult? _recentProjectTasks;
+  QualityScopeInsightRow? _qualityScopeInsight;
+  List<BadCaseStatItem> _badCaseStats = const <BadCaseStatItem>[];
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -89,7 +92,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       });
       _applyProjectPreset(_selectedProject);
       _syncSelectedProjectContext();
-      _loadProjectStats();
+      _loadProjectOverview();
       if (projects.isEmpty) {
         setState(() {
           _projectConfigLine = '还没有项目，可先去项目区创建一个短剧项目。';
@@ -166,23 +169,43 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     return '9:16';
   }
 
-  Future<void> _loadProjectStats() async {
+  Future<void> _loadProjectOverview() async {
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
       if (mounted) {
         setState(() {
           _projectStats = null;
+          _recentProjectTasks = null;
+          _qualityScopeInsight = null;
+          _badCaseStats = const <BadCaseStatItem>[];
         });
       }
       return;
     }
     setState(() {
-      _loadingProjectStats = true;
+      _loadingProjectOverview = true;
       _projectStats = null;
+      _recentProjectTasks = null;
+      _qualityScopeInsight = null;
+      _badCaseStats = const <BadCaseStatItem>[];
     });
     try {
-      final stats = await fetchProjectStatsByProjectId(token, project.id);
+      final results = await Future.wait<Object>([
+        fetchProjectStatsByProjectId(token, project.id),
+        postTasksGetTaskApi(
+          token,
+          page: 1,
+          limit: 6,
+          projectId: project.numericId,
+        ),
+        fetchQualityScopeInsights(
+          token,
+          projectId: project.numericId,
+          limit: 1,
+        ),
+        fetchBadCaseStats(token, projectId: project.numericId, limit: 3),
+      ]);
       if (!mounted) {
         return;
       }
@@ -190,7 +213,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         return;
       }
       setState(() {
-        _projectStats = stats;
+        _projectStats = results[0] as ProjectStats;
+        _recentProjectTasks = results[1] as TaskCenterGetTaskApiResult;
+        final scopeRows = results[2] as List<QualityScopeInsightRow>;
+        _qualityScopeInsight = scopeRows.isEmpty ? null : scopeRows.first;
+        _badCaseStats = results[3] as List<BadCaseStatItem>;
       });
     } on RustApiException catch (_) {
       if (!mounted) {
@@ -198,6 +225,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       }
       setState(() {
         _projectStats = null;
+        _recentProjectTasks = null;
+        _qualityScopeInsight = null;
+        _badCaseStats = const <BadCaseStatItem>[];
       });
     } catch (_) {
       if (!mounted) {
@@ -205,11 +235,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       }
       setState(() {
         _projectStats = null;
+        _recentProjectTasks = null;
+        _qualityScopeInsight = null;
+        _badCaseStats = const <BadCaseStatItem>[];
       });
     } finally {
       if (mounted) {
         setState(() {
-          _loadingProjectStats = false;
+          _loadingProjectOverview = false;
         });
       }
     }
@@ -251,7 +284,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             '已新建项目 #${created.numericId}，并写入 ${_modeLabel(_mode)} · ${_videoRatioLabel(_videoRatio)}。';
       });
       _syncSelectedProjectContext();
-      await _loadProjectStats();
+      await _loadProjectOverview();
     } on RustApiException catch (e) {
       if (!mounted) {
         return;
@@ -309,7 +342,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             '已写回项目 #${updated.numericId}：${_modeLabel(_mode)} · ${_videoRatioLabel(_videoRatio)}';
       });
       _syncSelectedProjectContext();
-      _loadProjectStats();
+      _loadProjectOverview();
     } on RustApiException catch (e) {
       if (!mounted) {
         return;
@@ -362,6 +395,88 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       return '已有脚本和分镜，但角色资产还少，建议先补角色与参考素材。';
     }
     return '脚本、分镜和角色资产都已有基础，可以直接进入制作工作区继续出图和出片。';
+  }
+
+  String _spaceOverviewSummary() {
+    if (_loadingProjectOverview) {
+      return '正在汇总当前项目的脚本、任务和质检状态…';
+    }
+    final project = _selectedProject;
+    if (project == null) {
+      return '先选一个项目，Space 才能把当前模式、任务和质检线索收成同一张概览。';
+    }
+    final taskCount = _recentProjectTasks?.total ?? 0;
+    final runningCount = _countTasksByStatus('running');
+    final failedCount = _countTasksByStatus('failed');
+    final quality = _qualityScopeInsight;
+    if (_projectStats == null) {
+      return '项目已选中，但概览还没读到。可以先刷新项目或直接进入脚本工作区。';
+    }
+    if (failedCount > 0) {
+      return '这个项目最近有 $failedCount 个失败任务，建议先去任务中心定位失败点，再继续出图或出片。';
+    }
+    if (runningCount > 0) {
+      return '当前还有 $runningCount 个任务在处理中，适合先去任务中心盯进度，同时准备下一轮脚本或素材。';
+    }
+    if (quality != null && quality.badCaseCount > 0) {
+      return '这个项目已有 ${quality.badCaseCount} 条坏例记录，建议先看质量评审再决定是改脚本还是重做分镜。';
+    }
+    if (taskCount <= 0) {
+      return _projectReadinessSummary(_projectStats);
+    }
+    return '当前项目最近已有 $taskCount 条任务记录，基础链路已经跑起来了，可以继续推进脚本、制作或质检复核。';
+  }
+
+  int _countTasksByStatus(String status) {
+    final rows = _recentProjectTasks?.data ?? const <JobRow>[];
+    return rows.where((row) => row.status == status).length;
+  }
+
+  String _qualitySummaryLine() {
+    final insight = _qualityScopeInsight;
+    if (insight == null) {
+      return _isAnimated
+          ? '质量评审还没有收敛出明显信号，后续会在这里提醒画风一致性、角色连续性和镜头节奏风险。'
+          : '质量评审还没有收敛出明显信号，后续会在这里提醒表演自然度、真实感和口播节奏风险。';
+    }
+    final passRate = insight.passRatePercent.toStringAsFixed(0);
+    if (_isAnimated) {
+      return '当前项目自动/人工评审通过率约 $passRate%，已记录 ${insight.badCaseCount} 条坏例；继续重点盯角色一致性、画面连续性和镜头节奏。';
+    }
+    return '当前项目自动/人工评审通过率约 $passRate%，已记录 ${insight.badCaseCount} 条坏例；继续重点盯表演自然度、场景真实感和口播镜头质感。';
+  }
+
+  String _formatBadCaseLabel(BadCaseStatItem item) {
+    final raw = (item.badCaseCategory ?? '').trim();
+    if (raw.isEmpty) {
+      return '未分类';
+    }
+    return raw.replaceAll('_', ' ');
+  }
+
+  String _formatTaskKind(JobRow row) {
+    final kind = row.kind.trim();
+    if (kind.isEmpty) {
+      return '未命名任务';
+    }
+    return kind.replaceAll('.', ' / ');
+  }
+
+  String _formatTaskStatus(JobRow row) {
+    switch (row.status) {
+      case 'queued':
+        return '排队中';
+      case 'running':
+        return '进行中';
+      case 'succeeded':
+        return '已完成';
+      case 'failed':
+        return '失败';
+      case 'cancelled':
+        return '已取消';
+      default:
+        return row.status;
+    }
   }
 
   @override
@@ -476,7 +591,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                               });
                               _applyProjectPreset(_selectedProject);
                               _syncSelectedProjectContext();
-                              _loadProjectStats();
+                              _loadProjectOverview();
                             },
                     ),
                   ),
@@ -559,7 +674,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               ],
               const SizedBox(height: 10),
               Text(
-                _loadingProjectStats
+                _loadingProjectOverview
                     ? '正在读取当前项目准备度…'
                     : _projectReadinessSummary(_projectStats),
                 style: theme.textTheme.bodySmall?.copyWith(color: outline),
@@ -592,6 +707,99 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     ),
                   ],
                 ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: outline),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('当前项目概览', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Text(
+                _spaceOverviewSummary(),
+                style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _MetricChip(
+                    label: '最近任务',
+                    value: (_recentProjectTasks?.total ?? 0).toString(),
+                  ),
+                  _MetricChip(
+                    label: '进行中',
+                    value: _countTasksByStatus('running').toString(),
+                  ),
+                  _MetricChip(
+                    label: '失败',
+                    value: _countTasksByStatus('failed').toString(),
+                  ),
+                  _MetricChip(
+                    label: '坏例',
+                    value: (_qualityScopeInsight?.badCaseCount ?? 0).toString(),
+                  ),
+                  _MetricChip(
+                    label: '通过率',
+                    value:
+                        '${(_qualityScopeInsight?.passRatePercent ?? 0).toStringAsFixed(0)}%',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(_qualitySummaryLine(), style: theme.textTheme.bodySmall),
+              if (_badCaseStats.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text('最近坏例倾向', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _badCaseStats
+                      .map(
+                        (item) => _MetricChip(
+                          label: _formatBadCaseLabel(item),
+                          value: item.count.toString(),
+                        ),
+                      )
+                      .toList(growable: false),
+                ),
+              ],
+              if ((_recentProjectTasks?.data ?? const <JobRow>[])
+                  .isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text('最近任务流', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 8),
+                for (final task in _recentProjectTasks!.data.take(3))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.fiber_manual_record,
+                          size: 10,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${_formatTaskKind(task)} · ${_formatTaskStatus(task)}',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ],
           ),
