@@ -8,6 +8,24 @@ use crate::state::AppState;
 use super::super::storage::{ensure_project_owned, parse_agent_type};
 use super::super::types::{MemoryHistoryItem, MessageRow, QueryMemoryBody, to_memory_history_item};
 
+fn memory_tier_requires_scope(memory_tier: &str) -> bool {
+    matches!(memory_tier, "stage_summary" | "delta_memory")
+}
+
+fn scope_signature_has_any_dimension(scope_signature: &serde_json::Value) -> bool {
+    let Some(object) = scope_signature.as_object() else {
+        return false;
+    };
+    object.values().any(|value| match value {
+        serde_json::Value::Null => false,
+        serde_json::Value::Bool(_) => true,
+        serde_json::Value::Number(_) => true,
+        serde_json::Value::String(text) => !text.trim().is_empty(),
+        serde_json::Value::Array(items) => !items.is_empty(),
+        serde_json::Value::Object(map) => !map.is_empty(),
+    })
+}
+
 #[utoipa::path(
     post,
     path = "/api/v1/agents/memory/query",
@@ -29,7 +47,6 @@ pub(crate) async fn query_memory(
 ) -> Result<Json<Vec<MemoryHistoryItem>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
-    let pool = state.require_pool()?;
     let memory_type = match body.memory_type.trim() {
         "" | "message" => "message",
         "summary" => "summary",
@@ -48,7 +65,26 @@ pub(crate) async fn query_memory(
                     .into(),
             ));
         }
+        if memory_tier_requires_scope(tier)
+            && !body
+                .scope_signature
+                .as_ref()
+                .is_some_and(scope_signature_has_any_dimension)
+        {
+            return Err(ApiError::BadRequest(format!(
+                "memoryTier {tier} requires a non-empty scopeSignature"
+            )));
+        }
+    } else if body
+        .scope_signature
+        .as_ref()
+        .is_some_and(|scope| !scope_signature_has_any_dimension(scope))
+    {
+        return Err(ApiError::BadRequest(
+            "scopeSignature must contain at least one scope dimension".into(),
+        ));
     }
+    let pool = state.require_pool()?;
 
     ensure_project_owned(pool, uid, body.project_id).await?;
     observe::memory_http(uid, body.project_id, "query");
@@ -106,4 +142,30 @@ pub(crate) async fn query_memory(
     let items: Vec<MemoryHistoryItem> = rows.into_iter().map(to_memory_history_item).collect();
 
     Ok(Json(items))
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::{memory_tier_requires_scope, scope_signature_has_any_dimension};
+
+    #[test]
+    fn scoped_query_tiers_require_scope_signature() {
+        assert!(memory_tier_requires_scope("stage_summary"));
+        assert!(memory_tier_requires_scope("delta_memory"));
+        assert!(!memory_tier_requires_scope("style_bible"));
+    }
+
+    #[test]
+    fn query_scope_signature_requires_meaningful_dimension() {
+        assert!(scope_signature_has_any_dimension(
+            &json!({"storyboardIds":[1], "episodeId": 2})
+        ));
+        assert!(!scope_signature_has_any_dimension(&json!({})));
+        assert!(!scope_signature_has_any_dimension(
+            &json!({"storyboardIds": [], "assetIds": []})
+        ));
+        assert!(!scope_signature_has_any_dimension(&json!("ep3")));
+    }
 }

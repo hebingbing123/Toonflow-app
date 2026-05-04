@@ -150,6 +150,21 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     return Map<String, dynamic>.from(decoded);
   }
 
+  bool _memoryTierRequiresScope(String tier) =>
+      tier == 'stage_summary' || tier == 'delta_memory';
+
+  Map<String, dynamic>? _validatedScopeSignatureForTier(
+    String tier, {
+    required String actionLabel,
+  }) {
+    final scopeSignature = _parseScopeSignature();
+    if (_memoryTierRequiresScope(tier) &&
+        (scopeSignature == null || scopeSignature.isEmpty)) {
+      throw FormatException('$actionLabel 需要填写非空的 scopeSignature JSON。');
+    }
+    return scopeSignature;
+  }
+
   String _normalizedSelection(
     String raw, {
     required List<String> supported,
@@ -194,6 +209,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
     final memoryType = _queryType;
+    final memoryTier = _memoryTier;
     if (projectId == null || agentType.isEmpty) {
       setState(() => _statusLine = '请填写合法的项目 numeric ID 和 agent type。');
       return;
@@ -209,13 +225,15 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         agentType: agentType,
         episodesId: _episodesId,
         memoryType: memoryType,
-        memoryTier: _memoryTier == 'all' ? null : _memoryTier,
-        scopeSignature: _parseScopeSignature(),
+        memoryTier: memoryTier == 'all' ? null : memoryTier,
+        scopeSignature: memoryTier == 'all'
+            ? _parseScopeSignature()
+            : _validatedScopeSignatureForTier(memoryTier, actionLabel: '查询 scoped 记忆'),
       );
       if (!mounted) return;
       setState(() {
         _memoryRows = rows;
-        final tierSummary = _memoryTier == 'all' ? '全部层级' : _memoryTier;
+        final tierSummary = memoryTier == 'all' ? '全部层级' : memoryTier;
         _memorySummary =
             '已读取 ${rows.length} 条 $memoryType 记忆 · 层级 $tierSummary。';
         _loadingMemory = false;
@@ -281,6 +299,10 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     final appendType = _appendType;
     final appendTier = _appendMemoryTier;
     final appendName = _appendNameCtrl.text.trim();
+    final scopeSignature = _validatedScopeSignatureForTier(
+      appendTier,
+      actionLabel: '追加 scoped 记忆',
+    );
     if (projectId == null ||
         agentType.isEmpty ||
         content.isEmpty ||
@@ -303,7 +325,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         content: content,
         name: appendName.isEmpty ? null : appendName,
         memoryTier: appendTier,
-        scopeSignature: _parseScopeSignature(),
+        scopeSignature: scopeSignature,
       );
       await _queryMemory();
       if (!mounted) return;
