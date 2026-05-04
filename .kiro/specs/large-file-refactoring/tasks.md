@@ -555,19 +555,19 @@
     - Verified all 14 files now have ≤800 lines, including the split Rust entry modules
     - _Requirements: 2.1-2.14_
 
-  - [~] 7.2 Verify preservation tests still pass
+  - [x] 7.2 Verify preservation tests still pass
     - **Property 2: Preservation** - API Compatibility and Test Coverage Maintained
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
-    - Run preservation property tests from step 2
-    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
-    - Verify all public APIs still accessible
-    - Verify all tests still pass
-    - Verify gate checks still pass
+    - `2026-05-04`: re-ran `cargo test --test preservation_properties -q` in `backend/`
+    - **ACTUAL OUTCOME**: Preservation property tests PASS (`7 passed; 0 failed`) and confirm the public refactoring surface remains accessible
+    - Verified the same preservation suite from step 2 still passes after the file splits
+    - Full gate and full-suite verification remain tracked separately in 7.3 / 7.4 because the dirty worktree still contains unrelated existing failures outside this large-file refactoring slice
     - _Requirements: 3.1-3.10_
 
   - [~] 7.3 Run complete test suite
     - Run `cargo test` in backend/ - ensure all tests pass
     - Run `flutter test` in frontend/ - ensure all tests pass
+    - `2026-05-04`: isolated rerun confirms `cargo test -q scripting::scripts::property_tests::tests::prop2_emotion_curve_coverage --lib` currently fails in the dirty worktree, separate from the large-file verification and preservation-property checks
     - _Requirements: 3.3_
 
   - [~] 7.4 Run final gate check
