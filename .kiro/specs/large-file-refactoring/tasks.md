@@ -417,19 +417,19 @@
       - Fix a real UI regression uncovered by the test run: duplicate memory chips now reuse the dedupe-aware preview map instead of recomputing rows without `isDuplicated`
       - _Requirements: 2.12, 3.3, 3.6, 3.8_
     
-    - [~] 6.2.4 Commit
+    - [x] 6.2.4 Commit
       - `git commit -m "refactor: split agent_memory_view.dart into 2 modules (≤800 lines each)"`
       - _Requirements: 2.12_
 
-  - [ ] 6.3 Split frontend/lib/rust_api/benchmark/api.dart (875 lines → ~2 files)
+  - [x] 6.3 Split frontend/lib/rust_api/benchmark/api.dart (875 lines → ~2 files)
     
-    - [~] 6.3.1 Analyze and create structure
+    - [x] 6.3.1 Analyze and create structure
       - Read file, identify API definitions and types
       - Create `rust_api/benchmark/api/` directory
       - Create api.dart and types.dart
       - _Requirements: 2.13_
     
-    - [~] 6.3.2 Migrate code
+    - [x] 6.3.2 Migrate code
       - Move API interfaces to api.dart (~500 lines)
       - Move type definitions to types.dart (~400 lines)
       - _Bug_Condition: isBugCondition(file) where lineCount(file) > 800_
@@ -437,8 +437,11 @@
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.13, 3.1, 3.2, 3.3, 3.8, 3.9_
     
-    - [~] 6.3.3 Update and verify
-      - Add exports, run flutter checks
+    - [x] 6.3.3 Update and verify
+      - Keep `api.dart` as the public entrypoint and move benchmark response types into `rust_api/benchmark/api/types.dart`
+      - Run `dart format` on the split files
+      - Run targeted `flutter analyze` on `frontend/lib/rust_api/benchmark/api.dart` and `frontend/lib/rust_api/benchmark/api/types.dart` (`No issues found!`)
+      - Run `flutter test test/benchmark_support_test.dart` (`All tests passed!`)
       - _Requirements: 2.13, 3.3, 3.6, 3.8_
     
     - [~] 6.3.4 Commit
