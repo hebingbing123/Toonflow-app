@@ -105,6 +105,7 @@ pub(super) use transformation::{
 };
 
 pub(super) use trimming::{
+    performance_fragment_has_subject_locked_signal,
     trim_director_performance_fragment_against_storyboard_fields,
     trim_fragment_by_shared_keyword_families, trim_prefixed_style_fragment,
     trim_style_fragment_against_prompt_coverage, trim_style_fragment_against_storyboard_fields,

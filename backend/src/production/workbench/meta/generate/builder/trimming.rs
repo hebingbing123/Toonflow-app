@@ -22,8 +22,15 @@ pub const SOUND_SHARED_KEYWORD_FAMILIES: &[&[&str]] = &[
 pub const PERFORMANCE_SHARED_KEYWORD_FAMILIES: &[&[&str]] = &[
     &["欲言又止", "欲说还休"],
     &["抬眼", "抬眸", "抬起眼"],
-    &["停顿", "顿住", "停了停"],
-    &["迟疑", "犹疑", "犹豫"],
+    &[
+        "停顿",
+        "停顿片刻",
+        "顿住",
+        "停了停",
+        "没有开口",
+        "迟迟没有开口",
+    ],
+    &["迟疑", "迟迟", "犹疑", "犹豫"],
     &["回头", "回眸", "回身看"],
     &["看向", "望向", "望着", "看着", "注视"],
     &["唇线收紧", "抿唇", "嘴唇抿紧", "唇角绷紧", "嘴角绷紧"],
@@ -86,11 +93,9 @@ pub fn trim_style_fragment_against_storyboard_fields(
         let trimmed = preserve_high_signal_performance_fragment(trimmed, &original_fragment);
         let trimmed = if trimmed.is_none()
             && video_prompt_scene_needs_identity_memory(fields)
-            && performance_fragment_has_unique_micro_detail(fragment)
-            && style_note_matches_shared_keyword_family(
+            && performance_fragment_has_subject_locked_signal(
                 fragment,
                 &[fields.action.as_str(), fields.dialogue.as_str()],
-                PERFORMANCE_SHARED_KEYWORD_FAMILIES,
             ) {
             Some(fragment.to_string())
         } else {
@@ -140,6 +145,39 @@ pub fn trim_style_fragment_against_storyboard_fields(
         };
     }
     Some(fragment.to_string())
+}
+
+pub fn performance_fragment_has_subject_locked_signal(fragment: &str, fields: &[&str]) -> bool {
+    performance_fragment_has_unique_micro_detail(fragment)
+        || performance_fragment_shared_keyword_family_count(fragment, fields) >= 2
+}
+
+fn performance_fragment_shared_keyword_family_count(fragment: &str, fields: &[&str]) -> usize {
+    let normalized_fragment = normalize_prompt_text(fragment);
+    if normalized_fragment.is_empty() {
+        return 0;
+    }
+
+    let normalized_fields = fields
+        .iter()
+        .map(|field| normalize_prompt_text(field))
+        .filter(|field| !field.is_empty())
+        .collect::<Vec<_>>();
+    if normalized_fields.is_empty() {
+        return 0;
+    }
+
+    PERFORMANCE_SHARED_KEYWORD_FAMILIES
+        .iter()
+        .filter(|family| {
+            family
+                .iter()
+                .any(|keyword| normalized_fragment.contains(keyword))
+                && normalized_fields
+                    .iter()
+                    .any(|field| family.iter().any(|keyword| field.contains(keyword)))
+        })
+        .count()
 }
 
 pub fn trim_prefixed_style_fragment(

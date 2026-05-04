@@ -194,6 +194,20 @@ fn compact_contextual_video_style_note_keeps_high_signal_performance_detail_for_
 }
 
 #[test]
+fn compact_contextual_video_style_note_keeps_subject_role_pair_for_hesitant_visible_speech() {
+    let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚站在窗边迟疑开口".into()),
+            video_desc: Some("（林晚站在窗边、城市夜景落地窗边、林晚、4秒、中景、缓推、抬眼后迟迟没有开口、隐忍 / 克制、冷蓝窗光、你终于来了、雨声、A22）".into()),
+            duration: Some("4s".into()),
+        };
+
+    assert_eq!(
+        compact_contextual_video_style_note("表演抬眼停顿，语气轻声克制", Some(&storyboard_row),),
+        Some("表演抬眼停顿".to_string())
+    );
+}
+
+#[test]
 fn compact_contextual_video_style_note_keeps_identity_micro_performance_for_silent_close_up() {
     let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("林晚在镜前停住".into()),

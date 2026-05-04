@@ -113,6 +113,48 @@ pub(in crate::production::workbench::meta::generate) fn select_contextual_observ
             ))
         })
         .collect::<Vec<_>>();
+    let has_subject_locked_role_candidate =
+        candidates
+            .iter()
+            .any(|(subject_priority, scope_priority, ..)| {
+                *subject_priority != usize::MAX && *scope_priority <= 1
+            });
+    if !has_subject_locked_role_candidate && !normalized_subject_candidates.is_empty() {
+        candidates.extend(
+            select_subject_role_video_style_memory_notes_for_storyboard(
+                rows,
+                &normalized_subject_candidates,
+                Some(storyboard_row),
+            )
+            .into_iter()
+            .filter_map(|note| {
+                let compacted = compact_guardrail_sensitive_style_note(
+                    &note,
+                    storyboard_row,
+                    constraint_pressure,
+                )
+                .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+                let evidence = observation_style_note_context_evidence(&note, &context).max(
+                    observation_style_note_context_evidence(&compacted, &context),
+                );
+                let compacted = rank_observation_summary_style_note_fragments(
+                    &compacted,
+                    &context,
+                    constraint_pressure,
+                )?;
+                let min_evidence = observation_summary_style_note_min_evidence(
+                    &compacted,
+                    &context,
+                    0,
+                    0,
+                    constraint_pressure,
+                );
+                let fragment_score =
+                    observation_summary_style_note_score(&compacted, &context, constraint_pressure);
+                (evidence >= min_evidence).then_some((0, 0, evidence, fragment_score, compacted))
+            }),
+        );
+    }
     let locked_subject_priority = candidates
         .iter()
         .map(|(subject_priority, ..)| *subject_priority)
@@ -384,7 +426,6 @@ pub(in crate::production::workbench::meta::generate) fn observation_style_note_c
 
     evidence
 }
-
 pub(in crate::production::workbench::meta::generate) fn style_note_matches_shared_keyword_family(
     note: &str,
     fields: &[&str],

@@ -183,10 +183,9 @@ pub fn fallback_contextual_performance_fragment(
                 style_note_fragment_family(fragment),
             ) >= 3
                 || (video_prompt_scene_needs_identity_memory(fields)
-                    && style_note_matches_shared_keyword_family(
+                    && performance_fragment_has_subject_locked_signal(
                         fragment,
                         &[fields.action.as_str(), fields.dialogue.as_str()],
-                        PERFORMANCE_SHARED_KEYWORD_FAMILIES,
                     ))
         })
         .filter(|fragment| {

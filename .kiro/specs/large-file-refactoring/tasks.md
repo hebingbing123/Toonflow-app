@@ -568,13 +568,15 @@
     - Run `cargo test` in backend/ - ensure all tests pass
     - Run `flutter test` in frontend/ - ensure all tests pass
     - `2026-05-04`: fixed `cargo test -q scripting::scripts::property_tests::tests::prop2_emotion_curve_coverage --lib` so the property now passes again
-    - Full backend suite still has existing unrelated failures in the dirty worktree, so this checkpoint remains open until those are resolved as well
+    - `2026-05-04`: preserved subject-locked `表演抬眼停顿` role memory across contextual trimming / role ranking, which reduced the backend full-suite failure count from `48` to `42`
+    - Current remaining backend blockers are still concentrated in meta prompt style-summary selection and downstream video negative-prompt suppression, so this checkpoint remains open until those clusters are resolved too
     - _Requirements: 3.3_
 
   - [~] 7.4 Run final gate check
     - Run `yarn refactor:check` at repository root
     - Ensure all checks pass (OpenAPI, cargo fmt, clippy, test, flutter analyze, test)
     - `2026-05-04`: after fixing the scripting property regression, the dirty-worktree baseline returned to `1664 passed; 48 failed; 37 ignored`
+    - `2026-05-04`: after preserving hesitant / subject-locked role-performance fragments, `yarn refactor:check` improved to `1671 passed; 42 failed; 37 ignored`; gate still open because the remaining failures cluster around observation-style summary selection and negative-prompt suppression
     - _Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.10_
 
   - [~] 7.5 Final commit
