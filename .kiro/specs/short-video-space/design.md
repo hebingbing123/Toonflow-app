@@ -4,6 +4,8 @@
 
 本 spec 将 `space/short-video` 中的产品结论与实施波浪落为可执行设计：在复用 Toonflow 现有生产域的前提下，增加项目级短视频配置、分镜 readiness 与候选确认、成片装配与导出校验、独立发布域与多平台适配，并明确与开源参考项目的边界。
 
+**产品完整性优先**：架构上为「全平台、全链路、可运营数据」留好扩展点（注册表、审计表、阶段标签、媒体槽位），避免为省工期引入只能短期存在的「终态 stub」；分波实现时仍以 `requirements.md` 需求 **9** 的 α/β/γ 终态对齐。
+
 **与 `docs/plans/moneyprinter-short-video-space.md` 的关系**：该文档使用 **MP-W1～MP-W7** 分段；其中 **MP-W1（Space 入口编排、动漫/真人、项目写回、跳转）正在实现**，本设计文档不将其重复展开为新的后端域。**MP-W2** 起的「统一视频目标、批量候选成片、任务阶段、媒体槽位」等与下述模块交叉，实现时与 `tasks.md` 的 **M 节 / B 节 / J 节** 对读。
 
 ## 架构
@@ -104,7 +106,7 @@ graph TB
 
 ### 平台注册表
 
-后端维护 `PlatformId` → `{ automation: full|semi|none, constraints: ..., adapter: Option<impl> }`，UI 与发布准备共用同一真源，避免「文档里有八个平台、代码里只写三个」的漂移。
+后端维护 `PlatformId` → `{ automation: full_auto|semi_auto|manual_assisted, constraints: ..., workflow: … }`：`manual_assisted` 须为**可执行**工作流（步骤、校验、人工确认点、审计写回均有实现，而非空白占位）；`full_auto` / `semi_auto` 为可机读投递路径。UI、发布准备与文档中的第一层平台清单**一一对应**；**终态不允许长期「未接入」**（与需求 12.1 一致）。分波上线时各平台可先后达标，但注册表从第一天起包含**全集平台行**与约束元数据，避免漂移。
 
 ## 与现有仓库模块的对应关系
 
