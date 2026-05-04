@@ -100,6 +100,17 @@ fn validate_create_review_body_rejects_out_of_range_scores() {
 }
 
 #[test]
+fn validate_create_review_body_requires_project_for_script_scope() {
+    let body = CreateQualityReviewBody {
+        target_type: "script".to_string(),
+        script_id: Some(7),
+        ..Default::default()
+    };
+    let err = validate_create_review_body(&body).expect_err("script scope must include project");
+    assert!(matches!(err, ApiError::BadRequest(_)));
+}
+
+#[test]
 fn validate_list_reviews_query_rejects_invalid_target_type() {
     let query = ListQualityReviewsQuery {
         project_id: None,

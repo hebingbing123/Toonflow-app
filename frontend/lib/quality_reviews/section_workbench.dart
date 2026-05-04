@@ -395,6 +395,10 @@ class _QualityReviewsWorkbenchDialogState
       setState(() => _statusLine = 'targetType 和 source 不能为空');
       return;
     }
+    if (scriptId != null && projectId == null) {
+      setState(() => _statusLine = '填写 scriptId 时必须同时填写 projectId');
+      return;
+    }
     setState(() {
       _creatingReview = true;
       _statusLine = null;

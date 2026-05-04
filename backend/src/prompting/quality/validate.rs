@@ -72,6 +72,12 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
         )));
     }
 
+    if body.script_id.is_some() && body.project_id.is_none() {
+        return Err(ApiError::BadRequest(
+            "projectId is required when scriptId is provided".into(),
+        ));
+    }
+
     if let Some(source) = body.source.as_deref() {
         if !VALID_SOURCES.contains(&source) {
             return Err(ApiError::BadRequest(format!(
