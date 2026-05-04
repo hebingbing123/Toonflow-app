@@ -543,7 +543,7 @@
     - `2026-05-04`: reran gate after the follow-up backend prompt-memory / negative-prompt fixes and the frontend analyzer cleanup; the full repository gate now passes again end to end
     - _Requirements: 3.3, 3.6, 3.8, 3.10_
 
-- [ ] 7. Final Verification
+- [x] 7. Final Verification
 
   - [x] 7.1 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - All Files Comply with 800 Line Limit
@@ -583,8 +583,9 @@
     - `2026-05-04`: final rerun now passes completely; merged OpenAPI export, backend `fmt` / `clippy -D warnings` / `cargo test`, frontend `flutter analyze`, and frontend `flutter test` are all green
     - _Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.10_
 
-  - [~] 7.5 Final commit
+  - [x] 7.5 Final commit
     - `git add` any remaining files
+    - `2026-05-04`: recorded the final verification / gate-complete status in commit `e3012f14`
     - `git commit -m "refactor: complete large file refactoring - all files now ≤800 lines"`
     - _Requirements: 2.1-2.14_
 
