@@ -47,6 +47,7 @@ void main() {
           body: QualityReviewsSection(
             accessToken: 'token',
             controller: controller,
+            initialProjectNumericId: 9,
           ),
         ),
       ),
@@ -85,6 +86,7 @@ void main() {
           body: QualityReviewsSection(
             accessToken: 'token',
             controller: controller,
+            initialProjectNumericId: 9,
           ),
         ),
       ),
@@ -99,6 +101,7 @@ void main() {
     expect(find.text('评审详情：r1 · output · manual'), findsNWidgets(2));
     expect(find.textContaining('Token效率：'), findsNothing);
     expect(find.text('只看 auto 样本'), findsOneWidget);
+    expect(find.widgetWithText(TextField, '9'), findsNWidgets(2));
     expect(find.widgetWithText(TextField, 'output'), findsWidgets);
   });
 }

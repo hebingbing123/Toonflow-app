@@ -12,13 +12,16 @@ void main() {
         home: Scaffold(
           body: TaskCenterSection(
             accessToken: 'token',
+            initialProjectNumericId: 9,
             loadingTaskProjects: false,
             loadingTaskCategories: false,
             loadingTaskApi: false,
             loadingTaskDetailsByNumericId: false,
             loadingTaskDetailsUuid: false,
             taskDetailJobIdController: TextEditingController(),
-            taskProjects: const [TaskCenterProjectItem(numericId: 9, name: '古风短剧')],
+            taskProjects: const [
+              TaskCenterProjectItem(numericId: 9, name: '古风短剧'),
+            ],
             taskCategoriesLine:
                 '分类 2 个 · asset.generate.image, script.export.zip',
             taskApiSummaryLine: 'page=1 limit=10 · total=1 · page_rows=1',
@@ -67,13 +70,16 @@ void main() {
         home: Scaffold(
           body: TaskCenterSection(
             accessToken: 'token',
+            initialProjectNumericId: 9,
             loadingTaskProjects: false,
             loadingTaskCategories: false,
             loadingTaskApi: false,
             loadingTaskDetailsByNumericId: false,
             loadingTaskDetailsUuid: false,
             taskDetailJobIdController: detailController,
-            taskProjects: const [TaskCenterProjectItem(numericId: 9, name: '古风短剧')],
+            taskProjects: const [
+              TaskCenterProjectItem(numericId: 9, name: '古风短剧'),
+            ],
             taskCategoriesLine:
                 '分类 2 个 · asset.generate.image, script.export.zip',
             taskApiSummaryLine: 'page=1 limit=10 · total=1 · page_rows=1',
@@ -116,6 +122,7 @@ void main() {
     expect(find.text('读取任务详情（numeric ID）'), findsOneWidget);
     expect(find.text('读取 UUID 详情'), findsOneWidget);
     expect(find.widgetWithText(TextField, '1'), findsWidgets);
+    expect(find.widgetWithText(TextField, '9'), findsOneWidget);
     expect(
       find.textContaining(
         '任务详情（numeric ID）：#101 · asset.generate.image · queued · uuid=job-101',

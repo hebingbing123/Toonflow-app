@@ -12,6 +12,7 @@ class _TaskCenterWorkbenchControllers {
   });
 
   factory _TaskCenterWorkbenchControllers.create({
+    int? initialProjectNumericId,
     required List<TaskCenterProjectItem> initialProjects,
     required List<JobRow> initialJobs,
   }) {
@@ -21,10 +22,16 @@ class _TaskCenterWorkbenchControllers {
       stateCtrl: TextEditingController(),
       taskClassCtrl: TextEditingController(),
       projectIdCtrl: TextEditingController(
-        text: initialProjects.isEmpty ? '' : initialProjects.first.numericId.toString(),
+        text:
+            initialProjectNumericId?.toString() ??
+            (initialProjects.isEmpty
+                ? ''
+                : initialProjects.first.numericId.toString()),
       ),
       numericTaskIdCtrl: TextEditingController(
-        text: initialJobs.isEmpty ? '' : initialJobs.first.numericTaskId.toString(),
+        text: initialJobs.isEmpty
+            ? ''
+            : initialJobs.first.numericTaskId.toString(),
       ),
       uuidCtrl: TextEditingController(
         text: initialJobs.isEmpty ? '' : initialJobs.first.id,
@@ -50,4 +57,3 @@ class _TaskCenterWorkbenchControllers {
     uuidCtrl.dispose();
   }
 }
-

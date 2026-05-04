@@ -149,6 +149,14 @@ extension _HomePageBuildProductSections on _HomePageState {
           );
         },
         onSyncProjectContext: (projectNumericId) {
+          setState(() {
+            _productScopedProjectNumericId = projectNumericId;
+          });
+          if (projectNumericId == null) {
+            _workspaceInputController.projectIdController.clear();
+            _workspaceInputController.clearScriptScope();
+            return;
+          }
           _workspaceInputController.applyProjectScope(projectNumericId);
           _workspaceInputController.clearScriptScope();
         },
@@ -208,6 +216,7 @@ extension _HomePageBuildProductSections on _HomePageState {
         ProductWorkspacePane.tasks)
       TaskCenterSection(
         accessToken: _session?.accessToken,
+        initialProjectNumericId: _productScopedProjectNumericId,
         loadingTaskProjects: _taskCenterController.loadingTaskProjects,
         loadingTaskCategories: _taskCenterController.loadingTaskCategories,
         loadingTaskApi: _taskCenterController.loadingTaskApi,
@@ -240,6 +249,7 @@ extension _HomePageBuildProductSections on _HomePageState {
       QualityReviewsSection(
         accessToken: _session?.accessToken,
         controller: _qualityReviewsController,
+        initialProjectNumericId: _productScopedProjectNumericId,
       ),
   ];
 }

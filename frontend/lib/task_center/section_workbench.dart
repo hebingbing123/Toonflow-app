@@ -4,6 +4,7 @@ part of 'section.dart';
 class _TaskCenterWorkbenchDialog extends StatefulWidget {
   const _TaskCenterWorkbenchDialog({
     required this.accessToken,
+    required this.initialProjectNumericId,
     required this.initialProjects,
     required this.initialTaskSummary,
     required this.initialCategoriesSummary,
@@ -13,6 +14,7 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
   });
 
   final String accessToken;
+  final int? initialProjectNumericId;
   final List<TaskCenterProjectItem> initialProjects;
   final String? initialTaskSummary;
   final String? initialCategoriesSummary;
@@ -52,6 +54,7 @@ class _TaskCenterWorkbenchDialogState
   void initState() {
     super.initState();
     _ctrls = _TaskCenterWorkbenchControllers.create(
+      initialProjectNumericId: widget.initialProjectNumericId,
       initialProjects: widget.initialProjects,
       initialJobs: widget.initialJobs,
     );

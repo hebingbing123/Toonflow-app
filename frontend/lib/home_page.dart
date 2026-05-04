@@ -123,6 +123,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _error;
+  int? _productScopedProjectNumericId;
   final _workspaceInputController = WorkspaceInputController();
   final _workspaceOperationController = WorkspaceOperationController();
   late final WorkspaceRunController _workspaceRunController =
@@ -356,6 +357,7 @@ class _HomePageState extends State<HomePage> {
     _taskCenterController.reset();
     _qualityReviewsController.reset();
     _workspaceOperationController.reset();
+    _productScopedProjectNumericId = null;
   }
 
   @override

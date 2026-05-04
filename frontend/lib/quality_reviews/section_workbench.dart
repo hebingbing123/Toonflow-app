@@ -4,6 +4,7 @@ part of 'section.dart';
 class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   const _QualityReviewsWorkbenchDialog({
     required this.accessToken,
+    required this.initialProjectNumericId,
     required this.initialReviews,
     required this.initialReviewDetails,
     required this.initialStatsSummary,
@@ -11,6 +12,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   });
 
   final String accessToken;
+  final int? initialProjectNumericId;
   final List<QualityReview> initialReviews;
   final String? initialReviewDetails;
   final String? initialStatsSummary;
@@ -100,7 +102,9 @@ class _QualityReviewsWorkbenchDialogState
   @override
   void initState() {
     super.initState();
-    _ctrls = _QualityReviewsWorkbenchControllers.create();
+    _ctrls = _QualityReviewsWorkbenchControllers.create(
+      initialProjectNumericId: widget.initialProjectNumericId,
+    );
     _reviews = List<QualityReview>.from(widget.initialReviews);
     _statsSummary = widget.initialStatsSummary;
     _stagePassRateSummary = widget.initialStagePassRateSummary;
@@ -401,7 +405,8 @@ class _QualityReviewsWorkbenchDialogState
       return;
     }
     if (targetType == 'storyboard' &&
-        (int.tryParse(rawTargetId) == null || (int.tryParse(rawTargetId) ?? 0) <= 0)) {
+        (int.tryParse(rawTargetId) == null ||
+            (int.tryParse(rawTargetId) ?? 0) <= 0)) {
       setState(() => _statusLine = '创建 storyboard 评审时，targetId 必须是正整数镜头 ID');
       return;
     }
@@ -416,9 +421,7 @@ class _QualityReviewsWorkbenchDialogState
           projectId: projectId,
           scriptId: scriptId,
           targetType: targetType,
-          targetId: rawTargetId.isEmpty
-              ? null
-              : rawTargetId,
+          targetId: rawTargetId.isEmpty ? null : rawTargetId,
           source: source,
           overallScore: score,
           stage: _ctrls.createStageCtrl.text.trim().isEmpty

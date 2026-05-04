@@ -18,7 +18,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
 
   final String? accessToken;
   final VoidCallback onOpenProjects;
-  final ValueChanged<int> onSyncProjectContext;
+  final ValueChanged<int?> onSyncProjectContext;
   final VoidCallback onOpenScriptWorkspace;
   final VoidCallback onOpenProductionWorkspace;
   final VoidCallback onOpenTasks;
@@ -147,10 +147,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
 
   void _syncSelectedProjectContext() {
     final project = _selectedProject;
-    if (project == null) {
-      return;
-    }
-    widget.onSyncProjectContext(project.numericId);
+    widget.onSyncProjectContext(project?.numericId);
   }
 
   ShortVideoMode _modeFromProject(ProjectRow project) {

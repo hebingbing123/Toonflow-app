@@ -22,9 +22,12 @@ class _QualityReviewsWorkbenchControllers {
     required this.createBadCaseCategoryCtrl,
   });
 
-  factory _QualityReviewsWorkbenchControllers.create() {
+  factory _QualityReviewsWorkbenchControllers.create({
+    int? initialProjectNumericId,
+  }) {
+    final initialProjectText = initialProjectNumericId?.toString() ?? '';
     return _QualityReviewsWorkbenchControllers(
-      projectIdFilterCtrl: TextEditingController(),
+      projectIdFilterCtrl: TextEditingController(text: initialProjectText),
       scriptIdFilterCtrl: TextEditingController(),
       targetTypeFilterCtrl: TextEditingController(),
       targetIdFilterCtrl: TextEditingController(),
@@ -32,7 +35,7 @@ class _QualityReviewsWorkbenchControllers {
       stageFilterCtrl: TextEditingController(text: 'all'),
       gradeFilterCtrl: TextEditingController(text: 'all'),
       reviewIdCtrl: TextEditingController(),
-      createProjectIdCtrl: TextEditingController(),
+      createProjectIdCtrl: TextEditingController(text: initialProjectText),
       createScriptIdCtrl: TextEditingController(),
       createTargetTypeCtrl: TextEditingController(text: 'output'),
       createTargetIdCtrl: TextEditingController(

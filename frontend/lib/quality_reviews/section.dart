@@ -15,10 +15,12 @@ class QualityReviewsSection extends StatelessWidget {
     super.key,
     required this.accessToken,
     required this.controller,
+    required this.initialProjectNumericId,
   });
 
   final String? accessToken;
   final QualityReviewsController controller;
+  final int? initialProjectNumericId;
 
   Future<void> _openQualityWorkbench(BuildContext context) async {
     final token = accessToken;
@@ -32,6 +34,7 @@ class QualityReviewsSection extends StatelessWidget {
       context: context,
       builder: (dialogCtx) => _QualityReviewsWorkbenchDialog(
         accessToken: token,
+        initialProjectNumericId: initialProjectNumericId,
         initialReviews: controller.qualityReviews ?? const <QualityReview>[],
         initialReviewDetails: controller.qualityReviewByIdLine,
         initialStatsSummary: controller.qualityStatsLine,
