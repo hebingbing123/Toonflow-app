@@ -79,6 +79,11 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
     }
 
     if body.target_type == "storyboard" {
+        if body.project_id.is_none() {
+            return Err(ApiError::BadRequest(
+                "projectId is required when targetType is storyboard".into(),
+            ));
+        }
         let storyboard_id = body
             .target_id
             .as_deref()

@@ -114,11 +114,24 @@ fn validate_create_review_body_requires_project_for_script_scope() {
 fn validate_create_review_body_requires_positive_storyboard_target_id() {
     let body = CreateQualityReviewBody {
         target_type: "storyboard".to_string(),
+        project_id: Some(12),
         target_id: Some("scene-1".to_string()),
         ..Default::default()
     };
     let err = validate_create_review_body(&body)
         .expect_err("storyboard review must carry positive numeric target id");
+    assert!(matches!(err, ApiError::BadRequest(_)));
+}
+
+#[test]
+fn validate_create_review_body_requires_project_for_storyboard_target() {
+    let body = CreateQualityReviewBody {
+        target_type: "storyboard".to_string(),
+        target_id: Some("12".to_string()),
+        ..Default::default()
+    };
+    let err = validate_create_review_body(&body)
+        .expect_err("storyboard review must carry project scope");
     assert!(matches!(err, ApiError::BadRequest(_)));
 }
 
