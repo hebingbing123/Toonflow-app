@@ -46,7 +46,7 @@ async fn review_queue_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    r#"{"decision":"pass","qualityScore":85,"notes":"ok"}"#,
+                    r#"{"submittedScore":{"overallScore":85,"passed":true,"recommendation":"approved","notes":"ok"}}"#,
                 ))
                 .unwrap(),
         )
@@ -54,5 +54,5 @@ async fn review_queue_roundtrip() {
         .unwrap();
     let (status, submitted) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "submit={submitted}");
-    assert_eq!(submitted["status"].as_str().unwrap_or(""), "reviewed");
+    assert_eq!(submitted["status"].as_str().unwrap_or(""), "submitted");
 }

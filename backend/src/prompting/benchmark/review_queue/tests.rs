@@ -30,6 +30,7 @@ mod unit_tests {
         let valid = SubmitReviewBody {
             submitted_score: serde_json::json!({
                 "overallScore": 85,
+                "passed": true,
                 "dimensions": {
                     "characterConsistency": 90,
                     "emotionalExpression": 80
@@ -55,6 +56,22 @@ mod unit_tests {
             submitted_score: serde_json::json!(null),
         };
         assert!(validate_submit_body(&invalid_null).is_err());
+
+        let invalid_missing_passed = SubmitReviewBody {
+            submitted_score: serde_json::json!({
+                "overallScore": 85,
+                "recommendation": "approved"
+            }),
+        };
+        assert!(validate_submit_body(&invalid_missing_passed).is_err());
+
+        let invalid_out_of_range = SubmitReviewBody {
+            submitted_score: serde_json::json!({
+                "overallScore": 120,
+                "passed": true
+            }),
+        };
+        assert!(validate_submit_body(&invalid_out_of_range).is_err());
     }
 }
 

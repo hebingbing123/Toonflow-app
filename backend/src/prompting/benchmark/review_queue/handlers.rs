@@ -235,10 +235,37 @@ fn validate_get_query(query: &GetReviewQueueQuery) -> Result<(), ApiError> {
 }
 
 pub(super) fn validate_submit_body(body: &SubmitReviewBody) -> Result<(), ApiError> {
-    // 验证 submitted_score 是一个有效的 JSON 对象
-    if !body.submitted_score.is_object() {
+    let Some(score_obj) = body.submitted_score.as_object() else {
         return Err(ApiError::BadRequest(
             "submitted_score must be a JSON object".into(),
+        ));
+    };
+
+    let Some(overall_score) = score_obj.get("overallScore").and_then(|value| value.as_f64()) else {
+        return Err(ApiError::BadRequest(
+            "submitted_score.overallScore must be a number between 0 and 100".into(),
+        ));
+    };
+    if !(0.0..=100.0).contains(&overall_score) {
+        return Err(ApiError::BadRequest(
+            "submitted_score.overallScore must be between 0 and 100".into(),
+        ));
+    }
+
+    if score_obj.get("passed").and_then(|value| value.as_bool()).is_none() {
+        return Err(ApiError::BadRequest(
+            "submitted_score.passed must be a boolean".into(),
+        ));
+    }
+
+    if score_obj.contains_key("requiresRework")
+        && score_obj
+            .get("requiresRework")
+            .and_then(|value| value.as_bool())
+            .is_none()
+    {
+        return Err(ApiError::BadRequest(
+            "submitted_score.requiresRework must be a boolean when provided".into(),
         ));
     }
     Ok(())
@@ -349,7 +376,11 @@ mod tests {
     #[test]
     fn test_validate_submit_body() {
         let valid_body = SubmitReviewBody {
-            submitted_score: serde_json::json!({"score": 85, "issues": []}),
+            submitted_score: serde_json::json!({
+                "overallScore": 85,
+                "passed": true,
+                "issues": []
+            }),
         };
         assert!(validate_submit_body(&valid_body).is_ok());
 
@@ -357,5 +388,15 @@ mod tests {
             submitted_score: serde_json::json!("not an object"),
         };
         assert!(validate_submit_body(&invalid_body).is_err());
+
+        let missing_passed = SubmitReviewBody {
+            submitted_score: serde_json::json!({"overallScore": 85}),
+        };
+        assert!(validate_submit_body(&missing_passed).is_err());
+
+        let invalid_score_range = SubmitReviewBody {
+            submitted_score: serde_json::json!({"overallScore": 101, "passed": true}),
+        };
+        assert!(validate_submit_body(&invalid_score_range).is_err());
     }
 }

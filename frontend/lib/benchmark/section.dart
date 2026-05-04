@@ -75,6 +75,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     text: const JsonEncoder.withIndent('  ').convert({
       'overallScore': 82,
       'passed': true,
+      'requiresRework': false,
       'recommendation': 'approved',
     }),
   );
