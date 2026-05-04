@@ -22,5 +22,5 @@
 
 ## 文档索引
 
-- [`open-source-borrowing.md`](./open-source-borrowing.md)
+- [`open-source-borrowing.md`](./open-source-borrowing.md)：已补充 `MoneyPrinterTurbo` 与 `Jellyfish` 的源码核对结论
 - [`auto-publishing-platforms.md`](./auto-publishing-platforms.md)
