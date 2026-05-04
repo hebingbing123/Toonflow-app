@@ -149,12 +149,6 @@ async fn validate_review_scope_ownership(
     }
 
     if target_type == "storyboard" {
-        let Some(project_id) = project_id else {
-            return Ok(());
-        };
-        let Some(script_id) = script_id else {
-            return Ok(());
-        };
         let Some(storyboard_id) = target_id
             .map(str::trim)
             .and_then(|value| value.parse::<i32>().ok())
@@ -162,29 +156,53 @@ async fn validate_review_scope_ownership(
         else {
             return Ok(());
         };
-        let ok: bool = sqlx::query_scalar(
-            r#"
-            SELECT EXISTS(
-              SELECT 1
-              FROM app_storyboard sb
-              INNER JOIN app_script sc ON sc.id = sb.script_id
-              INNER JOIN app_project p ON p.id = sc.project_id
-              WHERE p.owner_user_id = $1
-                AND p.numeric_id = $2
-                AND sc.numeric_id = $3
-                AND sb.numeric_id = $4
-            )
-            "#,
-        )
-        .bind(user_id)
-        .bind(project_id)
-        .bind(script_id)
-        .bind(storyboard_id)
-        .fetch_one(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-        if !ok {
-            return Err(ApiError::NotFound);
+        if let Some(project_id) = project_id {
+            let ok: bool = if let Some(script_id) = script_id {
+                sqlx::query_scalar(
+                    r#"
+                    SELECT EXISTS(
+                      SELECT 1
+                      FROM app_storyboard sb
+                      INNER JOIN app_script sc ON sc.id = sb.script_id
+                      INNER JOIN app_project p ON p.id = sc.project_id
+                      WHERE p.owner_user_id = $1
+                        AND p.numeric_id = $2
+                        AND sc.numeric_id = $3
+                        AND sb.numeric_id = $4
+                    )
+                    "#,
+                )
+                .bind(user_id)
+                .bind(project_id)
+                .bind(script_id)
+                .bind(storyboard_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+            } else {
+                sqlx::query_scalar(
+                    r#"
+                    SELECT EXISTS(
+                      SELECT 1
+                      FROM app_storyboard sb
+                      INNER JOIN app_script sc ON sc.id = sb.script_id
+                      INNER JOIN app_project p ON p.id = sc.project_id
+                      WHERE p.owner_user_id = $1
+                        AND p.numeric_id = $2
+                        AND sb.numeric_id = $3
+                    )
+                    "#,
+                )
+                .bind(user_id)
+                .bind(project_id)
+                .bind(storyboard_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+            };
+            if !ok {
+                return Err(ApiError::NotFound);
+            }
         }
     }
 
