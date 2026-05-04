@@ -155,7 +155,7 @@ fn create_mock_review_from_manual_scores(
 
     // 将手动分数映射回质量评审字段（简化映射）
     for manual in manual_scores {
-        let score_i16 = (manual.score / 10.0) as i16;
+        let score_i16 = scale_manual_score_to_review_score(manual.score);
         match manual.dimension {
             QualityDimension::CharacterConsistency => {
                 review.character_consistency = Some(score_i16);
@@ -183,6 +183,10 @@ fn create_mock_review_from_manual_scores(
     }
 
     review
+}
+
+fn scale_manual_score_to_review_score(score: f64) -> i16 {
+    (score / 10.0).round().clamp(0.0, 10.0) as i16
 }
 
 /// 获取量表配置查询参数
@@ -239,6 +243,15 @@ mod tests {
         let review = create_mock_review_from_manual_scores(&manual_scores, user_id);
 
         assert_eq!(review.user_id, user_id);
-        assert_eq!(review.character_consistency, Some(8));
+        assert_eq!(review.character_consistency, Some(9));
+    }
+
+    #[test]
+    fn test_scale_manual_score_to_review_score_rounds_and_clamps() {
+        assert_eq!(scale_manual_score_to_review_score(84.9), 8);
+        assert_eq!(scale_manual_score_to_review_score(85.0), 9);
+        assert_eq!(scale_manual_score_to_review_score(99.0), 10);
+        assert_eq!(scale_manual_score_to_review_score(140.0), 10);
+        assert_eq!(scale_manual_score_to_review_score(-12.0), 0);
     }
 }
