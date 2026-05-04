@@ -7,7 +7,22 @@
 1. **借鉴开源已验证流程**：参考 `MoneyPrinterTurbo`（单入口、集中参数、成片导向）与 `Jellyfish`（准备态、readiness、候选确认、任务回跳、结果回写），迁入现有 Rust + Flutter + Postgres 工作流，不照搬技术栈或单体任务目录模型。
 2. **补上分发环**：在生成与导出之后增加可选自动发布（国内与海外平台），与半自动发布并存；自动发布独立于生成任务，属于 `export` 之后的独立流程。
 
-文档真源：`space/short-video/README.md`、`implementation-breakdown.md`、`auto-publishing-platforms.md`、`open-source-borrowing.md`。
+文档真源：`space/short-video/README.md`、`implementation-breakdown.md`、`auto-publishing-platforms.md`、`open-source-borrowing.md`、`docs/plans/moneyprinter-short-video-space.md`（MoneyPrinter 优点迁移与 **MP-Wave** 语义）。
+
+## 文档与 Wave 编号对读（重要）
+
+仓库里存在**两套 Wave 口径**，本 spec 区分书写：
+
+| 口径 | 来源 | 含义（摘要） |
+|------|------|----------------|
+| **MP-W1…MP-W7** | `moneyprinter-short-video-space.md` | MP-W1 = Space **入口编排**（动漫/真人、项目写回、跳转、标准路径）；MP-W2 = 统一视频目标与批量候选成片等；MP-W3～MP-W7 = Jellyfish 风格准备态、媒体沉淀、任务调度台、成片装配、低优剪辑。 |
+| **impl Wave 1…6** | `implementation-breakdown.md` | impl Wave 1 = **项目级短视频目标配置**（多字段持久化）；impl Wave 2 = readiness/候选；impl Wave 3 = 成片装配与导出检查；impl Wave 4～6 = 发布与回流等。 |
+
+**当前约定**：**MP-W1（入口编排）正在实现**，本 spec **不为 MP-W1 追加新的实现任务条目**（避免与进行中的工作重复）；与 MP-W1 重叠的验收以该计划文档与主分支为准。**impl Wave 1（全量项目级配置）**与 **MP-W2** 在「统一视频目标配置」上高度重叠，任务在 `tasks.md` 的 **B 节**跟踪（不等同于 MP-W1）。
+
+### 5.2a 与「Wave 1」字样
+
+- 文中「创作目标配置」指 **impl Wave 1 / MP-W2 向** 的项目生产参数，**非** MP-W1 入口编排单独一波。
 
 ## 核心约束
 
@@ -32,6 +47,7 @@
 ### 1.2 Space 作为项目级总入口
 
 - Space 首页应能表达「当前项目卡在哪一环」，并统一跳转 Script Workspace、Production Workspace、任务中心、质量评审。
+- **第一屏显式模式**（`moneyprinter-short-video-space.md`）：`动漫短剧` 与 `真人短剧` 二选一（或等价 UI），共用同一生产主链、前置准备与验收重点可区分。
 - 借鉴 `MoneyPrinterTurbo` 的「从主题到成片的顺序式入口」与「下一步可见」，而非其单体 Python MVC 或单任务目录式输出。
 
 ### 1.3 可见主链与「下一步」（开源单入口流水线）
@@ -39,14 +55,15 @@
 - 在 Space 层展示**线性主链**（与 MPT 任务链精神一致，UI 表述随产品定稿）：脚本 → 素材/分镜准备 → 旁白/字幕 → 成片装配 → 导出 → 发布准备；每一步可显示完成/阻塞与深链到对应工作台。
 - **下一步**：根据 readiness、导出检查、发布准备结果计算「建议用户处理的单一或 Top-3 动作」，避免用户自行判断「该打开哪个台子」。
 
-### 1.4 项目生产概览（open-source-borrowing P0）
+### 1.4 项目生产概览（open-source-borrowing P0 + moneyprinter MP-W5）
 
 - **项目级生产概览**：一屏汇总当前项目在生成、导出、发布各段的进度与阻塞（与「卡在哪一环」互补，偏数据汇总而非仅阶段枚举）。
+- **建议指标**（`moneyprinter-short-video-space.md` MP-W5）：已就绪分镜数、生成中任务数、待复核坏例数（与质量评审域对接，字段以现有表为准）。
 - **阶段语义**（Jellyfish）：`shot preparation` → `candidate confirmation` → `ready for generation` → `export ready` 在 Toonflow 中映射为可读阶段或标签，供概览与主链使用（不要求与 Jellyfish 同名代码结构）。
 
 ---
 
-## 需求 2：项目级短视频目标配置（Wave 1 / P0）
+## 需求 2：项目级短视频目标配置（impl Wave 1 / MP-W2 / P0）
 
 ### 2.1 后端
 
@@ -219,11 +236,11 @@
 
 ### 9.2 P1
 
-发布单模型、平台适配层、`publish` 任务状态机、多平台文案改写；**任务中心短视频阶段过滤**；**导出前质量检查钩子**；旁白/字幕/BGM 若未在 Wave 1 字段中一次做完，则在本优先级补全编辑与持久化（与 `open-source-borrowing` P1 对齐）。
+发布单模型、平台适配层、`publish` 任务状态机、多平台文案改写；**任务中心短视频阶段过滤**；**导出前质量检查钩子**；旁白/字幕/BGM 若未在 **MP-W2 / impl 项目级配置波** 一次做完，则在本优先级补全编辑与持久化（与 `open-source-borrowing` P1、`moneyprinter-short-video-space.md` MP-W2 对齐）。
 
 ### 9.3 P2
 
-定时发布、批量排程、表现数据回流、轻量粗剪、**候选版本对比**（`open-source-borrowing` P2）。
+定时发布、批量排程、表现数据回流、轻量粗剪、**候选版本对比**（`open-source-borrowing` P2）；**MP-W7 低优先级后期剪辑能力**（只读剪辑台、基础重排、成片级字幕/BGM 调整、简单时间线评估等，详见 `moneyprinter-short-video-space.md`）。
 
 ### 9.4 最小可交付竖切（若只选一个切口）
 
@@ -284,11 +301,59 @@
 
 - 本 spec 需求 **1–4、11** 主要覆盖 `open-source-borrowing.md` 与 `implementation-breakdown.md` 的生产台与任务闭环。
 - 需求 **5–7、12** 主要覆盖 `auto-publishing-platforms.md` 与 `implementation-breakdown.md` 的发布域。
+- **需求 14** 对齐 `moneyprinter-short-video-space.md` 的 MP-W1～MP-W7（与 MPT 形态、Jellyfish 补充任务列表一一对应）；**MP-W1 不在本 backlog 重复立项**。
 - 若某 Jellyfish 检查项在 Toonflow 无字段映射，应在实现或 Task Review 中**显式列出缺口**，不得静默省略。
 
 ---
 
-## 需求 14：开源借鉴边界（非功能代码，约束设计）
+## 需求 14：`moneyprinter-short-video-space.md` 规划增量（MP-Wave）
+
+### 14.1 MP-W1：入口编排（**正在实现 — 本 spec 不追加实现任务**）
+
+- 新增 `短视频 Space`；用户切换 **动漫短剧 / 真人短剧**；在 Space 内选择项目并将 `projectType=short_drama`、`mode`、`videoRatio` 等写回项目（以该计划文档与当前代码为准）。
+- 从 Space 跳转：项目、脚本工作区、制作工作区、任务中心、质量评审；**明确一条标准路径**串联已有能力。
+- 文档所述「第一阶段四件事」：项目入口收口、脚本入口收口、制作入口收口、结果入口收口（题材/风格/创作手册/目标平台等可在 MP-W1 与后续波次间切分，以主分支实现为准）。
+
+### 14.2 MP-W2：MoneyPrinter 风格能力补齐（与 impl 项目级配置、任务编排重叠）
+
+- **统一视频目标配置**：平台、画幅、时长、创作模式、语音、字幕样式、BGM（与需求 2 / impl Wave 1 对齐）。
+- **一键批量生成候选成片**（依托现有 jobs；Space 发起与进度可见）。
+- **旁白、字幕、BGM** 成为可追踪的**任务阶段**（类型或阶段标签，与需求 11 协同）。
+- **成片候选可比对的质量验收摘要**（与质量评审/门控衔接）。
+
+### 14.3 MP-W2 真人模式附加
+
+- 真人参考图/参考镜头素材；角色与场景真实感约束；偏口播、表演、纪实感的脚本模板倾向；与动漫模式**不同的质量验收维度**。
+
+### 14.4 MP-W3：生成前准备态（增强需求 3）
+
+- 分镜更明确的 **`ready for generation` 视图状态**；Space **未就绪原因**归因到剧本、分镜、角色、参考图、视频参数等；候选确认流与 readiness 依赖（与需求 3.4 一致）。
+
+### 14.5 MP-W4：生成结果沉淀为可复用资产
+
+- **分镜媒体槽位**清晰：参考图、关键帧、当前生效视频、候选视频、导出结果分区管理。
+- **设当前视频 / 局部返工 / 导出** 统一为分镜**媒体操作**语义，减少结果散落在任务与临时链接。
+- **批量生成回写摘要**（哪些分镜已有可复用结果、哪些仅有任务无结果）；**回写失败 / 回写不完整**显式诊断（避免任务成功但分镜上下文未同步）。
+
+### 14.6 MP-W5：任务中心作短视频调度台（增强需求 11、1.4）
+
+- 任务中心 **project / script / storyboard** 快捷回跳（`publish` 见需求 11.1）。
+- 视频、出图、导出等任务的**阶段标签**：素材准备、出图、出视频、导出成片、质检（与 H 节任务对齐）。
+- 失败重试细分为：**重新生成**、**局部返工**、**回写补偿**（与需求 11.2 对齐）。
+
+### 14.7 MP-W6：后期输出与成片装配（增强需求 4）
+
+- 成片装配 rough cut；每分镜导出**最小字段**校验；按剧本/分镜顺序预组装批量成片输出。
+- **导出结果质量摘要**：缺帧、字幕缺失、旁白缺失、时长异常、未选当前视频等（可与导出前检查合并实现，但验收维度独立）。
+- **BGM、字幕样式、旁白声线** 收成**项目级或成片级**配置，避免逐分镜重复配置（与 `moneyprinter-short-video-space.md` 原文一致）。
+
+### 14.8 MP-W7：低优先级后期剪辑
+
+- 成片剪辑台只读版 → 镜头级基础重排/启停/替换当前视频版本 → 成片级字幕与 BGM 调整 → 导出前总校验 → 评估简单时间线 → 评估多轨/轻量轨道模型；**完整 NLE、多轨精细剪辑、帧级转场** 保持后置（同原文「暂不建议一开始就做」）。
+
+---
+
+## 需求 15：开源借鉴边界（非功能代码，约束设计）
 
 - **不深借**：`MoneyPrinterTurbo` 的单体 MVC、以单视频任务为中心的状态、本地任务目录式输出；`Jellyfish` 的全栈照搬；脱离 Toonflow 项目/剧本/分镜模型的孤立 readiness。
 - **深借**：Jellyfish 的 preparation → candidate confirmation → ready for generation 路径、readiness 聚合、任务与业务对象回跳、生成结果回写镜头/媒体上下文；MoneyPrinterTurbo 的单入口流水线感与集中参数、成片装配优先路径、快速批量候选成片（在 Toonflow 内由现有生成与任务体系承载，Space 负责编排与可见性）。
