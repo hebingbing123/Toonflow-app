@@ -63,9 +63,9 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
     if (readyAcrossAll > 0) {
       return StoryboardBatchWorkbenchDiagnosis(
         summary: '当前还没有选择要处理的分镜。',
-        detail: '已有 $readyAcrossAll 条分镜具备可用提示词，建议先一键选中可出图分镜，再批量发起出图或导出。',
+        detail: '已有 $readyAcrossAll 条分镜具备可用提示词，可直接一键批量出图；系统会自动挑出准备好的分镜入队。',
         recommendedAction:
-            StoryboardBatchWorkbenchRecommendedAction.selectReadyStoryboards,
+            StoryboardBatchWorkbenchRecommendedAction.generateSelected,
       );
     }
     return const StoryboardBatchWorkbenchDiagnosis(
