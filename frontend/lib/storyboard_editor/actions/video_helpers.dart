@@ -172,7 +172,14 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     if (sourceImage == null) {
       throw const FormatException('生成视频前需要先提供图片 URL 或当前预览图');
     }
-    final trackId = int.tryParse(_trackIdCtrl.text.trim());
+    var trackId = int.tryParse(_trackIdCtrl.text.trim());
+    if (trackId == null || trackId <= 0) {
+      final knownTrackIds = _knownTrackIds();
+      if (knownTrackIds.length == 1) {
+        trackId = knownTrackIds.first;
+        _trackIdCtrl.text = trackId.toString();
+      }
+    }
     if (trackId == null || trackId <= 0) {
       throw const FormatException('生成视频前请填写有效轨道 ID');
     }

@@ -201,7 +201,7 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
   if (prompt.isEmpty || duration == null || duration <= 0) {
     return const StoryboardWorkbenchDiagnosis(
       summary: '视频参数还没有准备完整。',
-      detail: '建议先生成默认视频提示词并确认时长，再提交视频任务。',
+      detail: '建议先生成默认视频提示词并确认时长；准备完成后可直接一键生成视频。',
       recommendedAction:
           StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt,
     );
@@ -231,9 +231,8 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
 
   return const StoryboardWorkbenchDiagnosis(
     summary: '图片、轨道和视频参数都已就绪。',
-    detail: '可以直接提交视频生成任务，随后刷新视频数据确认候选结果。',
+    detail: '可以直接一键生成视频，系统会自动补齐生成前提示词刷新、建议裁剪和结果回刷。',
     recommendedAction:
         StoryboardWorkbenchRecommendedAction.submitVideoGeneration,
   );
 }
-

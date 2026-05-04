@@ -130,7 +130,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
             TextButton(
               onPressed: saving ? null : onGenerateVideoPrompt,
-              child: const Text('生成默认视频提示词'),
+              child: const Text('手动生成默认提示词'),
             ),
             TextButton(
               onPressed: saving ? null : onOpenPatchRegeneration,
@@ -140,13 +140,20 @@ class _StoryboardVideoSection extends StatelessWidget {
               onPressed: saving || promptDiagnostics == null
                   ? null
                   : onApplyPromptRepairs,
-              child: const Text('应用生成前建议'),
+              child: const Text('手动应用生成前建议'),
             ),
             TextButton(
               onPressed: saving || loadingWorkbench ? null : onRefreshVideoData,
-              child: Text(loadingWorkbench ? '刷新中…' : '刷新视频数据'),
+              child: Text(loadingWorkbench ? '刷新中…' : '手动刷新视频数据'),
             ),
           ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '默认建议直接点“一键生成视频”。系统会自动补提示词、裁剪低收益片段、压缩重复负向约束并刷新结果；上面这些按钮保留给需要手动干预的场景。',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -327,7 +334,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             children: [
               FilledButton(
                 onPressed: saving ? null : onSubmitVideoGeneration,
-                child: Text(saving ? '提交中…' : '提交视频生成'),
+                child: Text(saving ? '生成中…' : '一键生成视频'),
               ),
               OutlinedButton(
                 onPressed: saving ? null : onExportCurrentVideo,
@@ -340,6 +347,13 @@ class _StoryboardVideoSection extends StatelessWidget {
                 child: Text(loadingExportJob ? '刷新导出任务中…' : '刷新导出任务状态'),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '若当前只发现 1 条可用轨道，提交时会自动回填，减少重复填写；存在多条轨道时仍保持手动选择，避免误生成。',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
           ),
         ),
         if (latestExportJob != null) ...[

@@ -107,7 +107,7 @@ String describeStoryboardWorkbenchRecommendedAction(
     case StoryboardWorkbenchRecommendedAction.refreshVideoData:
       return '刷新视频数据';
     case StoryboardWorkbenchRecommendedAction.submitVideoGeneration:
-      return '提交视频生成';
+      return '一键生成视频';
   }
 }
 
@@ -192,4 +192,3 @@ String buildStoryboardWorkbenchLoadingNotice({
     detail: detail,
   );
 }
-

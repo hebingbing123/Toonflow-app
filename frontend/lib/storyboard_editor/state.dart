@@ -52,7 +52,7 @@ extension _StoryboardWorkbenchState on _StoryboardWorkbenchPanelState {
             ? null
             : () => _runDialogAction(_submitVideoGeneration);
         if (_saving) {
-          recommendedActionLabel = '提交中…';
+          recommendedActionLabel = '生成中…';
         }
     }
     return (
