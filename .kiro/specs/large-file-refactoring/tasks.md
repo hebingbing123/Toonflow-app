@@ -444,19 +444,19 @@
       - Run `flutter test test/benchmark_support_test.dart` (`All tests passed!`)
       - _Requirements: 2.13, 3.3, 3.6, 3.8_
     
-    - [~] 6.3.4 Commit
+    - [x] 6.3.4 Commit
       - `git commit -m "refactor: split rust_api/benchmark/api.dart into 2 modules (≤800 lines each)"`
       - _Requirements: 2.13_
 
-  - [ ] 6.4 Split frontend/lib/quality_reviews/workbench_view.dart (805 lines → ~2 files)
+  - [x] 6.4 Split frontend/lib/quality_reviews/workbench_view.dart (805 lines → ~2 files)
     
-    - [~] 6.4.1 Analyze and create structure
+    - [x] 6.4.1 Analyze and create structure
       - Read file, identify widgets
       - Create `quality_reviews/workbench_view/` directory
       - Create workbench_view.dart and review_widgets.dart
       - _Requirements: 2.14_
     
-    - [~] 6.4.2 Migrate code
+    - [x] 6.4.2 Migrate code
       - Move main widget to workbench_view.dart (~500 lines)
       - Move sub-widgets to review_widgets.dart (~400 lines)
       - _Bug_Condition: isBugCondition(file) where lineCount(file) > 800_
@@ -464,8 +464,11 @@
       - _Preservation: Public APIs, test coverage_
       - _Requirements: 2.14, 3.1, 3.2, 3.3, 3.8, 3.9_
     
-    - [~] 6.4.3 Update and verify
-      - Add exports, run flutter checks
+    - [x] 6.4.3 Update and verify
+      - Keep `workbench_view.dart` as the public dialog entrypoint and move stage/grade display helpers into `quality_reviews/workbench_view/review_widgets.dart`
+      - Run `dart format` on the split files
+      - Run targeted `flutter analyze` on `frontend/lib/quality_reviews/workbench_view.dart`, `frontend/lib/quality_reviews/workbench_view/review_widgets.dart`, and `frontend/test/quality_reviews_workbench_dialog_view_test.dart` (`No issues found!`)
+      - Run `flutter test test/quality_reviews_workbench_dialog_view_test.dart` (`All tests passed!`)
       - _Requirements: 2.14, 3.3, 3.6, 3.8_
     
     - [~] 6.4.4 Commit
@@ -474,7 +477,7 @@
 
   - [~] 6.5 Phase 4 Gate Check
     - Run `yarn refactor:check` at repository root
-    - Ensure all checks pass
+    - `2026-05-04`: reran gate after 6.4; frontend-targeted checks passed, but full gate is still blocked by existing backend style-memory / negative-prompt failures (`1664 passed; 48 failed; 37 ignored`) outside this frontend slice
     - _Requirements: 3.3, 3.6, 3.8, 3.10_
 
 - [ ] 7. Final Verification
