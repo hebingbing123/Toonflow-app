@@ -195,6 +195,27 @@ fn project_style_note_is_low_gain_global_fill(
     if !generic_visual_fill {
         return false;
     }
+    if constraint_pressure.is_some_and(|pressure| {
+        (pressure.prefer_delivery_memory_recall
+            || pressure.has_dialogue_guardrail
+            || pressure.has_emotion_guardrail
+            || pressure.has_identity_guardrail)
+            && fragments.iter().all(|fragment| {
+                matches!(
+                    style_note_fragment_family(fragment),
+                    Some("镜头") | Some("情绪") | Some("光影") | Some("动作")
+                )
+            })
+            && fragments.iter().all(|fragment| {
+                ![
+                    "反光", "雨丝", "玻璃", "水痕", "逆光", "霓虹", "走位", "轴", "方向",
+                ]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+            })
+    }) {
+        return true;
+    }
     if fragments
         .iter()
         .all(|fragment| storyboard_style_already_covers_project_fill_fragment(fragment, fields))

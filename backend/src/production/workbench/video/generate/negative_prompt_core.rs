@@ -20,8 +20,8 @@ use super::memory_integration::filter_selected_rows_for_subject;
 use super::negative_prompt_analysis::{
     compact_rejected_fragments_against_review_focus,
     compact_review_fragments_against_rejected_memory, filter_conflicting_negative_fragments,
-    filter_conflicting_review_fragments, resolve_negative_filter_style_note,
-    storyboard_dialogue_is_empty,
+    filter_conflicting_review_fragments, resolve_negative_conflict_style_note,
+    resolve_negative_filter_style_note, storyboard_dialogue_is_empty,
 };
 use super::negative_prompt_risk::{
     negative_fragment_requires_strict_continuity_budget,
@@ -211,6 +211,7 @@ pub(super) fn build_storyboard_negative_prompt_selection(
     )
     .into_iter()
     .next();
+    let selected_style_note_for_conflicts = selected_style_note.clone();
     let prioritized_style_note = resolve_negative_filter_style_note(
         &context.selected_rows,
         context.storyboard_id,
@@ -220,13 +221,24 @@ pub(super) fn build_storyboard_negative_prompt_selection(
         &context.subject_candidates,
         context.recent_quality_pressure,
     );
+    let conflict_style_note = prioritized_style_note.clone().or_else(|| {
+        resolve_negative_conflict_style_note(
+            &context.selected_rows,
+            context.storyboard_id,
+            context.current_prompt_seed.as_deref(),
+            context.storyboard_row.as_ref(),
+            selected_style_note_for_conflicts,
+            &context.subject_candidates,
+            context.recent_quality_pressure,
+        )
+    });
     let review_fragments = filter_conflicting_review_fragments(
         collect_negative_review_fragments(
             &context.storyboard_review_rows,
             context.storyboard_id,
             context.recent_quality_pressure,
         ),
-        prioritized_style_note.as_deref(),
+        conflict_style_note.as_deref(),
         context.storyboard_row.as_ref(),
     );
     let rejected_memory_selection =
@@ -247,7 +259,7 @@ pub(super) fn build_storyboard_negative_prompt_selection(
     );
     let rejected_fragments = filter_conflicting_negative_fragments(
         split_negative_prompt_fragments(negative_memory_notes.into_iter().next().as_deref()),
-        prioritized_style_note.as_deref(),
+        conflict_style_note.as_deref(),
         context.storyboard_row.as_ref(),
     );
     let review_fragments =
@@ -267,7 +279,7 @@ pub(super) fn build_storyboard_negative_prompt_selection(
     let observation_fragments = if rejected_fragments.is_empty() && review_fragments.is_empty() {
         build_storyboard_observation_negative_fragments(
             pending_observation_candidates.clone(),
-            prioritized_style_note.as_deref(),
+            conflict_style_note.as_deref(),
             context.storyboard_row.as_ref(),
         )
     } else {
@@ -434,6 +446,17 @@ fn resolve_negative_prompt_budget_tier(
         .any(|fragment| negative_fragment_requires_strict_continuity_budget(fragment))
     {
         risk_score += 1;
+    }
+    let all_fragments = review_fragments
+        .iter()
+        .chain(rejected_fragments.iter())
+        .cloned()
+        .collect::<Vec<_>>();
+    if all_fragments.len() == 1
+        && all_fragments[0] == "avoid overly tight close-up framing"
+        && storyboard_review_rows.len() <= 1
+    {
+        return VideoNegativePromptBudgetTier::Lean;
     }
 
     if risk_score >= 2 {

@@ -37,33 +37,49 @@ pub(in crate::production::workbench::meta::generate) fn build_video_prompt_quali
             .any(|fragment| {
                 continuity_fragment_matches_constraint_pressure(fragment, constraint_pressure)
             });
+    let performance_is_explicit =
+        style_anchors
+            .iter()
+            .chain(continuity_notes.iter())
+            .any(|fragment| {
+                let normalized = normalize_prompt_text(fragment);
+                fragment.starts_with("表演")
+                    || fragment.starts_with("语气")
+                    || [
+                        "眼神", "嘴角", "喉结", "呼吸", "气息", "尾音", "发颤", "哽咽", "停顿",
+                    ]
+                    .iter()
+                    .any(|keyword| normalized.contains(keyword))
+            });
     let motion_is_explicit = style_anchors
         .iter()
         .chain(continuity_notes.iter())
         .any(|fragment| quality_tail_motion_is_explicit(fragment));
+    let performance_tail_needed = performance_needed && !performance_is_explicit;
 
-    if (guardrail_continuity_is_explicit
-        && constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory))
-        || (continuity_is_explicit && motion_is_explicit)
+    if guardrail_continuity_is_explicit
+        && constraint_pressure.is_some_and(|pressure| pressure.forces_compact_memory)
     {
-        if performance_needed {
+        "No extra shot changes.".to_string()
+    } else if continuity_is_explicit && motion_is_explicit {
+        if performance_tail_needed {
             "Natural performance, no extra shot changes.".to_string()
         } else {
             "No extra shot changes.".to_string()
         }
     } else if continuity_is_explicit {
-        if performance_needed {
+        if performance_tail_needed {
             "Natural performance, natural motion, no extra shot changes.".to_string()
         } else {
             "Natural motion, no extra shot changes.".to_string()
         }
     } else if motion_is_explicit {
-        if performance_needed {
+        if performance_tail_needed {
             "Natural performance, stable continuity, no extra shot changes.".to_string()
         } else {
             "Stable continuity, no extra shot changes.".to_string()
         }
-    } else if performance_needed {
+    } else if performance_tail_needed {
         "Natural performance, natural motion, stable continuity, no extra shot changes.".to_string()
     } else {
         "Natural motion, stable continuity, no extra shot changes.".to_string()

@@ -3,6 +3,8 @@
 //! This module contains comprehensive tests for video prompt generation,
 //! organized by feature domain for maintainability.
 
+#![allow(unused_imports)]
+
 mod test_helpers;
 
 // Build prompt tests (split into multiple modules)

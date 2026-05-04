@@ -210,7 +210,7 @@ String? buildQualityScopedExecutionChecklist({
   int? scriptId,
   int maxItems = 4,
 }) {
-  final steps = LinkedHashSet<String>();
+  final steps = <String>{};
   final scope = () {
     if (projectId != null && scriptId != null) return 'P$projectId/S$scriptId';
     if (projectId != null) return 'P$projectId';
@@ -267,4 +267,3 @@ String? buildQualityScopedExecutionChecklist({
   ];
   return lines.join('\n');
 }
-

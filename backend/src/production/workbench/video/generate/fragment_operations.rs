@@ -260,6 +260,9 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
     let mut visual_style_idx = None;
     let mut visual_error_flags = VisualErrorFlags::default();
     let mut visual_error_idx = None;
+    let mut visual_error_fragment = None;
+    let mut visual_error_fragment_count = 0usize;
+    let mut visual_error_uses_motion_jitter_wording = false;
 
     for (idx, fragment) in fragments.into_iter().enumerate() {
         if let Some(flags) = parse_character_consistency_fragment(&fragment) {
@@ -289,6 +292,13 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
         }
         if let Some(flags) = parse_visual_error_fragment(&fragment) {
             visual_error_idx.get_or_insert(idx);
+            visual_error_fragment_count += 1;
+            if visual_error_fragment.is_none() {
+                visual_error_fragment = Some(fragment.clone());
+            }
+            if canonical_negative_fragment(&fragment) == "avoid flicker or motion jitter" {
+                visual_error_uses_motion_jitter_wording = true;
+            }
             visual_error_flags.warped_anatomy |= flags.warped_anatomy;
             visual_error_flags.blur |= flags.blur;
             visual_error_flags.flicker |= flags.flicker;
@@ -312,7 +322,21 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
         }
     }
     if let Some(idx) = visual_error_idx {
-        for fragment in render_visual_error_fragments(visual_error_flags) {
+        let rendered_fragments = if visual_error_fragment_count == 1 {
+            vec![visual_error_fragment.unwrap_or_else(|| {
+                render_visual_error_fragments_for_budget(
+                    visual_error_flags,
+                    visual_error_uses_motion_jitter_wording,
+                )
+                .join(", ")
+            })]
+        } else {
+            render_visual_error_fragments_for_budget(
+                visual_error_flags,
+                visual_error_uses_motion_jitter_wording,
+            )
+        };
+        for fragment in rendered_fragments {
             compacted.push((idx, fragment));
         }
     }
@@ -443,7 +467,11 @@ fn negative_fragment_covers(existing: &str, candidate: &str) -> bool {
         parse_visual_error_fragment(existing),
         parse_visual_error_fragment(candidate),
     ) {
-        return visual_error_flags_cover(existing_flags, candidate_flags);
+        if visual_error_flags_cover(existing_flags, candidate_flags) {
+            return negative_fragment_information_score(existing)
+                >= negative_fragment_information_score(candidate);
+        }
+        return false;
     }
     if let (Some(existing_flags), Some(candidate_flags)) = (
         parse_character_consistency_fragment(existing),
@@ -468,27 +496,63 @@ fn compact_rushed_motion_and_jerky_fragment_pair(fragments: Vec<String>) -> Vec<
     let mut compacted = Vec::with_capacity(fragments.len());
     let mut saw_rushed_motion = false;
     let mut saw_motion_jitter = false;
+    let mut insertion_idx = None;
 
     for fragment in fragments {
         match canonical_negative_fragment(&fragment).as_str() {
-            "avoid rushed motion" => saw_rushed_motion = true,
-            "avoid flicker or motion jitter" => saw_motion_jitter = true,
+            "avoid rushed motion" => {
+                saw_rushed_motion = true;
+                insertion_idx.get_or_insert(compacted.len());
+            }
+            "avoid flicker or motion jitter" => {
+                saw_motion_jitter = true;
+                insertion_idx.get_or_insert(compacted.len());
+            }
             _ => compacted.push(fragment),
         }
     }
 
+    let insertion_idx = insertion_idx.unwrap_or(compacted.len());
     if saw_rushed_motion && saw_motion_jitter {
-        compacted.push("avoid rushed or jerky motion".to_string());
+        compacted.insert(insertion_idx, "avoid rushed or jerky motion".to_string());
     } else {
         if saw_rushed_motion {
-            compacted.push("avoid rushed motion".to_string());
+            compacted.insert(insertion_idx, "avoid rushed motion".to_string());
         }
         if saw_motion_jitter {
-            compacted.push("avoid flicker or motion jitter".to_string());
+            compacted.insert(insertion_idx, "avoid flicker or motion jitter".to_string());
         }
     }
 
     compacted
+}
+
+fn render_visual_error_fragments_for_budget(
+    flags: VisualErrorFlags,
+    use_motion_jitter_wording: bool,
+) -> Vec<String> {
+    if flags.warped_anatomy && flags.blur && flags.flicker {
+        return vec!["avoid warped anatomy, blur, flicker".to_string()];
+    }
+    if flags.warped_anatomy && flags.blur {
+        return vec!["avoid warped anatomy or blur".to_string()];
+    }
+
+    let mut fragments = Vec::new();
+    if flags.warped_anatomy {
+        fragments.push("avoid warped hands or limbs".to_string());
+    }
+    if flags.blur {
+        fragments.push("avoid blur".to_string());
+    }
+    if flags.flicker {
+        fragments.push(if use_motion_jitter_wording {
+            "avoid flicker or motion jitter".to_string()
+        } else {
+            "avoid flicker".to_string()
+        });
+    }
+    fragments
 }
 
 fn negative_fragment_contains(existing: &str, candidate: &str) -> bool {

@@ -142,6 +142,13 @@ pub fn director_performance_fragment_is_generic_proactive_hint(fragment: &str) -
     )
 }
 
+pub fn director_performance_fragment_is_generic_face_carryover(fragment: &str) -> bool {
+    matches!(
+        normalize_prompt_text(fragment).as_str(),
+        "神情内敛" | "眼神深沉" | "唇线收紧" | "神情低落" | "眼神黯淡" | "眉心轻蹙"
+    )
+}
+
 pub fn restore_reference_guardrail_style_detail(
     compacted_note: &str,
     original_note: &str,
@@ -544,13 +551,29 @@ pub fn score_compacted_style_note_against_constraint_pressure(
     }
     if pressure.prefer_visual_continuity_memory_recall {
         if style_note_contains_family(note, "光影") {
-            score += 5;
+            score += 12;
         }
         if style_note_contains_family(note, "镜头") {
-            score += 4;
+            score += 9;
         }
         if style_note_contains_family(note, "环境") {
-            score += 2;
+            score += 6;
+        }
+        if pressure.has_identity_guardrail && style_note_contains_family(note, "表演") {
+            score += 3;
+        }
+        if pressure.has_lighting_guardrail
+            && !style_note_contains_family(note, "光影")
+            && !style_note_contains_family(note, "环境")
+        {
+            score -= 8;
+        }
+        if pressure.forces_compact_memory
+            && !style_note_contains_family(note, "镜头")
+            && !style_note_contains_family(note, "光影")
+            && !style_note_contains_family(note, "环境")
+        {
+            score -= 6;
         }
     }
     if style_note_contains_family(note, "光影") && pressure.has_lighting_guardrail {
@@ -657,6 +680,14 @@ pub fn select_best_expressive_memory_pair_for_lean_tier(
                     LeanMemoryPairFocus::Emotional => 8,
                     LeanMemoryPairFocus::IdentityLighting => 0,
                 };
+            }
+            if pair_focus == LeanMemoryPairFocus::Dialogue
+                && families.contains(&Some("表演"))
+                && constraint_pressure.is_some_and(|pressure| {
+                    pressure.has_dialogue_guardrail || pressure.has_identity_guardrail
+                })
+            {
+                score += 12;
             }
             if pair_focus == LeanMemoryPairFocus::DeliveryLighting {
                 score += 12;

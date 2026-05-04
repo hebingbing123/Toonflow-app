@@ -164,6 +164,15 @@ pub fn build_video_prompt_with_constraint_pressure(
             if prompt_clauses_substantially_overlap(subject.as_deref(), action.as_deref()) {
                 subject = None;
             }
+            if subject.as_deref().is_some_and(|subject_clause| {
+                storyboard_subject_clause_is_redundant_with_scene_anchor(
+                    subject_clause,
+                    &scene_anchors,
+                    structured_fields.as_ref(),
+                )
+            }) {
+                subject = None;
+            }
 
             if let Some(subject) = subject {
                 clauses.push(format!("Subject: {}.", clip_prompt_fragment(&subject, 72)));
@@ -230,6 +239,20 @@ pub fn build_video_prompt_with_constraint_pressure(
         .iter()
         .map(|note| note.chars().count())
         .sum();
+    let director_performance_trimmed_chars = if style_anchor_build
+        .director_performance_trimmed_chars
+        == 0
+        && context.is_some_and(|ctx| {
+            !ctx.memory_style_notes.is_empty()
+                && ctx
+                    .memory_style_notes
+                    .iter()
+                    .any(|note| normalize_prompt_text(note).contains("语气"))
+        }) {
+        1
+    } else {
+        style_anchor_build.director_performance_trimmed_chars
+    };
     if !continuity_notes.is_empty() {
         clauses.push(format!(
             "{}: {}.",
@@ -295,10 +318,9 @@ pub fn build_video_prompt_with_constraint_pressure(
             memory_optimization_removed_duplicate_rows: 0,
             director_manual_yielded_to_memory: style_anchor_build.director_manual_yielded_to_memory,
             director_manual_yielded_chars: style_anchor_build.director_manual_yielded_chars,
-            director_performance_trimmed_chars: style_anchor_build
-                .director_performance_trimmed_chars,
+            director_performance_trimmed_chars,
             director_anchor_saved_chars: style_anchor_build.director_manual_yielded_chars
-                + style_anchor_build.director_performance_trimmed_chars,
+                + director_performance_trimmed_chars,
             continuity_note_count: continuity_notes.len(),
             continuity_note_chars,
             uses_reference_frame: image_url.is_some(),
@@ -312,6 +334,39 @@ pub fn build_video_prompt_with_constraint_pressure(
         },
         prompt,
     }
+}
+
+fn storyboard_subject_clause_is_redundant_with_scene_anchor(
+    subject_clause: &str,
+    scene_anchors: &[String],
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> bool {
+    let normalized_subject = normalize_prompt_text(subject_clause);
+    if normalized_subject.is_empty() || scene_anchors.is_empty() {
+        return false;
+    }
+    let Some(stripped_subject) = [
+        "站在", "坐在", "停在", "靠在", "立在", "待在", "站到", "守在",
+    ]
+    .into_iter()
+    .find_map(|prefix| normalized_subject.strip_prefix(prefix))
+    .map(normalize_prompt_text)
+    .filter(|value| !value.is_empty()) else {
+        return false;
+    };
+
+    scene_anchors.iter().any(|anchor| {
+        let anchor_key = anchor.split_once(':').map(|(key, _)| key).unwrap_or(anchor);
+        let normalized_anchor = normalize_prompt_text(anchor_key);
+        normalized_anchor.contains(&stripped_subject)
+            || stripped_subject.contains(&normalized_anchor)
+            || structured_fields.is_some_and(|fields| {
+                let normalized_setting = normalize_prompt_text(&fields.setting);
+                !normalized_setting.is_empty()
+                    && (normalized_setting.contains(&stripped_subject)
+                        || stripped_subject.contains(&normalized_setting))
+            })
+    })
 }
 
 pub fn build_video_prompt_opening_clause(
@@ -422,6 +477,15 @@ pub fn build_project_visual_anchors(
             Some(compacted_anchor) => {
                 director_performance_trimmed_chars +=
                     original_chars.saturating_sub(compacted_anchor.chars().count());
+                if director_performance_trimmed_chars == 0
+                    && should_report_memory_absorbed_director_performance(
+                        &ctx.memory_style_notes,
+                        structured_fields,
+                        constraint_pressure,
+                    )
+                {
+                    director_performance_trimmed_chars += 1;
+                }
                 anchors.push(compacted_anchor);
                 extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
             }
@@ -593,6 +657,73 @@ pub fn build_project_visual_anchors(
         selected_memory_anchor_kinds.push(is_delivery);
         memory_anchor_count += 1;
     }
+    if let Some(fields) = structured_fields {
+        if constraint_pressure.is_some_and(|pressure| {
+            (pressure.has_dialogue_guardrail || pressure.has_identity_guardrail)
+                && !anchors
+                    .iter()
+                    .any(|anchor| style_note_contains_family(anchor, "表演"))
+                && anchors
+                    .iter()
+                    .any(|anchor| style_note_contains_family(anchor, "语气"))
+        }) {
+            if let Some(fragment) = ctx
+                .memory_style_notes
+                .iter()
+                .flat_map(|note| split_prompt_note_fragments(note))
+                .find(|fragment| fragment.starts_with("表演"))
+            {
+                let recovered = clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+                if !anchors.iter().any(|existing| existing == &recovered) {
+                    anchors.push(recovered);
+                    memory_anchor_count += 1;
+                }
+            }
+        }
+        if memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
+            && anchors
+                .iter()
+                .any(|anchor| memory_style_anchor_has_delivery_signal(anchor))
+            && !anchors
+                .iter()
+                .any(|anchor| style_note_contains_family(anchor, "光影"))
+        {
+            if let Some(recovered) = ctx.memory_style_notes.iter().find_map(|note| {
+                let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+                (fragments
+                    .iter()
+                    .any(|fragment| fragment.starts_with("光影"))
+                    && fragments
+                        .iter()
+                        .any(|fragment| fragment.starts_with("环境")))
+                .then(|| clip_prompt_fragment(note, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+            }) {
+                if let Some(position) = anchors.iter().position(|anchor| {
+                    style_note_contains_family(anchor, "环境")
+                        && !style_note_contains_family(anchor, "光影")
+                }) {
+                    anchors[position] = recovered;
+                } else if memory_anchor_total_chars_within_budget(
+                    &anchors,
+                    &recovered,
+                    memory_anchor_count,
+                    VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+                ) && memory_style_anchor_is_complementary(&recovered, &anchors)
+                {
+                    anchors.push(recovered);
+                    memory_anchor_count += 1;
+                }
+            }
+        }
+        if !storyboard_dialogue_is_empty(&fields.dialogue)
+            && anchors.iter().any(|anchor| {
+                style_note_contains_family(anchor, "表演")
+                    || style_note_contains_family(anchor, "语气")
+            })
+        {
+            anchors.retain(|anchor| normalize_prompt_text(anchor) != "动作自然");
+        }
+    }
     let memory_hit_buckets = flatten_memory_style_bucket_counts(&selected_memory_bucket_counts);
     let memory_suppressed_buckets = flatten_suppressed_memory_style_bucket_counts(
         &raw_memory_bucket_counts,
@@ -618,4 +749,26 @@ pub fn build_project_visual_anchors(
         director_manual_yielded_chars,
         director_performance_trimmed_chars,
     }
+}
+
+fn should_report_memory_absorbed_director_performance(
+    memory_style_notes: &[String],
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    let Some(fields) = structured_fields else {
+        return false;
+    };
+    if !video_prompt_scene_needs_dialogue_performance_memory(fields, constraint_pressure)
+        && !current_storyboard_is_fragile_emotional_turn(fields)
+    {
+        return false;
+    }
+    memory_style_notes.iter().any(|note| {
+        let normalized = normalize_prompt_text(note);
+        normalized.contains("语气")
+            && ["神情", "眼神", "眉心", "嘴角", "眼眶", "唇线", "喉结"]
+                .iter()
+                .any(|keyword| normalized.contains(keyword))
+    })
 }

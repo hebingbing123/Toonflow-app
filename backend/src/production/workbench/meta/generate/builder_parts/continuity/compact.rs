@@ -15,7 +15,8 @@ pub(in crate::production::workbench::meta::generate) fn compact_continuity_note(
         let clipped = clip_prompt_fragment(&normalized, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
         return (!prompt_fragment_is_covered(&clipped, prompt_coverage)).then_some(clipped);
     };
-    if normalized.contains("视线方向一致")
+    if !normalized.contains(['，', ',', '；', ';', '。', '\n'])
+        && normalized.contains("视线方向一致")
         && [
             fields.subject.as_str(),
             fields.action.as_str(),
@@ -107,14 +108,26 @@ pub(in crate::production::workbench::meta::generate) fn compact_continuity_fragm
     }
 
     for (from, to) in [
+        ("保持方向连续", "方向连续"),
+        ("保留方向连续", "方向连续"),
+        ("延续方向连续", "方向连续"),
+        ("保持视线方向一致", "视线方向一致"),
+        ("保留视线方向一致", "视线方向一致"),
+        ("延续视线方向一致", "视线方向一致"),
         ("保持上一镜头衔接统一", "衔接统一"),
         ("保留上一镜头衔接统一", "衔接统一"),
         ("延续上一镜头衔接统一", "衔接统一"),
         ("保持上一镜头动作节奏连续", "动作节奏连续"),
         ("保留上一镜头动作节奏连续", "动作节奏连续"),
         ("延续上一镜头动作节奏连续", "动作节奏连续"),
+        ("保持站位不要跳轴", "站位不要跳轴"),
+        ("保留站位不要跳轴", "站位不要跳轴"),
+        ("延续站位不要跳轴", "站位不要跳轴"),
         ("人物站位不要跳轴", "站位不要跳轴"),
         ("角色站位不要跳轴", "站位不要跳轴"),
+        ("保持站位连续", "站位连续"),
+        ("保留站位连续", "站位连续"),
+        ("延续站位连续", "站位连续"),
         ("人物站位连续", "站位连续"),
         ("角色站位连续", "站位连续"),
         ("人物走位连续", "走位连续"),

@@ -117,10 +117,42 @@ pub fn compact_contextual_video_style_note(
     if fragments.is_empty() {
         return None;
     }
+    if should_drop_stale_soft_voice_performance_only_note(&normalized, &fields, &fragments) {
+        return None;
+    }
     Some(clip_prompt_fragment(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn should_drop_stale_soft_voice_performance_only_note(
+    original_note: &str,
+    fields: &StructuredStoryboardDescription,
+    fragments: &[String],
+) -> bool {
+    let performance_already_carries_fragile_signal = fragments.iter().any(|fragment| {
+        fragment.starts_with("表演")
+            && ["失声", "抽气", "发颤", "哽咽"]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+    });
+    current_storyboard_is_fragile_emotional_turn(fields)
+        && original_note.contains("语气轻声克制")
+        && !fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("语气"))
+        && fragments
+            .iter()
+            .all(|fragment| fragment.starts_with("表演"))
+        && !performance_already_carries_fragile_signal
+        && [fields.action.as_str(), fields.dialogue.as_str()]
+            .into_iter()
+            .any(|field| {
+                ["失声", "抽气", "发颤", "哽咽"]
+                    .iter()
+                    .any(|keyword| field.contains(keyword))
+            })
 }
 
 fn fallback_high_signal_contextual_style_fragments(

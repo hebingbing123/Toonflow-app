@@ -1,6 +1,6 @@
 use super::style_compact::{
-    selected_style_fragment_is_generic_restrained_mood, selected_style_fragment_is_low_gain_motion,
-    selected_style_fragment_is_low_gain_voice,
+    collapse_local_framing_stable_tracking, selected_style_fragment_is_generic_restrained_mood,
+    selected_style_fragment_is_low_gain_motion, selected_style_fragment_is_low_gain_voice,
 };
 use super::style_rank::{
     extract_selected_memory_style_note_for_storyboard, selected_video_style_value_from_content,
@@ -9,16 +9,19 @@ use super::*;
 
 pub(super) fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
     if let Some(value) = extract_key_value(&row.content, "style") {
-        return compact_video_style_prompt_note(&value);
+        return compact_video_style_prompt_note(&value)
+            .map(|note| collapse_local_framing_stable_tracking(&note));
     }
     extract_key_value(&row.content, "note").and_then(|note| {
         if is_low_signal_selected_memory_note(&note) {
             return None;
         }
-        compact_video_style_prompt_note(&note).or_else(|| {
-            extract_key_value(&row.content, "note")
-                .map(|raw| clip_prompt_fragment(&raw, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
-        })
+        compact_video_style_prompt_note(&note)
+            .map(|note| collapse_local_framing_stable_tracking(&note))
+            .or_else(|| {
+                extract_key_value(&row.content, "note")
+                    .map(|raw| clip_prompt_fragment(&raw, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+            })
     })
 }
 
@@ -120,7 +123,11 @@ pub(super) fn summary_style_memory_value_for_storyboard(
     extract_key_value(&row.content, "style")
         .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         .filter(|value| !value.is_empty())
-        .or_else(|| selected_video_style_value(row))
+        .or_else(|| {
+            extract_key_value(&row.content, "note")
+                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+                .filter(|value| !value.is_empty())
+        })
 }
 
 pub(super) fn generation_brief_style_memory_value(row: &AgentMemoryRow) -> Option<String> {

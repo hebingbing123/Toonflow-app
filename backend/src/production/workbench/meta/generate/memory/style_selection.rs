@@ -104,15 +104,34 @@ pub(in crate::production::workbench::meta::generate) fn build_video_prompt_memor
         storyboard_row,
         constraint_pressure,
     );
-    (
-        style_notes.into_iter().collect(),
-        select_video_prompt_memory_notes(
+    let style_notes = restore_runtime_exact_style_note_fragments(
+        style_notes,
+        &rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        storyboard_row,
+    );
+    let continuity_notes = {
+        let selected = select_video_prompt_memory_notes(
             &rows,
             storyboard_numeric_id,
             current_prompt_seed,
             Some(storyboard_row),
-        ),
-    )
+        );
+        if selected.is_empty() {
+            select_runtime_action_continuity_fallback(
+                &rows,
+                storyboard_numeric_id,
+                current_prompt_seed,
+                storyboard_row,
+            )
+            .into_iter()
+            .collect()
+        } else {
+            selected
+        }
+    };
+    (style_notes.into_iter().collect(), continuity_notes)
 }
 
 pub(in crate::production::workbench::meta::generate) fn select_video_prompt_style_notes(
@@ -142,8 +161,12 @@ pub(in crate::production::workbench::meta::generate) fn select_video_prompt_styl
     .into_iter()
     .map(|note| expand_compacted_delivery_style_note(&note))
     .filter_map(|note| {
-        compact_contextual_video_style_note(&note, Some(storyboard_row))
-            .map(|compacted| supplement_compacted_voice_note(&note, &compacted, storyboard_row))
+        compact_contextual_video_style_note(&note, Some(storyboard_row)).map(|compacted| {
+            preserve_runtime_exact_camera_fragment(
+                &note,
+                &supplement_compacted_voice_note(&note, &compacted, storyboard_row),
+            )
+        })
     })
     .collect::<Vec<_>>();
     let mut role_memory_notes = role_memory_candidates
@@ -282,6 +305,140 @@ pub(in crate::production::workbench::meta::generate) fn select_video_prompt_styl
     neighbor
 }
 
+fn preserve_runtime_exact_camera_fragment(original_note: &str, compacted_note: &str) -> String {
+    if split_prompt_note_fragments(compacted_note).any(|fragment| fragment.starts_with("镜头")) {
+        return compacted_note.to_string();
+    }
+    let original_has_character_signal =
+        split_prompt_note_fragments(original_note).any(|fragment| {
+            matches!(
+                style_note_fragment_family(&fragment),
+                Some("表演") | Some("语气")
+            )
+        });
+    if !original_has_character_signal {
+        return compacted_note.to_string();
+    }
+
+    let Some(camera_fragment) =
+        split_prompt_note_fragments(original_note).find(|fragment| fragment.starts_with("镜头"))
+    else {
+        return compacted_note.to_string();
+    };
+    let keeps_character_signal = split_prompt_note_fragments(compacted_note).any(|fragment| {
+        matches!(
+            style_note_fragment_family(&fragment),
+            Some("表演") | Some("语气")
+        )
+    });
+    if !keeps_character_signal {
+        return compacted_note.to_string();
+    }
+
+    sort_style_note_fragments_for_output(&format!("{camera_fragment}，{compacted_note}"))
+        .unwrap_or_else(|| compacted_note.to_string())
+}
+
+fn restore_runtime_exact_style_note_fragments(
+    notes: Vec<String>,
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    _storyboard_row: &StoryboardPromptSeedRow,
+) -> Vec<String> {
+    let exact_notes = rows
+        .iter()
+        .filter(|row| {
+            selected_runtime_style_row_matches(row, storyboard_numeric_id, current_prompt_seed)
+        })
+        .filter_map(|row| extract_key_value(&row.content, "style"))
+        .collect::<Vec<_>>();
+    notes
+        .into_iter()
+        .map(|note| {
+            exact_notes
+                .iter()
+                .find_map(|exact_note| {
+                    let restored = preserve_runtime_exact_camera_fragment(exact_note, &note);
+                    (restored != note).then_some(restored)
+                })
+                .unwrap_or(note)
+        })
+        .collect()
+}
+
+fn selected_runtime_style_row_matches(
+    row: &AgentMemoryRow,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> bool {
+    if row.name != "selected_video_memory" {
+        return false;
+    }
+
+    let storyboard_matches =
+        extract_key_value(&row.content, "storyboardIds").is_some_and(|value| {
+            value
+                .split(',')
+                .map(normalize_prompt_text)
+                .any(|part| part == storyboard_numeric_id.to_string())
+        });
+    if !storyboard_matches {
+        return false;
+    }
+
+    match current_prompt_seed {
+        Some(seed) => extract_key_value(&row.content, "promptSeed")
+            .is_none_or(|value| normalize_prompt_text(&value) == normalize_prompt_text(seed)),
+        None => true,
+    }
+}
+
+fn select_runtime_action_continuity_fallback(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Option<String> {
+    let structured_fields = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description);
+    rows.iter()
+        .filter(|row| row.name == "auto_scope_memory")
+        .filter(|row| auto_scope_memory_tool_matches_video_prompt(row.content.as_str()))
+        .filter(|row| runtime_row_overlaps_storyboard(&row.content, storyboard_numeric_id))
+        .filter(|row| {
+            auto_scope_memory_matches_current_prompt_seed(
+                row.content.as_str(),
+                storyboard_numeric_id,
+                current_prompt_seed,
+                false,
+            )
+        })
+        .filter_map(|row| {
+            extract_key_value(&row.content, "summary")
+                .or_else(|| extract_key_value(&row.content, "result"))
+                .and_then(|value| {
+                    compact_storyboard_memory_continuity_note(&value, structured_fields.as_ref())
+                })
+                .and_then(|value| compact_auto_scope_continuity_summary(&value))
+        })
+        .find(|note| note.contains("动作接上"))
+}
+
+fn runtime_row_overlaps_storyboard(content: &str, storyboard_numeric_id: i32) -> bool {
+    extract_key_value(content, "scope")
+        .map(|scope| scope.replace("storyboardIds=", ""))
+        .or_else(|| extract_key_value(content, "storyboardIds"))
+        .is_some_and(|value| {
+            value
+                .split(',')
+                .map(normalize_prompt_text)
+                .any(|part| part == storyboard_numeric_id.to_string())
+        })
+}
+
 fn select_scoped_contextual_summary_style_note(
     rows: &[AgentMemoryRow],
     storyboard_row: &StoryboardPromptSeedRow,
@@ -416,6 +573,19 @@ fn compact_generation_brief_style_note_for_storyboard(
             fragment
         })
         .collect();
+    if (pressure.prefer_visual_continuity_memory_recall || pressure.has_lighting_guardrail)
+        && expanded.contains("环境")
+        && expanded.contains("连续")
+        && !fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("环境"))
+    {
+        if let Some(environment_fragment) = split_prompt_note_fragments(&expanded)
+            .find(|fragment| fragment.starts_with("环境") && fragment.contains("连续"))
+        {
+            fragments.push(environment_fragment);
+        }
+    }
 
     let joined = sort_style_note_fragments_for_output(&fragments.join("，"))?;
     Some(supplement_compacted_voice_note(
@@ -425,7 +595,7 @@ fn compact_generation_brief_style_note_for_storyboard(
     ))
 }
 
-fn summary_style_note_only_repeats_storyboard_fields(
+pub(in crate::production::workbench::meta::generate) fn summary_style_note_only_repeats_storyboard_fields(
     note: &str,
     fields: &StructuredStoryboardDescription,
 ) -> bool {
@@ -553,18 +723,21 @@ pub(in crate::production::workbench::meta::generate) fn select_pressure_prioriti
     let mut best: Option<(i32, usize, PressureStyleCandidateSource, String)> = None;
 
     let mut consider = |note: &String, source: PressureStyleCandidateSource| {
-        let compacted =
-            compact_guardrail_sensitive_style_note(note, storyboard_row, Some(pressure))
-                .or_else(|| compact_contextual_video_style_note(note, Some(storyboard_row)));
-        let Some(compacted) = compacted else {
-            return;
-        };
-        let chosen_note =
+        let chosen_note = if source == PressureStyleCandidateSource::Summary {
+            note.clone()
+        } else {
+            let compacted =
+                compact_guardrail_sensitive_style_note(note, storyboard_row, Some(pressure))
+                    .or_else(|| compact_contextual_video_style_note(note, Some(storyboard_row)));
+            let Some(compacted) = compacted else {
+                return;
+            };
             if pressure.has_dialogue_guardrail || pressure.prefer_delivery_memory_recall {
                 preserve_delivery_pair_if_compaction_overtrims(note, &compacted)
             } else {
                 compacted
-            };
+            }
+        };
         let score =
             score_compacted_style_note_against_constraint_pressure(&chosen_note, &fields, pressure)
                 + match source {

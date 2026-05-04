@@ -253,7 +253,7 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
     parts.add('省下$directorSaved chars');
   }
   if (negativeSavedChars > 0 || negativeSavedFragments > 0) {
-    parts.add('负向精简=${negativeSavedFragments}条/$negativeSavedChars chars');
+    parts.add('负向精简=$negativeSavedFragments条/$negativeSavedChars chars');
   }
   final scopeSummary = _describeMemoryScopeRows(
     projectScopeRows: projectScopeRows,
@@ -317,7 +317,7 @@ String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
   }
   if (removedChars > 0 || removedRows > 0) {
     parts.add(
-      'slim ${removedChars} chars / ${removedRows}条'
+      'slim $removedChars chars / $removedRows条'
       '（重复 $removedDuplicateRows / 纯视觉 $removedVisualRows）',
     );
   }

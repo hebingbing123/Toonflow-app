@@ -16,6 +16,9 @@ pub(in crate::production::workbench::meta::generate) fn merge_exact_and_role_sty
     }
 
     exact_notes.iter().find_map(|exact_note| {
+        if exact_style_note_is_low_signal_template(exact_note) {
+            return None;
+        }
         role_memory_notes
             .iter()
             .find_map(|role_note| merge_complementary_style_note_pair(exact_note, role_note))

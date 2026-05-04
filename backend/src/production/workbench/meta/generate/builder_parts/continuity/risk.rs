@@ -106,7 +106,11 @@ pub(in crate::production::workbench::meta::generate) fn continuity_note_matches_
     if continuity_note_mentions_axis_risk(&normalized) {
         return video_prompt_scene_has_axis_risk(fields)
             || (continuity_note_mentions_blocking_risk(&normalized)
-                && video_prompt_scene_has_blocking_risk(fields));
+                && video_prompt_scene_has_blocking_risk(fields))
+            || (video_prompt_scene_has_motion_risk(fields)
+                && ["视线", "方向", "站位", "走位", "跳轴", "构图"]
+                    .iter()
+                    .any(|keyword| normalized.contains(keyword)));
     }
     if continuity_note_mentions_blocking_risk(&normalized) {
         return video_prompt_scene_has_blocking_risk(fields);

@@ -22,6 +22,50 @@ pub(super) fn resolve_negative_filter_style_note(
     subject_candidates: &[String],
     recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
+    resolve_negative_filter_style_note_inner(
+        selected_rows,
+        storyboard_id,
+        current_prompt_seed,
+        storyboard_row,
+        selected_style_note,
+        subject_candidates,
+        recent_quality_pressure,
+        false,
+    )
+}
+
+pub(super) fn resolve_negative_conflict_style_note(
+    selected_rows: &[AgentMemoryRow],
+    storyboard_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    selected_style_note: Option<String>,
+    subject_candidates: &[String],
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+) -> Option<String> {
+    resolve_negative_filter_style_note_inner(
+        selected_rows,
+        storyboard_id,
+        current_prompt_seed,
+        storyboard_row,
+        selected_style_note,
+        subject_candidates,
+        recent_quality_pressure,
+        true,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn resolve_negative_filter_style_note_inner(
+    selected_rows: &[AgentMemoryRow],
+    storyboard_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    selected_style_note: Option<String>,
+    subject_candidates: &[String],
+    recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+    allow_storyboard_repeat: bool,
+) -> Option<String> {
     let role_style_note = select_subject_role_video_style_memory_notes_for_storyboard(
         selected_rows,
         subject_candidates,
@@ -46,13 +90,25 @@ pub(super) fn resolve_negative_filter_style_note(
                 storyboard_row,
             )
             .and_then(|note| {
-                compact_contextual_negative_style_note(&note, storyboard_row).or_else(|| {
-                    storyboard_row
-                        .and_then(|row| row.video_desc.as_deref())
-                        .and_then(parse_structured_storyboard_description)
-                        .filter(|context| style_note_context_evidence(&note, context) >= 2)
-                        .and_then(|_| compact_video_style_prompt_note(&note))
-                })
+                compact_contextual_negative_style_note(&note, storyboard_row)
+                    .or_else(|| {
+                        storyboard_row
+                            .and_then(|row| row.video_desc.as_deref())
+                            .and_then(parse_structured_storyboard_description)
+                            .filter(|context| style_note_context_evidence(&note, context) >= 2)
+                            .and_then(|_| compact_video_style_prompt_note(&note))
+                    })
+                    .filter(|note| {
+                        allow_storyboard_repeat
+                            || storyboard_row
+                                .and_then(|row| row.video_desc.as_deref())
+                                .and_then(parse_structured_storyboard_description)
+                                .is_none_or(|context| {
+                                    !negative_style_note_only_repeats_storyboard_fields(
+                                        note, &context,
+                                    )
+                                })
+                    })
             })
         })
         .or_else(|| {
@@ -61,6 +117,7 @@ pub(super) fn resolve_negative_filter_style_note(
                 storyboard_row,
                 subject_candidates,
                 recent_quality_pressure,
+                allow_storyboard_repeat,
             )
         })
 }
@@ -124,6 +181,7 @@ fn select_contextual_summary_style_note(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
     subject_candidates: &[String],
     recent_quality_pressure: Option<VideoPromptConstraintPressure>,
+    allow_storyboard_repeat: bool,
 ) -> Option<String> {
     let context = storyboard_row
         .and_then(|row| row.video_desc.as_deref())
@@ -155,6 +213,11 @@ fn select_contextual_summary_style_note(
                     ) > 0)
                     .then_some(fallback)
             })?;
+        if !allow_storyboard_repeat
+            && negative_style_note_only_repeats_storyboard_fields(&compacted, &context)
+        {
+            return None;
+        }
         let bias = score_contextual_negative_style_note_bias(&compacted, recent_quality_pressure);
         (evidence >= 2).then_some((evidence, bias, compacted))
     })
@@ -422,6 +485,28 @@ fn style_note_context_evidence(
     }
 
     evidence
+}
+
+fn negative_style_note_only_repeats_storyboard_fields(
+    note: &str,
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    !fragments.is_empty()
+        && fragments
+            .iter()
+            .all(|fragment| match negative_style_fragment_axis(fragment) {
+                "camera" => {
+                    negative_style_fragment_overlaps_field(fragment, &fields.shot, "")
+                        || negative_style_fragment_overlaps_field(fragment, &fields.camera_move, "")
+                        || negative_filter_low_signal_local_camera_style_fragment(fragment)
+                }
+                "emotion" => negative_style_fragment_overlaps_field(fragment, &fields.mood, ""),
+                "lighting" => {
+                    negative_style_fragment_overlaps_field(fragment, &fields.lighting, "")
+                }
+                _ => false,
+            })
 }
 
 pub(super) fn filter_conflicting_review_fragments(

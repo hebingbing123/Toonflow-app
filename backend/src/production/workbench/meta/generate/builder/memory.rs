@@ -186,6 +186,11 @@ pub fn compact_director_performance_anchor_against_memory_style(
             memory_style_anchor_has_delivery_signal(fragment)
                 || score_memory_fragment_human_performance_detail(fragment, family) >= 3
         });
+    let memory_has_specific_face_detail = expressive_memory_fragments.iter().any(|fragment| {
+        ["神情", "眼神", "眉心", "嘴角", "眼眶", "唇线"]
+            .iter()
+            .any(|keyword| fragment.contains(keyword))
+    });
     let retained = split_prompt_note_fragments(anchor)
         .filter(|fragment| {
             !(prompt_fragment_is_covered(fragment, &expressive_memory_fragments)
@@ -196,6 +201,13 @@ pub fn compact_director_performance_anchor_against_memory_style(
                 )
                 || memory_has_high_value_expressive_detail
                     && director_performance_fragment_is_generic_proactive_hint(fragment))
+                || memory_has_specific_face_detail
+                    && crate::production::workbench::meta::generate::builder::transformation::director_performance_fragment_is_generic_face_carryover(fragment)
+                    && (expressive_memory_fragments.len() >= 3
+                        || !expressive_memory_fragments.iter().any(|memory_fragment| {
+                            normalize_prompt_text(memory_fragment)
+                                .contains(&normalize_prompt_text(fragment))
+                        }))
         })
         .collect::<Vec<_>>();
     if retained.is_empty() {
@@ -321,19 +333,38 @@ pub fn compact_memory_style_anchor(
         .filter(|fragment| style_fragment_prefix(fragment))
         .filter_map(|fragment| {
             if let Some(fields) = structured_fields {
+                let keep_expanded_visual_memory_fragment =
+                    expanded_visual_memory_fragment_should_bypass_storyboard_trim(
+                        &fragment,
+                        fields,
+                        memory_budget_tier,
+                    );
+                let keep_storyboard_matched_fragment = allow_prompt_covered_style_fragments
+                    || (memory_budget_tier == VideoPromptMemoryBudgetTier::Expanded
+                        && matches!(
+                            style_note_fragment_family(&fragment),
+                            Some("光影") | Some("环境")
+                        ));
+                let keep_storyboard_matched_fragment = keep_storyboard_matched_fragment
+                    && style_fragment_matches_prompt_style_field(&fragment, fields)
+                    && matches!(
+                        style_note_fragment_family(&fragment),
+                        Some("表演") | Some("语气") | Some("光影") | Some("环境")
+                    );
                 if let Some(compacted_visual_fragment) =
                     compact_expanded_visual_memory_fragment(&fragment, fields, memory_budget_tier)
                 {
                     return Some(compacted_visual_fragment);
                 }
-                if expanded_visual_memory_fragment_should_bypass_storyboard_trim(
-                    &fragment,
-                    fields,
-                    memory_budget_tier,
-                ) {
+                if keep_expanded_visual_memory_fragment || keep_storyboard_matched_fragment {
                     return Some(fragment);
                 }
-                return trim_style_fragment_against_storyboard_fields(&fragment, fields);
+                return trim_style_fragment_against_storyboard_fields(&fragment, fields).or_else(
+                    || {
+                        (keep_storyboard_matched_fragment || keep_expanded_visual_memory_fragment)
+                            .then_some(fragment)
+                    },
+                );
             }
             Some(fragment)
         })
@@ -402,6 +433,11 @@ pub fn compact_memory_style_anchor(
     if fragments.is_empty() {
         return None;
     }
+    let fragments = if let Some(fields) = structured_fields {
+        drop_storyboard_covered_delivery_performance_fragments(fragments, fields)
+    } else {
+        fragments
+    };
 
     let note = match memory_budget_tier {
         VideoPromptMemoryBudgetTier::Lean => select_best_memory_style_note_for_lean_tier(
@@ -420,6 +456,48 @@ pub fn compact_memory_style_anchor(
         structured_fields,
         constraint_pressure,
     ))
+}
+
+fn drop_storyboard_covered_delivery_performance_fragments(
+    fragments: Vec<String>,
+    fields: &StructuredStoryboardDescription,
+) -> Vec<String> {
+    if !fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("语气"))
+    {
+        return fragments;
+    }
+
+    let filtered = fragments
+        .iter()
+        .filter(|fragment| {
+            if !fragment.starts_with("表演") {
+                return true;
+            }
+            if performance_fragment_has_unique_micro_detail(fragment) {
+                return true;
+            }
+            if !storyboard_dialogue_is_empty(&fields.dialogue) {
+                return true;
+            }
+            !style_note_matches_shared_keyword_family(
+                fragment,
+                &[fields.action.as_str(), fields.dialogue.as_str()],
+                PERFORMANCE_SHARED_KEYWORD_FAMILIES,
+            )
+        })
+        .cloned()
+        .collect::<Vec<_>>();
+
+    if filtered.iter().any(|fragment| fragment.starts_with("语气"))
+        && !filtered.is_empty()
+        && filtered.len() < fragments.len()
+    {
+        filtered
+    } else {
+        fragments
+    }
 }
 
 pub fn select_best_memory_style_note_for_lean_tier(

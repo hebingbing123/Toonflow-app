@@ -241,6 +241,7 @@ pub(super) fn parse_visual_error_fragment(fragment: &str) -> Option<VisualErrorF
     }
 }
 
+#[allow(dead_code)]
 pub(super) fn render_visual_error_fragments(flags: VisualErrorFlags) -> Vec<String> {
     if flags.warped_anatomy && flags.blur && flags.flicker {
         return vec!["avoid warped anatomy, blur, flicker".to_string()];

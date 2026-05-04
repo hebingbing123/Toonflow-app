@@ -191,7 +191,7 @@ pub(crate) fn map_bad_case_category_with_comments(
     Some(mapped)
 }
 
-fn visual_error_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
+pub(super) fn visual_error_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
     let mut has_distortion = false;
     let mut has_blur = false;
     let mut has_flicker = false;
@@ -206,7 +206,9 @@ fn visual_error_category_is_redundant(comment_fragments: &[&'static str]) -> boo
     has_distortion && has_blur && has_flicker
 }
 
-fn storyboard_mismatch_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
+pub(super) fn storyboard_mismatch_category_is_redundant(
+    comment_fragments: &[&'static str],
+) -> bool {
     let mut has_shot_change = false;
     let mut has_wrong_framing = false;
     for fragment in comment_fragments {
@@ -223,7 +225,7 @@ fn storyboard_mismatch_category_is_redundant(comment_fragments: &[&'static str])
     has_shot_change && has_wrong_framing
 }
 
-fn pacing_issue_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
+pub(super) fn pacing_issue_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
     let mut has_rushed_motion = false;
     let mut has_jerky_motion = false;
     for fragment in comment_fragments {
@@ -439,7 +441,7 @@ pub(super) fn score_review_negative_fragment_bias(
     match negative_fragment_family(fragment) {
         "performance_delivery" | "lip_sync_mismatch" => {
             if pressure.prefer_delivery_memory_recall {
-                12
+                28
             } else {
                 0
             }

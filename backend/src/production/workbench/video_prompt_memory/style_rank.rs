@@ -1,3 +1,4 @@
+use super::style_compact::collapse_local_framing_stable_tracking;
 use super::style_role_select::role_style_storyboard_focus_score;
 use super::*;
 
@@ -23,6 +24,24 @@ pub(crate) fn select_prioritized_video_style_note(
     .into_iter()
     .filter(|candidate| ranked_style_note_is_worth_recalling(candidate, &context))
     .collect::<Vec<_>>();
+    if style_note_selection_context_is_empty(&context) {
+        return candidates
+            .into_iter()
+            .filter_map(|candidate| {
+                compact_video_style_prompt_note(&candidate.note)
+                    .map(|note| collapse_local_framing_stable_tracking(&note))
+                    .filter(|note| !note.is_empty())
+            })
+            .max_by(|a, b| {
+                score_selected_video_style_note(a)
+                    .cmp(&score_selected_video_style_note(b))
+                    .then(
+                        count_selected_video_style_axes(a).cmp(&count_selected_video_style_axes(b)),
+                    )
+                    .then(b.chars().count().cmp(&a.chars().count()))
+                    .then(b.cmp(a))
+            });
+    }
     let locked_storyboard_focus = candidates
         .iter()
         .map(|candidate| candidate.storyboard_focus)
@@ -51,7 +70,9 @@ pub(crate) fn select_prioritized_video_style_note(
             .then(a.note.cmp(&b.note))
     });
     candidates.into_iter().find_map(|candidate| {
-        compact_video_style_prompt_note(&candidate.note).filter(|note| !note.is_empty())
+        compact_video_style_prompt_note(&candidate.note)
+            .map(|note| collapse_local_framing_stable_tracking(&note))
+            .filter(|note| !note.is_empty())
     })
 }
 

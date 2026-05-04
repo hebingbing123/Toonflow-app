@@ -319,10 +319,20 @@ pub fn auto_scope_continuity_fragment_is_covered(
         }
         let same_axis = candidate_axis != AutoScopeContinuityAxis::None
             && candidate_axis == auto_scope_continuity_axis(other);
+        let other_is_stricter_same_axis =
+            same_axis && auto_scope_continuity_fragment_prefers(other, candidate);
         same_axis
-            && score_continuity_specificity(other) > candidate_specificity
             && auto_scope_continuity_fragments_share_anchor(candidate, other)
+            && (score_continuity_specificity(other) > candidate_specificity
+                || other_is_stricter_same_axis)
     })
+}
+
+fn auto_scope_continuity_fragment_prefers(other: &str, candidate: &str) -> bool {
+    let other = normalize_prompt_text(other);
+    let candidate = normalize_prompt_text(candidate);
+    (other.contains("不要跳轴") && candidate.contains("连续"))
+        || (other.contains("视线方向一致") && candidate.contains("方向连续"))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

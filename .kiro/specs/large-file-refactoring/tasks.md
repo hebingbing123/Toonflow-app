@@ -254,7 +254,7 @@
     - If failures occur, fix them before proceeding to Phase 2
     - _Requirements: 3.3, 3.4, 3.5, 3.7, 3.10_
 
-- [-] 4. Phase 2: Backend Supporting Files (Medium Priority)
+- [x] 4. Phase 2: Backend Supporting Files (Medium Priority)
 
   - [x] 4.1 Split backend/src/production/workbench/meta/generate/builder.rs (4,644 lines → ~6 files)
     
@@ -337,9 +337,10 @@
       - `git commit -m "refactor: split video_prompt_memory/rejected.rs into focused submodules (≤800 lines each)"`
       - _Requirements: 2.7_
 
-  - [~] 4.4 Phase 2 Gate Check
+  - [x] 4.4 Phase 2 Gate Check
     - Run `yarn refactor:check` at repository root
     - Ensure all checks pass
+    - `2026-05-04`: reran the full gate after the follow-up builder / memory / video prompt extraction fixes, plus the frontend analyzer cleanup (`dart fix --apply` + collection literal cleanup), and the gate is now green again
     - _Requirements: 3.3, 3.4, 3.5, 3.7, 3.10_
 
 - [ ] 5. Phase 3: Backend Remaining Files (Lower Priority)

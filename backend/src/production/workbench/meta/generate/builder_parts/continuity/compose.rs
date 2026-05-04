@@ -64,7 +64,34 @@ pub(in crate::production::workbench::meta::generate) fn build_continuity_notes(
             notes.retain(|note| continuity_note_is_lean_critical(note));
             notes
                 .retain(|note| note.chars().count() <= VIDEO_PROMPT_LEAN_CONTINUITY_NOTE_MAX_CHARS);
-            notes.truncate(1);
+            let keep_two_axis_notes = constraint_pressure.is_some_and(|pressure| {
+                pressure.forces_compact_memory
+                    && (pressure.has_identity_guardrail || pressure.has_dialogue_guardrail)
+            });
+            if keep_two_axis_notes {
+                let mut seen_axes = Vec::new();
+                notes.retain(|note| {
+                    let axis = normalize_prompt_text(note);
+                    let family = if axis.contains("视线") || axis.contains("方向") {
+                        "direction"
+                    } else if axis.contains("站位")
+                        || axis.contains("走位")
+                        || axis.contains("跳轴")
+                    {
+                        "positioning"
+                    } else {
+                        "other"
+                    };
+                    if seen_axes.contains(&family) {
+                        return false;
+                    }
+                    seen_axes.push(family);
+                    true
+                });
+                notes.truncate(2);
+            } else {
+                notes.truncate(1);
+            }
         }
     }
     notes

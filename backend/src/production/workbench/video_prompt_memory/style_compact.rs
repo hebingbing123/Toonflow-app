@@ -302,6 +302,32 @@ fn compact_prompt_shot_style_fragment(fragment: &str) -> Option<String> {
     ))
 }
 
+pub(super) fn collapse_local_framing_stable_tracking(note: &str) -> String {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    let has_non_camera_signal = fragments
+        .iter()
+        .any(|fragment| !fragment.starts_with("镜头"));
+    if !has_non_camera_signal {
+        return note.to_string();
+    }
+
+    fragments
+        .into_iter()
+        .map(|fragment| match fragment.as_str() {
+            "镜头特写稳定跟拍" | "镜头近景稳定跟拍" | "镜头中景稳定跟拍" | "镜头全景稳定跟拍" => {
+                "镜头稳定跟拍".to_string()
+            }
+            _ => fragment,
+        })
+        .fold(Vec::<String>::new(), |mut acc, fragment| {
+            if !acc.contains(&fragment) {
+                acc.push(fragment);
+            }
+            acc
+        })
+        .join("，")
+}
+
 pub(super) fn style_only_note(note: &str) -> Option<String> {
     let fragments = split_prompt_note_fragments(note)
         .filter(|fragment| {
@@ -314,6 +340,7 @@ pub(super) fn style_only_note(note: &str) -> Option<String> {
         return None;
     }
     compact_video_style_prompt_note(&fragments.join("，"))
+        .map(|note| collapse_local_framing_stable_tracking(&note))
 }
 
 pub(super) fn non_style_note(note: &str) -> Option<String> {

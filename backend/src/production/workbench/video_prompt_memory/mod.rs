@@ -222,8 +222,12 @@ const STYLE_NOTE_PREFIXES: [&str; 9] = [
 const STYLE_PROMPT_PREFIXES: [&str; 8] = [
     "镜头", "情绪", "光影", "动作", "表演", "环境", "语气", "声场",
 ];
-const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 9] = [
+const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 13] = [
     "远景",
+    "特写稳定跟拍",
+    "近景稳定跟拍",
+    "中景稳定跟拍",
+    "全景稳定跟拍",
     "稳定跟拍",
     "手持跟拍",
     "慢推",
@@ -233,8 +237,21 @@ const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 9] = [
     "手持",
     "跟拍",
 ];
-const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
-    "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
+const CONTINUITY_NOTE_KEYWORDS: [&str; 14] = [
+    "保持",
+    "延续",
+    "衔接",
+    "连续",
+    "一致",
+    "统一",
+    "方向",
+    "构图",
+    "视线",
+    "站位",
+    "走位",
+    "位置",
+    "前后景",
+    "跳轴",
 ];
 const SHOT_STYLE_KEYWORDS: [&str; 9] = [
     "稳定跟拍",

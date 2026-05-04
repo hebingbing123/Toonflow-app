@@ -1,25 +1,27 @@
+#![allow(unused_imports)]
+
 #[cfg(test)]
 mod tests {
-    use super::super::fragment_operations::merge_negative_prompts;
-    use super::super::memory_integration::{
+    use crate::error::ApiError;
+    use crate::production::types::GenerateVideoUploadItem;
+    use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
+    use crate::production::workbench::video::generate::fragment_operations::merge_negative_prompts;
+    use crate::production::workbench::video::generate::memory_integration::{
         compact_video_ratio, filter_selected_rows_for_subject, normalize_upload_sources,
         rejected_negative_memory_fetch_limit, resolve_storyboard_prompt,
         selected_memory_fetch_limit,
     };
-    use super::super::negative_prompt_analysis::{
+    use crate::production::workbench::video::generate::negative_prompt_analysis::{
         compact_review_fragments_against_rejected_memory,
         review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
         storyboard_dialogue_is_empty,
     };
-    use super::super::negative_prompt_builder::build_storyboard_negative_prompts_test as build_storyboard_negative_prompts;
-    use super::super::utils::infer_video_provider;
-    use super::super::{
+    use crate::production::workbench::video::generate::negative_prompt_builder::build_storyboard_negative_prompts_test as build_storyboard_negative_prompts;
+    use crate::production::workbench::video::generate::utils::infer_video_provider;
+    use crate::production::workbench::video::generate::{
         AutoNegativePromptSelection, NormalizedGenerateVideoUploadItem, QualityReviewSeedRow,
         RecentQualitySignalSeedRow, VideoNegativePromptBudgetTier, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
-    use crate::error::ApiError;
-    use crate::production::types::GenerateVideoUploadItem;
-    use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
     use crate::production::workbench::video_prompt_memory::{
         select_rejected_video_negative_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
         StoryboardPromptSeedRow,
