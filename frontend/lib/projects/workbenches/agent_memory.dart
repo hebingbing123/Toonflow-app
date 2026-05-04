@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
@@ -22,6 +24,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     extends State<ProjectsAgentMemoryWorkbenchDialog> {
   static const List<String> _queryTypes = <String>['summary', 'message', 'all'];
   static const List<String> _clearTypes = <String>['summary', 'message', 'all'];
+  static const List<String> _appendTypes = <String>['message', 'summary'];
   static const List<String> _memoryTierOptions = <String>[
     'all',
     'style_bible',
@@ -29,15 +32,25 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     'delta_memory',
     'message',
   ];
+  static const List<String> _automationModes = <String>[
+    'standard',
+    'lean',
+    'off',
+  ];
 
   late final TextEditingController _projectIdCtrl;
   late final TextEditingController _agentTypeCtrl;
   late final TextEditingController _episodesIdCtrl;
   late final TextEditingController _queryTypeCtrl;
   late final TextEditingController _memoryTierCtrl;
+  late final TextEditingController _scopeSignatureCtrl;
   late final TextEditingController _appendContentCtrl;
   late final TextEditingController _appendRoleCtrl;
+  late final TextEditingController _appendTypeCtrl;
+  late final TextEditingController _appendMemoryTierCtrl;
+  late final TextEditingController _appendNameCtrl;
   late final TextEditingController _clearTypeCtrl;
+  late final TextEditingController _automationModeCtrl;
 
   List<ProjectRow> _projects = const <ProjectRow>[];
   List<AgentMemoryHistoryItem> _memoryRows = const <AgentMemoryHistoryItem>[];
@@ -63,9 +76,14 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     _episodesIdCtrl = TextEditingController();
     _queryTypeCtrl = TextEditingController(text: 'summary');
     _memoryTierCtrl = TextEditingController(text: 'all');
+    _scopeSignatureCtrl = TextEditingController();
     _appendContentCtrl = TextEditingController();
     _appendRoleCtrl = TextEditingController(text: 'user');
+    _appendTypeCtrl = TextEditingController(text: 'message');
+    _appendMemoryTierCtrl = TextEditingController(text: 'message');
+    _appendNameCtrl = TextEditingController();
     _clearTypeCtrl = TextEditingController(text: 'summary');
+    _automationModeCtrl = TextEditingController(text: 'standard');
     _projects = List<ProjectRow>.from(widget.initialProjects);
   }
 
@@ -76,9 +94,14 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     _episodesIdCtrl.dispose();
     _queryTypeCtrl.dispose();
     _memoryTierCtrl.dispose();
+    _scopeSignatureCtrl.dispose();
     _appendContentCtrl.dispose();
     _appendRoleCtrl.dispose();
+    _appendTypeCtrl.dispose();
+    _appendMemoryTierCtrl.dispose();
+    _appendNameCtrl.dispose();
     _clearTypeCtrl.dispose();
+    _automationModeCtrl.dispose();
     super.dispose();
   }
 
@@ -101,6 +124,31 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     supported: _memoryTierOptions,
     fallback: 'all',
   );
+  String get _appendType => _normalizedSelection(
+    _appendTypeCtrl.text,
+    supported: _appendTypes,
+    fallback: 'message',
+  );
+  String get _appendMemoryTier => _normalizedSelection(
+    _appendMemoryTierCtrl.text,
+    supported: _memoryTierOptions.where((value) => value != 'all').toList(),
+    fallback: 'message',
+  );
+  String get _automationMode => _normalizedSelection(
+    _automationModeCtrl.text,
+    supported: _automationModes,
+    fallback: 'standard',
+  );
+
+  Map<String, dynamic>? _parseScopeSignature() {
+    final raw = _scopeSignatureCtrl.text.trim();
+    if (raw.isEmpty) return null;
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) {
+      throw const FormatException('scopeSignature 必须是 JSON 对象');
+    }
+    return Map<String, dynamic>.from(decoded);
+  }
 
   String _normalizedSelection(
     String raw, {
@@ -162,6 +210,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         episodesId: _episodesId,
         memoryType: memoryType,
         memoryTier: _memoryTier == 'all' ? null : _memoryTier,
+        scopeSignature: _parseScopeSignature(),
       );
       if (!mounted) return;
       setState(() {
@@ -229,6 +278,9 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     final agentType = _agentTypeCtrl.text.trim();
     final content = _appendContentCtrl.text.trim();
     final role = _appendRoleCtrl.text.trim();
+    final appendType = _appendType;
+    final appendTier = _appendMemoryTier;
+    final appendName = _appendNameCtrl.text.trim();
     if (projectId == null ||
         agentType.isEmpty ||
         content.isEmpty ||
@@ -246,8 +298,12 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         projectId: projectId,
         agentType: agentType,
         episodesId: _episodesId,
+        memoryType: appendType,
         role: role,
         content: content,
+        name: appendName.isEmpty ? null : appendName,
+        memoryTier: appendTier,
+        scopeSignature: _parseScopeSignature(),
       );
       await _queryMemory();
       if (!mounted) return;
@@ -330,12 +386,13 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         projectId: projectId,
         agentType: agentType,
         episodesId: episodesId,
+        automationMode: _automationMode,
       );
       await _queryMemory();
       if (!mounted) return;
       setState(() {
         _statusLine =
-            '已自动优化视频记忆：删除 ${result['removedRows'] ?? 0} 条 / ${(result['removedChars'] ?? 0)} chars，其中重复 ${(result['removedDuplicateRows'] ?? 0)} 条、纯视觉 ${(result['removedVisualRows'] ?? 0)} 条。';
+            '已自动优化视频记忆（${result['automationMode'] ?? _automationMode}）：删除 ${result['removedRows'] ?? 0} 条 / ${(result['removedChars'] ?? 0)} chars，其中重复 ${(result['removedDuplicateRows'] ?? 0)} 条、纯视觉 ${(result['removedVisualRows'] ?? 0)} 条。';
         _optimizingMemory = false;
       });
     } on RustApiException catch (e) {
@@ -375,14 +432,24 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         queryTypeOptions: _queryTypes,
         clearTypeOptions: _clearTypes,
         memoryTierOptions: _memoryTierOptions,
+        appendTypeOptions: _appendTypes,
+        automationModeOptions: _automationModes,
         projectIdCtrl: _projectIdCtrl,
         agentTypeCtrl: _agentTypeCtrl,
         episodesIdCtrl: _episodesIdCtrl,
         queryTypeCtrl: _queryTypeCtrl,
         memoryTierCtrl: _memoryTierCtrl,
+        scopeSignatureCtrl: _scopeSignatureCtrl,
         appendContentCtrl: _appendContentCtrl,
         appendRoleCtrl: _appendRoleCtrl,
+        appendTypeCtrl: _appendTypeCtrl,
+        appendMemoryTierCtrl: _appendMemoryTierCtrl,
+        appendNameCtrl: _appendNameCtrl,
         clearTypeCtrl: _clearTypeCtrl,
+        automationModeCtrl: _automationModeCtrl,
+        appendType: _appendType,
+        appendMemoryTier: _appendMemoryTier,
+        automationMode: _automationMode,
       ),
       callbacks: ProjectsAgentMemoryWorkbenchDialogViewCallbacks(
         onReloadProjects: _reloadProjects,
@@ -393,7 +460,11 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         onOptimizeVideoMemory: _optimizeVideoMemory,
         onQueryTypeChanged: (value) => _queryTypeCtrl.text = value,
         onMemoryTierChanged: (value) => _memoryTierCtrl.text = value,
+        onAppendTypeChanged: (value) => _appendTypeCtrl.text = value,
+        onAppendMemoryTierChanged: (value) =>
+            _appendMemoryTierCtrl.text = value,
         onClearTypeChanged: (value) => _clearTypeCtrl.text = value,
+        onAutomationModeChanged: (value) => _automationModeCtrl.text = value,
         onClose: () => Navigator.of(context).pop(),
       ),
     );

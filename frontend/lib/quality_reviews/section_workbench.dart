@@ -411,6 +411,12 @@ class _QualityReviewsWorkbenchDialogState
               : _ctrls.createTargetIdCtrl.text.trim(),
           source: source,
           overallScore: score,
+          stage: _ctrls.createStageCtrl.text.trim().isEmpty
+              ? null
+              : _ctrls.createStageCtrl.text.trim(),
+          grade: _ctrls.createGradeCtrl.text.trim().isEmpty
+              ? null
+              : _ctrls.createGradeCtrl.text.trim(),
           passed: _createPassed,
           comments: _ctrls.createCommentsCtrl.text.trim().isEmpty
               ? null
@@ -498,6 +504,8 @@ class _QualityReviewsWorkbenchDialogState
         createTargetIdCtrl: _ctrls.createTargetIdCtrl,
         createSourceCtrl: _ctrls.createSourceCtrl,
         createScoreCtrl: _ctrls.createScoreCtrl,
+        createStageCtrl: _ctrls.createStageCtrl,
+        createGradeCtrl: _ctrls.createGradeCtrl,
         createCommentsCtrl: _ctrls.createCommentsCtrl,
         createBadCaseCategoryCtrl: _ctrls.createBadCaseCategoryCtrl,
       ),

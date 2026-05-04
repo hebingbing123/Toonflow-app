@@ -51,6 +51,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.createTargetIdCtrl,
     required this.createSourceCtrl,
     required this.createScoreCtrl,
+    required this.createStageCtrl,
+    required this.createGradeCtrl,
     required this.createCommentsCtrl,
     required this.createBadCaseCategoryCtrl,
   });
@@ -98,6 +100,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final TextEditingController createTargetIdCtrl;
   final TextEditingController createSourceCtrl;
   final TextEditingController createScoreCtrl;
+  final TextEditingController createStageCtrl;
+  final TextEditingController createGradeCtrl;
   final TextEditingController createCommentsCtrl;
   final TextEditingController createBadCaseCategoryCtrl;
 }
@@ -490,6 +494,24 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 controller: model.createScoreCtrl,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'overallScore'),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: model.createStageCtrl,
+                      decoration: const InputDecoration(labelText: 'stage'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: model.createGradeCtrl,
+                      decoration: const InputDecoration(labelText: 'grade'),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               TextField(

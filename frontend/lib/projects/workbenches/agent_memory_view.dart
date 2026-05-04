@@ -25,14 +25,24 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
     required this.queryTypeOptions,
     required this.clearTypeOptions,
     required this.memoryTierOptions,
+    required this.appendTypeOptions,
+    required this.automationModeOptions,
     required this.projectIdCtrl,
     required this.agentTypeCtrl,
     required this.episodesIdCtrl,
     required this.queryTypeCtrl,
     required this.memoryTierCtrl,
+    required this.scopeSignatureCtrl,
     required this.appendContentCtrl,
     required this.appendRoleCtrl,
+    required this.appendTypeCtrl,
+    required this.appendMemoryTierCtrl,
+    required this.appendNameCtrl,
     required this.clearTypeCtrl,
+    required this.automationModeCtrl,
+    required this.appendType,
+    required this.appendMemoryTier,
+    required this.automationMode,
   });
 
   final List<ProjectRow> projects;
@@ -53,14 +63,24 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
   final List<String> queryTypeOptions;
   final List<String> clearTypeOptions;
   final List<String> memoryTierOptions;
+  final List<String> appendTypeOptions;
+  final List<String> automationModeOptions;
   final TextEditingController projectIdCtrl;
   final TextEditingController agentTypeCtrl;
   final TextEditingController episodesIdCtrl;
   final TextEditingController queryTypeCtrl;
   final TextEditingController memoryTierCtrl;
+  final TextEditingController scopeSignatureCtrl;
   final TextEditingController appendContentCtrl;
   final TextEditingController appendRoleCtrl;
+  final TextEditingController appendTypeCtrl;
+  final TextEditingController appendMemoryTierCtrl;
+  final TextEditingController appendNameCtrl;
   final TextEditingController clearTypeCtrl;
+  final TextEditingController automationModeCtrl;
+  final String appendType;
+  final String appendMemoryTier;
+  final String automationMode;
 }
 
 class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
@@ -73,7 +93,10 @@ class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
     required this.onOptimizeVideoMemory,
     required this.onQueryTypeChanged,
     required this.onMemoryTierChanged,
+    required this.onAppendTypeChanged,
+    required this.onAppendMemoryTierChanged,
     required this.onClearTypeChanged,
+    required this.onAutomationModeChanged,
     required this.onClose,
   });
 
@@ -85,7 +108,10 @@ class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
   final Future<void> Function() onOptimizeVideoMemory;
   final ValueChanged<String> onQueryTypeChanged;
   final ValueChanged<String> onMemoryTierChanged;
+  final ValueChanged<String> onAppendTypeChanged;
+  final ValueChanged<String> onAppendMemoryTierChanged;
   final ValueChanged<String> onClearTypeChanged;
+  final ValueChanged<String> onAutomationModeChanged;
   final VoidCallback onClose;
 }
 
@@ -202,6 +228,17 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'episodes id（可空）'),
               ),
               const SizedBox(height: 8),
+              TextField(
+                controller: model.scopeSignatureCtrl,
+                minLines: 2,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'scopeSignature JSON（可空）',
+                  helperText:
+                      '例如 {"episodeId":3,"storyboardIds":[12],"focusSections":["ep3-sc2"]}',
+                ),
+              ),
+              const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: model.queryType,
                 decoration: const InputDecoration(
@@ -241,6 +278,27 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 onChanged: (value) {
                   if (value != null) {
                     callbacks.onMemoryTierChanged(value);
+                  }
+                },
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: model.automationMode,
+                decoration: const InputDecoration(
+                  labelText: 'automation mode',
+                  helperText: 'standard / lean / off',
+                ),
+                items: model.automationModeOptions
+                    .map(
+                      (value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    callbacks.onAutomationModeChanged(value);
                   }
                 },
               ),
@@ -419,6 +477,58 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: model.appendType,
+                      decoration: const InputDecoration(
+                        labelText: 'append type',
+                        helperText: 'message / summary',
+                      ),
+                      items: model.appendTypeOptions
+                          .map(
+                            (value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          callbacks.onAppendTypeChanged(value);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: model.appendMemoryTier,
+                      decoration: const InputDecoration(
+                        labelText: 'append memory tier',
+                        helperText:
+                            'style_bible / stage_summary / delta_memory / message',
+                      ),
+                      items: model.memoryTierOptions
+                          .where((value) => value != 'all')
+                          .map(
+                            (value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(_memoryTierLabel(value)),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          callbacks.onAppendMemoryTierChanged(value);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
                     child: TextField(
                       controller: model.appendRoleCtrl,
                       decoration: const InputDecoration(labelText: 'role'),
@@ -426,11 +536,24 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
+                    child: TextField(
+                      controller: model.appendNameCtrl,
+                      decoration: const InputDecoration(labelText: 'name（可空）'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
                     child: FilledButton.tonal(
                       onPressed: model.appendingMemory
                           ? null
                           : callbacks.onAppendMemory,
-                      child: Text(model.appendingMemory ? '…' : '追加记忆'),
+                      child: Text(
+                        model.appendingMemory ? '…' : '按当前 scope 追加记忆',
+                      ),
                     ),
                   ),
                 ],

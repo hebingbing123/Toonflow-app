@@ -16,6 +16,8 @@ class _QualityReviewsWorkbenchControllers {
     required this.createTargetIdCtrl,
     required this.createSourceCtrl,
     required this.createScoreCtrl,
+    required this.createStageCtrl,
+    required this.createGradeCtrl,
     required this.createCommentsCtrl,
     required this.createBadCaseCategoryCtrl,
   });
@@ -37,7 +39,9 @@ class _QualityReviewsWorkbenchControllers {
         text: 'flutter-workbench-${DateTime.now().millisecondsSinceEpoch}',
       ),
       createSourceCtrl: TextEditingController(text: 'manual'),
-      createScoreCtrl: TextEditingController(text: '85'),
+      createScoreCtrl: TextEditingController(text: '8'),
+      createStageCtrl: TextEditingController(text: 'video_prompt'),
+      createGradeCtrl: TextEditingController(text: 'B'),
       createCommentsCtrl: TextEditingController(
         text: 'quality workbench review',
       ),
@@ -59,6 +63,8 @@ class _QualityReviewsWorkbenchControllers {
   final TextEditingController createTargetIdCtrl;
   final TextEditingController createSourceCtrl;
   final TextEditingController createScoreCtrl;
+  final TextEditingController createStageCtrl;
+  final TextEditingController createGradeCtrl;
   final TextEditingController createCommentsCtrl;
   final TextEditingController createBadCaseCategoryCtrl;
 
@@ -77,6 +83,8 @@ class _QualityReviewsWorkbenchControllers {
     createTargetIdCtrl.dispose();
     createSourceCtrl.dispose();
     createScoreCtrl.dispose();
+    createStageCtrl.dispose();
+    createGradeCtrl.dispose();
     createCommentsCtrl.dispose();
     createBadCaseCategoryCtrl.dispose();
   }

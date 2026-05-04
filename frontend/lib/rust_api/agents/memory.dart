@@ -119,6 +119,7 @@ Future<List<AgentMemoryHistoryItem>> queryAgentMemory(
   int? episodesId,
   String memoryType = 'message',
   String? memoryTier,
+  Map<String, dynamic>? scopeSignature,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/query');
   final body = <String, dynamic>{
@@ -129,6 +130,9 @@ Future<List<AgentMemoryHistoryItem>> queryAgentMemory(
   };
   if (memoryTier != null && memoryTier.isNotEmpty) {
     body['memoryTier'] = memoryTier;
+  }
+  if (scopeSignature != null && scopeSignature.isNotEmpty) {
+    body['scopeSignature'] = scopeSignature;
   }
   final res = await http
       .post(
@@ -220,6 +224,7 @@ Future<Map<String, dynamic>> optimizeAgentMemory(
   required int projectId,
   required String agentType,
   required int episodesId,
+  String? automationMode,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/optimize');
   final body = <String, dynamic>{
@@ -227,6 +232,9 @@ Future<Map<String, dynamic>> optimizeAgentMemory(
     'agentType': agentType,
     'episodesId': episodesId,
   };
+  if (automationMode != null && automationMode.isNotEmpty) {
+    body['automationMode'] = automationMode;
+  }
   final res = await http
       .post(
         uri,
@@ -257,6 +265,8 @@ Future<String> appendAgentMemory(
   String role = 'user',
   String? name,
   int? createTime,
+  String? memoryTier,
+  Map<String, dynamic>? scopeSignature,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/append');
   final body = <String, dynamic>{
@@ -269,6 +279,12 @@ Future<String> appendAgentMemory(
   if (episodesId != null) body['episodesId'] = episodesId;
   if (name != null) body['name'] = name;
   if (createTime != null) body['createTime'] = createTime;
+  if (memoryTier != null && memoryTier.isNotEmpty) {
+    body['memoryTier'] = memoryTier;
+  }
+  if (scopeSignature != null && scopeSignature.isNotEmpty) {
+    body['scopeSignature'] = scopeSignature;
+  }
   final res = await http
       .post(
         uri,
