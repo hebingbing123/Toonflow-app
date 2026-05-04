@@ -136,6 +136,29 @@ fn validate_create_review_body_requires_project_for_storyboard_target() {
 }
 
 #[test]
+fn validate_create_review_body_requires_storyboard_numeric_target_for_scoped_output() {
+    let body = CreateQualityReviewBody {
+        target_type: "output".to_string(),
+        project_id: Some(12),
+        target_id: Some("probe-output".to_string()),
+        ..Default::default()
+    };
+    let err =
+        validate_create_review_body(&body).expect_err("scoped output review must carry shot id");
+    assert!(matches!(err, ApiError::BadRequest(_)));
+}
+
+#[test]
+fn validate_create_review_body_accepts_unscoped_output_probe_without_numeric_target() {
+    let body = CreateQualityReviewBody {
+        target_type: "output".to_string(),
+        target_id: Some("flutter-probe-123".to_string()),
+        ..Default::default()
+    };
+    assert!(validate_create_review_body(&body).is_ok());
+}
+
+#[test]
 fn validate_list_reviews_query_rejects_invalid_target_type() {
     let query = ListQualityReviewsQuery {
         project_id: None,

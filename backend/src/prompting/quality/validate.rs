@@ -28,6 +28,10 @@ const VALID_STAGES: &[&str] = &[
 const VALID_GRADES: &[&str] = &["A", "B", "C", "D"];
 const SCORE_FIELD_RANGE: std::ops::RangeInclusive<i16> = 1..=10;
 
+fn target_type_uses_storyboard_numeric_target(target_type: &str) -> bool {
+    matches!(target_type, "storyboard" | "video" | "output")
+}
+
 pub(super) fn validate_list_reviews_query(query: &ListQualityReviewsQuery) -> Result<(), ApiError> {
     if let Some(target_type) = query.target_type.as_deref() {
         if !VALID_TARGET_TYPES.contains(&target_type) {
@@ -78,12 +82,9 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
         ));
     }
 
-    if body.target_type == "storyboard" {
-        if body.project_id.is_none() {
-            return Err(ApiError::BadRequest(
-                "projectId is required when targetType is storyboard".into(),
-            ));
-        }
+    let uses_storyboard_numeric_target =
+        target_type_uses_storyboard_numeric_target(body.target_type.as_str());
+    if uses_storyboard_numeric_target {
         let storyboard_id = body
             .target_id
             .as_deref()
@@ -91,10 +92,23 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
             .filter(|value| !value.is_empty())
             .and_then(|value| value.parse::<i32>().ok())
             .filter(|value| *value > 0);
-        if storyboard_id.is_none() {
+        if body.target_type == "storyboard" && body.project_id.is_none() {
+            return Err(ApiError::BadRequest(
+                "projectId is required when targetType is storyboard".into(),
+            ));
+        }
+        if body.target_type == "storyboard" && storyboard_id.is_none() {
             return Err(ApiError::BadRequest(
                 "targetId must be a positive storyboard id when targetType is storyboard".into(),
             ));
+        }
+        if (body.project_id.is_some() || body.script_id.is_some())
+            && storyboard_id.is_none()
+        {
+            return Err(ApiError::BadRequest(format!(
+                "targetId must be a positive storyboard id when targetType is {} within project/script scope",
+                body.target_type
+            )));
         }
     }
 
@@ -155,4 +169,18 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::target_type_uses_storyboard_numeric_target;
+
+    #[test]
+    fn storyboard_numeric_target_types_are_explicit() {
+        assert!(target_type_uses_storyboard_numeric_target("storyboard"));
+        assert!(target_type_uses_storyboard_numeric_target("video"));
+        assert!(target_type_uses_storyboard_numeric_target("output"));
+        assert!(!target_type_uses_storyboard_numeric_target("script"));
+        assert!(!target_type_uses_storyboard_numeric_target("asset"));
+    }
 }

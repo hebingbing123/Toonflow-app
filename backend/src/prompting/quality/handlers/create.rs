@@ -77,9 +77,31 @@ async fn validate_review_scope_ownership(
     user_id: Uuid,
     project_id: Option<i32>,
     script_id: Option<i32>,
+    job_id: Option<Uuid>,
     target_type: &str,
     target_id: Option<&str>,
 ) -> Result<(), ApiError> {
+    if let Some(job_id) = job_id {
+        let ok: bool = sqlx::query_scalar(
+            r#"
+            SELECT EXISTS(
+              SELECT 1
+              FROM app_generation_job
+              WHERE id = $1
+                AND owner_user_id = $2
+            )
+            "#,
+        )
+        .bind(job_id)
+        .bind(user_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        if !ok {
+            return Err(ApiError::NotFound);
+        }
+    }
+
     match (project_id, script_id) {
         (Some(project_id), Some(script_id)) => {
             let ok: bool = sqlx::query_scalar(
@@ -148,7 +170,7 @@ async fn validate_review_scope_ownership(
         (None, None) => {}
     }
 
-    if target_type == "storyboard" {
+    if matches!(target_type, "storyboard" | "video" | "output") {
         let Some(storyboard_id) = target_id
             .map(str::trim)
             .and_then(|value| value.parse::<i32>().ok())
@@ -237,6 +259,7 @@ pub(crate) async fn create_review(
         user_id,
         body.project_id,
         body.script_id,
+        body.job_id,
         &body.target_type,
         body.target_id.as_deref(),
     )
