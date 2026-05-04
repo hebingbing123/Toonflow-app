@@ -569,7 +569,8 @@
     - Run `flutter test` in frontend/ - ensure all tests pass
     - `2026-05-04`: fixed `cargo test -q scripting::scripts::property_tests::tests::prop2_emotion_curve_coverage --lib` so the property now passes again
     - `2026-05-04`: preserved subject-locked `表演抬眼停顿` role memory across contextual trimming / role ranking, which reduced the backend full-suite failure count from `48` to `42`
-    - Current remaining backend blockers are still concentrated in meta prompt style-summary selection and downstream video negative-prompt suppression, so this checkpoint remains open until those clusters are resolved too
+    - `2026-05-04`: after tightening contextual negative-style fallback, review-only residual-axis filtering, exact-prompt-seed rejected-memory pruning, and single-fragment character-family rendering, backend full suite improved again to `1681 passed; 32 failed; 37 ignored`
+    - Current remaining backend blockers are now concentrated in meta prompt style-summary / prompt-memory selection plus a smaller video negative-prompt ordering cluster, so this checkpoint remains open until those are resolved too
     - _Requirements: 3.3_
 
   - [~] 7.4 Run final gate check
@@ -577,6 +578,7 @@
     - Ensure all checks pass (OpenAPI, cargo fmt, clippy, test, flutter analyze, test)
     - `2026-05-04`: after fixing the scripting property regression, the dirty-worktree baseline returned to `1664 passed; 48 failed; 37 ignored`
     - `2026-05-04`: after preserving hesitant / subject-locked role-performance fragments, `yarn refactor:check` improved to `1671 passed; 42 failed; 37 ignored`; gate still open because the remaining failures cluster around observation-style summary selection and negative-prompt suppression
+    - `2026-05-04`: after fixing the observation-style pressure path plus the `merge_budget_tests` negative-prompt suppression / merge regressions, `yarn refactor:check` now reaches `1681 passed; 32 failed; 37 ignored`; gate is still open because the remaining failures are concentrated in meta prompt-memory/style selection and a smaller video negative-prompt ordering cluster
     - _Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.10_
 
   - [~] 7.5 Final commit

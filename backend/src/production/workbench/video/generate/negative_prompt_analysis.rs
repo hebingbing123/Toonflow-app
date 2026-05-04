@@ -45,7 +45,15 @@ pub(super) fn resolve_negative_filter_style_note(
                 current_prompt_seed,
                 storyboard_row,
             )
-            .and_then(|note| compact_contextual_negative_style_note(&note, storyboard_row))
+            .and_then(|note| {
+                compact_contextual_negative_style_note(&note, storyboard_row).or_else(|| {
+                    storyboard_row
+                        .and_then(|row| row.video_desc.as_deref())
+                        .and_then(parse_structured_storyboard_description)
+                        .filter(|context| style_note_context_evidence(&note, context) >= 2)
+                        .and_then(|_| compact_video_style_prompt_note(&note))
+                })
+            })
         })
         .or_else(|| {
             select_contextual_summary_style_note(
@@ -424,6 +432,24 @@ pub(super) fn filter_conflicting_review_fragments(
     fragments
         .into_iter()
         .flat_map(|fragment| {
+            compact_review_fragments_against_storyboard_style(
+                &fragment,
+                selected_style_note,
+                storyboard_row,
+            )
+        })
+        .filter(|fragment| !review_fragment_is_irrelevant_to_storyboard(fragment, storyboard_row))
+        .collect()
+}
+
+pub(super) fn filter_conflicting_negative_fragments(
+    fragments: Vec<String>,
+    selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    fragments
+        .into_iter()
+        .flat_map(|fragment| {
             compact_negative_constraint_fragments_against_storyboard_style(
                 &fragment,
                 selected_style_note,
@@ -432,6 +458,43 @@ pub(super) fn filter_conflicting_review_fragments(
         })
         .filter(|fragment| !review_fragment_is_irrelevant_to_storyboard(fragment, storyboard_row))
         .collect()
+}
+
+fn compact_review_fragments_against_storyboard_style(
+    fragment: &str,
+    selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Vec<String> {
+    let mut compacted = compact_negative_constraint_fragments_against_storyboard_style(
+        fragment,
+        selected_style_note,
+        storyboard_row,
+    );
+    let conflicts = |value: &str| {
+        negative_constraint_conflicts_with_storyboard_style(
+            value,
+            selected_style_note,
+            storyboard_row,
+        )
+    };
+
+    match canonical_negative_fragment(fragment).as_str() {
+        "avoid extreme camera angle or overly tight close-up framing"
+            if conflicts("avoid overly tight close-up framing") =>
+        {
+            compacted
+                .retain(|value| canonical_negative_fragment(value) != "avoid extreme camera angle");
+        }
+        "avoid oppressive or frantic mood" | "avoid overly cold, oppressive, or frantic mood"
+            if conflicts("avoid oppressive mood")
+                && conflicts("avoid overly cold emotional tone") =>
+        {
+            compacted.retain(|value| canonical_negative_fragment(value) != "avoid frantic mood");
+        }
+        _ => {}
+    }
+
+    compacted
 }
 
 pub(super) fn compact_review_fragments_against_rejected_memory(
@@ -516,7 +579,7 @@ fn compact_rejected_overlap_pair(
 }
 
 #[allow(dead_code)]
-fn review_fragment_conflicts_with_selected_style(
+pub(super) fn review_fragment_conflicts_with_selected_style(
     fragment: &str,
     selected_style_note: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
@@ -528,7 +591,7 @@ fn review_fragment_conflicts_with_selected_style(
     )
 }
 
-fn review_fragment_is_irrelevant_to_storyboard(
+pub(super) fn review_fragment_is_irrelevant_to_storyboard(
     fragment: &str,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> bool {
@@ -607,6 +670,12 @@ fn compact_negative_constraint_fragments_against_storyboard_style(
             .collect()
         }
         "avoid oppressive or frantic mood" | "avoid overly cold, oppressive, or frantic mood" => {
+            if selected_style_note.is_some()
+                && conflicts("avoid oppressive mood")
+                && conflicts("avoid overly cold emotional tone")
+            {
+                return Vec::new();
+            }
             compact_conflicting_mood_constraints(trimmed, conflicts)
         }
         "avoid flat cold lighting or harsh backlight silhouette" => {
@@ -623,6 +692,13 @@ fn compact_negative_constraint_fragments_against_storyboard_style(
             .then_some(trimmed.to_string())
             .into_iter()
             .collect(),
+        "avoid frantic mood"
+            if selected_style_note.is_some()
+                && conflicts("avoid oppressive mood")
+                && conflicts("avoid overly cold emotional tone") =>
+        {
+            Vec::new()
+        }
         _ => (!conflicts(trimmed))
             .then_some(trimmed.to_string())
             .into_iter()

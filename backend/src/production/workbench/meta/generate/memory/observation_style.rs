@@ -87,11 +87,14 @@ pub(in crate::production::workbench::meta::generate) fn select_contextual_observ
             let compacted =
                 compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
                     .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+            let candidate_note = restore_observation_delivery_signal_if_compaction_overtrims(
+                &note, &compacted, &context,
+            );
             let evidence = observation_style_note_context_evidence(&note, &context).max(
-                observation_style_note_context_evidence(&compacted, &context),
+                observation_style_note_context_evidence(&candidate_note, &context),
             );
             let compacted = rank_observation_summary_style_note_fragments(
-                &compacted,
+                &candidate_note,
                 &context,
                 constraint_pressure,
             )?;
@@ -134,11 +137,14 @@ pub(in crate::production::workbench::meta::generate) fn select_contextual_observ
                     constraint_pressure,
                 )
                 .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))?;
+                let candidate_note = restore_observation_delivery_signal_if_compaction_overtrims(
+                    &note, &compacted, &context,
+                );
                 let evidence = observation_style_note_context_evidence(&note, &context).max(
-                    observation_style_note_context_evidence(&compacted, &context),
+                    observation_style_note_context_evidence(&candidate_note, &context),
                 );
                 let compacted = rank_observation_summary_style_note_fragments(
-                    &compacted,
+                    &candidate_note,
                     &context,
                     constraint_pressure,
                 )?;
@@ -162,6 +168,19 @@ pub(in crate::production::workbench::meta::generate) fn select_contextual_observ
         .min();
     if let Some(locked_subject_priority) = locked_subject_priority {
         candidates.retain(|(subject_priority, ..)| *subject_priority == locked_subject_priority);
+    }
+    if constraint_pressure.is_some_and(|pressure| {
+        pressure.has_dialogue_guardrail
+            || pressure.has_identity_guardrail
+            || pressure.has_emotion_guardrail
+    }) && candidates.iter().any(|(_, _, _, _, note)| {
+        split_prompt_note_fragments(note)
+            .any(|fragment| fragment.starts_with("表演") || fragment.starts_with("语气"))
+    }) {
+        candidates.retain(|(_, _, _, _, note)| {
+            split_prompt_note_fragments(note)
+                .any(|fragment| fragment.starts_with("表演") || fragment.starts_with("语气"))
+        });
     }
 
     candidates
@@ -187,10 +206,6 @@ pub(in crate::production::workbench::meta::generate) fn observation_summary_styl
     subject_priority: usize,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> usize {
-    if scope_priority > 1 || subject_priority == usize::MAX {
-        return 2;
-    }
-
     let scene_needs_subject_locked_memory = video_prompt_scene_needs_identity_memory(context)
         || video_prompt_scene_needs_emotional_memory(context)
         || constraint_pressure.is_some_and(|pressure| {
@@ -198,10 +213,6 @@ pub(in crate::production::workbench::meta::generate) fn observation_summary_styl
                 || pressure.has_dialogue_guardrail
                 || pressure.has_emotion_guardrail
         });
-    if !scene_needs_subject_locked_memory {
-        return 2;
-    }
-
     let has_high_signal_subject_detail = split_prompt_note_fragments(compacted_note).any(
         |fragment| match style_note_fragment_family(&fragment) {
             Some("表演") => {
@@ -216,6 +227,18 @@ pub(in crate::production::workbench::meta::generate) fn observation_summary_styl
             _ => false,
         },
     );
+
+    if scope_priority > 1 || subject_priority == usize::MAX {
+        return usize::from(
+            !scene_needs_subject_locked_memory
+                || !has_high_signal_subject_detail
+                || constraint_pressure.is_none(),
+        ) + 1;
+    }
+
+    if !scene_needs_subject_locked_memory {
+        return 2;
+    }
 
     if has_high_signal_subject_detail {
         1
@@ -253,6 +276,27 @@ pub(in crate::production::workbench::meta::generate) fn rank_observation_summary
             ))
         })
         .collect::<Vec<_>>();
+    if constraint_pressure.is_some_and(|pressure| {
+        pressure.has_dialogue_guardrail
+            || pressure.has_identity_guardrail
+            || pressure.has_emotion_guardrail
+    }) {
+        for fragment in observation_summary_subject_locked_fallback_fragments(note, context) {
+            if scored
+                .iter()
+                .any(|(_, _, _, existing)| existing == &fragment)
+            {
+                continue;
+            }
+            scored.push((
+                observation_summary_style_fragment_score(&fragment, context, constraint_pressure)
+                    + 100,
+                0,
+                fragment.chars().count(),
+                fragment,
+            ));
+        }
+    }
     scored.sort_by(|a, b| {
         b.0.cmp(&a.0)
             .then(b.1.cmp(&a.1))
@@ -281,7 +325,74 @@ pub(in crate::production::workbench::meta::generate) fn rank_observation_summary
         }
     }
 
-    (!selected.is_empty()).then(|| selected.join("，"))
+    if selected.is_empty() {
+        for fragment in observation_summary_subject_locked_fallback_fragments(note, context) {
+            let separator_chars = usize::from(!selected.is_empty());
+            let next_chars = used_chars + separator_chars + fragment.chars().count();
+            if next_chars > max_chars {
+                continue;
+            }
+            used_chars = next_chars;
+            selected.push(fragment);
+            if selected.len() >= max_fragments {
+                break;
+            }
+        }
+    }
+
+    let mut selected = (!selected.is_empty())
+        .then(|| sort_style_note_fragments_for_output(&selected.join("，")))
+        .flatten()?;
+    if constraint_pressure.is_some_and(|pressure| {
+        pressure.has_dialogue_guardrail
+            || pressure.has_identity_guardrail
+            || pressure.has_emotion_guardrail
+    }) {
+        let delivery_fragments = split_prompt_note_fragments(&selected)
+            .filter_map(|fragment| {
+                if fragment.starts_with("表演") {
+                    return Some(fragment);
+                }
+                if !fragment.starts_with("语气") {
+                    return None;
+                }
+                if memory_fragment_has_high_signal_voice_detail(
+                    normalize_prompt_text(&fragment).as_str(),
+                ) {
+                    return Some(fragment);
+                }
+                let trimmed = trim_style_fragment_against_storyboard_fields(&fragment, context)
+                    .unwrap_or(fragment);
+                Some(strip_observation_voice_mood_tail(&trimmed))
+            })
+            .collect::<Vec<_>>();
+        if !delivery_fragments.is_empty() {
+            selected = sort_style_note_fragments_for_output(&delivery_fragments.join("，"))
+                .unwrap_or(selected);
+        }
+    }
+    supplement_observation_summary_voice_fragment(note, &selected, context, max_chars)
+}
+
+fn strip_observation_voice_mood_tail(fragment: &str) -> String {
+    let Some(body) = fragment.strip_prefix("语气") else {
+        return fragment.to_string();
+    };
+    let mut trimmed = normalize_prompt_text(body);
+    for keyword in ["克制", "隐忍", "压抑", "沉静", "冷静"] {
+        if !trimmed.contains(keyword) {
+            continue;
+        }
+        let candidate = normalize_prompt_text(&trimmed.replace(keyword, ""));
+        if candidate.chars().count() >= 2 {
+            trimmed = candidate;
+        }
+    }
+    if trimmed == body {
+        fragment.to_string()
+    } else {
+        format!("语气{trimmed}")
+    }
 }
 
 pub(in crate::production::workbench::meta::generate) fn observation_summary_style_note_score(
@@ -306,6 +417,136 @@ pub(in crate::production::workbench::meta::generate) fn observation_summary_styl
         + evidence * 12
 }
 
+fn observation_summary_subject_locked_fallback_fragments(
+    note: &str,
+    context: &StructuredStoryboardDescription,
+) -> Vec<String> {
+    let needs_subject_locked_memory = video_prompt_scene_needs_identity_memory(context)
+        || video_prompt_scene_needs_emotional_memory(context)
+        || video_prompt_scene_needs_dialogue_performance_memory(context, None);
+    if !needs_subject_locked_memory {
+        return Vec::new();
+    }
+
+    split_prompt_note_fragments(note)
+        .filter_map(|fragment| {
+            let trimmed = trim_style_fragment_against_storyboard_fields(&fragment, context)?;
+            let is_high_signal_performance = fragment.starts_with("表演")
+                && score_memory_fragment_human_performance_detail(&fragment, Some("表演")) >= 3;
+            let is_high_signal_voice = fragment.starts_with("语气")
+                && storyboard_supports_voice_style(context)
+                && memory_fragment_has_high_signal_voice_detail(
+                    normalize_prompt_text(&fragment).as_str(),
+                );
+            if is_high_signal_performance {
+                return Some(trimmed);
+            }
+            is_high_signal_voice.then_some(fragment)
+        })
+        .collect()
+}
+
+fn supplement_observation_summary_voice_fragment(
+    source_note: &str,
+    selected_note: &str,
+    context: &StructuredStoryboardDescription,
+    max_chars: usize,
+) -> Option<String> {
+    let has_performance =
+        split_prompt_note_fragments(selected_note).any(|fragment| fragment.starts_with("表演"));
+    let has_voice =
+        split_prompt_note_fragments(selected_note).any(|fragment| fragment.starts_with("语气"));
+    if !has_performance || has_voice || !storyboard_supports_voice_style(context) {
+        return Some(selected_note.to_string());
+    }
+
+    let voice_fragment = split_prompt_note_fragments(source_note)
+        .find(|fragment| fragment.starts_with("语气"))
+        .and_then(|fragment| trim_style_fragment_against_storyboard_fields(&fragment, context))
+        .map(|fragment| {
+            if memory_fragment_has_high_signal_voice_detail(
+                normalize_prompt_text(&fragment).as_str(),
+            ) {
+                fragment
+            } else {
+                strip_observation_voice_mood_tail(&fragment)
+            }
+        })
+        .filter(|fragment| {
+            !style_fragment_is_low_gain_hidden_speech_voice(fragment, context, "")
+                && !style_fragment_is_low_gain_mood_carryover(fragment, context)
+        });
+    let Some(voice_fragment) = voice_fragment else {
+        return Some(selected_note.to_string());
+    };
+
+    let merged =
+        sort_style_note_fragments_for_output(&format!("{selected_note}，{voice_fragment}"))?;
+    (merged.chars().count() <= max_chars)
+        .then_some(merged)
+        .or_else(|| Some(selected_note.to_string()))
+}
+
+fn restore_observation_delivery_signal_if_compaction_overtrims(
+    original: &str,
+    compacted: &str,
+    context: &StructuredStoryboardDescription,
+) -> String {
+    let original_fragments = split_prompt_note_fragments(original).collect::<Vec<_>>();
+    let compacted_fragments = split_prompt_note_fragments(compacted).collect::<Vec<_>>();
+    let original_has_performance = original_fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"));
+    let original_has_voice = original_fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("语气"));
+    let compacted_has_performance = compacted_fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("表演"));
+    let compacted_has_voice = compacted_fragments
+        .iter()
+        .any(|fragment| fragment.starts_with("语气"));
+    if original_has_performance
+        && original_has_voice
+        && compacted_has_performance
+        && !compacted_has_voice
+        && video_prompt_scene_needs_dialogue_performance_memory(context, None)
+    {
+        return original.to_string();
+    }
+
+    let original_voice_family = original_fragments
+        .iter()
+        .find(|fragment| fragment.starts_with("语气"))
+        .and_then(|fragment| style_voice_family_for_generate(fragment));
+    let compacted_voice_family = compacted_fragments
+        .iter()
+        .find(|fragment| fragment.starts_with("语气"))
+        .and_then(|fragment| style_voice_family_for_generate(fragment));
+    let original_has_high_signal_voice = original_fragments.iter().any(|fragment| {
+        fragment.starts_with("语气")
+            && memory_fragment_has_high_signal_voice_detail(
+                normalize_prompt_text(fragment).as_str(),
+            )
+    });
+    let original_voice_fragment = original_fragments
+        .iter()
+        .find(|fragment| fragment.starts_with("语气"))
+        .cloned();
+    let compacted_voice_fragment = compacted_fragments
+        .iter()
+        .find(|fragment| fragment.starts_with("语气"))
+        .cloned();
+    if original_has_high_signal_voice
+        && (original_voice_family.is_some() && compacted_voice_family != original_voice_family
+            || original_voice_fragment != compacted_voice_fragment)
+    {
+        return original.to_string();
+    }
+
+    compacted.to_string()
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub(in crate::production::workbench::meta::generate) enum ObservationFilterStyleCandidateSource {
     Summary,
@@ -327,6 +568,30 @@ pub(in crate::production::workbench::meta::generate) fn select_pressure_prioriti
         .video_desc
         .as_deref()
         .and_then(parse_structured_storyboard_description)?;
+    let pressure_prefers_delivery = pressure.has_dialogue_guardrail
+        || pressure.has_identity_guardrail
+        || pressure.has_emotion_guardrail;
+    if pressure_prefers_delivery {
+        let preferred = role_notes
+            .iter()
+            .chain(summary_notes.iter())
+            .find_map(|note| {
+                let compacted =
+                    compact_guardrail_sensitive_style_note(note, storyboard_row, Some(pressure))
+                        .or_else(|| {
+                            compact_contextual_video_style_note(note, Some(storyboard_row))
+                        })?;
+                let chosen_note = restore_observation_delivery_signal_if_compaction_overtrims(
+                    note, &compacted, &fields,
+                );
+                let has_delivery_signal = split_prompt_note_fragments(&chosen_note)
+                    .any(|fragment| fragment.starts_with("表演") || fragment.starts_with("语气"));
+                has_delivery_signal.then_some(chosen_note)
+            });
+        if preferred.is_some() {
+            return preferred;
+        }
+    }
     let mut best: Option<(i32, usize, ObservationFilterStyleCandidateSource, String)> = None;
 
     let mut consider = |note: &String, source: ObservationFilterStyleCandidateSource| {
@@ -336,14 +601,24 @@ pub(in crate::production::workbench::meta::generate) fn select_pressure_prioriti
         let Some(compacted) = compacted else {
             return;
         };
+        let chosen_note =
+            restore_observation_delivery_signal_if_compaction_overtrims(note, &compacted, &fields);
+        let delivery_bias = i32::from(
+            (pressure.has_dialogue_guardrail
+                || pressure.has_identity_guardrail
+                || pressure.has_emotion_guardrail)
+                && split_prompt_note_fragments(&chosen_note)
+                    .any(|fragment| fragment.starts_with("表演") || fragment.starts_with("语气")),
+        ) * 8;
         let score =
-            score_compacted_style_note_against_constraint_pressure(&compacted, &fields, pressure)
+            score_compacted_style_note_against_constraint_pressure(&chosen_note, &fields, pressure)
+                + delivery_bias
                 + match source {
                     ObservationFilterStyleCandidateSource::Role => 2,
                     ObservationFilterStyleCandidateSource::Prioritized => 1,
                     ObservationFilterStyleCandidateSource::Summary => 0,
                 };
-        let len = compacted.chars().count();
+        let len = chosen_note.chars().count();
 
         match &best {
             Some((best_score, best_len, best_source, best_note))
@@ -352,8 +627,9 @@ pub(in crate::production::workbench::meta::generate) fn select_pressure_prioriti
                         && (*best_len < len
                             || (*best_len == len
                                 && (*best_source > source
-                                    || (*best_source == source && best_note <= &compacted))))) => {}
-            _ => best = Some((score, len, source, compacted)),
+                                    || (*best_source == source
+                                        && best_note <= &chosen_note))))) => {}
+            _ => best = Some((score, len, source, chosen_note)),
         }
     };
 

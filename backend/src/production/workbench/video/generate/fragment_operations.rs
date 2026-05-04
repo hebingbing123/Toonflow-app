@@ -128,7 +128,7 @@ pub(super) fn merge_prioritized_negative_prompt_fragment_groups(
     }
 }
 
-fn prune_negative_prompt_fragments_for_recent_quality(
+pub(super) fn prune_negative_prompt_fragments_for_recent_quality(
     fragments: Vec<String>,
     recent_quality_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Vec<String> {
@@ -254,6 +254,8 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
     let mut compacted = Vec::with_capacity(fragments.len());
     let mut character_flags = CharacterConsistencyFlags::default();
     let mut character_idx = None;
+    let mut character_fragment = None;
+    let mut character_fragment_count = 0usize;
     let mut visual_style_flags = VisualStyleConstraintFlags::default();
     let mut visual_style_idx = None;
     let mut visual_error_flags = VisualErrorFlags::default();
@@ -262,6 +264,10 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
     for (idx, fragment) in fragments.into_iter().enumerate() {
         if let Some(flags) = parse_character_consistency_fragment(&fragment) {
             character_idx.get_or_insert(idx);
+            character_fragment_count += 1;
+            if character_fragment.is_none() {
+                character_fragment = Some(fragment.clone());
+            }
             character_flags.face_distortion |= flags.face_distortion;
             character_flags.identity_drift |= flags.identity_drift;
             character_flags.costume_inconsistency |= flags.costume_inconsistency;
@@ -292,7 +298,13 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
     }
 
     if let Some(idx) = character_idx {
-        compacted.push((idx, render_character_consistency_fragment(character_flags)));
+        let fragment = if character_fragment_count == 1 {
+            character_fragment
+                .unwrap_or_else(|| render_character_consistency_fragment(character_flags))
+        } else {
+            render_character_consistency_fragment(character_flags)
+        };
+        compacted.push((idx, fragment));
     }
     if let Some(idx) = visual_style_idx {
         for fragment in render_visual_style_constraint_fragments(visual_style_flags) {

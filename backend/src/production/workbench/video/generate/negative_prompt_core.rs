@@ -6,7 +6,7 @@ use crate::production::workbench::meta::generate::constraints::{
     VideoPromptConstraintPressure,
 };
 use crate::production::workbench::video_prompt_memory::{
-    normalize_prompt_text, parse_structured_storyboard_description,
+    extract_key_value, normalize_prompt_text, parse_structured_storyboard_description,
     select_rejected_video_memory_notes_and_observation_candidates_for_subject_with_bias,
     select_selected_video_memory_notes_for_storyboard, selected_memory_subject_aliases,
     storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
@@ -19,8 +19,9 @@ use super::fragment_operations::{
 use super::memory_integration::filter_selected_rows_for_subject;
 use super::negative_prompt_analysis::{
     compact_rejected_fragments_against_review_focus,
-    compact_review_fragments_against_rejected_memory, filter_conflicting_review_fragments,
-    resolve_negative_filter_style_note, storyboard_dialogue_is_empty,
+    compact_review_fragments_against_rejected_memory, filter_conflicting_negative_fragments,
+    filter_conflicting_review_fragments, resolve_negative_filter_style_note,
+    storyboard_dialogue_is_empty,
 };
 use super::negative_prompt_risk::{
     negative_fragment_requires_strict_continuity_budget,
@@ -239,15 +240,23 @@ pub(super) fn build_storyboard_negative_prompt_selection(
         );
     let negative_memory_notes = rejected_memory_selection.negative_notes;
     let pending_observation_candidates = rejected_memory_selection.observation_notes;
-    let rejected_fragments = filter_conflicting_review_fragments(
+    let has_exact_rejected_prompt_seed_match = rejected_memory_has_exact_prompt_seed_match(
+        rejected_rows,
+        context.storyboard_id,
+        context.current_prompt_seed.as_deref(),
+    );
+    let rejected_fragments = filter_conflicting_negative_fragments(
         split_negative_prompt_fragments(negative_memory_notes.into_iter().next().as_deref()),
         prioritized_style_note.as_deref(),
         context.storyboard_row.as_ref(),
     );
     let review_fragments =
         prune_storyboard_negative_fragments(review_fragments, context.storyboard_row.as_ref());
-    let rejected_fragments =
-        prune_storyboard_negative_fragments(rejected_fragments, context.storyboard_row.as_ref());
+    let rejected_fragments = if has_exact_rejected_prompt_seed_match {
+        rejected_fragments
+    } else {
+        prune_storyboard_negative_fragments(rejected_fragments, context.storyboard_row.as_ref())
+    };
     let review_fragments =
         compact_review_fragments_against_rejected_memory(review_fragments, &rejected_fragments);
     let rejected_fragments = compact_rejected_fragments_against_review_focus(
@@ -321,12 +330,33 @@ pub(super) fn build_storyboard_negative_prompt_selection(
     )
 }
 
+fn rejected_memory_has_exact_prompt_seed_match(
+    rows: &[AgentMemoryRow],
+    storyboard_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> bool {
+    let Some(current_prompt_seed) = current_prompt_seed else {
+        return false;
+    };
+
+    rows.iter().any(|row| {
+        row.name == "rejected_video_negative_memory"
+            && extract_key_value(&row.content, "promptSeed").as_deref() == Some(current_prompt_seed)
+            && extract_key_value(&row.content, "storyboardIds").is_some_and(|value| {
+                value
+                    .split(',')
+                    .filter_map(|part| part.trim().parse::<i32>().ok())
+                    .any(|value| value == storyboard_id)
+            })
+    })
+}
+
 pub(super) fn build_storyboard_observation_negative_fragments(
     observation_fragments: Vec<String>,
     prioritized_style_note: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
-    let observation_fragments = filter_conflicting_review_fragments(
+    let observation_fragments = filter_conflicting_negative_fragments(
         observation_fragments,
         prioritized_style_note,
         storyboard_row,

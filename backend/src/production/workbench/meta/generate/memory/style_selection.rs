@@ -653,28 +653,29 @@ pub(in crate::production::workbench::meta::generate) fn compact_guardrail_sensit
     storyboard_row: &StoryboardPromptSeedRow,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Option<String> {
+    let contextual_note = compact_contextual_video_style_note(note, Some(storyboard_row))
+        .or_else(|| Some(note.to_string()))?;
     let Some(pressure) = constraint_pressure
         .filter(|pressure| pressure.forces_compact_memory && pressure.has_active_guardrail())
     else {
-        return Some(note.to_string());
+        return Some(contextual_note);
     };
     let Some(fields) = storyboard_row
         .video_desc
         .as_deref()
         .and_then(parse_structured_storyboard_description)
     else {
-        return Some(note.to_string());
+        return Some(contextual_note);
     };
-    let note = compact_contextual_video_style_note(note, Some(storyboard_row))?;
-    let fragments = split_prompt_note_fragments(&note).collect::<Vec<_>>();
+    let fragments = split_prompt_note_fragments(&contextual_note).collect::<Vec<_>>();
     if fragments.is_empty() {
-        return Some(note);
+        return Some(contextual_note);
     }
 
     let compacted =
         select_best_memory_style_note_for_lean_tier(&fragments, Some(&fields), Some(pressure))
             .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_LEAN_MEMORY_NOTE_MAX_CHARS))
-            .unwrap_or(note);
+            .unwrap_or(contextual_note);
 
     Some(compacted)
 }
