@@ -1,6 +1,62 @@
 use super::super::*;
 use tower::ServiceExt;
 
+async fn create_project_and_script(app: &axum::Router, token: &str) -> (i32, String, i32) {
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/projects")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from("{}"))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, created_project) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::CREATED,
+        "created_project={created_project}"
+    );
+    let project_id = created_project["numeric_id"]
+        .as_i64()
+        .expect("project numeric_id") as i32;
+    let project_uuid = created_project["id"]
+        .as_str()
+        .expect("project uuid")
+        .to_string();
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri(format!("/api/v1/projects/{project_uuid}/scripts"))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(r#"{"name":"quality review scope script"}"#))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, created_script) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::CREATED,
+        "created_script={created_script}"
+    );
+    let script_id = created_script["numeric_id"]
+        .as_i64()
+        .expect("script numeric_id") as i32;
+
+    (project_id, project_uuid, script_id)
+}
+
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
 async fn quality_reviews_roundtrip() {
@@ -22,6 +78,8 @@ async fn quality_reviews_roundtrip() {
     let quality_job_id = Uuid::new_v4();
     let script_target_id = format!("pg_quality_script_{}", Uuid::new_v4());
     let asset_target_id = format!("pg_quality_asset_{}", Uuid::new_v4());
+    let (owned_project_id, _owned_project_uuid, owned_script_id) =
+        create_project_and_script(&app, &token).await;
     let mut created_review_ids = Vec::new();
     let mut created_job_ids = Vec::new();
 
@@ -110,6 +168,59 @@ async fn quality_reviews_roundtrip() {
         Uuid::parse_str(created_asset["id"].as_str().expect("asset review id")).unwrap();
     let asset_review_id_text = asset_review_id.to_string();
     created_review_ids.push(asset_review_id);
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/quality/reviews")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{owned_project_id},"scriptId":99999999,"targetType":"script","targetId":"bad-scope","overallScore":8,"passed":true}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, invalid_script_scope) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::NOT_FOUND,
+        "invalid_script_scope={invalid_script_scope}"
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/quality/reviews")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{owned_project_id},"scriptId":{owned_script_id},"targetType":"script","targetId":"owned-scope","overallScore":8,"passed":true}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, owned_scope_review) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "owned_scope_review={owned_scope_review}"
+    );
+    let owned_scope_review_id = Uuid::parse_str(
+        owned_scope_review["id"]
+            .as_str()
+            .expect("owned scope review id"),
+    )
+    .unwrap();
+    created_review_ids.push(owned_scope_review_id);
 
     let res = app
         .clone()
@@ -399,4 +510,8 @@ async fn quality_reviews_roundtrip() {
 
     cleanup_quality_reviews(&pool, &created_review_ids).await;
     cleanup_jobs(&pool, &created_job_ids).await;
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
+        .bind(owned_project_id)
+        .execute(&pool)
+        .await;
 }

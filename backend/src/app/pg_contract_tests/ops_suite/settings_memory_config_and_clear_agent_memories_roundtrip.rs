@@ -291,6 +291,106 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         Some("project scoped memory")
     );
 
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_agent_memory (
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
+          memory_type, role, name, content, summarized, create_time_ms, memory_tier, scope_signature
+        )
+        VALUES
+          ($1, $2, NULL, 'scriptAgent', 'message', 'assistant', 'scene_memory_a', 'scene A exact memory', 0, 11, 'delta_memory', '{"storyboardIds":[11]}'::jsonb),
+          ($1, $2, NULL, 'scriptAgent', 'message', 'assistant', 'scene_memory_b', 'scene B unrelated memory', 0, 12, 'delta_memory', '{"storyboardIds":[12]}'::jsonb),
+          ($1, $2, NULL, 'scriptAgent', 'summary', 'assistant', 'project_stage_summary', 'project stage summary survives message clear', 1, 13, 'stage_summary', '{"episodeId":9}'::jsonb)
+        "#,
+    )
+    .bind(sub)
+    .bind(project_id)
+    .execute(&pool)
+    .await
+    .expect("insert scoped test memories");
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/agents/memory/query")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"agentType":"scriptAgent","memoryType":"all","scopeSignature":{{"storyboardIds":[11]}}}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, scoped_memory) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "scoped_memory={scoped_memory}");
+    let scoped_memory = scoped_memory.as_array().expect("scoped_memory list");
+    assert_eq!(scoped_memory.len(), 1);
+    assert_eq!(
+        scoped_memory[0]["content"][0]["data"].as_str(),
+        Some("scene A exact memory")
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/agents/memory/clear")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"agentType":"scriptAgent","clearType":"message"}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, cleared_messages) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "cleared_messages={cleared_messages}"
+    );
+    assert_eq!(cleared_messages["ok"].as_bool(), Some(true));
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/agents/memory/query")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"agentType":"scriptAgent","memoryType":"summary"}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, summary_after_message_clear) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "summary_after_message_clear={summary_after_message_clear}"
+    );
+    let summary_after_message_clear = summary_after_message_clear
+        .as_array()
+        .expect("summary_after_message_clear list");
+    assert!(
+        summary_after_message_clear.iter().any(|row| {
+            row["content"][0]["data"].as_str()
+                == Some("project stage summary survives message clear")
+        }),
+        "summary memory should survive message clear: {summary_after_message_clear:?}"
+    );
+
     let _ = sqlx::query(
         "DELETE FROM public.app_agent_memory WHERE owner_user_id = $1 AND numeric_project_id = $2",
     )

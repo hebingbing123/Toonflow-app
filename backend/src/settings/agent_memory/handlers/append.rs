@@ -67,18 +67,6 @@ pub(crate) async fn append_memory(
             ));
         }
     }
-    let agent_type = parse_agent_type(&body.agent_type)?;
-    let pool = state.require_pool()?;
-
-    ensure_project_owned(pool, uid, body.project_id).await?;
-    observe::memory_http(uid, body.project_id, "append");
-
-    let create_time_ms = body
-        .create_time
-        .unwrap_or_else(|| Utc::now().timestamp_millis());
-
-    let summarized = if body.memory_type == "summary" { 1 } else { 0 };
-    // 默认 memory_tier 为 "message"
     let memory_tier = body.memory_tier.as_deref().unwrap_or("message");
     if memory_tier_requires_scope(memory_tier)
         && !body
@@ -90,6 +78,17 @@ pub(crate) async fn append_memory(
             "memoryTier {memory_tier} requires a non-empty scopeSignature"
         )));
     }
+    let agent_type = parse_agent_type(&body.agent_type)?;
+    let pool = state.require_pool()?;
+
+    ensure_project_owned(pool, uid, body.project_id).await?;
+    observe::memory_http(uid, body.project_id, "append");
+
+    let create_time_ms = body
+        .create_time
+        .unwrap_or_else(|| Utc::now().timestamp_millis());
+
+    let summarized = if body.memory_type == "summary" { 1 } else { 0 };
 
     let id: Uuid = sqlx::query_scalar(
         r#"

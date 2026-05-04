@@ -40,3 +40,19 @@ async fn agents_memory_append_requires_database_with_jwt() {
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
+
+#[tokio::test]
+async fn agents_memory_append_rejects_scoped_tier_without_scope_signature_before_db() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = post_json_bearer(
+        "/api/v1/agents/memory/append",
+        &token,
+        r#"{"projectId":1,"agentType":"scriptAgent","content":"smoke","memoryTier":"stage_summary"}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST, "v={v}");
+    assert_eq!(
+        v["message"].as_str(),
+        Some("memoryTier stage_summary requires a non-empty scopeSignature")
+    );
+}
