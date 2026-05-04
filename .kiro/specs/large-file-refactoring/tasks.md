@@ -35,9 +35,9 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1-3.10_
 
-- [~] 3. Phase 1: Backend Core Files (High Priority)
+- [x] 3. Phase 1: Backend Core Files (High Priority)
 
-  - [~] 3.1 Split backend/src/production/workbench/video_prompt_memory/mod.rs (12,497 lines → ~16 files)
+  - [x] 3.1 Split backend/src/production/workbench/video_prompt_memory/mod.rs (12,497 lines → ~16 files)
     
     - [x] 3.1.1 Analyze file structure
       - Read complete file content
@@ -343,7 +343,7 @@
     - `2026-05-04`: reran the full gate after the follow-up builder / memory / video prompt extraction fixes, plus the frontend analyzer cleanup (`dart fix --apply` + collection literal cleanup), and the gate is now green again
     - _Requirements: 3.3, 3.4, 3.5, 3.7, 3.10_
 
-- [ ] 5. Phase 3: Backend Remaining Files (Lower Priority)
+- [x] 5. Phase 3: Backend Remaining Files (Lower Priority)
 
   - [x] 5.1 Split backend/src/production/workbench/meta/generate/director.rs (1,089 lines → 2 files)
     
