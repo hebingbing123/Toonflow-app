@@ -29,6 +29,7 @@ use crate::production::workbench::video_prompt_memory::{
 use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
+use crate::settings::agent_memory::optimize_project_memory_budget;
 use crate::state::AppState;
 
 mod budget;
@@ -208,6 +209,7 @@ fn build_auto_quality_review_model_params(
             "memoryOptimizationRemovedChars": diagnostics.memory_optimization_removed_chars,
             "memoryOptimizationRemovedVisualRows": diagnostics.memory_optimization_removed_visual_rows,
             "memoryOptimizationRemovedDuplicateRows": diagnostics.memory_optimization_removed_duplicate_rows,
+            "memoryOptimizationRemovedLowValueRows": diagnostics.memory_optimization_removed_low_value_rows,
             "directorManualYieldedToMemory": diagnostics.director_manual_yielded_to_memory,
             "directorManualYieldedChars": diagnostics.director_manual_yielded_chars,
             "directorPerformanceTrimmedChars": diagnostics.director_performance_trimmed_chars,
@@ -269,6 +271,8 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     )
     .await?;
     enforce_quality_gate(QualityGateStage::VideoPrompt, &gate)?;
+    let project_memory_optimization =
+        optimize_project_memory_budget(pool, user_id, body.project_id, "productionAgent").await?;
     let memory_optimization = if body.storyboard_id.is_some_and(|id| id > 0) {
         Some(optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?)
     } else {
@@ -351,7 +355,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
                 .map(|selection| selection.source),
             single_storyboard_runtime.as_ref(),
         )
-        .with_memory_optimization(memory_optimization.as_ref());
+        .with_memory_optimization(&project_memory_optimization, memory_optimization.as_ref());
 
     if body.auto_quality_review {
         let pool = pool.clone();

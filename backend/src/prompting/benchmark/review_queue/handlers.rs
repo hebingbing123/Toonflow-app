@@ -369,10 +369,7 @@ async fn clear_experiment_result_human_review_requirement(
 }
 
 fn merged_human_review_score_summary(submitted_score: &serde_json::Value) -> serde_json::Value {
-    let mut merged = submitted_score
-        .as_object()
-        .cloned()
-        .unwrap_or_default();
+    let mut merged = submitted_score.as_object().cloned().unwrap_or_default();
     merged.insert("humanReview".into(), submitted_score.clone());
     serde_json::Value::Object(merged)
 }

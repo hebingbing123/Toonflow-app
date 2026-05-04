@@ -102,9 +102,7 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
                 "targetId must be a positive storyboard id when targetType is storyboard".into(),
             ));
         }
-        if (body.project_id.is_some() || body.script_id.is_some())
-            && storyboard_id.is_none()
-        {
+        if (body.project_id.is_some() || body.script_id.is_some()) && storyboard_id.is_none() {
             return Err(ApiError::BadRequest(format!(
                 "targetId must be a positive storyboard id when targetType is {} within project/script scope",
                 body.target_type

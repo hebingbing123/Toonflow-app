@@ -378,8 +378,9 @@ fn calculate_variant_stats(results: &[&ExperimentResultRow]) -> VariantStats {
                 }
             }
 
-            if let Some(requires_rework) =
-                score_summary.get("requiresRework").and_then(|v| v.as_bool())
+            if let Some(requires_rework) = score_summary
+                .get("requiresRework")
+                .and_then(|v| v.as_bool())
             {
                 if requires_rework {
                     rework_count += 1;
@@ -454,7 +455,9 @@ fn calculate_stage_breakdown(
                 .and_then(|v| v.as_i64())
                 .unwrap_or(0);
 
-            let entry = baseline_stage_map.entry(stage.clone()).or_insert((0, 0.0, 0));
+            let entry = baseline_stage_map
+                .entry(stage.clone())
+                .or_insert((0, 0.0, 0));
             entry.0 += tokens;
             if let Some(score) = result
                 .score_summary
@@ -768,10 +771,8 @@ mod tests {
         };
         let variant_scored = build_scored_result_row("video_prompt", 9.0, 110);
 
-        let breakdown = calculate_stage_breakdown(
-            &[&variant_scored],
-            &[&baseline_scored, &baseline_unscored],
-        );
+        let breakdown =
+            calculate_stage_breakdown(&[&variant_scored], &[&baseline_scored, &baseline_unscored]);
         let video_prompt = breakdown
             .iter()
             .find(|row| row.stage == "video_prompt")

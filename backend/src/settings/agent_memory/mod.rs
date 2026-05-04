@@ -29,8 +29,8 @@ pub(crate) use handlers::{
 pub(crate) use policy::{
     load_project_automation_memory_policy, load_project_memory_budget_snapshot,
     optimize_project_memory_budget, policy_allows_automated_memory,
-    save_project_automation_memory_policy, AutomationMemoryMode, ProjectAutomationMemoryPolicy,
-    MEMORY_POLICY_NAME,
+    save_project_automation_memory_policy, AutomationMemoryMode, MemoryBudgetOptimizeResult,
+    ProjectAutomationMemoryPolicy, MEMORY_POLICY_NAME,
 };
 pub(crate) use storage::{
     delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,

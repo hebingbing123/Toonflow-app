@@ -166,6 +166,7 @@ pub(super) async fn load_video_prompt_context(
 pub(super) fn select_video_prompt_asset_seed_rows(
     rows: Vec<ScriptRolePromptSeedRow>,
 ) -> Vec<ScriptRolePromptSeedRow> {
+    let mut seen_keys = std::collections::HashSet::new();
     let mut role_count = 0usize;
     let mut scene_count = 0usize;
     let mut tool_count = 0usize;
@@ -173,6 +174,19 @@ pub(super) fn select_video_prompt_asset_seed_rows(
 
     for row in rows {
         let asset_type = normalize_prompt_text(&row.asset_type).to_lowercase();
+        let identity = normalize_prompt_text(
+            row.name
+                .as_deref()
+                .filter(|value| !value.trim().is_empty())
+                .unwrap_or_else(|| row.describe.as_deref().unwrap_or("")),
+        );
+        if identity.is_empty() {
+            continue;
+        }
+        let dedupe_key = format!("{asset_type}|{identity}");
+        if !seen_keys.insert(dedupe_key) {
+            continue;
+        }
         let keep = match asset_type.as_str() {
             "role" if role_count < VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT => {
                 role_count += 1;

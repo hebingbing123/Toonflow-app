@@ -355,7 +355,9 @@ String buildStoryboardVideoPromptSourceSummary(
       diagnostics.memoryOptimizationRemovedRows > 0) {
     parts.add(
       '自动瘦身 ${diagnostics.memoryOptimizationRemovedRows} 条'
-      '（重复 ${diagnostics.memoryOptimizationRemovedDuplicateRows} / 纯视觉 ${diagnostics.memoryOptimizationRemovedVisualRows}）',
+      '（低信号 ${diagnostics.memoryOptimizationRemovedLowValueRows}'
+      ' / 重复 ${diagnostics.memoryOptimizationRemovedDuplicateRows}'
+      ' / 纯视觉 ${diagnostics.memoryOptimizationRemovedVisualRows}）',
     );
   }
   if (diagnostics.negativeSavedFragmentCount > 0 ||

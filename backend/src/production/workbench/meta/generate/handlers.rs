@@ -67,6 +67,7 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     pub(super) memory_optimization_removed_chars: usize,
     pub(super) memory_optimization_removed_visual_rows: usize,
     pub(super) memory_optimization_removed_duplicate_rows: usize,
+    pub(super) memory_optimization_removed_low_value_rows: usize,
     pub(super) director_manual_yielded_to_memory: bool,
     pub(super) director_manual_yielded_chars: usize,
     pub(super) director_performance_trimmed_chars: usize,

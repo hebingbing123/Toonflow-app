@@ -139,6 +139,7 @@ fn build_auto_quality_review_model_params_includes_memory_diagnostics() {
         memory_optimization_removed_chars: 0,
         memory_optimization_removed_visual_rows: 0,
         memory_optimization_removed_duplicate_rows: 0,
+        memory_optimization_removed_low_value_rows: 0,
         director_manual_yielded_to_memory: false,
         director_manual_yielded_chars: 0,
         director_performance_trimmed_chars: 0,

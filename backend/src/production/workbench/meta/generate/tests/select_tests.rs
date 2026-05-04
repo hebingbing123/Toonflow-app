@@ -104,6 +104,31 @@ fn select_video_prompt_asset_seed_rows_skips_unknown_asset_types() {
 }
 
 #[test]
+fn select_video_prompt_asset_seed_rows_dedupes_same_asset_identity_before_budgeting() {
+    let selected = select_video_prompt_asset_seed_rows(vec![
+        ScriptRolePromptSeedRow {
+            asset_type: "role".into(),
+            name: Some("林晚".into()),
+            describe: Some("黑色针织外套".into()),
+        },
+        ScriptRolePromptSeedRow {
+            asset_type: "role".into(),
+            name: Some("林晚".into()),
+            describe: Some("深灰针织外套".into()),
+        },
+        ScriptRolePromptSeedRow {
+            asset_type: "scene".into(),
+            name: Some("咖啡厅窗边".into()),
+            describe: Some("木桌与雨痕玻璃".into()),
+        },
+    ]);
+
+    assert_eq!(selected.len(), 2);
+    assert_eq!(selected[0].name.as_deref(), Some("林晚"));
+    assert_eq!(selected[1].name.as_deref(), Some("咖啡厅窗边"));
+}
+
+#[test]
 fn select_script_asset_anchors_keeps_multiple_ranked_results_when_requested() {
     let selected = select_script_asset_anchors(
         vec![

@@ -84,6 +84,7 @@ pub(super) fn sample_generate_video_prompt_diagnostics(
         memory_optimization_removed_chars: 88,
         memory_optimization_removed_visual_rows: 1,
         memory_optimization_removed_duplicate_rows: 1,
+        memory_optimization_removed_low_value_rows: 1,
         director_manual_yielded_to_memory: false,
         director_manual_yielded_chars: 0,
         director_performance_trimmed_chars: 0,

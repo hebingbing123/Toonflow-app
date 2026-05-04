@@ -84,18 +84,29 @@ impl GenerateVideoPromptDiagnostics {
 
     pub(super) fn with_memory_optimization(
         mut self,
-        result: Option<
+        project_result: &crate::settings::agent_memory::MemoryBudgetOptimizeResult,
+        scoped_result: Option<
             &crate::production::workbench::video_prompt_memory::VideoMemoryOptimizationResult,
         >,
     ) -> Self {
-        let Some(result) = result else {
-            return self;
-        };
-        self.memory_optimization_applied = result.removed_rows > 0;
-        self.memory_optimization_removed_rows = result.removed_rows;
-        self.memory_optimization_removed_chars = result.removed_chars;
-        self.memory_optimization_removed_visual_rows = result.removed_visual_rows;
-        self.memory_optimization_removed_duplicate_rows = result.removed_duplicate_rows;
+        let scoped_removed_rows = scoped_result.map(|result| result.removed_rows).unwrap_or(0);
+        let scoped_removed_chars = scoped_result
+            .map(|result| result.removed_chars)
+            .unwrap_or(0);
+        let scoped_removed_visual_rows = scoped_result
+            .map(|result| result.removed_visual_rows)
+            .unwrap_or(0);
+        let scoped_removed_duplicate_rows = scoped_result
+            .map(|result| result.removed_duplicate_rows)
+            .unwrap_or(0);
+        self.memory_optimization_removed_rows = project_result.removed_rows + scoped_removed_rows;
+        self.memory_optimization_removed_chars =
+            project_result.removed_chars + scoped_removed_chars;
+        self.memory_optimization_removed_visual_rows = scoped_removed_visual_rows;
+        self.memory_optimization_removed_duplicate_rows =
+            project_result.removed_duplicate_rows + scoped_removed_duplicate_rows;
+        self.memory_optimization_removed_low_value_rows = project_result.removed_low_value_rows;
+        self.memory_optimization_applied = self.memory_optimization_removed_rows > 0;
         self
     }
 }

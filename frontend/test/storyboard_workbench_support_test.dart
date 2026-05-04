@@ -82,7 +82,7 @@ void main() {
     );
     expect(
       buildStoryboardVideoPromptSourceSummary(diagnostics),
-      contains('自动瘦身 2 条（重复 1 / 纯视觉 1）'),
+      contains('自动瘦身 2 条（低信号 0 / 重复 1 / 纯视觉 1）'),
     );
     expect(
       buildStoryboardVideoPromptSourceSummary(diagnostics),
@@ -262,7 +262,7 @@ void main() {
 
       expect(
         diagnosis.recommendedAction,
-        StoryboardBatchWorkbenchRecommendedAction.selectReadyStoryboards,
+        StoryboardBatchWorkbenchRecommendedAction.generateSelected,
       );
     },
   );
@@ -332,7 +332,7 @@ void main() {
         ),
       );
 
-      expect(line, contains('下一步建议：批量发起出图。'));
+      expect(line, contains('下一步建议：一键批量出图。'));
     },
   );
 
@@ -1203,7 +1203,7 @@ void main() {
       ),
     );
 
-    expect(line, contains('下一步建议：提交视频生成。'));
+    expect(line, contains('下一步建议：一键生成视频。'));
   });
 
   test('buildStoryboardWorkbenchFailureNotice normalizes rust api errors', () {

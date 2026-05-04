@@ -42,6 +42,7 @@ class GenerateVideoPromptDiagnostics {
     this.memoryOptimizationRemovedChars = 0,
     this.memoryOptimizationRemovedVisualRows = 0,
     this.memoryOptimizationRemovedDuplicateRows = 0,
+    this.memoryOptimizationRemovedLowValueRows = 0,
     this.directorManualYieldedToMemory = false,
     this.directorManualYieldedChars = 0,
     this.directorPerformanceTrimmedChars = 0,
@@ -89,6 +90,7 @@ class GenerateVideoPromptDiagnostics {
   final int memoryOptimizationRemovedChars;
   final int memoryOptimizationRemovedVisualRows;
   final int memoryOptimizationRemovedDuplicateRows;
+  final int memoryOptimizationRemovedLowValueRows;
   final bool directorManualYieldedToMemory;
   final int directorManualYieldedChars;
   final int directorPerformanceTrimmedChars;
@@ -173,6 +175,9 @@ class GenerateVideoPromptDiagnostics {
           (json['memoryOptimizationRemovedVisualRows'] as num?)?.toInt() ?? 0,
       memoryOptimizationRemovedDuplicateRows:
           (json['memoryOptimizationRemovedDuplicateRows'] as num?)?.toInt() ??
+          0,
+      memoryOptimizationRemovedLowValueRows:
+          (json['memoryOptimizationRemovedLowValueRows'] as num?)?.toInt() ??
           0,
       directorManualYieldedToMemory:
           json['directorManualYieldedToMemory'] == true,
