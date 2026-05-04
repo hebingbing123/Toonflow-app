@@ -22,13 +22,13 @@ struct VariantRow {
 }
 
 #[derive(Debug, sqlx::FromRow)]
-struct ResultRow {
-    variant_id: Uuid,
-    case_type: Option<String>,
-    weight: Option<i32>,
-    score_summary: Option<serde_json::Value>,
-    roi_summary: Option<serde_json::Value>,
-    requires_human_review: bool,
+pub(super) struct ResultRow {
+    pub(super) variant_id: Uuid,
+    pub(super) case_type: Option<String>,
+    pub(super) weight: Option<i32>,
+    pub(super) score_summary: Option<serde_json::Value>,
+    pub(super) roi_summary: Option<serde_json::Value>,
+    pub(super) requires_human_review: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +41,7 @@ pub(super) struct VariantMetrics {
 }
 
 impl VariantMetrics {
-    fn from_rows(rows: &[&ResultRow]) -> Self {
+    pub(super) fn from_rows(rows: &[&ResultRow]) -> Self {
         if rows.is_empty() {
             return Self {
                 total_tokens: 0,
@@ -68,8 +68,7 @@ impl VariantMetrics {
                 .score_summary
                 .as_ref()
                 .and_then(|value| value.get("passed"))
-                .and_then(|value| value.as_bool())
-                .unwrap_or(false);
+                .and_then(|value| value.as_bool());
             let severe_count = row
                 .score_summary
                 .as_ref()
@@ -96,13 +95,13 @@ impl VariantMetrics {
                 scored_count += 1.0;
             }
 
-            if row.case_type.as_deref() == Some("bad_case") && !passed {
+            if row.case_type.as_deref() == Some("bad_case") && passed == Some(false) {
                 bad_case_recurrence_count += 1;
             }
 
             if row.case_type.as_deref() == Some("regression_guard")
                 && row.weight.unwrap_or(1) >= 3
-                && (!passed || severe_count > 0)
+                && (passed == Some(false) || severe_count > 0)
             {
                 severe_guard_failures += 1;
             }
@@ -306,9 +305,8 @@ pub(crate) async fn get_benchmark_trends(
             .score_summary
             .as_ref()
             .and_then(|value| value.get("passed"))
-            .and_then(|value| value.as_bool())
-            .unwrap_or(false);
-        if row.case_type.as_deref() == Some("bad_case") && !passed {
+            .and_then(|value| value.as_bool());
+        if row.case_type.as_deref() == Some("bad_case") && passed == Some(false) {
             aggregate.bad_case_failures += 1;
         }
     }

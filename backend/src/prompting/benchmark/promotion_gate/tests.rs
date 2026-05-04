@@ -1,10 +1,12 @@
 #[cfg(test)]
 mod tests {
     use super::super::handlers::{
-        classify_auto_decision, validate_decision_value, validate_promotion_request, VariantMetrics,
+        classify_auto_decision, validate_decision_value, validate_promotion_request, ResultRow,
+        VariantMetrics,
     };
     use super::super::types::BenchmarkTrendPoint;
     use proptest::prelude::*;
+    use uuid::Uuid;
 
     #[test]
     fn valid_gate_decisions_are_accepted() {
@@ -37,6 +39,37 @@ mod tests {
             requires_human_review_count: 0,
         };
         assert_eq!(metrics.severe_guard_failures, 1);
+    }
+
+    #[test]
+    fn incomplete_scores_do_not_count_as_failures_or_zero_out_quality() {
+        let variant_id = Uuid::new_v4();
+        let scored = ResultRow {
+            variant_id,
+            case_type: Some("golden".into()),
+            weight: Some(1),
+            score_summary: Some(serde_json::json!({
+                "overallScore": 88.0,
+                "passed": true
+            })),
+            roi_summary: Some(serde_json::json!({"tokensUsed": 1000})),
+            requires_human_review: false,
+        };
+        let incomplete_bad_case = ResultRow {
+            variant_id,
+            case_type: Some("bad_case".into()),
+            weight: Some(3),
+            score_summary: None,
+            roi_summary: Some(serde_json::json!({"tokensUsed": 200})),
+            requires_human_review: true,
+        };
+
+        let metrics = VariantMetrics::from_rows(&[&scored, &incomplete_bad_case]);
+
+        assert!((metrics.avg_quality_score - 88.0).abs() < f64::EPSILON);
+        assert_eq!(metrics.bad_case_recurrence_count, 0);
+        assert_eq!(metrics.severe_guard_failures, 0);
+        assert_eq!(metrics.requires_human_review_count, 1);
     }
 
     proptest! {

@@ -350,7 +350,9 @@ fn calculate_variant_stats(results: &[&ExperimentResultRow]) -> VariantStats {
 
     let mut total_tokens = 0i64;
     let mut total_quality_score = 0.0;
+    let mut scored_count = 0usize;
     let mut passed_count = 0;
+    let mut verdict_count = 0usize;
     let mut rework_count = 0;
     let mut bad_case_recurrence_count = 0;
 
@@ -366,22 +368,22 @@ fn calculate_variant_stats(results: &[&ExperimentResultRow]) -> VariantStats {
         if let Some(ref score_summary) = result.score_summary {
             if let Some(score) = score_summary.get("overallScore").and_then(|v| v.as_f64()) {
                 total_quality_score += score;
+                scored_count += 1;
             }
 
-            if score_summary
-                .get("passed")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false)
-            {
-                passed_count += 1;
+            if let Some(passed) = score_summary.get("passed").and_then(|v| v.as_bool()) {
+                verdict_count += 1;
+                if passed {
+                    passed_count += 1;
+                }
             }
 
-            if score_summary
-                .get("requiresRework")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false)
+            if let Some(requires_rework) =
+                score_summary.get("requiresRework").and_then(|v| v.as_bool())
             {
-                rework_count += 1;
+                if requires_rework {
+                    rework_count += 1;
+                }
             }
         }
 
@@ -389,11 +391,7 @@ fn calculate_variant_stats(results: &[&ExperimentResultRow]) -> VariantStats {
         if let Some(ref case_type) = result.case_type {
             if case_type == "bad_case" {
                 if let Some(ref score_summary) = result.score_summary {
-                    if !score_summary
-                        .get("passed")
-                        .and_then(|v| v.as_bool())
-                        .unwrap_or(false)
-                    {
+                    if score_summary.get("passed").and_then(|v| v.as_bool()) == Some(false) {
                         bad_case_recurrence_count += 1;
                     }
                 }
@@ -401,19 +399,29 @@ fn calculate_variant_stats(results: &[&ExperimentResultRow]) -> VariantStats {
         }
     }
 
-    let count = results.len() as f64;
-
     VariantStats {
         total_tokens,
-        avg_quality_score: total_quality_score / count,
-        pass_rate: passed_count as f64 / count,
-        rework_rate: rework_count as f64 / count,
+        avg_quality_score: if scored_count > 0 {
+            total_quality_score / scored_count as f64
+        } else {
+            0.0
+        },
+        pass_rate: if verdict_count > 0 {
+            passed_count as f64 / verdict_count as f64
+        } else {
+            0.0
+        },
+        rework_rate: if verdict_count > 0 {
+            rework_count as f64 / verdict_count as f64
+        } else {
+            0.0
+        },
         bad_case_recurrence_count,
     }
 }
 
 #[derive(sqlx::FromRow)]
-struct ExperimentResultRow {
+pub(super) struct ExperimentResultRow {
     #[allow(dead_code)]
     id: Uuid,
     variant_id: Uuid,
@@ -446,17 +454,17 @@ fn calculate_stage_breakdown(
                 .and_then(|v| v.as_i64())
                 .unwrap_or(0);
 
-            let score = result
+            let entry = baseline_stage_map.entry(stage.clone()).or_insert((0, 0.0, 0));
+            entry.0 += tokens;
+            if let Some(score) = result
                 .score_summary
                 .as_ref()
                 .and_then(|v| v.get("overallScore"))
                 .and_then(|v| v.as_f64())
-                .unwrap_or(0.0);
-
-            let entry = baseline_stage_map.entry(stage.clone()).or_insert((0, 0.0, 0));
-            entry.0 += tokens;
-            entry.1 += score;
-            entry.2 += 1;
+            {
+                entry.1 += score;
+                entry.2 += 1;
+            }
         }
     }
 
@@ -470,17 +478,17 @@ fn calculate_stage_breakdown(
                 .and_then(|v| v.as_i64())
                 .unwrap_or(0);
 
-            let score = result
+            let entry = stage_map.entry(stage.clone()).or_insert((0, 0.0, 0));
+            entry.0 += tokens;
+            if let Some(score) = result
                 .score_summary
                 .as_ref()
                 .and_then(|v| v.get("overallScore"))
                 .and_then(|v| v.as_f64())
-                .unwrap_or(0.0);
-
-            let entry = stage_map.entry(stage.clone()).or_insert((0, 0.0, 0));
-            entry.0 += tokens;
-            entry.1 += score;
-            entry.2 += 1;
+            {
+                entry.1 += score;
+                entry.2 += 1;
+            }
         }
     }
 
@@ -706,6 +714,28 @@ mod tests {
     }
 
     #[test]
+    fn variant_stats_ignore_unscored_rows_in_quality_and_verdict_rates() {
+        let scored = build_scored_result_row("video_prompt", 9.0, 120);
+        let unscored = ExperimentResultRow {
+            id: Uuid::new_v4(),
+            variant_id: Uuid::new_v4(),
+            benchmark_case_id: Uuid::new_v4(),
+            score_summary: None,
+            roi_summary: Some(serde_json::json!({ "tokensUsed": 30 })),
+            case_type: Some("bad_case".into()),
+            weight: Some(3),
+            stage: Some("video_prompt".into()),
+            issue_tags: None,
+        };
+
+        let stats = calculate_variant_stats(&[&scored, &unscored]);
+
+        assert!((stats.avg_quality_score - 9.0).abs() < f64::EPSILON);
+        assert!((stats.pass_rate - 0.0).abs() < f64::EPSILON);
+        assert_eq!(stats.bad_case_recurrence_count, 0);
+    }
+
+    #[test]
     fn stage_breakdown_uses_baseline_stage_sample_count_for_average() {
         let baseline_a = build_scored_result_row("video_prompt", 10.0, 100);
         let baseline_b = build_scored_result_row("video_prompt", 6.0, 120);
@@ -720,6 +750,35 @@ mod tests {
         assert!((video_prompt.avg_quality_score - 9.0).abs() < f64::EPSILON);
         assert!((video_prompt.quality_score_delta - 1.0).abs() < f64::EPSILON);
         assert_eq!(video_prompt.token_delta, -80);
+    }
+
+    #[test]
+    fn stage_breakdown_ignores_unscored_rows_in_stage_average() {
+        let baseline_scored = build_scored_result_row("video_prompt", 8.0, 100);
+        let baseline_unscored = ExperimentResultRow {
+            id: Uuid::new_v4(),
+            variant_id: Uuid::new_v4(),
+            benchmark_case_id: Uuid::new_v4(),
+            score_summary: None,
+            roi_summary: Some(serde_json::json!({ "tokensUsed": 40 })),
+            case_type: Some("golden".into()),
+            weight: Some(1),
+            stage: Some("video_prompt".into()),
+            issue_tags: None,
+        };
+        let variant_scored = build_scored_result_row("video_prompt", 9.0, 110);
+
+        let breakdown = calculate_stage_breakdown(
+            &[&variant_scored],
+            &[&baseline_scored, &baseline_unscored],
+        );
+        let video_prompt = breakdown
+            .iter()
+            .find(|row| row.stage == "video_prompt")
+            .expect("video_prompt breakdown");
+
+        assert!((video_prompt.avg_quality_score - 9.0).abs() < f64::EPSILON);
+        assert!((video_prompt.quality_score_delta - 1.0).abs() < f64::EPSILON);
     }
 
     proptest! {
