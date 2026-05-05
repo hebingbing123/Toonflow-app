@@ -11,7 +11,24 @@ use crate::state::AppState;
 
 use super::super::super::common::{trim_opt, ADV_LOCK_PROJECT_NUMERIC_ID};
 use super::super::super::types::{CreateProjectBody, ProjectRow};
+use super::super::super::validation::{
+    validate_duration_strategy, validate_mode, validate_target_market, validate_target_platforms,
+};
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/projects",
+    operation_id = "createProjectV1",
+    tag = "projects",
+    request_body = CreateProjectBody,
+    responses(
+        (status = 201, description = "Created", body = ProjectRow),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(crate) async fn create_project(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -19,6 +36,22 @@ pub(crate) async fn create_project(
 ) -> Result<(StatusCode, Json<ProjectRow>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+
+    // Validate enum fields if provided
+    if let Some(ref mode_val) = body.mode {
+        validate_mode(mode_val)?;
+    }
+    if let Some(ref market_val) = body.target_market {
+        validate_target_market(market_val)?;
+    }
+    if let Some(ref strategy_val) = body.duration_strategy {
+        validate_duration_strategy(strategy_val)?;
+    }
+    if let Some(ref platforms) = body.target_platforms {
+        if !platforms.is_empty() {
+            validate_target_platforms(platforms)?;
+        }
+    }
 
     let mut tx = pool
         .begin()

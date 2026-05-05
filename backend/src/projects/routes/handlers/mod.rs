@@ -1,5 +1,5 @@
-mod create_list;
-mod detail;
+pub(crate) mod create_list;
+pub(crate) mod detail;
 
 pub(crate) use create_list::{create_project, list_projects, projects_summary};
 pub(crate) use detail::{

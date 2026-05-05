@@ -10,6 +10,19 @@ use crate::state::AppState;
 
 use super::super::super::types::{ListProjectsQuery, ProjectRow};
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/projects",
+    operation_id = "listProjectsV1",
+    tag = "projects",
+    params(ListProjectsQuery),
+    responses(
+        (status = 200, description = "OK", body = Vec<ProjectRow>),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(crate) async fn list_projects(
     State(state): State<AppState>,
     headers: HeaderMap,

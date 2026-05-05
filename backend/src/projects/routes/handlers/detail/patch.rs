@@ -14,7 +14,28 @@ use crate::state::AppState;
 
 use super::super::super::common::merge_text_patch;
 use super::super::super::types::{PatchProjectBody, ProjectRow};
+use super::super::super::validation::{
+    validate_duration_strategy, validate_mode, validate_target_market, validate_target_platforms,
+};
 
+#[utoipa::path(
+    patch,
+    path = "/api/v1/projects/{project_id}",
+    operation_id = "patchProjectByIdV1",
+    tag = "projects",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID")
+    ),
+    request_body = PatchProjectBody,
+    responses(
+        (status = 200, description = "OK", body = ProjectRow),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(crate) async fn patch_project_by_id(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
@@ -59,7 +80,14 @@ pub(crate) async fn patch_project_by_id(
                     })
                 })
                 .collect();
-            FieldPatch::Set(Some(platforms?))
+            let platforms = platforms?;
+
+            // Validate target_platforms if not empty
+            if !platforms.is_empty() {
+                validate_target_platforms(&platforms)?;
+            }
+
+            FieldPatch::Set(Some(platforms))
         }
         Some(_) => {
             return Err(ApiError::BadRequest(
@@ -67,6 +95,17 @@ pub(crate) async fn patch_project_by_id(
             ))
         }
     };
+
+    // Validate enum fields if they are being set
+    if let FieldPatch::Set(Some(ref mode_val)) = mode_patch {
+        validate_mode(mode_val)?;
+    }
+    if let FieldPatch::Set(Some(ref market_val)) = target_market_patch {
+        validate_target_market(market_val)?;
+    }
+    if let FieldPatch::Set(Some(ref strategy_val)) = duration_strategy_patch {
+        validate_duration_strategy(strategy_val)?;
+    }
 
     let patches = [
         &name_patch,

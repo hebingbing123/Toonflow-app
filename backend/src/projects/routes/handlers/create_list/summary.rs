@@ -6,6 +6,18 @@ use crate::state::AppState;
 
 use super::super::super::types::ProjectsSummaryResponse;
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/projects/summary",
+    operation_id = "projectsSummaryV1",
+    tag = "projects",
+    responses(
+        (status = 200, description = "OK", body = ProjectsSummaryResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(crate) async fn projects_summary(
     State(state): State<AppState>,
     headers: HeaderMap,

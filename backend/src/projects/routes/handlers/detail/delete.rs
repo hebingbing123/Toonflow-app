@@ -10,6 +10,22 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+#[utoipa::path(
+    delete,
+    path = "/api/v1/projects/{project_id}",
+    operation_id = "deleteProjectByIdV1",
+    tag = "projects",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID")
+    ),
+    responses(
+        (status = 204, description = "Deleted"),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(crate) async fn delete_project_by_id(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,

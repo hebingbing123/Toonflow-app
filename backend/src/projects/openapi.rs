@@ -1,0 +1,31 @@
+//! OpenAPI fragment for projects routes (`/api/v1/projects/*`).
+
+use utoipa::OpenApi;
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        crate::projects::routes::handlers::create_list::list::list_projects,
+        crate::projects::routes::handlers::create_list::create::create_project,
+        crate::projects::routes::handlers::create_list::summary::projects_summary,
+        crate::projects::routes::handlers::detail::get::get_project_by_id,
+        crate::projects::routes::handlers::detail::patch::patch_project_by_id,
+        crate::projects::routes::handlers::detail::delete::delete_project_by_id,
+        crate::projects::routes::handlers::detail::style_config::patch_style_config,
+        crate::projects::routes::handlers::detail::stats::project_stats_by_id,
+    ),
+    components(schemas(
+        crate::projects::routes::types::ProjectRow,
+        crate::projects::routes::types::ScriptBrief,
+        crate::projects::routes::types::ProjectDetailResponse,
+        crate::projects::routes::types::ProjectStatsResponse,
+        crate::projects::routes::types::ProjectsSummaryResponse,
+        crate::projects::routes::types::PatchProjectBody,
+        crate::projects::routes::types::PatchStyleConfigBody,
+        crate::projects::routes::types::CreateProjectBody,
+    )),
+    tags(
+        (name = "projects", description = "Project CRUD and short video configuration")
+    )
+)]
+pub struct ProjectsOpenApi;

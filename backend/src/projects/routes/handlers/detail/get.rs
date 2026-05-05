@@ -13,6 +13,22 @@ use crate::state::AppState;
 
 use super::super::super::types::{ProjectDetailResponse, ProjectRow, ScriptBrief};
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}",
+    operation_id = "getProjectByIdV1",
+    tag = "projects",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID")
+    ),
+    responses(
+        (status = 200, description = "OK", body = ProjectDetailResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(crate) async fn get_project_by_id(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,

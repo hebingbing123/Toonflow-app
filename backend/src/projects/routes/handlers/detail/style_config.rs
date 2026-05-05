@@ -19,6 +19,24 @@ use super::super::super::types::{PatchStyleConfigBody, ProjectRow};
 ///
 /// 更新项目的画风技能包（`art_style_pack`）和故事风格技能包（`story_style_pack`）配置。
 /// 至少需要提供一个字段；传 `null` 可清除已有配置。
+#[utoipa::path(
+    patch,
+    path = "/api/v1/projects/{project_id}/style-config",
+    operation_id = "patchStyleConfigV1",
+    tag = "projects",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID")
+    ),
+    request_body = PatchStyleConfigBody,
+    responses(
+        (status = 200, description = "OK", body = ProjectRow),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(crate) async fn patch_style_config(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,

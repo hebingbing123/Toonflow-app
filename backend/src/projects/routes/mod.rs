@@ -3,8 +3,12 @@
 //! 项目 CRUD 和遗留项目端点的处理器。
 
 mod common;
-mod handlers;
-mod types;
+pub(crate) mod handlers;
+pub(crate) mod types;
+mod validation;
+
+#[cfg(test)]
+mod validation_integration_test;
 
 use axum::{routing::get, Router};
 

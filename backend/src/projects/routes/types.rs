@@ -1,203 +1,218 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::FromRow;
+use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 /// Query parameters for `GET /api/v1/projects` pagination.
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, IntoParams, ToSchema)]
 #[serde(deny_unknown_fields)]
-pub(super) struct ListProjectsQuery {
+#[into_params(parameter_in = Query)]
+pub struct ListProjectsQuery {
     #[serde(default)]
-    pub(super) limit: Option<i64>,
+    pub limit: Option<i64>,
     #[serde(default)]
-    pub(super) offset: Option<i64>,
+    pub offset: Option<i64>,
 }
 
-#[derive(Debug, FromRow, Serialize)]
-pub(super) struct ProjectRow {
-    pub(super) id: Uuid,
+#[derive(Debug, FromRow, Serialize, ToSchema)]
+#[schema(
+    title = "ProjectRow",
+    description = "Project record with short video configuration fields"
+)]
+pub struct ProjectRow {
+    pub id: Uuid,
     #[serde(rename = "numeric_id")]
     #[sqlx(rename = "numeric_id")]
-    pub(super) numeric_id: i32,
-    pub(super) name: Option<String>,
-    pub(super) intro: Option<String>,
-    pub(super) project_type: Option<String>,
-    pub(super) image_model: Option<String>,
-    pub(super) image_quality: Option<String>,
-    pub(super) video_model: Option<String>,
-    pub(super) art_style: Option<String>,
-    pub(super) director_manual: Option<String>,
-    pub(super) mode: Option<String>,
-    pub(super) video_ratio: Option<String>,
-    pub(super) create_time_ms: Option<i64>,
+    pub numeric_id: i32,
+    pub name: Option<String>,
+    pub intro: Option<String>,
+    pub project_type: Option<String>,
+    pub image_model: Option<String>,
+    pub image_quality: Option<String>,
+    pub video_model: Option<String>,
+    pub art_style: Option<String>,
+    pub director_manual: Option<String>,
+    pub mode: Option<String>,
+    pub video_ratio: Option<String>,
+    pub create_time_ms: Option<i64>,
     /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
-    pub(super) art_style_pack: Option<String>,
+    pub art_style_pack: Option<String>,
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
-    pub(super) story_style_pack: Option<String>,
+    pub story_style_pack: Option<String>,
     /// 目标市场（如 domestic, overseas, both）
-    pub(super) target_market: Option<String>,
+    #[schema(example = "domestic")]
+    pub target_market: Option<String>,
     /// 目标平台数组（如 ["douyin", "bilibili", "tiktok"]）
-    pub(super) target_platforms: Option<Vec<String>>,
+    #[schema(example = json!(["douyin", "bilibili"]))]
+    pub target_platforms: Option<Vec<String>>,
     /// 时长策略（如 short, medium, long）
-    pub(super) duration_strategy: Option<String>,
+    #[schema(example = "short")]
+    pub duration_strategy: Option<String>,
     /// 声线配置标识
-    pub(super) voice_profile: Option<String>,
+    pub voice_profile: Option<String>,
     /// 字幕样式标识
-    pub(super) subtitle_style: Option<String>,
+    pub subtitle_style: Option<String>,
     /// BGM 策略
-    pub(super) bgm_strategy: Option<String>,
+    pub bgm_strategy: Option<String>,
 }
 
-#[derive(Debug, FromRow, Serialize)]
-pub(super) struct ScriptBrief {
+#[derive(Debug, FromRow, Serialize, ToSchema)]
+pub struct ScriptBrief {
     #[serde(rename = "numeric_id")]
     #[sqlx(rename = "numeric_id")]
-    pub(super) numeric_id: i32,
-    pub(super) name: Option<String>,
-    pub(super) extract_state: Option<i32>,
+    pub numeric_id: i32,
+    pub name: Option<String>,
+    pub extract_state: Option<i32>,
 }
 
-#[derive(Serialize)]
-pub(super) struct ProjectDetailResponse {
-    pub(super) project: ProjectRow,
-    pub(super) scripts: Vec<ScriptBrief>,
+#[derive(Serialize, ToSchema)]
+pub struct ProjectDetailResponse {
+    pub project: ProjectRow,
+    pub scripts: Vec<ScriptBrief>,
 }
 
 /// Per-project counts for dashboards; aligns with Electron-era **`generalStatistics`** shape.
 /// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`** counts **`app_novel`** rows; **`video_count`** remains **`0`** until video rows exist in Postgres.
-#[derive(Serialize)]
-pub(super) struct ProjectStatsResponse {
-    pub(super) script_count: i64,
-    pub(super) storyboard_count: i64,
-    pub(super) role_count: i64,
-    pub(super) novel_count: i64,
-    pub(super) video_count: i64,
+#[derive(Serialize, ToSchema)]
+pub struct ProjectStatsResponse {
+    pub script_count: i64,
+    pub storyboard_count: i64,
+    pub role_count: i64,
+    pub novel_count: i64,
+    pub video_count: i64,
 }
 
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
-#[derive(Serialize)]
-pub(super) struct ProjectsSummaryResponse {
-    pub(super) project_count: i64,
-    pub(super) script_count: i64,
-    pub(super) storyboard_count: i64,
-    pub(super) novel_count: i64,
+#[derive(Serialize, ToSchema)]
+pub struct ProjectsSummaryResponse {
+    pub project_count: i64,
+    pub script_count: i64,
+    pub storyboard_count: i64,
+    pub novel_count: i64,
     /// Same rule as per-project **`GET …/stats`**: **`app_asset`** with **`asset_type = 'role'`**.
-    pub(super) role_count: i64,
-    pub(super) art_style_count: i64,
-    pub(super) asset_count: i64,
+    pub role_count: i64,
+    pub art_style_count: i64,
+    pub asset_count: i64,
     /// Same as per-project **`GET …/stats`**: **`0`** until video rows exist in Postgres.
-    pub(super) video_count: i64,
+    pub video_count: i64,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct PatchProjectBody {
+pub struct PatchProjectBody {
     #[serde(default)]
-    pub(super) name: Option<Value>,
+    pub name: Option<Value>,
     #[serde(default)]
-    pub(super) intro: Option<Value>,
+    pub intro: Option<Value>,
     #[serde(default)]
-    pub(super) project_type: Option<Value>,
+    pub project_type: Option<Value>,
     #[serde(default)]
-    pub(super) image_model: Option<Value>,
+    pub image_model: Option<Value>,
     #[serde(default)]
-    pub(super) image_quality: Option<Value>,
+    pub image_quality: Option<Value>,
     #[serde(default)]
-    pub(super) video_model: Option<Value>,
+    pub video_model: Option<Value>,
     #[serde(default)]
-    pub(super) art_style: Option<Value>,
+    pub art_style: Option<Value>,
     #[serde(default)]
-    pub(super) director_manual: Option<Value>,
+    pub director_manual: Option<Value>,
     #[serde(default)]
-    pub(super) mode: Option<Value>,
+    pub mode: Option<Value>,
     #[serde(default)]
-    pub(super) video_ratio: Option<Value>,
+    pub video_ratio: Option<Value>,
     /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
     #[serde(default)]
-    pub(super) art_style_pack: Option<Value>,
+    pub art_style_pack: Option<Value>,
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
     #[serde(default)]
-    pub(super) story_style_pack: Option<Value>,
+    pub story_style_pack: Option<Value>,
     /// 目标市场（如 domestic, overseas, both）
     #[serde(default)]
-    pub(super) target_market: Option<Value>,
+    #[schema(example = json!("domestic"))]
+    pub target_market: Option<Value>,
     /// 目标平台数组（如 ["douyin", "bilibili", "tiktok"]）
     #[serde(default)]
-    pub(super) target_platforms: Option<Value>,
+    #[schema(example = json!(["douyin", "bilibili"]))]
+    pub target_platforms: Option<Value>,
     /// 时长策略（如 short, medium, long）
     #[serde(default)]
-    pub(super) duration_strategy: Option<Value>,
+    #[schema(example = json!("short"))]
+    pub duration_strategy: Option<Value>,
     /// 声线配置标识
     #[serde(default)]
-    pub(super) voice_profile: Option<Value>,
+    pub voice_profile: Option<Value>,
     /// 字幕样式标识
     #[serde(default)]
-    pub(super) subtitle_style: Option<Value>,
+    pub subtitle_style: Option<Value>,
     /// BGM 策略
     #[serde(default)]
-    pub(super) bgm_strategy: Option<Value>,
+    pub bgm_strategy: Option<Value>,
 }
 
 /// `PATCH /api/v1/projects/{id}/style-config` 请求体
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct PatchStyleConfigBody {
+pub struct PatchStyleConfigBody {
     /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`），传 null 清除
     #[serde(default)]
-    pub(super) art_style_pack: Option<Value>,
+    pub art_style_pack: Option<Value>,
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`），传 null 清除
     #[serde(default)]
-    pub(super) story_style_pack: Option<Value>,
+    pub story_style_pack: Option<Value>,
 }
 
 /// JSON body for `POST /api/v1/projects` (camelCase from frontend; all fields optional).
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct CreateProjectBody {
+pub struct CreateProjectBody {
     #[serde(default)]
-    pub(super) name: Option<String>,
+    pub name: Option<String>,
     #[serde(default)]
-    pub(super) intro: Option<String>,
+    pub intro: Option<String>,
     #[serde(default)]
-    pub(super) project_type: Option<String>,
+    pub project_type: Option<String>,
     #[serde(default)]
-    pub(super) image_model: Option<String>,
+    pub image_model: Option<String>,
     #[serde(default)]
-    pub(super) image_quality: Option<String>,
+    pub image_quality: Option<String>,
     #[serde(default)]
-    pub(super) video_model: Option<String>,
+    pub video_model: Option<String>,
     #[serde(default)]
-    pub(super) art_style: Option<String>,
+    pub art_style: Option<String>,
     #[serde(default)]
-    pub(super) director_manual: Option<String>,
+    pub director_manual: Option<String>,
     #[serde(default)]
-    pub(super) mode: Option<String>,
+    pub mode: Option<String>,
     #[serde(default)]
-    pub(super) video_ratio: Option<String>,
+    pub video_ratio: Option<String>,
     /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
     #[serde(default)]
-    pub(super) art_style_pack: Option<String>,
+    pub art_style_pack: Option<String>,
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
     #[serde(default)]
-    pub(super) story_style_pack: Option<String>,
+    pub story_style_pack: Option<String>,
     /// 目标市场（如 domestic, overseas, both）
     #[serde(default)]
-    pub(super) target_market: Option<String>,
+    #[schema(example = "domestic")]
+    pub target_market: Option<String>,
     /// 目标平台数组（如 ["douyin", "bilibili", "tiktok"]）
     #[serde(default)]
-    pub(super) target_platforms: Option<Vec<String>>,
+    #[schema(example = json!(["douyin", "bilibili"]))]
+    pub target_platforms: Option<Vec<String>>,
     /// 时长策略（如 short, medium, long）
     #[serde(default)]
-    pub(super) duration_strategy: Option<String>,
+    #[schema(example = "short")]
+    pub duration_strategy: Option<String>,
     /// 声线配置标识
     #[serde(default)]
-    pub(super) voice_profile: Option<String>,
+    pub voice_profile: Option<String>,
     /// 字幕样式标识
     #[serde(default)]
-    pub(super) subtitle_style: Option<String>,
+    pub subtitle_style: Option<String>,
     /// BGM 策略
     #[serde(default)]
-    pub(super) bgm_strategy: Option<String>,
+    pub bgm_strategy: Option<String>,
 }
 
 #[cfg(test)]
