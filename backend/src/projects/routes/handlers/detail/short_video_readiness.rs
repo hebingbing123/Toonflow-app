@@ -30,6 +30,16 @@ struct StoryboardReadinessRow {
     no_blocking_job: bool,
 }
 
+/// Text from Postgres **`COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '')`**.
+/// **`candidate_cleared`** in `/short-video-readiness` is **`coalesced != 'pending'`** (no `TRIM`).
+///
+/// Keep this predicate aligned with the SELECT below; unit tests lock the contract for C10.
+#[must_use]
+#[allow(dead_code)] // Only referenced from unit tests; mirrors SQL for drift-sensitive readiness rules.
+fn candidate_cleared_from_coalesced_metadata_text(coalesced: &str) -> bool {
+    coalesced != "pending"
+}
+
 fn blocking_reason_codes(row: &StoryboardReadinessRow) -> Vec<&'static str> {
     let mut out = Vec::new();
     if !row.has_basic_slot {
@@ -121,6 +131,7 @@ pub(crate) async fn project_short_video_readiness_by_id(
           ) AS has_prompt_context,
           (TRIM(COALESCE(sb.file_path, '')) <> '') AS has_reference_visual,
           (
+            -- Must match `candidate_cleared_from_coalesced_metadata_text`
             COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '') <> 'pending'
           ) AS candidate_cleared,
           NOT EXISTS (
@@ -189,6 +200,70 @@ pub(crate) async fn project_short_video_readiness_by_id(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn candidate_cleared_semantics_match_sql_coalesce_and_pending_gate() {
+        assert!(candidate_cleared_from_coalesced_metadata_text(""));
+        assert!(candidate_cleared_from_coalesced_metadata_text("linked"));
+        assert!(candidate_cleared_from_coalesced_metadata_text("ignored"));
+        assert!(candidate_cleared_from_coalesced_metadata_text("confirmed"));
+        assert!(!candidate_cleared_from_coalesced_metadata_text("pending"));
+    }
+
+    fn all_checks_pass_row(candidate_cleared: bool) -> StoryboardReadinessRow {
+        StoryboardReadinessRow {
+            storyboard_id: Uuid::nil(),
+            storyboard_numeric_id: 42,
+            script_numeric_id: Some(7),
+            sb_index: Some(1),
+            has_basic_slot: true,
+            has_prompt_context: true,
+            has_reference_visual: true,
+            candidate_cleared,
+            no_blocking_job: true,
+        }
+    }
+
+    #[test]
+    fn readiness_emits_candidate_pending_iff_candidate_cleared_false() {
+        let cleared_row = all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text(""));
+        assert!(
+            !blocking_reason_codes(&cleared_row).contains(&"candidate_pending"),
+            "cleared shots must not block on candidate_pending"
+        );
+
+        let blocked_row =
+            all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text("pending"));
+        assert_eq!(
+            blocking_reason_codes(&blocked_row),
+            vec!["candidate_pending"],
+            "only pending-candidate gate should block when other checks pass"
+        );
+    }
+
+    #[test]
+    fn ready_for_generation_requires_candidate_cleared_among_other_checks() {
+        let row_pending =
+            all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text("pending"));
+        let reasons: Vec<String> = blocking_reason_codes(&row_pending)
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            reasons.iter().any(|s| s == "candidate_pending"),
+            "candidate_pending must surface when metadata candidateStatus is pending"
+        );
+
+        let row_cleared = all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text(""));
+        let reasons_cleared: Vec<String> = blocking_reason_codes(&row_cleared)
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            reasons_cleared.is_empty(),
+            "golden row should be ready_for_generation (empty blocking_reasons)"
+        );
+    }
 
     #[test]
     fn blocking_reason_codes_orders_expected_keys() {

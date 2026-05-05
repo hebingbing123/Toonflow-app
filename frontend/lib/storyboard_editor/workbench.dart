@@ -199,7 +199,6 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   Widget build(BuildContext context) {
     final viewState = _buildWorkbenchViewState();
 
-    final outline = Theme.of(context).colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -211,13 +210,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
         ),
         if (_storyboardShotReadiness != null) ...[
           const SizedBox(height: 12),
-          Text(
-            formatStoryboardShortVideoReadinessSummary(_storyboardShotReadiness!),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: _storyboardShotReadiness!.readyForGeneration
-                  ? Theme.of(context).colorScheme.primary
-                  : outline,
-            ),
+          _StoryboardShortVideoReadinessStrip(
+            readiness: _storyboardShotReadiness!,
           ),
         ],
         const SizedBox(height: 12),

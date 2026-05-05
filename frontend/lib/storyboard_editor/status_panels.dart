@@ -157,3 +157,109 @@ class _StoryboardDiagnosisCard extends StatelessWidget {
     );
   }
 }
+
+/// Read-only checklist aligned with **`GET …/short-video-readiness`** (C11 / MP-W3).
+class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
+  const _StoryboardShortVideoReadinessStrip({required this.readiness});
+
+  final StoryboardShortVideoReadiness readiness;
+
+  static List<({String label, bool ok})> _steps(StoryboardShortVideoReadiness r) {
+    return <({String label, bool ok})>[
+      (label: '时间线槽位', ok: r.hasBasicSlot),
+      (label: '脚本 / 提示词', ok: r.hasPromptContext),
+      (label: '参考图', ok: r.hasReferenceVisual),
+      (label: '候选确认', ok: r.candidateCleared),
+      (label: '无阻塞任务', ok: r.noBlockingJob),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final outline = theme.colorScheme.outline;
+    final steps = _steps(readiness);
+    final ready = readiness.readyForGeneration;
+    final badgeStyle = theme.textTheme.labelMedium?.copyWith(
+      color: ready ? theme.colorScheme.primary : outline,
+      fontWeight: FontWeight.w600,
+    );
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: outline.withValues(alpha: 0.45)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  '短视频就绪（服务端）',
+                  style: theme.textTheme.labelLarge,
+                ),
+              ),
+              Text(
+                ready ? '可生成' : '待补齐',
+                style: badgeStyle,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              for (final step in steps)
+                _ReadinessStepPill(
+                  label: step.label,
+                  ok: step.ok,
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            formatStoryboardShortVideoReadinessSummary(readiness),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: ready ? theme.colorScheme.primary : outline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadinessStepPill extends StatelessWidget {
+  const _ReadinessStepPill({required this.label, required this.ok});
+
+  final String label;
+  final bool ok;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final outline = scheme.outline;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          ok ? Icons.check_circle_outline : Icons.highlight_off_outlined,
+          size: 17,
+          color: ok ? scheme.primary : outline,
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: ok ? scheme.onSurface : outline,
+          ),
+        ),
+      ],
+    );
+  }
+}
