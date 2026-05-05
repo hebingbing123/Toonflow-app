@@ -79,8 +79,8 @@
 
 ## Phase J - Token and Cost ROI Closure (P0/P1)
 
-- [-] J.1 Add input hash cache for publish copy generation
-- [~] J.2 Change publish copy to incremental mode for changed platforms only
+- [x] J.1 Add input hash cache for publish copy generation
+- [-] J.2 Change publish copy to incremental mode for changed platforms only
 - [~] J.3 Add app_llm_usage_log for publish copy calls
 - [~] J.4 Aggregate short-video-space publish requests to single endpoint
 - [~] J.5 Reduce loadProjectOverview fanout and duplicate fetches

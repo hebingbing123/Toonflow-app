@@ -368,7 +368,7 @@ pub(crate) struct PublishDraftRow {
     pub(crate) updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow)]
 pub(crate) struct PublishTargetRow {
     pub(crate) id: Uuid,
     pub(crate) draft_id: Uuid,
