@@ -372,6 +372,23 @@ pub(crate) struct PublishAttemptAuditRow {
     pub(crate) created_at: DateTime<Utc>,
 }
 
+#[derive(Debug, FromRow)]
+#[allow(dead_code)]
+pub(crate) struct PublishMetricSyncCursorRow {
+    pub(crate) id: Uuid,
+    pub(crate) project_id: Uuid,
+    pub(crate) target_id: Uuid,
+    pub(crate) platform_id: String,
+    pub(crate) cursor_token: Option<String>,
+    pub(crate) status: String,
+    pub(crate) retry_count: i32,
+    pub(crate) next_retry_at: Option<DateTime<Utc>>,
+    pub(crate) last_error: Option<String>,
+    pub(crate) metadata: Json<Value>,
+    pub(crate) last_synced_at: Option<DateTime<Utc>>,
+    pub(crate) updated_at: DateTime<Utc>,
+}
+
 pub(crate) fn profile_from_row(r: PublishProfileRow) -> PublishProfileResponse {
     PublishProfileResponse {
         id: r.id,

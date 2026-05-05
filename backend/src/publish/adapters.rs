@@ -11,6 +11,16 @@ pub(crate) struct PublishAdapterResult {
     pub(crate) error_message: Option<String>,
 }
 
+pub(crate) struct PublishMetricsSnapshot {
+    pub(crate) metric_window: &'static str,
+    pub(crate) views: i64,
+    pub(crate) likes: i64,
+    pub(crate) comments: i64,
+    pub(crate) shares: i64,
+    pub(crate) completion_rate: f64,
+    pub(crate) raw_payload: Value,
+}
+
 pub(crate) fn run_target_adapter(
     job: &PublishJobRow,
     draft: &PublishDraftRow,
@@ -119,6 +129,34 @@ fn unsupported_platform(platform_id: &str) -> PublishAdapterResult {
             "stub": false,
         }),
         error_message: Some(format!("unsupported platform adapter: {platform_id}")),
+    }
+}
+
+pub(crate) fn fetch_platform_metrics_mock(
+    platform_id: &str,
+    external_video_id: &str,
+) -> PublishMetricsSnapshot {
+    let seed = external_video_id
+        .bytes()
+        .fold(0u64, |acc, b| acc.wrapping_add(b as u64));
+    let views = 800 + (seed % 9000) as i64;
+    let likes = (views / 8).max(1);
+    let comments = (views / 35).max(1);
+    let shares = (views / 45).max(1);
+    let completion_rate = 0.35 + ((seed % 50) as f64 / 100.0);
+    PublishMetricsSnapshot {
+        metric_window: "lifetime",
+        views,
+        likes,
+        comments,
+        shares,
+        completion_rate: completion_rate.min(0.98),
+        raw_payload: json!({
+            "source": "sandbox_metrics_mock",
+            "platform_id": platform_id,
+            "external_video_id": external_video_id,
+            "sampled_at": chrono::Utc::now().to_rfc3339(),
+        }),
     }
 }
 
