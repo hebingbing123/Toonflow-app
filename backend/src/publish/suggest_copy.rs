@@ -1,6 +1,8 @@
 //! **F1** — 多平台差异化文案建议（LLM 可用时调用；否则降级模板填充）。
+//! **J.1** — Input hash cache to reduce redundant LLM calls.
 
 use serde_json::{json, Value};
+use sqlx::PgPool;
 
 use crate::error::ApiError;
 use crate::llm::chat_completion_with_usage;
@@ -8,6 +10,7 @@ use crate::publish::platform_registry::spec_for_platform;
 use crate::publish::types::PublishTargetRow;
 use crate::state::AppState;
 
+use super::copy_cache::{compute_input_hash, lookup_cache, store_cache, update_cache_hit};
 use super::types::PublishDraftRow;
 
 fn truncate_chars(s: &str, max_chars: usize) -> String {
@@ -77,6 +80,7 @@ fn merge_llm_with_fallback(
 
 pub(crate) async fn suggest_platform_copy_fragment(
     state: &AppState,
+    pool: &PgPool,
     draft: &PublishDraftRow,
     targets: &[PublishTargetRow],
     style_hint: Option<&str>,
@@ -87,8 +91,21 @@ pub(crate) async fn suggest_platform_copy_fragment(
         ));
     }
 
+    // Compute input hash for cache lookup
+    let input_hash = compute_input_hash(draft, targets, style_hint);
+
+    // Check cache first
+    if let Some(cached) = lookup_cache(pool, &input_hash).await? {
+        // Update cache hit statistics
+        update_cache_hit(pool, cached.id).await?;
+        return Ok((cached.platform_copy_fragment, "cache"));
+    }
+
     let Some(cfg) = state.llm.as_ref() else {
-        return Ok((fallback_platform_copy_fragment(draft, targets), "fallback"));
+        let fragment = fallback_platform_copy_fragment(draft, targets);
+        // Store fallback result in cache
+        store_cache(pool, &input_hash, &fragment, "fallback").await?;
+        return Ok((fragment, "fallback"));
     };
 
     let mut spec_lines = Vec::new();
@@ -140,5 +157,9 @@ Respond with JSON only."#,
 
     let parsed = extract_json_value(&res.content)?;
     let merged = merge_llm_with_fallback(draft, targets, parsed);
+
+    // Store LLM result in cache
+    store_cache(pool, &input_hash, &merged, "llm").await?;
+
     Ok((merged, "llm"))
 }

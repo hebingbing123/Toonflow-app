@@ -74,12 +74,12 @@
 - [x] I.1 Upgrade export quality gate to off/warn/block strategy
 - [x] I.2 Add quality gate validation before publish queue
 - [x] I.3 Extend quality comparison to storyboard+video+output
-- [-] I.4 Promote quality nextAction to typed field for rework action
-- [~] I.5 Connect low-performance alert to rewrite/republish loop
+- [x] I.4 Promote quality nextAction to typed field for rework action
+- [x] I.5 Connect low-performance alert to rewrite/republish loop
 
 ## Phase J - Token and Cost ROI Closure (P0/P1)
 
-- [~] J.1 Add input hash cache for publish copy generation
+- [-] J.1 Add input hash cache for publish copy generation
 - [~] J.2 Change publish copy to incremental mode for changed platforms only
 - [~] J.3 Add app_llm_usage_log for publish copy calls
 - [~] J.4 Aggregate short-video-space publish requests to single endpoint

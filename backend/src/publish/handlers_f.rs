@@ -138,7 +138,7 @@ pub(crate) async fn suggest_publish_platform_copy(
     };
     let targets = list_targets(pool, draft_id).await?;
     let (fragment, source) =
-        suggest_platform_copy_fragment(&state, &draft, &targets, body.style_hint.as_deref())
+        suggest_platform_copy_fragment(&state, pool, &draft, &targets, body.style_hint.as_deref())
             .await?;
     if body.apply {
         merge_draft_platform_copy(pool, project_id, draft_id, &fragment).await?;

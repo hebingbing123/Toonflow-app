@@ -31,6 +31,8 @@ pub use types::{
     StagePassRateItem,
 };
 
+pub use next_action::NextAction;
+
 // Handlers 与 utoipa `__path_*` 由 `openapi.rs` 的 `paths(...)` 引用；本模块内仅装配路由。
 #[allow(unused_imports)]
 pub(crate) use handlers::{

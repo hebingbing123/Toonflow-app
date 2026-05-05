@@ -87,6 +87,10 @@ pub fn router() -> Router<AppState> {
             get(list_publish_performance_alerts),
         )
         .route(
+            "/api/v1/projects/{project_id}/publish/performance-alerts/process",
+            post(process_performance_alerts),
+        )
+        .route(
             "/api/v1/projects/{project_id}/publish/jobs/{job_id}/cancel",
             post(cancel_publish_job),
         )
@@ -933,4 +937,53 @@ pub(crate) async fn confirm_publish_job_semi_auto(
         .await?
         .ok_or(ApiError::NotFound)?;
     Ok(Json(job_from_row(updated)))
+}
+
+/// Process low-performance alerts and create quality reviews (I.5)
+#[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/publish/performance-alerts/process",
+    operation_id = "processPerformanceAlertsV1",
+    tag = "publish",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID"),
+        ("views_lt" = Option<i64>, Query, description = "Low-performance views threshold (default: 100)"),
+        ("completion_rate_lt" = Option<f64>, Query, description = "Low-performance completion-rate threshold (default: 0.3)"),
+        ("engagement_rate_lt" = Option<f64>, Query, description = "Low-performance engagement-rate threshold (default: 0.01)"),
+        ("limit" = Option<i64>, Query, description = "1..200, default 50")
+    ),
+    responses(
+        (status = 200, description = "Quality reviews created", body = Vec<serde_json::Value>),
+        (status = 404, description = "Not found")
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn process_performance_alerts(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    Query(query): Query<ListPublishPerformanceAlertsQuery>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<crate::prompting::quality::QualityReview>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_project_owned(pool, uid, project_id).await?;
+
+    let thresholds = super::performance_rework::PerformanceThresholds {
+        min_views: query.views_lt,
+        min_completion_rate: query.completion_rate_lt,
+        min_engagement_rate: 0.01, // Default engagement rate threshold
+    };
+
+    let limit = query.limit;
+
+    let reviews = super::performance_rework::process_low_performance_alerts(
+        pool,
+        project_id,
+        uid,
+        &thresholds,
+        limit,
+    )
+    .await?;
+
+    Ok(Json(reviews))
 }

@@ -2,10 +2,12 @@
 
 mod access;
 mod adapters;
+mod copy_cache;
 mod copy_validate;
 mod handlers;
 mod handlers_f;
 mod openapi;
+mod performance_rework;
 mod platform_registry;
 #[cfg(test)]
 mod quality_gate_tests;

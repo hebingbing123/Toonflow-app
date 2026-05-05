@@ -23,6 +23,7 @@ use utoipa::OpenApi;
         crate::publish::handlers::list_publish_jobs,
         crate::publish::handlers::list_publish_audit,
         crate::publish::handlers::list_publish_performance_alerts,
+        crate::publish::handlers::process_performance_alerts,
         crate::publish::handlers::cancel_publish_job,
         crate::publish::handlers::retry_publish_job,
         crate::publish::handlers::confirm_publish_job_semi_auto,
