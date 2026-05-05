@@ -534,6 +534,25 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
     scriptLines.add(
       '$title · ${shots.length} 镜 · 已选成片 $withMedia · 旁白就绪 $voReady',
     );
+    for (final sh in shots.take(4)) {
+      final preview = (sh.selectedMediaUrl ?? '').trim().isNotEmpty ? '预览✓' : '预览×';
+      final duration = (sh.duration ?? '').trim();
+      final subtitle = (sh.subtitleText ?? '').trim();
+      final subtitleState = subtitle.isEmpty ? '字幕×' : '字幕✓';
+      final voiceover = sh.voiceoverAssetReady ||
+              (sh.voiceoverAudioUrl ?? '').trim().isNotEmpty
+          ? '旁白✓'
+          : '旁白×';
+      final order = sh.sbIndex?.toString() ?? '${sh.storyboardNumericId}';
+      scriptLines.add(
+        '  镜头[$order] · $preview · ${duration.isEmpty ? '时长?' : duration} · '
+        '$subtitleState · $voiceover · '
+        'BGM ${(d.bgmStrategy ?? '').trim().isEmpty ? '默认' : d.bgmStrategy!.trim()}',
+      );
+    }
+    if (shots.length > 4) {
+      scriptLines.add('  …其余 ${shots.length - 4} 镜请在制作工作区时间线查看');
+    }
   }
   final q = assembly.candidateQualitySummary;
   final qualityLines = <String>[
@@ -561,7 +580,8 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
         '${defaultParts.join(' · ')}\n生效 TTS（入队/worker）：${eff.ttsVoice}',
     qualityLines: qualityLines,
     scriptLines: scriptLines,
-    detail: '来自只读装配接口；导出阻塞结论见下方「导出前检查」。',
+    detail:
+        '只读剪辑台：展示镜头顺序、时长、字幕、旁白、BGM 与预览就绪摘要；导出阻塞结论见下方「导出前检查」。',
   );
 }
 
