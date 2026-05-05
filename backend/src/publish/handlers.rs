@@ -27,8 +27,9 @@ use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, ListPublishAuditQuery,
     ListPublishDraftsQuery, ListPublishPerformanceAlertsQuery, PatchPublishDraftBody,
     PatchPublishProfileBody, PublishAttemptAuditResponse, PublishDraftResponse, PublishJobResponse,
-    PublishPerformanceAlertResponse, PublishPlatformMatrixResponse, PublishPrepareCheckResponse,
-    PublishProfileResponse, PublishTargetResponse, UpsertPublishTargetsBody,
+    PublishOverviewQuery, PublishOverviewResponse, PublishPerformanceAlertResponse,
+    PublishPlatformMatrixResponse, PublishPrepareCheckResponse, PublishProfileResponse,
+    PublishTargetResponse, UpsertPublishTargetsBody,
 };
 use super::validation::{prepare_check_for_draft, validate_automation_mode};
 use super::{
@@ -38,6 +39,10 @@ use super::{
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route(
+            "/api/v1/projects/{project_id}/publish/overview",
+            get(publish_overview),
+        )
         .route(
             "/api/v1/projects/{project_id}/publish/platform-matrix",
             get(publish_platform_matrix),
@@ -108,6 +113,92 @@ fn platform_matrix_body() -> PublishPlatformMatrixResponse {
     PublishPlatformMatrixResponse {
         platforms: capability_matrix(),
     }
+}
+
+/// Aggregated endpoint for short-video-space publish overview (J.4)
+/// Returns all publish-related data in a single request to reduce API fanout
+#[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}/publish/overview",
+    operation_id = "getPublishOverviewV1",
+    tag = "publish",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID"),
+        ("draft_id" = Option<Uuid>, Query, description = "Optional draft ID to fetch prepare check for"),
+        ("audit_limit" = Option<i64>, Query, description = "Audit limit (default: 30)")
+    ),
+    responses(
+        (status = 200, description = "OK", body = PublishOverviewResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn publish_overview(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    Query(query): Query<PublishOverviewQuery>,
+    headers: HeaderMap,
+) -> Result<Json<PublishOverviewResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_project_owned(pool, uid, project_id).await?;
+
+    // Fetch all data in parallel for optimal performance
+    let (drafts_rows, jobs_rows, perf_alerts_rows, audit_rows) = tokio::try_join!(
+        list_drafts(pool, project_id, None),
+        list_jobs(pool, project_id, uid),
+        list_low_performance_alerts(pool, project_id, uid, 1000, 0.45, 50),
+        list_attempt_audit(
+            pool,
+            project_id,
+            uid,
+            ListAttemptAuditFilter {
+                draft_id: None,
+                job_id: None,
+                delivery_mode: None,
+                evidence_key: None,
+                limit: query.audit_limit,
+            },
+        ),
+    )?;
+
+    // Convert rows to responses
+    let drafts: Vec<PublishDraftResponse> = drafts_rows.into_iter().map(draft_from_row).collect();
+    let jobs: Vec<PublishJobResponse> = jobs_rows.into_iter().map(job_from_row).collect();
+    let performance_alerts: Vec<PublishPerformanceAlertResponse> = perf_alerts_rows
+        .into_iter()
+        .map(performance_alert_from_row)
+        .collect();
+    let audit: Vec<PublishAttemptAuditResponse> =
+        audit_rows.into_iter().map(attempt_audit_from_row).collect();
+
+    // Optionally fetch prepare check if draft_id is provided
+    let prepare_check = if let Some(draft_id) = query.draft_id {
+        if let Some(draft) = fetch_draft(pool, project_id, draft_id).await? {
+            let targets = list_targets(pool, draft_id).await?;
+            let issues = prepare_check_for_draft(&draft, &targets);
+            let ok = !issues.iter().any(|i| i.severity == "blocking");
+            Some(PublishPrepareCheckResponse {
+                draft_id,
+                ok,
+                issues,
+            })
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    Ok(Json(PublishOverviewResponse {
+        matrix: platform_matrix_body(),
+        drafts,
+        prepare_check,
+        jobs,
+        performance_alerts,
+        audit,
+    }))
 }
 
 #[utoipa::path(

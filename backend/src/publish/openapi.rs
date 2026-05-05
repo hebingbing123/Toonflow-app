@@ -5,6 +5,7 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        crate::publish::handlers::publish_overview,
         crate::publish::handlers::publish_platform_matrix,
         crate::publish::handlers::list_publish_profiles,
         crate::publish::handlers::create_publish_profile,
@@ -32,6 +33,8 @@ use utoipa::OpenApi;
         crate::publish::handlers_f::suggest_publish_platform_copy,
     ),
     components(schemas(
+        crate::publish::types::PublishOverviewResponse,
+        crate::publish::types::PublishOverviewQuery,
         crate::publish::types::PublishProfileResponse,
         crate::publish::types::CreatePublishProfileBody,
         crate::publish::types::PatchPublishProfileBody,

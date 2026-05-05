@@ -81,8 +81,8 @@
 
 - [x] J.1 Add input hash cache for publish copy generation
 - [x] J.2 Change publish copy to incremental mode for changed platforms only
-- [-] J.3 Add app_llm_usage_log for publish copy calls
-- [~] J.4 Aggregate short-video-space publish requests to single endpoint
+- [x] J.3 Add app_llm_usage_log for publish copy calls
+- [-] J.4 Aggregate short-video-space publish requests to single endpoint
 - [~] J.5 Reduce loadProjectOverview fanout and duplicate fetches
 - [~] J.6 Add request deduplication and generation protection for high-frequency refresh
 

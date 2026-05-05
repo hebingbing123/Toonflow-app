@@ -537,3 +537,30 @@ pub(crate) fn performance_alert_from_row(
         synced_at: r.synced_at,
     }
 }
+
+/// Aggregated response for short-video-space publish overview (J.4)
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct PublishOverviewResponse {
+    pub matrix: PublishPlatformMatrixResponse,
+    pub drafts: Vec<PublishDraftResponse>,
+    pub prepare_check: Option<PublishPrepareCheckResponse>,
+    pub jobs: Vec<PublishJobResponse>,
+    pub performance_alerts: Vec<PublishPerformanceAlertResponse>,
+    pub audit: Vec<PublishAttemptAuditResponse>,
+}
+
+/// Query parameters for publish overview endpoint
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct PublishOverviewQuery {
+    /// Optional draft ID to fetch prepare check for
+    pub draft_id: Option<Uuid>,
+    /// Audit limit (default: 30)
+    #[serde(default = "default_overview_audit_limit")]
+    pub audit_limit: i64,
+}
+
+fn default_overview_audit_limit() -> i64 {
+    30
+}
