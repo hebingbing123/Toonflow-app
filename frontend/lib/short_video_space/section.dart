@@ -57,6 +57,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ProjectAssetsOverview? _projectAssetsOverview;
   ProjectShortVideoAssembly? _shortVideoAssembly;
   ProjectShortVideoExportCheck? _shortVideoExportCheck;
+  List<ProductionStoryboardItemV1> _candidateCompareRows =
+      const <ProductionStoryboardItemV1>[];
+  List<QualityReview> _candidateCompareReviews = const <QualityReview>[];
   PublishPlatformMatrixResponse? _publishMatrix;
   bool _publishUnavailable = false;
   List<PublishDraftRow> _publishDrafts = const <PublishDraftRow>[];
@@ -313,6 +316,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  List<Map<String, dynamic>> _publishTargetMaps() {
+    final out = <Map<String, dynamic>>[];
+    for (var i = 0; i < _targetPlatforms.length; i++) {
+      final p = _targetPlatforms[i];
+      out.add(<String, dynamic>{
+        'platform_id': p,
+        'automation_mode': 'semi_auto',
+        'serial_order': i,
+        'extra': <String, dynamic>{},
+      });
+    }
+    return out;
+  }
+
   Future<void> _refreshPublishSlice(ProjectRow project, String token) async {
     final snapshot = await _capturePublishSlice(project, token);
     if (!mounted || _selectedProjectId != project.id) {
@@ -349,15 +366,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         return;
       }
       final draftId = drafts.first.id;
-      final targets = _targetPlatforms
-          .map(
-            (p) => <String, dynamic>{
-              'platform_id': p,
-              'automation_mode': 'semi_auto',
-              'extra': <String, dynamic>{},
-            },
-          )
-          .toList(growable: false);
+      final targets = _publishTargetMaps();
       if (targets.isNotEmpty) {
         await upsertPublishTargets(token, project.id, draftId, targets);
       }
@@ -414,15 +423,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         return;
       }
       final draftId = drafts.first.id;
-      final targets = _targetPlatforms
-          .map(
-            (p) => <String, dynamic>{
-              'platform_id': p,
-              'automation_mode': 'semi_auto',
-              'extra': <String, dynamic>{},
-            },
-          )
-          .toList(growable: false);
+      final targets = _publishTargetMaps();
       if (targets.isNotEmpty) {
         await upsertPublishTargets(token, project.id, draftId, targets);
       }
@@ -444,6 +445,107 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('投递失败：$e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _suggestPublishCopy() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    if (_publishDrafts.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请先创建发布草稿。')),
+        );
+      }
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      final draftId = _publishDrafts.first.id;
+      final res = await suggestPublishPlatformCopy(
+        token,
+        project.id,
+        draftId,
+        apply: true,
+      );
+      await _refreshPublishSlice(project, token);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('差异化文案已写入（来源：${res.source}）。')),
+      );
+    } on RustApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('文案建议失败：${e.statusCode}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('文案建议失败：$e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _clearPublishSchedule() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    if (_publishDrafts.isEmpty) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      final ids = _publishDrafts.map((d) => d.id).toList(growable: false);
+      final res = await batchSchedulePublishDrafts(
+        token,
+        project.id,
+        draftIds: ids,
+        scheduledAtIso: null,
+      );
+      await _refreshPublishSlice(project, token);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('已更新 ${res.updated} 张草稿的定时字段（可为 worker 放行）。')),
+      );
+    } on RustApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('清除定时失败：${e.statusCode}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('清除定时失败：$e')),
         );
       }
     } finally {
@@ -522,6 +624,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _projectAssetsOverview = null;
           _shortVideoAssembly = null;
           _shortVideoExportCheck = null;
+          _candidateCompareRows = const <ProductionStoryboardItemV1>[];
+          _candidateCompareReviews = const <QualityReview>[];
           _publishMatrix = null;
           _publishUnavailable = false;
           _publishDrafts = const <PublishDraftRow>[];
@@ -546,6 +650,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _projectAssetsOverview = null;
       _shortVideoAssembly = null;
       _shortVideoExportCheck = null;
+      _candidateCompareRows = const <ProductionStoryboardItemV1>[];
+      _candidateCompareReviews = const <QualityReview>[];
       _publishMatrix = null;
       _publishUnavailable = false;
       _publishDrafts = const <PublishDraftRow>[];
@@ -613,6 +719,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       ProjectShortVideoAssembly? assemblySlice;
       ProjectShortVideoExportCheck? exportCheckSlice;
       ProjectShortVideoReadiness? shotReadiness;
+      var candidateCompareRows = <ProductionStoryboardItemV1>[];
+      var candidateCompareReviews = <QualityReview>[];
       var shotUnavailable = false;
       PublishPlatformMatrixResponse? publishMatrixSnap;
       var publishUnavailableSnap = false;
@@ -657,6 +765,30 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           publishPrepareSnap = snapshot.prepare;
           publishJobsSnap = snapshot.jobs;
         }),
+        Future(() async {
+          try {
+            final detail = await fetchProjectByProjectId(token, project.id);
+            final storyboardRows = <ProductionStoryboardItemV1>[];
+            for (final script in detail.scripts.take(6)) {
+              final resp = await postProductionGetStoryboardDataV1(
+                token,
+                projectId: project.numericId,
+                scriptId: script.numericId,
+              );
+              storyboardRows.addAll(resp.data);
+            }
+            candidateCompareRows = storyboardRows;
+            candidateCompareReviews = await fetchQualityReviews(
+              token,
+              projectId: project.numericId,
+              targetType: 'storyboard',
+              limit: 60,
+            );
+          } catch (_) {
+            candidateCompareRows = <ProductionStoryboardItemV1>[];
+            candidateCompareReviews = <QualityReview>[];
+          }
+        }),
       ]);
       if (!mounted || _selectedProjectId != project.id) {
         return;
@@ -673,6 +805,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _projectAssetsOverview = results[7] as ProjectAssetsOverview?;
         _shortVideoAssembly = assemblySlice;
         _shortVideoExportCheck = exportCheckSlice;
+        _candidateCompareRows = candidateCompareRows;
+        _candidateCompareReviews = candidateCompareReviews;
         _shotReadiness = shotReadiness;
         _shotReadinessUnavailable = shotUnavailable;
         _publishMatrix = publishMatrixSnap;
@@ -698,6 +832,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _projectAssetsOverview = null;
         _shortVideoAssembly = null;
         _shortVideoExportCheck = null;
+        _candidateCompareRows = const <ProductionStoryboardItemV1>[];
+        _candidateCompareReviews = const <QualityReview>[];
         _publishMatrix = null;
         _publishUnavailable = false;
         _publishDrafts = const <PublishDraftRow>[];
@@ -722,6 +858,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _projectAssetsOverview = null;
         _shortVideoAssembly = null;
         _shortVideoExportCheck = null;
+        _candidateCompareRows = const <ProductionStoryboardItemV1>[];
+        _candidateCompareReviews = const <QualityReview>[];
         _publishMatrix = null;
         _publishUnavailable = false;
         _publishDrafts = const <PublishDraftRow>[];
@@ -1071,6 +1209,19 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               accessToken.isNotEmpty
           ? () => unawaited(_confirmSemiAutoPublish())
           : null,
+      onSuggestPublishCopy: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty &&
+              !_publishUnavailable
+          ? () => unawaited(_suggestPublishCopy())
+          : null,
+      onClearPublishSchedule: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty &&
+              !_publishUnavailable &&
+              _publishDrafts.isNotEmpty
+          ? () => unawaited(_clearPublishSchedule())
+          : null,
     );
     final candidateCardUi = buildShortVideoCandidateCardUi(
       projectSelected: project != null,
@@ -1217,6 +1368,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               widget.onOpenProductionWorkspace();
             },
       candidateCardUi: candidateCardUi,
+      candidateComparePanelUi: const ShortVideoCandidateComparePanelUi(),
       onOpenProjectsForCandidateAssets:
           project == null ? null : widget.onOpenProjects,
       readinessIntro: _isAnimated

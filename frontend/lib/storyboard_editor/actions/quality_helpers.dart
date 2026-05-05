@@ -47,6 +47,37 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await _notifyStoryboardMutated();
   }
 
+  Future<void> _saveLiveActionReference() async {
+    final referenceShotUrls = _liveActionReferenceShotsCtrl.text
+        .split(RegExp(r'[\n,]'))
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .toList(growable: false);
+    final performanceNotes = _liveActionPerformanceNotesCtrl.text.trim();
+    final response = await postStoryboardUpdateLiveActionReferenceV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      storyboardId: widget.storyNumericId,
+      referenceShotUrls: referenceShotUrls,
+      performanceNotes: performanceNotes.isEmpty ? null : performanceNotes,
+    );
+    _liveActionReferenceShotsCtrl.text = response.referenceShotUrls.join('\n');
+    _liveActionPerformanceNotesCtrl.text = response.performanceNotes ?? '';
+    await _refreshProductionData();
+    await _refreshStoryboardShotReadiness();
+    if (!mounted) return;
+    _applyWorkbenchState(() {
+      final count = response.referenceShotUrls.length;
+      _setWorkbenchFollowUp(
+        count <= 0
+            ? '已清空真人参考镜头与表演约束。'
+            : '已保存 $count 条真人参考镜头，并同步表演/口播约束。',
+      );
+    });
+    await _notifyStoryboardMutated();
+  }
+
   Future<void> _clearCurrentFrame() async {
     await postStoryboardRemoveFrameV1(
       widget.token,

@@ -23,9 +23,12 @@ struct StoryboardReadinessRow {
     storyboard_numeric_id: i32,
     script_numeric_id: Option<i32>,
     sb_index: Option<i32>,
+    is_live_action_mode: bool,
     has_basic_slot: bool,
     has_prompt_context: bool,
     has_reference_visual: bool,
+    has_live_action_reference_shots: bool,
+    has_live_action_performance_notes: bool,
     candidate_cleared: bool,
     no_blocking_job: bool,
 }
@@ -50,6 +53,12 @@ fn blocking_reason_codes(row: &StoryboardReadinessRow) -> Vec<&'static str> {
     }
     if !row.has_reference_visual {
         out.push("missing_reference_visual");
+    }
+    if row.is_live_action_mode && !row.has_live_action_reference_shots {
+        out.push("missing_live_action_reference_shot");
+    }
+    if row.is_live_action_mode && !row.has_live_action_performance_notes {
+        out.push("missing_live_action_performance_notes");
     }
     if !row.candidate_cleared {
         out.push("candidate_pending");
@@ -124,12 +133,18 @@ pub(crate) async fn project_short_video_readiness_by_id(
           sb.numeric_id AS storyboard_numeric_id,
           sc.numeric_id AS script_numeric_id,
           sb.sb_index,
+          LOWER(TRIM(COALESCE(ap.mode, ''))) IN ('live_action.short_drama', '真人') AS is_live_action_mode,
           (sb.sb_index IS NOT NULL) AS has_basic_slot,
           (
             TRIM(COALESCE(sb.prompt, '')) <> ''
             OR TRIM(COALESCE(sb.video_desc, '')) <> ''
           ) AS has_prompt_context,
           (TRIM(COALESCE(sb.file_path, '')) <> '') AS has_reference_visual,
+          jsonb_array_length(
+            COALESCE(sb.metadata #> '{shortVideo,liveAction,referenceShotUrls}', '[]'::jsonb)
+          ) > 0 AS has_live_action_reference_shots,
+          TRIM(COALESCE(sb.metadata #>> '{shortVideo,liveAction,performanceNotes}', '')) <> ''
+            AS has_live_action_performance_notes,
           (
             -- Must match `candidate_cleared_from_coalesced_metadata_text`
             COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '') <> 'pending'
@@ -144,6 +159,7 @@ pub(crate) async fn project_short_video_readiness_by_id(
           ) AS no_blocking_job
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project ap ON ap.id = sc.project_id
         WHERE sc.project_id = $1
         ORDER BY sc.numeric_id ASC, sb.sb_index ASC NULLS LAST, sb.numeric_id ASC
         "#,
@@ -175,6 +191,8 @@ pub(crate) async fn project_short_video_readiness_by_id(
             has_basic_slot: r.has_basic_slot,
             has_prompt_context: r.has_prompt_context,
             has_reference_visual: r.has_reference_visual,
+            has_live_action_reference_shots: r.has_live_action_reference_shots,
+            has_live_action_performance_notes: r.has_live_action_performance_notes,
             candidate_cleared: r.candidate_cleared,
             no_blocking_job: r.no_blocking_job,
             ready_for_generation,
@@ -216,9 +234,12 @@ mod tests {
             storyboard_numeric_id: 42,
             script_numeric_id: Some(7),
             sb_index: Some(1),
+            is_live_action_mode: false,
             has_basic_slot: true,
             has_prompt_context: true,
             has_reference_visual: true,
+            has_live_action_reference_shots: true,
+            has_live_action_performance_notes: true,
             candidate_cleared,
             no_blocking_job: true,
         }
@@ -272,9 +293,12 @@ mod tests {
             storyboard_numeric_id: 1,
             script_numeric_id: Some(1),
             sb_index: None,
+            is_live_action_mode: false,
             has_basic_slot: false,
             has_prompt_context: false,
             has_reference_visual: false,
+            has_live_action_reference_shots: false,
+            has_live_action_performance_notes: false,
             candidate_cleared: false,
             no_blocking_job: false,
         };
@@ -287,6 +311,23 @@ mod tests {
                 "missing_reference_visual",
                 "candidate_pending",
                 "blocking_job"
+            ]
+        );
+    }
+
+    #[test]
+    fn live_action_readiness_requires_reference_shot_and_performance_notes() {
+        let row = StoryboardReadinessRow {
+            is_live_action_mode: true,
+            has_live_action_reference_shots: false,
+            has_live_action_performance_notes: false,
+            ..all_checks_pass_row(true)
+        };
+        assert_eq!(
+            blocking_reason_codes(&row),
+            vec![
+                "missing_live_action_reference_shot",
+                "missing_live_action_performance_notes",
             ]
         );
     }

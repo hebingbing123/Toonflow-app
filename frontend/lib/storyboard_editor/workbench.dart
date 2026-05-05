@@ -37,6 +37,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   late final TextEditingController _videoPromptCtrl;
   late final TextEditingController _negativeVideoPromptCtrl;
   late final TextEditingController _videoDurationCtrl;
+  late final TextEditingController _liveActionReferenceShotsCtrl;
+  late final TextEditingController _liveActionPerformanceNotesCtrl;
 
   bool _saving = false;
   bool _loadingProduction = false;
@@ -139,6 +141,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     _videoPromptCtrl = TextEditingController();
     _negativeVideoPromptCtrl = TextEditingController();
     _videoDurationCtrl = TextEditingController(text: '5');
+    _liveActionReferenceShotsCtrl = TextEditingController();
+    _liveActionPerformanceNotesCtrl = TextEditingController();
     _videoPromptCtrl.addListener(_handleVideoPromptChanged);
     Future<void>.microtask(
       () => _refreshAll(syncImageUrl: true, syncTrackId: true),
@@ -154,6 +158,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     _videoPromptCtrl.dispose();
     _negativeVideoPromptCtrl.dispose();
     _videoDurationCtrl.dispose();
+    _liveActionReferenceShotsCtrl.dispose();
+    _liveActionPerformanceNotesCtrl.dispose();
     super.dispose();
   }
 
@@ -250,6 +256,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           videoPromptCtrl: _videoPromptCtrl,
           negativeVideoPromptCtrl: _negativeVideoPromptCtrl,
           videoDurationCtrl: _videoDurationCtrl,
+          liveActionReferenceShotsCtrl: _liveActionReferenceShotsCtrl,
+          liveActionPerformanceNotesCtrl: _liveActionPerformanceNotesCtrl,
           resolution: _resolution,
           mode: _mode,
           audio: _audio,
@@ -273,6 +281,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onDeleteTrack: () => _runDialogAction(_deleteTrack),
           onGenerateVideoPrompt: () => _runDialogAction(_generateVideoPrompt),
           onGenerateVoiceover: () => _runDialogAction(_generateVoiceover),
+          onSaveLiveActionReference: () =>
+              _runDialogAction(_saveLiveActionReference),
           onOpenPatchRegeneration: _openPatchRegenerationDialog,
           onApplyPromptRepairs: _applyPromptRepairSuggestions,
           onRefreshVideoData: _refreshWorkbenchData,

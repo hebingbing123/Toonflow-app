@@ -56,6 +56,8 @@ pub(crate) struct ProductionStoryboardItem {
     pub(crate) voiceover_state: Option<String>,
     pub(crate) voiceover_audio_url: Option<String>,
     pub(crate) voiceover_error: Option<String>,
+    pub(crate) live_action_reference_shot_urls: Vec<String>,
+    pub(crate) live_action_performance_notes: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[sqlx(skip)]
     pub(crate) media_slots: Option<StoryboardMediaSlotsSummary>,
@@ -199,6 +201,8 @@ mod tests {
             voiceover_state: Some("completed".to_string()),
             voiceover_audio_url: Some("/api/v1/jobs/audio/file".to_string()),
             voiceover_error: None,
+            live_action_reference_shot_urls: vec!["https://example.com/shot-1.jpg".into()],
+            live_action_performance_notes: Some("自然口播，停顿克制".into()),
             media_slots: None,
         };
         let json = serde_json::to_string(&item).unwrap();
@@ -206,6 +210,7 @@ mod tests {
         assert!(json.contains("\"scriptId\":2"));
         assert!(json.contains("\"prompt\":\"test prompt\""));
         assert!(json.contains("\"videoDesc\":\"narration\""));
+        assert!(json.contains("\"liveActionReferenceShotUrls\""));
     }
 
     #[test]

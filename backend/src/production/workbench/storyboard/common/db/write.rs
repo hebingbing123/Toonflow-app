@@ -76,3 +76,51 @@ pub(in crate::production::workbench::storyboard) async fn update_storyboard_imag
 
     Ok(())
 }
+
+pub(in crate::production::workbench::storyboard) async fn update_live_action_reference(
+    pool: &sqlx::PgPool,
+    storyboard_id: Uuid,
+    reference_shot_urls: &[String],
+    performance_notes: Option<&str>,
+) -> Result<(), ApiError> {
+    let reference_json = serde_json::to_value(reference_shot_urls)
+        .map_err(|e| ApiError::BadRequest(format!("invalid live-action reference urls: {e}")))?;
+    let performance_json = match performance_notes {
+        Some(value) if !value.trim().is_empty() => {
+            serde_json::Value::String(value.trim().to_string())
+        }
+        _ => serde_json::Value::Null,
+    };
+
+    let updated = sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET
+          metadata = jsonb_set(
+            jsonb_set(
+              COALESCE(metadata, '{}'::jsonb),
+              '{shortVideo,liveAction,referenceShotUrls}',
+              $2::jsonb,
+              true
+            ),
+            '{shortVideo,liveAction,performanceNotes}',
+            $3::jsonb,
+            true
+          ),
+          updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(storyboard_id)
+    .bind(reference_json)
+    .bind(performance_json)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if updated.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(())
+}

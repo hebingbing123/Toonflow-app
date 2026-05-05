@@ -99,6 +99,10 @@ pub struct StoryboardShortVideoReadiness {
     pub has_prompt_context: bool,
     /// Reference frame / key visual (**`file_path`**) present.
     pub has_reference_visual: bool,
+    /// 真人模式：至少 1 条参考镜头 URL（**`metadata.shortVideo.liveAction.referenceShotUrls`**）。
+    pub has_live_action_reference_shots: bool,
+    /// 真人模式：表演/口播约束说明（**`metadata.shortVideo.liveAction.performanceNotes`**）。
+    pub has_live_action_performance_notes: bool,
     /// Candidate review cleared — currently **`metadata.shortVideo.candidateStatus`** (see gaps doc).
     pub candidate_cleared: bool,
     /// No queued/running **`app_generation_job`** targeting this storyboard.

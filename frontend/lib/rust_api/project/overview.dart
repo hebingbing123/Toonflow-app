@@ -211,6 +211,8 @@ class StoryboardShortVideoReadiness {
     required this.hasBasicSlot,
     required this.hasPromptContext,
     required this.hasReferenceVisual,
+    required this.hasLiveActionReferenceShots,
+    required this.hasLiveActionPerformanceNotes,
     required this.candidateCleared,
     required this.noBlockingJob,
     required this.readyForGeneration,
@@ -224,6 +226,8 @@ class StoryboardShortVideoReadiness {
   final bool hasBasicSlot;
   final bool hasPromptContext;
   final bool hasReferenceVisual;
+  final bool hasLiveActionReferenceShots;
+  final bool hasLiveActionPerformanceNotes;
   final bool candidateCleared;
   final bool noBlockingJob;
   final bool readyForGeneration;
@@ -243,6 +247,10 @@ class StoryboardShortVideoReadiness {
       hasBasicSlot: json['has_basic_slot'] as bool,
       hasPromptContext: json['has_prompt_context'] as bool,
       hasReferenceVisual: json['has_reference_visual'] as bool,
+      hasLiveActionReferenceShots:
+          json['has_live_action_reference_shots'] as bool? ?? false,
+      hasLiveActionPerformanceNotes:
+          json['has_live_action_performance_notes'] as bool? ?? false,
       candidateCleared: json['candidate_cleared'] as bool,
       noBlockingJob: json['no_blocking_job'] as bool,
       readyForGeneration: json['ready_for_generation'] as bool,
@@ -942,6 +950,10 @@ String labelShortVideoBlockingReason(String code) {
       return '脚本 / 提示词';
     case 'missing_reference_visual':
       return '参考图';
+    case 'missing_live_action_reference_shot':
+      return '真人参考镜头';
+    case 'missing_live_action_performance_notes':
+      return '表演 / 口播约束';
     case 'candidate_pending':
       return '候选确认';
     case 'blocking_job':

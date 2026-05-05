@@ -128,6 +128,7 @@ pub struct PublishTargetResponse {
     pub draft_id: Uuid,
     pub platform_id: String,
     pub automation_mode: String,
+    pub serial_order: i32,
     pub extra: Value,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -144,6 +145,9 @@ pub struct UpsertPublishTargetsBody {
 pub struct PublishTargetInput {
     pub platform_id: String,
     pub automation_mode: String,
+    /// Lower runs first for serial multi-platform publishes (**F3**).
+    #[serde(default)]
+    pub serial_order: i32,
     #[serde(default)]
     pub extra: Value,
 }
@@ -194,8 +198,12 @@ pub struct PublishPrepareCheckResponse {
 pub struct PublishPlatformCapabilityRow {
     pub platform_id: String,
     pub label_zh: String,
+    /// `domestic` | `overseas`（**F4** 分区矩阵）.
+    pub market_region: String,
     pub automation_mode: String,
     pub title_max_chars: i32,
+    pub tags_max: i32,
+    pub description_max_chars: i32,
     pub requires_cover: bool,
     pub notes: String,
 }
@@ -204,6 +212,49 @@ pub struct PublishPlatformCapabilityRow {
 #[serde(rename_all = "snake_case")]
 pub struct PublishPlatformMatrixResponse {
     pub platforms: Vec<PublishPlatformCapabilityRow>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct PublishValidateCopyBody {
+    pub platform_copy: Value,
+    pub targets: Vec<PublishTargetInput>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct PublishValidateCopyResponse {
+    pub ok: bool,
+    pub issues: Vec<PublishPrepareIssue>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct SuggestPlatformCopyBody {
+    #[serde(default)]
+    pub apply: bool,
+    pub style_hint: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct SuggestPlatformCopyResponse {
+    pub draft_id: Uuid,
+    pub platform_copy_fragment: Value,
+    pub source: String,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchScheduleDraftsBody {
+    pub draft_ids: Vec<Uuid>,
+    pub scheduled_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchScheduleDraftsResponse {
+    pub updated: i64,
 }
 
 #[derive(Debug, FromRow)]
@@ -247,6 +298,7 @@ pub(crate) struct PublishTargetRow {
     pub(crate) draft_id: Uuid,
     pub(crate) platform_id: String,
     pub(crate) automation_mode: String,
+    pub(crate) serial_order: i32,
     pub(crate) extra: Json<Value>,
     pub(crate) created_at: DateTime<Utc>,
     pub(crate) updated_at: DateTime<Utc>,
@@ -312,6 +364,7 @@ pub(crate) fn target_from_row(r: PublishTargetRow) -> PublishTargetResponse {
         draft_id: r.draft_id,
         platform_id: r.platform_id,
         automation_mode: r.automation_mode,
+        serial_order: r.serial_order,
         extra: r.extra.0,
         created_at: r.created_at,
         updated_at: r.updated_at,

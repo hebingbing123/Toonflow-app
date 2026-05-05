@@ -51,3 +51,24 @@ pub(in crate::production) struct UpdateStoryboardUrlResponse {
     pub(crate) image_url: String,
     pub(crate) message: &'static str,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(in crate::production) struct UpdateStoryboardLiveActionReferenceBody {
+    pub(crate) project_id: i32,
+    pub(crate) script_id: i32,
+    pub(crate) storyboard_id: i32,
+    #[serde(default)]
+    pub(crate) reference_shot_urls: Vec<String>,
+    #[serde(default)]
+    pub(crate) performance_notes: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(in crate::production) struct UpdateStoryboardLiveActionReferenceResponse {
+    pub(crate) storyboard_id: i32,
+    pub(crate) reference_shot_urls: Vec<String>,
+    pub(crate) performance_notes: Option<String>,
+    pub(crate) message: &'static str,
+}

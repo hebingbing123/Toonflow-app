@@ -8,10 +8,12 @@ use axum::{
 
 use super::super::common::{
     normalize_storyboard_image_url, normalize_storyboard_prompt, remove_storyboard_frame,
-    update_storyboard_image_url, update_storyboard_info, validate_storyboard_duration,
+    update_live_action_reference, update_storyboard_image_url, update_storyboard_info,
+    validate_storyboard_duration,
 };
 use super::types::{
     EditStoryboardInfoBody, EditStoryboardInfoResponse, RemoveFrameBody, RemoveFrameResponse,
+    UpdateStoryboardLiveActionReferenceBody, UpdateStoryboardLiveActionReferenceResponse,
     UpdateStoryboardUrlBody, UpdateStoryboardUrlResponse,
 };
 use crate::error::ApiError;
@@ -138,5 +140,86 @@ pub(in crate::production) async fn post_storyboard_update_url(
         storyboard_id: body.storyboard_id,
         image_url,
         message: "Storyboard image URL updated",
+    }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/update-live-action-reference",
+    operation_id = "postProductionStoryboardUpdateLiveActionReferenceV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(in crate::production) async fn post_storyboard_update_live_action_reference(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<UpdateStoryboardLiveActionReferenceBody>,
+) -> Result<JsonResponse<UpdateStoryboardLiveActionReferenceResponse>, ApiError> {
+    let reference_shot_urls = body
+        .reference_shot_urls
+        .into_iter()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .collect::<Vec<_>>();
+    if reference_shot_urls.len() > 6 {
+        return Err(ApiError::BadRequest(
+            "referenceShotUrls must contain at most 6 items".into(),
+        ));
+    }
+    if reference_shot_urls
+        .iter()
+        .any(|value| !(value.starts_with("http://") || value.starts_with("https://")))
+    {
+        return Err(ApiError::BadRequest(
+            "referenceShotUrls must use http(s) URLs".into(),
+        ));
+    }
+    let performance_notes = body
+        .performance_notes
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string);
+    if performance_notes
+        .as_ref()
+        .is_some_and(|value| value.chars().count() > 280)
+    {
+        return Err(ApiError::BadRequest(
+            "performanceNotes must be 280 chars or fewer".into(),
+        ));
+    }
+
+    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+        &state,
+        &headers,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await?;
+    update_live_action_reference(
+        pool,
+        sb_uuid,
+        &reference_shot_urls,
+        performance_notes.as_deref(),
+    )
+    .await?;
+
+    Ok(JsonResponse(UpdateStoryboardLiveActionReferenceResponse {
+        storyboard_id: body.storyboard_id,
+        reference_shot_urls,
+        performance_notes,
+        message: "Storyboard live-action reference updated",
     }))
 }

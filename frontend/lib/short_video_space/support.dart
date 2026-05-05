@@ -678,6 +678,101 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   );
 }
 
+ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
+  required bool projectSelected,
+  required bool loadingProjectOverview,
+  required List<ProductionStoryboardItemV1> storyboardRows,
+  required ProjectShortVideoReadiness? readiness,
+  required List<QualityReview> reviews,
+  required bool isLiveAction,
+  required void Function(ProductionStoryboardItemV1 row)? onSetCurrent,
+  required VoidCallback? onOpenProductionWorkspace,
+}) {
+  if (!projectSelected) {
+    return const ShortVideoCandidateComparePanelUi(visible: false);
+  }
+  if (loadingProjectOverview) {
+    return const ShortVideoCandidateComparePanelUi(
+      visible: true,
+      loading: true,
+      headline: '正在整理分镜候选与当前版本…',
+      detail: '会按分镜聚合参考图、当前视频、readiness 与质量评审摘要。',
+    );
+  }
+  if (storyboardRows.isEmpty) {
+    return const ShortVideoCandidateComparePanelUi(
+      visible: true,
+      unavailable: true,
+      headline: '当前还没有可对比的分镜候选。',
+      detail: '先在制作工作区生成镜头或补参考图，再回到 Space 查看对比。',
+    );
+  }
+
+  final readinessByStoryboard = <int, StoryboardShortVideoReadiness>{};
+  for (final row in readiness?.storyboards ?? const <StoryboardShortVideoReadiness>[]) {
+    readinessByStoryboard[row.storyboardNumericId] = row;
+  }
+  final reviewsByStoryboard = <String, List<QualityReview>>{};
+  for (final row in reviews) {
+    final targetId = (row.targetId ?? '').trim();
+    if (targetId.isEmpty) continue;
+    reviewsByStoryboard.putIfAbsent(targetId, () => <QualityReview>[]).add(row);
+  }
+
+  final sortedRows = List<ProductionStoryboardItemV1>.from(storyboardRows)
+    ..sort((a, b) {
+      final ar = readinessByStoryboard[a.id];
+      final br = readinessByStoryboard[b.id];
+      final aBlocked = ar != null && !ar.readyForGeneration;
+      final bBlocked = br != null && !br.readyForGeneration;
+      if (aBlocked != bBlocked) {
+        return aBlocked ? -1 : 1;
+      }
+      final byScript = (a.scriptId ?? 0).compareTo(b.scriptId ?? 0);
+      if (byScript != 0) return byScript;
+      return (a.sbIndex ?? a.id).compareTo(b.sbIndex ?? b.id);
+    });
+
+  final items = sortedRows.take(4).map((row) {
+    final shotReadiness = readinessByStoryboard[row.id];
+    final shotReviews = reviewsByStoryboard[row.id.toString()] ?? const <QualityReview>[];
+    final badCases = shotReviews.where((review) => review.isBadCase).length;
+    final passed = shotReviews.where((review) => review.passed == true).length;
+    final readinessLine = shotReadiness == null
+        ? 'readiness 暂无数据'
+        : shotReadiness.readyForGeneration
+        ? '已就绪，可继续生成/导出'
+        : '待补 ${shotReadiness.blockingReasons.map(labelShortVideoBlockingReason).join('、')}';
+    final qualityLine = shotReviews.isEmpty
+        ? (isLiveAction
+              ? '暂无质检记录，先盯表演自然度、真实感和口播镜头质感。'
+              : '暂无质检记录，先盯角色一致性、画面连续性和镜头节奏。')
+        : '评审 ${shotReviews.length} 条 · 通过 $passed 条 · 坏例 $badCases 条';
+    return ShortVideoCandidateCompareItemUi(
+      storyboardNumericId: row.id,
+      scriptNumericId: row.scriptId,
+      referenceImageUrl: row.mediaSlots?.referenceOrPreviewFrameUrl,
+      selectedVideoUrl: row.mediaSlots?.currentVideoUrl,
+      liveActionReferenceShotUrls: row.liveActionReferenceShotUrls,
+      readinessLine: readinessLine,
+      qualityLine: qualityLine,
+      onSetCurrent: (row.mediaSlots?.currentVideoUrl ?? '').trim().isEmpty
+          ? null
+          : () => onSetCurrent?.call(row),
+      onOpenRework: onOpenProductionWorkspace,
+    );
+  }).toList(growable: false);
+
+  return ShortVideoCandidateComparePanelUi(
+    visible: true,
+    headline: '优先对比 ${items.length} 条分镜的当前版本、参考图与质检状态。',
+    detail: isLiveAction
+        ? '真人模式会额外展示参考镜头与表演/口播约束命中情况，方便先锁住真实感与演员感。'
+        : '先看哪几条分镜缺参考、缺当前视频或命中过多坏例，再决定去制作台局部返工。',
+    items: items,
+  );
+}
+
 ShortVideoNextStepPlan buildShortVideoNextStepPlan({
   required bool isAnimated,
   required ProjectRow? project,
@@ -802,6 +897,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   VoidCallback? onBootstrapPublishDraft,
   VoidCallback? onEnqueuePublishJob,
   VoidCallback? onConfirmSemiAuto,
+  VoidCallback? onSuggestPublishCopy,
+  VoidCallback? onClearPublishSchedule,
 }) {
   if (!projectSelected) {
     return const ShortVideoPublishPanelUi(visible: false);
@@ -837,12 +934,21 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
             ? '导出检查：无阻塞项（**E13**：可从成片链路进入发布准备）。'
             : '导出检查：仍有 ${exportCheck.summary.blockingIssueCount} 条阻塞项；可先补齐字段再投递作业。');
 
-  final matrixLines = <String>[
-    if (matrix != null)
-      for (final row in matrix.platforms)
-        '${row.labelZh} · ${row.platformId} · ${row.automationMode} · 标题≤${row.titleMaxChars}'
-            '${row.requiresCover ? ' · 需封面' : ''}',
-  ];
+  final matrixDomesticLines = <String>[];
+  final matrixOverseasLines = <String>[];
+  if (matrix != null) {
+    for (final row in matrix.platforms) {
+      final line =
+          '${row.labelZh} · ${row.platformId} · ${row.automationMode} · 标题≤${row.titleMaxChars}'
+          ' · 标签≤${row.tagsMax} · 简介≤${row.descriptionMaxChars}'
+          '${row.requiresCover ? ' · 需封面' : ''}';
+      if (row.marketRegion == 'overseas') {
+        matrixOverseasLines.add(line);
+      } else {
+        matrixDomesticLines.add(line);
+      }
+    }
+  }
 
   final prepareLines = <String>[
     if (prepare != null) ...[
@@ -858,7 +964,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       .map(
         (d) =>
             '${d.title.trim().isEmpty ? '（无标题）' : d.title.trim()} · ${d.draftStatus}'
-            '${(d.videoAssetKey ?? '').trim().isEmpty ? ' · 缺 video 引用' : ''}',
+            '${(d.videoAssetKey ?? '').trim().isEmpty ? ' · 缺 video 引用' : ''}'
+            '${(d.scheduledAt ?? '').trim().isEmpty ? '' : ' · 定时 ${d.scheduledAt}'}',
       )
       .toList(growable: false);
 
@@ -883,7 +990,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     visible: true,
     headline: '已连接发布 API：${drafts.length} 张草稿 · ${jobs.length} 条作业。',
     exportGateHint: gate,
-    matrixLines: matrixLines,
+    matrixDomesticLines: matrixDomesticLines,
+    matrixOverseasLines: matrixOverseasLines,
     prepareLines: prepareLines,
     draftLines: draftLines,
     jobLines: jobLines,
@@ -896,5 +1004,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     awaitingSemiAutoJobId: awaitingId,
     onConfirmSemiAuto:
         awaitingId != null ? onConfirmSemiAuto : null,
+    onSuggestPublishCopy: onSuggestPublishCopy,
+    onClearPublishSchedule: onClearPublishSchedule,
   );
 }

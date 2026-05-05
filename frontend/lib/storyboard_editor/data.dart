@@ -90,6 +90,11 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
             (productionRow.duration ?? '').trim().isNotEmpty) {
           _videoDurationCtrl.text = productionRow.duration!.trim();
         }
+        _liveActionReferenceShotsCtrl.text = productionRow
+            .liveActionReferenceShotUrls
+            .join('\n');
+        _liveActionPerformanceNotesCtrl.text =
+            productionRow.liveActionPerformanceNotes ?? '';
       });
     } on RustApiException catch (e) {
       if (!mounted) return;

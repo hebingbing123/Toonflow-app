@@ -140,8 +140,6 @@ pub async fn example_target_market_consumer(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn example_functions_are_well_typed() {
         // These examples demonstrate the type-safe API for consumers

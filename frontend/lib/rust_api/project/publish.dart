@@ -189,6 +189,98 @@ Future<PublishJobRow> confirmSemiAutoPublishJob(
   return PublishJobRow.fromJson(map);
 }
 
+/// `POST …/publish/validate-copy`
+Future<PublishValidateCopyResponse> validatePublishCopy(
+  String accessToken,
+  String projectId, {
+  required Map<String, dynamic> platformCopy,
+  required List<Map<String, dynamic>> targets,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/validate-copy',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'platform_copy': platformCopy,
+          'targets': targets,
+        }),
+      )
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PublishValidateCopyResponse.fromJson(map);
+}
+
+/// `POST …/publish/drafts/{draft_id}/suggest-platform-copy`
+Future<SuggestPlatformCopyResponse> suggestPublishPlatformCopy(
+  String accessToken,
+  String projectId,
+  String draftId, {
+  bool apply = true,
+  String? styleHint,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/$draftId/suggest-platform-copy',
+  );
+  final payload = <String, dynamic>{'apply': apply};
+  if (styleHint != null) {
+    payload['style_hint'] = styleHint;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(payload),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return SuggestPlatformCopyResponse.fromJson(map);
+}
+
+/// `POST …/publish/drafts/batch-schedule`
+Future<BatchSchedulePublishDraftsResponse> batchSchedulePublishDrafts(
+  String accessToken,
+  String projectId, {
+  required List<String> draftIds,
+  String? scheduledAtIso,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/batch-schedule',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'draft_ids': draftIds,
+          'scheduled_at': scheduledAtIso,
+        }),
+      )
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return BatchSchedulePublishDraftsResponse.fromJson(map);
+}
+
 class PublishPlatformMatrixResponse {
   const PublishPlatformMatrixResponse({required this.platforms});
 
@@ -211,16 +303,23 @@ class PublishPlatformCapabilityRow {
   const PublishPlatformCapabilityRow({
     required this.platformId,
     required this.labelZh,
+    required this.marketRegion,
     required this.automationMode,
     required this.titleMaxChars,
+    required this.tagsMax,
+    required this.descriptionMaxChars,
     required this.requiresCover,
     required this.notes,
   });
 
   final String platformId;
   final String labelZh;
+  /// `domestic` | `overseas`
+  final String marketRegion;
   final String automationMode;
   final int titleMaxChars;
+  final int tagsMax;
+  final int descriptionMaxChars;
   final bool requiresCover;
   final String notes;
 
@@ -228,8 +327,11 @@ class PublishPlatformCapabilityRow {
     return PublishPlatformCapabilityRow(
       platformId: json['platform_id'] as String? ?? '',
       labelZh: json['label_zh'] as String? ?? '',
+      marketRegion: json['market_region'] as String? ?? 'domestic',
       automationMode: json['automation_mode'] as String? ?? '',
       titleMaxChars: (json['title_max_chars'] as num?)?.toInt() ?? 0,
+      tagsMax: (json['tags_max'] as num?)?.toInt() ?? 0,
+      descriptionMaxChars: (json['description_max_chars'] as num?)?.toInt() ?? 0,
       requiresCover: json['requires_cover'] as bool? ?? false,
       notes: json['notes'] as String? ?? '',
     );
@@ -248,6 +350,7 @@ class PublishDraftRow {
     this.scriptId,
     this.videoAssetKey,
     this.coverAssetKey,
+    this.scheduledAt,
   });
 
   final String id;
@@ -260,6 +363,7 @@ class PublishDraftRow {
   final String? scriptId;
   final String? videoAssetKey;
   final String? coverAssetKey;
+  final String? scheduledAt;
 
   factory PublishDraftRow.fromJson(Map<String, dynamic> json) {
     final tagRaw = json['tags'] as List<dynamic>? ?? const <dynamic>[];
@@ -274,6 +378,59 @@ class PublishDraftRow {
       scriptId: json['script_id'] as String?,
       videoAssetKey: json['video_asset_key'] as String?,
       coverAssetKey: json['cover_asset_key'] as String?,
+      scheduledAt: json['scheduled_at'] as String?,
+    );
+  }
+}
+
+class PublishValidateCopyResponse {
+  const PublishValidateCopyResponse({required this.ok, required this.issues});
+
+  final bool ok;
+  final List<PublishPrepareIssue> issues;
+
+  factory PublishValidateCopyResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['issues'] as List<dynamic>? ?? const <dynamic>[];
+    return PublishValidateCopyResponse(
+      ok: json['ok'] as bool? ?? false,
+      issues: raw
+          .map((e) => PublishPrepareIssue.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
+class SuggestPlatformCopyResponse {
+  const SuggestPlatformCopyResponse({
+    required this.draftId,
+    required this.platformCopyFragment,
+    required this.source,
+  });
+
+  final String draftId;
+  final Map<String, dynamic> platformCopyFragment;
+  final String source;
+
+  factory SuggestPlatformCopyResponse.fromJson(Map<String, dynamic> json) {
+    final frag = json['platform_copy_fragment'];
+    return SuggestPlatformCopyResponse(
+      draftId: json['draft_id'] as String? ?? '',
+      platformCopyFragment: frag is Map<String, dynamic>
+          ? frag
+          : <String, dynamic>{},
+      source: json['source'] as String? ?? '',
+    );
+  }
+}
+
+class BatchSchedulePublishDraftsResponse {
+  const BatchSchedulePublishDraftsResponse({required this.updated});
+
+  final int updated;
+
+  factory BatchSchedulePublishDraftsResponse.fromJson(Map<String, dynamic> json) {
+    return BatchSchedulePublishDraftsResponse(
+      updated: (json['updated'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -330,12 +487,14 @@ class PublishTargetRow {
     required this.draftId,
     required this.platformId,
     required this.automationMode,
+    required this.serialOrder,
   });
 
   final String id;
   final String draftId;
   final String platformId;
   final String automationMode;
+  final int serialOrder;
 
   factory PublishTargetRow.fromJson(Map<String, dynamic> json) {
     return PublishTargetRow(
@@ -343,6 +502,7 @@ class PublishTargetRow {
       draftId: json['draft_id'] as String? ?? '',
       platformId: json['platform_id'] as String? ?? '',
       automationMode: json['automation_mode'] as String? ?? '',
+      serialOrder: (json['serial_order'] as num?)?.toInt() ?? 0,
     );
   }
 }

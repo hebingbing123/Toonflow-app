@@ -24,7 +24,13 @@ pub(in crate::production::workbench::storyboard) async fn fetch_storyboard_item(
           sb.sb_index,
           sb.metadata #>> '{voiceover,state}' AS voiceover_state,
           sb.metadata #>> '{voiceover,audioUrl}' AS voiceover_audio_url,
-          sb.metadata #>> '{voiceover,error}' AS voiceover_error
+          sb.metadata #>> '{voiceover,error}' AS voiceover_error,
+          ARRAY(
+            SELECT jsonb_array_elements_text(
+              COALESCE(sb.metadata #> '{shortVideo,liveAction,referenceShotUrls}', '[]'::jsonb)
+            )
+          ) AS live_action_reference_shot_urls,
+          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes
         FROM app_storyboard sb
         WHERE sb.id = $1
         "#,
@@ -55,7 +61,13 @@ pub(in crate::production::workbench::storyboard) async fn list_storyboard_items_
           sb.sb_index,
           sb.metadata #>> '{voiceover,state}' AS voiceover_state,
           sb.metadata #>> '{voiceover,audioUrl}' AS voiceover_audio_url,
-          sb.metadata #>> '{voiceover,error}' AS voiceover_error
+          sb.metadata #>> '{voiceover,error}' AS voiceover_error,
+          ARRAY(
+            SELECT jsonb_array_elements_text(
+              COALESCE(sb.metadata #> '{shortVideo,liveAction,referenceShotUrls}', '[]'::jsonb)
+            )
+          ) AS live_action_reference_shot_urls,
+          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes
         FROM app_storyboard sb
         WHERE sb.script_id = $1
         ORDER BY sb.sb_index ASC

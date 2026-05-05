@@ -124,6 +124,48 @@ class ShortVideoExportCheckPanelUi {
   final String detail;
 }
 
+class ShortVideoCandidateCompareItemUi {
+  const ShortVideoCandidateCompareItemUi({
+    required this.storyboardNumericId,
+    this.scriptNumericId,
+    this.referenceImageUrl,
+    this.selectedVideoUrl,
+    this.liveActionReferenceShotUrls = const <String>[],
+    required this.readinessLine,
+    required this.qualityLine,
+    this.onSetCurrent,
+    this.onOpenRework,
+  });
+
+  final int storyboardNumericId;
+  final int? scriptNumericId;
+  final String? referenceImageUrl;
+  final String? selectedVideoUrl;
+  final List<String> liveActionReferenceShotUrls;
+  final String readinessLine;
+  final String qualityLine;
+  final VoidCallback? onSetCurrent;
+  final VoidCallback? onOpenRework;
+}
+
+class ShortVideoCandidateComparePanelUi {
+  const ShortVideoCandidateComparePanelUi({
+    this.visible = false,
+    this.loading = false,
+    this.unavailable = false,
+    this.headline = '',
+    this.detail = '',
+    this.items = const <ShortVideoCandidateCompareItemUi>[],
+  });
+
+  final bool visible;
+  final bool loading;
+  final bool unavailable;
+  final String headline;
+  final String detail;
+  final List<ShortVideoCandidateCompareItemUi> items;
+}
+
 /// **E10–E13**：发布准备清单、平台矩阵、草稿与作业（**`/publish/*`**）。
 class ShortVideoPublishPanelUi {
   const ShortVideoPublishPanelUi({
@@ -133,7 +175,8 @@ class ShortVideoPublishPanelUi {
     this.headline = '',
     this.exportGateHint = '',
     this.detail = '',
-    this.matrixLines = const <String>[],
+    this.matrixDomesticLines = const <String>[],
+    this.matrixOverseasLines = const <String>[],
     this.prepareLines = const <String>[],
     this.draftLines = const <String>[],
     this.jobLines = const <String>[],
@@ -143,6 +186,8 @@ class ShortVideoPublishPanelUi {
     this.onEnqueuePublishJob,
     this.awaitingSemiAutoJobId,
     this.onConfirmSemiAuto,
+    this.onSuggestPublishCopy,
+    this.onClearPublishSchedule,
   });
 
   final bool visible;
@@ -151,7 +196,8 @@ class ShortVideoPublishPanelUi {
   final String headline;
   final String exportGateHint;
   final String detail;
-  final List<String> matrixLines;
+  final List<String> matrixDomesticLines;
+  final List<String> matrixOverseasLines;
   final List<String> prepareLines;
   final List<String> draftLines;
   final List<String> jobLines;
@@ -161,6 +207,8 @@ class ShortVideoPublishPanelUi {
   final VoidCallback? onEnqueuePublishJob;
   final String? awaitingSemiAutoJobId;
   final VoidCallback? onConfirmSemiAuto;
+  final VoidCallback? onSuggestPublishCopy;
+  final VoidCallback? onClearPublishSchedule;
 }
 
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
@@ -254,6 +302,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
     required this.candidateCardUi,
+    required this.candidateComparePanelUi,
     this.onOpenProjectsForCandidateAssets,
     required this.readinessIntro,
     required this.readinessCountLabel,
@@ -320,6 +369,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final ShortVideoCandidateCardUi candidateCardUi;
+  final ShortVideoCandidateComparePanelUi candidateComparePanelUi;
   final VoidCallback? onOpenProjectsForCandidateAssets;
   final String readinessIntro;
   final String readinessCountLabel;
@@ -915,14 +965,30 @@ class ShortVideoSpaceView extends StatelessWidget {
                     publishPanelUi.headline,
                     style: theme.textTheme.bodyMedium?.copyWith(color: outline),
                   ),
-                  if (publishPanelUi.matrixLines.isNotEmpty) ...[
+                  if (publishPanelUi.matrixDomesticLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Text(
-                      '平台能力矩阵（占位约束）',
+                      '国内平台矩阵（占位约束）',
                       style: theme.textTheme.labelSmall?.copyWith(color: outline),
                     ),
                     const SizedBox(height: 6),
-                    for (final line in publishPanelUi.matrixLines)
+                    for (final line in publishPanelUi.matrixDomesticLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+                  if (publishPanelUi.matrixOverseasLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '海外平台矩阵（占位约束）',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in publishPanelUi.matrixOverseasLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
@@ -998,7 +1064,9 @@ class ShortVideoSpaceView extends StatelessWidget {
                   ],
                   if (publishPanelUi.onBootstrapPublishDraft != null ||
                       publishPanelUi.onEnqueuePublishJob != null ||
-                      publishPanelUi.onRefreshPublish != null) ...[
+                      publishPanelUi.onRefreshPublish != null ||
+                      publishPanelUi.onSuggestPublishCopy != null ||
+                      publishPanelUi.onClearPublishSchedule != null) ...[
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
@@ -1041,6 +1109,22 @@ class ShortVideoSpaceView extends StatelessWidget {
                                   )
                                 : const Icon(Icons.cloud_upload_outlined),
                             label: const Text('投递发布作业'),
+                          ),
+                        if (publishPanelUi.onSuggestPublishCopy != null)
+                          OutlinedButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onSuggestPublishCopy,
+                            icon: const Icon(Icons.auto_awesome_outlined),
+                            label: const Text('生成差异化文案'),
+                          ),
+                        if (publishPanelUi.onClearPublishSchedule != null)
+                          OutlinedButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onClearPublishSchedule,
+                            icon: const Icon(Icons.schedule_outlined),
+                            label: const Text('清除定时（允许入队）'),
                           ),
                       ],
                     ),
@@ -1133,6 +1217,39 @@ class ShortVideoSpaceView extends StatelessWidget {
                     onPressed: onOpenProjectsForCandidateAssets,
                     icon: const Icon(Icons.folder_open_outlined),
                     label: const Text('打开项目区维护资产'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+        if (candidateComparePanelUi.visible) ...[
+          const SizedBox(height: 16),
+          _Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('候选对比', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                Text(
+                  candidateComparePanelUi.headline,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  candidateComparePanelUi.detail,
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+                if (!candidateComparePanelUi.loading &&
+                    !candidateComparePanelUi.unavailable &&
+                    candidateComparePanelUi.items.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: candidateComparePanelUi.items
+                        .map((item) => _CandidateCompareCard(item: item))
+                        .toList(growable: false),
                   ),
                 ],
               ],
@@ -1421,6 +1538,101 @@ class _StageCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(detail, style: theme.textTheme.bodySmall),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CandidateCompareCard extends StatelessWidget {
+  const _CandidateCompareCard({required this.item});
+
+  final ShortVideoCandidateCompareItemUi item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final outline = theme.colorScheme.outline;
+    return SizedBox(
+      width: 280,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: outline),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '分镜 #${item.storyboardNumericId}'
+              '${item.scriptNumericId != null ? ' · 脚本 #${item.scriptNumericId}' : ''}',
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(item.readinessLine, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 4),
+            Text(
+              item.qualityLine,
+              style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            ),
+            if ((item.referenceImageUrl ?? '').trim().isNotEmpty) ...[
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.network(
+                  item.referenceImageUrl!,
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Container(
+                    height: 120,
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    alignment: Alignment.center,
+                    child: const Text('参考图不可预览'),
+                  ),
+                ),
+              ),
+            ],
+            if (item.liveActionReferenceShotUrls.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                '真人参考镜头 ${item.liveActionReferenceShotUrls.length} 条',
+                style: theme.textTheme.labelMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item.liveActionReferenceShotUrls.take(2).join('\n'),
+                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              ),
+            ],
+            if ((item.selectedVideoUrl ?? '').trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text('当前视频', style: theme.textTheme.labelMedium),
+              const SizedBox(height: 4),
+              SelectableText(
+                item.selectedVideoUrl!,
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (item.onSetCurrent != null)
+                  FilledButton.tonal(
+                    onPressed: item.onSetCurrent,
+                    child: const Text('设为当前'),
+                  ),
+                if (item.onOpenRework != null)
+                  OutlinedButton(
+                    onPressed: item.onOpenRework,
+                    child: const Text('局部返工'),
+                  ),
+              ],
+            ),
           ],
         ),
       ),

@@ -52,6 +52,8 @@ class ProductionStoryboardItemV1 {
     this.voiceoverState,
     this.voiceoverAudioUrl,
     this.voiceoverError,
+    this.liveActionReferenceShotUrls = const <String>[],
+    this.liveActionPerformanceNotes,
     this.mediaSlots,
   });
 
@@ -68,6 +70,8 @@ class ProductionStoryboardItemV1 {
   final String? voiceoverState;
   final String? voiceoverAudioUrl;
   final String? voiceoverError;
+  final List<String> liveActionReferenceShotUrls;
+  final String? liveActionPerformanceNotes;
   final StoryboardMediaSlotsSummaryV1? mediaSlots;
 
   factory ProductionStoryboardItemV1.fromJson(Map<String, dynamic> json) {
@@ -91,6 +95,12 @@ class ProductionStoryboardItemV1 {
       voiceoverState: json['voiceoverState'] as String?,
       voiceoverAudioUrl: json['voiceoverAudioUrl'] as String?,
       voiceoverError: json['voiceoverError'] as String?,
+      liveActionReferenceShotUrls:
+          (json['liveActionReferenceShotUrls'] as List<dynamic>? ?? const [])
+              .map((e) => e.toString())
+              .where((value) => value.trim().isNotEmpty)
+              .toList(growable: false),
+      liveActionPerformanceNotes: json['liveActionPerformanceNotes'] as String?,
       mediaSlots: json['mediaSlots'] == null
           ? null
           : StoryboardMediaSlotsSummaryV1.fromJson(

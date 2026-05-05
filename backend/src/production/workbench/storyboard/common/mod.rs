@@ -6,8 +6,8 @@ mod types;
 
 pub(super) use db::{
     fetch_storyboard_item, fetch_storyboard_preview_data, insert_storyboards_with_next_numeric_ids,
-    list_storyboard_items_by_script, remove_storyboard_frame, update_storyboard_image_url,
-    update_storyboard_info,
+    list_storyboard_items_by_script, remove_storyboard_frame, update_live_action_reference,
+    update_storyboard_image_url, update_storyboard_info,
 };
 pub(super) use normalize::{
     normalize_storyboard_duration, normalize_storyboard_image_url, normalize_storyboard_prompt,
@@ -122,6 +122,8 @@ mod tests {
             voiceover_state: None,
             voiceover_audio_url: None,
             voiceover_error: None,
+            live_action_reference_shot_urls: Vec::new(),
+            live_action_performance_notes: None,
             media_slots: None,
         }];
 

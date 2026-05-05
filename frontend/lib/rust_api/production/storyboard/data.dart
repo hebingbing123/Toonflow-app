@@ -170,6 +170,72 @@ Future<int> postStoryboardRemoveFrameV1(
   return res.statusCode;
 }
 
+class UpdateStoryboardLiveActionReferenceResponseV1 {
+  const UpdateStoryboardLiveActionReferenceResponseV1({
+    required this.storyboardId,
+    required this.referenceShotUrls,
+    this.performanceNotes,
+    required this.message,
+  });
+
+  final int storyboardId;
+  final List<String> referenceShotUrls;
+  final String? performanceNotes;
+  final String message;
+
+  factory UpdateStoryboardLiveActionReferenceResponseV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return UpdateStoryboardLiveActionReferenceResponseV1(
+      storyboardId: (json['storyboardId'] as num).toInt(),
+      referenceShotUrls:
+          (json['referenceShotUrls'] as List<dynamic>? ?? const [])
+              .map((e) => e.toString())
+              .toList(growable: false),
+      performanceNotes: json['performanceNotes'] as String?,
+      message: json['message'] as String? ?? '',
+    );
+  }
+}
+
+Future<UpdateStoryboardLiveActionReferenceResponseV1>
+postStoryboardUpdateLiveActionReferenceV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required int storyboardId,
+  required List<String> referenceShotUrls,
+  String? performanceNotes,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/storyboard/update-live-action-reference',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'storyboardId': storyboardId,
+          'referenceShotUrls': referenceShotUrls,
+          'performanceNotes': performanceNotes,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return UpdateStoryboardLiveActionReferenceResponseV1.fromJson(map);
+}
+
 /// `POST /api/v1/production/get-storyboard-data` — OpenAPI `postProductionGetStoryboardDataV1`.
 Future<ProductionGetProductionDataResponseV1> postProductionGetStoryboardDataV1(
   String accessToken, {

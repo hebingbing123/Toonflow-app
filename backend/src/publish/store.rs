@@ -1,17 +1,46 @@
 //! Postgres access for publish tables.
 
-use serde_json::json;
+use chrono::{DateTime, Utc};
+use serde_json::{json, Value};
 use sqlx::types::Json;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 use crate::error::ApiError;
 
+use super::platform_registry::sandbox_publish_receipt;
 use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, PatchPublishDraftBody,
     PatchPublishProfileBody, PublishDraftRow, PublishJobRow, PublishProfileRow, PublishTargetInput,
     PublishTargetRow,
 };
+
+fn merge_platform_block(existing: Option<&Value>, incoming: &Value) -> Value {
+    match incoming {
+        Value::Object(in_map) => {
+            let mut base = existing
+                .and_then(|v| v.as_object())
+                .cloned()
+                .unwrap_or_default();
+            for (k, v) in in_map {
+                base.insert(k.clone(), v.clone());
+            }
+            Value::Object(base)
+        }
+        _ => incoming.clone(),
+    }
+}
+
+fn merge_publish_platform_copy(cur: &Value, fragment: &Value) -> Value {
+    let mut root = cur.as_object().cloned().unwrap_or_default();
+    if let Some(frag_obj) = fragment.as_object() {
+        for (pid, incoming) in frag_obj {
+            let merged = merge_platform_block(root.get(pid), incoming);
+            root.insert(pid.clone(), merged);
+        }
+    }
+    Value::Object(root)
+}
 
 pub(crate) async fn list_profiles(
     pool: &PgPool,
@@ -353,16 +382,72 @@ pub(crate) async fn delete_draft(
     Ok(res.rows_affected() > 0)
 }
 
+pub(crate) async fn merge_draft_platform_copy(
+    pool: &PgPool,
+    project_id: Uuid,
+    draft_id: Uuid,
+    fragment: &Value,
+) -> Result<Option<PublishDraftRow>, ApiError> {
+    let Some(cur) = fetch_draft(pool, project_id, draft_id).await? else {
+        return Ok(None);
+    };
+    let merged = merge_publish_platform_copy(&cur.platform_copy.0, fragment);
+    let updated = sqlx::query_as::<_, PublishDraftRow>(
+        r#"
+        UPDATE app_publish_draft SET
+          platform_copy = $3,
+          updated_at = NOW()
+        WHERE id = $1 AND project_id = $2
+        RETURNING id, project_id, profile_id, script_id, video_asset_key, cover_asset_key,
+                  title, description, tags, platform_copy, scheduled_at, draft_status,
+                  metadata, created_at, updated_at
+        "#,
+    )
+    .bind(draft_id)
+    .bind(project_id)
+    .bind(Json(merged))
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(updated)
+}
+
+pub(crate) async fn batch_set_draft_scheduled_at(
+    pool: &PgPool,
+    project_id: Uuid,
+    draft_ids: &[Uuid],
+    scheduled_at: Option<DateTime<Utc>>,
+) -> Result<i64, ApiError> {
+    if draft_ids.is_empty() {
+        return Ok(0);
+    }
+    let res = sqlx::query(
+        r#"
+        UPDATE app_publish_draft SET
+          scheduled_at = $3,
+          updated_at = NOW()
+        WHERE project_id = $1 AND id = ANY($2::uuid[])
+        "#,
+    )
+    .bind(project_id)
+    .bind(draft_ids)
+    .bind(scheduled_at)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(res.rows_affected() as i64)
+}
+
 pub(crate) async fn list_targets(
     pool: &PgPool,
     draft_id: Uuid,
 ) -> Result<Vec<PublishTargetRow>, ApiError> {
     sqlx::query_as::<_, PublishTargetRow>(
         r#"
-        SELECT id, draft_id, platform_id, automation_mode, extra, created_at, updated_at
+        SELECT id, draft_id, platform_id, automation_mode, serial_order, extra, created_at, updated_at
         FROM app_publish_target
         WHERE draft_id = $1
-        ORDER BY platform_id ASC
+        ORDER BY serial_order ASC, platform_id ASC
         "#,
     )
     .bind(draft_id)
@@ -386,14 +471,15 @@ pub(crate) async fn replace_targets_tx(
     for t in targets {
         let row = sqlx::query_as::<_, PublishTargetRow>(
             r#"
-            INSERT INTO app_publish_target (draft_id, platform_id, automation_mode, extra)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, draft_id, platform_id, automation_mode, extra, created_at, updated_at
+            INSERT INTO app_publish_target (draft_id, platform_id, automation_mode, serial_order, extra)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id, draft_id, platform_id, automation_mode, serial_order, extra, created_at, updated_at
             "#,
         )
         .bind(draft_id)
         .bind(t.platform_id.trim())
         .bind(t.automation_mode.trim())
+        .bind(t.serial_order)
         .bind(Json(t.extra.clone()))
         .fetch_one(&mut **tx)
         .await
@@ -589,13 +675,16 @@ pub(crate) async fn claim_next_publish_job(
     let row = sqlx::query_as::<_, PublishJobRow>(
         r#"
         WITH cte AS (
-          SELECT id FROM app_publish_job
+          SELECT j.id
+          FROM app_publish_job AS j
+          INNER JOIN app_publish_draft AS d ON d.id = j.draft_id
           WHERE (
-            status IN ('queued', 'retrying')
-            OR (status = 'uploading' AND semi_auto_ack_at IS NOT NULL)
+            j.status IN ('queued', 'retrying')
+            OR (j.status = 'uploading' AND j.semi_auto_ack_at IS NOT NULL)
           )
-          ORDER BY created_at ASC
-          FOR UPDATE SKIP LOCKED
+          AND (d.scheduled_at IS NULL OR d.scheduled_at <= NOW())
+          ORDER BY j.created_at ASC
+          FOR UPDATE OF j SKIP LOCKED
           LIMIT 1
         )
         UPDATE app_publish_job AS j
@@ -687,7 +776,11 @@ pub(crate) async fn insert_stub_success_attempts(
         .bind(job_id)
         .bind(t.id)
         .bind(i as i32 + 1)
-        .bind(Json(json!({"stub": true, "platform_id": t.platform_id})))
+        .bind(Json(json!({
+            "stub": true,
+            "platform_id": t.platform_id,
+            "receipt": sandbox_publish_receipt(job_id, &t.platform_id),
+        })))
         .execute(pool)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

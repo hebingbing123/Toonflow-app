@@ -13,6 +13,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::access::{profile_belongs_to_project, require_project_owned, script_belongs_to_project};
+use super::platform_registry::capability_matrix;
 use super::state_machine::{can_cancel, can_confirm_semi_auto, can_retry};
 use super::store::{
     cancel_job_if_non_terminal, confirm_semi_auto_job, delete_draft, delete_profile, fetch_draft,
@@ -23,10 +24,10 @@ use super::store::{
 use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, PatchPublishDraftBody,
     PatchPublishProfileBody, PublishDraftResponse, PublishJobResponse,
-    PublishPlatformCapabilityRow, PublishPlatformMatrixResponse, PublishPrepareCheckResponse,
-    PublishProfileResponse, PublishTargetResponse, UpsertPublishTargetsBody,
+    PublishPlatformMatrixResponse, PublishPrepareCheckResponse, PublishProfileResponse,
+    PublishTargetResponse, UpsertPublishTargetsBody,
 };
-use super::validation::{prepare_check_for_draft, validate_automation_mode, PLATFORM_SPECS};
+use super::validation::{prepare_check_for_draft, validate_automation_mode};
 use super::{draft_from_row, job_from_row, profile_from_row, target_from_row};
 
 pub fn router() -> Router<AppState> {
@@ -87,17 +88,7 @@ pub fn router() -> Router<AppState> {
 
 fn platform_matrix_body() -> PublishPlatformMatrixResponse {
     PublishPlatformMatrixResponse {
-        platforms: PLATFORM_SPECS
-            .iter()
-            .map(|s| PublishPlatformCapabilityRow {
-                platform_id: s.platform_id.to_string(),
-                label_zh: s.label_zh.to_string(),
-                automation_mode: s.automation_default.to_string(),
-                title_max_chars: s.title_max_chars,
-                requires_cover: s.requires_cover,
-                notes: s.notes.to_string(),
-            })
-            .collect(),
+        platforms: capability_matrix(),
     }
 }
 

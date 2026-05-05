@@ -79,6 +79,8 @@ mod tests {
             voiceover_state: Some("ready".into()),
             voiceover_audio_url: Some("https://x/a.mp3".into()),
             voiceover_error: None,
+            live_action_reference_shot_urls: Vec::new(),
+            live_action_performance_notes: None,
             media_slots: None,
         }
     }

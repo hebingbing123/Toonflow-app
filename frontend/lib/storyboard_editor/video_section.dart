@@ -12,6 +12,8 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.videoPromptCtrl,
     required this.negativeVideoPromptCtrl,
     required this.videoDurationCtrl,
+    required this.liveActionReferenceShotsCtrl,
+    required this.liveActionPerformanceNotesCtrl,
     required this.resolution,
     required this.mode,
     required this.audio,
@@ -32,6 +34,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onDeleteTrack,
     required this.onGenerateVideoPrompt,
     required this.onGenerateVoiceover,
+    required this.onSaveLiveActionReference,
     required this.onOpenPatchRegeneration,
     required this.onApplyPromptRepairs,
     required this.onRefreshVideoData,
@@ -53,6 +56,8 @@ class _StoryboardVideoSection extends StatelessWidget {
   final TextEditingController videoPromptCtrl;
   final TextEditingController negativeVideoPromptCtrl;
   final TextEditingController videoDurationCtrl;
+  final TextEditingController liveActionReferenceShotsCtrl;
+  final TextEditingController liveActionPerformanceNotesCtrl;
   final String resolution;
   final String mode;
   final bool audio;
@@ -73,6 +78,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final VoidCallback onDeleteTrack;
   final VoidCallback onGenerateVideoPrompt;
   final VoidCallback onGenerateVoiceover;
+  final VoidCallback onSaveLiveActionReference;
   final VoidCallback onOpenPatchRegeneration;
   final VoidCallback onApplyPromptRepairs;
   final VoidCallback onRefreshVideoData;
@@ -212,6 +218,36 @@ class _StoryboardVideoSection extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: liveActionReferenceShotsCtrl,
+          minLines: 2,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: '真人参考镜头 URL（每行一条）',
+            helperText: '真人模式会把这组参考镜头纳入 readiness；动漫模式可留空。',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: liveActionPerformanceNotesCtrl,
+          minLines: 2,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: '表演 / 口播约束',
+            helperText: '例如停顿、情绪强度、镜头真实感、口型同步重点。',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: saving ? null : onSaveLiveActionReference,
+            child: const Text('保存真人参考与表演约束'),
           ),
         ),
         const SizedBox(height: 8),
