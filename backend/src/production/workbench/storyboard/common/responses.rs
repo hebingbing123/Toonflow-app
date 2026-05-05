@@ -1,13 +1,15 @@
 use crate::error::ApiError;
 use crate::production::workbench::storyboard_ops::{
-    ProductionGetProductionDataResponse, ProductionStoryboardItem,
+    hydrate_production_storyboard_items, ProductionGetProductionDataResponse,
+    ProductionStoryboardItem,
 };
 
 use super::types::{DownPreviewImageResponse, PreviewImageResponse, StoryboardPreviewData};
 
 pub(in crate::production::workbench::storyboard) fn build_storyboard_data_response(
-    data: Vec<ProductionStoryboardItem>,
+    mut data: Vec<ProductionStoryboardItem>,
 ) -> ProductionGetProductionDataResponse {
+    hydrate_production_storyboard_items(&mut data);
     ProductionGetProductionDataResponse { data }
 }
 

@@ -122,6 +122,7 @@ mod tests {
             voiceover_state: None,
             voiceover_audio_url: None,
             voiceover_error: None,
+            media_slots: None,
         }];
 
         let response = build_storyboard_data_response(rows);

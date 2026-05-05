@@ -6,6 +6,7 @@ use axum::{
 };
 
 use super::common::{require_owned_normalized_storyboards_access, validate_storyboard_ids};
+use super::media_slots::hydrate_production_storyboard_items;
 use super::types::{
     ProductionGetProductionDataResponse, ProductionStoryboardItem, StoryboardIdListBody,
 };
@@ -42,7 +43,7 @@ pub(in crate::production) async fn post_get_production_data(
         require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
             .await?;
 
-    let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
+    let mut rows = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
         SELECT
           sb.numeric_id AS id,
@@ -54,7 +55,10 @@ pub(in crate::production) async fn post_get_production_data(
           sb.state,
           sb.track_id,
           sb.flow_id,
-          sb.sb_index
+          sb.sb_index,
+          sb.metadata #>> '{voiceover,state}' AS voiceover_state,
+          sb.metadata #>> '{voiceover,audioUrl}' AS voiceover_audio_url,
+          sb.metadata #>> '{voiceover,error}' AS voiceover_error
         FROM app_storyboard sb
         WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])
@@ -66,6 +70,8 @@ pub(in crate::production) async fn post_get_production_data(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    hydrate_production_storyboard_items(&mut rows);
 
     Ok(JsonResponse(ProductionGetProductionDataResponse { data: rows }).into_response())
 }

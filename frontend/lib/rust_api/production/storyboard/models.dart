@@ -1,3 +1,41 @@
+/// OpenAPI **`StoryboardMediaSlotsSummary`** (`mediaSlots` on **`ProductionStoryboardItem`**).
+class StoryboardMediaSlotsSummaryV1 {
+  const StoryboardMediaSlotsSummaryV1({
+    required this.schemaVersion,
+    this.currentVideoUrl,
+    this.referenceOrPreviewFrameUrl,
+    this.legacyAmbiguousMediaUrl,
+    this.voiceoverAudioUrl,
+    this.voiceoverState,
+    this.exportArtifactUrl,
+    required this.candidateVideoSourcesHint,
+  });
+
+  /// Schema **`1`** for this slot taxonomy.
+  final int schemaVersion;
+  final String? currentVideoUrl;
+  final String? referenceOrPreviewFrameUrl;
+  final String? legacyAmbiguousMediaUrl;
+  final String? voiceoverAudioUrl;
+  final String? voiceoverState;
+  final String? exportArtifactUrl;
+  final String candidateVideoSourcesHint;
+
+  factory StoryboardMediaSlotsSummaryV1.fromJson(Map<String, dynamic> json) {
+    return StoryboardMediaSlotsSummaryV1(
+      schemaVersion: (json['schemaVersion'] as num).toInt(),
+      currentVideoUrl: json['currentVideoUrl'] as String?,
+      referenceOrPreviewFrameUrl:
+          json['referenceOrPreviewFrameUrl'] as String?,
+      legacyAmbiguousMediaUrl: json['legacyAmbiguousMediaUrl'] as String?,
+      voiceoverAudioUrl: json['voiceoverAudioUrl'] as String?,
+      voiceoverState: json['voiceoverState'] as String?,
+      exportArtifactUrl: json['exportArtifactUrl'] as String?,
+      candidateVideoSourcesHint: json['candidateVideoSourcesHint'] as String,
+    );
+  }
+}
+
 /// OpenAPI **`ProductionStoryboardItem`**.
 class ProductionStoryboardItemV1 {
   const ProductionStoryboardItemV1({
@@ -14,6 +52,7 @@ class ProductionStoryboardItemV1 {
     this.voiceoverState,
     this.voiceoverAudioUrl,
     this.voiceoverError,
+    this.mediaSlots,
   });
 
   final int id;
@@ -29,6 +68,7 @@ class ProductionStoryboardItemV1 {
   final String? voiceoverState;
   final String? voiceoverAudioUrl;
   final String? voiceoverError;
+  final StoryboardMediaSlotsSummaryV1? mediaSlots;
 
   factory ProductionStoryboardItemV1.fromJson(Map<String, dynamic> json) {
     return ProductionStoryboardItemV1(
@@ -51,6 +91,11 @@ class ProductionStoryboardItemV1 {
       voiceoverState: json['voiceoverState'] as String?,
       voiceoverAudioUrl: json['voiceoverAudioUrl'] as String?,
       voiceoverError: json['voiceoverError'] as String?,
+      mediaSlots: json['mediaSlots'] == null
+          ? null
+          : StoryboardMediaSlotsSummaryV1.fromJson(
+              json['mediaSlots'] as Map<String, dynamic>,
+            ),
     );
   }
 }

@@ -19,6 +19,24 @@ void main() {
     expect(item.duration, '5');
   });
 
+  test('ProductionStoryboardItemV1 parses mediaSlots taxonomy', () {
+    final item = ProductionStoryboardItemV1.fromJson(const {
+      'id': 2,
+      'url': 'https://example.com/shots/1.mp4',
+      'mediaSlots': {
+        'schemaVersion': 1,
+        'currentVideoUrl': 'https://example.com/shots/1.mp4',
+        'candidateVideoSourcesHint': 'workbench aggregates',
+      },
+    });
+    expect(item.mediaSlots!.schemaVersion, 1);
+    expect(item.mediaSlots!.currentVideoUrl, 'https://example.com/shots/1.mp4');
+    expect(
+      item.mediaSlots!.candidateVideoSourcesHint,
+      'workbench aggregates',
+    );
+  });
+
   test('buildStoryboardExportBundleSummary reports sidecars and duration', () {
     final summary = buildStoryboardExportBundleSummary(
       selectedIds: const [9, 7, 9],

@@ -2,6 +2,7 @@ pub(crate) mod batch_generate;
 mod common;
 pub(crate) mod export;
 mod export_source;
+pub(crate) mod media_slots;
 pub(crate) mod query;
 pub(crate) mod shot_text;
 mod types;
@@ -13,6 +14,7 @@ pub(crate) use common::require_owned_normalized_storyboards_scope;
 #[allow(unused_imports)]
 pub(crate) use export::__path_post_export_image;
 pub(in crate::production) use export::post_export_image;
+pub(crate) use media_slots::hydrate_production_storyboard_items;
 #[allow(unused_imports)]
 pub(crate) use query::{__path_post_get_production_data, __path_post_storyboard_polling_image};
 pub(in crate::production) use query::{post_get_production_data, post_storyboard_polling_image};

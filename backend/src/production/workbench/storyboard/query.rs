@@ -4,7 +4,10 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
+use super::super::storyboard_ops::{
+    hydrate_production_storyboard_items, ProductionGetProductionDataResponse,
+    ProductionStoryboardItem,
+};
 use super::common::{
     build_storyboard_data_response, fetch_storyboard_item, list_storyboard_items_by_script,
     StoryboardScopeBody, StoryboardScriptScopeBody,
@@ -46,7 +49,8 @@ pub(in crate::production) async fn post_storyboard_get_data(
         body.storyboard_id,
     )
     .await?;
-    let row = fetch_storyboard_item(pool, sb_uuid).await?;
+    let mut row = fetch_storyboard_item(pool, sb_uuid).await?;
+    hydrate_production_storyboard_items(std::slice::from_mut(&mut row));
 
     Ok(JsonResponse(row))
 }

@@ -1,6 +1,31 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
+/// Read-only **`mediaSlots`** on API responses clarifies legacy storyboard **`url`** / DB **`file_path`**
+/// (single column) versus voiceover (**`metadata.voiceover`**) versus **candidate/export** aggregates.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct StoryboardMediaSlotsSummary {
+    pub(crate) schema_version: i32,
+    /// **`url`** when it looks like a video file.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) current_video_url: Option<String>,
+    /// **`url`** when it looks like a static image (**reference frame / preview / keyframe** share this legacy slot until split).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) reference_or_preview_frame_url: Option<String>,
+    /// Non-empty **`url`** with unknown suffix — do not infer image vs video.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) legacy_ambiguous_media_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) voiceover_audio_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) voiceover_state: Option<String>,
+    /// Reserved (`None` until a dedicated metadata key lands).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) export_artifact_url: Option<String>,
+    pub(crate) candidate_video_sources_hint: &'static str,
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -31,6 +56,9 @@ pub(crate) struct ProductionStoryboardItem {
     pub(crate) voiceover_state: Option<String>,
     pub(crate) voiceover_audio_url: Option<String>,
     pub(crate) voiceover_error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[sqlx(skip)]
+    pub(crate) media_slots: Option<StoryboardMediaSlotsSummary>,
 }
 
 #[derive(Debug, Serialize)]
@@ -171,6 +199,7 @@ mod tests {
             voiceover_state: Some("completed".to_string()),
             voiceover_audio_url: Some("/api/v1/jobs/audio/file".to_string()),
             voiceover_error: None,
+            media_slots: None,
         };
         let json = serde_json::to_string(&item).unwrap();
         assert!(json.contains("\"id\":1"));
