@@ -1,8 +1,10 @@
-# Publish Copy Cache (J.1 & J.2)
+# Publish Copy Cache (J.1 & J.2) and Usage Logging (J.3)
 
 ## Overview
 
 The publish copy cache reduces redundant LLM calls by caching publish copy generation results based on input hash. When the same draft content and target platforms are requested again, the cached result is returned instead of making a new LLM call.
+
+All publish copy generation calls are logged to `app_llm_usage_log` for cost tracking and optimization analysis (J.3).
 
 ## Incremental Mode (J.2)
 
@@ -109,4 +111,55 @@ Unit tests verify:
 
 - J.1: Input hash cache for publish copy generation (completed)
 - J.2: Incremental publish copy generation for changed platforms only (completed)
-- J.3: LLM usage logging for publish copy calls
+- J.3: LLM usage logging for publish copy calls (completed)
+
+## LLM Usage Logging (J.3)
+
+All publish copy generation calls are logged to `app_llm_usage_log` with the following information:
+
+### Logged Metadata
+
+- **user_id**: User making the request
+- **call_type**: `"publish_copy_generation"`
+- **model_name**: LLM model used (e.g., "gpt-4o") or "fallback" for template-based generation
+- **provider**: LLM provider (e.g., "openai", "anthropic") if applicable
+- **Token counts**: `prompt_tokens`, `completion_tokens`, `total_tokens` (from LLM API response)
+- **duration_ms**: Total call duration including cache lookup and LLM call
+- **success**: `true` for successful generation, `false` for errors
+- **error_message**: Error details if generation failed
+
+### Context in Meta Field
+
+The `meta` JSONB field includes:
+- `draft_id`: UUID of the publish draft
+- `project_uuid`: UUID of the project (note: `project_id` field is NULL as publish uses UUID-based projects)
+- `source`: Generation source ("llm", "cache", "incremental", or "fallback")
+- `cache_hit`: Boolean indicating if result came from cache
+- `platforms_generated`: Array of platform IDs that were generated (empty for incremental with no changes)
+- `style_hint`: Optional style hint provided by user
+
+### Usage Scenarios
+
+1. **LLM Generation**: Full token usage logged with `source: "llm"`
+2. **Cache Hit**: No token usage, fast response with `source: "cache"` and `cache_hit: true`
+3. **Incremental (No Changes)**: No token usage, instant return with `source: "incremental"`
+4. **Fallback**: No token usage, template-based with `source: "fallback"` and `model_name: "fallback"`
+5. **Error**: No token usage, error details logged with `success: false`
+
+### Cost Analysis
+
+The logged data enables:
+- Token consumption tracking per user/project
+- Cost estimation when pricing data is available
+- Cache effectiveness analysis (cache hits vs. LLM calls)
+- Incremental mode savings measurement
+- Error rate monitoring
+
+### Privacy
+
+The logging does not include:
+- Draft content (title, description, tags)
+- Generated platform copy
+- User prompts or LLM responses
+
+Only metadata and token counts are logged for cost tracking purposes.

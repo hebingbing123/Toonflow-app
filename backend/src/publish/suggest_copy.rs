@@ -1,18 +1,31 @@
 //! **F1** — 多平台差异化文案建议（LLM 可用时调用；否则降级模板填充）。
 //! **J.1** — Input hash cache to reduce redundant LLM calls.
 //! **J.2** — Incremental copy generation for changed platforms only.
+//! **J.3** — LLM usage logging for publish copy calls.
 
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
 use crate::error::ApiError;
 use crate::llm::chat_completion_with_usage;
+use crate::llm::openai::TokenUsage;
 use crate::publish::platform_registry::spec_for_platform;
 use crate::publish::types::PublishTargetRow;
 use crate::state::AppState;
 
 use super::copy_cache::{compute_input_hash, lookup_cache, store_cache, update_cache_hit};
 use super::types::PublishDraftRow;
+
+/// Result of platform copy generation including usage metadata.
+#[derive(Debug, Clone)]
+pub struct PlatformCopyResult {
+    pub fragment: Value,
+    pub source: &'static str,
+    pub usage: Option<TokenUsage>,
+    pub duration_ms: Option<i64>,
+    pub cache_hit: bool,
+    pub platforms_generated: Vec<String>,
+}
 
 fn truncate_chars(s: &str, max_chars: usize) -> String {
     if s.chars().count() <= max_chars {
@@ -114,7 +127,9 @@ pub(crate) async fn suggest_platform_copy_fragment(
     draft: &PublishDraftRow,
     targets: &[PublishTargetRow],
     style_hint: Option<&str>,
-) -> Result<(Value, &'static str), ApiError> {
+) -> Result<PlatformCopyResult, ApiError> {
+    let start_time = std::time::Instant::now();
+
     if targets.is_empty() {
         return Err(ApiError::BadRequest(
             "no publish targets — add targets before generating copy".into(),
@@ -136,7 +151,15 @@ pub(crate) async fn suggest_platform_copy_fragment(
                 }
             }
         }
-        return Ok((Value::Object(result), "incremental"));
+        let duration_ms = start_time.elapsed().as_millis() as i64;
+        return Ok(PlatformCopyResult {
+            fragment: Value::Object(result),
+            source: "incremental",
+            usage: None,
+            duration_ms: Some(duration_ms),
+            cache_hit: false,
+            platforms_generated: vec![],
+        });
     }
 
     // Filter targets to only include added platforms for generation
@@ -178,7 +201,15 @@ pub(crate) async fn suggest_platform_copy_fragment(
             }
         }
 
-        return Ok((Value::Object(result), "cache"));
+        let duration_ms = start_time.elapsed().as_millis() as i64;
+        return Ok(PlatformCopyResult {
+            fragment: Value::Object(result),
+            source: "cache",
+            usage: None,
+            duration_ms: Some(duration_ms),
+            cache_hit: true,
+            platforms_generated: added.clone(),
+        });
     }
 
     let Some(cfg) = state.llm.as_ref() else {
@@ -201,7 +232,15 @@ pub(crate) async fn suggest_platform_copy_fragment(
             }
         }
 
-        return Ok((Value::Object(result), "fallback"));
+        let duration_ms = start_time.elapsed().as_millis() as i64;
+        return Ok(PlatformCopyResult {
+            fragment: Value::Object(result),
+            source: "fallback",
+            usage: None,
+            duration_ms: Some(duration_ms),
+            cache_hit: false,
+            platforms_generated: added.clone(),
+        });
     };
 
     let mut spec_lines = Vec::new();
@@ -272,7 +311,15 @@ Respond with JSON only."#,
         }
     }
 
-    Ok((Value::Object(result), "llm"))
+    let duration_ms = start_time.elapsed().as_millis() as i64;
+    Ok(PlatformCopyResult {
+        fragment: Value::Object(result),
+        source: "llm",
+        usage: res.usage,
+        duration_ms: Some(duration_ms),
+        cache_hit: false,
+        platforms_generated: added.clone(),
+    })
 }
 
 #[cfg(test)]
@@ -407,5 +454,75 @@ mod tests {
         assert_eq!(douyin_copy["title"], "Test Title");
         assert_eq!(douyin_copy["description"], "Test Description");
         assert_eq!(douyin_copy["tags"].as_array().unwrap().len(), 2);
+    }
+
+    #[test]
+    fn test_platform_copy_result_structure() {
+        let fragment = json!({
+            "douyin": {"title": "Test", "description": "Test"},
+        });
+        let usage = TokenUsage {
+            prompt_tokens: 100,
+            completion_tokens: 50,
+            total_tokens: 150,
+        };
+
+        let result = PlatformCopyResult {
+            fragment: fragment.clone(),
+            source: "llm",
+            usage: Some(usage.clone()),
+            duration_ms: Some(1500),
+            cache_hit: false,
+            platforms_generated: vec!["douyin".to_string()],
+        };
+
+        assert_eq!(result.source, "llm");
+        assert_eq!(result.cache_hit, false);
+        assert_eq!(result.platforms_generated.len(), 1);
+        assert_eq!(result.duration_ms, Some(1500));
+        assert!(result.usage.is_some());
+        assert_eq!(result.usage.unwrap().total_tokens, 150);
+    }
+
+    #[test]
+    fn test_platform_copy_result_incremental() {
+        let fragment = json!({
+            "douyin": {"title": "Test", "description": "Test"},
+        });
+
+        let result = PlatformCopyResult {
+            fragment,
+            source: "incremental",
+            usage: None,
+            duration_ms: Some(10),
+            cache_hit: false,
+            platforms_generated: vec![],
+        };
+
+        assert_eq!(result.source, "incremental");
+        assert_eq!(result.cache_hit, false);
+        assert_eq!(result.platforms_generated.len(), 0);
+        assert!(result.usage.is_none());
+    }
+
+    #[test]
+    fn test_platform_copy_result_cache_hit() {
+        let fragment = json!({
+            "xiaohongshu": {"title": "Cached", "description": "From cache"},
+        });
+
+        let result = PlatformCopyResult {
+            fragment,
+            source: "cache",
+            usage: None,
+            duration_ms: Some(50),
+            cache_hit: true,
+            platforms_generated: vec!["xiaohongshu".to_string()],
+        };
+
+        assert_eq!(result.source, "cache");
+        assert_eq!(result.cache_hit, true);
+        assert_eq!(result.platforms_generated.len(), 1);
+        assert!(result.usage.is_none());
     }
 }
