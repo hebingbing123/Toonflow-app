@@ -39,6 +39,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   String _bgmStrategy = '';
   bool _loadingProjects = false;
   bool _loadingProjectOverview = false;
+  bool _batchCandidateBusy = false;
   bool _creatingProject = false;
   bool _savingProjectConfig = false;
   List<ProjectRow> _projects = const <ProjectRow>[];
@@ -202,6 +203,69 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       return trimmed;
     }
     return '9:16';
+  }
+
+  Future<void> _runBatchCandidateClips() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    final stats = _projectStats;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    if ((stats?.storyboardCount ?? 0) <= 0) {
+      setState(() {
+        _projectConfigLine = '还没有分镜，无法批量生成候选成片。';
+      });
+      return;
+    }
+    setState(() {
+      _batchCandidateBusy = true;
+      _projectConfigLine = null;
+    });
+    try {
+      final detail = await fetchProjectByProjectId(token, project.id);
+      if (!mounted) {
+        return;
+      }
+      if (detail.scripts.isEmpty) {
+        setState(() {
+          _batchCandidateBusy = false;
+          _projectConfigLine = '项目下没有剧本行，请先在项目区创建剧本后再试。';
+        });
+        return;
+      }
+      final scriptNumericId = detail.scripts.first.numericId;
+      final res = await postProductionWorkbenchBatchGenerateCandidateClipsV1(
+        token,
+        projectId: project.numericId,
+        scriptId: scriptNumericId,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _batchCandidateBusy = false;
+        _projectConfigLine =
+            '已排队 ${res.generation.total} 条候选视频任务（轨道 #${res.appliedDefaults.trackId}，${res.appliedDefaults.resolution}，${res.appliedDefaults.duration}s）；跳过 ${res.skipped.length} 镜。';
+      });
+      await _loadProjectOverview();
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _batchCandidateBusy = false;
+        _projectConfigLine = '批量候选成片失败：${e.statusCode ?? '-'}';
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _batchCandidateBusy = false;
+        _projectConfigLine = '批量候选成片失败：$e';
+      });
+    }
   }
 
   Future<void> _loadProjectOverview() async {
@@ -702,6 +766,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
       assetsOverview: _projectAssetsOverview,
+      onBatchGenerateCandidateClips:
+          project != null && (_projectStats?.storyboardCount ?? 0) > 0
+              ? _runBatchCandidateClips
+              : null,
+      batchGenerateCandidateClipsBusy: _batchCandidateBusy,
     );
     final nextStepPlan = buildShortVideoNextStepPlan(
       isAnimated: _isAnimated,

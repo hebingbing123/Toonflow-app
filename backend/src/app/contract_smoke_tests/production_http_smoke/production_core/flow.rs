@@ -28,6 +28,15 @@ async fn production_workbench_generate_video_requires_database_with_jwt() {
 }
 
 #[tokio::test]
+async fn production_workbench_batch_generate_candidate_clips_requires_database_with_jwt() {
+    assert_database_error(
+        "/api/v1/production/workbench/batch-generate-candidate-clips",
+        r#"{"projectId":1,"scriptId":1}"#,
+    )
+    .await;
+}
+
+#[tokio::test]
 async fn production_export_image_requires_database_with_jwt() {
     assert_database_error(
         "/api/v1/production/export-image",

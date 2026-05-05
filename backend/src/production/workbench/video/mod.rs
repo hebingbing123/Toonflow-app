@@ -25,7 +25,10 @@ pub(in crate::production) struct VideoListBody {
 }
 
 #[allow(unused_imports)]
+pub(crate) use generate::__path_post_workbench_batch_generate_candidate_clips;
+#[allow(unused_imports)]
 pub(crate) use generate::__path_post_workbench_generate_video;
+pub(in crate::production) use generate::post_workbench_batch_generate_candidate_clips;
 pub(in crate::production) use generate::post_workbench_generate_video;
 #[allow(unused_imports)]
 pub(crate) use list::__path_post_workbench_get_video_list;

@@ -63,6 +63,24 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     );
     statuses['workbench/generate'] = 200;
 
+    var batchCandStatus = 500;
+    try {
+      await postProductionWorkbenchBatchGenerateCandidateClipsV1(
+        token,
+        projectId: 1,
+        scriptId: 1,
+      );
+      batchCandStatus = 200;
+    } on RustApiException catch (e) {
+      batchCandStatus = e.statusCode ?? 500;
+    }
+    _expectProbeStatus(
+      label: 'POST production/workbench/batch-generate-candidate-clips',
+      status: batchCandStatus,
+      accepted: const [200, 400, 404, 503],
+    );
+    statuses['workbench/batch-candidate-clips'] = batchCandStatus;
+
     final storyboardPoll = await postProductionStoryboardPollingImageV1(
       token,
       projectId: 1,

@@ -17,6 +17,7 @@ mod tests {
             voice_profile: Some("narrator_1".to_string()),
             subtitle_style: Some("modern".to_string()),
             bgm_strategy: Some("auto".to_string()),
+            video_model: Some("kling-v1".to_string()),
         };
 
         // Consumer can read video_ratio for generation parameters
@@ -48,6 +49,7 @@ mod tests {
             voice_profile: None,
             subtitle_style: None,
             bgm_strategy: None,
+            video_model: None,
         };
 
         // Consumers should handle None gracefully
@@ -72,6 +74,7 @@ mod tests {
             voice_profile: None,
             subtitle_style: None,
             bgm_strategy: None,
+            video_model: None,
         };
 
         // Consumer can iterate over all target platforms

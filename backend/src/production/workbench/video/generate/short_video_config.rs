@@ -24,6 +24,8 @@ pub struct StoryboardGenerationConfig {
     pub target_platforms: Option<Vec<String>>,
     /// Duration strategy (e.g., "short", "medium", "long")
     pub duration_strategy: Option<String>,
+    /// Default video generation model (**`app_project.video_model`**).
+    pub video_model: Option<String>,
     /// Voice profile identifier for narration
     pub voice_profile: Option<String>,
     /// Subtitle style identifier
@@ -71,7 +73,8 @@ pub async fn load_storyboard_generation_config(
             duration_strategy,
             voice_profile,
             subtitle_style,
-            bgm_strategy
+            bgm_strategy,
+            video_model
         FROM app_project
         WHERE id = $1
         "#,
@@ -103,6 +106,7 @@ mod tests {
             voice_profile: Some("default_narrator".to_string()),
             subtitle_style: Some("modern".to_string()),
             bgm_strategy: Some("auto".to_string()),
+            video_model: Some("kling-v1".to_string()),
         };
 
         assert_eq!(config.video_ratio, Some("9:16".to_string()));

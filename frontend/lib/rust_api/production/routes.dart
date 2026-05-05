@@ -35,6 +35,82 @@ class WorkbenchStoryboardNegativePrompt {
   }
 }
 
+/// `POST …/production/workbench/batch-generate-candidate-clips`.
+class BatchSkippedStoryboardV1 {
+  const BatchSkippedStoryboardV1({
+    required this.storyboardNumericId,
+    required this.reason,
+  });
+
+  final int storyboardNumericId;
+  final String reason;
+
+  factory BatchSkippedStoryboardV1.fromJson(Map<String, dynamic> json) {
+    return BatchSkippedStoryboardV1(
+      storyboardNumericId: (json['storyboardNumericId'] as num).toInt(),
+      reason: json['reason'] as String? ?? '',
+    );
+  }
+}
+
+class BatchCandidateClipDefaultsAppliedV1 {
+  const BatchCandidateClipDefaultsAppliedV1({
+    required this.trackId,
+    required this.model,
+    required this.mode,
+    required this.resolution,
+    required this.duration,
+  });
+
+  final int trackId;
+  final String model;
+  final String mode;
+  final String resolution;
+  final int duration;
+
+  factory BatchCandidateClipDefaultsAppliedV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return BatchCandidateClipDefaultsAppliedV1(
+      trackId: (json['trackId'] as num).toInt(),
+      model: json['model'] as String? ?? '',
+      mode: json['mode'] as String? ?? '',
+      resolution: json['resolution'] as String? ?? '',
+      duration: (json['duration'] as num).toInt(),
+    );
+  }
+}
+
+/// Response flattens the standard generate-video envelope plus skips + defaults.
+class BatchGenerateCandidateClipsResponseV1 {
+  const BatchGenerateCandidateClipsResponseV1({
+    required this.skipped,
+    required this.appliedDefaults,
+    required this.generation,
+  });
+
+  final List<BatchSkippedStoryboardV1> skipped;
+  final BatchCandidateClipDefaultsAppliedV1 appliedDefaults;
+  final WorkbenchGenerateVideoResponse generation;
+
+  factory BatchGenerateCandidateClipsResponseV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final rawSkipped = json['skipped'] as List<dynamic>? ?? const [];
+    return BatchGenerateCandidateClipsResponseV1(
+      skipped: rawSkipped
+          .map(
+            (e) => BatchSkippedStoryboardV1.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      appliedDefaults: BatchCandidateClipDefaultsAppliedV1.fromJson(
+        json['appliedDefaults'] as Map<String, dynamic>,
+      ),
+      generation: WorkbenchGenerateVideoResponse.fromJson(json),
+    );
+  }
+}
+
 class WorkbenchGenerateVideoResponse {
   const WorkbenchGenerateVideoResponse({
     required this.total,
@@ -320,6 +396,54 @@ Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchGenerateVideoResponse.fromJson(map);
+}
+
+/// `POST /api/v1/production/workbench/batch-generate-candidate-clips`.
+Future<BatchGenerateCandidateClipsResponseV1>
+postProductionWorkbenchBatchGenerateCandidateClipsV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  int? trackId,
+  List<int>? storyboardNumericIds,
+  String? prompt,
+  bool? skipInFlightStoryboards,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/workbench/batch-generate-candidate-clips',
+  );
+  final payload = <String, dynamic>{
+    'projectId': projectId,
+    'scriptId': scriptId,
+  };
+  if (trackId != null) payload['trackId'] = trackId;
+  if (storyboardNumericIds != null) {
+    payload['storyboardNumericIds'] = storyboardNumericIds;
+  }
+  if (prompt != null && prompt.trim().isNotEmpty) {
+    payload['prompt'] = prompt.trim();
+  }
+  if (skipInFlightStoryboards != null) {
+    payload['skipInFlightStoryboards'] = skipInFlightStoryboards;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(payload),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return BatchGenerateCandidateClipsResponseV1.fromJson(map);
 }
 
 /// `POST /api/v1/production/storyboard/polling-image` — OpenAPI `postProductionStoryboardPollingImageV1`

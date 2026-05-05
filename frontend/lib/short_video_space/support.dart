@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 import '../rust_api.dart';
 import 'view.dart';
 
@@ -587,6 +589,8 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   required bool projectSelected,
   required bool loadingProjectOverview,
   required ProjectAssetsOverview? assetsOverview,
+  VoidCallback? onBatchGenerateCandidateClips,
+  bool batchGenerateCandidateClipsBusy = false,
 }) {
   if (!projectSelected) {
     return const ShortVideoCandidateCardUi(visible: false);
@@ -626,6 +630,8 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
     unset: unset,
     headline: headline,
     detail: detail,
+    onBatchGenerateCandidateClips: onBatchGenerateCandidateClips,
+    batchGenerateCandidateClipsBusy: batchGenerateCandidateClipsBusy,
   );
 }
 

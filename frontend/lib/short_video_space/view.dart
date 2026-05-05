@@ -40,6 +40,8 @@ class ShortVideoCandidateCardUi {
     this.unset = 0,
     this.headline = '',
     this.detail = '',
+    this.onBatchGenerateCandidateClips,
+    this.batchGenerateCandidateClipsBusy = false,
   });
 
   final bool visible;
@@ -52,6 +54,8 @@ class ShortVideoCandidateCardUi {
   final int unset;
   final String headline;
   final String detail;
+  final VoidCallback? onBatchGenerateCandidateClips;
+  final bool batchGenerateCandidateClipsBusy;
 }
 
 /// Space 内嵌 **统一资产总览**（C9）：按类型分组 + 关联剧本号摘要。
@@ -860,6 +864,26 @@ class ShortVideoSpaceView extends StatelessWidget {
                   candidateCardUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 ),
+                if (candidateCardUi.onBatchGenerateCandidateClips != null) ...[
+                  const SizedBox(height: 10),
+                  FilledButton.tonalIcon(
+                    onPressed: candidateCardUi.batchGenerateCandidateClipsBusy
+                        ? null
+                        : candidateCardUi.onBatchGenerateCandidateClips,
+                    icon: candidateCardUi.batchGenerateCandidateClipsBusy
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.movie_creation_outlined),
+                    label: Text(
+                      candidateCardUi.batchGenerateCandidateClipsBusy
+                          ? '正在批量投递候选成片任务…'
+                          : '一键批量生成候选成片（按项目默认参数）',
+                    ),
+                  ),
+                ],
                 if (onOpenProjectsForCandidateAssets != null) ...[
                   const SizedBox(height: 10),
                   OutlinedButton.icon(

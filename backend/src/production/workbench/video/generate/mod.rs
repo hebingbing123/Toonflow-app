@@ -14,7 +14,9 @@ use crate::production::workbench::video_prompt_memory::{
 };
 use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::OwnedScriptScope;
 use crate::state::AppState;
+use uuid::Uuid;
 
 const VIDEO_NEGATIVE_PROMPT_MAX_CHARS: usize = 120;
 const VIDEO_NEGATIVE_PROMPT_LEAN_MAX_CHARS: usize = 84;
@@ -80,7 +82,7 @@ struct ScoredNegativeFragment {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct StoryboardNegativePrompt {
+pub(crate) struct StoryboardNegativePrompt {
     storyboard_id: i32,
     negative_prompt: Option<String>,
 }
@@ -185,6 +187,20 @@ pub(in crate::production) async fn post_workbench_generate_video(
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVideoBody>,
 ) -> Result<JsonResponse<WorkbenchGenerateVideoResponse>, ApiError> {
+    let (user_id, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+    let response = workbench_enqueue_video_jobs_from_body(user_id, pool, &scope_row, body).await?;
+    Ok(JsonResponse(response))
+}
+
+/// Shared core for **`POST …/workbench/generate-video`** and batch orchestration (**L1**).
+pub(crate) async fn workbench_enqueue_video_jobs_from_body(
+    user_id: Uuid,
+    pool: &sqlx::PgPool,
+    scope_row: &OwnedScriptScope,
+    body: WorkbenchGenerateVideoBody,
+) -> Result<WorkbenchGenerateVideoResponse, ApiError> {
     if body.track_id <= 0 {
         return Err(ApiError::BadRequest(
             "trackId must be a positive integer".into(),
@@ -202,9 +218,6 @@ pub(in crate::production) async fn post_workbench_generate_video(
         ));
     }
 
-    let (user_id, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
-            .await?;
     let upload_items = normalize_upload_sources(&body.upload_data)?;
     let storyboard_ids = upload_items
         .iter()
@@ -319,15 +332,16 @@ pub(in crate::production) async fn post_workbench_generate_video(
     }
 
     let total = enqueued.len();
-    Ok(JsonResponse(WorkbenchGenerateVideoResponse {
+    Ok(WorkbenchGenerateVideoResponse {
         enqueued,
         total,
         negative_prompt: body.negative_prompt.clone(),
         storyboard_negative_prompts: response_negative_prompts,
-    }))
+    })
 }
 
 // Module declarations
+mod batch_candidate_clips;
 mod consumer_examples;
 mod fragment_operations;
 mod fragment_parsing;
@@ -357,6 +371,10 @@ pub(crate) use quality_control::{
 pub(crate) use short_video_config::{
     load_storyboard_generation_config, StoryboardGenerationConfig,
 };
+
+#[allow(unused_imports)]
+pub(crate) use batch_candidate_clips::__path_post_workbench_batch_generate_candidate_clips;
+pub(in crate::production) use batch_candidate_clips::post_workbench_batch_generate_candidate_clips;
 
 // Internal imports for handler
 use fragment_operations::merge_negative_prompts;
