@@ -680,6 +680,137 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  Future<DateTime?> _pickScheduleTimeForDay(
+    BuildContext context,
+    DateTime dayLocal,
+  ) async {
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(DateTime.now()),
+    );
+    if (!context.mounted || pickedTime == null) {
+      return null;
+    }
+    return DateTime(
+      dayLocal.year,
+      dayLocal.month,
+      dayLocal.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+  }
+
+  Future<void> _bulkScheduleDraftsForCalendarDay(
+    BuildContext context,
+    ProjectRow project,
+    String token,
+    DateTime dayLocal,
+  ) async {
+    if (_publishDrafts.isEmpty) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    var overrideExisting = false;
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            final dayLabel =
+                '${dayLocal.year}-${dayLocal.month.toString().padLeft(2, '0')}-${dayLocal.day.toString().padLeft(2, '0')}';
+            return AlertDialog(
+              title: Text('批量定时 · $dayLabel'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: overrideExisting,
+                    onChanged: (v) {
+                      setLocal(() {
+                        overrideExisting = v ?? false;
+                      });
+                    },
+                    title: const Text('包含已定时草稿并重写为该时刻'),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    overrideExisting
+                        ? '将对当前列表中的全部草稿写入同一发布时间。'
+                        : '仅对尚未填写定时的草稿写入发布时间。',
+                    style: Theme.of(dialogCtx).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogCtx, false),
+                  child: const Text('取消'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(dialogCtx, true),
+                  child: const Text('选择时间'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (proceed != true || !context.mounted) {
+      return;
+    }
+    final dt = await _pickScheduleTimeForDay(context, dayLocal);
+    if (dt == null || !context.mounted) {
+      return;
+    }
+    final ids = _publishDrafts
+        .where(
+          (d) =>
+              overrideExisting || (d.scheduledAt ?? '').trim().isEmpty,
+        )
+        .map((d) => d.id)
+        .toList(growable: false);
+    if (ids.isEmpty) {
+      messenger?.showSnackBar(
+        const SnackBar(content: Text('没有符合条件的草稿（试勾选「包含已定时」）。')),
+      );
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      final iso = dt.toUtc().toIso8601String();
+      final res = await batchSchedulePublishDrafts(
+        token,
+        project.id,
+        draftIds: ids,
+        scheduledAtIso: iso,
+      );
+      await _refreshPublishSlice(project, token);
+      messenger?.showSnackBar(
+        SnackBar(content: Text('已更新 ${res.updated} 张草稿定时：$iso（UTC）')),
+      );
+    } on RustApiException catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('日历批量定时失败：${e.statusCode}')),
+      );
+    } catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('日历批量定时失败：$e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
   Future<void> _commitPublishPlatformCopy(
     ProjectRow project,
     String token,
@@ -1486,6 +1617,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               _publishDrafts.length > 1
           ? (ctx) => unawaited(
                 _scheduleAllDraftsSameTime(ctx, project, accessToken),
+              )
+          : null,
+      onPublishCalendarDayBulkSchedule: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty &&
+              !_publishUnavailable &&
+              _publishDrafts.isNotEmpty
+          ? (ctx, day) => unawaited(
+                _bulkScheduleDraftsForCalendarDay(
+                  ctx,
+                  project,
+                  accessToken,
+                  day,
+                ),
               )
           : null,
     );

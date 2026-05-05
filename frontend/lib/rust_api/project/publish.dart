@@ -27,13 +27,26 @@ Future<PublishPlatformMatrixResponse> fetchPublishPlatformMatrix(
 }
 
 /// `GET …/publish/drafts`
+///
+/// Optional [scheduledFrom] / [scheduledTo] (RFC3339): both required when filtering;
+/// returns only drafts with non-null `scheduled_at` in `[from, to)`.
 Future<List<PublishDraftRow>> fetchPublishDrafts(
   String accessToken,
-  String projectId,
-) async {
-  final uri = Uri.parse(
+  String projectId, {
+  String? scheduledFrom,
+  String? scheduledTo,
+}) async {
+  final qp = <String, String>{};
+  if (scheduledFrom != null) {
+    qp['scheduled_from'] = scheduledFrom;
+  }
+  if (scheduledTo != null) {
+    qp['scheduled_to'] = scheduledTo;
+  }
+  final base = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts',
   );
+  final uri = qp.isEmpty ? base : base.replace(queryParameters: qp);
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));

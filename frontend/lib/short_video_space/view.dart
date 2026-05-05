@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../rust_api.dart';
 import 'publish_copy_editor.dart';
+import 'publish_schedule_calendar.dart';
 
 enum ShortVideoMode { animated, liveAction }
 
@@ -199,6 +201,8 @@ class ShortVideoPublishPanelUi {
     this.onCommitPublishPlatformCopy,
     this.onScheduleFirstDraft,
     this.onScheduleAllDraftsSameTime,
+    this.publishScheduleCalendarDrafts,
+    this.onPublishCalendarDayBulkSchedule,
   });
 
   final bool visible;
@@ -229,6 +233,9 @@ class ShortVideoPublishPanelUi {
   final PublishPlatformCopyCommit? onCommitPublishPlatformCopy;
   final void Function(BuildContext context)? onScheduleFirstDraft;
   final void Function(BuildContext context)? onScheduleAllDraftsSameTime;
+  /// When null, treat as no drafts for calendar (keeps panel `const` paths valid).
+  final List<PublishDraftRow>? publishScheduleCalendarDrafts;
+  final PublishCalendarDayCallback? onPublishCalendarDayBulkSchedule;
 }
 
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
@@ -1048,6 +1055,27 @@ class ShortVideoSpaceView extends StatelessWidget {
                           style: theme.textTheme.bodySmall,
                         ),
                       ),
+                  ],
+                  if (!publishPanelUi.loading &&
+                      !publishPanelUi.unavailable &&
+                      (publishPanelUi.publishScheduleCalendarDrafts?.isNotEmpty ??
+                          false) &&
+                      publishPanelUi.onPublishCalendarDayBulkSchedule !=
+                          null) ...[
+                    const SizedBox(height: 14),
+                    Text(
+                      '排程月历（按本地日历日计数；点选某日批量写入定时）',
+                      style:
+                          theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 8),
+                    PublishScheduleCalendar(
+                      drafts:
+                          publishPanelUi.publishScheduleCalendarDrafts ?? [],
+                      busy: publishPanelUi.publishBusy,
+                      onDayTap:
+                          publishPanelUi.onPublishCalendarDayBulkSchedule!,
+                    ),
                   ],
                   if (!publishPanelUi.loading &&
                       !publishPanelUi.unavailable &&

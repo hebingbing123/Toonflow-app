@@ -15,6 +15,9 @@ use super::types::{
     PublishTargetRow,
 };
 
+/// Half-open `[from, to)` UTC window used by `GET …/publish/drafts`.
+pub(crate) type ScheduledDraftUtcWindow = (DateTime<Utc>, DateTime<Utc>);
+
 fn merge_platform_block(existing: Option<&Value>, incoming: &Value) -> Value {
     match incoming {
         Value::Object(in_map) => {
@@ -212,9 +215,11 @@ pub(crate) async fn delete_profile(
 pub(crate) async fn list_drafts(
     pool: &PgPool,
     project_id: Uuid,
+    scheduled_window: Option<ScheduledDraftUtcWindow>,
 ) -> Result<Vec<PublishDraftRow>, ApiError> {
-    sqlx::query_as::<_, PublishDraftRow>(
-        r#"
+    match scheduled_window {
+        None => sqlx::query_as::<_, PublishDraftRow>(
+            r#"
         SELECT id, project_id, profile_id, script_id, video_asset_key, cover_asset_key,
                title, description, tags, platform_copy, scheduled_at, draft_status,
                metadata, created_at, updated_at
@@ -222,11 +227,31 @@ pub(crate) async fn list_drafts(
         WHERE project_id = $1
         ORDER BY updated_at DESC
         "#,
-    )
-    .bind(project_id)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+        )
+        .bind(project_id)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string())),
+        Some((from, to_excl)) => sqlx::query_as::<_, PublishDraftRow>(
+            r#"
+        SELECT id, project_id, profile_id, script_id, video_asset_key, cover_asset_key,
+               title, description, tags, platform_copy, scheduled_at, draft_status,
+               metadata, created_at, updated_at
+        FROM app_publish_draft
+        WHERE project_id = $1
+          AND scheduled_at IS NOT NULL
+          AND scheduled_at >= $2
+          AND scheduled_at < $3
+        ORDER BY scheduled_at ASC
+        "#,
+        )
+        .bind(project_id)
+        .bind(from)
+        .bind(to_excl)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string())),
+    }
 }
 
 pub(crate) async fn insert_draft(

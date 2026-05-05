@@ -105,6 +105,15 @@ fn default_draft_editing() -> String {
     "editing".to_string()
 }
 
+/// Optional window for `GET …/publish/drafts`: only rows with `scheduled_at` in
+/// `[scheduled_from, scheduled_to)` (RFC3339, UTC recommended).
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct ListPublishDraftsQuery {
+    pub scheduled_from: Option<String>,
+    pub scheduled_to: Option<String>,
+}
+
 #[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct PatchPublishDraftBody {

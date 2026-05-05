@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../rust_api.dart';
 import 'publish_copy_editor.dart';
+import 'publish_schedule_calendar.dart';
 import 'view.dart';
 
 enum ShortVideoNextStepTarget {
@@ -905,6 +906,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   PublishPlatformCopyCommit? onCommitPublishPlatformCopy,
   void Function(BuildContext context)? onScheduleFirstDraft,
   void Function(BuildContext context)? onScheduleAllDraftsSameTime,
+  PublishCalendarDayCallback? onPublishCalendarDayBulkSchedule,
 }) {
   if (!projectSelected) {
     return const ShortVideoPublishPanelUi(visible: false);
@@ -1055,5 +1057,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     onCommitPublishPlatformCopy: onCommitPublishPlatformCopy,
     onScheduleFirstDraft: onScheduleFirstDraft,
     onScheduleAllDraftsSameTime: onScheduleAllDraftsSameTime,
+    publishScheduleCalendarDrafts: drafts.isEmpty ? null : drafts,
+    onPublishCalendarDayBulkSchedule:
+        drafts.isEmpty ? null : onPublishCalendarDayBulkSchedule,
   );
 }

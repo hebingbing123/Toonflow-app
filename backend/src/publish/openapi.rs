@@ -33,6 +33,7 @@ use utoipa::OpenApi;
         crate::publish::types::CreatePublishProfileBody,
         crate::publish::types::PatchPublishProfileBody,
         crate::publish::types::PublishDraftResponse,
+        crate::publish::types::ListPublishDraftsQuery,
         crate::publish::types::CreatePublishDraftBody,
         crate::publish::types::PatchPublishDraftBody,
         crate::publish::types::PublishTargetResponse,

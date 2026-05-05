@@ -1,11 +1,12 @@
 //! HTTP handlers for `/api/v1/projects/{project_id}/publish/*` (**E9**).
 
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::HeaderMap,
     routing::{get, post},
     Json, Router,
 };
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -19,11 +20,11 @@ use super::store::{
     cancel_job_if_non_terminal, confirm_semi_auto_job, delete_draft, delete_profile, fetch_draft,
     fetch_job_owned, fetch_profile, insert_draft, insert_profile, insert_publish_job, list_drafts,
     list_jobs, list_profiles, list_targets, patch_draft_row, patch_profile_row, replace_targets,
-    retry_job_if_allowed,
+    retry_job_if_allowed, ScheduledDraftUtcWindow,
 };
 use super::types::{
-    CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, PatchPublishDraftBody,
-    PatchPublishProfileBody, PublishDraftResponse, PublishJobResponse,
+    CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, ListPublishDraftsQuery,
+    PatchPublishDraftBody, PatchPublishProfileBody, PublishDraftResponse, PublishJobResponse,
     PublishPlatformMatrixResponse, PublishPrepareCheckResponse, PublishProfileResponse,
     PublishTargetResponse, UpsertPublishTargetsBody,
 };
@@ -270,9 +271,22 @@ pub(crate) async fn delete_publish_profile(
     path = "/api/v1/projects/{project_id}/publish/drafts",
     operation_id = "listPublishDraftsV1",
     tag = "publish",
-    params(("project_id" = Uuid, Path, description = "Project UUID")),
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID"),
+        (
+            "scheduled_from" = Option<String>,
+            Query,
+            description = "RFC3339 inclusive lower bound; requires `scheduled_to`."
+        ),
+        (
+            "scheduled_to" = Option<String>,
+            Query,
+            description = "RFC3339 exclusive upper bound; requires `scheduled_from`."
+        )
+    ),
     responses(
         (status = 200, description = "OK", body = Vec<PublishDraftResponse>),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody)
     ),
     security(("bearerAuth" = []))
@@ -280,13 +294,42 @@ pub(crate) async fn delete_publish_profile(
 pub(crate) async fn list_publish_drafts(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
+    Query(q): Query<ListPublishDraftsQuery>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<PublishDraftResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_project_owned(pool, uid, project_id).await?;
-    let rows = list_drafts(pool, project_id).await?;
+    let window = resolve_scheduled_draft_window(&q)?;
+    let rows = list_drafts(pool, project_id, window).await?;
     Ok(Json(rows.into_iter().map(draft_from_row).collect()))
+}
+
+fn resolve_scheduled_draft_window(
+    q: &ListPublishDraftsQuery,
+) -> Result<Option<ScheduledDraftUtcWindow>, ApiError> {
+    match (&q.scheduled_from, &q.scheduled_to) {
+        (None, None) => Ok(None),
+        (Some(from_s), Some(to_s)) => {
+            let from: DateTime<Utc> = from_s
+                .trim()
+                .parse()
+                .map_err(|_| ApiError::BadRequest("scheduled_from must be valid RFC3339".into()))?;
+            let to_excl: DateTime<Utc> = to_s
+                .trim()
+                .parse()
+                .map_err(|_| ApiError::BadRequest("scheduled_to must be valid RFC3339".into()))?;
+            if from >= to_excl {
+                return Err(ApiError::BadRequest(
+                    "scheduled_from must be strictly before scheduled_to".into(),
+                ));
+            }
+            Ok(Some((from, to_excl)))
+        }
+        _ => Err(ApiError::BadRequest(
+            "scheduled_from and scheduled_to must both be set when filtering".into(),
+        )),
+    }
 }
 
 fn validate_draft_status(raw: &str) -> Result<(), ApiError> {
