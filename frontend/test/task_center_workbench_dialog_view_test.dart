@@ -81,6 +81,7 @@ TaskCenterWorkbenchDialogViewCallbacks buildDialogCallbacks({
   ValueChanged<JobRow>? onPickJob,
   ValueChanged<JobRow>? onRetryFailedJob,
   ValueChanged<JobRow>? onCancelQueuedJob,
+  ValueChanged<JobRow>? onCompensateWritebackJob,
   ValueChanged<String>? onPickProductionPhase,
   VoidCallback? onClose = noop,
 }) {
@@ -94,6 +95,7 @@ TaskCenterWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onPickJob: onPickJob ?? (_) {},
     onRetryFailedJob: onRetryFailedJob ?? (_) {},
     onCancelQueuedJob: onCancelQueuedJob ?? (_) {},
+    onCompensateWritebackJob: onCompensateWritebackJob,
     onPickProductionPhase: onPickProductionPhase ?? (_) {},
     onClose: onClose ?? noop,
   );

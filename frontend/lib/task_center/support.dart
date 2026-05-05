@@ -218,6 +218,23 @@ String taskCenterShortVideoStageLabel(JobRow job) {
   }
 }
 
+bool taskCenterSupportsPartialRework(JobRow job) {
+  return tryParseTaskCenterDomainDeepLink(job) != null;
+}
+
+bool taskCenterSupportsWritebackCompensation(JobRow job) {
+  final kind = job.kind.trim().toLowerCase();
+  if (kind.contains('export') || kind.contains('publish')) {
+    return true;
+  }
+  final details = job.errorDetails;
+  if (details == null) {
+    return false;
+  }
+  final code = (details['code'] ?? '').toString();
+  return code.contains('writeback') || code.contains('persist');
+}
+
 String videoExportFailureCodeLabelZh(String code) {
   switch (code) {
     case 'payload_missing_source_url':

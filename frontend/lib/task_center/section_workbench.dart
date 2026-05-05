@@ -317,6 +317,15 @@ class _TaskCenterWorkbenchDialogState
     }
   }
 
+  Future<void> _runWritebackCompensation(JobRow job) async {
+    setState(() {
+      _ctrls.uuidCtrl.text = job.id;
+      _ctrls.numericTaskIdCtrl.text = job.numericTaskId.toString();
+      _statusLine = '已进入回写补偿：先读取任务 UUID 详情并校验写回状态。';
+    });
+    await _loadUuidDetails();
+  }
+
   Future<void> _openLiveUpdates() async {
     if (_ws != null) {
       return;
@@ -511,6 +520,9 @@ class _TaskCenterWorkbenchDialogState
         },
         onCancelQueuedJob: (job) {
           _cancelQueuedJob(job);
+        },
+        onCompensateWritebackJob: (job) {
+          _runWritebackCompensation(job);
         },
         onClose: () => Navigator.of(context).pop(),
         onNavigateExportJobDeepLink:

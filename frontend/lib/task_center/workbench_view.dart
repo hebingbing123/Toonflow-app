@@ -83,6 +83,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
     required this.onPickJob,
     required this.onRetryFailedJob,
     required this.onCancelQueuedJob,
+    this.onCompensateWritebackJob,
     required this.onClose,
     this.onNavigateExportJobDeepLink,
     this.onNavigateDomainDeepLink,
@@ -98,6 +99,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
   final ValueChanged<JobRow> onPickJob;
   final ValueChanged<JobRow> onRetryFailedJob;
   final ValueChanged<JobRow> onCancelQueuedJob;
+  final ValueChanged<JobRow>? onCompensateWritebackJob;
   final ValueChanged<String> onPickProductionPhase;
   final VoidCallback onClose;
   final void Function(TaskCenterExportJobDeepLink link)? onNavigateExportJobDeepLink;
@@ -309,6 +311,15 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                                 onNavigateDomainDeepLink:
                                     callbacks.onNavigateDomainDeepLink,
                               ),
+                            if (job.status == 'failed')
+                              _TaskFailedReworkActions(
+                                job: job,
+                                onRetry: callbacks.onRetryFailedJob,
+                                onNavigateDomainDeepLink:
+                                    callbacks.onNavigateDomainDeepLink,
+                                onCompensateWritebackJob:
+                                    callbacks.onCompensateWritebackJob,
+                              ),
                           ],
                         ),
                         trailing:
@@ -492,6 +503,53 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TaskFailedReworkActions extends StatelessWidget {
+  const _TaskFailedReworkActions({
+    required this.job,
+    required this.onRetry,
+    required this.onNavigateDomainDeepLink,
+    required this.onCompensateWritebackJob,
+  });
+
+  final JobRow job;
+  final ValueChanged<JobRow> onRetry;
+  final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
+  final ValueChanged<JobRow>? onCompensateWritebackJob;
+
+  @override
+  Widget build(BuildContext context) {
+    final domainLink = tryParseTaskCenterDomainDeepLink(job);
+    final canPartial = domainLink != null &&
+        onNavigateDomainDeepLink != null &&
+        taskCenterSupportsPartialRework(job);
+    final canCompensate = onCompensateWritebackJob != null &&
+        taskCenterSupportsWritebackCompensation(job);
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 2,
+        children: [
+          TextButton(
+            onPressed: () => onRetry(job),
+            child: const Text('重新生成'),
+          ),
+          if (canPartial)
+            TextButton(
+              onPressed: () => onNavigateDomainDeepLink!(domainLink),
+              child: const Text('局部返工'),
+            ),
+          if (canCompensate)
+            TextButton(
+              onPressed: () => onCompensateWritebackJob!(job),
+              child: const Text('回写补偿'),
+            ),
         ],
       ),
     );
