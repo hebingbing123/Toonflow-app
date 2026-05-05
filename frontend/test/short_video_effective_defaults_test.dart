@@ -27,4 +27,29 @@ void main() {
     });
     expect(asm.effectiveShortVideoDefaults.ttsVoice, 'alloy');
   });
+
+  test('assembly parses candidate_quality_summary when present', () {
+    final asm = ProjectShortVideoAssembly.fromJson({
+      'schema_version': 1,
+      'project_defaults': {
+        'voice_profile': null,
+        'subtitle_style': null,
+        'bgm_strategy': null,
+      },
+      'candidate_quality_summary': {
+        'schema_version': 1,
+        'project_bad_case_total': 2,
+        'assembly_shot_review_total': 5,
+        'assembly_shot_bad_case_count': 1,
+        'assembly_shots_with_bad_case': 1,
+        'assembly_late_stage_bad_case_count': 1,
+        'bad_cases_by_stage': [
+          {'stage': 'video_prompt', 'bad_case_count': 1},
+        ],
+      },
+      'scripts': <dynamic>[],
+    });
+    expect(asm.candidateQualitySummary.projectBadCaseTotal, 2);
+    expect(asm.candidateQualitySummary.badCasesByStage.first.stage, 'video_prompt');
+  });
 }

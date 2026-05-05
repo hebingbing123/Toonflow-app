@@ -85,6 +85,7 @@ class ShortVideoAssemblyPanelUi {
     this.unavailable = false,
     this.headline = '',
     this.defaultsLine = '',
+    this.qualityLines = const <String>[],
     this.scriptLines = const <String>[],
     this.detail = '',
   });
@@ -94,6 +95,8 @@ class ShortVideoAssemblyPanelUi {
   final bool unavailable;
   final String headline;
   final String defaultsLine;
+  /// L3：质量验收摘要行（与 **`candidate_quality_summary`** 对齐）。
+  final List<String> qualityLines;
   final List<String> scriptLines;
   final String detail;
 }
@@ -695,6 +698,35 @@ class ShortVideoSpaceView extends StatelessWidget {
                       assemblyPanelUi.defaultsLine,
                       style: theme.textTheme.bodySmall,
                     ),
+                  ],
+                  if (assemblyPanelUi.qualityLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '成片候选验收（质量评审）',
+                      style: theme.textTheme.labelMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in assemblyPanelUi.qualityLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.fact_check_outlined,
+                              size: 16,
+                              color: theme.colorScheme.tertiary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                line,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                   if (assemblyPanelUi.scriptLines.isNotEmpty) ...[
                     const SizedBox(height: 10),

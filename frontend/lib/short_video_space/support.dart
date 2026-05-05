@@ -424,6 +424,29 @@ ShortVideoAssetsOverviewPanelUi buildShortVideoAssetsOverviewPanelUi({
 }
 
 /// Maps **`short-video-export-check`** machine **`code`** to short zh labels for Space lists.
+/// 与后端 **`app_quality_review.stage`** 枚举对齐的短标签（L3 展示）。
+String shortVideoQualityStageLabelZh(String stage) {
+  final s = stage.trim();
+  switch (s) {
+    case '':
+      return '未标注阶段';
+    case 'story_skeleton':
+      return '故事骨架';
+    case 'adaptation_strategy':
+      return '改编策略';
+    case 'director_planning':
+      return '导演规划';
+    case 'storyboard_table':
+      return '分镜表';
+    case 'storyboard_panel':
+      return '分镜面板';
+    case 'video_prompt':
+      return '视频提示 / 成片';
+    default:
+      return s;
+  }
+}
+
 String shortVideoExportIssueLabelZh(String code) {
   switch (code) {
     case 'candidate_pending':
@@ -510,11 +533,31 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
       '$title · ${shots.length} 镜 · 已选成片 $withMedia · 旁白就绪 $voReady',
     );
   }
+  final q = assembly.candidateQualitySummary;
+  final qualityLines = <String>[
+    '项目级待验收坏例：${q.projectBadCaseTotal}（与生产概览同源）',
+    '当前装配分镜上的评审：${q.assemblyShotReviewTotal} 条 · 坏例 ${q.assemblyShotBadCaseCount} · 涉及分镜 ${q.assemblyShotsWithBadCase}',
+    '贴近成片阶段坏例（分镜面板/视频提示）：${q.assemblyLateStageBadCaseCount}',
+  ];
+  final stageLines = q.badCasesByStage
+      .take(6)
+      .map(
+        (b) =>
+            '${shortVideoQualityStageLabelZh(b.stage)} · 坏例 ${b.badCaseCount}',
+      )
+      .toList(growable: false);
+  if (stageLines.isNotEmpty) {
+    qualityLines.add('按阶段：${stageLines.join('；')}');
+  }
+  qualityLines.add(
+    '在任务中心侧可按项目筛选质量评审列表，分镜级 target 与装配一致。',
+  );
   return ShortVideoAssemblyPanelUi(
     visible: true,
     headline: headline,
     defaultsLine:
         '${defaultParts.join(' · ')}\n生效 TTS（入队/worker）：${eff.ttsVoice}',
+    qualityLines: qualityLines,
     scriptLines: scriptLines,
     detail: '来自只读装配接口；导出阻塞结论见下方「导出前检查」。',
   );

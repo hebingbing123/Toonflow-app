@@ -34,6 +34,8 @@ use utoipa::OpenApi;
         crate::projects::routes::types::AssetsOverviewTypeGroup,
         crate::projects::routes::types::ProjectAssetsOverviewResponse,
         crate::projects::routes::types::ProjectShortVideoAssemblyResponse,
+        crate::projects::routes::types::ShortVideoCandidateQualitySummary,
+        crate::projects::routes::types::ShortVideoQualityStageBucket,
         crate::projects::routes::types::ProjectShortVideoExportCheckResponse,
         crate::projects::routes::types::ShortVideoExportCheckIssue,
         crate::projects::routes::types::ShortVideoExportCheckSummary,

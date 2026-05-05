@@ -229,11 +229,38 @@ pub struct ShortVideoAssemblyScriptGroup {
     pub shots: Vec<ShortVideoAssemblyShot>,
 }
 
+/// L3：**成片候选 / 分镜级**质量评审摘要（只读；与 **`GET /api/v1/quality/reviews`** 同一 `app_quality_review` 源）。
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoQualityStageBucket {
+    /// 空字符串表示 **`stage` IS NULL**。
+    pub stage: String,
+    pub bad_case_count: i64,
+}
+
+/// 与当前装配快照中的分镜（`storyboard_numeric_id` 集合）对齐的坏例与评审计数。
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoCandidateQualitySummary {
+    pub schema_version: i32,
+    /// 与 **`GET …/production-overview`** **`pending_review_bad_case_count`** 同源（项目级坏例总数）。
+    pub project_bad_case_total: i64,
+    /// `target_type ∈ { storyboard, video, output }` 且 **`target_id`** 命中装配分镜的评审条数（含通过与坏例）。
+    pub assembly_shot_review_total: i64,
+    /// 上述范围内 **`is_bad_case`** 的条数。
+    pub assembly_shot_bad_case_count: i64,
+    /// 至少有一条坏例的不同分镜 **`numeric_id`** 数。
+    pub assembly_shots_with_bad_case: i64,
+    /// **`stage`** 为 **`storyboard_panel`** / **`video_prompt`** 的坏例数（更贴近成片验收）。
+    pub assembly_late_stage_bad_case_count: i64,
+    pub bad_cases_by_stage: Vec<ShortVideoQualityStageBucket>,
+}
+
 #[derive(Serialize, ToSchema)]
 pub struct ProjectShortVideoAssemblyResponse {
     pub schema_version: i32,
     pub project_defaults: ShortVideoAssemblyProjectDefaults,
     pub effective_short_video_defaults: ShortVideoAssemblyEffectiveDefaults,
+    /// 与 **`scripts`** 中分镜集合对齐的质量验收摘要（L3）。
+    pub candidate_quality_summary: ShortVideoCandidateQualitySummary,
     pub scripts: Vec<ShortVideoAssemblyScriptGroup>,
 }
 

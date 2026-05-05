@@ -556,17 +556,93 @@ class ShortVideoAssemblyScriptGroup {
   }
 }
 
+/// L3：与装配分镜对齐的质量评审摘要（**`candidate_quality_summary`**）。
+class ShortVideoCandidateQualitySummary {
+  const ShortVideoCandidateQualitySummary({
+    required this.schemaVersion,
+    required this.projectBadCaseTotal,
+    required this.assemblyShotReviewTotal,
+    required this.assemblyShotBadCaseCount,
+    required this.assemblyShotsWithBadCase,
+    required this.assemblyLateStageBadCaseCount,
+    required this.badCasesByStage,
+  });
+
+  final int schemaVersion;
+  final int projectBadCaseTotal;
+  final int assemblyShotReviewTotal;
+  final int assemblyShotBadCaseCount;
+  final int assemblyShotsWithBadCase;
+  final int assemblyLateStageBadCaseCount;
+  final List<ShortVideoQualityStageBucket> badCasesByStage;
+
+  factory ShortVideoCandidateQualitySummary.fromJson(Map<String, dynamic> json) {
+    final buckets =
+        json['bad_cases_by_stage'] as List<dynamic>? ?? const <dynamic>[];
+    return ShortVideoCandidateQualitySummary(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      projectBadCaseTotal: (json['project_bad_case_total'] as num).toInt(),
+      assemblyShotReviewTotal:
+          (json['assembly_shot_review_total'] as num).toInt(),
+      assemblyShotBadCaseCount:
+          (json['assembly_shot_bad_case_count'] as num).toInt(),
+      assemblyShotsWithBadCase:
+          (json['assembly_shots_with_bad_case'] as num).toInt(),
+      assemblyLateStageBadCaseCount:
+          (json['assembly_late_stage_bad_case_count'] as num).toInt(),
+      badCasesByStage: buckets
+          .map(
+            (e) =>
+                ShortVideoQualityStageBucket.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  /// Older servers without **`candidate_quality_summary`**.
+  factory ShortVideoCandidateQualitySummary.emptySchema1() {
+    return const ShortVideoCandidateQualitySummary(
+      schemaVersion: 1,
+      projectBadCaseTotal: 0,
+      assemblyShotReviewTotal: 0,
+      assemblyShotBadCaseCount: 0,
+      assemblyShotsWithBadCase: 0,
+      assemblyLateStageBadCaseCount: 0,
+      badCasesByStage: <ShortVideoQualityStageBucket>[],
+    );
+  }
+}
+
+class ShortVideoQualityStageBucket {
+  const ShortVideoQualityStageBucket({
+    required this.stage,
+    required this.badCaseCount,
+  });
+
+  final String stage;
+  final int badCaseCount;
+
+  factory ShortVideoQualityStageBucket.fromJson(Map<String, dynamic> json) {
+    return ShortVideoQualityStageBucket(
+      stage: json['stage'] as String? ?? '',
+      badCaseCount: (json['bad_case_count'] as num).toInt(),
+    );
+  }
+}
+
 class ProjectShortVideoAssembly {
   const ProjectShortVideoAssembly({
     required this.schemaVersion,
     required this.projectDefaults,
     required this.effectiveShortVideoDefaults,
+    required this.candidateQualitySummary,
     required this.scripts,
   });
 
   final int schemaVersion;
   final ShortVideoAssemblyProjectDefaults projectDefaults;
   final ShortVideoAssemblyEffectiveDefaults effectiveShortVideoDefaults;
+  final ShortVideoCandidateQualitySummary candidateQualitySummary;
   final List<ShortVideoAssemblyScriptGroup> scripts;
 
   factory ProjectShortVideoAssembly.fromJson(Map<String, dynamic> json) {
@@ -575,12 +651,16 @@ class ProjectShortVideoAssembly {
       json['project_defaults'] as Map<String, dynamic>,
     );
     final effRaw = json['effective_short_video_defaults'];
+    final cqRaw = json['candidate_quality_summary'];
     return ProjectShortVideoAssembly(
       schemaVersion: (json['schema_version'] as num).toInt(),
       projectDefaults: pd,
       effectiveShortVideoDefaults: effRaw is Map<String, dynamic>
           ? ShortVideoAssemblyEffectiveDefaults.fromJson(effRaw)
           : ShortVideoAssemblyEffectiveDefaults.inferredFromProjectDefaults(pd),
+      candidateQualitySummary: cqRaw is Map<String, dynamic>
+          ? ShortVideoCandidateQualitySummary.fromJson(cqRaw)
+          : ShortVideoCandidateQualitySummary.emptySchema1(),
       scripts: raw
           .map(
             (e) =>

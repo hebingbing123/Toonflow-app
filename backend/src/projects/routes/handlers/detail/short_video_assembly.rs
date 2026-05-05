@@ -17,9 +17,11 @@ use crate::state::AppState;
 use super::super::super::types::{
     ProjectShortVideoAssemblyResponse, ShortVideoAssemblyEffectiveDefaults,
     ShortVideoAssemblyProjectDefaults, ShortVideoAssemblyScriptGroup, ShortVideoAssemblyShot,
+    ShortVideoCandidateQualitySummary, ShortVideoQualityStageBucket,
 };
 use super::assembly_query::{
-    assembly_selected_media_kind, fetch_project_assembly_flat_rows, fetch_project_assembly_header,
+    assembly_selected_media_kind, fetch_assembly_candidate_quality_summary,
+    fetch_project_assembly_flat_rows, fetch_project_assembly_header,
 };
 use crate::short_video::defaults::resolve_tts_voice;
 
@@ -52,6 +54,27 @@ pub(crate) async fn project_short_video_assembly_by_id(
         .ok_or(ApiError::NotFound)?;
 
     let flat = fetch_project_assembly_flat_rows(pool, header.id).await?;
+
+    let storyboard_numeric_ids: Vec<i32> = flat.iter().map(|r| r.storyboard_numeric_id).collect();
+    let (quality_scalars, quality_stage_rows) =
+        fetch_assembly_candidate_quality_summary(pool, uid, header.id, &storyboard_numeric_ids)
+            .await?;
+    let bad_cases_by_stage: Vec<ShortVideoQualityStageBucket> = quality_stage_rows
+        .into_iter()
+        .map(|r| ShortVideoQualityStageBucket {
+            stage: r.stage,
+            bad_case_count: r.bad_case_count,
+        })
+        .collect();
+    let candidate_quality_summary = ShortVideoCandidateQualitySummary {
+        schema_version: 1,
+        project_bad_case_total: quality_scalars.project_bad_case_total,
+        assembly_shot_review_total: quality_scalars.assembly_shot_review_total,
+        assembly_shot_bad_case_count: quality_scalars.assembly_shot_bad_case_count,
+        assembly_shots_with_bad_case: quality_scalars.assembly_shots_with_bad_case,
+        assembly_late_stage_bad_case_count: quality_scalars.assembly_late_stage_bad_case_count,
+        bad_cases_by_stage,
+    };
 
     let mut script_order: Vec<i32> = Vec::new();
     let mut script_meta: HashMap<i32, Option<String>> = HashMap::new();
@@ -122,6 +145,7 @@ pub(crate) async fn project_short_video_assembly_by_id(
             subtitle_style: header.subtitle_style.clone(),
             bgm_strategy: header.bgm_strategy.clone(),
         },
+        candidate_quality_summary,
         scripts,
     }))
 }
