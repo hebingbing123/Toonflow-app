@@ -15,6 +15,7 @@ use utoipa::OpenApi;
         crate::projects::routes::handlers::detail::stats::project_stats_by_id,
         crate::projects::routes::handlers::detail::short_video_readiness::project_short_video_readiness_by_id,
         crate::projects::routes::handlers::detail::production_overview::project_production_overview_by_id,
+        crate::projects::routes::handlers::detail::assets_overview::project_assets_overview_by_id,
     ),
     components(schemas(
         crate::projects::routes::types::ProjectRow,
@@ -26,6 +27,10 @@ use utoipa::OpenApi;
         crate::projects::routes::types::ShortVideoReadinessRollup,
         crate::projects::routes::types::ProjectShortVideoReadinessResponse,
         crate::projects::routes::types::ProjectProductionOverviewResponse,
+        crate::projects::routes::types::AssetsOverviewCandidateCounts,
+        crate::projects::routes::types::AssetsOverviewItem,
+        crate::projects::routes::types::AssetsOverviewTypeGroup,
+        crate::projects::routes::types::ProjectAssetsOverviewResponse,
         crate::projects::routes::types::ProjectsSummaryResponse,
         crate::projects::routes::types::PatchProjectBody,
         crate::projects::routes::types::PatchStyleConfigBody,

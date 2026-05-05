@@ -51,7 +51,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ProjectShortVideoReadiness? _shotReadiness;
   bool _shotReadinessUnavailable = false;
   ProjectProductionOverview? _productionOverview;
-  ListAssetsResponse? _projectAssetsList;
+  ProjectAssetsOverview? _projectAssetsOverview;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -217,7 +217,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _shotReadiness = null;
           _shotReadinessUnavailable = false;
           _productionOverview = null;
-          _projectAssetsList = null;
+          _projectAssetsOverview = null;
         });
       }
       return;
@@ -233,7 +233,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _shotReadiness = null;
       _shotReadinessUnavailable = false;
       _productionOverview = null;
-      _projectAssetsList = null;
+      _projectAssetsOverview = null;
     });
     try {
       Future<ProjectProductionOverview?> loadProductionOverview() async {
@@ -247,13 +247,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         }
       }
 
-      Future<ListAssetsResponse?> loadProjectAssetsForCandidates() async {
+      Future<ProjectAssetsOverview?> loadProjectAssetsOverview() async {
         try {
-          return await fetchProjectAssetsByProjectId(
-            token,
-            project.id,
-            limit: 500,
-          );
+          return await fetchProjectAssetsOverviewByProjectId(token, project.id);
         } catch (_) {
           return null;
         }
@@ -288,7 +284,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           limit: 1,
         ),
         loadProductionOverview(),
-        loadProjectAssetsForCandidates(),
+        loadProjectAssetsOverview(),
       ]);
       if (!mounted) {
         return;
@@ -319,7 +315,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _sceneAssetCount = (results[4] as ListAssetsResponse).total;
         _clipAssetCount = (results[5] as ListAssetsResponse).total;
         _productionOverview = results[6] as ProjectProductionOverview?;
-        _projectAssetsList = results[7] as ListAssetsResponse?;
+        _projectAssetsOverview = results[7] as ProjectAssetsOverview?;
         _shotReadiness = shotReadiness;
         _shotReadinessUnavailable = shotUnavailable;
       });
@@ -337,7 +333,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _shotReadiness = null;
         _shotReadinessUnavailable = false;
         _productionOverview = null;
-        _projectAssetsList = null;
+        _projectAssetsOverview = null;
       });
     } catch (_) {
       if (!mounted) {
@@ -353,7 +349,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _shotReadiness = null;
         _shotReadinessUnavailable = false;
         _productionOverview = null;
-        _projectAssetsList = null;
+        _projectAssetsOverview = null;
       });
     } finally {
       if (mounted) {
@@ -651,10 +647,15 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             readiness: _shotReadiness,
             readinessUnavailable: _shotReadinessUnavailable,
           );
+    final assetsOverviewPanelUi = buildShortVideoAssetsOverviewPanelUi(
+      projectSelected: project != null,
+      loadingProjectOverview: _loadingProjectOverview,
+      overview: _projectAssetsOverview,
+    );
     final candidateCardUi = buildShortVideoCandidateCardUi(
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
-      assetsList: _projectAssetsList,
+      assetsOverview: _projectAssetsOverview,
     );
     final nextStepPlan = buildShortVideoNextStepPlan(
       isAnimated: _isAnimated,
@@ -780,6 +781,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       ),
       badCaseMetrics: badCaseMetrics,
       recentTaskLines: recentTaskLines,
+      assetsOverviewPanelUi: assetsOverviewPanelUi,
       candidateCardUi: candidateCardUi,
       onOpenProjectsForCandidateAssets:
           project == null ? null : widget.onOpenProjects,

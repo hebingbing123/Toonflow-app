@@ -309,6 +309,115 @@ class ProjectProductionOverview {
   }
 }
 
+/// `GET /api/v1/projects/{project_id}/assets-overview` — see `getProjectAssetsOverviewByProjectIdV1`.
+
+class AssetsOverviewCandidateCounts {
+  const AssetsOverviewCandidateCounts({
+    required this.pending,
+    required this.linked,
+    required this.ignored,
+    required this.unset,
+  });
+
+  final int pending;
+  final int linked;
+  final int ignored;
+  final int unset;
+
+  factory AssetsOverviewCandidateCounts.fromJson(Map<String, dynamic> json) {
+    int n(String k) => (json[k] as num).toInt();
+    return AssetsOverviewCandidateCounts(
+      pending: n('pending'),
+      linked: n('linked'),
+      ignored: n('ignored'),
+      unset: n('unset'),
+    );
+  }
+}
+
+class AssetsOverviewItem {
+  const AssetsOverviewItem({
+    required this.assetId,
+    required this.numericId,
+    required this.name,
+    required this.assetType,
+    this.candidateStatus,
+    required this.linkedScriptNumericIds,
+  });
+
+  final String assetId;
+  final int numericId;
+  final String name;
+  final String assetType;
+  final String? candidateStatus;
+  final List<int> linkedScriptNumericIds;
+
+  factory AssetsOverviewItem.fromJson(Map<String, dynamic> json) {
+    final raw = json['linked_script_numeric_ids'] as List<dynamic>? ??
+        const <dynamic>[];
+    return AssetsOverviewItem(
+      assetId: json['asset_id'] as String,
+      numericId: (json['numeric_id'] as num).toInt(),
+      name: json['name'] as String,
+      assetType: json['asset_type'] as String,
+      candidateStatus: json['candidate_status'] as String?,
+      linkedScriptNumericIds:
+          raw.map((e) => (e as num).toInt()).toList(growable: false),
+    );
+  }
+}
+
+class AssetsOverviewTypeGroup {
+  const AssetsOverviewTypeGroup({
+    required this.assetType,
+    required this.items,
+  });
+
+  final String assetType;
+  final List<AssetsOverviewItem> items;
+
+  factory AssetsOverviewTypeGroup.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>? ?? const <dynamic>[];
+    return AssetsOverviewTypeGroup(
+      assetType: json['asset_type'] as String,
+      items: raw
+          .map((e) => AssetsOverviewItem.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
+class ProjectAssetsOverview {
+  const ProjectAssetsOverview({
+    required this.schemaVersion,
+    required this.totalCount,
+    required this.candidateCounts,
+    required this.byAssetType,
+  });
+
+  final int schemaVersion;
+  final int totalCount;
+  final AssetsOverviewCandidateCounts candidateCounts;
+  final List<AssetsOverviewTypeGroup> byAssetType;
+
+  factory ProjectAssetsOverview.fromJson(Map<String, dynamic> json) {
+    final groups =
+        json['by_asset_type'] as List<dynamic>? ?? const <dynamic>[];
+    return ProjectAssetsOverview(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      totalCount: (json['total_count'] as num).toInt(),
+      candidateCounts: AssetsOverviewCandidateCounts.fromJson(
+        json['candidate_counts'] as Map<String, dynamic>,
+      ),
+      byAssetType: groups
+          .map(
+            (e) => AssetsOverviewTypeGroup.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 /// `GET /api/v1/projects/{project_id}` — see `getProjectByProjectIdV1`.
 Future<ProjectDetail> fetchProjectByProjectId(
   String accessToken,
@@ -387,6 +496,27 @@ Future<ProjectProductionOverview> fetchProjectProductionOverviewByProjectId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectProductionOverview.fromJson(map);
+}
+
+/// `GET /api/v1/projects/{project_id}/assets-overview` — see `getProjectAssetsOverviewByProjectIdV1`.
+Future<ProjectAssetsOverview> fetchProjectAssetsOverviewByProjectId(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets-overview',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectAssetsOverview.fromJson(map);
 }
 
 /// Maps backend **`blocking_reasons`** codes to short UI labels (Chinese).

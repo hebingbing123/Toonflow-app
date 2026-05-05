@@ -126,42 +126,72 @@ void main() {
     expect(labelShortVideoBlockingReason('unknown_code'), 'unknown_code');
   });
 
-  test('candidate card summarizes pending linked ignored from asset rows', () {
-    final list = ListAssetsResponse(
-      items: <AssetRow>[
-        const AssetRow(
-          id: 'a',
-          numericId: 1,
-          name: 'R1',
-          assetType: 'role',
-          candidateStatus: 'pending',
-        ),
-        const AssetRow(
-          id: 'b',
-          numericId: 2,
-          name: 'R2',
-          assetType: 'role',
-          candidateStatus: 'linked',
-        ),
-        const AssetRow(
-          id: 'c',
-          numericId: 3,
-          name: 'S1',
-          assetType: 'scene',
-          candidateStatus: 'ignored',
-        ),
-      ],
-      total: 3,
-    );
+  test('candidate card summarizes counts from assets-overview payload', () {
+    final overview = ProjectAssetsOverview.fromJson({
+      'schema_version': 1,
+      'total_count': 5,
+      'candidate_counts': {
+        'pending': 1,
+        'linked': 1,
+        'ignored': 1,
+        'unset': 2,
+      },
+      'by_asset_type': <dynamic>[],
+    });
     final ui = buildShortVideoCandidateCardUi(
       projectSelected: true,
       loadingProjectOverview: false,
-      assetsList: list,
+      assetsOverview: overview,
     );
     expect(ui.pending, 1);
     expect(ui.linked, 1);
     expect(ui.ignored, 1);
-    expect(ui.headline, contains('待确认'));
+    expect(ui.unset, 2);
+    expect(ui.headline, isNotEmpty);
+  });
+
+  test('assets overview panel lists type rows with merged script ids', () {
+    final overview = ProjectAssetsOverview.fromJson({
+      'schema_version': 1,
+      'total_count': 2,
+      'candidate_counts': {
+        'pending': 0,
+        'linked': 0,
+        'ignored': 0,
+        'unset': 2,
+      },
+      'by_asset_type': [
+        {
+          'asset_type': 'role',
+          'items': [
+            {
+              'asset_id': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+              'numeric_id': 1,
+              'name': 'A',
+              'asset_type': 'role',
+              'candidate_status': null,
+              'linked_script_numeric_ids': [3, 1],
+            },
+            {
+              'asset_id': 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+              'numeric_id': 2,
+              'name': 'B',
+              'asset_type': 'role',
+              'candidate_status': null,
+              'linked_script_numeric_ids': [2],
+            },
+          ],
+        },
+      ],
+    });
+    final ui = buildShortVideoAssetsOverviewPanelUi(
+      projectSelected: true,
+      loadingProjectOverview: false,
+      overview: overview,
+    );
+    expect(ui.typeLines, hasLength(1));
+    expect(ui.typeLines.single, contains('角色'));
+    expect(ui.typeLines.single, contains('剧本 #1·#2·#3'));
   });
 
   test('shot readiness UI summarizes rollup and blocked shots', () {

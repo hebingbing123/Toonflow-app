@@ -28,7 +28,7 @@ class ShortVideoReadinessItem {
   final String detail;
 }
 
-/// Candidate asset confirmation summary (**`app_asset.candidate_status`** via list assets API).
+/// Candidate asset confirmation summary (**`GET …/assets-overview`** `candidate_counts`; 旧版列表聚合已废弃)。
 class ShortVideoCandidateCardUi {
   const ShortVideoCandidateCardUi({
     this.visible = false,
@@ -37,6 +37,7 @@ class ShortVideoCandidateCardUi {
     this.pending = 0,
     this.linked = 0,
     this.ignored = 0,
+    this.unset = 0,
     this.headline = '',
     this.detail = '',
   });
@@ -47,7 +48,28 @@ class ShortVideoCandidateCardUi {
   final int pending;
   final int linked;
   final int ignored;
+  /// `candidate_status` 为空或非 pending/linked/ignored（与后端 `unset` 一致）。
+  final int unset;
   final String headline;
+  final String detail;
+}
+
+/// Space 内嵌 **统一资产总览**（C9）：按类型分组 + 关联剧本号摘要。
+class ShortVideoAssetsOverviewPanelUi {
+  const ShortVideoAssetsOverviewPanelUi({
+    this.visible = false,
+    this.loading = false,
+    this.unavailable = false,
+    this.headline = '',
+    this.typeLines = const <String>[],
+    this.detail = '',
+  });
+
+  final bool visible;
+  final bool loading;
+  final bool unavailable;
+  final String headline;
+  final List<String> typeLines;
   final String detail;
 }
 
@@ -136,6 +158,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.qualitySummaryLine,
     required this.badCaseMetrics,
     required this.recentTaskLines,
+    required this.assetsOverviewPanelUi,
     required this.candidateCardUi,
     this.onOpenProjectsForCandidateAssets,
     required this.readinessIntro,
@@ -197,6 +220,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final String qualitySummaryLine;
   final List<ShortVideoMetricData> badCaseMetrics;
   final List<String> recentTaskLines;
+  final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoCandidateCardUi candidateCardUi;
   final VoidCallback? onOpenProjectsForCandidateAssets;
   final String readinessIntro;
@@ -531,6 +555,63 @@ class ShortVideoSpaceView extends StatelessWidget {
             ],
           ),
         ),
+        if (assetsOverviewPanelUi.visible) ...[
+          const SizedBox(height: 16),
+          _Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('资产总览', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                if (assetsOverviewPanelUi.loading)
+                  Text(
+                    assetsOverviewPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else if (assetsOverviewPanelUi.unavailable)
+                  Text(
+                    assetsOverviewPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else ...[
+                  Text(
+                    assetsOverviewPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  ),
+                  if (assetsOverviewPanelUi.typeLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    for (final line in assetsOverviewPanelUi.typeLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.category_outlined,
+                              size: 16,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                line,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  assetsOverviewPanelUi.detail,
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
+            ),
+          ),
+        ],
         if (candidateCardUi.visible) ...[
           const SizedBox(height: 16),
           _Panel(
@@ -570,6 +651,10 @@ class ShortVideoSpaceView extends StatelessWidget {
                       _MetricChip(
                         label: '已忽略',
                         value: '${candidateCardUi.ignored}',
+                      ),
+                      _MetricChip(
+                        label: '未标记',
+                        value: '${candidateCardUi.unset}',
                       ),
                     ],
                   ),

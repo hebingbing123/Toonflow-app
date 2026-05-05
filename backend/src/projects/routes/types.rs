@@ -145,6 +145,41 @@ pub struct ProjectProductionOverviewResponse {
     pub pending_review_bad_case_count: i64,
 }
 
+/// `GET /api/v1/projects/{project_id}/assets-overview` — C5 统一资产只读聚合。
+#[derive(Serialize, ToSchema)]
+pub struct AssetsOverviewCandidateCounts {
+    pub pending: i64,
+    pub linked: i64,
+    pub ignored: i64,
+    /// **`candidate_status`** unset or unknown — treated as non-candidate flow for counts.
+    pub unset: i64,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct AssetsOverviewItem {
+    pub asset_id: Uuid,
+    pub numeric_id: i32,
+    pub name: String,
+    pub asset_type: String,
+    pub candidate_status: Option<String>,
+    /// Linked scripts (**`app_script.numeric_id`**) in the same project via **`app_script_asset`**.
+    pub linked_script_numeric_ids: Vec<i32>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct AssetsOverviewTypeGroup {
+    pub asset_type: String,
+    pub items: Vec<AssetsOverviewItem>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ProjectAssetsOverviewResponse {
+    pub schema_version: i32,
+    pub total_count: i64,
+    pub candidate_counts: AssetsOverviewCandidateCounts,
+    pub by_asset_type: Vec<AssetsOverviewTypeGroup>,
+}
+
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
 #[derive(Serialize, ToSchema)]
 pub struct ProjectsSummaryResponse {

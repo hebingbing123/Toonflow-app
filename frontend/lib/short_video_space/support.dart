@@ -356,11 +356,76 @@ ShotReadinessUi buildShotReadinessUi({
   );
 }
 
-/// Space **候选资产确认**卡：基于 `GET /projects/{id}/assets` 与行的 **`candidate_status`**。
+String shortVideoAssetTypeOverviewLabel(String assetType) {
+  switch (assetType) {
+    case 'role':
+      return '角色';
+    case 'scene':
+      return '场景';
+    case 'tool':
+      return '道具';
+    case 'clip':
+      return '镜头';
+    default:
+      return assetType.isEmpty ? '其他' : assetType;
+  }
+}
+
+/// Space **统一资产总览**（C9）：消费 **`GET /projects/{id}/assets-overview`**。
+ShortVideoAssetsOverviewPanelUi buildShortVideoAssetsOverviewPanelUi({
+  required bool projectSelected,
+  required bool loadingProjectOverview,
+  required ProjectAssetsOverview? overview,
+}) {
+  if (!projectSelected) {
+    return const ShortVideoAssetsOverviewPanelUi(visible: false);
+  }
+  if (loadingProjectOverview) {
+    return const ShortVideoAssetsOverviewPanelUi(
+      visible: true,
+      loading: true,
+      headline: '正在读取资产总览…',
+      detail: '按资产类型汇总数量，并聚合关联剧本号（app_script_asset）。',
+    );
+  }
+  if (overview == null) {
+    return const ShortVideoAssetsOverviewPanelUi(
+      visible: true,
+      unavailable: true,
+      headline: '资产总览暂不可用。',
+      detail: '可稍后刷新，或在项目区维护资产与剧本挂载关系。',
+    );
+  }
+  final lines = <String>[];
+  for (final g in overview.byAssetType) {
+    final ids = <int>{};
+    for (final item in g.items) {
+      ids.addAll(item.linkedScriptNumericIds);
+    }
+    final sorted = ids.toList()..sort();
+    final idPart = sorted.isEmpty
+        ? '暂无关联剧本'
+        : '剧本 ${sorted.take(8).map((n) => '#$n').join('·')}${sorted.length > 8 ? '…' : ''}';
+    lines.add(
+      '${shortVideoAssetTypeOverviewLabel(g.assetType)} · ${g.items.length} 条 · $idPart',
+    );
+  }
+  final headline =
+      '共 ${overview.totalCount} 条资产，按类型分组（实验剧本挂载关系见每行「剧本」摘要）。';
+  const detail = '数据来自只读聚合接口；候选状态维护仍在项目区 PATCH 资产。';
+  return ShortVideoAssetsOverviewPanelUi(
+    visible: true,
+    headline: headline,
+    typeLines: lines,
+    detail: detail,
+  );
+}
+
+/// Space **候选资产确认**卡：消费 **`GET …/assets-overview`** 的 **`candidate_counts`**。
 ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   required bool projectSelected,
   required bool loadingProjectOverview,
-  required ListAssetsResponse? assetsList,
+  required ProjectAssetsOverview? assetsOverview,
 }) {
   if (!projectSelected) {
     return const ShortVideoCandidateCardUi(visible: false);
@@ -373,7 +438,7 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
       detail: '用于统计候选 workflow：pending / linked / ignored（与 PATCH 资产一致）。',
     );
   }
-  if (assetsList == null) {
+  if (assetsOverview == null) {
     return const ShortVideoCandidateCardUi(
       visible: true,
       unavailable: true,
@@ -381,33 +446,23 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
       detail: '可稍后刷新页面，或直接去项目区查看并编辑资产。',
     );
   }
-  var pending = 0;
-  var linked = 0;
-  var ignored = 0;
-  for (final a in assetsList.items) {
-    final s = (a.candidateStatus ?? '').trim().toLowerCase();
-    if (s == 'pending') {
-      pending++;
-    } else if (s == 'linked') {
-      linked++;
-    } else if (s == 'ignored') {
-      ignored++;
-    }
-  }
+  final c = assetsOverview.candidateCounts;
+  final pending = c.pending;
+  final linked = c.linked;
+  final ignored = c.ignored;
+  final unset = c.unset;
   final tracked = pending + linked + ignored;
-  final total = assetsList.total;
-  final listed = assetsList.items.length;
   final headline = tracked == 0
-      ? '尚未有资产进入候选流（可标记为待确认 / 已关联 / 已忽略）。'
-      : '待确认 $pending · 已关联 $linked · 已忽略 $ignored';
-  final detail = total > listed
-      ? '项目资产共 $total 条；统计基于本次拉取的 $listed 条。资产较多时请在项目区分批标记后再刷新。'
-      : '基于当前列出的 $listed 条资产。在项目区可通过 PATCH candidate_status 更新。';
+      ? '尚未标记 pending / linked / ignored；可在项目区对镜头候选等资产 PATCH candidate_status。'
+      : '候选状态已按项目全量聚合（下方计数含未标记）：';
+  final detail =
+      '项目资产共 ${assetsOverview.totalCount} 条；计数由服务端一次性聚合（不分页）。在项目区可通过 PATCH candidate_status 更新。';
   return ShortVideoCandidateCardUi(
     visible: true,
     pending: pending,
     linked: linked,
     ignored: ignored,
+    unset: unset,
     headline: headline,
     detail: detail,
   );
