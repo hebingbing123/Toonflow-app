@@ -967,11 +967,18 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   VoidCallback? onRefreshPublish,
   VoidCallback? onBootstrapPublishDraft,
   VoidCallback? onEnqueuePublishJob,
+  VoidCallback? onEnqueueAllDrafts,
+  VoidCallback? onRetryFailedPublishJobs,
   VoidCallback? onConfirmSemiAuto,
   VoidCallback? onSuggestPublishCopy,
   VoidCallback? onClearPublishSchedule,
   VoidCallback? onOpenPublishTroubleshooting,
   List<String> publishTargetPlatformIds = const [],
+  Map<String, String> publishAutomationModesByPlatform =
+      const <String, String>{},
+  void Function(String platformId, String automationMode)?
+      onChangePublishAutomationMode,
+  List<String> publishBatchResultLines = const <String>[],
   int publishCopyEditorRevision = 0,
   PublishPlatformCopyCommit? onCommitPublishPlatformCopy,
   void Function(BuildContext context)? onScheduleFirstDraft,
@@ -1032,7 +1039,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   if (activeDraftId == null ||
       activeDraftId.trim().isEmpty ||
       !drafts.any((d) => d.id == activeDraftId)) {
-    activeDraftId = drafts.isNotEmpty ? drafts.first.id : null;
+    // No automatic fallback to first draft - require explicit selection
+    activeDraftId = null;
   }
   PublishDraftRow? activeDraft;
   if (activeDraftId != null) {
@@ -1045,13 +1053,18 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   }
 
   final prepareLines = <String>[
-    if (activeDraft != null) '当前草稿：${activeDraft.title.trim().isEmpty ? "（无标题）" : activeDraft.title.trim()}',
-    if (prepare != null) ...[
+    if (activeDraft != null) 
+      '当前草稿：${activeDraft.title.trim().isEmpty ? "（无标题）" : activeDraft.title.trim()}'
+    else if (drafts.isNotEmpty)
+      '⚠️ 请明确选择草稿（不再自动使用第一条）',
+    if (activeDraft != null && prepare != null) ...[
       if (prepare.ok) '校验：✓ 当前草稿满足占位规则（仍需真实成片引用才能实际上线）。',
       for (final issue in prepare.issues)
         '${issue.severity}: ${issue.message}'
             '${issue.platformId != null ? ' · ${issue.platformId}' : ''}',
-    ] else
+    ] else if (activeDraft == null && drafts.isNotEmpty)
+      '选择草稿后将显示 prepare-check 校验结果。'
+    else
       '尚无草稿或未完成 prepare-check（创建草稿后将自动读取第一条）。',
   ];
 
@@ -1081,6 +1094,13 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   final scheduledDraftCount = drafts
       .where((d) => (d.scheduledAt ?? '').trim().isNotEmpty)
       .length;
+  final labels = Map<String, String>.from(kShortVideoPublishPlatformLabels);
+  if (matrix != null) {
+    for (final p in matrix.platforms) {
+      labels[p.platformId] = p.labelZh;
+    }
+  }
+
   final publishOverviewLines = <String>[
     '成功作业：$succeededJobCount · 失败/部分失败：$failedJobCount',
     '待确认：$waitingConfirmCount · 已定时草稿：$scheduledDraftCount/${drafts.length}',
@@ -1099,6 +1119,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       final p = kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId;
       return '审计：$p · ${a.status} · mode=${a.deliveryMode}';
     }),
+    if (publishAutomationModesByPlatform.isNotEmpty)
+      '目标自动化：${publishAutomationModesByPlatform.entries.map((e) => "${labels[e.key] ?? e.key}=${e.value}").join("；")}',
   ];
 
   String? awaitingId;
@@ -1106,13 +1128,6 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     if (j.status == 'awaiting_confirmation') {
       awaitingId = j.id;
       break;
-    }
-  }
-
-  final labels = Map<String, String>.from(kShortVideoPublishPlatformLabels);
-  if (matrix != null) {
-    for (final p in matrix.platforms) {
-      labels[p.platformId] = p.labelZh;
     }
   }
 
@@ -1173,6 +1188,11 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     onCommitPublishPlatformCopy: onCommitPublishPlatformCopy,
     onScheduleFirstDraft: onScheduleFirstDraft,
     onScheduleAllDraftsSameTime: onScheduleAllDraftsSameTime,
+    onEnqueueAllDrafts: onEnqueueAllDrafts,
+    onRetryFailedPublishJobs: onRetryFailedPublishJobs,
+    publishBatchResultLines: publishBatchResultLines,
+    publishAutomationModesByPlatform: publishAutomationModesByPlatform,
+    onChangePublishAutomationMode: onChangePublishAutomationMode,
     publishDraftOptions: drafts,
     selectedPublishDraftId: activeDraftId,
     onSelectPublishDraft: onSelectPublishDraft,

@@ -70,6 +70,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   List<PublishAttemptAuditRow> _publishAuditRows =
       const <PublishAttemptAuditRow>[];
   String? _selectedPublishDraftId;
+  Map<String, String> _publishAutomationModesByPlatform =
+      <String, String>{};
+  List<String> _publishBatchResultLines = const <String>[];
   bool _publishBusy = false;
   int _publishCopyEditorRevision = 0;
   String? _selectedProjectId;
@@ -102,7 +105,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         }
       }
     }
-    return _publishDrafts.first;
+    // No automatic fallback to first draft - require explicit selection
+    return null;
   }
 
   void _syncSelectedPublishDraftWith(List<PublishDraftRow> drafts) {
@@ -114,7 +118,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     if (current != null && drafts.any((d) => d.id == current)) {
       return;
     }
-    _selectedPublishDraftId = drafts.first.id;
+    // Clear selection if current draft no longer exists - require explicit re-selection
+    _selectedPublishDraftId = null;
   }
 
   @override
@@ -333,15 +338,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       final perfAlerts = await fetchPublishPerformanceAlerts(token, project.id);
       final audits = await fetchPublishAudit(token, project.id, limit: 30);
       PublishPrepareCheckResponse? prepare;
-      if (drafts.isNotEmpty) {
-        var prepareDraftId = drafts.first.id;
-        final preferred = preferredDraftId;
-        if (preferred != null &&
-            preferred.trim().isNotEmpty &&
-            drafts.any((d) => d.id == preferred)) {
-          prepareDraftId = preferred;
+      // Only fetch prepare check if a draft is explicitly selected
+      if (drafts.isNotEmpty && preferredDraftId != null && preferredDraftId.trim().isNotEmpty) {
+        if (drafts.any((d) => d.id == preferredDraftId)) {
+          prepare = await fetchPublishPrepareCheck(token, project.id, preferredDraftId);
         }
-        prepare = await fetchPublishPrepareCheck(token, project.id, prepareDraftId);
       }
       return (
         matrix: matrix,
@@ -369,14 +370,38 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     final out = <Map<String, dynamic>>[];
     for (var i = 0; i < _targetPlatforms.length; i++) {
       final p = _targetPlatforms[i];
+      final mode = _publishAutomationModesByPlatform[p]?.trim();
       out.add(<String, dynamic>{
         'platform_id': p,
-        'automation_mode': 'semi_auto',
+        'automation_mode': mode == null || mode.isEmpty ? 'semi_auto' : mode,
         'serial_order': i,
         'extra': <String, dynamic>{},
       });
     }
     return out;
+  }
+
+  void _syncPublishAutomationModesFromMatrix() {
+    final matrix = _publishMatrix;
+    final next = <String, String>{};
+    for (final pid in _targetPlatforms) {
+      final existing = _publishAutomationModesByPlatform[pid];
+      if (existing != null && existing.trim().isNotEmpty) {
+        next[pid] = existing.trim();
+        continue;
+      }
+      String fallback = 'semi_auto';
+      if (matrix != null) {
+        for (final row in matrix.platforms) {
+          if (row.platformId == pid && row.automationMode.trim().isNotEmpty) {
+            fallback = row.automationMode.trim();
+            break;
+          }
+        }
+      }
+      next[pid] = fallback;
+    }
+    _publishAutomationModesByPlatform = next;
   }
 
   Future<void> _refreshPublishSlice(ProjectRow project, String token) async {
@@ -397,6 +422,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishJobs = snapshot.jobs;
       _publishPerfAlerts = snapshot.perfAlerts;
       _publishAuditRows = snapshot.audits;
+      _syncPublishAutomationModesFromMatrix();
     });
   }
 
@@ -480,7 +506,19 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         return;
       }
       final active = _activePublishDraft;
-      final draftId = active?.id ?? drafts.first.id;
+      if (active == null) {
+        // No draft explicitly selected - require user to select one
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('请先明确选择要发布的草稿（不再自动使用第一条草稿）。'),
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+      final draftId = active.id;
       final targets = _publishTargetMaps();
       if (targets.isNotEmpty) {
         await upsertPublishTargets(token, project.id, draftId, targets);
@@ -514,6 +552,107 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  Future<void> _enqueueAllDraftJobs() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    if (_publishDrafts.isEmpty) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+      _publishBatchResultLines = const <String>[];
+    });
+    try {
+      final summary = <String>[];
+      final targets = _publishTargetMaps();
+      var ok = 0;
+      for (final draft in _publishDrafts) {
+        try {
+          if (targets.isNotEmpty) {
+            await upsertPublishTargets(token, project.id, draft.id, targets);
+          }
+          await createPublishJob(token, project.id, draft.id);
+          ok++;
+          final title = draft.title.trim().isEmpty ? draft.id : draft.title.trim();
+          summary.add('OK · $title');
+        } on RustApiException catch (e) {
+          summary.add('FAIL · ${draft.id} · ${e.statusCode ?? '-'}');
+        } catch (e) {
+          summary.add('FAIL · ${draft.id} · $e');
+        }
+      }
+      await _refreshPublishSlice(project, token);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _publishBatchResultLines = summary;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('批量投递完成：$ok/${_publishDrafts.length} 成功。')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _retryFailedPublishJobs() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    final failed = _publishJobs
+        .where((j) => j.status == 'failed' || j.status == 'partial_failed')
+        .toList(growable: false);
+    if (failed.isEmpty) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+      _publishBatchResultLines = const <String>[];
+    });
+    try {
+      final summary = <String>[];
+      var ok = 0;
+      for (final job in failed) {
+        try {
+          await retryPublishJob(token, project.id, job.id);
+          ok++;
+          summary.add('OK · 重试作业 ${job.id.substring(0, 8)}');
+        } on RustApiException catch (e) {
+          summary
+              .add('FAIL · ${job.id.substring(0, 8)} · ${e.statusCode ?? '-'}');
+        } catch (e) {
+          summary.add('FAIL · ${job.id.substring(0, 8)} · $e');
+        }
+      }
+      await _refreshPublishSlice(project, token);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _publishBatchResultLines = summary;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('批量重试完成：$ok/${failed.length} 成功。')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
   Future<void> _suggestPublishCopy() async {
     final token = widget.accessToken;
     final project = _selectedProject;
@@ -534,6 +673,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     try {
       final draftId = _activePublishDraft?.id;
       if (draftId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('请先明确选择要生成文案的草稿。'),
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
         return;
       }
       final res = await suggestPublishPlatformCopy(
@@ -661,6 +808,16 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       return;
     }
     final messenger = ScaffoldMessenger.maybeOf(context);
+    final draftId = _activePublishDraft?.id;
+    if (draftId == null) {
+      messenger?.showSnackBar(
+        const SnackBar(
+          content: Text('请先明确选择要定时的草稿。'),
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
     final dt = await _pickScheduleDateTime(context);
     if (dt == null || !context.mounted) {
       return;
@@ -670,16 +827,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     });
     try {
       final iso = dt.toUtc().toIso8601String();
-      final draftId = _activePublishDraft?.id;
-      if (draftId == null) {
-        return;
-      }
       await patchPublishDraft(token, project.id, draftId, <String, dynamic>{
         'scheduled_at': iso,
       });
       await _refreshPublishSlice(project, token);
       messenger?.showSnackBar(
-        SnackBar(content: Text('首张草稿已设为定时：$iso（UTC）')),
+        SnackBar(content: Text('已设为定时：$iso（UTC）')),
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
@@ -887,14 +1040,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       return;
     }
     final messenger = ScaffoldMessenger.maybeOf(context);
+    final draftId = _activePublishDraft?.id;
+    if (draftId == null) {
+      messenger?.showSnackBar(
+        const SnackBar(
+          content: Text('请先明确选择要编辑文案的草稿。'),
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
     setState(() {
       _publishBusy = true;
     });
     try {
-      final draftId = _activePublishDraft?.id;
-      if (draftId == null) {
-        return;
-      }
       final draft = await fetchPublishDraft(token, project.id, draftId);
       final copy = Map<String, dynamic>.from(draft.platformCopy ?? {});
       final tags = tagsComma
@@ -1013,6 +1172,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _publishJobs = const <PublishJobRow>[];
           _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
           _publishAuditRows = const <PublishAttemptAuditRow>[];
+          _publishAutomationModesByPlatform = <String, String>{};
           _publishBusy = false;
           _publishCopyEditorRevision = 0;
         });
@@ -1042,6 +1202,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishJobs = const <PublishJobRow>[];
       _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
       _publishAuditRows = const <PublishAttemptAuditRow>[];
+      _publishAutomationModesByPlatform = <String, String>{};
       _publishBusy = false;
       _publishCopyEditorRevision = 0;
     });
@@ -1211,6 +1372,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishJobs = publishJobsSnap;
         _publishPerfAlerts = publishPerfAlertsSnap;
         _publishAuditRows = publishAuditsSnap;
+        _syncPublishAutomationModesFromMatrix();
       });
     } on RustApiException catch (_) {
       if (!mounted) {
@@ -1238,6 +1400,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishJobs = const <PublishJobRow>[];
         _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
         _publishAuditRows = const <PublishAttemptAuditRow>[];
+        _publishAutomationModesByPlatform = <String, String>{};
         _publishBusy = false;
         _publishCopyEditorRevision = 0;
       });
@@ -1267,6 +1430,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishJobs = const <PublishJobRow>[];
         _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
         _publishAuditRows = const <PublishAttemptAuditRow>[];
+        _publishAutomationModesByPlatform = <String, String>{};
         _publishBusy = false;
         _publishCopyEditorRevision = 0;
       });
@@ -2285,6 +2449,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           ? () => unawaited(_clearPublishSchedule())
           : null,
       publishTargetPlatformIds: _targetPlatforms,
+      onEnqueueAllDrafts:
+          project != null ? () => unawaited(_enqueueAllDraftJobs()) : null,
+      onRetryFailedPublishJobs:
+          project != null ? () => unawaited(_retryFailedPublishJobs()) : null,
+      publishBatchResultLines: _publishBatchResultLines,
+      publishAutomationModesByPlatform: _publishAutomationModesByPlatform,
+      onChangePublishAutomationMode: (platformId, automationMode) {
+        setState(() {
+          _publishAutomationModesByPlatform = <String, String>{
+            ..._publishAutomationModesByPlatform,
+            platformId: automationMode,
+          };
+        });
+      },
       publishCopyEditorRevision: _publishCopyEditorRevision,
       onCommitPublishPlatformCopy: project != null &&
               accessToken != null &&
