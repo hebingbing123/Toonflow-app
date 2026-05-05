@@ -124,6 +124,45 @@ class ShortVideoExportCheckPanelUi {
   final String detail;
 }
 
+/// **E10–E13**：发布准备清单、平台矩阵、草稿与作业（**`/publish/*`**）。
+class ShortVideoPublishPanelUi {
+  const ShortVideoPublishPanelUi({
+    this.visible = false,
+    this.loading = false,
+    this.unavailable = false,
+    this.headline = '',
+    this.exportGateHint = '',
+    this.detail = '',
+    this.matrixLines = const <String>[],
+    this.prepareLines = const <String>[],
+    this.draftLines = const <String>[],
+    this.jobLines = const <String>[],
+    this.onRefreshPublish,
+    this.publishBusy = false,
+    this.onBootstrapPublishDraft,
+    this.onEnqueuePublishJob,
+    this.awaitingSemiAutoJobId,
+    this.onConfirmSemiAuto,
+  });
+
+  final bool visible;
+  final bool loading;
+  final bool unavailable;
+  final String headline;
+  final String exportGateHint;
+  final String detail;
+  final List<String> matrixLines;
+  final List<String> prepareLines;
+  final List<String> draftLines;
+  final List<String> jobLines;
+  final VoidCallback? onRefreshPublish;
+  final bool publishBusy;
+  final VoidCallback? onBootstrapPublishDraft;
+  final VoidCallback? onEnqueuePublishJob;
+  final String? awaitingSemiAutoJobId;
+  final VoidCallback? onConfirmSemiAuto;
+}
+
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
 class ShotReadinessUi {
   const ShotReadinessUi({
@@ -212,6 +251,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.assetsOverviewPanelUi,
     required this.assemblyPanelUi,
     required this.exportCheckPanelUi,
+    required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
     required this.candidateCardUi,
     this.onOpenProjectsForCandidateAssets,
@@ -277,6 +317,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
+  final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final ShortVideoCandidateCardUi candidateCardUi;
   final VoidCallback? onOpenProjectsForCandidateAssets;
@@ -838,6 +879,176 @@ class ShortVideoSpaceView extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   exportCheckPanelUi.detail,
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (publishPanelUi.visible) ...[
+          const SizedBox(height: 16),
+          _Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('发布准备', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                if (publishPanelUi.exportGateHint.trim().isNotEmpty) ...[
+                  Text(
+                    publishPanelUi.exportGateHint,
+                    style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                if (publishPanelUi.loading)
+                  Text(
+                    publishPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else if (publishPanelUi.unavailable)
+                  Text(
+                    publishPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else ...[
+                  Text(
+                    publishPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  ),
+                  if (publishPanelUi.matrixLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '平台能力矩阵（占位约束）',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in publishPanelUi.matrixLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+                  if (publishPanelUi.prepareLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '发布准备校验',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in publishPanelUi.prepareLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+                  if (publishPanelUi.draftLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '发布单（草稿）',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in publishPanelUi.draftLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+                  if (publishPanelUi.jobLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '发布作业',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in publishPanelUi.jobLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+                  if (publishPanelUi.awaitingSemiAutoJobId != null &&
+                      publishPanelUi.onConfirmSemiAuto != null) ...[
+                    const SizedBox(height: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: publishPanelUi.publishBusy
+                          ? null
+                          : publishPanelUi.onConfirmSemiAuto,
+                      icon: publishPanelUi.publishBusy
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.verified_outlined),
+                      label: const Text('确认半自动发布（服务端闸门）'),
+                    ),
+                  ],
+                  if (publishPanelUi.onBootstrapPublishDraft != null ||
+                      publishPanelUi.onEnqueuePublishJob != null ||
+                      publishPanelUi.onRefreshPublish != null) ...[
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (publishPanelUi.onRefreshPublish != null)
+                          OutlinedButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onRefreshPublish,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('刷新发布数据'),
+                          ),
+                        if (publishPanelUi.onBootstrapPublishDraft != null)
+                          FilledButton.tonalIcon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onBootstrapPublishDraft,
+                            icon: publishPanelUi.publishBusy
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child:
+                                        CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.note_add_outlined),
+                            label: const Text('创建发布草稿并写入平台目标'),
+                          ),
+                        if (publishPanelUi.onEnqueuePublishJob != null)
+                          FilledButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onEnqueuePublishJob,
+                            icon: publishPanelUi.publishBusy
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child:
+                                        CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.cloud_upload_outlined),
+                            label: const Text('投递发布作业'),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  publishPanelUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],

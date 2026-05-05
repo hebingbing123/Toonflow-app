@@ -4,7 +4,7 @@
 
 use std::net::SocketAddr;
 
-use toonflow_server::{app, harness, jobs, state};
+use toonflow_server::{app, harness, jobs, publish, state};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[tokio::main]
@@ -48,6 +48,11 @@ async fn main() {
     let worker_state = state.clone();
     tokio::spawn(async move {
         jobs::worker::run(worker_state).await;
+    });
+
+    let publish_worker_state = state.clone();
+    tokio::spawn(async move {
+        publish::worker::run(publish_worker_state).await;
     });
 
     let app = app::build_router(state);

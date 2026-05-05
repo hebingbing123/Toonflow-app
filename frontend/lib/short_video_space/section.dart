@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../rust_api.dart';
@@ -55,6 +57,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ProjectAssetsOverview? _projectAssetsOverview;
   ProjectShortVideoAssembly? _shortVideoAssembly;
   ProjectShortVideoExportCheck? _shortVideoExportCheck;
+  PublishPlatformMatrixResponse? _publishMatrix;
+  bool _publishUnavailable = false;
+  List<PublishDraftRow> _publishDrafts = const <PublishDraftRow>[];
+  PublishPrepareCheckResponse? _publishPrepare;
+  List<PublishJobRow> _publishJobs = const <PublishJobRow>[];
+  bool _publishBusy = false;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -268,6 +276,234 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  Future<
+      ({
+        PublishPlatformMatrixResponse? matrix,
+        bool unavailable,
+        List<PublishDraftRow> drafts,
+        PublishPrepareCheckResponse? prepare,
+        List<PublishJobRow> jobs,
+      })> _capturePublishSlice(
+    ProjectRow project,
+    String token,
+  ) async {
+    try {
+      final matrix = await fetchPublishPlatformMatrix(token, project.id);
+      final drafts = await fetchPublishDrafts(token, project.id);
+      final jobs = await fetchPublishJobs(token, project.id);
+      PublishPrepareCheckResponse? prepare;
+      if (drafts.isNotEmpty) {
+        prepare = await fetchPublishPrepareCheck(token, project.id, drafts.first.id);
+      }
+      return (
+        matrix: matrix,
+        unavailable: false,
+        drafts: drafts,
+        prepare: prepare,
+        jobs: jobs,
+      );
+    } catch (_) {
+      return (
+        matrix: null,
+        unavailable: true,
+        drafts: <PublishDraftRow>[],
+        prepare: null,
+        jobs: <PublishJobRow>[],
+      );
+    }
+  }
+
+  Future<void> _refreshPublishSlice(ProjectRow project, String token) async {
+    final snapshot = await _capturePublishSlice(project, token);
+    if (!mounted || _selectedProjectId != project.id) {
+      return;
+    }
+    setState(() {
+      _publishMatrix = snapshot.matrix;
+      _publishUnavailable = snapshot.unavailable;
+      _publishDrafts = snapshot.drafts;
+      _publishPrepare = snapshot.prepare;
+      _publishJobs = snapshot.jobs;
+    });
+  }
+
+  Future<void> _bootstrapPublishDraft() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      final title = (project.name ?? '').trim();
+      await createPublishDraft(token, project.id, <String, dynamic>{
+        'title': title.isEmpty ? '发布草稿' : title,
+        'draft_status': 'editing',
+        'tags': <String>[],
+        'platform_copy': <String, dynamic>{},
+      });
+      final drafts = await fetchPublishDrafts(token, project.id);
+      if (drafts.isEmpty) {
+        return;
+      }
+      final draftId = drafts.first.id;
+      final targets = _targetPlatforms
+          .map(
+            (p) => <String, dynamic>{
+              'platform_id': p,
+              'automation_mode': 'semi_auto',
+              'extra': <String, dynamic>{},
+            },
+          )
+          .toList(growable: false);
+      if (targets.isNotEmpty) {
+        await upsertPublishTargets(token, project.id, draftId, targets);
+      }
+      await _refreshPublishSlice(project, token);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已创建发布草稿并写入平台目标。')),
+      );
+    } on RustApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('发布草稿失败：${e.statusCode}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('发布草稿失败：$e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _enqueuePublishJob() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      var drafts = await fetchPublishDrafts(token, project.id);
+      if (drafts.isEmpty) {
+        final title = (project.name ?? '').trim();
+        await createPublishDraft(token, project.id, <String, dynamic>{
+          'title': title.isEmpty ? '发布草稿' : title,
+          'draft_status': 'editing',
+          'tags': <String>[],
+          'platform_copy': <String, dynamic>{},
+        });
+        drafts = await fetchPublishDrafts(token, project.id);
+      }
+      if (drafts.isEmpty) {
+        return;
+      }
+      final draftId = drafts.first.id;
+      final targets = _targetPlatforms
+          .map(
+            (p) => <String, dynamic>{
+              'platform_id': p,
+              'automation_mode': 'semi_auto',
+              'extra': <String, dynamic>{},
+            },
+          )
+          .toList(growable: false);
+      if (targets.isNotEmpty) {
+        await upsertPublishTargets(token, project.id, draftId, targets);
+      }
+      await createPublishJob(token, project.id, draftId);
+      await _refreshPublishSlice(project, token);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已投递发布作业（服务端 worker 将处理队列）。')),
+      );
+    } on RustApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('投递失败：${e.statusCode}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('投递失败：$e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _confirmSemiAutoPublish() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    String? jobId;
+    for (final j in _publishJobs) {
+      if (j.status == 'awaiting_confirmation') {
+        jobId = j.id;
+        break;
+      }
+    }
+    if (jobId == null) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      await confirmSemiAutoPublishJob(token, project.id, jobId);
+      await _refreshPublishSlice(project, token);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已确认半自动闸门，worker 将继续投递。')),
+      );
+    } on RustApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('确认失败：${e.statusCode}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('确认失败：$e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
   Future<void> _loadProjectOverview() async {
     final token = widget.accessToken;
     final project = _selectedProject;
@@ -286,6 +522,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _projectAssetsOverview = null;
           _shortVideoAssembly = null;
           _shortVideoExportCheck = null;
+          _publishMatrix = null;
+          _publishUnavailable = false;
+          _publishDrafts = const <PublishDraftRow>[];
+          _publishPrepare = null;
+          _publishJobs = const <PublishJobRow>[];
+          _publishBusy = false;
         });
       }
       return;
@@ -304,6 +546,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _projectAssetsOverview = null;
       _shortVideoAssembly = null;
       _shortVideoExportCheck = null;
+      _publishMatrix = null;
+      _publishUnavailable = false;
+      _publishDrafts = const <PublishDraftRow>[];
+      _publishPrepare = null;
+      _publishJobs = const <PublishJobRow>[];
+      _publishBusy = false;
     });
     try {
       Future<ProjectProductionOverview?> loadProductionOverview() async {
@@ -366,6 +614,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       ProjectShortVideoExportCheck? exportCheckSlice;
       ProjectShortVideoReadiness? shotReadiness;
       var shotUnavailable = false;
+      PublishPlatformMatrixResponse? publishMatrixSnap;
+      var publishUnavailableSnap = false;
+      var publishDraftsSnap = <PublishDraftRow>[];
+      PublishPrepareCheckResponse? publishPrepareSnap;
+      var publishJobsSnap = <PublishJobRow>[];
       await Future.wait([
         Future(() async {
           try {
@@ -396,6 +649,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             shotUnavailable = true;
           }
         }),
+        Future(() async {
+          final snapshot = await _capturePublishSlice(project, token);
+          publishMatrixSnap = snapshot.matrix;
+          publishUnavailableSnap = snapshot.unavailable;
+          publishDraftsSnap = snapshot.drafts;
+          publishPrepareSnap = snapshot.prepare;
+          publishJobsSnap = snapshot.jobs;
+        }),
       ]);
       if (!mounted || _selectedProjectId != project.id) {
         return;
@@ -414,6 +675,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _shortVideoExportCheck = exportCheckSlice;
         _shotReadiness = shotReadiness;
         _shotReadinessUnavailable = shotUnavailable;
+        _publishMatrix = publishMatrixSnap;
+        _publishUnavailable = publishUnavailableSnap;
+        _publishDrafts = publishDraftsSnap;
+        _publishPrepare = publishPrepareSnap;
+        _publishJobs = publishJobsSnap;
       });
     } on RustApiException catch (_) {
       if (!mounted) {
@@ -432,6 +698,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _projectAssetsOverview = null;
         _shortVideoAssembly = null;
         _shortVideoExportCheck = null;
+        _publishMatrix = null;
+        _publishUnavailable = false;
+        _publishDrafts = const <PublishDraftRow>[];
+        _publishPrepare = null;
+        _publishJobs = const <PublishJobRow>[];
+        _publishBusy = false;
       });
     } catch (_) {
       if (!mounted) {
@@ -450,6 +722,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _projectAssetsOverview = null;
         _shortVideoAssembly = null;
         _shortVideoExportCheck = null;
+        _publishMatrix = null;
+        _publishUnavailable = false;
+        _publishDrafts = const <PublishDraftRow>[];
+        _publishPrepare = null;
+        _publishJobs = const <PublishJobRow>[];
+        _publishBusy = false;
       });
     } finally {
       if (mounted) {
@@ -762,6 +1040,38 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       loadingProjectOverview: _loadingProjectOverview,
       exportCheck: _shortVideoExportCheck,
     );
+    final accessToken = widget.accessToken;
+    final publishPanelUi = buildShortVideoPublishPanelUi(
+      projectSelected: project != null,
+      loadingProjectOverview: _loadingProjectOverview,
+      publishUnavailable: _publishUnavailable,
+      exportCheck: _shortVideoExportCheck,
+      matrix: _publishMatrix,
+      drafts: _publishDrafts,
+      prepare: _publishPrepare,
+      jobs: _publishJobs,
+      publishBusy: _publishBusy,
+      onRefreshPublish: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty
+          ? () => unawaited(_refreshPublishSlice(project, accessToken))
+          : null,
+      onBootstrapPublishDraft: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty
+          ? () => unawaited(_bootstrapPublishDraft())
+          : null,
+      onEnqueuePublishJob: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty
+          ? () => unawaited(_enqueuePublishJob())
+          : null,
+      onConfirmSemiAuto: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty
+          ? () => unawaited(_confirmSemiAutoPublish())
+          : null,
+    );
     final candidateCardUi = buildShortVideoCandidateCardUi(
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
@@ -899,6 +1209,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       assetsOverviewPanelUi: assetsOverviewPanelUi,
       assemblyPanelUi: assemblyPanelUi,
       exportCheckPanelUi: exportCheckPanelUi,
+      publishPanelUi: publishPanelUi,
       onOpenProductionForAssemblyExport: project == null
           ? null
           : () {

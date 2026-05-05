@@ -17,6 +17,7 @@ pub mod narrative;
 pub mod production;
 pub mod projects;
 pub mod prompting;
+pub mod publish;
 pub mod scope;
 pub mod scripting;
 pub mod settings;

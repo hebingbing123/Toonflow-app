@@ -56,6 +56,7 @@ pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     doc.merge(crate::prompting::PromptingHttpOpenApi::openapi());
     doc.merge(crate::production::ProductionApi::openapi());
     doc.merge(crate::projects::ProjectsOpenApi::openapi());
+    doc.merge(crate::publish::PublishOpenApi::openapi());
     doc.merge(crate::jobs::JobsOpenApi::openapi());
     doc.merge(crate::harness::HarnessOpenApi::openapi());
     doc.merge(crate::harness::WsUpgradeOpenApi::openapi());

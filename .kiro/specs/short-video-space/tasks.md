@@ -181,43 +181,43 @@
 
 ## E. impl Wave 4 / 发布：发布域模型、校验、状态机、半自动、worker、前端
 
-- [ ] E1. 数据：`publish_profiles` 迁移 + CRUD  
+- [x] E1. 数据：`publish_profiles` 迁移 + CRUD  
   - _需求: 5, 5.2a_
 
-- [ ] E2. 数据：`publish_drafts` 迁移 + CRUD  
+- [x] E2. 数据：`publish_drafts` 迁移 + CRUD  
   - _需求: 5, 5.2b_
 
-- [ ] E3. 数据：`publish_targets` + `publish_jobs` + `publish_attempts` 迁移  
+- [x] E3. 数据：`publish_targets` + `publish_jobs` + `publish_attempts` 迁移  
   - _需求: 5, 6_
 
-- [ ] E4. 后端：**发布准备校验**服务  
+- [x] E4. 后端：**发布准备校验**服务  
   - _需求: 5, 12_
 
-- [ ] E5. 后端：`publish` **状态机** + 单元测试  
+- [x] E5. 后端：`publish` **状态机** + 单元测试  
   - _需求: 5_
 
-- [ ] E6. 后端：**半自动确认** gate  
+- [x] E6. 后端：**半自动确认** gate  
   - _需求: 5.6_
 
-- [ ] E7. 后端：`publish_jobs` **worker** 骨架  
+- [x] E7. 后端：`publish_jobs` **worker** 骨架  
   - _需求: 5, 10_
 
-- [ ] E8. 后端：**取消 / 重试** API  
+- [x] E8. 后端：**取消 / 重试** API  
   - _需求: 5, 11_
 
-- [ ] E9. 后端：`publish` **HTTP 路由**  
+- [x] E9. 后端：`publish` **HTTP 路由**  
   - _需求: 5, 10_
 
-- [ ] E10. 前端：**发布准备** checklist  
+- [x] E10. 前端：**发布准备** checklist  
   - _需求: 5_
 
-- [ ] E11. 前端：**发布单列表** + draft 编辑  
+- [x] E11. 前端：**发布单列表** + draft 编辑  
   - _需求: 5, 5.2b_
 
-- [ ] E12. 前端：**平台能力矩阵**  
+- [x] E12. 前端：**平台能力矩阵**  
   - _需求: 5, 12_
 
-- [ ] E13. 前端：从**成片/导出完成态**进入发布准备  
+- [x] E13. 前端：从**成片/导出完成态**进入发布准备  
   - _需求: 5.7_
 
 ---

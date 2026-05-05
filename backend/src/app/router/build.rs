@@ -12,6 +12,7 @@ use crate::narrative;
 use crate::production;
 use crate::projects;
 use crate::prompting;
+use crate::publish;
 use crate::scripting;
 use crate::settings;
 use crate::state::AppState;
@@ -59,6 +60,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings::agent_memory::router())
         .merge(vendor::catalog::router())
         .merge(projects::routes::router())
+        .merge(publish::router())
         .merge(manuals::director::router())
         .merge(manuals::art_styles::router())
         .merge(narrative::novels::router())

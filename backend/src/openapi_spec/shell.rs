@@ -92,6 +92,10 @@ pub(super) fn openapi_shell() -> OpenApi {
             "settings",
             "Server-backed settings without SQLite `o_setting` (env-driven, in-memory snapshots, or future Postgres)",
         ),
+        tag(
+            "publish",
+            "Short-video publish profiles, drafts, platform targets, and publish jobs (`app_publish_*`; Postgres + RLS)",
+        ),
     ]);
 
     let bearer = HttpBuilder::new()

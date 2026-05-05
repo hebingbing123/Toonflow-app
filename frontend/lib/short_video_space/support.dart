@@ -786,3 +786,115 @@ ShortVideoNextStepPlan buildShortVideoNextStepPlan({
     target: ShortVideoNextStepTarget.productionWorkspace,
   );
 }
+
+/// **E10–E13**：消费 **`GET /publish/*`**，编排发布清单 / 矩阵 / 草稿 / 作业。
+ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
+  required bool projectSelected,
+  required bool loadingProjectOverview,
+  required bool publishUnavailable,
+  required ProjectShortVideoExportCheck? exportCheck,
+  required PublishPlatformMatrixResponse? matrix,
+  required List<PublishDraftRow> drafts,
+  required PublishPrepareCheckResponse? prepare,
+  required List<PublishJobRow> jobs,
+  required bool publishBusy,
+  VoidCallback? onRefreshPublish,
+  VoidCallback? onBootstrapPublishDraft,
+  VoidCallback? onEnqueuePublishJob,
+  VoidCallback? onConfirmSemiAuto,
+}) {
+  if (!projectSelected) {
+    return const ShortVideoPublishPanelUi(visible: false);
+  }
+  if (loadingProjectOverview) {
+    return const ShortVideoPublishPanelUi(
+      visible: true,
+      loading: true,
+      headline: '正在读取导出检查与发布域…',
+      detail: '后端路径：`/api/v1/projects/{id}/publish/*`（profiles / drafts / jobs）。',
+    );
+  }
+  if (publishUnavailable) {
+    return ShortVideoPublishPanelUi(
+      visible: true,
+      unavailable: true,
+      headline: '发布域接口暂不可用（可能尚未执行数据库迁移）。',
+      exportGateHint: exportCheck == null
+          ? '导出检查数据缺失，发布面板仅提示占位。'
+          : (exportCheck.summary.blockingIssueCount <= 0
+                ? '导出检查：当前无阻塞项。'
+                : '导出检查：仍有 ${exportCheck.summary.blockingIssueCount} 条阻塞项。'),
+      detail:
+          '确认 Supabase 已应用 `app_publish_*` 迁移后再试；Rust worker 会在后台消化发布作业队列。',
+      onRefreshPublish: onRefreshPublish,
+      publishBusy: publishBusy,
+    );
+  }
+
+  final gate = exportCheck == null
+      ? '导出检查数据暂不可用；仍可试着创建发布草稿并校验。'
+      : (exportCheck.summary.blockingIssueCount <= 0
+            ? '导出检查：无阻塞项（**E13**：可从成片链路进入发布准备）。'
+            : '导出检查：仍有 ${exportCheck.summary.blockingIssueCount} 条阻塞项；可先补齐字段再投递作业。');
+
+  final matrixLines = <String>[
+    if (matrix != null)
+      for (final row in matrix.platforms)
+        '${row.labelZh} · ${row.platformId} · ${row.automationMode} · 标题≤${row.titleMaxChars}'
+            '${row.requiresCover ? ' · 需封面' : ''}',
+  ];
+
+  final prepareLines = <String>[
+    if (prepare != null) ...[
+      if (prepare.ok) '校验：✓ 当前草稿满足占位规则（仍需真实成片引用才能实际上线）。',
+      for (final issue in prepare.issues)
+        '${issue.severity}: ${issue.message}'
+            '${issue.platformId != null ? ' · ${issue.platformId}' : ''}',
+    ] else
+      '尚无草稿或未完成 prepare-check（创建草稿后将自动读取第一条）。',
+  ];
+
+  final draftLines = drafts
+      .map(
+        (d) =>
+            '${d.title.trim().isEmpty ? '（无标题）' : d.title.trim()} · ${d.draftStatus}'
+            '${(d.videoAssetKey ?? '').trim().isEmpty ? ' · 缺 video 引用' : ''}',
+      )
+      .toList(growable: false);
+
+  final jobLines = jobs
+      .map((j) {
+        final short = j.id.length > 8 ? '${j.id.substring(0, 8)}…' : j.id;
+        final err = (j.errorMessage ?? '').trim();
+        return '$short · ${j.status}'
+            '${err.isEmpty ? '' : ' · $err'}';
+      })
+      .toList(growable: false);
+
+  String? awaitingId;
+  for (final j in jobs) {
+    if (j.status == 'awaiting_confirmation') {
+      awaitingId = j.id;
+      break;
+    }
+  }
+
+  return ShortVideoPublishPanelUi(
+    visible: true,
+    headline: '已连接发布 API：${drafts.length} 张草稿 · ${jobs.length} 条作业。',
+    exportGateHint: gate,
+    matrixLines: matrixLines,
+    prepareLines: prepareLines,
+    draftLines: draftLines,
+    jobLines: jobLines,
+    detail:
+        '半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。',
+    onRefreshPublish: onRefreshPublish,
+    publishBusy: publishBusy,
+    onBootstrapPublishDraft: onBootstrapPublishDraft,
+    onEnqueuePublishJob: onEnqueuePublishJob,
+    awaitingSemiAutoJobId: awaitingId,
+    onConfirmSemiAuto:
+        awaitingId != null ? onConfirmSemiAuto : null,
+  );
+}
