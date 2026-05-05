@@ -901,6 +901,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   VoidCallback? onConfirmSemiAuto,
   VoidCallback? onSuggestPublishCopy,
   VoidCallback? onClearPublishSchedule,
+  VoidCallback? onOpenPublishTroubleshooting,
   List<String> publishTargetPlatformIds = const [],
   int publishCopyEditorRevision = 0,
   PublishPlatformCopyCommit? onCommitPublishPlatformCopy,
@@ -985,6 +986,19 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
             '${err.isEmpty ? '' : ' · $err'}';
       })
       .toList(growable: false);
+  final succeededJobCount = jobs.where((j) => j.status == 'succeeded').length;
+  final failedJobCount = jobs
+      .where((j) => j.status == 'failed' || j.status == 'partial_failed')
+      .length;
+  final waitingConfirmCount =
+      jobs.where((j) => j.status == 'awaiting_confirmation').length;
+  final scheduledDraftCount = drafts
+      .where((d) => (d.scheduledAt ?? '').trim().isNotEmpty)
+      .length;
+  final publishOverviewLines = <String>[
+    '成功作业：$succeededJobCount · 失败/部分失败：$failedJobCount',
+    '待确认：$waitingConfirmCount · 已定时草稿：$scheduledDraftCount/${drafts.length}',
+  ];
 
   String? awaitingId;
   for (final j in jobs) {
@@ -1037,6 +1051,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     prepareLines: prepareLines,
     draftLines: draftLines,
     jobLines: jobLines,
+    publishOverviewLines: publishOverviewLines,
     detail:
         '半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。',
     onRefreshPublish: onRefreshPublish,
@@ -1060,5 +1075,6 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     publishScheduleCalendarDrafts: drafts.isEmpty ? null : drafts,
     onPublishCalendarDayBulkSchedule:
         drafts.isEmpty ? null : onPublishCalendarDayBulkSchedule,
+    onOpenPublishTroubleshooting: onOpenPublishTroubleshooting,
   );
 }

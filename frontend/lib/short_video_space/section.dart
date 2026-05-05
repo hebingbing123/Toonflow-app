@@ -1633,6 +1633,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                 ),
               )
           : null,
+      onOpenPublishTroubleshooting: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty
+          ? () {
+              _syncSelectedProjectContext();
+              widget.onOpenTasks();
+            }
+          : null,
     );
     final candidateCardUi = buildShortVideoCandidateCardUi(
       projectSelected: project != null,

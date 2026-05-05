@@ -182,6 +182,7 @@ class ShortVideoPublishPanelUi {
     this.matrixDomesticLines = const <String>[],
     this.matrixOverseasLines = const <String>[],
     this.prepareLines = const <String>[],
+    this.publishOverviewLines = const <String>[],
     this.draftLines = const <String>[],
     this.jobLines = const <String>[],
     this.onRefreshPublish,
@@ -203,6 +204,7 @@ class ShortVideoPublishPanelUi {
     this.onScheduleAllDraftsSameTime,
     this.publishScheduleCalendarDrafts,
     this.onPublishCalendarDayBulkSchedule,
+    this.onOpenPublishTroubleshooting,
   });
 
   final bool visible;
@@ -214,6 +216,7 @@ class ShortVideoPublishPanelUi {
   final List<String> matrixDomesticLines;
   final List<String> matrixOverseasLines;
   final List<String> prepareLines;
+  final List<String> publishOverviewLines;
   final List<String> draftLines;
   final List<String> jobLines;
   final VoidCallback? onRefreshPublish;
@@ -236,6 +239,7 @@ class ShortVideoPublishPanelUi {
   /// When null, treat as no drafts for calendar (keeps panel `const` paths valid).
   final List<PublishDraftRow>? publishScheduleCalendarDrafts;
   final PublishCalendarDayCallback? onPublishCalendarDayBulkSchedule;
+  final VoidCallback? onOpenPublishTroubleshooting;
 }
 
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
@@ -1115,6 +1119,22 @@ class ShortVideoSpaceView extends StatelessWidget {
                         ),
                       ),
                   ],
+                  if (publishPanelUi.publishOverviewLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '发布概览',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in publishPanelUi.publishOverviewLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
                   if (publishPanelUi.awaitingSemiAutoJobId != null &&
                       publishPanelUi.onConfirmSemiAuto != null) ...[
                     const SizedBox(height: 12),
@@ -1138,7 +1158,8 @@ class ShortVideoSpaceView extends StatelessWidget {
                       publishPanelUi.onSuggestPublishCopy != null ||
                       publishPanelUi.onClearPublishSchedule != null ||
                       publishPanelUi.onScheduleFirstDraft != null ||
-                      publishPanelUi.onScheduleAllDraftsSameTime != null) ...[
+                      publishPanelUi.onScheduleAllDraftsSameTime != null ||
+                      publishPanelUi.onOpenPublishTroubleshooting != null) ...[
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
@@ -1219,6 +1240,14 @@ class ShortVideoSpaceView extends StatelessWidget {
                                     ?.call(context),
                             icon: const Icon(Icons.calendar_month_outlined),
                             label: const Text('批量定时全部草稿…'),
+                          ),
+                        if (publishPanelUi.onOpenPublishTroubleshooting != null)
+                          OutlinedButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onOpenPublishTroubleshooting,
+                            icon: const Icon(Icons.bug_report_outlined),
+                            label: const Text('打开发布排障入口'),
                           ),
                       ],
                     ),
