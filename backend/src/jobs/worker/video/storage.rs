@@ -1,5 +1,47 @@
+use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
+
+pub(super) fn payload_coerced_i32(payload: &Value, key: &str) -> Option<i32> {
+    payload.get(key).and_then(|v| {
+        if let Some(n) = v.as_i64() {
+            return i32::try_from(n).ok();
+        }
+        if let Some(s) = v.as_str() {
+            return s.trim().parse().ok();
+        }
+        None
+    })
+}
+
+/// Structured diagnostics for task center / clients when `file_path` writeback fails (J4).
+pub(super) fn video_file_writeback_error_details(
+    job_kind: &'static str,
+    code: &'static str,
+    message: impl Into<String>,
+    project_numeric_id: Option<i32>,
+    script_numeric_id: Option<i32>,
+    storyboard_numeric_id: Option<i32>,
+) -> Value {
+    let message = message.into();
+    json!({
+        "schema_version": 1,
+        "domain": "production.video_file_writeback",
+        "code": code,
+        "job_kind": job_kind,
+        "message": message,
+        "action_codes": [
+            "workbench_refresh_video_data",
+            "workbench_manual_select_video",
+            "verify_project_script_storyboard_scope"
+        ],
+        "context": {
+            "project_numeric_id": project_numeric_id,
+            "script_numeric_id": script_numeric_id,
+            "storyboard_numeric_id": storyboard_numeric_id,
+        }
+    })
+}
 
 pub(super) async fn store_video_reference(
     pool: &PgPool,
@@ -7,8 +49,8 @@ pub(super) async fn store_video_reference(
     project_numeric_id: i32,
     storyboard_numeric_id: i32,
     video_url: &str,
-) -> Result<(), sqlx::Error> {
-    sqlx::query(
+) -> Result<u64, sqlx::Error> {
+    let res = sqlx::query(
         r#"
         UPDATE app_storyboard
         SET file_path = $1, state = '已完成', updated_at = NOW()
@@ -27,5 +69,5 @@ pub(super) async fn store_video_reference(
     .execute(pool)
     .await?;
 
-    Ok(())
+    Ok(res.rows_affected())
 }

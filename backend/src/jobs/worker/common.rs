@@ -13,6 +13,23 @@ pub(crate) enum JobRunError {
     Cancelled,
 }
 
+/// Worker success payload: JSON `result` plus optional `error_details` persisted even when status=`succeeded`
+/// (e.g. provider succeeded but DB writeback did not land — MP-W4 / J4).
+pub(crate) type JobCompletion = (serde_json::Value, Option<serde_json::Value>);
+
+#[inline]
+pub(crate) fn job_ok(result: serde_json::Value) -> JobCompletion {
+    (result, None)
+}
+
+#[inline]
+pub(crate) fn job_ok_with_details(
+    result: serde_json::Value,
+    error_details: serde_json::Value,
+) -> JobCompletion {
+    (result, Some(error_details))
+}
+
 pub(crate) async fn generation_job_is_cancelled(
     pool: &PgPool,
     job_id: Uuid,

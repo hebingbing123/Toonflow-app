@@ -113,7 +113,8 @@ class JobRow {
   final Map<String, dynamic> payload;
   final Map<String, dynamic>? result;
   final String? errorMessage;
-  /// Structured worker diagnostics when **`status`** is **`failed`** (e.g. **`video.export`** codes + deep_links).
+  /// Structured worker diagnostics: **`failed`** jobs (e.g. export codes + deep_links), or **`succeeded`**
+  /// jobs where provider output did not fully write back (e.g. `production.video_file_writeback` / J4).
   final Map<String, dynamic>? errorDetails;
   final String? idempotencyKey;
 

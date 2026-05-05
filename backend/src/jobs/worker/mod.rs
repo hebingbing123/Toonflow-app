@@ -35,7 +35,7 @@ mod vendor;
 mod video;
 mod voiceover;
 
-pub(crate) use common::JobRunError;
+pub(crate) use common::{job_ok, JobCompletion, JobRunError};
 
 fn worker_id_label() -> String {
     std::env::var("WORKER_ID")
@@ -85,16 +85,17 @@ async fn process_one_job(
     let outcome = execute_kind(state, pool, id, &row).await;
 
     match outcome {
-        Ok(result) => {
+        Ok((result, error_details)) => {
             let updated = sqlx::query_as::<_, JobRow>(
                 r#"
                 UPDATE app_generation_job
-                SET status = 'succeeded', result = $1, error_message = NULL, error_details = NULL, updated_at = NOW()
-                WHERE id = $2 AND status = 'running'
+                SET status = 'succeeded', result = $1, error_message = NULL, error_details = $2, updated_at = NOW()
+                WHERE id = $3 AND status = 'running'
                 RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
                 "#,
             )
             .bind(result)
+            .bind(error_details)
             .bind(id)
             .fetch_optional(pool)
             .await?;
@@ -198,7 +199,7 @@ async fn execute_kind(
     pool: &PgPool,
     id: Uuid,
     row: &JobRow,
-) -> Result<serde_json::Value, JobRunError> {
+) -> Result<JobCompletion, JobRunError> {
     match row.kind.as_str() {
         k if k == JOB_KIND_FLUTTER_PROBE => {
             // ~1s total; poll so running cancel can land cooperatively.
@@ -214,27 +215,39 @@ async fn execute_kind(
                     return Err(JobRunError::Cancelled);
                 }
             }
-            Ok(json!({ "ok": true, "probe": true }))
+            Ok(job_ok(json!({ "ok": true, "probe": true })))
         }
         k if k == JOB_KIND_ASSET_GENERATE_IMAGE => {
-            asset_image::run_asset_generate_image(state, pool, id, row).await
+            asset_image::run_asset_generate_image(state, pool, id, row)
+                .await
+                .map(job_ok)
         }
         k if k == JOB_KIND_ASSET_POLISH_PROMPT => {
-            asset_polish::run_asset_polish_prompt(state, pool, id, row).await
+            asset_polish::run_asset_polish_prompt(state, pool, id, row)
+                .await
+                .map(job_ok)
         }
         k if k == JOB_KIND_ASSET_GENERATE_BATCH => {
-            asset_image::run_asset_generate_batch(state, pool, id, row).await
+            asset_image::run_asset_generate_batch(state, pool, id, row)
+                .await
+                .map(job_ok)
         }
         k if k == JOB_KIND_ASSET_POLISH_BATCH => {
-            asset_polish::run_asset_polish_batch(state, pool, id, row).await
+            asset_polish::run_asset_polish_batch(state, pool, id, row)
+                .await
+                .map(job_ok)
         }
         k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => {
-            vendor::run_vendor_model_test(state, pool, row).await
+            vendor::run_vendor_model_test(state, pool, row)
+                .await
+                .map(job_ok)
         }
         k if k == JOB_KIND_VIDEO_GENERATE => video::run_video_generate(state, pool, id, row).await,
         k if k == JOB_KIND_VIDEO_EXPORT => video::run_video_export(state, pool, id, row).await,
         k if k == JOB_KIND_VOICEOVER_GENERATE => {
-            voiceover::run_voiceover_generate(state, pool, id, row).await
+            voiceover::run_voiceover_generate(state, pool, id, row)
+                .await
+                .map(job_ok)
         }
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"

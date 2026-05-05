@@ -2,22 +2,24 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::jobs::worker::common::generation_job_is_cancelled;
-use crate::jobs::worker::JobRunError;
-use crate::jobs::JobRow;
+use crate::jobs::worker::common::{generation_job_is_cancelled, job_ok, job_ok_with_details};
+use crate::jobs::worker::{JobCompletion, JobRunError};
+use crate::jobs::{JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::state::AppState;
 use crate::vendor::video::{
     VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient,
 };
 
-use super::storage::store_video_reference;
+use super::storage::{
+    payload_coerced_i32, store_video_reference, video_file_writeback_error_details,
+};
 
 pub(crate) async fn run_video_generate(
     _state: &AppState,
     pool: &PgPool,
     job_id: Uuid,
     row: &JobRow,
-) -> Result<serde_json::Value, JobRunError> {
+) -> Result<JobCompletion, JobRunError> {
     let p = &row.payload;
 
     let provider_str = p
@@ -94,14 +96,9 @@ pub(crate) async fn run_video_generate(
         }
     }
 
-    let project_numeric_id = p
-        .get("project_numeric_id")
-        .and_then(|x| x.as_i64())
-        .and_then(|n| i32::try_from(n).ok());
-    let storyboard_id = p
-        .get("storyboard_numeric_id")
-        .and_then(|x| x.as_i64())
-        .and_then(|n| i32::try_from(n).ok());
+    let project_numeric_id = payload_coerced_i32(p, "project_numeric_id");
+    let script_numeric_id = payload_coerced_i32(p, "script_id");
+    let storyboard_id = payload_coerced_i32(p, "storyboard_numeric_id");
 
     tracing::info!(
         job_id = %row.id,
@@ -163,13 +160,77 @@ pub(crate) async fn run_video_generate(
         .clone()
         .ok_or_else(|| JobRunError::Failed("no video URL in completed response".to_string()))?;
 
-    if let (Some(pid), Some(sid)) = (project_numeric_id, storyboard_id) {
-        if let Err(e) = store_video_reference(pool, row.owner_user_id, pid, sid, &video_url).await {
-            tracing::warn!(error = %e, "failed to store video reference");
+    let (writeback, error_details) = match (project_numeric_id, storyboard_id) {
+        (None, _) | (_, None) => {
+            let msg = "missing project_numeric_id or storyboard_numeric_id; video URL was not written to app_storyboard.file_path";
+            (
+                json!({
+                    "status": "skipped_missing_scope",
+                    "code": "video_generate_writeback_skipped_missing_scope",
+                    "detail": msg,
+                }),
+                Some(video_file_writeback_error_details(
+                    JOB_KIND_VIDEO_GENERATE,
+                    "video_generate_writeback_skipped_missing_scope",
+                    msg,
+                    project_numeric_id,
+                    script_numeric_id,
+                    storyboard_id,
+                )),
+            )
         }
-    }
+        (Some(pid), Some(sid)) => {
+            match store_video_reference(pool, row.owner_user_id, pid, sid, &video_url).await {
+                Ok(0) => {
+                    let msg = "UPDATE matched no storyboard row (check project/storyboard numeric ids and ownership)";
+                    tracing::warn!(job_id = %row.id, message = %msg, "video writeback matched no rows");
+                    (
+                        json!({
+                            "status": "no_row_matched",
+                            "code": "video_generate_writeback_no_row_matched",
+                            "detail": msg,
+                        }),
+                        Some(video_file_writeback_error_details(
+                            JOB_KIND_VIDEO_GENERATE,
+                            "video_generate_writeback_no_row_matched",
+                            msg,
+                            Some(pid),
+                            script_numeric_id,
+                            Some(sid),
+                        )),
+                    )
+                }
+                Ok(_) => (
+                    json!({
+                        "status": "ok",
+                        "code": "video_generate_writeback_ok",
+                    }),
+                    None,
+                ),
+                Err(e) => {
+                    let msg = format!("database error persisting video URL: {e}");
+                    tracing::warn!(job_id = %row.id, error = %e, "video writeback failed");
+                    (
+                        json!({
+                            "status": "sql_error",
+                            "code": "video_generate_writeback_sql_error",
+                            "detail": msg,
+                        }),
+                        Some(video_file_writeback_error_details(
+                            JOB_KIND_VIDEO_GENERATE,
+                            "video_generate_writeback_sql_error",
+                            &msg,
+                            Some(pid),
+                            script_numeric_id,
+                            Some(sid),
+                        )),
+                    )
+                }
+            }
+        }
+    };
 
-    Ok(json!({
+    let mut result = json!({
         "source": "video.generate",
         "provider": provider_str,
         "model": gen_resp.model,
@@ -177,6 +238,15 @@ pub(crate) async fn run_video_generate(
         "video_url": video_url,
         "preview_url": gen_resp.preview_url,
         "project_numeric_id": project_numeric_id,
+        "script_numeric_id": script_numeric_id,
         "storyboard_numeric_id": storyboard_id,
-    }))
+    });
+    if let Some(obj) = result.as_object_mut() {
+        obj.insert("writeback".to_string(), writeback);
+    }
+
+    Ok(match error_details {
+        Some(d) => job_ok_with_details(result, d),
+        None => job_ok(result),
+    })
 }

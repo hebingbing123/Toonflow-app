@@ -3,12 +3,15 @@ use serde_json::{json, Map};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::jobs::worker::JobRunError;
+use crate::jobs::worker::common::{job_ok, job_ok_with_details};
+use crate::jobs::worker::{JobCompletion, JobRunError};
 use crate::jobs::{JobRow, JOB_KIND_VIDEO_EXPORT};
 use crate::state::AppState;
 use crate::vendor::video::{VideoExportRequest, VideoProviderClient};
 
-use super::storage::store_video_reference;
+use super::storage::{
+    payload_coerced_i32, store_video_reference, video_file_writeback_error_details,
+};
 
 fn structured_video_export_failure(
     row: &JobRow,
@@ -44,7 +47,7 @@ pub(crate) async fn run_video_export(
     pool: &PgPool,
     job_id: Uuid,
     row: &JobRow,
-) -> Result<serde_json::Value, JobRunError> {
+) -> Result<JobCompletion, JobRunError> {
     let p = &row.payload;
 
     let source_url = p
@@ -81,14 +84,9 @@ pub(crate) async fn run_video_export(
         .and_then(|x| x.as_bool())
         .unwrap_or(true);
 
-    let project_numeric_id = p
-        .get("project_numeric_id")
-        .and_then(|x| x.as_i64())
-        .and_then(|n| i32::try_from(n).ok());
-    let storyboard_id = p
-        .get("storyboard_numeric_id")
-        .and_then(|x| x.as_i64())
-        .and_then(|n| i32::try_from(n).ok());
+    let project_numeric_id = payload_coerced_i32(p, "project_numeric_id");
+    let script_numeric_id = payload_coerced_i32(p, "script_numeric_id");
+    let storyboard_id = payload_coerced_i32(p, "storyboard_numeric_id");
 
     tracing::info!(
         job_id = %row.id,
@@ -143,14 +141,77 @@ pub(crate) async fn run_video_export(
     })?;
     let export_url = format!("/api/v1/jobs/{job_id}/file");
 
-    if let (Some(pid), Some(sid)) = (project_numeric_id, storyboard_id) {
-        if let Err(e) = store_video_reference(pool, row.owner_user_id, pid, sid, &export_url).await
-        {
-            tracing::warn!(error = %e, "failed to store video export reference");
+    let (writeback, error_details) = match (project_numeric_id, storyboard_id) {
+        (None, _) | (_, None) => {
+            let msg = "missing project_numeric_id or storyboard_numeric_id; export URL was not written to app_storyboard.file_path";
+            (
+                json!({
+                    "status": "skipped_missing_scope",
+                    "code": "video_export_writeback_skipped_missing_scope",
+                    "detail": msg,
+                }),
+                Some(video_file_writeback_error_details(
+                    JOB_KIND_VIDEO_EXPORT,
+                    "video_export_writeback_skipped_missing_scope",
+                    msg,
+                    project_numeric_id,
+                    script_numeric_id,
+                    storyboard_id,
+                )),
+            )
         }
-    }
+        (Some(pid), Some(sid)) => {
+            match store_video_reference(pool, row.owner_user_id, pid, sid, &export_url).await {
+                Ok(0) => {
+                    let msg = "UPDATE matched no storyboard row (check project/storyboard numeric ids and ownership)";
+                    tracing::warn!(job_id = %row.id, message = %msg, "video export writeback matched no rows");
+                    (
+                        json!({
+                            "status": "no_row_matched",
+                            "code": "video_export_writeback_no_row_matched",
+                            "detail": msg,
+                        }),
+                        Some(video_file_writeback_error_details(
+                            JOB_KIND_VIDEO_EXPORT,
+                            "video_export_writeback_no_row_matched",
+                            msg,
+                            Some(pid),
+                            script_numeric_id,
+                            Some(sid),
+                        )),
+                    )
+                }
+                Ok(_) => (
+                    json!({
+                        "status": "ok",
+                        "code": "video_export_writeback_ok",
+                    }),
+                    None,
+                ),
+                Err(e) => {
+                    let msg = format!("database error persisting export URL: {e}");
+                    tracing::warn!(job_id = %row.id, error = %e, "video export writeback failed");
+                    (
+                        json!({
+                            "status": "sql_error",
+                            "code": "video_export_writeback_sql_error",
+                            "detail": msg,
+                        }),
+                        Some(video_file_writeback_error_details(
+                            JOB_KIND_VIDEO_EXPORT,
+                            "video_export_writeback_sql_error",
+                            &msg,
+                            Some(pid),
+                            script_numeric_id,
+                            Some(sid),
+                        )),
+                    )
+                }
+            }
+        }
+    };
 
-    Ok(json!({
+    let mut result = json!({
         "source": "video.export",
         "task_id": export_resp.task_id,
         "status": export_resp.status.as_str(),
@@ -163,8 +224,17 @@ pub(crate) async fn run_video_export(
         "byte_length": bytes.len(),
         "source_url": source_url,
         "project_numeric_id": project_numeric_id,
+        "script_numeric_id": script_numeric_id,
         "storyboard_numeric_id": storyboard_id,
-    }))
+    });
+    if let Some(obj) = result.as_object_mut() {
+        obj.insert("writeback".to_string(), writeback);
+    }
+
+    Ok(match error_details {
+        Some(d) => job_ok_with_details(result, d),
+        None => job_ok(result),
+    })
 }
 
 const MAX_DOWNLOADED_VIDEO_EXPORT_BYTES: u64 = 512 * 1024 * 1024;
