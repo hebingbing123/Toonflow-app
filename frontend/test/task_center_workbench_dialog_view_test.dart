@@ -11,6 +11,7 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController projectIdCtrl,
   required TextEditingController numericTaskIdCtrl,
   required TextEditingController uuidCtrl,
+  TextEditingController? productionPhaseCtrl,
   List<TaskCenterTaskClassRow> categories = const <TaskCenterTaskClassRow>[
     TaskCenterTaskClassRow(taskClass: 'storyboard'),
     TaskCenterTaskClassRow(taskClass: 'render'),
@@ -51,6 +52,7 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
     projectIdCtrl: projectIdCtrl,
     numericTaskIdCtrl: numericTaskIdCtrl,
     uuidCtrl: uuidCtrl,
+    productionPhaseCtrl: productionPhaseCtrl ?? TextEditingController(),
     categories: categories,
     jobs: jobs,
     categoriesSummary: categoriesSummary,
@@ -79,6 +81,7 @@ TaskCenterWorkbenchDialogViewCallbacks buildDialogCallbacks({
   ValueChanged<JobRow>? onPickJob,
   ValueChanged<JobRow>? onRetryFailedJob,
   ValueChanged<JobRow>? onCancelQueuedJob,
+  ValueChanged<String>? onPickProductionPhase,
   VoidCallback? onClose = noop,
 }) {
   return TaskCenterWorkbenchDialogViewCallbacks(
@@ -91,6 +94,7 @@ TaskCenterWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onPickJob: onPickJob ?? (_) {},
     onRetryFailedJob: onRetryFailedJob ?? (_) {},
     onCancelQueuedJob: onCancelQueuedJob ?? (_) {},
+    onPickProductionPhase: onPickProductionPhase ?? (_) {},
     onClose: onClose ?? noop,
   );
 }

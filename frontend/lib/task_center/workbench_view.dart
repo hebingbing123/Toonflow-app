@@ -4,6 +4,20 @@ import '../../rust_api.dart';
 
 import 'support.dart';
 
+class _PhaseFilterItem {
+  const _PhaseFilterItem({required this.key, required this.label});
+  final String key;
+  final String label;
+}
+
+const List<_PhaseFilterItem> _shortVideoProductionPhaseFilterItems = [
+  _PhaseFilterItem(key: 'prep', label: '素材准备'),
+  _PhaseFilterItem(key: 'image', label: '出图'),
+  _PhaseFilterItem(key: 'video', label: '出视频'),
+  _PhaseFilterItem(key: 'export', label: '导出成片'),
+  _PhaseFilterItem(key: 'quality', label: '质检'),
+];
+
 class TaskCenterWorkbenchDialogViewModel {
   const TaskCenterWorkbenchDialogViewModel({
     required this.projectSummary,
@@ -15,6 +29,7 @@ class TaskCenterWorkbenchDialogViewModel {
     required this.projectIdCtrl,
     required this.numericTaskIdCtrl,
     required this.uuidCtrl,
+    required this.productionPhaseCtrl,
     required this.categories,
     required this.jobs,
     required this.categoriesSummary,
@@ -40,6 +55,7 @@ class TaskCenterWorkbenchDialogViewModel {
   final TextEditingController projectIdCtrl;
   final TextEditingController numericTaskIdCtrl;
   final TextEditingController uuidCtrl;
+  final TextEditingController productionPhaseCtrl;
   final List<TaskCenterTaskClassRow> categories;
   final List<JobRow> jobs;
   final String? categoriesSummary;
@@ -70,6 +86,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
     required this.onClose,
     this.onNavigateExportJobDeepLink,
     this.onNavigateDomainDeepLink,
+    required this.onPickProductionPhase,
   });
 
   final VoidCallback onLoadProjects;
@@ -81,6 +98,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
   final ValueChanged<JobRow> onPickJob;
   final ValueChanged<JobRow> onRetryFailedJob;
   final ValueChanged<JobRow> onCancelQueuedJob;
+  final ValueChanged<String> onPickProductionPhase;
   final VoidCallback onClose;
   final void Function(TaskCenterExportJobDeepLink link)? onNavigateExportJobDeepLink;
   final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
@@ -212,6 +230,31 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                 controller: model.stateCtrl,
                 decoration: const InputDecoration(labelText: '任务状态（可空）'),
               ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: model.productionPhaseCtrl,
+                decoration: const InputDecoration(
+                  labelText: '短视频阶段（可空：prep/image/video/export/quality）',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final item in _shortVideoProductionPhaseFilterItems)
+                    FilterChip(
+                      label: Text(item.label),
+                      selected:
+                          model.productionPhaseCtrl.text.trim() == item.key,
+                      onSelected: (_) => callbacks.onPickProductionPhase(
+                        model.productionPhaseCtrl.text.trim() == item.key
+                            ? ''
+                            : item.key,
+                      ),
+                    ),
+                ],
+              ),
               if (model.categories.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Wrap(
@@ -241,7 +284,10 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                       (job) => ListTile(
                         dense: true,
                         contentPadding: EdgeInsets.zero,
-                        title: Text('${job.kind} · ${job.status}'),
+                        title: Text(
+                          '${job.kind} · ${job.status}'
+                          '${taskCenterShortVideoStageLabel(job).isEmpty ? '' : ' · ${taskCenterShortVideoStageLabel(job)}'}',
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

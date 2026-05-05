@@ -179,6 +179,45 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
   );
 }
 
+String taskCenterShortVideoStageKey(JobRow job) {
+  final phase = (job.productionPhase ?? '').trim().toLowerCase();
+  final kind = job.kind.trim().toLowerCase();
+  if (phase.contains('quality') || kind.contains('quality')) {
+    return 'quality';
+  }
+  if (phase.contains('export') || kind.contains('video.export')) {
+    return 'export';
+  }
+  if (phase.contains('video') || kind.contains('video.') || kind.contains('clip')) {
+    return 'video';
+  }
+  if (phase.contains('image') || kind.contains('image') || kind.contains('asset.generate.image')) {
+    return 'image';
+  }
+  if (phase.isNotEmpty) {
+    return 'prep';
+  }
+  // Fallback: project/script/storyboard/publish-centric tasks are treated as preparation.
+  return 'prep';
+}
+
+String taskCenterShortVideoStageLabel(JobRow job) {
+  switch (taskCenterShortVideoStageKey(job)) {
+    case 'quality':
+      return '质检';
+    case 'export':
+      return '导出成片';
+    case 'video':
+      return '出视频';
+    case 'image':
+      return '出图';
+    case 'prep':
+      return '素材准备';
+    default:
+      return '';
+  }
+}
+
 String videoExportFailureCodeLabelZh(String code) {
   switch (code) {
     case 'payload_missing_source_url':

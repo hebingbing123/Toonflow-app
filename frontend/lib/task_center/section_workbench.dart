@@ -443,6 +443,12 @@ class _TaskCenterWorkbenchDialogState
   @override
   Widget build(BuildContext context) {
     final projectSummary = summarizeTaskProjects(_projects);
+    final phaseFilter = _ctrls.productionPhaseCtrl.text.trim();
+    final filteredJobs = phaseFilter.isEmpty
+        ? _jobs
+        : _jobs
+            .where((job) => taskCenterShortVideoStageKey(job) == phaseFilter)
+            .toList(growable: false);
     final jobSummary = _jobs.isEmpty
         ? (_taskSummary ?? '当前没有任务记录')
         : summarizeTaskJobs(_jobs);
@@ -457,8 +463,9 @@ class _TaskCenterWorkbenchDialogState
         projectIdCtrl: _ctrls.projectIdCtrl,
         numericTaskIdCtrl: _ctrls.numericTaskIdCtrl,
         uuidCtrl: _ctrls.uuidCtrl,
+        productionPhaseCtrl: _ctrls.productionPhaseCtrl,
         categories: _categories,
-        jobs: _jobs,
+        jobs: filteredJobs,
         categoriesSummary: _categoriesSummary,
         numericIdTaskDetailText: _numericIdTaskDetailText,
         uuidDetails: _uuidDetails,
@@ -495,6 +502,9 @@ class _TaskCenterWorkbenchDialogState
             _ctrls.numericTaskIdCtrl.text = job.numericTaskId.toString();
             _ctrls.uuidCtrl.text = job.id;
           });
+        },
+        onPickProductionPhase: (key) {
+          setState(() => _ctrls.productionPhaseCtrl.text = key);
         },
         onRetryFailedJob: (job) {
           _retryFailedJob(job);
