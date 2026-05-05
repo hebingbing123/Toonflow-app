@@ -644,7 +644,81 @@ pub(crate) async fn retry_job_if_allowed(
     job_id: Uuid,
     owner_user_id: Uuid,
 ) -> Result<bool, ApiError> {
-    let res = sqlx::query(
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let draft_id = sqlx::query_scalar::<_, Uuid>(
+        r#"
+        SELECT draft_id
+        FROM app_publish_job
+        WHERE id = $1 AND project_id = $2 AND owner_user_id = $3
+          AND status IN ('failed', 'cancelled', 'partial_failed')
+        FOR UPDATE
+        "#,
+    )
+    .bind(job_id)
+    .bind(project_id)
+    .bind(owner_user_id)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let Some(draft_id) = draft_id else {
+        tx.rollback()
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        return Ok(false);
+    };
+
+    let targets = sqlx::query_as::<_, PublishTargetRow>(
+        r#"
+        SELECT id, draft_id, platform_id, automation_mode, serial_order, extra, created_at, updated_at
+        FROM app_publish_target
+        WHERE draft_id = $1
+        ORDER BY serial_order ASC, created_at ASC
+        "#,
+    )
+    .bind(draft_id)
+    .fetch_all(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    for target in &targets {
+        let next_attempt_no: i32 = sqlx::query_scalar(
+            r#"
+            SELECT COALESCE(MAX(a.attempt_no), 0)::INT + 1
+            FROM app_publish_attempt AS a
+            WHERE a.job_id = $1 AND a.target_id = $2
+            "#,
+        )
+        .bind(job_id)
+        .bind(target.id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        sqlx::query(
+            r#"
+            INSERT INTO app_publish_attempt (job_id, target_id, attempt_no, status, detail)
+            VALUES ($1, $2, $3, 'retrying', $4)
+            "#,
+        )
+        .bind(job_id)
+        .bind(target.id)
+        .bind(next_attempt_no)
+        .bind(Json(json!({
+            "event": "manual_retry_requested",
+            "platform_id": target.platform_id,
+            "recorded_at": chrono::Utc::now().to_rfc3339(),
+        })))
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    }
+
+    sqlx::query(
         r#"
         UPDATE app_publish_job SET
           status = 'queued',
@@ -653,17 +727,18 @@ pub(crate) async fn retry_job_if_allowed(
           claimed_by = NULL,
           semi_auto_ack_at = NULL,
           updated_at = NOW()
-        WHERE id = $1 AND project_id = $2 AND owner_user_id = $3
-          AND status IN ('failed', 'cancelled', 'partial_failed')
+        WHERE id = $1
         "#,
     )
     .bind(job_id)
-    .bind(project_id)
-    .bind(owner_user_id)
-    .execute(pool)
+    .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(res.rows_affected() > 0)
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(true)
 }
 
 pub(crate) async fn confirm_semi_auto_job(
