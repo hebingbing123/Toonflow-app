@@ -103,3 +103,92 @@
   - 音频结果通过现有 `GET /api/v1/jobs/{id}/file` 对外提供，不额外发明新文件接口
   - `app_storyboard.metadata.voiceover` 会持续回写 queued / completed / failed 状态、音频 URL、错误信息与旁白来源文本
   - 分镜查询与导出装配数据已可消费 `voiceover` 状态，前端状态面板也会展示“已生成配音 / 生成中 / 失败”
+
+---
+
+## Phase G - Production Gap Review (Feature + Quality + Token + Reliability)
+
+- [x] 基于当前实现复核“发布是否真实闭环”而非 sandbox 演示闭环
+- [x] 复核“质量信号是否真正阻断高风险导出/发布”而非仅展示提示
+- [x] 复核“short-video-space 的刷新与拉取路径”是否存在明显 token/请求浪费
+- [x] 复核“多草稿、多平台、自动化模式”是否仍停留在 happy path
+- [x] 按严重级别收敛缺口，并转成可执行任务清单
+
+## Phase H - Production Feature Closure (P0)
+
+- [ ] 将发布适配从 `sandbox_closure` 升级到可区分 `sandbox/live/manual_bridge` 的真实投递链路
+- [ ] 在 attempts/jobs 中落地 `delivery_mode + evidence(request_id/manual_step_id/callback_id)`，支持审计筛选
+- [ ] 将表现数据同步从 mock 拉取升级为真实平台指标拉取（含失败重试与退避）
+- [ ] 发布面板改为“显式草稿选择”主路径，禁止默认 `_publishDrafts.first` 作为核心操作目标
+- [ ] 支持多草稿批量发布/定时/清档/重试，并返回逐草稿结果摘要
+- [ ] 自动化模式按平台能力真实生效（`full_auto|semi_auto|manual_assisted` 可见且受后端校验）
+
+## Phase I - Quality Enforcement Closure (P0)
+
+- [ ] 将导出质量门禁从占位升级为 `off|warn|block` 策略，并在 `block` 下阻止导出入队
+- [ ] 在发布入队前接入质量门禁校验，避免已知高风险内容直接进入发布作业
+- [ ] 扩展候选对比质量范围到 `storyboard + video + output`，不只看 storyboard
+- [ ] 把质量 `nextAction` 提升为显式 typed 字段并驱动“局部返工”一键动作
+- [ ] 打通“低表现预警 -> 改写文案/重排/重投任务”闭环，并回链原 draft/job
+
+## Phase J - Token and Cost ROI Closure (P0/P1)
+
+- [ ] 为 publish copy 建立输入哈希缓存（draft+targets+style_hint），避免同输入重复 LLM 调用
+- [ ] 将 publish copy 生成改为增量模式（仅生成变更平台块），降低全量重生成 token
+- [ ] 为 publish copy 调用补齐 `app_llm_usage_log` 记录（`call_type=publish.copy_suggest`）
+- [ ] 把 short-video-space 的发布切片请求聚合为单 endpoint（matrix/drafts/jobs/perf/prepare）
+- [ ] 减少 `_loadProjectOverview` 扇出与重复拉取，优先局部刷新受影响面板
+- [ ] 对高频刷新流程增加请求合并/代际保护，避免旧请求覆盖新状态与重复消耗
+
+## Phase K - Reliability / Observability / Contract Governance
+
+- [ ] 时间线重排保存增加版本冲突检测（避免并发静默覆盖）
+- [ ] 单镜头时长对齐改为最小字段 patch，避免“先读 prompt 再整条写回”带来的回滚风险
+- [ ] 对关键操作错误提示统一结构化（status/code/message/request-id + 下一步建议）
+- [ ] 增加跨面板快照版本（assembly/compare/export-check）并在不一致时显式提示
+- [ ] 为关键链路补埋点与 SLI（成功率、P95、失败码分布、质量转化漏斗）
+- [ ] 增加 OpenAPI drift gate + rust_api 合约一致性检查，避免手写接口漂移
+
+## Phase L - Production Acceptance Re-Run
+
+- [ ] 以“真实能力”重做九平台矩阵验收（每平台至少一条 live 或 manual_bridge 可追溯样本）
+- [ ] 在预发环境执行“质量门禁 + 发布闭环 + 回流指标”端到端回归
+- [ ] 对 token 优化项做 A/B 验证，确认成本下降同时质量不回退
+- [ ] 最终复核：功能、视频质量、token 成本、稳定性、可观测性五维全部过线
+
+## Phase M - Security / Compliance / Idempotency (常见漏项补齐)
+
+- [ ] 为平台回调与 webhook 增加签名校验、时间窗校验与防重放（nonce/timestamp）
+- [ ] 为发布创建、确认、重试、回写等关键写操作补幂等键（避免重复提交造成脏状态）
+- [ ] 统一 request-id 贯穿发布链路（API -> worker -> adapter -> callback）并可全链路检索
+- [ ] 对审计明细中的敏感字段做脱敏与最小暴露（token、凭据片段、用户隐私文本）
+- [ ] 为平台凭据访问增加更严格 RBAC（read/publish/retry/cancel/audit 分权）
+- [ ] 补发布域速率限制与配额保护（项目级/用户级），防止误触发批量风暴
+
+## Phase N - Operability / DR / Data Lifecycle (上线可运维补齐)
+
+- [ ] 定义并落地发布 SLA 与告警：`awaiting_confirmation`、`scheduled_deferred`、`callback_timeout` 超时告警
+- [ ] 为关键故障场景提供 runbook（平台不可用、回调失败、写回补偿失败、指标同步失败）
+- [ ] 建立发布与表现数据归档/保留策略（冷热分层），避免长期表膨胀拖慢查询
+- [ ] 为大项目场景补分页/游标能力（jobs/attempts/perf snapshots）与导出能力
+- [ ] 增加灰度发布与快速回滚开关（按项目/平台启停 live adapter）
+- [ ] 增加“生产级演练日”清单：从创建发布到回调/预警/补偿全链路桌面演练
+
+## Phase O - FinOps / Governance / Release Safety (补漏二次复核)
+
+- [ ] 建立发布与质量链路的成本归因看板（按项目/平台/call_type/模型统计 token 与调用成本）
+- [ ] 为 token 优化建立质量防回退基线集（固定样本 + 自动比较），防止“省 token 但降质量”
+- [ ] 增加“真实指标 vs mock 指标”口径隔离与看板标识，杜绝运营误读
+- [ ] 增加回调与重试的数据对账任务（job/attempt/target/snapshot 周期性校验并自动告警）
+- [ ] 为关键 schema 变更补 migration/backfill runbook（含回滚步骤与验收 SQL）
+- [ ] 发布策略配置改为“可审计变更”（谁在何时修改阈值/门禁策略/自动化模式）
+- [ ] 为生产级功能引入 feature flag 治理（默认关闭、灰度名单、自动回退）
+- [ ] 增加上线前 go/no-go 检查表（功能/质量/token/安全/运维 5 维硬门槛）
+
+## Phase P - UX and Human-in-the-loop Completeness (运营落地补漏)
+
+- [ ] 完成“音频和视频装配一致性”复核与修复（对齐 Phase F 未完成项）
+- [ ] 补齐“人工桥接发布”操作面板（手动步骤、回填凭证、超时处理、补偿动作）
+- [ ] 为多草稿与多平台操作增加“操作预览 + 影响范围确认”步骤，降低误操作风险
+- [ ] 增加失败态的一键恢复入口（重试、回滚到上次成功配置、跳转排障）
+- [ ] 为关键状态文案统一“真实能力标签”（live/sandbox/manual）与下一步建议
