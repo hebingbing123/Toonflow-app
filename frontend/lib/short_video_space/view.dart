@@ -40,6 +40,19 @@ class ShortVideoStageCardData {
   final String detail;
 }
 
+/// 与后端 `validate_target_platforms` 约定的平台 id → 展示名（需求：全矩阵勾选）。
+const Map<String, String> kShortVideoPublishPlatformLabels = {
+  'douyin': '抖音',
+  'bilibili': '哔哩哔哩',
+  'xiaohongshu': '小红书',
+  'weixin_channels': '视频号',
+  'kuaishou': '快手',
+  'tiktok': 'TikTok',
+  'youtube_shorts': 'YouTube Shorts',
+  'instagram_reels': 'Instagram Reels',
+  'facebook_reels': 'Facebook Reels',
+};
+
 class ShortVideoSpaceView extends StatelessWidget {
   const ShortVideoSpaceView({
     super.key,
@@ -55,6 +68,18 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.onRefreshProjects,
     required this.videoRatio,
     required this.onVideoRatioChanged,
+    required this.targetMarket,
+    required this.onTargetMarketChanged,
+    required this.targetPlatforms,
+    required this.onPublishPlatformTapped,
+    required this.durationStrategy,
+    required this.onDurationStrategyChanged,
+    required this.voiceProfile,
+    required this.onVoiceProfileChanged,
+    required this.subtitleStyle,
+    required this.onSubtitleStyleChanged,
+    required this.bgmStrategy,
+    required this.onBgmStrategyChanged,
     required this.creatingProject,
     required this.onCreateProject,
     required this.savingProjectConfig,
@@ -86,6 +111,19 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.onOpenTasks,
     required this.onOpenQuality,
   });
+
+  final String targetMarket;
+  final ValueChanged<String> onTargetMarketChanged;
+  final List<String> targetPlatforms;
+  final ValueChanged<String> onPublishPlatformTapped;
+  final String durationStrategy;
+  final ValueChanged<String> onDurationStrategyChanged;
+  final String voiceProfile;
+  final ValueChanged<String> onVoiceProfileChanged;
+  final String subtitleStyle;
+  final ValueChanged<String> onSubtitleStyleChanged;
+  final String bgmStrategy;
+  final ValueChanged<String> onBgmStrategyChanged;
 
   final ShortVideoMode mode;
   final String modeTitle;
@@ -220,6 +258,103 @@ class ShortVideoSpaceView extends StatelessWidget {
                   }
                   onVideoRatioChanged(selection.first);
                 },
+              ),
+              const SizedBox(height: 16),
+              Text('默认发布市场 / 平台', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                key: ValueKey<String>('tm-$selectedProjectId'),
+                initialValue: targetMarket,
+                decoration: const InputDecoration(
+                  labelText: '目标市场',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'domestic', child: Text('国内')),
+                  DropdownMenuItem(value: 'overseas', child: Text('海外')),
+                  DropdownMenuItem(value: 'both', child: Text('双端')),
+                ],
+                onChanged: loadingProjects
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          onTargetMarketChanged(value);
+                        }
+                      },
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '目标平台（至少选一个；写回项目供分发与校验共用）',
+                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: kShortVideoPublishPlatformLabels.entries
+                    .map(
+                      (e) => FilterChip(
+                        label: Text(e.value),
+                        selected: targetPlatforms.contains(e.key),
+                        onSelected: loadingProjects
+                            ? null
+                            : (_) {
+                                onPublishPlatformTapped(e.key);
+                              },
+                        showCheckmark: false,
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+              const SizedBox(height: 12),
+              Text('时长策略', style: theme.textTheme.labelLarge),
+              const SizedBox(height: 8),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: 'short', label: Text('短')),
+                  ButtonSegment(value: 'medium', label: Text('中')),
+                  ButtonSegment(value: 'long', label: Text('长')),
+                ],
+                selected: {durationStrategy},
+                onSelectionChanged: (selection) {
+                  if (loadingProjects || selection.isEmpty) {
+                    return;
+                  }
+                  onDurationStrategyChanged(selection.first);
+                },
+              ),
+              const SizedBox(height: 16),
+              Text('旁白 / 字幕 / BGM（项目级默认）', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              TextFormField(
+                key: ValueKey<String>('vp-$selectedProjectId'),
+                initialValue: voiceProfile,
+                decoration: const InputDecoration(
+                  labelText: '声线标识 voice_profile',
+                  hintText: '如 default_narrator（可留空）',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: onVoiceProfileChanged,
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                key: ValueKey<String>('ss-$selectedProjectId'),
+                initialValue: subtitleStyle,
+                decoration: const InputDecoration(
+                  labelText: '字幕样式 subtitle_style',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: onSubtitleStyleChanged,
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                key: ValueKey<String>('bgm-$selectedProjectId'),
+                initialValue: bgmStrategy,
+                decoration: const InputDecoration(
+                  labelText: 'BGM 策略 bgm_strategy',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: onBgmStrategyChanged,
               ),
               const SizedBox(height: 12),
               Wrap(

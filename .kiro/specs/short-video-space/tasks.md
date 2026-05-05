@@ -47,16 +47,16 @@
 - [ ] A1. Space 首页**主链 UI**（脚本 → 准备/分镜 → 旁白字幕 → 成片 → 导出 → 发布）：阶段枚举、完成/阻塞态、深链到各工作台  
   - _需求: 1.3_
 
-- [ ] A2. **下一步**计算规则 v1（可先规则引擎：聚合 readiness、导出检查、发布校验的阻塞源，输出 Top-1～Top-3 建议动作）  
+- [x] A2. **下一步**计算规则 v1（可先规则引擎：聚合 readiness、导出检查、发布校验的阻塞源，输出 Top-1～Top-3 建议动作）  
   - _需求: 1.3_
 
 - [ ] A3. **项目生产概览**后端：只读聚合（各段进度、阻塞摘要；含 **已就绪分镜数、生成中任务数、待复核坏例数**，与 `moneyprinter-short-video-space.md` MP-W5 对齐）  
   - _需求: 1.4, 14.6_
 
-- [ ] A4. **项目生产概览**前端：一屏汇总 + 与主链联动跳转  
+- [x] A4. **项目生产概览**前端：一屏汇总 + 与主链联动跳转  
   - _需求: 1.4_
 
-- [ ] A5. **阶段标签**映射（preparation / candidate confirmation / ready for generation / export ready）到内部状态或只读派生字段，供概览与主链展示  
+- [x] A5. **阶段标签**映射（preparation / candidate confirmation / ready for generation / export ready）到内部状态或只读派生字段，供概览与主链展示  
   - _需求: 1.4, 3_
 
 ---
@@ -65,19 +65,19 @@
 
 > 与 **MP-W2**「统一视频目标配置」及 **implementation-breakdown** 项目级配置对齐；**不**替代进行中的 MP-W1 入口与 `mode`/`videoRatio` 写回（应兼容共存）。
 
-- [ ] B1. 后端：项目扩展（或等价）持久化 `mode`、`video_ratio`、`target_market`、`target_platforms`、`duration_strategy`、`voice_profile`、`subtitle_style`、`bgm_strategy`  
+- [x] B1. 后端：项目扩展（或等价）持久化 `mode`、`video_ratio`、`target_market`、`target_platforms`、`duration_strategy`、`voice_profile`、`subtitle_style`、`bgm_strategy`  
   - _需求: 2, 14.2_
 
-- [ ] B2. 后端：配置 **GET/PATCH**（或 POST）API + 校验（枚举、数组非空等）  
+- [x] B2. 后端：配置 **GET/PATCH**（或 POST）API + 校验（枚举、数组非空等）  
   - _需求: 2_
 
-- [ ] B3. 后端：**消费方只读接入**至少两处（例：分镜生成参数读取、导出默认画幅），证明「单一配置源」  
+- [x] B3. 后端：**消费方只读接入**至少两处（例：分镜生成参数读取、导出默认画幅），证明「单一配置源」  
   - _需求: 2_
 
-- [ ] B4. 前端：目标配置表单、保存、错误提示；**创作模式摘要** + **默认市场/平台**展示  
+- [x] B4. 前端：目标配置表单、保存、错误提示；**创作模式摘要** + **默认市场/平台**展示  
   - _需求: 2, 9.4_
 
-- [ ] B5. OpenAPI / `rust_api`：项目短视频配置模型与调用（可与 B2 同 PR，但独立验收）  
+- [x] B5. OpenAPI / `rust_api`：项目短视频配置模型与调用（可与 B2 同 PR，但独立验收）  
   - _需求: 10_
 
 ---

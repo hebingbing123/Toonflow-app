@@ -6,10 +6,10 @@ This document describes the validation logic implemented for the short video con
 
 ## Validated Fields
 
-### 1. `mode` (动漫/真人)
-- **Valid values**: `"动漫"`, `"真人"`
+### 1. `mode`（动漫短剧 / 真人短剧）
+- **Valid values**: `"animated.short_drama"`, `"live_action.short_drama"`（Space 写回），以及历史值 `"动漫"`, `"真人"`
 - **Validation**: Enum validation
-- **Error message**: Includes valid options in Chinese
+- **Error message**: Lists allowed tokens
 
 ### 2. `target_market`
 - **Valid values**: `"domestic"`, `"overseas"`, `"both"`

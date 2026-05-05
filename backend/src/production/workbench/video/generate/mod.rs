@@ -328,6 +328,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
 }
 
 // Module declarations
+mod consumer_examples;
 mod fragment_operations;
 mod fragment_parsing;
 mod memory_integration;
@@ -337,6 +338,7 @@ mod negative_prompt_core;
 mod negative_prompt_risk;
 mod quality_control;
 mod scene_diagnostics;
+mod short_video_config;
 mod utils;
 
 #[cfg(test)]
@@ -348,6 +350,12 @@ pub(crate) use memory_integration::{
 };
 pub(crate) use quality_control::{
     infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
+};
+
+// Re-export for potential future use by other modules
+#[allow(unused_imports)]
+pub(crate) use short_video_config::{
+    load_storyboard_generation_config, StoryboardGenerationConfig,
 };
 
 // Internal imports for handler

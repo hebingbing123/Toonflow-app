@@ -31,6 +31,12 @@ class ShortVideoSpaceSection extends StatefulWidget {
 class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ShortVideoMode _mode = ShortVideoMode.animated;
   String _videoRatio = '9:16';
+  String _targetMarket = 'domestic';
+  List<String> _targetPlatforms = <String>['douyin'];
+  String _durationStrategy = 'short';
+  String _voiceProfile = '';
+  String _subtitleStyle = '';
+  String _bgmStrategy = '';
   bool _loadingProjects = false;
   bool _loadingProjectOverview = false;
   bool _creatingProject = false;
@@ -142,6 +148,30 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     setState(() {
       _mode = _modeFromProject(project);
       _videoRatio = _normalizeVideoRatio(project.videoRatio);
+      _targetMarket = project.targetMarket ?? 'domestic';
+      final tp = project.targetPlatforms;
+      _targetPlatforms = (tp != null && tp.isNotEmpty)
+          ? List<String>.from(tp)
+          : <String>['douyin'];
+      _durationStrategy = project.durationStrategy ?? 'short';
+      _voiceProfile = project.voiceProfile ?? '';
+      _subtitleStyle = project.subtitleStyle ?? '';
+      _bgmStrategy = project.bgmStrategy ?? '';
+    });
+  }
+
+  void _onPublishPlatformTapped(String platformId) {
+    setState(() {
+      final next = List<String>.from(_targetPlatforms);
+      if (next.contains(platformId)) {
+        if (next.length <= 1) {
+          return;
+        }
+        next.remove(platformId);
+      } else {
+        next.add(platformId);
+      }
+      _targetPlatforms = next;
     });
   }
 
@@ -295,6 +325,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           'projectType': 'short_drama',
           'mode': storedMode,
           'videoRatio': _videoRatio,
+          'targetMarket': _targetMarket,
+          'targetPlatforms': _targetPlatforms,
+          'durationStrategy': _durationStrategy,
+          if (_voiceProfile.trim().isNotEmpty)
+            'voiceProfile': _voiceProfile.trim(),
+          if (_subtitleStyle.trim().isNotEmpty)
+            'subtitleStyle': _subtitleStyle.trim(),
+          if (_bgmStrategy.trim().isNotEmpty) 'bgmStrategy': _bgmStrategy.trim(),
         },
       );
       if (!mounted) {
@@ -348,11 +386,21 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         ? 'animated.short_drama'
         : 'live_action.short_drama';
     try {
-      final updated = await updateProjectByProjectId(token, project.id, {
+      final body = <String, dynamic>{
         'projectType': 'short_drama',
         'mode': storedMode,
         'videoRatio': _videoRatio,
-      });
+        'targetMarket': _targetMarket,
+        'targetPlatforms': _targetPlatforms,
+        'durationStrategy': _durationStrategy,
+        'voiceProfile': _voiceProfile.trim().isEmpty
+            ? null
+            : _voiceProfile.trim(),
+        'subtitleStyle':
+            _subtitleStyle.trim().isEmpty ? null : _subtitleStyle.trim(),
+        'bgmStrategy': _bgmStrategy.trim().isEmpty ? null : _bgmStrategy.trim(),
+      };
+      final updated = await updateProjectByProjectId(token, project.id, body);
       if (!mounted) {
         return;
       }
@@ -362,7 +410,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             .toList(growable: false);
         _selectedProjectId = updated.id;
         _projectConfigLine =
-            '已写回项目 #${updated.numericId}：${shortVideoModeLabel(_mode)} · ${shortVideoVideoRatioLabel(_videoRatio)}';
+            '已写回项目 #${updated.numericId}：${shortVideoModeLabel(_mode)} · ${shortVideoVideoRatioLabel(_videoRatio)} · 市场 $_targetMarket · 平台 ${_targetPlatforms.length} 个 · 时长 $_durationStrategy';
       });
       _syncSelectedProjectContext();
       _loadProjectOverview();
@@ -582,6 +630,38 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onVideoRatioChanged: (value) {
         setState(() {
           _videoRatio = value;
+        });
+      },
+      targetMarket: _targetMarket,
+      onTargetMarketChanged: (value) {
+        setState(() {
+          _targetMarket = value;
+        });
+      },
+      targetPlatforms: _targetPlatforms,
+      onPublishPlatformTapped: _onPublishPlatformTapped,
+      durationStrategy: _durationStrategy,
+      onDurationStrategyChanged: (value) {
+        setState(() {
+          _durationStrategy = value;
+        });
+      },
+      voiceProfile: _voiceProfile,
+      onVoiceProfileChanged: (value) {
+        setState(() {
+          _voiceProfile = value;
+        });
+      },
+      subtitleStyle: _subtitleStyle,
+      onSubtitleStyleChanged: (value) {
+        setState(() {
+          _subtitleStyle = value;
+        });
+      },
+      bgmStrategy: _bgmStrategy,
+      onBgmStrategyChanged: (value) {
+        setState(() {
+          _bgmStrategy = value;
         });
       },
       creatingProject: _creatingProject,

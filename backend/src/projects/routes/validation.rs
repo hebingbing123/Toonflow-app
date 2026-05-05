@@ -2,12 +2,15 @@
 
 use crate::error::ApiError;
 
-/// 校验 mode 字段（动漫/真人）
+/// 校验 mode 字段（动漫短剧 / 真人短剧）
+///
+/// 允许：`animated.short_drama` / `live_action.short_drama`（Space 与 PATCH 实际写入），以及历史值 `动漫` / `真人`。
 pub(crate) fn validate_mode(mode: &str) -> Result<(), ApiError> {
     match mode {
         "动漫" | "真人" => Ok(()),
+        "animated.short_drama" | "live_action.short_drama" => Ok(()),
         _ => Err(ApiError::BadRequest(format!(
-            "mode must be '动漫' or '真人', got '{}'",
+            "mode must be 'animated.short_drama', 'live_action.short_drama', '动漫', or '真人', got '{}'",
             mode
         ))),
     }
@@ -80,6 +83,8 @@ mod tests {
     fn test_validate_mode() {
         assert!(validate_mode("动漫").is_ok());
         assert!(validate_mode("真人").is_ok());
+        assert!(validate_mode("animated.short_drama").is_ok());
+        assert!(validate_mode("live_action.short_drama").is_ok());
         assert!(validate_mode("invalid").is_err());
         assert!(validate_mode("anime").is_err());
     }

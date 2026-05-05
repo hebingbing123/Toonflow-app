@@ -22,6 +22,12 @@ class ProjectRow {
     this.createTimeMs,
     this.artStylePack,
     this.storyStylePack,
+    this.targetMarket,
+    this.targetPlatforms,
+    this.durationStrategy,
+    this.voiceProfile,
+    this.subtitleStyle,
+    this.bgmStrategy,
   });
 
   final String id;
@@ -39,8 +45,21 @@ class ProjectRow {
   final int? createTimeMs;
   final String? artStylePack;
   final String? storyStylePack;
+  /// `domestic` / `overseas` / `both`
+  final String? targetMarket;
+  final List<String>? targetPlatforms;
+  /// `short` / `medium` / `long`
+  final String? durationStrategy;
+  final String? voiceProfile;
+  final String? subtitleStyle;
+  final String? bgmStrategy;
 
   factory ProjectRow.fromJson(Map<String, dynamic> json) {
+    List<String>? platforms;
+    final tp = json['target_platforms'];
+    if (tp is List<dynamic>) {
+      platforms = tp.map((e) => e.toString()).toList(growable: false);
+    }
     return ProjectRow(
       id: json['id'] as String,
       numericId: (json['numeric_id'] as num).toInt(),
@@ -59,6 +78,12 @@ class ProjectRow {
           : (json['create_time_ms'] as num).toInt(),
       artStylePack: json['art_style_pack'] as String?,
       storyStylePack: json['story_style_pack'] as String?,
+      targetMarket: json['target_market'] as String?,
+      targetPlatforms: platforms,
+      durationStrategy: json['duration_strategy'] as String?,
+      voiceProfile: json['voice_profile'] as String?,
+      subtitleStyle: json['subtitle_style'] as String?,
+      bgmStrategy: json['bgm_strategy'] as String?,
     );
   }
 }
