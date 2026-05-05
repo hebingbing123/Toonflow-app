@@ -238,7 +238,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     if !body.prompt.trim().is_empty() {
         text_inputs.push(body.prompt.clone());
     }
-    let gate = run_quality_gate(
+    let (gate, strategy) = run_quality_gate(
         pool,
         user_id,
         body.project_id,
@@ -248,7 +248,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
         &text_inputs,
     )
     .await?;
-    enforce_quality_gate(QualityGateStage::VideoGenerate, &gate)?;
+    enforce_quality_gate(QualityGateStage::VideoGenerate, &gate, strategy)?;
     optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?;
 
     let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)

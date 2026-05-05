@@ -204,6 +204,11 @@ class ShortVideoPublishPanelUi {
     this.onCommitPublishPlatformCopy,
     this.onScheduleFirstDraft,
     this.onScheduleAllDraftsSameTime,
+    this.onEnqueueAllDrafts,
+    this.onRetryFailedPublishJobs,
+    this.publishBatchResultLines = const <String>[],
+    this.publishAutomationModesByPlatform = const <String, String>{},
+    this.onChangePublishAutomationMode,
     this.publishDraftOptions = const <PublishDraftRow>[],
     this.selectedPublishDraftId,
     this.onSelectPublishDraft,
@@ -241,6 +246,12 @@ class ShortVideoPublishPanelUi {
   final PublishPlatformCopyCommit? onCommitPublishPlatformCopy;
   final void Function(BuildContext context)? onScheduleFirstDraft;
   final void Function(BuildContext context)? onScheduleAllDraftsSameTime;
+  final VoidCallback? onEnqueueAllDrafts;
+  final VoidCallback? onRetryFailedPublishJobs;
+  final List<String> publishBatchResultLines;
+  final Map<String, String> publishAutomationModesByPlatform;
+  final void Function(String platformId, String automationMode)?
+      onChangePublishAutomationMode;
   final List<PublishDraftRow> publishDraftOptions;
   final String? selectedPublishDraftId;
   final ValueChanged<String>? onSelectPublishDraft;
@@ -1240,8 +1251,69 @@ class ShortVideoSpaceView extends StatelessWidget {
                       label: const Text('确认半自动发布（服务端闸门）'),
                     ),
                   ],
+                  if (publishPanelUi.publishAutomationModesByPlatform.isNotEmpty &&
+                      publishPanelUi.onChangePublishAutomationMode != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '自动化模式（按平台）',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final entry
+                        in publishPanelUi.publishAutomationModesByPlatform.entries)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 150,
+                              child: Text(
+                                publishPanelUi.publishPlatformLabels[entry.key] ??
+                                    entry.key,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                initialValue: entry.value,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'full_auto',
+                                    child: Text('full_auto'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'semi_auto',
+                                    child: Text('semi_auto'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'manual_assisted',
+                                    child: Text('manual_assisted'),
+                                  ),
+                                ],
+                                onChanged: publishPanelUi.publishBusy
+                                    ? null
+                                    : (next) {
+                                        if (next == null || next == entry.value) {
+                                          return;
+                                        }
+                                        publishPanelUi.onChangePublishAutomationMode
+                                            ?.call(entry.key, next);
+                                      },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                   if (publishPanelUi.onBootstrapPublishDraft != null ||
                       publishPanelUi.onEnqueuePublishJob != null ||
+                      publishPanelUi.onEnqueueAllDrafts != null ||
+                      publishPanelUi.onRetryFailedPublishJobs != null ||
                       publishPanelUi.onRefreshPublish != null ||
                       publishPanelUi.onSuggestPublishCopy != null ||
                       publishPanelUi.onClearPublishSchedule != null ||
@@ -1291,6 +1363,20 @@ class ShortVideoSpaceView extends StatelessWidget {
                                 : const Icon(Icons.cloud_upload_outlined),
                             label: const Text('投递发布作业'),
                           ),
+                        if (publishPanelUi.onEnqueueAllDrafts != null)
+                          FilledButton.tonal(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onEnqueueAllDrafts,
+                            child: const Text('批量投递全部草稿'),
+                          ),
+                        if (publishPanelUi.onRetryFailedPublishJobs != null)
+                          FilledButton.tonal(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onRetryFailedPublishJobs,
+                            child: const Text('批量重试失败作业'),
+                          ),
                         if (publishPanelUi.onSuggestPublishCopy != null)
                           OutlinedButton.icon(
                             onPressed: publishPanelUi.publishBusy
@@ -1339,6 +1425,22 @@ class ShortVideoSpaceView extends StatelessWidget {
                           ),
                       ],
                     ),
+                  ],
+                  if (publishPanelUi.publishBatchResultLines.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '批量结果摘要',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    ...publishPanelUi.publishBatchResultLines
+                        .take(8)
+                        .map(
+                          (line) => Text(
+                            '• $line',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
                   ],
                 ],
                 const SizedBox(height: 8),

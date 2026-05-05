@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use sqlx::PgPool;
 
-use crate::publish::adapters::{fetch_platform_metrics_mock, run_target_adapter};
+use crate::publish::adapters::{fetch_platform_metrics, run_target_adapter};
 use crate::publish::store::{
     await_publish_job_confirmation, claim_next_metric_sync_cursor, claim_next_publish_job,
     complete_metric_sync_cursor, fail_metric_sync_cursor, fail_publish_job_claim,
@@ -159,7 +159,29 @@ async fn process_one_metric_sync(pool: &PgPool) -> Result<(), String> {
         return Ok(());
     };
 
-    let metrics = fetch_platform_metrics_mock(&cursor.platform_id, &external_video_id);
+    let delivery_mode = cursor
+        .metadata
+        .0
+        .get("delivery_mode")
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or("sandbox");
+    let metrics =
+        match fetch_platform_metrics(&cursor.platform_id, &external_video_id, delivery_mode) {
+            Ok(v) => v,
+            Err(e) => {
+                fail_metric_sync_cursor(pool, cursor.id, cursor.retry_count + 1, &e)
+                    .await
+                    .map_err(|x| format!("{x:?}"))?;
+                return Ok(());
+            }
+        };
+    let metric_source = metrics
+        .raw_payload
+        .get("source")
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown")
+        .to_string();
     insert_publish_performance_snapshot(
         pool,
         &PublishPerformanceSnapshotUpsert {
@@ -184,6 +206,8 @@ async fn process_one_metric_sync(pool: &PgPool) -> Result<(), String> {
         cursor.id,
         serde_json::json!({
             "last_snapshot_synced_at": chrono::Utc::now().to_rfc3339(),
+            "last_metric_delivery_mode": delivery_mode,
+            "last_metric_source": metric_source,
         }),
     )
     .await

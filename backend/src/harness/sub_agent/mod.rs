@@ -108,7 +108,7 @@ pub async fn invoke_sub_agent_tool(
                 .into_iter()
                 .filter_map(|value| i32::try_from(value).ok())
                 .collect::<Vec<_>>();
-            let gate = run_quality_gate(
+            let (gate, strategy) = run_quality_gate(
                 pool,
                 ctx.user_id,
                 project_numeric_id,
@@ -119,7 +119,7 @@ pub async fn invoke_sub_agent_tool(
             )
             .await
             .map_err(api_error_to_invoke_error)?;
-            enforce_quality_gate(QualityGateStage::StoryboardPanel, &gate)
+            enforce_quality_gate(QualityGateStage::StoryboardPanel, &gate, strategy)
                 .map_err(api_error_to_invoke_error)?;
         }
     }

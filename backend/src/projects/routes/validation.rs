@@ -75,6 +75,17 @@ pub(crate) fn validate_target_platforms(platforms: &[String]) -> Result<(), ApiE
     Ok(())
 }
 
+/// 校验 quality_gate_strategy 字段
+pub(crate) fn validate_quality_gate_strategy(strategy: &str) -> Result<(), ApiError> {
+    match strategy {
+        "off" | "warn" | "block" => Ok(()),
+        _ => Err(ApiError::BadRequest(format!(
+            "quality_gate_strategy must be 'off', 'warn', or 'block', got '{}'",
+            strategy
+        ))),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,5 +163,14 @@ mod tests {
             "facebook_reels".to_string(),
         ];
         assert!(validate_target_platforms(&all_platforms).is_ok());
+    }
+
+    #[test]
+    fn test_validate_quality_gate_strategy() {
+        assert!(validate_quality_gate_strategy("off").is_ok());
+        assert!(validate_quality_gate_strategy("warn").is_ok());
+        assert!(validate_quality_gate_strategy("block").is_ok());
+        assert!(validate_quality_gate_strategy("invalid").is_err());
+        assert!(validate_quality_gate_strategy("skip").is_err());
     }
 }

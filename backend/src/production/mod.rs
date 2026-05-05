@@ -16,7 +16,10 @@ mod workbench;
 mod tests;
 
 pub use openapi::ProductionApi;
+pub use quality_gate::QualityGateStrategy;
 pub(crate) use quality_gate::{enforce_quality_gate, run_quality_gate, QualityGateStage};
+#[cfg(test)]
+pub(crate) use quality_gate::{QualityGateDecision, QualityGateIssue, QualityGateSeverity};
 pub use router::router;
 pub(crate) use types::{VideoItem, WorkbenchGenerateVideoBody};
 pub(crate) use workbench::storyboard_ops::shot_text::{

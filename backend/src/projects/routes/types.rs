@@ -55,6 +55,9 @@ pub struct ProjectRow {
     pub subtitle_style: Option<String>,
     /// BGM 策略
     pub bgm_strategy: Option<String>,
+    /// Quality gate enforcement strategy (off/warn/block)
+    #[schema(example = "block")]
+    pub quality_gate_strategy: Option<String>,
 }
 
 #[derive(Debug, FromRow, Serialize, ToSchema)]
@@ -372,6 +375,10 @@ pub struct PatchProjectBody {
     /// BGM 策略
     #[serde(default)]
     pub bgm_strategy: Option<Value>,
+    /// Quality gate enforcement strategy (off/warn/block)
+    #[serde(default)]
+    #[schema(example = json!("block"))]
+    pub quality_gate_strategy: Option<Value>,
 }
 
 /// `PATCH /api/v1/projects/{id}/style-config` 请求体

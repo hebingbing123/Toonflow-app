@@ -21,7 +21,7 @@ use super::store::{
     fetch_job_owned, fetch_profile, insert_draft, insert_profile, insert_publish_job,
     list_attempt_audit, list_drafts, list_jobs, list_low_performance_alerts, list_profiles,
     list_targets, patch_draft_row, patch_profile_row, replace_targets, retry_job_if_allowed,
-    ScheduledDraftUtcWindow,
+    ListAttemptAuditFilter, ScheduledDraftUtcWindow,
 };
 use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, ListPublishAuditQuery,
@@ -624,7 +624,8 @@ pub(crate) async fn publish_prepare_check(
     request_body = CreatePublishJobBody,
     responses(
         (status = 200, description = "Created", body = PublishJobResponse),
-        (status = 404, description = "Not found", body = crate::error::ErrorBody)
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Quality gate blocked", body = crate::error::ErrorBody)
     ),
     security(("bearerAuth" = []))
 )]
@@ -637,9 +638,73 @@ pub(crate) async fn create_publish_job(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_project_owned(pool, uid, project_id).await?;
-    if fetch_draft(pool, project_id, draft_id).await?.is_none() {
-        return Err(ApiError::NotFound);
+
+    let draft = fetch_draft(pool, project_id, draft_id)
+        .await?
+        .ok_or(ApiError::NotFound)?;
+
+    // Run quality gate validation before queueing publish job
+    if let Some(script_id_uuid) = draft.script_id {
+        use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
+
+        // Convert script UUID to numeric ID
+        let script_numeric_id: i32 = sqlx::query_scalar(
+            r#"
+            SELECT numeric_id
+            FROM app_script
+            WHERE id = $1
+            "#,
+        )
+        .bind(script_id_uuid)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        .ok_or(ApiError::NotFound)?;
+
+        // Convert project UUID to numeric ID
+        let project_numeric_id: i32 = sqlx::query_scalar(
+            r#"
+            SELECT numeric_id
+            FROM app_project
+            WHERE id = $1
+            "#,
+        )
+        .bind(project_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        .ok_or(ApiError::NotFound)?;
+
+        // Get all storyboard IDs for this script
+        let storyboard_ids: Vec<i32> = sqlx::query_scalar(
+            r#"
+            SELECT numeric_id
+            FROM app_storyboard
+            WHERE script_id = $1
+            ORDER BY numeric_id ASC
+            "#,
+        )
+        .bind(script_id_uuid)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        // Run quality gate check at VideoGenerate stage (publish is after video generation)
+        let (gate, strategy) = run_quality_gate(
+            pool,
+            uid,
+            project_numeric_id,
+            script_numeric_id,
+            QualityGateStage::VideoGenerate,
+            &storyboard_ids,
+            &[], // No additional text inputs for publish validation
+        )
+        .await?;
+
+        // Enforce quality gate based on strategy
+        enforce_quality_gate(QualityGateStage::VideoGenerate, &gate, strategy)?;
     }
+
     let row = insert_publish_job(pool, project_id, draft_id, uid, &body).await?;
     Ok(Json(job_from_row(row)))
 }
@@ -677,6 +742,8 @@ pub(crate) async fn list_publish_jobs(
         ("project_id" = Uuid, Path, description = "Project UUID"),
         ("draft_id" = Option<Uuid>, Query, description = "Optional draft filter"),
         ("job_id" = Option<Uuid>, Query, description = "Optional job filter"),
+        ("delivery_mode" = Option<String>, Query, description = "Optional delivery-mode filter: sandbox/live/manual_bridge/unknown"),
+        ("evidence_key" = Option<String>, Query, description = "Optional evidence key filter: request_id/manual_step_id/callback_id"),
         ("limit" = Option<i64>, Query, description = "1..200, default 50")
     ),
     responses(
@@ -694,7 +761,19 @@ pub(crate) async fn list_publish_audit(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_project_owned(pool, uid, project_id).await?;
-    let rows = list_attempt_audit(pool, project_id, uid, q.draft_id, q.job_id, q.limit).await?;
+    let rows = list_attempt_audit(
+        pool,
+        project_id,
+        uid,
+        ListAttemptAuditFilter {
+            draft_id: q.draft_id,
+            job_id: q.job_id,
+            delivery_mode: q.delivery_mode.as_deref(),
+            evidence_key: q.evidence_key.as_deref(),
+            limit: q.limit,
+        },
+    )
+    .await?;
     Ok(Json(rows.into_iter().map(attempt_audit_from_row).collect()))
 }
 

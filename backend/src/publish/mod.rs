@@ -7,6 +7,8 @@ mod handlers;
 mod handlers_f;
 mod openapi;
 mod platform_registry;
+#[cfg(test)]
+mod quality_gate_tests;
 mod state_machine;
 mod store;
 mod suggest_copy;

@@ -189,6 +189,8 @@ pub struct CreatePublishJobBody {
 pub struct ListPublishAuditQuery {
     pub draft_id: Option<Uuid>,
     pub job_id: Option<Uuid>,
+    pub delivery_mode: Option<String>,
+    pub evidence_key: Option<String>,
     #[serde(default = "default_publish_audit_limit")]
     pub limit: i64,
 }

@@ -15,7 +15,8 @@ use crate::state::AppState;
 use super::super::super::common::{merge_text_patch, trim_opt};
 use super::super::super::types::{PatchProjectBody, ProjectRow};
 use super::super::super::validation::{
-    validate_duration_strategy, validate_mode, validate_target_market, validate_target_platforms,
+    validate_duration_strategy, validate_mode, validate_quality_gate_strategy,
+    validate_target_market, validate_target_platforms,
 };
 
 fn trim_text_patch(patch: FieldPatch<String>) -> FieldPatch<String> {
@@ -104,6 +105,10 @@ pub(crate) async fn patch_project_by_id(
         body.bgm_strategy,
         "bgm_strategy",
     )?);
+    let quality_gate_strategy_patch = trim_text_patch(parse_optional_text_field(
+        body.quality_gate_strategy,
+        "quality_gate_strategy",
+    )?);
 
     // Parse target_platforms array field
     let target_platforms_patch = match body.target_platforms {
@@ -145,6 +150,9 @@ pub(crate) async fn patch_project_by_id(
     if let FieldPatch::Set(Some(ref strategy_val)) = duration_strategy_patch {
         validate_duration_strategy(strategy_val)?;
     }
+    if let FieldPatch::Set(Some(ref gate_strategy_val)) = quality_gate_strategy_patch {
+        validate_quality_gate_strategy(gate_strategy_val)?;
+    }
 
     let patches = [
         &name_patch,
@@ -164,12 +172,13 @@ pub(crate) async fn patch_project_by_id(
         &voice_profile_patch,
         &subtitle_style_patch,
         &bgm_strategy_patch,
+        &quality_gate_strategy_patch,
     ];
     if !patches.iter().any(|p| !matches!(**p, FieldPatch::Absent))
         && matches!(target_platforms_patch, FieldPatch::Absent)
     {
         return Err(ApiError::BadRequest(
-            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio, art_style_pack, story_style_pack, target_market, target_platforms, duration_strategy, voice_profile, subtitle_style, bgm_strategy)".into(),
+            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio, art_style_pack, story_style_pack, target_market, target_platforms, duration_strategy, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy)".into(),
         ));
     }
 
@@ -180,7 +189,7 @@ pub(crate) async fn patch_project_by_id(
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy
+               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         FROM app_project
         WHERE id = $1 AND owner_user_id = $2
         "#,
@@ -210,6 +219,8 @@ pub(crate) async fn patch_project_by_id(
     let new_voice_profile = merge_text_patch(&current.voice_profile, voice_profile_patch);
     let new_subtitle_style = merge_text_patch(&current.subtitle_style, subtitle_style_patch);
     let new_bgm_strategy = merge_text_patch(&current.bgm_strategy, bgm_strategy_patch);
+    let new_quality_gate_strategy =
+        merge_text_patch(&current.quality_gate_strategy, quality_gate_strategy_patch);
 
     let new_target_platforms = match target_platforms_patch {
         FieldPatch::Absent => current.target_platforms.clone(),
@@ -225,14 +236,15 @@ pub(crate) async fn patch_project_by_id(
             art_style_pack = $11, story_style_pack = $12,
             target_market = $13, target_platforms = $14, duration_strategy = $15,
             voice_profile = $16, subtitle_style = $17, bgm_strategy = $18,
+            quality_gate_strategy = $19,
             updated_at = NOW()
-        WHERE id = $19 AND owner_user_id = $20
+        WHERE id = $20 AND owner_user_id = $21
         RETURNING id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
                   art_style_pack, story_style_pack,
                   target_market, target_platforms, duration_strategy,
-                  voice_profile, subtitle_style, bgm_strategy
+                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         "#,
     )
     .bind(&new_name)
@@ -253,6 +265,7 @@ pub(crate) async fn patch_project_by_id(
     .bind(&new_voice_profile)
     .bind(&new_subtitle_style)
     .bind(&new_bgm_strategy)
+    .bind(&new_quality_gate_strategy)
     .bind(current.id)
     .bind(uid)
     .fetch_one(pool)

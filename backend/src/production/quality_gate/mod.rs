@@ -4,11 +4,13 @@ pub(crate) mod anti_ai;
 mod attribution;
 mod enforce;
 mod rules;
+mod strategy;
 
 use serde::Serialize;
 use serde_json::{json, Value};
 
 pub(crate) use enforce::{enforce_quality_gate, run_quality_gate};
+pub use strategy::QualityGateStrategy;
 
 pub(crate) const HAIR_MARKERS: [&str; 10] = [
     "黑长发",
@@ -223,7 +225,7 @@ mod tests {
             prompt_has_visual_conflict, storyboard_dialogue_is_empty,
         },
         scope_label, QualityGateDecision, QualityGateSeverity, QualityGateStage,
-        StoryboardQualityState,
+        QualityGateStrategy, StoryboardQualityState,
     };
     use crate::error::ApiError;
     use crate::production::workbench::video_prompt_memory::parse_structured_storyboard_description;
@@ -258,12 +260,56 @@ mod tests {
                 "storyboardId=12",
             )],
         };
-        let err = enforce_quality_gate(QualityGateStage::VideoPrompt, &decision)
-            .expect_err("should block");
+        let err = enforce_quality_gate(
+            QualityGateStage::VideoPrompt,
+            &decision,
+            QualityGateStrategy::Block,
+        )
+        .expect_err("should block");
         match err {
             ApiError::Conflict(message) => assert!(message.contains("video_prompt")),
             other => panic!("unexpected error: {other:?}"),
         }
+    }
+
+    #[test]
+    fn enforce_quality_gate_allows_with_warn_strategy() {
+        let decision = QualityGateDecision {
+            blocked: true,
+            issues: vec![issue(
+                QualityGateSeverity::Severe,
+                "visual_conflict",
+                "先统一镜头语言。",
+                "storyboardId=12",
+            )],
+        };
+        // Should not block with warn strategy
+        enforce_quality_gate(
+            QualityGateStage::VideoPrompt,
+            &decision,
+            QualityGateStrategy::Warn,
+        )
+        .expect("should allow with warn strategy");
+    }
+
+    #[test]
+    fn enforce_quality_gate_allows_with_off_strategy() {
+        let decision = QualityGateDecision {
+            blocked: true,
+            issues: vec![issue(
+                QualityGateSeverity::Severe,
+                "visual_conflict",
+                "先统一镜头语言。",
+                "storyboardId=12",
+            )],
+        };
+        // Should not block with off strategy
+        enforce_quality_gate(
+            QualityGateStage::VideoPrompt,
+            &decision,
+            QualityGateStrategy::Off,
+        )
+        .expect("should allow with off strategy");
     }
 
     #[test]
@@ -337,8 +383,13 @@ mod tests {
                 Just(QualityGateSeverity::Minor),
             ], 1..8usize),
             blocked_flag in any::<bool>(),
+            strategy in prop_oneof![
+                Just(QualityGateStrategy::Off),
+                Just(QualityGateStrategy::Warn),
+                Just(QualityGateStrategy::Block),
+            ],
         ) {
-            let has_severe = severities.iter().any(|severity| *severity == QualityGateSeverity::Severe);
+            let has_severe = severities.contains(&QualityGateSeverity::Severe);
             let issues = severities
                 .iter()
                 .enumerate()
@@ -355,8 +406,18 @@ mod tests {
                 blocked: blocked_flag && !has_severe,
                 issues,
             };
-            let result = enforce_quality_gate(stage, &decision);
-            if has_severe || decision.blocked {
+            let result = enforce_quality_gate(stage, &decision, strategy);
+
+            // Off strategy: always allow
+            if strategy == QualityGateStrategy::Off {
+                prop_assert!(result.is_ok());
+            }
+            // Warn strategy: always allow
+            else if strategy == QualityGateStrategy::Warn {
+                prop_assert!(result.is_ok());
+            }
+            // Block strategy: block on severe or blocked flag
+            else if has_severe || decision.blocked {
                 prop_assert!(matches!(result, Err(ApiError::Conflict(_))));
             } else {
                 prop_assert!(result.is_ok());

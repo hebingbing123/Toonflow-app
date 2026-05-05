@@ -305,6 +305,26 @@ Future<PublishJobRow> confirmSemiAutoPublishJob(
   return PublishJobRow.fromJson(map);
 }
 
+/// `POST …/publish/jobs/{job_id}/retry`
+Future<void> retryPublishJob(
+  String accessToken,
+  String projectId,
+  String jobId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs/$jobId/retry',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
 /// `POST …/publish/validate-copy`
 Future<PublishValidateCopyResponse> validatePublishCopy(
   String accessToken,

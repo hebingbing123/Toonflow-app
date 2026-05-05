@@ -12,6 +12,7 @@ use crate::settings::agent_memory::{
     load_project_style_bible_character_anchors, replace_named_summary_memory_with_scope,
 };
 
+use super::strategy::QualityGateStrategy;
 use super::{
     attribution::{decision_prefers_patch_scope, decision_suggests_attribution},
     contains_any, issue,
@@ -67,6 +68,34 @@ async fn load_storyboard_rows(
             )
         })
         .collect())
+}
+
+async fn load_quality_gate_strategy(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+) -> Result<QualityGateStrategy, ApiError> {
+    let strategy_str = sqlx::query_scalar::<_, Option<String>>(
+        r#"
+        SELECT quality_gate_strategy
+        FROM app_project
+        WHERE owner_user_id = $1
+          AND numeric_id = $2
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .flatten();
+
+    match strategy_str {
+        Some(s) => s.parse().map_err(|e: String| {
+            ApiError::BadRequest(format!("invalid quality_gate_strategy: {e}"))
+        }),
+        None => Ok(QualityGateStrategy::default()),
+    }
 }
 
 async fn has_role_rows(
@@ -215,7 +244,26 @@ pub(crate) async fn run_quality_gate(
     stage: QualityGateStage,
     storyboard_ids: &[i32],
     text_inputs: &[String],
-) -> Result<QualityGateDecision, ApiError> {
+) -> Result<(QualityGateDecision, QualityGateStrategy), ApiError> {
+    // Load quality gate strategy first
+    let strategy = load_quality_gate_strategy(pool, user_id, project_id).await?;
+
+    // If strategy is "off", skip all checks and return empty decision
+    if strategy.should_skip_checks() {
+        tracing::debug!(
+            project_id = project_id,
+            stage = stage.as_str(),
+            "quality gate checks skipped (strategy=off)"
+        );
+        return Ok((
+            QualityGateDecision {
+                blocked: false,
+                issues: Vec::new(),
+            },
+            strategy,
+        ));
+    }
+
     let storyboard_rows =
         load_storyboard_rows(pool, user_id, project_id, script_id, storyboard_ids).await?;
     let has_role_rows = has_role_rows(pool, user_id, project_id, script_id).await?;
@@ -334,17 +382,47 @@ pub(crate) async fn run_quality_gate(
         )
         .await?;
     }
-    Ok(decision)
+    Ok((decision, strategy))
 }
 
 pub(crate) fn enforce_quality_gate(
     stage: QualityGateStage,
     decision: &QualityGateDecision,
+    strategy: QualityGateStrategy,
 ) -> Result<(), ApiError> {
+    // If strategy is "off", skip all enforcement
+    if strategy.should_skip_checks() {
+        return Ok(());
+    }
+
     let severe_detected = decision
         .issues
         .iter()
         .any(|issue| issue.severity == QualityGateSeverity::Severe);
+
+    // If strategy is "warn", log issues but don't block
+    if strategy.should_warn() {
+        if decision.blocked || severe_detected {
+            tracing::warn!(
+                stage = stage.as_str(),
+                blocked = decision.blocked,
+                severe_count = decision
+                    .issues
+                    .iter()
+                    .filter(|i| i.severity == QualityGateSeverity::Severe)
+                    .count(),
+                minor_count = decision
+                    .issues
+                    .iter()
+                    .filter(|i| i.severity == QualityGateSeverity::Minor)
+                    .count(),
+                "quality gate issues detected (warn mode - allowing operation to proceed)"
+            );
+        }
+        return Ok(());
+    }
+
+    // Strategy is "block" - enforce blocking behavior
     if decision.blocked || severe_detected {
         return Err(ApiError::Conflict(decision_message(stage, decision)));
     }

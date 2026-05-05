@@ -260,7 +260,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         .into_iter()
         .collect::<Vec<_>>();
     let text_inputs = body.description.iter().cloned().collect::<Vec<_>>();
-    let gate = run_quality_gate(
+    let (gate, strategy) = run_quality_gate(
         pool,
         user_id,
         body.project_id,
@@ -270,7 +270,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         &text_inputs,
     )
     .await?;
-    enforce_quality_gate(QualityGateStage::VideoPrompt, &gate)?;
+    enforce_quality_gate(QualityGateStage::VideoPrompt, &gate, strategy)?;
     let project_memory_optimization = optimize_project_memory_budget(
         pool,
         user_id,

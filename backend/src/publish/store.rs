@@ -595,15 +595,31 @@ pub(crate) async fn list_jobs(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
+pub(crate) struct ListAttemptAuditFilter<'a> {
+    pub(crate) draft_id: Option<Uuid>,
+    pub(crate) job_id: Option<Uuid>,
+    pub(crate) delivery_mode: Option<&'a str>,
+    pub(crate) evidence_key: Option<&'a str>,
+    pub(crate) limit: i64,
+}
+
 pub(crate) async fn list_attempt_audit(
     pool: &PgPool,
     project_id: Uuid,
     owner_user_id: Uuid,
-    draft_id: Option<Uuid>,
-    job_id: Option<Uuid>,
-    limit: i64,
+    filter: ListAttemptAuditFilter<'_>,
 ) -> Result<Vec<PublishAttemptAuditRow>, ApiError> {
-    let capped_limit = limit.clamp(1, 200);
+    let capped_limit = filter.limit.clamp(1, 200);
+    let delivery_mode = filter
+        .delivery_mode
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string);
+    let evidence_key = filter
+        .evidence_key
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string);
     sqlx::query_as::<_, PublishAttemptAuditRow>(
         r#"
         SELECT
@@ -624,14 +640,18 @@ pub(crate) async fn list_attempt_audit(
           AND j.owner_user_id = $2
           AND ($3::uuid IS NULL OR j.draft_id = $3)
           AND ($4::uuid IS NULL OR j.id = $4)
+          AND ($5::text IS NULL OR a.detail->>'delivery_mode' = $5)
+          AND ($6::text IS NULL OR COALESCE(a.detail->'evidence', '{}'::jsonb) ? $6)
         ORDER BY a.created_at DESC
-        LIMIT $5
+        LIMIT $7
         "#,
     )
     .bind(project_id)
     .bind(owner_user_id)
-    .bind(draft_id)
-    .bind(job_id)
+    .bind(filter.draft_id)
+    .bind(filter.job_id)
+    .bind(delivery_mode)
+    .bind(evidence_key)
     .bind(capped_limit)
     .fetch_all(pool)
     .await
