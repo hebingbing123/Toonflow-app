@@ -18,18 +18,21 @@ use super::platform_registry::capability_matrix;
 use super::state_machine::{can_cancel, can_confirm_semi_auto, can_retry};
 use super::store::{
     cancel_job_if_non_terminal, confirm_semi_auto_job, delete_draft, delete_profile, fetch_draft,
-    fetch_job_owned, fetch_profile, insert_draft, insert_profile, insert_publish_job, list_drafts,
-    list_jobs, list_profiles, list_targets, patch_draft_row, patch_profile_row, replace_targets,
-    retry_job_if_allowed, ScheduledDraftUtcWindow,
+    fetch_job_owned, fetch_profile, insert_draft, insert_profile, insert_publish_job,
+    list_attempt_audit, list_drafts, list_jobs, list_profiles, list_targets, patch_draft_row,
+    patch_profile_row, replace_targets, retry_job_if_allowed, ScheduledDraftUtcWindow,
 };
 use super::types::{
-    CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, ListPublishDraftsQuery,
-    PatchPublishDraftBody, PatchPublishProfileBody, PublishDraftResponse, PublishJobResponse,
+    CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, ListPublishAuditQuery,
+    ListPublishDraftsQuery, PatchPublishDraftBody, PatchPublishProfileBody,
+    PublishAttemptAuditResponse, PublishDraftResponse, PublishJobResponse,
     PublishPlatformMatrixResponse, PublishPrepareCheckResponse, PublishProfileResponse,
     PublishTargetResponse, UpsertPublishTargetsBody,
 };
 use super::validation::{prepare_check_for_draft, validate_automation_mode};
-use super::{draft_from_row, job_from_row, profile_from_row, target_from_row};
+use super::{
+    attempt_audit_from_row, draft_from_row, job_from_row, profile_from_row, target_from_row,
+};
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -72,6 +75,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/publish/jobs",
             get(list_publish_jobs),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/publish/audit",
+            get(list_publish_audit),
         )
         .route(
             "/api/v1/projects/{project_id}/publish/jobs/{job_id}/cancel",
@@ -653,6 +660,36 @@ pub(crate) async fn list_publish_jobs(
     require_project_owned(pool, uid, project_id).await?;
     let rows = list_jobs(pool, project_id, uid).await?;
     Ok(Json(rows.into_iter().map(job_from_row).collect()))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}/publish/audit",
+    operation_id = "listPublishAuditV1",
+    tag = "publish",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID"),
+        ("draft_id" = Option<Uuid>, Query, description = "Optional draft filter"),
+        ("job_id" = Option<Uuid>, Query, description = "Optional job filter"),
+        ("limit" = Option<i64>, Query, description = "1..200, default 50")
+    ),
+    responses(
+        (status = 200, description = "OK", body = Vec<PublishAttemptAuditResponse>),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_publish_audit(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    Query(q): Query<ListPublishAuditQuery>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<PublishAttemptAuditResponse>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_project_owned(pool, uid, project_id).await?;
+    let rows = list_attempt_audit(pool, project_id, uid, q.draft_id, q.job_id, q.limit).await?;
+    Ok(Json(rows.into_iter().map(attempt_audit_from_row).collect()))
 }
 
 #[utoipa::path(

@@ -184,6 +184,34 @@ pub struct CreatePublishJobBody {
     pub payload: Value,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct ListPublishAuditQuery {
+    pub draft_id: Option<Uuid>,
+    pub job_id: Option<Uuid>,
+    #[serde(default = "default_publish_audit_limit")]
+    pub limit: i64,
+}
+
+fn default_publish_audit_limit() -> i64 {
+    50
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct PublishAttemptAuditResponse {
+    pub id: Uuid,
+    pub job_id: Uuid,
+    pub draft_id: Uuid,
+    pub target_id: Uuid,
+    pub platform_id: String,
+    pub attempt_no: i32,
+    pub status: String,
+    pub detail: Value,
+    pub error_message: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct PublishPrepareIssue {
@@ -330,6 +358,20 @@ pub(crate) struct PublishJobRow {
     pub(crate) updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, FromRow)]
+pub(crate) struct PublishAttemptAuditRow {
+    pub(crate) id: Uuid,
+    pub(crate) job_id: Uuid,
+    pub(crate) draft_id: Uuid,
+    pub(crate) target_id: Uuid,
+    pub(crate) platform_id: String,
+    pub(crate) attempt_no: i32,
+    pub(crate) status: String,
+    pub(crate) detail: Json<Value>,
+    pub(crate) error_message: Option<String>,
+    pub(crate) created_at: DateTime<Utc>,
+}
+
 pub(crate) fn profile_from_row(r: PublishProfileRow) -> PublishProfileResponse {
     PublishProfileResponse {
         id: r.id,
@@ -393,5 +435,20 @@ pub(crate) fn job_from_row(r: PublishJobRow) -> PublishJobResponse {
         claimed_by: r.claimed_by,
         created_at: r.created_at,
         updated_at: r.updated_at,
+    }
+}
+
+pub(crate) fn attempt_audit_from_row(r: PublishAttemptAuditRow) -> PublishAttemptAuditResponse {
+    PublishAttemptAuditResponse {
+        id: r.id,
+        job_id: r.job_id,
+        draft_id: r.draft_id,
+        target_id: r.target_id,
+        platform_id: r.platform_id,
+        attempt_no: r.attempt_no,
+        status: r.status,
+        detail: r.detail.0,
+        error_message: r.error_message,
+        created_at: r.created_at,
     }
 }

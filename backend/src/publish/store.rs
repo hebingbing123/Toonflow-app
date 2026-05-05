@@ -10,8 +10,8 @@ use crate::error::ApiError;
 
 use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, PatchPublishDraftBody,
-    PatchPublishProfileBody, PublishDraftRow, PublishJobRow, PublishProfileRow, PublishTargetInput,
-    PublishTargetRow,
+    PatchPublishProfileBody, PublishAttemptAuditRow, PublishDraftRow, PublishJobRow,
+    PublishProfileRow, PublishTargetInput, PublishTargetRow,
 };
 
 /// Half-open `[from, to)` UTC window used by `GET …/publish/drafts`.
@@ -589,6 +589,49 @@ pub(crate) async fn list_jobs(
     )
     .bind(project_id)
     .bind(owner_user_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
+pub(crate) async fn list_attempt_audit(
+    pool: &PgPool,
+    project_id: Uuid,
+    owner_user_id: Uuid,
+    draft_id: Option<Uuid>,
+    job_id: Option<Uuid>,
+    limit: i64,
+) -> Result<Vec<PublishAttemptAuditRow>, ApiError> {
+    let capped_limit = limit.clamp(1, 200);
+    sqlx::query_as::<_, PublishAttemptAuditRow>(
+        r#"
+        SELECT
+          a.id,
+          a.job_id,
+          j.draft_id,
+          a.target_id,
+          t.platform_id,
+          a.attempt_no,
+          a.status,
+          a.detail,
+          a.error_message,
+          a.created_at
+        FROM app_publish_attempt AS a
+        INNER JOIN app_publish_job AS j ON j.id = a.job_id
+        INNER JOIN app_publish_target AS t ON t.id = a.target_id
+        WHERE j.project_id = $1
+          AND j.owner_user_id = $2
+          AND ($3::uuid IS NULL OR j.draft_id = $3)
+          AND ($4::uuid IS NULL OR j.id = $4)
+        ORDER BY a.created_at DESC
+        LIMIT $5
+        "#,
+    )
+    .bind(project_id)
+    .bind(owner_user_id)
+    .bind(draft_id)
+    .bind(job_id)
+    .bind(capped_limit)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
