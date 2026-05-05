@@ -1418,6 +1418,278 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  Future<String?> _promptReplacementVideoUrl(
+    BuildContext context, {
+    String initialValue = '',
+  }) async {
+    final ctrl = TextEditingController(text: initialValue);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('替换当前视频版本'),
+          content: TextField(
+            controller: ctrl,
+            decoration: const InputDecoration(
+              labelText: '视频 URL',
+              hintText: 'https://...',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
+              child: const Text('写回当前版本'),
+            ),
+          ],
+        );
+      },
+    );
+    ctrl.dispose();
+    return result;
+  }
+
+  Future<void> _openAssemblyClipDeskOps() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    final assembly = _shortVideoAssembly;
+    if (token == null || token.isEmpty || project == null || assembly == null) {
+      return;
+    }
+    final entries = <_AssemblyClipDeskOpEntry>[
+      for (final group in assembly.scripts)
+        for (final shot in group.shots)
+          _AssemblyClipDeskOpEntry(
+            scriptNumericId: group.scriptNumericId,
+            storyboardNumericId: shot.storyboardNumericId,
+            sbIndex: shot.sbIndex,
+            selectedMediaUrl: (shot.selectedMediaUrl ?? '').trim(),
+            selectedMediaKind: shot.selectedMediaKind,
+          ),
+    ];
+    if (entries.isEmpty) {
+      return;
+    }
+    var ordered = List<_AssemblyClipDeskOpEntry>.from(entries);
+    final pausedStoryboardIds = <int>{
+      for (final item in entries)
+        if (item.selectedMediaUrl.isEmpty) item.storyboardNumericId,
+    };
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocalState) {
+            Future<void> runDisable(_AssemblyClipDeskOpEntry item) async {
+              try {
+                await postWorkbenchDeleteVideoV1(
+                  token,
+                  projectId: project.numericId,
+                  scriptId: item.scriptNumericId,
+                  storyboardId: item.storyboardNumericId,
+                );
+                pausedStoryboardIds.add(item.storyboardNumericId);
+                if (mounted) {
+                  setState(() {
+                    _projectConfigLine =
+                        '分镜 #${item.storyboardNumericId} 已暂停（清空当前视频）。';
+                  });
+                }
+                setLocalState(() {});
+                await _loadProjectOverview();
+              } on RustApiException catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '暂停失败：${e.statusCode ?? '-'}';
+                });
+              } catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '暂停失败：$e';
+                });
+              }
+            }
+
+            Future<void> runEnableOrReplace(
+              _AssemblyClipDeskOpEntry item, {
+              String? replacementUrl,
+            }) async {
+              final seedUrl = (replacementUrl ?? item.selectedMediaUrl).trim();
+              if (seedUrl.isEmpty) {
+                ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(
+                  const SnackBar(content: Text('没有可用视频 URL，请先输入替换地址。')),
+                );
+                return;
+              }
+              try {
+                await postWorkbenchSelectVideoV1(
+                  token,
+                  projectId: project.numericId,
+                  scriptId: item.scriptNumericId,
+                  storyboardId: item.storyboardNumericId,
+                  videoUrl: seedUrl,
+                );
+                pausedStoryboardIds.remove(item.storyboardNumericId);
+                if (replacementUrl != null) {
+                  final idx = ordered.indexWhere(
+                    (entry) =>
+                        entry.storyboardNumericId == item.storyboardNumericId,
+                  );
+                  if (idx >= 0) {
+                    ordered[idx] = ordered[idx].copyWith(selectedMediaUrl: seedUrl);
+                  }
+                }
+                if (mounted) {
+                  setState(() {
+                    _projectConfigLine =
+                        '分镜 #${item.storyboardNumericId} 已写回当前视频版本。';
+                  });
+                }
+                setLocalState(() {});
+                await _loadProjectOverview();
+              } on RustApiException catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '写回失败：${e.statusCode ?? '-'}';
+                });
+              } catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '写回失败：$e';
+                });
+              }
+            }
+
+            return AlertDialog(
+              title: const Text('镜头基础操作'),
+              content: SizedBox(
+                width: 760,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '支持基础重排（本次面板视图）、启停和替换当前视频版本。',
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '启停 / 替换会直接写回 J 媒体槽位；重排仅用于本次排障视图。',
+                      style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 10),
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: ordered.length,
+                        itemBuilder: (ctx, idx) {
+                          final item = ordered[idx];
+                          final paused = pausedStoryboardIds.contains(
+                            item.storyboardNumericId,
+                          );
+                          final canMoveUp = idx > 0;
+                          final canMoveDown = idx < ordered.length - 1;
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${idx + 1}',
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    paused
+                                        ? '状态：暂停'
+                                        : '状态：启用（${item.selectedMediaKind}）',
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      OutlinedButton(
+                                        onPressed: canMoveUp
+                                            ? () {
+                                                final current = ordered[idx];
+                                                ordered[idx] = ordered[idx - 1];
+                                                ordered[idx - 1] = current;
+                                                setLocalState(() {});
+                                              }
+                                            : null,
+                                        child: const Text('上移'),
+                                      ),
+                                      OutlinedButton(
+                                        onPressed: canMoveDown
+                                            ? () {
+                                                final current = ordered[idx];
+                                                ordered[idx] = ordered[idx + 1];
+                                                ordered[idx + 1] = current;
+                                                setLocalState(() {});
+                                              }
+                                            : null,
+                                        child: const Text('下移'),
+                                      ),
+                                      FilledButton.tonal(
+                                        onPressed: () {
+                                          if (paused) {
+                                            unawaited(runEnableOrReplace(item));
+                                          } else {
+                                            unawaited(runDisable(item));
+                                          }
+                                        },
+                                        child: Text(paused ? '启用' : '暂停'),
+                                      ),
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          final nextUrl =
+                                              await _promptReplacementVideoUrl(
+                                            ctx,
+                                            initialValue: item.selectedMediaUrl,
+                                          );
+                                          if ((nextUrl ?? '').trim().isEmpty) {
+                                            return;
+                                          }
+                                          unawaited(
+                                            runEnableOrReplace(
+                                              item,
+                                              replacementUrl: nextUrl,
+                                            ),
+                                          );
+                                        },
+                                        child: const Text('替换当前版本'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('关闭'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final project = _selectedProject;
@@ -1816,6 +2088,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               _syncSelectedProjectContext();
               widget.onOpenProductionWorkspace();
             },
+      onOpenAssemblyClipDeskOps: project == null ||
+              _shortVideoAssembly == null ||
+              (_shortVideoAssembly?.scripts.isEmpty ?? true)
+          ? null
+          : () => unawaited(_openAssemblyClipDeskOps()),
       candidateCardUi: candidateCardUi,
       candidateComparePanelUi: candidateComparePanelUi,
       onOpenProjectsForCandidateAssets:
@@ -1855,6 +2132,34 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       },
       onOpenTasks: widget.onOpenTasks,
       onOpenQuality: widget.onOpenQuality,
+    );
+  }
+}
+
+class _AssemblyClipDeskOpEntry {
+  const _AssemblyClipDeskOpEntry({
+    required this.scriptNumericId,
+    required this.storyboardNumericId,
+    required this.sbIndex,
+    required this.selectedMediaUrl,
+    required this.selectedMediaKind,
+  });
+
+  final int scriptNumericId;
+  final int storyboardNumericId;
+  final int? sbIndex;
+  final String selectedMediaUrl;
+  final String selectedMediaKind;
+
+  _AssemblyClipDeskOpEntry copyWith({
+    String? selectedMediaUrl,
+  }) {
+    return _AssemblyClipDeskOpEntry(
+      scriptNumericId: scriptNumericId,
+      storyboardNumericId: storyboardNumericId,
+      sbIndex: sbIndex,
+      selectedMediaUrl: selectedMediaUrl ?? this.selectedMediaUrl,
+      selectedMediaKind: selectedMediaKind,
     );
   }
 }

@@ -332,6 +332,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.exportCheckPanelUi,
     required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
+    this.onOpenAssemblyClipDeskOps,
     required this.candidateCardUi,
     required this.candidateComparePanelUi,
     this.onOpenProjectsForCandidateAssets,
@@ -399,6 +400,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
   final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
+  final VoidCallback? onOpenAssemblyClipDeskOps;
   final ShortVideoCandidateCardUi candidateCardUi;
   final ShortVideoCandidateComparePanelUi candidateComparePanelUi;
   final VoidCallback? onOpenProjectsForCandidateAssets;
@@ -885,10 +887,22 @@ class ShortVideoSpaceView extends StatelessWidget {
                     !assemblyPanelUi.loading &&
                     !assemblyPanelUi.unavailable) ...[
                   const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: onOpenProductionForAssemblyExport,
-                    icon: const Icon(Icons.movie_creation_outlined),
-                    label: const Text('打开制作工作区'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: onOpenProductionForAssemblyExport,
+                        icon: const Icon(Icons.movie_creation_outlined),
+                        label: const Text('打开制作工作区'),
+                      ),
+                      if (onOpenAssemblyClipDeskOps != null)
+                        OutlinedButton.icon(
+                          onPressed: onOpenAssemblyClipDeskOps,
+                          icon: const Icon(Icons.tune_outlined),
+                          label: const Text('镜头基础操作'),
+                        ),
+                    ],
                   ),
                 ],
               ],
