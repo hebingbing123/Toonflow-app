@@ -277,7 +277,7 @@
 
 ## H. 任务中心 / MP-W5：深链、阶段标签、失败三分解
 
-- [ ] H1. 任务列表 **project / script / storyboard / publish** 深链  
+- [x] H1. 任务列表 **project / script / storyboard / publish** 深链  
   - _需求: 11, 14.6_
 
 - [ ] H2. **短视频阶段过滤** + 任务 **阶段标签**（素材准备、出图、出视频、导出成片、质检 — **MP-W5**）  

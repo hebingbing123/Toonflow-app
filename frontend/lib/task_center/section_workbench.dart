@@ -12,6 +12,7 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
     required this.initialUuidDetails,
     required this.initialJobs,
     this.onNavigateExportJobDeepLink,
+    this.onNavigateDomainDeepLink,
   });
 
   final String accessToken;
@@ -24,6 +25,7 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
   final List<JobRow> initialJobs;
   final void Function(TaskCenterExportJobDeepLink link)?
       onNavigateExportJobDeepLink;
+  final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
 
   @override
   State<_TaskCenterWorkbenchDialog> createState() =>
@@ -507,6 +509,12 @@ class _TaskCenterWorkbenchDialogState
             : (link) {
                 Navigator.of(context).pop();
                 widget.onNavigateExportJobDeepLink!(link);
+              },
+        onNavigateDomainDeepLink: widget.onNavigateDomainDeepLink == null
+            ? null
+            : (link) {
+                Navigator.of(context).pop();
+                widget.onNavigateDomainDeepLink!(link);
               },
       ),
     );

@@ -81,6 +81,24 @@ class TaskCenterExportJobDeepLink {
   final bool openProductionWorkspace;
 }
 
+enum TaskCenterDomainDeepLinkTarget { project, script, storyboard, publish }
+
+class TaskCenterDomainDeepLink {
+  const TaskCenterDomainDeepLink({
+    required this.target,
+    required this.projectNumericId,
+    this.scriptNumericId,
+    this.storyboardNumericId,
+    this.publishDraftId,
+  });
+
+  final TaskCenterDomainDeepLinkTarget target;
+  final int projectNumericId;
+  final int? scriptNumericId;
+  final int? storyboardNumericId;
+  final String? publishDraftId;
+}
+
 int? taskCenterDeepLinkInt(Map<String, dynamic>? map, String key) {
   if (map == null) {
     return null;
@@ -120,6 +138,44 @@ TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
     scriptNumericId: script,
     storyboardNumericId: storyboard,
     openProductionWorkspace: true,
+  );
+}
+
+TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
+  final payload = job.payload;
+  final rawLinks = job.errorDetails == null ? null : job.errorDetails!['deep_links'];
+  final links = rawLinks is Map<String, dynamic> ? rawLinks : <String, dynamic>{};
+
+  final project = taskCenterDeepLinkInt(links, 'project_numeric_id') ??
+      taskCenterDeepLinkInt(payload, 'project_numeric_id');
+  if (project == null) {
+    return null;
+  }
+
+  final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
+      taskCenterDeepLinkInt(payload, 'script_numeric_id');
+  final storyboard = taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
+      taskCenterDeepLinkInt(payload, 'storyboard_numeric_id');
+  final publishDraftId = (links['publish_draft_id'] ?? payload['publish_draft_id'])?.toString();
+
+  final kind = job.kind.trim().toLowerCase();
+  TaskCenterDomainDeepLinkTarget target;
+  if (kind.contains('publish') || publishDraftId != null) {
+    target = TaskCenterDomainDeepLinkTarget.publish;
+  } else if (storyboard != null || kind.contains('storyboard')) {
+    target = TaskCenterDomainDeepLinkTarget.storyboard;
+  } else if (script != null || kind.contains('script')) {
+    target = TaskCenterDomainDeepLinkTarget.script;
+  } else {
+    target = TaskCenterDomainDeepLinkTarget.project;
+  }
+
+  return TaskCenterDomainDeepLink(
+    target: target,
+    projectNumericId: project,
+    scriptNumericId: script,
+    storyboardNumericId: storyboard,
+    publishDraftId: publishDraftId,
   );
 }
 

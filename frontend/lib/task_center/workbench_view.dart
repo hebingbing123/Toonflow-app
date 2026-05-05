@@ -69,6 +69,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
     required this.onCancelQueuedJob,
     required this.onClose,
     this.onNavigateExportJobDeepLink,
+    this.onNavigateDomainDeepLink,
   });
 
   final VoidCallback onLoadProjects;
@@ -82,6 +83,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
   final ValueChanged<JobRow> onCancelQueuedJob;
   final VoidCallback onClose;
   final void Function(TaskCenterExportJobDeepLink link)? onNavigateExportJobDeepLink;
+  final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
 }
 
 class TaskCenterWorkbenchDialogView extends StatelessWidget {
@@ -258,6 +260,8 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                                 job: job,
                                 onNavigateExportJobDeepLink:
                                     callbacks.onNavigateExportJobDeepLink,
+                                onNavigateDomainDeepLink:
+                                    callbacks.onNavigateDomainDeepLink,
                               ),
                           ],
                         ),
@@ -374,11 +378,14 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
   const _VideoExportFailedSubtitle({
     required this.job,
     required this.onNavigateExportJobDeepLink,
+    required this.onNavigateDomainDeepLink,
   });
 
   final JobRow job;
   final void Function(TaskCenterExportJobDeepLink link)?
       onNavigateExportJobDeepLink;
+  final void Function(TaskCenterDomainDeepLink link)?
+      onNavigateDomainDeepLink;
 
   @override
   Widget build(BuildContext context) {
@@ -390,6 +397,8 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
     final label = videoExportFailureCodeLabelZh(code ?? '');
     final link = tryParseVideoExportJobDeepLink(job);
     final deepLinkHandler = onNavigateExportJobDeepLink;
+    final domainLink = tryParseTaskCenterDomainDeepLink(job);
+    final domainLinkHandler = onNavigateDomainDeepLink;
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Column(
@@ -399,6 +408,13 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
             '结构化失败 · $label',
             style: small?.copyWith(color: outline),
           ),
+          if (domainLink != null && domainLinkHandler != null) ...[
+            const SizedBox(height: 2),
+            TextButton(
+              onPressed: () => domainLinkHandler(domainLink),
+              child: Text(_domainDeepLinkLabel(domainLink)),
+            ),
+          ],
           if (link != null && deepLinkHandler != null) ...[
             const SizedBox(height: 2),
             Wrap(
@@ -433,5 +449,18 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+String _domainDeepLinkLabel(TaskCenterDomainDeepLink link) {
+  switch (link.target) {
+    case TaskCenterDomainDeepLinkTarget.publish:
+      return '打开短视频 Space（发布）';
+    case TaskCenterDomainDeepLinkTarget.storyboard:
+      return '打开制作工作区（分镜）';
+    case TaskCenterDomainDeepLinkTarget.script:
+      return '打开剧本工作区（脚本）';
+    case TaskCenterDomainDeepLinkTarget.project:
+      return '打开短视频 Space（项目）';
   }
 }

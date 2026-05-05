@@ -231,6 +231,33 @@ extension _HomePageBuildProductSections on _HomePageState {
                 : ProductWorkspacePane.scriptWorkspace,
           );
         },
+        onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
+          setState(() {
+            _productScopedProjectNumericId = link.projectNumericId;
+          });
+          _workspaceInputController.applyProjectScope(
+            link.projectNumericId,
+            scriptNumericId: link.scriptNumericId,
+          );
+          switch (link.target) {
+            case TaskCenterDomainDeepLinkTarget.publish:
+            case TaskCenterDomainDeepLinkTarget.project:
+              _shellNavigationController.selectProductWorkspacePane(
+                ProductWorkspacePane.shortVideoSpace,
+              );
+              break;
+            case TaskCenterDomainDeepLinkTarget.script:
+              _shellNavigationController.selectProductWorkspacePane(
+                ProductWorkspacePane.scriptWorkspace,
+              );
+              break;
+            case TaskCenterDomainDeepLinkTarget.storyboard:
+              _shellNavigationController.selectProductWorkspacePane(
+                ProductWorkspacePane.productionWorkspace,
+              );
+              break;
+          }
+        },
         loadingTaskProjects: _taskCenterController.loadingTaskProjects,
         loadingTaskCategories: _taskCenterController.loadingTaskCategories,
         loadingTaskApi: _taskCenterController.loadingTaskApi,
