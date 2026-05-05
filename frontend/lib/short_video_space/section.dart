@@ -1469,12 +1469,15 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             sbIndex: shot.sbIndex,
             selectedMediaUrl: (shot.selectedMediaUrl ?? '').trim(),
             selectedMediaKind: shot.selectedMediaKind,
+            durationText: (shot.duration ?? '').trim(),
+            subtitleText: (shot.subtitleText ?? '').trim(),
           ),
     ];
     if (entries.isEmpty) {
       return;
     }
     var ordered = List<_AssemblyClipDeskOpEntry>.from(entries);
+    final initialOrdered = List<_AssemblyClipDeskOpEntry>.from(entries);
     final pausedStoryboardIds = <int>{
       for (final item in entries)
         if (item.selectedMediaUrl.isEmpty) item.storyboardNumericId,
@@ -1619,6 +1622,93 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               }
             }
 
+            Future<void> runAlignDuration(
+              _AssemblyClipDeskOpEntry item,
+              int durationSeconds,
+            ) async {
+              try {
+                final storyboard = await postStoryboardGetDataV1(
+                  token,
+                  projectId: project.numericId,
+                  scriptId: item.scriptNumericId,
+                  storyboardId: item.storyboardNumericId,
+                );
+                final prompt = (storyboard.prompt ?? '').trim();
+                if (prompt.isEmpty) {
+                  if (mounted) {
+                    setState(() {
+                      _projectConfigLine = '时长对齐失败：分镜 #${item.storyboardNumericId} 缺少 prompt';
+                    });
+                  }
+                  return;
+                }
+                final status = await postStoryboardEditInfoV1(
+                  token,
+                  projectId: project.numericId,
+                  scriptId: item.scriptNumericId,
+                  storyboardId: item.storyboardNumericId,
+                  prompt: prompt,
+                  duration: durationSeconds,
+                );
+                if (status != 200) {
+                  throw RustApiException(
+                    'edit storyboard info failed',
+                    statusCode: status,
+                  );
+                }
+                final idx = ordered.indexWhere(
+                  (entry) =>
+                      entry.storyboardNumericId == item.storyboardNumericId,
+                );
+                if (idx >= 0) {
+                  ordered[idx] = ordered[idx].copyWith(
+                    durationText: '${durationSeconds}s',
+                  );
+                }
+                if (mounted) {
+                  setState(() {
+                    _projectConfigLine =
+                        '分镜 #${item.storyboardNumericId} 已对齐为 ${durationSeconds}s。';
+                  });
+                }
+                setLocalState(() {});
+                await _loadProjectOverview();
+              } on RustApiException catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '时长对齐失败：${e.statusCode ?? '-'}';
+                });
+              } catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '时长对齐失败：$e';
+                });
+              }
+            }
+
+            int? parseDurationSeconds(String value) {
+              final trimmed = value.trim().toLowerCase();
+              if (trimmed.isEmpty) return null;
+              final digits = RegExp(r'^(\d{1,3})\s*s?$').firstMatch(trimmed);
+              if (digits == null) return null;
+              return int.tryParse(digits.group(1)!);
+            }
+
+            String subtitleMismatchLine(_AssemblyClipDeskOpEntry item) {
+              final durationSec = parseDurationSeconds(item.durationText);
+              final hasSubtitle = item.subtitleText.isNotEmpty;
+              if (hasSubtitle && durationSec == null) {
+                return '字幕存在，但时长未显式（建议先对齐时长）。';
+              }
+              if (!hasSubtitle && (durationSec ?? 0) > 0) {
+                return '时长已设定，但字幕为空（可能有字幕轨缺口）。';
+              }
+              if (hasSubtitle && (durationSec ?? 0) <= 0) {
+                return '字幕存在，但时长异常（<=0）。';
+              }
+              return '字幕与时长未见明显错位。';
+            }
+
             return AlertDialog(
               title: const Text('镜头基础操作'),
               content: SizedBox(
@@ -1638,10 +1728,26 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: FilledButton.tonalIcon(
-                        onPressed: () => unawaited(persistReorder()),
-                        icon: const Icon(Icons.save_outlined),
-                        label: const Text('保存重排顺序'),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.tonalIcon(
+                            onPressed: () => unawaited(persistReorder()),
+                            icon: const Icon(Icons.save_outlined),
+                            label: const Text('保存重排顺序'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              ordered = List<_AssemblyClipDeskOpEntry>.from(
+                                initialOrdered,
+                              );
+                              setLocalState(() {});
+                            },
+                            icon: const Icon(Icons.undo_outlined),
+                            label: const Text('撤销到打开时'),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -1671,6 +1777,15 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                                     paused
                                         ? '状态：暂停'
                                         : '状态：启用（${item.selectedMediaKind}）',
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '时长：${item.durationText.isEmpty ? "未设定" : item.durationText} · '
+                                    '字幕：${item.subtitleText.isEmpty ? "空" : "已填"}',
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '错位检查：${subtitleMismatchLine(item)}',
                                   ),
                                   const SizedBox(height: 8),
                                   Wrap(
@@ -1708,6 +1823,60 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                                           }
                                         },
                                         child: Text(paused ? '启用' : '暂停'),
+                                      ),
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          final ctrl = TextEditingController(
+                                            text: parseDurationSeconds(
+                                                      item.durationText,
+                                                    )?.toString() ??
+                                                '',
+                                          );
+                                          final picked = await showDialog<int>(
+                                            context: ctx,
+                                            builder: (dCtx) => AlertDialog(
+                                              title: const Text('单镜头时长对齐'),
+                                              content: TextField(
+                                                controller: ctrl,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                decoration: const InputDecoration(
+                                                  labelText: '时长（秒）',
+                                                  hintText: '输入 1~300',
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(
+                                                    dCtx,
+                                                  ).pop(),
+                                                  child: const Text('取消'),
+                                                ),
+                                                FilledButton(
+                                                  onPressed: () {
+                                                    final sec = int.tryParse(
+                                                      ctrl.text.trim(),
+                                                    );
+                                                    Navigator.of(
+                                                      dCtx,
+                                                    ).pop(sec);
+                                                  },
+                                                  child: const Text('对齐并写回'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                          ctrl.dispose();
+                                          if (picked == null ||
+                                              picked <= 0 ||
+                                              picked > 300) {
+                                            return;
+                                          }
+                                          unawaited(
+                                            runAlignDuration(item, picked),
+                                          );
+                                        },
+                                        child: const Text('时长对齐'),
                                       ),
                                       OutlinedButton(
                                         onPressed: () async {
@@ -2307,6 +2476,8 @@ class _AssemblyClipDeskOpEntry {
     required this.sbIndex,
     required this.selectedMediaUrl,
     required this.selectedMediaKind,
+    required this.durationText,
+    required this.subtitleText,
   });
 
   final int scriptNumericId;
@@ -2314,9 +2485,13 @@ class _AssemblyClipDeskOpEntry {
   final int? sbIndex;
   final String selectedMediaUrl;
   final String selectedMediaKind;
+  final String durationText;
+  final String subtitleText;
 
   _AssemblyClipDeskOpEntry copyWith({
     String? selectedMediaUrl,
+    String? durationText,
+    String? subtitleText,
   }) {
     return _AssemblyClipDeskOpEntry(
       scriptNumericId: scriptNumericId,
@@ -2324,6 +2499,8 @@ class _AssemblyClipDeskOpEntry {
       sbIndex: sbIndex,
       selectedMediaUrl: selectedMediaUrl ?? this.selectedMediaUrl,
       selectedMediaKind: selectedMediaKind,
+      durationText: durationText ?? this.durationText,
+      subtitleText: subtitleText ?? this.subtitleText,
     );
   }
 }
