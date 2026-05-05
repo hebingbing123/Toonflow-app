@@ -42,6 +42,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   bool _loadingProduction = false;
   bool _loadingWorkbench = false;
   bool _loadingExportJob = false;
+  StoryboardShortVideoReadiness? _storyboardShotReadiness;
   ProductionStoryboardItemV1? _productionRow;
   List<ProductionStoryboardItemV1> _productionRows = const [];
   VideoModelDetail? _modelDetail;
@@ -198,6 +199,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   Widget build(BuildContext context) {
     final viewState = _buildWorkbenchViewState();
 
+    final outline = Theme.of(context).colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -207,6 +209,17 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           productionRow: _productionRow,
           metaLine: _storyboardProductionMetaLine(_productionRow),
         ),
+        if (_storyboardShotReadiness != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            formatStoryboardShortVideoReadinessSummary(_storyboardShotReadiness!),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: _storyboardShotReadiness!.readyForGeneration
+                  ? Theme.of(context).colorScheme.primary
+                  : outline,
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         _StoryboardDiagnosisCard(
           diagnosis: viewState.diagnosis,

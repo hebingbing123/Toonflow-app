@@ -338,3 +338,35 @@ Future<ProjectShortVideoReadiness> fetchProjectShortVideoReadinessByProjectId(
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectShortVideoReadiness.fromJson(map);
 }
+
+/// Maps backend **`blocking_reasons`** codes to short UI labels (Chinese).
+String labelShortVideoBlockingReason(String code) {
+  switch (code) {
+    case 'missing_basic_slot':
+      return '时间线槽位';
+    case 'missing_prompt_context':
+      return '脚本 / 提示词';
+    case 'missing_reference_visual':
+      return '参考图';
+    case 'candidate_pending':
+      return '候选确认';
+    case 'blocking_job':
+      return '生成任务进行中';
+    default:
+      return code;
+  }
+}
+
+/// One-line summary for the storyboard workbench (current shot).
+String formatStoryboardShortVideoReadinessSummary(
+  StoryboardShortVideoReadiness row,
+) {
+  if (row.readyForGeneration) {
+    return '短视频就绪：本条分镜检查已通过，可继续生成。';
+  }
+  final parts = row.blockingReasons.map(labelShortVideoBlockingReason).toList();
+  if (parts.isEmpty) {
+    return '短视频就绪：有待核对项。';
+  }
+  return '短视频就绪：待补齐 ${parts.join('、')}';
+}

@@ -304,6 +304,58 @@ String shortVideoReadinessGapSummary({
   return '当前还缺 $labels$suffix，建议先回项目区把这些准备项补齐。';
 }
 
+/// Builds the Space panel for **`GET /api/v1/projects/{id}/short-video-readiness`**.
+ShotReadinessUi buildShotReadinessUi({
+  required bool loadingProjectOverview,
+  required ProjectShortVideoReadiness? readiness,
+  required bool readinessUnavailable,
+}) {
+  if (loadingProjectOverview) {
+    return const ShotReadinessUi(loading: true);
+  }
+  if (readinessUnavailable) {
+    return const ShotReadinessUi(unavailable: true);
+  }
+  if (readiness == null) {
+    return const ShotReadinessUi(
+      headline: '还没有读取到分镜就绪数据。',
+    );
+  }
+  final roll = readiness.rollup;
+  if (roll.totalStoryboards == 0) {
+    return const ShotReadinessUi(
+      headline: '当前项目还没有分镜行，可先在脚本侧拆镜后再看聚合。',
+    );
+  }
+  final headline =
+      '就绪 ${roll.readyCount}/${roll.totalStoryboards} 条分镜；阻塞 ${roll.blockedCount} 条。';
+  final reasonLines = readiness.rollup.byReason
+      .map(
+        (e) =>
+            '${labelShortVideoBlockingReason(e.reason)}（${e.storyboardCount} 条分镜）',
+      )
+      .toList(growable: false);
+  final shotDetailLines = readiness.storyboards
+      .where((s) => !s.readyForGeneration)
+      .take(5)
+      .map((s) {
+        final parts =
+            s.blockingReasons.map(labelShortVideoBlockingReason).join('、');
+        final script = s.scriptNumericId;
+        final idx = s.sbIndex;
+        return '分镜 #${s.storyboardNumericId}'
+            '${script != null ? ' · 脚本 #$script' : ''}'
+            '${idx != null ? ' · 镜位 $idx' : ''}'
+            '：$parts';
+      })
+      .toList(growable: false);
+  return ShotReadinessUi(
+    headline: headline,
+    reasonLines: reasonLines,
+    shotDetailLines: shotDetailLines,
+  );
+}
+
 ShortVideoNextStepPlan buildShortVideoNextStepPlan({
   required bool isAnimated,
   required ProjectRow? project,

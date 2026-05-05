@@ -48,6 +48,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   List<BadCaseStatItem> _badCaseStats = const <BadCaseStatItem>[];
   int _sceneAssetCount = 0;
   int _clipAssetCount = 0;
+  ProjectShortVideoReadiness? _shotReadiness;
+  bool _shotReadinessUnavailable = false;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -210,6 +212,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _badCaseStats = const <BadCaseStatItem>[];
           _sceneAssetCount = 0;
           _clipAssetCount = 0;
+          _shotReadiness = null;
+          _shotReadinessUnavailable = false;
         });
       }
       return;
@@ -222,6 +226,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _badCaseStats = const <BadCaseStatItem>[];
       _sceneAssetCount = 0;
       _clipAssetCount = 0;
+      _shotReadiness = null;
+      _shotReadinessUnavailable = false;
     });
     try {
       final results = await Future.wait<Object>([
@@ -259,6 +265,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       if (_selectedProjectId != project.id) {
         return;
       }
+      ProjectShortVideoReadiness? shotReadiness;
+      var shotUnavailable = false;
+      try {
+        shotReadiness = await fetchProjectShortVideoReadinessByProjectId(
+          token,
+          project.id,
+        );
+      } catch (_) {
+        shotReadiness = null;
+        shotUnavailable = true;
+      }
+      if (!mounted || _selectedProjectId != project.id) {
+        return;
+      }
       setState(() {
         _projectStats = results[0] as ProjectStats;
         _recentProjectTasks = results[1] as TaskCenterGetTaskApiResult;
@@ -267,6 +287,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _badCaseStats = results[3] as List<BadCaseStatItem>;
         _sceneAssetCount = (results[4] as ListAssetsResponse).total;
         _clipAssetCount = (results[5] as ListAssetsResponse).total;
+        _shotReadiness = shotReadiness;
+        _shotReadinessUnavailable = shotUnavailable;
       });
     } on RustApiException catch (_) {
       if (!mounted) {
@@ -279,6 +301,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _badCaseStats = const <BadCaseStatItem>[];
         _sceneAssetCount = 0;
         _clipAssetCount = 0;
+        _shotReadiness = null;
+        _shotReadinessUnavailable = false;
       });
     } catch (_) {
       if (!mounted) {
@@ -291,6 +315,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _badCaseStats = const <BadCaseStatItem>[];
         _sceneAssetCount = 0;
         _clipAssetCount = 0;
+        _shotReadiness = null;
+        _shotReadinessUnavailable = false;
       });
     } finally {
       if (mounted) {
@@ -543,6 +569,16 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       ShortVideoMetricData(label: '场景', value: _sceneAssetCount.toString()),
       ShortVideoMetricData(label: 'clip', value: _clipAssetCount.toString()),
     ];
+    if (_shotReadiness != null &&
+        _shotReadiness!.rollup.totalStoryboards > 0) {
+      overviewMetrics.add(
+        ShortVideoMetricData(
+          label: '分镜就绪',
+          value:
+              '${_shotReadiness!.rollup.readyCount}/${_shotReadiness!.rollup.totalStoryboards}',
+        ),
+      );
+    }
     final badCaseMetrics = _badCaseStats
         .map(
           (item) => ShortVideoMetricData(
@@ -565,6 +601,15 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       sceneAssetCount: _sceneAssetCount,
       clipAssetCount: _clipAssetCount,
     );
+    final shotReadinessUi = project == null
+        ? const ShotReadinessUi(
+            headline: '选择短剧项目后，会显示服务端分镜阻塞汇总。',
+          )
+        : buildShotReadinessUi(
+            loadingProjectOverview: _loadingProjectOverview,
+            readiness: _shotReadiness,
+            readinessUnavailable: _shotReadinessUnavailable,
+          );
     final nextStepPlan = buildShortVideoNextStepPlan(
       isAnimated: _isAnimated,
       project: project,
@@ -699,6 +744,13 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         readinessItems: readinessItems,
       ),
       readinessItems: readinessItems,
+      shotReadinessUi: shotReadinessUi,
+      onOpenProductionForShotReadiness: project == null
+          ? null
+          : () {
+              _syncSelectedProjectContext();
+              widget.onOpenProductionWorkspace();
+            },
       nextStepTitle: nextStepPlan.title,
       nextStepDetail: nextStepPlan.detail,
       onNextStep: _nextStepAction(),

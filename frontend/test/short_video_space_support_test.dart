@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/short_video_space/support.dart';
@@ -117,5 +119,71 @@ void main() {
     expect(shortVideoModeLabel(ShortVideoMode.liveAction), '真人短剧');
     expect(shortVideoVideoRatioLabel('16:9'), '横屏 16:9');
     expect(shortVideoVideoRatioLabel('9:16'), '竖屏 9:16');
+  });
+
+  test('blocking reason labels map API codes to Chinese', () {
+    expect(labelShortVideoBlockingReason('missing_reference_visual'), '参考图');
+    expect(labelShortVideoBlockingReason('unknown_code'), 'unknown_code');
+  });
+
+  test('shot readiness UI summarizes rollup and blocked shots', () {
+    final readiness = ProjectShortVideoReadiness.fromJson(
+      jsonDecode(
+            '''
+{
+  "schema_version": 1,
+  "rollup": {
+    "total_storyboards": 2,
+    "ready_count": 1,
+    "blocked_count": 1,
+    "by_reason": [
+      { "reason": "missing_reference_visual", "storyboard_count": 1 }
+    ]
+  },
+  "storyboards": [
+    {
+      "storyboard_id": "550e8400-e29b-41d4-a716-446655440000",
+      "storyboard_numeric_id": 10,
+      "script_numeric_id": 3,
+      "sb_index": 1,
+      "has_basic_slot": true,
+      "has_prompt_context": true,
+      "has_reference_visual": false,
+      "candidate_cleared": true,
+      "no_blocking_job": true,
+      "ready_for_generation": false,
+      "blocking_reasons": ["missing_reference_visual"]
+    },
+    {
+      "storyboard_id": "650e8400-e29b-41d4-a716-446655440001",
+      "storyboard_numeric_id": 11,
+      "script_numeric_id": 3,
+      "sb_index": 2,
+      "has_basic_slot": true,
+      "has_prompt_context": true,
+      "has_reference_visual": true,
+      "candidate_cleared": true,
+      "no_blocking_job": true,
+      "ready_for_generation": true,
+      "blocking_reasons": []
+    }
+  ]
+}
+''',
+          )
+          as Map<String, dynamic>,
+    );
+    final ui = buildShotReadinessUi(
+      loadingProjectOverview: false,
+      readiness: readiness,
+      readinessUnavailable: false,
+    );
+    expect(ui.headline, contains('就绪 1/2'));
+    expect(ui.reasonLines.single, contains('参考图'));
+    expect(ui.shotDetailLines, isNotEmpty);
+    expect(
+      formatStoryboardShortVideoReadinessSummary(readiness.storyboards.first),
+      contains('参考图'),
+    );
   });
 }

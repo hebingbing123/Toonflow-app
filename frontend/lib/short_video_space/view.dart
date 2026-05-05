@@ -28,6 +28,23 @@ class ShortVideoReadinessItem {
   final String detail;
 }
 
+/// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
+class ShotReadinessUi {
+  const ShotReadinessUi({
+    this.loading = false,
+    this.unavailable = false,
+    this.headline,
+    this.reasonLines = const <String>[],
+    this.shotDetailLines = const <String>[],
+  });
+
+  final bool loading;
+  final bool unavailable;
+  final String? headline;
+  final List<String> reasonLines;
+  final List<String> shotDetailLines;
+}
+
 class ShortVideoStageCardData {
   const ShortVideoStageCardData({
     required this.title,
@@ -100,6 +117,8 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.readinessCountLabel,
     required this.readinessGapSummary,
     required this.readinessItems,
+    required this.shotReadinessUi,
+    this.onOpenProductionForShotReadiness,
     required this.nextStepTitle,
     required this.nextStepDetail,
     required this.onNextStep,
@@ -157,6 +176,8 @@ class ShortVideoSpaceView extends StatelessWidget {
   final String readinessCountLabel;
   final String readinessGapSummary;
   final List<ShortVideoReadinessItem> readinessItems;
+  final ShotReadinessUi shotReadinessUi;
+  final VoidCallback? onOpenProductionForShotReadiness;
   final String nextStepTitle;
   final String nextStepDetail;
   final VoidCallback onNextStep;
@@ -513,6 +534,84 @@ class ShortVideoSpaceView extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: _ReadinessRow(item: item),
                 ),
+              const SizedBox(height: 16),
+              Text('分镜生成就绪（服务端）', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              if (shotReadinessUi.loading)
+                Text(
+                  '正在读取分镜就绪聚合…',
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                )
+              else if (shotReadinessUi.unavailable)
+                Text(
+                  '分镜就绪摘要暂不可用，其余概览仍有效。',
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                )
+              else ...[
+                if (shotReadinessUi.headline != null)
+                  Text(
+                    shotReadinessUi.headline!,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  ),
+                if (shotReadinessUi.reasonLines.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  for (final line in shotReadinessUi.reasonLines)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: 16,
+                            color: theme.colorScheme.tertiary,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              line,
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+                if (shotReadinessUi.shotDetailLines.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '优先处理的分镜',
+                    style: theme.textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 6),
+                  for (final line in shotReadinessUi.shotDetailLines)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.movie_filter_outlined,
+                            size: 16,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(line, style: theme.textTheme.bodySmall),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+                if (onOpenProductionForShotReadiness != null) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: onOpenProductionForShotReadiness,
+                    icon: const Icon(Icons.movie_creation_outlined),
+                    label: const Text('打开制作工作区分镜'),
+                  ),
+                ],
+              ],
             ],
           ),
         ),

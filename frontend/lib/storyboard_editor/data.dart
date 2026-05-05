@@ -195,6 +195,36 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
     if (jobId != null && jobId.isNotEmpty) {
       await _refreshExportJobStatus();
     }
+    await _refreshStoryboardShotReadiness();
+  }
+
+  Future<void> _refreshStoryboardShotReadiness() async {
+    try {
+      final pr = await fetchProjectShortVideoReadinessByProjectId(
+        widget.token,
+        widget.projectId,
+      );
+      if (!mounted) {
+        return;
+      }
+      StoryboardShortVideoReadiness? mine;
+      for (final s in pr.storyboards) {
+        if (s.storyboardNumericId == widget.storyNumericId) {
+          mine = s;
+          break;
+        }
+      }
+      _applyWorkbenchState(() {
+        _storyboardShotReadiness = mine;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      _applyWorkbenchState(() {
+        _storyboardShotReadiness = null;
+      });
+    }
   }
 
   List<int> _knownTrackIds() {
