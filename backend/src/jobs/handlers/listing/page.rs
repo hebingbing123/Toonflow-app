@@ -7,6 +7,7 @@ use axum::{
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::dto::{JobRow, ListJobsPageQuery, ListJobsPageResponse};
+use crate::jobs::hydrate_job_rows;
 use crate::state::AppState;
 
 use super::super::common::{
@@ -72,7 +73,7 @@ pub(crate) async fn list_jobs_page(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let offset = compute_task_page_offset(page, limit);
-    let rows = sqlx::query_as::<_, JobRow>(
+    let mut rows = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
@@ -94,6 +95,8 @@ pub(crate) async fn list_jobs_page(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    hydrate_job_rows(&mut rows);
 
     Ok(Json(ListJobsPageResponse { data: rows, total }))
 }

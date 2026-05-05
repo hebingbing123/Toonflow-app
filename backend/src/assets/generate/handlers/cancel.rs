@@ -50,7 +50,7 @@ pub(crate) async fn post_cancel_generate(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let cancelled_jobs = sqlx::query_as::<_, JobRow>(
+    let mut cancelled_jobs = sqlx::query_as::<_, JobRow>(
         r#"
         WITH target_assets AS (
             SELECT a.numeric_id
@@ -102,6 +102,8 @@ pub(crate) async fn post_cancel_generate(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    crate::jobs::hydrate_job_rows(&mut cancelled_jobs);
 
     for row in cancelled_jobs {
         let text = crate::jobs::envelope_generation_job_updated(&row);

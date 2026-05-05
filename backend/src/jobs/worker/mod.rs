@@ -22,7 +22,7 @@ use crate::metering::usage;
 use crate::state::AppState;
 
 use super::{
-    envelope_generation_job_updated, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
+    envelope_generation_job_updated, hydrate_job_row, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
     JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
     JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT,
     JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
@@ -67,9 +67,11 @@ async fn process_one_job(
     pool: &PgPool,
     worker_id: &str,
 ) -> Result<(), sqlx::Error> {
-    let Some(row) = claim_next_job(pool, worker_id).await? else {
+    let Some(mut row) = claim_next_job(pool, worker_id).await? else {
         return Ok(());
     };
+
+    hydrate_job_row(&mut row);
 
     observe::generation_job(row.owner_user_id, row.id, "claimed");
 
@@ -100,7 +102,7 @@ async fn process_one_job(
             .fetch_optional(pool)
             .await?;
 
-            if let Some(final_row) = updated {
+            if let Some(mut final_row) = updated {
                 observe::generation_job(owner, id, "succeeded");
                 if let Err(e) =
                     usage::record_generation_job_succeeded(pool, owner, id, &final_row.kind).await
@@ -111,6 +113,7 @@ async fn process_one_job(
                         "app_usage_event insert failed (job still succeeded)"
                     );
                 }
+                hydrate_job_row(&mut final_row);
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }
@@ -134,8 +137,9 @@ async fn process_one_job(
             .fetch_optional(pool)
             .await?;
 
-            if let Some(final_row) = updated {
+            if let Some(mut final_row) = updated {
                 observe::generation_job(owner, id, "failed");
+                hydrate_job_row(&mut final_row);
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }
@@ -158,8 +162,9 @@ async fn process_one_job(
             .fetch_optional(pool)
             .await?;
 
-            if let Some(final_row) = updated {
+            if let Some(mut final_row) = updated {
                 observe::generation_job(owner, id, "failed");
+                hydrate_job_row(&mut final_row);
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }

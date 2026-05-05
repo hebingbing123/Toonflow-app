@@ -7,6 +7,7 @@ mod dto;
 mod enqueue;
 mod handlers;
 mod kinds;
+mod track_metadata;
 
 // Public API surface for other crates / tests; not all items referenced from this module body.
 #[allow(unused_imports)]
@@ -15,9 +16,11 @@ pub use enqueue::{enqueue_generation_job, envelope_generation_job_updated};
 pub use handlers::JobsOpenApi;
 pub use kinds::{
     JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
-    JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
-    JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
+    JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_BGM_GENERATE, JOB_KIND_FLUTTER_PROBE,
+    JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_SUBTITLE_GENERATE, JOB_KIND_VIDEO_EXPORT,
+    JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
 };
+pub(crate) use track_metadata::{hydrate_job_row, hydrate_job_rows, merge_default_track_metadata};
 
 use axum::Router;
 

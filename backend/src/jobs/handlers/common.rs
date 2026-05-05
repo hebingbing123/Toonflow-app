@@ -3,6 +3,7 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::jobs::dto::JobRow;
+use crate::jobs::hydrate_job_row;
 
 pub(crate) fn require_pool(state: &crate::state::AppState) -> Result<&sqlx::PgPool, ApiError> {
     state.require_pool()
@@ -95,7 +96,7 @@ pub(crate) async fn fetch_job_by_numeric_task_id(
     uid: Uuid,
     numeric_task_id: i64,
 ) -> Result<JobRow, ApiError> {
-    sqlx::query_as::<_, JobRow>(
+    let mut row = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
@@ -107,7 +108,9 @@ pub(crate) async fn fetch_job_by_numeric_task_id(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)
+    .ok_or(ApiError::NotFound)?;
+    hydrate_job_row(&mut row);
+    Ok(row)
 }
 
 pub(crate) async fn fetch_job_by_id(
@@ -115,7 +118,7 @@ pub(crate) async fn fetch_job_by_id(
     uid: Uuid,
     id: Uuid,
 ) -> Result<JobRow, ApiError> {
-    sqlx::query_as::<_, JobRow>(
+    let mut row = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
@@ -127,7 +130,9 @@ pub(crate) async fn fetch_job_by_id(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)
+    .ok_or(ApiError::NotFound)?;
+    hydrate_job_row(&mut row);
+    Ok(row)
 }
 
 #[cfg(test)]

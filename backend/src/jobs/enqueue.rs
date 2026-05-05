@@ -7,6 +7,7 @@ use crate::metering::quota;
 use crate::metering::usage;
 
 use super::dto::JobRow;
+use super::{hydrate_job_row, merge_default_track_metadata};
 
 /// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.
 pub async fn enqueue_generation_job(
@@ -16,7 +17,9 @@ pub async fn enqueue_generation_job(
     payload: serde_json::Value,
 ) -> Result<JobRow, ApiError> {
     quota::check_daily_job_quota(pool, owner_user_id).await?;
-    let row = sqlx::query_as::<_, JobRow>(
+    let mut payload = payload;
+    merge_default_track_metadata(kind, &mut payload);
+    let mut row = sqlx::query_as::<_, JobRow>(
         r#"
         INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
         VALUES ($1, $2, $3, 'queued', NULL)
@@ -29,6 +32,8 @@ pub async fn enqueue_generation_job(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    hydrate_job_row(&mut row);
 
     if let Err(e) =
         usage::record_generation_job_created(pool, owner_user_id, row.id, &row.kind).await

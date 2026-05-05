@@ -32,3 +32,9 @@ pub const JOB_KIND_VIDEO_EXPORT: &str = "video.export";
 /// storyboard narration into a persisted local audio artifact and writes the latest artifact
 /// reference back into **`app_storyboard.metadata.voiceover`**.
 pub const JOB_KIND_VOICEOVER_GENERATE: &str = "voiceover.generate";
+/// Reserved (**L2**): timed subtitles / captions; enqueue may set **`job_sub_kind`** = **`subtitle.captions`**;
+/// worker route not implemented — jobs would fail until a handler lands.
+pub const JOB_KIND_SUBTITLE_GENERATE: &str = "subtitle.generate";
+/// Reserved (**L2**): background music mix; enqueue may set **`job_sub_kind`** = **`bgm.mix`**;
+/// worker route not implemented — jobs would fail until a handler lands.
+pub const JOB_KIND_BGM_GENERATE: &str = "bgm.generate";

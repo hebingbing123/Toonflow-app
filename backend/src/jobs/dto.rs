@@ -23,6 +23,14 @@ pub struct JobRow {
     pub claimed_by: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    /// Stable sub‑type for UX / analytics (**also** in **`payload.job_sub_kind`**).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[sqlx(skip)]
+    pub job_sub_kind: Option<String>,
+    /// Coarse production stage (**also** in **`payload.production_phase`**).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[sqlx(skip)]
+    pub production_phase: Option<String>,
 }
 
 #[derive(Debug, FromRow)]

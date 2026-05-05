@@ -103,6 +103,8 @@ class JobRow {
     this.claimedBy,
     required this.createdAt,
     required this.updatedAt,
+    this.jobSubKind,
+    this.productionPhase,
   });
 
   final int numericTaskId;
@@ -123,6 +125,12 @@ class JobRow {
   final String createdAt;
   final String updatedAt;
 
+  /// Worker / product sub-type (e.g. `voiceover.tts`); mirrors API `job_sub_kind`.
+  final String? jobSubKind;
+
+  /// Production pipeline phase label (e.g. `post_production.narration`).
+  final String? productionPhase;
+
   factory JobRow.fromJson(Map<String, dynamic> json) {
     return JobRow(
       numericTaskId: (json['numeric_task_id'] as num).toInt(),
@@ -142,6 +150,8 @@ class JobRow {
       claimedBy: json['claimed_by'] as String?,
       createdAt: json['created_at'] as String,
       updatedAt: json['updated_at'] as String,
+      jobSubKind: json['job_sub_kind'] as String?,
+      productionPhase: json['production_phase'] as String?,
     );
   }
 }

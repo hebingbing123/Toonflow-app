@@ -3,6 +3,7 @@ use axum::{extract::State, http::HeaderMap, Json};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::dto::{CreateJobBody, JobRow};
+use crate::jobs::{hydrate_job_row, merge_default_track_metadata};
 use crate::metering::quota;
 use crate::metering::usage;
 use crate::state::AppState;
@@ -42,7 +43,7 @@ pub(crate) async fn create_job(
 
     let idem = idempotency_key_header(&headers);
     if let Some(ref key) = idem {
-        if let Some(row) = sqlx::query_as::<_, JobRow>(
+        if let Some(mut row) = sqlx::query_as::<_, JobRow>(
             r#"
             SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
             FROM app_generation_job
@@ -55,11 +56,15 @@ pub(crate) async fn create_job(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?
         {
+            hydrate_job_row(&mut row);
             return Ok(Json(row));
         }
     }
 
     quota::check_daily_job_quota(pool, uid).await?;
+
+    let mut payload = body.payload;
+    merge_default_track_metadata(kind, &mut payload);
 
     let insert = sqlx::query_as::<_, JobRow>(
         r#"
@@ -70,18 +75,18 @@ pub(crate) async fn create_job(
     )
     .bind(uid)
     .bind(kind)
-    .bind(body.payload)
+    .bind(payload)
     .bind(idem.clone())
     .fetch_one(pool)
     .await;
 
-    let row = match insert {
+    let mut row = match insert {
         Ok(r) => r,
         Err(e) if is_unique_violation(&e) => {
             let Some(key) = idem.as_ref() else {
                 return Err(ApiError::DatabaseError(e.to_string()));
             };
-            sqlx::query_as::<_, JobRow>(
+            let mut r = sqlx::query_as::<_, JobRow>(
                 r#"
                 SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
                 FROM app_generation_job
@@ -95,10 +100,14 @@ pub(crate) async fn create_job(
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?
             .ok_or_else(|| {
                 ApiError::DatabaseError("idempotency conflict but row not found".into())
-            })?
+            })?;
+            hydrate_job_row(&mut r);
+            r
         }
         Err(e) => return Err(ApiError::DatabaseError(e.to_string())),
     };
+
+    hydrate_job_row(&mut row);
 
     if let Err(e) = usage::record_generation_job_created(pool, uid, row.id, &row.kind).await {
         tracing::warn!(

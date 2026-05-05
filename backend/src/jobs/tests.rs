@@ -26,6 +26,8 @@ fn sample_job_row() -> JobRow {
         claimed_by: None,
         created_at: Utc::now(),
         updated_at: Utc::now(),
+        job_sub_kind: None,
+        production_phase: None,
     }
 }
 

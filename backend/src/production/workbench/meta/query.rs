@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
 use crate::error::ApiError;
-use crate::jobs::{JobRow, JOB_KIND_VIDEO_GENERATE};
+use crate::jobs::{hydrate_job_rows, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::VideoItem;
 use crate::scope::http::require_owned_numeric_script_scope_ids;
 use crate::state::AppState;
@@ -113,7 +113,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         GEN_JOB_SCOPE_FILTER,
     );
 
-    let generating_jobs = sqlx::query_as::<_, JobRow>(&generating_jobs_sql)
+    let mut generating_jobs = sqlx::query_as::<_, JobRow>(&generating_jobs_sql)
         .bind(uid)
         .bind(JOB_KIND_VIDEO_GENERATE)
         .bind(body.project_id)
@@ -121,6 +121,8 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         .fetch_all(pool)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    hydrate_job_rows(&mut generating_jobs);
 
     let script_storyboard_count: i64 = sqlx::query_scalar(
         r#"SELECT COUNT(*)::bigint FROM app_storyboard sb WHERE sb.script_id = $1"#,
