@@ -73,6 +73,50 @@ class ShortVideoAssetsOverviewPanelUi {
   final String detail;
 }
 
+/// D4：**成片装配**快照（**`GET …/short-video-assembly`**）。
+class ShortVideoAssemblyPanelUi {
+  const ShortVideoAssemblyPanelUi({
+    this.visible = false,
+    this.loading = false,
+    this.unavailable = false,
+    this.headline = '',
+    this.defaultsLine = '',
+    this.scriptLines = const <String>[],
+    this.detail = '',
+  });
+
+  final bool visible;
+  final bool loading;
+  final bool unavailable;
+  final String headline;
+  final String defaultsLine;
+  final List<String> scriptLines;
+  final String detail;
+}
+
+/// D4：**导出前检查**摘要（**`GET …/short-video-export-check`**）。
+class ShortVideoExportCheckPanelUi {
+  const ShortVideoExportCheckPanelUi({
+    this.visible = false,
+    this.loading = false,
+    this.unavailable = false,
+    this.headline = '',
+    this.metrics = const <ShortVideoMetricData>[],
+    this.qualityGateLine = '',
+    this.blockingLines = const <String>[],
+    this.detail = '',
+  });
+
+  final bool visible;
+  final bool loading;
+  final bool unavailable;
+  final String headline;
+  final List<ShortVideoMetricData> metrics;
+  final String qualityGateLine;
+  final List<String> blockingLines;
+  final String detail;
+}
+
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
 class ShotReadinessUi {
   const ShotReadinessUi({
@@ -159,6 +203,9 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.badCaseMetrics,
     required this.recentTaskLines,
     required this.assetsOverviewPanelUi,
+    required this.assemblyPanelUi,
+    required this.exportCheckPanelUi,
+    this.onOpenProductionForAssemblyExport,
     required this.candidateCardUi,
     this.onOpenProjectsForCandidateAssets,
     required this.readinessIntro,
@@ -221,6 +268,9 @@ class ShortVideoSpaceView extends StatelessWidget {
   final List<ShortVideoMetricData> badCaseMetrics;
   final List<String> recentTaskLines;
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
+  final ShortVideoAssemblyPanelUi assemblyPanelUi;
+  final ShortVideoExportCheckPanelUi exportCheckPanelUi;
+  final VoidCallback? onOpenProductionForAssemblyExport;
   final ShortVideoCandidateCardUi candidateCardUi;
   final VoidCallback? onOpenProjectsForCandidateAssets;
   final String readinessIntro;
@@ -606,6 +656,152 @@ class ShortVideoSpaceView extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   assetsOverviewPanelUi.detail,
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (assemblyPanelUi.visible) ...[
+          const SizedBox(height: 16),
+          _Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('成片装配快照', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                if (assemblyPanelUi.loading)
+                  Text(
+                    assemblyPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else if (assemblyPanelUi.unavailable)
+                  Text(
+                    assemblyPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else ...[
+                  Text(
+                    assemblyPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  ),
+                  if (assemblyPanelUi.defaultsLine.trim().isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      assemblyPanelUi.defaultsLine,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                  if (assemblyPanelUi.scriptLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    for (final line in assemblyPanelUi.scriptLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.movie_filter_outlined,
+                              size: 16,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                line,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  assemblyPanelUi.detail,
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+                if (onOpenProductionForAssemblyExport != null &&
+                    assemblyPanelUi.visible &&
+                    !assemblyPanelUi.loading &&
+                    !assemblyPanelUi.unavailable) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: onOpenProductionForAssemblyExport,
+                    icon: const Icon(Icons.movie_creation_outlined),
+                    label: const Text('打开制作工作区'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+        if (exportCheckPanelUi.visible) ...[
+          const SizedBox(height: 16),
+          _Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('导出前检查', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                if (exportCheckPanelUi.loading)
+                  Text(
+                    exportCheckPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else if (exportCheckPanelUi.unavailable)
+                  Text(
+                    exportCheckPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else ...[
+                  Text(
+                    exportCheckPanelUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  ),
+                  if (exportCheckPanelUi.metrics.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: exportCheckPanelUi.metrics
+                          .map(
+                            (m) =>
+                                _MetricChip(label: m.label, value: m.value),
+                          )
+                          .toList(growable: false),
+                    ),
+                  ],
+                  if (exportCheckPanelUi.qualityGateLine.trim().isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      exportCheckPanelUi.qualityGateLine,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                  if (exportCheckPanelUi.blockingLines.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '阻塞项（按接口顺序节选）',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: outline,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in exportCheckPanelUi.blockingLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  exportCheckPanelUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],

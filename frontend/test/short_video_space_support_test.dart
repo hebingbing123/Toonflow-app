@@ -126,6 +126,12 @@ void main() {
     expect(labelShortVideoBlockingReason('unknown_code'), 'unknown_code');
   });
 
+  test('export check issue codes map to Chinese labels', () {
+    expect(shortVideoExportIssueLabelZh('candidate_pending'), '候选待确认');
+    expect(shortVideoExportIssueLabelZh('missing_selected_media'), '未选成片媒体');
+    expect(shortVideoExportIssueLabelZh('unknown_export_code'), 'unknown_export_code');
+  });
+
   test('candidate card summarizes counts from assets-overview payload', () {
     final overview = ProjectAssetsOverview.fromJson({
       'schema_version': 1,

@@ -37,6 +37,7 @@ use utoipa::OpenApi;
         crate::projects::routes::types::ProjectShortVideoExportCheckResponse,
         crate::projects::routes::types::ShortVideoExportCheckIssue,
         crate::projects::routes::types::ShortVideoExportCheckSummary,
+        crate::projects::routes::types::ShortVideoExportQualityGatePlaceholder,
         crate::projects::routes::types::ShortVideoAssemblyProjectDefaults,
         crate::projects::routes::types::ShortVideoAssemblyScriptGroup,
         crate::projects::routes::types::ShortVideoAssemblyShot,

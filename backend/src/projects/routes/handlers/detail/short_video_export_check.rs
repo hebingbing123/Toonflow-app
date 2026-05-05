@@ -16,6 +16,7 @@ use crate::state::AppState;
 
 use super::super::super::types::{
     ProjectShortVideoExportCheckResponse, ShortVideoExportCheckIssue, ShortVideoExportCheckSummary,
+    ShortVideoExportQualityGatePlaceholder,
 };
 use super::assembly_query::{
     assembly_selected_media_kind, fetch_project_assembly_flat_rows, fetch_project_assembly_header,
@@ -183,6 +184,21 @@ pub(crate) async fn project_short_video_export_check_by_id(
     let warning_issue_count = issues.iter().filter(|i| i.severity == "warning").count() as i64;
     let export_ready = blocking_issue_count == 0;
 
+    let pending_review_bad_case_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_quality_review q
+        WHERE q.user_id = $2
+          AND q.is_bad_case = true
+          AND q.project_id = (SELECT numeric_id FROM app_project WHERE id = $1)
+        "#,
+    )
+    .bind(header.id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectShortVideoExportCheckResponse {
         schema_version: 1,
         export_ready,
@@ -192,6 +208,11 @@ pub(crate) async fn project_short_video_export_check_by_id(
             warning_issue_count,
         },
         issues,
+        quality_gate_placeholder: ShortVideoExportQualityGatePlaceholder {
+            schema_version: 1,
+            enforced: false,
+            pending_review_bad_case_count,
+        },
     }))
 }
 

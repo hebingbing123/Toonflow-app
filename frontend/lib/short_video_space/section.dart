@@ -52,6 +52,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool _shotReadinessUnavailable = false;
   ProjectProductionOverview? _productionOverview;
   ProjectAssetsOverview? _projectAssetsOverview;
+  ProjectShortVideoAssembly? _shortVideoAssembly;
+  ProjectShortVideoExportCheck? _shortVideoExportCheck;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -218,6 +220,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _shotReadinessUnavailable = false;
           _productionOverview = null;
           _projectAssetsOverview = null;
+          _shortVideoAssembly = null;
+          _shortVideoExportCheck = null;
         });
       }
       return;
@@ -234,6 +238,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _shotReadinessUnavailable = false;
       _productionOverview = null;
       _projectAssetsOverview = null;
+      _shortVideoAssembly = null;
+      _shortVideoExportCheck = null;
     });
     try {
       Future<ProjectProductionOverview?> loadProductionOverview() async {
@@ -292,17 +298,41 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       if (_selectedProjectId != project.id) {
         return;
       }
+      ProjectShortVideoAssembly? assemblySlice;
+      ProjectShortVideoExportCheck? exportCheckSlice;
       ProjectShortVideoReadiness? shotReadiness;
       var shotUnavailable = false;
-      try {
-        shotReadiness = await fetchProjectShortVideoReadinessByProjectId(
-          token,
-          project.id,
-        );
-      } catch (_) {
-        shotReadiness = null;
-        shotUnavailable = true;
-      }
+      await Future.wait([
+        Future(() async {
+          try {
+            assemblySlice =
+                await fetchProjectShortVideoAssemblyByProjectId(token, project.id);
+          } catch (_) {
+            assemblySlice = null;
+          }
+        }),
+        Future(() async {
+          try {
+            exportCheckSlice = await fetchProjectShortVideoExportCheckByProjectId(
+              token,
+              project.id,
+            );
+          } catch (_) {
+            exportCheckSlice = null;
+          }
+        }),
+        Future(() async {
+          try {
+            shotReadiness = await fetchProjectShortVideoReadinessByProjectId(
+              token,
+              project.id,
+            );
+          } catch (_) {
+            shotReadiness = null;
+            shotUnavailable = true;
+          }
+        }),
+      ]);
       if (!mounted || _selectedProjectId != project.id) {
         return;
       }
@@ -316,6 +346,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _clipAssetCount = (results[5] as ListAssetsResponse).total;
         _productionOverview = results[6] as ProjectProductionOverview?;
         _projectAssetsOverview = results[7] as ProjectAssetsOverview?;
+        _shortVideoAssembly = assemblySlice;
+        _shortVideoExportCheck = exportCheckSlice;
         _shotReadiness = shotReadiness;
         _shotReadinessUnavailable = shotUnavailable;
       });
@@ -334,6 +366,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _shotReadinessUnavailable = false;
         _productionOverview = null;
         _projectAssetsOverview = null;
+        _shortVideoAssembly = null;
+        _shortVideoExportCheck = null;
       });
     } catch (_) {
       if (!mounted) {
@@ -350,6 +384,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _shotReadinessUnavailable = false;
         _productionOverview = null;
         _projectAssetsOverview = null;
+        _shortVideoAssembly = null;
+        _shortVideoExportCheck = null;
       });
     } finally {
       if (mounted) {
@@ -652,6 +688,16 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       loadingProjectOverview: _loadingProjectOverview,
       overview: _projectAssetsOverview,
     );
+    final assemblyPanelUi = buildShortVideoAssemblyPanelUi(
+      projectSelected: project != null,
+      loadingProjectOverview: _loadingProjectOverview,
+      assembly: _shortVideoAssembly,
+    );
+    final exportCheckPanelUi = buildShortVideoExportCheckPanelUi(
+      projectSelected: project != null,
+      loadingProjectOverview: _loadingProjectOverview,
+      exportCheck: _shortVideoExportCheck,
+    );
     final candidateCardUi = buildShortVideoCandidateCardUi(
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
@@ -782,6 +828,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       badCaseMetrics: badCaseMetrics,
       recentTaskLines: recentTaskLines,
       assetsOverviewPanelUi: assetsOverviewPanelUi,
+      assemblyPanelUi: assemblyPanelUi,
+      exportCheckPanelUi: exportCheckPanelUi,
+      onOpenProductionForAssemblyExport: project == null
+          ? null
+          : () {
+              _syncSelectedProjectContext();
+              widget.onOpenProductionWorkspace();
+            },
       candidateCardUi: candidateCardUi,
       onOpenProjectsForCandidateAssets:
           project == null ? null : widget.onOpenProjects,

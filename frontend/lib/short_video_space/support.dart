@@ -421,6 +421,165 @@ ShortVideoAssetsOverviewPanelUi buildShortVideoAssetsOverviewPanelUi({
   );
 }
 
+/// Maps **`short-video-export-check`** machine **`code`** to short zh labels for Space lists.
+String shortVideoExportIssueLabelZh(String code) {
+  switch (code) {
+    case 'candidate_pending':
+      return '候选待确认';
+    case 'missing_selected_media':
+      return '未选成片媒体';
+    case 'selected_media_not_video':
+      return '所选媒体非视频';
+    case 'subtitle_placeholder':
+      return '字幕 / 口播文案缺失';
+    case 'voiceover_failed':
+      return '旁白生成失败';
+    case 'voiceover_audio_missing':
+      return '旁白音频未就绪';
+    case 'duration_not_explicit':
+      return '时长未标明（导出默认）';
+    case 'duration_unparsable':
+      return '时长格式异常';
+    case 'completion_uncertain':
+      return '成片状态未标「已完成」';
+    default:
+      return code;
+  }
+}
+
+/// Space **成片装配**卡：消费 **`GET …/short-video-assembly`**。
+ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
+  required bool projectSelected,
+  required bool loadingProjectOverview,
+  required ProjectShortVideoAssembly? assembly,
+}) {
+  if (!projectSelected) {
+    return const ShortVideoAssemblyPanelUi(visible: false);
+  }
+  if (loadingProjectOverview) {
+    return const ShortVideoAssemblyPanelUi(
+      visible: true,
+      loading: true,
+      headline: '正在读取成片装配快照…',
+      detail: '数据来自 GET …/short-video-assembly（按剧本顺序汇总分镜与成片要素）。',
+    );
+  }
+  if (assembly == null) {
+    return const ShortVideoAssemblyPanelUi(
+      visible: true,
+      unavailable: true,
+      headline: '成片装配快照暂不可用。',
+      detail: '可稍后刷新，或在制作工作区确认分镜与时间线后再试。',
+    );
+  }
+  final scripts = assembly.scripts;
+  var totalShots = 0;
+  for (final g in scripts) {
+    totalShots += g.shots.length;
+  }
+  final headline = scripts.isEmpty
+      ? '当前尚无剧本 / 分镜装配数据。'
+      : '${scripts.length} 个剧本 · $totalShots 条分镜（导出路径快照）';
+  final d = assembly.projectDefaults;
+  final defaultParts = <String>[
+    (d.voiceProfile ?? '').trim().isEmpty
+        ? '配音档案：未写'
+        : '配音档案：${d.voiceProfile!.trim()}',
+    (d.subtitleStyle ?? '').trim().isEmpty
+        ? '字幕：默认'
+        : '字幕：${d.subtitleStyle!.trim()}',
+    (d.bgmStrategy ?? '').trim().isEmpty
+        ? 'BGM：未指定'
+        : 'BGM：${d.bgmStrategy!.trim()}',
+  ];
+  final scriptLines = <String>[];
+  for (final g in scripts) {
+    final name = (g.scriptName ?? '').trim();
+    final title = name.isEmpty
+        ? '剧本 #${g.scriptNumericId}'
+        : '剧本 #${g.scriptNumericId} · $name';
+    final shots = g.shots;
+    final withMedia = shots
+        .where((sh) => (sh.selectedMediaUrl ?? '').trim().isNotEmpty)
+        .length;
+    final voReady = shots.where((sh) => sh.voiceoverAssetReady).length;
+    scriptLines.add(
+      '$title · ${shots.length} 镜 · 已选成片 $withMedia · 旁白就绪 $voReady',
+    );
+  }
+  return ShortVideoAssemblyPanelUi(
+    visible: true,
+    headline: headline,
+    defaultsLine: defaultParts.join(' · '),
+    scriptLines: scriptLines,
+    detail: '来自只读装配接口；导出阻塞结论见下方「导出前检查」。',
+  );
+}
+
+/// Space **导出前检查**卡：消费 **`GET …/short-video-export-check`**。
+ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
+  required bool projectSelected,
+  required bool loadingProjectOverview,
+  required ProjectShortVideoExportCheck? exportCheck,
+}) {
+  if (!projectSelected) {
+    return const ShortVideoExportCheckPanelUi(visible: false);
+  }
+  if (loadingProjectOverview) {
+    return const ShortVideoExportCheckPanelUi(
+      visible: true,
+      loading: true,
+      headline: '正在读取导出前检查…',
+      detail: '聚合分镜阻塞与提醒；质量门禁观测字段仅占位展示。',
+    );
+  }
+  if (exportCheck == null) {
+    return const ShortVideoExportCheckPanelUi(
+      visible: true,
+      unavailable: true,
+      headline: '导出前检查暂不可用。',
+      detail: '可稍后刷新页面，或在制作工作区确认分镜后再试。',
+    );
+  }
+  final s = exportCheck.summary;
+  final metrics = <ShortVideoMetricData>[
+    ShortVideoMetricData(label: '分镜', value: '${s.storyboardCount}'),
+    ShortVideoMetricData(label: '阻塞', value: '${s.blockingIssueCount}'),
+    ShortVideoMetricData(label: '提醒', value: '${s.warningIssueCount}'),
+    ShortVideoMetricData(
+      label: '可导出',
+      value: exportCheck.exportReady ? '是' : '否',
+    ),
+  ];
+  final headline = exportCheck.exportReady
+      ? '服务端未发现阻塞级问题（仍需在制作侧确认成片）。'
+      : '存在阻塞项：建议先在制作工作区补齐后再导出 / 成片。';
+  final qg = exportCheck.qualityGatePlaceholder;
+  final qualityGateLine = qg.pendingReviewBadCaseCount > 0
+      ? '质量观测（占位）：待复核坏例 ${qg.pendingReviewBadCaseCount} 条（当前未强制拦截导出）。'
+      : '质量观测（占位）：暂无待复核坏例计数（未强制拦截导出）。';
+  final blockingLines = exportCheck.issues
+      .where((i) => i.severity == 'blocking')
+      .take(14)
+      .map((i) {
+        final sb = i.sbIndex;
+        final sbPart = sb == null ? '' : ' · 序 $sb';
+        return '剧本 #${i.scriptNumericId} · 分镜 #${i.storyboardNumericId}$sbPart · ${shortVideoExportIssueLabelZh(i.code)}';
+      })
+      .toList(growable: false);
+  final detail = exportCheck.exportReady
+      ? '阻塞计数为 0 时表示服务端聚合路径上暂无硬阻塞（仍以实际导出管线为准）。'
+      : '下方列出部分阻塞项；完整列表请在制作工作区逐镜核对。';
+  return ShortVideoExportCheckPanelUi(
+    visible: true,
+    headline: headline,
+    metrics: metrics,
+    qualityGateLine: qualityGateLine,
+    blockingLines: blockingLines,
+    detail: detail,
+  );
+}
+
 /// Space **候选资产确认**卡：消费 **`GET …/assets-overview`** 的 **`candidate_counts`**。
 ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   required bool projectSelected,

@@ -606,21 +606,47 @@ class ShortVideoExportCheckIssue {
   }
 }
 
+class ShortVideoExportQualityGatePlaceholder {
+  const ShortVideoExportQualityGatePlaceholder({
+    required this.schemaVersion,
+    required this.enforced,
+    required this.pendingReviewBadCaseCount,
+  });
+
+  final int schemaVersion;
+  final bool enforced;
+  final int pendingReviewBadCaseCount;
+
+  factory ShortVideoExportQualityGatePlaceholder.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ShortVideoExportQualityGatePlaceholder(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      enforced: json['enforced'] as bool,
+      pendingReviewBadCaseCount:
+          (json['pending_review_bad_case_count'] as num).toInt(),
+    );
+  }
+}
+
 class ProjectShortVideoExportCheck {
   const ProjectShortVideoExportCheck({
     required this.schemaVersion,
     required this.exportReady,
     required this.summary,
     required this.issues,
+    required this.qualityGatePlaceholder,
   });
 
   final int schemaVersion;
   final bool exportReady;
   final ShortVideoExportCheckSummary summary;
   final List<ShortVideoExportCheckIssue> issues;
+  final ShortVideoExportQualityGatePlaceholder qualityGatePlaceholder;
 
   factory ProjectShortVideoExportCheck.fromJson(Map<String, dynamic> json) {
     final raw = json['issues'] as List<dynamic>? ?? const <dynamic>[];
+    final qgRaw = json['quality_gate_placeholder'];
     return ProjectShortVideoExportCheck(
       schemaVersion: (json['schema_version'] as num).toInt(),
       exportReady: json['export_ready'] as bool,
@@ -633,6 +659,13 @@ class ProjectShortVideoExportCheck {
                 ShortVideoExportCheckIssue.fromJson(e as Map<String, dynamic>),
           )
           .toList(growable: false),
+      qualityGatePlaceholder: qgRaw is Map<String, dynamic>
+          ? ShortVideoExportQualityGatePlaceholder.fromJson(qgRaw)
+          : const ShortVideoExportQualityGatePlaceholder(
+              schemaVersion: 1,
+              enforced: false,
+              pendingReviewBadCaseCount: 0,
+            ),
     );
   }
 }

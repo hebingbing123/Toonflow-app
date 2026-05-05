@@ -246,12 +246,23 @@ pub struct ShortVideoExportCheckIssue {
     pub sb_index: Option<i32>,
 }
 
+/// D3：**导出前质量检查钩子占位**（只读观测 **`app_quality_review`** 坏例计数；策略强制执行二期）。
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoExportQualityGatePlaceholder {
+    pub schema_version: i32,
+    /// 占位阶段固定 **`false`**；二期才可据此阻断导出。
+    pub enforced: bool,
+    /// 与 **`GET …/production-overview`** **`pending_review_bad_case_count`** 同源计数。
+    pub pending_review_bad_case_count: i64,
+}
+
 #[derive(Serialize, ToSchema)]
 pub struct ProjectShortVideoExportCheckResponse {
     pub schema_version: i32,
     pub export_ready: bool,
     pub summary: ShortVideoExportCheckSummary,
     pub issues: Vec<ShortVideoExportCheckIssue>,
+    pub quality_gate_placeholder: ShortVideoExportQualityGatePlaceholder,
 }
 
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
