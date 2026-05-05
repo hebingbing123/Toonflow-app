@@ -474,6 +474,14 @@ String shortVideoExportIssueLabelZh(String code) {
   }
 }
 
+int? _parseDurationSecondsLoose(String raw) {
+  final normalized = raw.trim().toLowerCase();
+  if (normalized.isEmpty) return null;
+  final m = RegExp(r'^(\d{1,4})(?:\s*s)?$').firstMatch(normalized);
+  if (m == null) return null;
+  return int.tryParse(m.group(1)!);
+}
+
 /// Space **成片装配**卡：消费 **`GET …/short-video-assembly`**。
 ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   required bool projectSelected,
@@ -521,6 +529,11 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
         : 'BGM：${d.bgmStrategy!.trim()}',
   ];
   final scriptLines = <String>[];
+  var shotsWithVideo = 0;
+  var shotsWithSubtitle = 0;
+  var shotsWithVoiceover = 0;
+  var totalDurationSeconds = 0;
+  var durationKnownShots = 0;
   for (final g in scripts) {
     final name = (g.scriptName ?? '').trim();
     final title = name.isEmpty
@@ -550,6 +563,22 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
         'BGM ${(d.bgmStrategy ?? '').trim().isEmpty ? '默认' : d.bgmStrategy!.trim()}',
       );
     }
+    for (final sh in shots) {
+      if ((sh.selectedMediaUrl ?? '').trim().isNotEmpty) {
+        shotsWithVideo += 1;
+      }
+      if ((sh.subtitleText ?? '').trim().isNotEmpty) {
+        shotsWithSubtitle += 1;
+      }
+      if (sh.voiceoverAssetReady || (sh.voiceoverAudioUrl ?? '').trim().isNotEmpty) {
+        shotsWithVoiceover += 1;
+      }
+      final sec = _parseDurationSecondsLoose(sh.duration ?? '');
+      if (sec != null && sec > 0) {
+        totalDurationSeconds += sec;
+        durationKnownShots += 1;
+      }
+    }
     if (shots.length > 4) {
       scriptLines.add('  …其余 ${shots.length - 4} 镜请在制作工作区时间线查看');
     }
@@ -573,6 +602,21 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   qualityLines.add(
     '在任务中心侧可按项目筛选质量评审列表，分镜级 target 与装配一致。',
   );
+  final hasBgm = (d.bgmStrategy ?? '').trim().isNotEmpty;
+  final multiTrackTrackCount = 1 + (shotsWithSubtitle > 0 ? 1 : 0) + (shotsWithVoiceover > 0 ? 1 : 0) + (hasBgm ? 1 : 0);
+  final withinLimitedTracks = multiTrackTrackCount <= 4;
+  final timelineMinutes = totalDurationSeconds / 60.0;
+  final overProfessionalBoundary = !withinLimitedTracks || timelineMinutes > 8.0;
+  final multiTrackDecisionLines = <String>[
+    '轨道占用估算：视频 1 + 字幕 ${shotsWithSubtitle > 0 ? 1 : 0} + 旁白 ${shotsWithVoiceover > 0 ? 1 : 0} + BGM ${hasBgm ? 1 : 0} = $multiTrackTrackCount 轨。',
+    '素材就绪：视频镜头 $shotsWithVideo/$totalShots，字幕镜头 $shotsWithSubtitle/$totalShots，旁白镜头 $shotsWithVoiceover/$totalShots。',
+    '时长估算：已识别 $durationKnownShots/$totalShots 镜，总时长约 ${timelineMinutes.toStringAsFixed(1)} 分钟。',
+    if (overProfessionalBoundary)
+      '导出决策：当前超出受限多轨边界（>4 轨或时长复杂），建议转专业台（需求 8.2）处理。'
+    else
+      '导出决策：维持受限多轨（<=4 轨）路径，可继续在当前链路导出。',
+    '边界说明：Space 仅覆盖“视频 + 单字幕轨 + 旁白 + BGM”受限混排，不替代专业 NLE。',
+  ];
   return ShortVideoAssemblyPanelUi(
     visible: true,
     headline: headline,
@@ -580,6 +624,7 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
         '${defaultParts.join(' · ')}\n生效 TTS（入队/worker）：${eff.ttsVoice}',
     qualityLines: qualityLines,
     scriptLines: scriptLines,
+    multiTrackDecisionLines: multiTrackDecisionLines,
     detail:
         '只读剪辑台：展示镜头顺序、时长、字幕、旁白、BGM 与预览就绪摘要；导出阻塞结论见下方「导出前检查」。',
   );

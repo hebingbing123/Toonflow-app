@@ -91,6 +91,7 @@ class ShortVideoAssemblyPanelUi {
     this.defaultsLine = '',
     this.qualityLines = const <String>[],
     this.scriptLines = const <String>[],
+    this.multiTrackDecisionLines = const <String>[],
     this.detail = '',
   });
 
@@ -102,6 +103,7 @@ class ShortVideoAssemblyPanelUi {
   /// L3：质量验收摘要行（与 **`candidate_quality_summary`** 对齐）。
   final List<String> qualityLines;
   final List<String> scriptLines;
+  final List<String> multiTrackDecisionLines;
   final String detail;
 }
 
@@ -866,6 +868,32 @@ class ShortVideoSpaceView extends StatelessWidget {
                               Icons.movie_filter_outlined,
                               size: 16,
                               color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                line,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                  if (assemblyPanelUi.multiTrackDecisionLines.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text('受限多轨导出决策（K5）', style: theme.textTheme.labelMedium),
+                    const SizedBox(height: 6),
+                    for (final line in assemblyPanelUi.multiTrackDecisionLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.alt_route_outlined,
+                              size: 16,
+                              color: theme.colorScheme.secondary,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
