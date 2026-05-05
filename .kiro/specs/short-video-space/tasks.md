@@ -44,7 +44,7 @@
 
 ## A. Space 壳层：主链、下一步、生产概览（开源「单入口」）
 
-- [ ] A1. Space 首页**主链 UI**（脚本 → 准备/分镜 → 旁白字幕 → 成片 → 导出 → 发布）：阶段枚举、完成/阻塞态、深链到各工作台  
+- [x] A1. Space 首页**主链 UI**（脚本 → 准备/分镜 → 旁白字幕 → 成片 → 导出 → 发布）：阶段枚举、完成/阻塞态、深链到各工作台
   - _需求: 1.3_
 
 - [x] A2. **下一步**计算规则 v1（可先规则引擎：聚合 readiness、导出检查、发布校验的阻塞源，输出 Top-1～Top-3 建议动作）  
@@ -309,16 +309,16 @@
 
 ## I. 契约、注册、全量验收
 
-- [ ] I1. OpenAPI + `rust_api`：**publish** 全套 + **short_video_space / readiness / assembly** 等 α–β 新增端点随 PR 持续导出（禁止仅 publish 有契约而其余手写漂移）  
+- [x] I1. OpenAPI + `rust_api`：**publish** 全套 + **short_video_space / readiness / assembly** 等 α–β 新增端点随 PR 持续导出（禁止仅 publish 有契约而其余手写漂移）
   - _需求: 10, 9_
 
-- [ ] I2. Shell / `build_sections_product`：注册 **short_video_space** 全子面板（主链、概览、配置、readiness、成片、发布、成片台、任务入口）  
+- [x] I2. Shell / `build_sections_product`：注册 **short_video_space** 全子面板（主链、概览、配置、readiness、成片、发布、成片台、任务入口）
   - _需求: 10, 9_
 
-- [ ] I3. **Review**：对照 `space/short-video` **四文档** + `moneyprinter` plan；按 **需求 9** α/β/γ 勾选终态（含 **F9 全平台矩阵**、**G5/G6 表现与预警**、**L5 候选对比**、**K1–K5**）；**MP-W1 完成后勾选 M 节**  
+- [x] I3. **Review**：对照 `space/short-video` **四文档** + `moneyprinter` plan；按 **需求 9** α/β/γ 勾选终态（含 **F9 全平台矩阵**、**G5/G6 表现与预警**、**L5 候选对比**、**K1–K5**）；**MP-W1 完成后勾选 M 节**
   - _需求: 13, 8, 14, 15, 9_
 
-- [ ] I4. **全量门禁**：`bash scripts/refactor-check.sh`  
+- [x] I4. **全量门禁**：`bash scripts/refactor-check.sh`
   - _需求: 设计文档 — 测试策略_
 
 ---
