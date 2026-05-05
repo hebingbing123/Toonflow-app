@@ -440,6 +440,39 @@ class ShortVideoAssemblyProjectDefaults {
   }
 }
 
+/// D7：与后端 enqueue / worker 一致的成片侧生效默认（JSON **`effective_short_video_defaults`**）。
+class ShortVideoAssemblyEffectiveDefaults {
+  const ShortVideoAssemblyEffectiveDefaults({
+    required this.ttsVoice,
+    this.subtitleStyle,
+    this.bgmStrategy,
+  });
+
+  final String ttsVoice;
+  final String? subtitleStyle;
+  final String? bgmStrategy;
+
+  factory ShortVideoAssemblyEffectiveDefaults.fromJson(Map<String, dynamic> json) {
+    return ShortVideoAssemblyEffectiveDefaults(
+      ttsVoice: json['tts_voice'] as String,
+      subtitleStyle: json['subtitle_style'] as String?,
+      bgmStrategy: json['bgm_strategy'] as String?,
+    );
+  }
+
+  /// Older API payloads without **`effective_short_video_defaults`**（与 Rust **`resolve_tts_voice`** 对齐）。
+  factory ShortVideoAssemblyEffectiveDefaults.inferredFromProjectDefaults(
+    ShortVideoAssemblyProjectDefaults pd,
+  ) {
+    final vp = (pd.voiceProfile ?? '').trim();
+    return ShortVideoAssemblyEffectiveDefaults(
+      ttsVoice: vp.isEmpty ? 'alloy' : vp,
+      subtitleStyle: pd.subtitleStyle,
+      bgmStrategy: pd.bgmStrategy,
+    );
+  }
+}
+
 class ShortVideoAssemblyShot {
   const ShortVideoAssemblyShot({
     required this.storyboardId,
@@ -527,20 +560,27 @@ class ProjectShortVideoAssembly {
   const ProjectShortVideoAssembly({
     required this.schemaVersion,
     required this.projectDefaults,
+    required this.effectiveShortVideoDefaults,
     required this.scripts,
   });
 
   final int schemaVersion;
   final ShortVideoAssemblyProjectDefaults projectDefaults;
+  final ShortVideoAssemblyEffectiveDefaults effectiveShortVideoDefaults;
   final List<ShortVideoAssemblyScriptGroup> scripts;
 
   factory ProjectShortVideoAssembly.fromJson(Map<String, dynamic> json) {
     final raw = json['scripts'] as List<dynamic>? ?? const <dynamic>[];
+    final pd = ShortVideoAssemblyProjectDefaults.fromJson(
+      json['project_defaults'] as Map<String, dynamic>,
+    );
+    final effRaw = json['effective_short_video_defaults'];
     return ProjectShortVideoAssembly(
       schemaVersion: (json['schema_version'] as num).toInt(),
-      projectDefaults: ShortVideoAssemblyProjectDefaults.fromJson(
-        json['project_defaults'] as Map<String, dynamic>,
-      ),
+      projectDefaults: pd,
+      effectiveShortVideoDefaults: effRaw is Map<String, dynamic>
+          ? ShortVideoAssemblyEffectiveDefaults.fromJson(effRaw)
+          : ShortVideoAssemblyEffectiveDefaults.inferredFromProjectDefaults(pd),
       scripts: raw
           .map(
             (e) =>

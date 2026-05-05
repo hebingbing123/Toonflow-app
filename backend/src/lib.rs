@@ -20,6 +20,7 @@ pub mod prompting;
 pub mod scope;
 pub mod scripting;
 pub mod settings;
+pub mod short_video;
 pub mod state;
 pub mod vendor;
 

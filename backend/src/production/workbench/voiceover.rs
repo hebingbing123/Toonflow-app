@@ -10,6 +10,7 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VOICEOVER_GENERATE};
 use crate::production::workbench::storyboard_ops::require_owned_normalized_storyboards_scope;
 use crate::scope::http::require_owned_numeric_storyboard_scope;
+use crate::short_video::defaults::resolve_tts_voice;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -36,7 +37,7 @@ struct VoiceoverQueueContext<'a> {
     headers: &'a HeaderMap,
     project_id: i32,
     script_id: i32,
-    voice: Option<&'a str>,
+    resolved_voice: &'a str,
     speed: Option<f32>,
 }
 
@@ -62,14 +63,6 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVoiceoverBody>,
 ) -> Result<JsonResponse<WorkbenchGenerateVoiceoverResponse>, ApiError> {
-    let queue_ctx = VoiceoverQueueContext {
-        state: &state,
-        headers: &headers,
-        project_id: body.project_id,
-        script_id: body.script_id,
-        voice: body.voice.as_deref(),
-        speed: body.speed,
-    };
     let (uid, pool, script_uuid, storyboard_ids) = require_owned_normalized_storyboards_scope(
         &state,
         &headers,
@@ -78,6 +71,31 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
         &body.storyboard_ids,
     )
     .await?;
+
+    let proj_defaults: Option<(Option<String>, Option<String>, Option<String>)> = sqlx::query_as(
+        r#"
+        SELECT voice_profile, subtitle_style, bgm_strategy
+        FROM app_project
+        WHERE owner_user_id = $1 AND numeric_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let (voice_profile, _subtitle_style, _bgm_strategy) =
+        proj_defaults.unwrap_or((None, None, None));
+    let resolved_voice = resolve_tts_voice(body.voice.as_deref(), voice_profile.as_deref());
+    let queue_ctx = VoiceoverQueueContext {
+        state: &state,
+        headers: &headers,
+        project_id: body.project_id,
+        script_id: body.script_id,
+        resolved_voice: resolved_voice.as_str(),
+        speed: body.speed,
+    };
 
     let rows: Vec<(i32, Option<String>, Option<String>)> = sqlx::query_as(
         r#"
@@ -119,15 +137,8 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
             "project_numeric_id": body.project_id,
             "script_numeric_id": body.script_id,
             "storyboard_numeric_id": storyboard_id,
+            "voice": resolved_voice.as_str(),
         });
-        if let Some(voice) = body
-            .voice
-            .as_deref()
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
-        {
-            payload["voice"] = json!(voice);
-        }
         if let Some(speed) = body.speed.filter(|value| *value >= 0.25 && *value <= 4.0) {
             payload["speed"] = json!(speed);
         }
@@ -171,7 +182,7 @@ async fn mark_storyboard_voiceover_queued(
     .bind(storyboard_uuid)
     .bind(json!({
         "state": "queued",
-        "voice": ctx.voice,
+        "voice": ctx.resolved_voice,
         "speed": ctx.speed,
         "sourceText": narration,
         "error": null,

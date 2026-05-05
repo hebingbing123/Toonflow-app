@@ -481,6 +481,7 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
       ? '当前尚无剧本 / 分镜装配数据。'
       : '${scripts.length} 个剧本 · $totalShots 条分镜（导出路径快照）';
   final d = assembly.projectDefaults;
+  final eff = assembly.effectiveShortVideoDefaults;
   final defaultParts = <String>[
     (d.voiceProfile ?? '').trim().isEmpty
         ? '配音档案：未写'
@@ -510,7 +511,8 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   return ShortVideoAssemblyPanelUi(
     visible: true,
     headline: headline,
-    defaultsLine: defaultParts.join(' · '),
+    defaultsLine:
+        '${defaultParts.join(' · ')}\n生效 TTS（入队/worker）：${eff.ttsVoice}',
     scriptLines: scriptLines,
     detail: '来自只读装配接口；导出阻塞结论见下方「导出前检查」。',
   );

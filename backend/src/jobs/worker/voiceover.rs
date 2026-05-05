@@ -8,11 +8,11 @@ use crate::jobs::worker::JobRunError;
 use crate::jobs::JobRow;
 use crate::llm::{audio_speech_bytes, LlmConfig};
 use crate::settings::agent_deploy::load_agent_deploy_config;
+use crate::short_video::defaults::resolve_tts_voice;
 use crate::state::AppState;
 use crate::vendor::catalog::lookup_vendor_catalog;
 use crate::vendor::credential::decrypt;
 
-const DEFAULT_VOICE: &str = "alloy";
 const DEFAULT_SPEED: f32 = 1.0;
 
 #[derive(Debug, sqlx::FromRow)]
@@ -47,6 +47,9 @@ pub(crate) async fn run_voiceover_generate(
     )
     .await?;
 
+    let project_voice_profile =
+        load_project_voice_profile(pool, row.owner_user_id, project_numeric_id).await?;
+
     let process = async {
         let seed = load_storyboard_seed(pool, storyboard_id).await?;
         let narration_text = resolve_narration_text(&seed).ok_or_else(|| {
@@ -56,13 +59,10 @@ pub(crate) async fn run_voiceover_generate(
             )
         })?;
 
-        let voice = payload
-            .get("voice")
-            .and_then(|value| value.as_str())
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
-            .unwrap_or(DEFAULT_VOICE)
-            .to_string();
+        let voice = resolve_tts_voice(
+            payload.get("voice").and_then(|value| value.as_str()),
+            project_voice_profile.as_deref(),
+        );
         let speed = payload
             .get("speed")
             .and_then(|value| value.as_f64())
@@ -148,6 +148,27 @@ pub(crate) async fn run_voiceover_generate(
             Err(err)
         }
     }
+}
+
+async fn load_project_voice_profile(
+    pool: &PgPool,
+    owner_user_id: Uuid,
+    project_numeric_id: i32,
+) -> Result<Option<String>, JobRunError> {
+    let row = sqlx::query_scalar::<_, Option<String>>(
+        r#"
+        SELECT voice_profile
+        FROM app_project
+        WHERE owner_user_id = $1 AND numeric_id = $2
+        "#,
+    )
+    .bind(owner_user_id)
+    .bind(project_numeric_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| JobRunError::Failed(e.to_string()))?;
+
+    Ok(row.unwrap_or_default())
 }
 
 fn payload_json_i32(payload: &Value, key: &str) -> Result<i32, JobRunError> {

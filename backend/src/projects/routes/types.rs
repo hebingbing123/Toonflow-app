@@ -188,6 +188,16 @@ pub struct ShortVideoAssemblyProjectDefaults {
     pub bgm_strategy: Option<String>,
 }
 
+/// D7：**成片侧生效默认**（当前等价项目列；旁白声线与 enqueue/worker 解析一致）。
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoAssemblyEffectiveDefaults {
+    /// 解析后的 TTS **`voice`**（显式覆盖 \| **`voice_profile`** \| **`alloy`**）。
+    #[schema(example = "alloy")]
+    pub tts_voice: String,
+    pub subtitle_style: Option<String>,
+    pub bgm_strategy: Option<String>,
+}
+
 #[derive(Serialize, ToSchema)]
 pub struct ShortVideoAssemblyShot {
     pub storyboard_id: Uuid,
@@ -223,6 +233,7 @@ pub struct ShortVideoAssemblyScriptGroup {
 pub struct ProjectShortVideoAssemblyResponse {
     pub schema_version: i32,
     pub project_defaults: ShortVideoAssemblyProjectDefaults,
+    pub effective_short_video_defaults: ShortVideoAssemblyEffectiveDefaults,
     pub scripts: Vec<ShortVideoAssemblyScriptGroup>,
 }
 

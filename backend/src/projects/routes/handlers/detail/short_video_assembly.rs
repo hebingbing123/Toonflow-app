@@ -15,12 +15,13 @@ use crate::production::{resolve_shot_script_source, resolve_shot_voiceover_ready
 use crate::state::AppState;
 
 use super::super::super::types::{
-    ProjectShortVideoAssemblyResponse, ShortVideoAssemblyProjectDefaults,
-    ShortVideoAssemblyScriptGroup, ShortVideoAssemblyShot,
+    ProjectShortVideoAssemblyResponse, ShortVideoAssemblyEffectiveDefaults,
+    ShortVideoAssemblyProjectDefaults, ShortVideoAssemblyScriptGroup, ShortVideoAssemblyShot,
 };
 use super::assembly_query::{
     assembly_selected_media_kind, fetch_project_assembly_flat_rows, fetch_project_assembly_header,
 };
+use crate::short_video::defaults::resolve_tts_voice;
 
 #[utoipa::path(
     get,
@@ -108,12 +109,18 @@ pub(crate) async fn project_short_video_assembly_by_id(
         })
         .collect();
 
+    let effective_tts_voice = resolve_tts_voice(None, header.voice_profile.as_deref());
     Ok(Json(ProjectShortVideoAssemblyResponse {
         schema_version: 1,
         project_defaults: ShortVideoAssemblyProjectDefaults {
-            voice_profile: header.voice_profile,
-            subtitle_style: header.subtitle_style,
-            bgm_strategy: header.bgm_strategy,
+            voice_profile: header.voice_profile.clone(),
+            subtitle_style: header.subtitle_style.clone(),
+            bgm_strategy: header.bgm_strategy.clone(),
+        },
+        effective_short_video_defaults: ShortVideoAssemblyEffectiveDefaults {
+            tts_voice: effective_tts_voice,
+            subtitle_style: header.subtitle_style.clone(),
+            bgm_strategy: header.bgm_strategy.clone(),
         },
         scripts,
     }))
