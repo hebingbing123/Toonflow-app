@@ -204,6 +204,9 @@ class ShortVideoPublishPanelUi {
     this.onCommitPublishPlatformCopy,
     this.onScheduleFirstDraft,
     this.onScheduleAllDraftsSameTime,
+    this.publishDraftOptions = const <PublishDraftRow>[],
+    this.selectedPublishDraftId,
+    this.onSelectPublishDraft,
     this.publishScheduleCalendarDrafts,
     this.onPublishCalendarDayBulkSchedule,
     this.onOpenPublishTroubleshooting,
@@ -238,6 +241,9 @@ class ShortVideoPublishPanelUi {
   final PublishPlatformCopyCommit? onCommitPublishPlatformCopy;
   final void Function(BuildContext context)? onScheduleFirstDraft;
   final void Function(BuildContext context)? onScheduleAllDraftsSameTime;
+  final List<PublishDraftRow> publishDraftOptions;
+  final String? selectedPublishDraftId;
+  final ValueChanged<String>? onSelectPublishDraft;
   /// When null, treat as no drafts for calendar (keeps panel `const` paths valid).
   final List<PublishDraftRow>? publishScheduleCalendarDrafts;
   final PublishCalendarDayCallback? onPublishCalendarDayBulkSchedule;
@@ -1168,6 +1174,38 @@ class ShortVideoSpaceView extends StatelessWidget {
                           style: theme.textTheme.bodySmall,
                         ),
                       ),
+                  ],
+                  if (publishPanelUi.publishDraftOptions.length > 1 &&
+                      publishPanelUi.onSelectPublishDraft != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '当前操作草稿',
+                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    ),
+                    const SizedBox(height: 6),
+                    DropdownButtonFormField<String>(
+                      initialValue: publishPanelUi.selectedPublishDraftId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      items: publishPanelUi.publishDraftOptions.map((d) {
+                        final title = d.title.trim().isEmpty ? '（无标题）' : d.title.trim();
+                        return DropdownMenuItem<String>(
+                          value: d.id,
+                          child: Text('$title · ${d.draftStatus}'),
+                        );
+                      }).toList(growable: false),
+                      onChanged: publishPanelUi.publishBusy
+                          ? null
+                          : (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return;
+                              }
+                              publishPanelUi.onSelectPublishDraft?.call(v);
+                            },
+                    ),
                   ],
                   if (publishPanelUi.publishOverviewLines.isNotEmpty) ...[
                     const SizedBox(height: 10),

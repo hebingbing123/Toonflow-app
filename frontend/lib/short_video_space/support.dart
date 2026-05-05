@@ -961,6 +961,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   required List<PublishJobRow> jobs,
   required List<PublishPerformanceAlertRow> performanceAlerts,
   required List<PublishAttemptAuditRow> audits,
+  required String? selectedPublishDraftId,
+  ValueChanged<String>? onSelectPublishDraft,
   required bool publishBusy,
   VoidCallback? onRefreshPublish,
   VoidCallback? onBootstrapPublishDraft,
@@ -1026,7 +1028,24 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     }
   }
 
+  String? activeDraftId = selectedPublishDraftId;
+  if (activeDraftId == null ||
+      activeDraftId.trim().isEmpty ||
+      !drafts.any((d) => d.id == activeDraftId)) {
+    activeDraftId = drafts.isNotEmpty ? drafts.first.id : null;
+  }
+  PublishDraftRow? activeDraft;
+  if (activeDraftId != null) {
+    for (final d in drafts) {
+      if (d.id == activeDraftId) {
+        activeDraft = d;
+        break;
+      }
+    }
+  }
+
   final prepareLines = <String>[
+    if (activeDraft != null) '当前草稿：${activeDraft.title.trim().isEmpty ? "（无标题）" : activeDraft.title.trim()}',
     if (prepare != null) ...[
       if (prepare.ok) '校验：✓ 当前草稿满足占位规则（仍需真实成片引用才能实际上线）。',
       for (final issue in prepare.issues)
@@ -1119,9 +1138,9 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     }
   }
 
-  final primaryDraftId = drafts.isNotEmpty ? drafts.first.id : '';
-  final platformCopySnap = drafts.isNotEmpty
-      ? Map<String, dynamic>.from(drafts.first.platformCopy ?? {})
+  final primaryDraftId = activeDraft?.id ?? '';
+  final platformCopySnap = activeDraft != null
+      ? Map<String, dynamic>.from(activeDraft.platformCopy ?? {})
       : <String, dynamic>{};
 
   return ShortVideoPublishPanelUi(
@@ -1154,6 +1173,9 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     onCommitPublishPlatformCopy: onCommitPublishPlatformCopy,
     onScheduleFirstDraft: onScheduleFirstDraft,
     onScheduleAllDraftsSameTime: onScheduleAllDraftsSameTime,
+    publishDraftOptions: drafts,
+    selectedPublishDraftId: activeDraftId,
+    onSelectPublishDraft: onSelectPublishDraft,
     publishScheduleCalendarDrafts: drafts.isEmpty ? null : drafts,
     onPublishCalendarDayBulkSchedule:
         drafts.isEmpty ? null : onPublishCalendarDayBulkSchedule,

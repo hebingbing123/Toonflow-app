@@ -69,6 +69,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       const <PublishPerformanceAlertRow>[];
   List<PublishAttemptAuditRow> _publishAuditRows =
       const <PublishAttemptAuditRow>[];
+  String? _selectedPublishDraftId;
   bool _publishBusy = false;
   int _publishCopyEditorRevision = 0;
   String? _selectedProjectId;
@@ -87,6 +88,33 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       }
     }
     return null;
+  }
+
+  PublishDraftRow? get _activePublishDraft {
+    if (_publishDrafts.isEmpty) {
+      return null;
+    }
+    final selected = _selectedPublishDraftId;
+    if (selected != null) {
+      for (final d in _publishDrafts) {
+        if (d.id == selected) {
+          return d;
+        }
+      }
+    }
+    return _publishDrafts.first;
+  }
+
+  void _syncSelectedPublishDraftWith(List<PublishDraftRow> drafts) {
+    if (drafts.isEmpty) {
+      _selectedPublishDraftId = null;
+      return;
+    }
+    final current = _selectedPublishDraftId;
+    if (current != null && drafts.any((d) => d.id == current)) {
+      return;
+    }
+    _selectedPublishDraftId = drafts.first.id;
   }
 
   @override
@@ -296,6 +324,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       })> _capturePublishSlice(
     ProjectRow project,
     String token,
+    String? preferredDraftId,
   ) async {
     try {
       final matrix = await fetchPublishPlatformMatrix(token, project.id);
@@ -305,7 +334,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       final audits = await fetchPublishAudit(token, project.id, limit: 30);
       PublishPrepareCheckResponse? prepare;
       if (drafts.isNotEmpty) {
-        prepare = await fetchPublishPrepareCheck(token, project.id, drafts.first.id);
+        var prepareDraftId = drafts.first.id;
+        final preferred = preferredDraftId;
+        if (preferred != null &&
+            preferred.trim().isNotEmpty &&
+            drafts.any((d) => d.id == preferred)) {
+          prepareDraftId = preferred;
+        }
+        prepare = await fetchPublishPrepareCheck(token, project.id, prepareDraftId);
       }
       return (
         matrix: matrix,
@@ -344,7 +380,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   }
 
   Future<void> _refreshPublishSlice(ProjectRow project, String token) async {
-    final snapshot = await _capturePublishSlice(project, token);
+    final snapshot = await _capturePublishSlice(
+      project,
+      token,
+      _selectedPublishDraftId,
+    );
     if (!mounted || _selectedProjectId != project.id) {
       return;
     }
@@ -352,6 +392,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishMatrix = snapshot.matrix;
       _publishUnavailable = snapshot.unavailable;
       _publishDrafts = snapshot.drafts;
+      _syncSelectedPublishDraftWith(snapshot.drafts);
       _publishPrepare = snapshot.prepare;
       _publishJobs = snapshot.jobs;
       _publishPerfAlerts = snapshot.perfAlerts;
@@ -385,6 +426,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       if (targets.isNotEmpty) {
         await upsertPublishTargets(token, project.id, draftId, targets);
       }
+      _selectedPublishDraftId = draftId;
       await _refreshPublishSlice(project, token);
       if (!mounted) {
         return;
@@ -437,7 +479,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       if (drafts.isEmpty) {
         return;
       }
-      final draftId = drafts.first.id;
+      final active = _activePublishDraft;
+      final draftId = active?.id ?? drafts.first.id;
       final targets = _publishTargetMaps();
       if (targets.isNotEmpty) {
         await upsertPublishTargets(token, project.id, draftId, targets);
@@ -489,7 +532,10 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishBusy = true;
     });
     try {
-      final draftId = _publishDrafts.first.id;
+      final draftId = _activePublishDraft?.id;
+      if (draftId == null) {
+        return;
+      }
       final res = await suggestPublishPlatformCopy(
         token,
         project.id,
@@ -624,7 +670,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     });
     try {
       final iso = dt.toUtc().toIso8601String();
-      await patchPublishDraft(token, project.id, _publishDrafts.first.id, <String, dynamic>{
+      final draftId = _activePublishDraft?.id;
+      if (draftId == null) {
+        return;
+      }
+      await patchPublishDraft(token, project.id, draftId, <String, dynamic>{
         'scheduled_at': iso,
       });
       await _refreshPublishSlice(project, token);
@@ -841,7 +891,10 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishBusy = true;
     });
     try {
-      final draftId = _publishDrafts.first.id;
+      final draftId = _activePublishDraft?.id;
+      if (draftId == null) {
+        return;
+      }
       final draft = await fetchPublishDraft(token, project.id, draftId);
       final copy = Map<String, dynamic>.from(draft.platformCopy ?? {});
       final tags = tagsComma
@@ -1093,7 +1146,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           }
         }),
         Future(() async {
-          final snapshot = await _capturePublishSlice(project, token);
+          final snapshot = await _capturePublishSlice(
+            project,
+            token,
+            _selectedPublishDraftId,
+          );
           publishMatrixSnap = snapshot.matrix;
           publishUnavailableSnap = snapshot.unavailable;
           publishDraftsSnap = snapshot.drafts;
@@ -1149,6 +1206,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishMatrix = publishMatrixSnap;
         _publishUnavailable = publishUnavailableSnap;
         _publishDrafts = publishDraftsSnap;
+        _syncSelectedPublishDraftWith(publishDraftsSnap);
         _publishPrepare = publishPrepareSnap;
         _publishJobs = publishJobsSnap;
         _publishPerfAlerts = publishPerfAlertsSnap;
@@ -2182,6 +2240,16 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       jobs: _publishJobs,
       performanceAlerts: _publishPerfAlerts,
       audits: _publishAuditRows,
+      selectedPublishDraftId: _selectedPublishDraftId,
+      onSelectPublishDraft: (draftId) {
+        setState(() {
+          _selectedPublishDraftId = draftId;
+          _publishCopyEditorRevision++;
+        });
+        if (project != null && accessToken != null && accessToken.isNotEmpty) {
+          unawaited(_refreshPublishSlice(project, accessToken));
+        }
+      },
       publishBusy: _publishBusy,
       onRefreshPublish: project != null &&
               accessToken != null &&
