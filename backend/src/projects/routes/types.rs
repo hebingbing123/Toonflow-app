@@ -132,6 +132,19 @@ pub struct ProjectShortVideoReadinessResponse {
     pub storyboards: Vec<StoryboardShortVideoReadiness>,
 }
 
+/// `GET /api/v1/projects/{project_id}/production-overview` — MP-W5 / A3 聚合。
+#[derive(Serialize, ToSchema)]
+pub struct ProjectProductionOverviewResponse {
+    pub schema_version: i32,
+    /// Same readiness rule as **`/short-video-readiness`** (**`ready_for_generation`**).
+    pub ready_storyboard_count: i64,
+    pub total_storyboard_count: i64,
+    /// Distinct **`app_generation_job`** rows (**`queued`** / **`running`**) scoped to this project.
+    pub running_generation_job_count: i64,
+    /// **`app_quality_review`** rows with **`is_bad_case`** for this project (**`project_id`** = numeric).
+    pub pending_review_bad_case_count: i64,
+}
+
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
 #[derive(Serialize, ToSchema)]
 pub struct ProjectsSummaryResponse {

@@ -50,6 +50,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   int _clipAssetCount = 0;
   ProjectShortVideoReadiness? _shotReadiness;
   bool _shotReadinessUnavailable = false;
+  ProjectProductionOverview? _productionOverview;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -214,6 +215,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _clipAssetCount = 0;
           _shotReadiness = null;
           _shotReadinessUnavailable = false;
+          _productionOverview = null;
         });
       }
       return;
@@ -228,9 +230,21 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _clipAssetCount = 0;
       _shotReadiness = null;
       _shotReadinessUnavailable = false;
+      _productionOverview = null;
     });
     try {
-      final results = await Future.wait<Object>([
+      Future<ProjectProductionOverview?> loadProductionOverview() async {
+        try {
+          return await fetchProjectProductionOverviewByProjectId(
+            token,
+            project.id,
+          );
+        } catch (_) {
+          return null;
+        }
+      }
+
+      final results = await Future.wait<Object?>([
         fetchProjectStatsByProjectId(token, project.id),
         postTasksGetTaskApi(
           token,
@@ -258,6 +272,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           page: 1,
           limit: 1,
         ),
+        loadProductionOverview(),
       ]);
       if (!mounted) {
         return;
@@ -287,6 +302,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _badCaseStats = results[3] as List<BadCaseStatItem>;
         _sceneAssetCount = (results[4] as ListAssetsResponse).total;
         _clipAssetCount = (results[5] as ListAssetsResponse).total;
+        _productionOverview = results[6] as ProjectProductionOverview?;
         _shotReadiness = shotReadiness;
         _shotReadinessUnavailable = shotUnavailable;
       });
@@ -303,6 +319,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _clipAssetCount = 0;
         _shotReadiness = null;
         _shotReadinessUnavailable = false;
+        _productionOverview = null;
       });
     } catch (_) {
       if (!mounted) {
@@ -317,6 +334,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _clipAssetCount = 0;
         _shotReadiness = null;
         _shotReadinessUnavailable = false;
+        _productionOverview = null;
       });
     } finally {
       if (mounted) {
@@ -538,17 +556,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               value: _projectStats!.videoCount.toString(),
             ),
           ];
+    final po = _productionOverview;
     final overviewMetrics = <ShortVideoMetricData>[
       ShortVideoMetricData(
         label: '最近任务',
         value: (_recentProjectTasks?.total ?? 0).toString(),
       ),
       ShortVideoMetricData(
-        label: '进行中',
-        value: shortVideoCountTasksByStatus(
-          _recentProjectTasks,
-          'running',
-        ).toString(),
+        label: po != null ? '生成任务' : '进行中',
+        value: po != null
+            ? po.runningGenerationJobCount.toString()
+            : shortVideoCountTasksByStatus(
+                _recentProjectTasks,
+                'running',
+              ).toString(),
       ),
       ShortVideoMetricData(
         label: '失败',
@@ -559,7 +580,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       ),
       ShortVideoMetricData(
         label: '坏例',
-        value: (_qualityScopeInsight?.badCaseCount ?? 0).toString(),
+        value: po != null
+            ? po.pendingReviewBadCaseCount.toString()
+            : (_qualityScopeInsight?.badCaseCount ?? 0).toString(),
       ),
       ShortVideoMetricData(
         label: '通过率',
@@ -569,13 +592,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       ShortVideoMetricData(label: '场景', value: _sceneAssetCount.toString()),
       ShortVideoMetricData(label: 'clip', value: _clipAssetCount.toString()),
     ];
-    if (_shotReadiness != null &&
-        _shotReadiness!.rollup.totalStoryboards > 0) {
+    if (po != null && po.totalStoryboardCount > 0) {
       overviewMetrics.add(
         ShortVideoMetricData(
           label: '分镜就绪',
           value:
-              '${_shotReadiness!.rollup.readyCount}/${_shotReadiness!.rollup.totalStoryboards}',
+              '${po.readyStoryboardCount}/${po.totalStoryboardCount}',
         ),
       );
     }

@@ -26,3 +26,4 @@ This document is the **auditable map** for **C2** in `.kiro/specs/short-video-sp
 
 - Handler: `backend/src/projects/routes/handlers/detail/short_video_readiness.rs`
 - Types: `backend/src/projects/routes/types.rs` (`ProjectShortVideoReadinessResponse`)
+- A3 / MP-W5 生产概览（就绪分镜数、生成中任务、坏例数）: `GET /api/v1/projects/{id}/production-overview` — `handlers/detail/production_overview.rs`（就绪判定与本 readiness 端点一致）

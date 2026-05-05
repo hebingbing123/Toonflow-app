@@ -280,6 +280,35 @@ class ProjectShortVideoReadiness {
   }
 }
 
+/// `GET /api/v1/projects/{project_id}/production-overview` — see `getProjectProductionOverviewByProjectIdV1`.
+class ProjectProductionOverview {
+  const ProjectProductionOverview({
+    required this.schemaVersion,
+    required this.readyStoryboardCount,
+    required this.totalStoryboardCount,
+    required this.runningGenerationJobCount,
+    required this.pendingReviewBadCaseCount,
+  });
+
+  final int schemaVersion;
+  final int readyStoryboardCount;
+  final int totalStoryboardCount;
+  final int runningGenerationJobCount;
+  final int pendingReviewBadCaseCount;
+
+  factory ProjectProductionOverview.fromJson(Map<String, dynamic> json) {
+    return ProjectProductionOverview(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      readyStoryboardCount: (json['ready_storyboard_count'] as num).toInt(),
+      totalStoryboardCount: (json['total_storyboard_count'] as num).toInt(),
+      runningGenerationJobCount:
+          (json['running_generation_job_count'] as num).toInt(),
+      pendingReviewBadCaseCount:
+          (json['pending_review_bad_case_count'] as num).toInt(),
+    );
+  }
+}
+
 /// `GET /api/v1/projects/{project_id}` — see `getProjectByProjectIdV1`.
 Future<ProjectDetail> fetchProjectByProjectId(
   String accessToken,
@@ -337,6 +366,27 @@ Future<ProjectShortVideoReadiness> fetchProjectShortVideoReadinessByProjectId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectShortVideoReadiness.fromJson(map);
+}
+
+/// `GET /api/v1/projects/{project_id}/production-overview` — see `getProjectProductionOverviewByProjectIdV1`.
+Future<ProjectProductionOverview> fetchProjectProductionOverviewByProjectId(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/production-overview',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectProductionOverview.fromJson(map);
 }
 
 /// Maps backend **`blocking_reasons`** codes to short UI labels (Chinese).
