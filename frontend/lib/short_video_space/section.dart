@@ -66,6 +66,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   PublishPrepareCheckResponse? _publishPrepare;
   List<PublishJobRow> _publishJobs = const <PublishJobRow>[];
   bool _publishBusy = false;
+  int _publishCopyEditorRevision = 0;
   String? _selectedProjectId;
   String? _projectConfigLine;
 
@@ -485,6 +486,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       if (!mounted) {
         return;
       }
+      setState(() {
+        _publishCopyEditorRevision++;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('差异化文案已写入（来源：${res.source}）。')),
       );
@@ -548,6 +552,184 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           SnackBar(content: Text('清除定时失败：$e')),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<DateTime?> _pickScheduleDateTime(BuildContext context) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: today.subtract(const Duration(days: 1)),
+      lastDate: today.add(const Duration(days: 365 * 2)),
+    );
+    if (!context.mounted) {
+      return null;
+    }
+    if (pickedDate == null) {
+      return null;
+    }
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(now),
+    );
+    if (!context.mounted || pickedTime == null) {
+      return null;
+    }
+    return DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+  }
+
+  Future<void> _scheduleFirstDraft(
+    BuildContext context,
+    ProjectRow project,
+    String token,
+  ) async {
+    if (_publishDrafts.isEmpty) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final dt = await _pickScheduleDateTime(context);
+    if (dt == null || !context.mounted) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      final iso = dt.toUtc().toIso8601String();
+      await patchPublishDraft(token, project.id, _publishDrafts.first.id, <String, dynamic>{
+        'scheduled_at': iso,
+      });
+      await _refreshPublishSlice(project, token);
+      messenger?.showSnackBar(
+        SnackBar(content: Text('首张草稿已设为定时：$iso（UTC）')),
+      );
+    } on RustApiException catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('定时失败：${e.statusCode}')),
+      );
+    } catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('定时失败：$e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _scheduleAllDraftsSameTime(
+    BuildContext context,
+    ProjectRow project,
+    String token,
+  ) async {
+    if (_publishDrafts.length < 2) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final dt = await _pickScheduleDateTime(context);
+    if (dt == null || !context.mounted) {
+      return;
+    }
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      final iso = dt.toUtc().toIso8601String();
+      final ids = _publishDrafts.map((d) => d.id).toList(growable: false);
+      final res = await batchSchedulePublishDrafts(
+        token,
+        project.id,
+        draftIds: ids,
+        scheduledAtIso: iso,
+      );
+      await _refreshPublishSlice(project, token);
+      messenger?.showSnackBar(
+        SnackBar(content: Text('已批量定时 ${res.updated} 张草稿：$iso（UTC）')),
+      );
+    } on RustApiException catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('批量定时失败：${e.statusCode}')),
+      );
+    } catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('批量定时失败：$e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _publishBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _commitPublishPlatformCopy(
+    ProjectRow project,
+    String token,
+    String platformId,
+    String title,
+    String description,
+    String tagsComma,
+  ) async {
+    if (_publishDrafts.isEmpty) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    setState(() {
+      _publishBusy = true;
+    });
+    try {
+      final draftId = _publishDrafts.first.id;
+      final draft = await fetchPublishDraft(token, project.id, draftId);
+      final copy = Map<String, dynamic>.from(draft.platformCopy ?? {});
+      final tags = tagsComma
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      copy[platformId] = <String, dynamic>{
+        'title': title.trim(),
+        'description': description.trim(),
+        'tags': tags,
+      };
+      await patchPublishDraft(token, project.id, draftId, <String, dynamic>{
+        'platform_copy': copy,
+      });
+      if (!context.mounted) {
+        return;
+      }
+      setState(() {
+        _publishCopyEditorRevision++;
+      });
+      await _refreshPublishSlice(project, token);
+      messenger?.showSnackBar(
+        const SnackBar(content: Text('已保存差异化文案。')),
+      );
+    } on RustApiException catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('保存文案失败：${e.statusCode}')),
+      );
+    } catch (e) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('保存文案失败：$e')),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -632,6 +814,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _publishPrepare = null;
           _publishJobs = const <PublishJobRow>[];
           _publishBusy = false;
+          _publishCopyEditorRevision = 0;
         });
       }
       return;
@@ -658,6 +841,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishPrepare = null;
       _publishJobs = const <PublishJobRow>[];
       _publishBusy = false;
+      _publishCopyEditorRevision = 0;
     });
     try {
       Future<ProjectProductionOverview?> loadProductionOverview() async {
@@ -840,6 +1024,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishPrepare = null;
         _publishJobs = const <PublishJobRow>[];
         _publishBusy = false;
+        _publishCopyEditorRevision = 0;
       });
     } catch (_) {
       if (!mounted) {
@@ -866,6 +1051,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishPrepare = null;
         _publishJobs = const <PublishJobRow>[];
         _publishBusy = false;
+        _publishCopyEditorRevision = 0;
       });
     } finally {
       if (mounted) {
@@ -1266,6 +1452,41 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               !_publishUnavailable &&
               _publishDrafts.isNotEmpty
           ? () => unawaited(_clearPublishSchedule())
+          : null,
+      publishTargetPlatformIds: _targetPlatforms,
+      publishCopyEditorRevision: _publishCopyEditorRevision,
+      onCommitPublishPlatformCopy: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty &&
+              !_publishUnavailable &&
+              _publishDrafts.isNotEmpty
+          ? (platformId, title, description, tagsComma) =>
+                _commitPublishPlatformCopy(
+                  project,
+                  accessToken,
+                  platformId,
+                  title,
+                  description,
+                  tagsComma,
+                )
+          : null,
+      onScheduleFirstDraft: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty &&
+              !_publishUnavailable &&
+              _publishDrafts.isNotEmpty
+          ? (ctx) => unawaited(
+                _scheduleFirstDraft(ctx, project, accessToken),
+              )
+          : null,
+      onScheduleAllDraftsSameTime: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty &&
+              !_publishUnavailable &&
+              _publishDrafts.length > 1
+          ? (ctx) => unawaited(
+                _scheduleAllDraftsSameTime(ctx, project, accessToken),
+              )
           : null,
     );
     final candidateCardUi = buildShortVideoCandidateCardUi(

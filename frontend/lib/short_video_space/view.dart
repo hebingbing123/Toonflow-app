@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'publish_copy_editor.dart';
+
 enum ShortVideoMode { animated, liveAction }
 
 class ShortVideoProjectOption {
@@ -188,6 +190,15 @@ class ShortVideoPublishPanelUi {
     this.onConfirmSemiAuto,
     this.onSuggestPublishCopy,
     this.onClearPublishSchedule,
+    this.publishPrimaryDraftId = '',
+    this.publishDomesticTargetIds = const <String>[],
+    this.publishOverseasTargetIds = const <String>[],
+    this.publishPlatformLabels = const <String, String>{},
+    this.publishPlatformCopySnapshot = const <String, dynamic>{},
+    this.publishCopyEditorRevision = 0,
+    this.onCommitPublishPlatformCopy,
+    this.onScheduleFirstDraft,
+    this.onScheduleAllDraftsSameTime,
   });
 
   final bool visible;
@@ -209,6 +220,15 @@ class ShortVideoPublishPanelUi {
   final VoidCallback? onConfirmSemiAuto;
   final VoidCallback? onSuggestPublishCopy;
   final VoidCallback? onClearPublishSchedule;
+  final String publishPrimaryDraftId;
+  final List<String> publishDomesticTargetIds;
+  final List<String> publishOverseasTargetIds;
+  final Map<String, String> publishPlatformLabels;
+  final Map<String, dynamic> publishPlatformCopySnapshot;
+  final int publishCopyEditorRevision;
+  final PublishPlatformCopyCommit? onCommitPublishPlatformCopy;
+  final void Function(BuildContext context)? onScheduleFirstDraft;
+  final void Function(BuildContext context)? onScheduleAllDraftsSameTime;
 }
 
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
@@ -1029,6 +1049,28 @@ class ShortVideoSpaceView extends StatelessWidget {
                         ),
                       ),
                   ],
+                  if (!publishPanelUi.loading &&
+                      !publishPanelUi.unavailable &&
+                      publishPanelUi.publishPrimaryDraftId.isNotEmpty &&
+                      (publishPanelUi.publishDomesticTargetIds.isNotEmpty ||
+                          publishPanelUi.publishOverseasTargetIds
+                              .isNotEmpty)) ...[
+                    const SizedBox(height: 12),
+                    PublishPlatformCopyEditor(
+                      key: ValueKey(
+                        '${publishPanelUi.publishPrimaryDraftId}_${publishPanelUi.publishCopyEditorRevision}',
+                      ),
+                      draftId: publishPanelUi.publishPrimaryDraftId,
+                      domesticPlatformIds:
+                          publishPanelUi.publishDomesticTargetIds,
+                      overseasPlatformIds:
+                          publishPanelUi.publishOverseasTargetIds,
+                      platformLabels: publishPanelUi.publishPlatformLabels,
+                      platformCopy: publishPanelUi.publishPlatformCopySnapshot,
+                      busy: publishPanelUi.publishBusy,
+                      onCommit: publishPanelUi.onCommitPublishPlatformCopy,
+                    ),
+                  ],
                   if (publishPanelUi.jobLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Text(
@@ -1066,7 +1108,9 @@ class ShortVideoSpaceView extends StatelessWidget {
                       publishPanelUi.onEnqueuePublishJob != null ||
                       publishPanelUi.onRefreshPublish != null ||
                       publishPanelUi.onSuggestPublishCopy != null ||
-                      publishPanelUi.onClearPublishSchedule != null) ...[
+                      publishPanelUi.onClearPublishSchedule != null ||
+                      publishPanelUi.onScheduleFirstDraft != null ||
+                      publishPanelUi.onScheduleAllDraftsSameTime != null) ...[
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
@@ -1125,6 +1169,28 @@ class ShortVideoSpaceView extends StatelessWidget {
                                 : publishPanelUi.onClearPublishSchedule,
                             icon: const Icon(Icons.schedule_outlined),
                             label: const Text('清除定时（允许入队）'),
+                          ),
+                        if (publishPanelUi.onScheduleFirstDraft != null &&
+                            publishPanelUi.publishPrimaryDraftId.isNotEmpty)
+                          OutlinedButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : () => publishPanelUi.onScheduleFirstDraft
+                                    ?.call(context),
+                            icon: const Icon(Icons.event_available_outlined),
+                            label: const Text('定时首张草稿…'),
+                          ),
+                        if (publishPanelUi.onScheduleAllDraftsSameTime !=
+                                null &&
+                            publishPanelUi.draftLines.length > 1)
+                          OutlinedButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : () => publishPanelUi
+                                    .onScheduleAllDraftsSameTime
+                                    ?.call(context),
+                            icon: const Icon(Icons.calendar_month_outlined),
+                            label: const Text('批量定时全部草稿…'),
                           ),
                       ],
                     ),

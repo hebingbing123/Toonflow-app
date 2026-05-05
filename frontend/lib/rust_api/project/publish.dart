@@ -91,6 +91,52 @@ Future<PublishDraftRow> createPublishDraft(
   return PublishDraftRow.fromJson(map);
 }
 
+/// `GET …/publish/drafts/{draft_id}`
+Future<PublishDraftRow> fetchPublishDraft(
+  String accessToken,
+  String projectId,
+  String draftId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/$draftId',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PublishDraftRow.fromJson(map);
+}
+
+/// `PATCH …/publish/drafts/{draft_id}` — body keys snake_case，省略字段不修改。
+Future<PublishDraftRow> patchPublishDraft(
+  String accessToken,
+  String projectId,
+  String draftId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/$draftId',
+  );
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PublishDraftRow.fromJson(map);
+}
+
 /// `POST …/publish/drafts/{draft_id}/targets`
 Future<List<PublishTargetRow>> upsertPublishTargets(
   String accessToken,
@@ -351,6 +397,7 @@ class PublishDraftRow {
     this.videoAssetKey,
     this.coverAssetKey,
     this.scheduledAt,
+    this.platformCopy,
   });
 
   final String id;
@@ -364,9 +411,17 @@ class PublishDraftRow {
   final String? videoAssetKey;
   final String? coverAssetKey;
   final String? scheduledAt;
+  final Map<String, dynamic>? platformCopy;
 
   factory PublishDraftRow.fromJson(Map<String, dynamic> json) {
     final tagRaw = json['tags'] as List<dynamic>? ?? const <dynamic>[];
+    final pcRaw = json['platform_copy'];
+    Map<String, dynamic>? platformCopy;
+    if (pcRaw is Map<String, dynamic>) {
+      platformCopy = pcRaw;
+    } else if (pcRaw is Map) {
+      platformCopy = Map<String, dynamic>.from(pcRaw);
+    }
     return PublishDraftRow(
       id: json['id'] as String? ?? '',
       projectId: json['project_id'] as String? ?? '',
@@ -379,6 +434,7 @@ class PublishDraftRow {
       videoAssetKey: json['video_asset_key'] as String?,
       coverAssetKey: json['cover_asset_key'] as String?,
       scheduledAt: json['scheduled_at'] as String?,
+      platformCopy: platformCopy,
     );
   }
 }

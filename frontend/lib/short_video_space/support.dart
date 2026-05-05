@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../rust_api.dart';
+import 'publish_copy_editor.dart';
 import 'view.dart';
 
 enum ShortVideoNextStepTarget {
@@ -899,6 +900,11 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   VoidCallback? onConfirmSemiAuto,
   VoidCallback? onSuggestPublishCopy,
   VoidCallback? onClearPublishSchedule,
+  List<String> publishTargetPlatformIds = const [],
+  int publishCopyEditorRevision = 0,
+  PublishPlatformCopyCommit? onCommitPublishPlatformCopy,
+  void Function(BuildContext context)? onScheduleFirstDraft,
+  void Function(BuildContext context)? onScheduleAllDraftsSameTime,
 }) {
   if (!projectSelected) {
     return const ShortVideoPublishPanelUi(visible: false);
@@ -986,6 +992,40 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     }
   }
 
+  final labels = Map<String, String>.from(kShortVideoPublishPlatformLabels);
+  if (matrix != null) {
+    for (final p in matrix.platforms) {
+      labels[p.platformId] = p.labelZh;
+    }
+  }
+
+  final domesticTargetIds = <String>[];
+  final overseasTargetIds = <String>[];
+  if (matrix != null && publishTargetPlatformIds.isNotEmpty) {
+    final domesticSet = matrix.platforms
+        .where((p) => p.marketRegion != 'overseas')
+        .map((p) => p.platformId)
+        .toSet();
+    final overseasSet = matrix.platforms
+        .where((p) => p.marketRegion == 'overseas')
+        .map((p) => p.platformId)
+        .toSet();
+    for (final id in publishTargetPlatformIds) {
+      if (domesticSet.contains(id)) {
+        domesticTargetIds.add(id);
+      } else if (overseasSet.contains(id)) {
+        overseasTargetIds.add(id);
+      } else {
+        domesticTargetIds.add(id);
+      }
+    }
+  }
+
+  final primaryDraftId = drafts.isNotEmpty ? drafts.first.id : '';
+  final platformCopySnap = drafts.isNotEmpty
+      ? Map<String, dynamic>.from(drafts.first.platformCopy ?? {})
+      : <String, dynamic>{};
+
   return ShortVideoPublishPanelUi(
     visible: true,
     headline: '已连接发布 API：${drafts.length} 张草稿 · ${jobs.length} 条作业。',
@@ -1006,5 +1046,14 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
         awaitingId != null ? onConfirmSemiAuto : null,
     onSuggestPublishCopy: onSuggestPublishCopy,
     onClearPublishSchedule: onClearPublishSchedule,
+    publishPrimaryDraftId: primaryDraftId,
+    publishDomesticTargetIds: domesticTargetIds,
+    publishOverseasTargetIds: overseasTargetIds,
+    publishPlatformLabels: labels,
+    publishPlatformCopySnapshot: platformCopySnap,
+    publishCopyEditorRevision: publishCopyEditorRevision,
+    onCommitPublishPlatformCopy: onCommitPublishPlatformCopy,
+    onScheduleFirstDraft: onScheduleFirstDraft,
+    onScheduleAllDraftsSameTime: onScheduleAllDraftsSameTime,
   );
 }
