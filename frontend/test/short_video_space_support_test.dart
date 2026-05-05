@@ -123,6 +123,10 @@ void main() {
 
   test('blocking reason labels map API codes to Chinese', () {
     expect(labelShortVideoBlockingReason('missing_reference_visual'), '参考图');
+    expect(
+      labelShortVideoBlockingReason('missing_live_action_reference_shot'),
+      '真人参考镜头',
+    );
     expect(labelShortVideoBlockingReason('unknown_code'), 'unknown_code');
   });
 
@@ -223,6 +227,8 @@ void main() {
       "has_basic_slot": true,
       "has_prompt_context": true,
       "has_reference_visual": false,
+      "has_live_action_reference_shots": false,
+      "has_live_action_performance_notes": false,
       "candidate_cleared": true,
       "no_blocking_job": true,
       "ready_for_generation": false,
@@ -236,6 +242,8 @@ void main() {
       "has_basic_slot": true,
       "has_prompt_context": true,
       "has_reference_visual": true,
+      "has_live_action_reference_shots": true,
+      "has_live_action_performance_notes": true,
       "candidate_cleared": true,
       "no_blocking_job": true,
       "ready_for_generation": true,
@@ -259,5 +267,100 @@ void main() {
       formatStoryboardShortVideoReadinessSummary(readiness.storyboards.first),
       contains('参考图'),
     );
+  });
+
+  test('candidate compare panel prefers blocked live-action shots first', () {
+    final readiness = ProjectShortVideoReadiness.fromJson({
+      'schema_version': 1,
+      'rollup': {
+        'total_storyboards': 2,
+        'ready_count': 1,
+        'blocked_count': 1,
+        'by_reason': [
+          {'reason': 'missing_live_action_reference_shot', 'storyboard_count': 1},
+        ],
+      },
+      'storyboards': [
+        {
+          'storyboard_id': '550e8400-e29b-41d4-a716-446655440000',
+          'storyboard_numeric_id': 10,
+          'script_numeric_id': 3,
+          'sb_index': 1,
+          'has_basic_slot': true,
+          'has_prompt_context': true,
+          'has_reference_visual': true,
+          'has_live_action_reference_shots': false,
+          'has_live_action_performance_notes': true,
+          'candidate_cleared': true,
+          'no_blocking_job': true,
+          'ready_for_generation': false,
+          'blocking_reasons': ['missing_live_action_reference_shot'],
+        },
+        {
+          'storyboard_id': '650e8400-e29b-41d4-a716-446655440001',
+          'storyboard_numeric_id': 11,
+          'script_numeric_id': 3,
+          'sb_index': 2,
+          'has_basic_slot': true,
+          'has_prompt_context': true,
+          'has_reference_visual': true,
+          'has_live_action_reference_shots': true,
+          'has_live_action_performance_notes': true,
+          'candidate_cleared': true,
+          'no_blocking_job': true,
+          'ready_for_generation': true,
+          'blocking_reasons': <String>[],
+        },
+      ],
+    });
+    final panel = buildShortVideoCandidateComparePanelUi(
+      projectSelected: true,
+      loadingProjectOverview: false,
+      storyboardRows: const [
+        ProductionStoryboardItemV1(
+          id: 11,
+          scriptId: 3,
+          mediaSlots: StoryboardMediaSlotsSummaryV1(
+            schemaVersion: 1,
+            referenceOrPreviewFrameUrl: 'https://example.com/11.png',
+            currentVideoUrl: 'https://example.com/11.mp4',
+            candidateVideoSourcesHint: 'hint',
+          ),
+        ),
+        ProductionStoryboardItemV1(
+          id: 10,
+          scriptId: 3,
+          mediaSlots: StoryboardMediaSlotsSummaryV1(
+            schemaVersion: 1,
+            referenceOrPreviewFrameUrl: 'https://example.com/10.png',
+            currentVideoUrl: 'https://example.com/10.mp4',
+            candidateVideoSourcesHint: 'hint',
+          ),
+          liveActionReferenceShotUrls: ['https://example.com/ref-10.jpg'],
+        ),
+      ],
+      readiness: readiness,
+      reviews: const [
+        QualityReview(
+          id: 'r1',
+          createdAt: '2026-05-05T00:00:00Z',
+          updatedAt: '2026-05-05T00:00:00Z',
+          userId: 'u1',
+          projectId: 7,
+          targetType: 'storyboard',
+          targetId: '10',
+          source: 'manual',
+          passed: false,
+          isBadCase: true,
+        ),
+      ],
+      isLiveAction: true,
+      onSetCurrent: null,
+      onOpenProductionWorkspace: null,
+    );
+    expect(panel.items, hasLength(2));
+    expect(panel.items.first.storyboardNumericId, 10);
+    expect(panel.items.first.readinessLine, contains('真人参考镜头'));
+    expect(panel.items.first.qualityLine, contains('坏例 1 条'));
   });
 }

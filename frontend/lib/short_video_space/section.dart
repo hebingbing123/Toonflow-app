@@ -1042,6 +1042,51 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     }
   }
 
+  Future<void> _setComparedStoryboardCurrent(
+    ProductionStoryboardItemV1 row,
+  ) async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    final videoUrl = row.mediaSlots?.currentVideoUrl?.trim() ?? '';
+    if (token == null ||
+        token.isEmpty ||
+        project == null ||
+        row.scriptId == null ||
+        videoUrl.isEmpty) {
+      return;
+    }
+    setState(() {
+      _projectConfigLine = '正在确认分镜 #${row.id} 的当前视频版本…';
+    });
+    try {
+      await postWorkbenchStoryboardMediaOpV1(
+        token,
+        <String, dynamic>{
+          'op': 'selectVideo',
+          'projectId': project.numericId,
+          'scriptId': row.scriptId,
+          'storyboardId': row.id,
+          'videoUrl': videoUrl,
+        },
+      );
+      if (!mounted) return;
+      setState(() {
+        _projectConfigLine = '已确认分镜 #${row.id} 的当前视频版本。';
+      });
+      await _loadProjectOverview();
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _projectConfigLine = '设当前失败：${e.statusCode ?? '-'}';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _projectConfigLine = '设当前失败：$e';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final project = _selectedProject;
@@ -1233,6 +1278,21 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               : null,
       batchGenerateCandidateClipsBusy: _batchCandidateBusy,
     );
+    final candidateComparePanelUi = buildShortVideoCandidateComparePanelUi(
+      projectSelected: project != null,
+      loadingProjectOverview: _loadingProjectOverview,
+      storyboardRows: _candidateCompareRows,
+      readiness: _shotReadiness,
+      reviews: _candidateCompareReviews,
+      isLiveAction: !_isAnimated,
+      onSetCurrent: _setComparedStoryboardCurrent,
+      onOpenProductionWorkspace: project == null
+          ? null
+          : () {
+              _syncSelectedProjectContext();
+              widget.onOpenProductionWorkspace();
+            },
+    );
     final nextStepPlan = buildShortVideoNextStepPlan(
       isAnimated: _isAnimated,
       project: project,
@@ -1368,7 +1428,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               widget.onOpenProductionWorkspace();
             },
       candidateCardUi: candidateCardUi,
-      candidateComparePanelUi: const ShortVideoCandidateComparePanelUi(),
+      candidateComparePanelUi: candidateComparePanelUi,
       onOpenProjectsForCandidateAssets:
           project == null ? null : widget.onOpenProjects,
       readinessIntro: _isAnimated
