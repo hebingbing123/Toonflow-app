@@ -333,6 +333,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
     this.onOpenAssemblyClipDeskOps,
+    this.onOpenAssemblyDefaultsEditor,
     required this.candidateCardUi,
     required this.candidateComparePanelUi,
     this.onOpenProjectsForCandidateAssets,
@@ -401,6 +402,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final VoidCallback? onOpenAssemblyClipDeskOps;
+  final VoidCallback? onOpenAssemblyDefaultsEditor;
   final ShortVideoCandidateCardUi candidateCardUi;
   final ShortVideoCandidateComparePanelUi candidateComparePanelUi;
   final VoidCallback? onOpenProjectsForCandidateAssets;
@@ -901,6 +903,12 @@ class ShortVideoSpaceView extends StatelessWidget {
                           onPressed: onOpenAssemblyClipDeskOps,
                           icon: const Icon(Icons.tune_outlined),
                           label: const Text('镜头基础操作'),
+                        ),
+                      if (onOpenAssemblyDefaultsEditor != null)
+                        OutlinedButton.icon(
+                          onPressed: onOpenAssemblyDefaultsEditor,
+                          icon: const Icon(Icons.subtitles_outlined),
+                          label: const Text('成片样式调整'),
                         ),
                     ],
                   ),

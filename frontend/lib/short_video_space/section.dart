@@ -1690,6 +1690,104 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     );
   }
 
+  Future<void> _openAssemblyDefaultsEditor() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    final subtitleCtrl = TextEditingController(text: _subtitleStyle);
+    final bgmCtrl = TextEditingController(text: _bgmStrategy);
+    try {
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: const Text('成片级样式调整'),
+            content: SizedBox(
+              width: 520,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: subtitleCtrl,
+                    decoration: const InputDecoration(
+                      labelText: '字幕样式 subtitle_style',
+                      hintText: '例如 cinematic_cn_v2（留空则回退默认）',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: bgmCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'BGM 策略 bgm_strategy',
+                      hintText: '例如 pulse_light（留空则回退默认）',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '保存后会写回 D7 默认配置，并刷新成片装配快照中的生效值。',
+                    style: Theme.of(ctx).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  final nextSubtitle = subtitleCtrl.text.trim();
+                  final nextBgm = bgmCtrl.text.trim();
+                  Navigator.of(ctx).pop();
+                  try {
+                    final updated = await updateProjectByProjectId(
+                      token,
+                      project.id,
+                      <String, dynamic>{
+                        'subtitleStyle': nextSubtitle.isEmpty ? null : nextSubtitle,
+                        'bgmStrategy': nextBgm.isEmpty ? null : nextBgm,
+                      },
+                    );
+                    if (!mounted) return;
+                    setState(() {
+                      _subtitleStyle = updated.subtitleStyle ?? '';
+                      _bgmStrategy = updated.bgmStrategy ?? '';
+                      _projects = _projects
+                          .map((row) => row.id == updated.id ? updated : row)
+                          .toList(growable: false);
+                      _projectConfigLine =
+                          '已更新成片级默认：字幕 ${_subtitleStyle.trim().isEmpty ? "默认" : _subtitleStyle.trim()} · '
+                          'BGM ${_bgmStrategy.trim().isEmpty ? "默认" : _bgmStrategy.trim()}';
+                    });
+                    await _loadProjectOverview();
+                  } on RustApiException catch (e) {
+                    if (!mounted) return;
+                    setState(() {
+                      _projectConfigLine = '成片样式写回失败：${e.statusCode ?? '-'}';
+                    });
+                  } catch (e) {
+                    if (!mounted) return;
+                    setState(() {
+                      _projectConfigLine = '成片样式写回失败：$e';
+                    });
+                  }
+                },
+                child: const Text('保存并刷新'),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
+      subtitleCtrl.dispose();
+      bgmCtrl.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final project = _selectedProject;
@@ -2093,6 +2191,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               (_shortVideoAssembly?.scripts.isEmpty ?? true)
           ? null
           : () => unawaited(_openAssemblyClipDeskOps()),
+      onOpenAssemblyDefaultsEditor: project == null || _shortVideoAssembly == null
+          ? null
+          : () => unawaited(_openAssemblyDefaultsEditor()),
       candidateCardUi: candidateCardUi,
       candidateComparePanelUi: candidateComparePanelUi,
       onOpenProjectsForCandidateAssets:
