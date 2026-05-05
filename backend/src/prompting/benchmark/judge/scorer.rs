@@ -373,6 +373,7 @@ mod tests {
             grade: Some("A".to_string()),
             skill_file_path: None,
             skill_version_hash: None,
+            next_action: None,
         }
     }
 

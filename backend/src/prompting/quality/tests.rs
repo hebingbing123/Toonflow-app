@@ -173,6 +173,7 @@ fn validate_list_reviews_query_rejects_invalid_target_type() {
         memory_delivery_priority_applied: None,
         stage: None,
         grade: None,
+        next_action: None,
         limit: None,
         offset: None,
     };
@@ -490,6 +491,7 @@ mod task15_tests {
             grade: None,
             skill_file_path: None,
             skill_version_hash: None,
+            next_action: None,
         }
     }
 

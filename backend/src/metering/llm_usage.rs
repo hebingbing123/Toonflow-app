@@ -233,6 +233,7 @@ mod tests {
             grade: Some("C".into()),
             skill_file_path: None,
             skill_version_hash: None,
+            next_action: None,
         };
 
         let meta = build_quality_review_usage_meta(&review);

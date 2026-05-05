@@ -56,6 +56,7 @@ mod tests {
             grade: Some("D".into()),
             skill_file_path: None,
             skill_version_hash: None,
+            next_action: None,
         }
     }
 

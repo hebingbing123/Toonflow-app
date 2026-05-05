@@ -20,6 +20,8 @@ mod types;
 mod validate;
 
 #[cfg(test)]
+mod next_action_tests;
+#[cfg(test)]
 mod tests;
 
 pub use types::{

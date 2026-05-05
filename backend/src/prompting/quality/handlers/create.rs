@@ -268,6 +268,9 @@ pub(crate) async fn create_review(
     let source = body.source.as_deref().unwrap_or("manual");
     let is_bad_case = body.is_bad_case.unwrap_or(false);
 
+    // Infer next_action if not provided
+    let next_action_str = body.next_action.as_deref();
+
     let mut review = sqlx::query_as::<_, QualityReview>(
         r#"
         INSERT INTO app_quality_review (
@@ -276,8 +279,8 @@ pub(crate) async fn create_review(
             pacing, faithfulness, visual_quality, overall_score, passed,
             comments, skill_version, model_name, model_params, memory_delivery_priority_applied,
             is_bad_case, bad_case_category,
-            stage, grade, skill_file_path, skill_version_hash
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
+            stage, grade, skill_file_path, skill_version_hash, next_action
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
         RETURNING *
         "#,
     )
@@ -307,6 +310,7 @@ pub(crate) async fn create_review(
     .bind(&body.grade)
     .bind(&body.skill_file_path)
     .bind(&body.skill_version_hash)
+    .bind(next_action_str)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -355,6 +359,7 @@ pub(crate) async fn create_review(
     }
 
     // 附加结构化问题类型和下一步动作建议到 diagnostics（需求 14.1, 14.2, 14.5）
+    // Also update the next_action field if it wasn't provided (需求 I.4)
     let issue_types = infer_issue_types(&review);
     let next_action = infer_next_action(&review, &issue_types);
     let merged = merge_issue_diagnostics_into_model_params(
@@ -362,11 +367,20 @@ pub(crate) async fn create_review(
         &issue_types,
         &next_action,
     );
+
+    // Update both model_params and next_action field
+    let next_action_to_store = if review.next_action.is_none() {
+        Some(next_action.as_str())
+    } else {
+        review.next_action.as_deref()
+    };
+
     review = sqlx::query_as::<_, QualityReview>(
-        r#"UPDATE app_quality_review SET model_params = $2, updated_at = NOW() WHERE id = $1 RETURNING *"#,
+        r#"UPDATE app_quality_review SET model_params = $2, next_action = $3, updated_at = NOW() WHERE id = $1 RETURNING *"#,
     )
     .bind(review.id)
     .bind(merged)
+    .bind(next_action_to_store)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

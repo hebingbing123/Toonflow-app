@@ -43,6 +43,8 @@ pub struct QualityReview {
     pub skill_file_path: Option<String>,
     /// 评审时使用的技能文件 SHA256 哈希（需求 6.5）
     pub skill_version_hash: Option<String>,
+    /// 下一步修复动作（需求 I.4）：typed field for rework action
+    pub next_action: Option<String>,
 }
 
 /// 创建质量评估请求体
@@ -78,6 +80,8 @@ pub struct CreateQualityReviewBody {
     pub skill_file_path: Option<String>,
     /// 评审时使用的技能文件 SHA256 哈希（需求 6.5）
     pub skill_version_hash: Option<String>,
+    /// 下一步修复动作（需求 I.4）：typed field for rework action
+    pub next_action: Option<String>,
 }
 
 /// 质量评估列表查询参数
@@ -97,6 +101,8 @@ pub struct ListQualityReviewsQuery {
     pub stage: Option<String>,
     /// 按评分等级过滤（需求 6.6）：A / B / C / D
     pub grade: Option<String>,
+    /// 按下一步动作过滤（需求 I.4）
+    pub next_action: Option<String>,
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }

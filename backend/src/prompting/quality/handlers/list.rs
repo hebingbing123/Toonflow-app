@@ -82,6 +82,11 @@ pub(crate) async fn list_reviews(
         qb.push(" AND grade = ");
         qb.push_bind(grade);
     }
+    // 按下一步动作过滤（需求 I.4）
+    if let Some(next_action) = &query.next_action {
+        qb.push(" AND next_action = ");
+        qb.push_bind(next_action);
+    }
     qb.push(" ORDER BY created_at DESC LIMIT ");
     qb.push_bind(limit);
     qb.push(" OFFSET ");
