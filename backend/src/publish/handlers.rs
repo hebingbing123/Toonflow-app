@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::http_kit::request_dedupe::{dedupe_publish_overview, RequestDedupeKey};
 use crate::state::AppState;
 
 use super::access::{profile_belongs_to_project, require_project_owned, script_belongs_to_project};
@@ -144,61 +145,79 @@ pub(crate) async fn publish_overview(
     let pool = state.require_pool()?;
     require_project_owned(pool, uid, project_id).await?;
 
-    // Fetch all data in parallel for optimal performance
-    let (drafts_rows, jobs_rows, perf_alerts_rows, audit_rows) = tokio::try_join!(
-        list_drafts(pool, project_id, None),
-        list_jobs(pool, project_id, uid),
-        list_low_performance_alerts(pool, project_id, uid, 1000, 0.45, 50),
-        list_attempt_audit(
-            pool,
-            project_id,
-            uid,
-            ListAttemptAuditFilter {
-                draft_id: None,
-                job_id: None,
-                delivery_mode: None,
-                evidence_key: None,
-                limit: query.audit_limit,
-            },
-        ),
-    )?;
+    // J.6: Deduplicate concurrent identical requests
+    let dedupe_key =
+        RequestDedupeKey::publish_overview(uid, project_id, query.draft_id, query.audit_limit);
 
-    // Convert rows to responses
-    let drafts: Vec<PublishDraftResponse> = drafts_rows.into_iter().map(draft_from_row).collect();
-    let jobs: Vec<PublishJobResponse> = jobs_rows.into_iter().map(job_from_row).collect();
-    let performance_alerts: Vec<PublishPerformanceAlertResponse> = perf_alerts_rows
-        .into_iter()
-        .map(performance_alert_from_row)
-        .collect();
-    let audit: Vec<PublishAttemptAuditResponse> =
-        audit_rows.into_iter().map(attempt_audit_from_row).collect();
+    let result_json = dedupe_publish_overview(dedupe_key, || async {
+        // Fetch all data in parallel for optimal performance
+        let (drafts_rows, jobs_rows, perf_alerts_rows, audit_rows) = tokio::try_join!(
+            list_drafts(pool, project_id, None),
+            list_jobs(pool, project_id, uid),
+            list_low_performance_alerts(pool, project_id, uid, 1000, 0.45, 50),
+            list_attempt_audit(
+                pool,
+                project_id,
+                uid,
+                ListAttemptAuditFilter {
+                    draft_id: None,
+                    job_id: None,
+                    delivery_mode: None,
+                    evidence_key: None,
+                    limit: query.audit_limit,
+                },
+            ),
+        )?;
 
-    // Optionally fetch prepare check if draft_id is provided
-    let prepare_check = if let Some(draft_id) = query.draft_id {
-        if let Some(draft) = fetch_draft(pool, project_id, draft_id).await? {
-            let targets = list_targets(pool, draft_id).await?;
-            let issues = prepare_check_for_draft(&draft, &targets);
-            let ok = !issues.iter().any(|i| i.severity == "blocking");
-            Some(PublishPrepareCheckResponse {
-                draft_id,
-                ok,
-                issues,
-            })
+        // Convert rows to responses
+        let drafts: Vec<PublishDraftResponse> =
+            drafts_rows.into_iter().map(draft_from_row).collect();
+        let jobs: Vec<PublishJobResponse> = jobs_rows.into_iter().map(job_from_row).collect();
+        let performance_alerts: Vec<PublishPerformanceAlertResponse> = perf_alerts_rows
+            .into_iter()
+            .map(performance_alert_from_row)
+            .collect();
+        let audit: Vec<PublishAttemptAuditResponse> =
+            audit_rows.into_iter().map(attempt_audit_from_row).collect();
+
+        // Optionally fetch prepare check if draft_id is provided
+        let prepare_check = if let Some(draft_id) = query.draft_id {
+            if let Some(draft) = fetch_draft(pool, project_id, draft_id).await? {
+                let targets = list_targets(pool, draft_id).await?;
+                let issues = prepare_check_for_draft(&draft, &targets);
+                let ok = !issues.iter().any(|i| i.severity == "blocking");
+                Some(PublishPrepareCheckResponse {
+                    draft_id,
+                    ok,
+                    issues,
+                })
+            } else {
+                None
+            }
         } else {
             None
-        }
-    } else {
-        None
-    };
+        };
 
-    Ok(Json(PublishOverviewResponse {
-        matrix: platform_matrix_body(),
-        drafts,
-        prepare_check,
-        jobs,
-        performance_alerts,
-        audit,
-    }))
+        let response = PublishOverviewResponse {
+            matrix: platform_matrix_body(),
+            drafts,
+            prepare_check,
+            jobs,
+            performance_alerts,
+            audit,
+        };
+
+        // Serialize to JSON for caching
+        serde_json::to_value(&response)
+            .map_err(|e| ApiError::BadRequest(format!("Failed to serialize response: {}", e)))
+    })
+    .await?;
+
+    // Deserialize back to typed response
+    let response: PublishOverviewResponse = serde_json::from_value(result_json)
+        .map_err(|e| ApiError::BadRequest(format!("Failed to deserialize response: {}", e)))?;
+
+    Ok(Json(response))
 }
 
 #[utoipa::path(

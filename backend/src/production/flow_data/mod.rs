@@ -37,7 +37,7 @@ pub(crate) async fn load_production_flow_json_by_scope(
     script_id: Uuid,
     script_content: Option<String>,
 ) -> Result<Value, ApiError> {
-    let saved = rows::fetch_saved_flow(pool, project_id, script_id).await?;
+    let (saved, flow_version) = rows::fetch_saved_flow(pool, project_id, script_id).await?;
     let asset_rows = rows::fetch_asset_rows(pool, project_id, script_id).await?;
     let storyboard_rows = rows::fetch_storyboard_rows(pool, script_id).await?;
 
@@ -45,6 +45,7 @@ pub(crate) async fn load_production_flow_json_by_scope(
     let storyboard_items = compose::build_storyboard_items(saved.as_object(), storyboard_rows);
     Ok(compose::merge_flow(
         saved,
+        flow_version,
         script_content,
         root_assets,
         storyboard_items,

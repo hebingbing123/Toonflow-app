@@ -16,4 +16,9 @@ pub(crate) struct SaveFlowDataBody {
     pub(crate) project_id: i32,
     pub(crate) episodes_id: i32,
     pub(crate) data: Value,
+    /// Optional version timestamp (ISO 8601) for optimistic locking.
+    /// If provided, the save will fail with 409 Conflict if the current
+    /// `app_production_flow.updated_at` doesn't match this value.
+    #[serde(default)]
+    pub(crate) flow_version: Option<String>,
 }

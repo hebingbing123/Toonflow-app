@@ -124,3 +124,28 @@ pub(in crate::production::workbench::storyboard) async fn update_live_action_ref
 
     Ok(())
 }
+
+pub(in crate::production::workbench::storyboard) async fn update_storyboard_duration(
+    pool: &sqlx::PgPool,
+    storyboard_id: Uuid,
+    duration: i32,
+) -> Result<(), ApiError> {
+    let updated = sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET duration = $2::text, updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(storyboard_id)
+    .bind(duration)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if updated.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(())
+}

@@ -77,7 +77,7 @@ pub struct ProjectDetailResponse {
 
 /// Per-project counts for dashboards; aligns with Electron-era **`generalStatistics`** shape.
 /// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`** counts **`app_novel`** rows; **`video_count`** remains **`0`** until video rows exist in Postgres.
-#[derive(Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProjectStatsResponse {
     pub script_count: i64,
     pub storyboard_count: i64,
@@ -140,7 +140,7 @@ pub struct ProjectShortVideoReadinessResponse {
 }
 
 /// `GET /api/v1/projects/{project_id}/production-overview` — MP-W5 / A3 聚合。
-#[derive(Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProjectProductionOverviewResponse {
     pub schema_version: i32,
     /// Same readiness rule as **`/short-video-readiness`** (**`ready_for_generation`**).
@@ -153,7 +153,7 @@ pub struct ProjectProductionOverviewResponse {
 }
 
 /// `GET /api/v1/projects/{project_id}/assets-overview` — C5 统一资产只读聚合。
-#[derive(Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct AssetsOverviewCandidateCounts {
     pub pending: i64,
     pub linked: i64,
@@ -162,7 +162,7 @@ pub struct AssetsOverviewCandidateCounts {
     pub unset: i64,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct AssetsOverviewItem {
     pub asset_id: Uuid,
     pub numeric_id: i32,
@@ -173,13 +173,13 @@ pub struct AssetsOverviewItem {
     pub linked_script_numeric_ids: Vec<i32>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct AssetsOverviewTypeGroup {
     pub asset_type: String,
     pub items: Vec<AssetsOverviewItem>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProjectAssetsOverviewResponse {
     pub schema_version: i32,
     pub total_count: i64,

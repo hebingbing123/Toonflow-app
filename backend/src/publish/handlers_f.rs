@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::http_kit::request_dedupe::{dedupe_platform_copy, RequestDedupeKey};
 use crate::metering::llm_usage::record_llm_usage;
 use crate::state::AppState;
 
@@ -139,10 +140,30 @@ pub(crate) async fn suggest_publish_platform_copy(
     };
     let targets = list_targets(pool, draft_id).await?;
 
-    let start_time = std::time::Instant::now();
-    let result =
-        suggest_platform_copy_fragment(&state, pool, &draft, &targets, body.style_hint.as_deref())
-            .await;
+    // J.6: Deduplicate concurrent generation requests to prevent redundant LLM calls
+    let dedupe_key = RequestDedupeKey::suggest_platform_copy(
+        uid,
+        project_id,
+        draft_id,
+        body.style_hint.as_deref(),
+    );
+
+    // Wrap the generation in deduplication
+    let result_json = dedupe_platform_copy(dedupe_key, || async {
+        let result = suggest_platform_copy_fragment(
+            &state,
+            pool,
+            &draft,
+            &targets,
+            body.style_hint.as_deref(),
+        )
+        .await?;
+
+        // Serialize result for caching
+        serde_json::to_value(&result)
+            .map_err(|e| ApiError::BadRequest(format!("Failed to serialize result: {}", e)))
+    })
+    .await?;
 
     // J.3: Log LLM usage for publish copy generation (both success and failure)
     let model_name = state
@@ -160,65 +181,41 @@ pub(crate) async fn suggest_publish_platform_copy(
         }
     });
 
-    match result {
-        Ok(ref res) => {
-            let meta = serde_json::json!({
-                "draft_id": draft_id,
-                "project_uuid": project_id,
-                "source": res.source,
-                "cache_hit": res.cache_hit,
-                "platforms_generated": res.platforms_generated,
-                "style_hint": body.style_hint,
-            });
+    // Deserialize to get metadata for logging
+    if let Ok(res) =
+        serde_json::from_value::<super::suggest_copy::PlatformCopyResult>(result_json.clone())
+    {
+        let meta = serde_json::json!({
+            "draft_id": draft_id,
+            "project_uuid": project_id,
+            "source": res.source,
+            "cache_hit": res.cache_hit,
+            "platforms_generated": res.platforms_generated,
+            "style_hint": body.style_hint,
+            "deduplicated": true,
+        });
 
-            record_llm_usage(
-                pool,
-                uid,
-                None, // project_id (numeric) - not available in publish domain
-                None, // script_id
-                None, // job_id
-                "publish_copy_generation",
-                model_name,
-                provider,
-                res.usage.as_ref(),
-                None, // prompt_chars
-                true, // success
-                None, // error_message
-                res.duration_ms,
-                meta,
-            )
-            .await;
-        }
-        Err(ref e) => {
-            let duration_ms = start_time.elapsed().as_millis() as i64;
-            let error_msg = format!("{:?}", e);
-            let meta = serde_json::json!({
-                "draft_id": draft_id,
-                "project_uuid": project_id,
-                "style_hint": body.style_hint,
-            });
-
-            record_llm_usage(
-                pool,
-                uid,
-                None,
-                None,
-                None,
-                "publish_copy_generation",
-                model_name,
-                provider,
-                None, // no usage on error
-                None,
-                false, // success = false
-                Some(&error_msg),
-                Some(duration_ms),
-                meta,
-            )
-            .await;
-        }
+        record_llm_usage(
+            pool,
+            uid,
+            None, // project_id (numeric) - not available in publish domain
+            None, // script_id
+            None, // job_id
+            "publish_copy_generation",
+            model_name,
+            provider,
+            res.usage.as_ref(),
+            None, // prompt_chars
+            true, // success
+            None, // error_message
+            res.duration_ms,
+            meta,
+        )
+        .await;
     }
 
-    let result = result?;
+    let result: super::suggest_copy::PlatformCopyResult = serde_json::from_value(result_json)
+        .map_err(|e| ApiError::BadRequest(format!("Failed to deserialize result: {}", e)))?;
 
     if body.apply {
         merge_draft_platform_copy(pool, project_id, draft_id, &result.fragment).await?;

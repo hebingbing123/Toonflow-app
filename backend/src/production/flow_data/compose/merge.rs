@@ -2,11 +2,18 @@ use serde_json::Value;
 
 pub(crate) fn merge_flow(
     saved: Value,
+    flow_version: Option<String>,
     script_content: Option<String>,
     root_assets: Vec<Value>,
     storyboard_items: Vec<Value>,
 ) -> Value {
     let mut merged = saved.as_object().cloned().unwrap_or_default();
+
+    // Add version for optimistic locking
+    if let Some(version) = flow_version {
+        merged.insert("flowVersion".into(), Value::String(version));
+    }
+
     merged.insert(
         "script".into(),
         Value::String(script_content.unwrap_or_default()),

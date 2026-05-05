@@ -17,10 +17,10 @@ use super::copy_cache::{compute_input_hash, lookup_cache, store_cache, update_ca
 use super::types::PublishDraftRow;
 
 /// Result of platform copy generation including usage metadata.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct PlatformCopyResult {
     pub fragment: Value,
-    pub source: &'static str,
+    pub source: String,
     pub usage: Option<TokenUsage>,
     pub duration_ms: Option<i64>,
     pub cache_hit: bool,
@@ -154,7 +154,7 @@ pub(crate) async fn suggest_platform_copy_fragment(
         let duration_ms = start_time.elapsed().as_millis() as i64;
         return Ok(PlatformCopyResult {
             fragment: Value::Object(result),
-            source: "incremental",
+            source: "incremental".to_string(),
             usage: None,
             duration_ms: Some(duration_ms),
             cache_hit: false,
@@ -204,7 +204,7 @@ pub(crate) async fn suggest_platform_copy_fragment(
         let duration_ms = start_time.elapsed().as_millis() as i64;
         return Ok(PlatformCopyResult {
             fragment: Value::Object(result),
-            source: "cache",
+            source: "cache".to_string(),
             usage: None,
             duration_ms: Some(duration_ms),
             cache_hit: true,
@@ -235,7 +235,7 @@ pub(crate) async fn suggest_platform_copy_fragment(
         let duration_ms = start_time.elapsed().as_millis() as i64;
         return Ok(PlatformCopyResult {
             fragment: Value::Object(result),
-            source: "fallback",
+            source: "fallback".to_string(),
             usage: None,
             duration_ms: Some(duration_ms),
             cache_hit: false,
@@ -314,7 +314,7 @@ Respond with JSON only."#,
     let duration_ms = start_time.elapsed().as_millis() as i64;
     Ok(PlatformCopyResult {
         fragment: Value::Object(result),
-        source: "llm",
+        source: "llm".to_string(),
         usage: res.usage,
         duration_ms: Some(duration_ms),
         cache_hit: false,
@@ -469,7 +469,7 @@ mod tests {
 
         let result = PlatformCopyResult {
             fragment: fragment.clone(),
-            source: "llm",
+            source: "llm".to_string(),
             usage: Some(usage.clone()),
             duration_ms: Some(1500),
             cache_hit: false,
@@ -492,7 +492,7 @@ mod tests {
 
         let result = PlatformCopyResult {
             fragment,
-            source: "incremental",
+            source: "incremental".to_string(),
             usage: None,
             duration_ms: Some(10),
             cache_hit: false,
@@ -513,7 +513,7 @@ mod tests {
 
         let result = PlatformCopyResult {
             fragment,
-            source: "cache",
+            source: "cache".to_string(),
             usage: None,
             duration_ms: Some(50),
             cache_hit: true,
@@ -521,7 +521,7 @@ mod tests {
         };
 
         assert_eq!(result.source, "cache");
-        assert_eq!(result.cache_hit, true);
+        assert!(result.cache_hit);
         assert_eq!(result.platforms_generated.len(), 1);
         assert!(result.usage.is_none());
     }

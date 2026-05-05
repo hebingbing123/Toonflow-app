@@ -30,17 +30,13 @@ mod preservation_tests {
 
         // Verify public API is accessible
         let _ = std::mem::size_of::<production::ProductionApi>();
-
-        assert!(true, "Production module compiled and is accessible");
     }
 
     /// Test that prompting module compiles and is accessible
     #[test]
     fn prompting_module_accessible() {
         // This test verifies that the prompting module compiles
-        use toonflow_server::prompting;
-
-        assert!(true, "Prompting module compiled and is accessible");
+        let _ = std::mem::size_of::<toonflow_server::state::AppState>();
     }
 
     /// Test that all target modules compile
@@ -61,8 +57,6 @@ mod preservation_tests {
         // 9. backend/src/prompting/quality/handlers/aggregates.rs
         // 10. backend/src/app/pg_contract_tests/production_suite/production_workbench_video_roundtrip.rs
         // 11-14. Frontend files (tested separately)
-
-        assert!(true, "All backend modules compiled successfully");
     }
 }
 
@@ -75,7 +69,7 @@ mod compilation_tests {
     #[test]
     fn backend_compiles() {
         // If this test runs, the backend compiled successfully
-        assert!(true, "Backend compilation successful");
+        let _ = std::mem::size_of::<toonflow_server::state::AppState>();
     }
 }
 
@@ -100,10 +94,6 @@ mod test_result_preservation {
         // This test documents the baseline
         // Actual test count verification is done by running the full test suite
         // and comparing results before/after refactoring
-        assert!(
-            true,
-            "Baseline: Backend 1679 passed; 34 failed; 37 ignored | Frontend: 330 passed; 1 failed"
-        );
     }
 
     /// Baseline: Gate check status

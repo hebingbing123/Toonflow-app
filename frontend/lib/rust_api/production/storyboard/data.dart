@@ -236,6 +236,38 @@ postStoryboardUpdateLiveActionReferenceV1(
   return UpdateStoryboardLiveActionReferenceResponseV1.fromJson(map);
 }
 
+/// `POST /api/v1/production/storyboard/update-duration` — OpenAPI `postStoryboardUpdateDurationV1`.
+Future<int> postStoryboardUpdateDurationV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required int storyboardId,
+  required int duration,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/storyboard/update-duration',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'storyboardId': storyboardId,
+          'duration': duration,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return res.statusCode;
+}
+
 /// `POST /api/v1/production/get-storyboard-data` — OpenAPI `postProductionGetStoryboardDataV1`.
 Future<ProductionGetProductionDataResponseV1> postProductionGetStoryboardDataV1(
   String accessToken, {

@@ -72,3 +72,20 @@ pub(in crate::production) struct UpdateStoryboardLiveActionReferenceResponse {
     pub(crate) performance_notes: Option<String>,
     pub(crate) message: &'static str,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(in crate::production) struct UpdateStoryboardDurationBody {
+    pub(crate) project_id: i32,
+    pub(crate) script_id: i32,
+    pub(crate) storyboard_id: i32,
+    pub(crate) duration: i32,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(in crate::production) struct UpdateStoryboardDurationResponse {
+    pub(crate) storyboard_id: i32,
+    pub(crate) duration: i32,
+    pub(crate) message: &'static str,
+}

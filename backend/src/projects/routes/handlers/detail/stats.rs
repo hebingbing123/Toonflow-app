@@ -13,28 +13,13 @@ use crate::state::AppState;
 
 use super::super::super::types::ProjectStatsResponse;
 
-#[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/stats",
-    operation_id = "getProjectStatsByProjectIdV1",
-    tag = "projects",
-    params(
-        ("project_id" = Uuid, Path, description = "Project UUID")
-    ),
-    responses(
-        (status = 200, description = "OK", body = ProjectStatsResponse),
-        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
-        (status = 404, description = "Not found", body = crate::error::ErrorBody),
-        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
-    ),
-    security(("bearerAuth" = []))
-)]
-pub(crate) async fn project_stats_by_id(
-    State(state): State<AppState>,
-    Path(project_id): Path<Uuid>,
-    headers: HeaderMap,
-) -> Result<Json<ProjectStatsResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+/// Internal function to fetch project stats without HTTP layer
+pub(crate) async fn project_stats_by_id_internal(
+    state: &AppState,
+    project_id: Uuid,
+    uid: Uuid,
+    _headers: &HeaderMap,
+) -> Result<ProjectStatsResponse, ApiError> {
     let pool = state.require_pool()?;
 
     let row: Option<(Uuid,)> = sqlx::query_as(
@@ -119,11 +104,37 @@ pub(crate) async fn project_stats_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(ProjectStatsResponse {
+    Ok(ProjectStatsResponse {
         script_count,
         storyboard_count,
         role_count,
         novel_count,
         video_count,
-    }))
+    })
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}/stats",
+    operation_id = "getProjectStatsByProjectIdV1",
+    tag = "projects",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID")
+    ),
+    responses(
+        (status = 200, description = "OK", body = ProjectStatsResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn project_stats_by_id(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+) -> Result<Json<ProjectStatsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let result = project_stats_by_id_internal(&state, project_id, uid, &headers).await?;
+    Ok(Json(result))
 }

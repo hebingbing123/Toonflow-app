@@ -12,6 +12,7 @@ use utoipa::OpenApi;
         crate::projects::routes::handlers::detail::patch::patch_project_by_id,
         crate::projects::routes::handlers::detail::delete::delete_project_by_id,
         crate::projects::routes::handlers::detail::style_config::patch_style_config,
+        crate::projects::routes::handlers::detail::overview::project_overview_by_id,
         crate::projects::routes::handlers::detail::stats::project_stats_by_id,
         crate::projects::routes::handlers::detail::short_video_readiness::project_short_video_readiness_by_id,
         crate::projects::routes::handlers::detail::short_video_assembly::project_short_video_assembly_by_id,
@@ -48,6 +49,8 @@ use utoipa::OpenApi;
         crate::projects::routes::types::PatchProjectBody,
         crate::projects::routes::types::PatchStyleConfigBody,
         crate::projects::routes::types::CreateProjectBody,
+        crate::projects::routes::handlers::detail::overview::ProjectOverviewResponse,
+        crate::projects::routes::handlers::detail::overview::ProjectOverviewQuery,
         // Quality comparison types (I.3)
         crate::production::QualityMetrics,
         crate::production::StoryboardQualityProgression,

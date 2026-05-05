@@ -76,7 +76,7 @@ mod tests {
             );
 
             // Verify constraint 2: no high-intensity scene in the first 20%.
-            let high_in_first_20pct = fixed[..boundary].iter().any(|&x| x == 2);
+            let high_in_first_20pct = fixed[..boundary].contains(&2);
             prop_assert!(
                 !high_in_first_20pct,
                 "high-intensity scene found in first 20% (boundary={}) of: {:?}",

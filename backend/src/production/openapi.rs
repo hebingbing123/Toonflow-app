@@ -39,6 +39,7 @@
         super::workbench::storyboard::mutate::post_storyboard_remove_frame,
         super::workbench::storyboard::mutate::post_storyboard_update_url,
         super::workbench::storyboard::mutate::post_storyboard_update_live_action_reference,
+        super::workbench::storyboard::mutate::post_storyboard_update_duration,
         super::workbench::meta::post_workbench_generate_video_prompt,
         super::workbench::meta::post_workbench_get_generate_data,
         super::workbench::meta::post_workbench_get_video_model_detail,

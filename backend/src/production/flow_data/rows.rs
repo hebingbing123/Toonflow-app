@@ -57,10 +57,10 @@ pub(super) async fn fetch_saved_flow(
     pool: &sqlx::PgPool,
     project_id: Uuid,
     script_id: Uuid,
-) -> Result<Value, ApiError> {
-    let saved = sqlx::query_scalar::<_, Value>(
+) -> Result<(Value, Option<String>), ApiError> {
+    let row = sqlx::query_as::<_, (Value, Option<String>)>(
         r#"
-        SELECT flow_data
+        SELECT flow_data, updated_at::text
         FROM app_production_flow
         WHERE project_id = $1
           AND script_id = $2
@@ -71,7 +71,8 @@ pub(super) async fn fetch_saved_flow(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(saved.unwrap_or_else(|| json!({})))
+
+    Ok(row.unwrap_or_else(|| (json!({}), None)))
 }
 
 pub(super) async fn fetch_asset_rows(

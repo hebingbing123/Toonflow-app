@@ -7,7 +7,7 @@ mod types;
 pub(super) use db::{
     fetch_storyboard_item, fetch_storyboard_preview_data, insert_storyboards_with_next_numeric_ids,
     list_storyboard_items_by_script, remove_storyboard_frame, update_live_action_reference,
-    update_storyboard_image_url, update_storyboard_info,
+    update_storyboard_duration, update_storyboard_image_url, update_storyboard_info,
 };
 pub(super) use normalize::{
     normalize_storyboard_duration, normalize_storyboard_image_url, normalize_storyboard_prompt,

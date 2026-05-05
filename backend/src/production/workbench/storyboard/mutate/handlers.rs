@@ -8,11 +8,12 @@ use axum::{
 
 use super::super::common::{
     normalize_storyboard_image_url, normalize_storyboard_prompt, remove_storyboard_frame,
-    update_live_action_reference, update_storyboard_image_url, update_storyboard_info,
-    validate_storyboard_duration,
+    update_live_action_reference, update_storyboard_duration, update_storyboard_image_url,
+    update_storyboard_info, validate_storyboard_duration,
 };
 use super::types::{
     EditStoryboardInfoBody, EditStoryboardInfoResponse, RemoveFrameBody, RemoveFrameResponse,
+    UpdateStoryboardDurationBody, UpdateStoryboardDurationResponse,
     UpdateStoryboardLiveActionReferenceBody, UpdateStoryboardLiveActionReferenceResponse,
     UpdateStoryboardUrlBody, UpdateStoryboardUrlResponse,
 };
@@ -221,5 +222,51 @@ pub(in crate::production) async fn post_storyboard_update_live_action_reference(
         reference_shot_urls,
         performance_notes,
         message: "Storyboard live-action reference updated",
+    }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/update-duration",
+    operation_id = "postProductionStoryboardUpdateDurationV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(in crate::production) async fn post_storyboard_update_duration(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<UpdateStoryboardDurationBody>,
+) -> Result<JsonResponse<UpdateStoryboardDurationResponse>, ApiError> {
+    if body.duration <= 0 {
+        return Err(ApiError::BadRequest(
+            "duration must be a positive integer".into(),
+        ));
+    }
+
+    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+        &state,
+        &headers,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await?;
+    update_storyboard_duration(pool, sb_uuid, body.duration).await?;
+
+    Ok(JsonResponse(UpdateStoryboardDurationResponse {
+        storyboard_id: body.storyboard_id,
+        duration: body.duration,
+        message: "Storyboard duration updated",
     }))
 }

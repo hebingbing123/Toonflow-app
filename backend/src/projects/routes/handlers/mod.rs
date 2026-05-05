@@ -4,7 +4,7 @@ pub(crate) mod detail;
 pub(crate) use create_list::{create_project, list_projects, projects_summary};
 pub(crate) use detail::{
     delete_project_by_id, get_project_by_id, patch_project_by_id, patch_style_config,
-    project_assets_overview_by_id, project_production_overview_by_id,
+    project_assets_overview_by_id, project_overview_by_id, project_production_overview_by_id,
     project_short_video_assembly_by_id, project_short_video_export_check_by_id,
     project_short_video_readiness_by_id, project_stats_by_id,
 };

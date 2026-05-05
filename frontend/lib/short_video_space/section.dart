@@ -1863,32 +1863,16 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               int durationSeconds,
             ) async {
               try {
-                final storyboard = await postStoryboardGetDataV1(
+                final status = await postStoryboardUpdateDurationV1(
                   token,
                   projectId: project.numericId,
                   scriptId: item.scriptNumericId,
                   storyboardId: item.storyboardNumericId,
-                );
-                final prompt = (storyboard.prompt ?? '').trim();
-                if (prompt.isEmpty) {
-                  if (mounted) {
-                    setState(() {
-                      _projectConfigLine = '时长对齐失败：分镜 #${item.storyboardNumericId} 缺少 prompt';
-                    });
-                  }
-                  return;
-                }
-                final status = await postStoryboardEditInfoV1(
-                  token,
-                  projectId: project.numericId,
-                  scriptId: item.scriptNumericId,
-                  storyboardId: item.storyboardNumericId,
-                  prompt: prompt,
                   duration: durationSeconds,
                 );
                 if (status != 200) {
                   throw RustApiException(
-                    'edit storyboard info failed',
+                    'update storyboard duration failed',
                     statusCode: status,
                   );
                 }

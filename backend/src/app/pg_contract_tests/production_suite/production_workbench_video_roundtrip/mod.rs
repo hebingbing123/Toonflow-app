@@ -527,3 +527,156 @@ async fn production_workbench_video_roundtrip() {
         .execute(&pool)
         .await;
 }
+
+#[tokio::test]
+#[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+async fn production_flow_version_conflict_detection() {
+    let (pool, token, app, _sub) = connect_contract_app().await;
+
+    let (project_id, project_uuid) = create_project(&app, &token).await;
+    let script_id = create_script(&app, &token, &project_uuid, "pg_version_test").await;
+    let storyboard_id = create_storyboard(
+        &app,
+        &token,
+        &project_uuid,
+        script_id,
+        r#"{"prompt":"version_test_storyboard","duration":"5","track_id":1,"flow_id":1,"sb_index":0}"#,
+    )
+    .await;
+
+    // Initial save to create flow record
+    save_flow_data(
+        &app,
+        &token,
+        serde_json::json!({
+            "projectId": project_id,
+            "episodesId": script_id,
+            "data": {
+                "scriptPlan": "initial-plan",
+                "storyboard": [{"id": storyboard_id}],
+            }
+        }),
+    )
+    .await;
+
+    // Get flow data with version
+    let flow_data = get_flow_data(&app, &token, project_id, script_id).await;
+    let version = flow_data["flowVersion"]
+        .as_str()
+        .expect("flowVersion should be present");
+    assert!(!version.is_empty(), "flowVersion should not be empty");
+
+    // Save with correct version should succeed
+    save_flow_data(
+        &app,
+        &token,
+        serde_json::json!({
+            "projectId": project_id,
+            "episodesId": script_id,
+            "flowVersion": version,
+            "data": {
+                "scriptPlan": "updated-plan",
+                "storyboard": [{"id": storyboard_id}],
+            }
+        }),
+    )
+    .await;
+
+    // Verify the update succeeded
+    let updated_flow = get_flow_data(&app, &token, project_id, script_id).await;
+    assert_eq!(updated_flow["scriptPlan"].as_str(), Some("updated-plan"));
+    let new_version = updated_flow["flowVersion"]
+        .as_str()
+        .expect("flowVersion should be present after update");
+    assert_ne!(version, new_version, "version should change after update");
+
+    // Save with stale version should fail with 409 Conflict
+    let stale_save_res = helpers::post_json_raw_response(
+        &app,
+        &token,
+        "/api/v1/production/save-flow-data",
+        serde_json::json!({
+            "projectId": project_id,
+            "episodesId": script_id,
+            "flowVersion": version, // Using old version
+            "data": {
+                "scriptPlan": "conflicting-plan",
+                "storyboard": [{"id": storyboard_id}],
+            }
+        }),
+    )
+    .await;
+
+    assert_eq!(
+        stale_save_res.status(),
+        StatusCode::CONFLICT,
+        "save with stale version should return 409 Conflict"
+    );
+
+    let (_, body, _) = read_bytes_response(stale_save_res, 4096).await;
+    let error_body: Value = serde_json::from_slice(&body).expect("error body json");
+    assert_eq!(error_body["code"].as_str(), Some("conflict"));
+    assert_eq!(error_body["status"], 409);
+    assert!(
+        error_body["message"]
+            .as_str()
+            .unwrap_or_default()
+            .contains("Timeline has been modified"),
+        "error message should explain version conflict"
+    );
+    // Verify details field contains version information
+    assert!(
+        error_body["details"].is_object(),
+        "details should be present"
+    );
+    assert_eq!(
+        error_body["details"]["expected_version"].as_str(),
+        Some(version),
+        "details should include expected version"
+    );
+    assert_eq!(
+        error_body["details"]["current_version"].as_str(),
+        Some(new_version),
+        "details should include current version"
+    );
+    assert_eq!(
+        error_body["details"]["conflict_type"].as_str(),
+        Some("version_mismatch"),
+        "details should include conflict type"
+    );
+
+    // Verify the conflicting save did not apply
+    let final_flow = get_flow_data(&app, &token, project_id, script_id).await;
+    assert_eq!(
+        final_flow["scriptPlan"].as_str(),
+        Some("updated-plan"),
+        "conflicting save should not have applied"
+    );
+
+    // Save without version should still work (backward compatibility)
+    save_flow_data(
+        &app,
+        &token,
+        serde_json::json!({
+            "projectId": project_id,
+            "episodesId": script_id,
+            "data": {
+                "scriptPlan": "no-version-plan",
+                "storyboard": [{"id": storyboard_id}],
+            }
+        }),
+    )
+    .await;
+
+    let no_version_flow = get_flow_data(&app, &token, project_id, script_id).await;
+    assert_eq!(
+        no_version_flow["scriptPlan"].as_str(),
+        Some("no-version-plan"),
+        "save without version should work for backward compatibility"
+    );
+
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
+        .bind(project_id)
+        .execute(&pool)
+        .await;
+}

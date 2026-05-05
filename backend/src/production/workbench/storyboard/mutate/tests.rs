@@ -30,3 +30,39 @@ fn normalize_storyboard_image_url_rejects_blank_value() {
         ApiError::BadRequest(message) if message == "imageUrl must not be empty"
     ));
 }
+
+#[test]
+fn update_duration_body_validates_positive_duration() {
+    use super::types::UpdateStoryboardDurationBody;
+    use serde_json;
+
+    // Valid duration
+    let valid = serde_json::from_str::<UpdateStoryboardDurationBody>(
+        r#"{"projectId":1,"scriptId":2,"storyboardId":3,"duration":5}"#,
+    );
+    assert!(valid.is_ok());
+    assert_eq!(valid.unwrap().duration, 5);
+
+    // Zero duration should be rejected by handler, not deserialization
+    let zero = serde_json::from_str::<UpdateStoryboardDurationBody>(
+        r#"{"projectId":1,"scriptId":2,"storyboardId":3,"duration":0}"#,
+    );
+    assert!(zero.is_ok());
+
+    // Negative duration should be rejected by handler, not deserialization
+    let negative = serde_json::from_str::<UpdateStoryboardDurationBody>(
+        r#"{"projectId":1,"scriptId":2,"storyboardId":3,"duration":-1}"#,
+    );
+    assert!(negative.is_ok());
+}
+
+#[test]
+fn update_duration_body_rejects_unknown_fields() {
+    use super::types::UpdateStoryboardDurationBody;
+    use serde_json;
+
+    let err = serde_json::from_str::<UpdateStoryboardDurationBody>(
+        r#"{"projectId":1,"scriptId":2,"storyboardId":3,"duration":5,"extra":"field"}"#,
+    );
+    assert!(err.is_err());
+}

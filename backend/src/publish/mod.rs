@@ -26,6 +26,7 @@ pub fn router() -> Router<AppState> {
     handlers::router().merge(handlers_f::router())
 }
 
+pub(crate) use access::require_project_owned;
 pub use openapi::PublishOpenApi;
 
 pub(crate) use types::{

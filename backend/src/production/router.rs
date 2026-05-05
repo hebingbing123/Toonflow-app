@@ -158,6 +158,10 @@ pub fn router() -> Router<AppState> {
             post(workbench::storyboard::post_storyboard_update_live_action_reference),
         )
         .route(
+            "/api/v1/production/storyboard/update-duration",
+            post(workbench::storyboard::post_storyboard_update_duration),
+        )
+        .route(
             "/api/v1/production/workbench/generate-video-prompt",
             post(workbench::meta::post_workbench_generate_video_prompt),
         )

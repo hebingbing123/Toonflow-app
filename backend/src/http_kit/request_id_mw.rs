@@ -7,6 +7,7 @@ const MAX_ERROR_JSON: usize = 65_536;
 
 /// Runs **inside** [`tower_http::request_id::SetRequestId`] / [`tower_http::request_id::PropagateRequestId`]:
 /// copies `x-request-id` from the request into JSON error bodies that match `ErrorBody` (`code` + `message`, no `request_id` yet).
+/// Also ensures `status` field is present in error responses.
 pub async fn inject_request_id_into_json_errors(request: Request, next: Next) -> Response {
     let rid = request
         .headers()
@@ -42,11 +43,16 @@ pub async fn inject_request_id_into_json_errors(request: Request, next: Next) ->
                 return Response::from_parts(parts, Body::from(bytes));
             };
             if let Some(obj) = v.as_object_mut() {
+                // Inject request_id if missing
                 if obj.get("code").is_some()
                     && obj.get("message").is_some()
                     && obj.get("request_id").is_none()
                 {
                     obj.insert("request_id".into(), json!(rid));
+                }
+                // Ensure status field is present (should be set by ApiError, but fallback to HTTP status)
+                if obj.get("status").is_none() {
+                    obj.insert("status".into(), json!(status.as_u16()));
                 }
             }
             let out = serde_json::to_vec(&v).unwrap_or_else(|_| bytes.to_vec());
@@ -118,6 +124,7 @@ mod tests {
             .await
             .unwrap();
         let v: Value = serde_json::from_slice(&body).unwrap();
+        assert_eq!(v["status"], 401);
         assert_eq!(v["code"], "unauthorized");
         assert_eq!(v["request_id"].as_str().unwrap(), hdr);
     }
@@ -144,6 +151,7 @@ mod tests {
             .await
             .unwrap();
         let v: Value = serde_json::from_slice(&body).unwrap();
+        assert_eq!(v["status"], 401);
         assert_eq!(v["request_id"].as_str().unwrap(), "client-fixed-id");
     }
 }

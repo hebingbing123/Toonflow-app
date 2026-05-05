@@ -12,10 +12,18 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, ToSchema)]
 pub struct ErrorBody {
+    /// HTTP status code (e.g., 400, 404, 409, 500)
+    pub status: u16,
+    /// Machine-readable error code (e.g., "validation_error", "not_found", "conflict")
     pub code: String,
+    /// Human-readable error message
     pub message: String,
+    /// Request ID for tracing and debugging (injected by middleware)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub request_id: Option<String>,
+    /// Optional additional context (e.g., field-specific validation errors, version conflicts)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details: Option<serde_json::Value>,
     /// Milliseconds until the rate-limit / quota window resets. Present on **429** responses.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retry_after_ms: Option<u64>,
@@ -28,6 +36,11 @@ pub enum ApiError {
     AuthNotConfigured,
     NotFound,
     Conflict(String),
+    /// Conflict with optional details (e.g., version conflict with expected/current versions)
+    ConflictWithDetails {
+        message: String,
+        details: serde_json::Value,
+    },
     BadRequest(String),
     DatabaseError(String),
     /// `BILLING_WEBHOOK_SECRET` unset — webhook ingestion disabled.
@@ -61,59 +74,84 @@ fn secs_until_utc_midnight() -> u64 {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        let (status, code, message) = match &self {
+        let (status, code, message, details) = match &self {
             ApiError::Unauthorized => (
                 StatusCode::UNAUTHORIZED,
                 "unauthorized",
                 "Missing or invalid Authorization header",
+                None,
             ),
             ApiError::BadToken => (
                 StatusCode::UNAUTHORIZED,
                 "invalid_token",
                 "JWT verification failed",
+                None,
             ),
             ApiError::AuthNotConfigured => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "auth_not_configured",
                 "SUPABASE_JWT_SECRET is not set",
+                None,
             ),
-            ApiError::NotFound => (StatusCode::NOT_FOUND, "not_found", "Resource not found"),
-            ApiError::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg.as_str()),
-            ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg.as_str()),
+            ApiError::NotFound => (
+                StatusCode::NOT_FOUND,
+                "not_found",
+                "Resource not found",
+                None,
+            ),
+            ApiError::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg.as_str(), None),
+            ApiError::ConflictWithDetails { message, details } => (
+                StatusCode::CONFLICT,
+                "conflict",
+                message.as_str(),
+                Some(details.clone()),
+            ),
+            ApiError::BadRequest(msg) => {
+                (StatusCode::BAD_REQUEST, "bad_request", msg.as_str(), None)
+            }
             ApiError::DatabaseError(msg) => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "database_error",
                 msg.as_str(),
+                None,
             ),
             ApiError::WebhookNotConfigured => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "webhook_not_configured",
                 "BILLING_WEBHOOK_SECRET is not set",
+                None,
             ),
             ApiError::InvalidWebhookSignature => (
                 StatusCode::UNAUTHORIZED,
                 "invalid_webhook_signature",
                 "HMAC verification failed",
+                None,
             ),
             ApiError::Internal => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "internal_error",
                 "Internal server error",
+                None,
             ),
             ApiError::LlmNotConfigured => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "llm_not_configured",
                 "LLM is not configured (set OPENAI_API_KEY or LLM_API_KEY)",
+                None,
             ),
-            ApiError::NotImplemented(msg) => {
-                (StatusCode::NOT_IMPLEMENTED, "not_implemented", msg.as_str())
-            }
+            ApiError::NotImplemented(msg) => (
+                StatusCode::NOT_IMPLEMENTED,
+                "not_implemented",
+                msg.as_str(),
+                None,
+            ),
             ApiError::QuotaExceeded(msg) => (
                 StatusCode::TOO_MANY_REQUESTS,
                 "quota_exceeded",
                 msg.as_str(),
+                None,
             ),
-            ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg.as_str()),
+            ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg.as_str(), None),
         };
 
         let is_quota = matches!(self, ApiError::QuotaExceeded(_));
@@ -124,9 +162,11 @@ impl IntoResponse for ApiError {
         };
 
         let body = ErrorBody {
+            status: status.as_u16(),
             code: code.to_string(),
             message: message.to_string(),
             request_id: None,
+            details,
             retry_after_ms: retry_secs.map(|s| s * 1_000),
         };
 
@@ -171,12 +211,83 @@ mod tests {
             .expect("Retry-After header present");
         let secs: u64 = retry_hdr.to_str().unwrap().parse().expect("numeric");
         assert!(secs > 0 && secs <= 86_400, "secs={secs}");
+
+        let body = decode_error_body(resp);
+        assert_eq!(
+            body.get("status").and_then(serde_json::Value::as_u64),
+            Some(429)
+        );
     }
 
     #[test]
     fn other_errors_have_no_retry_after_header() {
         let resp = ApiError::NotFound.into_response();
         assert!(resp.headers().get(header::RETRY_AFTER).is_none());
+    }
+
+    #[test]
+    fn error_body_includes_status_field() {
+        let resp = ApiError::BadRequest("invalid input".into()).into_response();
+        let body = decode_error_body(resp);
+        assert_eq!(
+            body.get("status").and_then(serde_json::Value::as_u64),
+            Some(400)
+        );
+        assert_eq!(
+            body.get("code").and_then(serde_json::Value::as_str),
+            Some("bad_request")
+        );
+        assert_eq!(
+            body.get("message").and_then(serde_json::Value::as_str),
+            Some("invalid input")
+        );
+    }
+
+    #[test]
+    fn conflict_with_details_includes_details_field() {
+        let resp = ApiError::ConflictWithDetails {
+            message: "Version conflict".to_string(),
+            details: serde_json::json!({
+                "expected_version": "v1",
+                "current_version": "v2",
+                "conflict_type": "version_mismatch"
+            }),
+        }
+        .into_response();
+
+        let body = decode_error_body(resp);
+        assert_eq!(
+            body.get("status").and_then(serde_json::Value::as_u64),
+            Some(409)
+        );
+        assert_eq!(
+            body.get("code").and_then(serde_json::Value::as_str),
+            Some("conflict")
+        );
+        assert_eq!(
+            body.get("message").and_then(serde_json::Value::as_str),
+            Some("Version conflict")
+        );
+
+        let details = body.get("details").expect("details should be present");
+        assert_eq!(
+            details
+                .get("expected_version")
+                .and_then(serde_json::Value::as_str),
+            Some("v1")
+        );
+        assert_eq!(
+            details
+                .get("current_version")
+                .and_then(serde_json::Value::as_str),
+            Some("v2")
+        );
+        assert_eq!(
+            details
+                .get("conflict_type")
+                .and_then(serde_json::Value::as_str),
+            Some("version_mismatch")
+        );
     }
 
     proptest! {
@@ -208,6 +319,10 @@ mod tests {
             prop_assert_eq!(
                 body.get("code").and_then(serde_json::Value::as_str),
                 Some("quota_exceeded")
+            );
+            prop_assert_eq!(
+                body.get("status").and_then(serde_json::Value::as_u64),
+                Some(429)
             );
         }
     }

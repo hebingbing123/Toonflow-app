@@ -16,15 +16,20 @@ use crate::state::AppState;
 
 use handlers::{
     create_project, delete_project_by_id, get_project_by_id, list_projects, patch_project_by_id,
-    patch_style_config, project_assets_overview_by_id, project_production_overview_by_id,
-    project_short_video_assembly_by_id, project_short_video_export_check_by_id,
-    project_short_video_readiness_by_id, project_stats_by_id, projects_summary,
+    patch_style_config, project_assets_overview_by_id, project_overview_by_id,
+    project_production_overview_by_id, project_short_video_assembly_by_id,
+    project_short_video_export_check_by_id, project_short_video_readiness_by_id,
+    project_stats_by_id, projects_summary,
 };
 
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/projects/summary", get(projects_summary))
         .route("/api/v1/projects", get(list_projects).post(create_project))
+        .route(
+            "/api/v1/projects/{project_id}/overview",
+            get(project_overview_by_id),
+        )
         .route(
             "/api/v1/projects/{project_id}/stats",
             get(project_stats_by_id),

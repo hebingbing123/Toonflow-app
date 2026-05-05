@@ -86,6 +86,45 @@ pub(crate) async fn post_save_flow_data(
         )
         .await?;
 
+    // Version conflict detection: if flowVersion is provided, check current version
+    if let Some(ref expected_version) = body.flow_version {
+        let current_version: Option<String> = sqlx::query_scalar(
+            r#"
+            SELECT updated_at::text
+            FROM app_production_flow
+            WHERE project_id = $1 AND script_id = $2
+            "#,
+        )
+        .bind(project_id)
+        .bind(script_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        if let Some(current) = current_version {
+            if &current != expected_version {
+                return Err(ApiError::ConflictWithDetails {
+                    message: "Timeline has been modified by another user or session".to_string(),
+                    details: serde_json::json!({
+                        "expected_version": expected_version,
+                        "current_version": current,
+                        "conflict_type": "version_mismatch"
+                    }),
+                });
+            }
+        } else {
+            // No existing flow record - if client provided a version, it's stale
+            return Err(ApiError::ConflictWithDetails {
+                message: "Timeline has been modified (no existing flow record)".to_string(),
+                details: serde_json::json!({
+                    "expected_version": expected_version,
+                    "current_version": null,
+                    "conflict_type": "missing_record"
+                }),
+            });
+        }
+    }
+
     if let Some(ordered_ids) = ordered_storyboard_ids {
         for (index, storyboard_numeric_id) in ordered_ids.iter().enumerate() {
             sqlx::query(

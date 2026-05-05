@@ -82,15 +82,15 @@
 - [x] J.1 Add input hash cache for publish copy generation
 - [x] J.2 Change publish copy to incremental mode for changed platforms only
 - [x] J.3 Add app_llm_usage_log for publish copy calls
-- [-] J.4 Aggregate short-video-space publish requests to single endpoint
-- [~] J.5 Reduce loadProjectOverview fanout and duplicate fetches
-- [~] J.6 Add request deduplication and generation protection for high-frequency refresh
+- [x] J.4 Aggregate short-video-space publish requests to single endpoint
+- [x] J.5 Reduce loadProjectOverview fanout and duplicate fetches
+- [x] J.6 Add request deduplication and generation protection for high-frequency refresh
 
 ## Phase K - Reliability / Observability / Contract Governance
 
-- [~] K.1 Add version conflict detection for timeline reorder save
-- [~] K.2 Change shot duration alignment to minimal field patch
-- [~] K.3 Standardize error messages with status/code/message/request-id
+- [x] K.1 Add version conflict detection for timeline reorder save
+- [x] K.2 Change shot duration alignment to minimal field patch
+- [-] K.3 Standardize error messages with status/code/message/request-id
 - [~] K.4 Add cross-panel snapshot versioning with inconsistency alerts
 - [~] K.5 Add metrics and SLI for critical paths
 - [~] K.6 Add OpenAPI drift gate and rust_api contract consistency check
