@@ -196,10 +196,10 @@ pub(in crate::production) async fn post_workbench_delete_video(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct SelectVideoBody {
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-    video_url: String,
+    pub project_id: i32,
+    pub script_id: i32,
+    pub storyboard_id: i32,
+    pub video_url: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -211,37 +211,19 @@ pub(in crate::production) struct SelectVideoResponse {
     message: &'static str,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/v1/production/workbench/select-video",
-    operation_id = "postProductionWorkbenchSelectVideoV1",
-    tag = "production",
-    request_body(content = serde_json::Value, content_type = "application/json"),
-    responses(
-        (status = 200, description = "OK", body = serde_json::Value),
-        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
-        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
-        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
-        (status = 404, description = "Not found", body = crate::error::ErrorBody),
-        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
-        (status = 500, description = "Server error", body = crate::error::ErrorBody),
-        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
-    ),
-    security(("bearerAuth" = []))
-)]
-pub(in crate::production) async fn post_workbench_select_video(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<SelectVideoBody>,
-) -> Result<JsonResponse<SelectVideoResponse>, ApiError> {
+pub(in crate::production::workbench) async fn run_workbench_select_video(
+    state: &AppState,
+    headers: &HeaderMap,
+    body: SelectVideoBody,
+) -> Result<SelectVideoResponse, ApiError> {
     validate_positive_id("storyboardId", body.storyboard_id)?;
     if body.video_url.trim().is_empty() {
         return Err(ApiError::BadRequest("videoUrl must not be empty".into()));
     }
-    let user_id = require_authenticated_user(&state, &headers)?;
+    let user_id = require_authenticated_user(state, headers)?;
 
     let (pool, scope_row) =
-        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
+        require_owned_numeric_script_scope_row(state, headers, body.project_id, body.script_id)
             .await?;
 
     let updated = sqlx::query(
@@ -310,10 +292,37 @@ pub(in crate::production) async fn post_workbench_select_video(
         }
     }
 
-    Ok(JsonResponse(SelectVideoResponse {
+    Ok(SelectVideoResponse {
         storyboard_id: body.storyboard_id,
         video_url: body.video_url.trim().to_string(),
         selected_memory,
         message: "Video selected for storyboard",
-    }))
+    })
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/select-video",
+    operation_id = "postProductionWorkbenchSelectVideoV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(in crate::production) async fn post_workbench_select_video(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<SelectVideoBody>,
+) -> Result<JsonResponse<SelectVideoResponse>, ApiError> {
+    let res = run_workbench_select_video(&state, &headers, body).await?;
+    Ok(JsonResponse(res))
 }

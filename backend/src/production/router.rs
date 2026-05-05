@@ -66,6 +66,10 @@ pub fn router() -> Router<AppState> {
             post(workbench::track::post_workbench_select_video),
         )
         .route(
+            "/api/v1/production/workbench/storyboard-media-op",
+            post(workbench::post_workbench_storyboard_media_op),
+        )
+        .route(
             "/api/v1/production/assets/batch-generate-assets-image",
             post(workbench::assets::post_assets_batch_generate_image),
         )

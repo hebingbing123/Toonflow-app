@@ -298,17 +298,18 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     if (sourceUrl.isEmpty) {
       throw const FormatException('当前分镜还没有可导出的已选视频或候选视频 URL');
     }
-    final job = await createJob(
+    final media = await postWorkbenchStoryboardMediaOpV1(
       widget.token,
-      'video.export',
-      payload: <String, dynamic>{
-        'source_url': sourceUrl,
+      <String, dynamic>{
+        'op': 'enqueueVideoExport',
+        'projectId': widget.projectNumericId,
+        'scriptId': widget.scriptNumericId,
+        'storyboardId': widget.storyNumericId,
+        'sourceUrl': sourceUrl,
         'format': 'mp4',
-        'project_numeric_id': widget.projectNumericId,
-        'script_numeric_id': widget.scriptNumericId,
-        'storyboard_numeric_id': widget.storyNumericId,
       },
     );
+    final job = media.enqueueVideoExport!.job;
     if (!mounted) return;
     _applyWorkbenchState(() {
       _latestExportJobId = job.id;

@@ -189,17 +189,19 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               repairPriority = const [];
                             });
                             try {
-                              final response = await postProductionPatchV1(
+                              final media = await postWorkbenchStoryboardMediaOpV1(
                                 widget.token,
-                                request: ProductionPatchRequest(
-                                  projectId: widget.projectNumericId,
-                                  episodesId: widget.scriptNumericId,
-                                  scope: scopeCtrl.text,
-                                  ids: ids,
-                                  reason: reasonCtrl.text.trim(),
-                                  modelTier: modelTierCtrl.text,
-                                ),
+                                <String, dynamic>{
+                                  'op': 'patchRegeneration',
+                                  'projectId': widget.projectNumericId,
+                                  'episodesId': widget.scriptNumericId,
+                                  'scope': scopeCtrl.text,
+                                  'ids': ids,
+                                  'reason': reasonCtrl.text.trim(),
+                                  'modelTier': modelTierCtrl.text,
+                                },
                               );
+                              final response = media.patchRegeneration!;
                               if (!ctx.mounted) return;
                               final shortPatchId = response.patchId.length > 8
                                   ? response.patchId.substring(0, 8)

@@ -192,6 +192,28 @@ async fn persist_attribution_memory(
     Ok(true)
 }
 
+/// Shared patch pipeline (also used by workbench storyboard media op — J2).
+pub(crate) async fn run_production_patch_core(
+    pool: &PgPool,
+    uid: Uuid,
+    body: &PatchRequest,
+) -> Result<PatchResponse, ApiError> {
+    if body.reason.trim().is_empty() {
+        return Err(ApiError::BadRequest(
+            "reason 不能为空，请说明返工原因".into(),
+        ));
+    }
+
+    let history =
+        load_patch_history(pool, uid, body.project_id, body.episodes_id, &body.scope).await?;
+    let mut response =
+        dispatch::build_patch_response(body, &history).map_err(ApiError::BadRequest)?;
+    response.memory_written = persist_attribution_memory(pool, uid, body, &response).await?;
+    persist_patch_attempt(pool, uid, body).await?;
+
+    Ok(response)
+}
+
 /// `POST /api/v1/production/patch`
 ///
 /// 局部返工端点。接受返工粒度、目标 ID 列表、原因和模型层级，
@@ -208,19 +230,6 @@ pub async fn post_production_patch(
     let pool = state.require_pool()?;
     ensure_project_owned(pool, uid, body.project_id).await?;
 
-    // 验证 reason 非空
-    if body.reason.trim().is_empty() {
-        return Err(ApiError::BadRequest(
-            "reason 不能为空，请说明返工原因".into(),
-        ));
-    }
-
-    let history =
-        load_patch_history(pool, uid, body.project_id, body.episodes_id, &body.scope).await?;
-    let mut response =
-        dispatch::build_patch_response(&body, &history).map_err(ApiError::BadRequest)?;
-    response.memory_written = persist_attribution_memory(pool, uid, &body, &response).await?;
-    persist_patch_attempt(pool, uid, &body).await?;
-
+    let response = run_production_patch_core(pool, uid, &body).await?;
     Ok(Json(response))
 }

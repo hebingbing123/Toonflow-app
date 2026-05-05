@@ -16,6 +16,7 @@
         super::workbench::track::post_workbench_delete_track,
         super::workbench::track::post_workbench_delete_video,
         super::workbench::track::post_workbench_select_video,
+        super::workbench::post_workbench_storyboard_media_op,
         super::workbench::assets::post_assets_batch_generate_image,
         super::workbench::assets::post_assets_delete_derivative,
         super::workbench::assets::post_assets_get_data,

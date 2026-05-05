@@ -241,6 +241,19 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         videoUrl: 'https://example.com/probe.mp4',
       ),
     );
+    statuses['prod/workbench.media-op'] = await _runTypedProductionProbe(
+      label: 'POST production/workbench/storyboard-media-op',
+      run: () => postWorkbenchStoryboardMediaOpV1(
+        token,
+        <String, dynamic>{
+          'op': 'selectVideo',
+          'projectId': 1,
+          'scriptId': 1,
+          'storyboardId': 1,
+          'videoUrl': 'https://example.com/probe.mp4',
+        },
+      ),
+    );
   }
 }
 
