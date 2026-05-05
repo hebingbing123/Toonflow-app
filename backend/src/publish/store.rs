@@ -1,7 +1,7 @@
 //! Postgres access for publish tables.
 
 use chrono::{DateTime, Utc};
-use serde_json::Value;
+use serde_json::{json, Value};
 use sqlx::types::Json;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
@@ -859,6 +859,61 @@ pub(crate) async fn finalize_job_with_attempts(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let _ = draft_id; // reserved for future draft status projection / G 节回流
+    for attempt in attempts {
+        sqlx::query(
+            r#"
+            UPDATE app_publish_target
+            SET
+              extra = COALESCE(extra, '{}'::jsonb) || $2,
+              updated_at = NOW()
+            WHERE id = $1
+            "#,
+        )
+        .bind(attempt.target_id)
+        .bind(Json(json!({
+            "last_publish_result": {
+                "job_id": job_id,
+                "attempt_no": attempt.attempt_no,
+                "status": attempt.status,
+                "error_message": attempt.error_message,
+                "detail": attempt.detail,
+                "updated_at": chrono::Utc::now().to_rfc3339(),
+            }
+        })))
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    }
+
+    sqlx::query(
+        r#"
+        UPDATE app_publish_draft
+        SET
+          draft_status = CASE
+            WHEN $2 = 'succeeded' THEN 'archived'
+            ELSE draft_status
+          END,
+          metadata = COALESCE(metadata, '{}'::jsonb) || $3,
+          updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(draft_id)
+    .bind(final_status)
+    .bind(Json(json!({
+        "last_publish_result": {
+            "job_id": job_id,
+            "status": final_status,
+            "error_message": final_error_message,
+            "target_count": attempts.len(),
+            "succeeded_count": succeeded,
+            "failed_count": failed,
+            "updated_at": chrono::Utc::now().to_rfc3339(),
+        }
+    })))
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(())
 }

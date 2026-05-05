@@ -1,5 +1,7 @@
 //! Publish preparation validation (short-video-space **E4** / 需求 5.3).
 
+use std::collections::HashSet;
+
 use serde_json::Value;
 
 use crate::publish::copy_validate;
@@ -20,6 +22,7 @@ pub(crate) fn prepare_issues_target_inputs_only(
     targets: &[PublishTargetInput],
 ) -> Vec<PublishPrepareIssue> {
     let mut issues = Vec::new();
+    let mut seen_platforms = HashSet::new();
 
     if targets.is_empty() {
         issues.push(PublishPrepareIssue {
@@ -32,21 +35,52 @@ pub(crate) fn prepare_issues_target_inputs_only(
     }
 
     for t in targets {
-        if validate_automation_mode(&t.automation_mode).is_err() {
+        let platform_id = t.platform_id.trim();
+        if platform_id.is_empty() {
             issues.push(PublishPrepareIssue {
-                code: "invalid_automation_mode".into(),
-                message: format!("平台 {} 的 automation_mode 非法", t.platform_id),
-                platform_id: Some(t.platform_id.clone()),
+                code: "missing_platform_id".into(),
+                message: "platform_id 不能为空".into(),
+                platform_id: None,
                 severity: "blocking".into(),
             });
             continue;
         }
 
-        let Some(_spec) = spec_for_platform(&t.platform_id) else {
+        if !seen_platforms.insert(platform_id.to_string()) {
+            issues.push(PublishPrepareIssue {
+                code: "duplicate_platform".into(),
+                message: format!("平台 `{platform_id}` 重复出现，请保留一条目标"),
+                platform_id: Some(platform_id.to_string()),
+                severity: "blocking".into(),
+            });
+            continue;
+        }
+
+        if validate_automation_mode(&t.automation_mode).is_err() {
+            issues.push(PublishPrepareIssue {
+                code: "invalid_automation_mode".into(),
+                message: format!("平台 {platform_id} 的 automation_mode 非法"),
+                platform_id: Some(platform_id.to_string()),
+                severity: "blocking".into(),
+            });
+            continue;
+        }
+
+        if t.serial_order < 0 {
+            issues.push(PublishPrepareIssue {
+                code: "negative_serial_order".into(),
+                message: format!("平台 {platform_id} 的 serial_order 不能为负数"),
+                platform_id: Some(platform_id.to_string()),
+                severity: "blocking".into(),
+            });
+            continue;
+        }
+
+        let Some(_spec) = spec_for_platform(platform_id) else {
             issues.push(PublishPrepareIssue {
                 code: "unknown_platform".into(),
-                message: format!("未知平台 `{}`（请先接入矩阵）", t.platform_id),
-                platform_id: Some(t.platform_id.clone()),
+                message: format!("未知平台 `{platform_id}`（请先接入矩阵）"),
+                platform_id: Some(platform_id.to_string()),
                 severity: "blocking".into(),
             });
             continue;
@@ -161,4 +195,44 @@ fn platform_title_for_copy(platform_copy: &Value, platform_id: &str) -> Option<S
     let obj = platform_copy.as_object()?;
     let plat = obj.get(platform_id)?;
     plat.get("title")?.as_str().map(|s| s.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{prepare_issues_target_inputs_only, validate_automation_mode};
+    use crate::publish::types::PublishTargetInput;
+    use serde_json::Value;
+
+    fn target(platform_id: &str, automation_mode: &str, serial_order: i32) -> PublishTargetInput {
+        PublishTargetInput {
+            platform_id: platform_id.to_string(),
+            automation_mode: automation_mode.to_string(),
+            serial_order,
+            extra: Value::Object(Default::default()),
+        }
+    }
+
+    #[test]
+    fn automation_mode_accepts_known_values() {
+        assert!(validate_automation_mode("full_auto").is_ok());
+        assert!(validate_automation_mode("semi_auto").is_ok());
+        assert!(validate_automation_mode("manual_assisted").is_ok());
+    }
+
+    #[test]
+    fn target_input_checks_duplicate_unknown_and_negative_order() {
+        let issues = prepare_issues_target_inputs_only(&[
+            target("douyin", "semi_auto", 0),
+            target("douyin", "semi_auto", 1),
+            target("mystery_platform", "semi_auto", 0),
+            target("bilibili", "semi_auto", -1),
+        ]);
+        let codes = issues
+            .iter()
+            .map(|issue| issue.code.as_str())
+            .collect::<Vec<_>>();
+        assert!(codes.contains(&"duplicate_platform"));
+        assert!(codes.contains(&"unknown_platform"));
+        assert!(codes.contains(&"negative_serial_order"));
+    }
 }

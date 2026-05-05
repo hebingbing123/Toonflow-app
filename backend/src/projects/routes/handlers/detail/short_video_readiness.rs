@@ -34,13 +34,13 @@ struct StoryboardReadinessRow {
 }
 
 /// Text from Postgres **`COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '')`**.
-/// **`candidate_cleared`** in `/short-video-readiness` is **`coalesced != 'pending'`** (no `TRIM`).
+/// **`candidate_cleared`** in `/short-video-readiness` is **`TRIM(coalesced) != 'pending'`**.
 ///
 /// Keep this predicate aligned with the SELECT below; unit tests lock the contract for C10.
 #[must_use]
 #[allow(dead_code)] // Only referenced from unit tests; mirrors SQL for drift-sensitive readiness rules.
 fn candidate_cleared_from_coalesced_metadata_text(coalesced: &str) -> bool {
-    coalesced != "pending"
+    coalesced.trim() != "pending"
 }
 
 fn blocking_reason_codes(row: &StoryboardReadinessRow) -> Vec<&'static str> {
@@ -147,14 +147,15 @@ pub(crate) async fn project_short_video_readiness_by_id(
             AS has_live_action_performance_notes,
           (
             -- Must match `candidate_cleared_from_coalesced_metadata_text`
-            COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '') <> 'pending'
+            TRIM(COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '')) <> 'pending'
           ) AS candidate_cleared,
           NOT EXISTS (
             SELECT 1
             FROM app_generation_job j
             WHERE j.owner_user_id = $2
               AND j.status IN ('queued', 'running')
-              AND (j.payload->>'storyboard_numeric_id') IS NOT NULL
+              AND j.payload ? 'storyboard_numeric_id'
+              AND (j.payload->>'storyboard_numeric_id') ~ '^[0-9]+$'
               AND (j.payload->>'storyboard_numeric_id')::int = sb.numeric_id
           ) AS no_blocking_job
         FROM app_storyboard sb
@@ -226,6 +227,7 @@ mod tests {
         assert!(candidate_cleared_from_coalesced_metadata_text("ignored"));
         assert!(candidate_cleared_from_coalesced_metadata_text("confirmed"));
         assert!(!candidate_cleared_from_coalesced_metadata_text("pending"));
+        assert!(!candidate_cleared_from_coalesced_metadata_text(" pending "));
     }
 
     fn all_checks_pass_row(candidate_cleared: bool) -> StoryboardReadinessRow {

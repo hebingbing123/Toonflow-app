@@ -80,14 +80,15 @@ pub(crate) async fn project_production_overview_by_id(
           )
           AND (TRIM(COALESCE(sb.file_path, '')) <> '')
           AND (
-            COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '') <> 'pending'
+            TRIM(COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '')) <> 'pending'
           )
           AND NOT EXISTS (
             SELECT 1
             FROM app_generation_job j
             WHERE j.owner_user_id = $2
               AND j.status IN ('queued', 'running')
-              AND (j.payload->>'storyboard_numeric_id') IS NOT NULL
+              AND j.payload ? 'storyboard_numeric_id'
+              AND (j.payload->>'storyboard_numeric_id') ~ '^[0-9]+$'
               AND (j.payload->>'storyboard_numeric_id')::int = sb.numeric_id
           )
         "#,
