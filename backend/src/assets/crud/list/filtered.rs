@@ -70,7 +70,7 @@ pub(super) async fn select_project_assets_filtered(
     let mut qb: QueryBuilder<Postgres> = if let Some(sid) = script_numeric_id {
         let mut qb = QueryBuilder::new(
             r#"
-            SELECT DISTINCT a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms
+            SELECT DISTINCT a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms, a.candidate_status
             FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
             INNER JOIN app_script_asset sa ON sa.asset_id = a.id
@@ -86,7 +86,7 @@ pub(super) async fn select_project_assets_filtered(
     } else {
         let mut qb = QueryBuilder::new(
             r#"
-            SELECT a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms
+            SELECT a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms, a.candidate_status
             FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
             WHERE p.id = "#,

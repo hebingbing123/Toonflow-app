@@ -14,6 +14,7 @@ mod crud;
 mod crud_images;
 mod generate;
 pub mod models;
+mod openapi;
 mod router;
 pub(super) mod utils;
 mod workbench_query;
@@ -27,6 +28,7 @@ pub use crud::{
 /// Shared by other domains (e.g. narrative novels) that scope rows by **`app_project.id`**.
 pub(crate) use crud::ensure_owned_project_pk;
 
+pub use openapi::AssetsSchemasOpenApi;
 pub use router::router;
 
 // ── Module-level public constant (used by other crate modules) ───────────────

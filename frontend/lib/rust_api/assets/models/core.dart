@@ -7,6 +7,7 @@ class AssetRow {
     required this.assetType,
     this.description,
     this.createTimeMs,
+    this.candidateStatus,
   });
 
   final String id;
@@ -15,6 +16,8 @@ class AssetRow {
   final String assetType;
   final String? description;
   final int? createTimeMs;
+  /// `pending` / `linked` / `ignored` when this asset is in the candidate flow.
+  final String? candidateStatus;
 
   factory AssetRow.fromJson(Map<String, dynamic> json) {
     return AssetRow(
@@ -26,6 +29,7 @@ class AssetRow {
       createTimeMs: json['create_time_ms'] == null
           ? null
           : (json['create_time_ms'] as num).toInt(),
+      candidateStatus: json['candidate_status'] as String?,
     );
   }
 }

@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, FromRow};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 /// `app_asset` 实体的数据库行。
-#[derive(Debug, FromRow, Serialize)]
+#[derive(Debug, FromRow, Serialize, ToSchema)]
 pub struct AssetRow {
     pub id: Uuid,
     #[serde(rename = "numeric_id")]
@@ -14,6 +15,9 @@ pub struct AssetRow {
     pub asset_type: String,
     pub description: Option<String>,
     pub create_time_ms: Option<i64>,
+    /// `pending` / `linked` / `ignored`；未参与候选流时为 **`null`**。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub candidate_status: Option<String>,
 }
 
 /// 项目中列出资产的查询参数。
@@ -31,7 +35,7 @@ pub struct ListAssetsQuery {
     pub limit: Option<u32>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ListAssetsResponse {
     pub items: Vec<AssetRow>,
     pub total: i64,
@@ -75,7 +79,7 @@ pub(crate) struct CornerScapeDbRow {
     pub history_images: SqlxJson<Value>,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, ToSchema)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct CreateAssetBody {
     pub name: String,
@@ -85,7 +89,7 @@ pub(crate) struct CreateAssetBody {
     pub description: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, ToSchema)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct PatchAssetBody {
     #[serde(default)]
@@ -96,6 +100,9 @@ pub(crate) struct PatchAssetBody {
     pub asset_type: Option<Value>,
     #[serde(default, rename = "cover_numeric_image_id")]
     pub cover_numeric_image_id: Option<Value>,
+    /// `pending` / `linked` / `ignored`，或 JSON **`null`** 清除。
+    #[serde(default)]
+    pub candidate_status: Option<Value>,
 }
 
 #[derive(Debug, FromRow, Serialize)]
@@ -165,4 +172,5 @@ pub(crate) struct AssetPatchCurrent {
     pub asset_type: String,
     pub description: Option<String>,
     pub metadata: SqlxJson<Value>,
+    pub candidate_status: Option<String>,
 }

@@ -48,6 +48,7 @@ pub struct CoreHandlersApi;
 /// Full utoipa document: core handlers, domain APIs, and YAML-index stubs.
 pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     let mut doc = CoreHandlersApi::openapi();
+    doc.merge(crate::assets::AssetsSchemasOpenApi::openapi());
     doc.merge(crate::manuals::art_styles::ArtStyleSchemasOpenApi::openapi());
     doc.merge(crate::billing::BillingApi::openapi());
     doc.merge(crate::settings::SettingsOpenApi::openapi());

@@ -77,7 +77,7 @@ async fn create_project_asset_inner(
           project_id, numeric_id, name, asset_type, description, create_time_ms, metadata
         )
         VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb)
-        RETURNING id, numeric_id, name, asset_type, description, create_time_ms
+        RETURNING id, numeric_id, name, asset_type, description, create_time_ms, candidate_status
         "#,
     )
     .bind(project_uuid)

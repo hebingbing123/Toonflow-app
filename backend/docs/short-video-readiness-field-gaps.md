@@ -19,7 +19,7 @@ This document is the **auditable map** for **C2** in `.kiro/specs/short-video-sp
 | Action beats / shot grammar | **No dedicated field** | Needs design (script graph vs shot metadata) before API. |
 | Semantic defaults (camera, lighting intent) | **Partial** (prompt text only) | Could remain LLM-derived text until structured shot schema exists. |
 | Provider / model availability | **Not in DB** | Runtime/config surface; not per-shot readiness v1. |
-| Linked candidate assets from **`app_asset`** | **Not wired** | **C4**: `pending` / `linked` / `ignored` + migrations/API. |
+| Linked candidate assets from **`app_asset`** | **Column `app_asset.candidate_status`** (`pending` \| `linked` \| `ignored`; PATCH body **`candidate_status`**) | Storyboard **`metadata.shortVideo.candidateStatus`** remains usable until shot↔asset linkage drives rollup. |
 | Multi-shot batch jobs listing many IDs in one payload | **Partial** | v1 only matches `payload.storyboard_numeric_id` (per-job enqueue pattern used today). |
 
 ## Related code

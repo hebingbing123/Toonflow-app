@@ -112,7 +112,7 @@ Future<AssetRow> createProjectAssetUnderProject(
 
 /// `PATCH /api/v1/projects/{project_id}/assets/{asset_numeric_id}` — see `patchProjectAssetByProjectIdV1`.
 ///
-/// [body] must match OpenAPI **`PatchAssetBody`** (**`name`** / **`description`** / **`asset_type`** / **`cover_numeric_image_id`**).
+/// [body] must match OpenAPI **`PatchAssetBody`** (**`name`** / **`description`** / **`asset_type`** / **`cover_numeric_image_id`** / **`candidate_status`**).
 Future<AssetRow> patchProjectAssetByProjectIds(
   String accessToken,
   String projectId,

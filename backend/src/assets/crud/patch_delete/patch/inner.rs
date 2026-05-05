@@ -1,6 +1,7 @@
 //! `PATCH` project asset by stable numeric ids — domain logic.
 
 use axum::Json;
+use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};
 use uuid::Uuid;
 
@@ -13,6 +14,29 @@ use crate::http_kit::json_patch::{
 use super::super::helpers::{
     cover_numeric_image_exists_for_asset, merge_metadata_image_id, parse_asset_type_patch,
 };
+
+fn parse_candidate_status_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
+    match v {
+        None => Ok(FieldPatch::Absent),
+        Some(Value::Null) => Ok(FieldPatch::Set(None)),
+        Some(Value::String(s)) => {
+            let t = s.trim().to_lowercase();
+            if t.is_empty() {
+                return Ok(FieldPatch::Set(None));
+            }
+            match t.as_str() {
+                "pending" | "linked" | "ignored" => Ok(FieldPatch::Set(Some(t))),
+                _ => Err(ApiError::BadRequest(
+                    "candidate_status must be pending, linked, or ignored (or null to clear)"
+                        .into(),
+                )),
+            }
+        }
+        _ => Err(ApiError::BadRequest(
+            "candidate_status must be a string or null".into(),
+        )),
+    }
+}
 
 pub(super) async fn patch_project_asset_inner(
     pool: &PgPool,
@@ -30,21 +54,23 @@ pub(super) async fn patch_project_asset_inner(
     let type_patch = parse_asset_type_patch(body.asset_type)?;
     let cover_patch =
         parse_optional_i32_field(body.cover_numeric_image_id, "cover_numeric_image_id")?;
+    let candidate_patch = parse_candidate_status_patch(body.candidate_status)?;
 
     if matches!(name_patch, FieldPatch::Absent)
         && matches!(desc_patch, FieldPatch::Absent)
         && matches!(type_patch, FieldPatch::Absent)
         && matches!(cover_patch, FieldPatch::Absent)
+        && matches!(candidate_patch, FieldPatch::Absent)
     {
         return Err(ApiError::BadRequest(
-            "expected at least one of: name, description, asset_type, cover_numeric_image_id"
+            "expected at least one of: name, description, asset_type, cover_numeric_image_id, candidate_status"
                 .into(),
         ));
     }
 
     let current = sqlx::query_as::<_, AssetPatchCurrent>(
         r#"
-        SELECT a.id, a.name, a.asset_type, a.description, a.metadata
+        SELECT a.id, a.name, a.asset_type, a.description, a.metadata, a.candidate_status
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
@@ -93,6 +119,11 @@ pub(super) async fn patch_project_asset_inner(
         }
     };
 
+    let new_candidate_status = match &candidate_patch {
+        FieldPatch::Absent => current.candidate_status.clone(),
+        FieldPatch::Set(v) => v.clone(),
+    };
+
     if matches!(&name_patch, FieldPatch::Set(_)) && new_name != current.name {
         let clash: bool = sqlx::query_scalar(
             r#"
@@ -128,19 +159,21 @@ pub(super) async fn patch_project_asset_inner(
             description = $2,
             asset_type = $3,
             metadata = $4,
+            candidate_status = $5,
             updated_at = NOW()
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.id = $5
-          AND p.owner_user_id = $6
-          AND a.numeric_id = $7
-        RETURNING a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms
+          AND p.id = $6
+          AND p.owner_user_id = $7
+          AND a.numeric_id = $8
+        RETURNING a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms, a.candidate_status
         "#,
     )
     .bind(&new_name)
     .bind(&new_desc)
     .bind(&new_type)
     .bind(SqlxJson(new_metadata))
+    .bind(&new_candidate_status)
     .bind(project_id)
     .bind(uid)
     .bind(asset_numeric_id)

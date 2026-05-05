@@ -27,6 +27,13 @@ fn patch_asset_body_accepts_cover_numeric_image_id_only() {
 }
 
 #[test]
+fn patch_asset_body_accepts_candidate_status_only() {
+    let b: PatchAssetBody = serde_json::from_str(r#"{"candidate_status":"linked"}"#).unwrap();
+    assert!(b.name.is_none());
+    assert!(b.candidate_status.is_some());
+}
+
+#[test]
 fn create_asset_body_accepts_minimal() {
     let b: CreateAssetBody = serde_json::from_str(r#"{"name":"Hero","type":"role"}"#).unwrap();
     assert_eq!(b.name, "Hero");
