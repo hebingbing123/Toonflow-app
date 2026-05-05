@@ -248,3 +248,56 @@ pub(super) async fn fetch_assembly_candidate_quality_summary(
         buckets,
     ))
 }
+
+/// Fetch quality degradation metrics for assembly storyboards (I.3).
+///
+/// Returns (degradation_count, degradation_rate_percent).
+pub(super) async fn fetch_quality_degradation_metrics(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_uuid: Uuid,
+    storyboard_numeric_ids: &[i32],
+) -> Result<(i64, f64), ApiError> {
+    if storyboard_numeric_ids.is_empty() {
+        return Ok((0, 0.0));
+    }
+
+    // Convert project UUID to numeric ID
+    let project_numeric_id: i32 = sqlx::query_scalar(
+        r#"
+        SELECT numeric_id
+        FROM app_project
+        WHERE id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(project_uuid)
+    .bind(user_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    // Use the comparison module to fetch quality progression
+    use crate::production::fetch_storyboard_quality_progression;
+
+    let progressions = fetch_storyboard_quality_progression(
+        pool,
+        user_id,
+        project_numeric_id,
+        storyboard_numeric_ids,
+    )
+    .await?;
+
+    let total = progressions.len() as i64;
+    let degraded = progressions
+        .iter()
+        .filter(|p| p.quality_degradation_detected)
+        .count() as i64;
+
+    let rate = if total > 0 {
+        (degraded as f64 / total as f64) * 100.0
+    } else {
+        0.0
+    };
+
+    Ok((degraded, rate))
+}

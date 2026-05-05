@@ -259,6 +259,10 @@ pub struct ShortVideoCandidateQualitySummary {
     /// **`stage`** 为 **`storyboard_panel`** / **`video_prompt`** 的坏例数（更贴近成片验收）。
     pub assembly_late_stage_bad_case_count: i64,
     pub bad_cases_by_stage: Vec<ShortVideoQualityStageBucket>,
+    /// 检测到质量退化的分镜数（I.3：storyboard→video→output 质量对比）
+    pub quality_degradation_count: i64,
+    /// 质量退化率（百分比）
+    pub quality_degradation_rate_percent: f64,
 }
 
 #[derive(Serialize, ToSchema)]

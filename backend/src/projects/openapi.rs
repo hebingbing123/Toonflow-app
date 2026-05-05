@@ -48,6 +48,11 @@ use utoipa::OpenApi;
         crate::projects::routes::types::PatchProjectBody,
         crate::projects::routes::types::PatchStyleConfigBody,
         crate::projects::routes::types::CreateProjectBody,
+        // Quality comparison types (I.3)
+        crate::production::QualityMetrics,
+        crate::production::StoryboardQualityProgression,
+        crate::production::QualityDegradationSummary,
+        crate::production::QualityComparison,
     )),
     tags(
         (name = "projects", description = "Project CRUD and short video configuration")

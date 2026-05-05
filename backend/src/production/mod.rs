@@ -16,7 +16,11 @@ mod workbench;
 mod tests;
 
 pub use openapi::ProductionApi;
-pub use quality_gate::QualityGateStrategy;
+pub use quality_gate::{
+    compare_stage_quality, detect_quality_degradation, fetch_storyboard_quality_progression,
+    QualityComparison, QualityDegradationSummary, QualityGateStrategy, QualityMetrics,
+    StoryboardQualityProgression,
+};
 pub(crate) use quality_gate::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 #[cfg(test)]
 pub(crate) use quality_gate::{QualityGateDecision, QualityGateIssue, QualityGateSeverity};

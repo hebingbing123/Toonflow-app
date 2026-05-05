@@ -72,8 +72,8 @@
 ## Phase I - Quality Enforcement Closure (P0)
 
 - [x] I.1 Upgrade export quality gate to off/warn/block strategy
-- [-] I.2 Add quality gate validation before publish queue
-- [~] I.3 Extend quality comparison to storyboard+video+output
+- [x] I.2 Add quality gate validation before publish queue
+- [-] I.3 Extend quality comparison to storyboard+video+output
 - [~] I.4 Promote quality nextAction to typed field for rework action
 - [~] I.5 Connect low-performance alert to rewrite/republish loop
 

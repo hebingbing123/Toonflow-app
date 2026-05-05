@@ -2,6 +2,7 @@
 
 pub(crate) mod anti_ai;
 mod attribution;
+pub mod comparison;
 mod enforce;
 mod rules;
 mod strategy;
@@ -9,6 +10,10 @@ mod strategy;
 use serde::Serialize;
 use serde_json::{json, Value};
 
+pub use comparison::{
+    compare_stage_quality, detect_quality_degradation, fetch_storyboard_quality_progression,
+    QualityComparison, QualityDegradationSummary, QualityMetrics, StoryboardQualityProgression,
+};
 pub(crate) use enforce::{enforce_quality_gate, run_quality_gate};
 pub use strategy::QualityGateStrategy;
 

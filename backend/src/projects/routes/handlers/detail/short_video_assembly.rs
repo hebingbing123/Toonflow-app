@@ -22,6 +22,7 @@ use super::super::super::types::{
 use super::assembly_query::{
     assembly_selected_media_kind, fetch_assembly_candidate_quality_summary,
     fetch_project_assembly_flat_rows, fetch_project_assembly_header,
+    fetch_quality_degradation_metrics,
 };
 use crate::short_video::defaults::resolve_tts_voice;
 
@@ -66,6 +67,11 @@ pub(crate) async fn project_short_video_assembly_by_id(
             bad_case_count: r.bad_case_count,
         })
         .collect();
+
+    // Fetch quality degradation metrics (I.3)
+    let (quality_degradation_count, quality_degradation_rate_percent) =
+        fetch_quality_degradation_metrics(pool, uid, header.id, &storyboard_numeric_ids).await?;
+
     let candidate_quality_summary = ShortVideoCandidateQualitySummary {
         schema_version: 1,
         project_bad_case_total: quality_scalars.project_bad_case_total,
@@ -74,6 +80,8 @@ pub(crate) async fn project_short_video_assembly_by_id(
         assembly_shots_with_bad_case: quality_scalars.assembly_shots_with_bad_case,
         assembly_late_stage_bad_case_count: quality_scalars.assembly_late_stage_bad_case_count,
         bad_cases_by_stage,
+        quality_degradation_count,
+        quality_degradation_rate_percent,
     };
 
     let mut script_order: Vec<i32> = Vec::new();
