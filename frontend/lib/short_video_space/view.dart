@@ -28,6 +28,29 @@ class ShortVideoReadinessItem {
   final String detail;
 }
 
+/// Candidate asset confirmation summary (**`app_asset.candidate_status`** via list assets API).
+class ShortVideoCandidateCardUi {
+  const ShortVideoCandidateCardUi({
+    this.visible = false,
+    this.loading = false,
+    this.unavailable = false,
+    this.pending = 0,
+    this.linked = 0,
+    this.ignored = 0,
+    this.headline = '',
+    this.detail = '',
+  });
+
+  final bool visible;
+  final bool loading;
+  final bool unavailable;
+  final int pending;
+  final int linked;
+  final int ignored;
+  final String headline;
+  final String detail;
+}
+
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
 class ShotReadinessUi {
   const ShotReadinessUi({
@@ -113,6 +136,8 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.qualitySummaryLine,
     required this.badCaseMetrics,
     required this.recentTaskLines,
+    required this.candidateCardUi,
+    this.onOpenProjectsForCandidateAssets,
     required this.readinessIntro,
     required this.readinessCountLabel,
     required this.readinessGapSummary,
@@ -172,6 +197,8 @@ class ShortVideoSpaceView extends StatelessWidget {
   final String qualitySummaryLine;
   final List<ShortVideoMetricData> badCaseMetrics;
   final List<String> recentTaskLines;
+  final ShortVideoCandidateCardUi candidateCardUi;
+  final VoidCallback? onOpenProjectsForCandidateAssets;
   final String readinessIntro;
   final String readinessCountLabel;
   final String readinessGapSummary;
@@ -504,6 +531,66 @@ class ShortVideoSpaceView extends StatelessWidget {
             ],
           ),
         ),
+        if (candidateCardUi.visible) ...[
+          const SizedBox(height: 16),
+          _Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('候选资产确认', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                if (candidateCardUi.loading)
+                  Text(
+                    candidateCardUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else if (candidateCardUi.unavailable)
+                  Text(
+                    candidateCardUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  )
+                else ...[
+                  Text(
+                    candidateCardUi.headline,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _MetricChip(
+                        label: '待确认',
+                        value: '${candidateCardUi.pending}',
+                      ),
+                      _MetricChip(
+                        label: '已关联',
+                        value: '${candidateCardUi.linked}',
+                      ),
+                      _MetricChip(
+                        label: '已忽略',
+                        value: '${candidateCardUi.ignored}',
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  candidateCardUi.detail,
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+                if (onOpenProjectsForCandidateAssets != null) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: onOpenProjectsForCandidateAssets,
+                    icon: const Icon(Icons.folder_open_outlined),
+                    label: const Text('打开项目区维护资产'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         _Panel(
           child: Column(

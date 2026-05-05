@@ -356,6 +356,63 @@ ShotReadinessUi buildShotReadinessUi({
   );
 }
 
+/// Space **候选资产确认**卡：基于 `GET /projects/{id}/assets` 与行的 **`candidate_status`**。
+ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
+  required bool projectSelected,
+  required bool loadingProjectOverview,
+  required ListAssetsResponse? assetsList,
+}) {
+  if (!projectSelected) {
+    return const ShortVideoCandidateCardUi(visible: false);
+  }
+  if (loadingProjectOverview) {
+    return const ShortVideoCandidateCardUi(
+      visible: true,
+      loading: true,
+      headline: '正在读取项目资产…',
+      detail: '用于统计候选 workflow：pending / linked / ignored（与 PATCH 资产一致）。',
+    );
+  }
+  if (assetsList == null) {
+    return const ShortVideoCandidateCardUi(
+      visible: true,
+      unavailable: true,
+      headline: '候选资产摘要暂不可用。',
+      detail: '可稍后刷新页面，或直接去项目区查看并编辑资产。',
+    );
+  }
+  var pending = 0;
+  var linked = 0;
+  var ignored = 0;
+  for (final a in assetsList.items) {
+    final s = (a.candidateStatus ?? '').trim().toLowerCase();
+    if (s == 'pending') {
+      pending++;
+    } else if (s == 'linked') {
+      linked++;
+    } else if (s == 'ignored') {
+      ignored++;
+    }
+  }
+  final tracked = pending + linked + ignored;
+  final total = assetsList.total;
+  final listed = assetsList.items.length;
+  final headline = tracked == 0
+      ? '尚未有资产进入候选流（可标记为待确认 / 已关联 / 已忽略）。'
+      : '待确认 $pending · 已关联 $linked · 已忽略 $ignored';
+  final detail = total > listed
+      ? '项目资产共 $total 条；统计基于本次拉取的 $listed 条。资产较多时请在项目区分批标记后再刷新。'
+      : '基于当前列出的 $listed 条资产。在项目区可通过 PATCH candidate_status 更新。';
+  return ShortVideoCandidateCardUi(
+    visible: true,
+    pending: pending,
+    linked: linked,
+    ignored: ignored,
+    headline: headline,
+    detail: detail,
+  );
+}
+
 ShortVideoNextStepPlan buildShortVideoNextStepPlan({
   required bool isAnimated,
   required ProjectRow? project,

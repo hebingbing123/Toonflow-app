@@ -126,6 +126,44 @@ void main() {
     expect(labelShortVideoBlockingReason('unknown_code'), 'unknown_code');
   });
 
+  test('candidate card summarizes pending linked ignored from asset rows', () {
+    final list = ListAssetsResponse(
+      items: <AssetRow>[
+        const AssetRow(
+          id: 'a',
+          numericId: 1,
+          name: 'R1',
+          assetType: 'role',
+          candidateStatus: 'pending',
+        ),
+        const AssetRow(
+          id: 'b',
+          numericId: 2,
+          name: 'R2',
+          assetType: 'role',
+          candidateStatus: 'linked',
+        ),
+        const AssetRow(
+          id: 'c',
+          numericId: 3,
+          name: 'S1',
+          assetType: 'scene',
+          candidateStatus: 'ignored',
+        ),
+      ],
+      total: 3,
+    );
+    final ui = buildShortVideoCandidateCardUi(
+      projectSelected: true,
+      loadingProjectOverview: false,
+      assetsList: list,
+    );
+    expect(ui.pending, 1);
+    expect(ui.linked, 1);
+    expect(ui.ignored, 1);
+    expect(ui.headline, contains('待确认'));
+  });
+
   test('shot readiness UI summarizes rollup and blocked shots', () {
     final readiness = ProjectShortVideoReadiness.fromJson(
       jsonDecode(
