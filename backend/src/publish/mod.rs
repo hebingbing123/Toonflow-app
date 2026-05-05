@@ -1,6 +1,7 @@
 //! 发布域（short-video-space **§E**）：`publish_profiles` / `publish_drafts` / targets / jobs / attempts + 校验、状态机、半自动闸门、worker 骨架。
 
 mod access;
+mod adapters;
 mod copy_validate;
 mod handlers;
 mod handlers_f;

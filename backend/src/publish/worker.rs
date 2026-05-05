@@ -1,12 +1,13 @@
-//! Publish job worker skeleton (**E7**) — validates drafts, respects semi-auto gate (**E6**), stub-finishes attempts.
+//! Publish job worker (**E7/F7**) — validates drafts, respects semi-auto gate, dispatches per-platform adapters.
 
 use std::time::Duration;
 
 use sqlx::PgPool;
 
+use crate::publish::adapters::run_target_adapter;
 use crate::publish::store::{
     await_publish_job_confirmation, claim_next_publish_job, fail_publish_job_claim,
-    finalize_job_stub_success, list_targets,
+    finalize_job_with_attempts, list_targets, PublishAttemptUpsert,
 };
 use crate::publish::{store, validation};
 use crate::state::AppState;
@@ -43,16 +44,6 @@ async fn process_one_publish_job(pool: &PgPool, worker_id: &str) -> Result<(), S
     else {
         return Ok(());
     };
-
-    if job.status == "uploading" {
-        let targets = list_targets(pool, job.draft_id)
-            .await
-            .map_err(|e| format!("{e:?}"))?;
-        finalize_job_stub_success(pool, job.id, job.draft_id, &targets)
-            .await
-            .map_err(|e| format!("{e:?}"))?;
-        return Ok(());
-    }
 
     let draft = match store::fetch_draft(pool, job.project_id, job.draft_id).await {
         Ok(d) => d,
@@ -96,7 +87,22 @@ async fn process_one_publish_job(pool: &PgPool, worker_id: &str) -> Result<(), S
         return Ok(());
     }
 
-    finalize_job_stub_success(pool, job.id, job.draft_id, &targets)
+    let attempts = targets
+        .iter()
+        .enumerate()
+        .map(|(idx, target)| {
+            let result = run_target_adapter(&job, &draft, target);
+            PublishAttemptUpsert {
+                target_id: target.id,
+                attempt_no: idx as i32 + 1,
+                status: result.status.to_string(),
+                detail: result.detail,
+                error_message: result.error_message,
+            }
+        })
+        .collect::<Vec<_>>();
+
+    finalize_job_with_attempts(pool, job.id, job.draft_id, &attempts)
         .await
         .map_err(|e| format!("{e:?}"))?;
     Ok(())

@@ -1,14 +1,13 @@
 //! Postgres access for publish tables.
 
 use chrono::{DateTime, Utc};
-use serde_json::{json, Value};
+use serde_json::Value;
 use sqlx::types::Json;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 use crate::error::ApiError;
 
-use super::platform_registry::sandbox_publish_receipt;
 use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, PatchPublishDraftBody,
     PatchPublishProfileBody, PublishDraftRow, PublishJobRow, PublishProfileRow, PublishTargetInput,
@@ -786,26 +785,34 @@ pub(crate) async fn clear_attempts_for_job(pool: &PgPool, job_id: Uuid) -> Resul
     Ok(())
 }
 
-pub(crate) async fn insert_stub_success_attempts(
+pub(crate) struct PublishAttemptUpsert {
+    pub(crate) target_id: Uuid,
+    pub(crate) attempt_no: i32,
+    pub(crate) status: String,
+    pub(crate) detail: Value,
+    pub(crate) error_message: Option<String>,
+}
+
+pub(crate) async fn insert_publish_attempts(
     pool: &PgPool,
     job_id: Uuid,
-    targets: &[PublishTargetRow],
+    attempts: &[PublishAttemptUpsert],
 ) -> Result<(), ApiError> {
-    for (i, t) in targets.iter().enumerate() {
+    for attempt in attempts {
         sqlx::query(
             r#"
-            INSERT INTO app_publish_attempt (job_id, target_id, attempt_no, status, detail)
-            VALUES ($1, $2, $3, 'succeeded', $4)
+            INSERT INTO app_publish_attempt (
+              job_id, target_id, attempt_no, status, detail, error_message
+            )
+            VALUES ($1, $2, $3, $4, $5, $6)
             "#,
         )
         .bind(job_id)
-        .bind(t.id)
-        .bind(i as i32 + 1)
-        .bind(Json(json!({
-            "stub": true,
-            "platform_id": t.platform_id,
-            "receipt": sandbox_publish_receipt(job_id, &t.platform_id),
-        })))
+        .bind(attempt.target_id)
+        .bind(attempt.attempt_no)
+        .bind(attempt.status.as_str())
+        .bind(Json(attempt.detail.clone()))
+        .bind(attempt.error_message.as_deref())
         .execute(pool)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -813,19 +820,32 @@ pub(crate) async fn insert_stub_success_attempts(
     Ok(())
 }
 
-pub(crate) async fn finalize_job_stub_success(
+pub(crate) async fn finalize_job_with_attempts(
     pool: &PgPool,
     job_id: Uuid,
     draft_id: Uuid,
-    targets: &[PublishTargetRow],
+    attempts: &[PublishAttemptUpsert],
 ) -> Result<(), ApiError> {
+    let succeeded = attempts.iter().filter(|a| a.status == "succeeded").count();
+    let failed = attempts.iter().filter(|a| a.status != "succeeded").count();
+    let (final_status, final_error_message): (&str, Option<String>) = if failed == 0 {
+        ("succeeded", None)
+    } else if succeeded == 0 {
+        ("failed", Some("all publish targets failed".to_string()))
+    } else {
+        (
+            "partial_failed",
+            Some(format!("{failed} publish targets failed")),
+        )
+    };
+
     clear_attempts_for_job(pool, job_id).await?;
-    insert_stub_success_attempts(pool, job_id, targets).await?;
+    insert_publish_attempts(pool, job_id, attempts).await?;
     sqlx::query(
         r#"
         UPDATE app_publish_job SET
-          status = 'succeeded',
-          error_message = NULL,
+          status = $2,
+          error_message = $3,
           error_details = NULL,
           claimed_by = NULL,
           updated_at = NOW()
@@ -833,6 +853,8 @@ pub(crate) async fn finalize_job_stub_success(
         "#,
     )
     .bind(job_id)
+    .bind(final_status)
+    .bind(final_error_message.as_deref())
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
