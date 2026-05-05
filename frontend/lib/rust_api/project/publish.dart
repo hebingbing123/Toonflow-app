@@ -199,6 +199,33 @@ Future<List<PublishJobRow>> fetchPublishJobs(
       .toList(growable: false);
 }
 
+/// `GET …/publish/performance-alerts`
+Future<List<PublishPerformanceAlertRow>> fetchPublishPerformanceAlerts(
+  String accessToken,
+  String projectId, {
+  int viewsLt = 1000,
+  double completionRateLt = 0.45,
+  int limit = 50,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/performance-alerts',
+  ).replace(queryParameters: <String, String>{
+    'views_lt': viewsLt.toString(),
+    'completion_rate_lt': completionRateLt.toString(),
+    'limit': limit.toString(),
+  });
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final raw = jsonDecode(res.body) as List<dynamic>;
+  return raw
+      .map((e) => PublishPerformanceAlertRow.fromJson(e as Map<String, dynamic>))
+      .toList(growable: false);
+}
+
 /// `POST …/publish/drafts/{draft_id}/jobs`
 Future<PublishJobRow> createPublishJob(
   String accessToken,
@@ -598,6 +625,44 @@ class PublishJobRow {
       draftId: json['draft_id'] as String? ?? '',
       status: json['status'] as String? ?? '',
       errorMessage: json['error_message'] as String?,
+    );
+  }
+}
+
+class PublishPerformanceAlertRow {
+  const PublishPerformanceAlertRow({
+    required this.targetId,
+    required this.draftId,
+    required this.platformId,
+    required this.views,
+    required this.likes,
+    required this.comments,
+    required this.shares,
+    required this.completionRate,
+    required this.syncedAt,
+  });
+
+  final String targetId;
+  final String draftId;
+  final String platformId;
+  final int views;
+  final int likes;
+  final int comments;
+  final int shares;
+  final double completionRate;
+  final String syncedAt;
+
+  factory PublishPerformanceAlertRow.fromJson(Map<String, dynamic> json) {
+    return PublishPerformanceAlertRow(
+      targetId: json['target_id'] as String? ?? '',
+      draftId: json['draft_id'] as String? ?? '',
+      platformId: json['platform_id'] as String? ?? '',
+      views: (json['views'] as num?)?.toInt() ?? 0,
+      likes: (json['likes'] as num?)?.toInt() ?? 0,
+      comments: (json['comments'] as num?)?.toInt() ?? 0,
+      shares: (json['shares'] as num?)?.toInt() ?? 0,
+      completionRate: (json['completion_rate'] as num?)?.toDouble() ?? 0.0,
+      syncedAt: json['synced_at'] as String? ?? '',
     );
   }
 }

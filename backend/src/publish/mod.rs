@@ -25,5 +25,6 @@ pub fn router() -> Router<AppState> {
 pub use openapi::PublishOpenApi;
 
 pub(crate) use types::{
-    attempt_audit_from_row, draft_from_row, job_from_row, profile_from_row, target_from_row,
+    attempt_audit_from_row, draft_from_row, job_from_row, performance_alert_from_row,
+    profile_from_row, target_from_row,
 };

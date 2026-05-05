@@ -19,19 +19,21 @@ use super::state_machine::{can_cancel, can_confirm_semi_auto, can_retry};
 use super::store::{
     cancel_job_if_non_terminal, confirm_semi_auto_job, delete_draft, delete_profile, fetch_draft,
     fetch_job_owned, fetch_profile, insert_draft, insert_profile, insert_publish_job,
-    list_attempt_audit, list_drafts, list_jobs, list_profiles, list_targets, patch_draft_row,
-    patch_profile_row, replace_targets, retry_job_if_allowed, ScheduledDraftUtcWindow,
+    list_attempt_audit, list_drafts, list_jobs, list_low_performance_alerts, list_profiles,
+    list_targets, patch_draft_row, patch_profile_row, replace_targets, retry_job_if_allowed,
+    ScheduledDraftUtcWindow,
 };
 use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, ListPublishAuditQuery,
-    ListPublishDraftsQuery, PatchPublishDraftBody, PatchPublishProfileBody,
-    PublishAttemptAuditResponse, PublishDraftResponse, PublishJobResponse,
-    PublishPlatformMatrixResponse, PublishPrepareCheckResponse, PublishProfileResponse,
-    PublishTargetResponse, UpsertPublishTargetsBody,
+    ListPublishDraftsQuery, ListPublishPerformanceAlertsQuery, PatchPublishDraftBody,
+    PatchPublishProfileBody, PublishAttemptAuditResponse, PublishDraftResponse, PublishJobResponse,
+    PublishPerformanceAlertResponse, PublishPlatformMatrixResponse, PublishPrepareCheckResponse,
+    PublishProfileResponse, PublishTargetResponse, UpsertPublishTargetsBody,
 };
 use super::validation::{prepare_check_for_draft, validate_automation_mode};
 use super::{
-    attempt_audit_from_row, draft_from_row, job_from_row, profile_from_row, target_from_row,
+    attempt_audit_from_row, draft_from_row, job_from_row, performance_alert_from_row,
+    profile_from_row, target_from_row,
 };
 
 pub fn router() -> Router<AppState> {
@@ -79,6 +81,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/publish/audit",
             get(list_publish_audit),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/publish/performance-alerts",
+            get(list_publish_performance_alerts),
         )
         .route(
             "/api/v1/projects/{project_id}/publish/jobs/{job_id}/cancel",
@@ -690,6 +696,46 @@ pub(crate) async fn list_publish_audit(
     require_project_owned(pool, uid, project_id).await?;
     let rows = list_attempt_audit(pool, project_id, uid, q.draft_id, q.job_id, q.limit).await?;
     Ok(Json(rows.into_iter().map(attempt_audit_from_row).collect()))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}/publish/performance-alerts",
+    operation_id = "listPublishPerformanceAlertsV1",
+    tag = "publish",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID"),
+        ("views_lt" = Option<i64>, Query, description = "Low-performance views threshold"),
+        ("completion_rate_lt" = Option<f64>, Query, description = "Low-performance completion-rate threshold"),
+        ("limit" = Option<i64>, Query, description = "1..200, default 50")
+    ),
+    responses(
+        (status = 200, description = "OK", body = Vec<PublishPerformanceAlertResponse>),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_publish_performance_alerts(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    Query(q): Query<ListPublishPerformanceAlertsQuery>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<PublishPerformanceAlertResponse>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_project_owned(pool, uid, project_id).await?;
+    let rows = list_low_performance_alerts(
+        pool,
+        project_id,
+        uid,
+        q.views_lt,
+        q.completion_rate_lt,
+        q.limit,
+    )
+    .await?;
+    Ok(Json(
+        rows.into_iter().map(performance_alert_from_row).collect(),
+    ))
 }
 
 #[utoipa::path(

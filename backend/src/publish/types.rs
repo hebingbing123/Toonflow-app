@@ -197,6 +197,43 @@ fn default_publish_audit_limit() -> i64 {
     50
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct ListPublishPerformanceAlertsQuery {
+    #[serde(default = "default_perf_alert_views_lt")]
+    pub views_lt: i64,
+    #[serde(default = "default_perf_alert_completion_rate_lt")]
+    pub completion_rate_lt: f64,
+    #[serde(default = "default_perf_alert_limit")]
+    pub limit: i64,
+}
+
+fn default_perf_alert_views_lt() -> i64 {
+    1000
+}
+
+fn default_perf_alert_completion_rate_lt() -> f64 {
+    0.45
+}
+
+fn default_perf_alert_limit() -> i64 {
+    50
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct PublishPerformanceAlertResponse {
+    pub target_id: Uuid,
+    pub draft_id: Uuid,
+    pub platform_id: String,
+    pub views: i64,
+    pub likes: i64,
+    pub comments: i64,
+    pub shares: i64,
+    pub completion_rate: f64,
+    pub synced_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct PublishAttemptAuditResponse {
@@ -389,6 +426,19 @@ pub(crate) struct PublishMetricSyncCursorRow {
     pub(crate) updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, FromRow)]
+pub(crate) struct PublishPerformanceAlertRow {
+    pub(crate) target_id: Uuid,
+    pub(crate) draft_id: Uuid,
+    pub(crate) platform_id: String,
+    pub(crate) views: i64,
+    pub(crate) likes: i64,
+    pub(crate) comments: i64,
+    pub(crate) shares: i64,
+    pub(crate) completion_rate: f64,
+    pub(crate) synced_at: DateTime<Utc>,
+}
+
 pub(crate) fn profile_from_row(r: PublishProfileRow) -> PublishProfileResponse {
     PublishProfileResponse {
         id: r.id,
@@ -467,5 +517,21 @@ pub(crate) fn attempt_audit_from_row(r: PublishAttemptAuditRow) -> PublishAttemp
         detail: r.detail.0,
         error_message: r.error_message,
         created_at: r.created_at,
+    }
+}
+
+pub(crate) fn performance_alert_from_row(
+    r: PublishPerformanceAlertRow,
+) -> PublishPerformanceAlertResponse {
+    PublishPerformanceAlertResponse {
+        target_id: r.target_id,
+        draft_id: r.draft_id,
+        platform_id: r.platform_id,
+        views: r.views,
+        likes: r.likes,
+        comments: r.comments,
+        shares: r.shares,
+        completion_rate: r.completion_rate,
+        synced_at: r.synced_at,
     }
 }

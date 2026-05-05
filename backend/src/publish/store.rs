@@ -11,7 +11,8 @@ use crate::error::ApiError;
 use super::types::{
     CreatePublishDraftBody, CreatePublishJobBody, CreatePublishProfileBody, PatchPublishDraftBody,
     PatchPublishProfileBody, PublishAttemptAuditRow, PublishDraftRow, PublishJobRow,
-    PublishMetricSyncCursorRow, PublishProfileRow, PublishTargetInput, PublishTargetRow,
+    PublishMetricSyncCursorRow, PublishPerformanceAlertRow, PublishProfileRow, PublishTargetInput,
+    PublishTargetRow,
 };
 
 /// Half-open `[from, to)` UTC window used by `GET …/publish/drafts`.
@@ -631,6 +632,57 @@ pub(crate) async fn list_attempt_audit(
     .bind(owner_user_id)
     .bind(draft_id)
     .bind(job_id)
+    .bind(capped_limit)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
+pub(crate) async fn list_low_performance_alerts(
+    pool: &PgPool,
+    project_id: Uuid,
+    owner_user_id: Uuid,
+    views_lt: i64,
+    completion_rate_lt: f64,
+    limit: i64,
+) -> Result<Vec<PublishPerformanceAlertRow>, ApiError> {
+    let capped_limit = limit.clamp(1, 200);
+    let capped_views = views_lt.max(0);
+    let capped_cr = completion_rate_lt.clamp(0.0, 1.0);
+    sqlx::query_as::<_, PublishPerformanceAlertRow>(
+        r#"
+        SELECT
+          s.target_id,
+          s.draft_id,
+          s.platform_id,
+          COALESCE(s.views, 0)::BIGINT AS views,
+          COALESCE(s.likes, 0)::BIGINT AS likes,
+          COALESCE(s.comments, 0)::BIGINT AS comments,
+          COALESCE(s.shares, 0)::BIGINT AS shares,
+          COALESCE(s.completion_rate, 0)::DOUBLE PRECISION AS completion_rate,
+          s.synced_at
+        FROM (
+          SELECT DISTINCT ON (target_id)
+            target_id, draft_id, platform_id, views, likes, comments, shares, completion_rate, synced_at
+          FROM app_publish_performance_snapshot
+          WHERE project_id = $1
+          ORDER BY target_id, synced_at DESC
+        ) AS s
+        INNER JOIN app_publish_draft AS d ON d.id = s.draft_id
+        INNER JOIN app_project AS p ON p.id = d.project_id
+        WHERE p.owner_user_id = $2
+          AND (
+            COALESCE(s.views, 0) < $3
+            OR COALESCE(s.completion_rate, 0)::DOUBLE PRECISION < $4
+          )
+        ORDER BY s.synced_at DESC
+        LIMIT $5
+        "#,
+    )
+    .bind(project_id)
+    .bind(owner_user_id)
+    .bind(capped_views)
+    .bind(capped_cr)
     .bind(capped_limit)
     .fetch_all(pool)
     .await
