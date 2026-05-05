@@ -12,11 +12,18 @@ use crate::error::ApiError;
 use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
-use super::super::super::common::merge_text_patch;
+use super::super::super::common::{merge_text_patch, trim_opt};
 use super::super::super::types::{PatchProjectBody, ProjectRow};
 use super::super::super::validation::{
     validate_duration_strategy, validate_mode, validate_target_market, validate_target_platforms,
 };
+
+fn trim_text_patch(patch: FieldPatch<String>) -> FieldPatch<String> {
+    match patch {
+        FieldPatch::Absent => FieldPatch::Absent,
+        FieldPatch::Set(v) => FieldPatch::Set(trim_opt(v)),
+    }
+}
 
 #[utoipa::path(
     patch,
@@ -45,27 +52,58 @@ pub(crate) async fn patch_project_by_id(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
 
-    let name_patch = parse_optional_text_field(body.name, "name")?;
-    let intro_patch = parse_optional_text_field(body.intro, "intro")?;
-    let project_type_patch = parse_optional_text_field(body.project_type, "project_type")?;
-    let image_model_patch = parse_optional_text_field(body.image_model, "image_model")?;
-    let image_quality_patch = parse_optional_text_field(body.image_quality, "image_quality")?;
-    let video_model_patch = parse_optional_text_field(body.video_model, "video_model")?;
-    let art_style_patch = parse_optional_text_field(body.art_style, "art_style")?;
-    let director_manual_patch = parse_optional_text_field(body.director_manual, "director_manual")?;
-    let mode_patch = parse_optional_text_field(body.mode, "mode")?;
-    let video_ratio_patch = parse_optional_text_field(body.video_ratio, "video_ratio")?;
+    let name_patch = trim_text_patch(parse_optional_text_field(body.name, "name")?);
+    let intro_patch = trim_text_patch(parse_optional_text_field(body.intro, "intro")?);
+    let project_type_patch = trim_text_patch(parse_optional_text_field(
+        body.project_type,
+        "project_type",
+    )?);
+    let image_model_patch =
+        trim_text_patch(parse_optional_text_field(body.image_model, "image_model")?);
+    let image_quality_patch = trim_text_patch(parse_optional_text_field(
+        body.image_quality,
+        "image_quality",
+    )?);
+    let video_model_patch =
+        trim_text_patch(parse_optional_text_field(body.video_model, "video_model")?);
+    let art_style_patch = trim_text_patch(parse_optional_text_field(body.art_style, "art_style")?);
+    let director_manual_patch = trim_text_patch(parse_optional_text_field(
+        body.director_manual,
+        "director_manual",
+    )?);
+    let mode_patch = trim_text_patch(parse_optional_text_field(body.mode, "mode")?);
+    let video_ratio_patch =
+        trim_text_patch(parse_optional_text_field(body.video_ratio, "video_ratio")?);
 
-    let art_style_pack_patch = parse_optional_text_field(body.art_style_pack, "art_style_pack")?;
-    let story_style_pack_patch =
-        parse_optional_text_field(body.story_style_pack, "story_style_pack")?;
+    let art_style_pack_patch = trim_text_patch(parse_optional_text_field(
+        body.art_style_pack,
+        "art_style_pack",
+    )?);
+    let story_style_pack_patch = trim_text_patch(parse_optional_text_field(
+        body.story_style_pack,
+        "story_style_pack",
+    )?);
 
-    let target_market_patch = parse_optional_text_field(body.target_market, "target_market")?;
-    let duration_strategy_patch =
-        parse_optional_text_field(body.duration_strategy, "duration_strategy")?;
-    let voice_profile_patch = parse_optional_text_field(body.voice_profile, "voice_profile")?;
-    let subtitle_style_patch = parse_optional_text_field(body.subtitle_style, "subtitle_style")?;
-    let bgm_strategy_patch = parse_optional_text_field(body.bgm_strategy, "bgm_strategy")?;
+    let target_market_patch = trim_text_patch(parse_optional_text_field(
+        body.target_market,
+        "target_market",
+    )?);
+    let duration_strategy_patch = trim_text_patch(parse_optional_text_field(
+        body.duration_strategy,
+        "duration_strategy",
+    )?);
+    let voice_profile_patch = trim_text_patch(parse_optional_text_field(
+        body.voice_profile,
+        "voice_profile",
+    )?);
+    let subtitle_style_patch = trim_text_patch(parse_optional_text_field(
+        body.subtitle_style,
+        "subtitle_style",
+    )?);
+    let bgm_strategy_patch = trim_text_patch(parse_optional_text_field(
+        body.bgm_strategy,
+        "bgm_strategy",
+    )?);
 
     // Parse target_platforms array field
     let target_platforms_patch = match body.target_platforms {
@@ -80,12 +118,13 @@ pub(crate) async fn patch_project_by_id(
                     })
                 })
                 .collect();
-            let platforms = platforms?;
+            let platforms = platforms?
+                .into_iter()
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect::<Vec<_>>();
 
-            // Validate target_platforms if not empty
-            if !platforms.is_empty() {
-                validate_target_platforms(&platforms)?;
-            }
+            validate_target_platforms(&platforms)?;
 
             FieldPatch::Set(Some(platforms))
         }

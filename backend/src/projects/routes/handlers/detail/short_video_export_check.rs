@@ -51,7 +51,7 @@ fn evaluate_row(row: &super::assembly_query::AssemblyFlatRow) -> Vec<ShortVideoE
             .as_deref()
             .is_some_and(|u| !u.trim().is_empty());
 
-    if row.candidate_status.as_deref() == Some("pending") {
+    if row.candidate_status.as_deref().map(str::trim) == Some("pending") {
         out.push(issue(
             "blocking",
             "candidate_pending",

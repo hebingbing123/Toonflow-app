@@ -37,6 +37,14 @@ pub(crate) async fn create_project(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
 
+    let target_platforms = body.target_platforms.as_ref().map(|platforms| {
+        platforms
+            .iter()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>()
+    });
+
     // Validate enum fields if provided
     if let Some(ref mode_val) = body.mode {
         validate_mode(mode_val)?;
@@ -47,10 +55,8 @@ pub(crate) async fn create_project(
     if let Some(ref strategy_val) = body.duration_strategy {
         validate_duration_strategy(strategy_val)?;
     }
-    if let Some(ref platforms) = body.target_platforms {
-        if !platforms.is_empty() {
-            validate_target_platforms(platforms)?;
-        }
+    if let Some(ref platforms) = target_platforms {
+        validate_target_platforms(platforms)?;
     }
 
     let mut tx = pool
@@ -111,7 +117,7 @@ pub(crate) async fn create_project(
     .bind(trim_opt(body.art_style_pack))
     .bind(trim_opt(body.story_style_pack))
     .bind(trim_opt(body.target_market))
-    .bind(body.target_platforms)
+    .bind(target_platforms)
     .bind(trim_opt(body.duration_strategy))
     .bind(trim_opt(body.voice_profile))
     .bind(trim_opt(body.subtitle_style))
