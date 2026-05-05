@@ -1,8 +1,5 @@
 //! **F6** — nine-platform capability registry（契约真源；矩阵 UI / 校验 / sandbox adapter 共用）。
 
-use serde_json::{json, Value};
-use uuid::Uuid;
-
 use crate::publish::types::PublishPlatformCapabilityRow;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -155,16 +152,6 @@ pub(crate) fn capability_matrix() -> Vec<PublishPlatformCapabilityRow> {
             notes: p.notes.to_string(),
         })
         .collect()
-}
-
-/// Per-platform sandbox 回执（**F7/F8** 真对接前占位闭环).
-pub(crate) fn sandbox_publish_receipt(job_id: Uuid, platform_id: &str) -> Value {
-    json!({
-        "adapter": "sandbox",
-        "platform_id": platform_id,
-        "external_video_id": format!("sandbox:{platform_id}:{job_id}"),
-        "published_at": chrono::Utc::now().to_rfc3339(),
-    })
 }
 
 #[cfg(test)]

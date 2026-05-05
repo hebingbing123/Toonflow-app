@@ -245,10 +245,10 @@
 - [x] F7. 后端：**国内五平台**各实现一种可发布闭环（抖音、哔哩哔哩、小红书、视频号、快手 — 以各平台开放能力为准）  
   - _需求: 7, 12, 9.3_
 
-- [ ] F8. 后端：**海外四平台**各实现一种可发布闭环（TikTok、YouTube Shorts、Instagram Reels、Facebook Reels）  
+- [x] F8. 后端：**海外四平台**各实现一种可发布闭环（TikTok、YouTube Shorts、Instagram Reels、Facebook Reels）  
   - _需求: 7, 12, 9.3_
 
-- [ ] F9. 验收：**发布平台矩阵全绿**（九平台均非「未接入」终态；半自动含确认 UI + attempts 审计）；sandbox / checklist 或集成测试  
+- [x] F9. 验收：**发布平台矩阵全绿**（九平台均非「未接入」终态；半自动含确认 UI + attempts 审计）；sandbox / checklist 或集成测试  
   - _需求: 12.1, 9.3_
 
 ---

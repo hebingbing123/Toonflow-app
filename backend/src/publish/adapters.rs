@@ -1,9 +1,8 @@
-//! **F7/F8** adapter routing: domestic five-platform sandbox closures + overseas fallback.
+//! **F7/F8** adapter routing: nine-platform sandbox closures (domestic + overseas).
 
 use serde_json::{json, Value};
 use uuid::Uuid;
 
-use super::platform_registry::sandbox_publish_receipt;
 use super::types::{PublishDraftRow, PublishJobRow, PublishTargetRow};
 
 pub(crate) struct PublishAdapterResult {
@@ -53,7 +52,35 @@ pub(crate) fn run_target_adapter(
             draft.id,
             json!({"publish_target": "photo_video", "scene": "short_video"}),
         ),
-        _ => success_with_overseas_fallback(job.id, &target.platform_id),
+        "tiktok" => success_with_receipt(
+            "tiktok_sandbox_closure",
+            &target.platform_id,
+            job.id,
+            draft.id,
+            json!({"endpoint": "content/post", "market": "global"}),
+        ),
+        "youtube_shorts" => success_with_receipt(
+            "youtube_shorts_sandbox_closure",
+            &target.platform_id,
+            job.id,
+            draft.id,
+            json!({"endpoint": "youtube.videos.insert", "privacy": "private"}),
+        ),
+        "instagram_reels" => success_with_receipt(
+            "instagram_reels_sandbox_closure",
+            &target.platform_id,
+            job.id,
+            draft.id,
+            json!({"endpoint": "ig_container_publish", "surface": "reels"}),
+        ),
+        "facebook_reels" => success_with_receipt(
+            "facebook_reels_sandbox_closure",
+            &target.platform_id,
+            job.id,
+            draft.id,
+            json!({"endpoint": "graph_video_publish", "surface": "reels"}),
+        ),
+        _ => unsupported_platform(&target.platform_id),
     }
 }
 
@@ -83,16 +110,15 @@ fn success_with_receipt(
     }
 }
 
-fn success_with_overseas_fallback(job_id: Uuid, platform_id: &str) -> PublishAdapterResult {
+fn unsupported_platform(platform_id: &str) -> PublishAdapterResult {
     PublishAdapterResult {
-        status: "succeeded",
+        status: "failed",
         detail: json!({
-            "adapter": "sandbox_fallback",
+            "adapter": "unsupported_platform",
             "platform_id": platform_id,
-            "stub": true,
-            "receipt": sandbox_publish_receipt(job_id, platform_id),
+            "stub": false,
         }),
-        error_message: None,
+        error_message: Some(format!("unsupported platform adapter: {platform_id}")),
     }
 }
 
@@ -177,5 +203,44 @@ mod tests {
             assert_eq!(result.status, "succeeded");
             assert!(result.error_message.is_none());
         }
+    }
+
+    #[test]
+    fn overseas_platforms_map_to_distinct_adapters() {
+        let job = sample_job();
+        let draft = sample_draft();
+        for pid in [
+            "tiktok",
+            "youtube_shorts",
+            "instagram_reels",
+            "facebook_reels",
+        ] {
+            let result = run_target_adapter(&job, &draft, &sample_target(pid));
+            let adapter = result
+                .detail
+                .get("adapter")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default();
+            assert!(adapter.starts_with(pid));
+            assert_eq!(result.status, "succeeded");
+            assert!(result.error_message.is_none());
+        }
+    }
+
+    #[test]
+    fn unknown_platform_is_failed() {
+        let job = sample_job();
+        let draft = sample_draft();
+        let result = run_target_adapter(&job, &draft, &sample_target("unknown_platform"));
+        assert_eq!(result.status, "failed");
+        assert!(result.error_message.is_some());
+        assert_eq!(
+            result
+                .detail
+                .get("adapter")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default(),
+            "unsupported_platform"
+        );
     }
 }
