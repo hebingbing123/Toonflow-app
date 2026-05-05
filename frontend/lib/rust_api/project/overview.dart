@@ -551,6 +551,92 @@ class ProjectShortVideoAssembly {
   }
 }
 
+/// Models for **`GET /api/v1/projects/{project_id}/short-video-export-check`** (`getProjectShortVideoExportCheckByProjectIdV1`).
+class ShortVideoExportCheckSummary {
+  const ShortVideoExportCheckSummary({
+    required this.storyboardCount,
+    required this.blockingIssueCount,
+    required this.warningIssueCount,
+  });
+
+  final int storyboardCount;
+  final int blockingIssueCount;
+  final int warningIssueCount;
+
+  factory ShortVideoExportCheckSummary.fromJson(Map<String, dynamic> json) {
+    return ShortVideoExportCheckSummary(
+      storyboardCount: (json['storyboard_count'] as num).toInt(),
+      blockingIssueCount: (json['blocking_issue_count'] as num).toInt(),
+      warningIssueCount: (json['warning_issue_count'] as num).toInt(),
+    );
+  }
+}
+
+class ShortVideoExportCheckIssue {
+  const ShortVideoExportCheckIssue({
+    required this.severity,
+    required this.code,
+    required this.detail,
+    required this.scriptNumericId,
+    required this.storyboardId,
+    required this.storyboardNumericId,
+    this.sbIndex,
+  });
+
+  final String severity;
+  final String code;
+  final String detail;
+  final int scriptNumericId;
+  final String storyboardId;
+  final int storyboardNumericId;
+  final int? sbIndex;
+
+  factory ShortVideoExportCheckIssue.fromJson(Map<String, dynamic> json) {
+    return ShortVideoExportCheckIssue(
+      severity: json['severity'] as String,
+      code: json['code'] as String,
+      detail: json['detail'] as String,
+      scriptNumericId: (json['script_numeric_id'] as num).toInt(),
+      storyboardId: json['storyboard_id'] as String,
+      storyboardNumericId: (json['storyboard_numeric_id'] as num).toInt(),
+      sbIndex: json['sb_index'] == null
+          ? null
+          : (json['sb_index'] as num).toInt(),
+    );
+  }
+}
+
+class ProjectShortVideoExportCheck {
+  const ProjectShortVideoExportCheck({
+    required this.schemaVersion,
+    required this.exportReady,
+    required this.summary,
+    required this.issues,
+  });
+
+  final int schemaVersion;
+  final bool exportReady;
+  final ShortVideoExportCheckSummary summary;
+  final List<ShortVideoExportCheckIssue> issues;
+
+  factory ProjectShortVideoExportCheck.fromJson(Map<String, dynamic> json) {
+    final raw = json['issues'] as List<dynamic>? ?? const <dynamic>[];
+    return ProjectShortVideoExportCheck(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      exportReady: json['export_ready'] as bool,
+      summary: ShortVideoExportCheckSummary.fromJson(
+        json['summary'] as Map<String, dynamic>,
+      ),
+      issues: raw
+          .map(
+            (e) =>
+                ShortVideoExportCheckIssue.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 /// `GET /api/v1/projects/{project_id}` — see `getProjectByProjectIdV1`.
 Future<ProjectDetail> fetchProjectByProjectId(
   String accessToken,
@@ -671,6 +757,27 @@ Future<ProjectShortVideoAssembly> fetchProjectShortVideoAssemblyByProjectId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectShortVideoAssembly.fromJson(map);
+}
+
+/// `GET /api/v1/projects/{project_id}/short-video-export-check` — see `getProjectShortVideoExportCheckByProjectIdV1`.
+Future<ProjectShortVideoExportCheck> fetchProjectShortVideoExportCheckByProjectId(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/short-video-export-check',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectShortVideoExportCheck.fromJson(map);
 }
 
 /// Maps backend **`blocking_reasons`** codes to short UI labels (Chinese).

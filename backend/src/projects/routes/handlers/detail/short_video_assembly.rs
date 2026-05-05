@@ -5,7 +5,6 @@ use axum::{
     http::HeaderMap,
     Json,
 };
-use sqlx::FromRow;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -19,62 +18,9 @@ use super::super::super::types::{
     ProjectShortVideoAssemblyResponse, ShortVideoAssemblyProjectDefaults,
     ShortVideoAssemblyScriptGroup, ShortVideoAssemblyShot,
 };
-
-#[derive(Debug, FromRow)]
-struct ProjectAssemblyHeaderRow {
-    id: Uuid,
-    voice_profile: Option<String>,
-    subtitle_style: Option<String>,
-    bgm_strategy: Option<String>,
-}
-
-#[derive(Debug, FromRow)]
-struct AssemblyFlatRow {
-    storyboard_id: Uuid,
-    storyboard_numeric_id: i32,
-    script_numeric_id: i32,
-    script_name: Option<String>,
-    sb_index: Option<i32>,
-    file_path: Option<String>,
-    duration: Option<String>,
-    state: Option<String>,
-    track_id: Option<i32>,
-    prompt: Option<String>,
-    video_desc: Option<String>,
-    voiceover_state: Option<String>,
-    voiceover_audio_url: Option<String>,
-    voiceover_error: Option<String>,
-}
-
-fn assembly_selected_media_kind(url: Option<&str>) -> &'static str {
-    let Some(raw) = url.map(str::trim).filter(|s| !s.is_empty()) else {
-        return "none";
-    };
-    let path = raw
-        .split('?')
-        .next()
-        .unwrap_or(raw)
-        .split('#')
-        .next()
-        .unwrap_or(raw);
-    let lower = path.to_ascii_lowercase();
-    if lower.ends_with(".mp4")
-        || lower.ends_with(".mov")
-        || lower.ends_with(".webm")
-        || lower.ends_with(".mkv")
-    {
-        return "video";
-    }
-    if lower.ends_with(".png")
-        || lower.ends_with(".jpg")
-        || lower.ends_with(".jpeg")
-        || lower.ends_with(".webp")
-        || lower.ends_with(".gif")
-    {
-        return "image";
-    }
-    "other"
-}
+use super::assembly_query::{
+    assembly_selected_media_kind, fetch_project_assembly_flat_rows, fetch_project_assembly_header,
+};
 
 #[utoipa::path(
     get,
@@ -100,50 +46,11 @@ pub(crate) async fn project_short_video_assembly_by_id(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
 
-    let header: Option<ProjectAssemblyHeaderRow> = sqlx::query_as(
-        r#"
-        SELECT id, voice_profile, subtitle_style, bgm_strategy
-        FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let header = fetch_project_assembly_header(pool, project_id, uid)
+        .await?
+        .ok_or(ApiError::NotFound)?;
 
-    let Some(header) = header else {
-        return Err(ApiError::NotFound);
-    };
-
-    let flat: Vec<AssemblyFlatRow> = sqlx::query_as(
-        r#"
-        SELECT
-          sb.id AS storyboard_id,
-          sb.numeric_id AS storyboard_numeric_id,
-          sc.numeric_id AS script_numeric_id,
-          sc.name AS script_name,
-          sb.sb_index,
-          sb.file_path,
-          sb.duration,
-          sb.state,
-          sb.track_id,
-          sb.prompt,
-          sb.video_desc,
-          sb.metadata #>> '{voiceover,state}' AS voiceover_state,
-          sb.metadata #>> '{voiceover,audioUrl}' AS voiceover_audio_url,
-          sb.metadata #>> '{voiceover,error}' AS voiceover_error
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        WHERE sc.project_id = $1
-        ORDER BY sc.numeric_id ASC, sb.sb_index ASC NULLS LAST, sb.numeric_id ASC
-        "#,
-    )
-    .bind(header.id)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let flat = fetch_project_assembly_flat_rows(pool, header.id).await?;
 
     let mut script_order: Vec<i32> = Vec::new();
     let mut script_meta: HashMap<i32, Option<String>> = HashMap::new();

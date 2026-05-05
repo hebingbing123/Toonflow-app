@@ -226,6 +226,34 @@ pub struct ProjectShortVideoAssemblyResponse {
     pub scripts: Vec<ShortVideoAssemblyScriptGroup>,
 }
 
+/// `GET /api/v1/projects/{project_id}/short-video-export-check` — D2 导出前检查与摘要。
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoExportCheckSummary {
+    pub storyboard_count: i64,
+    pub blocking_issue_count: i64,
+    pub warning_issue_count: i64,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoExportCheckIssue {
+    /// **`blocking`** \| **`warning`**
+    pub severity: String,
+    pub code: String,
+    pub detail: String,
+    pub script_numeric_id: i32,
+    pub storyboard_id: Uuid,
+    pub storyboard_numeric_id: i32,
+    pub sb_index: Option<i32>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ProjectShortVideoExportCheckResponse {
+    pub schema_version: i32,
+    pub export_ready: bool,
+    pub summary: ShortVideoExportCheckSummary,
+    pub issues: Vec<ShortVideoExportCheckIssue>,
+}
+
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
 #[derive(Serialize, ToSchema)]
 pub struct ProjectsSummaryResponse {

@@ -17,8 +17,8 @@ use crate::state::AppState;
 use handlers::{
     create_project, delete_project_by_id, get_project_by_id, list_projects, patch_project_by_id,
     patch_style_config, project_assets_overview_by_id, project_production_overview_by_id,
-    project_short_video_assembly_by_id, project_short_video_readiness_by_id, project_stats_by_id,
-    projects_summary,
+    project_short_video_assembly_by_id, project_short_video_export_check_by_id,
+    project_short_video_readiness_by_id, project_stats_by_id, projects_summary,
 };
 
 pub fn router() -> Router<AppState> {
@@ -44,6 +44,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/short-video-assembly",
             get(project_short_video_assembly_by_id),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/short-video-export-check",
+            get(project_short_video_export_check_by_id),
         )
         .route(
             "/api/v1/projects/{project_id}/style-config",

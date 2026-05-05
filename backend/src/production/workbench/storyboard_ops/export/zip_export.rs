@@ -9,7 +9,9 @@ use zip::write::FileOptions;
 use super::super::export_source::{
     infer_export_extension, parse_storyboard_export_source, StoryboardExportSource,
 };
-use super::super::shot_text::{resolve_shot_script_source, resolve_shot_voiceover_ready};
+use super::super::shot_text::{
+    parse_storyboard_duration_seconds, resolve_shot_script_source, resolve_shot_voiceover_ready,
+};
 use super::super::types::ExportImageSourceRow;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -487,13 +489,6 @@ fn resolve_shot_script_line(shot: &StoryboardExportManifestShot) -> String {
                 .map(str::to_string)
         })
         .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id))
-}
-
-fn parse_storyboard_duration_seconds(value: Option<&str>) -> i32 {
-    value
-        .and_then(|raw| raw.trim().parse::<i32>().ok())
-        .filter(|duration| *duration > 0)
-        .unwrap_or(5)
 }
 
 fn format_srt_timestamp(total_ms: u64) -> String {
