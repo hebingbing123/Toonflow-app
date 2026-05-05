@@ -1565,6 +1565,60 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               }
             }
 
+            Future<void> persistReorder() async {
+              final byScript = <int, List<int>>{};
+              for (final item in ordered) {
+                byScript.putIfAbsent(item.scriptNumericId, () => <int>[]).add(
+                  item.storyboardNumericId,
+                );
+              }
+              try {
+                for (final entry in byScript.entries) {
+                  final scriptNumericId = entry.key;
+                  final orderedStoryboardIds = entry.value;
+                  Map<String, dynamic> flowData;
+                  try {
+                    flowData = await fetchProductionFlowDataV1(
+                      token,
+                      projectId: project.numericId,
+                      episodesId: scriptNumericId,
+                    );
+                  } on RustApiException {
+                    flowData = <String, dynamic>{};
+                  }
+                  flowData['storyboard'] = orderedStoryboardIds
+                      .map((id) => <String, dynamic>{'id': id})
+                      .toList(growable: false);
+                  final code = await postProductionSaveFlowDataV1(
+                    token,
+                    projectId: project.numericId,
+                    episodesId: scriptNumericId,
+                    data: flowData,
+                  );
+                  if (code != 200) {
+                    throw RustApiException('save flow failed', statusCode: code);
+                  }
+                }
+                if (mounted) {
+                  setState(() {
+                    _projectConfigLine =
+                        '已持久化镜头重排顺序（按剧本写回时间线与分镜序号）。';
+                  });
+                }
+                await _loadProjectOverview();
+              } on RustApiException catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '重排持久化失败：${e.statusCode ?? '-'}';
+                });
+              } catch (e) {
+                if (!mounted) return;
+                setState(() {
+                  _projectConfigLine = '重排持久化失败：$e';
+                });
+              }
+            }
+
             return AlertDialog(
               title: const Text('镜头基础操作'),
               content: SizedBox(
@@ -1580,6 +1634,15 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                     Text(
                       '启停 / 替换会直接写回 J 媒体槽位；重排仅用于本次排障视图。',
                       style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FilledButton.tonalIcon(
+                        onPressed: () => unawaited(persistReorder()),
+                        icon: const Icon(Icons.save_outlined),
+                        label: const Text('保存重排顺序'),
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Flexible(
