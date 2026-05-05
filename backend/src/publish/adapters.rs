@@ -105,6 +105,7 @@ fn success_with_receipt(
         status: "succeeded",
         detail: json!({
             "adapter": adapter,
+            "delivery_mode": "sandbox",
             "platform_id": platform_id,
             "draft_id": draft_id,
             "stub": false,
@@ -125,6 +126,7 @@ fn unsupported_platform(platform_id: &str) -> PublishAdapterResult {
         status: "failed",
         detail: json!({
             "adapter": "unsupported_platform",
+            "delivery_mode": "unknown",
             "platform_id": platform_id,
             "stub": false,
         }),
@@ -153,6 +155,7 @@ pub(crate) fn fetch_platform_metrics_mock(
         completion_rate: completion_rate.min(0.98),
         raw_payload: json!({
             "source": "sandbox_metrics_mock",
+            "delivery_mode": "sandbox",
             "platform_id": platform_id,
             "external_video_id": external_video_id,
             "sampled_at": chrono::Utc::now().to_rfc3339(),

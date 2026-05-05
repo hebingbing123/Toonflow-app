@@ -960,6 +960,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   required PublishPrepareCheckResponse? prepare,
   required List<PublishJobRow> jobs,
   required List<PublishPerformanceAlertRow> performanceAlerts,
+  required List<PublishAttemptAuditRow> audits,
   required bool publishBusy,
   VoidCallback? onRefreshPublish,
   VoidCallback? onBootstrapPublishDraft,
@@ -1064,6 +1065,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   final publishOverviewLines = <String>[
     '成功作业：$succeededJobCount · 失败/部分失败：$failedJobCount',
     '待确认：$waitingConfirmCount · 已定时草稿：$scheduledDraftCount/${drafts.length}',
+    if (audits.isNotEmpty)
+      '投递模式：${audits.take(8).map((a) => a.deliveryMode).toSet().join(" / ")}',
     if (performanceAlerts.isNotEmpty)
       '低表现预警：${performanceAlerts.length} 条（建议进入任务中心排障并改写文案）',
     ...performanceAlerts
@@ -1073,6 +1076,10 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
               '${kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId}'
               ' · 播放 ${a.views} · 完播 ${(a.completionRate * 100).toStringAsFixed(0)}%',
         ),
+    ...audits.take(3).map((a) {
+      final p = kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId;
+      return '审计：$p · ${a.status} · mode=${a.deliveryMode}';
+    }),
   ];
 
   String? awaitingId;

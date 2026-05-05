@@ -199,6 +199,36 @@ Future<List<PublishJobRow>> fetchPublishJobs(
       .toList(growable: false);
 }
 
+/// `GET …/publish/audit`
+Future<List<PublishAttemptAuditRow>> fetchPublishAudit(
+  String accessToken,
+  String projectId, {
+  String? draftId,
+  String? jobId,
+  int limit = 50,
+}) async {
+  final qp = <String, String>{'limit': '$limit'};
+  if (draftId != null && draftId.trim().isNotEmpty) {
+    qp['draft_id'] = draftId.trim();
+  }
+  if (jobId != null && jobId.trim().isNotEmpty) {
+    qp['job_id'] = jobId.trim();
+  }
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/audit',
+  ).replace(queryParameters: qp);
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final raw = jsonDecode(res.body) as List<dynamic>;
+  return raw
+      .map((e) => PublishAttemptAuditRow.fromJson(e as Map<String, dynamic>))
+      .toList(growable: false);
+}
+
 /// `GET …/publish/performance-alerts`
 Future<List<PublishPerformanceAlertRow>> fetchPublishPerformanceAlerts(
   String accessToken,
@@ -663,6 +693,66 @@ class PublishPerformanceAlertRow {
       shares: (json['shares'] as num?)?.toInt() ?? 0,
       completionRate: (json['completion_rate'] as num?)?.toDouble() ?? 0.0,
       syncedAt: json['synced_at'] as String? ?? '',
+    );
+  }
+}
+
+class PublishAttemptAuditRow {
+  const PublishAttemptAuditRow({
+    required this.id,
+    required this.jobId,
+    required this.draftId,
+    required this.targetId,
+    required this.platformId,
+    required this.attemptNo,
+    required this.status,
+    required this.detail,
+    required this.createdAt,
+    this.errorMessage,
+  });
+
+  final String id;
+  final String jobId;
+  final String draftId;
+  final String targetId;
+  final String platformId;
+  final int attemptNo;
+  final String status;
+  final Map<String, dynamic> detail;
+  final String createdAt;
+  final String? errorMessage;
+
+  String get deliveryMode {
+    final top = (detail['delivery_mode'] as String?)?.trim();
+    if (top != null && top.isNotEmpty) {
+      return top;
+    }
+    final receipt = detail['receipt'];
+    if (receipt is Map<String, dynamic>) {
+      final mode = (receipt['mode'] as String?)?.trim();
+      if (mode != null && mode.isNotEmpty) {
+        if (mode == 'sandbox_closure') {
+          return 'sandbox';
+        }
+        return mode;
+      }
+    }
+    return 'unknown';
+  }
+
+  factory PublishAttemptAuditRow.fromJson(Map<String, dynamic> json) {
+    final d = json['detail'];
+    return PublishAttemptAuditRow(
+      id: json['id'] as String? ?? '',
+      jobId: json['job_id'] as String? ?? '',
+      draftId: json['draft_id'] as String? ?? '',
+      targetId: json['target_id'] as String? ?? '',
+      platformId: json['platform_id'] as String? ?? '',
+      attemptNo: (json['attempt_no'] as num?)?.toInt() ?? 0,
+      status: json['status'] as String? ?? '',
+      detail: d is Map<String, dynamic> ? d : <String, dynamic>{},
+      createdAt: json['created_at'] as String? ?? '',
+      errorMessage: json['error_message'] as String?,
     );
   }
 }

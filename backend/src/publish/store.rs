@@ -1066,6 +1066,13 @@ pub(crate) async fn finalize_job_with_attempts(
             .and_then(|v| v.as_str())
             .unwrap_or_default()
             .to_string();
+        let delivery_mode = attempt
+            .detail
+            .get("delivery_mode")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.trim().is_empty())
+            .unwrap_or("unknown")
+            .to_string();
         if attempt.status == "succeeded" && !platform_id.is_empty() {
             sqlx::query(
                 r#"
@@ -1091,6 +1098,7 @@ pub(crate) async fn finalize_job_with_attempts(
             .bind(Json(json!({
                 "last_publish_job_id": job_id,
                 "external_video_id": maybe_external_video_id,
+                "delivery_mode": delivery_mode,
                 "last_publish_updated_at": chrono::Utc::now().to_rfc3339(),
             })))
             .execute(pool)

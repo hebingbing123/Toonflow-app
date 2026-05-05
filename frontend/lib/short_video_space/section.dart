@@ -67,6 +67,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   List<PublishJobRow> _publishJobs = const <PublishJobRow>[];
   List<PublishPerformanceAlertRow> _publishPerfAlerts =
       const <PublishPerformanceAlertRow>[];
+  List<PublishAttemptAuditRow> _publishAuditRows =
+      const <PublishAttemptAuditRow>[];
   bool _publishBusy = false;
   int _publishCopyEditorRevision = 0;
   String? _selectedProjectId;
@@ -290,6 +292,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         PublishPrepareCheckResponse? prepare,
         List<PublishJobRow> jobs,
         List<PublishPerformanceAlertRow> perfAlerts,
+        List<PublishAttemptAuditRow> audits,
       })> _capturePublishSlice(
     ProjectRow project,
     String token,
@@ -299,6 +302,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       final drafts = await fetchPublishDrafts(token, project.id);
       final jobs = await fetchPublishJobs(token, project.id);
       final perfAlerts = await fetchPublishPerformanceAlerts(token, project.id);
+      final audits = await fetchPublishAudit(token, project.id, limit: 30);
       PublishPrepareCheckResponse? prepare;
       if (drafts.isNotEmpty) {
         prepare = await fetchPublishPrepareCheck(token, project.id, drafts.first.id);
@@ -310,6 +314,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         prepare: prepare,
         jobs: jobs,
         perfAlerts: perfAlerts,
+        audits: audits,
       );
     } catch (_) {
       return (
@@ -319,6 +324,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         prepare: null,
         jobs: <PublishJobRow>[],
         perfAlerts: <PublishPerformanceAlertRow>[],
+        audits: <PublishAttemptAuditRow>[],
       );
     }
   }
@@ -349,6 +355,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishPrepare = snapshot.prepare;
       _publishJobs = snapshot.jobs;
       _publishPerfAlerts = snapshot.perfAlerts;
+      _publishAuditRows = snapshot.audits;
     });
   }
 
@@ -952,6 +959,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           _publishPrepare = null;
           _publishJobs = const <PublishJobRow>[];
           _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
+          _publishAuditRows = const <PublishAttemptAuditRow>[];
           _publishBusy = false;
           _publishCopyEditorRevision = 0;
         });
@@ -980,6 +988,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _publishPrepare = null;
       _publishJobs = const <PublishJobRow>[];
       _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
+      _publishAuditRows = const <PublishAttemptAuditRow>[];
       _publishBusy = false;
       _publishCopyEditorRevision = 0;
     });
@@ -1052,6 +1061,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       PublishPrepareCheckResponse? publishPrepareSnap;
       var publishJobsSnap = <PublishJobRow>[];
       var publishPerfAlertsSnap = <PublishPerformanceAlertRow>[];
+      var publishAuditsSnap = <PublishAttemptAuditRow>[];
       await Future.wait([
         Future(() async {
           try {
@@ -1090,6 +1100,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           publishPrepareSnap = snapshot.prepare;
           publishJobsSnap = snapshot.jobs;
           publishPerfAlertsSnap = snapshot.perfAlerts;
+          publishAuditsSnap = snapshot.audits;
         }),
         Future(() async {
           try {
@@ -1141,6 +1152,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishPrepare = publishPrepareSnap;
         _publishJobs = publishJobsSnap;
         _publishPerfAlerts = publishPerfAlertsSnap;
+        _publishAuditRows = publishAuditsSnap;
       });
     } on RustApiException catch (_) {
       if (!mounted) {
@@ -1167,6 +1179,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishPrepare = null;
         _publishJobs = const <PublishJobRow>[];
         _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
+        _publishAuditRows = const <PublishAttemptAuditRow>[];
         _publishBusy = false;
         _publishCopyEditorRevision = 0;
       });
@@ -1195,6 +1208,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         _publishPrepare = null;
         _publishJobs = const <PublishJobRow>[];
         _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
+        _publishAuditRows = const <PublishAttemptAuditRow>[];
         _publishBusy = false;
         _publishCopyEditorRevision = 0;
       });
@@ -2167,6 +2181,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       prepare: _publishPrepare,
       jobs: _publishJobs,
       performanceAlerts: _publishPerfAlerts,
+      audits: _publishAuditRows,
       publishBusy: _publishBusy,
       onRefreshPublish: project != null &&
               accessToken != null &&
