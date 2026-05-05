@@ -152,6 +152,7 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
   required Iterable<ProductionStoryboardItemV1> productionStoryboards,
   required Iterable<VideoItem> generatedVideos,
   required Iterable<JobRow> generatingJobs,
+  VideoBatchWritebackSummary? videoWritebackSummary,
   required String? draftImageUrl,
   required String trackIdText,
   required String videoPromptText,
@@ -215,12 +216,20 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
     generatedVideos,
     scriptStoryboard.numericId,
   );
-  if (generatingJobs.isNotEmpty) {
+  final inFlightJobTotal =
+      videoWritebackSummary?.inFlightGenerationJobCount ?? generatingJobs.length;
+  if (inFlightJobTotal > 0) {
+    final pending = videoWritebackSummary?.storyboardNumericIdsPendingWriteback
+            .length ??
+        0;
+    final detailExtra = pending > 0
+        ? ' 其中约 $pending 条分镜仍仅有进行中任务，尚未检测到片媒体回库。'
+        : '';
     return StoryboardWorkbenchDiagnosis(
-      summary: '当前剧本还有 ${generatingJobs.length} 条视频任务在运行。',
+      summary: '当前剧本还有 $inFlightJobTotal 条视频任务在运行。',
       detail: storyboardVideos.isEmpty
-          ? '建议先刷新视频数据，确认当前分镜是否已有新结果，再决定是否继续提交。'
-          : '建议先刷新视频数据并检查当前分镜已有候选视频，再决定是否继续提交。',
+          ? '建议先刷新视频数据，确认当前分镜是否已有新结果，再决定是否继续提交。$detailExtra'
+          : '建议先刷新视频数据并检查当前分镜已有候选视频，再决定是否继续提交。$detailExtra',
       recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
     );
   }

@@ -70,6 +70,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       productionStoryboards: _productionRows,
       generatedVideos: _generateData?.generatedVideos ?? const [],
       generatingJobs: _generateData?.generatingJobs ?? const [],
+      videoWritebackSummary: _generateData?.videoWritebackSummary,
       draftImageUrl: _imageUrlCtrl.text,
       trackIdText: _trackIdCtrl.text,
       videoPromptText: _videoPromptCtrl.text,

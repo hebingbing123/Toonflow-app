@@ -299,6 +299,48 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   return GenerateVideoPromptResponse.fromJson(map);
 }
 
+/// OpenAPI **`VideoBatchWritebackSummary`** (`get-generate-data` rollup).
+class VideoBatchWritebackSummary {
+  const VideoBatchWritebackSummary({
+    this.schemaVersion = 1,
+    this.scriptStoryboardCount = 0,
+    this.storyboardNumericIdsWithPersistedVideo = const [],
+    this.storyboardNumericIdsWithInFlightGeneration = const [],
+    this.storyboardNumericIdsPendingWriteback = const [],
+    this.inFlightGenerationJobCount = 0,
+  });
+
+  final int schemaVersion;
+  final int scriptStoryboardCount;
+  final List<int> storyboardNumericIdsWithPersistedVideo;
+  final List<int> storyboardNumericIdsWithInFlightGeneration;
+  final List<int> storyboardNumericIdsPendingWriteback;
+  final int inFlightGenerationJobCount;
+
+  factory VideoBatchWritebackSummary.fromJson(Map<String, dynamic>? json) {
+    if (json == null || json.isEmpty) {
+      return const VideoBatchWritebackSummary();
+    }
+    List<int> intList(dynamic key) => (json[key] as List<dynamic>? ?? const [])
+        .whereType<num>()
+        .map((n) => n.toInt())
+        .toList(growable: false);
+    return VideoBatchWritebackSummary(
+      schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? 1,
+      scriptStoryboardCount:
+          (json['scriptStoryboardCount'] as num?)?.toInt() ?? 0,
+      storyboardNumericIdsWithPersistedVideo:
+          intList('storyboardNumericIdsWithPersistedVideo'),
+      storyboardNumericIdsWithInFlightGeneration:
+          intList('storyboardNumericIdsWithInFlightGeneration'),
+      storyboardNumericIdsPendingWriteback:
+          intList('storyboardNumericIdsPendingWriteback'),
+      inFlightGenerationJobCount:
+          (json['inFlightGenerationJobCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 /// OpenAPI **`GetGenerateDataResponse`**.
 class GetGenerateDataResponse {
   const GetGenerateDataResponse({
@@ -306,12 +348,14 @@ class GetGenerateDataResponse {
     required this.scriptId,
     required this.generatedVideos,
     required this.generatingJobs,
+    this.videoWritebackSummary = const VideoBatchWritebackSummary(),
   });
 
   final int projectId;
   final int scriptId;
   final List<VideoItem> generatedVideos;
   final List<JobRow> generatingJobs;
+  final VideoBatchWritebackSummary videoWritebackSummary;
 
   factory GetGenerateDataResponse.fromJson(Map<String, dynamic> json) {
     final rawVideos = json['generatedVideos'] as List<dynamic>? ?? const [];
@@ -325,6 +369,9 @@ class GetGenerateDataResponse {
       generatingJobs: rawJobs
           .map((e) => JobRow.fromJson(e as Map<String, dynamic>))
           .toList(),
+      videoWritebackSummary: VideoBatchWritebackSummary.fromJson(
+        json['videoWritebackSummary'] as Map<String, dynamic>?,
+      ),
     );
   }
 }

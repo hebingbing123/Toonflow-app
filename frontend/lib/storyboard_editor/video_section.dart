@@ -505,9 +505,30 @@ class _StoryboardVideoSection extends StatelessWidget {
             ],
           );
         }),
-        if ((generateData?.generatingJobs.isNotEmpty ?? false)) ...[
+        if (generateData != null &&
+            (generateData!.generatingJobs.isNotEmpty ||
+                generateData!.videoWritebackSummary.inFlightGenerationJobCount >
+                    0)) ...[
           const SizedBox(height: 8),
           Text('进行中的视频任务', style: Theme.of(context).textTheme.labelLarge),
+          Builder(
+            builder: (ctx) {
+              final s = generateData!.videoWritebackSummary;
+              if (s.scriptStoryboardCount == 0) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  '成片回写概要：本分镜脚本共 ${s.scriptStoryboardCount} 镜；'
+                  '已检测到片媒体路径 ${s.storyboardNumericIdsWithPersistedVideo.length}；'
+                  '进行中任务关联 ${s.storyboardNumericIdsWithInFlightGeneration.length} 镜'
+                  '${s.storyboardNumericIdsPendingWriteback.isNotEmpty ? '，其中尚未回库的约 ${s.storyboardNumericIdsPendingWriteback.length} 镜（待 worker 完结）' : ''}。',
+                  style: Theme.of(ctx).textTheme.bodySmall,
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 4),
           ...generateData!.generatingJobs
               .take(3)
