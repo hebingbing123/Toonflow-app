@@ -83,6 +83,55 @@ pub struct ProjectStatsResponse {
     pub video_count: i64,
 }
 
+/// Per-storyboard short-video readiness flags plus derived **`ready_for_generation`**.
+///
+/// Check semantics are documented in **`backend/docs/short-video-readiness-field-gaps.md`** (Jellyfish
+/// extras vs stored fields).
+#[derive(Serialize, ToSchema)]
+pub struct StoryboardShortVideoReadiness {
+    pub storyboard_id: Uuid,
+    pub storyboard_numeric_id: i32,
+    pub script_numeric_id: Option<i32>,
+    pub sb_index: Option<i32>,
+    /// Timeline ordering present (**`app_storyboard.sb_index`**).
+    pub has_basic_slot: bool,
+    /// Prompt or video description text present.
+    pub has_prompt_context: bool,
+    /// Reference frame / key visual (**`file_path`**) present.
+    pub has_reference_visual: bool,
+    /// Candidate review cleared — currently **`metadata.shortVideo.candidateStatus`** (see gaps doc).
+    pub candidate_cleared: bool,
+    /// No queued/running **`app_generation_job`** targeting this storyboard.
+    pub no_blocking_job: bool,
+    /// All of the above checks pass.
+    pub ready_for_generation: bool,
+    /// Machine-readable reasons when **`ready_for_generation`** is false.
+    pub blocking_reasons: Vec<String>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoReadinessReasonRollup {
+    pub reason: String,
+    /// Storyboards that fail this check (one shot may contribute to multiple reasons).
+    pub storyboard_count: i64,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoReadinessRollup {
+    pub total_storyboards: i64,
+    pub ready_count: i64,
+    pub blocked_count: i64,
+    pub by_reason: Vec<ShortVideoReadinessReasonRollup>,
+}
+
+/// `GET /api/v1/projects/{project_id}/short-video-readiness`
+#[derive(Serialize, ToSchema)]
+pub struct ProjectShortVideoReadinessResponse {
+    pub schema_version: i32,
+    pub rollup: ShortVideoReadinessRollup,
+    pub storyboards: Vec<StoryboardShortVideoReadiness>,
+}
+
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
 #[derive(Serialize, ToSchema)]
 pub struct ProjectsSummaryResponse {

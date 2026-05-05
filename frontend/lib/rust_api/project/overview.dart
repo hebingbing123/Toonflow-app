@@ -153,6 +153,133 @@ class ProjectStats {
   }
 }
 
+/// `GET /api/v1/projects/{project_id}/short-video-readiness` — see `getProjectShortVideoReadinessByProjectIdV1`.
+
+class ShortVideoReadinessReasonRollup {
+  const ShortVideoReadinessReasonRollup({
+    required this.reason,
+    required this.storyboardCount,
+  });
+
+  final String reason;
+  final int storyboardCount;
+
+  factory ShortVideoReadinessReasonRollup.fromJson(Map<String, dynamic> json) {
+    return ShortVideoReadinessReasonRollup(
+      reason: json['reason'] as String,
+      storyboardCount: (json['storyboard_count'] as num).toInt(),
+    );
+  }
+}
+
+class ShortVideoReadinessRollup {
+  const ShortVideoReadinessRollup({
+    required this.totalStoryboards,
+    required this.readyCount,
+    required this.blockedCount,
+    required this.byReason,
+  });
+
+  final int totalStoryboards;
+  final int readyCount;
+  final int blockedCount;
+  final List<ShortVideoReadinessReasonRollup> byReason;
+
+  factory ShortVideoReadinessRollup.fromJson(Map<String, dynamic> json) {
+    final raw = json['by_reason'] as List<dynamic>? ?? const <dynamic>[];
+    return ShortVideoReadinessRollup(
+      totalStoryboards: (json['total_storyboards'] as num).toInt(),
+      readyCount: (json['ready_count'] as num).toInt(),
+      blockedCount: (json['blocked_count'] as num).toInt(),
+      byReason: raw
+          .map(
+            (e) => ShortVideoReadinessReasonRollup.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+class StoryboardShortVideoReadiness {
+  const StoryboardShortVideoReadiness({
+    required this.storyboardId,
+    required this.storyboardNumericId,
+    this.scriptNumericId,
+    this.sbIndex,
+    required this.hasBasicSlot,
+    required this.hasPromptContext,
+    required this.hasReferenceVisual,
+    required this.candidateCleared,
+    required this.noBlockingJob,
+    required this.readyForGeneration,
+    required this.blockingReasons,
+  });
+
+  final String storyboardId;
+  final int storyboardNumericId;
+  final int? scriptNumericId;
+  final int? sbIndex;
+  final bool hasBasicSlot;
+  final bool hasPromptContext;
+  final bool hasReferenceVisual;
+  final bool candidateCleared;
+  final bool noBlockingJob;
+  final bool readyForGeneration;
+  final List<String> blockingReasons;
+
+  factory StoryboardShortVideoReadiness.fromJson(Map<String, dynamic> json) {
+    final reasons = json['blocking_reasons'] as List<dynamic>? ?? const <dynamic>[];
+    return StoryboardShortVideoReadiness(
+      storyboardId: json['storyboard_id'] as String,
+      storyboardNumericId: (json['storyboard_numeric_id'] as num).toInt(),
+      scriptNumericId: json['script_numeric_id'] == null
+          ? null
+          : (json['script_numeric_id'] as num).toInt(),
+      sbIndex: json['sb_index'] == null
+          ? null
+          : (json['sb_index'] as num).toInt(),
+      hasBasicSlot: json['has_basic_slot'] as bool,
+      hasPromptContext: json['has_prompt_context'] as bool,
+      hasReferenceVisual: json['has_reference_visual'] as bool,
+      candidateCleared: json['candidate_cleared'] as bool,
+      noBlockingJob: json['no_blocking_job'] as bool,
+      readyForGeneration: json['ready_for_generation'] as bool,
+      blockingReasons: reasons.map((e) => e.toString()).toList(),
+    );
+  }
+}
+
+class ProjectShortVideoReadiness {
+  const ProjectShortVideoReadiness({
+    required this.schemaVersion,
+    required this.rollup,
+    required this.storyboards,
+  });
+
+  final int schemaVersion;
+  final ShortVideoReadinessRollup rollup;
+  final List<StoryboardShortVideoReadiness> storyboards;
+
+  factory ProjectShortVideoReadiness.fromJson(Map<String, dynamic> json) {
+    final sb = json['storyboards'] as List<dynamic>? ?? const <dynamic>[];
+    return ProjectShortVideoReadiness(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      rollup: ShortVideoReadinessRollup.fromJson(
+        json['rollup'] as Map<String, dynamic>,
+      ),
+      storyboards: sb
+          .map(
+            (e) => StoryboardShortVideoReadiness.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
 /// `GET /api/v1/projects/{project_id}` — see `getProjectByProjectIdV1`.
 Future<ProjectDetail> fetchProjectByProjectId(
   String accessToken,
@@ -189,4 +316,25 @@ Future<ProjectStats> fetchProjectStatsByProjectId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectStats.fromJson(map);
+}
+
+/// `GET /api/v1/projects/{project_id}/short-video-readiness` — see `getProjectShortVideoReadinessByProjectIdV1`.
+Future<ProjectShortVideoReadiness> fetchProjectShortVideoReadinessByProjectId(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/short-video-readiness',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectShortVideoReadiness.fromJson(map);
 }
