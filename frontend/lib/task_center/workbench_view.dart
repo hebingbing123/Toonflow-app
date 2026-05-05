@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 
+import 'support.dart';
+
 class TaskCenterWorkbenchDialogViewModel {
   const TaskCenterWorkbenchDialogViewModel({
     required this.projectSummary,
@@ -66,6 +68,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
     required this.onRetryFailedJob,
     required this.onCancelQueuedJob,
     required this.onClose,
+    this.onNavigateExportJobDeepLink,
   });
 
   final VoidCallback onLoadProjects;
@@ -78,6 +81,7 @@ class TaskCenterWorkbenchDialogViewCallbacks {
   final ValueChanged<JobRow> onRetryFailedJob;
   final ValueChanged<JobRow> onCancelQueuedJob;
   final VoidCallback onClose;
+  final void Function(TaskCenterExportJobDeepLink link)? onNavigateExportJobDeepLink;
 }
 
 class TaskCenterWorkbenchDialogView extends StatelessWidget {
@@ -236,13 +240,26 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                         title: Text('${job.kind} · ${job.status}'),
-                        subtitle: Text(
-                          [
-                            '#${job.numericTaskId} · ${job.id}',
-                            if (job.errorMessage != null &&
-                                job.errorMessage!.isNotEmpty)
-                              '失败原因=${job.errorMessage}',
-                          ].join('\n'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              [
+                                '#${job.numericTaskId} · ${job.id}',
+                                if (job.errorMessage != null &&
+                                    job.errorMessage!.isNotEmpty)
+                                  '失败原因=${job.errorMessage}',
+                              ].join('\n'),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (job.kind == 'video.export' &&
+                                job.status == 'failed')
+                              _VideoExportFailedSubtitle(
+                                job: job,
+                                onNavigateExportJobDeepLink:
+                                    callbacks.onNavigateExportJobDeepLink,
+                              ),
+                          ],
                         ),
                         trailing:
                             (job.status == 'failed' ||
@@ -349,6 +366,72 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
       actions: [
         TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
       ],
+    );
+  }
+}
+
+class _VideoExportFailedSubtitle extends StatelessWidget {
+  const _VideoExportFailedSubtitle({
+    required this.job,
+    required this.onNavigateExportJobDeepLink,
+  });
+
+  final JobRow job;
+  final void Function(TaskCenterExportJobDeepLink link)?
+      onNavigateExportJobDeepLink;
+
+  @override
+  Widget build(BuildContext context) {
+    final outline = Theme.of(context).colorScheme.outline;
+    final small = Theme.of(context).textTheme.bodySmall;
+    final code = job.errorDetails == null
+        ? null
+        : job.errorDetails!['code'] as String?;
+    final label = videoExportFailureCodeLabelZh(code ?? '');
+    final link = tryParseVideoExportJobDeepLink(job);
+    final deepLinkHandler = onNavigateExportJobDeepLink;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '结构化失败 · $label',
+            style: small?.copyWith(color: outline),
+          ),
+          if (link != null && deepLinkHandler != null) ...[
+            const SizedBox(height: 2),
+            Wrap(
+              spacing: 4,
+              runSpacing: 0,
+              children: [
+                TextButton(
+                  onPressed: () => deepLinkHandler(
+                    TaskCenterExportJobDeepLink(
+                      projectNumericId: link.projectNumericId,
+                      scriptNumericId: link.scriptNumericId,
+                      storyboardNumericId: link.storyboardNumericId,
+                      openProductionWorkspace: true,
+                    ),
+                  ),
+                  child: const Text('打开制作工作区'),
+                ),
+                TextButton(
+                  onPressed: () => deepLinkHandler(
+                    TaskCenterExportJobDeepLink(
+                      projectNumericId: link.projectNumericId,
+                      scriptNumericId: link.scriptNumericId,
+                      storyboardNumericId: link.storyboardNumericId,
+                      openProductionWorkspace: false,
+                    ),
+                  ),
+                  child: const Text('打开剧本工作区'),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

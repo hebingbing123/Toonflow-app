@@ -74,7 +74,7 @@ pub(crate) async fn list_jobs_page(
     let offset = compute_task_page_offset(page, limit);
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1
           AND ($2::text IS NULL OR kind = $2)

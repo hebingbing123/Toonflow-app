@@ -88,7 +88,7 @@ pub(crate) async fn post_cancel_generate(
                     AND (it->>'asset_numeric_id')::int = t.numeric_id
                 )
               )
-            RETURNING j.numeric_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
+            RETURNING j.numeric_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.error_details, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
         )
         SELECT * FROM cancelled
         "#,

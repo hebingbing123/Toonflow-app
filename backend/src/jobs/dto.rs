@@ -16,6 +16,8 @@ pub struct JobRow {
     pub payload: Value,
     pub result: Option<Value>,
     pub error_message: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error_details: Option<Value>,
     pub idempotency_key: Option<String>,
     /// Worker label (`WORKER_ID` env) when `running`; set on claim.
     pub claimed_by: Option<String>,

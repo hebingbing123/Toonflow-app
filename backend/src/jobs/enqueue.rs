@@ -20,7 +20,7 @@ pub async fn enqueue_generation_job(
         r#"
         INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
         VALUES ($1, $2, $3, 'queued', NULL)
-        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(owner_user_id)

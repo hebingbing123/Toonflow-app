@@ -1,14 +1,43 @@
 use futures_util::StreamExt;
-use serde_json::json;
+use serde_json::{json, Map};
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::jobs::worker::JobRunError;
-use crate::jobs::JobRow;
+use crate::jobs::{JobRow, JOB_KIND_VIDEO_EXPORT};
 use crate::state::AppState;
 use crate::vendor::video::{VideoExportRequest, VideoProviderClient};
 
 use super::storage::store_video_reference;
+
+fn structured_video_export_failure(
+    row: &JobRow,
+    code: &'static str,
+    message: impl Into<String>,
+) -> JobRunError {
+    let message = message.into();
+    let p = &row.payload;
+    let mut links = Map::new();
+    for key in [
+        "project_numeric_id",
+        "script_numeric_id",
+        "storyboard_numeric_id",
+    ] {
+        if let Some(n) = p.get(key).and_then(|x| x.as_i64()) {
+            links.insert(key.to_string(), json!(n));
+        }
+    }
+    JobRunError::FailedStructured {
+        message: message.clone(),
+        error_details: json!({
+            "schema_version": 1,
+            "code": code,
+            "job_kind": JOB_KIND_VIDEO_EXPORT,
+            "message": message,
+            "deep_links": links,
+        }),
+    }
+}
 
 pub(crate) async fn run_video_export(
     state: &AppState,
@@ -21,20 +50,30 @@ pub(crate) async fn run_video_export(
     let source_url = p
         .get("source_url")
         .and_then(|x| x.as_str())
-        .ok_or_else(|| JobRunError::Failed("payload missing source_url".into()))?;
+        .ok_or_else(|| {
+            structured_video_export_failure(
+                row,
+                "payload_missing_source_url",
+                "payload missing source_url",
+            )
+        })?;
     let source_url = source_url.trim();
     if source_url.is_empty() {
-        return Err(JobRunError::Failed(
-            "payload source_url cannot be empty".into(),
+        return Err(structured_video_export_failure(
+            row,
+            "payload_source_url_empty",
+            "payload source_url cannot be empty",
         ));
     }
 
     let format = p.get("format").and_then(|x| x.as_str()).unwrap_or("mp4");
     let format_norm = format.trim().to_ascii_lowercase();
     if !matches!(format_norm.as_str(), "mp4" | "mov" | "webm") {
-        return Err(JobRunError::Failed(format!(
-            "payload format must be mp4/mov/webm (got {format})"
-        )));
+        return Err(structured_video_export_failure(
+            row,
+            "payload_format_invalid",
+            format!("payload format must be mp4/mov/webm (got {format})"),
+        ));
     }
     let target_resolution = p.get("target_resolution").and_then(|x| x.as_str());
     let include_audio = p
@@ -60,9 +99,10 @@ pub(crate) async fn run_video_export(
     );
 
     let root = state.local_video_export_dir.as_ref().ok_or_else(|| {
-        JobRunError::Failed(
-            "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot persist exported video artifact"
-                .into(),
+        structured_video_export_failure(
+            row,
+            "local_export_dir_unset",
+            "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot persist exported video artifact",
         )
     })?;
 
@@ -74,22 +114,33 @@ pub(crate) async fn run_video_export(
         include_audio,
     };
 
-    let export_resp = client
-        .export_video(&export_req)
-        .await
-        .map_err(|e| JobRunError::Failed(format!("export failed: {e}")))?;
+    let export_resp = client.export_video(&export_req).await.map_err(|e| {
+        structured_video_export_failure(
+            row,
+            "export_provider_failed",
+            format!("export failed: {e}"),
+        )
+    })?;
 
     let (bytes, content_type) =
-        download_video_bytes_capped(&state.http_client, source_url, &format_norm).await?;
+        download_video_bytes_capped(row, &state.http_client, source_url, &format_norm).await?;
     let user_dir = root.join(row.owner_user_id.to_string());
-    tokio::fs::create_dir_all(&user_dir)
-        .await
-        .map_err(|e| JobRunError::Failed(format!("failed to create export directory: {e}")))?;
+    tokio::fs::create_dir_all(&user_dir).await.map_err(|e| {
+        structured_video_export_failure(
+            row,
+            "export_directory_create_failed",
+            format!("failed to create export directory: {e}"),
+        )
+    })?;
     let file_name = format!("{job_id}.{format_norm}");
     let disk_path = user_dir.join(&file_name);
-    tokio::fs::write(&disk_path, &bytes)
-        .await
-        .map_err(|e| JobRunError::Failed(format!("failed to persist exported video: {e}")))?;
+    tokio::fs::write(&disk_path, &bytes).await.map_err(|e| {
+        structured_video_export_failure(
+            row,
+            "export_file_persist_failed",
+            format!("failed to persist exported video: {e}"),
+        )
+    })?;
     let export_url = format!("/api/v1/jobs/{job_id}/file");
 
     if let (Some(pid), Some(sid)) = (project_numeric_id, storyboard_id) {
@@ -119,20 +170,20 @@ pub(crate) async fn run_video_export(
 const MAX_DOWNLOADED_VIDEO_EXPORT_BYTES: u64 = 512 * 1024 * 1024;
 
 async fn download_video_bytes_capped(
+    row: &JobRow,
     client: &reqwest::Client,
     url: &str,
     expected_format: &str,
 ) -> Result<(Vec<u8>, Option<String>), JobRunError> {
-    let resp = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| JobRunError::Failed(e.to_string()))?;
+    let resp = client.get(url).send().await.map_err(|e| {
+        structured_video_export_failure(row, "video_download_stream", e.to_string())
+    })?;
     if !resp.status().is_success() {
-        return Err(JobRunError::Failed(format!(
-            "video download HTTP {}",
-            resp.status()
-        )));
+        return Err(structured_video_export_failure(
+            row,
+            "video_download_http",
+            format!("video download HTTP {}", resp.status()),
+        ));
     }
     let content_type = resp
         .headers()
@@ -143,26 +194,36 @@ async fn download_video_bytes_capped(
         .map(str::to_string);
     if let Some(actual_format) = infer_video_format(url, content_type.as_deref()) {
         if actual_format != expected_format {
-            return Err(JobRunError::Failed(format!(
-                "requested format {expected_format} does not match downloadable source format {actual_format}; transcoding is not implemented yet"
-            )));
+            return Err(structured_video_export_failure(
+                row,
+                "video_format_mismatch_no_transcode",
+                format!(
+                    "requested format {expected_format} does not match downloadable source format {actual_format}; transcoding is not implemented yet"
+                ),
+            ));
         }
     }
     let max = MAX_DOWNLOADED_VIDEO_EXPORT_BYTES as usize;
     if let Some(cl) = resp.content_length() {
         if cl > max as u64 {
-            return Err(JobRunError::Failed(
-                "video Content-Length exceeds export limit".into(),
+            return Err(structured_video_export_failure(
+                row,
+                "video_content_length_exceeds_limit",
+                "video Content-Length exceeds export limit",
             ));
         }
     }
     let mut stream = resp.bytes_stream();
     let mut out = Vec::new();
     while let Some(item) = stream.next().await {
-        let chunk = item.map_err(|e| JobRunError::Failed(e.to_string()))?;
+        let chunk = item.map_err(|e| {
+            structured_video_export_failure(row, "video_download_stream", e.to_string())
+        })?;
         if out.len().saturating_add(chunk.len()) > max {
-            return Err(JobRunError::Failed(
-                "video body exceeds export limit".into(),
+            return Err(structured_video_export_failure(
+                row,
+                "video_body_exceeds_limit",
+                "video body exceeds export limit",
             ));
         }
         out.extend_from_slice(&chunk);

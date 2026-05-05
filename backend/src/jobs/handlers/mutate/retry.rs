@@ -50,9 +50,9 @@ pub(crate) async fn retry_job(
     let updated = sqlx::query_as::<_, JobRow>(
         r#"
         UPDATE app_generation_job
-        SET status = 'queued', error_message = NULL, result = NULL, claimed_by = NULL, updated_at = NOW()
+        SET status = 'queued', error_message = NULL, result = NULL, error_details = NULL, claimed_by = NULL, updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status = 'failed'
-        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)

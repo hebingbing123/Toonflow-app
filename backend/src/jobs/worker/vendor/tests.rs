@@ -83,6 +83,9 @@ fn vendor_probe_llm_config_without_state_llm_returns_clear_error() {
                 "unexpected message: {message}"
             );
         }
+        JobRunError::FailedStructured { message, .. } => {
+            panic!("unexpected structured failure: {message}");
+        }
         JobRunError::Cancelled => panic!("unexpected cancellation"),
     }
 }

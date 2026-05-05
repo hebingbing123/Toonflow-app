@@ -89,9 +89,9 @@ async fn process_one_job(
             let updated = sqlx::query_as::<_, JobRow>(
                 r#"
                 UPDATE app_generation_job
-                SET status = 'succeeded', result = $1, error_message = NULL, updated_at = NOW()
+                SET status = 'succeeded', result = $1, error_message = NULL, error_details = NULL, updated_at = NOW()
                 WHERE id = $2 AND status = 'running'
-                RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
                 "#,
             )
             .bind(result)
@@ -123,12 +123,36 @@ async fn process_one_job(
             let updated = sqlx::query_as::<_, JobRow>(
                 r#"
                 UPDATE app_generation_job
-                SET status = 'failed', error_message = $1, updated_at = NOW()
+                SET status = 'failed', error_message = $1, error_details = NULL, updated_at = NOW()
                 WHERE id = $2 AND status = 'running'
-                RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
                 "#,
             )
             .bind(msg)
+            .bind(id)
+            .fetch_optional(pool)
+            .await?;
+
+            if let Some(final_row) = updated {
+                observe::generation_job(owner, id, "failed");
+                let text = envelope_generation_job_updated(&final_row);
+                state.notify.broadcast_to_user(owner, text).await;
+            }
+        }
+        Err(JobRunError::FailedStructured {
+            message,
+            error_details,
+        }) => {
+            let updated = sqlx::query_as::<_, JobRow>(
+                r#"
+                UPDATE app_generation_job
+                SET status = 'failed', error_message = $1, error_details = $2, updated_at = NOW()
+                WHERE id = $3 AND status = 'running'
+                RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
+                "#,
+            )
+            .bind(message)
+            .bind(error_details)
             .bind(id)
             .fetch_optional(pool)
             .await?;
@@ -159,7 +183,7 @@ async fn claim_next_job(pool: &PgPool, worker_id: &str) -> Result<Option<JobRow>
         SET status = 'running', claimed_by = $1, updated_at = NOW()
         FROM cte
         WHERE j.id = cte.id
-        RETURNING j.numeric_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
+        RETURNING j.numeric_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.error_details, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
         "#,
     )
     .bind(worker_id)

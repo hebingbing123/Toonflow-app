@@ -21,6 +21,7 @@ fn sample_job_row() -> JobRow {
         payload: json!({ "n": 1 }),
         result: None,
         error_message: None,
+        error_details: None,
         idempotency_key: Some("idem-1".into()),
         claimed_by: None,
         created_at: Utc::now(),

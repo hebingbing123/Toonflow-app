@@ -45,6 +45,9 @@ String summarizeTaskJobs(Iterable<JobRow> rows, {int maxItems = 4}) {
 String formatTaskJobDetails(JobRow row) {
   final payloadKeys = row.payload.keys.take(4).join(', ');
   final resultKeys = row.result?.keys.take(4).join(', ');
+  final errCode = row.errorDetails == null
+      ? null
+      : row.errorDetails!['code'] as String?;
   return [
     '#${row.numericTaskId}',
     row.kind,
@@ -55,7 +58,98 @@ String formatTaskJobDetails(JobRow row) {
       'claimed_by=${row.claimedBy}',
     if (row.errorMessage != null && row.errorMessage!.isNotEmpty)
       'error=${row.errorMessage}',
+    if (errCode != null && errCode.isNotEmpty) 'failure_code=$errCode',
     if (payloadKeys.isNotEmpty) 'payload={$payloadKeys}',
     if (resultKeys != null && resultKeys.isNotEmpty) 'result={$resultKeys}',
   ].join(' · ');
+}
+
+/// Shell navigates workspaces after the task dialog pops (**`video.export`** failed rows).
+class TaskCenterExportJobDeepLink {
+  const TaskCenterExportJobDeepLink({
+    required this.projectNumericId,
+    this.scriptNumericId,
+    this.storyboardNumericId,
+    required this.openProductionWorkspace,
+  });
+
+  final int projectNumericId;
+  final int? scriptNumericId;
+  final int? storyboardNumericId;
+
+  /// **`true`** → 制作工作区；**`false`** → 剧本工作区。
+  final bool openProductionWorkspace;
+}
+
+int? taskCenterDeepLinkInt(Map<String, dynamic>? map, String key) {
+  if (map == null) {
+    return null;
+  }
+  final value = map[key];
+  if (value is num) {
+    return value.toInt();
+  }
+  if (value is String) {
+    return int.tryParse(value);
+  }
+  return null;
+}
+
+TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
+  if (job.kind != 'video.export') {
+    return null;
+  }
+  final payload = job.payload;
+  final rawLinks = job.errorDetails == null
+      ? null
+      : job.errorDetails!['deep_links'];
+  final links = rawLinks is Map<String, dynamic>
+      ? rawLinks
+      : <String, dynamic>{};
+  final project = taskCenterDeepLinkInt(links, 'project_numeric_id') ??
+      taskCenterDeepLinkInt(payload, 'project_numeric_id');
+  if (project == null) {
+    return null;
+  }
+  final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
+      taskCenterDeepLinkInt(payload, 'script_numeric_id');
+  final storyboard = taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
+      taskCenterDeepLinkInt(payload, 'storyboard_numeric_id');
+  return TaskCenterExportJobDeepLink(
+    projectNumericId: project,
+    scriptNumericId: script,
+    storyboardNumericId: storyboard,
+    openProductionWorkspace: true,
+  );
+}
+
+String videoExportFailureCodeLabelZh(String code) {
+  switch (code) {
+    case 'payload_missing_source_url':
+      return '缺少 source_url';
+    case 'payload_source_url_empty':
+      return '成片 URL 为空';
+    case 'payload_format_invalid':
+      return '导出格式无效';
+    case 'local_export_dir_unset':
+      return '服务端未配置导出目录';
+    case 'export_provider_failed':
+      return '导出提供方失败';
+    case 'export_directory_create_failed':
+      return '创建导出目录失败';
+    case 'export_file_persist_failed':
+      return '写入导出文件失败';
+    case 'video_download_http':
+      return '源视频 HTTP 失败';
+    case 'video_download_stream':
+      return '源视频下载中断';
+    case 'video_format_mismatch_no_transcode':
+      return '格式不一致（未转码）';
+    case 'video_content_length_exceeds_limit':
+      return '源视频过大（长度头）';
+    case 'video_body_exceeds_limit':
+      return '源视频过大（正文）';
+    default:
+      return code.isEmpty ? '未知原因码' : code;
+  }
 }

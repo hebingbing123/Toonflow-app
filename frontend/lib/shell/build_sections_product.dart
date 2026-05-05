@@ -217,6 +217,20 @@ extension _HomePageBuildProductSections on _HomePageState {
       TaskCenterSection(
         accessToken: _session?.accessToken,
         initialProjectNumericId: _productScopedProjectNumericId,
+        onNavigateExportJobDeepLink: (TaskCenterExportJobDeepLink link) {
+          setState(() {
+            _productScopedProjectNumericId = link.projectNumericId;
+          });
+          _workspaceInputController.applyProjectScope(
+            link.projectNumericId,
+            scriptNumericId: link.scriptNumericId,
+          );
+          _shellNavigationController.selectProductWorkspacePane(
+            link.openProductionWorkspace
+                ? ProductWorkspacePane.productionWorkspace
+                : ProductWorkspacePane.scriptWorkspace,
+          );
+        },
         loadingTaskProjects: _taskCenterController.loadingTaskProjects,
         loadingTaskCategories: _taskCenterController.loadingTaskCategories,
         loadingTaskApi: _taskCenterController.loadingTaskApi,

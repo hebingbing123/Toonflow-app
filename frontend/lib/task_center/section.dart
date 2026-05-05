@@ -37,6 +37,7 @@ class TaskCenterSection extends StatelessWidget {
     required this.onProbeTaskDetailByNumericId,
     required this.onProbeTaskDetailUuid,
     required this.onSelectTaskJob,
+    this.onNavigateExportJobDeepLink,
   });
 
   final String? accessToken;
@@ -60,6 +61,8 @@ class TaskCenterSection extends StatelessWidget {
   final VoidCallback onProbeTaskDetailByNumericId;
   final VoidCallback onProbeTaskDetailUuid;
   final ValueChanged<JobRow> onSelectTaskJob;
+  final void Function(TaskCenterExportJobDeepLink link)?
+      onNavigateExportJobDeepLink;
 
   Future<void> _openTaskWorkbench(BuildContext context) async {
     final token = accessToken;
@@ -80,6 +83,7 @@ class TaskCenterSection extends StatelessWidget {
         initialNumericIdTaskDetail: taskDetailNumericIdLine,
         initialUuidDetails: taskDetailUuidLine,
         initialJobs: taskApiJobs ?? const <JobRow>[],
+        onNavigateExportJobDeepLink: onNavigateExportJobDeepLink,
       ),
     );
   }

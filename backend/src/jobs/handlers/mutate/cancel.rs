@@ -45,7 +45,7 @@ pub(crate) async fn cancel_job(
         UPDATE app_generation_job
         SET status = 'cancelled', updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status IN ('queued', 'running')
-        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)

@@ -132,6 +132,7 @@ pub(crate) async fn run_voiceover_generate(
         Err(err) => {
             let error_message = match &err {
                 JobRunError::Failed(message) => message.clone(),
+                JobRunError::FailedStructured { message, .. } => message.clone(),
                 JobRunError::Cancelled => "voiceover generation cancelled".to_string(),
             };
             let _ = persist_storyboard_voiceover_metadata(

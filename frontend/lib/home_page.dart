@@ -46,6 +46,7 @@ import 'system_probes/account/controller.dart';
 import 'system_probes/content/controller.dart';
 import 'system_probes/models_catalog/controller.dart';
 import 'task_center/controller.dart';
+import 'task_center/support.dart';
 import 'rust_api.dart';
 
 part 'project_editor/editor.dart';

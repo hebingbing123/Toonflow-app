@@ -44,7 +44,7 @@ pub(crate) async fn create_job(
     if let Some(ref key) = idem {
         if let Some(row) = sqlx::query_as::<_, JobRow>(
             r#"
-            SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+            SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
             FROM app_generation_job
             WHERE owner_user_id = $1 AND idempotency_key = $2
             "#,
@@ -65,7 +65,7 @@ pub(crate) async fn create_job(
         r#"
         INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
         VALUES ($1, $2, $3, 'queued', $4)
-        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(uid)
@@ -83,7 +83,7 @@ pub(crate) async fn create_job(
             };
             sqlx::query_as::<_, JobRow>(
                 r#"
-                SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
                 FROM app_generation_job
                 WHERE owner_user_id = $1 AND idempotency_key = $2
                 "#,

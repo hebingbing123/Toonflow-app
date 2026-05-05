@@ -305,6 +305,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
         'source_url': sourceUrl,
         'format': 'mp4',
         'project_numeric_id': widget.projectNumericId,
+        'script_numeric_id': widget.scriptNumericId,
         'storyboard_numeric_id': widget.storyNumericId,
       },
     );

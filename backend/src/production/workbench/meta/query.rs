@@ -80,7 +80,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
 
     let generating_jobs = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT 0 AS numeric_task_id, id, owner_user_id, kind, status, payload, result, NULL AS error_message, NULL AS idempotency_key, NULL AS claimed_by, created_at, updated_at
+        SELECT 0 AS numeric_task_id, id, owner_user_id, kind, status, payload, result, NULL AS error_message, NULL AS error_details, NULL AS idempotency_key, NULL AS claimed_by, created_at, updated_at
         FROM app_job
         WHERE owner_user_id = $1
           AND kind = $2

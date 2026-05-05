@@ -98,6 +98,7 @@ class JobRow {
     required this.payload,
     this.result,
     this.errorMessage,
+    this.errorDetails,
     this.idempotencyKey,
     this.claimedBy,
     required this.createdAt,
@@ -112,6 +113,8 @@ class JobRow {
   final Map<String, dynamic> payload;
   final Map<String, dynamic>? result;
   final String? errorMessage;
+  /// Structured worker diagnostics when **`status`** is **`failed`** (e.g. **`video.export`** codes + deep_links).
+  final Map<String, dynamic>? errorDetails;
   final String? idempotencyKey;
 
   /// Worker label when `running` (`WORKER_ID` on server); mirrors OpenAPI `claimed_by`.
@@ -131,6 +134,9 @@ class JobRow {
           ? null
           : Map<String, dynamic>.from(json['result'] as Map),
       errorMessage: json['error_message'] as String?,
+      errorDetails: json['error_details'] == null
+          ? null
+          : Map<String, dynamic>.from(json['error_details'] as Map),
       idempotencyKey: json['idempotency_key'] as String?,
       claimedBy: json['claimed_by'] as String?,
       createdAt: json['created_at'] as String,

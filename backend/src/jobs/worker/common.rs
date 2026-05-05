@@ -5,6 +5,11 @@ use uuid::Uuid;
 
 pub(crate) enum JobRunError {
     Failed(String),
+    /// Machine-oriented payload persisted as `app_generation_job.error_details` when status=`failed`.
+    FailedStructured {
+        message: String,
+        error_details: serde_json::Value,
+    },
     Cancelled,
 }
 

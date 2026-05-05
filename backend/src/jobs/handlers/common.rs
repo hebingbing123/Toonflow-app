@@ -97,7 +97,7 @@ pub(crate) async fn fetch_job_by_numeric_task_id(
 ) -> Result<JobRow, ApiError> {
     sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1 AND numeric_task_id = $2
         "#,
@@ -117,7 +117,7 @@ pub(crate) async fn fetch_job_by_id(
 ) -> Result<JobRow, ApiError> {
     sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE id = $1 AND owner_user_id = $2
         "#,

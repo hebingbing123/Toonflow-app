@@ -11,6 +11,7 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
     required this.initialNumericIdTaskDetail,
     required this.initialUuidDetails,
     required this.initialJobs,
+    this.onNavigateExportJobDeepLink,
   });
 
   final String accessToken;
@@ -21,6 +22,8 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
   final String? initialNumericIdTaskDetail;
   final String? initialUuidDetails;
   final List<JobRow> initialJobs;
+  final void Function(TaskCenterExportJobDeepLink link)?
+      onNavigateExportJobDeepLink;
 
   @override
   State<_TaskCenterWorkbenchDialog> createState() =>
@@ -498,6 +501,13 @@ class _TaskCenterWorkbenchDialogState
           _cancelQueuedJob(job);
         },
         onClose: () => Navigator.of(context).pop(),
+        onNavigateExportJobDeepLink:
+            widget.onNavigateExportJobDeepLink == null
+            ? null
+            : (link) {
+                Navigator.of(context).pop();
+                widget.onNavigateExportJobDeepLink!(link);
+              },
       ),
     );
   }
