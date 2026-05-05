@@ -5,6 +5,7 @@
 pub mod chat;
 mod config;
 pub mod images;
+pub mod speech;
 
 pub use chat::completion::ChatCompletionResult;
 pub use chat::parse::TokenUsage;
@@ -14,6 +15,7 @@ pub use images::{
     images_generation_or_edit_url, images_generation_url, resolve_openai_image_model,
     resolve_openai_image_size,
 };
+pub use speech::audio_speech_bytes;
 
 #[cfg(test)]
 pub(crate) use chat::{parse_assistant_content, parse_sse_data_line};

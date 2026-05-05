@@ -119,6 +119,9 @@ mod tests {
             track_id: Some(1),
             flow_id: Some(2),
             sb_index: Some(4),
+            voiceover_state: None,
+            voiceover_audio_url: None,
+            voiceover_error: None,
         }];
 
         let response = build_storyboard_data_response(rows);

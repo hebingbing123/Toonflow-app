@@ -7,6 +7,7 @@
         super::workbench::flow::post_get_flow_data,
         super::workbench::flow::post_save_flow_data,
         super::workbench::video::post_workbench_generate_video,
+        super::workbench::voiceover::post_workbench_generate_voiceover,
         super::workbench::storyboard_ops::query::post_storyboard_polling_image,
         super::workbench::storyboard_ops::export::post_export_image,
         super::workbench::storyboard_ops::batch_generate::post_storyboard_batch_generate_image,

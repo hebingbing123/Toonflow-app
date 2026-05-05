@@ -161,6 +161,7 @@ pub(crate) fn contract_state(pool: sqlx::PgPool, jwt_secret: String) -> AppState
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
         local_video_export_dir: None,
+        local_voiceover_audio_dir: None,
     }
 }
 
@@ -176,6 +177,7 @@ pub(crate) fn smoke_state() -> AppState {
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
         local_video_export_dir: None,
+        local_voiceover_audio_dir: None,
     }
 }
 
@@ -259,6 +261,7 @@ pub(crate) fn contract_state_with_local_dir(
         local_asset_image_dir: Some(dir),
         local_art_style_cover_dir: None,
         local_video_export_dir: None,
+        local_voiceover_audio_dir: None,
     }
 }
 
@@ -278,5 +281,6 @@ pub(crate) fn contract_state_with_local_art_style_dir(
         local_asset_image_dir: None,
         local_art_style_cover_dir: Some(dir),
         local_video_export_dir: None,
+        local_voiceover_audio_dir: None,
     }
 }

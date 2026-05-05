@@ -34,6 +34,18 @@ pub(super) struct ProjectRow {
     pub(super) art_style_pack: Option<String>,
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
     pub(super) story_style_pack: Option<String>,
+    /// 目标市场（如 domestic, overseas, both）
+    pub(super) target_market: Option<String>,
+    /// 目标平台数组（如 ["douyin", "bilibili", "tiktok"]）
+    pub(super) target_platforms: Option<Vec<String>>,
+    /// 时长策略（如 short, medium, long）
+    pub(super) duration_strategy: Option<String>,
+    /// 声线配置标识
+    pub(super) voice_profile: Option<String>,
+    /// 字幕样式标识
+    pub(super) subtitle_style: Option<String>,
+    /// BGM 策略
+    pub(super) bgm_strategy: Option<String>,
 }
 
 #[derive(Debug, FromRow, Serialize)]
@@ -106,6 +118,24 @@ pub(super) struct PatchProjectBody {
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
     #[serde(default)]
     pub(super) story_style_pack: Option<Value>,
+    /// 目标市场（如 domestic, overseas, both）
+    #[serde(default)]
+    pub(super) target_market: Option<Value>,
+    /// 目标平台数组（如 ["douyin", "bilibili", "tiktok"]）
+    #[serde(default)]
+    pub(super) target_platforms: Option<Value>,
+    /// 时长策略（如 short, medium, long）
+    #[serde(default)]
+    pub(super) duration_strategy: Option<Value>,
+    /// 声线配置标识
+    #[serde(default)]
+    pub(super) voice_profile: Option<Value>,
+    /// 字幕样式标识
+    #[serde(default)]
+    pub(super) subtitle_style: Option<Value>,
+    /// BGM 策略
+    #[serde(default)]
+    pub(super) bgm_strategy: Option<Value>,
 }
 
 /// `PATCH /api/v1/projects/{id}/style-config` 请求体
@@ -150,6 +180,24 @@ pub(super) struct CreateProjectBody {
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
     #[serde(default)]
     pub(super) story_style_pack: Option<String>,
+    /// 目标市场（如 domestic, overseas, both）
+    #[serde(default)]
+    pub(super) target_market: Option<String>,
+    /// 目标平台数组（如 ["douyin", "bilibili", "tiktok"]）
+    #[serde(default)]
+    pub(super) target_platforms: Option<Vec<String>>,
+    /// 时长策略（如 short, medium, long）
+    #[serde(default)]
+    pub(super) duration_strategy: Option<String>,
+    /// 声线配置标识
+    #[serde(default)]
+    pub(super) voice_profile: Option<String>,
+    /// 字幕样式标识
+    #[serde(default)]
+    pub(super) subtitle_style: Option<String>,
+    /// BGM 策略
+    #[serde(default)]
+    pub(super) bgm_strategy: Option<String>,
 }
 
 #[cfg(test)]

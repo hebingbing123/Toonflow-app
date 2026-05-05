@@ -89,6 +89,7 @@ mod tests {
             local_asset_image_dir: None,
             local_art_style_cover_dir: None,
             local_video_export_dir: None,
+            local_voiceover_audio_dir: None,
         }
     }
 

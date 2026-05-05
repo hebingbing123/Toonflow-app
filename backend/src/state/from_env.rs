@@ -94,6 +94,16 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
             "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR set; video.export workers will persist video artifacts locally"
         );
     }
+    let local_voiceover_audio_dir = std::env::var("TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .map(std::path::PathBuf::from);
+    if local_voiceover_audio_dir.is_some() {
+        tracing::info!(
+            "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR set; voiceover.generate workers will persist audio artifacts locally"
+        );
+    }
 
     Ok(AppState {
         pool,
@@ -106,5 +116,6 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         local_asset_image_dir,
         local_art_style_cover_dir,
         local_video_export_dir,
+        local_voiceover_audio_dir,
     })
 }

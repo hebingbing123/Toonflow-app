@@ -236,6 +236,29 @@ class GenerateVideoPromptResponse {
   }
 }
 
+class WorkbenchGenerateVoiceoverResponse {
+  const WorkbenchGenerateVoiceoverResponse({
+    required this.total,
+    required this.enqueuedJobIds,
+  });
+
+  final int total;
+  final List<String> enqueuedJobIds;
+
+  factory WorkbenchGenerateVoiceoverResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final rawJobs = json['enqueued'] as List<dynamic>? ?? const [];
+    return WorkbenchGenerateVoiceoverResponse(
+      total: (json['total'] as num?)?.toInt() ?? rawJobs.length,
+      enqueuedJobIds: rawJobs
+          .map((item) => (item as Map<String, dynamic>)['id']?.toString() ?? '')
+          .where((value) => value.isNotEmpty)
+          .toList(growable: false),
+    );
+  }
+}
+
 /// `POST /api/v1/production/workbench/generate-video-prompt` — OpenAPI `postWorkbenchGenerateVideoPromptV1`.
 Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   String accessToken, {
@@ -333,4 +356,47 @@ Future<GetGenerateDataResponse> postWorkbenchGetGenerateDataV1(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return GetGenerateDataResponse.fromJson(map);
+}
+
+/// `POST /api/v1/production/workbench/generate-voiceover`.
+Future<WorkbenchGenerateVoiceoverResponse> postWorkbenchGenerateVoiceoverV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required List<int> storyboardIds,
+  String? voice,
+  double? speed,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/workbench/generate-voiceover',
+  );
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'scriptId': scriptId,
+    'storyboardIds': storyboardIds,
+  };
+  if (voice != null && voice.trim().isNotEmpty) {
+    body['voice'] = voice.trim();
+  }
+  if (speed != null) {
+    body['speed'] = speed;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkbenchGenerateVoiceoverResponse.fromJson(map);
 }

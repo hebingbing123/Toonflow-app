@@ -11,6 +11,9 @@ class ProductionStoryboardItemV1 {
     this.trackId,
     this.flowId,
     this.sbIndex,
+    this.voiceoverState,
+    this.voiceoverAudioUrl,
+    this.voiceoverError,
   });
 
   final int id;
@@ -23,6 +26,9 @@ class ProductionStoryboardItemV1 {
   final int? trackId;
   final int? flowId;
   final int? sbIndex;
+  final String? voiceoverState;
+  final String? voiceoverAudioUrl;
+  final String? voiceoverError;
 
   factory ProductionStoryboardItemV1.fromJson(Map<String, dynamic> json) {
     return ProductionStoryboardItemV1(
@@ -42,6 +48,9 @@ class ProductionStoryboardItemV1 {
       sbIndex: json['sbIndex'] == null
           ? null
           : (json['sbIndex'] as num).toInt(),
+      voiceoverState: json['voiceoverState'] as String?,
+      voiceoverAudioUrl: json['voiceoverAudioUrl'] as String?,
+      voiceoverError: json['voiceoverError'] as String?,
     );
   }
 }

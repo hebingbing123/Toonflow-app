@@ -57,7 +57,9 @@ pub(in crate::production) async fn post_export_image(
             sb.duration,
             sb.state,
             sb.track_id,
-            sb.sb_index
+            sb.sb_index,
+            sb.metadata #>> '{voiceover,audioUrl}' AS voiceover_audio_url,
+            sb.metadata #>> '{voiceover,state}' AS voiceover_state
         FROM app_storyboard sb
         WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])

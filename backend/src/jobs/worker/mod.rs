@@ -9,6 +9,7 @@
 //! - `asset_image` — 资产图片生成
 //! - `vendor` — 提供商测试
 //! - `video` — 视频生成
+//! - `voiceover` — 旁白配音生成
 
 use std::time::Duration;
 
@@ -24,7 +25,7 @@ use super::{
     envelope_generation_job_updated, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
     JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
     JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT,
-    JOB_KIND_VIDEO_GENERATE,
+    JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
 };
 
 mod asset_image;
@@ -32,6 +33,7 @@ mod asset_polish;
 mod common;
 mod vendor;
 mod video;
+mod voiceover;
 
 pub(crate) use common::JobRunError;
 
@@ -207,6 +209,9 @@ async fn execute_kind(
         }
         k if k == JOB_KIND_VIDEO_GENERATE => video::run_video_generate(state, pool, id, row).await,
         k if k == JOB_KIND_VIDEO_EXPORT => video::run_video_export(state, pool, id, row).await,
+        k if k == JOB_KIND_VOICEOVER_GENERATE => {
+            voiceover::run_voiceover_generate(state, pool, id, row).await
+        }
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"
         ))),

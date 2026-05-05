@@ -124,7 +124,9 @@ pub(crate) async fn get_job_file(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = require_pool(&state)?;
     let row = fetch_job_by_id(pool, uid, id).await?;
-    if row.kind != crate::jobs::JOB_KIND_VIDEO_EXPORT {
+    if row.kind != crate::jobs::JOB_KIND_VIDEO_EXPORT
+        && row.kind != crate::jobs::JOB_KIND_VOICEOVER_GENERATE
+    {
         return Err(ApiError::NotFound);
     }
 
@@ -144,10 +146,20 @@ pub(crate) async fn get_job_file(
 
     let result = file.result.0;
     if result.get("storage").and_then(|value| value.as_str()) == Some("local") {
-        let Some(root) = state.local_video_export_dir.as_ref() else {
+        let root = if row.kind == crate::jobs::JOB_KIND_VIDEO_EXPORT {
+            state.local_video_export_dir.as_ref()
+        } else {
+            state.local_voiceover_audio_dir.as_ref()
+        };
+        let Some(root) = root else {
             return Err(ApiError::DatabaseError(
-                "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot serve locally stored exported videos"
-                    .into(),
+                if row.kind == crate::jobs::JOB_KIND_VIDEO_EXPORT {
+                    "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot serve locally stored exported videos"
+                        .into()
+                } else {
+                    "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR is not set; cannot serve locally stored voiceover audio"
+                        .into()
+                },
             ));
         };
         let file_name = result

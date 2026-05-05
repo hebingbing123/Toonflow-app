@@ -26,7 +26,9 @@ pub(crate) async fn get_project_by_id(
         SELECT id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms,
-               art_style_pack, story_style_pack
+               art_style_pack, story_style_pack,
+               target_market, target_platforms, duration_strategy,
+               voice_profile, subtitle_style, bgm_strategy
         FROM app_project
         WHERE id = $1 AND owner_user_id = $2
         "#,

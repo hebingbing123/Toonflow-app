@@ -120,6 +120,8 @@ pub(super) struct StoryboardExportManifestShot {
     subtitle_text: Option<String>,
     subtitle_source: &'static str,
     voiceover_ready: bool,
+    voiceover_audio_url: Option<String>,
+    voiceover_asset_ready: bool,
     image_filename: String,
     image_source: Option<String>,
 }
@@ -166,6 +168,12 @@ impl StoryboardExportManifestShot {
                 row.video_desc.as_deref(),
                 row.prompt.as_deref(),
             ),
+            voiceover_audio_url: row.voiceover_audio_url.clone(),
+            voiceover_asset_ready: row.voiceover_state.as_deref() == Some("completed")
+                && row
+                    .voiceover_audio_url
+                    .as_deref()
+                    .is_some_and(|value| !value.trim().is_empty()),
             image_filename: format!("storyboard-{}.{}", row.numeric_id, extension),
             image_source: row.file_path.clone(),
         }
@@ -202,6 +210,8 @@ pub(super) struct StoryboardExportVoiceoverSegment {
     text: String,
     subtitle_source: &'static str,
     voiceover_ready: bool,
+    voiceover_audio_url: Option<String>,
+    voiceover_asset_ready: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -228,6 +238,8 @@ pub(super) struct StoryboardExportAssemblyShot {
     subtitle_text: String,
     subtitle_source: &'static str,
     voiceover_ready: bool,
+    voiceover_audio_url: Option<String>,
+    voiceover_asset_ready: bool,
     suggested_transition: &'static str,
 }
 
@@ -400,6 +412,8 @@ pub(super) fn build_storyboard_voiceover_segments(
                 text: resolve_shot_script_line(shot),
                 subtitle_source: shot.subtitle_source,
                 voiceover_ready: shot.voiceover_ready,
+                voiceover_audio_url: shot.voiceover_audio_url.clone(),
+                voiceover_asset_ready: shot.voiceover_asset_ready,
             }
         })
         .collect::<Vec<_>>();
@@ -442,6 +456,8 @@ pub(super) fn build_storyboard_assembly_plan(
                 subtitle_text: resolve_shot_script_line(shot),
                 subtitle_source: shot.subtitle_source,
                 voiceover_ready: shot.voiceover_ready,
+                voiceover_audio_url: shot.voiceover_audio_url.clone(),
+                voiceover_asset_ready: shot.voiceover_asset_ready,
                 suggested_transition: "cut",
             }
         })

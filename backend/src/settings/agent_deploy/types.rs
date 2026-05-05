@@ -21,18 +21,18 @@ pub(crate) struct AgentDeployListItem {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct AgentDeployConfigItem {
-    pub(super) model: String,
-    pub(super) model_name: String,
+pub(crate) struct AgentDeployConfigItem {
+    pub(crate) model: String,
+    pub(crate) model_name: String,
     #[serde(default)]
-    pub(super) vendor_id: Option<String>,
+    pub(crate) vendor_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct AgentDeployConfig {
+pub(crate) struct AgentDeployConfig {
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
-    pub(super) rows: HashMap<String, AgentDeployConfigItem>,
+    pub(crate) rows: HashMap<String, AgentDeployConfigItem>,
 }
 
 #[derive(Debug, Serialize)]

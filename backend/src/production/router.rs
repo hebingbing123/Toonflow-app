@@ -30,6 +30,10 @@ pub fn router() -> Router<AppState> {
             post(workbench::video::post_workbench_generate_video),
         )
         .route(
+            "/api/v1/production/workbench/generate-voiceover",
+            post(workbench::voiceover::post_workbench_generate_voiceover),
+        )
+        .route(
             "/api/v1/production/storyboard/polling-image",
             post(workbench::storyboard_ops::post_storyboard_polling_image),
         )

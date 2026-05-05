@@ -9,3 +9,4 @@ pub mod storyboard_ops;
 pub mod track;
 pub mod video;
 pub mod video_prompt_memory;
+pub mod voiceover;

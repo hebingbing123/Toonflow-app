@@ -47,6 +47,8 @@ fn storyboard_csv_quotes_prompt_and_preserves_columns() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(9),
+            voiceover_audio_url: Some("/api/v1/jobs/job-7/file".into()),
+            voiceover_state: Some("completed".into()),
         },
         0,
     );
@@ -73,6 +75,8 @@ fn storyboard_srt_uses_timeline_offsets_and_prompt_text() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(9),
+            voiceover_audio_url: Some("/api/v1/jobs/job-7/file".into()),
+            voiceover_state: Some("completed".into()),
         },
         0,
     );
@@ -86,6 +90,8 @@ fn storyboard_srt_uses_timeline_offsets_and_prompt_text() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(10),
+            voiceover_audio_url: None,
+            voiceover_state: None,
         },
         1,
     );
@@ -108,6 +114,8 @@ fn storyboard_voiceover_script_uses_narration_then_prompt_fallback() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(9),
+            voiceover_audio_url: Some("/api/v1/jobs/job-7/file".into()),
+            voiceover_state: Some("completed".into()),
         },
         0,
     );
@@ -121,6 +129,8 @@ fn storyboard_voiceover_script_uses_narration_then_prompt_fallback() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(10),
+            voiceover_audio_url: None,
+            voiceover_state: None,
         },
         1,
     );
@@ -148,6 +158,8 @@ fn storyboard_voiceover_segments_carry_timeline_and_ready_counts() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(9),
+            voiceover_audio_url: Some("/api/v1/jobs/job-7/file".into()),
+            voiceover_state: Some("completed".into()),
         },
         0,
     );
@@ -161,6 +173,8 @@ fn storyboard_voiceover_segments_carry_timeline_and_ready_counts() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(10),
+            voiceover_audio_url: None,
+            voiceover_state: None,
         },
         1,
     );
@@ -209,6 +223,8 @@ fn storyboard_assembly_plan_carries_edit_timeline_and_audio_counts() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(9),
+            voiceover_audio_url: Some("/api/v1/jobs/job-7/file".into()),
+            voiceover_state: Some("completed".into()),
         },
         0,
     );
@@ -222,6 +238,8 @@ fn storyboard_assembly_plan_carries_edit_timeline_and_audio_counts() {
             state: Some("已完成".into()),
             track_id: Some(3),
             sb_index: Some(10),
+            voiceover_audio_url: None,
+            voiceover_state: None,
         },
         1,
     );

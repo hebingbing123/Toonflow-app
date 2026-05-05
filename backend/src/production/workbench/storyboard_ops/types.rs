@@ -28,6 +28,9 @@ pub(crate) struct ProductionStoryboardItem {
     pub(crate) flow_id: Option<i32>,
     #[sqlx(rename = "sb_index")]
     pub(crate) sb_index: Option<i32>,
+    pub(crate) voiceover_state: Option<String>,
+    pub(crate) voiceover_audio_url: Option<String>,
+    pub(crate) voiceover_error: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -60,6 +63,8 @@ pub(super) struct ExportImageSourceRow {
     pub(super) state: Option<String>,
     pub(super) track_id: Option<i32>,
     pub(super) sb_index: Option<i32>,
+    pub(super) voiceover_audio_url: Option<String>,
+    pub(super) voiceover_state: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -163,6 +168,9 @@ mod tests {
             track_id: Some(3),
             flow_id: Some(4),
             sb_index: Some(5),
+            voiceover_state: Some("completed".to_string()),
+            voiceover_audio_url: Some("/api/v1/jobs/audio/file".to_string()),
+            voiceover_error: None,
         };
         let json = serde_json::to_string(&item).unwrap();
         assert!(json.contains("\"id\":1"));

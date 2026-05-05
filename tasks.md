@@ -44,11 +44,11 @@
 
 ## Phase F - Highest Priority Dubbing Parity
 
-- [ ] 对照 `master` 梳理旧仓库 TTS / Audio 能力边界，明确哪些已经存在、哪些只是接口壳子
-- [ ] 把当前“旁白文案 + voiceover sidecar”升级成正式配音链路设计，不再把它视为低优先级增强
-- [ ] 明确最小可交付路径：旁白文本 -> TTS 请求 -> 音频资产回写 -> 成片装配可消费
-- [ ] 优先补单供应商 TTS 打通，不先做多供应商复杂编排
-- [ ] 给配音链路补状态可见性与失败重试，避免生成成功但没有可复用音频资产
+- [x] 对照 `master` 梳理旧仓库 TTS / Audio 能力边界，明确哪些已经存在、哪些只是接口壳子
+- [x] 把当前“旁白文案 + voiceover sidecar”升级成正式配音链路设计，不再把它视为低优先级增强
+- [x] 明确最小可交付路径：旁白文本 -> TTS 请求 -> 音频资产回写 -> 成片装配可消费
+- [x] 优先补单供应商 TTS 打通，不先做多供应商复杂编排
+- [x] 给配音链路补状态可见性与失败重试，避免生成成功但没有可复用音频资产
 - [ ] 完成后再 review 是否还缺“音频和视频装配一致性”或“声线 / 情绪控制”补口
 
 ## 交付节奏
@@ -97,3 +97,9 @@
   - 旧仓库存在 `AiAudio` / `ttsRequest` / `ttsDubbing` 部署位与供应商模型定义
   - 但现有证据更接近“供应商适配入口 + 音频能力占位”，不是已完整打通的正式短剧配音工作流
   - 因此当前重构分支仍需把“正式配音链路”提升为最高优先级补齐项
+- [x] 打通首版正式配音链路：
+  - 新增 `POST /api/v1/production/workbench/generate-voiceover`，按 storyboard 批量入队 `voiceover.generate`
+  - worker 复用 `ttsDubbing` 模型配置与 OpenAI 兼容 speech 接口，生成本地 mp3 资产
+  - 音频结果通过现有 `GET /api/v1/jobs/{id}/file` 对外提供，不额外发明新文件接口
+  - `app_storyboard.metadata.voiceover` 会持续回写 queued / completed / failed 状态、音频 URL、错误信息与旁白来源文本
+  - 分镜查询与导出装配数据已可消费 `voiceover` 状态，前端状态面板也会展示“已生成配音 / 生成中 / 失败”

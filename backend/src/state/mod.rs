@@ -38,6 +38,9 @@ pub struct AppState {
     /// When set, **`video.export`** workers persist exported video files under
     /// **`{dir}/{user_id}/{job_id}.{ext}`** and serve them via **`GET /api/v1/jobs/{id}/file`**.
     pub local_video_export_dir: Option<PathBuf>,
+    /// When set, **`voiceover.generate`** workers persist synthesized audio files under
+    /// **`{dir}/{user_id}/{job_id}.mp3`** and serve them via **`GET /api/v1/jobs/{id}/file`**.
+    pub local_voiceover_audio_dir: Option<PathBuf>,
 }
 
 impl AppState {

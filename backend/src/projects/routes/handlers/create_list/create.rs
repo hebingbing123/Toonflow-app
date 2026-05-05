@@ -49,13 +49,17 @@ pub(crate) async fn create_project(
           owner_user_id, numeric_id, name, intro, project_type,
           image_model, image_quality, video_model, art_style,
           director_manual, mode, video_ratio, create_time_ms, metadata,
-          art_style_pack, story_style_pack
+          art_style_pack, story_style_pack,
+          target_market, target_platforms, duration_strategy,
+          voice_profile, subtitle_style, bgm_strategy
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, '{}'::jsonb, $14, $15)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, '{}'::jsonb, $14, $15, $16, $17, $18, $19, $20, $21)
         RETURNING id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
-                  art_style_pack, story_style_pack
+                  art_style_pack, story_style_pack,
+                  target_market, target_platforms, duration_strategy,
+                  voice_profile, subtitle_style, bgm_strategy
         "#,
     )
     .bind(uid)
@@ -73,6 +77,12 @@ pub(crate) async fn create_project(
     .bind(now_ms)
     .bind(trim_opt(body.art_style_pack))
     .bind(trim_opt(body.story_style_pack))
+    .bind(trim_opt(body.target_market))
+    .bind(body.target_platforms)
+    .bind(trim_opt(body.duration_strategy))
+    .bind(trim_opt(body.voice_profile))
+    .bind(trim_opt(body.subtitle_style))
+    .bind(trim_opt(body.bgm_strategy))
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

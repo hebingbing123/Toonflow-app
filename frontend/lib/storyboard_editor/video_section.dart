@@ -31,6 +31,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onAddTrack,
     required this.onDeleteTrack,
     required this.onGenerateVideoPrompt,
+    required this.onGenerateVoiceover,
     required this.onOpenPatchRegeneration,
     required this.onApplyPromptRepairs,
     required this.onRefreshVideoData,
@@ -71,6 +72,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final VoidCallback onAddTrack;
   final VoidCallback onDeleteTrack;
   final VoidCallback onGenerateVideoPrompt;
+  final VoidCallback onGenerateVoiceover;
   final VoidCallback onOpenPatchRegeneration;
   final VoidCallback onApplyPromptRepairs;
   final VoidCallback onRefreshVideoData;
@@ -193,9 +195,23 @@ class _StoryboardVideoSection extends StatelessWidget {
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: saving ? null : onSaveVideoDescription,
-            child: const Text('保存字幕/旁白文案'),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              TextButton(
+                onPressed: saving ? null : onSaveVideoDescription,
+                child: const Text('保存字幕/旁白文案'),
+              ),
+              TextButton(
+                onPressed: saving ? null : onGenerateVoiceover,
+                child: Text(
+                  (productionRow?.voiceoverState ?? '').trim() == 'completed'
+                      ? '重新生成配音'
+                      : '生成配音',
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 8),

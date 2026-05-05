@@ -241,6 +241,26 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     await _notifyStoryboardMutated();
   }
 
+  Future<void> _generateVoiceover() async {
+    final response = await postWorkbenchGenerateVoiceoverV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      storyboardIds: [widget.storyNumericId],
+    );
+    await _refreshProductionData();
+    if (!mounted) return;
+    final queuedIds = response.enqueuedJobIds;
+    _applyWorkbenchState(() {
+      _setWorkbenchFollowUp(
+        queuedIds.isEmpty
+            ? '已提交 ${response.total} 条配音任务，可稍后刷新制作数据查看状态。'
+            : '已提交 ${response.total} 条配音任务（job=${queuedIds.first}），可稍后刷新制作数据查看状态。',
+      );
+    });
+    await _notifyStoryboardMutated();
+  }
+
   Future<void> _saveVideoDescription() async {
     final response = await updateStoryboardByProjectAndNumericId(
       widget.token,

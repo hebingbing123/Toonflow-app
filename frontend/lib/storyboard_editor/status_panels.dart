@@ -24,6 +24,16 @@ class _StoryboardPreviewCard extends StatelessWidget {
         productionStoryboard: productionRow,
       ),
     );
+    final voiceoverState = (productionRow?.voiceoverState ?? '').trim();
+    final voiceoverAudioUrl = (productionRow?.voiceoverAudioUrl ?? '').trim();
+    final voiceoverError = (productionRow?.voiceoverError ?? '').trim();
+    final audioDeliveryLine = switch (voiceoverState) {
+      'completed' when voiceoverAudioUrl.isNotEmpty => '已生成配音',
+      'queued' => '配音排队中',
+      'failed' when voiceoverError.isNotEmpty => '配音失败：$voiceoverError',
+      'failed' => '配音失败',
+      _ => narrationSource,
+    };
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -93,7 +103,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
           ],
           const SizedBox(height: 8),
           Text(
-            '音频交付：$narrationSource',
+            '音频交付：$audioDeliveryLine',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
