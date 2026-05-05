@@ -180,6 +180,52 @@ pub struct ProjectAssetsOverviewResponse {
     pub by_asset_type: Vec<AssetsOverviewTypeGroup>,
 }
 
+/// `GET /api/v1/projects/{project_id}/short-video-assembly` — D1 成片装配只读读模型。
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoAssemblyProjectDefaults {
+    pub voice_profile: Option<String>,
+    pub subtitle_style: Option<String>,
+    pub bgm_strategy: Option<String>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoAssemblyShot {
+    pub storyboard_id: Uuid,
+    pub storyboard_numeric_id: i32,
+    pub sb_index: Option<i32>,
+    pub selected_media_url: Option<String>,
+    /// **`none`** \| **`video`** \| **`image`** \| **`other`** — heuristic from URL/path suffix.
+    pub selected_media_kind: String,
+    pub duration: Option<String>,
+    pub state: Option<String>,
+    pub track_id: Option<i32>,
+    /// Same source field as **`app_storyboard.video_desc`** (字幕 / 口播文案)。
+    pub subtitle_text: Option<String>,
+    /// **`explicit_narration`** \| **`prompt_fallback`** \| **`placeholder`**（与导出 manifest 一致）。
+    pub subtitle_source: String,
+    /// Non-placeholder narration text exists for VO/TTS pipelines（与导出 **`voiceover_ready`** 一致）。
+    pub voiceover_script_ready: bool,
+    pub voiceover_state: Option<String>,
+    pub voiceover_audio_url: Option<String>,
+    pub voiceover_error: Option<String>,
+    /// Completed VO asset with non-empty audio URL.
+    pub voiceover_asset_ready: bool,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoAssemblyScriptGroup {
+    pub script_numeric_id: i32,
+    pub script_name: Option<String>,
+    pub shots: Vec<ShortVideoAssemblyShot>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ProjectShortVideoAssemblyResponse {
+    pub schema_version: i32,
+    pub project_defaults: ShortVideoAssemblyProjectDefaults,
+    pub scripts: Vec<ShortVideoAssemblyScriptGroup>,
+}
+
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
 #[derive(Serialize, ToSchema)]
 pub struct ProjectsSummaryResponse {

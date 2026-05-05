@@ -19,6 +19,9 @@ pub use openapi::ProductionApi;
 pub(crate) use quality_gate::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 pub use router::router;
 pub(crate) use types::{VideoItem, WorkbenchGenerateVideoBody};
+pub(crate) use workbench::storyboard_ops::shot_text::{
+    resolve_shot_script_source, resolve_shot_voiceover_ready,
+};
 pub(crate) use workbench::video::generate::{
     infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
 };

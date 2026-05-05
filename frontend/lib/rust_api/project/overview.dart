@@ -418,6 +418,139 @@ class ProjectAssetsOverview {
   }
 }
 
+/// `GET /api/v1/projects/{project_id}/short-video-assembly` — see `getProjectShortVideoAssemblyByProjectIdV1`.
+
+class ShortVideoAssemblyProjectDefaults {
+  const ShortVideoAssemblyProjectDefaults({
+    this.voiceProfile,
+    this.subtitleStyle,
+    this.bgmStrategy,
+  });
+
+  final String? voiceProfile;
+  final String? subtitleStyle;
+  final String? bgmStrategy;
+
+  factory ShortVideoAssemblyProjectDefaults.fromJson(Map<String, dynamic> json) {
+    return ShortVideoAssemblyProjectDefaults(
+      voiceProfile: json['voice_profile'] as String?,
+      subtitleStyle: json['subtitle_style'] as String?,
+      bgmStrategy: json['bgm_strategy'] as String?,
+    );
+  }
+}
+
+class ShortVideoAssemblyShot {
+  const ShortVideoAssemblyShot({
+    required this.storyboardId,
+    required this.storyboardNumericId,
+    this.sbIndex,
+    this.selectedMediaUrl,
+    required this.selectedMediaKind,
+    this.duration,
+    this.state,
+    this.trackId,
+    this.subtitleText,
+    required this.subtitleSource,
+    required this.voiceoverScriptReady,
+    this.voiceoverState,
+    this.voiceoverAudioUrl,
+    this.voiceoverError,
+    required this.voiceoverAssetReady,
+  });
+
+  final String storyboardId;
+  final int storyboardNumericId;
+  final int? sbIndex;
+  final String? selectedMediaUrl;
+  final String selectedMediaKind;
+  final String? duration;
+  final String? state;
+  final int? trackId;
+  final String? subtitleText;
+  final String subtitleSource;
+  final bool voiceoverScriptReady;
+  final String? voiceoverState;
+  final String? voiceoverAudioUrl;
+  final String? voiceoverError;
+  final bool voiceoverAssetReady;
+
+  factory ShortVideoAssemblyShot.fromJson(Map<String, dynamic> json) {
+    return ShortVideoAssemblyShot(
+      storyboardId: json['storyboard_id'] as String,
+      storyboardNumericId: (json['storyboard_numeric_id'] as num).toInt(),
+      sbIndex: json['sb_index'] == null
+          ? null
+          : (json['sb_index'] as num).toInt(),
+      selectedMediaUrl: json['selected_media_url'] as String?,
+      selectedMediaKind: json['selected_media_kind'] as String,
+      duration: json['duration'] as String?,
+      state: json['state'] as String?,
+      trackId: json['track_id'] == null
+          ? null
+          : (json['track_id'] as num).toInt(),
+      subtitleText: json['subtitle_text'] as String?,
+      subtitleSource: json['subtitle_source'] as String,
+      voiceoverScriptReady: json['voiceover_script_ready'] as bool,
+      voiceoverState: json['voiceover_state'] as String?,
+      voiceoverAudioUrl: json['voiceover_audio_url'] as String?,
+      voiceoverError: json['voiceover_error'] as String?,
+      voiceoverAssetReady: json['voiceover_asset_ready'] as bool,
+    );
+  }
+}
+
+class ShortVideoAssemblyScriptGroup {
+  const ShortVideoAssemblyScriptGroup({
+    required this.scriptNumericId,
+    this.scriptName,
+    required this.shots,
+  });
+
+  final int scriptNumericId;
+  final String? scriptName;
+  final List<ShortVideoAssemblyShot> shots;
+
+  factory ShortVideoAssemblyScriptGroup.fromJson(Map<String, dynamic> json) {
+    final raw = json['shots'] as List<dynamic>? ?? const <dynamic>[];
+    return ShortVideoAssemblyScriptGroup(
+      scriptNumericId: (json['script_numeric_id'] as num).toInt(),
+      scriptName: json['script_name'] as String?,
+      shots: raw
+          .map((e) => ShortVideoAssemblyShot.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
+class ProjectShortVideoAssembly {
+  const ProjectShortVideoAssembly({
+    required this.schemaVersion,
+    required this.projectDefaults,
+    required this.scripts,
+  });
+
+  final int schemaVersion;
+  final ShortVideoAssemblyProjectDefaults projectDefaults;
+  final List<ShortVideoAssemblyScriptGroup> scripts;
+
+  factory ProjectShortVideoAssembly.fromJson(Map<String, dynamic> json) {
+    final raw = json['scripts'] as List<dynamic>? ?? const <dynamic>[];
+    return ProjectShortVideoAssembly(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      projectDefaults: ShortVideoAssemblyProjectDefaults.fromJson(
+        json['project_defaults'] as Map<String, dynamic>,
+      ),
+      scripts: raw
+          .map(
+            (e) =>
+                ShortVideoAssemblyScriptGroup.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 /// `GET /api/v1/projects/{project_id}` — see `getProjectByProjectIdV1`.
 Future<ProjectDetail> fetchProjectByProjectId(
   String accessToken,
@@ -517,6 +650,27 @@ Future<ProjectAssetsOverview> fetchProjectAssetsOverviewByProjectId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectAssetsOverview.fromJson(map);
+}
+
+/// `GET /api/v1/projects/{project_id}/short-video-assembly` — see `getProjectShortVideoAssemblyByProjectIdV1`.
+Future<ProjectShortVideoAssembly> fetchProjectShortVideoAssemblyByProjectId(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/short-video-assembly',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectShortVideoAssembly.fromJson(map);
 }
 
 /// Maps backend **`blocking_reasons`** codes to short UI labels (Chinese).

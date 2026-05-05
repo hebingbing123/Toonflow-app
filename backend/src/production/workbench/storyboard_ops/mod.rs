@@ -3,6 +3,7 @@ mod common;
 pub(crate) mod export;
 mod export_source;
 pub(crate) mod query;
+pub(crate) mod shot_text;
 mod types;
 
 #[allow(unused_imports)]

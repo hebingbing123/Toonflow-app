@@ -9,6 +9,7 @@ use zip::write::FileOptions;
 use super::super::export_source::{
     infer_export_extension, parse_storyboard_export_source, StoryboardExportSource,
 };
+use super::super::shot_text::{resolve_shot_script_source, resolve_shot_voiceover_ready};
 use super::super::types::ExportImageSourceRow;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -486,31 +487,6 @@ fn resolve_shot_script_line(shot: &StoryboardExportManifestShot) -> String {
                 .map(str::to_string)
         })
         .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id))
-}
-
-fn resolve_shot_script_source(subtitle_text: Option<&str>, prompt: Option<&str>) -> &'static str {
-    if subtitle_text
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .is_some()
-    {
-        return "explicit_narration";
-    }
-    if prompt
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .is_some()
-    {
-        return "prompt_fallback";
-    }
-    "placeholder"
-}
-
-fn resolve_shot_voiceover_ready(subtitle_text: Option<&str>, prompt: Option<&str>) -> bool {
-    matches!(
-        resolve_shot_script_source(subtitle_text, prompt),
-        "explicit_narration" | "prompt_fallback"
-    )
 }
 
 fn parse_storyboard_duration_seconds(value: Option<&str>) -> i32 {
