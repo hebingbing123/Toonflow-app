@@ -256,6 +256,7 @@ pub(crate) async fn load_auto_negative_prompt(
     }))
 }
 
+#[allow(dead_code)]
 pub(crate) async fn load_auto_negative_prompts(
     pool: &PgPool,
     user_id: Uuid,

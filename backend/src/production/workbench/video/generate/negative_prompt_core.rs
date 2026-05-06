@@ -386,7 +386,9 @@ fn compact_pending_observation_fragments(fragments: Vec<String>) -> Vec<String> 
         if negative_fragment_is_covered(&fragment, &kept) {
             continue;
         }
-        kept.retain(|existing| !negative_fragment_is_covered(existing, &[fragment.clone()]));
+        kept.retain(|existing| {
+            !negative_fragment_is_covered(existing, std::slice::from_ref(&fragment))
+        });
         kept.push(fragment);
     }
     kept
