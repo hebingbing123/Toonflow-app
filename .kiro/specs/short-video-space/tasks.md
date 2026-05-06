@@ -342,10 +342,10 @@
 
 > 本节用于把当前“可演示/可联调”能力补齐到“可生产运营”能力；不推翻 E～G、K 既有成果，重点补真实投递、真实回流、强门禁、多草稿与自动化分层。
 
-- [ ] P1. 发布 adapter **真实能力分层**：为九平台明确 `sandbox/live/manual_bridge`，并在结果/审计中可区分（禁止把 sandbox 成功等同真实发布成功）  
+- [x] P1. 发布 adapter **真实能力分层**：为九平台明确 `sandbox/live/manual_bridge`，并在结果/审计中可区分（禁止把 sandbox 成功等同真实发布成功）  
   - _需求: 7, 12, 9.3_
 
-- [ ] P2. 发布 attempts / jobs 增加 `delivery_mode` 与 `evidence`（request_id / manual_step_id / callback_id），支持平台、项目、时间筛选审计  
+- [x] P2. 发布 attempts / jobs 增加 `delivery_mode` 与 `evidence`（request_id / manual_step_id / callback_id），支持平台、项目、时间筛选审计  
   - _需求: 6, 11, 12_
 
 - [x] P3. **真实平台投递闭环**（优先国内 5，再海外 4）：按平台最小可行真实链路接通（鉴权、投递、状态回查/回调），sandbox 仅保留演练路径  
@@ -360,16 +360,16 @@
 - [x] P6. 预警后进入运营闭环：一键创建“改写文案 / 重新排程 / 重投发布”任务，并回链原 publish draft/job  
   - _需求: 6.2a, 11, 9.3_
 
-- [ ] P7. 导出质量门禁从占位升级为 `off / warn / block`：在 `block` 命中时阻止导出入队，并返回结构化阻断原因与返工入口  
+- [x] P7. 导出质量门禁从占位升级为 `off / warn / block`：在 `block` 命中时阻止导出入队，并返回结构化阻断原因与返工入口  
   - _需求: 4.3, 11, 14.7_
 
 - [x] P8. 发布面板支持 **多草稿主流程**：草稿选择器、批量定时/批量发布/批量清档、批量阻塞摘要（不再默认 first draft 路径）  
   - _需求: 5.2b, 6, 9.3_
 
-- [ ] P9. 自动化模式按平台真实能力生效：前端可选择/展示 `full_auto|semi_auto|manual_assisted`，并由后端校验约束  
+- [x] P9. 自动化模式按平台真实能力生效：前端可选择/展示 `full_auto|semi_auto|manual_assisted`，并由后端校验约束  
   - _需求: 5.6, 12, 9.3_
 
-- [ ] P10. 发布状态机补全生产语义：新增人工桥接状态与超时/补偿分支（如 `manual_pending`、`callback_timeout`、`compensating`），并补迁移测试  
+- [x] P10. 发布状态机补全生产语义：新增人工桥接状态与超时/补偿分支（如 `manual_pending`、`callback_timeout`、`compensating`），并补迁移测试  
   - _需求: 5, 11, 12_
 
 - [x] P11. 发布/表现数据看板口径统一：在 Space 与任务中心中显式展示“真实发布 vs sandbox 发布”与“真实指标 vs mock 指标”  
