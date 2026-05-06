@@ -71,7 +71,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split publish/store.rs into store/ submodules (1345→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.3, 13.1_
 
-- [~] 6. Refactor backend/src/publish/handlers.rs (1100 lines → 6 modules)
+- [-] 6. Refactor backend/src/publish/handlers.rs (1100 lines → 6 modules)
   - Analyze current structure and identify resource-based handler grouping
   - Create `publish/handlers/` directory; move handlers.rs → `handlers/mod.rs` (≈150 lines, router + re-exports)
   - Create `handlers/profile.rs` (≈250 lines) with profile CRUD handlers (list_publish_profiles, create_publish_profile, get_publish_profile, patch_publish_profile, delete_publish_profile)
