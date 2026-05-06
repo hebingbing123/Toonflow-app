@@ -215,6 +215,22 @@ class ShortVideoPublishPanelUi {
     this.publishScheduleCalendarDrafts,
     this.onPublishCalendarDayBulkSchedule,
     this.onOpenPublishTroubleshooting,
+    // P8: Multi-select
+    this.multiSelectMode = false,
+    this.selectedDraftIds = const <String>{},
+    this.onToggleMultiSelectMode,
+    this.onToggleDraftSelection,
+    this.onSelectAllDrafts,
+    this.onClearDraftSelection,
+    this.onBatchScheduleDrafts,
+    this.onBatchPublishDrafts,
+    this.onBatchArchiveDrafts,
+    this.onCompareDrafts,
+    this.batchValidation,
+    // P11: Delivery mode breakdown
+    this.jobsByDeliveryMode = const <String, int>{},
+    this.deliveryModeFilter,
+    this.onDeliveryModeFilterChanged,
   });
 
   final bool visible;
@@ -259,6 +275,24 @@ class ShortVideoPublishPanelUi {
   final List<PublishDraftRow>? publishScheduleCalendarDrafts;
   final PublishCalendarDayCallback? onPublishCalendarDayBulkSchedule;
   final VoidCallback? onOpenPublishTroubleshooting;
+  
+  // P8: Multi-select fields
+  final bool multiSelectMode;
+  final Set<String> selectedDraftIds;
+  final VoidCallback? onToggleMultiSelectMode;
+  final ValueChanged<String>? onToggleDraftSelection;
+  final VoidCallback? onSelectAllDrafts;
+  final VoidCallback? onClearDraftSelection;
+  final void Function(BuildContext context)? onBatchScheduleDrafts;
+  final VoidCallback? onBatchPublishDrafts;
+  final VoidCallback? onBatchArchiveDrafts;
+  final VoidCallback? onCompareDrafts;
+  final PublishBatchValidationResponse? batchValidation;
+  
+  // P11: Delivery mode breakdown
+  final Map<String, int> jobsByDeliveryMode;
+  final String? deliveryModeFilter;
+  final ValueChanged<String>? onDeliveryModeFilterChanged;
 }
 
 /// Server-backed shot readiness slice for Space (see **`GET …/short-video-readiness`**).
@@ -302,6 +336,94 @@ const Map<String, String> kShortVideoPublishPlatformLabels = {
   'instagram_reels': 'Instagram Reels',
   'facebook_reels': 'Facebook Reels',
 };
+
+/// P11: Delivery Mode Badge widget
+class DeliveryModeBadge extends StatelessWidget {
+  const DeliveryModeBadge({
+    super.key,
+    required this.deliveryMode,
+    this.small = false,
+  });
+
+  final String deliveryMode;
+  final bool small;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    Color bgColor;
+    Color textColor;
+    IconData icon;
+    String label;
+    
+    switch (deliveryMode.toLowerCase()) {
+      case 'live':
+        bgColor = Colors.green.shade100;
+        textColor = Colors.green.shade900;
+        icon = Icons.check_circle;
+        label = '真实 ✓';
+        break;
+      case 'sandbox':
+        bgColor = Colors.grey.shade200;
+        textColor = Colors.grey.shade800;
+        icon = Icons.warning_amber;
+        label = '沙盒 ⚠️';
+        break;
+      case 'manual_bridge':
+        bgColor = Colors.blue.shade100;
+        textColor = Colors.blue.shade900;
+        icon = Icons.person;
+        label = '人工 👤';
+        break;
+      default:
+        bgColor = Colors.orange.shade100;
+        textColor = Colors.orange.shade900;
+        icon = Icons.help_outline;
+        label = deliveryMode.isEmpty ? '未知' : deliveryMode;
+    }
+    
+    if (small) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: textColor,
+            fontSize: 10,
+          ),
+        ),
+      );
+    }
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: textColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: textColor),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class ShortVideoSpaceView extends StatelessWidget {
   const ShortVideoSpaceView({
@@ -1113,18 +1235,186 @@ class ShortVideoSpaceView extends StatelessWidget {
                   ],
                   if (publishPanelUi.draftLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    Text(
-                      '发布单（草稿）',
-                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    Row(
+                      children: [
+                        Text(
+                          '发布单（草稿）',
+                          style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                        ),
+                        const Spacer(),
+                        // P8: Multi-select toggle
+                        if (publishPanelUi.onToggleMultiSelectMode != null)
+                          TextButton.icon(
+                            onPressed: publishPanelUi.publishBusy
+                                ? null
+                                : publishPanelUi.onToggleMultiSelectMode,
+                            icon: Icon(
+                              publishPanelUi.multiSelectMode
+                                  ? Icons.check_box
+                                  : Icons.check_box_outline_blank,
+                              size: 18,
+                            ),
+                            label: Text(
+                              publishPanelUi.multiSelectMode ? '退出多选' : '多选模式',
+                              style: theme.textTheme.labelSmall,
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 6),
-                    for (final line in publishPanelUi.draftLines)
+                    // P8: Multi-select toolbar
+                    if (publishPanelUi.multiSelectMode) ...[
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '已选择 ${publishPanelUi.selectedDraftIds.length} 张草稿',
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Spacer(),
+                                TextButton(
+                                  onPressed: publishPanelUi.publishBusy
+                                      ? null
+                                      : publishPanelUi.onSelectAllDrafts,
+                                  child: const Text('全选'),
+                                ),
+                                TextButton(
+                                  onPressed: publishPanelUi.publishBusy
+                                      ? null
+                                      : publishPanelUi.onClearDraftSelection,
+                                  child: const Text('清空'),
+                                ),
+                              ],
+                            ),
+                            if (publishPanelUi.selectedDraftIds.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  if (publishPanelUi.onBatchScheduleDrafts != null)
+                                    FilledButton.tonalIcon(
+                                      onPressed: publishPanelUi.publishBusy
+                                          ? null
+                                          : () => publishPanelUi.onBatchScheduleDrafts?.call(context),
+                                      icon: const Icon(Icons.schedule, size: 18),
+                                      label: const Text('批量定时'),
+                                    ),
+                                  if (publishPanelUi.onBatchPublishDrafts != null)
+                                    FilledButton.icon(
+                                      onPressed: publishPanelUi.publishBusy
+                                          ? null
+                                          : publishPanelUi.onBatchPublishDrafts,
+                                      icon: const Icon(Icons.publish, size: 18),
+                                      label: const Text('批量发布'),
+                                    ),
+                                  if (publishPanelUi.onBatchArchiveDrafts != null)
+                                    OutlinedButton.icon(
+                                      onPressed: publishPanelUi.publishBusy
+                                          ? null
+                                          : publishPanelUi.onBatchArchiveDrafts,
+                                      icon: const Icon(Icons.archive, size: 18),
+                                      label: const Text('批量归档'),
+                                    ),
+                                  if (publishPanelUi.onCompareDrafts != null)
+                                    OutlinedButton.icon(
+                                      onPressed: publishPanelUi.publishBusy
+                                          ? null
+                                          : publishPanelUi.onCompareDrafts,
+                                      icon: const Icon(Icons.compare, size: 18),
+                                      label: const Text('对比草稿'),
+                                    ),
+                                ],
+                              ),
+                            ],
+                            // P8: Batch validation summary
+                            if (publishPanelUi.batchValidation != null) ...[
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '批量验证结果',
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '就绪：${publishPanelUi.batchValidation!.readyCount} 张 · '
+                                      '阻塞：${publishPanelUi.batchValidation!.blockedCount} 张',
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                    if (publishPanelUi.batchValidation!.blockedDrafts.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      ...publishPanelUi.batchValidation!.blockedDrafts.take(3).map(
+                                        (d) => Padding(
+                                          padding: const EdgeInsets.only(top: 2),
+                                          child: Text(
+                                            '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: '
+                                            '${d.blockingReasons.map((r) => r.message).join(", ")}',
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: theme.colorScheme.error,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    // P8: Draft list with checkboxes
+                    for (var i = 0; i < publishPanelUi.publishDraftOptions.length; i++)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          line,
-                          style: theme.textTheme.bodySmall,
-                        ),
+                        child: publishPanelUi.multiSelectMode
+                            ? CheckboxListTile(
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                value: publishPanelUi.selectedDraftIds.contains(
+                                  publishPanelUi.publishDraftOptions[i].id,
+                                ),
+                                onChanged: publishPanelUi.publishBusy
+                                    ? null
+                                    : (checked) {
+                                        publishPanelUi.onToggleDraftSelection?.call(
+                                          publishPanelUi.publishDraftOptions[i].id,
+                                        );
+                                      },
+                                title: Text(
+                                  publishPanelUi.draftLines[i],
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              )
+                            : Text(
+                                publishPanelUi.draftLines[i],
+                                style: theme.textTheme.bodySmall,
+                              ),
                       ),
                   ],
                   if (!publishPanelUi.loading &&
@@ -1172,9 +1462,39 @@ class ShortVideoSpaceView extends StatelessWidget {
                   ],
                   if (publishPanelUi.jobLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    Text(
-                      '发布作业',
-                      style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    Row(
+                      children: [
+                        Text(
+                          '发布作业',
+                          style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                        ),
+                        const Spacer(),
+                        // P11: Delivery mode filter chips
+                        if (publishPanelUi.jobsByDeliveryMode.isNotEmpty)
+                          Wrap(
+                            spacing: 4,
+                            children: publishPanelUi.jobsByDeliveryMode.entries.map((e) {
+                              final isSelected = publishPanelUi.deliveryModeFilter == e.key;
+                              return FilterChip(
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    DeliveryModeBadge(deliveryMode: e.key, small: true),
+                                    const SizedBox(width: 4),
+                                    Text('${e.value}', style: theme.textTheme.labelSmall),
+                                  ],
+                                ),
+                                selected: isSelected,
+                                onSelected: publishPanelUi.onDeliveryModeFilterChanged == null
+                                    ? null
+                                    : (_) => publishPanelUi.onDeliveryModeFilterChanged?.call(e.key),
+                                showCheckmark: false,
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              );
+                            }).toList(),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                     for (final line in publishPanelUi.jobLines)
@@ -1225,6 +1545,46 @@ class ShortVideoSpaceView extends StatelessWidget {
                       style: theme.textTheme.labelSmall?.copyWith(color: outline),
                     ),
                     const SizedBox(height: 6),
+                    // P11: Delivery mode breakdown
+                    if (publishPanelUi.jobsByDeliveryMode.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '作业投递模式分布',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 6,
+                              children: publishPanelUi.jobsByDeliveryMode.entries.map((e) {
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    DeliveryModeBadge(deliveryMode: e.key),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${e.value} 条',
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     for (final line in publishPanelUi.publishOverviewLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
