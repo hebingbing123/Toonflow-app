@@ -333,6 +333,63 @@ pub struct BatchScheduleDraftsResponse {
     pub updated: i64,
 }
 
+/// P8: Batch publish multiple drafts
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchPublishDraftsBody {
+    pub draft_ids: Vec<Uuid>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchPublishDraftsResponse {
+    pub enqueued: i64,
+    pub failed: Vec<BatchOperationFailure>,
+}
+
+/// P8: Batch archive multiple drafts
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchArchiveDraftsBody {
+    pub draft_ids: Vec<Uuid>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchArchiveDraftsResponse {
+    pub archived: i64,
+}
+
+/// P8: Batch validate multiple drafts before operation
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchValidateDraftsBody {
+    pub draft_ids: Vec<Uuid>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchValidateDraftsResponse {
+    pub ready_count: i64,
+    pub blocked_count: i64,
+    pub blocked_drafts: Vec<BlockedDraftSummary>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BlockedDraftSummary {
+    pub draft_id: Uuid,
+    pub title: String,
+    pub blocking_reasons: Vec<PublishPrepareIssue>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct BatchOperationFailure {
+    pub draft_id: Uuid,
+    pub reason: String,
+}
+
 #[derive(Debug, FromRow)]
 pub(crate) struct PublishProfileRow {
     pub(crate) id: Uuid,

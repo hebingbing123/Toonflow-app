@@ -581,6 +581,188 @@ class BatchSchedulePublishDraftsResponse {
   }
 }
 
+/// `POST …/publish/drafts/batch-validate`
+Future<PublishBatchValidationResponse> batchValidatePublishDrafts(
+  String accessToken,
+  String projectId, {
+  required List<String> draftIds,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/batch-validate',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'draft_ids': draftIds,
+        }),
+      )
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PublishBatchValidationResponse.fromJson(map);
+}
+
+/// `POST …/publish/drafts/batch-publish`
+Future<PublishBatchPublishResponse> batchPublishDrafts(
+  String accessToken,
+  String projectId, {
+  required List<String> draftIds,
+  bool immediate = true,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/batch-publish',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'draft_ids': draftIds,
+          'immediate': immediate,
+        }),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PublishBatchPublishResponse.fromJson(map);
+}
+
+/// `POST …/publish/drafts/batch-archive`
+Future<PublishBatchArchiveResponse> batchArchivePublishDrafts(
+  String accessToken,
+  String projectId, {
+  required List<String> draftIds,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/batch-archive',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'draft_ids': draftIds,
+        }),
+      )
+      .timeout(const Duration(seconds: 25));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PublishBatchArchiveResponse.fromJson(map);
+}
+
+class PublishBatchValidationResponse {
+  const PublishBatchValidationResponse({
+    required this.readyCount,
+    required this.blockedCount,
+    required this.blockedDrafts,
+  });
+
+  final int readyCount;
+  final int blockedCount;
+  final List<PublishBlockedDraft> blockedDrafts;
+
+  factory PublishBatchValidationResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['blocked_drafts'] as List<dynamic>? ?? const <dynamic>[];
+    return PublishBatchValidationResponse(
+      readyCount: (json['ready_count'] as num?)?.toInt() ?? 0,
+      blockedCount: (json['blocked_count'] as num?)?.toInt() ?? 0,
+      blockedDrafts: raw
+          .map((e) => PublishBlockedDraft.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
+class PublishBlockedDraft {
+  const PublishBlockedDraft({
+    required this.draftId,
+    required this.title,
+    required this.blockingReasons,
+  });
+
+  final String draftId;
+  final String title;
+  final List<PublishBlockingReason> blockingReasons;
+
+  factory PublishBlockedDraft.fromJson(Map<String, dynamic> json) {
+    final raw = json['blocking_reasons'] as List<dynamic>? ?? const <dynamic>[];
+    return PublishBlockedDraft(
+      draftId: json['draft_id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      blockingReasons: raw
+          .map((e) => PublishBlockingReason.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
+class PublishBlockingReason {
+  const PublishBlockingReason({
+    required this.code,
+    required this.message,
+  });
+
+  final String code;
+  final String message;
+
+  factory PublishBlockingReason.fromJson(Map<String, dynamic> json) {
+    return PublishBlockingReason(
+      code: json['code'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+    );
+  }
+}
+
+class PublishBatchPublishResponse {
+  const PublishBatchPublishResponse({
+    required this.successCount,
+    required this.failedCount,
+    required this.jobIds,
+  });
+
+  final int successCount;
+  final int failedCount;
+  final List<String> jobIds;
+
+  factory PublishBatchPublishResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['job_ids'] as List<dynamic>? ?? const <dynamic>[];
+    return PublishBatchPublishResponse(
+      successCount: (json['success_count'] as num?)?.toInt() ?? 0,
+      failedCount: (json['failed_count'] as num?)?.toInt() ?? 0,
+      jobIds: raw.map((e) => '$e').toList(growable: false),
+    );
+  }
+}
+
+class PublishBatchArchiveResponse {
+  const PublishBatchArchiveResponse({required this.archivedCount});
+
+  final int archivedCount;
+
+  factory PublishBatchArchiveResponse.fromJson(Map<String, dynamic> json) {
+    return PublishBatchArchiveResponse(
+      archivedCount: (json['archived_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class PublishPrepareCheckResponse {
   const PublishPrepareCheckResponse({
     required this.draftId,
@@ -660,6 +842,7 @@ class PublishJobRow {
     required this.draftId,
     required this.status,
     this.errorMessage,
+    this.deliveryMode,
   });
 
   final String id;
@@ -667,6 +850,7 @@ class PublishJobRow {
   final String draftId;
   final String status;
   final String? errorMessage;
+  final String? deliveryMode;
 
   factory PublishJobRow.fromJson(Map<String, dynamic> json) {
     return PublishJobRow(
@@ -675,6 +859,7 @@ class PublishJobRow {
       draftId: json['draft_id'] as String? ?? '',
       status: json['status'] as String? ?? '',
       errorMessage: json['error_message'] as String?,
+      deliveryMode: json['delivery_mode'] as String?,
     );
   }
 }
@@ -690,6 +875,8 @@ class PublishPerformanceAlertRow {
     required this.shares,
     required this.completionRate,
     required this.syncedAt,
+    this.metricSource,
+    this.deliveryMode,
   });
 
   final String targetId;
@@ -701,6 +888,8 @@ class PublishPerformanceAlertRow {
   final int shares;
   final double completionRate;
   final String syncedAt;
+  final String? metricSource;
+  final String? deliveryMode;
 
   factory PublishPerformanceAlertRow.fromJson(Map<String, dynamic> json) {
     return PublishPerformanceAlertRow(
@@ -713,6 +902,8 @@ class PublishPerformanceAlertRow {
       shares: (json['shares'] as num?)?.toInt() ?? 0,
       completionRate: (json['completion_rate'] as num?)?.toDouble() ?? 0.0,
       syncedAt: json['synced_at'] as String? ?? '',
+      metricSource: json['metric_source'] as String?,
+      deliveryMode: json['delivery_mode'] as String?,
     );
   }
 }

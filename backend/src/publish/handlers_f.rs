@@ -17,11 +17,15 @@ use crate::state::AppState;
 use super::access::require_project_owned;
 use super::copy_validate::adapter_copy_issues_for_inputs;
 use super::store::{
-    batch_set_draft_scheduled_at, fetch_draft, list_targets, merge_draft_platform_copy,
+    batch_archive_drafts, batch_set_draft_scheduled_at, fetch_draft, fetch_drafts_by_ids,
+    insert_publish_job, list_targets, merge_draft_platform_copy,
 };
 use super::suggest_copy::suggest_platform_copy_fragment;
 use super::types::{
-    BatchScheduleDraftsBody, BatchScheduleDraftsResponse, PublishValidateCopyBody,
+    BatchArchiveDraftsBody, BatchArchiveDraftsResponse, BatchOperationFailure,
+    BatchPublishDraftsBody, BatchPublishDraftsResponse, BatchScheduleDraftsBody,
+    BatchScheduleDraftsResponse, BatchValidateDraftsBody, BatchValidateDraftsResponse,
+    BlockedDraftSummary, CreatePublishJobBody, PublishValidateCopyBody,
     PublishValidateCopyResponse, SuggestPlatformCopyBody, SuggestPlatformCopyResponse,
 };
 use super::validation::prepare_issues_target_inputs_only;
@@ -35,6 +39,18 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/publish/drafts/batch-schedule",
             post(batch_schedule_publish_drafts),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/publish/drafts/batch-publish",
+            post(batch_publish_drafts),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/publish/drafts/batch-archive",
+            post(batch_archive_publish_drafts),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/publish/drafts/batch-validate",
+            post(batch_validate_publish_drafts),
         )
         .route(
             "/api/v1/projects/{project_id}/publish/drafts/{draft_id}/suggest-platform-copy",
@@ -224,5 +240,176 @@ pub(crate) async fn suggest_publish_platform_copy(
         draft_id,
         platform_copy_fragment: result.fragment,
         source: result.source.to_string(),
+    }))
+}
+
+/// P8: Batch publish multiple drafts
+#[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/publish/drafts/batch-publish",
+    operation_id = "batchPublishDraftsV1",
+    tag = "publish",
+    params(("project_id" = Uuid, Path, description = "Project UUID")),
+    request_body = BatchPublishDraftsBody,
+    responses(
+        (status = 200, description = "OK", body = BatchPublishDraftsResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn batch_publish_drafts(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<BatchPublishDraftsBody>,
+) -> Result<Json<BatchPublishDraftsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_project_owned(pool, uid, project_id).await?;
+
+    let mut enqueued = 0i64;
+    let mut failed = Vec::new();
+
+    for draft_id in &body.draft_ids {
+        // Check if draft exists
+        match fetch_draft(pool, project_id, *draft_id).await? {
+            Some(_) => {
+                // Create publish job
+                let job_body = CreatePublishJobBody {
+                    payload: serde_json::json!({}),
+                };
+                match insert_publish_job(pool, project_id, *draft_id, uid, &job_body).await {
+                    Ok(_) => enqueued += 1,
+                    Err(e) => failed.push(BatchOperationFailure {
+                        draft_id: *draft_id,
+                        reason: format!("{:?}", e),
+                    }),
+                }
+            }
+            None => failed.push(BatchOperationFailure {
+                draft_id: *draft_id,
+                reason: "Draft not found".to_string(),
+            }),
+        }
+    }
+
+    Ok(Json(BatchPublishDraftsResponse { enqueued, failed }))
+}
+
+/// P8: Batch archive multiple drafts
+#[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/publish/drafts/batch-archive",
+    operation_id = "batchArchivePublishDraftsV1",
+    tag = "publish",
+    params(("project_id" = Uuid, Path, description = "Project UUID")),
+    request_body = BatchArchiveDraftsBody,
+    responses(
+        (status = 200, description = "OK", body = BatchArchiveDraftsResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn batch_archive_publish_drafts(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<BatchArchiveDraftsBody>,
+) -> Result<Json<BatchArchiveDraftsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_project_owned(pool, uid, project_id).await?;
+
+    let archived = batch_archive_drafts(pool, project_id, &body.draft_ids).await?;
+    Ok(Json(BatchArchiveDraftsResponse { archived }))
+}
+
+/// P8: Batch validate multiple drafts before operation
+#[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/publish/drafts/batch-validate",
+    operation_id = "batchValidatePublishDraftsV1",
+    tag = "publish",
+    params(("project_id" = Uuid, Path, description = "Project UUID")),
+    request_body = BatchValidateDraftsBody,
+    responses(
+        (status = 200, description = "OK", body = BatchValidateDraftsResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn batch_validate_publish_drafts(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<BatchValidateDraftsBody>,
+) -> Result<Json<BatchValidateDraftsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_project_owned(pool, uid, project_id).await?;
+
+    let drafts = fetch_drafts_by_ids(pool, project_id, &body.draft_ids).await?;
+    let mut ready_count = 0i64;
+    let mut blocked_drafts = Vec::new();
+
+    for draft in drafts {
+        // Fetch targets for this draft
+        let targets = list_targets(pool, draft.id).await?;
+
+        // Basic validation: check if draft has required fields
+        let mut blocking_reasons = Vec::new();
+
+        if draft.video_asset_key.is_none()
+            || draft
+                .video_asset_key
+                .as_ref()
+                .is_none_or(|s| s.trim().is_empty())
+        {
+            blocking_reasons.push(super::types::PublishPrepareIssue {
+                code: "missing_video".to_string(),
+                message: "Video asset is required".to_string(),
+                platform_id: None,
+                severity: "blocking".to_string(),
+            });
+        }
+
+        if draft.title.trim().is_empty() {
+            blocking_reasons.push(super::types::PublishPrepareIssue {
+                code: "missing_title".to_string(),
+                message: "Title is required".to_string(),
+                platform_id: None,
+                severity: "blocking".to_string(),
+            });
+        }
+
+        if targets.is_empty() {
+            blocking_reasons.push(super::types::PublishPrepareIssue {
+                code: "no_targets".to_string(),
+                message: "No publish targets configured".to_string(),
+                platform_id: None,
+                severity: "blocking".to_string(),
+            });
+        }
+
+        if blocking_reasons.is_empty() {
+            ready_count += 1;
+        } else {
+            blocked_drafts.push(BlockedDraftSummary {
+                draft_id: draft.id,
+                title: draft.title.clone(),
+                blocking_reasons,
+            });
+        }
+    }
+
+    let blocked_count = blocked_drafts.len() as i64;
+
+    Ok(Json(BatchValidateDraftsResponse {
+        ready_count,
+        blocked_count,
+        blocked_drafts,
     }))
 }

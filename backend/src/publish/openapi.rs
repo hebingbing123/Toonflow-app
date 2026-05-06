@@ -30,6 +30,9 @@ use utoipa::OpenApi;
         crate::publish::handlers::confirm_publish_job_semi_auto,
         crate::publish::handlers_f::publish_validate_copy,
         crate::publish::handlers_f::batch_schedule_publish_drafts,
+        crate::publish::handlers_f::batch_publish_drafts,
+        crate::publish::handlers_f::batch_archive_publish_drafts,
+        crate::publish::handlers_f::batch_validate_publish_drafts,
         crate::publish::handlers_f::suggest_publish_platform_copy,
     ),
     components(schemas(
@@ -61,6 +64,14 @@ use utoipa::OpenApi;
         crate::publish::types::SuggestPlatformCopyResponse,
         crate::publish::types::BatchScheduleDraftsBody,
         crate::publish::types::BatchScheduleDraftsResponse,
+        crate::publish::types::BatchPublishDraftsBody,
+        crate::publish::types::BatchPublishDraftsResponse,
+        crate::publish::types::BatchArchiveDraftsBody,
+        crate::publish::types::BatchArchiveDraftsResponse,
+        crate::publish::types::BatchValidateDraftsBody,
+        crate::publish::types::BatchValidateDraftsResponse,
+        crate::publish::types::BlockedDraftSummary,
+        crate::publish::types::BatchOperationFailure,
     )),
     tags(
         (name = "publish", description = "Short-video publish drafts, targets, jobs (Wave 4)")

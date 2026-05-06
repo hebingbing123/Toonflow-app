@@ -984,6 +984,22 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   void Function(BuildContext context)? onScheduleFirstDraft,
   void Function(BuildContext context)? onScheduleAllDraftsSameTime,
   PublishCalendarDayCallback? onPublishCalendarDayBulkSchedule,
+  // P8: Multi-select parameters
+  bool multiSelectMode = false,
+  Set<String> selectedDraftIds = const <String>{},
+  VoidCallback? onToggleMultiSelectMode,
+  ValueChanged<String>? onToggleDraftSelection,
+  VoidCallback? onSelectAllDrafts,
+  VoidCallback? onClearDraftSelection,
+  void Function(BuildContext context)? onBatchScheduleDrafts,
+  VoidCallback? onBatchPublishDrafts,
+  VoidCallback? onBatchArchiveDrafts,
+  VoidCallback? onCompareDrafts,
+  PublishBatchValidationResponse? batchValidation,
+  // P11: Delivery mode parameters
+  Map<String, int> jobsByDeliveryMode = const <String, int>{},
+  String? deliveryModeFilter,
+  ValueChanged<String>? onDeliveryModeFilterChanged,
 }) {
   if (!projectSelected) {
     return const ShortVideoPublishPanelUi(visible: false);
@@ -1158,6 +1174,13 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       ? Map<String, dynamic>.from(activeDraft.platformCopy ?? {})
       : <String, dynamic>{};
 
+  // P11: Calculate jobs by delivery mode
+  final jobsByDeliveryModeMap = <String, int>{};
+  for (final job in jobs) {
+    final mode = job.deliveryMode ?? 'unknown';
+    jobsByDeliveryModeMap[mode] = (jobsByDeliveryModeMap[mode] ?? 0) + 1;
+  }
+
   return ShortVideoPublishPanelUi(
     visible: true,
     headline: '已连接发布 API：${drafts.length} 张草稿 · ${jobs.length} 条作业。',
@@ -1200,5 +1223,21 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     onPublishCalendarDayBulkSchedule:
         drafts.isEmpty ? null : onPublishCalendarDayBulkSchedule,
     onOpenPublishTroubleshooting: onOpenPublishTroubleshooting,
+    // P8: Multi-select
+    multiSelectMode: multiSelectMode,
+    selectedDraftIds: selectedDraftIds,
+    onToggleMultiSelectMode: onToggleMultiSelectMode,
+    onToggleDraftSelection: onToggleDraftSelection,
+    onSelectAllDrafts: onSelectAllDrafts,
+    onClearDraftSelection: onClearDraftSelection,
+    onBatchScheduleDrafts: onBatchScheduleDrafts,
+    onBatchPublishDrafts: onBatchPublishDrafts,
+    onBatchArchiveDrafts: onBatchArchiveDrafts,
+    onCompareDrafts: onCompareDrafts,
+    batchValidation: batchValidation,
+    // P11: Delivery mode
+    jobsByDeliveryMode: jobsByDeliveryModeMap,
+    deliveryModeFilter: deliveryModeFilter,
+    onDeliveryModeFilterChanged: onDeliveryModeFilterChanged,
   );
 }

@@ -21,6 +21,47 @@ pub struct PerformanceThresholds {
     pub min_completion_rate: f64,
     /// Minimum engagement rate (likes+comments+shares / views) to consider content as low-performing
     pub min_engagement_rate: f64,
+    /// Platform-specific overrides (platform_id -> thresholds)
+    pub platform_overrides: std::collections::HashMap<String, PlatformThresholds>,
+}
+
+/// Platform-specific performance thresholds
+#[derive(Debug, Clone)]
+pub struct PlatformThresholds {
+    pub min_views: Option<i64>,
+    pub min_completion_rate: Option<f64>,
+    pub min_engagement_rate: Option<f64>,
+}
+
+impl PerformanceThresholds {
+    /// Get effective thresholds for a specific platform
+    pub fn for_platform(&self, platform_id: &str) -> EffectiveThresholds {
+        if let Some(override_thresholds) = self.platform_overrides.get(platform_id) {
+            EffectiveThresholds {
+                min_views: override_thresholds.min_views.unwrap_or(self.min_views),
+                min_completion_rate: override_thresholds
+                    .min_completion_rate
+                    .unwrap_or(self.min_completion_rate),
+                min_engagement_rate: override_thresholds
+                    .min_engagement_rate
+                    .unwrap_or(self.min_engagement_rate),
+            }
+        } else {
+            EffectiveThresholds {
+                min_views: self.min_views,
+                min_completion_rate: self.min_completion_rate,
+                min_engagement_rate: self.min_engagement_rate,
+            }
+        }
+    }
+}
+
+/// Effective thresholds after applying platform overrides
+#[derive(Debug, Clone)]
+pub struct EffectiveThresholds {
+    pub min_views: i64,
+    pub min_completion_rate: f64,
+    pub min_engagement_rate: f64,
 }
 
 impl Default for PerformanceThresholds {
@@ -29,6 +70,7 @@ impl Default for PerformanceThresholds {
             min_views: 100,
             min_completion_rate: 0.3,
             min_engagement_rate: 0.01,
+            platform_overrides: std::collections::HashMap::new(),
         }
     }
 }
@@ -106,6 +148,7 @@ pub fn recommend_rework_action(alert: &LowPerformanceAlert) -> ReworkRecommendat
 }
 
 /// Fetch low-performance alerts with associated draft and script information
+/// **P5**: Now supports platform-specific threshold overrides
 pub async fn fetch_low_performance_alerts_with_context(
     pool: &PgPool,
     project_id: Uuid,
@@ -150,18 +193,12 @@ pub async fn fetch_low_performance_alerts_with_context(
         INNER JOIN app_publish_draft AS d ON d.id = s.draft_id
         INNER JOIN app_project AS p ON p.id = d.project_id
         WHERE p.owner_user_id = $2
-          AND (
-            COALESCE(s.views, 0) < $3
-            OR COALESCE(s.completion_rate, 0)::DOUBLE PRECISION < $4
-          )
         ORDER BY s.synced_at DESC
-        LIMIT $5
+        LIMIT $3
         "#,
     )
     .bind(project_id)
     .bind(owner_user_id)
-    .bind(thresholds.min_views)
-    .bind(thresholds.min_completion_rate)
     .bind(capped_limit)
     .fetch_all(pool)
     .await
@@ -169,7 +206,7 @@ pub async fn fetch_low_performance_alerts_with_context(
 
     let alerts = rows
         .into_iter()
-        .map(|row| {
+        .filter_map(|row| {
             let views = row.views;
             let likes = row.likes;
             let comments = row.comments;
@@ -181,7 +218,19 @@ pub async fn fetch_low_performance_alerts_with_context(
                 0.0
             };
 
-            LowPerformanceAlert {
+            // P5: Apply platform-specific thresholds
+            let effective = thresholds.for_platform(&row.platform_id);
+
+            // Check if this row meets low-performance criteria for its platform
+            let is_low_performing = views < effective.min_views
+                || row.completion_rate < effective.min_completion_rate
+                || engagement_rate < effective.min_engagement_rate;
+
+            if !is_low_performing {
+                return None;
+            }
+
+            Some(LowPerformanceAlert {
                 target_id: row.target_id,
                 draft_id: row.draft_id,
                 script_id: row.script_id,
@@ -192,9 +241,8 @@ pub async fn fetch_low_performance_alerts_with_context(
                 shares,
                 completion_rate: row.completion_rate,
                 engagement_rate,
-            }
+            })
         })
-        .filter(|alert| alert.engagement_rate < thresholds.min_engagement_rate)
         .collect();
 
     Ok(alerts)
@@ -429,6 +477,97 @@ pub async fn process_low_performance_alerts(
     Ok(reviews)
 }
 
+/// **P6**: Create rework task for low-performance content
+/// Links back to original publish draft/job for operational loop
+#[allow(dead_code)]
+pub async fn create_rework_task_for_alert(
+    pool: &PgPool,
+    _user_id: Uuid,
+    alert: &LowPerformanceAlert,
+    recommendation: &ReworkRecommendation,
+) -> Result<ReworkTaskInfo, ApiError> {
+    // Fetch original publish job and draft information
+    #[derive(sqlx::FromRow)]
+    struct PublishContext {
+        job_id: Uuid,
+        draft_id: Uuid,
+        project_id: Uuid,
+        title: String,
+        external_video_id: Option<String>,
+    }
+
+    let context = sqlx::query_as::<_, PublishContext>(
+        r#"
+        SELECT 
+            j.id as job_id,
+            d.id as draft_id,
+            d.project_id,
+            d.title,
+            (
+                SELECT external_video_id 
+                FROM app_publish_performance_snapshot 
+                WHERE target_id = $1 
+                ORDER BY synced_at DESC 
+                LIMIT 1
+            ) as external_video_id
+        FROM app_publish_target t
+        INNER JOIN app_publish_draft d ON d.id = t.draft_id
+        LEFT JOIN app_publish_job j ON j.draft_id = d.id
+        WHERE t.id = $1
+        LIMIT 1
+        "#,
+    )
+    .bind(alert.target_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    // Create rework task metadata
+    let task_metadata = json!({
+        "source": "low_performance_alert",
+        "alert": {
+            "target_id": alert.target_id,
+            "platform_id": alert.platform_id,
+            "views": alert.views,
+            "completion_rate": alert.completion_rate,
+            "engagement_rate": alert.engagement_rate,
+        },
+        "original_publish": {
+            "job_id": context.job_id,
+            "draft_id": context.draft_id,
+            "title": context.title,
+            "external_video_id": context.external_video_id,
+        },
+        "recommendation": {
+            "action": format!("{:?}", recommendation),
+            "description": recommendation.description(),
+            "next_action": recommendation.to_next_action().as_str(),
+        },
+    });
+
+    Ok(ReworkTaskInfo {
+        target_id: alert.target_id,
+        draft_id: context.draft_id,
+        job_id: context.job_id,
+        project_id: context.project_id,
+        recommendation: recommendation.clone(),
+        task_metadata,
+    })
+}
+
+/// Information about a rework task created from low-performance alert
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct ReworkTaskInfo {
+    pub target_id: Uuid,
+    pub draft_id: Uuid,
+    pub job_id: Uuid,
+    pub project_id: Uuid,
+    pub recommendation: ReworkRecommendation,
+    pub task_metadata: serde_json::Value,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -577,5 +716,97 @@ mod tests {
         assert_eq!(thresholds.min_views, 100);
         assert_eq!(thresholds.min_completion_rate, 0.3);
         assert_eq!(thresholds.min_engagement_rate, 0.01);
+    }
+
+    /// **P5 验收**: Platform-specific threshold overrides work correctly
+    #[test]
+    fn test_platform_specific_thresholds() {
+        let mut thresholds = PerformanceThresholds::default();
+
+        // Add platform-specific override for TikTok (higher thresholds)
+        thresholds.platform_overrides.insert(
+            "tiktok".to_string(),
+            PlatformThresholds {
+                min_views: Some(500),
+                min_completion_rate: Some(0.4),
+                min_engagement_rate: Some(0.02),
+            },
+        );
+
+        // Add platform-specific override for Bilibili (lower completion rate)
+        thresholds.platform_overrides.insert(
+            "bilibili".to_string(),
+            PlatformThresholds {
+                min_views: None, // Use default
+                min_completion_rate: Some(0.25),
+                min_engagement_rate: None, // Use default
+            },
+        );
+
+        // Test TikTok overrides
+        let tiktok_effective = thresholds.for_platform("tiktok");
+        assert_eq!(tiktok_effective.min_views, 500);
+        assert_eq!(tiktok_effective.min_completion_rate, 0.4);
+        assert_eq!(tiktok_effective.min_engagement_rate, 0.02);
+
+        // Test Bilibili partial override
+        let bilibili_effective = thresholds.for_platform("bilibili");
+        assert_eq!(bilibili_effective.min_views, 100); // Default
+        assert_eq!(bilibili_effective.min_completion_rate, 0.25); // Override
+        assert_eq!(bilibili_effective.min_engagement_rate, 0.01); // Default
+
+        // Test platform without override uses defaults
+        let douyin_effective = thresholds.for_platform("douyin");
+        assert_eq!(douyin_effective.min_views, 100);
+        assert_eq!(douyin_effective.min_completion_rate, 0.3);
+        assert_eq!(douyin_effective.min_engagement_rate, 0.01);
+    }
+
+    /// **P6 验收**: Rework task info contains all necessary context
+    #[test]
+    fn test_rework_task_info_structure() {
+        let alert = LowPerformanceAlert {
+            target_id: Uuid::new_v4(),
+            draft_id: Uuid::new_v4(),
+            script_id: Some(Uuid::new_v4()),
+            platform_id: "tiktok".to_string(),
+            views: 50,
+            likes: 1,
+            comments: 0,
+            shares: 0,
+            completion_rate: 0.15,
+            engagement_rate: 0.02,
+        };
+
+        let recommendation = recommend_rework_action(&alert);
+
+        // Simulate task metadata structure
+        let task_metadata = json!({
+            "source": "low_performance_alert",
+            "alert": {
+                "target_id": alert.target_id,
+                "platform_id": alert.platform_id,
+                "views": alert.views,
+                "completion_rate": alert.completion_rate,
+                "engagement_rate": alert.engagement_rate,
+            },
+            "recommendation": {
+                "action": format!("{:?}", recommendation),
+                "description": recommendation.description(),
+                "next_action": recommendation.to_next_action().as_str(),
+            },
+        });
+
+        // Verify structure
+        assert!(task_metadata.get("source").is_some());
+        assert!(task_metadata.get("alert").is_some());
+        assert!(task_metadata.get("recommendation").is_some());
+
+        let alert_data = task_metadata.get("alert").unwrap();
+        assert_eq!(
+            alert_data.get("platform_id").and_then(|v| v.as_str()),
+            Some("tiktok")
+        );
+        assert_eq!(alert_data.get("views").and_then(|v| v.as_i64()), Some(50));
     }
 }

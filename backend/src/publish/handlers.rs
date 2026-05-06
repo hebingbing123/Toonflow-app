@@ -1082,6 +1082,7 @@ pub(crate) async fn process_performance_alerts(
         min_views: query.views_lt,
         min_completion_rate: query.completion_rate_lt,
         min_engagement_rate: 0.01, // Default engagement rate threshold
+        platform_overrides: std::collections::HashMap::new(), // P5: No overrides by default
     };
 
     let limit = query.limit;

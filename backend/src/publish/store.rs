@@ -463,6 +463,58 @@ pub(crate) async fn batch_set_draft_scheduled_at(
     Ok(res.rows_affected() as i64)
 }
 
+/// P8: Batch archive drafts
+pub(crate) async fn batch_archive_drafts(
+    pool: &PgPool,
+    project_id: Uuid,
+    draft_ids: &[Uuid],
+) -> Result<i64, ApiError> {
+    if draft_ids.is_empty() {
+        return Ok(0);
+    }
+    let res = sqlx::query(
+        r#"
+        UPDATE app_publish_draft SET
+          draft_status = 'archived',
+          updated_at = NOW()
+        WHERE project_id = $1 AND id = ANY($2::uuid[])
+          AND draft_status != 'archived'
+        "#,
+    )
+    .bind(project_id)
+    .bind(draft_ids)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(res.rows_affected() as i64)
+}
+
+/// P8: Fetch multiple drafts for batch validation
+pub(crate) async fn fetch_drafts_by_ids(
+    pool: &PgPool,
+    project_id: Uuid,
+    draft_ids: &[Uuid],
+) -> Result<Vec<PublishDraftRow>, ApiError> {
+    if draft_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    sqlx::query_as::<_, PublishDraftRow>(
+        r#"
+        SELECT id, project_id, profile_id, script_id, video_asset_key, cover_asset_key,
+               title, description, tags, platform_copy, scheduled_at, draft_status,
+               metadata, created_at, updated_at
+        FROM app_publish_draft
+        WHERE project_id = $1 AND id = ANY($2::uuid[])
+        ORDER BY updated_at DESC
+        "#,
+    )
+    .bind(project_id)
+    .bind(draft_ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
 pub(crate) async fn list_targets(
     pool: &PgPool,
     draft_id: Uuid,
