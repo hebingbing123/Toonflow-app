@@ -356,18 +356,23 @@ mod tests {
             FieldPatch::Set(None)
         ));
 
-        let patch =
-            parse_json_object_patch::<ProjectBrief>(Some(json!({"premise":"复仇"})), "projectBrief")
-                .unwrap();
+        let patch = parse_json_object_patch::<ProjectBrief>(
+            Some(json!({"premise":"复仇"})),
+            "projectBrief",
+        )
+        .unwrap();
         assert!(matches!(patch, FieldPatch::Set(Some(Value::Object(_)))));
     }
 
     #[test]
     fn parse_json_object_patch_rejects_non_object() {
-        let err = parse_json_object_patch::<BrandBible>(Some(json!("bad")), "brandBible")
-            .unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("brandBible must be an object or null"));
+        let err =
+            parse_json_object_patch::<BrandBible>(Some(json!("bad")), "brandBible").unwrap_err();
+        match err {
+            ApiError::BadRequest(message) => {
+                assert!(message.contains("brandBible must be an object or null"));
+            }
+            other => panic!("unexpected error: {other:?}"),
+        }
     }
 }

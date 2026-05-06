@@ -101,7 +101,7 @@ pub(crate) async fn create_project(
                   director_manual, mode, video_ratio, create_time_ms,
                   art_style_pack, story_style_pack,
                   target_market, target_platforms, duration_strategy,
-                  voice_profile, subtitle_style, bgm_strategy
+                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         "#,
     )
     .bind(uid)

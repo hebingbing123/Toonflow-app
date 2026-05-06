@@ -41,7 +41,7 @@ pub(crate) async fn list_projects(
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy
+               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         FROM app_project
         WHERE owner_user_id = $1
         ORDER BY create_time_ms DESC NULLS LAST, numeric_id DESC

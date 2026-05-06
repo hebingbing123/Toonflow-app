@@ -51,27 +51,41 @@
 
 ### 2. 项目立项 + 项目首页竖切
 
-状态：`in_progress`
+状态：`completed`
 
-目标：
+已完成：
 
-- `project_brief`
-- 项目首页驾驶舱
-- `readiness score` 基础版
-- `brand bible` 基础版
-- onboarding 首次进入项目路径
-- 对应定向测试
+- `app_project.project_brief` / `app_project.brand_bible` 落库
+- `GET /api/v1/projects/{project_id}/home` 项目首页读模型
+- `readiness score` / onboarding / `style_bible_ready` 基础版
+- 项目创建弹窗补 `project_brief` / `brand_bible`
+- 现有项目详情入口补“项目首页驾驶舱”卡片与保存回写
+- 顺带修复 `ProjectRow` 查询列不完整导致的潜在运行时映射错误
 
-当前实现策略：
+已提交：
 
-- 优先复用现有项目详情入口
-- 先补项目首页读模型 / API
-- 再补项目立项写字段
-- 最后补前端首页卡片与引导
+- 待本轮提交
+
+已验证：
+
+- `cargo test brief_ready_requires_three_meaningful_fields --lib`
+- `cargo test parse_json_object_patch --lib`
+- `flutter test test/projects_section_test.dart`
+- 触达文件 `flutter analyze` 通过
+
+备注：
+
+- `yarn refactor:check` 已执行
+- OpenAPI drift / rust_api consistency 通过
+- 当前卡在工作区既有脏改动触发的 `cargo fmt --check` 差异：
+  - `backend/src/publish/nine_platform_acceptance_tests/mod.rs`
+  - `backend/src/publish/nine_platform_acceptance_tests/tests/metrics.rs`
+  - `backend/src/publish/nine_platform_acceptance_tests/tests/registry.rs`
+- 这些差异不属于本竖切新增代码
 
 ### 3. 内容接入竖切（主路径）
 
-状态：`pending`
+状态：`in_progress`
 
 ### 4. 改写与上游结构竖切
 
