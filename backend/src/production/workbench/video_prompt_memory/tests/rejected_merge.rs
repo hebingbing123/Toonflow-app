@@ -3,8 +3,8 @@ use super::*;
 #[test]
 fn merge_rejected_video_negative_memory_accumulates_rejection_count_and_deduplicates() {
     let merged = merge_rejected_video_negative_memory(
-        "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=2 | riskTags=motion/lighting | avoid=avoid shaky handheld motion, avoid flat cold lighting",
-        "storyboardIds=12 | subject=晚晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=lighting/emotion | avoid=avoid flat cold lighting, avoid oppressive or frantic mood",
+        "storyboardIds=12 | subject=林晚 | subjectAliases=林晚/晚晚 | rejectionCount=2 | riskTags=motion/lighting | badCaseCategory=lighting_issue | reviewSummary=逆光太硬 | avoid=avoid shaky handheld motion, avoid flat cold lighting",
+        "storyboardIds=12 | subject=晚晚 | subjectAliases=林晚/晚晚 | rejectionCount=1 | riskTags=lighting/emotion | badCaseCategory=dialogue_issue | reviewSummary=台词像读文章 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood",
     );
 
     assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
@@ -13,6 +13,8 @@ fn merge_rejected_video_negative_memory_accumulates_rejection_count_and_deduplic
     assert!(merged.contains("subjectAliases=林晚"));
     assert!(merged.contains("riskTags=emotion/lighting/motion"));
     assert!(merged.contains("focusTags=delivery_realism/identity_continuity/lighting_realism"));
+    assert!(merged.contains("badCaseCategory=dialogue_issue"));
+    assert!(merged.contains("reviewSummary=台词像读文章"));
     assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting"));
     assert!(!merged.contains("avoid oppressive or frantic mood"));
 }

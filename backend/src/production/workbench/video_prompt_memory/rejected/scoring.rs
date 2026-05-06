@@ -262,7 +262,7 @@ pub(in crate::production::workbench::video_prompt_memory) fn score_rejected_vide
     if bias.prefer_delivery
         && tags
             .iter()
-            .any(|tag| matches!(tag.as_str(), "delivery_realism"))
+            .any(|tag| matches!(tag.as_str(), "delivery_realism" | "emotion_arc"))
     {
         score += 28;
     }

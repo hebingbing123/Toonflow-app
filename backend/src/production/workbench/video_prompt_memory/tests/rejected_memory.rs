@@ -204,7 +204,7 @@ fn build_rejected_video_negative_memory_persists_identity_risk_tag_for_face_visi
 #[test]
 fn prepare_rejected_video_negative_memory_for_storage_prefers_delivery_guards_when_bias_is_hot() {
     let prepared = prepare_rejected_video_negative_memory_for_storage(
-        "storyboardIds=12 | rejectionCount=1 | riskTags=lighting/dialogue/performance | avoid=avoid flat cold lighting, avoid blank expression or monotone delivery, avoid lip-sync mismatch",
+        "storyboardIds=12 | rejectionCount=1 | riskTags=lighting/dialogue/performance | focusTags=delivery_realism/emotion_arc | badCaseCategory=dialogue_issue | reviewSummary=台词像读文章 | avoid=avoid flat cold lighting, avoid blank expression or monotone delivery, avoid lip-sync mismatch",
         Some(VideoPromptMemorySelectionBias {
             prefer_delivery: true,
             prefer_visual_continuity: false,
@@ -229,6 +229,11 @@ fn prepare_rejected_video_negative_memory_for_storage_prefers_delivery_guards_wh
         prepared.contains("focusTags=delivery_realism"),
         "{prepared}"
     );
+    assert!(
+        prepared.contains("badCaseCategory=dialogue_issue"),
+        "{prepared}"
+    );
+    assert!(prepared.contains("reviewSummary=台词像读文章"), "{prepared}");
 }
 
 #[test]

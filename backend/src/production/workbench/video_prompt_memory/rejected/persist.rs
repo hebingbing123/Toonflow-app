@@ -442,6 +442,12 @@ fn merge_rejected_video_negative_memory_with_bias(
         .unwrap_or_default();
     let subject_aliases = merged_subject_aliases(existing, incoming, &subject);
     let rejection_count = rejected_video_negative_rejection_count(existing).saturating_add(1);
+    let bad_case_category = extract_key_value(incoming, "badCaseCategory")
+        .or_else(|| extract_key_value(existing, "badCaseCategory"))
+        .unwrap_or_default();
+    let review_summary = extract_key_value(incoming, "reviewSummary")
+        .or_else(|| extract_key_value(existing, "reviewSummary"))
+        .unwrap_or_default();
     let avoid = merge_rejected_negative_avoid_with_bias(
         extract_key_value(existing, "avoid").as_deref(),
         extract_key_value(incoming, "avoid").as_deref(),
@@ -464,6 +470,12 @@ fn merge_rejected_video_negative_memory_with_bias(
         parts.push(format!("subjectAliases={subject_aliases}"));
     }
     parts.push(format!("rejectionCount={rejection_count}"));
+    if !bad_case_category.is_empty() {
+        parts.push(format!("badCaseCategory={bad_case_category}"));
+    }
+    if !review_summary.is_empty() {
+        parts.push(format!("reviewSummary={review_summary}"));
+    }
     if !risk_tags.is_empty() {
         parts.push(format!("riskTags={}", risk_tags.join("/")));
     }

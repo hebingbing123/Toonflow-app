@@ -18,6 +18,18 @@ use super::feedback_generic::{
     SELECTED_MEMORY_PROMOTION_SCORE_THRESHOLD, SEVERE_SCORE_THRESHOLD,
 };
 
+const QUALITY_REVIEW_SUMMARY_MAX_CHARS: usize = 36;
+
+fn compact_quality_review_summary(review: &QualityReview) -> Option<String> {
+    let summary = review
+        .comments
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())?;
+    let clipped = summary.chars().take(QUALITY_REVIEW_SUMMARY_MAX_CHARS).collect::<String>();
+    (!clipped.is_empty()).then_some(clipped)
+}
+
 pub(super) fn should_promote_quality_review_selected_video_memory(review: &QualityReview) -> bool {
     quality_review_storyboard_target_id(review).is_some()
         && !review.is_bad_case
@@ -77,6 +89,20 @@ pub(super) fn build_quality_review_rejected_video_memory(review: &QualityReview)
     let risk_tags = infer_risk_tags(&fragments);
     if !risk_tags.is_empty() {
         parts.push(format!("riskTags={}", risk_tags.join("/")));
+    }
+    if !focus_tags.is_empty() {
+        parts.push(format!("focusTags={}", focus_tags.join("/")));
+    }
+    if let Some(category) = review
+        .bad_case_category
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        parts.push(format!("badCaseCategory={category}"));
+    }
+    if let Some(summary) = compact_quality_review_summary(review) {
+        parts.push(format!("reviewSummary={summary}"));
     }
     parts.push(format!("avoid={}", fragments.join(", ")));
     Some(parts.join(" | "))

@@ -424,7 +424,12 @@ pub(in crate::production::workbench::video_prompt_memory) fn prepare_rejected_vi
     }
 
     let risk_tags = rejected_video_risk_tags_from_avoid(&compacted.join(", "));
-    let focus_tags = rejected_video_focus_tags_from_avoid(&compacted.join(", "));
+    let mut focus_tags = extract_rejected_video_focus_tags(content);
+    for tag in rejected_video_focus_tags_from_avoid(&compacted.join(", ")) {
+        if !focus_tags.iter().any(|existing| existing == &tag) {
+            focus_tags.push(tag);
+        }
+    }
     let mut parts = Vec::new();
     for key in [
         "storyboardIds",
@@ -432,6 +437,8 @@ pub(in crate::production::workbench::video_prompt_memory) fn prepare_rejected_vi
         "subject",
         "subjectAliases",
         "rejectionCount",
+        "badCaseCategory",
+        "reviewSummary",
     ] {
         if let Some(value) = extract_key_value(content, key).filter(|value| !value.is_empty()) {
             parts.push(format!("{key}={value}"));
