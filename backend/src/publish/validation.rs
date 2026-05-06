@@ -17,6 +17,35 @@ pub(crate) fn validate_automation_mode(mode: &str) -> Result<(), &'static str> {
     }
 }
 
+/// **P9**: 验证 automation_mode 是否与平台能力兼容
+///
+/// 当前策略：允许用户选择任何有效的 automation_mode，但会在 prepare_check 中给出警告
+/// 如果选择的模式与平台推荐的 recommended_tier 不一致。
+///
+/// 未来可以根据平台真实能力限制某些模式（例如某些平台不支持 full_auto）。
+pub(crate) fn validate_automation_mode_for_platform(
+    platform_id: &str,
+    automation_mode: &str,
+) -> Result<Option<String>, &'static str> {
+    // 首先验证 automation_mode 本身是否有效
+    validate_automation_mode(automation_mode)?;
+
+    // 获取平台规格
+    let Some(spec) = spec_for_platform(platform_id) else {
+        return Err("unknown platform");
+    };
+
+    // 检查是否与推荐的 tier 一致
+    if automation_mode != spec.recommended_tier {
+        Ok(Some(format!(
+            "平台 {} 推荐使用 {} 模式，当前选择 {}",
+            spec.label_zh, spec.recommended_tier, automation_mode
+        )))
+    } else {
+        Ok(None)
+    }
+}
+
 /// Targets-only checks for **`POST …/publish/validate-copy`** (**F**).
 pub(crate) fn prepare_issues_target_inputs_only(
     targets: &[PublishTargetInput],
@@ -150,6 +179,18 @@ pub(crate) fn prepare_check_for_draft(
             continue;
         };
 
+        // **P9**: 检查 automation_mode 是否与平台能力兼容
+        if let Ok(Some(warning)) =
+            validate_automation_mode_for_platform(&t.platform_id, &t.automation_mode)
+        {
+            issues.push(PublishPrepareIssue {
+                code: "automation_mode_mismatch".into(),
+                message: warning,
+                platform_id: Some(t.platform_id.clone()),
+                severity: "warning".into(),
+            });
+        }
+
         let title_for_platform = platform_title_for_copy(&draft.platform_copy.0, &t.platform_id)
             .unwrap_or_else(|| draft.title.clone());
 
@@ -234,5 +275,37 @@ mod tests {
         assert!(codes.contains(&"duplicate_platform"));
         assert!(codes.contains(&"unknown_platform"));
         assert!(codes.contains(&"negative_serial_order"));
+    }
+
+    /// **P9 验收**: automation_mode 与平台能力兼容性检查
+    #[test]
+    fn p9_automation_mode_platform_compatibility() {
+        use super::validate_automation_mode_for_platform;
+
+        // 测试与推荐模式一致（无警告）
+        let result = validate_automation_mode_for_platform("douyin", "semi_auto");
+        assert!(result.is_ok());
+        assert!(
+            result.unwrap().is_none(),
+            "Should have no warning when matching recommended tier"
+        );
+
+        // 测试与推荐模式不一致（有警告）
+        let result = validate_automation_mode_for_platform("douyin", "full_auto");
+        assert!(result.is_ok());
+        let warning = result.unwrap();
+        assert!(
+            warning.is_some(),
+            "Should have warning when not matching recommended tier"
+        );
+        assert!(warning.unwrap().contains("推荐使用"));
+
+        // 测试无效的 automation_mode
+        let result = validate_automation_mode_for_platform("douyin", "invalid_mode");
+        assert!(result.is_err());
+
+        // 测试未知平台
+        let result = validate_automation_mode_for_platform("unknown_platform", "semi_auto");
+        assert!(result.is_err());
     }
 }
