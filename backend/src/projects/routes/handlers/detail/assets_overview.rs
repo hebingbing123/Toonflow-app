@@ -142,8 +142,22 @@ pub(crate) async fn project_assets_overview_by_id(
         });
     }
 
+    // Compute data version from latest asset updates
+    let data_version: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT MAX(updated_at)::text
+        FROM app_asset
+        WHERE project_id = $1
+        "#,
+    )
+    .bind(resolved_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectAssetsOverviewResponse {
         schema_version: 1,
+        data_version,
         total_count,
         candidate_counts: AssetsOverviewCandidateCounts {
             pending,

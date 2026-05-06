@@ -141,8 +141,33 @@ pub(crate) async fn project_short_video_assembly_by_id(
         .collect();
 
     let effective_tts_voice = resolve_tts_voice(None, header.voice_profile.as_deref());
+
+    // Compute data version from latest storyboard and voiceover updates
+    let data_version: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT MAX(updated_at)::text
+        FROM (
+          SELECT MAX(sb.updated_at) as updated_at
+          FROM app_storyboard sb
+          INNER JOIN app_script sc ON sc.id = sb.script_id
+          WHERE sc.project_id = $1
+          UNION ALL
+          SELECT MAX(vo.updated_at) as updated_at
+          FROM app_voiceover vo
+          INNER JOIN app_storyboard sb ON sb.id = vo.storyboard_id
+          INNER JOIN app_script sc ON sc.id = sb.script_id
+          WHERE sc.project_id = $1
+        ) AS versions
+        "#,
+    )
+    .bind(header.id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectShortVideoAssemblyResponse {
         schema_version: 1,
+        data_version,
         project_defaults: ShortVideoAssemblyProjectDefaults {
             voice_profile: header.voice_profile.clone(),
             subtitle_style: header.subtitle_style.clone(),

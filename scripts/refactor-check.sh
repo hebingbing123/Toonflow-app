@@ -9,6 +9,12 @@ cd "$ROOT"
 echo "==> merged OpenAPI export (YAML parse)"
 (cd backend && cargo run --quiet --bin export-openapi) | ruby -ryaml -e "YAML.load(STDIN.read)"
 
+echo "==> OpenAPI drift detection"
+bash scripts/check_openapi_drift.sh
+
+echo "==> rust_api contract consistency"
+bash scripts/check_rust_api_consistency.sh
+
 echo "==> backend/ (fmt, clippy, test)"
 (
   cd backend

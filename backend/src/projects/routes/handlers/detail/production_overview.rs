@@ -141,8 +141,50 @@ pub(crate) async fn project_production_overview_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    // Compute data version from latest relevant table updates
+    let data_version: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT MAX(updated_at)::text
+        FROM (
+          SELECT MAX(sb.updated_at) as updated_at
+          FROM app_storyboard sb
+          INNER JOIN app_script sc ON sc.id = sb.script_id
+          WHERE sc.project_id = $1
+          UNION ALL
+          SELECT MAX(j.updated_at) as updated_at
+          FROM app_generation_job j
+          WHERE j.owner_user_id = $2
+            AND j.status IN ('queued', 'running')
+            AND (
+              j.payload->>'project_numeric_id' = (
+                SELECT numeric_id::text FROM app_project WHERE id = $1
+              )
+              OR EXISTS (
+                SELECT 1
+                FROM app_storyboard sb
+                INNER JOIN app_script sc ON sc.id = sb.script_id
+                WHERE sc.project_id = $1
+                  AND (j.payload->>'storyboard_numeric_id') IS NOT NULL
+                  AND (j.payload->>'storyboard_numeric_id')::int = sb.numeric_id
+              )
+            )
+          UNION ALL
+          SELECT MAX(q.updated_at) as updated_at
+          FROM app_quality_review q
+          WHERE q.user_id = $2
+            AND q.project_id = (SELECT numeric_id FROM app_project WHERE id = $1)
+        ) AS versions
+        "#,
+    )
+    .bind(resolved_id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectProductionOverviewResponse {
         schema_version: 1,
+        data_version,
         total_storyboard_count,
         ready_storyboard_count,
         running_generation_job_count,

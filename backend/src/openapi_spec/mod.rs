@@ -28,6 +28,9 @@ use utoipa::OpenApi;
         crate::app::handlers::version,
         crate::app::handlers::ready,
         crate::app::handlers::me,
+        crate::app::handlers::get_metrics,
+        crate::app::handlers::get_sli_status,
+        crate::app::handlers::get_sli_definitions,
     ),
     components(schemas(
         crate::app::handlers::HealthResponse,
@@ -35,12 +38,20 @@ use utoipa::OpenApi;
         crate::app::handlers::VersionResponse,
         crate::app::handlers::ReadyResponse,
         crate::app::handlers::MeResponse,
+        crate::app::handlers::metrics::MetricsQuery,
+        crate::app::handlers::metrics::MetricsResponse,
+        crate::app::handlers::metrics::SliStatusResponse,
+        crate::http_kit::metrics::registry::EndpointMetrics,
+        crate::http_kit::metrics::sli::SliDefinition,
+        crate::http_kit::metrics::sli::SliSnapshot,
+        crate::http_kit::metrics::sli::CriticalPath,
         crate::error::ErrorBody,
         crate::state::MemoryConfig,
     )),
     tags(
         (name = "system", description = "Health, readiness, and lightweight probes"),
         (name = "session", description = "Auth probe (Supabase JWT)"),
+        (name = "observability", description = "Metrics, SLIs, and monitoring endpoints"),
     )
 )]
 pub struct CoreHandlersApi;

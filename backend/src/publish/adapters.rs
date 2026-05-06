@@ -11,6 +11,7 @@ pub(crate) struct PublishAdapterResult {
     pub(crate) error_message: Option<String>,
 }
 
+#[derive(Debug)]
 pub(crate) struct PublishMetricsSnapshot {
     pub(crate) metric_window: &'static str,
     pub(crate) views: i64,

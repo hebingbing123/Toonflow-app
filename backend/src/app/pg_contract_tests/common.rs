@@ -151,6 +151,7 @@ pub(crate) async fn read_bytes_response(
 
 pub(crate) fn contract_state(pool: sqlx::PgPool, jwt_secret: String) -> AppState {
     AppState {
+        metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
         pool: Some(pool),
         jwt_secret: Some(jwt_secret.into_bytes()),
         llm: None,
@@ -167,6 +168,7 @@ pub(crate) fn contract_state(pool: sqlx::PgPool, jwt_secret: String) -> AppState
 
 pub(crate) fn smoke_state() -> AppState {
     AppState {
+        metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
         pool: None,
         jwt_secret: Some(TEST_JWT_SECRET.to_vec()),
         llm: None,
@@ -251,6 +253,7 @@ pub(crate) fn contract_state_with_local_dir(
     dir: PathBuf,
 ) -> AppState {
     AppState {
+        metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
         pool: Some(pool),
         jwt_secret: Some(jwt_secret.into_bytes()),
         llm: None,
@@ -271,6 +274,7 @@ pub(crate) fn contract_state_with_local_art_style_dir(
     dir: PathBuf,
 ) -> AppState {
     AppState {
+        metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
         pool: Some(pool),
         jwt_secret: Some(jwt_secret.into_bytes()),
         llm: None,

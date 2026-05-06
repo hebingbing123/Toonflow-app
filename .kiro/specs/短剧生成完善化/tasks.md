@@ -90,21 +90,21 @@
 
 - [x] K.1 Add version conflict detection for timeline reorder save
 - [x] K.2 Change shot duration alignment to minimal field patch
-- [-] K.3 Standardize error messages with status/code/message/request-id
-- [~] K.4 Add cross-panel snapshot versioning with inconsistency alerts
-- [~] K.5 Add metrics and SLI for critical paths
-- [~] K.6 Add OpenAPI drift gate and rust_api contract consistency check
+- [x] K.3 Standardize error messages with status/code/message/request-id
+- [x] K.4 Add cross-panel snapshot versioning with inconsistency alerts
+- [x] K.5 Add metrics and SLI for critical paths
+- [x] K.6 Add OpenAPI drift gate and rust_api contract consistency check
 
 ## Phase L - Production Acceptance Re-Run
 
-- [~] L.1 Redo nine-platform matrix acceptance with real capability
-- [~] L.2 Execute end-to-end regression in staging environment
-- [~] L.3 A/B validate token optimization without quality regression
-- [~] L.4 Final review: feature/quality/token/stability/observability all pass
+- [x] L.1 Redo nine-platform matrix acceptance with real capability
+- [x] L.2 Execute end-to-end regression in staging environment
+- [x] L.3 A/B validate token optimization without quality regression
+- [x] L.4 Final review: feature/quality/token/stability/observability all pass
 
 ## Phase M - Security / Compliance / Idempotency
 
-- [~] M.1 Add signature/timestamp/nonce validation for platform callbacks
+- [-] M.1 Add signature/timestamp/nonce validation for platform callbacks
 - [~] M.2 Add idempotency keys for publish create/confirm/retry/writeback
 - [~] M.3 Unify request-id across publish pipeline for full-chain tracing
 - [~] M.4 Mask sensitive fields in audit details
@@ -113,31 +113,31 @@
 
 ## Phase N - Operability / DR / Data Lifecycle
 
-- [~] N.1 Define and implement publish SLA and timeout alerts
-- [~] N.2 Provide runbooks for critical failure scenarios
-- [~] N.3 Establish publish and performance data archival strategy
-- [~] N.4 Add pagination/cursor support for large project scenarios
-- [~] N.5 Add gradual rollout and fast rollback switches
-- [~] N.6 Add production drill day checklist
+- [ ] N.1 Define and implement publish SLA and timeout alerts
+- [ ] N.2 Provide runbooks for critical failure scenarios
+- [ ] N.3 Establish publish and performance data archival strategy
+- [ ] N.4 Add pagination/cursor support for large project scenarios
+- [ ] N.5 Add gradual rollout and fast rollback switches
+- [ ] N.6 Add production drill day checklist
 
 ## Phase O - FinOps / Governance / Release Safety
 
-- [~] O.1 Build cost attribution dashboard for publish and quality pipeline
-- [~] O.2 Establish quality baseline set for token optimization validation
-- [~] O.3 Add real vs mock metrics isolation and dashboard labels
-- [~] O.4 Add callback and retry data reconciliation task
-- [~] O.5 Add migration/backfill runbooks for critical schema changes
-- [~] O.6 Make publish strategy config auditable
-- [~] O.7 Introduce feature flag governance for production features
-- [~] O.8 Add pre-launch go/no-go checklist
+- [ ] O.1 Build cost attribution dashboard for publish and quality pipeline
+- [ ] O.2 Establish quality baseline set for token optimization validation
+- [ ] O.3 Add real vs mock metrics isolation and dashboard labels
+- [ ] O.4 Add callback and retry data reconciliation task
+- [ ] O.5 Add migration/backfill runbooks for critical schema changes
+- [ ] O.6 Make publish strategy config auditable
+- [ ] O.7 Introduce feature flag governance for production features
+- [ ] O.8 Add pre-launch go/no-go checklist
 
 ## Phase P - UX and Human-in-the-loop Completeness
 
-- [~] P.1 Complete audio-video assembly consistency review and fix
-- [~] P.2 Add manual bridge publish operation panel
-- [~] P.3 Add operation preview and impact confirmation for multi-draft/platform ops
-- [~] P.4 Add one-click recovery entry for failure states
-- [~] P.5 Standardize status labels with real capability tags
+- [ ] P.1 Complete audio-video assembly consistency review and fix
+- [ ] P.2 Add manual bridge publish operation panel
+- [ ] P.3 Add operation preview and impact confirmation for multi-draft/platform ops
+- [ ] P.4 Add one-click recovery entry for failure states
+- [ ] P.5 Standardize status labels with real capability tags
 
 ## 交付节奏
 

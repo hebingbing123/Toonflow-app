@@ -12,6 +12,7 @@ use crate::state::WsNotifyHub;
 
 fn test_state_without_llm() -> AppState {
     AppState {
+        metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
         pool: None,
         jwt_secret: None,
         llm: None,

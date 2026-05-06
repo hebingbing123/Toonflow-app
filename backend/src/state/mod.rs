@@ -12,6 +12,7 @@ use sqlx::PgPool;
 use tokio::sync::RwLock;
 
 use crate::error::ApiError;
+use crate::http_kit::metrics::MetricsRegistry;
 use crate::llm::LlmConfig;
 
 pub use memory_config::MemoryConfig;
@@ -41,6 +42,8 @@ pub struct AppState {
     /// When set, **`voiceover.generate`** workers persist synthesized audio files under
     /// **`{dir}/{user_id}/{job_id}.mp3`** and serve them via **`GET /api/v1/jobs/{id}/file`**.
     pub local_voiceover_audio_dir: Option<PathBuf>,
+    /// Metrics registry for request tracking and SLI monitoring
+    pub metrics_registry: Arc<MetricsRegistry>,
 }
 
 impl AppState {

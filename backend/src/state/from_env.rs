@@ -9,6 +9,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use super::{AppState, MemoryConfig, WsNotifyHub};
+use crate::http_kit::metrics::MetricsRegistry;
 use crate::llm::LlmConfig;
 
 const ENV_SWITCH_AI_DEV_TOOL: &str = "TOONFLOW_SWITCH_AI_DEV_TOOL";
@@ -117,5 +118,6 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         local_art_style_cover_dir,
         local_video_export_dir,
         local_voiceover_audio_dir,
+        metrics_registry: Arc::new(MetricsRegistry::default()),
     })
 }

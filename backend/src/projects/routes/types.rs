@@ -143,6 +143,9 @@ pub struct ProjectShortVideoReadinessResponse {
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProjectProductionOverviewResponse {
     pub schema_version: i32,
+    /// Snapshot version for cross-panel consistency checking (ISO 8601 timestamp).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data_version: Option<String>,
     /// Same readiness rule as **`/short-video-readiness`** (**`ready_for_generation`**).
     pub ready_storyboard_count: i64,
     pub total_storyboard_count: i64,
@@ -182,6 +185,9 @@ pub struct AssetsOverviewTypeGroup {
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProjectAssetsOverviewResponse {
     pub schema_version: i32,
+    /// Snapshot version for cross-panel consistency checking (ISO 8601 timestamp).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data_version: Option<String>,
     pub total_count: i64,
     pub candidate_counts: AssetsOverviewCandidateCounts,
     pub by_asset_type: Vec<AssetsOverviewTypeGroup>,
@@ -268,6 +274,9 @@ pub struct ShortVideoCandidateQualitySummary {
 #[derive(Serialize, ToSchema)]
 pub struct ProjectShortVideoAssemblyResponse {
     pub schema_version: i32,
+    /// Snapshot version for cross-panel consistency checking (ISO 8601 timestamp).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data_version: Option<String>,
     pub project_defaults: ShortVideoAssemblyProjectDefaults,
     pub effective_short_video_defaults: ShortVideoAssemblyEffectiveDefaults,
     /// 与 **`scripts`** 中分镜集合对齐的质量验收摘要（L3）。
@@ -308,6 +317,9 @@ pub struct ShortVideoExportQualityGatePlaceholder {
 #[derive(Serialize, ToSchema)]
 pub struct ProjectShortVideoExportCheckResponse {
     pub schema_version: i32,
+    /// Snapshot version for cross-panel consistency checking (ISO 8601 timestamp).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data_version: Option<String>,
     pub export_ready: bool,
     pub summary: ShortVideoExportCheckSummary,
     pub issues: Vec<ShortVideoExportCheckIssue>,

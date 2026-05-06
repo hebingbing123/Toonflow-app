@@ -10,6 +10,7 @@ pub(crate) use common::*;
 mod assets_suite;
 mod business_suite;
 mod content_suite;
+mod e2e_regression_suite;
 mod narrative_suite;
 mod ops_suite;
 mod production_suite;

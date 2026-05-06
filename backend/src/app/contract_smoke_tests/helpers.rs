@@ -41,6 +41,7 @@ pub(super) fn test_addr() -> SocketAddr {
 
 pub(super) fn smoke_state() -> AppState {
     AppState {
+        metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
         pool: None,
         jwt_secret: Some(TEST_JWT_SECRET.to_vec()),
         llm: None,
@@ -58,6 +59,7 @@ pub(super) fn smoke_state() -> AppState {
 /// Same as [`smoke_state`] but JWT verification is disabled (production analogue: **`SUPABASE_JWT_SECRET` unset**).
 pub(super) fn smoke_state_without_jwt_secret() -> AppState {
     AppState {
+        metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
         pool: None,
         jwt_secret: None,
         llm: None,

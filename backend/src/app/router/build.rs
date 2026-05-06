@@ -107,6 +107,13 @@ pub fn build_router(state: AppState) -> Router {
         .route("/api/v1/ping", get(handlers::ping))
         .route("/api/v1/version", get(handlers::version))
         .route("/api/v1/ready", get(handlers::ready))
+        // Metrics endpoints
+        .route("/api/v1/metrics", get(handlers::get_metrics))
+        .route("/api/v1/metrics/sli", get(handlers::get_sli_status))
+        .route(
+            "/api/v1/metrics/sli/definitions",
+            get(handlers::get_sli_definitions),
+        )
         .with_state(state)
         .layer(from_fn(inject_request_id_into_json_errors))
         .layer(tower_http::request_id::PropagateRequestIdLayer::x_request_id())

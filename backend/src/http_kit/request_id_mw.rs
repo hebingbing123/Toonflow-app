@@ -85,6 +85,7 @@ mod tests {
 
     fn test_state() -> AppState {
         AppState {
+            metrics_registry: Arc::new(crate::http_kit::metrics::MetricsRegistry::default()),
             pool: None,
             jwt_secret: Some(b"not-empty".to_vec()),
             llm: None,

@@ -199,8 +199,32 @@ pub(crate) async fn project_short_video_export_check_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    // Compute data version from latest storyboard and voiceover updates
+    let data_version: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT MAX(updated_at)::text
+        FROM (
+          SELECT MAX(sb.updated_at) as updated_at
+          FROM app_storyboard sb
+          INNER JOIN app_script sc ON sc.id = sb.script_id
+          WHERE sc.project_id = $1
+          UNION ALL
+          SELECT MAX(vo.updated_at) as updated_at
+          FROM app_voiceover vo
+          INNER JOIN app_storyboard sb ON sb.id = vo.storyboard_id
+          INNER JOIN app_script sc ON sc.id = sb.script_id
+          WHERE sc.project_id = $1
+        ) AS versions
+        "#,
+    )
+    .bind(header.id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectShortVideoExportCheckResponse {
         schema_version: 1,
+        data_version,
         export_ready,
         summary: ShortVideoExportCheckSummary {
             storyboard_count,
