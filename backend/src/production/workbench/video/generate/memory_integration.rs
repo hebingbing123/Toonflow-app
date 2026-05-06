@@ -213,7 +213,7 @@ pub(super) fn apply_project_mode_prompt_preset(prompt: &str, project_mode: Optio
                 trimmed.to_string()
             } else {
                 format!(
-                    "{trimmed}；真人短剧质感，真实演员表演，自然口型与口播同步，真实摄影与镜头语言，避免二次元卡通渲染"
+                    "{trimmed}；真人短剧写实，演员微表情和情绪递进，口型同步，身份一致，真实光线镜头，避免AI感卡通感"
                 )
             }
         }
@@ -225,7 +225,7 @@ pub(super) fn apply_project_mode_prompt_preset(prompt: &str, project_mode: Optio
                 trimmed.to_string()
             } else {
                 format!(
-                    "{trimmed}；动漫短剧风格，二次元角色造型，画面表达可以适度风格化，避免真人写实质感过强"
+                    "{trimmed}；动漫短剧风格，角色表演有情绪层次，动作镜头利落清晰，适度风格化，避免过强真人纪实感"
                 )
             }
         }

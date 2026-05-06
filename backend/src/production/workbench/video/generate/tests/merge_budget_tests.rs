@@ -735,9 +735,12 @@ mod tests {
             "夜晚巷口对峙，角色压低声音说话",
             Some("live_action.short_drama"),
         );
-        assert!(prompt.contains("真人短剧质感"));
-        assert!(prompt.contains("真实演员表演"));
-        assert!(prompt.contains("避免二次元卡通渲染"));
+        assert!(prompt.contains("真人短剧写实"));
+        assert!(prompt.contains("演员微表情和情绪递进"));
+        assert!(prompt.contains("口型同步"));
+        assert!(prompt.contains("身份一致"));
+        assert!(prompt.contains("避免AI感卡通感"));
+        assert!(prompt.chars().count() < 64, "{prompt}");
     }
 
     #[test]
@@ -747,8 +750,10 @@ mod tests {
             Some("animated.short_drama"),
         );
         assert!(prompt.contains("动漫短剧风格"));
-        assert!(prompt.contains("二次元角色造型"));
-        assert!(prompt.contains("避免真人写实质感过强"));
+        assert!(prompt.contains("角色表演有情绪层次"));
+        assert!(prompt.contains("动作镜头利落清晰"));
+        assert!(prompt.contains("避免过强真人纪实感"));
+        assert!(prompt.chars().count() < 58, "{prompt}");
     }
 
     #[test]
