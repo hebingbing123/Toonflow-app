@@ -1,6 +1,7 @@
 //! Shared test helper functions for video prompt generation tests.
 
 use crate::production::workbench::meta::generate::GenerateVideoPromptDiagnostics;
+use crate::production::workbench::meta::generate::constraints::RecentQualitySignalRow;
 use crate::production::workbench::video_prompt_memory::StructuredStoryboardDescription;
 
 /// Creates a grounded low-risk storyboard description for testing.
@@ -99,5 +100,24 @@ pub(super) fn sample_generate_video_prompt_diagnostics(
         memory_project_scope_row_count: 1,
         memory_script_scope_row_count: 2,
         memory_role_scope_row_count: 1,
+    }
+}
+
+pub(super) fn sample_recent_quality_signal_row() -> RecentQualitySignalRow {
+    RecentQualitySignalRow {
+        passed: Some(true),
+        overall_score: Some(9),
+        dialogue_naturalness: Some(9),
+        character_consistency: Some(9),
+        visual_quality: Some(8),
+        memory_delivery_priority_applied: Some(true),
+        is_bad_case: false,
+        bad_case_category: None,
+        comments: Some("情绪自然，人物稳定，光影真实".into()),
+        feedback_memory_focus_tags: vec![
+            "delivery_realism".into(),
+            "emotion_arc".into(),
+            "identity_continuity".into(),
+        ],
     }
 }

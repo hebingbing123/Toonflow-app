@@ -18,6 +18,7 @@ mod build_prompt_style_memory;
 
 // Other test modules
 mod anchor_tests;
+mod automation_mode_tests;
 mod compact_tests;
 mod continuity_tests;
 mod diagnostics_tests;

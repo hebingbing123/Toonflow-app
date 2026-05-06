@@ -29,7 +29,10 @@ use crate::production::workbench::video_prompt_memory::{
 use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
-use crate::settings::agent_memory::optimize_project_memory_budget;
+use crate::settings::agent_memory::{
+    load_project_automation_memory_policy, optimize_project_memory_budget,
+    save_project_automation_memory_policy, AutomationMemoryMode, ProjectAutomationMemoryPolicy,
+};
 use crate::state::AppState;
 
 mod budget;
@@ -96,13 +99,13 @@ impl From<RecentQualitySignalDbRow> for RecentQualitySignalRow {
     }
 }
 
-async fn load_recent_quality_constraint_pressure(
+async fn load_recent_quality_signal_rows(
     pool: &PgPool,
     user_id: Uuid,
     project_id: i32,
     script_id: i32,
     storyboard_id: Option<i32>,
-) -> Result<Option<VideoPromptConstraintPressure>, ApiError> {
+) -> Result<Vec<RecentQualitySignalRow>, ApiError> {
     let storyboard_target = storyboard_id.filter(|id| *id > 0).map(|id| id.to_string());
     let rows = sqlx::query_as::<_, RecentQualitySignalDbRow>(
         r#"
@@ -141,11 +144,119 @@ async fn load_recent_quality_constraint_pressure(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let rows = rows
-        .into_iter()
-        .map(RecentQualitySignalRow::from)
-        .collect::<Vec<_>>();
-    Ok(derive_recent_quality_constraint_pressure(&rows))
+    Ok(rows.into_iter().map(RecentQualitySignalRow::from).collect())
+}
+
+fn text_contains_any(text: &str, keywords: &[&str]) -> bool {
+    keywords.iter().any(|keyword| text.contains(keyword))
+}
+
+fn recent_quality_row_requires_standard_memory_mode(row: &RecentQualitySignalRow) -> bool {
+    let comment = row
+        .comments
+        .as_deref()
+        .map(normalize_prompt_text)
+        .unwrap_or_default()
+        .to_lowercase();
+    let category = row
+        .bad_case_category
+        .as_deref()
+        .map(normalize_prompt_text)
+        .unwrap_or_default()
+        .to_lowercase();
+
+    row.is_bad_case
+        || row.passed == Some(false)
+        || row.overall_score.is_some_and(|score| score <= 7)
+        || row.dialogue_naturalness.is_some_and(|score| score <= 7)
+        || row.character_consistency.is_some_and(|score| score <= 7)
+        || row.visual_quality.is_some_and(|score| score <= 7)
+        || text_contains_any(
+            &comment,
+            &[
+                "读文章",
+                "生硬",
+                "口型",
+                "台词",
+                "没情绪",
+                "单一状态",
+                "平平淡淡",
+                "穿帮",
+                "串脸",
+                "不自然",
+                "很假",
+                "monotone",
+                "stiff",
+                "lip sync",
+                "identity",
+                "face drift",
+            ],
+        )
+        || text_contains_any(
+            &category,
+            &[
+                "dialogue",
+                "delivery",
+                "lip",
+                "identity",
+                "character",
+                "consistency",
+                "emotion",
+                "performance",
+                "lighting",
+                "motion",
+            ],
+        )
+}
+
+fn pressure_requires_standard_memory_mode(pressure: VideoPromptConstraintPressure) -> bool {
+    pressure.forces_compact_memory
+        || pressure.has_identity_guardrail
+        || pressure.has_dialogue_guardrail
+        || pressure.has_blocking_guardrail
+        || pressure.has_emotion_guardrail
+        || (pressure.has_lighting_guardrail && pressure.has_motion_guardrail)
+}
+
+fn infer_adaptive_automation_memory_mode(
+    recent_rows: &[RecentQualitySignalRow],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> AutomationMemoryMode {
+    if constraint_pressure.is_some_and(pressure_requires_standard_memory_mode)
+        || recent_rows
+            .iter()
+            .any(recent_quality_row_requires_standard_memory_mode)
+    {
+        AutomationMemoryMode::Standard
+    } else {
+        AutomationMemoryMode::Lean
+    }
+}
+
+async fn apply_adaptive_project_memory_mode(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    recent_rows: &[RecentQualitySignalRow],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Result<AutomationMemoryMode, ApiError> {
+    let current = load_project_automation_memory_policy(pool, user_id, project_id, "productionAgent")
+        .await?;
+    if current.mode == AutomationMemoryMode::Off {
+        return Ok(AutomationMemoryMode::Off);
+    }
+    let next_mode = infer_adaptive_automation_memory_mode(recent_rows, constraint_pressure);
+    if current.mode != next_mode {
+        save_project_automation_memory_policy(
+            pool,
+            user_id,
+            project_id,
+            "productionAgent",
+            &ProjectAutomationMemoryPolicy { mode: next_mode },
+        )
+        .await?;
+    }
+    Ok(next_mode)
 }
 
 fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {
@@ -271,14 +382,15 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     )
     .await?;
     enforce_quality_gate(QualityGateStage::VideoPrompt, &gate, strategy)?;
-    let project_memory_optimization = optimize_project_memory_budget(
+    let recent_quality_rows = load_recent_quality_signal_rows(
         pool,
         user_id,
         body.project_id,
-        Some(body.script_id),
-        "productionAgent",
+        body.script_id,
+        body.storyboard_id,
     )
     .await?;
+    let recent_quality_pressure = derive_recent_quality_constraint_pressure(&recent_quality_rows);
     let memory_optimization = if body.storyboard_id.is_some_and(|id| id > 0) {
         Some(optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?)
     } else {
@@ -313,19 +425,28 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         negative_prompt_selection.as_ref(),
         observation_note.as_deref(),
     );
-    let constraint_pressure = constraint_pressure.unwrap_or_default().merge(
-        load_recent_quality_constraint_pressure(
-            pool,
-            user_id,
-            body.project_id,
-            body.script_id,
-            body.storyboard_id,
-        )
-        .await?,
-    );
+    let constraint_pressure = constraint_pressure
+        .unwrap_or_default()
+        .merge(recent_quality_pressure);
     let constraint_pressure = constraint_pressure
         .has_active_guardrail()
         .then_some(constraint_pressure);
+    apply_adaptive_project_memory_mode(
+        pool,
+        user_id,
+        body.project_id,
+        &recent_quality_rows,
+        constraint_pressure,
+    )
+    .await?;
+    let project_memory_optimization = optimize_project_memory_budget(
+        pool,
+        user_id,
+        body.project_id,
+        Some(body.script_id),
+        "productionAgent",
+    )
+    .await?;
     let context = load_video_prompt_context(
         pool,
         user_id,
