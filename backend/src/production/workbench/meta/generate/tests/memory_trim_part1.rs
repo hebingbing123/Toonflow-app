@@ -616,6 +616,51 @@ fn trim_video_prompt_memory_rows_with_context_drops_project_style_fill_when_scri
 }
 
 #[test]
+fn trim_video_prompt_memory_rows_with_context_drops_script_style_fill_when_role_memory_is_precise(
+) {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚含泪低声说别走".into()),
+        video_desc: Some(
+            "（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_role_video_style_memory".into(),
+            content: "subject=林晚 | subjectAliases=林晚/晚晚 | sampleCount=4 | style=表演呼吸发颤，语气哽咽克制 | note=表演呼吸发颤，语气哽咽克制".into(),
+        },
+        AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=6 | style=镜头稳定跟拍，情绪压抑，光影冷蓝窗光 | note=镜头稳定跟拍，情绪压抑，光影冷蓝窗光".into(),
+        },
+    ];
+
+    let trimmed = trim_video_prompt_memory_rows_with_context(
+        rows,
+        18,
+        Some("seed-18-current"),
+        &["林晚".to_string(), "晚晚".to_string()],
+        Some(&storyboard_row),
+        Some(VideoPromptConstraintPressure {
+            has_dialogue_guardrail: true,
+            has_emotion_guardrail: true,
+            prefer_delivery_memory_recall: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        }),
+    );
+
+    assert!(trimmed.iter().any(|row| {
+        row.name == "script_role_video_style_memory" && row.content.contains("subject=林晚")
+    }));
+    assert!(!trimmed
+        .iter()
+        .any(|row| row.name == "script_video_style_memory"));
+}
+
+#[test]
 fn trim_video_prompt_memory_rows_with_context_keeps_project_style_when_visual_continuity_is_prioritized(
 ) {
     let storyboard_row = StoryboardPromptSeedRow {

@@ -69,11 +69,19 @@ pub(in crate::production::workbench::meta::generate) fn trim_video_prompt_memory
     ) {
         kept.insert(idx);
     }
-    for (idx, _) in script_style_candidates
-        .iter()
-        .take(VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT)
-    {
-        kept.insert(*idx);
+    if should_keep_script_style_summary_rows(
+        &script_style_candidates,
+        &script_role_style_candidates,
+        subject_candidates,
+        storyboard_row,
+        constraint_pressure,
+    ) {
+        for (idx, _) in script_style_candidates
+            .iter()
+            .take(VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT)
+        {
+            kept.insert(*idx);
+        }
     }
     if should_keep_project_style_summary_rows(
         &script_style_candidates,

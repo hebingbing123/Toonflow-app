@@ -1,5 +1,74 @@
 use super::*;
 
+pub(in crate::production::workbench::meta::generate) fn should_keep_script_style_summary_rows(
+    script_style_candidates: &[(usize, AgentMemoryRow)],
+    script_role_style_candidates: &[(usize, AgentMemoryRow)],
+    subject_candidates: &[String],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> bool {
+    if script_style_candidates.is_empty() {
+        return false;
+    }
+
+    let Some(storyboard_row) = storyboard_row else {
+        return true;
+    };
+    let Some(fields) = storyboard_row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return true;
+    };
+    let pressure = constraint_pressure.unwrap_or_default();
+    if pressure.prefer_visual_continuity_memory_recall || pressure.has_lighting_guardrail {
+        return true;
+    }
+
+    let scene_prefers_precise_subject_memory = (!subject_candidates.is_empty()
+        && video_prompt_scene_needs_identity_memory(&fields))
+        || video_prompt_scene_needs_emotional_memory(&fields)
+        || storyboard_has_visible_speech_performance_risk(
+            &fields,
+            storyboard_row.prompt.as_deref(),
+        )
+        || pressure.prefer_delivery_memory_recall
+        || pressure.has_dialogue_guardrail
+        || pressure.has_emotion_guardrail
+        || pressure.has_identity_guardrail;
+    if !scene_prefers_precise_subject_memory || script_role_style_candidates.is_empty() {
+        return true;
+    }
+
+    let best_role_locked_score = script_role_style_candidates
+        .iter()
+        .filter_map(|(_, row)| {
+            project_style_memory_trim_note_score(
+                row,
+                storyboard_row,
+                Some(pressure),
+                subject_candidates,
+            )
+        })
+        .max()
+        .unwrap_or(i32::MIN);
+    if best_role_locked_score < 18 {
+        return true;
+    }
+
+    script_style_candidates.iter().any(|(_, row)| {
+        !project_style_note_is_low_gain_global_fill(row, &fields, Some(pressure))
+            || project_style_memory_trim_note_score(
+                row,
+                storyboard_row,
+                Some(pressure),
+                subject_candidates,
+            )
+            .is_some_and(|score| score + 4 >= best_role_locked_score)
+    })
+}
+
 pub(in crate::production::workbench::meta::generate) fn should_keep_project_style_summary_rows(
     script_style_candidates: &[(usize, AgentMemoryRow)],
     script_role_style_candidates: &[(usize, AgentMemoryRow)],
