@@ -71,7 +71,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split publish/store.rs into store/ submodules (1345→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.3, 13.1_
 
-- [-] 6. Refactor backend/src/publish/handlers.rs (1100 lines → 6 modules)
+- [x] 6. Refactor backend/src/publish/handlers.rs (1100 lines → 6 modules)
   - Analyze current structure and identify resource-based handler grouping
   - Create `publish/handlers/` directory; move handlers.rs → `handlers/mod.rs` (≈150 lines, router + re-exports)
   - Create `handlers/profile.rs` (≈250 lines) with profile CRUD handlers (list_publish_profiles, create_publish_profile, get_publish_profile, patch_publish_profile, delete_publish_profile)
@@ -85,7 +85,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split publish/handlers.rs into handlers/ submodules (1100→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.4, 13.1_
 
-- [~] 7. Refactor backend/src/publish/adapters.rs (1057 lines → 6 modules)
+- [x] 7. Refactor backend/src/publish/adapters.rs (1057 lines → 6 modules)
   - Analyze current structure: adapters.rs contains run_target_adapter (sandbox/live/manual_bridge routing), fetch_platform_metrics, and shared helpers
   - Create `publish/adapters/` directory; move adapters.rs → `adapters/mod.rs` (≈100 lines, PlatformAdapter trait, run_target_adapter entry point, re-exports)
   - Create `adapters/sandbox.rs` (≈100 lines) with run_sandbox_adapter and sandbox delivery logic
@@ -99,7 +99,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split publish/adapters.rs into adapters/ submodules (1057→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.6, 13.1_
 
-- [~] 8. Refactor backend/src/production/workbench/meta/generate/memory/observation_style.rs (1035 lines → 4 modules)
+- [x] 8. Refactor backend/src/production/workbench/meta/generate/memory/observation_style.rs (1035 lines → 4 modules)
   - Analyze current structure: functions group into filter/selection, scoring/ranking, compaction, and matching
   - Create `memory/observation_style/` directory; move observation_style.rs → `observation_style/mod.rs` (≈100 lines, pub re-exports of all pub(in ...) items)
   - Create `observation_style/filter.rs` (≈350 lines) with resolve_observation_filter_style_note, compact_observation_filter_candidate, select_contextual_observation_summary_style_note, select_pressure_prioritized_observation_filter_style_note
@@ -112,12 +112,12 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split memory/observation_style.rs into observation_style/ submodules (1035→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7, 13.1_
 
-- [~] 9. Checkpoint - Phase 2 complete
+- [ ] 9. Checkpoint - Phase 2 complete
   - Ensure all Phase 2 tests pass, ask the user if questions arise.
 
 ### Phase 3: Medium Priority Files
 
-- [~] 10. Refactor backend/src/production/workbench/meta/generate/memory/style_selection.rs (940 lines → 4 modules)
+- [x] 10. Refactor backend/src/production/workbench/meta/generate/memory/style_selection.rs (940 lines → 4 modules)
   - Analyze current structure: functions group into loading/building, selection, compaction, and guardrail logic
   - Create `memory/style_selection/` directory; move style_selection.rs → `style_selection/mod.rs` (≈100 lines, re-exports)
   - Create `style_selection/load.rs` (≈250 lines) with load_video_prompt_memory_notes, build_video_prompt_memory_notes, build_video_prompt_memory_notes_with_pressure, rejected_video_memory_selection_bias
@@ -129,7 +129,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split memory/style_selection.rs into style_selection/ submodules (940→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 11. Refactor backend/src/harness/sub_agent/scope.rs (903 lines → 3 modules)
+- [x] 11. Refactor backend/src/harness/sub_agent/scope.rs (903 lines → 3 modules)
   - Note: sub_agent/ directory already exists with mod.rs, memory.rs, spec.rs, tests.rs — scope.rs is already a submodule
   - Analyze current structure of scope.rs and identify split boundaries by scope type
   - Create `sub_agent/scope/` directory; move scope.rs → `scope/mod.rs` (≈150 lines, ScopeSignature struct, public entry points, re-exports)
@@ -141,7 +141,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split sub_agent/scope.rs into scope/ submodules (903→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 12. Refactor backend/src/production/workbench/video/generate/negative_prompt_analysis.rs (854 lines → 3 modules)
+- [-] 12. Refactor backend/src/production/workbench/video/generate/negative_prompt_analysis.rs (854 lines → 3 modules)
   - Note: video/generate/ already has negative_prompt_core.rs, negative_prompt_builder.rs, negative_prompt_risk.rs — follow same naming pattern
   - Create `video/generate/negative_prompt_analysis/` directory; move negative_prompt_analysis.rs → `negative_prompt_analysis/mod.rs` (≈150 lines, public entry points, re-exports)
   - Create `negative_prompt_analysis/detection.rs` (≈350 lines) with detection and classification logic
