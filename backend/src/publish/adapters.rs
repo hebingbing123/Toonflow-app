@@ -1,12 +1,21 @@
 //! **F7/F8** adapter routing: nine-platform sandbox closures (domestic + overseas).
+//!
+//! **P1 真实能力分层（sandbox/live/manual_bridge）**：
+//! - `sandbox`: 演示/测试模式，不实际投递到平台，返回模拟成功
+//! - `live`: 真实 API 投递，直接调用平台接口
+//! - `manual_bridge`: 人工辅助投递，需要人工确认后通过桥接完成
+//!
+//! **重要约束**：sandbox 成功 ≠ 真实发布成功；审计与结果展示须明确区分 delivery_mode。
 
 use serde_json::{json, Value};
 use uuid::Uuid;
 
 use super::types::{PublishDraftRow, PublishJobRow, PublishTargetRow};
 
+/// Adapter 执行结果，包含 delivery_mode 用于区分真实能力层级
 pub(crate) struct PublishAdapterResult {
     pub(crate) status: &'static str,
+    /// detail 中必须包含 `delivery_mode` 字段（sandbox/live/manual_bridge）
     pub(crate) detail: Value,
     pub(crate) error_message: Option<String>,
 }
@@ -512,5 +521,89 @@ mod tests {
         );
         assert!(live.is_ok() || live.is_err());
         assert!(manual.is_ok() || manual.is_err());
+    }
+
+    /// **P1 验收**: sandbox 成功必须在 detail 中明确标记 delivery_mode="sandbox"，
+    /// 不得与 live/manual_bridge 混淆
+    #[test]
+    fn p1_sandbox_success_clearly_marked_as_sandbox() {
+        let job = sample_job();
+        let draft = sample_draft();
+        let result = run_target_adapter(
+            &job,
+            &draft,
+            &sample_target_with_mode("douyin", "semi_auto"),
+        );
+
+        assert_eq!(result.status, "succeeded");
+        let delivery_mode = result
+            .detail
+            .get("delivery_mode")
+            .and_then(|v| v.as_str())
+            .expect("delivery_mode must be present in result");
+
+        assert_eq!(
+            delivery_mode, "sandbox",
+            "semi_auto should map to sandbox delivery_mode, not live or manual_bridge"
+        );
+
+        // 确保 receipt 中也标记了 sandbox 模式
+        let receipt_mode = result
+            .detail
+            .get("receipt")
+            .and_then(|v| v.get("mode"))
+            .and_then(|v| v.as_str())
+            .expect("receipt.mode must be present");
+
+        assert_eq!(
+            receipt_mode, "sandbox_closure",
+            "receipt mode should clearly indicate sandbox"
+        );
+    }
+
+    /// **P1 验收**: full_auto 应映射到 live delivery_mode
+    #[test]
+    fn p1_full_auto_maps_to_live_delivery_mode() {
+        let job = sample_job();
+        let draft = sample_draft();
+        let result = run_target_adapter(
+            &job,
+            &draft,
+            &sample_target_with_mode("douyin", "full_auto"),
+        );
+
+        let delivery_mode = result
+            .detail
+            .get("delivery_mode")
+            .and_then(|v| v.as_str())
+            .expect("delivery_mode must be present");
+
+        assert_eq!(
+            delivery_mode, "live",
+            "full_auto should map to live delivery_mode"
+        );
+    }
+
+    /// **P1 验收**: manual_assisted 应映射到 manual_bridge delivery_mode
+    #[test]
+    fn p1_manual_assisted_maps_to_manual_bridge() {
+        let job = sample_job();
+        let draft = sample_draft();
+        let result = run_target_adapter(
+            &job,
+            &draft,
+            &sample_target_with_mode("douyin", "manual_assisted"),
+        );
+
+        let delivery_mode = result
+            .detail
+            .get("delivery_mode")
+            .and_then(|v| v.as_str())
+            .expect("delivery_mode must be present");
+
+        assert_eq!(
+            delivery_mode, "manual_bridge",
+            "manual_assisted should map to manual_bridge delivery_mode"
+        );
     }
 }

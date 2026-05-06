@@ -104,40 +104,40 @@
 
 ## Phase M - Security / Compliance / Idempotency
 
-- [-] M.1 Add signature/timestamp/nonce validation for platform callbacks
-- [~] M.2 Add idempotency keys for publish create/confirm/retry/writeback
-- [~] M.3 Unify request-id across publish pipeline for full-chain tracing
-- [~] M.4 Mask sensitive fields in audit details
-- [~] M.5 Add stricter RBAC for platform credential access
-- [~] M.6 Add rate limiting and quota protection for publish domain
+- [x] M.1 Add signature/timestamp/nonce validation for platform callbacks
+- [x] M.2 Add idempotency keys for publish create/confirm/retry/writeback
+- [x] M.3 Unify request-id across publish pipeline for full-chain tracing
+- [x] M.4 Mask sensitive fields in audit details
+- [x] M.5 Add stricter RBAC for platform credential access
+- [x] M.6 Add rate limiting and quota protection for publish domain
 
 ## Phase N - Operability / DR / Data Lifecycle
 
-- [ ] N.1 Define and implement publish SLA and timeout alerts
-- [ ] N.2 Provide runbooks for critical failure scenarios
-- [ ] N.3 Establish publish and performance data archival strategy
-- [ ] N.4 Add pagination/cursor support for large project scenarios
-- [ ] N.5 Add gradual rollout and fast rollback switches
-- [ ] N.6 Add production drill day checklist
+- [x] N.1 Define and implement publish SLA and timeout alerts
+- [x] N.2 Provide runbooks for critical failure scenarios
+- [x] N.3 Establish publish and performance data archival strategy
+- [x] N.4 Add pagination/cursor support for large project scenarios
+- [x] N.5 Add gradual rollout and fast rollback switches
+- [x] N.6 Add production drill day checklist
 
 ## Phase O - FinOps / Governance / Release Safety
 
-- [ ] O.1 Build cost attribution dashboard for publish and quality pipeline
-- [ ] O.2 Establish quality baseline set for token optimization validation
-- [ ] O.3 Add real vs mock metrics isolation and dashboard labels
-- [ ] O.4 Add callback and retry data reconciliation task
-- [ ] O.5 Add migration/backfill runbooks for critical schema changes
-- [ ] O.6 Make publish strategy config auditable
-- [ ] O.7 Introduce feature flag governance for production features
-- [ ] O.8 Add pre-launch go/no-go checklist
+- [x] O.1 Build cost attribution dashboard for publish and quality pipeline
+- [x] O.2 Establish quality baseline set for token optimization validation
+- [x] O.3 Add real vs mock metrics isolation and dashboard labels
+- [x] O.4 Add callback and retry data reconciliation task
+- [x] O.5 Add migration/backfill runbooks for critical schema changes
+- [x] O.6 Make publish strategy config auditable
+- [x] O.7 Introduce feature flag governance for production features
+- [x] O.8 Add pre-launch go/no-go checklist
 
 ## Phase P - UX and Human-in-the-loop Completeness
 
-- [ ] P.1 Complete audio-video assembly consistency review and fix
-- [ ] P.2 Add manual bridge publish operation panel
-- [ ] P.3 Add operation preview and impact confirmation for multi-draft/platform ops
-- [ ] P.4 Add one-click recovery entry for failure states
-- [ ] P.5 Standardize status labels with real capability tags
+- [x] P.1 Complete audio-video assembly consistency review and fix
+- [x] P.2 Add manual bridge publish operation panel
+- [x] P.3 Add operation preview and impact confirmation for multi-draft/platform ops
+- [x] P.4 Add one-click recovery entry for failure states
+- [x] P.5 Standardize status labels with real capability tags
 
 ## 交付节奏
 

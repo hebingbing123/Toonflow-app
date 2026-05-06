@@ -32,6 +32,10 @@ pub(crate) struct PlatformCapability {
 }
 
 /// 国内 5 + 海外 4；与 `requirements` 需求 12 矩阵一致。
+/// **P1**: 每个平台的 `recommended_tier` 决定默认 automation_mode，进而映射到 delivery_mode：
+/// - `full_auto` → `live` (真实 API)
+/// - `semi_auto` → `sandbox` (当前实现，P3 后升级为真实)
+/// - `manual_assisted` → `manual_bridge` (人工辅助)
 pub(crate) const ALL: &[PlatformCapability] = &[
     PlatformCapability {
         platform_id: "douyin",

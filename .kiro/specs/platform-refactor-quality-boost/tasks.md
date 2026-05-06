@@ -15,14 +15,14 @@
   - 测试：`cargo check` 编译通过 ✓
   - _需求: 1.1_
 
-- [ ] 2. 拆分 sub_agent.rs（91KB）
+- [x] 2. 拆分 sub_agent.rs（91KB）
   - 新建 `harness/sub_agent/` 目录
   - 拆分为：`mod.rs`（常量 + 公共入口）、`spec.rs`（SubAgentSpec + sub_agent_spec 路由）、`script.rs`（storySkeleton/adaptationStrategy/script/supervision）、`production.rs`（derive_assets/generate_assets/director_plan/storyboard_gen/storyboard_panel/storyboard_table/production_supervision）、`memory.rs`（AutoMemoryRow + 记忆读取/压缩/注入）、`scope.rs`（ScopeSignature + 构建逻辑）
   - 删除原 `harness/sub_agent.rs`，`harness/mod.rs` 改为 `mod sub_agent;`
   - 测试：`cargo check` 编译通过
   - _需求: 1.2_
 
-- [ ] 3. 拆分 quality_gate.rs + feedback.rs + patch/dispatch.rs
+- [x] 3. 拆分 quality_gate.rs + feedback.rs + patch/dispatch.rs
   - `quality_gate.rs` → `quality_gate/`：mod.rs + rules.rs + enforce.rs + anti_ai.rs + attribution.rs
   - `quality/feedback.rs` → feedback_video.rs + feedback_generic.rs + feedback_memory.rs，原 feedback.rs 改为 barrel
   - `patch/dispatch.rs` → dispatch_scope.rs + dispatch_model.rs + dispatch_attribution.rs，原 dispatch.rs 改为 barrel

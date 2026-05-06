@@ -304,14 +304,30 @@ pub struct ShortVideoExportCheckIssue {
     pub sb_index: Option<i32>,
 }
 
-/// D3：**导出前质量检查钩子占位**（只读观测 **`app_quality_review`** 坏例计数；策略强制执行二期）。
+/// **P7**: 导出质量门禁（off/warn/block）
 #[derive(Serialize, ToSchema)]
-pub struct ShortVideoExportQualityGatePlaceholder {
+pub struct ShortVideoExportQualityGate {
     pub schema_version: i32,
-    /// 占位阶段固定 **`false`**；二期才可据此阻断导出。
+    /// 门禁策略：off（跳过检查）、warn（显示警告但允许）、block（阻断导出）
+    #[schema(example = "block")]
+    pub strategy: String,
+    /// 是否强制执行（block 模式下为 true）
     pub enforced: bool,
     /// 与 **`GET …/production-overview`** **`pending_review_bad_case_count`** 同源计数。
     pub pending_review_bad_case_count: i64,
+    /// block 模式下的阻断原因（结构化）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocking_reasons: Option<Vec<QualityGateBlockingReason>>,
+}
+
+/// 质量门禁阻断原因
+#[derive(Serialize, ToSchema)]
+pub struct QualityGateBlockingReason {
+    pub code: String,
+    pub message: String,
+    /// 返工入口（前端路由或 deep link）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rework_route: Option<String>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -323,7 +339,7 @@ pub struct ProjectShortVideoExportCheckResponse {
     pub export_ready: bool,
     pub summary: ShortVideoExportCheckSummary,
     pub issues: Vec<ShortVideoExportCheckIssue>,
-    pub quality_gate_placeholder: ShortVideoExportQualityGatePlaceholder,
+    pub quality_gate: ShortVideoExportQualityGate,
 }
 
 /// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).

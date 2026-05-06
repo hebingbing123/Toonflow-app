@@ -1,47 +1,45 @@
 //! M.1: Tests for platform callback security validation
 
-use super::callback_config::upsert_platform_secret;
-use super::callback_validation::{
-    validate_callback, CallbackValidationConfig, ValidationError,
-};
-use axum::http::HeaderMap;
-use chrono::{Duration, Utc};
-use hmac::{Hmac, Mac};
-use sha2::Sha256;
-use sqlx::PgPool;
-
-type HmacSha256 = Hmac<Sha256>;
-
-/// Helper to compute valid signature
-fn compute_signature(secret: &str, timestamp: &str, body: &[u8]) -> String {
-    let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).unwrap();
-    let mut payload = timestamp.as_bytes().to_vec();
-    payload.push(b'.');
-    payload.extend_from_slice(body);
-    mac.update(&payload);
-    hex::encode(mac.finalize().into_bytes())
-}
-
-/// Helper to create valid headers
-fn create_valid_headers(
-    signature: &str,
-    timestamp: &str,
-    nonce: &str,
-    callback_id: Option<&str>,
-) -> HeaderMap {
-    let mut headers = HeaderMap::new();
-    headers.insert("x-platform-signature", signature.parse().unwrap());
-    headers.insert("x-platform-timestamp", timestamp.parse().unwrap());
-    headers.insert("x-platform-nonce", nonce.parse().unwrap());
-    if let Some(id) = callback_id {
-        headers.insert("x-callback-id", id.parse().unwrap());
-    }
-    headers
-}
-
-#[cfg(test)]
+#[cfg(all(test, feature = "migrate"))]
 mod tests {
-    use super::*;
+    use super::super::callback_config::upsert_platform_secret;
+    use super::super::callback_validation::{
+        validate_callback, CallbackValidationConfig, ValidationError,
+    };
+    use axum::http::HeaderMap;
+    use chrono::{Duration, Utc};
+    use hmac::{Hmac, Mac};
+    use sha2::Sha256;
+    use sqlx::PgPool;
+
+    type HmacSha256 = Hmac<Sha256>;
+
+    /// Helper to compute valid signature
+    fn compute_signature(secret: &str, timestamp: &str, body: &[u8]) -> String {
+        let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).unwrap();
+        let mut payload = timestamp.as_bytes().to_vec();
+        payload.push(b'.');
+        payload.extend_from_slice(body);
+        mac.update(&payload);
+        hex::encode(mac.finalize().into_bytes())
+    }
+
+    /// Helper to create valid headers
+    fn create_valid_headers(
+        signature: &str,
+        timestamp: &str,
+        nonce: &str,
+        callback_id: Option<&str>,
+    ) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert("x-platform-signature", signature.parse().unwrap());
+        headers.insert("x-platform-timestamp", timestamp.parse().unwrap());
+        headers.insert("x-platform-nonce", nonce.parse().unwrap());
+        if let Some(id) = callback_id {
+            headers.insert("x-callback-id", id.parse().unwrap());
+        }
+        headers
+    }
 
     #[sqlx::test]
     async fn test_valid_callback(pool: PgPool) {

@@ -57,7 +57,7 @@ pub struct CallbackResponse {
 
 pub fn callback_router() -> Router<AppState> {
     Router::new().route(
-        "/api/v1/callbacks/publish/:platform_id",
+        "/api/v1/callbacks/publish/{platform_id}",
         post(handle_platform_callback),
     )
 }
