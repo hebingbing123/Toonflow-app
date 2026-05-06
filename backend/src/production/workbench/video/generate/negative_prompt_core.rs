@@ -14,7 +14,8 @@ use crate::production::workbench::video_prompt_memory::{
 };
 
 use super::fragment_operations::{
-    merge_prioritized_negative_prompt_fragment_groups, split_negative_prompt_fragments,
+    merge_prioritized_negative_prompt_fragment_groups, negative_fragment_is_covered,
+    split_negative_prompt_fragments,
 };
 use super::memory_integration::filter_selected_rows_for_subject;
 use super::negative_prompt_analysis::{
@@ -373,7 +374,22 @@ pub(super) fn build_storyboard_observation_negative_fragments(
         prioritized_style_note,
         storyboard_row,
     );
-    prune_storyboard_negative_fragments(observation_fragments, storyboard_row)
+    compact_pending_observation_fragments(prune_storyboard_negative_fragments(
+        observation_fragments,
+        storyboard_row,
+    ))
+}
+
+fn compact_pending_observation_fragments(fragments: Vec<String>) -> Vec<String> {
+    let mut kept = Vec::new();
+    for fragment in fragments {
+        if negative_fragment_is_covered(&fragment, &kept) {
+            continue;
+        }
+        kept.retain(|existing| !negative_fragment_is_covered(existing, &[fragment.clone()]));
+        kept.push(fragment);
+    }
+    kept
 }
 
 impl From<RecentQualitySignalSeedRow> for RecentQualitySignalRow {

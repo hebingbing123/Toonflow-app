@@ -17,6 +17,7 @@ mod tests {
         review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
         storyboard_dialogue_is_empty,
     };
+    use crate::production::workbench::video::generate::negative_prompt_core::build_storyboard_observation_negative_fragments;
     use crate::production::workbench::video::generate::negative_prompt_builder::build_storyboard_negative_prompts_test as build_storyboard_negative_prompts;
     use crate::production::workbench::video::generate::utils::infer_video_provider;
     use crate::production::workbench::video::generate::{
@@ -321,6 +322,31 @@ mod tests {
         assert_eq!(
             compact_review_fragments_against_rejected_memory(review_fragments, &rejected_fragments),
             vec!["avoid rushed motion".to_string()]
+        );
+    }
+
+    #[test]
+    fn build_storyboard_observation_negative_fragments_drops_covered_weaker_fallback_fragment() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("林晚含泪低声说别走".into()),
+            video_desc: Some("（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            build_storyboard_observation_negative_fragments(
+                vec![
+                    "avoid blank expression or monotone delivery".to_string(),
+                    "avoid monotone delivery".to_string(),
+                    "avoid lip-sync mismatch".to_string(),
+                ],
+                None,
+                Some(&storyboard_row),
+            ),
+            vec![
+                "avoid blank expression or monotone delivery".to_string(),
+                "avoid lip-sync mismatch".to_string(),
+            ]
         );
     }
 
