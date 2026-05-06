@@ -157,8 +157,8 @@ async fn apply_adaptive_project_memory_mode(
     recent_rows: &[RecentQualitySignalRow],
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Result<AutomationMemoryMode, ApiError> {
-    let current = load_project_automation_memory_policy(pool, user_id, project_id, "productionAgent")
-        .await?;
+    let current =
+        load_project_automation_memory_policy(pool, user_id, project_id, "productionAgent").await?;
     if current.mode == AutomationMemoryMode::Off {
         return Ok(AutomationMemoryMode::Off);
     }

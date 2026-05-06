@@ -233,7 +233,10 @@ fn prepare_rejected_video_negative_memory_for_storage_prefers_delivery_guards_wh
         prepared.contains("badCaseCategory=dialogue_issue"),
         "{prepared}"
     );
-    assert!(prepared.contains("reviewSummary=台词像读文章"), "{prepared}");
+    assert!(
+        prepared.contains("reviewSummary=台词像读文章"),
+        "{prepared}"
+    );
 }
 
 #[test]

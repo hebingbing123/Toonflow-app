@@ -68,12 +68,13 @@ mod tests {
         assert!(content.contains("rejectionCount=2"), "{content}");
         assert!(content.contains("riskTags=dialogue"), "{content}");
         assert!(
-            content.contains(
-                "focusTags=delivery_realism/identity_continuity/lighting_realism"
-            ),
+            content.contains("focusTags=delivery_realism/identity_continuity/lighting_realism"),
             "{content}"
         );
-        assert!(content.contains("badCaseCategory=dialogue_issue"), "{content}");
+        assert!(
+            content.contains("badCaseCategory=dialogue_issue"),
+            "{content}"
+        );
         assert!(
             content.contains("reviewSummary=表情太平像读稿，嘴型也有点对不上，逆光太硬"),
             "{content}"
@@ -260,9 +261,7 @@ mod tests {
         let content = build_quality_review_rejected_video_memory(&review)
             .expect("focused rejected video memory");
         assert!(
-            content.contains(
-                "focusTags=delivery_realism/identity_continuity/lighting_realism"
-            ),
+            content.contains("focusTags=delivery_realism/identity_continuity/lighting_realism"),
             "{content}"
         );
         assert!(

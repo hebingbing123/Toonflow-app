@@ -450,7 +450,8 @@ fn select_scoped_contextual_summary_style_note(
         .as_deref()
         .and_then(parse_structured_storyboard_description);
 
-    let candidates = rows.iter()
+    let candidates = rows
+        .iter()
         .filter(|row| allowed_names.contains(&row.name.as_str()))
         .filter_map(|row| {
             let is_generation_brief = row.name.contains("generation_brief");

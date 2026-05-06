@@ -17,8 +17,8 @@ mod tests {
         review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
         storyboard_dialogue_is_empty,
     };
-    use crate::production::workbench::video::generate::negative_prompt_core::build_storyboard_observation_negative_fragments;
     use crate::production::workbench::video::generate::negative_prompt_builder::build_storyboard_negative_prompts_test as build_storyboard_negative_prompts;
+    use crate::production::workbench::video::generate::negative_prompt_core::build_storyboard_observation_negative_fragments;
     use crate::production::workbench::video::generate::utils::infer_video_provider;
     use crate::production::workbench::video::generate::{
         AutoNegativePromptSelection, NormalizedGenerateVideoUploadItem, QualityReviewSeedRow,

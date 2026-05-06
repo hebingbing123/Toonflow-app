@@ -1,6 +1,8 @@
 use super::focus::prepare_selected_video_memory_for_storage;
+use super::storage::{
+    storyboard_scope_signature, summary_memory_allowed, VIDEO_SCOPED_MEMORY_TIER,
+};
 use super::*;
-use super::storage::{storyboard_scope_signature, summary_memory_allowed, VIDEO_SCOPED_MEMORY_TIER};
 
 pub(crate) async fn persist_selected_video_memory(
     pool: &PgPool,

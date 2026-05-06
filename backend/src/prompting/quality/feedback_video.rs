@@ -26,7 +26,10 @@ fn compact_quality_review_summary(review: &QualityReview) -> Option<String> {
         .as_deref()
         .map(str::trim)
         .filter(|value| !value.is_empty())?;
-    let clipped = summary.chars().take(QUALITY_REVIEW_SUMMARY_MAX_CHARS).collect::<String>();
+    let clipped = summary
+        .chars()
+        .take(QUALITY_REVIEW_SUMMARY_MAX_CHARS)
+        .collect::<String>();
     (!clipped.is_empty()).then_some(clipped)
 }
 

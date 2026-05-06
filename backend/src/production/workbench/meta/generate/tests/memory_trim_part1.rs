@@ -616,8 +616,8 @@ fn trim_video_prompt_memory_rows_with_context_drops_project_style_fill_when_scri
 }
 
 #[test]
-fn trim_video_prompt_memory_rows_with_context_drops_script_style_fill_when_role_memory_is_precise(
-) {
+fn trim_video_prompt_memory_rows_with_context_drops_script_style_fill_when_role_memory_is_precise()
+{
     let storyboard_row = StoryboardPromptSeedRow {
         prompt: Some("林晚含泪低声说别走".into()),
         video_desc: Some(

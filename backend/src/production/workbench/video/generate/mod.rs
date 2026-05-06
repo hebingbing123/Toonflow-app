@@ -179,8 +179,8 @@ async fn apply_adaptive_project_memory_mode(
     recent_rows: &[RecentQualitySignalRow],
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> Result<AutomationMemoryMode, ApiError> {
-    let current = load_project_automation_memory_policy(pool, user_id, project_id, "productionAgent")
-        .await?;
+    let current =
+        load_project_automation_memory_policy(pool, user_id, project_id, "productionAgent").await?;
     if current.mode == AutomationMemoryMode::Off {
         return Ok(AutomationMemoryMode::Off);
     }
@@ -438,9 +438,7 @@ mod utils;
 mod tests;
 
 // Re-exports
-pub(crate) use memory_integration::{
-    load_storyboard_negative_prompt_runtime,
-};
+pub(crate) use memory_integration::load_storyboard_negative_prompt_runtime;
 pub(crate) use quality_control::{
     infer_negative_fragments_from_comments, map_bad_case_category_with_comments,
 };
