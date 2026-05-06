@@ -75,14 +75,14 @@ pub(super) mod tests {
     }
 
     // Import test modules
-    mod registry;
-    mod validation;
     mod adapters;
-    mod delivery_modes;
-    mod evidence;
-    mod metrics;
     mod automation;
+    mod coverage;
+    mod delivery_modes;
     mod draft_mapping;
     mod error_handling;
-    mod coverage;
+    mod evidence;
+    mod metrics;
+    mod registry;
+    mod validation;
 }

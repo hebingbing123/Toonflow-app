@@ -42,8 +42,7 @@ fn test_domestic_platforms_count() {
     );
 
     // Validate expected domestic platforms
-    let domestic_ids: Vec<&str> =
-        domestic_platforms.iter().map(|p| p.platform_id).collect();
+    let domestic_ids: Vec<&str> = domestic_platforms.iter().map(|p| p.platform_id).collect();
     assert!(domestic_ids.contains(&"douyin"));
     assert!(domestic_ids.contains(&"bilibili"));
     assert!(domestic_ids.contains(&"xiaohongshu"));
@@ -71,8 +70,7 @@ fn test_overseas_platforms_count() {
     );
 
     // Validate expected overseas platforms
-    let overseas_ids: Vec<&str> =
-        overseas_platforms.iter().map(|p| p.platform_id).collect();
+    let overseas_ids: Vec<&str> = overseas_platforms.iter().map(|p| p.platform_id).collect();
     assert!(overseas_ids.contains(&"tiktok"));
     assert!(overseas_ids.contains(&"youtube_shorts"));
     assert!(overseas_ids.contains(&"instagram_reels"));

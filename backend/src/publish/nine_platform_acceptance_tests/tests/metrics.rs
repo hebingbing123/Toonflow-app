@@ -7,8 +7,7 @@ fn test_sandbox_metrics_fetch_for_all_platforms() {
     // Test that sandbox metrics can be fetched for all platforms
     for platform in ALL {
         let external_video_id = format!("{}:test-123", platform.platform_id);
-        let result =
-            fetch_platform_metrics(platform.platform_id, &external_video_id, "sandbox");
+        let result = fetch_platform_metrics(platform.platform_id, &external_video_id, "sandbox");
 
         assert!(
             result.is_ok(),
