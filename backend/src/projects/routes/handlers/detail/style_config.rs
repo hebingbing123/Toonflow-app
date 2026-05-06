@@ -74,7 +74,7 @@ pub(crate) async fn patch_style_config(
     // 先读取当前记录（确认存在且属于当前用户）
     let current = sqlx::query_as::<_, ProjectRow>(
         r#"
-        SELECT id, numeric_id, name, intro, project_type,
+        SELECT id, workspace_id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack
@@ -112,7 +112,7 @@ pub(crate) async fn patch_style_config(
         UPDATE app_project
         SET art_style_pack = $1, story_style_pack = $2, updated_at = NOW()
         WHERE id = $3 AND owner_user_id = $4
-        RETURNING id, numeric_id, name, intro, project_type,
+        RETURNING id, workspace_id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
                   art_style_pack, story_style_pack

@@ -8,6 +8,7 @@ import '../core.dart';
 class ProjectRow {
   const ProjectRow({
     required this.id,
+    this.workspaceId,
     required this.numericId,
     this.name,
     this.intro,
@@ -31,6 +32,7 @@ class ProjectRow {
   });
 
   final String id;
+  final String? workspaceId;
   final int numericId;
   final String? name;
   final String? intro;
@@ -45,9 +47,11 @@ class ProjectRow {
   final int? createTimeMs;
   final String? artStylePack;
   final String? storyStylePack;
+
   /// `domestic` / `overseas` / `both`
   final String? targetMarket;
   final List<String>? targetPlatforms;
+
   /// `short` / `medium` / `long`
   final String? durationStrategy;
   final String? voiceProfile;
@@ -62,6 +66,7 @@ class ProjectRow {
     }
     return ProjectRow(
       id: json['id'] as String,
+      workspaceId: json['workspace_id'] as String?,
       numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String?,
       intro: json['intro'] as String?,
@@ -234,7 +239,8 @@ class StoryboardShortVideoReadiness {
   final List<String> blockingReasons;
 
   factory StoryboardShortVideoReadiness.fromJson(Map<String, dynamic> json) {
-    final reasons = json['blocking_reasons'] as List<dynamic>? ?? const <dynamic>[];
+    final reasons =
+        json['blocking_reasons'] as List<dynamic>? ?? const <dynamic>[];
     return StoryboardShortVideoReadiness(
       storyboardId: json['storyboard_id'] as String,
       storyboardNumericId: (json['storyboard_numeric_id'] as num).toInt(),
@@ -309,10 +315,10 @@ class ProjectProductionOverview {
       schemaVersion: (json['schema_version'] as num).toInt(),
       readyStoryboardCount: (json['ready_storyboard_count'] as num).toInt(),
       totalStoryboardCount: (json['total_storyboard_count'] as num).toInt(),
-      runningGenerationJobCount:
-          (json['running_generation_job_count'] as num).toInt(),
-      pendingReviewBadCaseCount:
-          (json['pending_review_bad_case_count'] as num).toInt(),
+      runningGenerationJobCount: (json['running_generation_job_count'] as num)
+          .toInt(),
+      pendingReviewBadCaseCount: (json['pending_review_bad_case_count'] as num)
+          .toInt(),
     );
   }
 }
@@ -361,7 +367,8 @@ class AssetsOverviewItem {
   final List<int> linkedScriptNumericIds;
 
   factory AssetsOverviewItem.fromJson(Map<String, dynamic> json) {
-    final raw = json['linked_script_numeric_ids'] as List<dynamic>? ??
+    final raw =
+        json['linked_script_numeric_ids'] as List<dynamic>? ??
         const <dynamic>[];
     return AssetsOverviewItem(
       assetId: json['asset_id'] as String,
@@ -369,17 +376,15 @@ class AssetsOverviewItem {
       name: json['name'] as String,
       assetType: json['asset_type'] as String,
       candidateStatus: json['candidate_status'] as String?,
-      linkedScriptNumericIds:
-          raw.map((e) => (e as num).toInt()).toList(growable: false),
+      linkedScriptNumericIds: raw
+          .map((e) => (e as num).toInt())
+          .toList(growable: false),
     );
   }
 }
 
 class AssetsOverviewTypeGroup {
-  const AssetsOverviewTypeGroup({
-    required this.assetType,
-    required this.items,
-  });
+  const AssetsOverviewTypeGroup({required this.assetType, required this.items});
 
   final String assetType;
   final List<AssetsOverviewItem> items;
@@ -409,8 +414,7 @@ class ProjectAssetsOverview {
   final List<AssetsOverviewTypeGroup> byAssetType;
 
   factory ProjectAssetsOverview.fromJson(Map<String, dynamic> json) {
-    final groups =
-        json['by_asset_type'] as List<dynamic>? ?? const <dynamic>[];
+    final groups = json['by_asset_type'] as List<dynamic>? ?? const <dynamic>[];
     return ProjectAssetsOverview(
       schemaVersion: (json['schema_version'] as num).toInt(),
       totalCount: (json['total_count'] as num).toInt(),
@@ -439,7 +443,9 @@ class ShortVideoAssemblyProjectDefaults {
   final String? subtitleStyle;
   final String? bgmStrategy;
 
-  factory ShortVideoAssemblyProjectDefaults.fromJson(Map<String, dynamic> json) {
+  factory ShortVideoAssemblyProjectDefaults.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return ShortVideoAssemblyProjectDefaults(
       voiceProfile: json['voice_profile'] as String?,
       subtitleStyle: json['subtitle_style'] as String?,
@@ -460,7 +466,9 @@ class ShortVideoAssemblyEffectiveDefaults {
   final String? subtitleStyle;
   final String? bgmStrategy;
 
-  factory ShortVideoAssemblyEffectiveDefaults.fromJson(Map<String, dynamic> json) {
+  factory ShortVideoAssemblyEffectiveDefaults.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return ShortVideoAssemblyEffectiveDefaults(
       ttsVoice: json['tts_voice'] as String,
       subtitleStyle: json['subtitle_style'] as String?,
@@ -558,7 +566,9 @@ class ShortVideoAssemblyScriptGroup {
       scriptNumericId: (json['script_numeric_id'] as num).toInt(),
       scriptName: json['script_name'] as String?,
       shots: raw
-          .map((e) => ShortVideoAssemblyShot.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => ShortVideoAssemblyShot.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }
@@ -584,24 +594,27 @@ class ShortVideoCandidateQualitySummary {
   final int assemblyLateStageBadCaseCount;
   final List<ShortVideoQualityStageBucket> badCasesByStage;
 
-  factory ShortVideoCandidateQualitySummary.fromJson(Map<String, dynamic> json) {
+  factory ShortVideoCandidateQualitySummary.fromJson(
+    Map<String, dynamic> json,
+  ) {
     final buckets =
         json['bad_cases_by_stage'] as List<dynamic>? ?? const <dynamic>[];
     return ShortVideoCandidateQualitySummary(
       schemaVersion: (json['schema_version'] as num).toInt(),
       projectBadCaseTotal: (json['project_bad_case_total'] as num).toInt(),
-      assemblyShotReviewTotal:
-          (json['assembly_shot_review_total'] as num).toInt(),
-      assemblyShotBadCaseCount:
-          (json['assembly_shot_bad_case_count'] as num).toInt(),
-      assemblyShotsWithBadCase:
-          (json['assembly_shots_with_bad_case'] as num).toInt(),
+      assemblyShotReviewTotal: (json['assembly_shot_review_total'] as num)
+          .toInt(),
+      assemblyShotBadCaseCount: (json['assembly_shot_bad_case_count'] as num)
+          .toInt(),
+      assemblyShotsWithBadCase: (json['assembly_shots_with_bad_case'] as num)
+          .toInt(),
       assemblyLateStageBadCaseCount:
           (json['assembly_late_stage_bad_case_count'] as num).toInt(),
       badCasesByStage: buckets
           .map(
-            (e) =>
-                ShortVideoQualityStageBucket.fromJson(e as Map<String, dynamic>),
+            (e) => ShortVideoQualityStageBucket.fromJson(
+              e as Map<String, dynamic>,
+            ),
           )
           .toList(growable: false),
     );
@@ -671,8 +684,9 @@ class ProjectShortVideoAssembly {
           : ShortVideoCandidateQualitySummary.emptySchema1(),
       scripts: raw
           .map(
-            (e) =>
-                ShortVideoAssemblyScriptGroup.fromJson(e as Map<String, dynamic>),
+            (e) => ShortVideoAssemblyScriptGroup.fromJson(
+              e as Map<String, dynamic>,
+            ),
           )
           .toList(growable: false),
     );
@@ -751,8 +765,8 @@ class ShortVideoExportQualityGatePlaceholder {
     return ShortVideoExportQualityGatePlaceholder(
       schemaVersion: (json['schema_version'] as num).toInt(),
       enforced: json['enforced'] as bool,
-      pendingReviewBadCaseCount:
-          (json['pending_review_bad_case_count'] as num).toInt(),
+      pendingReviewBadCaseCount: (json['pending_review_bad_case_count'] as num)
+          .toInt(),
     );
   }
 }
@@ -921,7 +935,8 @@ Future<ProjectShortVideoAssembly> fetchProjectShortVideoAssemblyByProjectId(
 }
 
 /// `GET /api/v1/projects/{project_id}/short-video-export-check` — see `getProjectShortVideoExportCheckByProjectIdV1`.
-Future<ProjectShortVideoExportCheck> fetchProjectShortVideoExportCheckByProjectId(
+Future<ProjectShortVideoExportCheck>
+fetchProjectShortVideoExportCheckByProjectId(
   String accessToken,
   String projectId,
 ) async {

@@ -11,7 +11,9 @@ use crate::auth::require_claims;
 use crate::error::ApiError;
 use crate::state::{AppState, MemoryConfig};
 
-use super::types::MeResponse;
+use crate::workspaces::ensure_personal_workspace;
+
+use super::types::{MeResponse, WorkspaceSummary};
 
 #[derive(FromRow)]
 struct UserProfileRow {
@@ -54,7 +56,9 @@ pub(crate) async fn me(
         per_user_quota,
         jobs_today,
         memory_cfg,
+        current_workspace,
     ) = if let Some(pool) = state.pool.as_ref() {
+        let workspace = ensure_personal_workspace(pool, sub).await?;
         let row = sqlx::query_as::<_, UserProfileRow>(
             r#"
             SELECT
@@ -117,9 +121,24 @@ pub(crate) async fn me(
             per_user_quota,
             Some(today),
             mem_cfg,
+            Some(WorkspaceSummary {
+                id: workspace.workspace_id,
+                name: workspace.workspace_name,
+                workspace_type: workspace.workspace_type,
+            }),
         )
     } else {
-        ("free".to_string(), None, None, None, None, None, None, None)
+        (
+            "free".to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
     };
 
     // Resolve effective quota using same logic as quota::effective_daily_job_quota
@@ -162,5 +181,6 @@ pub(crate) async fn me(
         daily_job_quota,
         jobs_today,
         memory_config,
+        current_workspace,
     }))
 }

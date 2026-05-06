@@ -36,4 +36,8 @@ async fn me_ok_without_pool_with_jwt() {
         v["subscription_current_period_end_at"].is_null(),
         "subscription_current_period_end_at should be absent without pool"
     );
+    assert!(
+        v["current_workspace"].is_null(),
+        "current_workspace should be absent without pool"
+    );
 }

@@ -24,5 +24,6 @@ pub mod settings;
 pub mod short_video;
 pub mod state;
 pub mod vendor;
+pub mod workspaces;
 
 pub mod openapi_spec;

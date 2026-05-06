@@ -53,6 +53,10 @@ async fn project_numeric_crud_roundtrip() {
     let (status, added) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "added={added}");
     let project_uuid = added["id"].as_str().expect("project id").to_owned();
+    let workspace_id = added["workspace_id"]
+        .as_str()
+        .expect("workspace id")
+        .to_owned();
     let numeric_id = added["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let res = app
@@ -82,6 +86,10 @@ async fn project_numeric_crud_roundtrip() {
         created_row["numeric_id"].as_i64(),
         Some(i64::from(numeric_id))
     );
+    assert_eq!(
+        created_row["workspace_id"].as_str(),
+        Some(workspace_id.as_str())
+    );
     assert_eq!(created_row["intro"].as_str(), Some("seed intro"));
     assert_eq!(created_row["project_type"].as_str(), Some("short-drama"));
     assert_eq!(created_row["mode"].as_str(), Some("novel"));
@@ -104,6 +112,20 @@ async fn project_numeric_crud_roundtrip() {
     .await
     .expect("select initial mode");
     assert_eq!(stored_mode.as_deref(), Some("novel"));
+
+    let stored_workspace_id: Option<Uuid> = sqlx::query_scalar(
+        "SELECT workspace_id FROM public.app_project WHERE owner_user_id = $1 AND numeric_id = $2",
+    )
+    .bind(sub)
+    .bind(numeric_id)
+    .fetch_optional(&pool)
+    .await
+    .expect("select workspace id")
+    .flatten();
+    assert_eq!(
+        stored_workspace_id.as_ref().map(Uuid::to_string).as_deref(),
+        Some(workspace_id.as_str())
+    );
 
     let patch_body = json!({
         "name": updated_name,

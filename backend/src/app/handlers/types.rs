@@ -35,6 +35,13 @@ pub(crate) struct ReadyResponse {
 }
 
 #[derive(Serialize, ToSchema)]
+pub(crate) struct WorkspaceSummary {
+    pub id: Uuid,
+    pub name: String,
+    pub workspace_type: String,
+}
+
+#[derive(Serialize, ToSchema)]
 pub(crate) struct MeResponse {
     pub sub: Uuid,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -60,4 +67,6 @@ pub(crate) struct MeResponse {
     /// User memory/RAG configuration from `app_user_profile.memory_config` (or server defaults).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub memory_config: Option<MemoryConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub current_workspace: Option<WorkspaceSummary>,
 }

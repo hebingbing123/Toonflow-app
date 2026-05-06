@@ -11,6 +11,7 @@ extension _HomePageBuildSections on _HomePageState {
     ];
 
     if (signedIn) {
+      widgets.add(_buildWorkspaceContextSection(context));
       widgets.add(_buildWorkspaceModeSection(context));
       widgets.addAll(
         _shellNavigationController.isProductMode
@@ -127,6 +128,28 @@ extension _HomePageBuildSections on _HomePageState {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildWorkspaceContextSection(BuildContext context) {
+    final workspace = _sessionMe?.currentWorkspace;
+    final projects = _projectsController.projects;
+    final currentProject = _productScopedProjectNumericId == null
+        ? null
+        : projects
+              ?.where((p) => p.numericId == _productScopedProjectNumericId)
+              .firstOrNull;
+    final projectLabel = currentProject != null
+        ? 'Project #${currentProject.numericId} · ${currentProject.name?.trim().isNotEmpty == true ? currentProject.name!.trim() : 'Untitled project'}'
+        : (_productScopedProjectNumericId != null
+              ? 'Project #$_productScopedProjectNumericId'
+              : null);
+
+    return WorkspaceContextView(
+      loading: _loadingSessionMe,
+      workspaceName: workspace?.name,
+      workspaceType: workspace?.workspaceType,
+      projectLabel: projectLabel,
     );
   }
 

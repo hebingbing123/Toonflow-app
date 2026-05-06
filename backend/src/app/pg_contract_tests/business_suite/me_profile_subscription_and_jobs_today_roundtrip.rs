@@ -109,6 +109,20 @@ async fn me_profile_subscription_and_jobs_today_roundtrip() {
         me["jobs_today"].as_i64().unwrap_or_default() >= 2,
         "jobs_today should include the two enqueued jobs: {me}"
     );
+    assert_eq!(
+        me["current_workspace"]["name"].as_str(),
+        Some("Personal Workspace")
+    );
+    assert_eq!(
+        me["current_workspace"]["workspace_type"].as_str(),
+        Some("personal")
+    );
+    assert!(
+        me["current_workspace"]["id"]
+            .as_str()
+            .is_some_and(|value| !value.trim().is_empty()),
+        "workspace id should be present: {me}"
+    );
 
     cleanup_jobs(&pool, &created_job_ids).await;
     let _ = sqlx::query("DELETE FROM public.app_user_profile WHERE user_id = $1")

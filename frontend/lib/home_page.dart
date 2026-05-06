@@ -40,6 +40,7 @@ import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
 import 'shell/navigation_controller.dart';
 import 'shell/sections.dart';
+import 'shell/workspace_context_view.dart';
 import 'skills_harness/controller.dart';
 import 'overview/controller.dart';
 import 'system_probes/account/controller.dart';
@@ -125,6 +126,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? _error;
   int? _productScopedProjectNumericId;
+  MeResponse? _sessionMe;
+  String? _lastSessionAccessToken;
+  bool _loadingSessionMe = false;
   final _workspaceInputController = WorkspaceInputController();
   final _workspaceOperationController = WorkspaceOperationController();
   late final WorkspaceRunController _workspaceRunController =
@@ -293,11 +297,59 @@ class _HomePageState extends State<HomePage> {
     if (kSupabaseConfigured) {
       _authController.attachAuthListener();
     }
+    _syncSessionContext();
   }
 
   void _handleAuthChanged() {
+    _syncSessionContext();
     if (!mounted) return;
     setState(() {});
+  }
+
+  Future<void> _syncSessionContext() async {
+    final token = _authController.session?.accessToken;
+    if (token == _lastSessionAccessToken) {
+      return;
+    }
+    _lastSessionAccessToken = token;
+    if (token == null) {
+      if (!mounted) return;
+      setState(() {
+        _sessionMe = null;
+        _loadingSessionMe = false;
+      });
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _loadingSessionMe = true;
+      });
+    }
+
+    try {
+      final me = await fetchMeV1(token);
+      if (!mounted || _lastSessionAccessToken != token) {
+        return;
+      }
+      setState(() {
+        _sessionMe = me;
+      });
+    } on RustApiException catch (error) {
+      if (_lastSessionAccessToken == token) {
+        _setSharedError(error.toString());
+      }
+    } catch (error) {
+      if (_lastSessionAccessToken == token) {
+        _setSharedError(error.toString());
+      }
+    } finally {
+      if (mounted && _lastSessionAccessToken == token) {
+        setState(() {
+          _loadingSessionMe = false;
+        });
+      }
+    }
   }
 
   void _handleAccountProbesChanged() {
@@ -359,6 +411,9 @@ class _HomePageState extends State<HomePage> {
     _qualityReviewsController.reset();
     _workspaceOperationController.reset();
     _productScopedProjectNumericId = null;
+    _sessionMe = null;
+    _lastSessionAccessToken = null;
+    _loadingSessionMe = false;
   }
 
   @override

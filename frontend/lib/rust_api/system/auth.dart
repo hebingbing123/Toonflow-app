@@ -14,6 +14,7 @@ class MeResponse {
     required this.planTier,
     this.billingCurrency,
     this.billingProvider,
+    this.currentWorkspace,
   });
 
   final String sub;
@@ -21,6 +22,7 @@ class MeResponse {
   final String planTier;
   final String? billingCurrency;
   final String? billingProvider;
+  final WorkspaceSummary? currentWorkspace;
 
   factory MeResponse.fromJson(Map<String, dynamic> json) {
     return MeResponse(
@@ -29,6 +31,31 @@ class MeResponse {
       planTier: json['plan_tier'] as String,
       billingCurrency: json['billing_currency'] as String?,
       billingProvider: json['billing_provider'] as String?,
+      currentWorkspace: json['current_workspace'] is Map<String, dynamic>
+          ? WorkspaceSummary.fromJson(
+              json['current_workspace'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+}
+
+class WorkspaceSummary {
+  const WorkspaceSummary({
+    required this.id,
+    required this.name,
+    required this.workspaceType,
+  });
+
+  final String id;
+  final String name;
+  final String workspaceType;
+
+  factory WorkspaceSummary.fromJson(Map<String, dynamic> json) {
+    return WorkspaceSummary(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      workspaceType: json['workspace_type'] as String,
     );
   }
 }

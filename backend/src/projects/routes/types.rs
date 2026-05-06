@@ -22,6 +22,7 @@ pub struct ListProjectsQuery {
 )]
 pub struct ProjectRow {
     pub id: Uuid,
+    pub workspace_id: Option<Uuid>,
     #[serde(rename = "numeric_id")]
     #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
