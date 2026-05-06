@@ -450,9 +450,10 @@ fn select_scoped_contextual_summary_style_note(
         .as_deref()
         .and_then(parse_structured_storyboard_description);
 
-    rows.iter()
+    let candidates = rows.iter()
         .filter(|row| allowed_names.contains(&row.name.as_str()))
         .filter_map(|row| {
+            let is_generation_brief = row.name.contains("generation_brief");
             let note = if row.name.contains("generation_brief") {
                 extract_key_value(&row.content, "style")
                     .map(|value| expand_compacted_delivery_style_note(&value))
@@ -493,14 +494,35 @@ fn select_scoped_contextual_summary_style_note(
                     )
                 })
                 .unwrap_or(0);
-            let brief_priority = i32::from(row.name.contains("generation_brief"));
+            let brief_priority = i32::from(is_generation_brief);
             Some((
                 score,
                 evidence,
                 brief_priority,
                 compacted.chars().count(),
+                is_generation_brief,
                 compacted,
             ))
+        })
+        .collect::<Vec<_>>();
+
+    candidates
+        .iter()
+        .filter(|candidate| {
+            !candidates.iter().any(|other| {
+                if std::ptr::eq(*candidate, other) {
+                    return false;
+                }
+                let candidate_note = &candidate.5;
+                let other_note = &other.5;
+                let overlaps = style_note_fragments_subset_of(candidate_note, other_note)
+                    || style_note_fragments_subset_of(other_note, candidate_note);
+                overlaps
+                    && other.0 >= candidate.0
+                    && other.1 >= candidate.1
+                    && other.3 <= candidate.3
+                    && (other.4 != candidate.4 || other.3 < candidate.3)
+            })
         })
         .max_by(|left, right| {
             left.0
@@ -508,9 +530,9 @@ fn select_scoped_contextual_summary_style_note(
                 .then(left.1.cmp(&right.1))
                 .then(left.2.cmp(&right.2))
                 .then_with(|| right.3.cmp(&left.3))
-                .then_with(|| right.4.cmp(&left.4))
+                .then_with(|| right.5.cmp(&left.5))
         })
-        .map(|(_, _, _, _, note)| note)
+        .map(|(_, _, _, _, _, note)| note.clone())
 }
 
 fn compact_generation_brief_style_note_for_storyboard(

@@ -734,6 +734,42 @@ fn select_video_prompt_style_notes_prefers_project_generation_brief_for_visual_c
 }
 
 #[test]
+fn select_video_prompt_style_notes_prefers_shorter_style_summary_when_brief_is_redundant() {
+    let rows = vec![
+        AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=6 | style=表演呼吸发颤后停顿，语气压低哽咽尾音".into(),
+        },
+        AgentMemoryRow {
+            name: "script_video_generation_brief_memory".into(),
+            content: "sampleCount=4 | style=表演呼吸发颤后停顿，语气压低哽咽尾音，情绪压抑克制 | riskTags=dialogue/performance | focusTags=delivery_realism/emotion_arc".into(),
+        },
+    ];
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚含泪低声说别走".into()),
+        video_desc: Some("（林晚含泪低声说别走、雨夜窗边、林晚、5秒、近景、静止、含泪停顿后低声开口、哽咽克制、冷蓝窗光、别走、雨声压住呼吸、A18）".into()),
+        duration: Some("5s".into()),
+    };
+
+    assert_eq!(
+        select_video_prompt_style_notes(
+            &rows,
+            18,
+            None,
+            &storyboard_row,
+            Some(VideoPromptConstraintPressure {
+                has_dialogue_guardrail: true,
+                has_emotion_guardrail: true,
+                prefer_delivery_memory_recall: true,
+                forces_compact_memory: true,
+                ..VideoPromptConstraintPressure::default()
+            }),
+        ),
+        vec!["表演呼吸发颤后停顿，语气压低哽咽尾音".to_string()]
+    );
+}
+
+#[test]
 fn select_video_prompt_style_notes_prefers_subject_role_memory_before_generic_summary() {
     let rows = vec![
         AgentMemoryRow {
