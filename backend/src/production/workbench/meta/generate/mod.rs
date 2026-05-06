@@ -48,7 +48,10 @@ mod tests;
 mod tokens;
 
 use constraints::VideoPromptConstraintPressure;
-use constraints::{derive_recent_quality_constraint_pressure, RecentQualitySignalRow};
+use constraints::{
+    derive_recent_quality_constraint_pressure, infer_adaptive_automation_memory_mode,
+    RecentQualitySignalRow,
+};
 use handlers::{
     GenerateVideoPromptBody, GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse,
 };
@@ -145,92 +148,6 @@ async fn load_recent_quality_signal_rows(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(rows.into_iter().map(RecentQualitySignalRow::from).collect())
-}
-
-fn text_contains_any(text: &str, keywords: &[&str]) -> bool {
-    keywords.iter().any(|keyword| text.contains(keyword))
-}
-
-fn recent_quality_row_requires_standard_memory_mode(row: &RecentQualitySignalRow) -> bool {
-    let comment = row
-        .comments
-        .as_deref()
-        .map(normalize_prompt_text)
-        .unwrap_or_default()
-        .to_lowercase();
-    let category = row
-        .bad_case_category
-        .as_deref()
-        .map(normalize_prompt_text)
-        .unwrap_or_default()
-        .to_lowercase();
-
-    row.is_bad_case
-        || row.passed == Some(false)
-        || row.overall_score.is_some_and(|score| score <= 7)
-        || row.dialogue_naturalness.is_some_and(|score| score <= 7)
-        || row.character_consistency.is_some_and(|score| score <= 7)
-        || row.visual_quality.is_some_and(|score| score <= 7)
-        || text_contains_any(
-            &comment,
-            &[
-                "读文章",
-                "生硬",
-                "口型",
-                "台词",
-                "没情绪",
-                "单一状态",
-                "平平淡淡",
-                "穿帮",
-                "串脸",
-                "不自然",
-                "很假",
-                "monotone",
-                "stiff",
-                "lip sync",
-                "identity",
-                "face drift",
-            ],
-        )
-        || text_contains_any(
-            &category,
-            &[
-                "dialogue",
-                "delivery",
-                "lip",
-                "identity",
-                "character",
-                "consistency",
-                "emotion",
-                "performance",
-                "lighting",
-                "motion",
-            ],
-        )
-}
-
-fn pressure_requires_standard_memory_mode(pressure: VideoPromptConstraintPressure) -> bool {
-    pressure.forces_compact_memory
-        || pressure.has_identity_guardrail
-        || pressure.has_dialogue_guardrail
-        || pressure.has_blocking_guardrail
-        || pressure.has_emotion_guardrail
-        || (pressure.has_lighting_guardrail && pressure.has_motion_guardrail)
-}
-
-fn infer_adaptive_automation_memory_mode(
-    recent_rows: &[RecentQualitySignalRow],
-    constraint_pressure: Option<VideoPromptConstraintPressure>,
-) -> AutomationMemoryMode {
-    if constraint_pressure.is_some_and(pressure_requires_standard_memory_mode)
-        || recent_rows
-            .iter()
-            .any(recent_quality_row_requires_standard_memory_mode)
-    {
-        AutomationMemoryMode::Standard
-    } else {
-        AutomationMemoryMode::Lean
-    }
 }
 
 async fn apply_adaptive_project_memory_mode(

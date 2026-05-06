@@ -11,3 +11,6 @@ mod merge_budget_tests;
 
 #[cfg(test)]
 mod short_video_config_integration;
+
+#[cfg(test)]
+mod automation_mode_tests;

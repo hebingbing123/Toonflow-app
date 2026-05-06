@@ -9,12 +9,20 @@ use super::WorkbenchGenerateVideoBody;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
+use crate::production::workbench::meta::generate::constraints::{
+    derive_recent_quality_constraint_pressure, infer_adaptive_automation_memory_mode,
+    RecentQualitySignalRow,
+};
 use crate::production::workbench::video_prompt_memory::{
     optimize_scoped_video_memory, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::scope::OwnedScriptScope;
+use crate::settings::agent_memory::{
+    load_project_automation_memory_policy, save_project_automation_memory_policy,
+    AutomationMemoryMode, ProjectAutomationMemoryPolicy,
+};
 use crate::state::AppState;
 use uuid::Uuid;
 
@@ -149,6 +157,47 @@ impl AutoNegativePromptSelection {
     }
 }
 
+fn merge_negative_selection_constraint_pressure(
+    selections: impl Iterator<Item = AutoNegativePromptSelection>,
+) -> Option<VideoPromptConstraintPressure> {
+    let merged = selections.fold(
+        VideoPromptConstraintPressure::default(),
+        |pressure, selection| {
+            pressure.merge(VideoPromptConstraintPressure::from_runtime_constraints(
+                Some(&selection),
+                None,
+            ))
+        },
+    );
+    merged.has_active_guardrail().then_some(merged)
+}
+
+async fn apply_adaptive_project_memory_mode(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    recent_rows: &[RecentQualitySignalRow],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> Result<AutomationMemoryMode, ApiError> {
+    let current = load_project_automation_memory_policy(pool, user_id, project_id, "productionAgent")
+        .await?;
+    if current.mode == AutomationMemoryMode::Off {
+        return Ok(AutomationMemoryMode::Off);
+    }
+    let next_mode = infer_adaptive_automation_memory_mode(recent_rows, constraint_pressure);
+    if current.mode != next_mode {
+        save_project_automation_memory_policy(
+            pool,
+            user_id,
+            project_id,
+            "productionAgent",
+            &ProjectAutomationMemoryPolicy { mode: next_mode },
+        )
+        .await?;
+    }
+    Ok(next_mode)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum VideoNegativePromptBudgetTier {
     Lean,
@@ -249,13 +298,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     )
     .await?;
     enforce_quality_gate(QualityGateStage::VideoGenerate, &gate, strategy)?;
-    optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?;
-
-    let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
-        .await?
-        .unwrap_or_else(|| "16:9".to_string());
-    let project_mode = load_project_mode(pool, scope_row.project_id).await?;
-    let storyboard_negative_prompts = load_auto_negative_prompts(
+    let recent_quality_rows = memory_integration::load_recent_quality_signal_rows(
         pool,
         user_id,
         body.project_id,
@@ -263,6 +306,42 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
         &storyboard_ids,
     )
     .await?;
+    let recent_quality_rows = recent_quality_rows
+        .into_iter()
+        .map(RecentQualitySignalRow::from)
+        .collect::<Vec<_>>();
+    let recent_quality_pressure = derive_recent_quality_constraint_pressure(&recent_quality_rows);
+    let storyboard_negative_prompt_details = memory_integration::load_auto_negative_prompt_details(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        &storyboard_ids,
+    )
+    .await?;
+    let constraint_pressure = merge_negative_selection_constraint_pressure(
+        storyboard_negative_prompt_details.values().cloned(),
+    )
+    .map(|pressure| pressure.merge(recent_quality_pressure))
+    .or(recent_quality_pressure);
+    apply_adaptive_project_memory_mode(
+        pool,
+        user_id,
+        body.project_id,
+        &recent_quality_rows,
+        constraint_pressure,
+    )
+    .await?;
+    optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?;
+
+    let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
+        .await?
+        .unwrap_or_else(|| "16:9".to_string());
+    let project_mode = load_project_mode(pool, scope_row.project_id).await?;
+    let storyboard_negative_prompts = storyboard_negative_prompt_details
+        .into_iter()
+        .map(|(storyboard_id, selection)| (storyboard_id, selection.prompt))
+        .collect::<std::collections::HashMap<_, _>>();
     let provider = infer_video_provider(&body.model);
     let duration_label = format!("{}s", body.duration);
     let default_prompt = body.prompt.trim().to_string();
@@ -360,7 +439,7 @@ mod tests;
 
 // Re-exports
 pub(crate) use memory_integration::{
-    load_auto_negative_prompts, load_storyboard_negative_prompt_runtime,
+    load_storyboard_negative_prompt_runtime,
 };
 pub(crate) use quality_control::{
     infer_negative_fragments_from_comments, map_bad_case_category_with_comments,

@@ -2,6 +2,7 @@
 
 use crate::production::workbench::meta::common::normalize_prompt_text;
 use crate::production::workbench::video::generate::AutoNegativePromptSelection;
+use crate::settings::agent_memory::AutomationMemoryMode;
 
 use super::{observation_note_budget_family, VideoPromptObservationFamily};
 
@@ -299,12 +300,104 @@ fn contains_any(value: &str, needles: &[&str]) -> bool {
     needles.iter().any(|needle| value.contains(needle))
 }
 
+fn text_contains_any(text: &str, keywords: &[&str]) -> bool {
+    keywords.iter().any(|keyword| text.contains(keyword))
+}
+
+pub(crate) fn recent_quality_row_requires_standard_memory_mode(
+    row: &RecentQualitySignalRow,
+) -> bool {
+    let comment = row
+        .comments
+        .as_deref()
+        .map(normalize_prompt_text)
+        .unwrap_or_default()
+        .to_lowercase();
+    let category = row
+        .bad_case_category
+        .as_deref()
+        .map(normalize_prompt_text)
+        .unwrap_or_default()
+        .to_lowercase();
+
+    row.is_bad_case
+        || row.passed == Some(false)
+        || row.overall_score.is_some_and(|score| score <= 7)
+        || row.dialogue_naturalness.is_some_and(|score| score <= 7)
+        || row.character_consistency.is_some_and(|score| score <= 7)
+        || row.visual_quality.is_some_and(|score| score <= 7)
+        || text_contains_any(
+            &comment,
+            &[
+                "读文章",
+                "生硬",
+                "口型",
+                "台词",
+                "没情绪",
+                "单一状态",
+                "平平淡淡",
+                "穿帮",
+                "串脸",
+                "不自然",
+                "很假",
+                "monotone",
+                "stiff",
+                "lip sync",
+                "identity",
+                "face drift",
+            ],
+        )
+        || text_contains_any(
+            &category,
+            &[
+                "dialogue",
+                "delivery",
+                "lip",
+                "identity",
+                "character",
+                "consistency",
+                "emotion",
+                "performance",
+                "lighting",
+                "motion",
+            ],
+        )
+}
+
+pub(crate) fn pressure_requires_standard_memory_mode(
+    pressure: VideoPromptConstraintPressure,
+) -> bool {
+    pressure.forces_compact_memory
+        || pressure.has_identity_guardrail
+        || pressure.has_dialogue_guardrail
+        || pressure.has_blocking_guardrail
+        || pressure.has_emotion_guardrail
+        || (pressure.has_lighting_guardrail && pressure.has_motion_guardrail)
+}
+
+pub(crate) fn infer_adaptive_automation_memory_mode(
+    recent_rows: &[RecentQualitySignalRow],
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+) -> AutomationMemoryMode {
+    if constraint_pressure.is_some_and(pressure_requires_standard_memory_mode)
+        || recent_rows
+            .iter()
+            .any(recent_quality_row_requires_standard_memory_mode)
+    {
+        AutomationMemoryMode::Standard
+    } else {
+        AutomationMemoryMode::Lean
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        derive_recent_quality_constraint_pressure, RecentQualitySignalRow,
+        derive_recent_quality_constraint_pressure, infer_adaptive_automation_memory_mode,
+        recent_quality_row_requires_standard_memory_mode, RecentQualitySignalRow,
         VideoPromptConstraintPressure,
     };
+    use crate::settings::agent_memory::AutomationMemoryMode;
 
     #[test]
     fn derive_recent_quality_constraint_pressure_marks_dialogue_emotion_and_identity_risks() {
@@ -416,5 +509,41 @@ mod tests {
         assert!(merged.forces_compact_memory);
         assert!(!merged.prefer_delivery_memory_recall);
         assert!(!merged.prefer_visual_continuity_memory_recall);
+    }
+
+    #[test]
+    fn adaptive_memory_mode_uses_standard_for_dialogue_failure_rows() {
+        let row = RecentQualitySignalRow {
+            passed: Some(false),
+            overall_score: Some(6),
+            dialogue_naturalness: Some(6),
+            character_consistency: Some(8),
+            visual_quality: Some(8),
+            memory_delivery_priority_applied: Some(false),
+            is_bad_case: false,
+            bad_case_category: Some("dialogue".into()),
+            comments: Some("像读文章，口型也僵".into()),
+            feedback_memory_focus_tags: Vec::new(),
+        };
+
+        assert!(recent_quality_row_requires_standard_memory_mode(&row));
+        assert_eq!(
+            infer_adaptive_automation_memory_mode(&[row], None),
+            AutomationMemoryMode::Standard
+        );
+    }
+
+    #[test]
+    fn adaptive_memory_mode_keeps_lean_for_positive_bias_without_failures() {
+        let pressure = VideoPromptConstraintPressure {
+            prefer_delivery_memory_recall: true,
+            prefer_visual_continuity_memory_recall: true,
+            ..VideoPromptConstraintPressure::default()
+        };
+
+        assert_eq!(
+            infer_adaptive_automation_memory_mode(&[], Some(pressure)),
+            AutomationMemoryMode::Lean
+        );
     }
 }
