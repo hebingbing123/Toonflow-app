@@ -1,4 +1,7 @@
 use super::*;
+use super::super::storage::{
+    storyboard_scope_signature, summary_memory_allowed, VIDEO_SCOPED_MEMORY_TIER,
+};
 
 fn storyboard_memory_key(storyboard_numeric_id: i32) -> Option<String> {
     if storyboard_numeric_id > 0 {
@@ -64,6 +67,34 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     } else {
         content
     };
+    let scope_signature = storyboard_scope_signature(
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_numeric_id,
+        REJECTED_VIDEO_NEGATIVE_MEMORY_NAME,
+        &next_content,
+    );
+    if !summary_memory_allowed(
+        pool,
+        user_id,
+        project_numeric_id,
+        REJECTED_VIDEO_NEGATIVE_MEMORY_NAME,
+        &next_content,
+        VIDEO_SCOPED_MEMORY_TIER,
+        &scope_signature,
+    )
+    .await?
+    {
+        clear_rejected_video_negative_memory(
+            pool,
+            user_id,
+            project_numeric_id,
+            script_numeric_id,
+            storyboard_numeric_id,
+        )
+        .await?;
+        return Ok(());
+    }
 
     if latest.as_deref() == Some(next_content.as_str()) {
         return Ok(());
@@ -82,9 +113,10 @@ pub(crate) async fn persist_rejected_video_negative_memory(
         r#"
         INSERT INTO app_agent_memory (
           owner_user_id, numeric_project_id, episodes_id, agent_type,
-          memory_type, role, name, content, summarized, create_time_ms
+          memory_type, role, name, content, summarized, create_time_ms,
+          memory_tier, scope_signature
         )
-        VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+        VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000, $6, $7)
         "#,
     )
     .bind(user_id)
@@ -92,6 +124,8 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     .bind(script_numeric_id)
     .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
     .bind(&next_content)
+    .bind(VIDEO_SCOPED_MEMORY_TIER)
+    .bind(&scope_signature)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

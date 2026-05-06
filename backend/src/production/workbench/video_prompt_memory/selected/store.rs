@@ -1,5 +1,6 @@
 use super::focus::prepare_selected_video_memory_for_storage;
 use super::*;
+use super::storage::{storyboard_scope_signature, summary_memory_allowed, VIDEO_SCOPED_MEMORY_TIER};
 
 pub(crate) async fn persist_selected_video_memory(
     pool: &PgPool,
@@ -19,6 +20,40 @@ pub(crate) async fn persist_selected_video_memory(
     else {
         return Ok(());
     };
+    let Some(storyboard_numeric_id) = extract_key_value(&content, "storyboardIds")
+        .and_then(|value| value.parse::<i32>().ok())
+        .filter(|id| *id > 0)
+    else {
+        return Ok(());
+    };
+    let scope_signature = storyboard_scope_signature(
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_numeric_id,
+        SELECTED_VIDEO_MEMORY_NAME,
+        &content,
+    );
+    if !summary_memory_allowed(
+        pool,
+        user_id,
+        project_numeric_id,
+        SELECTED_VIDEO_MEMORY_NAME,
+        &content,
+        VIDEO_SCOPED_MEMORY_TIER,
+        &scope_signature,
+    )
+    .await?
+    {
+        delete_selected_video_memory_for_scope(
+            pool,
+            user_id,
+            project_numeric_id,
+            script_numeric_id,
+            &content,
+        )
+        .await?;
+        return Ok(());
+    }
     let latest_same_scope = load_latest_selected_video_memory_for_scope(
         pool,
         user_id,
@@ -54,9 +89,10 @@ pub(crate) async fn persist_selected_video_memory(
         r#"
         INSERT INTO app_agent_memory (
           owner_user_id, numeric_project_id, episodes_id, agent_type,
-          memory_type, role, name, content, summarized, create_time_ms
+          memory_type, role, name, content, summarized, create_time_ms,
+          memory_tier, scope_signature
         )
-        VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+        VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000, $6, $7)
         "#,
     )
     .bind(user_id)
@@ -64,6 +100,8 @@ pub(crate) async fn persist_selected_video_memory(
     .bind(script_numeric_id)
     .bind(SELECTED_VIDEO_MEMORY_NAME)
     .bind(&content)
+    .bind(VIDEO_SCOPED_MEMORY_TIER)
+    .bind(&scope_signature)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
