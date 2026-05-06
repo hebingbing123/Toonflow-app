@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../rust_api.dart';
+import 'import_parser.dart';
 
 part 'workbench_launcher_controllers.dart';
 part 'workbench_launcher_state.dart';
@@ -29,6 +30,24 @@ Future<void> openNovelWorkbenchDialog({
     required void Function(List<NovelRow> rows, String message) applyResult,
   })
   buildSearchSection,
+  required Widget Function({
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required StateSetter setLocalState,
+    required String token,
+    required ProjectRow project,
+    required List<bool> novelsBusy,
+    required List<ParsedNovelChapter> importPreviewRows,
+    required bool localBusy,
+    required void Function(bool value) setLocalBusy,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required void Function(String value) updateInfoLine,
+    required TextEditingController importRawTextCtrl,
+    required TextEditingController importBatchSizeCtrl,
+    required void Function(List<ParsedNovelChapter> rows, String message)
+    applyImportPreview,
+  })
+  buildImportSection,
   required Widget Function({
     required BuildContext ctx,
     required StateSetter setDialogState,
@@ -200,6 +219,28 @@ Future<void> openNovelWorkbenchDialog({
                             rows: rows,
                             message: message,
                           );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      buildImportSection(
+                        ctx: dialogCtx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        token: token,
+                        project: project,
+                        novelsBusy: novelsBusy,
+                        importPreviewRows: local.importPreviewRows,
+                        localBusy: local.localBusy,
+                        setLocalBusy: setLocalBusy,
+                        refreshWorkbench: refreshWorkbench,
+                        updateInfoLine: updateInfoLine,
+                        importRawTextCtrl: ctrls.importRawTextCtrl,
+                        importBatchSizeCtrl: ctrls.importBatchSizeCtrl,
+                        applyImportPreview: (rows, message) {
+                          setLocalState(() {
+                            local.importPreviewRows = rows;
+                            local.infoLine = message;
+                          });
                         },
                       ),
                       const SizedBox(height: 16),

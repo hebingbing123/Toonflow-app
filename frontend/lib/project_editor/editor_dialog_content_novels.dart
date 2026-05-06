@@ -29,13 +29,11 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
             project: p,
             novelsRef: dialogState.novelsRef,
             novelsBusy: dialogState.novelsBusy,
-            reloadAssetsAndStats: () => dialogState.reloadAssetsAndStats(
-              token,
-              p.id,
-              p.numericId,
-            ),
+            reloadAssetsAndStats: () =>
+                dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
             parseNumericIdList: parseNumericIdList,
             buildSearchSection: _buildNovelWorkbenchSearchSection,
+            buildImportSection: _buildNovelWorkbenchImportSection,
             buildCreateSection: _buildNovelWorkbenchCreateSection,
             buildEditSection: _buildNovelWorkbenchEditSection,
             buildDeleteSection: _buildNovelWorkbenchDeleteSection,
@@ -44,11 +42,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
           refreshNovels: () async {
             setDialogState(() => dialogState.novelsLoading[0] = true);
             try {
-              await dialogState.reloadAssetsAndStats(
-                token,
-                p.id,
-                p.numericId,
-              );
+              await dialogState.reloadAssetsAndStats(token, p.id, p.numericId);
             } finally {
               if (ctx.mounted) {
                 setDialogState(() => dialogState.novelsLoading[0] = false);
@@ -78,9 +72,9 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
               );
             } on RustApiException catch (e) {
               if (ctx.mounted) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(content: Text('$e')),
-                );
+                ScaffoldMessenger.of(
+                  ctx,
+                ).showSnackBar(SnackBar(content: Text('$e')));
               }
             } finally {
               if (ctx.mounted) {
@@ -119,9 +113,9 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
                   await fetchProjectNovelEventsByProjectId(token, p.id);
             } on RustApiException catch (e) {
               if (ctx.mounted) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(content: Text(e.toString())),
-                );
+                ScaffoldMessenger.of(
+                  ctx,
+                ).showSnackBar(SnackBar(content: Text(e.toString())));
               }
             } finally {
               if (ctx.mounted) {
@@ -149,4 +143,3 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
     );
   }
 }
-

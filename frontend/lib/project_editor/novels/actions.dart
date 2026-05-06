@@ -3,6 +3,10 @@ part of '../../../home_page.dart';
 /// Encapsulates chapter workbench mutations so the main novels workbench file
 /// can focus on dialog orchestration and domain layout.
 extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
+  List<ParsedNovelChapter> _parseNovelImportPreview(String raw) {
+    return parseWholeBookNovelText(raw);
+  }
+
   Future<void> _runNovelWorkbenchAction({
     required BuildContext ctx,
     required StateSetter setDialogState,
@@ -75,6 +79,43 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     });
   }
 
+  Future<void> _importNovelWorkbenchChapters({
+    required String token,
+    required ProjectRow project,
+    required List<ParsedNovelChapter> chapters,
+    required int batchSize,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required StateSetter setLocalState,
+    required void Function(String infoLine) applyInfoLine,
+  }) async {
+    if (chapters.isEmpty) {
+      throw const FormatException('请先预解析整本内容');
+    }
+    if (batchSize <= 0) {
+      throw const FormatException('批次大小必须大于 0');
+    }
+
+    for (var i = 0; i < chapters.length; i += batchSize) {
+      final end = (i + batchSize < chapters.length)
+          ? i + batchSize
+          : chapters.length;
+      final slice = chapters.sublist(i, end);
+      for (final chapter in slice) {
+        await createProjectNovelUnderProject(
+          token,
+          project.id,
+          chapterIndex: chapter.chapterIndex,
+          chapter: chapter.chapter,
+          chapterData: chapter.chapterData,
+        );
+      }
+      applyInfoLine('已导入 $end/${chapters.length} 条章节…');
+    }
+
+    await refreshWorkbench(setLocalState);
+    applyInfoLine('整本导入完成，共新增 ${chapters.length} 条章节。');
+  }
+
   Future<void> _readNovelWorkbenchChapter({
     required String token,
     required ProjectRow project,
@@ -101,15 +142,10 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required void Function(String infoLine) applyInfoLine,
   }) async {
     final id = int.parse(selectedNovelIdCtrl.text.trim());
-    final row = await patchProjectNovelByProjectIds(
-      token,
-      project.id,
-      id,
-      {
-        'chapter': patchChapterCtrl.text.trim(),
-        'chapter_data': patchBodyCtrl.text.trim(),
-      },
-    );
+    final row = await patchProjectNovelByProjectIds(token, project.id, id, {
+      'chapter': patchChapterCtrl.text.trim(),
+      'chapter_data': patchBodyCtrl.text.trim(),
+    });
     await refreshWorkbench(setLocalState);
     applyInfoLine('已更新章节 #${row.numericId}。');
   }
@@ -196,7 +232,9 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
               .take(3)
               .map((row) => '#${row.numericId}:${row.eventState}')
               .join(' · ');
-    applyInfoLine('workbench get-novel-event-state 返回 ${rows.length} 条：$sample');
+    applyInfoLine(
+      'workbench get-novel-event-state 返回 ${rows.length} 条：$sample',
+    );
   }
 
   Future<void> _batchDeleteNovelWorkbenchChapters({
@@ -211,11 +249,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     if (ids.isEmpty) {
       throw const FormatException('至少提供一个章节 ID');
     }
-    final message = await batchDeleteNovelsUnderProject(
-      token,
-      project.id,
-      ids,
-    );
+    final message = await batchDeleteNovelsUnderProject(token, project.id, ids);
     await refreshWorkbench(setLocalState);
     applyInfoLine('已批量删除 ${ids.length} 条章节：$message');
   }

@@ -3,6 +3,8 @@ part of 'workbench_launcher.dart';
 class _NovelWorkbenchControllers {
   const _NovelWorkbenchControllers({
     required this.searchCtrl,
+    required this.importRawTextCtrl,
+    required this.importBatchSizeCtrl,
     required this.createChapterCtrl,
     required this.createBodyCtrl,
     required this.selectedNovelIdCtrl,
@@ -21,6 +23,8 @@ class _NovelWorkbenchControllers {
   }) {
     return _NovelWorkbenchControllers(
       searchCtrl: TextEditingController(),
+      importRawTextCtrl: TextEditingController(),
+      importBatchSizeCtrl: TextEditingController(text: '10'),
       createChapterCtrl: TextEditingController(
         text: '章节_${DateTime.now().millisecondsSinceEpoch}',
       ),
@@ -30,7 +34,9 @@ class _NovelWorkbenchControllers {
       ),
       patchChapterCtrl: TextEditingController(text: first?.chapter ?? ''),
       patchBodyCtrl: TextEditingController(text: first?.chapterData ?? ''),
-      deleteNovelIdCtrl: TextEditingController(text: last?.numericId.toString() ?? ''),
+      deleteNovelIdCtrl: TextEditingController(
+        text: last?.numericId.toString() ?? '',
+      ),
       generateIdsCtrl: TextEditingController(
         text: currentItems.take(3).map((e) => e.numericId).join(','),
       ),
@@ -44,6 +50,8 @@ class _NovelWorkbenchControllers {
   }
 
   final TextEditingController searchCtrl;
+  final TextEditingController importRawTextCtrl;
+  final TextEditingController importBatchSizeCtrl;
   final TextEditingController createChapterCtrl;
   final TextEditingController createBodyCtrl;
   final TextEditingController selectedNovelIdCtrl;
@@ -56,6 +64,8 @@ class _NovelWorkbenchControllers {
 
   void dispose() {
     searchCtrl.dispose();
+    importRawTextCtrl.dispose();
+    importBatchSizeCtrl.dispose();
     createChapterCtrl.dispose();
     createBodyCtrl.dispose();
     selectedNovelIdCtrl.dispose();
@@ -67,4 +77,3 @@ class _NovelWorkbenchControllers {
     batchDeleteIdsCtrl.dispose();
   }
 }
-

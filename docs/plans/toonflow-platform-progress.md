@@ -87,6 +87,18 @@
 
 状态：`in_progress`
 
+当前增量：
+
+- 章节工作台新增“整本导入”入口
+- 前端支持整本正文本地预解析（按章节标题自动切章）
+- 支持预解析预览与按批次写入既有章节 API
+- 为后续 `manual` / `whole-book import` / `crawler_client` 共用落库契约做统一入口
+
+本轮定向验证：
+
+- `flutter test test/novel_import_parser_test.dart`
+- 触达文件 `flutter analyze` 通过
+
 ### 4. 改写与上游结构竖切
 
 状态：`pending`
