@@ -1,0 +1,116 @@
+# Toonflow 平台执行进度
+
+更新时间：2026-05-06
+
+这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
+大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
+
+## 状态约定
+
+- `completed`：已实现、已验证、已提交
+- `in_progress`：当前正在实现
+- `pending`：尚未开始
+- `blocked`：有明确阻塞，需先清理依赖项
+
+## 当前总览
+
+- 当前阶段：`Phase 1 — 平台底座与最小主链`
+- 当前执行策略：按“前后端一并落地”的竖切推进
+- 当前最新完成 commit：`9335f826`
+- 当前最新完成竖切：`Workspace 基础竖切`
+
+## Phase 1 进度
+
+### 1. Workspace 基础竖切
+
+状态：`completed`
+
+已完成：
+
+- personal workspace 自动创建
+- `workspace/project` 基础作用域落库
+- `GET /api/v1/me` 返回当前 workspace
+- 项目创建/读取带 `workspace_id`
+- 前端显示 workspace / project 上下文栏
+
+已提交：
+
+- `9335f826` — personal workspace foundation + current workspace/project context
+
+已验证：
+
+- `cargo test me_ok_without_pool_with_jwt`
+- `flutter test test/workspace_context_view_test.dart`
+- 触达文件 `flutter analyze` 通过
+
+备注：
+
+- `yarn refactor:check` 已执行
+- backend 通过
+- frontend 全量仍被仓库既有 `short_video_space/*` analyzer 告警卡住，不是该竖切新增问题
+
+### 2. 项目立项 + 项目首页竖切
+
+状态：`in_progress`
+
+目标：
+
+- `project_brief`
+- 项目首页驾驶舱
+- `readiness score` 基础版
+- `brand bible` 基础版
+- onboarding 首次进入项目路径
+- 对应定向测试
+
+当前实现策略：
+
+- 优先复用现有项目详情入口
+- 先补项目首页读模型 / API
+- 再补项目立项写字段
+- 最后补前端首页卡片与引导
+
+### 3. 内容接入竖切（主路径）
+
+状态：`pending`
+
+### 4. 改写与上游结构竖切
+
+状态：`pending`
+
+### 5. 资产与生产竖切
+
+状态：`pending`
+
+### 6. 质量与发布最小闭环竖切
+
+状态：`pending`
+
+## 当前阻塞与注意事项
+
+### 已知非本轮新增阻塞
+
+- frontend 全量 `flutter analyze` 仍有既存告警：
+  - `frontend/lib/short_video_space/section_production.dart`
+  - `frontend/lib/short_video_space/section_production_assembly.dart`
+  - `frontend/lib/short_video_space/section_project.dart`
+  - `frontend/lib/short_video_space/section_publish*.dart`
+
+这些问题会影响 `yarn refactor:check` 最终全绿，但不是 workspace 竖切引入。
+
+### 合约测试环境注意
+
+- 需要 `DATABASE_URL`
+- 需要 `SUPABASE_JWT_SECRET`
+
+没有这两个环境变量时，需 PG 的 `#[ignore]` 合约测试无法本地完整验证。
+
+## 更新规则
+
+后续每完成一个“可提交竖切增量”，这里都要同步更新：
+
+1. 当前阶段
+2. 当前竖切状态
+3. 已完成内容
+4. 定向验证结果
+5. 对应 commit
+6. 下一条要做的竖切
