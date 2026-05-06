@@ -422,6 +422,57 @@ fn trim_video_prompt_memory_rows_with_context_prefers_delivery_rich_selected_row
 }
 
 #[test]
+fn trim_video_prompt_memory_rows_with_context_keeps_note_and_focus_driven_delivery_row_on_fragile_turn(
+) {
+    let storyboard_row = StoryboardPromptSeedRow {
+        prompt: Some("林晚强忍情绪后开口".into()),
+        video_desc: Some(
+            "（林晚强忍情绪后开口、雨夜走廊、林晚、5秒、近景、静止、抬眼停顿后低声开口、压抑、冷蓝窗光、别再说了、雨声压过呼吸声、A19）"
+                .into(),
+        ),
+        duration: Some("5s".into()),
+    };
+    let mut rows = vec![AgentMemoryRow {
+        name: "selected_video_memory".into(),
+        content: "storyboardIds=19 | promptSeed=seed-19-current | style=镜头近景，光影冷蓝窗光 | note=表演抬眼停顿后再低声开口，强忍泪意 | focusTags=delivery_realism/emotion_arc".into(),
+    }];
+    for id in (20..=25).rev() {
+        rows.push(AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: format!(
+                "storyboardIds={id} | promptSeed=seed-{id} | style=镜头近景稳定跟拍，构图压迫"
+            ),
+        });
+    }
+
+    let trimmed = trim_video_prompt_memory_rows_with_context(
+        rows,
+        19,
+        Some("seed-19-current"),
+        &["林晚".to_string()],
+        Some(&storyboard_row),
+        Some(VideoPromptConstraintPressure {
+            has_dialogue_guardrail: true,
+            has_emotion_guardrail: true,
+            prefer_delivery_memory_recall: true,
+            forces_compact_memory: true,
+            ..VideoPromptConstraintPressure::default()
+        }),
+    );
+
+    let selected = trimmed
+        .iter()
+        .filter(|row| row.name == "selected_video_memory")
+        .map(|row| row.content.as_str())
+        .collect::<Vec<_>>();
+    assert!(selected.iter().any(|row| {
+        row.contains("storyboardIds=19")
+            && row.contains("note=表演抬眼停顿后再低声开口，强忍泪意")
+            && row.contains("focusTags=delivery_realism/emotion_arc")
+    }));
+}
+
+#[test]
 fn trim_video_prompt_memory_rows_with_context_keeps_visual_selected_rows_when_scene_is_not_fragile()
 {
     let storyboard_row = StoryboardPromptSeedRow {

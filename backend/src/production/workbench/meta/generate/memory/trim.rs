@@ -237,10 +237,8 @@ fn storyboard_memory_trim_quality_score(
         storyboard_trim_prefers_delivery_memory(storyboard_row, constraint_pressure);
     let should_prefer_visual_continuity =
         storyboard_trim_prefers_visual_continuity_memory(constraint_pressure);
-    let style = extract_key_value(&row.content, "style")
-        .or_else(|| extract_key_value(&row.content, "note"))
-        .unwrap_or_default();
-    let fragments = split_prompt_note_fragments(&style).collect::<Vec<_>>();
+    let fragments = selected_memory_trim_fragments(&row.content);
+    let focus_tags = selected_memory_trim_focus_tags(&row.content);
     let mut score = 0;
     let has_delivery = extract_key_value(&row.content, "delivery")
         .is_some_and(|value| !normalize_prompt_text(&value).is_empty());
@@ -268,6 +266,12 @@ fn storyboard_memory_trim_quality_score(
                     "镜头近景" | "镜头中景" | "镜头远景" | "镜头特写" | "镜头全景"
                 )
         });
+    let has_delivery_focus = focus_tags
+        .iter()
+        .any(|tag| matches!(tag.as_str(), "delivery_realism"));
+    let has_emotion_focus = focus_tags.iter().any(|tag| tag == "emotion_arc");
+    let has_identity_focus = focus_tags.iter().any(|tag| tag == "identity_continuity");
+    let has_lighting_focus = focus_tags.iter().any(|tag| tag == "lighting_realism");
 
     if has_delivery {
         score += 12;
@@ -284,6 +288,18 @@ fn storyboard_memory_trim_quality_score(
     if has_lighting {
         score += 6;
     }
+    if has_delivery_focus {
+        score += 6;
+    }
+    if has_emotion_focus {
+        score += 5;
+    }
+    if has_identity_focus {
+        score += 4;
+    }
+    if has_lighting_focus {
+        score += 4;
+    }
     if should_prefer_delivery {
         if has_delivery {
             score += 26;
@@ -292,6 +308,12 @@ fn storyboard_memory_trim_quality_score(
             score += 18;
         }
         if has_emotion {
+            score += 10;
+        }
+        if has_delivery_focus {
+            score += 12;
+        }
+        if has_emotion_focus {
             score += 10;
         }
         if visual_only {
@@ -307,6 +329,12 @@ fn storyboard_memory_trim_quality_score(
         }
         if has_lighting {
             score += 22;
+        }
+        if has_identity_focus {
+            score += 10;
+        }
+        if has_lighting_focus {
+            score += 10;
         }
         if visual_only && !has_identity && !has_lighting {
             score -= 10;
@@ -324,6 +352,32 @@ fn storyboard_memory_trim_quality_score(
     }
 
     score
+}
+
+fn selected_memory_trim_fragments(content: &str) -> Vec<String> {
+    let mut fragments = Vec::new();
+    for value in ["style", "note"]
+        .into_iter()
+        .filter_map(|key| extract_key_value(content, key))
+    {
+        for fragment in split_prompt_note_fragments(&value) {
+            if !fragments.iter().any(|existing| existing == &fragment) {
+                fragments.push(fragment);
+            }
+        }
+    }
+    fragments
+}
+
+fn selected_memory_trim_focus_tags(content: &str) -> Vec<String> {
+    let Some(value) = extract_key_value(content, "focusTags") else {
+        return Vec::new();
+    };
+    value
+        .split('/')
+        .map(normalize_prompt_text)
+        .filter(|tag| !tag.is_empty())
+        .collect()
 }
 
 fn storyboard_trim_prefers_delivery_memory(
