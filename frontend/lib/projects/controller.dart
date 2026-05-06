@@ -47,13 +47,17 @@ class ProjectsController extends ChangeNotifier {
   }
 
   Future<bool> createEmptyProject() async {
+    return createProjectWithFields();
+  }
+
+  Future<bool> createProjectWithFields([Map<String, dynamic>? fields]) async {
     final token = _accessToken;
     if (token == null) return false;
     creatingProject = true;
     _setError(null);
     notifyListeners();
     try {
-      await createProject(token);
+      await createProject(token, fields: fields);
       await loadProjects();
       return true;
     } on RustApiException catch (e) {

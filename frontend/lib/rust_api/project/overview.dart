@@ -129,6 +129,187 @@ class ProjectDetail {
   }
 }
 
+class ProjectBriefDraft {
+  const ProjectBriefDraft({
+    this.premise = '',
+    this.targetAudience = '',
+    this.emotionalTone = '',
+    this.coreHook = '',
+    this.visualDirection = '',
+  });
+
+  final String premise;
+  final String targetAudience;
+  final String emotionalTone;
+  final String coreHook;
+  final String visualDirection;
+
+  factory ProjectBriefDraft.fromJson(Map<String, dynamic> json) {
+    return ProjectBriefDraft(
+      premise: json['premise'] as String? ?? '',
+      targetAudience: json['targetAudience'] as String? ?? '',
+      emotionalTone: json['emotionalTone'] as String? ?? '',
+      coreHook: json['coreHook'] as String? ?? '',
+      visualDirection: json['visualDirection'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic>? toJsonOrNull() {
+    final map = <String, dynamic>{};
+    if (premise.trim().isNotEmpty) map['premise'] = premise.trim();
+    if (targetAudience.trim().isNotEmpty) {
+      map['targetAudience'] = targetAudience.trim();
+    }
+    if (emotionalTone.trim().isNotEmpty) {
+      map['emotionalTone'] = emotionalTone.trim();
+    }
+    if (coreHook.trim().isNotEmpty) map['coreHook'] = coreHook.trim();
+    if (visualDirection.trim().isNotEmpty) {
+      map['visualDirection'] = visualDirection.trim();
+    }
+    return map.isEmpty ? null : map;
+  }
+}
+
+class BrandBibleDraft {
+  const BrandBibleDraft({
+    this.brandName = '',
+    this.brandPromise = '',
+    this.visualMotifs = const <String>[],
+    this.forbiddenElements = const <String>[],
+    this.continuityRules = const <String>[],
+  });
+
+  final String brandName;
+  final String brandPromise;
+  final List<String> visualMotifs;
+  final List<String> forbiddenElements;
+  final List<String> continuityRules;
+
+  factory BrandBibleDraft.fromJson(Map<String, dynamic> json) {
+    List<String> parseList(String key) {
+      final raw = json[key] as List<dynamic>? ?? const <dynamic>[];
+      return raw.map((item) => item.toString()).toList(growable: false);
+    }
+
+    return BrandBibleDraft(
+      brandName: json['brandName'] as String? ?? '',
+      brandPromise: json['brandPromise'] as String? ?? '',
+      visualMotifs: parseList('visualMotifs'),
+      forbiddenElements: parseList('forbiddenElements'),
+      continuityRules: parseList('continuityRules'),
+    );
+  }
+
+  Map<String, dynamic>? toJsonOrNull() {
+    final map = <String, dynamic>{};
+    if (brandName.trim().isNotEmpty) map['brandName'] = brandName.trim();
+    if (brandPromise.trim().isNotEmpty) {
+      map['brandPromise'] = brandPromise.trim();
+    }
+    if (visualMotifs.isNotEmpty) map['visualMotifs'] = visualMotifs;
+    if (forbiddenElements.isNotEmpty) {
+      map['forbiddenElements'] = forbiddenElements;
+    }
+    if (continuityRules.isNotEmpty) map['continuityRules'] = continuityRules;
+    return map.isEmpty ? null : map;
+  }
+}
+
+class ProjectHomeChecklistItem {
+  const ProjectHomeChecklistItem({
+    required this.key,
+    required this.label,
+    required this.done,
+    this.detail,
+  });
+
+  final String key;
+  final String label;
+  final bool done;
+  final String? detail;
+
+  factory ProjectHomeChecklistItem.fromJson(Map<String, dynamic> json) {
+    return ProjectHomeChecklistItem(
+      key: json['key'] as String,
+      label: json['label'] as String,
+      done: json['done'] as bool,
+      detail: json['detail'] as String?,
+    );
+  }
+}
+
+class ProjectHomeOnboarding {
+  const ProjectHomeOnboarding({
+    required this.complete,
+    this.nextStep,
+    required this.checklist,
+  });
+
+  final bool complete;
+  final String? nextStep;
+  final List<ProjectHomeChecklistItem> checklist;
+
+  factory ProjectHomeOnboarding.fromJson(Map<String, dynamic> json) {
+    final raw = json['checklist'] as List<dynamic>? ?? const <dynamic>[];
+    return ProjectHomeOnboarding(
+      complete: json['complete'] as bool? ?? false,
+      nextStep: json['next_step'] as String?,
+      checklist: raw
+          .map(
+            (item) =>
+                ProjectHomeChecklistItem.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class ProjectHome {
+  const ProjectHome({
+    required this.project,
+    required this.stats,
+    required this.readinessScore,
+    required this.readinessSummary,
+    required this.onboarding,
+    required this.styleBibleReady,
+    this.projectBrief,
+    this.brandBible,
+  });
+
+  final ProjectRow project;
+  final ProjectStats stats;
+  final int readinessScore;
+  final String readinessSummary;
+  final ProjectHomeOnboarding onboarding;
+  final bool styleBibleReady;
+  final ProjectBriefDraft? projectBrief;
+  final BrandBibleDraft? brandBible;
+
+  factory ProjectHome.fromJson(Map<String, dynamic> json) {
+    return ProjectHome(
+      project: ProjectRow.fromJson(json['project'] as Map<String, dynamic>),
+      stats: ProjectStats.fromJson(json['stats'] as Map<String, dynamic>),
+      readinessScore: (json['readiness_score'] as num).toInt(),
+      readinessSummary: json['readiness_summary'] as String? ?? '',
+      onboarding: ProjectHomeOnboarding.fromJson(
+        json['onboarding'] as Map<String, dynamic>,
+      ),
+      styleBibleReady: json['style_bible_ready'] as bool? ?? false,
+      projectBrief: json['project_brief'] is Map<String, dynamic>
+          ? ProjectBriefDraft.fromJson(
+              json['project_brief'] as Map<String, dynamic>,
+            )
+          : null,
+      brandBible: json['brand_bible'] is Map<String, dynamic>
+          ? BrandBibleDraft.fromJson(
+              json['brand_bible'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+}
+
 class ProjectStats {
   const ProjectStats({
     required this.scriptCount,
@@ -848,6 +1029,24 @@ Future<ProjectStats> fetchProjectStatsByProjectId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectStats.fromJson(map);
+}
+
+Future<ProjectHome> fetchProjectHomeByProjectId(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/home');
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectHome.fromJson(map);
 }
 
 /// `GET /api/v1/projects/{project_id}/short-video-readiness` — see `getProjectShortVideoReadinessByProjectIdV1`.

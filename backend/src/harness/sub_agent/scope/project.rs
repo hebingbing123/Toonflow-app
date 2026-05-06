@@ -154,7 +154,10 @@ pub(in crate::harness::sub_agent) fn scope_has_conflicting_storyboard_prompt_see
         })
 }
 
-pub(in crate::harness::sub_agent) fn scope_overlap_score(current: &ScopeSignature, candidate: &ScopeSignature) -> usize {
+pub(in crate::harness::sub_agent) fn scope_overlap_score(
+    current: &ScopeSignature,
+    candidate: &ScopeSignature,
+) -> usize {
     let mut score = 0;
     score += prompt_seed_overlap_score(current, candidate) * 16;
     score += overlap_count(&current.storyboard_ids, &candidate.storyboard_ids) * 8;
@@ -266,7 +269,9 @@ pub(in crate::harness::sub_agent) fn select_auto_memory_entries(
         .collect()
 }
 
-pub(in crate::harness::sub_agent) fn dedupe_auto_memory_entries(entries: Vec<String>) -> Vec<String> {
+pub(in crate::harness::sub_agent) fn dedupe_auto_memory_entries(
+    entries: Vec<String>,
+) -> Vec<String> {
     let mut seen = std::collections::HashSet::new();
     let mut deduped = Vec::with_capacity(entries.len());
     for entry in entries {

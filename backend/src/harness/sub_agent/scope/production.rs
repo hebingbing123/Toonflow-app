@@ -239,7 +239,9 @@ fn strip_auto_memory_scaffolding(fragment: &str) -> String {
     }
 }
 
-pub(in crate::harness::sub_agent) fn compact_auto_memory_summary_text(text: &str) -> Option<String> {
+pub(in crate::harness::sub_agent) fn compact_auto_memory_summary_text(
+    text: &str,
+) -> Option<String> {
     let compacted = text
         .split('，')
         .map(strip_auto_memory_scaffolding)
@@ -251,7 +253,9 @@ pub(in crate::harness::sub_agent) fn compact_auto_memory_summary_text(text: &str
     (!compacted.is_empty()).then_some(truncate_chars(&compacted, AUTO_MEMORY_MAX_CHARS))
 }
 
-pub(in crate::harness::sub_agent) fn compact_auto_memory_review_text(review: &str) -> Option<String> {
+pub(in crate::harness::sub_agent) fn compact_auto_memory_review_text(
+    review: &str,
+) -> Option<String> {
     let summary = review
         .split(';')
         .map(str::trim)
@@ -364,11 +368,14 @@ pub(in crate::harness::sub_agent) fn compact_rework_reason(reason: &str) -> Opti
     (!compact.is_empty()).then_some(compact)
 }
 
-pub(in crate::harness::sub_agent) fn build_rework_context_note(arguments: &Value) -> Option<String> {
+pub(in crate::harness::sub_agent) fn build_rework_context_note(
+    arguments: &Value,
+) -> Option<String> {
     let reason = arguments.get("reason").and_then(Value::as_str)?;
     let reason = compact_rework_reason(reason)?;
     let goal = infer_rework_goal(&reason);
-    let scope = super::project::scope_summary(arguments).unwrap_or_else(|| "只读当前对象的局部上下文".to_string());
+    let scope = super::project::scope_summary(arguments)
+        .unwrap_or_else(|| "只读当前对象的局部上下文".to_string());
     Some(format!(
         "Repair brief: failure_reason={reason}; fix_goal={goal}; local_scope={scope}. 只围绕这个范围补读与修复，不要把整个项目上下文重新拉满。"
     ))

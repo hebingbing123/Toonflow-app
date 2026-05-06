@@ -11,18 +11,70 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
+use serde_json::Value;
 
 use super::super::super::common::{merge_text_patch, trim_opt};
-use super::super::super::types::{PatchProjectBody, ProjectRow};
+use super::super::super::types::{BrandBible, PatchProjectBody, ProjectBrief, ProjectRow};
 use super::super::super::validation::{
     validate_duration_strategy, validate_mode, validate_quality_gate_strategy,
     validate_target_market, validate_target_platforms,
 };
 
+#[derive(sqlx::FromRow)]
+struct ProjectPatchRow {
+    id: Uuid,
+    #[allow(dead_code)]
+    workspace_id: Option<Uuid>,
+    #[allow(dead_code)]
+    numeric_id: i32,
+    name: Option<String>,
+    intro: Option<String>,
+    project_type: Option<String>,
+    image_model: Option<String>,
+    image_quality: Option<String>,
+    video_model: Option<String>,
+    art_style: Option<String>,
+    director_manual: Option<String>,
+    mode: Option<String>,
+    video_ratio: Option<String>,
+    #[allow(dead_code)]
+    create_time_ms: Option<i64>,
+    art_style_pack: Option<String>,
+    story_style_pack: Option<String>,
+    target_market: Option<String>,
+    target_platforms: Option<Vec<String>>,
+    duration_strategy: Option<String>,
+    voice_profile: Option<String>,
+    subtitle_style: Option<String>,
+    bgm_strategy: Option<String>,
+    quality_gate_strategy: Option<String>,
+    project_brief: Option<Value>,
+    brand_bible: Option<Value>,
+}
+
 fn trim_text_patch(patch: FieldPatch<String>) -> FieldPatch<String> {
     match patch {
         FieldPatch::Absent => FieldPatch::Absent,
         FieldPatch::Set(v) => FieldPatch::Set(trim_opt(v)),
+    }
+}
+
+fn parse_json_object_patch<T: serde::de::DeserializeOwned>(
+    value: Option<Value>,
+    field: &str,
+) -> Result<FieldPatch<Value>, ApiError> {
+    match value {
+        None => Ok(FieldPatch::Absent),
+        Some(Value::Null) => Ok(FieldPatch::Set(None)),
+        Some(raw @ Value::Object(_)) => {
+            serde_json::from_value::<T>(raw.clone()).map_err(|e| {
+                ApiError::BadRequest(format!("{field} must be a valid object: {e}"))
+            })?;
+            Ok(FieldPatch::Set(Some(raw)))
+        }
+        Some(_) => Err(ApiError::BadRequest(format!(
+            "{field} must be an object or null"
+        ))),
     }
 }
 
@@ -109,6 +161,9 @@ pub(crate) async fn patch_project_by_id(
         body.quality_gate_strategy,
         "quality_gate_strategy",
     )?);
+    let project_brief_patch =
+        parse_json_object_patch::<ProjectBrief>(body.project_brief, "projectBrief")?;
+    let brand_bible_patch = parse_json_object_patch::<BrandBible>(body.brand_bible, "brandBible")?;
 
     // Parse target_platforms array field
     let target_platforms_patch = match body.target_platforms {
@@ -176,20 +231,23 @@ pub(crate) async fn patch_project_by_id(
     ];
     if !patches.iter().any(|p| !matches!(**p, FieldPatch::Absent))
         && matches!(target_platforms_patch, FieldPatch::Absent)
+        && matches!(project_brief_patch, FieldPatch::Absent)
+        && matches!(brand_bible_patch, FieldPatch::Absent)
     {
         return Err(ApiError::BadRequest(
-            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio, art_style_pack, story_style_pack, target_market, target_platforms, duration_strategy, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy)".into(),
+            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio, art_style_pack, story_style_pack, target_market, target_platforms, duration_strategy, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy, projectBrief, brandBible)".into(),
         ));
     }
 
-    let current = sqlx::query_as::<_, ProjectRow>(
+    let current = sqlx::query_as::<_, ProjectPatchRow>(
         r#"
         SELECT id, workspace_id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
+               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               project_brief, brand_bible
         FROM app_project
         WHERE id = $1 AND owner_user_id = $2
         "#,
@@ -221,6 +279,14 @@ pub(crate) async fn patch_project_by_id(
     let new_bgm_strategy = merge_text_patch(&current.bgm_strategy, bgm_strategy_patch);
     let new_quality_gate_strategy =
         merge_text_patch(&current.quality_gate_strategy, quality_gate_strategy_patch);
+    let new_project_brief = match project_brief_patch {
+        FieldPatch::Absent => current.project_brief.clone(),
+        FieldPatch::Set(v) => v,
+    };
+    let new_brand_bible = match brand_bible_patch {
+        FieldPatch::Absent => current.brand_bible.clone(),
+        FieldPatch::Set(v) => v,
+    };
 
     let new_target_platforms = match target_platforms_patch {
         FieldPatch::Absent => current.target_platforms.clone(),
@@ -236,9 +302,9 @@ pub(crate) async fn patch_project_by_id(
             art_style_pack = $11, story_style_pack = $12,
             target_market = $13, target_platforms = $14, duration_strategy = $15,
             voice_profile = $16, subtitle_style = $17, bgm_strategy = $18,
-            quality_gate_strategy = $19,
+            quality_gate_strategy = $19, project_brief = $20, brand_bible = $21,
             updated_at = NOW()
-        WHERE id = $20 AND owner_user_id = $21
+        WHERE id = $22 AND owner_user_id = $23
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
@@ -266,6 +332,8 @@ pub(crate) async fn patch_project_by_id(
     .bind(&new_subtitle_style)
     .bind(&new_bgm_strategy)
     .bind(&new_quality_gate_strategy)
+    .bind(&new_project_brief)
+    .bind(&new_brand_bible)
     .bind(current.id)
     .bind(uid)
     .fetch_one(pool)
@@ -273,4 +341,33 @@ pub(crate) async fn patch_project_by_id(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(row))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::http_kit::json_patch::FieldPatch;
+    use serde_json::json;
+
+    #[test]
+    fn parse_json_object_patch_accepts_null_and_object() {
+        assert!(matches!(
+            parse_json_object_patch::<ProjectBrief>(Some(Value::Null), "projectBrief").unwrap(),
+            FieldPatch::Set(None)
+        ));
+
+        let patch =
+            parse_json_object_patch::<ProjectBrief>(Some(json!({"premise":"复仇"})), "projectBrief")
+                .unwrap();
+        assert!(matches!(patch, FieldPatch::Set(Some(Value::Object(_)))));
+    }
+
+    #[test]
+    fn parse_json_object_patch_rejects_non_object() {
+        let err = parse_json_object_patch::<BrandBible>(Some(json!("bad")), "brandBible")
+            .unwrap_err();
+        assert!(err
+            .to_string()
+            .contains("brandBible must be an object or null"));
+    }
 }

@@ -63,12 +63,66 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     required ProjectDetail detail,
     required TextEditingController nameCtrl,
     required TextEditingController introCtrl,
+    required TextEditingController premiseCtrl,
+    required TextEditingController audienceCtrl,
+    required TextEditingController toneCtrl,
+    required TextEditingController hookCtrl,
+    required TextEditingController visualCtrl,
+    required TextEditingController brandNameCtrl,
+    required TextEditingController brandPromiseCtrl,
+    required TextEditingController visualMotifsCtrl,
+    required TextEditingController forbiddenCtrl,
+    required TextEditingController continuityCtrl,
     required _ProjectEditorDialogState dialogState,
   }) {
+    final home = dialogState.homeRef[0];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (home != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Theme.of(ctx).colorScheme.outlineVariant,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(
+                ctx,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('项目首页', style: Theme.of(ctx).textTheme.titleSmall),
+                const SizedBox(height: 6),
+                Text(
+                  'Readiness ${home.readinessScore}/100 · ${home.readinessSummary}',
+                  style: Theme.of(ctx).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                if (home.onboarding.nextStep != null)
+                  Text(
+                    '下一步：${home.onboarding.nextStep}',
+                    style: Theme.of(ctx).textTheme.bodySmall,
+                  ),
+                const SizedBox(height: 8),
+                ...home.onboarding.checklist.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '${item.done ? '✓' : '○'} ${item.label}',
+                      style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         TextField(
           controller: nameCtrl,
           decoration: const InputDecoration(labelText: 'Name (empty = clear)'),
@@ -78,6 +132,69 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           controller: introCtrl,
           maxLines: 3,
           decoration: const InputDecoration(labelText: 'Intro (empty = clear)'),
+        ),
+        const SizedBox(height: 16),
+        Text('项目立项', style: Theme.of(ctx).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        TextField(
+          controller: premiseCtrl,
+          maxLines: 2,
+          decoration: const InputDecoration(labelText: 'Premise'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: audienceCtrl,
+          decoration: const InputDecoration(labelText: 'Target audience'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: toneCtrl,
+          decoration: const InputDecoration(labelText: 'Emotional tone'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: hookCtrl,
+          decoration: const InputDecoration(labelText: 'Core hook'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: visualCtrl,
+          decoration: const InputDecoration(labelText: 'Visual direction'),
+        ),
+        const SizedBox(height: 16),
+        Text('品牌圣经', style: Theme.of(ctx).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        TextField(
+          controller: brandNameCtrl,
+          decoration: const InputDecoration(labelText: 'Brand name'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: brandPromiseCtrl,
+          maxLines: 2,
+          decoration: const InputDecoration(labelText: 'Brand promise'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: visualMotifsCtrl,
+          maxLines: 2,
+          decoration: const InputDecoration(labelText: 'Visual motifs (每行一个)'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: forbiddenCtrl,
+          maxLines: 2,
+          decoration: const InputDecoration(
+            labelText: 'Forbidden elements (每行一个)',
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: continuityCtrl,
+          maxLines: 2,
+          decoration: const InputDecoration(
+            labelText: 'Continuity rules (每行一个)',
+          ),
         ),
         const SizedBox(height: 12),
         _buildStylePackPickerField(

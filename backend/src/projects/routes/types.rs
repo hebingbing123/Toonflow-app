@@ -4,6 +4,67 @@ use sqlx::FromRow;
 use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ProjectBrief {
+    #[serde(default)]
+    pub premise: Option<String>,
+    #[serde(default)]
+    pub target_audience: Option<String>,
+    #[serde(default)]
+    pub emotional_tone: Option<String>,
+    #[serde(default)]
+    pub core_hook: Option<String>,
+    #[serde(default)]
+    pub visual_direction: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BrandBible {
+    #[serde(default)]
+    pub brand_name: Option<String>,
+    #[serde(default)]
+    pub brand_promise: Option<String>,
+    #[serde(default)]
+    pub visual_motifs: Vec<String>,
+    #[serde(default)]
+    pub forbidden_elements: Vec<String>,
+    #[serde(default)]
+    pub continuity_rules: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct ProjectHomeChecklistItem {
+    pub key: String,
+    pub label: String,
+    pub done: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub detail: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct ProjectHomeOnboarding {
+    pub complete: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub next_step: Option<String>,
+    pub checklist: Vec<ProjectHomeChecklistItem>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ProjectHomeResponse {
+    pub project: ProjectRow,
+    pub stats: ProjectStatsResponse,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub project_brief: Option<ProjectBrief>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub brand_bible: Option<BrandBible>,
+    pub readiness_score: i32,
+    pub readiness_summary: String,
+    pub onboarding: ProjectHomeOnboarding,
+    pub style_bible_ready: bool,
+}
+
 /// Query parameters for `GET /api/v1/projects` pagination.
 #[derive(Debug, Deserialize, Default, IntoParams, ToSchema)]
 #[serde(deny_unknown_fields)]
@@ -412,6 +473,10 @@ pub struct PatchProjectBody {
     #[serde(default)]
     #[schema(example = json!("block"))]
     pub quality_gate_strategy: Option<Value>,
+    #[serde(default)]
+    pub project_brief: Option<Value>,
+    #[serde(default)]
+    pub brand_bible: Option<Value>,
 }
 
 /// `PATCH /api/v1/projects/{id}/style-config` 请求体
@@ -477,6 +542,10 @@ pub struct CreateProjectBody {
     /// BGM 策略
     #[serde(default)]
     pub bgm_strategy: Option<String>,
+    #[serde(default)]
+    pub project_brief: Option<ProjectBrief>,
+    #[serde(default)]
+    pub brand_bible: Option<BrandBible>,
 }
 
 #[cfg(test)]

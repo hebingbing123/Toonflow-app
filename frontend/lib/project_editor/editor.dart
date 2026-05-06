@@ -6,8 +6,24 @@ extension _HomePageProjectEditor on _HomePageState {
     if (token == null) return;
     final nameCtrl = TextEditingController(text: p.name ?? '');
     final introCtrl = TextEditingController(text: p.intro ?? '');
+    final premiseCtrl = TextEditingController();
+    final audienceCtrl = TextEditingController();
+    final toneCtrl = TextEditingController();
+    final hookCtrl = TextEditingController();
+    final visualCtrl = TextEditingController();
+    final brandNameCtrl = TextEditingController();
+    final brandPromiseCtrl = TextEditingController();
+    final visualMotifsCtrl = TextEditingController();
+    final forbiddenCtrl = TextEditingController();
+    final continuityCtrl = TextEditingController();
     try {
       final detail = await fetchProjectByProjectId(token, p.id);
+      ProjectHome? homeSnap;
+      try {
+        homeSnap = await fetchProjectHomeByProjectId(token, p.id);
+      } catch (_) {
+        homeSnap = null;
+      }
       _StylePackCatalog stylePackCatalog = const _StylePackCatalog(
         artPacks: <_StylePackOption>[],
         storyPacks: <_StylePackOption>[],
@@ -23,6 +39,23 @@ extension _HomePageProjectEditor on _HomePageState {
       if (!mounted) return;
       nameCtrl.text = detail.project.name ?? '';
       introCtrl.text = detail.project.intro ?? '';
+      premiseCtrl.text = homeSnap?.projectBrief?.premise ?? '';
+      audienceCtrl.text = homeSnap?.projectBrief?.targetAudience ?? '';
+      toneCtrl.text = homeSnap?.projectBrief?.emotionalTone ?? '';
+      hookCtrl.text = homeSnap?.projectBrief?.coreHook ?? '';
+      visualCtrl.text = homeSnap?.projectBrief?.visualDirection ?? '';
+      brandNameCtrl.text = homeSnap?.brandBible?.brandName ?? '';
+      brandPromiseCtrl.text = homeSnap?.brandBible?.brandPromise ?? '';
+      visualMotifsCtrl.text =
+          (homeSnap?.brandBible?.visualMotifs ?? const <String>[]).join('\n');
+      forbiddenCtrl.text =
+          (homeSnap?.brandBible?.forbiddenElements ?? const <String>[]).join(
+            '\n',
+          );
+      continuityCtrl.text =
+          (homeSnap?.brandBible?.continuityRules ?? const <String>[]).join(
+            '\n',
+          );
       final scriptList = List<ScriptBrief>.from(detail.scripts);
       ProjectStats? statsSnap;
       try {
@@ -44,6 +77,7 @@ extension _HomePageProjectEditor on _HomePageState {
       }
       if (!mounted) return;
       final dialogState = _ProjectEditorDialogState(
+        initialHome: homeSnap,
         initialStats: statsSnap,
         initialAssets: assetsSnap,
         initialNovels: novelsSnap,
@@ -70,6 +104,16 @@ extension _HomePageProjectEditor on _HomePageState {
                   dialogState: dialogState,
                   nameCtrl: nameCtrl,
                   introCtrl: introCtrl,
+                  premiseCtrl: premiseCtrl,
+                  audienceCtrl: audienceCtrl,
+                  toneCtrl: toneCtrl,
+                  hookCtrl: hookCtrl,
+                  visualCtrl: visualCtrl,
+                  brandNameCtrl: brandNameCtrl,
+                  brandPromiseCtrl: brandPromiseCtrl,
+                  visualMotifsCtrl: visualMotifsCtrl,
+                  forbiddenCtrl: forbiddenCtrl,
+                  continuityCtrl: continuityCtrl,
                   scriptList: scriptList,
                 ),
                 actions: _buildProjectEditorDialogActions(
@@ -80,6 +124,16 @@ extension _HomePageProjectEditor on _HomePageState {
                   dialogState: dialogState,
                   nameCtrl: nameCtrl,
                   introCtrl: introCtrl,
+                  premiseCtrl: premiseCtrl,
+                  audienceCtrl: audienceCtrl,
+                  toneCtrl: toneCtrl,
+                  hookCtrl: hookCtrl,
+                  visualCtrl: visualCtrl,
+                  brandNameCtrl: brandNameCtrl,
+                  brandPromiseCtrl: brandPromiseCtrl,
+                  visualMotifsCtrl: visualMotifsCtrl,
+                  forbiddenCtrl: forbiddenCtrl,
+                  continuityCtrl: continuityCtrl,
                 ),
               );
             },
@@ -95,6 +149,16 @@ extension _HomePageProjectEditor on _HomePageState {
     } finally {
       nameCtrl.dispose();
       introCtrl.dispose();
+      premiseCtrl.dispose();
+      audienceCtrl.dispose();
+      toneCtrl.dispose();
+      hookCtrl.dispose();
+      visualCtrl.dispose();
+      brandNameCtrl.dispose();
+      brandPromiseCtrl.dispose();
+      visualMotifsCtrl.dispose();
+      forbiddenCtrl.dispose();
+      continuityCtrl.dispose();
     }
   }
 }
@@ -122,6 +186,7 @@ class _StylePackCatalog {
 
 class _ProjectEditorDialogState {
   _ProjectEditorDialogState({
+    ProjectHome? initialHome,
     ProjectStats? initialStats,
     ListAssetsResponse? initialAssets,
     ListNovelsResponse? initialNovels,
@@ -129,7 +194,8 @@ class _ProjectEditorDialogState {
     List<_StylePackOption> storyStylePackOptions = const <_StylePackOption>[],
     String? selectedArtStylePack,
     String? selectedStoryStylePack,
-  }) : statsRef = <ProjectStats?>[initialStats],
+  }) : homeRef = <ProjectHome?>[initialHome],
+       statsRef = <ProjectStats?>[initialStats],
        assetsRef = <ListAssetsResponse?>[initialAssets],
        novelsRef = <ListNovelsResponse?>[initialNovels],
        artStylePackOptionsRef = <List<_StylePackOption>>[artStylePackOptions],
@@ -139,6 +205,7 @@ class _ProjectEditorDialogState {
        selectedArtStylePackRef = <String?>[selectedArtStylePack],
        selectedStoryStylePackRef = <String?>[selectedStoryStylePack];
 
+  final List<ProjectHome?> homeRef;
   final List<ProjectStats?> statsRef;
   final List<ListAssetsResponse?> assetsRef;
   final List<ListNovelsResponse?> novelsRef;

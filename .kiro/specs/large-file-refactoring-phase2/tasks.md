@@ -112,7 +112,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split memory/observation_style.rs into observation_style/ submodules (1035→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7, 13.1_
 
-- [ ] 9. Checkpoint - Phase 2 complete
+- [x] 9. Checkpoint - Phase 2 complete
   - Ensure all Phase 2 tests pass, ask the user if questions arise.
 
 ### Phase 3: Medium Priority Files
@@ -141,7 +141,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split sub_agent/scope.rs into scope/ submodules (903→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [-] 12. Refactor backend/src/production/workbench/video/generate/negative_prompt_analysis.rs (854 lines → 3 modules)
+- [x] 12. Refactor backend/src/production/workbench/video/generate/negative_prompt_analysis.rs (854 lines → 3 modules)
   - Note: video/generate/ already has negative_prompt_core.rs, negative_prompt_builder.rs, negative_prompt_risk.rs — follow same naming pattern
   - Create `video/generate/negative_prompt_analysis/` directory; move negative_prompt_analysis.rs → `negative_prompt_analysis/mod.rs` (≈150 lines, public entry points, re-exports)
   - Create `negative_prompt_analysis/detection.rs` (≈350 lines) with detection and classification logic
@@ -152,7 +152,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split negative_prompt_analysis.rs into negative_prompt_analysis/ submodules (854→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 13. Refactor backend/src/publish/nine_platform_acceptance_tests.rs (835 lines → keep as single file with internal test modules)
+- [-] 13. Refactor backend/src/publish/nine_platform_acceptance_tests.rs (835 lines → keep as single file with internal test modules)
   - Note: This is a test file. Rust test files use `mod` blocks internally rather than separate files — split into internal modules
   - Analyze current structure and identify per-platform test groups
   - Refactor to use internal `mod douyin { ... }`, `mod kuaishou { ... }`, `mod xiaohongshu { ... }`, `mod bilibili { ... }`, `mod wechat_channels { ... }` blocks (≈150 lines each)

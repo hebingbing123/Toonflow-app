@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'create_project_dialog.dart';
 import 'controller.dart';
 import 'previews.dart';
 import 'workbenches/agent_memory.dart';
@@ -76,7 +77,9 @@ class ProjectsSection extends StatelessWidget {
   }
 
   Future<void> _createEmptyProject(BuildContext context) async {
-    final created = await controller.createEmptyProject();
+    final fields = await showCreateProjectDialog(context);
+    if (!context.mounted || fields == null) return;
+    final created = await controller.createProjectWithFields(fields);
     if (!context.mounted || !created) return;
     ScaffoldMessenger.of(
       context,

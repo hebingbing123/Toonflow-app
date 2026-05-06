@@ -234,7 +234,9 @@ fn storyboard_has_no_dialogue(row: &StoryboardPromptSeedRow) -> bool {
         .is_some_and(|fields| storyboard_dialogue_is_empty(&fields.dialogue))
 }
 
-pub(in crate::production::workbench::video::generate) fn storyboard_dialogue_is_empty(dialogue: &str) -> bool {
+pub(in crate::production::workbench::video::generate) fn storyboard_dialogue_is_empty(
+    dialogue: &str,
+) -> bool {
     let normalized = normalize_prompt_text(dialogue);
     let normalized_ascii = normalized.to_ascii_lowercase();
     normalized.is_empty()

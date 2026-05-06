@@ -146,7 +146,10 @@ pub(in crate::production::workbench::meta::generate) fn select_video_prompt_styl
         return vec![selected];
     }
     if !exact.is_empty()
-        && !super::compact::exact_style_notes_should_yield_to_role_memory(&exact, &role_memory_notes)
+        && !super::compact::exact_style_notes_should_yield_to_role_memory(
+            &exact,
+            &role_memory_notes,
+        )
     {
         return exact;
     }
@@ -249,12 +252,18 @@ fn select_scoped_contextual_summary_style_note(
                     constraint_pressure,
                 )
             } else {
-                super::compact::compact_guardrail_sensitive_style_note(&note, storyboard_row, constraint_pressure)
-                    .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))
+                super::compact::compact_guardrail_sensitive_style_note(
+                    &note,
+                    storyboard_row,
+                    constraint_pressure,
+                )
+                .or_else(|| compact_contextual_video_style_note(&note, Some(storyboard_row)))
             }?;
             if !row.name.contains("generation_brief")
                 && fields.as_ref().is_some_and(|fields| {
-                    super::compact::summary_style_note_only_repeats_storyboard_fields(&compacted, fields)
+                    super::compact::summary_style_note_only_repeats_storyboard_fields(
+                        &compacted, fields,
+                    )
                 })
             {
                 return None;
@@ -343,9 +352,12 @@ pub(in crate::production::workbench::meta::generate) fn select_pressure_prioriti
         let chosen_note = if source == PressureStyleCandidateSource::Summary {
             note.clone()
         } else {
-            let compacted =
-                super::compact::compact_guardrail_sensitive_style_note(note, storyboard_row, Some(pressure))
-                    .or_else(|| compact_contextual_video_style_note(note, Some(storyboard_row)));
+            let compacted = super::compact::compact_guardrail_sensitive_style_note(
+                note,
+                storyboard_row,
+                Some(pressure),
+            )
+            .or_else(|| compact_contextual_video_style_note(note, Some(storyboard_row)));
             let Some(compacted) = compacted else {
                 return;
             };

@@ -1,6 +1,6 @@
 //! Scope signature: parsing, matching, scoring, and prompt-building for sub-agent memory scoping.
 
-use serde_json::{json, Value};
+use serde_json::Value;
 
 mod production;
 mod project;
@@ -27,7 +27,10 @@ pub(in crate::harness::sub_agent) struct ScopeSignature {
     pub(in crate::harness::sub_agent) relative_script_offset: Option<i64>,
 }
 
-pub(in crate::harness::sub_agent) fn parse_positive_id_list(arguments: &Value, key: &str) -> Vec<i64> {
+pub(in crate::harness::sub_agent) fn parse_positive_id_list(
+    arguments: &Value,
+    key: &str,
+) -> Vec<i64> {
     let mut ids = arguments
         .get(key)
         .and_then(Value::as_array)
@@ -41,7 +44,10 @@ pub(in crate::harness::sub_agent) fn parse_positive_id_list(arguments: &Value, k
     ids
 }
 
-pub(in crate::harness::sub_agent) fn parse_asset_type_list(arguments: &Value, key: &str) -> Vec<&'static str> {
+pub(in crate::harness::sub_agent) fn parse_asset_type_list(
+    arguments: &Value,
+    key: &str,
+) -> Vec<&'static str> {
     let mut types = arguments
         .get(key)
         .and_then(Value::as_array)
@@ -60,7 +66,10 @@ pub(in crate::harness::sub_agent) fn parse_asset_type_list(arguments: &Value, ke
     types
 }
 
-pub(in crate::harness::sub_agent) fn parse_focus_section_list(arguments: &Value, key: &str) -> Vec<&'static str> {
+pub(in crate::harness::sub_agent) fn parse_focus_section_list(
+    arguments: &Value,
+    key: &str,
+) -> Vec<&'static str> {
     let mut sections = arguments
         .get(key)
         .and_then(Value::as_array)
@@ -79,7 +88,10 @@ pub(in crate::harness::sub_agent) fn parse_focus_section_list(arguments: &Value,
     sections
 }
 
-pub(in crate::harness::sub_agent) fn parse_relative_script_offset(arguments: &Value, key: &str) -> Option<i64> {
+pub(in crate::harness::sub_agent) fn parse_relative_script_offset(
+    arguments: &Value,
+    key: &str,
+) -> Option<i64> {
     match arguments.get(key).and_then(Value::as_i64) {
         Some(-1) => Some(-1),
         Some(1) => Some(1),
@@ -87,7 +99,9 @@ pub(in crate::harness::sub_agent) fn parse_relative_script_offset(arguments: &Va
     }
 }
 
-pub(in crate::harness::sub_agent) fn parse_storyboard_prompt_seed_scope(scope: Option<&str>) -> Vec<(i64, String)> {
+pub(in crate::harness::sub_agent) fn parse_storyboard_prompt_seed_scope(
+    scope: Option<&str>,
+) -> Vec<(i64, String)> {
     let Some(scope) = scope.map(str::trim).filter(|value| !value.is_empty()) else {
         return Vec::new();
     };

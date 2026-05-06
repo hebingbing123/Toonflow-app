@@ -130,6 +130,35 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('projects section opens project creation brief dialog', (
+    WidgetTester tester,
+  ) async {
+    final controller = buildController(
+      projects: const <ProjectRow>[],
+      artStyles: const <ArtStyleRow>[],
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsSection(
+            accessToken: 'token',
+            controller: controller,
+            onOpenProjectDetail: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('新建空项目'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('新建项目'), findsOneWidget);
+    expect(find.widgetWithText(TextField, '项目名'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Premise'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Brand name'), findsOneWidget);
+    controller.dispose();
+  });
+
   testWidgets('projects section opens agent memory workbench', (
     WidgetTester tester,
   ) async {

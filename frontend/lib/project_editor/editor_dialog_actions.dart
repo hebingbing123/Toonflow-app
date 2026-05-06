@@ -9,6 +9,16 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
     required _ProjectEditorDialogState dialogState,
     required TextEditingController nameCtrl,
     required TextEditingController introCtrl,
+    required TextEditingController premiseCtrl,
+    required TextEditingController audienceCtrl,
+    required TextEditingController toneCtrl,
+    required TextEditingController hookCtrl,
+    required TextEditingController visualCtrl,
+    required TextEditingController brandNameCtrl,
+    required TextEditingController brandPromiseCtrl,
+    required TextEditingController visualMotifsCtrl,
+    required TextEditingController forbiddenCtrl,
+    required TextEditingController continuityCtrl,
   }) {
     return [
       TextButton(
@@ -79,9 +89,28 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                       currentProject.selectedArtStylePackRef[0];
                   final selectedStoryStylePack =
                       currentProject.selectedStoryStylePackRef[0];
+                  List<String> splitLines(String raw) => raw
+                      .split('\n')
+                      .map((line) => line.trim())
+                      .where((line) => line.isNotEmpty)
+                      .toList(growable: false);
                   await updateProjectByProjectId(token, p.id, {
                     'name': nameCtrl.text.isEmpty ? null : nameCtrl.text,
                     'intro': introCtrl.text.isEmpty ? null : introCtrl.text,
+                    'projectBrief': ProjectBriefDraft(
+                      premise: premiseCtrl.text,
+                      targetAudience: audienceCtrl.text,
+                      emotionalTone: toneCtrl.text,
+                      coreHook: hookCtrl.text,
+                      visualDirection: visualCtrl.text,
+                    ).toJsonOrNull(),
+                    'brandBible': BrandBibleDraft(
+                      brandName: brandNameCtrl.text,
+                      brandPromise: brandPromiseCtrl.text,
+                      visualMotifs: splitLines(visualMotifsCtrl.text),
+                      forbiddenElements: splitLines(forbiddenCtrl.text),
+                      continuityRules: splitLines(continuityCtrl.text),
+                    ).toJsonOrNull(),
                   });
                   if (selectedArtStylePack != p.artStylePack ||
                       selectedStoryStylePack != p.storyStylePack) {

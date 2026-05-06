@@ -90,11 +90,12 @@ pub(crate) async fn create_project(
           owner_user_id, workspace_id, numeric_id, name, intro, project_type,
           image_model, image_quality, video_model, art_style,
           director_manual, mode, video_ratio, create_time_ms, metadata,
+          project_brief, brand_bible,
           art_style_pack, story_style_pack,
           target_market, target_platforms, duration_strategy,
           voice_profile, subtitle_style, bgm_strategy
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, '{}'::jsonb, $15, $16, $17, $18, $19, $20, $21, $22)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, '{}'::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23)
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
@@ -117,6 +118,20 @@ pub(crate) async fn create_project(
     .bind(trim_opt(body.mode))
     .bind(trim_opt(body.video_ratio))
     .bind(now_ms)
+    .bind(
+        body.project_brief
+            .as_ref()
+            .map(serde_json::to_value)
+            .transpose()
+            .map_err(|e| ApiError::BadRequest(format!("invalid projectBrief: {e}")))?,
+    )
+    .bind(
+        body.brand_bible
+            .as_ref()
+            .map(serde_json::to_value)
+            .transpose()
+            .map_err(|e| ApiError::BadRequest(format!("invalid brandBible: {e}")))?,
+    )
     .bind(trim_opt(body.art_style_pack))
     .bind(trim_opt(body.story_style_pack))
     .bind(trim_opt(body.target_market))
