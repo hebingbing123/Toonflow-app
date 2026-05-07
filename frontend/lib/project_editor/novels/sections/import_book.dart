@@ -16,6 +16,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     required TextEditingController importUrlCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
+    required TextEditingController importIntakeStatusCtrl,
+    required TextEditingController importIntakeNoteCtrl,
     required void Function(List<ParsedNovelChapter> rows, String message)
     applyImportPreview,
   }) {
@@ -120,12 +122,53 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         batchSize:
                             int.tryParse(importBatchSizeCtrl.text.trim()) ?? 10,
                         intakeSourceUrl: importUrlCtrl.text.trim(),
+                        intakeStatus: importIntakeStatusCtrl.text.trim(),
+                        intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
+                            ? null
+                            : importIntakeNoteCtrl.text.trim(),
                         refreshWorkbench: refreshWorkbench,
                         setLocalState: setLocalState,
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
               child: const Text('导入预解析章节'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                initialValue: importIntakeStatusCtrl.text.isEmpty
+                    ? 'pending_review'
+                    : importIntakeStatusCtrl.text,
+                decoration: const InputDecoration(labelText: '导入后准入状态'),
+                items: const [
+                  DropdownMenuItem(value: 'draft', child: Text('draft')),
+                  DropdownMenuItem(
+                    value: 'pending_review',
+                    child: Text('pending_review'),
+                  ),
+                  DropdownMenuItem(value: 'admitted', child: Text('admitted')),
+                  DropdownMenuItem(value: 'rejected', child: Text('rejected')),
+                ],
+                onChanged: (value) {
+                  importIntakeStatusCtrl.text = value ?? 'pending_review';
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: importIntakeNoteCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: '导入备注',
+                  helperText: '可写抓取来源、清洗说明、待审原因等',
+                ),
+              ),
             ),
           ],
         ),

@@ -8,6 +8,8 @@ class _NovelWorkbenchControllers {
     required this.importUrlCtrl,
     required this.importRawTextCtrl,
     required this.importBatchSizeCtrl,
+    required this.importIntakeStatusCtrl,
+    required this.importIntakeNoteCtrl,
     required this.createChapterCtrl,
     required this.createBodyCtrl,
     required this.selectedNovelIdCtrl,
@@ -37,6 +39,8 @@ class _NovelWorkbenchControllers {
       importUrlCtrl: TextEditingController(),
       importRawTextCtrl: TextEditingController(),
       importBatchSizeCtrl: TextEditingController(text: '10'),
+      importIntakeStatusCtrl: TextEditingController(text: 'pending_review'),
+      importIntakeNoteCtrl: TextEditingController(),
       createChapterCtrl: TextEditingController(
         text: '章节_${DateTime.now().millisecondsSinceEpoch}',
       ),
@@ -79,6 +83,8 @@ class _NovelWorkbenchControllers {
   final TextEditingController importUrlCtrl;
   final TextEditingController importRawTextCtrl;
   final TextEditingController importBatchSizeCtrl;
+  final TextEditingController importIntakeStatusCtrl;
+  final TextEditingController importIntakeNoteCtrl;
   final TextEditingController createChapterCtrl;
   final TextEditingController createBodyCtrl;
   final TextEditingController selectedNovelIdCtrl;
@@ -102,6 +108,8 @@ class _NovelWorkbenchControllers {
     importUrlCtrl.dispose();
     importRawTextCtrl.dispose();
     importBatchSizeCtrl.dispose();
+    importIntakeStatusCtrl.dispose();
+    importIntakeNoteCtrl.dispose();
     createChapterCtrl.dispose();
     createBodyCtrl.dispose();
     selectedNovelIdCtrl.dispose();

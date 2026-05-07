@@ -142,6 +142,8 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required List<ParsedNovelChapter> chapters,
     required int batchSize,
     required String? intakeSourceUrl,
+    required String intakeStatus,
+    required String? intakeNote,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
@@ -185,7 +187,8 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           chapterData: chapter.chapterData,
           intakeSource: sourceKind,
           intakeSourceUrl: intakeSourceUrl,
-          intakeStatus: 'admitted',
+          intakeStatus: intakeStatus,
+          intakeNote: intakeNote,
         );
       }
       applyInfoLine('已导入 $end/${normalizedChapters.length} 条章节…');
