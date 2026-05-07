@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`c0e6acb2`
-- 当前最新完成竖切：`改写与上游结构竖切 script workspace 下游消费增量`
+- 当前最新完成 commit：`ec304994`
+- 当前最新完成竖切：`改写与上游结构竖切 production scriptPlan 约束下沉增量`
 
 ## Phase 1 进度
 
@@ -140,6 +140,7 @@
 - script workspace 默认先消费 `planData.script` 里的计划剧本草稿，再按需补事件或章节窗口，避免上来整包回读小说正文
 - 骨架工作台新增“结构化改写 guidance”生成与预览，把章节压缩、事件改写、人物情绪推进与去 AI 味约束整理成可执行 guidance，供后续 script 子代理或人工改稿消费
 - script workspace 的“上下文快照 / 结果摘要”现在会把 `get_planData` 派生为“改写约束”卡，明确下游先消费计划剧本草稿、再补最少事件与章节正文，避免 guidance 只停留在计划侧
+- production workspace 在读取 `scriptPlan` 时，会额外展示“改写约束下沉”卡，并在 flow 摘要中标记“已承接改写约束”，让导演计划、后续分镜与素材核对明确继承上游改写意图
 
 本轮定向验证：
 
@@ -148,6 +149,7 @@
 - `flutter test test/project_script_plan_workbench_support_test.dart test/project_script_plan_workbench_view_test.dart test/script_agent_plan_data_test.dart`
 - `flutter test test/script_workspace_support_test.dart`
 - `flutter test test/agent_workspaces_section_test.dart --plain-name "Script pane renders planData and tool context snapshots"`
+- `flutter test test/production_context_snapshot_test.dart test/production_workspace_support_test.dart`
 - 触达文件 `flutter analyze` 通过
 
 已提交：
@@ -158,6 +160,7 @@
 - `79272d92` — teach script workspaces to prefer planData draft packets before wider chapter reads
 - `72166473` — add structured rewrite guidance generation and preview on top of the plan workbench
 - `c0e6acb2` — surface plan-derived rewrite constraints inside the script workspace snapshot and result summary
+- `ec304994` — surface rewrite-constraint landing inside production scriptPlan snapshots and summaries
 
 ### 5. 资产与生产竖切
 
