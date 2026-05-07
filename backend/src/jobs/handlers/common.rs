@@ -83,6 +83,33 @@ pub(crate) fn normalize_task_page_project_filter(project_id: Option<i32>) -> Opt
         .filter(|s| !s.is_empty())
 }
 
+pub(crate) async fn ensure_workspace_member_project_numeric_access(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_numeric_id: &str,
+) -> Result<(), ApiError> {
+    let has_project_access: bool = sqlx::query_scalar(
+        r#"
+        SELECT EXISTS (
+          SELECT 1
+          FROM app_project p
+          INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+          WHERE p.numeric_id::text = $1
+            AND wm.user_id = $2
+        )
+        "#,
+    )
+    .bind(project_numeric_id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if !has_project_access {
+        return Err(ApiError::NotFound);
+    }
+    Ok(())
+}
+
 pub(crate) fn job_status_allows_retry(status: &str) -> bool {
     status.eq_ignore_ascii_case("failed")
 }

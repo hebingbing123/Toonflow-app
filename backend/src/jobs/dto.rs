@@ -73,6 +73,12 @@ pub struct ListJobsPageResponse {
     pub total: i64,
 }
 
+#[derive(Debug, Deserialize, Default)]
+pub(super) struct JobSummaryQuery {
+    #[serde(default)]
+    pub(super) project_id: Option<i32>,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CreateJobBody {

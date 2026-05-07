@@ -11,7 +11,8 @@ use crate::jobs::hydrate_job_rows;
 use crate::state::AppState;
 
 use super::super::common::{
-    compute_task_page_offset, normalize_task_page_project_filter, require_pool, trim_query_opt,
+    compute_task_page_offset, ensure_workspace_member_project_numeric_access,
+    normalize_task_page_project_filter, require_pool, trim_query_opt,
 };
 
 #[utoipa::path(
@@ -56,25 +57,7 @@ pub(crate) async fn list_jobs_page(
 
     let offset = compute_task_page_offset(page, limit);
     let (total, mut rows) = if let Some(project_key) = project_key.as_deref() {
-        let has_project_access: bool = sqlx::query_scalar(
-            r#"
-            SELECT EXISTS (
-              SELECT 1
-              FROM app_project p
-              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
-              WHERE p.numeric_id::text = $1
-                AND wm.user_id = $2
-            )
-            "#,
-        )
-        .bind(project_key)
-        .bind(uid)
-        .fetch_one(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-        if !has_project_access {
-            return Err(ApiError::NotFound);
-        }
+        ensure_workspace_member_project_numeric_access(pool, uid, project_key).await?;
 
         let total: i64 = sqlx::query_scalar(
             r#"
