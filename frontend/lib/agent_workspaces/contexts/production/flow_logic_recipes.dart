@@ -45,10 +45,10 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
     );
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '刷新分镜 flow',
+        title: affectedIds.isEmpty ? '刷新分镜结果' : '回读缺帧状态',
         detail: affectedIds.isEmpty
-            ? '分镜生成动作已执行，先按补图最小字段回读 storyboard 再决定是否写回。'
-            : '分镜生成动作已执行，先只回读本次镜头 #${affectedIds.join(', ')} 的补图状态。',
+            ? '分镜生成动作已执行，先刷新分镜结果，再决定是否写回。'
+            : '分镜生成动作已执行，先回读本次镜头 #${affectedIds.join(', ')} 的缺帧状态。',
         flowKey: 'storyboard',
         domainTool: 'get_flowData',
         domainArgs: buildProductionStoryboardGenerationArgs(ids: affectedIds),
@@ -70,10 +70,10 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
     );
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '刷新分镜表',
+        title: affectedIds.isEmpty ? '刷新分镜表' : '回读局部分镜表',
         detail: affectedIds.isEmpty
-            ? '分镜表子代理已执行，先回读关键列窗口再决定是否继续修订。'
-            : '分镜表子代理已执行，先只回读本次镜头 #${affectedIds.join(', ')} 对应的分镜表行。',
+            ? '分镜表子代理已执行，先刷新分镜表，再决定是否继续修订。'
+            : '分镜表子代理已执行，先回读本次镜头 #${affectedIds.join(', ')} 对应的局部分镜表行。',
         flowKey: 'storyboardTable',
         domainTool: 'get_flowData',
         domainArgs: buildProductionStoryboardTableReadArgs(ids: affectedIds),
@@ -107,10 +107,10 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
         : const <int>[];
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '刷新资产 flow',
+        title: affectedIds.isEmpty ? '刷新资产结果' : '回读受影响资产',
         detail: affectedIds.isEmpty
-            ? '资产动作已执行，先拉取最新 assets 结果再决定是否写回。'
-            : '资产生成动作已执行，先只回读本次资产 #${affectedIds.join(', ')} 的最新状态。',
+            ? '资产动作已执行，先刷新资产结果，再决定是否写回。'
+            : '资产生成动作已执行，先回读本次资产 #${affectedIds.join(', ')} 的最新状态。',
         flowKey: 'assets',
         domainTool: 'get_flowData',
         domainArgs: buildProductionAssetReadArgs(ids: affectedIds),

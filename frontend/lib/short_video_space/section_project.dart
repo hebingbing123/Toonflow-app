@@ -1,10 +1,9 @@
-// Extensions on `_ShortVideoSpaceSectionState` legitimately call `setState`; analyzer
-// does not treat `part` extensions as `State` instance members.
+// Part extensions call `setState` on `_ShortVideoSpaceSectionState`; analyzer treats
+// extension `this` as the extension type, not `State` (false positive).
 // ignore_for_file: invalid_use_of_protected_member, library_private_types_in_public_api
 
 part of 'section.dart';
 
-// Project management methods
 extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   Future<void> _loadProjects() async {
     final token = widget.accessToken;

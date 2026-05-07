@@ -2,8 +2,7 @@
 
 part of 'section.dart';
 
-/// Extension containing publish scheduling operations for ShortVideoSpaceSection.
-/// Includes draft scheduling, calendar operations, and time picking.
+/// Publish scheduling: draft scheduling, calendar, time picking.
 extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
   Future<DateTime?> _pickScheduleDateTime(BuildContext context) async {
     final now = DateTime.now();

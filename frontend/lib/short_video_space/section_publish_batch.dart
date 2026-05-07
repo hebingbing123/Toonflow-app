@@ -2,8 +2,7 @@
 
 part of 'section.dart';
 
-/// Extension containing P8 multi-select and batch operations for ShortVideoSpaceSection.
-/// Includes batch scheduling, publishing, archiving, and draft comparison.
+/// P8 multi-select and batch: scheduling, publishing, archiving, comparison.
 extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   void _toggleMultiSelectMode() {
     setState(() {

@@ -2,8 +2,7 @@
 
 part of 'section.dart';
 
-/// Extension containing core publish operations for ShortVideoSpaceSection.
-/// Includes draft management, job enqueueing, and publish slice operations.
+/// Core publish operations: draft management, job enqueueing, publish slice.
 extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   Future<
       ({

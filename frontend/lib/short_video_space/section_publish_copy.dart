@@ -2,8 +2,7 @@
 
 part of 'section.dart';
 
-/// Extension containing publish copy management operations for ShortVideoSpaceSection.
-/// Includes copy suggestion, editing, and platform-specific copy operations.
+/// Publish copy: suggestion, editing, platform-specific copy.
 extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
   Future<void> _suggestPublishCopy() async {
     final token = widget.accessToken;

@@ -475,7 +475,9 @@ void main() {
         ],
         'ids': <int>[2, 8],
       });
+      expect(recipes.first.title, '回读缺帧状态');
       expect(recipes.first.detail, contains('镜头 #2, 8'));
+      expect(recipes.first.detail, contains('缺帧状态'));
     },
   );
 
@@ -508,6 +510,35 @@ void main() {
       });
       expect(storyboardTableStage.detail, contains('镜头 #4, 12'));
       expect(storyboardTableStage.detail, contains('局部分镜表行'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes narrows storyboard table refresh after storyboard-table sub-agent run',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_storyboard_table',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{'result': '已完成'},
+        toolArguments: <String, dynamic>{
+          'prompt': '先修订 storyboard ids=12, 4, 12 的分镜表行。',
+        },
+      );
+
+      expect(recipes.first.title, '回读局部分镜表');
+      expect(recipes.first.detail, contains('局部分镜表行'));
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+        'ids': <int>[4, 12],
+      });
     },
   );
 
@@ -1856,7 +1887,9 @@ void main() {
         'ids': <int>[7, 12],
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
+      expect(recipes.first.title, '回读受影响资产');
       expect(recipes.first.detail, contains('#7, 12'));
+      expect(recipes.first.detail, contains('回读'));
       expect(recipes.last.prompt, contains('这 2 个资产'));
     },
   );
