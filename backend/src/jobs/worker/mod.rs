@@ -184,7 +184,10 @@ async fn claim_next_job(pool: &PgPool, worker_id: &str) -> Result<Option<JobRow>
             WHERE status = 'queued'
               AND (
                 payload->>'run_at_ms' IS NULL
-                OR (payload->>'run_at_ms')::bigint <= (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint
+                OR (
+                  (payload->>'run_at_ms') ~ '^[0-9]+$'
+                  AND (payload->>'run_at_ms')::bigint <= (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint
+                )
               )
             ORDER BY created_at ASC
             FOR UPDATE SKIP LOCKED

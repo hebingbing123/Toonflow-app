@@ -1791,6 +1791,11 @@ components:
     NovelCrawlScheduleCreateBody:
       additionalProperties: false
       properties:
+        idempotency_key:
+          description: 'Optional idempotency key: same user + same key returns the existing schedule job.'
+          type:
+          - string
+          - 'null'
         intake_note:
           type:
           - string

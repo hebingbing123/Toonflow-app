@@ -33,6 +33,9 @@ pub struct NovelCrawlScheduleCreateBody {
     /// Optional project numeric id to enable task-center filtering (`/api/v1/jobs/page?project_id=...`).
     #[serde(default)]
     pub project_numeric_id: Option<i32>,
+    /// Optional idempotency key: same user + same key returns the existing schedule job.
+    #[serde(default)]
+    pub idempotency_key: Option<String>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -138,7 +141,51 @@ pub(crate) async fn post_novel_crawl_schedule_create(
         "job_sub_kind": "novel.crawl.schedule"
     });
 
-    let row = enqueue_generation_job(pool, uid, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH, payload).await?;
+    let idem = body
+        .idempotency_key
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(|s| s.chars().take(200).collect::<String>());
+
+    let row = if let Some(key) = idem.as_deref() {
+        let insert = sqlx::query_as::<_, JobRow>(
+            r#"
+            INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
+            VALUES ($1, $2, $3, 'queued', $4)
+            RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
+            "#,
+        )
+        .bind(uid)
+        .bind(JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH)
+        .bind(payload)
+        .bind(key)
+        .fetch_one(pool)
+        .await;
+
+        match insert {
+            Ok(row) => row,
+            Err(e) if e.as_database_error().and_then(|db| db.code()).is_some_and(|c| c == "23505") => {
+                sqlx::query_as::<_, JobRow>(
+                    r#"
+                    SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
+                    FROM app_generation_job
+                    WHERE owner_user_id = $1 AND idempotency_key = $2
+                    "#,
+                )
+                .bind(uid)
+                .bind(key)
+                .fetch_optional(pool)
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+                .ok_or_else(|| ApiError::DatabaseError("idempotency conflict but row not found".into()))?
+            }
+            Err(e) => return Err(ApiError::DatabaseError(e.to_string())),
+        }
+    } else {
+        enqueue_generation_job(pool, uid, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH, payload).await?
+    };
+
     Ok(JsonResponse(schedule_row_from_job(row)))
 }
 

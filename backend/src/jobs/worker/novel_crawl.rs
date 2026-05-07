@@ -131,11 +131,19 @@ pub(crate) async fn run_novel_crawl_import_batch(
             }
             Err(e) => {
                 failed += 1;
+                let (code, msg) = match &e {
+                    crate::error::ApiError::BadRequest(m) => ("bad_request", m.clone()),
+                    crate::error::ApiError::Forbidden(m) => ("forbidden", m.clone()),
+                    crate::error::ApiError::NotFound => ("not_found", "not found".into()),
+                    crate::error::ApiError::DatabaseError(m) => ("database_error", m.clone()),
+                    crate::error::ApiError::QuotaExceeded(m) => ("quota_exceeded", m.clone()),
+                    _ => ("import_failed", format!("{e:?}")),
+                };
                 items.push(json!({
                   "url": url,
                   "ok": false,
-                  "error_code": "import_failed",
-                  "error_message": format!("{e:?}"),
+                  "error_code": code,
+                  "error_message": msg,
                 }));
             }
         }
