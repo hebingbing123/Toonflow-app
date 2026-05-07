@@ -74,6 +74,7 @@
 
 - [ ] **C**：删除已无注册的死模块（主文档 §四「C–D 未做」）— **每删一批** 跑全门禁 + parity diff。
   - [x] **C0（模块根冲突）**：删除与 **`transformation/`**、**`performance_rework/`** 子目录并存的遗留顶层 **`transformation.rs`** / **`performance_rework.rs`**（否则 `mod foo` 只加载顶层文件，拆分目录被静默忽略）。
+  - [x] **C1（测试重导出噪音）**：**`memory/style_selection/mod.rs`** 去掉未被子测试经 **`generate::`** 引用的 **`#[cfg(test)] pub(in generate) use …`** 项，避免 `cargo clippy --all-targets --all-features` 下 **unused_imports**（默认门禁仍为 `clippy` 无 `--all-features`）。
 - [ ] **D**：删 PG `legacy_id` 列 — **独立窗口**；依赖 `import_staging` / promote 方案（见主文档 §七）。
 
 **验收**：单独发布说明 + DBA 签字类流程（若适用）。

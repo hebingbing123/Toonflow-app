@@ -25,7 +25,7 @@
 - **Q1–Q3**（ops-only，平台级可观测 + Runbook）：**已完成** — 扩展 `QueueStats` / `job_queue_metrics` 日志字段；[**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)（扩容、SQL、Gate、与 trace 关联）；代码 `backend/src/jobs/queue/pg.rs`、`worker/mod.rs`。
 - **Q4**：与 harness trace 字段联调 — **仍 open**（见任务清单 DoD）。
 
-- **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）。**H1**（`agent_memory` / `clear-agent-memories`：**`projectUuid`** 优先 + legacy **`projectId`**）已合。**H2**（`asset_extract`）已合。**H3**（**`assets-generate`** 入队 payload **v2**）已合 — [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)。**H4**（Harness WS **`projectUuid`** / **`scriptUuid`** + legacy **`project_id`** / **`script_id`**；矩阵 [**`harness-ws-context-matrix.md`**](./harness-ws-context-matrix.md)；Flutter `agent_workspaces` 双写）已合。**H5·C0**：移除 **`builder/transformation.rs`** 与 **`publish/performance_rework.rs`** 与同名子目录的模块根冲突（见 **`tasks-http-api-cleanup.md`** H5）。**H5** 其余 C 批与 **D** 仍待排期。
+- **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）。**H1**（`agent_memory` / `clear-agent-memories`：**`projectUuid`** 优先 + legacy **`projectId`**）已合。**H2**（`asset_extract`）已合。**H3**（**`assets-generate`** 入队 payload **v2**）已合 — [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)。**H4**（Harness WS **`projectUuid`** / **`scriptUuid`** + legacy **`project_id`** / **`script_id`**；矩阵 [**`harness-ws-context-matrix.md`**](./harness-ws-context-matrix.md)；Flutter `agent_workspaces` 双写）已合。**H5·C0–C1**：模块根冲突清理 + **`style_selection`** 测试重导出裁剪（见 **`tasks-http-api-cleanup.md`** H5）。**H5** 其余 C 批与 **D** 仍待排期。
 
 ## Phase 1 进度
 
