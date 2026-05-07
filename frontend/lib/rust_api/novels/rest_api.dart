@@ -257,3 +257,42 @@ Future<NovelCrawlImportResponse> postProjectNovelCrawlImport(
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlImportResponse.fromJson(map);
 }
+
+/// `POST /api/v1/projects/{project_id}/novels/crawl-import-batch` — see `postProjectNovelCrawlImportBatchByProjectIdV1`.
+Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
+  String accessToken,
+  String projectId,
+  List<String> urls, {
+  required String intakeStatus,
+  String? intakeNote,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-import-batch',
+  );
+  final body = <String, dynamic>{
+    'urls': urls,
+    'intake_status': intakeStatus,
+    'intake_note': intakeNote,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 180));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelCrawlImportBatchResponse.fromJson(map);
+}

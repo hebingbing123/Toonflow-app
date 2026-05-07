@@ -1556,6 +1556,95 @@ components:
       required:
       - modelName
       type: object
+    NovelCrawlImportBatchBody:
+      additionalProperties: false
+      description: Body for **`POST …/novels/crawl-import-batch`** — hosted crawl import for multiple URLs.
+      properties:
+        intake_note:
+          type:
+          - string
+          - 'null'
+        intake_status:
+          type: string
+        urls:
+          items:
+            type: string
+          type: array
+      required:
+      - urls
+      - intake_status
+      type: object
+    NovelCrawlImportBatchItem:
+      properties:
+        body_char_count:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        chapter_url_count:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        chapters_created:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        error_code:
+          type:
+          - string
+          - 'null'
+        error_message:
+          type:
+          - string
+          - 'null'
+        mode:
+          type:
+          - string
+          - 'null'
+        ok:
+          type: boolean
+        page_count:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        quality_warnings:
+          items:
+            type: string
+          type: array
+        title:
+          type:
+          - string
+          - 'null'
+        url:
+          type: string
+      required:
+      - url
+      - ok
+      type: object
+    NovelCrawlImportBatchResponse:
+      properties:
+        failed:
+          format: int32
+          type: integer
+        items:
+          items:
+            $ref: '#/components/schemas/NovelCrawlImportBatchItem'
+          type: array
+        succeeded:
+          format: int32
+          type: integer
+        total:
+          format: int32
+          type: integer
+      required:
+      - total
+      - succeeded
+      - failed
+      - items
+      type: object
     NovelCrawlImportBody:
       additionalProperties: false
       description: Body for **`POST …/novels/crawl-import`** — server-side crawl + parse + import.
@@ -11064,6 +11153,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NovelCrawlImportResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - novels
+  /api/v1/projects/{project_id}/novels/crawl-import-batch:
+    post:
+      operationId: postProjectNovelCrawlImportBatchByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovelCrawlImportBatchBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NovelCrawlImportBatchResponse'
           description: OK
         '400':
           content:

@@ -14,6 +14,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required void Function(String value) updateInfoLine,
     required TextEditingController importUrlCtrl,
+    required TextEditingController importBatchUrlsCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
     required TextEditingController importExecutionSideCtrl,
@@ -45,6 +46,16 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             labelText: '抓取 URL',
             helperText:
                 '以 client 抓取+修正+导入为主；server 用于托管预览。',
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: importBatchUrlsCtrl,
+          minLines: 2,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: '批量托管 URL（每行一个）',
+            helperText: '仅用于托管导入（增值）批量触发；默认导入仍以预解析修正区为准。',
           ),
         ),
         const SizedBox(height: 8),
@@ -163,6 +174,31 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       ),
                     ),
               child: const Text('托管导入（增值）'),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              onPressed: localBusy || importExecutionSideCtrl.text.trim() != 'server'
+                  ? null
+                  : () => _runNovelWorkbenchAction(
+                      ctx: ctx,
+                      setDialogState: setDialogState,
+                      setLocalState: setLocalState,
+                      novelsBusy: novelsBusy,
+                      setLocalBusy: setLocalBusy,
+                      action: () => _importNovelWorkbenchViaServerCrawlBatch(
+                        token: token,
+                        project: project,
+                        batchUrls: importBatchUrlsCtrl.text,
+                        intakeStatus: importIntakeStatusCtrl.text.trim(),
+                        intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
+                            ? null
+                            : importIntakeNoteCtrl.text.trim(),
+                        refreshWorkbench: refreshWorkbench,
+                        setLocalState: setLocalState,
+                        applyInfoLine: updateInfoLine,
+                      ),
+                    ),
+              child: const Text('批量托管导入（增值）'),
             ),
           ],
         ),

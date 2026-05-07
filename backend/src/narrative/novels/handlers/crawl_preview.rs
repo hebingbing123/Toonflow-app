@@ -19,6 +19,9 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::dto::{
+    NovelCrawlImportBatchBody, NovelCrawlImportBatchItem, NovelCrawlImportBatchResponse,
+};
+use super::super::dto::{
     NovelCrawlImportBody, NovelCrawlImportResponse, NovelCrawlPreviewBody,
     NovelCrawlPreviewResponse,
 };
@@ -748,6 +751,173 @@ pub(crate) async fn post_novel_crawl_import(
         body_char_count: preview.body_char_count,
         chapters_created: created,
         quality_warnings: warnings,
+    }))
+}
+
+fn classify_import_error(err: &ApiError) -> (String, String) {
+    // Stable-ish error codes for observability; keep the message human-readable.
+    match err {
+        ApiError::Unauthorized => ("unauthorized".into(), "unauthorized".into()),
+        ApiError::BadToken => ("invalid_token".into(), "invalid token".into()),
+        ApiError::AuthNotConfigured => ("auth_not_configured".into(), "auth not configured".into()),
+        ApiError::NotFound => ("not_found".into(), "not found".into()),
+        ApiError::Forbidden(msg) => ("forbidden".into(), msg.clone()),
+        ApiError::BadRequest(msg) => ("bad_request".into(), msg.clone()),
+        ApiError::Conflict(msg) => ("conflict".into(), msg.clone()),
+        ApiError::ConflictWithDetails { message, .. } => ("conflict".into(), message.clone()),
+        ApiError::DatabaseError(msg) => ("database_error".into(), msg.clone()),
+        ApiError::QuotaExceeded(msg) => ("quota_exceeded".into(), msg.clone()),
+        ApiError::NotImplemented(msg) => ("not_implemented".into(), msg.clone()),
+        ApiError::Internal => ("internal".into(), "internal error".into()),
+        ApiError::WebhookNotConfigured => (
+            "webhook_not_configured".into(),
+            "webhook not configured".into(),
+        ),
+        ApiError::InvalidWebhookSignature => (
+            "invalid_webhook_signature".into(),
+            "invalid webhook signature".into(),
+        ),
+        ApiError::LlmNotConfigured => ("llm_not_configured".into(), "llm not configured".into()),
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/novels/crawl-import-batch",
+    operation_id = "postProjectNovelCrawlImportBatchByProjectIdV1",
+    tag = "novels",
+    params(
+        ("project_id" = Uuid, Path, description = "Project UUID")
+    ),
+    request_body = NovelCrawlImportBatchBody,
+    responses(
+        (status = 200, description = "OK", body = NovelCrawlImportBatchResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_novel_crawl_import_batch(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(project_id): Path<Uuid>,
+    Json(body): Json<NovelCrawlImportBatchBody>,
+) -> Result<JsonResponse<NovelCrawlImportBatchResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
+    if body.urls.is_empty() {
+        return Err(ApiError::BadRequest("urls must not be empty".into()));
+    }
+    if body.urls.len() > 50 {
+        return Err(ApiError::BadRequest("urls too many (max 50)".into()));
+    }
+
+    let mut items: Vec<NovelCrawlImportBatchItem> = Vec::new();
+    let mut succeeded = 0i32;
+    let mut failed = 0i32;
+
+    for raw in body.urls.iter() {
+        let url = raw.trim().to_string();
+        if url.is_empty() {
+            continue;
+        }
+
+        let result: Result<NovelCrawlImportResponse, ApiError> = async {
+            let parsed =
+                url::Url::parse(&url).map_err(|_| ApiError::BadRequest("invalid url".into()))?;
+            assert_fetchable_url(&parsed)?;
+
+            let preview = crawl_preview_adaptive(&state, &parsed).await?;
+            let normalized_for_import = normalize_extracted_text_for_import(&preview.body_text);
+            let mut chapters =
+                parse_whole_book_chapters_from_normalized(&normalized_for_import, "导入章节");
+            chapters.retain(|(_, _, data)| !data.trim().is_empty());
+            for (idx, ch) in chapters.iter_mut().enumerate() {
+                ch.0 = (idx + 1) as i32;
+            }
+
+            let (blockers, warnings) = evaluate_novel_import_quality(&chapters, 200, 50, 40);
+            if !blockers.is_empty() {
+                return Err(ApiError::BadRequest(format!(
+                    "导入质量门未通过：{}",
+                    blockers.join("；")
+                )));
+            }
+
+            let created = insert_imported_novels_for_project(
+                pool,
+                project_id,
+                &chapters,
+                &body.intake_status,
+                body.intake_note.as_deref(),
+                &url,
+                &CrawlAuditSummary {
+                    mode: preview.mode.clone(),
+                    page_count: preview.page_count,
+                    chapter_url_count: preview.chapter_url_count,
+                    body_char_count: preview.body_char_count,
+                },
+            )
+            .await?;
+
+            Ok(NovelCrawlImportResponse {
+                title: preview.title,
+                mode: preview.mode,
+                page_count: preview.page_count,
+                chapter_url_count: preview.chapter_url_count,
+                body_char_count: preview.body_char_count,
+                chapters_created: created,
+                quality_warnings: warnings,
+            })
+        }
+        .await;
+
+        match result {
+            Ok(ok) => {
+                succeeded += 1;
+                items.push(NovelCrawlImportBatchItem {
+                    url,
+                    ok: true,
+                    error_code: None,
+                    error_message: None,
+                    title: Some(ok.title),
+                    mode: Some(ok.mode),
+                    page_count: Some(ok.page_count),
+                    chapter_url_count: Some(ok.chapter_url_count),
+                    body_char_count: Some(ok.body_char_count),
+                    chapters_created: Some(ok.chapters_created),
+                    quality_warnings: ok.quality_warnings,
+                });
+            }
+            Err(e) => {
+                failed += 1;
+                let (code, msg) = classify_import_error(&e);
+                items.push(NovelCrawlImportBatchItem {
+                    url,
+                    ok: false,
+                    error_code: Some(code),
+                    error_message: Some(msg),
+                    title: None,
+                    mode: None,
+                    page_count: None,
+                    chapter_url_count: None,
+                    body_char_count: None,
+                    chapters_created: None,
+                    quality_warnings: Vec::new(),
+                });
+            }
+        }
+    }
+
+    Ok(JsonResponse(NovelCrawlImportBatchResponse {
+        total: (succeeded + failed),
+        succeeded,
+        failed,
+        items,
     }))
 }
 

@@ -355,6 +355,43 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     );
   }
 
+  Future<void> _importNovelWorkbenchViaServerCrawlBatch({
+    required String token,
+    required ProjectRow project,
+    required String batchUrls,
+    required String intakeStatus,
+    required String? intakeNote,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required StateSetter setLocalState,
+    required void Function(String infoLine) applyInfoLine,
+  }) async {
+    final urls = batchUrls
+        .split(RegExp(r'[\n\r]+'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList(growable: false);
+    if (urls.isEmpty) {
+      throw const FormatException('请先在批量托管 URL 里填入至少 1 行 URL');
+    }
+    final res = await postProjectNovelCrawlImportBatch(
+      token,
+      project.id,
+      urls,
+      intakeStatus: intakeStatus,
+      intakeNote: intakeNote,
+    );
+    await refreshWorkbench(setLocalState);
+    final sampleFailures = res.items
+        .where((e) => !e.ok)
+        .take(3)
+        .map((e) => '${e.errorCode ?? 'error'}: ${e.url}')
+        .join('；');
+    applyInfoLine(
+      '批量托管导入完成：成功 ${res.succeeded}/${res.total}，失败 ${res.failed}。'
+      '${sampleFailures.isEmpty ? '' : ' 失败样例：$sampleFailures'}',
+    );
+  }
+
   String _resolveImportSourceKind({
     required String intakeSourceMode,
     required String? intakeSourceUrl,

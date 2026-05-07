@@ -135,6 +135,77 @@ class NovelCrawlImportResponse {
   }
 }
 
+class NovelCrawlImportBatchItem {
+  const NovelCrawlImportBatchItem({
+    required this.url,
+    required this.ok,
+    this.errorCode,
+    this.errorMessage,
+    this.title,
+    this.mode,
+    this.pageCount,
+    this.chapterUrlCount,
+    this.bodyCharCount,
+    this.chaptersCreated,
+    required this.qualityWarnings,
+  });
+
+  final String url;
+  final bool ok;
+  final String? errorCode;
+  final String? errorMessage;
+  final String? title;
+  final String? mode;
+  final int? pageCount;
+  final int? chapterUrlCount;
+  final int? bodyCharCount;
+  final int? chaptersCreated;
+  final List<String> qualityWarnings;
+
+  factory NovelCrawlImportBatchItem.fromJson(Map<String, dynamic> json) {
+    final rawWarnings = json['quality_warnings'] as List<dynamic>? ?? const [];
+    return NovelCrawlImportBatchItem(
+      url: json['url'] as String? ?? '',
+      ok: json['ok'] as bool? ?? false,
+      errorCode: json['error_code'] as String?,
+      errorMessage: json['error_message'] as String?,
+      title: json['title'] as String?,
+      mode: json['mode'] as String?,
+      pageCount: (json['page_count'] as num?)?.toInt(),
+      chapterUrlCount: (json['chapter_url_count'] as num?)?.toInt(),
+      bodyCharCount: (json['body_char_count'] as num?)?.toInt(),
+      chaptersCreated: (json['chapters_created'] as num?)?.toInt(),
+      qualityWarnings: rawWarnings.map((e) => e as String).toList(growable: false),
+    );
+  }
+}
+
+class NovelCrawlImportBatchResponse {
+  const NovelCrawlImportBatchResponse({
+    required this.total,
+    required this.succeeded,
+    required this.failed,
+    required this.items,
+  });
+
+  final int total;
+  final int succeeded;
+  final int failed;
+  final List<NovelCrawlImportBatchItem> items;
+
+  factory NovelCrawlImportBatchResponse.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'] as List<dynamic>? ?? const [];
+    return NovelCrawlImportBatchResponse(
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      succeeded: (json['succeeded'] as num?)?.toInt() ?? 0,
+      failed: (json['failed'] as num?)?.toInt() ?? 0,
+      items: rawItems
+          .map((e) => NovelCrawlImportBatchItem.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
 /// Compat row (**`getNovelIndex`** shape); filled from **`GET …/projects/{uuid}/novels`**.
 class NovelWorkbenchIndexItem {
   const NovelWorkbenchIndexItem({

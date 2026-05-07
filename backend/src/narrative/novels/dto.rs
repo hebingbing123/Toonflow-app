@@ -142,3 +142,45 @@ pub struct NovelCrawlImportResponse {
     pub chapters_created: i32,
     pub quality_warnings: Vec<String>,
 }
+
+/// Body for **`POST …/novels/crawl-import-batch`** — hosted crawl import for multiple URLs.
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct NovelCrawlImportBatchBody {
+    pub urls: Vec<String>,
+    pub intake_status: String,
+    #[serde(default)]
+    pub intake_note: Option<String>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NovelCrawlImportBatchItem {
+    pub url: String,
+    pub ok: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mode: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub chapter_url_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub body_char_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub chapters_created: Option<i32>,
+    #[serde(default)]
+    pub quality_warnings: Vec<String>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NovelCrawlImportBatchResponse {
+    pub total: i32,
+    pub succeeded: i32,
+    pub failed: i32,
+    pub items: Vec<NovelCrawlImportBatchItem>,
+}

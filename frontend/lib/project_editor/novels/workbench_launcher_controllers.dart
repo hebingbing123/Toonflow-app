@@ -6,6 +6,7 @@ class _NovelWorkbenchControllers {
     required this.searchIntakeStatusCtrl,
     required this.searchIntakeSourceCtrl,
     required this.importUrlCtrl,
+    required this.importBatchUrlsCtrl,
     required this.importRawTextCtrl,
     required this.importBatchSizeCtrl,
     required this.importExecutionSideCtrl,
@@ -38,6 +39,7 @@ class _NovelWorkbenchControllers {
       searchIntakeStatusCtrl: TextEditingController(),
       searchIntakeSourceCtrl: TextEditingController(),
       importUrlCtrl: TextEditingController(),
+      importBatchUrlsCtrl: TextEditingController(),
       importRawTextCtrl: TextEditingController(),
       importBatchSizeCtrl: TextEditingController(text: '10'),
       importExecutionSideCtrl: TextEditingController(text: 'client'),
@@ -83,6 +85,7 @@ class _NovelWorkbenchControllers {
   final TextEditingController searchIntakeStatusCtrl;
   final TextEditingController searchIntakeSourceCtrl;
   final TextEditingController importUrlCtrl;
+  final TextEditingController importBatchUrlsCtrl;
   final TextEditingController importRawTextCtrl;
   final TextEditingController importBatchSizeCtrl;
   final TextEditingController importExecutionSideCtrl;
@@ -109,6 +112,7 @@ class _NovelWorkbenchControllers {
     searchIntakeStatusCtrl.dispose();
     searchIntakeSourceCtrl.dispose();
     importUrlCtrl.dispose();
+    importBatchUrlsCtrl.dispose();
     importRawTextCtrl.dispose();
     importBatchSizeCtrl.dispose();
     importExecutionSideCtrl.dispose();
