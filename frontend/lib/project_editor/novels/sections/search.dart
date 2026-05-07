@@ -69,6 +69,10 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                     value: 'crawler_client',
                     child: Text('crawler_client'),
                   ),
+                  DropdownMenuItem(
+                    value: 'crawler_server',
+                    child: Text('crawler_server'),
+                  ),
                 ],
                 onChanged: (value) {
                   searchIntakeSourceCtrl.text = value ?? '';
