@@ -212,6 +212,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     );
   }
   final data = flowSnapshot['assets'];
+  final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
   final executionHint = buildProductionScriptPlanExecutionHint(
     flowSnapshot['scriptPlan'],
   );
@@ -304,6 +305,22 @@ ProductionWorkspaceStage _buildAssetsStage({
       domainArgs: scriptPlanAssetArgs,
     );
   }
+  if (!scriptPlanReady &&
+      activeKey != 'assets' &&
+      toolName != 'generate_deriveAsset' &&
+      toolName != 'add_deriveAsset' &&
+      toolName != 'del_deriveAsset' &&
+      toolName != 'run_sub_agent_derive_assets' &&
+      toolName != 'run_sub_agent_generate_assets') {
+    return ProductionWorkspaceStage(
+      title: '资产准备',
+      flowKey: 'assets',
+      statusLabel: '等待导演计划',
+      detail: '先读取或生成 scriptPlan，再规划 assets，避免素材补齐脱离导演节奏与改写约束。',
+      domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
+    );
+  }
   if (activeKey == 'assets' ||
       toolName == 'generate_deriveAsset' ||
       toolName == 'add_deriveAsset' ||
@@ -392,6 +409,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     );
   }
   final data = flowSnapshot['storyboardTable'];
+  final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
   if (data is String) {
     final trimmed = data.trim();
     if (trimmed.isEmpty) {
@@ -435,6 +453,18 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     );
   }
+  if (!scriptPlanReady &&
+      activeKey != 'storyboardTable' &&
+      toolName != 'run_sub_agent_storyboard_table') {
+    return ProductionWorkspaceStage(
+      title: '分镜表',
+      flowKey: 'storyboardTable',
+      statusLabel: '等待导演计划',
+      detail: '先读取或生成 scriptPlan，再拆分 storyboardTable，避免镜头表脱离导演计划。',
+      domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
+    );
+  }
   if (activeKey == 'storyboardTable' ||
       toolName == 'run_sub_agent_storyboard_table') {
     final affectedIds = toolName == 'run_sub_agent_storyboard_table'
@@ -470,6 +500,10 @@ ProductionWorkspaceStage _buildStoryboardStage({
   required Object? result,
   required Map<String, dynamic>? toolArguments,
 }) {
+  final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
+  final storyboardTableReady = _productionStoryboardTableReady(
+    flowSnapshot['storyboardTable'],
+  );
   final executionHint = buildProductionScriptPlanExecutionHint(
     flowSnapshot['scriptPlan'],
   );
@@ -561,6 +595,35 @@ ProductionWorkspaceStage _buildStoryboardStage({
       domainArgs: buildProductionStoryboardReviewArgs(),
     );
   }
+  if (!scriptPlanReady &&
+      activeKey != 'storyboard' &&
+      toolName != 'generate_storyboard' &&
+      toolName != 'run_sub_agent_storyboard_gen' &&
+      toolName != 'run_sub_agent_storyboard_panel') {
+    return ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: '等待导演计划',
+      detail: '先读取或生成 scriptPlan，再推进 storyboard，避免直接补图但情绪和镜头意图未定。',
+      domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
+    );
+  }
+  if (scriptPlanReady &&
+      !storyboardTableReady &&
+      activeKey != 'storyboard' &&
+      toolName != 'generate_storyboard' &&
+      toolName != 'run_sub_agent_storyboard_gen' &&
+      toolName != 'run_sub_agent_storyboard_panel') {
+    return ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: '等待分镜表',
+      detail: '先补 storyboardTable 再推进 storyboard，避免直接出图时镜头拆分和资产关联还没定型。',
+      domainTool: 'get_flowData',
+      domainArgs: buildProductionStoryboardTableReadArgs(),
+    );
+  }
   if (activeKey == 'storyboard' ||
       toolName == 'generate_storyboard' ||
       toolName == 'run_sub_agent_storyboard_gen' ||
@@ -634,4 +697,20 @@ int _readInt(Object? value) {
   if (value is num) return value.toInt();
   if (value is String) return int.tryParse(value.trim()) ?? 0;
   return 0;
+}
+
+bool _productionScriptPlanReady(Object? value) {
+  return value is String && value.trim().isNotEmpty;
+}
+
+bool _productionStoryboardTableReady(Object? value) {
+  if (value is String) {
+    return value.trim().isNotEmpty && countProductionStoryboardTableRows(value) > 0;
+  }
+  if (value is Map<String, dynamic>) {
+    final rowCount = _readInt(value['rowCount']);
+    final totalRows = _readInt(value['totalRows']);
+    return rowCount > 0 || totalRows > 0;
+  }
+  return false;
 }

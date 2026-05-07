@@ -2127,6 +2127,75 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages blocks assets until script plan exists',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: null,
+        suggestedFlowKey: null,
+        result: null,
+      );
+
+      final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
+      expect(assetsStage.statusLabel, '等待导演计划');
+      expect(assetsStage.domainArgs, <String, dynamic>{
+        'key': 'scriptPlan',
+        'maxChars': 2200,
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages blocks storyboard table until script plan exists',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: null,
+        suggestedFlowKey: null,
+        result: null,
+      );
+
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(tableStage.statusLabel, '等待导演计划');
+      expect(tableStage.domainArgs, <String, dynamic>{
+        'key': 'scriptPlan',
+        'maxChars': 2200,
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages blocks storyboard until storyboard table exists',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '<scriptPlan>已有导演计划</scriptPlan>',
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.statusLabel, '等待分镜表');
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+        'rowStart': 1,
+        'rowCount': 8,
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages uses focused script window in missing storyboard prompt',
     () {
       final stages = buildProductionWorkspaceStages(
