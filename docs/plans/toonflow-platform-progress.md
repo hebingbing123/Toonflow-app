@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`77b545b7`
-- 当前最新完成竖切：`改写与上游结构竖切事件联动骨架草稿增量`
+- 当前最新完成 commit：`0070f3ef`
+- 当前最新完成竖切：`改写与上游结构竖切剧本初稿包桥接增量`
 
 ## Phase 1 进度
 
@@ -135,11 +135,19 @@
 - 保存走既有 `script-agent/set-plan-data` 契约，项目内可直接维护上游结构页
 - 骨架工作台联动当前小说章节 / 事件数据，展示事件覆盖摘要
 - 可用现有事件和章节生成“故事骨架草稿 / 改编策略草稿”，先用确定性模板压缩后续 AI 改写输入
+- 可用现有事件 / 章节 / 骨架 / 策略生成“剧本初稿包”，先走确定性模板减少无效 token 消耗
+- 骨架工作台新增剧本初稿预览与一键写入，复用既有 `script-agent/set-plan-data` 将同名剧本覆盖更新、缺失剧本自动创建
 
 本轮定向验证：
 
 - `flutter test test/script_agent_plan_data_test.dart test/project_script_plan_workbench_view_test.dart test/project_script_plan_workbench_support_test.dart`
 - 触达文件 `flutter analyze` 通过
+
+已提交：
+
+- `e863fe13` — add project-level plan workbench for story skeleton and adaptation strategy
+- `77b545b7` — seed skeleton and strategy drafts from current novel events before spending model tokens
+- `0070f3ef` — bridge deterministic script draft packets into preview and writeback on top of the existing script-agent plan rail
 
 ### 5. 资产与生产竖切
 
