@@ -3,7 +3,7 @@
 更新时间：2026-05-07
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
-大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
+大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
 
 ## 状态约定
 
