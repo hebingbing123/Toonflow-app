@@ -7,7 +7,10 @@ use serde_json::json;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_IMAGE};
+use crate::jobs::{
+    enqueue_generation_job, payload_project::ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2, JobRow,
+    JOB_KIND_ASSET_GENERATE_IMAGE,
+};
 use crate::state::AppState;
 
 use super::super::common::{
@@ -70,6 +73,8 @@ pub(crate) async fn post_generate_assets(
 
     let asset_type = asset_type_str(&body.asset_type);
     let payload = json!({
+        "payload_schema_version": ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2,
+        "project_uuid": project_uuid,
         "source": "assets-generate.generate",
         "project_numeric_id": body.project_id,
         "asset_numeric_id": body.id,

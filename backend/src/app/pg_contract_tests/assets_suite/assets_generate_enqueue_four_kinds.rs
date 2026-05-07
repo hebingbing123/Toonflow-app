@@ -79,6 +79,8 @@ async fn assets_generate_enqueue_four_kinds() {
     assert_eq!(status, StatusCode::OK, "generate body={job}");
     assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_GENERATE_IMAGE));
     assert_eq!(job["status"].as_str(), Some("queued"));
+    assert_eq!(job["payload"]["payload_schema_version"].as_i64(), Some(2));
+    assert_eq!(job["payload"]["project_uuid"].as_str(), Some(project_uuid));
     assert_eq!(job["payload"]["has_base64"].as_bool(), Some(true));
     assert_eq!(
         job["payload"]["image_base64"].as_str(),
@@ -106,6 +108,8 @@ async fn assets_generate_enqueue_four_kinds() {
     assert_eq!(status, StatusCode::OK, "polish body={job}");
     assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_POLISH_PROMPT));
     assert_eq!(job["status"].as_str(), Some("queued"));
+    assert_eq!(job["payload"]["payload_schema_version"].as_i64(), Some(2));
+    assert_eq!(job["payload"]["project_uuid"].as_str(), Some(project_uuid));
 
     let bat_gen = format!(
         r#"{{"projectId":{numeric_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":{asset_numeric_id},"type":"role","name":"n","prompt":"p","base64":"data:image/png;base64,AA=="}}]}}"#
@@ -128,6 +132,8 @@ async fn assets_generate_enqueue_four_kinds() {
     assert_eq!(status, StatusCode::OK, "batch-generate body={job}");
     assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_GENERATE_BATCH));
     assert_eq!(job["status"].as_str(), Some("queued"));
+    assert_eq!(job["payload"]["payload_schema_version"].as_i64(), Some(2));
+    assert_eq!(job["payload"]["project_uuid"].as_str(), Some(project_uuid));
     assert_eq!(
         job["payload"]["items"][0]["has_base64"].as_bool(),
         Some(true)
@@ -157,4 +163,6 @@ async fn assets_generate_enqueue_four_kinds() {
     assert_eq!(status, StatusCode::OK, "batch-polish body={job}");
     assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_POLISH_BATCH));
     assert_eq!(job["status"].as_str(), Some("queued"));
+    assert_eq!(job["payload"]["payload_schema_version"].as_i64(), Some(2));
+    assert_eq!(job["payload"]["project_uuid"].as_str(), Some(project_uuid));
 }

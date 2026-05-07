@@ -46,14 +46,14 @@
 
 ## 波次 H3：`assets-generate` + `app_generation_job` payload（高风险，单独里程碑）
 
-**触点**：`backend/src/assets/generate.rs`、`backend/src/jobs/worker/*.rs`、队列 JSON payload。
+**触点**：`backend/src/assets/generate/handlers/*`、`backend/src/jobs/payload_project.rs`、`backend/src/jobs/worker/asset_image/*`、`asset_polish.rs`；队列 JSON payload。
 
-- [ ] **设计先行**（1 页即可）：payload **版本号**、双写期、在途任务兼容、回滚。
-- [ ] 实现：worker 同时识别 v1/v2 payload 或迁移脚本清空队列窗口。
-- [ ] OpenAPI + parity 表「队列语义」行更新。
-- [ ] 与 [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md) Q2 协调：改 schema 后指标查询仍正确。
+- [x] **设计先行**：[**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)（版本号、双写、在途 v1、回滚）。
+- [x] 实现：入队 **`payload_schema_version`: 2** + **`project_uuid`**；worker 经 **`resolve_project_numeric_from_job_payload`** 兼容仅 numeric 的旧 payload。
+- [x] OpenAPI：HTTP body 未改（仍为 camelCase projectId）；队列 payload 为内部契约 — parity 见设计文档与 `http-api-cleanup.md` §七。
+- [x] 与 [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md) Q2：`pending_by_kind_json` 不按 payload 字段分组；`/jobs/page` numeric 过滤仍依赖 **`project_numeric_id`**（双写保留）。
 
-**验收**：压测或 staging 长跑一批生成任务；`yarn refactor:check`。
+**验收**：`yarn refactor:check`；staging 长跑生成任务建议在发布说明中勾选（本仓库 CI 以门禁为准）。
 
 ---
 

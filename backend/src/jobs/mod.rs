@@ -7,6 +7,7 @@ mod dto;
 mod enqueue;
 mod handlers;
 mod kinds;
+pub(crate) mod payload_project;
 mod track_metadata;
 
 // Public API surface for other crates / tests; not all items referenced from this module body.

@@ -1,6 +1,8 @@
 //! HTTP 接口和 Worker 使用的标准 `app_generation_job.kind` 值。
 //!
 //! 定义资产生成和提示词优化的任务类型常量。
+//!
+//! **`assets-generate`** 入队 payload 版本与 **`project_uuid`** 解析：见 [`crate::jobs::payload_project`] 与仓库 **`docs/plans/assets-generate-job-payload-v2.md`**。
 
 /// Single-image asset generate (Electron-era **`POST …/assets-generate/generate`**); worker uses
 /// **`images/edits`** when payload has `image_base64`, otherwise **`images/generations`**,

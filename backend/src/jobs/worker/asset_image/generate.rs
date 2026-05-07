@@ -2,6 +2,7 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::jobs::payload_project::resolve_project_numeric_from_job_payload;
 use crate::jobs::worker::common::{generation_job_is_cancelled, JobRunError};
 use crate::jobs::JobRow;
 use crate::llm::{resolve_openai_image_model, resolve_openai_image_size};
@@ -26,11 +27,8 @@ pub(crate) async fn run_asset_generate_image(
     }
 
     let p = &row.payload;
-    let project_numeric_id = p
-        .get("project_numeric_id")
-        .and_then(|x| x.as_i64())
-        .and_then(|n| i32::try_from(n).ok())
-        .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
+    let project_numeric_id =
+        resolve_project_numeric_from_job_payload(pool, row.owner_user_id, p).await?;
     let asset_numeric_id = p
         .get("asset_numeric_id")
         .and_then(|x| x.as_i64())

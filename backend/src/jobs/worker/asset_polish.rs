@@ -7,6 +7,7 @@ use crate::llm::{chat_completion_with_usage, LlmConfig, TokenUsage};
 use crate::metering::llm_usage::record_llm_usage;
 use crate::state::AppState;
 
+use crate::jobs::payload_project::resolve_project_numeric_from_job_payload;
 use crate::jobs::JobRow;
 
 use super::common::{generation_job_is_cancelled, JobRunError};
@@ -73,10 +74,8 @@ pub(super) async fn run_asset_polish_prompt(
     };
 
     let p = &row.payload;
-    let project_numeric_id = p
-        .get("project_numeric_id")
-        .and_then(|x| x.as_i64())
-        .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
+    let project_numeric_id =
+        resolve_project_numeric_from_job_payload(pool, row.owner_user_id, p).await?;
     let asset_numeric_id = p
         .get("asset_numeric_id")
         .and_then(|x| x.as_i64())
@@ -105,7 +104,7 @@ pub(super) async fn run_asset_polish_prompt(
     record_llm_usage(
         pool,
         row.owner_user_id,
-        Some(project_numeric_id as i32),
+        Some(project_numeric_id),
         None,
         Some(job_id),
         "jobs.asset_polish_prompt",
@@ -126,7 +125,7 @@ pub(super) async fn run_asset_polish_prompt(
 
     Ok(json!({
         "source": "assets-generate.polish-prompt",
-        "project_numeric_id": project_numeric_id,
+        "project_numeric_id": project_numeric_id as i64,
         "asset_numeric_id": asset_numeric_id,
         "polished_prompt": result.text,
     }))
@@ -145,10 +144,8 @@ pub(super) async fn run_asset_polish_batch(
     };
 
     let p = &row.payload;
-    let project_numeric_id = p
-        .get("project_numeric_id")
-        .and_then(|x| x.as_i64())
-        .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
+    let project_numeric_id =
+        resolve_project_numeric_from_job_payload(pool, row.owner_user_id, p).await?;
     let items = p
         .get("items")
         .and_then(|x| x.as_array())
@@ -195,7 +192,7 @@ pub(super) async fn run_asset_polish_batch(
         record_llm_usage(
             pool,
             row.owner_user_id,
-            Some(project_numeric_id as i32),
+            Some(project_numeric_id),
             None,
             Some(job_id),
             "jobs.asset_polish_batch_item",
@@ -222,7 +219,7 @@ pub(super) async fn run_asset_polish_batch(
 
     Ok(json!({
         "source": "assets-generate.batch-polish",
-        "project_numeric_id": project_numeric_id,
+        "project_numeric_id": project_numeric_id as i64,
         "items": out,
     }))
 }

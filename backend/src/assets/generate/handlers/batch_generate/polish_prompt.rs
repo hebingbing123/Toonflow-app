@@ -7,7 +7,10 @@ use serde_json::json;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_POLISH_BATCH};
+use crate::jobs::{
+    enqueue_generation_job, payload_project::ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2, JobRow,
+    JOB_KIND_ASSET_POLISH_BATCH,
+};
 use crate::state::AppState;
 
 use super::super::super::common::{
@@ -86,6 +89,8 @@ pub(crate) async fn post_batch_polish_assets_prompt(
     ensure_asset_numerics_exist_in_owned_project(pool, uid, project_uuid, &polish_ids).await?;
 
     let payload = json!({
+        "payload_schema_version": ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2,
+        "project_uuid": project_uuid,
         "source": "assets-generate.batch-polish",
         "project_numeric_id": body.project_id,
         "concurrent_count": body.concurrent_count,
