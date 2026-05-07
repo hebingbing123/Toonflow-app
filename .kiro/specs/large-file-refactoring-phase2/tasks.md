@@ -152,7 +152,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split negative_prompt_analysis.rs into negative_prompt_analysis/ submodules (854→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [-] 13. Refactor backend/src/publish/nine_platform_acceptance_tests.rs (835 lines → keep as single file with internal test modules)
+- [x] 13. Refactor backend/src/publish/nine_platform_acceptance_tests.rs (835 lines → keep as single file with internal test modules)
   - Note: This is a test file. Rust test files use `mod` blocks internally rather than separate files — split into internal modules
   - Analyze current structure and identify per-platform test groups
   - Refactor to use internal `mod douyin { ... }`, `mod kuaishou { ... }`, `mod xiaohongshu { ... }`, `mod bilibili { ... }`, `mod wechat_channels { ... }` blocks (≈150 lines each)
@@ -163,7 +163,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): modularize nine_platform_acceptance_tests.rs by platform (835→≤800 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 14. Refactor backend/src/prompting/benchmark/memory_profiles/handlers.rs (834 lines → 3 modules)
+- [x] 14. Refactor backend/src/prompting/benchmark/memory_profiles/handlers.rs (834 lines → 3 modules)
   - Note: memory_profiles/ already has mod.rs, types.rs, tests.rs — handlers.rs is a submodule; follow same pattern as publish/handlers/
   - Create `memory_profiles/handlers/` directory; move handlers.rs → `handlers/mod.rs` (≈150 lines, router, re-exports)
   - Create `handlers/profile.rs` (≈350 lines) with profile CRUD handlers
@@ -174,7 +174,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split memory_profiles/handlers.rs into handlers/ submodules (834→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 15. Refactor backend/src/production/workbench/meta/generate/tests/select_tests.rs (857 lines → split following existing pattern)
+- [-] 15. Refactor backend/src/production/workbench/meta/generate/tests/select_tests.rs (857 lines → split following existing pattern)
   - Note: tests/ directory already uses the pattern `*_tests_part1.rs` / `*_tests_part2.rs` (e.g. memory_trim_part1.rs, observation_tests_part1.rs) — follow same convention
   - Analyze current structure and split into two files by test category
   - Create `tests/select_tests_part1.rs` (≈430 lines) with first half of tests (unit + basic integration)

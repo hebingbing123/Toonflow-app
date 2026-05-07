@@ -27,5 +27,6 @@ mod memory_trim_part1;
 mod memory_trim_part2;
 mod observation_tests_part1;
 mod observation_tests_part2;
-mod select_tests;
+mod select_tests_part1;
+mod select_tests_part2;
 mod style_tests;
