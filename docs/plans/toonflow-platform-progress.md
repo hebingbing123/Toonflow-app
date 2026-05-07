@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`5e5f6ea2`
-- 当前最新完成竖切：`改写与上游结构竖切 production 执行提示继承增量`
+- 当前最新完成 commit：`4b253161`
+- 当前最新完成竖切：`改写与上游结构竖切 production 执行提示可视化增量`
 
 ## Phase 1 进度
 
@@ -143,6 +143,7 @@
 - production workspace 在读取 `scriptPlan` 时，会额外展示“改写约束下沉”卡，并在 flow 摘要中标记“已承接改写约束”，让导演计划、后续分镜与素材核对明确继承上游改写意图
 - production workspace 在读取 `scriptPlan` 后，recipe 会新增“继续导演计划”动作，并自动继承 scriptPlan 已点名的关键资产范围，让后续导演计划、分镜和素材动作优先围绕改写约束收束，而不是重新扩读整包上下文
 - production workspace 的资产补图与分镜补帧 prompt 现在会继承 scriptPlan 提炼出的短版执行提示，把情绪递进、画面意图和去生硬约束压缩进动作提示，在不扩读大上下文的前提下提升画面与表演自然度
+- production workspace 的阶段卡与建议卡现在会直接展示本次子代理将使用的执行提示，用户无需先点应用再检查，即可判断本轮动作是否仍遵守改写约束、情绪递进和最小上下文读取策略
 
 本轮定向验证：
 
@@ -165,6 +166,7 @@
 - `ec304994` — surface rewrite-constraint landing inside production scriptPlan snapshots and summaries
 - `c90ce32a` — prioritize rewrite-constrained director-plan follow-ups in production recipes
 - `5e5f6ea2` — distill scriptPlan rewrite intent into production asset/storyboard execution hints
+- `4b253161` — surface production execution prompts inline on stage and recipe cards
 
 ### 5. 资产与生产竖切
 
