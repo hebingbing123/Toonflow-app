@@ -21,6 +21,7 @@ use crate::state::AppState;
     responses(
         (status = 204, description = "Deleted"),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -41,9 +42,15 @@ pub(crate) async fn delete_project_by_id(
 
     let numeric_id: Option<i32> = sqlx::query_scalar(
         r#"
-        SELECT numeric_id
-        FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        SELECT p.numeric_id
+        FROM app_project p
+        WHERE p.id = $1
+          AND EXISTS (
+            SELECT 1
+            FROM public.app_workspace_member m
+            WHERE m.workspace_id = p.workspace_id
+              AND m.user_id = $2
+          )
         "#,
     )
     .bind(project_id)
@@ -62,11 +69,9 @@ pub(crate) async fn delete_project_by_id(
     sqlx::query(
         r#"
         DELETE FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
+        WHERE numeric_project_id = $1
         "#,
     )
-    .bind(uid)
     .bind(numeric_id)
     .execute(&mut *tx)
     .await
@@ -75,11 +80,10 @@ pub(crate) async fn delete_project_by_id(
     let res = sqlx::query(
         r#"
         DELETE FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

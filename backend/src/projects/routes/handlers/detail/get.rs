@@ -24,6 +24,7 @@ use super::super::super::types::{ProjectDetailResponse, ProjectRow, ScriptBrief}
     responses(
         (status = 200, description = "OK", body = ProjectDetailResponse),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -45,8 +46,14 @@ pub(crate) async fn get_project_by_id(
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
                voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
-        FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        FROM app_project p
+        WHERE p.id = $1
+          AND EXISTS (
+            SELECT 1
+            FROM public.app_workspace_member m
+            WHERE m.workspace_id = p.workspace_id
+              AND m.user_id = $2
+          )
         "#,
     )
     .bind(project_id)

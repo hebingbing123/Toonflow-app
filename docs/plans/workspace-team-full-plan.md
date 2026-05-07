@@ -71,7 +71,7 @@
 
 - [x] **W4.1** `GET /api/v1/projects`：默认按 `current_workspace_id` 过滤；若 profile 指向失效则回退 personal（同 workspace 视角可见项目）
 - [x] **W4.2** `POST /api/v1/projects`：默认当前 workspace（含 personal 回退）；支持显式 `workspaceId` 且强校验 membership，非成员写入返回 `403`
-- [ ] **W4.3** `GET/PATCH/DELETE …/projects/{id}`：校验 **project.workspace_id** 与成员身份
+- [x] **W4.3** `GET/PATCH/DELETE …/projects/{id}`：已改为按 **project.workspace_id + workspace member** 校验（移除 owner_user_id 单用户闸门）
 - [ ] **W4.4** 剧本 / 分镜 / 小说 / 资产 / workbench **所有** `project_id` 路径 handler：统一走 **「project ∈ workspace + 成员权限」** 中间件或 helper（避免漏网接口）
 - [ ] **W4.5** `app_generation_job`（及 payload）：是否挂 `workspace_id` 或由 `project_id` 派生 — **书面定稿** + 列表/取消/统计接口一致
 - [ ] **W4.6** `GET /api/v1/usage/summary`、memory、skills、quality 等：**定义**是否按 workspace 聚合或保持 user；**实现与 OpenAPI 一致**

@@ -91,6 +91,7 @@ fn parse_json_object_patch<T: serde::de::DeserializeOwned>(
         (status = 200, description = "OK", body = ProjectRow),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -248,8 +249,14 @@ pub(crate) async fn patch_project_by_id(
                target_market, target_platforms, duration_strategy,
                voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
                project_brief, brand_bible
-        FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        FROM app_project p
+        WHERE p.id = $1
+          AND EXISTS (
+            SELECT 1
+            FROM public.app_workspace_member m
+            WHERE m.workspace_id = p.workspace_id
+              AND m.user_id = $2
+          )
         "#,
     )
     .bind(project_id)
@@ -304,7 +311,7 @@ pub(crate) async fn patch_project_by_id(
             voice_profile = $16, subtitle_style = $17, bgm_strategy = $18,
             quality_gate_strategy = $19, project_brief = $20, brand_bible = $21,
             updated_at = NOW()
-        WHERE id = $22 AND owner_user_id = $23
+        WHERE id = $22
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
@@ -335,7 +342,6 @@ pub(crate) async fn patch_project_by_id(
     .bind(&new_project_brief)
     .bind(&new_brand_bible)
     .bind(current.id)
-    .bind(uid)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
