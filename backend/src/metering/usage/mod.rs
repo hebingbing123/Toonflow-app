@@ -16,7 +16,11 @@ pub use record::{record_generation_job_created, record_generation_job_succeeded}
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(summary::usage_summary),
-    components(schemas(summary::UsageSummaryResponse, crate::error::ErrorBody)),
+    components(schemas(
+        summary::UsageSummaryResponse,
+        summary::UsageSummaryScope,
+        crate::error::ErrorBody
+    )),
     tags((name = "usage", description = "Per-user usage and quota hints"))
 )]
 pub struct MeteringOpenApi;

@@ -76,7 +76,7 @@
 - [ ] **W4.5** `app_generation_job`（及 payload）：是否挂 `workspace_id` 或由 `project_id` 派生 — **书面定稿** + 列表/取消/统计接口一致（进行中：先按 `project_id` 派生语义收口，`GET /api/v1/jobs/page`、`GET /api/v1/jobs`、jobs 三个 summary 端点，以及 `GET /api/v1/jobs/{id}` / `GET /api/v1/jobs/task-detail/{task_id}` / `POST /api/v1/jobs/{id}/cancel` / `POST /api/v1/jobs/{id}/retry` 已统一为 owner 或同 workspace 项目成员可见/可操作；`POST /api/v1/jobs` 在 payload 携带 project 字段时会校验并规范化 `project_uuid` + `project_numeric_id`；本地文件下载路径与 job 变更通知已按 `job.owner_user_id` 对齐，避免成员代操作时落错目录/错发通知；worker 侧 `video/voiceover/asset-image` 项目资源写回与 scope 校验已从 `project.owner_user_id` 切换到 workspace 成员语义）
   - **W4.5 决策定稿（2026-05-08）**：`app_generation_job` **不新增** `workspace_id` 列；空间可见性由 payload 中规范化后的 `project_uuid + project_numeric_id` 派生。理由：避免双写一致性负担（`project_id`/`workspace_id` 漂移）、兼容历史行、且与现有 project-membership helper 复用最稳。
   - **约束**：无 `project_*` 的 job 继续按 `owner_user_id` 个人视图；带 `project_*` 的 job 一律按「owner 或同 workspace 成员」判定读写权限。
-- [ ] **W4.6** `GET /api/v1/usage/summary`、memory、skills、quality 等：**定义**是否按 workspace 聚合或保持 user；**实现与 OpenAPI 一致**
+- [ ] **W4.6** `GET /api/v1/usage/summary`、memory、skills、quality 等：**定义**是否按 workspace 聚合或保持 user；**实现与 OpenAPI 一致**（进行中：`GET /api/v1/usage/summary` 已在响应与 OpenAPI 显式标注 `scope = user`，固定用户口径，避免与 workspace 语义混淆；memory/skills/quality 口径仍待逐项收口）
 - [ ] **W4.7** Parity：[ `electron-node-parity.md`](./electron-node-parity.md) 更新「多用户可见范围」与旧栈差异说明
 
 ---

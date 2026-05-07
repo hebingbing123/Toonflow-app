@@ -14,7 +14,15 @@ use crate::metering::quota;
 use crate::state::AppState;
 
 #[derive(Serialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum UsageSummaryScope {
+    User,
+}
+
+#[derive(Serialize, ToSchema)]
 pub(crate) struct UsageSummaryResponse {
+    /// Aggregation scope for this response. W4.6 currently locks this endpoint to `user`.
+    pub(crate) scope: UsageSummaryScope,
     pub(crate) events_last_24h: i64,
     pub(crate) events_last_7d: i64,
     /// Per-`event_type` counts in the rolling last 7 days (same window as `events_last_7d`).
@@ -103,6 +111,7 @@ pub(super) async fn usage_summary(
     let quota_remaining = daily_job_quota.map(|cap| (cap - jobs_today).max(0));
 
     Ok(Json(UsageSummaryResponse {
+        scope: UsageSummaryScope::User,
         events_last_24h: row.0,
         events_last_7d: row.1,
         event_counts_last_7d,

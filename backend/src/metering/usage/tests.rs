@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::summary::UsageSummaryResponse;
+use super::summary::{UsageSummaryResponse, UsageSummaryScope};
 
 #[test]
 fn usage_summary_response_serialize_with_quota() {
@@ -9,6 +9,7 @@ fn usage_summary_response_serialize_with_quota() {
     event_counts.insert("generation_job.created".to_string(), 3i64);
 
     let resp = UsageSummaryResponse {
+        scope: UsageSummaryScope::User,
         events_last_24h: 5,
         events_last_7d: 10,
         event_counts_last_7d: event_counts,
@@ -18,6 +19,7 @@ fn usage_summary_response_serialize_with_quota() {
     };
 
     let json = serde_json::to_string(&resp).unwrap();
+    assert!(json.contains("\"scope\":\"user\""));
     assert!(json.contains("\"events_last_24h\":5"));
     assert!(json.contains("\"events_last_7d\":10"));
     assert!(json.contains("\"jobs_today\":3"));
@@ -28,6 +30,7 @@ fn usage_summary_response_serialize_with_quota() {
 #[test]
 fn usage_summary_response_serialize_without_quota() {
     let resp = UsageSummaryResponse {
+        scope: UsageSummaryScope::User,
         events_last_24h: 0,
         events_last_7d: 0,
         event_counts_last_7d: HashMap::new(),
@@ -44,6 +47,7 @@ fn usage_summary_response_serialize_without_quota() {
 #[test]
 fn usage_summary_response_with_zero_remaining() {
     let resp = UsageSummaryResponse {
+        scope: UsageSummaryScope::User,
         events_last_24h: 10,
         events_last_7d: 50,
         event_counts_last_7d: HashMap::new(),
