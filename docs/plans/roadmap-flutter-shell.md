@@ -24,7 +24,9 @@ YAML：`flutter-shell`。
 
 - `flutter analyze`、`flutter test`（门禁脚本已包含）。
 
-## 实施步骤（草案）
+## 执行计划与工作包
+
+> **维护约定**：与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 及上文表格一致；落地时在同一竖切或跟进 PR 中更新对应 WP。与实现冲突处以代码与 OpenAPI 为准。
 
 ### WP-A：`short_video_space/*` 静态分析清零
 

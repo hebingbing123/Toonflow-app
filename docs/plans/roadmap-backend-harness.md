@@ -34,7 +34,9 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 - 变更域跑 `yarn refactor:check`。
 - 新增 WS 或 HTTP 工具必须更新 `docs/websocket-events.md` 与 OpenAPI（若暴露 REST）。
 
-## 实施步骤（草案）
+## 执行计划与工作包
+
+> **维护约定**：与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 及上文表格一致；落地时在同一竖切或跟进 PR 中更新对应 WP。与实现冲突处以代码与 OpenAPI 为准。
 
 ### WP-A：更广端到端契约矩阵（关键用户路径）
 
