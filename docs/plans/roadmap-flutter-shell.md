@@ -16,9 +16,9 @@ YAML：`flutter-shell`。
 
 | 内容 | 状态 | 备注 |
 |------|------|------|
-| `short_video_space/*` 静态分析告警清零 | `next` | `toonflow-platform-progress.md`「已知阻塞」曾提及 |
-| Web：CORS / token / 深链方案文档化 | `next` | 与 [`roadmap-repo-contract-infra.md`](./roadmap-repo-contract-infra.md) 联动 |
-| 大屏信息架构（减少单文件复杂度） | `next` | 维持 ≤800 行文件 guideline |
+| `short_video_space/*` 静态分析告警清零 | `next` | **必做** |
+| Web：CORS / token / 深链方案文档化 | `next` | **必做**；与 [`roadmap-repo-contract-infra.md`](./roadmap-repo-contract-infra.md) 联动 |
+| 大屏信息架构（减少单文件复杂度） | `next` | **必做**；≤800 行/file |
 
 ## 验收
 
@@ -32,11 +32,11 @@ YAML：`flutter-shell`。
 
 | 项 | 内容 |
 |----|------|
-| **目标** | `flutter analyze` 无 info/warning 累积（或按团队约定仅允许 exclude 清单内例外）。 |
+| **目标** | **必做**：`flutter analyze` 清零；例外仅允许列入书面 exclude 清单并经 review。 |
 | **依赖** | 无外部阻塞。 |
-| **PR 切片** | （1）`dart analyze` 输出逐项修复（`avoid_print`、`deprecated`、无效 null check 等）；（2）过大文件按职责拆到同级 `*_widgets.dart` / `*_logic.dart`（遵守 ≤800 行指引）。 |
-| **触点** | `frontend/lib/short_video_space/`；关联 `rust_api` 若签名变迁。 |
-| **测试** | `flutter test` 目录内现有用例 + 新增最小 widget 测试（可选）。 |
+| **PR 切片** | （1）逐项修复 `dart analyze`；（2）过大文件拆分 `*_widgets.dart` / `*_logic.dart`（≤800 行）。 |
+| **触点** | `frontend/lib/short_video_space/`；`rust_api` 签名变迁须同步。 |
+| **测试** | **必做**：现有 `flutter test` 全绿；**必做**：为短剧空间核心入口新增最小 widget/smoke 测试。 |
 | **回滚** | Revert 对应提交；优先小 PR。 |
 
 ### WP-B：Web 客户端 CORS / Token / 深链文档
@@ -45,9 +45,9 @@ YAML：`flutter-shell`。
 |----|------|
 | **目标** | 贡献者能在 10 分钟内理解 Web 版如何配 `baseUrl`、Supabase session、刷新 token 失败时的 UX。 |
 | **依赖** | 与 [`roadmap-repo-contract-infra.md`](./roadmap-repo-contract-infra.md) WP-A 一致的真实部署 URL 规范。 |
-| **PR 切片** | （1）`docs/plans/flutter-web-client.md`（或 README 章节）；（2）代码内统一 `baseUrl` 读取入口注释链接到文档。 |
-| **触点** | `frontend/lib/` 下环境与 API client 初始化；`supabase_flutter` 配置处。 |
-| **测试** | 文档审查；可选集成测试跳过（Web 驱动成本高）。 |
+| **PR 切片** | （1）**必做**：新增 `docs/plans/flutter-web-client.md`（README 仅可链向该文）；（2）**必做**：`baseUrl`/Auth 初始化处注释链接文档。 |
+| **触点** | `frontend/lib/` 环境与 API client；`supabase_flutter` 配置。 |
+| **测试** | **必做**：文档审查 + **书面 Web smoke 矩阵**（手工步骤入库）；自动化能覆盖则追加，不因成本减免矩阵。 |
 | **回滚** | 文档删除不影响运行时。 |
 
 ### WP-C：大屏信息架构与组件拆分
@@ -55,7 +55,7 @@ YAML：`flutter-shell`。
 | 项 | 内容 |
 |----|------|
 | **目标** | Project editor、Agent workspace、短剧空间等大入口保持「一层导航清晰 + 子组件文件化」。 |
-| **依赖** | 产品设计不剧烈摇摆（避免反复改名）。 |
+| **依赖** | 导航结构以交付为准；若产品改名须同步 PR 更新图表与路由文案（**必做**连贯修订）。 |
 | **PR 切片** | （1）按用户旅程画 ASCII/mermaid 导航图放进 [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 或本文档；（2）每个 PR 只迁移一个对话框/区块 StatelessWidget；（3）禁止单 PR 超大搬家。 |
 | **触点** | `frontend/lib/project_editor/`；`frontend/lib/agent_workspaces/`；`frontend/lib/short_video_space/`。 |
 | **测试** | `flutter analyze`；关键路径手动点测。 |

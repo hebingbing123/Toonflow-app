@@ -17,9 +17,9 @@ YAML：`product-shipping-bar`、`master-detailed-parity-audit`、`decommission-e
 
 | 内容 | 状态 | 备注 |
 |------|------|------|
-| Parity 表增量维护（新 REST/WS 必须回填） | `next` | 任何新接口合并前检查 |
-| 灰度 / 回滚 Runbook（部署拓扑、Feature flag） | `next` | 母文档 `product-shipping-bar` 语义 |
-| 九平台真实发布验收（P12） | `blocked` | 见 [`.kiro/specs/short-video-space/P-SECTION-STATUS.md`](../../.kiro/specs/short-video-space/P-SECTION-STATUS.md) |
+| Parity 表增量维护（新 REST/WS 必须回填） | `next` | **必做**；合并门禁 |
+| 灰度 / 回滚 Runbook（部署拓扑、Feature flag） | `next` | **必做**；`product-shipping-bar` |
+| 九平台真实发布验收（P12） | `blocked` | **必做**；Gate：凭证/合规；见 [`.kiro/specs/short-video-space/P-SECTION-STATUS.md`](../../.kiro/specs/short-video-space/P-SECTION-STATUS.md) |
 
 ## 验收
 
@@ -35,7 +35,7 @@ YAML：`product-shipping-bar`、`master-detailed-parity-audit`、`decommission-e
 | 项 | 内容 |
 |----|------|
 | **目标** | 任意新增或语义变更的 REST/WS 在合并前更新 [`electron-node-parity.md`](./electron-node-parity.md)（或子表）与 OpenAPI/WS 文档。 |
-| **依赖** | Reviewer 执行 checklist；可选 Danger/bot 提示。 |
+| **依赖** | Reviewer checklist **必做**；**必做**：Danger 或 GitHub bot **或** CI 校验 parity 片段变更——三者至少强化其一，禁止仅靠口头约定。 |
 | **PR 切片** | （1）PR 模板 checklist 一条「parity updated?」；（2）大功能：单独 docs commit。 |
 | **触点** | `electron-node-parity.md`；`docs/websocket-events.md`；`backend` OpenAPI 导出。 |
 | **测试** | `yarn refactor:check`；人工 diff parity 表与 router。 |
@@ -56,7 +56,7 @@ YAML：`product-shipping-bar`、`master-detailed-parity-audit`、`decommission-e
 
 | 项 | 内容 |
 |----|------|
-| **目标** | 短剧发布链路在各平台真实账号下走通（上架策略外）。 |
+| **目标** | **必做**：短剧发布链路在各平台真实账号下走通（上架策略外）；表内 `blocked` 仅表示 **Gate** 未就绪，不减免交付责任。 |
 | **依赖** | 真实凭证与合规；见 [`.kiro/specs/short-video-space/P-SECTION-STATUS.md`](../../.kiro/specs/short-video-space/P-SECTION-STATUS.md)。 |
 | **PR 切片** | 通常为「运营 + 工程联合」里程碑；（1）staging 用测试号；（2）生产分批平台；（3）每平台残留 issues 回填 parity 或 kiro。 |
 | **触点** | `frontend/lib/short_video_space/`；后端 publish/export 相关 handler（以 parity 表为准）。 |
