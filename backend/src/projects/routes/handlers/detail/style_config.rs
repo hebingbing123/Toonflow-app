@@ -12,7 +12,9 @@ use crate::error::ApiError;
 use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
-use super::super::super::common::{merge_text_patch, trim_opt};
+use super::super::super::common::{
+    merge_text_patch, require_project_workspace_member_scope, trim_opt,
+};
 use super::super::super::types::{PatchStyleConfigBody, ProjectRow};
 
 fn trim_text_patch(patch: FieldPatch<String>) -> FieldPatch<String> {
@@ -39,6 +41,7 @@ fn trim_text_patch(patch: FieldPatch<String>) -> FieldPatch<String> {
         (status = 200, description = "OK", body = ProjectRow),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -52,6 +55,7 @@ pub(crate) async fn patch_style_config(
 ) -> Result<Json<ProjectRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     if body.art_style_pack.is_none() && body.story_style_pack.is_none() {
         return Err(ApiError::BadRequest(
@@ -81,11 +85,10 @@ pub(crate) async fn patch_style_config(
                target_market, target_platforms, duration_strategy,
                voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1
         "#,
     )
-    .bind(project_id)
-    .bind(uid)
+    .bind(scope.id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -113,7 +116,7 @@ pub(crate) async fn patch_style_config(
         r#"
         UPDATE app_project
         SET art_style_pack = $1, story_style_pack = $2, updated_at = NOW()
-        WHERE id = $3 AND owner_user_id = $4
+        WHERE id = $3
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
@@ -125,7 +128,6 @@ pub(crate) async fn patch_style_config(
     .bind(&new_art_style_pack)
     .bind(&new_story_style_pack)
     .bind(current.id)
-    .bind(uid)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

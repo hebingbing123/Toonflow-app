@@ -9,6 +9,7 @@ use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
 
+use super::super::super::common::require_project_workspace_member_scope;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -177,6 +178,7 @@ fn readiness_summary(score: i32, onboarding: &ProjectHomeOnboarding) -> String {
     responses(
         (status = 200, description = "OK", body = ProjectHomeResponse),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -189,6 +191,7 @@ pub(crate) async fn project_home_by_id(
 ) -> Result<Json<ProjectHomeResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     let row = sqlx::query_as::<_, ProjectHomeRow>(
         r#"
@@ -200,11 +203,10 @@ pub(crate) async fn project_home_by_id(
                voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
                project_brief, brand_bible
         FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1
         "#,
     )
-    .bind(project_id)
-    .bind(uid)
+    .bind(scope.id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -212,7 +214,7 @@ pub(crate) async fn project_home_by_id(
 
     let script_count: i64 =
         sqlx::query_scalar("SELECT COUNT(*)::bigint FROM app_script WHERE project_id = $1")
-            .bind(project_id)
+            .bind(scope.id)
             .fetch_one(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -224,20 +226,20 @@ pub(crate) async fn project_home_by_id(
         WHERE s.project_id = $1
         "#,
     )
-    .bind(project_id)
+    .bind(scope.id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let role_count: i64 = sqlx::query_scalar(
         "SELECT COUNT(*)::bigint FROM app_asset WHERE project_id = $1 AND asset_type = 'role'",
     )
-    .bind(project_id)
+    .bind(scope.id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let novel_count: i64 =
         sqlx::query_scalar("SELECT COUNT(*)::bigint FROM app_novel WHERE project_id = $1")
-            .bind(project_id)
+            .bind(scope.id)
             .fetch_one(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -253,7 +255,7 @@ pub(crate) async fn project_home_by_id(
           )
         "#,
     )
-    .bind(project_id)
+    .bind(scope.id)
     .bind(uid)
     .fetch_one(pool)
     .await
