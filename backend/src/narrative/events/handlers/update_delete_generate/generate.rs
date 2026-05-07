@@ -19,7 +19,18 @@ use super::super::super::extraction::{
 use super::super::super::MAX_GENERATE_EVENTS_CONCURRENCY;
 
 fn is_blocked_intake_status(status: Option<&str>) -> bool {
-    matches!(status, Some("pending_review") | Some("rejected"))
+    matches!(
+        status,
+        Some("draft") | Some("pending_review") | Some("rejected")
+    )
+}
+
+fn invalid_novel_quality_reason(chapter_data: &str) -> Option<&'static str> {
+    let len = chapter_data.chars().count();
+    if len < 30 {
+        return Some("正文过短");
+    }
+    None
 }
 
 pub(crate) async fn post_generate_novel_events_for_project(
@@ -91,6 +102,19 @@ pub(crate) async fn post_generate_novel_events_for_project(
                 .join(", ")
         )));
     }
+    let low_quality_ids: Vec<String> = novels
+        .iter()
+        .filter_map(|row| {
+            invalid_novel_quality_reason(&row.chapter_data)
+                .map(|reason| format!("{}({reason})", row.numeric_id))
+        })
+        .collect();
+    if !low_quality_ids.is_empty() {
+        return Err(ApiError::BadRequest(format!(
+            "以下章节未通过质量门，不可直接生成事件：{}",
+            low_quality_ids.join(", ")
+        )));
+    }
 
     let ids: Vec<Uuid> = novels.iter().map(|n| n.id).collect();
     sqlx::query(
@@ -131,14 +155,24 @@ pub(crate) async fn post_generate_novel_events_for_project(
 
 #[cfg(test)]
 mod tests {
-    use super::is_blocked_intake_status;
+    use super::{invalid_novel_quality_reason, is_blocked_intake_status};
 
     #[test]
     fn blocks_pending_and_rejected_intake_status() {
+        assert!(is_blocked_intake_status(Some("draft")));
         assert!(is_blocked_intake_status(Some("pending_review")));
         assert!(is_blocked_intake_status(Some("rejected")));
         assert!(!is_blocked_intake_status(Some("admitted")));
-        assert!(!is_blocked_intake_status(Some("draft")));
         assert!(!is_blocked_intake_status(None));
+    }
+
+    #[test]
+    fn blocks_short_chapter_data_in_quality_gate() {
+        assert_eq!(invalid_novel_quality_reason("短内容"), Some("正文过短"));
+        assert_eq!(
+            invalid_novel_quality_reason(&"a".repeat(29)),
+            Some("正文过短")
+        );
+        assert_eq!(invalid_novel_quality_reason(&"a".repeat(30)), None);
     }
 }
