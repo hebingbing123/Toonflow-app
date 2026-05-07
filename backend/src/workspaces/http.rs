@@ -1,7 +1,7 @@
 use axum::{
     extract::{Path, Query, State},
     http::HeaderMap,
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -71,6 +71,39 @@ pub struct WorkspaceMemberResponse {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CreateWorkspaceInviteBody {
+    pub email: String,
+    /// Allowed: **`admin`** or **`member`**.
+    pub role: String,
+    /// Invite expiry window in hours (default **168** = 7d, max **720** = 30d).
+    #[serde(default)]
+    pub expires_in_hours: Option<i64>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct AcceptWorkspaceInviteBody {
+    pub token: String,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
+pub struct WorkspaceInviteResponse {
+    pub id: Uuid,
+    pub workspace_id: Uuid,
+    pub email: String,
+    pub token: String,
+    pub role: String,
+    pub invited_by: Uuid,
+    pub status: String,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
+    pub accepted_by: Option<Uuid>,
+    pub accepted_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
 #[derive(Debug, Deserialize, IntoParams)]
 #[into_params(parameter_in = Query)]
 pub struct ListWorkspacesQuery {
@@ -112,6 +145,14 @@ pub(crate) fn router() -> Router<AppState> {
         .route(
             "/api/v1/workspaces/{workspace_id}/members",
             get(list_workspace_members).post(add_workspace_member),
+        )
+        .route(
+            "/api/v1/workspaces/{workspace_id}/invites",
+            post(create_workspace_invite),
+        )
+        .route(
+            "/api/v1/workspaces/invites/accept",
+            post(accept_workspace_invite),
         )
 }
 
@@ -157,6 +198,16 @@ fn normalize_member_role(role: &str) -> Option<&'static str> {
         "member" => Some("member"),
         _ => None,
     }
+}
+
+fn parse_invite_expires_hours(expires_in_hours: Option<i64>) -> Result<i64, ApiError> {
+    let hours = expires_in_hours.unwrap_or(168);
+    if !(1..=720).contains(&hours) {
+        return Err(ApiError::BadRequest(
+            "expires_in_hours must be between 1 and 720".into(),
+        ));
+    }
+    Ok(hours)
 }
 
 fn max_enterprise_workspaces_per_user() -> i64 {
@@ -654,6 +705,159 @@ pub(crate) async fn add_workspace_member(
     Ok(Json(row))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/workspaces/{workspace_id}/invites",
+    operation_id = "createWorkspaceInviteV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID")
+    ),
+    request_body(content = CreateWorkspaceInviteBody, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceInviteResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn create_workspace_invite(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+    Json(body): Json<CreateWorkspaceInviteBody>,
+) -> Result<Json<WorkspaceInviteResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+
+    let role = normalize_member_role(&body.role)
+        .ok_or_else(|| ApiError::BadRequest("role must be admin or member".into()))?;
+    let email = body.email.trim().to_ascii_lowercase();
+    if email.is_empty() || !email.contains('@') {
+        return Err(ApiError::BadRequest("email must be a valid address".into()));
+    }
+    let expires_hours = parse_invite_expires_hours(body.expires_in_hours)?;
+    let token = Uuid::new_v4().to_string();
+
+    let row: WorkspaceInviteResponse = sqlx::query_as(
+        r#"
+        INSERT INTO public.app_workspace_invite (
+          workspace_id, email, token, role, invited_by, status, expires_at
+        )
+        VALUES ($1, $2, $3, $4, $5, 'pending', NOW() + make_interval(hours => $6))
+        RETURNING
+          id, workspace_id, email, token, role, invited_by, status, expires_at,
+          accepted_by, accepted_at, created_at, updated_at
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(email)
+    .bind(token)
+    .bind(role)
+    .bind(uid)
+    .bind(expires_hours)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(row))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/workspaces/invites/accept",
+    operation_id = "acceptWorkspaceInviteV1",
+    tag = "workspaces",
+    request_body(content = AcceptWorkspaceInviteBody, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceMemberResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn accept_workspace_invite(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<AcceptWorkspaceInviteBody>,
+) -> Result<Json<WorkspaceMemberResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let token = body.token.trim();
+    if token.is_empty() {
+        return Err(ApiError::BadRequest("token must not be empty".into()));
+    }
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let invite: Option<WorkspaceInviteResponse> = sqlx::query_as(
+        r#"
+        SELECT
+          id, workspace_id, email, token, role, invited_by, status, expires_at,
+          accepted_by, accepted_at, created_at, updated_at
+        FROM public.app_workspace_invite
+        WHERE token = $1
+        FOR UPDATE
+        "#,
+    )
+    .bind(token)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let invite = invite.ok_or(ApiError::NotFound)?;
+    if invite.status != "pending" {
+        return Err(ApiError::Conflict("invite is not pending".into()));
+    }
+    if invite.expires_at < chrono::Utc::now() {
+        return Err(ApiError::Conflict("invite has expired".into()));
+    }
+
+    let member: WorkspaceMemberResponse = sqlx::query_as(
+        r#"
+        INSERT INTO public.app_workspace_member (workspace_id, user_id, role)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (workspace_id, user_id) DO UPDATE
+        SET role = EXCLUDED.role, updated_at = NOW()
+        RETURNING workspace_id, user_id, role, created_at, updated_at
+        "#,
+    )
+    .bind(invite.workspace_id)
+    .bind(uid)
+    .bind(invite.role)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_workspace_invite
+        SET status = 'accepted', accepted_by = $2, accepted_at = NOW(), updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(invite.id)
+    .bind(uid)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(member))
+}
+
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(
@@ -662,14 +866,19 @@ pub(crate) async fn add_workspace_member(
         get_workspace,
         patch_workspace,
         list_workspace_members,
-        add_workspace_member
+        add_workspace_member,
+        create_workspace_invite,
+        accept_workspace_invite
     ),
     components(schemas(
         WorkspaceResponse,
         WorkspaceListItem,
         WorkspaceMemberResponse,
+        WorkspaceInviteResponse,
         CreateWorkspaceBody,
         AddWorkspaceMemberBody,
+        CreateWorkspaceInviteBody,
+        AcceptWorkspaceInviteBody,
         PatchWorkspaceBody,
         crate::error::ErrorBody
     )),

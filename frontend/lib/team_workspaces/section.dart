@@ -135,11 +135,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       return;
     }
     final userIdController = TextEditingController();
+    final inviteEmailController = TextEditingController();
     String role = 'member';
     List<WorkspaceMemberResponse> members = <WorkspaceMemberResponse>[];
+    WorkspaceInviteResponse? latestInvite;
     String? error;
     bool loading = true;
     bool adding = false;
+    bool inviting = false;
 
     Future<void> loadMembers(StateSetter setModalState) async {
       setModalState(() {
@@ -246,6 +249,54 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: inviteEmailController,
+                        decoration: const InputDecoration(
+                          labelText: '邀请邮箱',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FilledButton.tonal(
+                        onPressed: inviting
+                            ? null
+                            : () async {
+                                final email = inviteEmailController.text.trim();
+                                if (email.isEmpty) {
+                                  setModalState(() => error = '请输入邀请邮箱');
+                                  return;
+                                }
+                                setModalState(() {
+                                  inviting = true;
+                                  error = null;
+                                });
+                                try {
+                                  final invite = await createWorkspaceInviteV1(
+                                    token,
+                                    row.workspace.id,
+                                    CreateWorkspaceInviteBody(
+                                      email: email,
+                                      role: role,
+                                    ),
+                                  );
+                                  setModalState(() => latestInvite = invite);
+                                  inviteEmailController.clear();
+                                } catch (e) {
+                                  setModalState(() => error = e.toString());
+                                } finally {
+                                  setModalState(() => inviting = false);
+                                }
+                              },
+                        child: Text(inviting ? '生成邀请中…' : '生成邀请链接'),
+                      ),
+                      if (latestInvite != null) ...<Widget>[
+                        const SizedBox(height: 8),
+                        SelectableText(
+                          'invite token: ${latestInvite!.token}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                       if (error != null) ...<Widget>[
                         const SizedBox(height: 8),
                         SelectableText(
@@ -282,6 +333,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       },
     );
     userIdController.dispose();
+    inviteEmailController.dispose();
   }
 
   Future<void> _confirmArchive(WorkspaceListItem row) async {

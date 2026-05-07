@@ -90,6 +90,56 @@ class WorkspaceMemberResponse {
   }
 }
 
+/// One `app_workspace_invite` row.
+class WorkspaceInviteResponse {
+  const WorkspaceInviteResponse({
+    required this.id,
+    required this.workspaceId,
+    required this.email,
+    required this.token,
+    required this.role,
+    required this.invitedBy,
+    required this.status,
+    required this.expiresAt,
+    this.acceptedBy,
+    this.acceptedAt,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String id;
+  final String workspaceId;
+  final String email;
+  final String token;
+  final String role;
+  final String invitedBy;
+  final String status;
+  final DateTime expiresAt;
+  final String? acceptedBy;
+  final DateTime? acceptedAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  factory WorkspaceInviteResponse.fromJson(Map<String, dynamic> json) {
+    return WorkspaceInviteResponse(
+      id: json['id'] as String,
+      workspaceId: json['workspace_id'] as String,
+      email: json['email'] as String,
+      token: json['token'] as String,
+      role: json['role'] as String,
+      invitedBy: json['invited_by'] as String,
+      status: json['status'] as String,
+      expiresAt: DateTime.parse(json['expires_at'] as String),
+      acceptedBy: json['accepted_by'] as String?,
+      acceptedAt: json['accepted_at'] == null
+          ? null
+          : DateTime.parse(json['accepted_at'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
+}
+
 /// `POST /api/v1/workspaces`
 class CreateWorkspaceBody {
   const CreateWorkspaceBody({required this.name, this.metadata});
@@ -139,6 +189,36 @@ class AddWorkspaceMemberBody {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'user_id': userId,
     'role': role,
+  };
+}
+
+/// `POST /api/v1/workspaces/{workspace_id}/invites`
+class CreateWorkspaceInviteBody {
+  const CreateWorkspaceInviteBody({
+    required this.email,
+    required this.role,
+    this.expiresInHours,
+  });
+
+  final String email;
+  final String role;
+  final int? expiresInHours;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'email': email,
+    'role': role,
+    if (expiresInHours != null) 'expires_in_hours': expiresInHours,
+  };
+}
+
+/// `POST /api/v1/workspaces/invites/accept`
+class AcceptWorkspaceInviteBody {
+  const AcceptWorkspaceInviteBody({required this.token});
+
+  final String token;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'token': token,
   };
 }
 
@@ -209,6 +289,51 @@ Future<WorkspaceMemberResponse> addWorkspaceMemberV1(
   AddWorkspaceMemberBody body,
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceMemberResponse.fromJson(map);
+}
+
+Future<WorkspaceInviteResponse> createWorkspaceInviteV1(
+  String accessToken,
+  String workspaceId,
+  CreateWorkspaceInviteBody body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceInviteResponse.fromJson(map);
+}
+
+Future<WorkspaceMemberResponse> acceptWorkspaceInviteV1(
+  String accessToken,
+  AcceptWorkspaceInviteBody body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/invites/accept');
   final res = await http
       .post(
         uri,

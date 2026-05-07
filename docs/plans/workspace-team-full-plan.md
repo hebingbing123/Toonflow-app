@@ -43,9 +43,9 @@
 ## 三、Phase W2 — 成员与邀请（完整闭环）
 
 - [x] **W2.1** `POST …/workspaces/{id}/members`：**直接添加** 已存在用户（`user_id` + `role`）；已落地 owner/admin 鉴权 + 角色限制（`admin/member`）+ Flutter 成员管理入口（查看 + 添加）
-- [ ] **W2.2** 邀请表 `app_workspace_invite`（或等价）：`email` / `token` / `expires_at` / `role` / `invited_by` / 状态（pending/accepted/revoked）
-- [ ] **W2.3** `POST …/workspaces/{id}/invites`：生成邀请（邮件或仅返回一次性链接，**两种策略可配置**）
-- [ ] **W2.4** `POST /api/v1/workspaces/invites/accept`：凭 token 加入 member
+- [x] **W2.2** 邀请表 `app_workspace_invite`：`email` / `token` / `expires_at` / `role` / `invited_by` / 状态（pending/accepted/revoked）已迁移
+- [x] **W2.3** `POST …/workspaces/{id}/invites`：生成邀请（当前先返回 token 链接形态；邮件发送待 W2.9 Runbook 补充）
+- [x] **W2.4** `POST /api/v1/workspaces/invites/accept`：凭 token 加入 member（幂等 upsert + 过期/状态冲突校验）
 - [ ] **W2.5** `DELETE …/members/{user_id}` / `PATCH …/members/{user_id}`：移除、改角色（防删最后一个 owner、转让 owner 流程）
 - [ ] **W2.6** 成员 **主动离开** workspace（非 personal 或 personal 禁止离开的产品规则需书面化）
 - [ ] **W2.7** 审计：`workspace_id` + actor + action + target_user + timestamp（可复用现有审计模式或新表）
