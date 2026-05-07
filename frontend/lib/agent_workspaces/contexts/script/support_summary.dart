@@ -37,6 +37,12 @@ List<String> summarizeScriptResultSnapshot(String? toolName, Object? result) {
       }
       if (scriptRows is List) {
         lines.add('计划剧本 ${scriptRows.length} 条');
+        if (scriptRows.isNotEmpty &&
+            (data['storySkeleton'] as String?)?.trim().isNotEmpty == true &&
+            (data['adaptationStrategy'] as String?)?.trim().isNotEmpty ==
+                true) {
+          lines.add('改写约束已可下游消费');
+        }
       }
       return lines.isEmpty ? <String>['planData 已返回'] : lines;
     case 'get_script_content':

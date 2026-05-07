@@ -25,6 +25,40 @@ class ScriptContextSnapshotView extends StatelessWidget {
     return '${value.substring(0, maxChars)}...';
   }
 
+  String _firstMeaningfulLine(String value) {
+    for (final line in value.split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) continue;
+      return trimmed.startsWith('- ') ? trimmed.substring(2).trim() : trimmed;
+    }
+    return '';
+  }
+
+  String _buildRewriteGuidancePreview(Map<String, dynamic> data) {
+    final storySkeleton = (data['storySkeleton'] as String?)?.trim() ?? '';
+    final adaptationStrategy =
+        (data['adaptationStrategy'] as String?)?.trim() ?? '';
+    final scriptRows = (data['script'] is List)
+        ? (data['script'] as List)
+              .whereType<Map<String, dynamic>>()
+              .toList(growable: false)
+        : const <Map<String, dynamic>>[];
+    final skeletonHint = _firstMeaningfulLine(storySkeleton);
+    final strategyHint = _firstMeaningfulLine(adaptationStrategy);
+    final lines = <String>[];
+    if (skeletonHint.isNotEmpty) {
+      lines.add('骨架重点：$skeletonHint');
+    }
+    if (strategyHint.isNotEmpty) {
+      lines.add('改编口径：$strategyHint');
+    }
+    if (scriptRows.isNotEmpty) {
+      lines.add('执行顺序：先消费 planData.script 草稿，再按需补事件与章节正文。');
+      lines.add('对白约束：避免解释剧情，优先口语化冲突表达和情绪推进。');
+    }
+    return lines.join('\n');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -87,15 +121,30 @@ class ScriptContextSnapshotView extends StatelessWidget {
           body: adaptationStrategy,
           subtitle: '来自 get_planData',
         );
+        final rewriteGuidance = _buildRewriteGuidancePreview(data);
+        addPreviewCard(
+          title: '改写约束',
+          body: rewriteGuidance,
+          subtitle: '由 get_planData 派生的下游消费提示',
+        );
         if (scriptRows.isNotEmpty) {
           final lines = scriptRows
               .take(4)
               .map((Map<String, dynamic> row) {
-                final name =
-                    (row['scriptName'] as String?)?.trim().isNotEmpty == true
-                    ? (row['scriptName'] as String).trim()
+                final name = ((row['name'] as String?) ??
+                            (row['scriptName'] as String?))
+                        ?.trim()
+                        .isNotEmpty ==
+                    true
+                    ? (((row['name'] as String?) ??
+                              (row['scriptName'] as String?))!)
+                          .trim()
                     : '未命名剧本';
-                final content = (row['scriptData'] as String?)?.trim() ?? '';
+                final content =
+                    ((row['content'] as String?) ??
+                            (row['scriptData'] as String?))
+                        ?.trim() ??
+                    '';
                 final preview = content.isEmpty
                     ? '无正文'
                     : _previewText(content, maxChars: 220);

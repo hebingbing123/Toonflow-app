@@ -77,6 +77,23 @@ void main() {
     },
   );
 
+  test('summarizeScriptResultSnapshot marks rewrite guidance as ready', () {
+    final lines = summarizeScriptResultSnapshot('get_planData', <String, dynamic>{
+      'data': <String, dynamic>{
+        'storySkeleton': '三幕骨架',
+        'adaptationStrategy': '先压后扬',
+        'script': const <Map<String, dynamic>>[
+          <String, dynamic>{'name': '第1集', 'content': '计划剧本草稿'},
+        ],
+      },
+    });
+
+    expect(lines, contains('故事骨架已就绪'));
+    expect(lines, contains('改编策略已就绪'));
+    expect(lines, contains('计划剧本 1 条'));
+    expect(lines, contains('改写约束已可下游消费'));
+  });
+
   test(
     'buildScriptWorkspaceArgumentSuggestions offers novel id fill chips',
     () {

@@ -366,9 +366,11 @@ void main() {
 
     expect(find.text('上下文快照'), findsOneWidget);
     expect(find.text('故事骨架'), findsWidgets);
-    expect(find.textContaining('主角失去记忆后踏上回乡之路'), findsOneWidget);
+    expect(find.textContaining('主角失去记忆后踏上回乡之路'), findsNWidgets(2));
     expect(find.text('改编策略'), findsWidgets);
-    expect(find.textContaining('聚焦母女关系'), findsOneWidget);
+    expect(find.textContaining('聚焦母女关系'), findsNWidgets(2));
+    expect(find.text('改写约束'), findsOneWidget);
+    expect(find.textContaining('先消费 planData.script 草稿'), findsOneWidget);
     expect(find.text('计划内剧本草稿'), findsOneWidget);
     expect(find.textContaining('第一集'), findsOneWidget);
     expect(find.text('当前剧本正文'), findsOneWidget);
