@@ -507,6 +507,7 @@ void main() {
         'ids': <int>[4, 12],
       });
       expect(storyboardTableStage.detail, contains('镜头 #4, 12'));
+      expect(storyboardTableStage.detail, contains('局部分镜表行'));
     },
   );
 
@@ -1776,6 +1777,7 @@ void main() {
         ],
         'limit': 12,
       });
+      expect(storyboardStage.detail, contains('刷新分镜结果'));
       expect(storyboardStage.subAgentTool, isNull);
     },
   );
@@ -1808,6 +1810,7 @@ void main() {
         ],
       });
       expect(storyboardStage.detail, contains('#3, 9'));
+      expect(storyboardStage.detail, contains('缺帧状态'));
     },
   );
 
@@ -1832,6 +1835,7 @@ void main() {
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
       expect(assetsStage.detail, contains('本次受影响资产'));
+      expect(assetsStage.detail, contains('回读'));
     },
   );
 

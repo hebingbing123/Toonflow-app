@@ -186,7 +186,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
       title: '导演计划',
       flowKey: 'scriptPlan',
       statusLabel: '建议刷新',
-      detail: '导演计划刚变更或正在处理，建议重新读取 scriptPlan 确认最新内容。',
+      detail: '导演计划刚变更或正在处理，建议先刷新导演计划，确认最新内容后再推进下游阶段。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
     );
@@ -379,8 +379,8 @@ ProductionWorkspaceStage _buildAssetsStage({
           (toolName == 'generate_deriveAsset' ||
                   toolName == 'run_sub_agent_generate_assets') &&
               refreshArgs.containsKey('ids')
-          ? '资产生成动作刚执行，建议先只回读本次受影响资产，确认结果后再决定是否扩读。'
-          : '资产相关动作刚执行，建议重新读取 assets 确认最新结果。',
+          ? '资产生成动作刚执行，建议先回读本次受影响资产，确认结果后再决定是否扩读。'
+          : '资产相关动作刚执行，建议先刷新资产结果，确认最新状态后再决定是否继续补素材。',
       domainTool: 'get_flowData',
       domainArgs: refreshArgs,
     );
@@ -536,8 +536,8 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       flowKey: 'storyboardTable',
       statusLabel: '建议刷新',
       detail: affectedIds.isEmpty
-          ? '分镜表刚变更或正在处理，建议重新读取 storyboardTable。'
-          : '分镜表刚变更，建议先只回读镜头 #${affectedIds.join(', ')} 对应的 storyboardTable 行。',
+          ? '分镜表刚变更或正在处理，建议先刷新分镜表，再判断是否继续审核或修订。'
+          : '分镜表刚变更，建议先回读镜头 #${affectedIds.join(', ')} 对应的局部分镜表行。',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardTableReadArgs(ids: affectedIds),
     );
@@ -774,9 +774,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
               toolName == 'run_sub_agent_storyboard_gen' ||
               toolName == 'run_sub_agent_storyboard_panel'
           ? affectedIds.isEmpty
-                ? '分镜动作刚执行，建议先按补图最小字段读取 storyboard，再决定是否继续补帧或写回。'
-                : '分镜动作刚执行，建议先只回读本次镜头 #${affectedIds.join(', ')} 的补图状态。'
-          : '分镜动作刚执行，建议重新读取 storyboard 再决定是否写回。',
+                ? '分镜动作刚执行，建议先刷新分镜结果，再决定是否继续补帧或写回。'
+                : '分镜动作刚执行，建议先回读本次镜头 #${affectedIds.join(', ')} 的缺帧状态。'
+          : '分镜动作刚执行，建议先刷新分镜结果，再决定是否写回。',
       domainTool: 'get_flowData',
       domainArgs: refreshArgs,
     );
