@@ -3,7 +3,7 @@
 use super::super::style_role_select::role_style_storyboard_focus_score;
 use super::super::*;
 
-pub(in crate::production::workbench::video_prompt_memory) fn build_style_note_selection_context(
+pub(in super::super) fn build_style_note_selection_context(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> StyleNoteSelectionContext {
     let description = storyboard_row
@@ -60,7 +60,7 @@ pub(in crate::production::workbench::video_prompt_memory) fn build_style_note_se
     }
 }
 
-pub(super) fn collect_ranked_video_style_note_candidates(
+pub(in super::super) fn collect_ranked_video_style_note_candidates(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
     _current_prompt_seed: Option<&str>,
@@ -140,7 +140,7 @@ fn extract_style_note_value(row: &AgentMemoryRow) -> Option<String> {
     selected_video_style_value_from_content(&row.content)
 }
 
-pub(in crate::production::workbench::video_prompt_memory) fn extract_selected_memory_style_note_for_storyboard(
+pub(in super::super) fn extract_selected_memory_style_note_for_storyboard(
     row: &AgentMemoryRow,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Option<String> {
@@ -152,7 +152,7 @@ pub(in crate::production::workbench::video_prompt_memory) fn extract_selected_me
     selected_video_style_value(row)
 }
 
-pub(in crate::production::workbench::video_prompt_memory) fn selected_video_style_value_from_content(content: &str) -> Option<String> {
+pub(in super::super) fn selected_video_style_value_from_content(content: &str) -> Option<String> {
     if let Some(value) = extract_key_value(content, "style") {
         return compact_video_style_prompt_note(&value);
     }

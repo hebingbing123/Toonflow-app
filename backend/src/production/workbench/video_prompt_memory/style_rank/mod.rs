@@ -5,8 +5,19 @@ mod score;
 
 use super::style_compact::collapse_local_framing_stable_tracking;
 use super::*;
+// Import all items from submodules for internal use
 use aggregate::*;
 use score::*;
+
+// Re-export functions needed by other modules in video_prompt_memory
+pub(super) use aggregate::{
+    build_style_note_selection_context, extract_selected_memory_style_note_for_storyboard,
+    selected_video_style_value_from_content,
+};
+pub(super) use score::{
+    is_local_framing_only_fragment, score_style_note_context_evidence,
+    style_note_selection_context_is_empty,
+};
 
 pub(crate) fn select_prioritized_video_style_note(
     rows: &[AgentMemoryRow],

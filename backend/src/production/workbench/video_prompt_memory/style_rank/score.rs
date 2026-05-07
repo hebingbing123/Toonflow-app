@@ -2,7 +2,7 @@
 
 use super::super::*;
 
-pub(super) fn select_best_selected_video_style_note(notes: Vec<String>) -> Option<String> {
+pub(in super::super) fn select_best_selected_video_style_note(notes: Vec<String>) -> Option<String> {
     notes.into_iter().max_by(|a, b| {
         score_selected_video_style_note(a)
             .cmp(&score_selected_video_style_note(b))
@@ -12,7 +12,7 @@ pub(super) fn select_best_selected_video_style_note(notes: Vec<String>) -> Optio
     })
 }
 
-pub(super) fn score_selected_video_style_note(note: &str) -> i32 {
+pub(in super::super) fn score_selected_video_style_note(note: &str) -> i32 {
     let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
     if fragments.is_empty() {
         return 0;
@@ -54,7 +54,7 @@ pub(super) fn score_selected_video_style_note(note: &str) -> i32 {
     score
 }
 
-pub(super) fn count_selected_video_style_axes(note: &str) -> usize {
+pub(in super::super) fn count_selected_video_style_axes(note: &str) -> usize {
     let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
     [
         fragments
@@ -93,7 +93,7 @@ fn note_contains_selected_video_emotion_signal(fragments: &[String]) -> bool {
         .any(|fragment| fragment.starts_with("情绪") || fragment.starts_with("表演"))
 }
 
-pub(in crate::production::workbench::video_prompt_memory) fn is_local_framing_only_fragment(fragment: &str) -> bool {
+pub(in super::super) fn is_local_framing_only_fragment(fragment: &str) -> bool {
     fragment == "镜头近景"
         || fragment == "镜头中景"
         || fragment == "镜头远景"
@@ -101,7 +101,7 @@ pub(in crate::production::workbench::video_prompt_memory) fn is_local_framing_on
         || fragment == "镜头全景"
 }
 
-pub(super) fn score_ranked_style_note(
+pub(in super::super) fn score_ranked_style_note(
     note: &RankedStyleNote,
     context: &StyleNoteSelectionContext,
 ) -> i32 {
@@ -310,7 +310,7 @@ fn selected_generic_restrained_mood_lags_fragile_scene(
         && !note.contains("发颤")
 }
 
-pub(super) fn ranked_style_note_is_worth_recalling(
+pub(in super::super) fn ranked_style_note_is_worth_recalling(
     note: &RankedStyleNote,
     context: &StyleNoteSelectionContext,
 ) -> bool {
@@ -329,7 +329,7 @@ pub(super) fn ranked_style_note_is_worth_recalling(
     }
 }
 
-pub(in crate::production::workbench::video_prompt_memory) fn style_note_selection_context_is_empty(context: &StyleNoteSelectionContext) -> bool {
+pub(in super::super) fn style_note_selection_context_is_empty(context: &StyleNoteSelectionContext) -> bool {
     [
         context.description.as_str(),
         context.subject.as_str(),
@@ -343,7 +343,7 @@ pub(in crate::production::workbench::video_prompt_memory) fn style_note_selectio
     .all(|value| value.is_empty())
 }
 
-pub(in crate::production::workbench::video_prompt_memory) fn score_style_note_context_evidence(
+pub(in super::super) fn score_style_note_context_evidence(
     note: &RankedStyleNote,
     context: &StyleNoteSelectionContext,
 ) -> usize {
