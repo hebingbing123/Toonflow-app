@@ -52,9 +52,14 @@ pub(in crate::production) async fn post_assets_polling_image(
         INNER JOIN app_project p ON p.id = a.project_id
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $1
         LEFT JOIN app_asset_image ai ON ai.asset_id = a.id
-        WHERE p.owner_user_id = $2
-          AND p.numeric_id = $3
+        WHERE p.numeric_id = $3
           AND a.numeric_id = ANY($4::int4[])
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
         GROUP BY a.numeric_id
         ORDER BY array_position($4::int4[], a.numeric_id)
         "#,

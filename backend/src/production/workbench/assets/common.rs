@@ -35,9 +35,14 @@ pub(super) async fn ensure_assets_linked_to_script(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
           AND a.numeric_id = ANY($4::int4[])
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(uid)

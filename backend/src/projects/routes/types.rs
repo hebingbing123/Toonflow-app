@@ -554,7 +554,7 @@ pub struct CreateProjectBody {
 /// `POST /api/v1/workbench/select-video` 请求体 — 选择/替换当前采用视频
 #[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-#[expect(dead_code)]
+#[allow(dead_code)]
 pub struct WorkbenchSelectVideoRequest {
     pub project_id: i32,
     pub script_id: i32,
@@ -562,6 +562,7 @@ pub struct WorkbenchSelectVideoRequest {
     pub video_url: String,
 }
 
+#[allow(dead_code)]
 impl WorkbenchSelectVideoRequest {
     /// Validates the request fields.
     /// Returns an error message if validation fails.
@@ -576,7 +577,7 @@ impl WorkbenchSelectVideoRequest {
 /// `POST /api/v1/workbench/delete-video` 请求体 — 清空当前采用视频(暂停镜头)
 #[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-#[expect(dead_code)]
+#[allow(dead_code)]
 pub struct WorkbenchDeleteVideoRequest {
     pub project_id: i32,
     pub script_id: i32,
@@ -586,7 +587,7 @@ pub struct WorkbenchDeleteVideoRequest {
 /// `POST /api/v1/storyboard/update-duration` 请求体 — 更新镜头时长
 #[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-#[expect(dead_code)]
+#[allow(dead_code)]
 pub struct StoryboardUpdateDurationRequest {
     pub project_id: i32,
     pub script_id: i32,
@@ -594,10 +595,26 @@ pub struct StoryboardUpdateDurationRequest {
     pub duration: i32,
 }
 
+#[allow(dead_code)]
+impl StoryboardUpdateDurationRequest {
+    /// Validates the request fields.
+    /// Returns an error message if validation fails.
+    /// Duration must be in range [1, 300] seconds.
+    pub fn validate(&self) -> Result<(), String> {
+        if self.duration < 1 || self.duration > 300 {
+            return Err(format!(
+                "duration must be between 1 and 300 seconds, got {}",
+                self.duration
+            ));
+        }
+        Ok(())
+    }
+}
+
 /// `POST /api/v1/production/save-flow-data` 请求体 — 保存生产流程数据(持久化镜头顺序)
 #[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-#[expect(dead_code)]
+#[allow(dead_code)]
 pub struct ProductionSaveFlowDataRequest {
     pub project_id: i32,
     pub episodes_id: i32,
