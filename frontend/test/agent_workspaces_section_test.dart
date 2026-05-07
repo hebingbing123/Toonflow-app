@@ -1613,6 +1613,8 @@ void main() {
 
     expect(find.text('下一步建议'), findsOneWidget);
     expect(find.text('先生成资产计划'), findsOneWidget);
+    expect(find.text('执行提示'), findsWidgets);
+    expect(find.textContaining('空白 assets flow'), findsWidgets);
 
     final recipeCard = find
         .ancestor(of: find.text('先生成资产计划'), matching: find.byType(Card))
@@ -2279,6 +2281,8 @@ void main() {
     expect(find.text('执行阶段'), findsOneWidget);
     expect(find.text('待规划'), findsOneWidget);
     expect(find.text('资产准备'), findsOneWidget);
+    expect(find.text('执行提示'), findsWidgets);
+    expect(find.textContaining('最小可行的衍生素材集合'), findsWidgets);
 
     final advanceStageButton = find.widgetWithText(FilledButton, '推进阶段').first;
     await tester.ensureVisible(advanceStageButton);

@@ -22,6 +22,25 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
   final ValueChanged<ProductionWorkspaceStage> onRunStageDomainTool;
   final ValueChanged<ProductionWorkspaceStage> onRunStageSubAgent;
 
+  Widget _buildPromptPreview(BuildContext context, String prompt) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('执行提示', style: Theme.of(context).textTheme.labelSmall),
+          const SizedBox(height: 4),
+          Text(prompt, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (stages.isEmpty) return const SizedBox.shrink();
@@ -55,6 +74,10 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                     stage.detail,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  if (stage.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
+                    const SizedBox(height: 8),
+                    _buildPromptPreview(context, stage.prompt!.trim()),
+                  ],
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -109,6 +132,25 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
   final ValueChanged<ProductionWorkspaceRecipe> onRunRecipeDomainTool;
   final ValueChanged<ProductionWorkspaceRecipe> onRunRecipeSubAgent;
 
+  Widget _buildPromptPreview(BuildContext context, String prompt) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('执行提示', style: Theme.of(context).textTheme.labelSmall),
+          const SizedBox(height: 4),
+          Text(prompt, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (recipes.isEmpty) return const SizedBox.shrink();
@@ -136,6 +178,10 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     recipe.detail,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  if (recipe.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
+                    const SizedBox(height: 8),
+                    _buildPromptPreview(context, recipe.prompt!.trim()),
+                  ],
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
