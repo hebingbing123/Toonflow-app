@@ -5,6 +5,7 @@ enum HomeSectionMode { product, debug }
 enum ProductWorkspacePane {
   shortVideoSpace,
   projects,
+  teamWorkspaces,
   scriptWorkspace,
   productionWorkspace,
   workspaceActivity,

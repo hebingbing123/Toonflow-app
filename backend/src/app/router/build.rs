@@ -17,6 +17,7 @@ use crate::scripting;
 use crate::settings;
 use crate::state::AppState;
 use crate::vendor;
+use crate::workspaces;
 
 use axum::{
     http::{header, HeaderName, Method},
@@ -57,6 +58,7 @@ pub fn build_router(state: AppState) -> Router {
     // Layer 2: Per-user rate limiting (~10 req/s per user)
     let user_limited = Router::new()
         .merge(strict_limited)
+        .merge(workspaces::router())
         .merge(settings::agent_memory::router())
         .merge(vendor::catalog::router())
         .merge(projects::routes::router())

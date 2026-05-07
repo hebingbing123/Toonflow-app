@@ -30,10 +30,10 @@
 
 > **全栈**：W1 每条须 **Rust + OpenAPI + `rust_api` + Flutter**（创建/列表/详情/编辑入口；归档须有 UI 确认）。
 
-- [ ] **W1.1** `POST /api/v1/workspaces`：创建 `enterprise`（名称、可选描述/metadata、可选 slug/展示名规则）
-- [ ] **W1.2** `GET /api/v1/workspaces`：列出当前用户 **作为 member** 的全部 workspace（personal + enterprise）
-- [ ] **W1.3** `GET /api/v1/workspaces/{workspace_id}`：详情（仅 member 可读）
-- [ ] **W1.4** `PATCH /api/v1/workspaces/{workspace_id}`：改名、metadata（owner/admin）
+- [x] **W1.1** `POST /api/v1/workspaces`：创建 `enterprise`（名称、可选 **metadata** JSON object；slug 仍 **未做**）
+- [x] **W1.2** `GET /api/v1/workspaces`：列出当前用户 **作为 member** 的全部 workspace（personal 优先排序 + enterprise）
+- [x] **W1.3** `GET /api/v1/workspaces/{workspace_id}`：详情（仅 member 可读）
+- [x] **W1.4** `PATCH /api/v1/workspaces/{workspace_id}`：改名、metadata（**owner/admin**）
 - [ ] **W1.5** 软删除或归档策略：`archived_at` / `deleted_at` + 列表过滤 + **不可再切换为当前**（需迁移或 product 规则文档）
 - [ ] **W1.6** 企业空间 **配额/数量上限**（每用户可创建 enterprise 数、每空间成员上限）— 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) 限流/plan 策略对齐或单列 env
 - [ ] **W1.7** OpenAPI + `pg_contract` + smoke

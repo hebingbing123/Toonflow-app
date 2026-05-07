@@ -6,5 +6,6 @@ export '../overview/section.dart';
 export '../projects/section.dart';
 export '../quality_reviews/section.dart';
 export '../short_video_space/section.dart';
+export '../team_workspaces/section.dart';
 export '../skills_harness/section.dart';
 export '../task_center/section.dart';

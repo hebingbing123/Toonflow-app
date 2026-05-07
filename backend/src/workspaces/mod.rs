@@ -3,12 +3,20 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 
+mod http;
+
 #[derive(Debug, Clone, FromRow)]
 pub struct WorkspaceContext {
     pub workspace_id: Uuid,
     pub workspace_name: String,
     pub workspace_type: String,
 }
+
+pub fn router() -> axum::Router<crate::state::AppState> {
+    http::router()
+}
+
+pub use http::WorkspacesOpenApi;
 
 pub async fn ensure_personal_workspace(
     pool: &PgPool,

@@ -7,6 +7,7 @@ extension _HomePageBuildProductSections on _HomePageState {
     final paneEntries = <(ProductWorkspacePane, String)>[
       (ProductWorkspacePane.shortVideoSpace, '短视频 Space'),
       (ProductWorkspacePane.projects, '项目'),
+      (ProductWorkspacePane.teamWorkspaces, '团队工作区'),
       (ProductWorkspacePane.scriptWorkspace, '脚本工作区'),
       (ProductWorkspacePane.productionWorkspace, '制作工作区'),
       (ProductWorkspacePane.workspaceActivity, '工作区动态'),
@@ -191,6 +192,9 @@ extension _HomePageBuildProductSections on _HomePageState {
         controller: _projectsController,
         onOpenProjectDetail: _openProjectDetail,
       ),
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.teamWorkspaces)
+      TeamWorkspacesSection(accessToken: _session?.accessToken),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.scriptWorkspace)
       _buildAgentWorkspacePane(

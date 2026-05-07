@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
-- 当前最新完成竖切：HTTP **H4**（Harness WS **`projectUuid`** / **`scriptUuid`** attach + Flutter **`agent_workspaces`** 双写；矩阵 [**`harness-ws-context-matrix.md`**](./harness-ws-context-matrix.md)；提交主题 **`feat(harness): WS attach projectUuid/scriptUuid`**）
-- **下一大型竖切**（未开工）：**团队 Workspace 完整功能** — 全任务 W1–W11 见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)（生命周期、邀请、权限、全站 API、Flutter、Harness、计费策略、RLS/安全、观测、发布文档）
+- 当前最新完成竖切：团队 Workspace **W1.1–W1.4** 首包 — **`POST/GET/PATCH /api/v1/workspaces*`** + Flutter 产品区 **「团队工作区」** 列表/创建 + 契约 smoke；详见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) Phase W1
+- **下一大型竖切**（进行中）：**团队 Workspace 完整功能** — 余下 **W1.5+（归档/配额）**、**W2–W11** 见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 
