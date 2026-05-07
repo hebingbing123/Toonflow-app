@@ -44,7 +44,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           decoration: const InputDecoration(
             labelText: '抓取 URL',
             helperText:
-                'client：自适应 TOC/分页；server：托管单页预览（与下方抓取执行端联动）。',
+                'client/server 都支持自适应 TOC/分页（与下方抓取执行端联动）。',
           ),
         ),
         const SizedBox(height: 8),
@@ -158,7 +158,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   ),
                   DropdownMenuItem(
                     value: 'server',
-                    child: Text('server (托管预览，单页)'),
+                    child: Text('server (托管预览)'),
                   ),
                 ],
                 onChanged: (value) {

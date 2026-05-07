@@ -1,6 +1,6 @@
 //! Server-side novel URL preview fetch (HTML → title + body text). Preview only; does not write `app_novel` rows.
 
-use std::net::IpAddr;
+use std::{collections::HashSet, net::IpAddr};
 
 use axum::{
     extract::{Json, Path, State},
@@ -20,6 +20,16 @@ use crate::state::AppState;
 use super::super::dto::{NovelCrawlPreviewBody, NovelCrawlPreviewResponse};
 
 const MAX_HTML_BYTES: u64 = 2 * 1024 * 1024;
+const MAX_TOC_PAGES: usize = 20;
+const MAX_PAGINATION_HOPS: usize = 5;
+
+#[derive(Debug, Clone)]
+struct ExtractedCrawlerContent {
+    title: String,
+    body_text: String,
+    chapter_urls: Vec<String>,
+    next_page_url: Option<String>,
+}
 
 fn assert_fetchable_url(url: &url::Url) -> Result<(), ApiError> {
     match url.scheme() {
@@ -85,7 +95,69 @@ fn normalize_extracted_text(raw: &str) -> String {
         .join("\n")
 }
 
-fn extract_title_and_body(html: &str, fallback_title: &str) -> (String, String) {
+fn normalize_url_candidate(base_url: &url::Url, raw: &str) -> Option<String> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty()
+        || trimmed.starts_with("javascript:")
+        || trimmed.starts_with('#')
+        || trimmed.starts_with("mailto:")
+    {
+        return None;
+    }
+    let joined = base_url.join(trimmed).ok()?;
+    Some(joined.to_string())
+}
+
+fn extract_links(document: &Html, base_url: &url::Url, selector: &str, cap: usize) -> Vec<String> {
+    let Ok(sel) = Selector::parse(selector) else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    let mut seen = HashSet::<String>::new();
+    for node in document.select(&sel) {
+        let Some(href) = node.value().attr("href") else {
+            continue;
+        };
+        let Some(url) = normalize_url_candidate(base_url, href) else {
+            continue;
+        };
+        if seen.insert(url.clone()) {
+            out.push(url);
+            if out.len() >= cap {
+                break;
+            }
+        }
+    }
+    out
+}
+
+fn extract_next_page(document: &Html, base_url: &url::Url) -> Option<String> {
+    let Ok(a_sel) = Selector::parse("a[href]") else {
+        return None;
+    };
+    for node in document.select(&a_sel) {
+        let anchor_text = node.text().collect::<String>();
+        let text = anchor_text.trim().to_lowercase();
+        if text.contains("下一页")
+            || text.contains("next")
+            || text.contains("下页")
+            || text.contains("继续")
+        {
+            if let Some(href) = node.value().attr("href") {
+                if let Some(url) = normalize_url_candidate(base_url, href) {
+                    return Some(url);
+                }
+            }
+        }
+    }
+    None
+}
+
+fn extract_crawler_content(
+    html: &str,
+    fallback_title: &str,
+    page_url: &url::Url,
+) -> ExtractedCrawlerContent {
     let cleaned = strip_scripts_and_styles(html);
     let document = Html::parse_document(&cleaned);
     let title_sel = Selector::parse("title").expect("selector title");
@@ -103,7 +175,133 @@ fn extract_title_and_body(html: &str, fallback_title: &str) -> (String, String) 
         .map(|n| n.text().collect::<Vec<_>>().join("\n"))
         .unwrap_or_default();
     let body_text = normalize_extracted_text(&body_raw);
-    (title, body_text)
+
+    let chapter_urls = {
+        let mut links = extract_links(&document, page_url, "article a[href]", MAX_TOC_PAGES);
+        if links.is_empty() {
+            links = extract_links(
+                &document,
+                page_url,
+                ".chapter a[href], .list a[href], .catalog a[href]",
+                MAX_TOC_PAGES,
+            );
+        }
+        if links.is_empty() {
+            links = extract_links(&document, page_url, "a[href]", MAX_TOC_PAGES);
+        }
+        links
+    };
+    let next_page_url = extract_next_page(&document, page_url);
+
+    ExtractedCrawlerContent {
+        title,
+        body_text,
+        chapter_urls,
+        next_page_url,
+    }
+}
+
+async fn fetch_crawler_content(
+    state: &AppState,
+    parsed: &url::Url,
+) -> Result<ExtractedCrawlerContent, ApiError> {
+    assert_fetchable_url(parsed)?;
+    let resp = state
+        .http_client
+        .get(parsed.clone())
+        .header(
+            USER_AGENT,
+            "Toonflow/1.0 server-side content-intake crawler",
+        )
+        .send()
+        .await
+        .map_err(|e| ApiError::BadRequest(format!("fetch failed: {e}")))?;
+
+    let status = resp.status();
+    if !status.is_success() {
+        return Err(ApiError::BadRequest(format!(
+            "upstream returned HTTP {}",
+            status.as_u16()
+        )));
+    }
+
+    let len = resp.content_length().unwrap_or(0);
+    if len > MAX_HTML_BYTES {
+        return Err(ApiError::BadRequest(
+            "response body too large (Content-Length)".into(),
+        ));
+    }
+
+    let bytes = resp
+        .bytes()
+        .await
+        .map_err(|e| ApiError::BadRequest(format!("failed to read response body: {e}")))?;
+    if bytes.len() as u64 > MAX_HTML_BYTES {
+        return Err(ApiError::BadRequest("response body too large".into()));
+    }
+    let html = String::from_utf8_lossy(&bytes).into_owned();
+    let host = parsed.host_str().unwrap_or("novel");
+    Ok(extract_crawler_content(&html, host, parsed))
+}
+
+async fn crawl_preview_adaptive(
+    state: &AppState,
+    seed_url: &url::Url,
+) -> Result<NovelCrawlPreviewResponse, ApiError> {
+    let seed = fetch_crawler_content(state, seed_url).await?;
+
+    if !seed.chapter_urls.is_empty() {
+        let mut chunks = Vec::<String>::new();
+        for chapter_url in seed.chapter_urls.iter().take(MAX_TOC_PAGES) {
+            let Ok(parsed) = url::Url::parse(chapter_url) else {
+                continue;
+            };
+            let chapter = fetch_crawler_content(state, &parsed).await?;
+            if chapter.body_text.trim().is_empty() {
+                continue;
+            }
+            chunks.push(format!("{}\n{}", chapter.title, chapter.body_text));
+        }
+        if !chunks.is_empty() {
+            return Ok(NovelCrawlPreviewResponse {
+                title: seed.title,
+                body_text: chunks.join("\n\n"),
+                mode: "toc".into(),
+                page_count: chunks.len() as i32,
+            });
+        }
+    }
+
+    let mut pages = vec![seed.body_text];
+    let mut visited = HashSet::<String>::from([seed_url.to_string()]);
+    let mut next_url = seed.next_page_url;
+    let mut hops = 0usize;
+    while let Some(raw_next) = next_url {
+        if hops >= MAX_PAGINATION_HOPS || visited.contains(&raw_next) {
+            break;
+        }
+        visited.insert(raw_next.clone());
+        let Ok(parsed) = url::Url::parse(&raw_next) else {
+            break;
+        };
+        let page = fetch_crawler_content(state, &parsed).await?;
+        if page.body_text.trim().is_empty() {
+            break;
+        }
+        pages.push(page.body_text);
+        next_url = page.next_page_url;
+        hops += 1;
+    }
+    Ok(NovelCrawlPreviewResponse {
+        title: seed.title,
+        body_text: pages.join("\n\n"),
+        mode: if pages.len() > 1 {
+            "pagination".into()
+        } else {
+            "single".into()
+        },
+        page_count: pages.len() as i32,
+    })
 }
 
 #[utoipa::path(
@@ -142,55 +340,15 @@ pub(crate) async fn post_novel_crawl_preview(
         url::Url::parse(raw_url).map_err(|_| ApiError::BadRequest("invalid url".into()))?;
     assert_fetchable_url(&parsed)?;
 
-    let resp = state
-        .http_client
-        .get(parsed.clone())
-        .header(
-            USER_AGENT,
-            "Toonflow/1.0 server-side content-intake crawler",
-        )
-        .send()
-        .await
-        .map_err(|e| ApiError::BadRequest(format!("fetch failed: {e}")))?;
-
-    let status = resp.status();
-    if !status.is_success() {
-        return Err(ApiError::BadRequest(format!(
-            "upstream returned HTTP {}",
-            status.as_u16()
-        )));
-    }
-
-    let len = resp.content_length().unwrap_or(0);
-    if len > MAX_HTML_BYTES {
-        return Err(ApiError::BadRequest(
-            "response body too large (Content-Length)".into(),
-        ));
-    }
-
-    let bytes = resp
-        .bytes()
-        .await
-        .map_err(|e| ApiError::BadRequest(format!("failed to read response body: {e}")))?;
-    if bytes.len() as u64 > MAX_HTML_BYTES {
-        return Err(ApiError::BadRequest("response body too large".into()));
-    }
-
-    let html = String::from_utf8_lossy(&bytes).into_owned();
-    let host = parsed.host_str().unwrap_or("novel");
-    let (title, body_text) = extract_title_and_body(&html, host);
-
-    Ok(JsonResponse(NovelCrawlPreviewResponse {
-        title,
-        body_text,
-        mode: "single".into(),
-        page_count: 1,
-    }))
+    let payload = crawl_preview_adaptive(&state, &parsed).await?;
+    Ok(JsonResponse(payload))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{extract_title_and_body, normalize_extracted_text, strip_scripts_and_styles};
+    use url::Url;
+
+    use super::{extract_crawler_content, normalize_extracted_text, strip_scripts_and_styles};
 
     #[test]
     fn strips_script_before_body_text() {
@@ -198,14 +356,31 @@ mod tests {
 <script>alert(1)</script><p>正文一行</p></body></html>"#;
         let cleaned = strip_scripts_and_styles(html);
         assert!(!cleaned.contains("alert"));
-        let (title, body) = extract_title_and_body(html, "fb");
-        assert_eq!(title, "Hi");
-        assert!(body.contains("正文一行"));
+        let page = Url::parse("https://x.example/book/1").expect("url");
+        let extracted = extract_crawler_content(html, "fb", &page);
+        assert_eq!(extracted.title, "Hi");
+        assert!(extracted.body_text.contains("正文一行"));
     }
 
     #[test]
     fn normalize_collapses_blank_lines() {
         let s = normalize_extracted_text("a\n\n\n  b  ");
         assert_eq!(s, "a\nb");
+    }
+
+    #[test]
+    fn extracts_catalog_links_and_next_page() {
+        let html = r#"<!doctype html><html><head><title>目录</title></head><body>
+<div class="catalog"><a href="/c1">第一章</a><a href="/c2">第二章</a></div>
+<a href="/next">下一页</a>
+</body></html>"#;
+        let page = Url::parse("https://x.example/book").expect("url");
+        let extracted = extract_crawler_content(html, "fb", &page);
+        assert_eq!(extracted.chapter_urls.len(), 2);
+        assert_eq!(extracted.chapter_urls[0], "https://x.example/c1");
+        assert_eq!(
+            extracted.next_page_url.as_deref(),
+            Some("https://x.example/next")
+        );
     }
 }
