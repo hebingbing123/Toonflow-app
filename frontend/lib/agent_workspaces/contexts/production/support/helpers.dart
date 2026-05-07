@@ -419,6 +419,28 @@ String summarizeProductionDiagnosisHeadline(
   return '当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。';
 }
 
+String summarizeAppliedProductionRecipeStatus(ProductionWorkspaceRecipe recipe) {
+  final title = recipe.title.trim();
+  if (title == '补足分场景意图') {
+    return '已应用任务建议：$title，下一步先细化导演计划。';
+  }
+  if (title == '先看分镜表落地' || title == '抽样读取分镜表') {
+    return '已应用任务建议：$title，下一步先扩读关键分镜表窗口。';
+  }
+  return '已应用任务建议：$title';
+}
+
+String summarizeAppliedProductionStageStatus(ProductionWorkspaceStage stage) {
+  final status = stage.statusLabel.trim();
+  if (status == '回补导演计划') {
+    return '已应用阶段动作：${stage.title}，下一步先细化导演计划。';
+  }
+  if (status == '待扩读' || status == '等待分镜表完善') {
+    return '已应用阶段动作：${stage.title}，下一步先扩读关键分镜表窗口。';
+  }
+  return '已应用阶段动作：${stage.title}';
+}
+
 String buildProductionScriptPlanExecutionHint(
   Object? flowData, {
   int maxSections = 2,

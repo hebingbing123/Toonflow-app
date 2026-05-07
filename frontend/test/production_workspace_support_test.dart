@@ -2777,6 +2777,35 @@ void main() {
     );
   });
 
+  test('applied production recipe status explains the next cheapest action', () {
+    const recipe = ProductionWorkspaceRecipe(
+      title: '补足分场景意图',
+      detail: '先补导演计划。',
+      flowKey: 'storyboardTable',
+      subAgentTool: 'run_sub_agent_director_plan',
+    );
+
+    expect(
+      summarizeAppliedProductionRecipeStatus(recipe),
+      '已应用任务建议：补足分场景意图，下一步先细化导演计划。',
+    );
+  });
+
+  test('applied production stage status explains storyboard-table expansion', () {
+    const stage = ProductionWorkspaceStage(
+      title: '分镜表',
+      flowKey: 'storyboardTable',
+      statusLabel: '待扩读',
+      detail: '先扩读分镜表。',
+      domainTool: 'get_flowData',
+    );
+
+    expect(
+      summarizeAppliedProductionStageStatus(stage),
+      '已应用阶段动作：分镜表，下一步先扩读关键分镜表窗口。',
+    );
+  });
+
   test(
     'summarizeProductionFlowValue surfaces storyboard table coverage digest',
     () {

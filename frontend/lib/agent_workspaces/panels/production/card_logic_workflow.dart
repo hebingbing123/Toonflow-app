@@ -23,7 +23,7 @@ extension _AgentWorkspaceProductionCardWorkflow
     if (prompt != null && prompt.isNotEmpty) {
       widget.productionPromptController.text = prompt;
     }
-    _setTaskStatus('已应用任务建议：${recipe.title}');
+    _setTaskStatus(summarizeAppliedProductionRecipeStatus(recipe));
   }
 
   void _applyWorkspaceStage(ProductionWorkspaceStage stage) {
@@ -46,7 +46,7 @@ extension _AgentWorkspaceProductionCardWorkflow
     if (prompt != null && prompt.isNotEmpty) {
       widget.productionPromptController.text = prompt;
     }
-    _setTaskStatus('已应用阶段动作：${stage.title}');
+    _setTaskStatus(summarizeAppliedProductionStageStatus(stage));
   }
 
   void _runWorkspaceStageDomainTool(ProductionWorkspaceStage stage) {
