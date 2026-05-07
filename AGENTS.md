@@ -19,6 +19,10 @@
 - **单文件体量**：`backend/`、`frontend/` 中 **避免单文件过长**（建议 **≤800 行**；明显膨胀时 **拆模块/组件**），与路线图「竖切、可维护」一致。
 - 对照 `master` 或 parity 时，若发现 **明确 bug、性能问题、明显不合理设计**，可在 **同一竖切/同一 PR 节奏内** 一并修复（避免无关大重构）。
 
+## 计划文档与全栈交付
+
+- `docs/plans/` 中 **竖切任务清单**（`tasks-*.md`）、**路线图分册**（`roadmap-*.md`）及 **Workspace 全量计划** 默认要求：用户/运营可见的能力 **须 `backend/` + `frontend/`（含 `rust_api`）+ 契约** 同里程碑交付；例外须在计划中标 **`(ops-only)`**。约定见 [`docs/plans/full-stack-delivery-covenant.md`](docs/plans/full-stack-delivery-covenant.md)；平台级补漏清单见 [`docs/plans/platform-capabilities-backlog.md`](docs/plans/platform-capabilities-backlog.md)。
+
 ## 重构栈门禁（自动跑，别让用户手动点）
 
 凡改动 **`backend/`**（含 **`backend/src/openapi_spec/shell.rs`**、**`openapi_spec/generated/`**、**`scripts/fixtures/openapi_stub_input.yaml`**（改后通常需跑 **`scripts/gen_openapi_utoipa_stubs.py`**））、**`frontend/`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：

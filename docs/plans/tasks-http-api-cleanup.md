@@ -3,6 +3,8 @@
 **主文档**：[`http-api-cleanup.md`](./http-api-cleanup.md)（清单、进度表、阶段 C–D）。  
 **门禁**：每波合并 `yarn refactor:check`；契约三件套 **OpenAPI + contract_smoke + pg_contract**（涉及 DB 时）同 PR。
 
+**全栈**：**H0** 可仅文档；**H1–H4** 凡改对外 REST/WS，**同一合并窗口**须 **`backend/` + `frontend/lib/rust_api` + 用户主路径 UI**（禁止只合 Rust）；与 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md) 一致。**H5** 以契约与删码为主，触 UI 则同上。
+
 **优先级**（已替你排好）：先 **低耦合、易回滚** 的 HTTP/契约，再动 **jobs payload / worker**，最后 **Harness WS 与 REST 同一里程碑**，避免「REST 新、Agent 旧」断裂（见主文档 §七风险表）。
 
 ---

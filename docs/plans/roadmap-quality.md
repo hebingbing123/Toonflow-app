@@ -26,6 +26,8 @@
 ## 执行计划与工作包
 
 > **维护约定**：与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 及上文表格一致；落地时在同一竖切或跟进 PR 中更新对应 WP。与实现冲突处以代码与 OpenAPI 为准。
+>
+> **全栈**：凡影响用户/运营可见行为的工作包，须 **同里程碑** 交付 **Rust + OpenAPI/WS（若适用）+ `frontend/`（含 `rust_api` 与相关 UI/错误态）**；纯文档/运维且无 API 的 WP 可在「目标」首行标 **`(ops-only)`**。约定见 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)。
 
 ### WP-A：人工抽检量表固化
 

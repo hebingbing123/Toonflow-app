@@ -29,6 +29,8 @@ YAML：`git-branch`、`monorepo-layout`、`api-contract`、`postgres-ops`、`sup
 ## 执行计划与工作包
 
 > **维护约定**：与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 及上文表格一致；落地时在同一竖切或跟进 PR 中更新对应 WP。与实现冲突处以代码与 OpenAPI 为准。
+>
+> **全栈**：凡影响用户/运营可见行为的工作包，须 **同里程碑** 交付 **Rust + OpenAPI/WS（若适用）+ `frontend/`（含 `rust_api` 与相关 UI/错误态）**；纯文档/运维且无 API 的 WP 可在「目标」首行标 **`(ops-only)`**。约定见 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)。
 
 ### WP-A：生产 CORS / WebSocket 反代清单
 
@@ -38,6 +40,7 @@ YAML：`git-branch`、`monorepo-layout`、`api-contract`、`postgres-ops`、`sup
 | **依赖** | 已有 Flutter 可配置 `baseUrl`；TLS 证书与域名由运维提供。 |
 | **PR 切片** | （1）**必做**：新建或充实 `docs/plans/deploy-web-client.md`（或等价单一真源），写清单与反代片段；（2）**必做**：生产路径将 `CorsLayer` 从 `Any` 改为 env 可控允许列表（单独 PR），默认值仅覆盖本地/dev。 |
 | **触点** | `backend/src/app/router/build.rs`（CORS）；`docs/plans/harness-rust-flutter.md` §0（连接模型）；Nginx/Caddy 示例片段写入同一 Runbook。 |
+| **Flutter** | **必做**：按 `deploy-web-client` / `flutter-web-client` 文档在 **Web** 上跑通登录 → 项目列表 → **WS 探针或 Harness** 一条链；CORS 收紧后须重跑该链并截图或记入 Runbook。 |
 | **测试** | 本地 `flutter run -d chrome` 指向 staging `baseUrl`；验证 REST + WS 握手；CORS 变更须补契约烟雾或书面集成验收步骤。 |
 | **回滚** | CORS 配置回退上一提交；反代层仅文档变更无运行时回滚。 |
 

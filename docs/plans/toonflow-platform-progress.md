@@ -3,7 +3,7 @@
 更新时间：2026-05-07
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
-大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**；团队 Workspace **完整功能**总表见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
+大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**；团队 Workspace **完整功能**总表见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)。**全栈约定**（禁止只合后端）：[**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)；**平台级补遗池**：[**`platform-capabilities-backlog.md`**](./platform-capabilities-backlog.md)。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
 
 ## 状态约定
 

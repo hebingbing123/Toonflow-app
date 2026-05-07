@@ -6,6 +6,12 @@
 **关联**：[`harness-rust-flutter.md`](./harness-rust-flutter.md)（组织/工作区按阶段）、[`toonflow-platform-progress.md`](./toonflow-platform-progress.md) §1 基线、迁移 `supabase/migrations/*app_workspace*`。  
 **门禁**：凡动 `backend/` / `frontend/` / OpenAPI / 迁移 / WS 文档，合并前 **`yarn refactor:check`**。
 
+## 〇、全栈交付（适用于 W1–W11 全部条目）
+
+- 与 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md) 一致：凡 **用户 / 运营可见** 的 REST、WS、设置项，**同一里程碑**须交付 **`backend/` + `frontend/`（`rust_api` + 主路径或内部控制台 UI）** + OpenAPI/WS 文档 + 测试；不得长期停留在「仅 Rust 合并」。
+- **W6** 为 Flutter 体验收口 Phase，**不得晚于** W1–W4 相关 API 稳定版 **超过 1 个发布周期**；若 API 先上，须在 [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 标 **debt** 与目标日期。
+- **平台级通用能力**（应用内通知、全局搜索、API Key、出站 webhook、账户导出/删号等）见 [**`platform-capabilities-backlog.md`**](./platform-capabilities-backlog.md)；纳入本计划时在对应 Phase 增行并回链该表。
+
 ---
 
 ## 一、当前基线（已实现，本计划不重复造轮子）
@@ -21,6 +27,8 @@
 ---
 
 ## 二、Phase W1 — Workspace 生命周期（企业空间本体）
+
+> **全栈**：W1 每条须 **Rust + OpenAPI + `rust_api` + Flutter**（创建/列表/详情/编辑入口；归档须有 UI 确认）。
 
 - [ ] **W1.1** `POST /api/v1/workspaces`：创建 `enterprise`（名称、可选描述/metadata、可选 slug/展示名规则）
 - [ ] **W1.2** `GET /api/v1/workspaces`：列出当前用户 **作为 member** 的全部 workspace（personal + enterprise）
@@ -58,7 +66,8 @@
 
 ## 五、Phase W4 — 资源范围：项目为轴，扩展到全站
 
-> 原则：**`workspace_id` 为空间边界**；`owner_user_id` 保留为「创建者/责任人」，**可见性与写权限**由 **workspace 角色 + 可选项目级 ACL** 决定（见 W5）。
+> 原则：**`workspace_id` 为空间边界**；`owner_user_id` 保留为「创建者/责任人」，**可见性与写权限**由 **workspace 角色 + 可选项目级 ACL** 决定（见 W5）。  
+> **全栈**：每条 handler 变更须对应 **Flutter 工作台 / 项目编辑器** 与 **`rust_api`** 联调，禁止只改后端。
 
 - [ ] **W4.1** `GET /api/v1/projects`：**默认**按 `current_workspace_id` 过滤，且仅 **该 workspace 的 member** 可见（含他人创建的项目）
 - [ ] **W4.2** `POST /api/v1/projects`：`workspace_id` 默认当前 workspace；**禁止**写入非成员 workspace
@@ -154,6 +163,13 @@ W1 → W2 → W3 → W4（与 W7 尽量同一「大竖切」窗口内交替，�
 - [ ] **W1–W11** 各 Phase 勾选完成或明确 **「不做」** 并记录理由（产品签字）。
 - [ ] 个人用户 **零回归**（personal workspace、单用户项目主路径）。
 - [ ] `yarn refactor:check` 与 parity / WS 文档持续绿。
+- [ ] **全栈**：无「仅后端已合并、Flutter 仍断」的开放项；[`full-stack-delivery-covenant.md`](./full-stack-delivery-covenant.md) 例外已书面登记。
+
+---
+
+## 十五、与平台能力补遗表的关系
+
+主表 W1–W11 专注 **Workspace / 成员 / 权限 / 计费绑定**。[**`platform-capabilities-backlog.md`**](./platform-capabilities-backlog.md) 中的 **通知、搜索、API Key、出站 webhook、账户导出** 等与租户强相关项，在排期时 **并入 W2/W4/W8/W11** 或单独立项，并在本文件增加交叉引用行，避免平台级遗漏。
 
 ---
 

@@ -1,6 +1,7 @@
 # HTTP API 收敛 / 移除跟踪（原 SQLite/Electron 对齐面）
 
-**竖切执行清单（B·其余域，已排优先级）**：[**`tasks-http-api-cleanup.md`**](./tasks-http-api-cleanup.md)。
+**竖切执行清单（B·其余域，已排优先级）**：[**`tasks-http-api-cleanup.md`**](./tasks-http-api-cleanup.md)。  
+**全栈**：每波须满足 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)（Rust + Flutter + 契约同窗口，除非 `tasks-http-api-cleanup` 标明 H0/docs-only）。
 
 **范围说明（避免误解「一次做完本文档」）**：§一–§三多为**清单与依赖图**；§四进度表中 **C–D**（整棵 `*历史*` HTTP 模块删除、PG 删 **`legacy_id` 列**）与 **B·其余域**（**`harness`/jobs 整型 payload、`asset_extract` 体字段、`assets-generate` 队列语义** 等；**资产侧**：顶层 **`POST /api/v1/assets/*` 已删除**，兼容写读已收拢到 **`POST …/projects/{project_id}/assets/workbench/*`**）属于**多里程碑工程**，无法在单次门禁/提交内安全清空。实施时以 **阶段 B 按域竖切**为单位推进，每域通过后 **`yarn refactor:check`** 再合并。
 
