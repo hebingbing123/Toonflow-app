@@ -7,7 +7,8 @@
 ## 为什么要拆
 
 `harness-rust-flutter.md` 是**总蓝图**：架构取舍、历史评估与里程碑 YAML 挤在一起，不利于「按方向排期、更新状态」。  
-这里按**工程方向**拆成独立文件，每个文件内用统一表格跟踪「基线已完成 vs 下一阶段」。
+这里按**工程方向**拆成独立文件，每个文件内用统一表格跟踪「基线已完成 vs 下一阶段」。  
+各分册文末另有 **`## 实施步骤（草案）`**：按 **工作包（WP）** 给出目标、依赖、建议 PR 切片、代码/文档触点、测试与回滚（可直接拷进 Issue / 竖切任务）。
 
 ## 状态约定（与各路线图文件一致）
 
@@ -33,3 +34,4 @@
 1. **周计划**：从 [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 看当前 Phase；从本索引跳进对应方向文件，勾选 `next` 行。
 2. **发版前**：优先核对 [`roadmap-parity-shipping.md`](./roadmap-parity-shipping.md) 与 [`electron-node-parity.md`](./electron-node-parity.md)。
 3. **商业/合规**：[`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) 里标 `blocked` 的项不要强行在代码里「假装完成」。
+4. **落到迭代**：把某个 WP 标成「本周在做」，做完把对应表格行从 `next` 改成 `baseline_done`（或打上完成日期），并在 [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 记一笔竖切 commit。

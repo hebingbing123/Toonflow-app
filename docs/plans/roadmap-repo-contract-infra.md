@@ -24,3 +24,38 @@ YAML：`git-branch`、`monorepo-layout`、`api-contract`、`postgres-ops`、`sup
 
 - OpenAPI 可导出且与 `scripts/fixtures/openapi_baseline.yaml` 一致。
 - `docs/websocket-events.md` 与实现一致（有变更则随门禁更新）。
+
+## 实施步骤（草案）
+
+### WP-A：生产 CORS / WebSocket 反代清单
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 把「浏览器 Web 客户端连线上 Rust」所需的反代、CORS、WS 升级、缓存策略写成可执行清单，减少部署猜谜。 |
+| **依赖** | 已有 Flutter 可配置 `baseUrl`；TLS 证书与域名由运维提供。 |
+| **PR 切片** | （1）文档-only：在本文档或新建 `docs/plans/deploy-web-client.md` 写清单；（2）若需收紧 CORS：单独 PR 改 `backend/src/app/router/build.rs` 的 `CorsLayer`，用 env 允许域名列表替代 `Any`。 |
+| **触点** | `backend/src/app/router/build.rs`（CORS）；`docs/plans/harness-rust-flutter.md` §0（连接模型）；必要时补 Nginx/Caddy 示例片段。 |
+| **测试** | 本地 `flutter run -d chrome` 指向 staging `baseUrl`；验证 REST + WS 握手；若改 CORS，补契约烟雾或集成说明。 |
+| **回滚** | CORS 配置回退上一提交；反代层仅文档变更无运行时回滚。 |
+
+### WP-B：迁移与备份 Runbook
+
+| 项 | 内容 |
+|----|------|
+| **目标** | `supabase/migrations` 发布顺序、灰度期间双写/只读策略（若有）、备份与恢复演练步骤可查。 |
+| **依赖** | 托管 Supabase 或自管 PG 的连接串与备份工具权限。 |
+| **PR 切片** | （1）Runbook 文档；（2）可选：`scripts/` 下只读检查脚本（校验迁移版本号与 `sqlx migrate info` 一致）。 |
+| **触点** | `supabase/migrations/`；[`database-migration-history-policy.md`](./database-migration-history-policy.md)。 |
+| **测试** | 在 staging 执行「从备份恢复 → 跑迁移 → smoke」桌面演练并记录耗时。 |
+| **回滚** | 按 Runbook 执行 down 迁移或从备份恢复（事先定义何种变更允许 down）。 |
+
+### WP-C：错误码字典与变更日志
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 客户端依赖的 JSON `code` 字段有稳定清单；破坏性变更走文档或 semver 约定。 |
+| **依赖** | 现有错误构造集中在 `backend/src/error/`（或等价模块）。 |
+| **PR 切片** | （1）从代码枚举/OpenAPI 摘要生成表格（可维护 `docs/plans/api-error-codes.md` 或生成脚本）；（2）Flutter `rust_api` 若有硬编码映射则单边注释链接到该表。 |
+| **触点** | OpenAPI 导出；`backend/src/error/`；`backend/src/openapi_spec/` 若涉及摘要字段。 |
+| **测试** | `yarn refactor:check`；抽查若干 4xx/5xx 响应与表一致。 |
+| **回滚** | 文档回退；不建议对已发放客户端做静默改码（需版本协商）。 |
