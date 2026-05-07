@@ -1,7 +1,7 @@
 //! 项目范围的 `app_novel` REST（遗留 `o_novel` 索引/列表/获取/更新/删除子集）。
 
 mod dto;
-mod handlers;
+pub(crate) mod handlers;
 mod openapi;
 
 // Stable paths `crate::narrative::novels::{NovelRow, …}` (matches pre-split public API).
@@ -33,6 +33,11 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/novels/crawl-import-batch",
             post(handlers::post_novel_crawl_import_batch),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/novels/crawl-schedules",
+            get(handlers::list_novel_crawl_schedules)
+                .post(handlers::post_novel_crawl_schedule_create),
         )
         .route(
             "/api/v1/projects/{project_id}/novels",

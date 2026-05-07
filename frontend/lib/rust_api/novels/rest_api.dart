@@ -296,3 +296,71 @@ Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlImportBatchResponse.fromJson(map);
 }
+
+/// `POST /api/v1/projects/{project_id}/novels/crawl-schedules` — see `postProjectNovelCrawlScheduleCreateByProjectIdV1`.
+Future<NovelCrawlScheduleRow> postProjectNovelCrawlScheduleCreate(
+  String accessToken,
+  String projectId, {
+  required List<String> urls,
+  required String intakeStatus,
+  String? intakeNote,
+  int? runAtMs,
+  int? repeatIntervalMs,
+  int? projectNumericId,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-schedules',
+  );
+  final body = <String, dynamic>{
+    'urls': urls,
+    'intake_status': intakeStatus,
+    'intake_note': intakeNote,
+    'run_at_ms': runAtMs,
+    'repeat_interval_ms': repeatIntervalMs,
+    'project_numeric_id': projectNumericId,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelCrawlScheduleRow.fromJson(map);
+}
+
+/// `GET /api/v1/projects/{project_id}/novels/crawl-schedules` — see `getProjectNovelCrawlSchedulesByProjectIdV1`.
+Future<List<NovelCrawlScheduleRow>> fetchProjectNovelCrawlSchedules(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-schedules',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => NovelCrawlScheduleRow.fromJson(e as Map<String, dynamic>))
+      .toList(growable: false);
+}

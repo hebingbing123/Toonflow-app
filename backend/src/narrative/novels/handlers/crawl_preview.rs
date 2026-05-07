@@ -41,11 +41,11 @@ struct ExtractedCrawlerContent {
 }
 
 #[derive(Debug, Clone)]
-struct CrawlAuditSummary {
-    mode: String,
-    page_count: i32,
-    chapter_url_count: i32,
-    body_char_count: i32,
+pub(crate) struct CrawlAuditSummary {
+    pub(crate) mode: String,
+    pub(crate) page_count: i32,
+    pub(crate) chapter_url_count: i32,
+    pub(crate) body_char_count: i32,
 }
 
 fn assert_fetchable_url(url: &url::Url) -> Result<(), ApiError> {
@@ -290,7 +290,7 @@ async fn fetch_crawler_content(
     Ok(extract_crawler_content(&html, host, parsed))
 }
 
-async fn crawl_preview_adaptive(
+pub(crate) async fn crawl_preview_adaptive(
     state: &AppState,
     seed_url: &url::Url,
 ) -> Result<NovelCrawlPreviewResponse, ApiError> {
@@ -396,7 +396,7 @@ pub(crate) async fn post_novel_crawl_preview(
     Ok(JsonResponse(payload))
 }
 
-fn normalize_extracted_text_for_import(raw: &str) -> String {
+pub(crate) fn normalize_extracted_text_for_import(raw: &str) -> String {
     // Ported from Flutter `import_parser.dart::_normalizeExtractedText`.
     let mut normalized = raw
         .replace("\r\n", "\n")
@@ -429,7 +429,7 @@ fn normalize_extracted_text_for_import(raw: &str) -> String {
         .to_string()
 }
 
-fn parse_whole_book_chapters_from_normalized(
+pub(crate) fn parse_whole_book_chapters_from_normalized(
     normalized: &str,
     fallback_prefix: &str,
 ) -> Vec<(i32, String, String)> {
@@ -501,7 +501,7 @@ fn parse_whole_book_chapters_from_normalized(
     chapters
 }
 
-fn evaluate_novel_import_quality(
+pub(crate) fn evaluate_novel_import_quality(
     chapters: &[(i32, String, String)],
     min_total_chars: usize,
     min_avg_chapter_chars: usize,
@@ -573,7 +573,7 @@ fn evaluate_novel_import_quality(
     (blockers, warnings)
 }
 
-async fn insert_imported_novels_for_project(
+pub(crate) async fn insert_imported_novels_for_project(
     pool: &sqlx::PgPool,
     project_id: Uuid,
     chapters: &[(i32, String, String)],

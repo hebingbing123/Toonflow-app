@@ -24,13 +24,14 @@ use crate::state::AppState;
 use super::{
     envelope_generation_job_updated, hydrate_job_row, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
     JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
-    JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT,
-    JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
+    JOB_KIND_FLUTTER_PROBE, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
+    JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
 };
 
 mod asset_image;
 mod asset_polish;
 mod common;
+mod novel_crawl;
 mod vendor;
 mod video;
 mod voiceover;
@@ -181,6 +182,10 @@ async fn claim_next_job(pool: &PgPool, worker_id: &str) -> Result<Option<JobRow>
         WITH cte AS (
             SELECT id FROM app_generation_job
             WHERE status = 'queued'
+              AND (
+                payload->>'run_at_ms' IS NULL
+                OR (payload->>'run_at_ms')::bigint <= (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint
+              )
             ORDER BY created_at ASC
             FOR UPDATE SKIP LOCKED
             LIMIT 1
@@ -253,6 +258,9 @@ async fn execute_kind(
             voiceover::run_voiceover_generate(state, pool, id, row)
                 .await
                 .map(job_ok)
+        }
+        k if k == JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH => {
+            novel_crawl::run_novel_crawl_import_batch(state, pool, row).await
         }
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"

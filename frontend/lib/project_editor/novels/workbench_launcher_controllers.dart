@@ -7,6 +7,8 @@ class _NovelWorkbenchControllers {
     required this.searchIntakeSourceCtrl,
     required this.importUrlCtrl,
     required this.importBatchUrlsCtrl,
+    required this.importScheduleDelayMinutesCtrl,
+    required this.importScheduleRepeatMinutesCtrl,
     required this.importRawTextCtrl,
     required this.importBatchSizeCtrl,
     required this.importExecutionSideCtrl,
@@ -40,6 +42,8 @@ class _NovelWorkbenchControllers {
       searchIntakeSourceCtrl: TextEditingController(),
       importUrlCtrl: TextEditingController(),
       importBatchUrlsCtrl: TextEditingController(),
+      importScheduleDelayMinutesCtrl: TextEditingController(text: '0'),
+      importScheduleRepeatMinutesCtrl: TextEditingController(text: ''),
       importRawTextCtrl: TextEditingController(),
       importBatchSizeCtrl: TextEditingController(text: '10'),
       importExecutionSideCtrl: TextEditingController(text: 'client'),
@@ -86,6 +90,8 @@ class _NovelWorkbenchControllers {
   final TextEditingController searchIntakeSourceCtrl;
   final TextEditingController importUrlCtrl;
   final TextEditingController importBatchUrlsCtrl;
+  final TextEditingController importScheduleDelayMinutesCtrl;
+  final TextEditingController importScheduleRepeatMinutesCtrl;
   final TextEditingController importRawTextCtrl;
   final TextEditingController importBatchSizeCtrl;
   final TextEditingController importExecutionSideCtrl;
@@ -113,6 +119,8 @@ class _NovelWorkbenchControllers {
     searchIntakeSourceCtrl.dispose();
     importUrlCtrl.dispose();
     importBatchUrlsCtrl.dispose();
+    importScheduleDelayMinutesCtrl.dispose();
+    importScheduleRepeatMinutesCtrl.dispose();
     importRawTextCtrl.dispose();
     importBatchSizeCtrl.dispose();
     importExecutionSideCtrl.dispose();

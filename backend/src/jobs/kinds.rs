@@ -38,3 +38,6 @@ pub const JOB_KIND_SUBTITLE_GENERATE: &str = "subtitle.generate";
 /// Reserved (**L2**): background music mix; enqueue may set **`job_sub_kind`** = **`bgm.mix`**;
 /// worker route not implemented — jobs would fail until a handler lands.
 pub const JOB_KIND_BGM_GENERATE: &str = "bgm.generate";
+
+/// Hosted novel crawl import batch (premium): executes `crawl-import-batch` logic under job worker.
+pub const JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH: &str = "novel.crawl.import_batch";

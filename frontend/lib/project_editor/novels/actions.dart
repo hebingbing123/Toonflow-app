@@ -392,6 +392,64 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     );
   }
 
+  Future<void> _createNovelCrawlSchedule({
+    required String token,
+    required ProjectRow project,
+    required String batchUrls,
+    required int delayMinutes,
+    required int? repeatMinutes,
+    required String intakeStatus,
+    required String? intakeNote,
+    required void Function(String infoLine) applyInfoLine,
+  }) async {
+    final urls = batchUrls
+        .split(RegExp(r'[\n\r]+'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList(growable: false);
+    if (urls.isEmpty) {
+      throw const FormatException('请先在批量托管 URL 里填入至少 1 行 URL');
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final runAtMs = now + (delayMinutes * 60 * 1000);
+    final repeatIntervalMs = repeatMinutes == null || repeatMinutes <= 0
+        ? null
+        : repeatMinutes * 60 * 1000;
+    final created = await postProjectNovelCrawlScheduleCreate(
+      token,
+      project.id,
+      urls: urls,
+      intakeStatus: intakeStatus,
+      intakeNote: intakeNote,
+      runAtMs: runAtMs,
+      repeatIntervalMs: repeatIntervalMs,
+      projectNumericId: project.numericId,
+    );
+    applyInfoLine(
+      '已创建托管抓取计划：task #${created.numericTaskId}（${created.status}；delay ${delayMinutes}m；repeat ${repeatMinutes ?? 0}m）',
+    );
+  }
+
+  Future<void> _listNovelCrawlSchedules({
+    required String token,
+    required ProjectRow project,
+    required void Function(String infoLine) applyInfoLine,
+  }) async {
+    final rows = await fetchProjectNovelCrawlSchedules(token, project.id);
+    if (rows.isEmpty) {
+      applyInfoLine('暂无托管抓取计划（仅显示本项目最近 100 条）。');
+      return;
+    }
+    final head = rows.take(3).map((e) {
+      final runAt = e.runAtMs == null
+          ? 'n/a'
+          : DateTime.fromMillisecondsSinceEpoch(e.runAtMs!).toIso8601String();
+      final repeat = e.repeatIntervalMs == null ? '' : ' repeat=${e.repeatIntervalMs}ms';
+      return '#${e.numericTaskId} ${e.status} runAt=$runAt$repeat';
+    }).join('；');
+    applyInfoLine('本项目托管抓取计划 ${rows.length} 条，最近：$head');
+  }
+
   String _resolveImportSourceKind({
     required String intakeSourceMode,
     required String? intakeSourceUrl,

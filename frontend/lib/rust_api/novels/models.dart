@@ -206,6 +206,47 @@ class NovelCrawlImportBatchResponse {
   }
 }
 
+class NovelCrawlScheduleRow {
+  const NovelCrawlScheduleRow({
+    required this.numericTaskId,
+    required this.id,
+    required this.kind,
+    required this.status,
+    required this.payload,
+    this.errorMessage,
+    this.errorDetails,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final int numericTaskId;
+  final String id;
+  final String kind;
+  final String status;
+  final Map<String, dynamic> payload;
+  final String? errorMessage;
+  final Map<String, dynamic>? errorDetails;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  int? get runAtMs => (payload['run_at_ms'] as num?)?.toInt();
+  int? get repeatIntervalMs => (payload['repeat_interval_ms'] as num?)?.toInt();
+
+  factory NovelCrawlScheduleRow.fromJson(Map<String, dynamic> json) {
+    return NovelCrawlScheduleRow(
+      numericTaskId: (json['numeric_task_id'] as num).toInt(),
+      id: json['id'] as String,
+      kind: json['kind'] as String? ?? '',
+      status: json['status'] as String? ?? '',
+      payload: (json['payload'] as Map<String, dynamic>?) ?? const {},
+      errorMessage: json['error_message'] as String?,
+      errorDetails: json['error_details'] as Map<String, dynamic>?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
+}
+
 /// Compat row (**`getNovelIndex`** shape); filled from **`GET …/projects/{uuid}/novels`**.
 class NovelWorkbenchIndexItem {
   const NovelWorkbenchIndexItem({

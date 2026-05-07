@@ -15,6 +15,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     required void Function(String value) updateInfoLine,
     required TextEditingController importUrlCtrl,
     required TextEditingController importBatchUrlsCtrl,
+    required TextEditingController importScheduleDelayMinutesCtrl,
+    required TextEditingController importScheduleRepeatMinutesCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
     required TextEditingController importExecutionSideCtrl,
@@ -57,6 +59,83 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             labelText: '批量托管 URL（每行一个）',
             helperText: '仅用于托管导入（增值）批量触发；默认导入仍以预解析修正区为准。',
           ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            SizedBox(
+              width: 180,
+              child: TextField(
+                controller: importScheduleDelayMinutesCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: '托管计划延迟（分钟）',
+                  helperText: '0 表示立即执行',
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 180,
+              child: TextField(
+                controller: importScheduleRepeatMinutesCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: '重复间隔（分钟）',
+                  helperText: '留空表示不重复',
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            OutlinedButton(
+              onPressed:
+                  localBusy || importExecutionSideCtrl.text.trim() != 'server'
+                      ? null
+                      : () => _runNovelWorkbenchAction(
+                            ctx: ctx,
+                            setDialogState: setDialogState,
+                            setLocalState: setLocalState,
+                            novelsBusy: novelsBusy,
+                            setLocalBusy: setLocalBusy,
+                            action: () => _createNovelCrawlSchedule(
+                              token: token,
+                              project: project,
+                              batchUrls: importBatchUrlsCtrl.text,
+                              delayMinutes:
+                                  int.tryParse(importScheduleDelayMinutesCtrl.text.trim()) ??
+                                      0,
+                              repeatMinutes: int.tryParse(
+                                importScheduleRepeatMinutesCtrl.text.trim(),
+                              ),
+                              intakeStatus: importIntakeStatusCtrl.text.trim(),
+                              intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
+                                  ? null
+                                  : importIntakeNoteCtrl.text.trim(),
+                              applyInfoLine: updateInfoLine,
+                            ),
+                          ),
+              child: const Text('创建托管抓取计划'),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              onPressed:
+                  localBusy || importExecutionSideCtrl.text.trim() != 'server'
+                      ? null
+                      : () => _runNovelWorkbenchAction(
+                            ctx: ctx,
+                            setDialogState: setDialogState,
+                            setLocalState: setLocalState,
+                            novelsBusy: novelsBusy,
+                            setLocalBusy: setLocalBusy,
+                            action: () => _listNovelCrawlSchedules(
+                              token: token,
+                              project: project,
+                              applyInfoLine: updateInfoLine,
+                            ),
+                          ),
+              child: const Text('查看托管计划'),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Align(

@@ -48,6 +48,8 @@ Future<void> openNovelWorkbenchDialog({
     required void Function(String value) updateInfoLine,
     required TextEditingController importUrlCtrl,
     required TextEditingController importBatchUrlsCtrl,
+    required TextEditingController importScheduleDelayMinutesCtrl,
+    required TextEditingController importScheduleRepeatMinutesCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
     required TextEditingController importExecutionSideCtrl,
@@ -254,6 +256,10 @@ Future<void> openNovelWorkbenchDialog({
                         updateInfoLine: updateInfoLine,
                         importUrlCtrl: ctrls.importUrlCtrl,
                         importBatchUrlsCtrl: ctrls.importBatchUrlsCtrl,
+                        importScheduleDelayMinutesCtrl:
+                            ctrls.importScheduleDelayMinutesCtrl,
+                        importScheduleRepeatMinutesCtrl:
+                            ctrls.importScheduleRepeatMinutesCtrl,
                         importRawTextCtrl: ctrls.importRawTextCtrl,
                         importBatchSizeCtrl: ctrls.importBatchSizeCtrl,
                         importExecutionSideCtrl: ctrls.importExecutionSideCtrl,

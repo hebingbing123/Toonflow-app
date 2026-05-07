@@ -1728,6 +1728,74 @@ components:
       - chapter_url_count
       - body_char_count
       type: object
+    NovelCrawlScheduleCreateBody:
+      additionalProperties: false
+      properties:
+        intake_note:
+          type:
+          - string
+          - 'null'
+        intake_status:
+          type: string
+        project_numeric_id:
+          description: Optional project numeric id to enable task-center filtering (`/api/v1/jobs/page?project_id=...`).
+          format: int32
+          type:
+          - integer
+          - 'null'
+        repeat_interval_ms:
+          description: When set (>0), worker auto-enqueues the next run.
+          format: int64
+          type:
+          - integer
+          - 'null'
+        run_at_ms:
+          description: Unix epoch milliseconds; omitted or <=0 means run immediately.
+          format: int64
+          type:
+          - integer
+          - 'null'
+        urls:
+          items:
+            type: string
+          type: array
+      required:
+      - urls
+      - intake_status
+      type: object
+    NovelCrawlScheduleRow:
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        error_details: {}
+        error_message:
+          type:
+          - string
+          - 'null'
+        id:
+          format: uuid
+          type: string
+        kind:
+          type: string
+        numeric_task_id:
+          format: int64
+          type: integer
+        payload: {}
+        status:
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+      required:
+      - numeric_task_id
+      - id
+      - kind
+      - status
+      - payload
+      - created_at
+      - updated_at
+      type: object
     ObservationAsset:
       description: 观察资产记录
       properties:
@@ -11257,6 +11325,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NovelCrawlPreviewResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - novels
+  /api/v1/projects/{project_id}/novels/crawl-schedules:
+    get:
+      operationId: getProjectNovelCrawlSchedulesByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/NovelCrawlScheduleRow'
+                type: array
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - novels
+    post:
+      operationId: postProjectNovelCrawlScheduleCreateByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovelCrawlScheduleCreateBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NovelCrawlScheduleRow'
           description: OK
         '400':
           content:
