@@ -3,7 +3,7 @@
 更新时间：2026-05-07
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
-大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
+大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**、**[团队 Workspace MVP](./tasks-workspace-team-mvp.md)**。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
 
 ## 状态约定
 
@@ -19,6 +19,7 @@
 - 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
 - 当前最新完成 commit：`c9557011`
 - 当前最新完成竖切：`内容接入竖切（小说爬虫 client/server + 托管调度 + 观测闭环）`
+- **下一候选竖切**（未开工）：**团队 Workspace MVP** — 验收 A1–A5 见 [**`tasks-workspace-team-mvp.md`**](./tasks-workspace-team-mvp.md)（enterprise 空间、按 `user_id` 加成员、切换当前 workspace、项目列表按 workspace 成员可见、Flutter 选择器）
 
 ## Phase 1 进度
 
@@ -90,7 +91,7 @@
 
 专项计划：
 
-- [novel-intake-crawler-plan.md](/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/novel-intake-crawler-plan.md)
+- [novel-intake-crawler-plan.md](./novel-intake-crawler-plan.md)
 
 当前增量（含小说爬虫四阶段收口）：
 
@@ -254,6 +255,24 @@
 本轮定向验证：
 
 - `yarn refactor:check` 全绿（backend fmt/clippy/test + frontend analyze/test + OpenAPI drift）
+
+## 下一阶段：团队 Workspace MVP（`pending`）
+
+**目标**：在 **不削弱个人路径**（personal workspace 行为保持）的前提下，收口 **enterprise workspace + 成员 + 切换上下文 + 列表按 workspace**。
+
+**专项清单**：[**`tasks-workspace-team-mvp.md`**](./tasks-workspace-team-mvp.md)
+
+| 验收项 | 状态 |
+|--------|------|
+| A1 创建 enterprise workspace | `pending` |
+| A2 owner/admin 按 `user_id` 添加成员 | `pending` |
+| A3 切换 `current_workspace` API | `pending` |
+| A4 `GET /api/v1/projects`（+ 本里程碑内一处写路径）按 workspace 成员规则 | `pending` |
+| A5 Flutter workspace 选择器 + 刷新 + 契约/parity | `pending` |
+
+**已提交**：_（本段随竖切更新 commit）_
+
+**备注**：首版 **不加邮件邀请**；邀请表、魔法链接可列为 Phase 2+。
 
 ## 当前阻塞与注意事项
 
