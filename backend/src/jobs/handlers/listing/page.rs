@@ -54,47 +54,104 @@ pub(crate) async fn list_jobs_page(
     let status = trim_query_opt(q.state);
     let project_key = normalize_task_page_project_filter(q.project_id);
 
-    let total: i64 = sqlx::query_scalar(
-        r#"
-        SELECT COUNT(*)::bigint
-        FROM app_generation_job
-        WHERE owner_user_id = $1
-          AND ($2::text IS NULL OR kind = $2)
-          AND ($3::text IS NULL OR status = $3)
-          AND ($4::text IS NULL OR payload->>'project_numeric_id' = $4)
-        "#,
-    )
-    .bind(uid)
-    .bind(kind.as_deref())
-    .bind(status.as_deref())
-    .bind(project_key.as_deref())
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
     let offset = compute_task_page_offset(page, limit);
-    let mut rows = sqlx::query_as::<_, JobRow>(
-        r#"
-        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
-        FROM app_generation_job
-        WHERE owner_user_id = $1
-          AND ($2::text IS NULL OR kind = $2)
-          AND ($3::text IS NULL OR status = $3)
-          AND ($4::text IS NULL OR payload->>'project_numeric_id' = $4)
-        ORDER BY created_at DESC
-        OFFSET $5
-        LIMIT $6
-        "#,
-    )
-    .bind(uid)
-    .bind(kind.as_deref())
-    .bind(status.as_deref())
-    .bind(project_key.as_deref())
-    .bind(offset)
-    .bind(i64::from(limit))
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let (total, mut rows) = if let Some(project_key) = project_key.as_deref() {
+        let has_project_access: bool = sqlx::query_scalar(
+            r#"
+            SELECT EXISTS (
+              SELECT 1
+              FROM app_project p
+              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+              WHERE p.numeric_id::text = $1
+                AND wm.user_id = $2
+            )
+            "#,
+        )
+        .bind(project_key)
+        .bind(uid)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        if !has_project_access {
+            return Err(ApiError::NotFound);
+        }
+
+        let total: i64 = sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)::bigint
+            FROM app_generation_job
+            WHERE payload->>'project_numeric_id' = $1
+              AND ($2::text IS NULL OR kind = $2)
+              AND ($3::text IS NULL OR status = $3)
+            "#,
+        )
+        .bind(project_key)
+        .bind(kind.as_deref())
+        .bind(status.as_deref())
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        let rows = sqlx::query_as::<_, JobRow>(
+            r#"
+            SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
+            FROM app_generation_job
+            WHERE payload->>'project_numeric_id' = $1
+              AND ($2::text IS NULL OR kind = $2)
+              AND ($3::text IS NULL OR status = $3)
+            ORDER BY created_at DESC
+            OFFSET $4
+            LIMIT $5
+            "#,
+        )
+        .bind(project_key)
+        .bind(kind.as_deref())
+        .bind(status.as_deref())
+        .bind(offset)
+        .bind(i64::from(limit))
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        (total, rows)
+    } else {
+        let total: i64 = sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)::bigint
+            FROM app_generation_job
+            WHERE owner_user_id = $1
+              AND ($2::text IS NULL OR kind = $2)
+              AND ($3::text IS NULL OR status = $3)
+            "#,
+        )
+        .bind(uid)
+        .bind(kind.as_deref())
+        .bind(status.as_deref())
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        let rows = sqlx::query_as::<_, JobRow>(
+            r#"
+            SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
+            FROM app_generation_job
+            WHERE owner_user_id = $1
+              AND ($2::text IS NULL OR kind = $2)
+              AND ($3::text IS NULL OR status = $3)
+            ORDER BY created_at DESC
+            OFFSET $4
+            LIMIT $5
+            "#,
+        )
+        .bind(uid)
+        .bind(kind.as_deref())
+        .bind(status.as_deref())
+        .bind(offset)
+        .bind(i64::from(limit))
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        (total, rows)
+    };
 
     hydrate_job_rows(&mut rows);
 

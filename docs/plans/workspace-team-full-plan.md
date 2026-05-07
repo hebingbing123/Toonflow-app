@@ -73,7 +73,7 @@
 - [x] **W4.2** `POST /api/v1/projects`：默认当前 workspace（含 personal 回退）；支持显式 `workspaceId` 且强校验 membership，非成员写入返回 `403`
 - [x] **W4.3** `GET/PATCH/DELETE …/projects/{id}`：已改为按 **project.workspace_id + workspace member** 校验（移除 owner_user_id 单用户闸门）
 - [ ] **W4.4** 剧本 / 分镜 / 小说 / 资产 / workbench **所有** `project_id` 路径 handler：统一走 **「project ∈ workspace + 成员权限」** 中间件或 helper（进行中：已抽 `require_project_workspace_member_scope` 并接入 `project/home`、`project/stats`、`project/style-config`、`project/overview`、`project/assets-overview`、`project/production-overview`、`project/short-video-assembly`、`project/short-video-export-check`、`project/short-video-readiness`；并将资产域公共 `ensure_owned_project_pk` 与 `scope/mod.rs` 中 script/storyboard/project 解析 helper 切为 workspace 成员校验，小说 `project_id` CRUD 与小说事件 `project_id` 列表/删除/批删/生成查询内联 owner 过滤已移除，脚本导出/抽取轮询（`scripts/export-poll`）以及小说抓取 schedule/observability 的项目查询已切为 workspace 成员可见）
-- [ ] **W4.5** `app_generation_job`（及 payload）：是否挂 `workspace_id` 或由 `project_id` 派生 — **书面定稿** + 列表/取消/统计接口一致
+- [ ] **W4.5** `app_generation_job`（及 payload）：是否挂 `workspace_id` 或由 `project_id` 派生 — **书面定稿** + 列表/取消/统计接口一致（进行中：先按 `project_id` 派生语义收口，`GET /api/v1/jobs/page` 在传 `project_id` 时改为 workspace 成员可见项目内任务；不传 `project_id` 仍保持 owner 视图）
 - [ ] **W4.6** `GET /api/v1/usage/summary`、memory、skills、quality 等：**定义**是否按 workspace 聚合或保持 user；**实现与 OpenAPI 一致**
 - [ ] **W4.7** Parity：[ `electron-node-parity.md`](./electron-node-parity.md) 更新「多用户可见范围」与旧栈差异说明
 
