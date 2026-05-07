@@ -404,6 +404,21 @@ String productionRecipeSubAgentButtonLabel(ProductionWorkspaceRecipe recipe) {
   return '运行子代理';
 }
 
+String summarizeProductionDiagnosisHeadline(
+  List<ProductionWorkspaceRecipe> recipes,
+) {
+  if (recipes.isEmpty) return '';
+  final first = recipes.first;
+  final title = first.title.trim();
+  if (title == '补足分场景意图') {
+    return '当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。';
+  }
+  if (title == '先看分镜表落地' || title == '抽样读取分镜表') {
+    return '当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。';
+  }
+  return '当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。';
+}
+
 String buildProductionScriptPlanExecutionHint(
   Object? flowData, {
   int maxSections = 2,

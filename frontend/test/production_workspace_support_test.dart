@@ -2745,6 +2745,38 @@ void main() {
     expect(productionRecipeSubAgentButtonLabel(refineRecipe), '细化导演计划');
   });
 
+  test('production diagnosis headline explains script-plan refinement first', () {
+    const recipes = <ProductionWorkspaceRecipe>[
+      ProductionWorkspaceRecipe(
+        title: '补足分场景意图',
+        detail: '先补导演计划。',
+        flowKey: 'storyboardTable',
+        subAgentTool: 'run_sub_agent_director_plan',
+      ),
+    ];
+
+    expect(
+      summarizeProductionDiagnosisHeadline(recipes),
+      '当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。',
+    );
+  });
+
+  test('production diagnosis headline explains storyboard-table expansion first', () {
+    const recipes = <ProductionWorkspaceRecipe>[
+      ProductionWorkspaceRecipe(
+        title: '先看分镜表落地',
+        detail: '先扩读分镜表。',
+        flowKey: 'storyboardTable',
+        domainTool: 'get_flowData',
+      ),
+    ];
+
+    expect(
+      summarizeProductionDiagnosisHeadline(recipes),
+      '当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。',
+    );
+  });
+
   test(
     'summarizeProductionFlowValue surfaces storyboard table coverage digest',
     () {

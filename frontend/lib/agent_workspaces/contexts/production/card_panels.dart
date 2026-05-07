@@ -162,11 +162,19 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (recipes.isEmpty) return const SizedBox.shrink();
+    final diagnosisHeadline = summarizeProductionDiagnosisHeadline(recipes);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
         Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
+        if (diagnosisHeadline.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 6),
+          Text(
+            diagnosisHeadline,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
         const SizedBox(height: 6),
         ...recipes.map(
           (ProductionWorkspaceRecipe recipe) => Card(
