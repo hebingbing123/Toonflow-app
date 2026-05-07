@@ -125,7 +125,19 @@
 
 ### 4. 改写与上游结构竖切
 
-状态：`pending`
+状态：`in_progress`
+
+当前增量：
+
+- 项目剧本区新增“骨架工作台”入口
+- 前端可读取并编辑 `storySkeleton` / `adaptationStrategy`
+- 前端兼容 `script-agent/get-plan-data` 当前两种返回结构，避免首次读取和已有计划读取形状不一致
+- 保存走既有 `script-agent/set-plan-data` 契约，项目内可直接维护上游结构页
+
+本轮定向验证：
+
+- `flutter test test/script_agent_plan_data_test.dart test/project_script_plan_workbench_view_test.dart`
+- 触达文件 `flutter analyze` 通过
 
 ### 5. 资产与生产竖切
 

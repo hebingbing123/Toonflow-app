@@ -39,6 +39,11 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
         scriptList: scriptList,
         statsRef: dialogState.statsRef,
       ),
+      openPlanWorkbench: () => _openProjectScriptPlanWorkbenchDialog(
+        ctx: ctx,
+        token: token,
+        project: p,
+      ),
       openBatchAddDialog: () => _openBatchAddScriptsDialog(
         ctx: ctx,
         setDialogState: setDialogState,
@@ -68,4 +73,3 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
     );
   }
 }
-

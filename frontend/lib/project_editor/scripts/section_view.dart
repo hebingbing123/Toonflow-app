@@ -28,6 +28,7 @@ class ProjectScriptsSectionViewModel {
 class ProjectScriptsSectionViewCallbacks {
   const ProjectScriptsSectionViewCallbacks({
     required this.onOpenWorkbench,
+    required this.onOpenPlanWorkbench,
     required this.onOpenBatchAddDialog,
     required this.onExportAll,
     required this.onPollAll,
@@ -37,6 +38,7 @@ class ProjectScriptsSectionViewCallbacks {
   });
 
   final VoidCallback? onOpenWorkbench;
+  final VoidCallback? onOpenPlanWorkbench;
   final VoidCallback? onOpenBatchAddDialog;
   final VoidCallback? onExportAll;
   final VoidCallback? onPollAll;
@@ -94,11 +96,23 @@ class ProjectScriptsSectionView extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: model.saving || model.scriptTaskBusy
-                    ? null
-                    : callbacks.onOpenWorkbench,
-                child: const Text('打开剧本批量工作台'),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: model.saving || model.scriptTaskBusy
+                        ? null
+                        : callbacks.onOpenWorkbench,
+                    child: const Text('打开剧本批量工作台'),
+                  ),
+                  OutlinedButton(
+                    onPressed: model.saving || model.scriptTaskBusy
+                        ? null
+                        : callbacks.onOpenPlanWorkbench,
+                    child: const Text('打开骨架工作台'),
+                  ),
+                ],
               ),
             ],
           ),
