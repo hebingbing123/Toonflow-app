@@ -427,10 +427,11 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   }
 
   String? activeDraftId = selectedPublishDraftId;
-  if (activeDraftId == null ||
-      activeDraftId.trim().isEmpty ||
-      !drafts.any((d) => d.id == activeDraftId)) {
-    activeDraftId = null;
+  final selectedOk = activeDraftId != null &&
+      activeDraftId.trim().isNotEmpty &&
+      drafts.any((d) => d.id == activeDraftId);
+  if (!selectedOk) {
+    activeDraftId = drafts.length == 1 ? drafts.first.id : null;
   }
   PublishDraftRow? activeDraft;
   if (activeDraftId != null) {
@@ -452,10 +453,12 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       for (final issue in prepare.issues)
         '${issue.severity}: ${issue.message}'
             '${issue.platformId != null ? ' · ${issue.platformId}' : ''}',
-    ] else if (activeDraft == null && drafts.isNotEmpty)
+    ]     else if (activeDraft == null && drafts.length > 1)
+      '多张草稿时请先在「当前操作草稿」中选择一张，再显示 prepare-check。'
+    else if (activeDraft == null && drafts.isNotEmpty)
       '选择草稿后将显示 prepare-check 校验结果。'
     else
-      '尚无草稿或未完成 prepare-check（创建草稿后将自动读取第一条）。',
+      '尚无草稿或未完成 prepare-check。',
   ];
 
   final draftLines = drafts

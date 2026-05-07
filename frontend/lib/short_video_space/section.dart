@@ -113,6 +113,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     if (_publishDrafts.isEmpty) {
       return null;
     }
+    if (_publishDrafts.length == 1) {
+      return _publishDrafts.first;
+    }
     final selected = _selectedPublishDraftId;
     if (selected != null) {
       for (final d in _publishDrafts) {
@@ -121,7 +124,6 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         }
       }
     }
-    // No automatic fallback to first draft - require explicit selection
     return null;
   }
 
@@ -130,12 +132,35 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       _selectedPublishDraftId = null;
       return;
     }
+    if (drafts.length == 1) {
+      _selectedPublishDraftId = drafts.first.id;
+      return;
+    }
     final current = _selectedPublishDraftId;
     if (current != null && drafts.any((d) => d.id == current)) {
       return;
     }
-    // Clear selection if current draft no longer exists - require explicit re-selection
     _selectedPublishDraftId = null;
+  }
+
+  /// 与 [_activePublishDraft] 一致，但基于本次 API 返回的列表（投递前 state 可能未刷新）。
+  String? _resolvePublishDraftIdFromList(List<PublishDraftRow> drafts) {
+    if (drafts.isEmpty) {
+      return null;
+    }
+    if (drafts.length == 1) {
+      return drafts.first.id;
+    }
+    final sel = _selectedPublishDraftId;
+    if (sel == null || sel.trim().isEmpty) {
+      return null;
+    }
+    for (final d in drafts) {
+      if (d.id == sel) {
+        return d.id;
+      }
+    }
+    return null;
   }
 
   @override

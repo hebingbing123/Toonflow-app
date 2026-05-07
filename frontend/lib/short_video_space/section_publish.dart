@@ -24,10 +24,24 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       final perfAlerts = await fetchPublishPerformanceAlerts(token, project.id);
       final audits = await fetchPublishAudit(token, project.id, limit: 30);
       PublishPrepareCheckResponse? prepare;
-      // Only fetch prepare check if a draft is explicitly selected
-      if (drafts.isNotEmpty && preferredDraftId != null && preferredDraftId.trim().isNotEmpty) {
-        if (drafts.any((d) => d.id == preferredDraftId)) {
-          prepare = await fetchPublishPrepareCheck(token, project.id, preferredDraftId);
+      if (drafts.isNotEmpty) {
+        String? prepareDraftId;
+        if (drafts.length == 1) {
+          prepareDraftId = drafts.first.id;
+        } else {
+          final pref = preferredDraftId;
+          if (pref != null &&
+              pref.trim().isNotEmpty &&
+              drafts.any((d) => d.id == pref)) {
+            prepareDraftId = pref;
+          }
+        }
+        if (prepareDraftId != null) {
+          prepare = await fetchPublishPrepareCheck(
+            token,
+            project.id,
+            prepareDraftId,
+          );
         }
       }
       return (
@@ -123,17 +137,13 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     });
     try {
       final title = (project.name ?? '').trim();
-      await createPublishDraft(token, project.id, <String, dynamic>{
+      final created = await createPublishDraft(token, project.id, <String, dynamic>{
         'title': title.isEmpty ? '发布草稿' : title,
         'draft_status': 'editing',
         'tags': <String>[],
         'platform_copy': <String, dynamic>{},
       });
-      final drafts = await fetchPublishDrafts(token, project.id);
-      if (drafts.isEmpty) {
-        return;
-      }
-      final draftId = drafts.first.id;
+      final draftId = created.id;
       final targets = _publishTargetMaps();
       if (targets.isNotEmpty) {
         await upsertPublishTargets(token, project.id, draftId, targets);
@@ -180,31 +190,36 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       var drafts = await fetchPublishDrafts(token, project.id);
       if (drafts.isEmpty) {
         final title = (project.name ?? '').trim();
-        await createPublishDraft(token, project.id, <String, dynamic>{
+        final created = await createPublishDraft(token, project.id, <String, dynamic>{
           'title': title.isEmpty ? '发布草稿' : title,
           'draft_status': 'editing',
           'tags': <String>[],
           'platform_copy': <String, dynamic>{},
         });
-        drafts = await fetchPublishDrafts(token, project.id);
+        drafts = [created];
+        if (mounted) {
+          setState(() {
+            _selectedPublishDraftId = created.id;
+          });
+        } else {
+          _selectedPublishDraftId = created.id;
+        }
       }
       if (drafts.isEmpty) {
         return;
       }
-      final active = _activePublishDraft;
-      if (active == null) {
-        // No draft explicitly selected - require user to select one
-        if (mounted) {
+      final draftId = _resolvePublishDraftIdFromList(drafts);
+      if (draftId == null) {
+        if (mounted && drafts.length > 1) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('请先明确选择要发布的草稿（不再自动使用第一条草稿）。'),
+              content: Text('有多张发布草稿时，请先在「当前操作草稿」中选择一张。'),
               duration: Duration(seconds: 4),
             ),
           );
         }
         return;
       }
-      final draftId = active.id;
       final targets = _publishTargetMaps();
       if (targets.isNotEmpty) {
         await upsertPublishTargets(token, project.id, draftId, targets);

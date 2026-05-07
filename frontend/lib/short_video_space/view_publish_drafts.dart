@@ -288,6 +288,10 @@ class _PublishDraftsPanel extends StatelessWidget {
               DropdownButtonFormField<String>(
                 initialValue: publishPanelUi.selectedPublishDraftId,
                 isExpanded: true,
+                hint: publishPanelUi.selectedPublishDraftId == null ||
+                        publishPanelUi.selectedPublishDraftId!.trim().isEmpty
+                    ? const Text('请选择要操作的草稿')
+                    : null,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   isDense: true,
@@ -492,7 +496,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : () => publishPanelUi.onScheduleFirstDraft?.call(context),
                       icon: const Icon(Icons.event_available_outlined),
-                      label: const Text('定时首张草稿…'),
+                      label: const Text('定时当前草稿…'),
                     ),
                   if (publishPanelUi.onScheduleAllDraftsSameTime != null &&
                       publishPanelUi.draftLines.length > 1)
