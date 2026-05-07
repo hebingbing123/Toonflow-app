@@ -23,7 +23,7 @@ async fn promotion_gate_evaluate_blocked_on_guard_failure() {
     let res = app.clone().oneshot(
         Request::builder()
             .method(Method::POST)
-            .uri(&format!("/api/v1/benchmark/promotion-gate/{run_id}/decide"))
+            .uri(format!("/api/v1/benchmark/promotion-gate/{run_id}/decide"))
             .header(header::AUTHORIZATION, format!("Bearer {token}"))
             .header(header::CONTENT_TYPE, "application/json")
             .extension(ConnectInfo(test_addr()))
@@ -41,7 +41,7 @@ async fn promotion_gate_evaluate_blocked_on_guard_failure() {
         .oneshot(
             Request::builder()
                 .method(Method::GET)
-                .uri(&format!("/api/v1/benchmark/promotion-gate/{run_id}"))
+                .uri(format!("/api/v1/benchmark/promotion-gate/{run_id}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())

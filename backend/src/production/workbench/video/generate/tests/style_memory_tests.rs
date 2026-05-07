@@ -27,9 +27,9 @@ use sqlx::PgPool;
 use std::collections::HashMap;
 use uuid::Uuid;
 
-fn storyboard_seed_rows(
-    rows: &[(i32, Option<&str>, Option<&str>, Option<&str>)],
-) -> HashMap<i32, StoryboardPromptSeedRow> {
+type SeedFixtureRow<'a> = (i32, Option<&'a str>, Option<&'a str>, Option<&'a str>);
+
+fn storyboard_seed_rows(rows: &[SeedFixtureRow<'_>]) -> HashMap<i32, StoryboardPromptSeedRow> {
     rows.iter()
         .map(|(storyboard_id, prompt, video_desc, duration)| {
             (

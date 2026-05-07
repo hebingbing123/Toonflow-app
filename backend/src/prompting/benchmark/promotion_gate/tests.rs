@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod cases {
     use super::super::handlers::{
         classify_auto_decision, validate_decision_value, validate_promotion_request, ResultRow,
         VariantMetrics,

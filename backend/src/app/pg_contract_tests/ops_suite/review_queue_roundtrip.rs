@@ -41,7 +41,7 @@ async fn review_queue_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(&format!("/api/v1/benchmark/review-queue/{item_id}/submit"))
+                .uri(format!("/api/v1/benchmark/review-queue/{item_id}/submit"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))

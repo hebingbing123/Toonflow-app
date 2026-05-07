@@ -477,7 +477,7 @@ mod tests {
         };
 
         assert_eq!(result.source, "llm");
-        assert_eq!(result.cache_hit, false);
+        assert!(!result.cache_hit);
         assert_eq!(result.platforms_generated.len(), 1);
         assert_eq!(result.duration_ms, Some(1500));
         assert!(result.usage.is_some());
@@ -500,7 +500,7 @@ mod tests {
         };
 
         assert_eq!(result.source, "incremental");
-        assert_eq!(result.cache_hit, false);
+        assert!(!result.cache_hit);
         assert_eq!(result.platforms_generated.len(), 0);
         assert!(result.usage.is_none());
     }

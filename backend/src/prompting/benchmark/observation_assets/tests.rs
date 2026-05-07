@@ -1,7 +1,7 @@
 //! 观察资产治理单元测试。
 
 #[cfg(test)]
-mod tests {
+mod cases {
     use crate::prompting::benchmark::observation_assets::handlers::{
         validate_scope_kind, validate_source_kind, validate_status,
     };

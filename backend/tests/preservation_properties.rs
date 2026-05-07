@@ -112,11 +112,7 @@ mod test_result_preservation {
     /// - All tests should pass
     #[test]
     fn gate_check_baseline_recorded() {
-        // This test documents the gate check baseline
-        assert!(
-            true,
-            "Baseline: Gate check fails on format, but compilation and tests work"
-        );
+        // Baseline documented in module doc above; gate status is enforced by CI, not this stub.
     }
 }
 
@@ -149,6 +145,6 @@ mod module_structure_tests {
         //
         // If any of these are missing after refactoring, compilation will fail.
 
-        assert!(true, "Module re-exports will be verified by compilation");
+        // Re-export surface is verified by `cargo check` / integration tests when APIs move.
     }
 }

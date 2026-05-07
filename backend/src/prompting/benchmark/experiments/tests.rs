@@ -1,7 +1,7 @@
 //! 实验运行与变体快照单元测试。
 
 #[cfg(test)]
-mod tests {
+mod cases {
     use super::super::cost_optimization::{
         calculate_full_replay_cost, calculate_stage_scope_savings, calculate_tier_savings,
         estimate_artifact_reuse_savings, ArtifactReuse, SampleTier, Stage, TokenSavingsEstimate,

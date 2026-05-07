@@ -127,7 +127,7 @@ mod tests {
             data_version: Option<&'static str>,
         }
 
-        let panels = vec![
+        let panels = [
             PanelSnapshot {
                 panel: "production",
                 data_version: Some("2025-01-15 10:30:45.123456+00"),

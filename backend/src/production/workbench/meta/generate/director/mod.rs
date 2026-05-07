@@ -367,38 +367,6 @@ fn guardrail_coverage_fragment_is_style_like(fragment: &str) -> bool {
     .any(|prefix| fragment.starts_with(prefix))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn guardrail_performance_anchor_keeps_fragile_dialogue_cues_without_pressure() {
-        let fields = StructuredStoryboardDescription {
-            subject: "林晚".to_string(),
-            setting: "病房门口".to_string(),
-            subject_refs: "林晚".to_string(),
-            duration_seconds: Some(4),
-            shot: "近景".to_string(),
-            camera_move: "缓推".to_string(),
-            action: "抽气后低声说我没事".to_string(),
-            mood: "压抑".to_string(),
-            lighting: "冷白侧光".to_string(),
-            dialogue: "我没事".to_string(),
-            sound: "空调低鸣".to_string(),
-        };
-
-        let anchor = resolve_guardrail_performance_anchor(
-            Some(&fields),
-            &["神情低落, 眼神黯淡, 眉心轻蹙".to_string()],
-            None,
-        )
-        .expect("anchor");
-
-        assert!(anchor.contains("开口前先压住气息"), "{anchor}");
-        assert!(anchor.contains("尾音带轻颤"), "{anchor}");
-    }
-}
-
 pub(super) fn resolve_environment_texture_style_anchor(
     project_art_style: Option<&str>,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -465,4 +433,36 @@ pub(super) fn resolve_motion_style_anchor(
         &cue,
         VIDEO_PROMPT_MOTION_ANCHOR_MAX_CHARS,
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn guardrail_performance_anchor_keeps_fragile_dialogue_cues_without_pressure() {
+        let fields = StructuredStoryboardDescription {
+            subject: "林晚".to_string(),
+            setting: "病房门口".to_string(),
+            subject_refs: "林晚".to_string(),
+            duration_seconds: Some(4),
+            shot: "近景".to_string(),
+            camera_move: "缓推".to_string(),
+            action: "抽气后低声说我没事".to_string(),
+            mood: "压抑".to_string(),
+            lighting: "冷白侧光".to_string(),
+            dialogue: "我没事".to_string(),
+            sound: "空调低鸣".to_string(),
+        };
+
+        let anchor = resolve_guardrail_performance_anchor(
+            Some(&fields),
+            &["神情低落, 眼神黯淡, 眉心轻蹙".to_string()],
+            None,
+        )
+        .expect("anchor");
+
+        assert!(anchor.contains("开口前先压住气息"), "{anchor}");
+        assert!(anchor.contains("尾音带轻颤"), "{anchor}");
+    }
 }

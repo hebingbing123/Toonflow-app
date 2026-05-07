@@ -1,7 +1,7 @@
 //! 记忆预算档与 ROI 证据单元测试。
 
 #[cfg(test)]
-mod tests {
+mod cases {
     use super::super::types::*;
 
     #[test]

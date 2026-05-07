@@ -206,7 +206,7 @@ mod tests {
             for (char_id, num) in &char_to_num {
                 let all_match = items.iter().zip(assignments.iter()).all(|((cid, sg), asn)| {
                     if cid == char_id && *sg {
-                        asn.map_or(false, |n| n == *num)
+                        asn.is_some_and(|n| n == *num)
                     } else {
                         true
                     }

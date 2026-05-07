@@ -52,6 +52,6 @@ fn test_receipt_contains_required_fields() {
             .get("external_video_id")
             .and_then(|v| v.as_str())
             .unwrap();
-        assert!(external_video_id.contains(&platform.platform_id));
+        assert!(external_video_id.contains(platform.platform_id));
     }
 }

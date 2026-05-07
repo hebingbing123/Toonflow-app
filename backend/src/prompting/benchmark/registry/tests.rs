@@ -1,7 +1,7 @@
 //! 基线样本注册表单元测试。
 
 #[cfg(test)]
-mod tests {
+mod cases {
     use super::super::handlers::{validate_case_type, validate_source_kind, validate_stage};
     use proptest::prelude::*;
 

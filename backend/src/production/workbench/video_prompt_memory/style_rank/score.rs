@@ -2,7 +2,9 @@
 
 use super::super::*;
 
-pub(in super::super) fn select_best_selected_video_style_note(notes: Vec<String>) -> Option<String> {
+pub(in super::super) fn select_best_selected_video_style_note(
+    notes: Vec<String>,
+) -> Option<String> {
     notes.into_iter().max_by(|a, b| {
         score_selected_video_style_note(a)
             .cmp(&score_selected_video_style_note(b))
@@ -329,7 +331,9 @@ pub(in super::super) fn ranked_style_note_is_worth_recalling(
     }
 }
 
-pub(in super::super) fn style_note_selection_context_is_empty(context: &StyleNoteSelectionContext) -> bool {
+pub(in super::super) fn style_note_selection_context_is_empty(
+    context: &StyleNoteSelectionContext,
+) -> bool {
     [
         context.description.as_str(),
         context.subject.as_str(),

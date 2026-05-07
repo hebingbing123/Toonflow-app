@@ -244,7 +244,7 @@ mod tests {
 
         let score = calculate_performance_score(&alert);
         assert!(
-            score >= 4 && score <= 7,
+            (4..=7).contains(&score),
             "Expected moderate score, got {}",
             score
         );
