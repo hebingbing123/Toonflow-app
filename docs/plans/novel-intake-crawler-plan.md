@@ -26,6 +26,7 @@
 - 导入前自动重排序号与空正文拦截
 - `crawler_client` 首版：按 URL 抓网页、抽标题与正文、回填整本导入区
 - `POST /api/v1/projects/{project_id}/novels/crawl-preview`：托管端抓取预览（工作台「抓取执行端」选 server 时走该路径，支持 TOC / 分页 / 单页回退）
+- `POST /api/v1/projects/{project_id}/novels/crawl-import`：托管端抓取 + 解析 + 质量门 + 落库（工作台「托管导入（增值）」按钮触发）
 - `intake_source` / `intake_source_url` / `intake_status` / `intake_note`
 - 手动、整本、客户端爬虫三条入口统一写入 intake 元数据
 - 列表筛选与批量准入操作
@@ -40,9 +41,9 @@
 
 - `intake_source`
   - `manual`
-  - `import`
+  - `whole_book_import`
   - `crawler_client`
-  - `crawler_server`（后置）
+  - `crawler_server`
 - `intake_source_url`
   - 原文来源地址
 - `intake_status`
@@ -119,6 +120,8 @@
 
 ### D. `server-side crawl`（后置增值）
 
+状态：**已完成第一阶段（托管预览 + 托管导入）**
+
 定位：
 
 - 托管采集
@@ -146,6 +149,7 @@
 > - intake 状态影响后续链路：`draft` / `pending_review` / `rejected` 章节禁止直接触发 `generate-events`
 > - 后端事件生成新增兜底质量门：正文字数过短章节会被直接拦截，避免绕过导入页后进入高成本抽取
 > - intake 来源契约后端白名单化：统一收敛到 `manual / whole_book_import / crawler_client / crawler_server`（兼容 `import` 别名）
+> - `crawler_server` 第一阶段：`crawl-preview`（托管预览）+ `crawl-import`（托管导入）已接入；默认仍以前端预解析修正导入为主，托管导入作为增值入口
 
 ### 1. 多来源抓取策略
 
@@ -245,7 +249,7 @@
 
 ## 7. 可观测与审计
 
-状态：**已完成第一阶段（导入模式/页数/质量提示可见）**
+状态：**已完成第二阶段（导入模式/页数/质量提示 + server 抓取摘要）**
 
 后续需要补：
 
@@ -273,13 +277,11 @@
 
 ## 近期实施顺序
 
-近期建议顺序：
+本轮主线已完成。后续建议顺序：
 
-1. 完善 `crawler_client` 清洗与切章稳定性
-2. 增加导入质量门
-3. 增加多来源抓取适配点
-4. 让 intake 状态更明确影响后续改写主链
-5. 再规划 `server-side crawl`
+1. 沉淀 `crawler_server` 与 `crawler_client` 的来源级看板（成功率 / 失败原因 / 准入转化）
+2. 托管导入扩展到批量与定时策略（增值能力）
+3. 切章可靠性继续做第二阶段（误切拦截、超长分块、极短合并提示）
 
 ## 结论
 
@@ -292,11 +294,8 @@
 - 导入修正
 - 准入状态
 
-还没完全收口的是：
+后续可继续增强的是：
 
-- 多来源抓取适配
-- 清洗层
-- 切章可靠性增强
-- 导入质量门
-- 服务端托管爬虫
+- 切章可靠性第二阶段
+- 托管爬虫批量/定时能力
 - 更完整的平台级可观测
