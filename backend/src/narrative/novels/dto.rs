@@ -184,3 +184,38 @@ pub struct NovelCrawlImportBatchResponse {
     pub failed: i32,
     pub items: Vec<NovelCrawlImportBatchItem>,
 }
+
+#[derive(Debug, FromRow, Serialize, ToSchema)]
+pub struct NovelIntakeSourceCount {
+    pub intake_source: Option<String>,
+    pub chapter_count: i64,
+}
+
+#[derive(Debug, FromRow, Serialize, ToSchema)]
+pub struct NovelIntakeStatusCount {
+    pub intake_status: Option<String>,
+    pub chapter_count: i64,
+}
+
+#[derive(Debug, FromRow, Serialize, ToSchema)]
+pub struct NovelCrawlJobStatusCount {
+    pub status: String,
+    pub job_count: i64,
+}
+
+#[derive(Debug, FromRow, Serialize, ToSchema)]
+pub struct NovelCrawlAuditSampleRow {
+    pub numeric_id: i32,
+    pub intake_source_url: Option<String>,
+    pub intake_note: Option<String>,
+    pub create_time_ms: Option<i64>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NovelCrawlObservabilityResponse {
+    pub total_chapters: i64,
+    pub intake_sources: Vec<NovelIntakeSourceCount>,
+    pub intake_statuses: Vec<NovelIntakeStatusCount>,
+    pub recent_server_imports: Vec<NovelCrawlAuditSampleRow>,
+    pub crawl_job_statuses: Vec<NovelCrawlJobStatusCount>,
+}

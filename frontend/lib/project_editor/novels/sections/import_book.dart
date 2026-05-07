@@ -135,6 +135,25 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                           ),
               child: const Text('查看托管计划'),
             ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              onPressed:
+                  localBusy || importExecutionSideCtrl.text.trim() != 'server'
+                      ? null
+                      : () => _runNovelWorkbenchAction(
+                            ctx: ctx,
+                            setDialogState: setDialogState,
+                            setLocalState: setLocalState,
+                            novelsBusy: novelsBusy,
+                            setLocalBusy: setLocalBusy,
+                            action: () => _showNovelCrawlObservability(
+                              token: token,
+                              project: project,
+                              applyInfoLine: updateInfoLine,
+                            ),
+                          ),
+              child: const Text('刷新托管统计'),
+            ),
           ],
         ),
         const SizedBox(height: 8),

@@ -364,3 +364,24 @@ Future<List<NovelCrawlScheduleRow>> fetchProjectNovelCrawlSchedules(
       .map((e) => NovelCrawlScheduleRow.fromJson(e as Map<String, dynamic>))
       .toList(growable: false);
 }
+
+/// `GET /api/v1/projects/{project_id}/novels/crawl-observability` — see `getProjectNovelCrawlObservabilityByProjectIdV1`.
+Future<NovelCrawlObservabilityResponse> fetchProjectNovelCrawlObservability(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-observability',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelCrawlObservabilityResponse.fromJson(map);
+}

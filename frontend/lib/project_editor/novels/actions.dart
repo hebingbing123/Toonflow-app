@@ -450,6 +450,31 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     applyInfoLine('本项目托管抓取计划 ${rows.length} 条，最近：$head');
   }
 
+  Future<void> _showNovelCrawlObservability({
+    required String token,
+    required ProjectRow project,
+    required void Function(String infoLine) applyInfoLine,
+  }) async {
+    final res = await fetchProjectNovelCrawlObservability(token, project.id);
+    final topSources = res.intakeSources
+        .take(3)
+        .map((e) => '${e.intakeSource ?? 'none'}=${e.chapterCount}')
+        .join(', ');
+    final topStatuses = res.intakeStatuses
+        .take(3)
+        .map((e) => '${e.intakeStatus ?? 'none'}=${e.chapterCount}')
+        .join(', ');
+    final jobs = res.crawlJobStatuses
+        .map((e) => '${e.status}=${e.jobCount}')
+        .join(', ');
+    final recent = res.recentServerImports.isEmpty
+        ? ''
+        : ' 最近 server 导入：${res.recentServerImports.take(2).map((e) => '#${e.numericId}').join(', ')}';
+    applyInfoLine(
+      '托管统计：章节总数 ${res.totalChapters}；source[$topSources]；status[$topStatuses]；crawlJobs[$jobs]。$recent',
+    );
+  }
+
   String _resolveImportSourceKind({
     required String intakeSourceMode,
     required String? intakeSourceUrl,

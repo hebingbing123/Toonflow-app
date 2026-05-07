@@ -40,6 +40,10 @@ pub fn router() -> Router<AppState> {
                 .post(handlers::post_novel_crawl_schedule_create),
         )
         .route(
+            "/api/v1/projects/{project_id}/novels/crawl-observability",
+            get(handlers::get_novel_crawl_observability),
+        )
+        .route(
             "/api/v1/projects/{project_id}/novels",
             get(handlers::list_novels_for_project).post(handlers::create_novel_for_project),
         )

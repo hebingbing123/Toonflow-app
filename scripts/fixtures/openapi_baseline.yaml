@@ -1556,6 +1556,27 @@ components:
       required:
       - modelName
       type: object
+    NovelCrawlAuditSampleRow:
+      properties:
+        create_time_ms:
+          format: int64
+          type:
+          - integer
+          - 'null'
+        intake_note:
+          type:
+          - string
+          - 'null'
+        intake_source_url:
+          type:
+          - string
+          - 'null'
+        numeric_id:
+          format: int32
+          type: integer
+      required:
+      - numeric_id
+      type: object
     NovelCrawlImportBatchBody:
       additionalProperties: false
       description: Body for **`POST …/novels/crawl-import-batch`** — hosted crawl import for multiple URLs.
@@ -1693,6 +1714,45 @@ components:
       - chapters_created
       - quality_warnings
       type: object
+    NovelCrawlJobStatusCount:
+      properties:
+        job_count:
+          format: int64
+          type: integer
+        status:
+          type: string
+      required:
+      - status
+      - job_count
+      type: object
+    NovelCrawlObservabilityResponse:
+      properties:
+        crawl_job_statuses:
+          items:
+            $ref: '#/components/schemas/NovelCrawlJobStatusCount'
+          type: array
+        intake_sources:
+          items:
+            $ref: '#/components/schemas/NovelIntakeSourceCount'
+          type: array
+        intake_statuses:
+          items:
+            $ref: '#/components/schemas/NovelIntakeStatusCount'
+          type: array
+        recent_server_imports:
+          items:
+            $ref: '#/components/schemas/NovelCrawlAuditSampleRow'
+          type: array
+        total_chapters:
+          format: int64
+          type: integer
+      required:
+      - total_chapters
+      - intake_sources
+      - intake_statuses
+      - recent_server_imports
+      - crawl_job_statuses
+      type: object
     NovelCrawlPreviewBody:
       additionalProperties: false
       description: Body for **`POST …/novels/crawl-preview`** — server-side HTML fetch + text extraction (preview only).
@@ -1795,6 +1855,30 @@ components:
       - payload
       - created_at
       - updated_at
+      type: object
+    NovelIntakeSourceCount:
+      properties:
+        chapter_count:
+          format: int64
+          type: integer
+        intake_source:
+          type:
+          - string
+          - 'null'
+      required:
+      - chapter_count
+      type: object
+    NovelIntakeStatusCount:
+      properties:
+        chapter_count:
+          format: int64
+          type: integer
+        intake_status:
+          type:
+          - string
+          - 'null'
+      required:
+      - chapter_count
       type: object
     ObservationAsset:
       description: 观察资产记录
@@ -11273,6 +11357,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NovelCrawlImportBatchResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - novels
+  /api/v1/projects/{project_id}/novels/crawl-observability:
+    get:
+      operationId: getProjectNovelCrawlObservabilityByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NovelCrawlObservabilityResponse'
           description: OK
         '400':
           content:

@@ -247,6 +247,106 @@ class NovelCrawlScheduleRow {
   }
 }
 
+class NovelIntakeSourceCount {
+  const NovelIntakeSourceCount({required this.intakeSource, required this.chapterCount});
+  final String? intakeSource;
+  final int chapterCount;
+
+  factory NovelIntakeSourceCount.fromJson(Map<String, dynamic> json) {
+    return NovelIntakeSourceCount(
+      intakeSource: json['intake_source'] as String?,
+      chapterCount: (json['chapter_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class NovelIntakeStatusCount {
+  const NovelIntakeStatusCount({required this.intakeStatus, required this.chapterCount});
+  final String? intakeStatus;
+  final int chapterCount;
+
+  factory NovelIntakeStatusCount.fromJson(Map<String, dynamic> json) {
+    return NovelIntakeStatusCount(
+      intakeStatus: json['intake_status'] as String?,
+      chapterCount: (json['chapter_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class NovelCrawlJobStatusCount {
+  const NovelCrawlJobStatusCount({required this.status, required this.jobCount});
+  final String status;
+  final int jobCount;
+
+  factory NovelCrawlJobStatusCount.fromJson(Map<String, dynamic> json) {
+    return NovelCrawlJobStatusCount(
+      status: json['status'] as String? ?? '',
+      jobCount: (json['job_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class NovelCrawlAuditSampleRow {
+  const NovelCrawlAuditSampleRow({
+    required this.numericId,
+    this.intakeSourceUrl,
+    this.intakeNote,
+    this.createTimeMs,
+  });
+
+  final int numericId;
+  final String? intakeSourceUrl;
+  final String? intakeNote;
+  final int? createTimeMs;
+
+  factory NovelCrawlAuditSampleRow.fromJson(Map<String, dynamic> json) {
+    return NovelCrawlAuditSampleRow(
+      numericId: (json['numeric_id'] as num?)?.toInt() ?? 0,
+      intakeSourceUrl: json['intake_source_url'] as String?,
+      intakeNote: json['intake_note'] as String?,
+      createTimeMs: (json['create_time_ms'] as num?)?.toInt(),
+    );
+  }
+}
+
+class NovelCrawlObservabilityResponse {
+  const NovelCrawlObservabilityResponse({
+    required this.totalChapters,
+    required this.intakeSources,
+    required this.intakeStatuses,
+    required this.recentServerImports,
+    required this.crawlJobStatuses,
+  });
+
+  final int totalChapters;
+  final List<NovelIntakeSourceCount> intakeSources;
+  final List<NovelIntakeStatusCount> intakeStatuses;
+  final List<NovelCrawlAuditSampleRow> recentServerImports;
+  final List<NovelCrawlJobStatusCount> crawlJobStatuses;
+
+  factory NovelCrawlObservabilityResponse.fromJson(Map<String, dynamic> json) {
+    final rawSources = json['intake_sources'] as List<dynamic>? ?? const [];
+    final rawStatuses = json['intake_statuses'] as List<dynamic>? ?? const [];
+    final rawImports = json['recent_server_imports'] as List<dynamic>? ?? const [];
+    final rawJobs = json['crawl_job_statuses'] as List<dynamic>? ?? const [];
+    return NovelCrawlObservabilityResponse(
+      totalChapters: (json['total_chapters'] as num?)?.toInt() ?? 0,
+      intakeSources: rawSources
+          .map((e) => NovelIntakeSourceCount.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+      intakeStatuses: rawStatuses
+          .map((e) => NovelIntakeStatusCount.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+      recentServerImports: rawImports
+          .map((e) => NovelCrawlAuditSampleRow.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+      crawlJobStatuses: rawJobs
+          .map((e) => NovelCrawlJobStatusCount.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
 /// Compat row (**`getNovelIndex`** shape); filled from **`GET …/projects/{uuid}/novels`**.
 class NovelWorkbenchIndexItem {
   const NovelWorkbenchIndexItem({
