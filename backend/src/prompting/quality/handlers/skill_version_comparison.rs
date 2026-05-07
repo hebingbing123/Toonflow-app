@@ -47,6 +47,7 @@ pub(crate) async fn get_skill_version_comparison(
     let items = sqlx::query_as::<_, SkillVersionComparisonItem>(
         r#"
         SELECT
+            'user'::text as scope,
             skill_file_path,
             skill_version_hash,
             COUNT(*) as total_count,

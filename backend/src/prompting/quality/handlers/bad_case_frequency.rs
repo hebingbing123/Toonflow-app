@@ -101,6 +101,7 @@ pub(crate) async fn get_bad_case_frequency(
         .map(
             |(issue_type, (raw_category, count, sample_comments))| BadCaseFrequencyItem {
                 is_high_frequency: count >= 3,
+                scope: "user".to_string(),
                 issue_type,
                 raw_category,
                 count,

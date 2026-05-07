@@ -22,6 +22,7 @@ pub struct BadCaseStatsQuery {
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct BadCaseStatItem {
+    pub scope: String,
     pub bad_case_category: Option<String>,
     pub count: i64,
     pub pass_rate_percent: f64,
@@ -56,6 +57,7 @@ pub(crate) async fn get_bad_case_stats(
     let items = sqlx::query_as::<_, BadCaseStatItem>(
         r#"
         SELECT
+            'user'::text as scope,
             bad_case_category,
             COUNT(*) as count,
             COALESCE(ROUND(

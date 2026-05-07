@@ -625,6 +625,7 @@ mod task15_tests {
     #[test]
     fn bad_case_frequency_item_serializes() {
         let item = BadCaseFrequencyItem {
+            scope: "user".into(),
             issue_type: "dialogue_stiffness".into(),
             raw_category: Some("dialogue_issue".into()),
             count: 4,
@@ -632,6 +633,7 @@ mod task15_tests {
             sample_comments: vec!["读文章感很强".into()],
         };
         let v = serde_json::to_value(&item).unwrap();
+        assert_eq!(v["scope"], "user");
         assert_eq!(v["issueType"], "dialogue_stiffness");
         assert_eq!(v["count"], 4);
         assert_eq!(v["isHighFrequency"], true);
@@ -642,6 +644,7 @@ mod task15_tests {
     #[test]
     fn skill_version_comparison_item_serializes() {
         let item = SkillVersionComparisonItem {
+            scope: "user".into(),
             skill_file_path: "art_skills/2D_90s_japanese_anime/art_prompt/art_storyboard_video.md"
                 .into(),
             skill_version_hash: "abc12345".into(),
@@ -655,6 +658,7 @@ mod task15_tests {
             grade_d_count: 1,
         };
         let v = serde_json::to_value(&item).unwrap();
+        assert_eq!(v["scope"], "user");
         assert_eq!(v["skillVersionHash"], "abc12345");
         assert_eq!(v["passRatePercent"], 80.0);
         assert_eq!(v["gradeACount"], 3);

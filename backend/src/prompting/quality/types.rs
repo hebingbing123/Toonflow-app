@@ -274,6 +274,7 @@ pub struct QualityTokenEfficiencySample {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BadCaseFrequencyItem {
+    pub scope: String,
     /// 规范化问题类型（snake_case）
     pub issue_type: String,
     /// 原始 bad_case_category 值
@@ -290,6 +291,7 @@ pub struct BadCaseFrequencyItem {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct SkillVersionComparisonItem {
+    pub scope: String,
     pub skill_file_path: String,
     pub skill_version_hash: String,
     pub total_count: i64,
