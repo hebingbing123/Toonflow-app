@@ -2726,6 +2726,42 @@ void main() {
     expect(productionStageSubAgentButtonLabel(refineStage), '细化导演计划');
   });
 
+  test('production stage button labels specialize refresh actions by scope', () {
+    const scriptRefreshStage = ProductionWorkspaceStage(
+      title: '导演计划',
+      flowKey: 'scriptPlan',
+      statusLabel: '建议刷新',
+      detail: '导演计划刚变更或正在处理，建议重新读取 scriptPlan 确认最新内容。',
+      domainTool: 'get_flowData',
+    );
+    const assetRefreshStage = ProductionWorkspaceStage(
+      title: '资产准备',
+      flowKey: 'assets',
+      statusLabel: '建议刷新',
+      detail: '资产生成动作刚执行，建议先只回读本次受影响资产，确认结果后再决定是否扩读。',
+      domainTool: 'get_flowData',
+    );
+    const tableRefreshStage = ProductionWorkspaceStage(
+      title: '分镜表',
+      flowKey: 'storyboardTable',
+      statusLabel: '建议刷新',
+      detail: '分镜表刚变更，建议先只回读镜头 #3, 9 对应的 storyboardTable 行。',
+      domainTool: 'get_flowData',
+    );
+    const storyboardRefreshStage = ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: '建议刷新',
+      detail: '分镜动作刚执行，建议先只回读本次镜头 #3, 9 的补图状态。',
+      domainTool: 'get_flowData',
+    );
+
+    expect(productionStageDomainButtonLabel(scriptRefreshStage), '刷新导演计划');
+    expect(productionStageDomainButtonLabel(assetRefreshStage), '回读受影响资产');
+    expect(productionStageDomainButtonLabel(tableRefreshStage), '回读局部分镜表');
+    expect(productionStageDomainButtonLabel(storyboardRefreshStage), '回读缺帧状态');
+  });
+
   test('production recipe button labels follow storyboard fallback actions', () {
     const expandRecipe = ProductionWorkspaceRecipe(
       title: '先看分镜表落地',

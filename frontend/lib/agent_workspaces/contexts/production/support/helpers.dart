@@ -358,6 +358,7 @@ String _extractProductionCoverageDigest(String detail) {
 
 String productionStageDomainButtonLabel(ProductionWorkspaceStage stage) {
   final status = stage.statusLabel.trim();
+  final detail = stage.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
   if (status == '待扩读' || status == '等待分镜表完善') {
     return '扩读分镜表';
   }
@@ -365,6 +366,20 @@ String productionStageDomainButtonLabel(ProductionWorkspaceStage stage) {
       status == '等待导演计划' ||
       status == '等待导演计划完善') {
     return '读取导演计划';
+  }
+  if (status == '建议刷新') {
+    if (stage.flowKey == 'scriptPlan') {
+      return '刷新导演计划';
+    }
+    if (stage.flowKey == 'assets') {
+      return detail.contains('受影响资产') ? '回读受影响资产' : '刷新资产结果';
+    }
+    if (stage.flowKey == 'storyboardTable') {
+      return detail.contains('镜头 #') ? '回读局部分镜表' : '刷新分镜表';
+    }
+    if (stage.flowKey == 'storyboard') {
+      return detail.contains('补图状态') ? '回读缺帧状态' : '刷新分镜结果';
+    }
   }
   return '读取 flow';
 }
