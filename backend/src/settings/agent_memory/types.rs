@@ -119,6 +119,7 @@ pub(crate) struct ContentBlock {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct MemoryHistoryItem {
+    pub(crate) scope: &'static str,
     pub(crate) id: String,
     pub(crate) role: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -167,6 +168,7 @@ pub(crate) fn to_memory_history_item(row: MessageRow) -> MemoryHistoryItem {
         .unwrap_or_else(Utc::now);
     let memory_tier = row.memory_tier.unwrap_or_else(|| "message".to_string());
     MemoryHistoryItem {
+        scope: "user",
         id: row.id.to_string(),
         role: normalize_role(row.role),
         name: row.name,

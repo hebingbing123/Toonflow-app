@@ -23,6 +23,7 @@
 - **W4.6 已启动**：`GET /api/v1/usage/summary` 响应与 OpenAPI 已显式增加 `scope = user`，先固定用户聚合口径；memory / skills / quality 范围定义继续推进
 - **W4.6 持续推进**：`GET /api/v1/skills/summary`、`GET /api/v1/agents/memory/cost-overview`、`GET /api/v1/quality/stats` 已显式返回 `scope=user`，与 usage 端点对齐为用户口径
 - **W4.6 持续推进**：quality 其余聚合端点（`stage-pass-rate`、`stage-grade-distribution`、`scope-insights`、`token-efficiency`、`token-efficiency/samples`）已补 `scope=user`，`quality` 聚合口径统一为 user
+- **W4.6 持续推进**：`POST /api/v1/agents/memory/query` 的 `MemoryHistoryItem` 已补 `scope=user`，memory 可见输出与 usage/skills/quality 口径对齐
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 
