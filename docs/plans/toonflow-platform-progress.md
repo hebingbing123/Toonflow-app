@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`4b253161`
-- 当前最新完成竖切：`改写与上游结构竖切 production 执行提示可视化增量`
+- 当前最新完成 commit：`9b675231`
+- 当前最新完成竖切：`资产与生产竖切 production readiness/gap 摘要增量`
 
 ## Phase 1 进度
 
@@ -170,7 +170,24 @@
 
 ### 5. 资产与生产竖切
 
-状态：`pending`
+状态：`in_progress`
+
+当前增量：
+
+- production workspace 的 flow 摘要与阶段文案现在会显式给出 readiness / gap 信息，而不只显示“是否有数据”
+- assets flow 会显示主资产已就绪数、主资产待补数、衍生缺口数，便于判断当前是否真能推进出图
+- storyboard flow 会显示画面结果已就绪数、待补帧数、纯文本镜头数，避免误把纯文本镜头当成缺帧
+- storyboardTable flow 会显示已读取行数 / 总行数 / 待展开行数，便于决定是否继续抽样还是进入修订
+- 这些 readiness / gap 摘要同时下沉到 production stage detail 与结果摘要中，帮助用户在最少点击下判断当前阻塞点
+
+本轮定向验证：
+
+- `flutter test test/production_workspace_support_test.dart`
+- 触达文件 `flutter analyze` 通过
+
+已提交：
+
+- `9b675231` — turn production flow snapshots into explicit readiness and gap summaries
 
 ### 6. 质量与发布最小闭环竖切
 
