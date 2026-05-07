@@ -36,11 +36,33 @@ fn search_ilike(raw: Option<String>) -> Option<String> {
     })
 }
 
+fn exact_filter(raw: Option<String>) -> Option<String> {
+    raw.and_then(|s| {
+        let t = s.trim();
+        if t.is_empty() {
+            None
+        } else {
+            Some(t.to_owned())
+        }
+    })
+}
+
+fn validate_intake_status(value: &str) -> Result<(), ApiError> {
+    match value {
+        "draft" | "pending_review" | "admitted" | "rejected" => Ok(()),
+        _ => Err(ApiError::BadRequest(
+            "intake_status must be one of draft, pending_review, admitted, rejected".into(),
+        )),
+    }
+}
+
 async fn count_novels_filtered(
     pool: &PgPool,
     project_id: Uuid,
     uid: Uuid,
     search_pat: Option<&str>,
+    intake_status: Option<&str>,
+    intake_source: Option<&str>,
 ) -> Result<i64, ApiError> {
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
@@ -56,6 +78,14 @@ async fn count_novels_filtered(
         qb.push(" AND n.chapter ILIKE ");
         qb.push_bind(pat);
     }
+    if let Some(status) = intake_status {
+        qb.push(" AND n.metadata->>'intakeStatus' = ");
+        qb.push_bind(status);
+    }
+    if let Some(source) = intake_source {
+        qb.push(" AND n.metadata->>'intakeSource' = ");
+        qb.push_bind(source);
+    }
     let total: i64 = qb
         .build_query_scalar()
         .fetch_one(pool)
@@ -69,6 +99,8 @@ async fn select_novels_filtered(
     project_id: Uuid,
     uid: Uuid,
     search_pat: Option<&str>,
+    intake_status: Option<&str>,
+    intake_source: Option<&str>,
     limit_offset: Option<(i64, i64)>,
 ) -> Result<Vec<NovelRow>, ApiError> {
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
@@ -89,6 +121,14 @@ async fn select_novels_filtered(
     if let Some(pat) = search_pat {
         qb.push(" AND n.chapter ILIKE ");
         qb.push_bind(pat);
+    }
+    if let Some(status) = intake_status {
+        qb.push(" AND n.metadata->>'intakeStatus' = ");
+        qb.push_bind(status);
+    }
+    if let Some(source) = intake_source {
+        qb.push(" AND n.metadata->>'intakeSource' = ");
+        qb.push_bind(source);
     }
     qb.push(" ORDER BY n.chapter_index ASC, n.numeric_id ASC ");
     if let Some((lim, off)) = limit_offset {
@@ -111,6 +151,14 @@ async fn list_novels_inner(
 ) -> Result<Json<ListNovelsResponse>, ApiError> {
     let search_pat = search_ilike(query.search);
     let search_ref = search_pat.as_deref();
+    let intake_status = exact_filter(query.intake_status);
+    let intake_status_ref = intake_status.as_deref();
+    let intake_source = exact_filter(query.intake_source);
+    let intake_source_ref = intake_source.as_deref();
+
+    if let Some(status) = intake_status_ref {
+        validate_intake_status(status)?;
+    }
 
     let limit_clamped = match query.limit {
         None => None,
@@ -142,11 +190,37 @@ async fn list_novels_inner(
     });
 
     let (items, total) = if limit_offset.is_some() {
-        let total = count_novels_filtered(pool, project_id, uid, search_ref).await?;
-        let items = select_novels_filtered(pool, project_id, uid, search_ref, limit_offset).await?;
+        let total = count_novels_filtered(
+            pool,
+            project_id,
+            uid,
+            search_ref,
+            intake_status_ref,
+            intake_source_ref,
+        )
+        .await?;
+        let items = select_novels_filtered(
+            pool,
+            project_id,
+            uid,
+            search_ref,
+            intake_status_ref,
+            intake_source_ref,
+            limit_offset,
+        )
+        .await?;
         (items, total)
     } else {
-        let items = select_novels_filtered(pool, project_id, uid, search_ref, None).await?;
+        let items = select_novels_filtered(
+            pool,
+            project_id,
+            uid,
+            search_ref,
+            intake_status_ref,
+            intake_source_ref,
+            None,
+        )
+        .await?;
         let total = items.len() as i64;
         (items, total)
     };

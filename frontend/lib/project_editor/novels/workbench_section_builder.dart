@@ -18,18 +18,7 @@ Widget buildProjectNovelsWorkbenchSection({
   final first = novels.isNotEmpty ? novels.first : null;
   final last = novels.isNotEmpty ? novels.last : null;
   final summaryLine = summarizeNovelRows(novels);
-  final admittedCount = novels
-      .where((row) => row.intakeStatus == 'admitted')
-      .length;
-  final pendingCount = novels
-      .where((row) => row.intakeStatus == 'pending_review')
-      .length;
-  final rejectedCount = novels
-      .where((row) => row.intakeStatus == 'rejected')
-      .length;
-  final crawlerCount = novels
-      .where((row) => row.intakeSource == 'crawler_client')
-      .length;
+  final intakeSummaryLine = summarizeNovelIntakeRows(novels);
   final disabled =
       novelsBusy[0] ||
       novelsLoading[0] ||
@@ -63,7 +52,7 @@ Widget buildProjectNovelsWorkbenchSection({
         if (novels.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
-            '准入 admitted $admittedCount / pending $pendingCount / rejected $rejectedCount · crawler $crawlerCount 条',
+            intakeSummaryLine,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
             ),

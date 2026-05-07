@@ -54,3 +54,21 @@ fn patch_novel_body_accepts_nullable_intake_fields() {
     assert_eq!(body.intake_source_url, Some(Value::Null));
     assert_eq!(body.intake_note, Some(json!("needs cleanup")));
 }
+
+#[test]
+fn list_novels_query_accepts_intake_filters() {
+    let query: super::dto::ListNovelsQuery = serde_json::from_value(json!({
+        "search": "第一章",
+        "intake_status": "pending_review",
+        "intake_source": "crawler_client",
+        "page": 2,
+        "limit": 20
+    }))
+    .expect("deserialize novels list query");
+
+    assert_eq!(query.search.as_deref(), Some("第一章"));
+    assert_eq!(query.intake_status.as_deref(), Some("pending_review"));
+    assert_eq!(query.intake_source.as_deref(), Some("crawler_client"));
+    assert_eq!(query.page, Some(2));
+    assert_eq!(query.limit, Some(20));
+}

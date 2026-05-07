@@ -24,9 +24,12 @@ Future<void> openNovelWorkbenchDialog({
     required ProjectRow project,
     required List<bool> novelsBusy,
     required TextEditingController searchCtrl,
+    required TextEditingController searchIntakeStatusCtrl,
+    required TextEditingController searchIntakeSourceCtrl,
     required bool localBusy,
     required void Function(bool value) setLocalBusy,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required void Function(String value) updateInfoLine,
     required void Function(List<NovelRow> rows, String message) applyResult,
   })
   buildSearchSection,
@@ -113,6 +116,9 @@ Future<void> openNovelWorkbenchDialog({
     required void Function(String value) updateInfoLine,
     required TextEditingController numericIdsCtrl,
     required TextEditingController batchDeleteIdsCtrl,
+    required TextEditingController batchAdmissionIdsCtrl,
+    required TextEditingController batchAdmissionStatusCtrl,
+    required TextEditingController batchAdmissionNoteCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
   })
   buildSnapshotSection,
@@ -213,9 +219,12 @@ Future<void> openNovelWorkbenchDialog({
                         project: project,
                         novelsBusy: novelsBusy,
                         searchCtrl: ctrls.searchCtrl,
+                        searchIntakeStatusCtrl: ctrls.searchIntakeStatusCtrl,
+                        searchIntakeSourceCtrl: ctrls.searchIntakeSourceCtrl,
                         localBusy: local.localBusy,
                         setLocalBusy: setLocalBusy,
                         refreshWorkbench: refreshWorkbench,
+                        updateInfoLine: updateInfoLine,
                         applyResult: (rows, message) {
                           applyNovelWorkbenchSearchResult(
                             setLocalState: setLocalState,
@@ -314,6 +323,10 @@ Future<void> openNovelWorkbenchDialog({
                         updateInfoLine: updateInfoLine,
                         numericIdsCtrl: ctrls.numericIdsCtrl,
                         batchDeleteIdsCtrl: ctrls.batchDeleteIdsCtrl,
+                        batchAdmissionIdsCtrl: ctrls.batchAdmissionIdsCtrl,
+                        batchAdmissionStatusCtrl:
+                            ctrls.batchAdmissionStatusCtrl,
+                        batchAdmissionNoteCtrl: ctrls.batchAdmissionNoteCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
                     ],

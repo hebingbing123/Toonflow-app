@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`c986cabf`
-- 当前最新完成竖切：`内容接入竖切（主路径）crawler_client 首个增量`
+- 当前最新完成 commit：`6acfab0e`
+- 当前最新完成竖切：`内容接入竖切（主路径）准入筛选与批量处理增量`
 
 ## Phase 1 进度
 
@@ -99,11 +99,15 @@
 - 前端手动录入、整本导入、`crawler_client` 三条入口统一写入 intake source/status
 - 章节编辑区支持查看和更新准入状态、来源 URL、准入备注
 - 工作台摘要增加 admitted/pending/rejected/crawler 统计
+- 列表接口支持按 `intake_status` / `intake_source` 过滤
+- 工作台搜索区支持准入状态 / 来源筛选与一键清空筛选
+- 工作台支持批量更新章节准入状态与准入备注，便于处理 pending/rejected 队列
 
 本轮定向验证：
 
 - `flutter test test/novel_import_parser_test.dart`
 - `cargo test narrative::novels --lib`
+- `flutter test test/novel_workbench_support_test.dart`
 - 触达文件 `flutter analyze` 通过
 - 本轮额外确认：`yarn refactor:check` 已全绿；后续默认保留到整批任务完成后再统一执行
 
@@ -111,6 +115,9 @@
 
 - `76232801` — add whole-book intake preview + batch import on top of the existing chapter API
 - `c986cabf` — add crawler extraction regression coverage on the shared import path
+- `7a7bb497` — preserve explicit nulls in intake PATCH bodies for admission editing
+- `91170746` — unify intake source/admission metadata on the shared novel rail
+- `6acfab0e` — add intake filtering and batch admission actions on the shared workbench
 
 ### 4. 改写与上游结构竖切
 

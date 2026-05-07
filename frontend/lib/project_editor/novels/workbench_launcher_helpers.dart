@@ -35,6 +35,13 @@ Future<void> refreshNovelWorkbenchLocalState({
           .map((e) => e.numericId)
           .join(',');
     }
+    if (ctrls.batchAdmissionIdsCtrl.text.trim().isEmpty &&
+        refreshed.isNotEmpty) {
+      ctrls.batchAdmissionIdsCtrl.text = refreshed
+          .take(3)
+          .map((e) => e.numericId)
+          .join(',');
+    }
   });
 }
 

@@ -39,6 +39,10 @@ pub struct ListNovelsQuery {
     #[serde(default)]
     pub search: Option<String>,
     #[serde(default)]
+    pub intake_status: Option<String>,
+    #[serde(default)]
+    pub intake_source: Option<String>,
+    #[serde(default)]
     pub page: Option<u32>,
     #[serde(default)]
     pub limit: Option<u32>,

@@ -81,18 +81,31 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required String token,
     required ProjectRow project,
     required TextEditingController searchCtrl,
+    required TextEditingController searchIntakeStatusCtrl,
+    required TextEditingController searchIntakeSourceCtrl,
     required void Function(List<NovelRow> rows, String infoLine) applyResult,
   }) async {
     final rows = await fetchProjectNovelsByProjectId(
       token,
       project.id,
       search: searchCtrl.text.trim(),
+      intakeStatus: searchIntakeStatusCtrl.text.trim(),
+      intakeSource: searchIntakeSourceCtrl.text.trim(),
       page: 1,
       limit: 10,
     );
+    final filters = <String>[
+      if (searchCtrl.text.trim().isNotEmpty) 'keyword',
+      if (searchIntakeStatusCtrl.text.trim().isNotEmpty)
+        'status=${searchIntakeStatusCtrl.text.trim()}',
+      if (searchIntakeSourceCtrl.text.trim().isNotEmpty)
+        'source=${searchIntakeSourceCtrl.text.trim()}',
+    ];
     applyResult(
       List<NovelRow>.from(rows.items),
-      '搜索命中 ${rows.total} 条，当前展示 ${rows.items.length} 条。',
+      filters.isEmpty
+          ? '搜索命中 ${rows.total} 条，当前展示 ${rows.items.length} 条。'
+          : '筛选命中 ${rows.total} 条（${filters.join(' / ')}），当前展示 ${rows.items.length} 条。',
     );
   }
 
@@ -320,5 +333,34 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     final message = await batchDeleteNovelsUnderProject(token, project.id, ids);
     await refreshWorkbench(setLocalState);
     applyInfoLine('已批量删除 ${ids.length} 条章节：$message');
+  }
+
+  Future<void> _batchUpdateNovelWorkbenchAdmission({
+    required String token,
+    required ProjectRow project,
+    required TextEditingController batchAdmissionIdsCtrl,
+    required TextEditingController batchAdmissionStatusCtrl,
+    required TextEditingController batchAdmissionNoteCtrl,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required StateSetter setLocalState,
+    required void Function(String infoLine) applyInfoLine,
+  }) async {
+    final ids = parseNumericIdList(batchAdmissionIdsCtrl.text);
+    if (ids.isEmpty) {
+      throw const FormatException('至少提供一个章节 ID');
+    }
+    final nextStatus = batchAdmissionStatusCtrl.text.trim();
+    if (nextStatus.isEmpty) {
+      throw const FormatException('请先选择目标准入状态');
+    }
+    final note = batchAdmissionNoteCtrl.text.trim();
+    for (final id in ids) {
+      await patchProjectNovelByProjectIds(token, project.id, id, {
+        'intake_status': nextStatus,
+        'intake_note': note.isEmpty ? null : note,
+      });
+    }
+    await refreshWorkbench(setLocalState);
+    applyInfoLine('已批量更新 ${ids.length} 条章节到 $nextStatus。');
   }
 }

@@ -92,6 +92,9 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
     required void Function(String value) updateInfoLine,
     required TextEditingController numericIdsCtrl,
     required TextEditingController batchDeleteIdsCtrl,
+    required TextEditingController batchAdmissionIdsCtrl,
+    required TextEditingController batchAdmissionStatusCtrl,
+    required TextEditingController batchAdmissionNoteCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
   }) {
     return Column(
@@ -193,6 +196,65 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                   ),
                 ),
           child: const Text('批量删除章节'),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: batchAdmissionIdsCtrl,
+          decoration: const InputDecoration(
+            labelText: '批量准入章节 IDs',
+            helperText: '用逗号分隔，如 1,2,3',
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: batchAdmissionStatusCtrl.text.isEmpty
+              ? 'pending_review'
+              : batchAdmissionStatusCtrl.text,
+          decoration: const InputDecoration(labelText: '目标准入状态'),
+          items: const [
+            DropdownMenuItem(value: 'draft', child: Text('draft')),
+            DropdownMenuItem(
+              value: 'pending_review',
+              child: Text('pending_review'),
+            ),
+            DropdownMenuItem(value: 'admitted', child: Text('admitted')),
+            DropdownMenuItem(value: 'rejected', child: Text('rejected')),
+          ],
+          onChanged: (value) {
+            batchAdmissionStatusCtrl.text = value ?? 'pending_review';
+          },
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: batchAdmissionNoteCtrl,
+          maxLines: 2,
+          decoration: const InputDecoration(
+            labelText: '批量准入备注',
+            helperText: '留空表示不写备注；会覆盖所选章节的 intake_note。',
+          ),
+        ),
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed: localBusy
+              ? null
+              : () => _runNovelWorkbenchAction(
+                  ctx: ctx,
+                  setDialogState: setDialogState,
+                  setLocalState: setLocalState,
+                  novelsBusy: novelsBusy,
+                  setLocalBusy: setLocalBusy,
+                  action: () => _batchUpdateNovelWorkbenchAdmission(
+                    token: token,
+                    project: project,
+                    batchAdmissionIdsCtrl: batchAdmissionIdsCtrl,
+                    batchAdmissionStatusCtrl: batchAdmissionStatusCtrl,
+                    batchAdmissionNoteCtrl: batchAdmissionNoteCtrl,
+                    refreshWorkbench: refreshWorkbench,
+                    setLocalState: setLocalState,
+                    applyInfoLine: updateInfoLine,
+                  ),
+                ),
+          child: const Text('批量更新准入状态'),
         ),
       ],
     );

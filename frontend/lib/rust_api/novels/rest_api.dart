@@ -11,12 +11,20 @@ Future<ListNovelsResponse> fetchProjectNovelsByProjectId(
   String accessToken,
   String projectId, {
   String? search,
+  String? intakeStatus,
+  String? intakeSource,
   int? page,
   int? limit,
 }) async {
   final qp = <String, String>{};
   if (search != null && search.isNotEmpty) {
     qp['search'] = search;
+  }
+  if (intakeStatus != null && intakeStatus.isNotEmpty) {
+    qp['intake_status'] = intakeStatus;
+  }
+  if (intakeSource != null && intakeSource.isNotEmpty) {
+    qp['intake_source'] = intakeSource;
   }
   if (page != null) {
     qp['page'] = '$page';

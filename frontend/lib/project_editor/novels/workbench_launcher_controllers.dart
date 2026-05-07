@@ -3,6 +3,8 @@ part of 'workbench_launcher.dart';
 class _NovelWorkbenchControllers {
   const _NovelWorkbenchControllers({
     required this.searchCtrl,
+    required this.searchIntakeStatusCtrl,
+    required this.searchIntakeSourceCtrl,
     required this.importUrlCtrl,
     required this.importRawTextCtrl,
     required this.importBatchSizeCtrl,
@@ -18,6 +20,9 @@ class _NovelWorkbenchControllers {
     required this.generateIdsCtrl,
     required this.numericIdsCtrl,
     required this.batchDeleteIdsCtrl,
+    required this.batchAdmissionIdsCtrl,
+    required this.batchAdmissionStatusCtrl,
+    required this.batchAdmissionNoteCtrl,
   });
 
   factory _NovelWorkbenchControllers.fromItems({
@@ -27,6 +32,8 @@ class _NovelWorkbenchControllers {
   }) {
     return _NovelWorkbenchControllers(
       searchCtrl: TextEditingController(),
+      searchIntakeStatusCtrl: TextEditingController(),
+      searchIntakeSourceCtrl: TextEditingController(),
       importUrlCtrl: TextEditingController(),
       importRawTextCtrl: TextEditingController(),
       importBatchSizeCtrl: TextEditingController(text: '10'),
@@ -58,10 +65,17 @@ class _NovelWorkbenchControllers {
       batchDeleteIdsCtrl: TextEditingController(
         text: currentItems.skip(1).take(2).map((e) => e.numericId).join(','),
       ),
+      batchAdmissionIdsCtrl: TextEditingController(
+        text: currentItems.take(3).map((e) => e.numericId).join(','),
+      ),
+      batchAdmissionStatusCtrl: TextEditingController(text: 'pending_review'),
+      batchAdmissionNoteCtrl: TextEditingController(),
     );
   }
 
   final TextEditingController searchCtrl;
+  final TextEditingController searchIntakeStatusCtrl;
+  final TextEditingController searchIntakeSourceCtrl;
   final TextEditingController importUrlCtrl;
   final TextEditingController importRawTextCtrl;
   final TextEditingController importBatchSizeCtrl;
@@ -77,9 +91,14 @@ class _NovelWorkbenchControllers {
   final TextEditingController generateIdsCtrl;
   final TextEditingController numericIdsCtrl;
   final TextEditingController batchDeleteIdsCtrl;
+  final TextEditingController batchAdmissionIdsCtrl;
+  final TextEditingController batchAdmissionStatusCtrl;
+  final TextEditingController batchAdmissionNoteCtrl;
 
   void dispose() {
     searchCtrl.dispose();
+    searchIntakeStatusCtrl.dispose();
+    searchIntakeSourceCtrl.dispose();
     importUrlCtrl.dispose();
     importRawTextCtrl.dispose();
     importBatchSizeCtrl.dispose();
@@ -95,5 +114,8 @@ class _NovelWorkbenchControllers {
     generateIdsCtrl.dispose();
     numericIdsCtrl.dispose();
     batchDeleteIdsCtrl.dispose();
+    batchAdmissionIdsCtrl.dispose();
+    batchAdmissionStatusCtrl.dispose();
+    batchAdmissionNoteCtrl.dispose();
   }
 }
