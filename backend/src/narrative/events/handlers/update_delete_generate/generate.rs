@@ -18,6 +18,10 @@ use super::super::super::extraction::{
 };
 use super::super::super::MAX_GENERATE_EVENTS_CONCURRENCY;
 
+fn is_blocked_intake_status(status: Option<&str>) -> bool {
+    matches!(status, Some("pending_review") | Some("rejected"))
+}
+
 pub(crate) async fn post_generate_novel_events_for_project(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -46,7 +50,14 @@ pub(crate) async fn post_generate_novel_events_for_project(
 
     let novels: Vec<NovelEventExtractionRow> = sqlx::query_as(
         r#"
-        SELECT n.id, p.numeric_id AS project_numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data
+        SELECT n.id,
+               p.numeric_id AS project_numeric_id,
+               n.numeric_id,
+               n.chapter_index,
+               n.reel,
+               n.chapter,
+               n.chapter_data,
+               n.metadata->>'intakeStatus' AS intake_status
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
@@ -64,6 +75,21 @@ pub(crate) async fn post_generate_novel_events_for_project(
 
     if novels.is_empty() {
         return Err(ApiError::BadRequest("没有对应章节".into()));
+    }
+    let blocked_ids: Vec<i32> = novels
+        .iter()
+        .filter(|row| is_blocked_intake_status(row.intake_status.as_deref()))
+        .map(|row| row.numeric_id)
+        .collect();
+    if !blocked_ids.is_empty() {
+        return Err(ApiError::BadRequest(format!(
+            "以下章节尚未准入，不可直接生成事件：{}",
+            blocked_ids
+                .iter()
+                .map(i32::to_string)
+                .collect::<Vec<_>>()
+                .join(", ")
+        )));
     }
 
     let ids: Vec<Uuid> = novels.iter().map(|n| n.id).collect();
@@ -101,4 +127,18 @@ pub(crate) async fn post_generate_novel_events_for_project(
     Ok(JsonResponse(NovelOkMessageResponse {
         message: "生成事件成功",
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_blocked_intake_status;
+
+    #[test]
+    fn blocks_pending_and_rejected_intake_status() {
+        assert!(is_blocked_intake_status(Some("pending_review")));
+        assert!(is_blocked_intake_status(Some("rejected")));
+        assert!(!is_blocked_intake_status(Some("admitted")));
+        assert!(!is_blocked_intake_status(Some("draft")));
+        assert!(!is_blocked_intake_status(None));
+    }
 }

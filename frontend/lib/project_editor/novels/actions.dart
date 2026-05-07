@@ -1,5 +1,19 @@
 part of '../../../home_page.dart';
 
+class _CrawlerPreviewPayload {
+  const _CrawlerPreviewPayload({
+    required this.title,
+    required this.bodyText,
+    required this.mode,
+    required this.pageCount,
+  });
+
+  final String title;
+  final String bodyText;
+  final String mode;
+  final int pageCount;
+}
+
 /// Encapsulates chapter workbench mutations so the main novels workbench file
 /// can focus on dialog orchestration and domain layout.
 extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
@@ -34,19 +48,93 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       throw FormatException('抓取失败，HTTP ${response.statusCode}');
     }
 
-    final extracted = extractCrawlerContentFromHtml(
-      response.body,
-      fallbackTitle: uri.host,
-    );
-    importRawTextCtrl.text = extracted.bodyText;
-    final rows = _parseNovelImportPreview(extracted.bodyText);
+    final payload = await _crawlNovelSourceAdaptive(uri, response.body);
+    importRawTextCtrl.text = payload.bodyText;
+    final rows = _parseNovelImportPreview(payload.bodyText);
     applyImportPreview(
       rows,
       rows.isEmpty
-          ? '已抓取 ${extracted.title}，但没有抽出可导入正文。'
-          : '已抓取 ${extracted.title}，抽出 ${rows.length} 条可导入章节。',
+          ? '已抓取 ${payload.title}，但没有抽出可导入正文。'
+          : '已抓取 ${payload.title}，抽出 ${rows.length} 条可导入章节。',
     );
-    applyInfoLine('client-side crawl 已完成：${extracted.title}');
+    applyInfoLine(
+      'client-side crawl 已完成：${payload.title}（模式 ${payload.mode}，抓取 ${payload.pageCount} 页）',
+    );
+  }
+
+  Future<_CrawlerPreviewPayload> _crawlNovelSourceAdaptive(
+    Uri seedUri,
+    String seedHtml,
+  ) async {
+    final seed = extractCrawlerContentFromHtml(
+      seedHtml,
+      fallbackTitle: seedUri.host,
+      pageUri: seedUri,
+    );
+    if (seed.chapterUrls.isNotEmpty) {
+      final chapterPages = seed.chapterUrls.take(20).toList(growable: false);
+      final chunks = <String>[];
+      for (var i = 0; i < chapterPages.length; i += 1) {
+        final body = await _fetchCrawlerBodyText(chapterPages[i]);
+        if (body == null || body.bodyText.trim().isEmpty) {
+          continue;
+        }
+        chunks.add('${body.title}\n${body.bodyText}');
+      }
+      if (chunks.isNotEmpty) {
+        return _CrawlerPreviewPayload(
+          title: seed.title,
+          bodyText: chunks.join('\n\n'),
+          mode: 'toc',
+          pageCount: chunks.length,
+        );
+      }
+    }
+
+    final pages = <String>[seed.bodyText];
+    final visited = <String>{seedUri.toString()};
+    var next = seed.nextPageUrl;
+    var hops = 0;
+    while (next != null && hops < 5) {
+      if (visited.contains(next)) {
+        break;
+      }
+      visited.add(next);
+      final page = await _fetchCrawlerBodyText(next);
+      if (page == null || page.bodyText.trim().isEmpty) {
+        break;
+      }
+      pages.add(page.bodyText);
+      next = page.nextPageUrl;
+      hops += 1;
+    }
+    return _CrawlerPreviewPayload(
+      title: seed.title,
+      bodyText: pages.join('\n\n'),
+      mode: pages.length > 1 ? 'pagination' : 'single',
+      pageCount: pages.length,
+    );
+  }
+
+  Future<ExtractedCrawlerContent?> _fetchCrawlerBodyText(String rawUrl) async {
+    final uri = Uri.tryParse(rawUrl);
+    if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
+      return null;
+    }
+    final response = await http.get(
+      uri,
+      headers: const <String, String>{
+        'User-Agent': 'Toonflow/1.0 content-intake crawler',
+      },
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      return null;
+    }
+    return extractCrawlerContentFromHtml(
+      response.body,
+      fallbackTitle: uri.host,
+      pageUri: uri,
+    );
   }
 
   Future<void> _runNovelWorkbenchAction({
@@ -151,6 +239,13 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     final normalizedChapters = reindexParsedNovelChapters(chapters);
     if (normalizedChapters.isEmpty) {
       throw const FormatException('请先预解析整本内容');
+    }
+    final quality = evaluateNovelImportQuality(normalizedChapters);
+    if (!quality.canImport) {
+      throw FormatException('导入质量门未通过：${quality.blockers.join('；')}');
+    }
+    if (quality.warnings.isNotEmpty) {
+      applyInfoLine('导入质量提示：${quality.warnings.join('；')}');
     }
     if (batchSize <= 0) {
       throw const FormatException('批次大小必须大于 0');

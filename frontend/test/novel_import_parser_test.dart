@@ -47,8 +47,29 @@ void main() {
       expect(extracted.title, '测试小说');
       expect(extracted.bodyText, contains('第一章 初见'));
       expect(extracted.bodyText, isNot(contains('window.bad')));
+      expect(extracted.nextPageUrl, isNull);
+      expect(extracted.chapterUrls, isEmpty);
     },
   );
+
+  test('extractCrawlerContentFromHtml removes crawler junk lines', () {
+    final extracted = extractCrawlerContentFromHtml('''
+<html>
+  <head><title>测试站</title></head>
+  <body>
+    <div>第一章 开端</div>
+    <div>请记住本站</div>
+    <div>她推开门。</div>
+    <div>点击下一页继续阅读</div>
+  </body>
+</html>
+''');
+
+    expect(extracted.bodyText, contains('第一章 开端'));
+    expect(extracted.bodyText, contains('她推开门。'));
+    expect(extracted.bodyText, isNot(contains('请记住本站')));
+    expect(extracted.bodyText, isNot(contains('点击下一页')));
+  });
 
   test(
     'reindexParsedNovelChapters trims and renumbers edited preview rows',
@@ -93,5 +114,96 @@ void main() {
     expect(rows.length, 1);
     expect(rows.first.chapterIndex, 1);
     expect(rows.first.chapter, '第二章');
+  });
+
+  test('parseWholeBookNovelText supports 序章 and 番外 headers', () {
+    final rows = parseWholeBookNovelText('''
+序章
+雨从凌晨开始下。
+
+番外
+多年以后，她又回到这扇门前。
+''');
+
+    expect(rows.length, 2);
+    expect(rows[0].chapter, '序章');
+    expect(rows[1].chapter, '番外');
+  });
+
+  test('evaluateNovelImportQuality blocks too short imports', () {
+    final report = evaluateNovelImportQuality([
+      const ParsedNovelChapter(
+        chapterIndex: 1,
+        chapter: '第一章',
+        chapterData: '太短',
+      ),
+    ]);
+
+    expect(report.canImport, isFalse);
+    expect(report.blockers, isNotEmpty);
+  });
+
+  test('evaluateNovelImportQuality warns duplicated chapter content', () {
+    final report = evaluateNovelImportQuality(
+      [
+        const ParsedNovelChapter(
+          chapterIndex: 1,
+          chapter: '第一章',
+          chapterData: '这是第一章的正文，长度足够用于测试。',
+        ),
+        const ParsedNovelChapter(
+          chapterIndex: 2,
+          chapter: '第二章',
+          chapterData: '这是第一章的正文，长度足够用于测试。',
+        ),
+        const ParsedNovelChapter(
+          chapterIndex: 3,
+          chapter: '第三章',
+          chapterData: '这是第三章的正文，内容不同且长度同样足够。',
+        ),
+      ],
+      minTotalChars: 30,
+      minAverageChapterChars: 10,
+    );
+
+    expect(report.canImport, isTrue);
+    expect(report.warnings.join(' '), contains('重复正文'));
+  });
+
+  test('extractCrawlerContentFromHtml discovers next page url', () {
+    final extracted = extractCrawlerContentFromHtml(
+      '''
+<html>
+  <head><title>分页正文</title></head>
+  <body>
+    <div>第一章 片段</div>
+    <a href="/book/1?page=2">下一页</a>
+  </body>
+</html>
+''',
+      pageUri: Uri.parse('https://example.com/book/1?page=1'),
+    );
+
+    expect(extracted.nextPageUrl, 'https://example.com/book/1?page=2');
+  });
+
+  test('extractCrawlerContentFromHtml discovers chapter links from toc', () {
+    final extracted = extractCrawlerContentFromHtml(
+      '''
+<html>
+  <head><title>目录</title></head>
+  <body>
+    <a href="/book/1/chapter-1">第一章 初见</a>
+    <a href="/book/1/chapter-2">第二章 回响</a>
+    <a href="https://evil.example.org/chapter-3">第三章</a>
+  </body>
+</html>
+''',
+      pageUri: Uri.parse('https://example.com/book/1/toc'),
+    );
+
+    expect(extracted.chapterUrls.length, 2);
+    expect(extracted.chapterUrls[0], 'https://example.com/book/1/chapter-1');
+    expect(extracted.chapterUrls[1], 'https://example.com/book/1/chapter-2');
   });
 }

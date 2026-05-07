@@ -113,10 +113,12 @@ pub(super) struct GenerateNovelEventsBody {
 pub(super) struct NovelEventExtractionRow {
     pub(super) id: Uuid,
     pub(super) project_numeric_id: i32,
+    pub(super) numeric_id: i32,
     pub(super) chapter_index: i32,
     pub(super) reel: Option<String>,
     pub(super) chapter: String,
     pub(super) chapter_data: String,
+    pub(super) intake_status: Option<String>,
 }
 
 fn default_generate_events_concurrency() -> usize {
