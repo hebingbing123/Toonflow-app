@@ -233,14 +233,15 @@ ProductionWorkspaceStage _buildAssetsStage({
     final missingCount = rows.length - readyCount;
     final pendingDeriveIds = extractProductionPendingDeriveAssetIds(rows);
     final pendingScope = summarizeProductionAssetFocusIds(pendingDeriveIds);
+    final readiness = summarizeProductionAssetReadiness(rows);
     if (missingCount > 0) {
       return ProductionWorkspaceStage(
         title: '资产准备',
         flowKey: 'assets',
         statusLabel: '需补图',
         detail: pendingScope.isEmpty
-            ? '共 ${rows.length} 项资产，仍有 $missingCount 项缺少图像结果，适合继续运行素材生成。'
-            : '共 ${rows.length} 项资产，$pendingScope 仍缺图，优先只补这批衍生资产更省 token。',
+            ? '共 ${rows.length} 项资产，仍有 $missingCount 项缺少图像结果，适合继续运行素材生成。$readiness。'
+            : '共 ${rows.length} 项资产，$pendingScope 仍缺图，优先只补这批衍生资产更省 token。$readiness。',
         subAgentTool: 'run_sub_agent_generate_assets',
         subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),
         prompt: buildProductionAssetGenerationPrompt(
@@ -253,7 +254,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       title: '资产准备',
       flowKey: 'assets',
       statusLabel: '已齐备',
-      detail: '共 ${rows.length} 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。',
+      detail: '共 ${rows.length} 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。$readiness。',
       domainTool: 'get_flowData',
       domainArgs: _assetsCompactArgs(),
     );
@@ -414,7 +415,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       flowKey: 'storyboardTable',
       statusLabel: '待审核',
       detail:
-          'storyboardTable 已有内容，${digest.isEmpty ? '' : '$digest，'}约 ${trimmed.length} 字，建议先做分镜表审核再推进 storyboard 画面结果。',
+          'storyboardTable 已有内容，${digest.isEmpty ? '' : '$digest，'}约 ${trimmed.length} 字，建议先做分镜表审核再推进 storyboard 画面结果。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: rowCount)}。',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     );
@@ -426,7 +427,8 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       title: '分镜表',
       flowKey: 'storyboardTable',
       statusLabel: '已抽样',
-      detail: '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。',
+      detail:
+          '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardTableReadArgs(),
       subAgentTool: 'run_sub_agent_production_supervision',
@@ -529,6 +531,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
     );
     final missingCount = missingIds.length;
     final skippedCount = rows.length - targetRows.length;
+    final readiness = summarizeProductionStoryboardReadiness(rows);
     if (missingCount > 0) {
       final idsLabel = missingIds.take(6).join(', ');
       final idTail = missingIds.length > 6 ? ' 等 ${missingIds.length} 个镜头' : '';
@@ -538,7 +541,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
         flowKey: 'storyboard',
         statusLabel: '需补帧',
         detail:
-            '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}${reviewScope.isEmpty ? '' : ' $reviewScope。'}',
+            '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}${reviewScope.isEmpty ? '' : ' $reviewScope。'} $readiness。',
         subAgentTool: 'run_sub_agent_storyboard_gen',
         subAgentArgs: buildProductionSubAgentArgs(
           storyboardIds: missingIds,
@@ -553,7 +556,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       flowKey: 'storyboard',
       statusLabel: '已完成',
       detail:
-          '需出图 ${targetRows.length} 个镜头，画面结果齐备${skippedCount > 0 ? '；另有 $skippedCount 个纯文本镜头按设计无需出图' : ''}，可准备写回或继续导演计划。',
+          '需出图 ${targetRows.length} 个镜头，画面结果齐备${skippedCount > 0 ? '；另有 $skippedCount 个纯文本镜头按设计无需出图' : ''}，可准备写回或继续导演计划。$readiness。',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardReviewArgs(),
     );

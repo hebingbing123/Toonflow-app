@@ -264,6 +264,58 @@ String summarizeProductionAssetFocusIds(
   return '资产 #$visible 等 ${ids.length} 项';
 }
 
+String summarizeProductionAssetReadiness(List<Map<String, dynamic>> rows) {
+  if (rows.isEmpty) return '资产为空';
+  final readyRoots = rows.where(productionFlowEntryHasMediaResult).length;
+  final pendingDeriveCount = extractProductionPendingDeriveAssetIds(rows).length;
+  final rootMissingCount = rows.length - readyRoots;
+  final parts = <String>['主资产 $readyRoots/${rows.length} 已就绪'];
+  if (pendingDeriveCount > 0) {
+    parts.add('衍生缺口 $pendingDeriveCount 项');
+  }
+  if (rootMissingCount > 0) {
+    parts.add('主资产待补 $rootMissingCount 项');
+  }
+  return parts.join('，');
+}
+
+String summarizeProductionStoryboardReadiness(List<Map<String, dynamic>> rows) {
+  if (rows.isEmpty) return '分镜为空';
+  final targetCount = rows.where(productionStoryboardEntryNeedsImageGeneration).length;
+  final readyCount = rows.where((row) {
+    return productionStoryboardEntryNeedsImageGeneration(row) &&
+        productionFlowEntryHasMediaResult(row);
+  }).length;
+  final missingCount = extractProductionStoryboardMissingImageIds(rows).length;
+  final pureTextCount = rows.length - targetCount;
+  final parts = <String>['画面结果 $readyCount/$targetCount 已就绪'];
+  if (missingCount > 0) {
+    parts.add('待补帧 $missingCount 项');
+  }
+  if (pureTextCount > 0) {
+    parts.add('纯文本 $pureTextCount 项');
+  }
+  return parts.join('，');
+}
+
+String summarizeProductionStoryboardTableCoverage({
+  required int sampledRows,
+  required int totalRows,
+}) {
+  if (sampledRows <= 0 && totalRows <= 0) {
+    return '分镜表未读取';
+  }
+  if (totalRows <= 0) {
+    return '分镜表已读 $sampledRows 行';
+  }
+  final remaining = (totalRows - sampledRows).clamp(0, totalRows);
+  final parts = <String>['分镜表已读 $sampledRows/$totalRows 行'];
+  if (remaining > 0) {
+    parts.add('待展开 $remaining 行');
+  }
+  return parts.join('，');
+}
+
 String buildProductionScriptPlanExecutionHint(
   Object? flowData, {
   int maxSections = 2,

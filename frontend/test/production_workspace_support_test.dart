@@ -20,6 +20,22 @@ void main() {
     expect(lines, contains('状态种类 2 个'));
   });
 
+  test('summarizeProductionFlowValue surfaces asset readiness digest', () {
+    final lines = summarizeProductionFlowValue(<Map<String, dynamic>>[
+      <String, dynamic>{
+        'id': 1,
+        'name': '角色A',
+        'src': 'https://example.com/a.png',
+        'derive': <Map<String, dynamic>>[
+          <String, dynamic>{'id': 11},
+        ],
+      },
+      <String, dynamic>{'id': 2, 'name': '角色B'},
+    ], flowKey: 'assets');
+
+    expect(lines, contains('主资产 1/2 已就绪，衍生缺口 1 项，主资产待补 1 项'));
+  });
+
   test(
     'summarizeProductionFlowValue surfaces storyboard generation digest',
     () {
@@ -44,6 +60,7 @@ void main() {
       ], flowKey: 'storyboard');
 
       expect(lines, contains('列表 3 项'));
+      expect(lines, contains('画面结果 1/2 已就绪，待补帧 1 项，纯文本 1 项'));
       expect(lines, contains('需出图 2 项'));
       expect(lines, contains('缺帧 1 项'));
       expect(lines, contains('纯文本 1 项'));
@@ -1597,6 +1614,8 @@ void main() {
     expect(assetsStage.statusLabel, '需补图');
     expect(assetsStage.subAgentTool, 'run_sub_agent_generate_assets');
     expect(assetsStage.detail, contains('资产 #12, 21 仍缺图'));
+    expect(assetsStage.detail, contains('主资产 1/2 已就绪'));
+    expect(assetsStage.detail, contains('衍生缺口 2 项'));
     expect(
       assetsStage.prompt,
       '请优先只核对并生成这 2 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。',
@@ -2241,7 +2260,32 @@ void main() {
       expect(storyboardStage.statusLabel, '需补帧');
       expect(storyboardStage.detail, contains('#101'));
       expect(storyboardStage.detail, contains('纯文本模式'));
+      expect(storyboardStage.detail, contains('画面结果 1/2 已就绪'));
       expect(storyboardStage.prompt, contains('优先处理这 1 个镜头'));
+    },
+  );
+
+  test('summarizeProductionStoryboardTableCoverage reports remaining rows', () {
+    expect(
+      summarizeProductionStoryboardTableCoverage(sampledRows: 8, totalRows: 24),
+      '分镜表已读 8/24 行，待展开 16 行',
+    );
+  });
+
+  test(
+    'summarizeProductionFlowValue surfaces storyboard table coverage digest',
+    () {
+      final lines = summarizeProductionFlowValue(<String, dynamic>{
+        'rowStart': 1,
+        'rowCount': 8,
+        'totalRows': 24,
+        'rows': <Map<String, dynamic>>[
+          <String, dynamic>{'id': '1', 'associateAssetsIds': <int>[3]},
+        ],
+      }, flowKey: 'storyboardTable');
+
+      expect(lines, contains('分镜表已读 8/24 行，待展开 16 行'));
+      expect(lines, contains('关联资产 1 项'));
     },
   );
 

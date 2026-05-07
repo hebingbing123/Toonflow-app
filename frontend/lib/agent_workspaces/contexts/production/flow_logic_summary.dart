@@ -119,12 +119,16 @@ List<String> summarizeProductionFlowValue(Object? value, {String? flowKey}) {
       final lines = <String>['列表 ${value.length} 项'];
       if (withPrompt > 0) lines.add('含提示词 $withPrompt 项');
       if (withUrl > 0) lines.add('含媒体地址 $withUrl 项');
+      if (normalizedKey == 'assets') {
+        lines.add(summarizeProductionAssetReadiness(rows));
+      }
       if (normalizedKey == 'storyboard') {
         final targetCount = rows
             .where(productionStoryboardEntryNeedsImageGeneration)
             .length;
         final missingIds = extractProductionStoryboardMissingImageIds(rows);
         final skippedCount = rows.length - targetCount;
+        lines.add(summarizeProductionStoryboardReadiness(rows));
         if (targetCount > 0) lines.add('需出图 $targetCount 项');
         if (missingIds.isNotEmpty) lines.add('缺帧 ${missingIds.length} 项');
         if (skippedCount > 0) lines.add('纯文本 $skippedCount 项');
@@ -140,6 +144,10 @@ List<String> summarizeProductionFlowValue(Object? value, {String? flowKey}) {
       final sampledRows = _readSummaryInt(value['rowCount']);
       final assetCount = extractProductionReferencedAssetIds(value).length;
       return <String>[
+        summarizeProductionStoryboardTableCoverage(
+          sampledRows: sampledRows > 0 ? sampledRows : rowCount,
+          totalRows: rowCount > 0 ? rowCount : _readSummaryInt(value['totalRows']),
+        ),
         if (sampledRows > 0 && rowCount > 0) '分镜表抽样 $sampledRows/$rowCount 行',
         if (sampledRows <= 0 && rowCount > 0) '分镜表 $rowCount 行',
         if (assetCount > 0) '关联资产 $assetCount 项',
