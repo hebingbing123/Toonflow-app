@@ -1287,6 +1287,31 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages marks thin script plan as incomplete before downstream advance',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+</scriptPlan>
+''',
+        },
+      );
+
+      final scriptPlanStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'scriptPlan',
+      );
+      expect(scriptPlanStage.statusLabel, '待完善');
+      expect(scriptPlanStage.subAgentTool, 'run_sub_agent_director_plan');
+      expect(scriptPlanStage.detail, contains('至少 3 个规划维度'));
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages narrows check-assets review to structured asset types',
     () {
       final stages = buildProductionWorkspaceStages(
@@ -2077,6 +2102,10 @@ void main() {
         result: <String, dynamic>{
           'data': '''
 <scriptPlan>
+① 主题立意与叙事核心
+先立住复仇目标，前两场别拖。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
 ④ 分场景情绪与画面意图
 先核对玉佩与令牌两类道具，再决定是否补衍生状态。
 </scriptPlan>
@@ -2107,6 +2136,11 @@ void main() {
         result: <String, dynamic>{
           'data': '''
 <scriptPlan>
+① 主题立意与叙事核心
+先立住复仇目标，前两场别拖。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
+④ 分场景情绪与画面意图
 执行计划里先确认资产 #12, 3 与 asset 9 是否可直接复用。
 </scriptPlan>
 ''',
@@ -2165,13 +2199,51 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages blocks downstream work until script plan is sufficiently complete',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+</scriptPlan>
+''',
+        },
+      );
+
+      final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(assetsStage.statusLabel, '等待导演计划完善');
+      expect(tableStage.statusLabel, '等待导演计划完善');
+      expect(storyboardStage.statusLabel, '等待导演计划完善');
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages blocks storyboard until storyboard table exists',
     () {
       final stages = buildProductionWorkspaceStages(
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
-          'data': '<scriptPlan>已有导演计划</scriptPlan>',
+          'data': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
+④ 分场景情绪与画面意图
+情绪起伏要递进，镜头别一上来全顶满。
+</scriptPlan>
+''',
         },
       );
 
@@ -2192,6 +2264,33 @@ void main() {
         'rowStart': 1,
         'rowCount': 8,
       });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages allows storyboard-table gate only after stronger script plan coverage',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
+④ 分场景情绪与画面意图
+情绪起伏要递进，镜头别一上来全顶满。
+</scriptPlan>
+''',
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.statusLabel, '等待分镜表');
     },
   );
 

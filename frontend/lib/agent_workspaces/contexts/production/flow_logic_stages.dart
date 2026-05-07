@@ -160,6 +160,17 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     final sectionCount = countProductionScriptPlanSections(trimmed);
     final sectionLine = sectionCount > 0 ? '已覆盖 $sectionCount/6 个规划维度，' : '';
     final scriptWindow = summarizeProductionPlanningScriptWindow();
+    if (!_productionScriptPlanAdvanceReady(trimmed)) {
+      return ProductionWorkspaceStage(
+        title: '导演计划',
+        flowKey: 'scriptPlan',
+        statusLabel: '待完善',
+        detail:
+            '已读取 scriptPlan，$sectionLine当前约 ${trimmed.length} 字；下游暂不放行，建议先补到至少 3 个规划维度，再进入审核与 assets/storyboard 主链。',
+        subAgentTool: 'run_sub_agent_director_plan',
+        prompt: '请继续完善当前 scriptPlan，至少补齐 3 个规划维度，并明确情绪推进、资产依赖与镜头意图。',
+      );
+    }
     return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
@@ -213,6 +224,9 @@ ProductionWorkspaceStage _buildAssetsStage({
   }
   final data = flowSnapshot['assets'];
   final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
+  final scriptPlanAdvanceReady = _productionScriptPlanAdvanceReady(
+    flowSnapshot['scriptPlan'],
+  );
   final executionHint = buildProductionScriptPlanExecutionHint(
     flowSnapshot['scriptPlan'],
   );
@@ -294,6 +308,23 @@ ProductionWorkspaceStage _buildAssetsStage({
   final scriptPlanAssetScope = summarizeProductionAssetScope(
     scriptPlanAssetArgs,
   );
+  if (scriptPlanReady &&
+      !scriptPlanAdvanceReady &&
+      activeKey != 'assets' &&
+      toolName != 'generate_deriveAsset' &&
+      toolName != 'add_deriveAsset' &&
+      toolName != 'del_deriveAsset' &&
+      toolName != 'run_sub_agent_derive_assets' &&
+      toolName != 'run_sub_agent_generate_assets') {
+    return ProductionWorkspaceStage(
+      title: '资产准备',
+      flowKey: 'assets',
+      statusLabel: '等待导演计划完善',
+      detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再规划 assets，避免素材准备跑偏。',
+      domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
+    );
+  }
   if (flowSnapshot['scriptPlan'] is String) {
     return ProductionWorkspaceStage(
       title: '资产准备',
@@ -410,6 +441,9 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   }
   final data = flowSnapshot['storyboardTable'];
   final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
+  final scriptPlanAdvanceReady = _productionScriptPlanAdvanceReady(
+    flowSnapshot['scriptPlan'],
+  );
   if (data is String) {
     final trimmed = data.trim();
     if (trimmed.isEmpty) {
@@ -465,6 +499,19 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       domainArgs: _scriptPlanCompactArgs(),
     );
   }
+  if (scriptPlanReady &&
+      !scriptPlanAdvanceReady &&
+      activeKey != 'storyboardTable' &&
+      toolName != 'run_sub_agent_storyboard_table') {
+    return ProductionWorkspaceStage(
+      title: '分镜表',
+      flowKey: 'storyboardTable',
+      statusLabel: '等待导演计划完善',
+      detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再拆分 storyboardTable。',
+      domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
+    );
+  }
   if (activeKey == 'storyboardTable' ||
       toolName == 'run_sub_agent_storyboard_table') {
     final affectedIds = toolName == 'run_sub_agent_storyboard_table'
@@ -501,6 +548,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
   required Map<String, dynamic>? toolArguments,
 }) {
   final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
+  final scriptPlanAdvanceReady = _productionScriptPlanAdvanceReady(
+    flowSnapshot['scriptPlan'],
+  );
   final storyboardTableReady = _productionStoryboardTableReady(
     flowSnapshot['storyboardTable'],
   );
@@ -610,6 +660,21 @@ ProductionWorkspaceStage _buildStoryboardStage({
     );
   }
   if (scriptPlanReady &&
+      !scriptPlanAdvanceReady &&
+      activeKey != 'storyboard' &&
+      toolName != 'generate_storyboard' &&
+      toolName != 'run_sub_agent_storyboard_gen' &&
+      toolName != 'run_sub_agent_storyboard_panel') {
+    return ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: '等待导演计划完善',
+      detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再推进 storyboard，避免补图时情绪和镜头意图仍发散。',
+      domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
+    );
+  }
+  if (scriptPlanAdvanceReady &&
       !storyboardTableReady &&
       activeKey != 'storyboard' &&
       toolName != 'generate_storyboard' &&
@@ -701,6 +766,16 @@ int _readInt(Object? value) {
 
 bool _productionScriptPlanReady(Object? value) {
   return value is String && value.trim().isNotEmpty;
+}
+
+bool _productionScriptPlanAdvanceReady(Object? value) {
+  if (value is! String) return false;
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return false;
+  final sectionCount = countProductionScriptPlanSections(trimmed);
+  if (sectionCount >= 3) return true;
+  if (sectionCount == 0 && trimmed.length >= 280) return true;
+  return false;
 }
 
 bool _productionStoryboardTableReady(Object? value) {
