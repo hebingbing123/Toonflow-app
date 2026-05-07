@@ -246,17 +246,16 @@ pub(crate) async fn project_home_by_id(
     let video_count: i64 = sqlx::query_scalar(
         r#"
         SELECT COUNT(*)::bigint
-        FROM app_generation_job
-        WHERE owner_user_id = $2
-          AND status = 'succeeded'
-          AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
-          AND payload->>'project_numeric_id' = (
-              SELECT numeric_id::text FROM app_project WHERE id = $1
+        FROM app_generation_job j
+        WHERE j.status = 'succeeded'
+          AND (j.kind ILIKE '%video%' OR j.kind ILIKE '%workbench%')
+          AND (j.payload->>'project_numeric_id') ~ '^[0-9]+$'
+          AND (j.payload->>'project_numeric_id')::int = (
+              SELECT numeric_id FROM app_project WHERE id = $1
           )
         "#,
     )
     .bind(scope.id)
-    .bind(uid)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

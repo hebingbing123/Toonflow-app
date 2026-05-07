@@ -363,9 +363,14 @@ pub(crate) async fn maybe_fill_project_style_bible_from_assets(
     let project_intro: Option<String> = sqlx::query_scalar(
         r#"
         SELECT intro
-        FROM app_project
-        WHERE owner_user_id = $1
-          AND numeric_id = $2
+        FROM app_project p
+        WHERE p.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(user_id)
@@ -383,9 +388,14 @@ pub(crate) async fn maybe_fill_project_style_bible_from_assets(
           a.metadata->>'prompt' AS prompt
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
           AND a.asset_type = 'role'
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         ORDER BY a.numeric_id ASC
         LIMIT 8
         "#,

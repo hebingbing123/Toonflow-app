@@ -67,8 +67,15 @@ pub(super) async fn process_one_group(
         UPDATE app_script s
         SET extract_state = 0, updated_at = NOW()
         FROM app_project p
-        WHERE s.project_id = p.id AND p.id = $1 AND p.owner_user_id = $2
+        WHERE s.project_id = p.id
+          AND p.id = $1
           AND s.numeric_id = ANY($3)
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
         "#,
     )
     .bind(project_uuid)
@@ -147,8 +154,15 @@ pub(super) async fn process_one_group(
         UPDATE app_script s
         SET extract_state = 1, error_reason = NULL, updated_at = NOW()
         FROM app_project p
-        WHERE s.project_id = p.id AND p.id = $1 AND p.owner_user_id = $2
+        WHERE s.project_id = p.id
+          AND p.id = $1
           AND s.numeric_id = ANY($3)
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
         "#,
     )
     .bind(project_uuid)

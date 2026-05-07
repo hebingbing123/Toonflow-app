@@ -233,10 +233,15 @@ pub(super) async fn count_video_track_rows(
         FROM app_video_track vt
         INNER JOIN app_project p ON p.id = vt.project_id
         INNER JOIN app_script s ON s.id = vt.script_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
           AND s.numeric_id = $3
           AND vt.numeric_id = $4
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(sub)

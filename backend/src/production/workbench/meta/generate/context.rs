@@ -79,9 +79,14 @@ pub(super) async fn load_video_prompt_context(
     let project_row = sqlx::query_as::<_, ProjectPromptSeedRow>(
         r#"
         SELECT art_style, director_manual
-        FROM app_project
-        WHERE owner_user_id = $1
-          AND numeric_id = $2
+        FROM app_project p
+        WHERE p.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(user_id)
@@ -101,10 +106,15 @@ pub(super) async fn load_video_prompt_context(
           INNER JOIN app_project p ON p.id = a.project_id
           INNER JOIN app_script_asset sa ON sa.asset_id = a.id
           INNER JOIN app_script sc ON sc.id = sa.script_id
-          WHERE p.owner_user_id = $1
-            AND p.numeric_id = $2
+          WHERE p.numeric_id = $2
             AND sc.numeric_id = $3
             AND a.asset_type IN ('role', 'scene', 'tool')
+            AND EXISTS (
+              SELECT 1
+              FROM app_workspace_member wm
+              WHERE wm.workspace_id = p.workspace_id
+                AND wm.user_id = $1
+            )
         )
         SELECT asset_type, name, describe
         FROM ranked_assets

@@ -86,9 +86,25 @@ async fn validate_review_scope_ownership(
             r#"
             SELECT EXISTS(
               SELECT 1
-              FROM app_generation_job
-              WHERE id = $1
-                AND owner_user_id = $2
+              FROM app_generation_job j
+              WHERE j.id = $1
+                AND (
+                  j.owner_user_id = $2
+                  OR (
+                    (j.payload->>'project_numeric_id') ~ '^[0-9]+$'
+                    AND EXISTS (
+                      SELECT 1
+                      FROM app_project p
+                      WHERE p.numeric_id = (j.payload->>'project_numeric_id')::int
+                        AND EXISTS (
+                          SELECT 1
+                          FROM app_workspace_member wm
+                          WHERE wm.workspace_id = p.workspace_id
+                            AND wm.user_id = $2
+                        )
+                    )
+                  )
+                )
             )
             "#,
         )
@@ -110,9 +126,14 @@ async fn validate_review_scope_ownership(
                   SELECT 1
                   FROM app_script sc
                   INNER JOIN app_project p ON p.id = sc.project_id
-                  WHERE p.owner_user_id = $1
-                    AND p.numeric_id = $2
+                  WHERE p.numeric_id = $2
                     AND sc.numeric_id = $3
+                    AND EXISTS (
+                      SELECT 1
+                      FROM app_workspace_member wm
+                      WHERE wm.workspace_id = p.workspace_id
+                        AND wm.user_id = $1
+                    )
                 )
                 "#,
             )
@@ -131,9 +152,14 @@ async fn validate_review_scope_ownership(
                 r#"
                 SELECT EXISTS(
                   SELECT 1
-                  FROM app_project
-                  WHERE owner_user_id = $1
-                    AND numeric_id = $2
+                  FROM app_project p
+                  WHERE p.numeric_id = $2
+                    AND EXISTS (
+                      SELECT 1
+                      FROM app_workspace_member wm
+                      WHERE wm.workspace_id = p.workspace_id
+                        AND wm.user_id = $1
+                    )
                 )
                 "#,
             )
@@ -153,8 +179,13 @@ async fn validate_review_scope_ownership(
                   SELECT 1
                   FROM app_script sc
                   INNER JOIN app_project p ON p.id = sc.project_id
-                  WHERE p.owner_user_id = $1
-                    AND sc.numeric_id = $2
+                  WHERE sc.numeric_id = $2
+                    AND EXISTS (
+                      SELECT 1
+                      FROM app_workspace_member wm
+                      WHERE wm.workspace_id = p.workspace_id
+                        AND wm.user_id = $1
+                    )
                 )
                 "#,
             )
@@ -187,10 +218,15 @@ async fn validate_review_scope_ownership(
                       FROM app_storyboard sb
                       INNER JOIN app_script sc ON sc.id = sb.script_id
                       INNER JOIN app_project p ON p.id = sc.project_id
-                      WHERE p.owner_user_id = $1
-                        AND p.numeric_id = $2
+                      WHERE p.numeric_id = $2
                         AND sc.numeric_id = $3
                         AND sb.numeric_id = $4
+                        AND EXISTS (
+                          SELECT 1
+                          FROM app_workspace_member wm
+                          WHERE wm.workspace_id = p.workspace_id
+                            AND wm.user_id = $1
+                        )
                     )
                     "#,
                 )
@@ -209,9 +245,14 @@ async fn validate_review_scope_ownership(
                       FROM app_storyboard sb
                       INNER JOIN app_script sc ON sc.id = sb.script_id
                       INNER JOIN app_project p ON p.id = sc.project_id
-                      WHERE p.owner_user_id = $1
-                        AND p.numeric_id = $2
+                      WHERE p.numeric_id = $2
                         AND sb.numeric_id = $3
+                        AND EXISTS (
+                          SELECT 1
+                          FROM app_workspace_member wm
+                          WHERE wm.workspace_id = p.workspace_id
+                            AND wm.user_id = $1
+                        )
                     )
                     "#,
                 )

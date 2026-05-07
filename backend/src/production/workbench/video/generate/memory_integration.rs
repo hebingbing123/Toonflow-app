@@ -633,10 +633,15 @@ pub(super) async fn load_storyboard_prompt_seed_rows(
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
           AND sc.numeric_id = $3
           AND sb.numeric_id = ANY($4)
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(user_id)

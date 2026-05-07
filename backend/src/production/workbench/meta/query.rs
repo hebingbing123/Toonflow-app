@@ -65,16 +65,15 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
     Json(body): Json<GetGenerateDataBody>,
 ) -> Result<JsonResponse<GetGenerateDataResponse>, ApiError> {
     const GEN_JOB_SCOPE_FILTER: &str = r#"
-        j.owner_user_id = $1
-        AND j.kind = $2
+        j.kind = $1
         AND j.status IN ('queued', 'running')
         AND (j.payload->>'project_numeric_id') ~ '^[0-9]+$'
-        AND (j.payload->>'project_numeric_id')::int = $3
+        AND (j.payload->>'project_numeric_id')::int = $2
         AND (j.payload->>'script_id') ~ '^[0-9]+$'
-        AND (j.payload->>'script_id')::int = $4
+        AND (j.payload->>'script_id')::int = $3
     "#;
 
-    let (uid, pool, script_id) =
+    let (_uid, pool, script_id) =
         require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
             .await?;
 
@@ -114,7 +113,6 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
     );
 
     let mut generating_jobs = sqlx::query_as::<_, JobRow>(&generating_jobs_sql)
-        .bind(uid)
         .bind(JOB_KIND_VIDEO_GENERATE)
         .bind(body.project_id)
         .bind(body.script_id)
@@ -138,7 +136,6 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
             GEN_JOB_SCOPE_FILTER,
         );
         sqlx::query_scalar(&count_sql)
-            .bind(uid)
             .bind(JOB_KIND_VIDEO_GENERATE)
             .bind(body.project_id)
             .bind(body.script_id)
@@ -161,7 +158,6 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
 
     let storyboard_numeric_ids_with_in_flight_generation: Vec<i32> =
         sqlx::query_scalar::<_, i32>(&in_flight_storyboards_sql)
-            .bind(uid)
             .bind(JOB_KIND_VIDEO_GENERATE)
             .bind(body.project_id)
             .bind(body.script_id)

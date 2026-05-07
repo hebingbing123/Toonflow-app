@@ -41,10 +41,15 @@ async fn load_storyboard_rows(
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
           AND sc.numeric_id = $3
           AND sb.numeric_id = ANY($4)
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         ORDER BY sb.numeric_id ASC
         "#,
     )
@@ -78,9 +83,14 @@ async fn load_quality_gate_strategy(
     let strategy_str = sqlx::query_scalar::<_, Option<String>>(
         r#"
         SELECT quality_gate_strategy
-        FROM app_project
-        WHERE owner_user_id = $1
-          AND numeric_id = $2
+        FROM app_project p
+        WHERE p.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(user_id)
@@ -111,10 +121,15 @@ async fn has_role_rows(
         INNER JOIN app_project p ON p.id = a.project_id
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id
         INNER JOIN app_script sc ON sc.id = sa.script_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
           AND sc.numeric_id = $3
           AND a.asset_type = 'role'
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(user_id)

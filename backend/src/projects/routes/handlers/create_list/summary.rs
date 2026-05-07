@@ -28,29 +28,50 @@ pub(crate) async fn projects_summary(
     let row: (i64, i64, i64, i64, i64, i64, i64) = sqlx::query_as(
         r#"
         SELECT
-            (SELECT COUNT(*)::bigint FROM app_project WHERE owner_user_id = $1),
+            (SELECT COUNT(DISTINCT p.id)::bigint
+             FROM app_project p
+             WHERE EXISTS (
+               SELECT 1 FROM app_workspace_member wm
+               WHERE wm.workspace_id = p.workspace_id AND wm.user_id = $1
+             )),
             (SELECT COUNT(*)::bigint
              FROM app_script s
              INNER JOIN app_project p ON s.project_id = p.id
-             WHERE p.owner_user_id = $1),
+             WHERE EXISTS (
+               SELECT 1 FROM app_workspace_member wm
+               WHERE wm.workspace_id = p.workspace_id AND wm.user_id = $1
+             )),
             (SELECT COUNT(*)::bigint
              FROM app_storyboard sb
              INNER JOIN app_script s ON sb.script_id = s.id
              INNER JOIN app_project p ON s.project_id = p.id
-             WHERE p.owner_user_id = $1),
+             WHERE EXISTS (
+               SELECT 1 FROM app_workspace_member wm
+               WHERE wm.workspace_id = p.workspace_id AND wm.user_id = $1
+             )),
             (SELECT COUNT(*)::bigint
              FROM app_novel n
              INNER JOIN app_project p ON p.id = n.project_id
-             WHERE p.owner_user_id = $1),
+             WHERE EXISTS (
+               SELECT 1 FROM app_workspace_member wm
+               WHERE wm.workspace_id = p.workspace_id AND wm.user_id = $1
+             )),
             (SELECT COUNT(*)::bigint
              FROM app_asset a
              INNER JOIN app_project p ON p.id = a.project_id
-             WHERE p.owner_user_id = $1 AND a.asset_type = 'role'),
+             WHERE a.asset_type = 'role'
+               AND EXISTS (
+                 SELECT 1 FROM app_workspace_member wm
+                 WHERE wm.workspace_id = p.workspace_id AND wm.user_id = $1
+               )),
             (SELECT COUNT(*)::bigint FROM app_art_style WHERE owner_user_id = $1),
             (SELECT COUNT(*)::bigint
              FROM app_asset a
              INNER JOIN app_project p ON p.id = a.project_id
-             WHERE p.owner_user_id = $1)
+             WHERE EXISTS (
+               SELECT 1 FROM app_workspace_member wm
+               WHERE wm.workspace_id = p.workspace_id AND wm.user_id = $1
+             ))
         "#,
     )
     .bind(uid)

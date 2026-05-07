@@ -128,7 +128,13 @@ pub async fn fetch_low_performance_alerts_with_context(
         ) AS s
         INNER JOIN app_publish_draft AS d ON d.id = s.draft_id
         INNER JOIN app_project AS p ON p.id = d.project_id
-        WHERE p.owner_user_id = $2
+        WHERE p.id = d.project_id
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
         ORDER BY s.synced_at DESC
         LIMIT $3
         "#,

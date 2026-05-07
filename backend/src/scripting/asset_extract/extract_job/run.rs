@@ -7,6 +7,7 @@ use crate::llm::LlmConfig;
 
 use super::super::util::load_system_prompt;
 use super::process_group::process_one_group;
+use crate::scope;
 
 pub(crate) async fn run_extract_job(
     pool: PgPool,
@@ -19,15 +20,12 @@ pub(crate) async fn run_extract_job(
 ) -> Result<(), String> {
     let system = load_system_prompt();
 
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $2"#,
-    )
-    .bind(project_numeric_id)
-    .bind(uid)
-    .fetch_optional(&pool)
-    .await
-    .map_err(|e| e.to_string())?
-    .ok_or_else(|| "project not found or not owned".to_string())?;
+    let project_uuid: Uuid = scope::owned_project_id_by_numeric(&pool, uid, project_numeric_id)
+        .await
+        .map_err(|e| match e {
+            scope::ScopeError::NotFound => "project not found or not accessible".to_string(),
+            scope::ScopeError::Database(m) => m,
+        })?;
 
     sqlx::query(
         r#"
@@ -36,8 +34,13 @@ pub(crate) async fn run_extract_job(
         FROM app_project p
         WHERE s.project_id = p.id
           AND p.id = $1
-          AND p.owner_user_id = $2
           AND s.numeric_id = ANY($3)
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
         "#,
     )
     .bind(project_uuid)

@@ -92,8 +92,13 @@ pub(crate) async fn invoke_get_novel_text(
             SELECT n.numeric_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
             FROM app_novel n
             INNER JOIN app_project p ON p.id = n.project_id
-            WHERE p.owner_user_id = $1
-              AND p.numeric_id = $2
+            WHERE p.numeric_id = $2
+              AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $1
+              )
               AND n.numeric_id = $3
             ORDER BY n.chapter_index ASC, n.numeric_id ASC
             LIMIT $4
@@ -112,8 +117,13 @@ pub(crate) async fn invoke_get_novel_text(
             SELECT n.numeric_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
             FROM app_novel n
             INNER JOIN app_project p ON p.id = n.project_id
-            WHERE p.owner_user_id = $1
-              AND p.numeric_id = $2
+            WHERE p.numeric_id = $2
+              AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $1
+              )
             ORDER BY n.chapter_index ASC, n.numeric_id ASC
             LIMIT $3
             "#,
@@ -177,8 +187,13 @@ pub(crate) async fn invoke_get_novel_events(
             INNER JOIN app_project p ON p.id = e.project_id
             INNER JOIN app_novel_event_chapter ec ON ec.event_id = e.id
             INNER JOIN app_novel n ON n.id = ec.novel_id
-            WHERE p.owner_user_id = $1
-              AND p.numeric_id = $2
+            WHERE p.numeric_id = $2
+              AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $1
+              )
               AND n.numeric_id = $3
             ORDER BY e.numeric_id ASC
             LIMIT $4
@@ -197,8 +212,13 @@ pub(crate) async fn invoke_get_novel_events(
             SELECT e.numeric_id, e.name, e.detail
             FROM app_novel_event e
             INNER JOIN app_project p ON p.id = e.project_id
-            WHERE p.owner_user_id = $1
-              AND p.numeric_id = $2
+            WHERE p.numeric_id = $2
+              AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $1
+              )
             ORDER BY e.numeric_id ASC
             LIMIT $3
             "#,

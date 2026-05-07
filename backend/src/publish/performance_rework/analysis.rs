@@ -86,7 +86,13 @@ pub async fn create_quality_review_for_low_performance(
                 s.numeric_id AS script_numeric_id
             FROM app_script s
             INNER JOIN app_project p ON p.id = s.project_id
-            WHERE s.id = $1 AND p.owner_user_id = $2
+            WHERE s.id = $1
+              AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $2
+              )
             "#,
         )
         .bind(script_uuid)

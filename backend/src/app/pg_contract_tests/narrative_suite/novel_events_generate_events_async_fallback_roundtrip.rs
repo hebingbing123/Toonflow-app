@@ -70,7 +70,12 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         FROM public.app_novel n
         INNER JOIN public.app_project p ON p.id = n.project_id
         WHERE p.numeric_id = $1
-          AND p.owner_user_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
         ORDER BY n.chapter_index ASC, n.numeric_id ASC
         "#,
     )
@@ -89,7 +94,12 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         FROM public.app_project p
         WHERE n.project_id = p.id
           AND p.numeric_id = $1
-          AND p.owner_user_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
           AND n.numeric_id = ANY($3)
         "#,
     )
@@ -130,7 +140,12 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         FROM public.app_novel n
         INNER JOIN public.app_project p ON p.id = n.project_id
         WHERE p.numeric_id = $1
-          AND p.owner_user_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
           AND n.numeric_id = ANY($3)
         ORDER BY n.chapter_index ASC, n.numeric_id ASC
         "#,
@@ -156,7 +171,12 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
             FROM public.app_novel n
             INNER JOIN public.app_project p ON p.id = n.project_id
             WHERE p.numeric_id = $1
-              AND p.owner_user_id = $2
+              AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $2
+              )
               AND n.numeric_id = ANY($3)
             ORDER BY n.chapter_index ASC, n.numeric_id ASC
             "#,

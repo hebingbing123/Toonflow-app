@@ -34,7 +34,7 @@ pub(crate) async fn invoke_get_plan_data(
             .await
             .map_err(|e| match e {
                 ScopeError::NotFound => {
-                    InvokeError::MissingContext("attached project is not owned or missing".into())
+                    InvokeError::MissingContext("attached project is not accessible".into())
                 }
                 ScopeError::Database(msg) => InvokeError::DatabaseError(msg),
             })?;
@@ -57,7 +57,13 @@ pub(crate) async fn invoke_get_plan_data(
         SELECT s.numeric_id, s.name, s.content, s.extract_state
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1 AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         ORDER BY s.numeric_id
         "#,
     )
