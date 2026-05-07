@@ -57,9 +57,9 @@
 ## 四、Phase W3 — 当前上下文与「个人/团队」切换
 
 - [x] **W3.1** `PATCH /api/v1/me/current-workspace`：切换 `current_workspace_id`（强校验 membership）；Flutter 团队工作区列表已加“切换到此”入口
-- [ ] **W3.2** 切换后 **全客户端状态**：项目列表、选中 project、Harness attach、短剧空间上下文等 **统一刷新**（Flutter 架构层一次收口）
-- [ ] **W3.3** 首次登录默认 workspace 规则：无 enterprise 时 personal；曾加入团队则 **记忆上次 workspace**（`app_user_profile` 已有字段可扩展）
-- [ ] **W3.4** 错误码：非成员切换 → 明确 `403` + `code`
+- [x] **W3.2** 切换后 **全客户端状态**：项目列表、选中 project、Harness attach、短剧空间上下文统一刷新（通过 `onWorkspaceContextChanged` 收口）
+- [x] **W3.3** 首次登录默认 workspace 规则：`/me` 优先读取 `current_workspace_id`（记忆上次）；若失效/非成员自动回退 personal 并修正 profile
+- [x] **W3.4** 错误码：非成员切换返回明确 `403`（`forbidden`）
 - [ ] **W3.5** OpenAPI + widget/integration 测试
 
 ---

@@ -31,6 +31,7 @@ struct UserProfileRow {
     subscription_current_period_end_at: Option<DateTime<Utc>>,
     daily_job_quota: Option<i64>,
     memory_config: Option<sqlx::types::Json<MemoryConfig>>,
+    current_workspace_id: Option<Uuid>,
 }
 
 #[utoipa::path(
@@ -65,7 +66,7 @@ pub(crate) async fn me(
         memory_cfg,
         current_workspace,
     ) = if let Some(pool) = state.pool.as_ref() {
-        let workspace = ensure_personal_workspace(pool, sub).await?;
+        let personal_workspace = ensure_personal_workspace(pool, sub).await?;
         let row = sqlx::query_as::<_, UserProfileRow>(
             r#"
             SELECT
@@ -75,7 +76,8 @@ pub(crate) async fn me(
               subscription_status,
               subscription_current_period_end_at,
               daily_job_quota,
-              memory_config
+              memory_config,
+              current_workspace_id
             FROM app_user_profile
             WHERE user_id = $1
             "#,
@@ -93,6 +95,7 @@ pub(crate) async fn me(
             subscription_current_period_end_at,
             per_user_quota,
             mem_cfg,
+            current_workspace_id,
         ) = match row {
             Some(r) => (
                 r.plan_tier,
@@ -102,8 +105,9 @@ pub(crate) async fn me(
                 r.subscription_current_period_end_at,
                 r.daily_job_quota,
                 r.memory_config.map(|j| j.0),
+                r.current_workspace_id,
             ),
-            None => ("free".to_string(), None, None, None, None, None, None),
+            None => ("free".to_string(), None, None, None, None, None, None, None),
         };
 
         let today: i64 = sqlx::query_scalar(
@@ -119,6 +123,58 @@ pub(crate) async fn me(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+        let current_workspace = if let Some(current_id) = current_workspace_id {
+            let row: Option<(Uuid, String, String)> = sqlx::query_as(
+                r#"
+                SELECT w.id, w.name, w.workspace_type::text
+                FROM public.app_workspace w
+                INNER JOIN public.app_workspace_member m ON m.workspace_id = w.id
+                WHERE w.id = $1
+                  AND m.user_id = $2
+                LIMIT 1
+                "#,
+            )
+            .bind(current_id)
+            .bind(sub)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+            if let Some((id, name, workspace_type)) = row {
+                WorkspaceSummary {
+                    id,
+                    name,
+                    workspace_type,
+                }
+            } else {
+                // Profile points to a stale/non-member workspace; heal to personal.
+                sqlx::query(
+                    r#"
+                    UPDATE public.app_user_profile
+                    SET current_workspace_id = $2, updated_at = NOW()
+                    WHERE user_id = $1
+                    "#,
+                )
+                .bind(sub)
+                .bind(personal_workspace.workspace_id)
+                .execute(pool)
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+                WorkspaceSummary {
+                    id: personal_workspace.workspace_id,
+                    name: personal_workspace.workspace_name.clone(),
+                    workspace_type: personal_workspace.workspace_type.clone(),
+                }
+            }
+        } else {
+            WorkspaceSummary {
+                id: personal_workspace.workspace_id,
+                name: personal_workspace.workspace_name.clone(),
+                workspace_type: personal_workspace.workspace_type.clone(),
+            }
+        };
+
         (
             tier,
             currency,
@@ -128,11 +184,7 @@ pub(crate) async fn me(
             per_user_quota,
             Some(today),
             mem_cfg,
-            Some(WorkspaceSummary {
-                id: workspace.workspace_id,
-                name: workspace.workspace_name,
-                workspace_type: workspace.workspace_type,
-            }),
+            Some(current_workspace),
         )
     } else {
         (
