@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../rust_api.dart';
 import 'import_parser.dart';
+import 'support.dart';
 
 part 'workbench_launcher_controllers.dart';
 part 'workbench_launcher_state.dart';

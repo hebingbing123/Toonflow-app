@@ -73,3 +73,17 @@ List<int> chapterIndexesToNumericIds({
   };
   return indexes.map((index) => byIndex[index]).whereType<int>().toList();
 }
+
+List<int> pickEventGeneratableNovelIds(
+  Iterable<NovelRow> chapters, {
+  int maxCount = 3,
+}) {
+  if (maxCount <= 0) {
+    return const <int>[];
+  }
+  return chapters
+      .where((row) => row.intakeStatus == 'admitted')
+      .take(maxCount)
+      .map((row) => row.numericId)
+      .toList(growable: false);
+}

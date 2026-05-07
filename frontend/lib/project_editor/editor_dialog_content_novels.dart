@@ -52,11 +52,20 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
           generateEvents: () async {
             setDialogState(() => dialogState.novelsBusy[0] = true);
             try {
-              final ids =
-                  (dialogState.novelsRef[0]?.items ?? const <NovelRow>[])
-                      .take(3)
-                      .map((e) => e.numericId)
-                      .toList();
+              final ids = pickEventGeneratableNovelIds(
+                dialogState.novelsRef[0]?.items ?? const <NovelRow>[],
+                maxCount: 3,
+              );
+              if (ids.isEmpty) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(
+                      content: Text('没有可生成事件的 admitted 章节，请先准入章节。'),
+                    ),
+                  );
+                }
+                return;
+              }
               final message = await postNovelEventsGenerateEvents(
                 token,
                 projectNumericId: p.numericId,

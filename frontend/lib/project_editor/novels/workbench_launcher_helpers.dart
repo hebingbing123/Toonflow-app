@@ -30,10 +30,8 @@ Future<void> refreshNovelWorkbenchLocalState({
       ctrls.deleteNovelIdCtrl.text = refreshed.last.numericId.toString();
     }
     if (ctrls.generateIdsCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-      ctrls.generateIdsCtrl.text = refreshed
-          .take(3)
-          .map((e) => e.numericId)
-          .join(',');
+      final generateIds = pickEventGeneratableNovelIds(refreshed, maxCount: 3);
+      ctrls.generateIdsCtrl.text = generateIds.join(',');
     }
     if (ctrls.batchAdmissionIdsCtrl.text.trim().isEmpty &&
         refreshed.isNotEmpty) {

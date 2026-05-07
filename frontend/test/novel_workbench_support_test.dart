@@ -163,4 +163,47 @@ void main() {
   test('summarizeNovelEventRows handles empty data', () {
     expect(summarizeNovelEventRows(const []), '当前没有小说事件');
   });
+
+  test('pickEventGeneratableNovelIds returns admitted chapters only', () {
+    final ids = pickEventGeneratableNovelIds([
+      NovelRow(
+        id: 'n1',
+        numericId: 11,
+        chapterIndex: 1,
+        chapter: '第一章',
+        chapterData: 'a',
+        eventState: 0,
+        intakeStatus: 'pending_review',
+      ),
+      NovelRow(
+        id: 'n2',
+        numericId: 12,
+        chapterIndex: 2,
+        chapter: '第二章',
+        chapterData: 'b',
+        eventState: 0,
+        intakeStatus: 'admitted',
+      ),
+      NovelRow(
+        id: 'n3',
+        numericId: 13,
+        chapterIndex: 3,
+        chapter: '第三章',
+        chapterData: 'c',
+        eventState: 0,
+        intakeStatus: 'rejected',
+      ),
+      NovelRow(
+        id: 'n4',
+        numericId: 14,
+        chapterIndex: 4,
+        chapter: '第四章',
+        chapterData: 'd',
+        eventState: 0,
+        intakeStatus: 'admitted',
+      ),
+    ], maxCount: 3);
+
+    expect(ids, [12, 14]);
+  });
 }
