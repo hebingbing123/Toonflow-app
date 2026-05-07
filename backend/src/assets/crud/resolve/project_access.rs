@@ -3,14 +3,26 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 
-/// **404** if the UUID project is missing or not owned by **`uid`**.
+/// **404** if the UUID project is missing or not accessible by **`uid`** in workspace membership scope.
 pub(crate) async fn ensure_owned_project_pk(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
 ) -> Result<(), ApiError> {
     let ok: bool = sqlx::query_scalar(
-        r#"SELECT EXISTS (SELECT 1 FROM app_project WHERE id = $1 AND owner_user_id = $2)"#,
+        r#"
+        SELECT EXISTS(
+          SELECT 1
+          FROM app_project p
+          WHERE p.id = $1
+            AND EXISTS (
+              SELECT 1
+              FROM app_workspace_member wm
+              WHERE wm.workspace_id = p.workspace_id
+                AND wm.user_id = $2
+            )
+        )
+        "#,
     )
     .bind(project_id)
     .bind(uid)
@@ -24,14 +36,24 @@ pub(crate) async fn ensure_owned_project_pk(
     }
 }
 
-/// **404** if the project is missing or not owned; returns **`app_project.numeric_id`** for Electron-era payloads.
+/// **404** if the project is missing or inaccessible; returns **`app_project.numeric_id`** for Electron-era payloads.
 pub(crate) async fn ensure_owned_project_numeric_id(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
 ) -> Result<i32, ApiError> {
     let v: Option<i32> = sqlx::query_scalar(
-        r#"SELECT p.numeric_id FROM app_project p WHERE p.id = $1 AND p.owner_user_id = $2"#,
+        r#"
+        SELECT p.numeric_id
+        FROM app_project p
+        WHERE p.id = $1
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $2
+          )
+        "#,
     )
     .bind(project_id)
     .bind(uid)
@@ -76,8 +98,15 @@ pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
             let ok: bool = sqlx::query_scalar(
                 r#"
                 SELECT EXISTS(
-                  SELECT 1 FROM app_project
-                  WHERE numeric_id = $1 AND owner_user_id = $2
+                  SELECT 1
+                  FROM app_project p
+                  WHERE p.numeric_id = $1
+                    AND EXISTS (
+                      SELECT 1
+                      FROM app_workspace_member wm
+                      WHERE wm.workspace_id = p.workspace_id
+                        AND wm.user_id = $2
+                    )
                 )
                 "#,
             )
@@ -115,7 +144,13 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                 r#"
                 SELECT p.id, p.numeric_id
                 FROM app_project p
-                WHERE p.id = $1 AND p.owner_user_id = $2
+                WHERE p.id = $1
+                  AND EXISTS (
+                    SELECT 1
+                    FROM app_workspace_member wm
+                    WHERE wm.workspace_id = p.workspace_id
+                      AND wm.user_id = $2
+                  )
                 "#,
             )
             .bind(u)
@@ -136,7 +171,13 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                 r#"
                 SELECT p.id, p.numeric_id
                 FROM app_project p
-                WHERE p.id = $1 AND p.owner_user_id = $2
+                WHERE p.id = $1
+                  AND EXISTS (
+                    SELECT 1
+                    FROM app_workspace_member wm
+                    WHERE wm.workspace_id = p.workspace_id
+                      AND wm.user_id = $2
+                  )
                 "#,
             )
             .bind(u)
@@ -156,7 +197,13 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                 r#"
                 SELECT p.id, p.numeric_id
                 FROM app_project p
-                WHERE p.numeric_id = $1 AND p.owner_user_id = $2
+                WHERE p.numeric_id = $1
+                  AND EXISTS (
+                    SELECT 1
+                    FROM app_workspace_member wm
+                    WHERE wm.workspace_id = p.workspace_id
+                      AND wm.user_id = $2
+                  )
                 "#,
             )
             .bind(n)

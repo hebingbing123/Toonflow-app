@@ -12,7 +12,6 @@ use crate::state::AppState;
 
 async fn delete_novel_inner(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     novel_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
@@ -26,12 +25,10 @@ async fn delete_novel_inner(
         USING app_project p
         WHERE n.project_id = p.id
           AND p.id = $1
-          AND p.owner_user_id = $2
-          AND n.numeric_id = $3
+          AND n.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(novel_numeric_id)
     .execute(pool)
     .await
@@ -56,5 +53,5 @@ pub(crate) async fn delete_novel_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_novel_inner(pool, uid, project_id, novel_numeric_id).await
+    delete_novel_inner(pool, project_id, novel_numeric_id).await
 }

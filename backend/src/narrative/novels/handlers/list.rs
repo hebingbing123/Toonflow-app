@@ -75,7 +75,6 @@ pub(super) fn normalize_intake_source(raw: &str) -> Result<String, ApiError> {
 async fn count_novels_filtered(
     pool: &PgPool,
     project_id: Uuid,
-    uid: Uuid,
     search_pat: Option<&str>,
     intake_status: Option<&str>,
     intake_source: Option<&str>,
@@ -88,8 +87,6 @@ async fn count_novels_filtered(
         WHERE p.id = "#,
     );
     qb.push_bind(project_id);
-    qb.push(" AND p.owner_user_id = ");
-    qb.push_bind(uid);
     if let Some(pat) = search_pat {
         qb.push(" AND n.chapter ILIKE ");
         qb.push_bind(pat);
@@ -113,7 +110,6 @@ async fn count_novels_filtered(
 async fn select_novels_filtered(
     pool: &PgPool,
     project_id: Uuid,
-    uid: Uuid,
     search_pat: Option<&str>,
     intake_status: Option<&str>,
     intake_source: Option<&str>,
@@ -132,8 +128,6 @@ async fn select_novels_filtered(
         WHERE p.id = "#,
     );
     qb.push_bind(project_id);
-    qb.push(" AND p.owner_user_id = ");
-    qb.push_bind(uid);
     if let Some(pat) = search_pat {
         qb.push(" AND n.chapter ILIKE ");
         qb.push_bind(pat);
@@ -161,7 +155,6 @@ async fn select_novels_filtered(
 
 async fn list_novels_inner(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     query: ListNovelsQuery,
 ) -> Result<Json<ListNovelsResponse>, ApiError> {
@@ -215,7 +208,6 @@ async fn list_novels_inner(
         let total = count_novels_filtered(
             pool,
             project_id,
-            uid,
             search_ref,
             intake_status_ref,
             intake_source_ref,
@@ -224,7 +216,6 @@ async fn list_novels_inner(
         let items = select_novels_filtered(
             pool,
             project_id,
-            uid,
             search_ref,
             intake_status_ref,
             intake_source_ref,
@@ -236,7 +227,6 @@ async fn list_novels_inner(
         let items = select_novels_filtered(
             pool,
             project_id,
-            uid,
             search_ref,
             intake_status_ref,
             intake_source_ref,
@@ -263,7 +253,7 @@ pub(crate) async fn list_novels_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    list_novels_inner(pool, uid, project_id, query).await
+    list_novels_inner(pool, project_id, query).await
 }
 
 #[cfg(test)]

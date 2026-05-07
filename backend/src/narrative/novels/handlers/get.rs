@@ -15,7 +15,6 @@ use super::super::dto::NovelRow;
 
 async fn fetch_owned_novel_row(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     novel_numeric_id: i32,
 ) -> Result<NovelRow, ApiError> {
@@ -34,12 +33,10 @@ async fn fetch_owned_novel_row(
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND n.numeric_id = $3
+          AND n.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(novel_numeric_id)
     .fetch_optional(pool)
     .await
@@ -61,6 +58,6 @@ pub(crate) async fn get_novel_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    let row = fetch_owned_novel_row(pool, uid, project_id, novel_numeric_id).await?;
+    let row = fetch_owned_novel_row(pool, project_id, novel_numeric_id).await?;
     Ok(Json(row))
 }

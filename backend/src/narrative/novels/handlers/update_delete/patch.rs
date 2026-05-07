@@ -52,7 +52,6 @@ fn build_novel_intake_metadata_from_row(
 
 async fn patch_novel_inner(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     novel_numeric_id: i32,
     body: PatchNovelBody,
@@ -102,12 +101,10 @@ async fn patch_novel_inner(
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND n.numeric_id = $3
+          AND n.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(novel_numeric_id)
     .fetch_optional(pool)
     .await
@@ -202,8 +199,7 @@ async fn patch_novel_inner(
         FROM app_project p
         WHERE n.project_id = p.id
           AND p.id = $9
-          AND p.owner_user_id = $10
-          AND n.numeric_id = $11
+          AND n.numeric_id = $10
         RETURNING n.id, n.numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
                   n.event, n.event_state, n.error_reason, n.create_time_ms,
                   n.metadata->>'intakeSource' AS intake_source,
@@ -221,7 +217,6 @@ async fn patch_novel_inner(
     .bind(new_err.as_ref())
     .bind(new_metadata)
     .bind(project_id)
-    .bind(uid)
     .bind(novel_numeric_id)
     .fetch_one(pool)
     .await
@@ -243,5 +238,5 @@ pub(crate) async fn patch_novel_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_novel_inner(pool, uid, project_id, novel_numeric_id, body).await
+    patch_novel_inner(pool, project_id, novel_numeric_id, body).await
 }
