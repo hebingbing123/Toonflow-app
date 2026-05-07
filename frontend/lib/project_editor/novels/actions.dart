@@ -229,6 +229,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required ProjectRow project,
     required List<ParsedNovelChapter> chapters,
     required int batchSize,
+    required String intakeSourceMode,
     required String? intakeSourceUrl,
     required String intakeStatus,
     required String? intakeNote,
@@ -270,10 +271,10 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           : normalizedChapters.length;
       final slice = normalizedChapters.sublist(i, end);
       for (final chapter in slice) {
-        final sourceKind =
-            (intakeSourceUrl != null && intakeSourceUrl.isNotEmpty)
-            ? 'crawler_client'
-            : 'whole_book_import';
+        final sourceKind = _resolveImportSourceKind(
+          intakeSourceMode: intakeSourceMode,
+          intakeSourceUrl: intakeSourceUrl,
+        );
         await createProjectNovelUnderProject(
           token,
           project.id,
@@ -291,6 +292,20 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
 
     await refreshWorkbench(setLocalState);
     applyInfoLine('整本导入完成，共新增 ${normalizedChapters.length} 条章节。');
+  }
+
+  String _resolveImportSourceKind({
+    required String intakeSourceMode,
+    required String? intakeSourceUrl,
+  }) {
+    final hasUrl = intakeSourceUrl != null && intakeSourceUrl.trim().isNotEmpty;
+    if (!hasUrl) {
+      return 'whole_book_import';
+    }
+    if (intakeSourceMode == 'server') {
+      return 'crawler_server';
+    }
+    return 'crawler_client';
   }
 
   Future<void> _readNovelWorkbenchChapter({

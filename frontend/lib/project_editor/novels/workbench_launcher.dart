@@ -49,6 +49,7 @@ Future<void> openNovelWorkbenchDialog({
     required TextEditingController importUrlCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
+    required TextEditingController importExecutionSideCtrl,
     required TextEditingController importIntakeStatusCtrl,
     required TextEditingController importIntakeNoteCtrl,
     required void Function(List<ParsedNovelChapter> rows, String message)
@@ -253,6 +254,7 @@ Future<void> openNovelWorkbenchDialog({
                         importUrlCtrl: ctrls.importUrlCtrl,
                         importRawTextCtrl: ctrls.importRawTextCtrl,
                         importBatchSizeCtrl: ctrls.importBatchSizeCtrl,
+                        importExecutionSideCtrl: ctrls.importExecutionSideCtrl,
                         importIntakeStatusCtrl: ctrls.importIntakeStatusCtrl,
                         importIntakeNoteCtrl: ctrls.importIntakeNoteCtrl,
                         applyImportPreview: (rows, message) {

@@ -8,6 +8,7 @@ class _NovelWorkbenchControllers {
     required this.importUrlCtrl,
     required this.importRawTextCtrl,
     required this.importBatchSizeCtrl,
+    required this.importExecutionSideCtrl,
     required this.importIntakeStatusCtrl,
     required this.importIntakeNoteCtrl,
     required this.createChapterCtrl,
@@ -39,6 +40,7 @@ class _NovelWorkbenchControllers {
       importUrlCtrl: TextEditingController(),
       importRawTextCtrl: TextEditingController(),
       importBatchSizeCtrl: TextEditingController(text: '10'),
+      importExecutionSideCtrl: TextEditingController(text: 'client'),
       importIntakeStatusCtrl: TextEditingController(text: 'pending_review'),
       importIntakeNoteCtrl: TextEditingController(),
       createChapterCtrl: TextEditingController(
@@ -83,6 +85,7 @@ class _NovelWorkbenchControllers {
   final TextEditingController importUrlCtrl;
   final TextEditingController importRawTextCtrl;
   final TextEditingController importBatchSizeCtrl;
+  final TextEditingController importExecutionSideCtrl;
   final TextEditingController importIntakeStatusCtrl;
   final TextEditingController importIntakeNoteCtrl;
   final TextEditingController createChapterCtrl;
@@ -108,6 +111,7 @@ class _NovelWorkbenchControllers {
     importUrlCtrl.dispose();
     importRawTextCtrl.dispose();
     importBatchSizeCtrl.dispose();
+    importExecutionSideCtrl.dispose();
     importIntakeStatusCtrl.dispose();
     importIntakeNoteCtrl.dispose();
     createChapterCtrl.dispose();

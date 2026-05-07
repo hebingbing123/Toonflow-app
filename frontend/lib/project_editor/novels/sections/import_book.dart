@@ -16,6 +16,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     required TextEditingController importUrlCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
+    required TextEditingController importExecutionSideCtrl,
     required TextEditingController importIntakeStatusCtrl,
     required TextEditingController importIntakeNoteCtrl,
     required void Function(List<ParsedNovelChapter> rows, String message)
@@ -121,6 +122,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         chapters: importPreviewRows,
                         batchSize:
                             int.tryParse(importBatchSizeCtrl.text.trim()) ?? 10,
+                        intakeSourceMode: importExecutionSideCtrl.text.trim(),
                         intakeSourceUrl: importUrlCtrl.text.trim(),
                         intakeStatus: importIntakeStatusCtrl.text.trim(),
                         intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
@@ -139,6 +141,28 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                initialValue: importExecutionSideCtrl.text.isEmpty
+                    ? 'client'
+                    : importExecutionSideCtrl.text,
+                decoration: const InputDecoration(labelText: '抓取执行端'),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'client',
+                    child: Text('client (当前可用)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'server',
+                    child: Text('server (托管来源标记)'),
+                  ),
+                ],
+                onChanged: (value) {
+                  importExecutionSideCtrl.text = value ?? 'client';
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
             Expanded(
               child: DropdownButtonFormField<String>(
                 initialValue: importIntakeStatusCtrl.text.isEmpty
