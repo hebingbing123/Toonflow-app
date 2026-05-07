@@ -26,7 +26,7 @@
 - **Q1–Q3**（ops-only，平台级可观测 + Runbook）：**已完成** — 扩展 `QueueStats` / `job_queue_metrics` 日志字段；[**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)（扩容、SQL、Gate、与 trace 关联）；代码 `backend/src/jobs/queue/pg.rs`、`worker/mod.rs`。
 - **Q4**：与 harness trace 字段联调 — **仍 open**（见任务清单 DoD）。
 
-- **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）。**H1**（`agent_memory` / `clear-agent-memories`：**`projectUuid`** 优先 + legacy **`projectId`**；无 DB 时缺项目先 **400**）已合 Rust + Flutter；**Harness `projectUuid`（H1 尾部 / H4）** 仍为待办。**H2**（`asset_extract`）为下一全栈波次。
+- **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）。**H1**（`agent_memory` / `clear-agent-memories`：**`projectUuid`** 优先 + legacy **`projectId`**；无 DB 时缺项目先 **400**）已合 Rust + Flutter；**Harness `projectUuid`（H1 尾部 / H4）** 仍为待办。**H2**（`asset_extract`：**`project_uuid`** + legacy **`project_numeric_id`**；共享 `assets` 解析器）已合。**H3**（`assets-generate` / jobs payload）为下一高风险里程碑。
 
 ## Phase 1 进度
 

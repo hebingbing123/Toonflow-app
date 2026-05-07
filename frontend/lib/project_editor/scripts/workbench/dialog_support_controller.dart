@@ -162,6 +162,7 @@ class ProjectScriptsWorkbenchController {
     final groupSize = int.tryParse(session.groupSizeCtrl.text.trim());
     final accepted = await startScriptAssetExtract(
       token,
+      projectUuid: project.id,
       projectNumericId: project.numericId,
       scriptNumericIds: selected,
       groupSize: groupSize,

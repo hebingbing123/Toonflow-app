@@ -122,6 +122,7 @@ Widget buildProjectScriptsSection({
     try {
       final accepted = await startScriptAssetExtract(
         token,
+        projectUuid: project.id,
         projectNumericId: project.numericId,
         scriptNumericIds: allScriptIds,
       );

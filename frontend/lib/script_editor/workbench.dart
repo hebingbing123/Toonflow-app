@@ -141,6 +141,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   Future<void> _startExtractAssets() async {
     final accepted = await startScriptAssetExtract(
       widget.token,
+      projectUuid: widget.projectId,
       projectNumericId: widget.projectNumericId,
       scriptNumericIds: [widget.scriptNumericId],
     );

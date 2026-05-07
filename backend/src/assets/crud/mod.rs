@@ -28,6 +28,7 @@ pub(crate) use patch_delete::{delete_project_asset_for_project, patch_project_as
 pub(crate) use resolve::{
     ensure_owned_project_numeric_id, ensure_owned_project_pk,
     resolve_owned_asset_id_and_metadata_for_project, resolve_owned_asset_id_for_project,
+    resolve_owned_project_numeric_from_uuid_or_legacy_id,
 };
 pub use resolve::{
     next_asset_image_sort_index, resolve_asset_id_for_job,

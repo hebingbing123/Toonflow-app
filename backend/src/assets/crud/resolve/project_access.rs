@@ -40,3 +40,59 @@ pub(crate) async fn ensure_owned_project_numeric_id(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     v.ok_or(ApiError::NotFound)
 }
+
+/// Resolves **`app_project.numeric_id`** when the client sends **UUID** and/or legacy **numeric** id.
+///
+/// Used by HTTP handlers that still key `app_agent_memory` / jobs by **`numeric_id`** while exposing
+/// **`app_project.id`** on newer clients. Prefer UUID; if both are set they must agree.
+pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
+    pool: &PgPool,
+    uid: Uuid,
+    project_uuid: Option<Uuid>,
+    project_numeric_id: Option<i32>,
+) -> Result<i32, ApiError> {
+    match (project_uuid, project_numeric_id) {
+        (Some(u), Some(n)) => {
+            if n <= 0 {
+                return Err(ApiError::BadRequest(
+                    "project_numeric_id must be positive".into(),
+                ));
+            }
+            let resolved = ensure_owned_project_numeric_id(pool, uid, u).await?;
+            if resolved != n {
+                return Err(ApiError::BadRequest(
+                    "Project UUID and numeric project id must refer to the same project".into(),
+                ));
+            }
+            Ok(resolved)
+        }
+        (Some(u), None) => ensure_owned_project_numeric_id(pool, uid, u).await,
+        (None, Some(n)) => {
+            if n <= 0 {
+                return Err(ApiError::BadRequest(
+                    "project_numeric_id must be positive".into(),
+                ));
+            }
+            let ok: bool = sqlx::query_scalar(
+                r#"
+                SELECT EXISTS(
+                  SELECT 1 FROM app_project
+                  WHERE numeric_id = $1 AND owner_user_id = $2
+                )
+                "#,
+            )
+            .bind(n)
+            .bind(uid)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            if !ok {
+                return Err(ApiError::NotFound);
+            }
+            Ok(n)
+        }
+        (None, None) => Err(ApiError::BadRequest(
+            "Provide project UUID (preferred) or legacy numeric project id".into(),
+        )),
+    }
+}

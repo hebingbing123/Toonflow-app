@@ -36,9 +36,9 @@
 
 **触点**：`backend/src/scripting/asset_extract/mod.rs`；调用方 `rust_api` + 工作台。
 
-- [ ] 设计：body 从 **`project_numeric_id`** 迁到 **UUID 项目 id**（或 query 与 path 统一）。
-- [ ] 后端 + OpenAPI + smoke。
-- [ ] Flutter 全主路径切换；删除或 deprecate 旧 helper。
+- [x] 设计：body 增加 **`project_uuid`**（**`app_project.id`**），保留 **`project_numeric_id`** 兼容；与 **`assets::resolve_owned_project_numeric_from_uuid_or_legacy_id`** 对齐（与 H1 同一解析语义）。
+- [x] 后端 + OpenAPI（仍为 schema ref 路径；导出可解析）+ smoke（缺项目 **400**）。
+- [x] Flutter 主路径发 **`project_uuid`**（有 UUID 时）；`startScriptAssetExtract` 仍接受 legacy numeric。
 
 **验收**：同 H1。
 

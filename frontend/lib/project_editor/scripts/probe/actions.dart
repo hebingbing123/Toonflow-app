@@ -248,6 +248,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   final ids = scriptList.map((s) => s.numericId).toList();
                   final acc = await startScriptAssetExtract(
                     token,
+                    projectUuid: p.id,
                     projectNumericId: p.numericId,
                     scriptNumericIds: ids,
                   );

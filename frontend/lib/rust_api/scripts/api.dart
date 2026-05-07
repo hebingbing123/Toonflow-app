@@ -231,17 +231,27 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
 }
 
 /// `POST /api/v1/scripts/extract-assets` — background LLM extraction (**503** if LLM/DB unset). See `startScriptAssetExtractV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectNumericId`** is legacy **`numeric_id`**.
 Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
   String accessToken, {
-  required int projectNumericId,
+  int? projectNumericId,
+  String? projectUuid,
   required List<int> scriptNumericIds,
   int? groupSize,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-assets');
   final body = <String, dynamic>{
-    'project_numeric_id': projectNumericId,
     'script_numeric_ids': scriptNumericIds,
   };
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    body['project_uuid'] = u;
+  } else if (projectNumericId != null) {
+    body['project_numeric_id'] = projectNumericId;
+  } else {
+    throw ArgumentError('projectUuid or projectNumericId is required');
+  }
   if (groupSize != null) {
     body['group_size'] = groupSize;
   }

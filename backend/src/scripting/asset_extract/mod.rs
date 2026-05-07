@@ -7,7 +7,9 @@
 
 use axum::{extract::State, http::HeaderMap, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
+use crate::assets::resolve_owned_project_numeric_from_uuid_or_legacy_id;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -24,8 +26,12 @@ const DEFAULT_GROUP_SIZE: usize = 5;
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ExtractAssetsBody {
-    /// Stable project integer id (`app_project.numeric_id`).
-    pub project_numeric_id: i32,
+    /// Preferred: project primary key (`app_project.id`).
+    #[serde(default)]
+    pub project_uuid: Option<Uuid>,
+    /// Legacy: stable project integer id (`app_project.numeric_id`).
+    #[serde(default)]
+    pub project_numeric_id: Option<i32>,
     pub script_numeric_ids: Vec<i32>,
     #[serde(default = "default_group_size")]
     pub group_size: usize,
@@ -55,9 +61,11 @@ async fn start_script_asset_extract(
 ) -> Result<Json<ExtractAcceptedResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if body.project_numeric_id <= 0 {
+    let project_uuid = body.project_uuid;
+    let project_numeric_id_in = body.project_numeric_id;
+    if project_uuid.is_none() && project_numeric_id_in.is_none() {
         return Err(ApiError::BadRequest(
-            "project_numeric_id must be positive".into(),
+            "Provide project_uuid (preferred) or legacy project_numeric_id".into(),
         ));
     }
     let mut script_ids: Vec<i32> = body
@@ -85,10 +93,17 @@ async fn start_script_asset_extract(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
 
+    let project_numeric_id = resolve_owned_project_numeric_from_uuid_or_legacy_id(
+        pool,
+        uid,
+        project_uuid,
+        project_numeric_id_in,
+    )
+    .await?;
+
     let pool = pool.clone();
     let cfg = cfg.clone();
     let client = state.http_client.clone();
-    let project_numeric_id = body.project_numeric_id;
 
     tokio::spawn(async move {
         if let Err(e) = extract_job::run_extract_job(
@@ -127,5 +142,25 @@ mod tests {
                 || err.to_string().contains("unknown variant"),
             "{err}"
         );
+    }
+
+    #[test]
+    fn extract_body_accepts_project_uuid_only() {
+        let u = Uuid::from_u128(0x55);
+        let b: ExtractAssetsBody = serde_json::from_str(&format!(
+            r#"{{"project_uuid":"{u}","script_numeric_ids":[1,2]}}"#
+        ))
+        .unwrap();
+        assert_eq!(b.project_uuid, Some(u));
+        assert_eq!(b.project_numeric_id, None);
+        assert_eq!(b.script_numeric_ids, vec![1, 2]);
+    }
+
+    #[test]
+    fn extract_body_accepts_legacy_numeric_only() {
+        let b: ExtractAssetsBody =
+            serde_json::from_str(r#"{"project_numeric_id":7,"script_numeric_ids":[3]}"#).unwrap();
+        assert!(b.project_uuid.is_none());
+        assert_eq!(b.project_numeric_id, Some(7));
     }
 }

@@ -28,24 +28,30 @@ pub(crate) async fn resolve_agent_memory_project_numeric_id(
     project_uuid: Option<Uuid>,
     project_id_legacy: Option<i32>,
 ) -> Result<i32, ApiError> {
-    match (project_uuid, project_id_legacy) {
-        (Some(u), Some(n)) => {
-            let resolved = crate::assets::ensure_owned_project_numeric_id(pool, uid, u).await?;
-            if resolved != n {
-                return Err(ApiError::BadRequest(
-                    "projectUuid and projectId must refer to the same project".into(),
-                ));
-            }
-            Ok(resolved)
+    match crate::assets::resolve_owned_project_numeric_from_uuid_or_legacy_id(
+        pool,
+        uid,
+        project_uuid,
+        project_id_legacy,
+    )
+    .await
+    {
+        Ok(n) => Ok(n),
+        Err(ApiError::BadRequest(msg))
+            if msg == "Provide project UUID (preferred) or legacy numeric project id" =>
+        {
+            Err(ApiError::BadRequest(
+                "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+            ))
         }
-        (Some(u), None) => crate::assets::ensure_owned_project_numeric_id(pool, uid, u).await,
-        (None, Some(n)) => {
-            ensure_project_owned(pool, uid, n).await?;
-            Ok(n)
+        Err(ApiError::BadRequest(msg))
+            if msg == "Project UUID and numeric project id must refer to the same project" =>
+        {
+            Err(ApiError::BadRequest(
+                "projectUuid and projectId must refer to the same project".into(),
+            ))
         }
-        (None, None) => Err(ApiError::BadRequest(
-            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
-        )),
+        Err(e) => Err(e),
     }
 }
 
