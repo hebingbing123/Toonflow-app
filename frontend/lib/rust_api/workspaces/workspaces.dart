@@ -63,6 +63,33 @@ class WorkspaceListItem {
   }
 }
 
+/// One `app_workspace_member` row.
+class WorkspaceMemberResponse {
+  const WorkspaceMemberResponse({
+    required this.workspaceId,
+    required this.userId,
+    required this.role,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String workspaceId;
+  final String userId;
+  final String role;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  factory WorkspaceMemberResponse.fromJson(Map<String, dynamic> json) {
+    return WorkspaceMemberResponse(
+      workspaceId: json['workspace_id'] as String,
+      userId: json['user_id'] as String,
+      role: json['role'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
+}
+
 /// `POST /api/v1/workspaces`
 class CreateWorkspaceBody {
   const CreateWorkspaceBody({required this.name, this.metadata});
@@ -97,6 +124,22 @@ class PatchWorkspaceBody {
     }
     return map;
   }
+}
+
+/// `POST /api/v1/workspaces/{workspace_id}/members`
+class AddWorkspaceMemberBody {
+  const AddWorkspaceMemberBody({
+    required this.userId,
+    required this.role,
+  });
+
+  final String userId;
+  final String role;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'user_id': userId,
+    'role': role,
+  };
 }
 
 Future<List<WorkspaceListItem>> fetchWorkspacesV1(
@@ -141,6 +184,46 @@ Future<WorkspaceResponse> createWorkspaceV1(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceResponse.fromJson(map);
+}
+
+Future<List<WorkspaceMemberResponse>> fetchWorkspaceMembersV1(
+  String accessToken,
+  String workspaceId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members');
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => WorkspaceMemberResponse.fromJson(e as Map<String, dynamic>))
+      .toList(growable: false);
+}
+
+Future<WorkspaceMemberResponse> addWorkspaceMemberV1(
+  String accessToken,
+  String workspaceId,
+  AddWorkspaceMemberBody body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceMemberResponse.fromJson(map);
 }
 
 Future<WorkspaceResponse> patchWorkspaceV1(

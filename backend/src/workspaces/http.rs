@@ -54,6 +54,23 @@ pub struct PatchWorkspaceBody {
     pub archive: Option<bool>,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct AddWorkspaceMemberBody {
+    pub user_id: Uuid,
+    /// Allowed: **`admin`** or **`member`**. (`owner` requires dedicated transfer flow.)
+    pub role: String,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
+pub struct WorkspaceMemberResponse {
+    pub workspace_id: Uuid,
+    pub user_id: Uuid,
+    pub role: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
 #[derive(Debug, Deserialize, IntoParams)]
 #[into_params(parameter_in = Query)]
 pub struct ListWorkspacesQuery {
@@ -92,6 +109,10 @@ pub(crate) fn router() -> Router<AppState> {
             "/api/v1/workspaces/{workspace_id}",
             get(get_workspace).patch(patch_workspace),
         )
+        .route(
+            "/api/v1/workspaces/{workspace_id}/members",
+            get(list_workspace_members).post(add_workspace_member),
+        )
 }
 
 async fn require_workspace_member_role(
@@ -126,6 +147,15 @@ async fn require_workspace_admin_or_owner(
         Err(ApiError::Forbidden(
             "requires workspace owner or admin".into(),
         ))
+    }
+}
+
+fn normalize_member_role(role: &str) -> Option<&'static str> {
+    let v = role.trim().to_ascii_lowercase();
+    match v.as_str() {
+        "admin" => Some("admin"),
+        "member" => Some("member"),
+        _ => None,
     }
 }
 
@@ -513,13 +543,133 @@ pub(crate) async fn patch_workspace(
     }))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/workspaces/{workspace_id}/members",
+    operation_id = "listWorkspaceMembersV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID")
+    ),
+    responses(
+        (status = 200, description = "OK", body = [WorkspaceMemberResponse]),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_workspace_members(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+) -> Result<Json<Vec<WorkspaceMemberResponse>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let _ = require_workspace_member_role(pool, uid, workspace_id).await?;
+
+    let rows: Vec<WorkspaceMemberResponse> = sqlx::query_as(
+        r#"
+        SELECT workspace_id, user_id, role, created_at, updated_at
+        FROM public.app_workspace_member
+        WHERE workspace_id = $1
+        ORDER BY created_at ASC, user_id ASC
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(rows))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/workspaces/{workspace_id}/members",
+    operation_id = "addWorkspaceMemberV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID")
+    ),
+    request_body(content = AddWorkspaceMemberBody, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceMemberResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn add_workspace_member(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+    Json(body): Json<AddWorkspaceMemberBody>,
+) -> Result<Json<WorkspaceMemberResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+
+    let role = normalize_member_role(&body.role).ok_or_else(|| {
+        ApiError::BadRequest("role must be admin or member (owner requires transfer flow)".into())
+    })?;
+
+    let ws_exists: bool =
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM public.app_workspace WHERE id = $1)")
+            .bind(workspace_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if !ws_exists {
+        return Err(ApiError::NotFound);
+    }
+
+    let user_exists: bool =
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM auth.users WHERE id = $1)")
+            .bind(body.user_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if !user_exists {
+        return Err(ApiError::NotFound);
+    }
+
+    let row: WorkspaceMemberResponse = sqlx::query_as(
+        r#"
+        INSERT INTO public.app_workspace_member (workspace_id, user_id, role)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (workspace_id, user_id) DO UPDATE
+        SET role = EXCLUDED.role, updated_at = NOW()
+        RETURNING workspace_id, user_id, role, created_at, updated_at
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.user_id)
+    .bind(role)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(row))
+}
+
 #[derive(utoipa::OpenApi)]
 #[openapi(
-    paths(create_workspace, list_workspaces, get_workspace, patch_workspace),
+    paths(
+        create_workspace,
+        list_workspaces,
+        get_workspace,
+        patch_workspace,
+        list_workspace_members,
+        add_workspace_member
+    ),
     components(schemas(
         WorkspaceResponse,
         WorkspaceListItem,
+        WorkspaceMemberResponse,
         CreateWorkspaceBody,
+        AddWorkspaceMemberBody,
         PatchWorkspaceBody,
         crate::error::ErrorBody
     )),

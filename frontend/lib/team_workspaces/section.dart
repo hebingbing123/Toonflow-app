@@ -129,6 +129,161 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     return row.role == 'owner' || row.role == 'admin';
   }
 
+  Future<void> _openMembersDialog(WorkspaceListItem row) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final userIdController = TextEditingController();
+    String role = 'member';
+    List<WorkspaceMemberResponse> members = <WorkspaceMemberResponse>[];
+    String? error;
+    bool loading = true;
+    bool adding = false;
+
+    Future<void> loadMembers(StateSetter setModalState) async {
+      setModalState(() {
+        loading = true;
+        error = null;
+      });
+      try {
+        final rows = await fetchWorkspaceMembersV1(token, row.workspace.id);
+        setModalState(() {
+          members = rows;
+          loading = false;
+        });
+      } catch (e) {
+        setModalState(() {
+          error = e.toString();
+          loading = false;
+        });
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            if (loading && members.isEmpty && error == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                loadMembers(setModalState);
+              });
+            }
+            return AlertDialog(
+              title: Text('成员管理 · ${row.workspace.name}'),
+              content: SizedBox(
+                width: 480,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextField(
+                        controller: userIdController,
+                        decoration: const InputDecoration(
+                          labelText: '用户 UUID',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        initialValue: role,
+                        decoration: const InputDecoration(
+                          labelText: '角色',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const <DropdownMenuItem<String>>[
+                          DropdownMenuItem(value: 'member', child: Text('member')),
+                          DropdownMenuItem(value: 'admin', child: Text('admin')),
+                        ],
+                        onChanged: adding
+                            ? null
+                            : (v) => setModalState(() => role = v ?? 'member'),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: <Widget>[
+                          FilledButton(
+                            onPressed: adding
+                                ? null
+                                : () async {
+                                    final userId = userIdController.text.trim();
+                                    if (userId.isEmpty) {
+                                      setModalState(() => error = '请输入用户 UUID');
+                                      return;
+                                    }
+                                    setModalState(() {
+                                      adding = true;
+                                      error = null;
+                                    });
+                                    try {
+                                      await addWorkspaceMemberV1(
+                                        token,
+                                        row.workspace.id,
+                                        AddWorkspaceMemberBody(
+                                          userId: userId,
+                                          role: role,
+                                        ),
+                                      );
+                                      userIdController.clear();
+                                      await loadMembers(setModalState);
+                                    } catch (e) {
+                                      setModalState(() => error = e.toString());
+                                    } finally {
+                                      setModalState(() => adding = false);
+                                    }
+                                  },
+                            child: Text(adding ? '添加中…' : '添加成员'),
+                          ),
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: loading ? null : () => loadMembers(setModalState),
+                            child: const Text('刷新'),
+                          ),
+                        ],
+                      ),
+                      if (error != null) ...<Widget>[
+                        const SizedBox(height: 8),
+                        SelectableText(
+                          error!,
+                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      if (members.isEmpty && !loading)
+                        const Text('暂无成员（异常）。'),
+                      if (loading) const LinearProgressIndicator(),
+                      if (members.isNotEmpty)
+                        ...members.map(
+                          (m) => ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(m.userId),
+                            subtitle: Text(m.role),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('关闭'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    userIdController.dispose();
+  }
+
   Future<void> _confirmArchive(WorkspaceListItem row) async {
     final ok = await showDialog<bool>(
       context: context,
@@ -293,6 +448,12 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
+                    if (canManage)
+                      TextButton(
+                        onPressed:
+                            (_loading || busy) ? null : () => _openMembersDialog(row),
+                        child: const Text('成员'),
+                      ),
                     if (canManage && w.archivedAt == null)
                       TextButton(
                         onPressed: (_loading || busy) ? null : () => _confirmArchive(row),

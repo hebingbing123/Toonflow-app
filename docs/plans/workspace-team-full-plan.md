@@ -42,7 +42,7 @@
 
 ## 三、Phase W2 — 成员与邀请（完整闭环）
 
-- [ ] **W2.1** `POST …/workspaces/{id}/members`：**直接添加** 已存在用户（`user_id` + `role`），校验 inviter 为 owner/admin
+- [x] **W2.1** `POST …/workspaces/{id}/members`：**直接添加** 已存在用户（`user_id` + `role`）；已落地 owner/admin 鉴权 + 角色限制（`admin/member`）+ Flutter 成员管理入口（查看 + 添加）
 - [ ] **W2.2** 邀请表 `app_workspace_invite`（或等价）：`email` / `token` / `expires_at` / `role` / `invited_by` / 状态（pending/accepted/revoked）
 - [ ] **W2.3** `POST …/workspaces/{id}/invites`：生成邀请（邮件或仅返回一次性链接，**两种策略可配置**）
 - [ ] **W2.4** `POST /api/v1/workspaces/invites/accept`：凭 token 加入 member
