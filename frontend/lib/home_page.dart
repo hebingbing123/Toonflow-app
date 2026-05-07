@@ -312,9 +312,9 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  Future<void> _syncSessionContext() async {
+  Future<void> _syncSessionContext({bool force = false}) async {
     final token = _authController.session?.accessToken;
-    if (token == _lastSessionAccessToken) {
+    if (!force && token == _lastSessionAccessToken) {
       return;
     }
     _lastSessionAccessToken = token;
@@ -356,6 +356,27 @@ class _HomePageState extends State<HomePage> {
         });
       }
     }
+  }
+
+  Future<void> _handleWorkspaceContextChanged() async {
+    _projectsController.reset();
+    _jobsController.reset();
+    _taskCenterController.reset();
+    _qualityReviewsController.reset();
+    _workspaceOutputController.reset();
+    _workspaceInputController.projectIdController.clear();
+    _workspaceInputController.projectUuidController.clear();
+    _workspaceInputController.clearScriptScope();
+    if (mounted) {
+      setState(() {
+        _productScopedProjectNumericId = null;
+      });
+    }
+    await _syncSessionContext(force: true);
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
   }
 
   void _handleAccountProbesChanged() {

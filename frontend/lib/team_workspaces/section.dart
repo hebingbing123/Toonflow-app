@@ -4,9 +4,14 @@ import '../rust_api.dart';
 
 /// Team / enterprise workspace lifecycle（**W1.1–W1.6**：列表/创建/归档与恢复/配额由后端约束）。
 class TeamWorkspacesSection extends StatefulWidget {
-  const TeamWorkspacesSection({super.key, required this.accessToken});
+  const TeamWorkspacesSection({
+    super.key,
+    required this.accessToken,
+    this.onWorkspaceContextChanged,
+  });
 
   final String? accessToken;
+  final Future<void> Function()? onWorkspaceContextChanged;
 
   @override
   State<TeamWorkspacesSection> createState() => _TeamWorkspacesSectionState();
@@ -416,6 +421,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             messenger.showSnackBar(
                               const SnackBar(content: Text('已退出该空间')),
                             );
+                            if (widget.onWorkspaceContextChanged != null) {
+                              await widget.onWorkspaceContextChanged!();
+                            }
                             await _load();
                           } catch (e) {
                             setModalState(() {
@@ -484,6 +492,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(archive ? '已归档' : '已恢复')),
       );
+      if (widget.onWorkspaceContextChanged != null) {
+        await widget.onWorkspaceContextChanged!();
+      }
       await _load();
     } catch (e) {
       if (!mounted) {
@@ -517,6 +528,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('已切换到 ${row.workspace.name}')),
       );
+      if (widget.onWorkspaceContextChanged != null) {
+        await widget.onWorkspaceContextChanged!();
+      }
       await _load();
     } catch (e) {
       if (!mounted) {
