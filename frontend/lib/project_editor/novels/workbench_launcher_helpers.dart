@@ -20,6 +20,11 @@ Future<void> refreshNovelWorkbenchLocalState({
       ctrls.selectedNovelIdCtrl.text = refreshed.first.numericId.toString();
       ctrls.patchChapterCtrl.text = refreshed.first.chapter;
       ctrls.patchBodyCtrl.text = refreshed.first.chapterData;
+      ctrls.patchIntakeStatusCtrl.text =
+          refreshed.first.intakeStatus ?? 'admitted';
+      ctrls.patchIntakeSourceUrlCtrl.text =
+          refreshed.first.intakeSourceUrl ?? '';
+      ctrls.patchIntakeNoteCtrl.text = refreshed.first.intakeNote ?? '';
     }
     if (ctrls.deleteNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
       ctrls.deleteNovelIdCtrl.text = refreshed.last.numericId.toString();
@@ -44,4 +49,3 @@ void applyNovelWorkbenchSearchResult({
     local.infoLine = message;
   });
 }
-

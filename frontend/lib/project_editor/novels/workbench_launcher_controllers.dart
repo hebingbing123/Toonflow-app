@@ -11,6 +11,9 @@ class _NovelWorkbenchControllers {
     required this.selectedNovelIdCtrl,
     required this.patchChapterCtrl,
     required this.patchBodyCtrl,
+    required this.patchIntakeStatusCtrl,
+    required this.patchIntakeSourceUrlCtrl,
+    required this.patchIntakeNoteCtrl,
     required this.deleteNovelIdCtrl,
     required this.generateIdsCtrl,
     required this.numericIdsCtrl,
@@ -36,6 +39,13 @@ class _NovelWorkbenchControllers {
       ),
       patchChapterCtrl: TextEditingController(text: first?.chapter ?? ''),
       patchBodyCtrl: TextEditingController(text: first?.chapterData ?? ''),
+      patchIntakeStatusCtrl: TextEditingController(
+        text: first?.intakeStatus ?? 'admitted',
+      ),
+      patchIntakeSourceUrlCtrl: TextEditingController(
+        text: first?.intakeSourceUrl ?? '',
+      ),
+      patchIntakeNoteCtrl: TextEditingController(text: first?.intakeNote ?? ''),
       deleteNovelIdCtrl: TextEditingController(
         text: last?.numericId.toString() ?? '',
       ),
@@ -60,6 +70,9 @@ class _NovelWorkbenchControllers {
   final TextEditingController selectedNovelIdCtrl;
   final TextEditingController patchChapterCtrl;
   final TextEditingController patchBodyCtrl;
+  final TextEditingController patchIntakeStatusCtrl;
+  final TextEditingController patchIntakeSourceUrlCtrl;
+  final TextEditingController patchIntakeNoteCtrl;
   final TextEditingController deleteNovelIdCtrl;
   final TextEditingController generateIdsCtrl;
   final TextEditingController numericIdsCtrl;
@@ -75,6 +88,9 @@ class _NovelWorkbenchControllers {
     selectedNovelIdCtrl.dispose();
     patchChapterCtrl.dispose();
     patchBodyCtrl.dispose();
+    patchIntakeStatusCtrl.dispose();
+    patchIntakeSourceUrlCtrl.dispose();
+    patchIntakeNoteCtrl.dispose();
     deleteNovelIdCtrl.dispose();
     generateIdsCtrl.dispose();
     numericIdsCtrl.dispose();

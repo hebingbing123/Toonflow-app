@@ -80,6 +80,9 @@ Future<void> openNovelWorkbenchDialog({
     required TextEditingController selectedNovelIdCtrl,
     required TextEditingController patchChapterCtrl,
     required TextEditingController patchBodyCtrl,
+    required TextEditingController patchIntakeStatusCtrl,
+    required TextEditingController patchIntakeSourceUrlCtrl,
+    required TextEditingController patchIntakeNoteCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
   })
   buildEditSection,
@@ -191,7 +194,7 @@ Future<void> openNovelWorkbenchDialog({
                                 (row) => Padding(
                                   padding: const EdgeInsets.only(bottom: 6),
                                   child: Text(
-                                    '#${row.numericId} · ${row.chapter} · 事件状态 ${row.eventState}',
+                                    '#${row.numericId} · ${row.chapter} · ${row.intakeSource ?? 'unknown'} / ${row.intakeStatus ?? 'unset'} · 事件状态 ${row.eventState}',
                                     style: Theme.of(
                                       dialogCtx,
                                     ).textTheme.bodySmall,
@@ -277,6 +280,10 @@ Future<void> openNovelWorkbenchDialog({
                         selectedNovelIdCtrl: ctrls.selectedNovelIdCtrl,
                         patchChapterCtrl: ctrls.patchChapterCtrl,
                         patchBodyCtrl: ctrls.patchBodyCtrl,
+                        patchIntakeStatusCtrl: ctrls.patchIntakeStatusCtrl,
+                        patchIntakeSourceUrlCtrl:
+                            ctrls.patchIntakeSourceUrlCtrl,
+                        patchIntakeNoteCtrl: ctrls.patchIntakeNoteCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
                       const SizedBox(height: 16),

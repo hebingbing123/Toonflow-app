@@ -38,18 +38,18 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             onPressed: localBusy
                 ? null
                 : () => _runNovelWorkbenchAction(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      setLocalState: setLocalState,
-                      novelsBusy: novelsBusy,
-                      setLocalBusy: setLocalBusy,
-                      action: () => _crawlNovelSourcePreview(
-                        importUrlCtrl: importUrlCtrl,
-                        importRawTextCtrl: importRawTextCtrl,
-                        applyInfoLine: updateInfoLine,
-                        applyImportPreview: applyImportPreview,
-                      ),
+                    ctx: ctx,
+                    setDialogState: setDialogState,
+                    setLocalState: setLocalState,
+                    novelsBusy: novelsBusy,
+                    setLocalBusy: setLocalBusy,
+                    action: () => _crawlNovelSourcePreview(
+                      importUrlCtrl: importUrlCtrl,
+                      importRawTextCtrl: importRawTextCtrl,
+                      applyInfoLine: updateInfoLine,
+                      applyImportPreview: applyImportPreview,
                     ),
+                  ),
             child: const Text('抓取并预解析'),
           ),
         ),
@@ -107,6 +107,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         chapters: importPreviewRows,
                         batchSize:
                             int.tryParse(importBatchSizeCtrl.text.trim()) ?? 10,
+                        intakeSourceUrl: importUrlCtrl.text.trim(),
                         refreshWorkbench: refreshWorkbench,
                         setLocalState: setLocalState,
                         applyInfoLine: updateInfoLine,

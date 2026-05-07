@@ -112,6 +112,8 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       project.id,
       chapter: createChapterCtrl.text.trim(),
       chapterData: createBodyCtrl.text.trim(),
+      intakeSource: 'manual',
+      intakeStatus: 'admitted',
     );
     await refreshWorkbench(setLocalState);
     setLocalState(() {
@@ -126,6 +128,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required ProjectRow project,
     required List<ParsedNovelChapter> chapters,
     required int batchSize,
+    required String? intakeSourceUrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
@@ -143,12 +146,19 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           : chapters.length;
       final slice = chapters.sublist(i, end);
       for (final chapter in slice) {
+        final sourceKind =
+            (intakeSourceUrl != null && intakeSourceUrl.isNotEmpty)
+            ? 'crawler_client'
+            : 'whole_book_import';
         await createProjectNovelUnderProject(
           token,
           project.id,
           chapterIndex: chapter.chapterIndex,
           chapter: chapter.chapter,
           chapterData: chapter.chapterData,
+          intakeSource: sourceKind,
+          intakeSourceUrl: intakeSourceUrl,
+          intakeStatus: 'admitted',
         );
       }
       applyInfoLine('已导入 $end/${chapters.length} 条章节…');
@@ -164,12 +174,18 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required TextEditingController selectedNovelIdCtrl,
     required TextEditingController patchChapterCtrl,
     required TextEditingController patchBodyCtrl,
+    required TextEditingController patchIntakeStatusCtrl,
+    required TextEditingController patchIntakeSourceUrlCtrl,
+    required TextEditingController patchIntakeNoteCtrl,
     required void Function(String infoLine) applyInfoLine,
   }) async {
     final id = int.parse(selectedNovelIdCtrl.text.trim());
     final row = await fetchProjectNovelByProjectIds(token, project.id, id);
     patchChapterCtrl.text = row.chapter;
     patchBodyCtrl.text = row.chapterData;
+    patchIntakeStatusCtrl.text = row.intakeStatus ?? 'admitted';
+    patchIntakeSourceUrlCtrl.text = row.intakeSourceUrl ?? '';
+    patchIntakeNoteCtrl.text = row.intakeNote ?? '';
     applyInfoLine('已读取章节 #${row.numericId}。');
   }
 
@@ -179,6 +195,9 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required TextEditingController selectedNovelIdCtrl,
     required TextEditingController patchChapterCtrl,
     required TextEditingController patchBodyCtrl,
+    required TextEditingController patchIntakeStatusCtrl,
+    required TextEditingController patchIntakeSourceUrlCtrl,
+    required TextEditingController patchIntakeNoteCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
@@ -187,6 +206,13 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     final row = await patchProjectNovelByProjectIds(token, project.id, id, {
       'chapter': patchChapterCtrl.text.trim(),
       'chapter_data': patchBodyCtrl.text.trim(),
+      'intake_status': patchIntakeStatusCtrl.text.trim(),
+      'intake_source_url': patchIntakeSourceUrlCtrl.text.trim().isEmpty
+          ? null
+          : patchIntakeSourceUrlCtrl.text.trim(),
+      'intake_note': patchIntakeNoteCtrl.text.trim().isEmpty
+          ? null
+          : patchIntakeNoteCtrl.text.trim(),
     });
     await refreshWorkbench(setLocalState);
     applyInfoLine('已更新章节 #${row.numericId}。');

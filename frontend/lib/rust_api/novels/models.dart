@@ -10,6 +10,10 @@ class NovelRow {
     required this.eventState,
     this.errorReason,
     this.createTimeMs,
+    this.intakeSource,
+    this.intakeSourceUrl,
+    this.intakeStatus,
+    this.intakeNote,
   });
 
   final String id;
@@ -22,6 +26,10 @@ class NovelRow {
   final int eventState;
   final String? errorReason;
   final int? createTimeMs;
+  final String? intakeSource;
+  final String? intakeSourceUrl;
+  final String? intakeStatus;
+  final String? intakeNote;
 
   factory NovelRow.fromJson(Map<String, dynamic> json) {
     return NovelRow(
@@ -37,6 +45,10 @@ class NovelRow {
       createTimeMs: json['create_time_ms'] == null
           ? null
           : (json['create_time_ms'] as num).toInt(),
+      intakeSource: json['intake_source'] as String?,
+      intakeSourceUrl: json['intake_source_url'] as String?,
+      intakeStatus: json['intake_status'] as String?,
+      intakeNote: json['intake_note'] as String?,
     );
   }
 }

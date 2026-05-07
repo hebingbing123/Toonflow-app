@@ -3,6 +3,7 @@ use axum::{
     http::{HeaderMap, StatusCode},
     Json,
 };
+use serde_json::{Map, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -16,6 +17,37 @@ use super::super::ADV_LOCK_NOVEL_NUMERIC;
 
 use super::list::trim_opt;
 
+fn validate_intake_status(value: &str) -> Result<(), ApiError> {
+    match value {
+        "draft" | "pending_review" | "admitted" | "rejected" => Ok(()),
+        _ => Err(ApiError::BadRequest(
+            "intake_status must be one of draft, pending_review, admitted, rejected".into(),
+        )),
+    }
+}
+
+fn build_novel_intake_metadata(
+    intake_source: Option<String>,
+    intake_source_url: Option<String>,
+    intake_status: Option<String>,
+    intake_note: Option<String>,
+) -> Value {
+    let mut metadata = Map::new();
+    if let Some(value) = intake_source {
+        metadata.insert("intakeSource".into(), Value::String(value));
+    }
+    if let Some(value) = intake_source_url {
+        metadata.insert("intakeSourceUrl".into(), Value::String(value));
+    }
+    if let Some(value) = intake_status {
+        metadata.insert("intakeStatus".into(), Value::String(value));
+    }
+    if let Some(value) = intake_note {
+        metadata.insert("intakeNote".into(), Value::String(value));
+    }
+    Value::Object(metadata)
+}
+
 async fn create_novel_inner(
     pool: &PgPool,
     project_uuid: Uuid,
@@ -25,6 +57,17 @@ async fn create_novel_inner(
     let reel = trim_opt(body.reel);
     let chapter = body.chapter.unwrap_or_default();
     let chapter_data = body.chapter_data.unwrap_or_default();
+    let intake_source = trim_opt(body.intake_source);
+    let intake_source_url = trim_opt(body.intake_source_url);
+    let intake_status = trim_opt(body.intake_status);
+    let intake_note = trim_opt(body.intake_note);
+
+    if let Some(ref status) = intake_status {
+        validate_intake_status(status)?;
+    }
+
+    let metadata =
+        build_novel_intake_metadata(intake_source, intake_source_url, intake_status, intake_note);
 
     let mut tx = pool
         .begin()
@@ -55,9 +98,13 @@ async fn create_novel_inner(
           project_id, numeric_id, chapter_index, reel, chapter, chapter_data,
           event, event_state, error_reason, create_time_ms, metadata
         )
-        VALUES ($1, $2, $3, $4, $5, $6, NULL, 0, NULL, $7, '{}'::jsonb)
+        VALUES ($1, $2, $3, $4, $5, $6, NULL, 0, NULL, $7, $8)
         RETURNING id, numeric_id, chapter_index, reel, chapter, chapter_data,
-                  event, event_state, error_reason, create_time_ms
+                  event, event_state, error_reason, create_time_ms,
+                  metadata->>'intakeSource' AS intake_source,
+                  metadata->>'intakeSourceUrl' AS intake_source_url,
+                  metadata->>'intakeStatus' AS intake_status,
+                  metadata->>'intakeNote' AS intake_note
         "#,
     )
     .bind(project_uuid)
@@ -67,6 +114,7 @@ async fn create_novel_inner(
     .bind(&chapter)
     .bind(&chapter_data)
     .bind(now_ms)
+    .bind(metadata)
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

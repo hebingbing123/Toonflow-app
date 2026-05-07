@@ -74,7 +74,11 @@ async fn select_novels_filtered(
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
         SELECT n.id, n.numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
-               n.event, n.event_state, n.error_reason, n.create_time_ms
+               n.event, n.event_state, n.error_reason, n.create_time_ms,
+               n.metadata->>'intakeSource' AS intake_source,
+               n.metadata->>'intakeSourceUrl' AS intake_source_url,
+               n.metadata->>'intakeStatus' AS intake_status,
+               n.metadata->>'intakeNote' AS intake_note
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = "#,

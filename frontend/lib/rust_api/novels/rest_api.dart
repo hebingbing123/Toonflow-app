@@ -71,6 +71,10 @@ Future<NovelRow> createProjectNovelUnderProject(
   String? reel,
   String? chapter,
   String? chapterData,
+  String? intakeSource,
+  String? intakeSourceUrl,
+  String? intakeStatus,
+  String? intakeNote,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/novels');
   final body = <String, dynamic>{};
@@ -85,6 +89,18 @@ Future<NovelRow> createProjectNovelUnderProject(
   }
   if (chapterData != null) {
     body['chapter_data'] = chapterData;
+  }
+  if (intakeSource != null) {
+    body['intake_source'] = intakeSource;
+  }
+  if (intakeSourceUrl != null) {
+    body['intake_source_url'] = intakeSourceUrl;
+  }
+  if (intakeStatus != null) {
+    body['intake_status'] = intakeStatus;
+  }
+  if (intakeNote != null) {
+    body['intake_note'] = intakeNote;
   }
   final res = await http
       .post(

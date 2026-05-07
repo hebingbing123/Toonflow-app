@@ -1,7 +1,6 @@
 part of '../../../../home_page.dart';
 
-extension _HomePageProjectEditorNovelWorkbenchEditSection
-    on _HomePageState {
+extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
   Widget _buildNovelWorkbenchEditSection({
     required BuildContext ctx,
     required StateSetter setDialogState,
@@ -15,6 +14,9 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection
     required TextEditingController selectedNovelIdCtrl,
     required TextEditingController patchChapterCtrl,
     required TextEditingController patchBodyCtrl,
+    required TextEditingController patchIntakeStatusCtrl,
+    required TextEditingController patchIntakeSourceUrlCtrl,
+    required TextEditingController patchIntakeNoteCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
   }) {
     return Column(
@@ -47,6 +49,9 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection
                         selectedNovelIdCtrl: selectedNovelIdCtrl,
                         patchChapterCtrl: patchChapterCtrl,
                         patchBodyCtrl: patchBodyCtrl,
+                        patchIntakeStatusCtrl: patchIntakeStatusCtrl,
+                        patchIntakeSourceUrlCtrl: patchIntakeSourceUrlCtrl,
+                        patchIntakeNoteCtrl: patchIntakeNoteCtrl,
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
@@ -67,6 +72,25 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection
           decoration: const InputDecoration(labelText: '更新后的章节正文'),
         ),
         const SizedBox(height: 8),
+        TextField(
+          controller: patchIntakeStatusCtrl,
+          decoration: const InputDecoration(
+            labelText: '准入状态',
+            helperText: 'draft / pending_review / admitted / rejected',
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: patchIntakeSourceUrlCtrl,
+          decoration: const InputDecoration(labelText: '来源 URL'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: patchIntakeNoteCtrl,
+          maxLines: 2,
+          decoration: const InputDecoration(labelText: '准入备注'),
+        ),
+        const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: localBusy
               ? null
@@ -82,6 +106,9 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection
                     selectedNovelIdCtrl: selectedNovelIdCtrl,
                     patchChapterCtrl: patchChapterCtrl,
                     patchBodyCtrl: patchBodyCtrl,
+                    patchIntakeStatusCtrl: patchIntakeStatusCtrl,
+                    patchIntakeSourceUrlCtrl: patchIntakeSourceUrlCtrl,
+                    patchIntakeNoteCtrl: patchIntakeNoteCtrl,
                     refreshWorkbench: refreshWorkbench,
                     setLocalState: setLocalState,
                     applyInfoLine: updateInfoLine,

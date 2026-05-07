@@ -18,6 +18,18 @@ Widget buildProjectNovelsWorkbenchSection({
   final first = novels.isNotEmpty ? novels.first : null;
   final last = novels.isNotEmpty ? novels.last : null;
   final summaryLine = summarizeNovelRows(novels);
+  final admittedCount = novels
+      .where((row) => row.intakeStatus == 'admitted')
+      .length;
+  final pendingCount = novels
+      .where((row) => row.intakeStatus == 'pending_review')
+      .length;
+  final rejectedCount = novels
+      .where((row) => row.intakeStatus == 'rejected')
+      .length;
+  final crawlerCount = novels
+      .where((row) => row.intakeSource == 'crawler_client')
+      .length;
   final disabled =
       novelsBusy[0] ||
       novelsLoading[0] ||
@@ -48,6 +60,15 @@ Widget buildProjectNovelsWorkbenchSection({
             color: Theme.of(ctx).colorScheme.onSurfaceVariant,
           ),
         ),
+        if (novels.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(
+            '准入 admitted $admittedCount / pending $pendingCount / rejected $rejectedCount · crawler $crawlerCount 条',
+            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -62,7 +83,9 @@ Widget buildProjectNovelsWorkbenchSection({
               child: Text(novelsLoading[0] ? '刷新章节…' : '刷新章节'),
             ),
             OutlinedButton(
-              onPressed: disabled || novels.isEmpty ? null : () => generateEvents(),
+              onPressed: disabled || novels.isEmpty
+                  ? null
+                  : () => generateEvents(),
               child: const Text('为前 3 条生成事件'),
             ),
           ],

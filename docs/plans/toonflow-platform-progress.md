@@ -16,8 +16,9 @@
 
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
-- 当前最新完成 commit：`76232801`
-- 当前最新完成竖切：`内容接入竖切（主路径）首个整本导入增量`
+- 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
+- 当前最新完成 commit：`c986cabf`
+- 当前最新完成竖切：`内容接入竖切（主路径）crawler_client 首个增量`
 
 ## Phase 1 进度
 
@@ -94,15 +95,22 @@
 - 支持预解析预览与按批次写入既有章节 API
 - 前端支持 `crawler_client` 首版：按 URL 抓网页、抽标题与正文、回填到整本导入区
 - 为后续 `manual` / `whole-book import` / `crawler_client` 共用落库契约做统一入口
+- 后端 `novels` create/get/list/patch 契约补齐 `intake_source` / `intake_source_url` / `intake_status` / `intake_note`
+- 前端手动录入、整本导入、`crawler_client` 三条入口统一写入 intake source/status
+- 章节编辑区支持查看和更新准入状态、来源 URL、准入备注
+- 工作台摘要增加 admitted/pending/rejected/crawler 统计
 
 本轮定向验证：
 
 - `flutter test test/novel_import_parser_test.dart`
+- `cargo test narrative::novels --lib`
 - 触达文件 `flutter analyze` 通过
+- 本轮额外确认：`yarn refactor:check` 已全绿；后续默认保留到整批任务完成后再统一执行
 
 已提交：
 
 - `76232801` — add whole-book intake preview + batch import on top of the existing chapter API
+- `c986cabf` — add crawler extraction regression coverage on the shared import path
 
 ### 4. 改写与上游结构竖切
 
