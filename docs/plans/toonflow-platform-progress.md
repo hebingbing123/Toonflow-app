@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`f1947716`
-- 当前最新完成竖切：`资产与生产竖切 production 主链阻断态增量`
+- 当前最新完成 commit：`f1b3154b`
+- 当前最新完成竖切：`资产与生产竖切 scriptPlan 完整度门控增量`
 
 ## Phase 1 进度
 
@@ -185,6 +185,7 @@
 - 这些 readiness / gap 摘要同时下沉到 production stage detail 与结果摘要中，帮助用户在最少点击下判断当前阻塞点
 - production stage board 顶部会额外给出“当前卡点”总览，直接指出主链里第一个未解决的阶段，避免用户在平台视角下逐卡寻找阻塞点
 - production stage 现在会显式给出主链阻断态：没有 `scriptPlan` 时，assets / storyboardTable / storyboard 会显示“等待导演计划”；有 `scriptPlan` 但还没有 `storyboardTable` 时，storyboard 会显示“等待分镜表”，避免下游阶段错误暗示可以直接出图
+- production stage 现在进一步区分“有导演计划”与“导演计划是否够完整”：薄的 `scriptPlan` 会显示“待完善”，下游阶段会显示“等待导演计划完善”，要求至少补到基础规划维度后再放行，避免为了省 token 过早进入素材和分镜链导致质量变差
 
 本轮定向验证：
 
@@ -196,6 +197,7 @@
 - `9b675231` — turn production flow snapshots into explicit readiness and gap summaries
 - `08c608ef` — surface the first unresolved production blocker above the stage board
 - `f1947716` — enforce blocker states between scriptPlan, storyboardTable, and storyboard
+- `f1b3154b` — require a minimally complete scriptPlan before downstream stages can advance
 
 ### 6. 质量与发布最小闭环竖切
 
