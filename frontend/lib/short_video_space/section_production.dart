@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 part of 'section.dart';
 
 /// Production workflow methods for ShortVideoSpaceSection

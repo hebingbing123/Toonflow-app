@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member, library_private_types_in_public_api
+
 part of 'section.dart';
 
 /// Extension containing publish scheduling operations for ShortVideoSpaceSection.

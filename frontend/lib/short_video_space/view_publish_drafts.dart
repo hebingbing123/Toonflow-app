@@ -286,6 +286,9 @@ class _PublishDraftsPanel extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
+                key: ValueKey<String>(
+                  'publish_op_draft_${publishPanelUi.selectedPublishDraftId ?? "__none__"}',
+                ),
                 initialValue: publishPanelUi.selectedPublishDraftId,
                 isExpanded: true,
                 hint: publishPanelUi.selectedPublishDraftId == null ||

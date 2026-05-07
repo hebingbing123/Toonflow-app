@@ -1,3 +1,7 @@
+// Extensions on `_ShortVideoSpaceSectionState` legitimately call `setState`; analyzer
+// does not treat `part` extensions as `State` instance members.
+// ignore_for_file: invalid_use_of_protected_member, library_private_types_in_public_api
+
 part of 'section.dart';
 
 // Project management methods
