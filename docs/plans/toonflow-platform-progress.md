@@ -1,6 +1,6 @@
 # Toonflow 平台执行进度
 
-更新时间：2026-05-06
+更新时间：2026-05-07
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
 大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
@@ -16,8 +16,8 @@
 
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
-- 当前最新完成 commit：`9335f826`
-- 当前最新完成竖切：`Workspace 基础竖切`
+- 当前最新完成 commit：`76232801`
+- 当前最新完成竖切：`内容接入竖切（主路径）首个整本导入增量`
 
 ## Phase 1 进度
 
@@ -64,7 +64,7 @@
 
 已提交：
 
-- 待本轮提交
+- `b6e26d63` — complete project-home slice on existing project detail surfaces
 
 已验证：
 
@@ -98,6 +98,10 @@
 
 - `flutter test test/novel_import_parser_test.dart`
 - 触达文件 `flutter analyze` 通过
+
+已提交：
+
+- `76232801` — add whole-book intake preview + batch import on top of the existing chapter API
 
 ### 4. 改写与上游结构竖切
 
