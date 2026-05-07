@@ -13,7 +13,8 @@ use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::{
-    enqueue_generation_job, hydrate_job_row, JobRow, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
+    enqueue_generation_job, hydrate_job_row, merge_client_request_id_from_http_headers, JobRow,
+    JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
 };
 use crate::state::AppState;
 
@@ -130,7 +131,7 @@ pub(crate) async fn post_novel_crawl_schedule_create(
 
     let repeat_interval_ms = body.repeat_interval_ms.filter(|v| *v > 0);
 
-    let payload = json!({
+    let mut payload = json!({
         "project_id": project_id.to_string(),
         "project_numeric_id": body.project_numeric_id,
         "urls": urls,
@@ -140,6 +141,7 @@ pub(crate) async fn post_novel_crawl_schedule_create(
         "repeat_interval_ms": repeat_interval_ms,
         "job_sub_kind": "novel.crawl.schedule"
     });
+    merge_client_request_id_from_http_headers(&headers, &mut payload);
 
     let idem = body
         .idempotency_key
@@ -183,7 +185,14 @@ pub(crate) async fn post_novel_crawl_schedule_create(
             Err(e) => return Err(ApiError::DatabaseError(e.to_string())),
         }
     } else {
-        enqueue_generation_job(pool, uid, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH, payload).await?
+        enqueue_generation_job(
+            pool,
+            uid,
+            JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
+            payload,
+            Some(&headers),
+        )
+        .await?
     };
 
     Ok(JsonResponse(schedule_row_from_job(row)))

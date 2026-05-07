@@ -73,9 +73,15 @@ pub(crate) async fn invoke_generate_derive_asset(
             "model": model,
             "resolution": resolution,
         });
-        let row = enqueue_generation_job(pool, ctx.user_id, JOB_KIND_ASSET_GENERATE_BATCH, payload)
-            .await
-            .map_err(|e| map_api_error(e, "failed to enqueue derived-asset generation job"))?;
+        let row = enqueue_generation_job(
+            pool,
+            ctx.user_id,
+            JOB_KIND_ASSET_GENERATE_BATCH,
+            payload,
+            None,
+        )
+        .await
+        .map_err(|e| map_api_error(e, "failed to enqueue derived-asset generation job"))?;
         enqueued.push(row);
     }
 
@@ -138,10 +144,15 @@ pub(crate) async fn invoke_generate_storyboard(
             "model": model,
             "resolution": resolution,
         });
-        let item =
-            enqueue_generation_job(pool, ctx.user_id, JOB_KIND_ASSET_GENERATE_BATCH, payload)
-                .await
-                .map_err(|e| map_api_error(e, "failed to enqueue storyboard generation job"))?;
+        let item = enqueue_generation_job(
+            pool,
+            ctx.user_id,
+            JOB_KIND_ASSET_GENERATE_BATCH,
+            payload,
+            None,
+        )
+        .await
+        .map_err(|e| map_api_error(e, "failed to enqueue storyboard generation job"))?;
         enqueued.push(item);
     }
 

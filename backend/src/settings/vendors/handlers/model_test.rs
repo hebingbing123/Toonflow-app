@@ -59,7 +59,13 @@ pub(crate) async fn post_vendor_model_test(
         "id": id,
     });
 
-    let row =
-        enqueue_generation_job(pool, uid, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, payload).await?;
+    let row = enqueue_generation_job(
+        pool,
+        uid,
+        JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
+        payload,
+        Some(&headers),
+    )
+    .await?;
     Ok(Json(row))
 }

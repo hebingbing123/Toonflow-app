@@ -97,6 +97,13 @@ pub(crate) async fn post_batch_polish_assets_prompt(
         "items": items_json,
     });
 
-    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_POLISH_BATCH, payload).await?;
+    let row = enqueue_generation_job(
+        pool,
+        uid,
+        JOB_KIND_ASSET_POLISH_BATCH,
+        payload,
+        Some(&headers),
+    )
+    .await?;
     Ok(JsonResponse(row))
 }

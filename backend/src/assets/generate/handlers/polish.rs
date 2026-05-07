@@ -72,6 +72,13 @@ pub(crate) async fn post_polish_assets_prompt(
         "describe": describe,
     });
 
-    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_POLISH_PROMPT, payload).await?;
+    let row = enqueue_generation_job(
+        pool,
+        uid,
+        JOB_KIND_ASSET_POLISH_PROMPT,
+        payload,
+        Some(&headers),
+    )
+    .await?;
     Ok(JsonResponse(row))
 }

@@ -136,6 +136,13 @@ pub(crate) async fn post_batch_generate_image_assets(
         payload["script_id"] = json!(sid);
     }
 
-    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_BATCH, payload).await?;
+    let row = enqueue_generation_job(
+        pool,
+        uid,
+        JOB_KIND_ASSET_GENERATE_BATCH,
+        payload,
+        Some(&headers),
+    )
+    .await?;
     Ok(JsonResponse(row))
 }

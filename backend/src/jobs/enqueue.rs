@@ -1,3 +1,4 @@
+use axum::http::HeaderMap;
 use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -7,17 +8,25 @@ use crate::metering::quota;
 use crate::metering::usage;
 
 use super::dto::JobRow;
-use super::{hydrate_job_row, merge_default_track_metadata};
+use super::{
+    hydrate_job_row, merge_client_request_id_from_http_headers, merge_default_track_metadata,
+};
 
 /// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.
+///
+/// When **`http_headers`** is **`Some`**, copies **`X-Request-Id`** into **`payload.client_request_id`**
+/// if not already set (see **`merge_client_request_id_from_http_headers`**).
 pub async fn enqueue_generation_job(
     pool: &PgPool,
     owner_user_id: Uuid,
     kind: &str,
-    payload: serde_json::Value,
+    mut payload: serde_json::Value,
+    http_headers: Option<&HeaderMap>,
 ) -> Result<JobRow, ApiError> {
     quota::check_daily_job_quota(pool, owner_user_id).await?;
-    let mut payload = payload;
+    if let Some(headers) = http_headers {
+        merge_client_request_id_from_http_headers(headers, &mut payload);
+    }
     merge_default_track_metadata(kind, &mut payload);
     let mut row = sqlx::query_as::<_, JobRow>(
         r#"

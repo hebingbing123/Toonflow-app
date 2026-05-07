@@ -74,7 +74,14 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
         "model": body.model.unwrap_or_else(|| "dall-e-3".to_string()),
     });
 
-    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_BATCH, payload).await?;
+    let row = enqueue_generation_job(
+        pool,
+        uid,
+        JOB_KIND_ASSET_GENERATE_BATCH,
+        payload,
+        Some(&headers),
+    )
+    .await?;
 
     Ok(JsonResponse(GenerateFlowImageResponse {
         job_id: row.id.to_string(),

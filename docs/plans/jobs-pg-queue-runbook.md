@@ -122,9 +122,9 @@ LIMIT 50;
 | `kind` | **`app_generation_job.kind`** |
 | `phase` | **`claimed`** / **`succeeded`** / **`failed`** / **`cancelled`** |
 | `worker_id` | 与 **`claimed_by`** 一致的 worker 标签（**`WORKER_ID`** 或 **`default`**） |
-| `client_request_id` | 可选；来自入队 **`payload.client_request_id`** 或 **`payload.request_id`**（非空才用于 join；HTTP 若将 **`X-Request-Id`** 写入 payload 则可与网关日志关联） |
+| `client_request_id` | 可选；**`POST /api/v1/jobs`**、**`enqueue_generation_job` 的 HTTP 调用方**在 **`payload`** 尚无 **`client_request_id`** / **`request_id`** 时，自动写入当前请求的 **`X-Request-Id`**（trim）；Harness / worker 内部入队传 **`None`** 则不写。 |
 
-- HTTP 请求用 **`X-Request-Id`**；与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) **WP-F** trace 策略对齐时，在 span 中携带同一 **`job_id`**（或把 request id 写入上表 **`payload`** 键以便 join）。
+- HTTP 请求用 **`X-Request-Id`**；与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) **WP-F** trace 策略对齐时，在 span 中携带同一 **`job_id`**（或依赖上表自动写入的 **`client_request_id`** 与网关日志 join）。
 
 ---
 
@@ -132,3 +132,4 @@ LIMIT 50;
 
 - 与 **`tasks-pg-queue-observability` Q1–Q2** 同步：扩展 `QueueStats`、结构化 `job_queue_metrics`、本 Runbook 首版。
 - **Q4**：§9 补充 **`generation_job_phase`** 字段表与 **`client_request_id`** join 说明。
+- **Q4（续）**：REST / **`enqueue_generation_job(..., Some(&headers))`** 自动把 **`X-Request-Id`** 落入 **`payload.client_request_id`**。

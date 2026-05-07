@@ -3,6 +3,7 @@
 //! - Stored inside **`payload`** for DB‑only consumers and historical rows.
 //! - Mirrored on **`JobRow`** (`#[sqlx(skip)]`) after **`hydrate_job_row`** for task center / WS JSON.
 
+use axum::http::HeaderMap;
 use serde_json::{json, Value};
 
 use super::dto::JobRow;
@@ -76,6 +77,26 @@ fn default_production_phase(kind: &str) -> Option<&'static str> {
     })
 }
 
+/// When **`payload`** is a JSON object and neither **`client_request_id`** nor **`request_id`**
+/// is already set, copies trimmed **`x-request-id`** into **`client_request_id`** so the job
+/// worker can emit joinable logs (**`generation_job_phase`**, see Runbook §9).
+pub fn merge_client_request_id_from_http_headers(headers: &HeaderMap, payload: &mut Value) {
+    let Some(obj) = payload.as_object_mut() else {
+        return;
+    };
+    if obj.contains_key("client_request_id") || obj.contains_key("request_id") {
+        return;
+    }
+    let Some(raw) = headers.get("x-request-id").and_then(|h| h.to_str().ok()) else {
+        return;
+    };
+    let t = raw.trim();
+    if t.is_empty() {
+        return;
+    }
+    obj.insert("client_request_id".into(), json!(t));
+}
+
 /// Ensures **`payload`** carries stable track metadata when keys are absent (caller may override).
 pub fn merge_default_track_metadata(kind: &str, payload: &mut Value) {
     let Some(obj) = payload.as_object_mut() else {
@@ -122,6 +143,27 @@ mod tests {
     use crate::jobs::dto::JobRow;
     use serde_json::json;
     use uuid::Uuid;
+
+    #[test]
+    fn merge_client_request_id_from_x_request_id_header() {
+        use axum::http::HeaderMap;
+        let mut headers = HeaderMap::new();
+        headers.insert("x-request-id", "abc-123".parse().unwrap());
+        let mut payload = json!({"k": 1});
+        super::merge_client_request_id_from_http_headers(&headers, &mut payload);
+        assert_eq!(payload["client_request_id"], json!("abc-123"));
+    }
+
+    #[test]
+    fn merge_client_request_id_skips_when_payload_already_has_request_id() {
+        use axum::http::HeaderMap;
+        let mut headers = HeaderMap::new();
+        headers.insert("x-request-id", "from-header".parse().unwrap());
+        let mut payload = json!({"request_id": "from-body"});
+        super::merge_client_request_id_from_http_headers(&headers, &mut payload);
+        assert_eq!(payload["request_id"], json!("from-body"));
+        assert!(payload.get("client_request_id").is_none());
+    }
 
     #[test]
     fn merge_inserts_voiceover_defaults() {

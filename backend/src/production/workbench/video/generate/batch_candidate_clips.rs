@@ -300,8 +300,14 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
         track_id: resolved.track_id,
     };
 
-    let generation =
-        workbench_enqueue_video_jobs_from_body(user_id, pool, &scope_row, workbench_body).await?;
+    let generation = workbench_enqueue_video_jobs_from_body(
+        user_id,
+        pool,
+        &scope_row,
+        workbench_body,
+        Some(&headers),
+    )
+    .await?;
 
     Ok(JsonResponse(BatchGenerateCandidateClipsResponse {
         skipped,

@@ -142,7 +142,14 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
         if let Some(speed) = body.speed.filter(|value| *value >= 0.25 && *value <= 4.0) {
             payload["speed"] = json!(speed);
         }
-        let row = enqueue_generation_job(pool, uid, JOB_KIND_VOICEOVER_GENERATE, payload).await?;
+        let row = enqueue_generation_job(
+            pool,
+            uid,
+            JOB_KIND_VOICEOVER_GENERATE,
+            payload,
+            Some(&headers),
+        )
+        .await?;
         enqueued.push(row);
     }
 

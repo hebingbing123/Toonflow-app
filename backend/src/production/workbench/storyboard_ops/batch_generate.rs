@@ -63,7 +63,14 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
             "resolution": item.resolution.as_deref().unwrap_or(default_resolution),
         });
 
-        let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_BATCH, payload).await?;
+        let row = enqueue_generation_job(
+            pool,
+            uid,
+            JOB_KIND_ASSET_GENERATE_BATCH,
+            payload,
+            Some(&headers),
+        )
+        .await?;
         enqueued.push(row);
     }
 

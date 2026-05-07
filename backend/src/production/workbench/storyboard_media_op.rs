@@ -178,7 +178,9 @@ pub(in crate::production) async fn post_workbench_storyboard_media_op(
                 "script_numeric_id": script_id,
                 "storyboard_numeric_id": storyboard_id,
             });
-            let job = enqueue_generation_job(pool, uid, JOB_KIND_VIDEO_EXPORT, payload).await?;
+            let job =
+                enqueue_generation_job(pool, uid, JOB_KIND_VIDEO_EXPORT, payload, Some(&headers))
+                    .await?;
             Ok(JsonResponse(StoryboardMediaOpResponse {
                 op: StoryboardMediaOpKind::EnqueueVideoExport,
                 select_video: None,

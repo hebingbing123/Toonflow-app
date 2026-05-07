@@ -169,6 +169,7 @@ pub(crate) async fn run_novel_crawl_import_batch(
             row.owner_user_id,
             crate::jobs::JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
             next_payload,
+            None,
         )
         .await
         {

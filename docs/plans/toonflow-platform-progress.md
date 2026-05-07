@@ -23,7 +23,7 @@
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 
 - **Q1–Q3**（ops-only，平台级可观测 + Runbook）：**已完成** — 扩展 `QueueStats` / `job_queue_metrics` 日志字段；[**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)（扩容、SQL、Gate、与 trace 关联）；代码 `backend/src/jobs/queue/pg.rs`、`worker/mod.rs`。
-- **Q4**：**Backend + Runbook** 已落地 — **`observe::generation_job`** 结构化 **`event = generation_job_phase`**（**`job_id`** / **`kind`** / **`worker_id`** 等）；与 harness span / Flutter 可见 trace 的 **WP-F 尾部**仍 open（见 **`tasks-pg-queue-observability.md`**）。
+- **Q4**：**Backend + Runbook** 已落地 — **`observe::generation_job`** 结构化 **`event = generation_job_phase`**（**`job_id`** / **`kind`** / **`worker_id`** 等）；**`X-Request-Id` → `payload.client_request_id`** 已由 **`POST /api/v1/jobs`** 与主要 HTTP 入队路径自动写入；与 harness span / Flutter 可见 trace 的 **WP-F 尾部**仍 open（见 **`tasks-pg-queue-observability.md`**）。
 
 - **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）。**H1**（`agent_memory` / `clear-agent-memories`：**`projectUuid`** 优先 + legacy **`projectId`**）已合。**H2**（`asset_extract`）已合。**H3**（**`assets-generate`** 入队 payload **v2**）已合 — [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)。**H4**（Harness WS **`projectUuid`** / **`scriptUuid`** + legacy **`project_id`** / **`script_id`**；矩阵 [**`harness-ws-context-matrix.md`**](./harness-ws-context-matrix.md)；Flutter `agent_workspaces` 双写）已合。**H5·C0–C3**：C0–C2 见 **`tasks-http-api-cleanup.md`** H5；**C3**：`cargo clippy --all-targets --all-features -D warnings` 清洁批次（**`b306fe98`**）。**H5** 其余 C 批与 **D** 仍待排期。
 

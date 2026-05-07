@@ -239,7 +239,9 @@ pub(in crate::production) async fn post_workbench_generate_video(
     let (user_id, pool, scope_row) =
         require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
             .await?;
-    let response = workbench_enqueue_video_jobs_from_body(user_id, pool, &scope_row, body).await?;
+    let response =
+        workbench_enqueue_video_jobs_from_body(user_id, pool, &scope_row, body, Some(&headers))
+            .await?;
     Ok(JsonResponse(response))
 }
 
@@ -249,6 +251,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     pool: &sqlx::PgPool,
     scope_row: &OwnedScriptScope,
     body: WorkbenchGenerateVideoBody,
+    http_headers: Option<&HeaderMap>,
 ) -> Result<WorkbenchGenerateVideoResponse, ApiError> {
     if body.track_id <= 0 {
         return Err(ApiError::BadRequest(
@@ -402,7 +405,14 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
             "track_id": body.track_id,
             "image_url": item.source_url,
         });
-        let row = enqueue_generation_job(pool, user_id, JOB_KIND_VIDEO_GENERATE, payload).await?;
+        let row = enqueue_generation_job(
+            pool,
+            user_id,
+            JOB_KIND_VIDEO_GENERATE,
+            payload,
+            http_headers,
+        )
+        .await?;
         enqueued.push(row);
         response_negative_prompts.push(StoryboardNegativePrompt {
             storyboard_id: item.storyboard_id,

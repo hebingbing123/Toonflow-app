@@ -22,7 +22,10 @@ pub use kinds::{
     JOB_KIND_SUBTITLE_GENERATE, JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE,
     JOB_KIND_VOICEOVER_GENERATE,
 };
-pub(crate) use track_metadata::{hydrate_job_row, hydrate_job_rows, merge_default_track_metadata};
+pub(crate) use track_metadata::{
+    hydrate_job_row, hydrate_job_rows, merge_client_request_id_from_http_headers,
+    merge_default_track_metadata,
+};
 
 use axum::Router;
 

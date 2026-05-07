@@ -3,7 +3,9 @@ use axum::{extract::State, http::HeaderMap, Json};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::dto::{CreateJobBody, JobRow};
-use crate::jobs::{hydrate_job_row, merge_default_track_metadata};
+use crate::jobs::{
+    hydrate_job_row, merge_client_request_id_from_http_headers, merge_default_track_metadata,
+};
 use crate::metering::quota;
 use crate::metering::usage;
 use crate::state::AppState;
@@ -64,6 +66,7 @@ pub(crate) async fn create_job(
     quota::check_daily_job_quota(pool, uid).await?;
 
     let mut payload = body.payload;
+    merge_client_request_id_from_http_headers(&headers, &mut payload);
     merge_default_track_metadata(kind, &mut payload);
 
     let insert = sqlx::query_as::<_, JobRow>(

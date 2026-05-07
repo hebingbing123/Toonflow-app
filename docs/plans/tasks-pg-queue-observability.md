@@ -62,7 +62,7 @@
 
 **目标**：`generation.job.*` 与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F 一致时，job_id **已进入** `observe::generation_job`；本竖切核对 **日志字段可被日志管道 join**（字段名与 span 约定与 harness PR 一并合并）。
 
-- [x] **Backend**：**`observe::generation_job`** 输出 **`event = generation_job_phase`** 的 **`info`** 结构化字段（**`job_id`**、**`user_id`**、**`kind`**、**`phase`**、**`worker_id`**、可选 **`client_request_id`**）；worker 全路径已传入 **`kind`** / **`worker_id`**。
+- [x] **Backend**：**`observe::generation_job`** 输出 **`event = generation_job_phase`** 的 **`info`** 结构化字段（**`job_id`**、**`user_id`**、**`kind`**、**`phase`**、**`worker_id`**、可选 **`client_request_id`**）；worker 全路径已传入 **`kind`** / **`worker_id`**。**`POST /api/v1/jobs`** 与带 **`HeaderMap`** 的 **`enqueue_generation_job`** 调用在 **`payload`** 未自带 id 时写入 **`X-Request-Id` → `client_request_id`**。
 - [x] **Docs**：Runbook **§9** 已写 **`job_id`** / **`event`** 过滤与可选 **`client_request_id`** join。
 - [ ] **Flutter**：若 harness PR 已暴露 **用户可见** trace/job 关联（如质量工作台），须同步 UI；否则本节 **Backend+Docs 为主**，与 harness WP-F 同一 PR 门禁。
 

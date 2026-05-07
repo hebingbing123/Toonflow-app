@@ -87,6 +87,13 @@ pub(crate) async fn post_generate_assets(
         "image_base64": image_base64,
     });
 
-    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_IMAGE, payload).await?;
+    let row = enqueue_generation_job(
+        pool,
+        uid,
+        JOB_KIND_ASSET_GENERATE_IMAGE,
+        payload,
+        Some(&headers),
+    )
+    .await?;
     Ok(JsonResponse(row))
 }
