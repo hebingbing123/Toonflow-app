@@ -53,12 +53,10 @@ pub(crate) async fn post_project_workbench_save_assets(
         SELECT a.id, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.owner_user_id = $1
-          AND p.id = $2
-          AND a.numeric_id = $3
+        WHERE p.id = $1
+          AND a.numeric_id = $2
         "#,
     )
-    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .fetch_optional(&mut *tx)
@@ -130,13 +128,11 @@ pub(crate) async fn post_project_workbench_save_assets(
             updated_at = NOW()
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.owner_user_id = $2
-          AND p.id = $3
-          AND a.numeric_id = $4
+          AND p.id = $2
+          AND a.numeric_id = $3
         "#,
     )
     .bind(SqlxJson(metadata))
-    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .execute(&mut *tx)

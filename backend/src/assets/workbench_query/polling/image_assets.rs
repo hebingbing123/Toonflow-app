@@ -15,7 +15,6 @@ use super::validate::validate_polling_ids;
 
 async fn run_polling_image_assets(
     pool: &sqlx::PgPool,
-    uid: uuid::Uuid,
     project_id: Uuid,
     ids: &[i32],
 ) -> Result<Vec<WorkbenchPollingImageAssetsItem>, ApiError> {
@@ -40,14 +39,12 @@ async fn run_polling_image_assets(
              ELSE NULL
            END
          )
-        WHERE p.owner_user_id = $1
-          AND p.id = $2
-          AND a.numeric_id = ANY($3)
+        WHERE p.id = $1
+          AND a.numeric_id = ANY($2)
           AND ai.state <> '生成中'
         ORDER BY a.numeric_id ASC
         "#,
     )
-    .bind(uid)
     .bind(project_id)
     .bind(ids)
     .fetch_all(pool)
@@ -67,6 +64,6 @@ pub(crate) async fn post_project_workbench_polling_image_assets(
     validate_polling_ids(&body.ids)?;
     let pool = state.require_pool()?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    let rows = run_polling_image_assets(pool, uid, project_id, &body.ids).await?;
+    let rows = run_polling_image_assets(pool, project_id, &body.ids).await?;
     Ok(Json(rows))
 }
