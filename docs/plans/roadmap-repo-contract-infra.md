@@ -50,7 +50,7 @@ YAML：`git-branch`、`monorepo-layout`、`api-contract`、`postgres-ops`、`sup
 |----|------|
 | **目标** | `supabase/migrations` 发布顺序、灰度期间双写/只读策略（若有）、备份与恢复演练步骤可查。 |
 | **依赖** | 托管 Supabase 或自管 PG 的连接串与备份工具权限。 |
-| **PR 切片** | （1）**必做**：Runbook 文档；（2）**必做**：迁移版本一致性自动化——`scripts/` 只读检查 **或** CI workflow 步骤，至少一种入库且默认会跑（可与现有 refactor 门禁对齐）。 |
+| **PR 切片** | （1）**必做**：Runbook 文档（含 DB 发布/回滚；**PG 任务队列**专项见 [**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)）；（2）**必做**：迁移版本一致性自动化——`scripts/` 只读检查 **或** CI workflow 步骤，至少一种入库且默认会跑（可与现有 refactor 门禁对齐）。 |
 | **触点** | `supabase/migrations/`；[`database-migration-history-policy.md`](./database-migration-history-policy.md)。 |
 | **测试** | 在 staging 执行「从备份恢复 → 跑迁移 → smoke」桌面演练并记录耗时。 |
 | **回滚** | 按 Runbook 执行 down 迁移或从备份恢复（事先定义何种变更允许 down）。 |

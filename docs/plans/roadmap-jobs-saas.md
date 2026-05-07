@@ -41,7 +41,7 @@ YAML：`jobs-and-webhook-hardening`、`saas-product-spec`。
 
 ### WP-A0：PG 队列观测 + 队列抽象就绪（必做，默认路径）
 
-**竖切清单（勾选执行）**：[**`tasks-pg-queue-observability.md`**](./tasks-pg-queue-observability.md)。
+**竖切清单（勾选执行）**：[**`tasks-pg-queue-observability.md`**](./tasks-pg-queue-observability.md) · **Runbook**：[**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)。
 
 | 项 | 内容 |
 |----|------|

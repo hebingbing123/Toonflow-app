@@ -36,13 +36,13 @@
 
 ## 竖切 Q2：「排队过久 / 按 kind」诊断 SQL 或只读 API
 
-**目标**：支持排障：最老 `queued` 年龄、`failed` 近窗计数、**按 `kind` 分组** pending（可二选一或分两 PR）。
+**目标**：支持排障：最老 **可认领** queued 年龄、24h 内 `failed`、**按 `kind` 分布**（与 worker 抢单语义一致）。
 
-- [ ] **方案 A（推荐先做）**：**Backend** 扩展 `QueueStats` + `pg.rs` 单次查询（或 `stats_extended()`），增加：`oldest_queued_age_secs`、`optional: top kinds json`。**Flutter**：无（ops-only）；若后续要做「设置 → 开发者诊断」再单列 WP）。
-- [ ] **方案 B**：**Backend** 新增内部运维 REST（如 `GET /api/v1/jobs/queue-metrics`，**强鉴权** / 仅 admin）。**Flutter**：**必做** 内部运维页或扩展现有 debug 区只读展示 + `rust_api` 模型；**OpenAPI** + `contract_smoke`。
-- [ ] OpenAPI：若走 REST，必须更新导出与 `contract_smoke` 最小用例。
+- [x] **方案 A（已落地）**：扩展 **`QueueStats`** + **`PgQueue::stats()`**：`pending_claimable`、`failed_last_24h`、`oldest_claimable_queued_age_secs`、`pending_by_kind_json`（至多 15 kind）；并入 **`job_queue_metrics`** 日志。**Flutter**：无（ops-only）；若上 **方案 B** REST 再单列全栈 WP）。
+- [ ] **方案 B**（可选）：**Backend** 内部运维 REST + **Flutter** 只读屏 + OpenAPI（见全栈约定）。
+- [ ] OpenAPI：仅方案 B 需要。
 
-**验收**：`cargo test` jobs 相关；若动 OpenAPI，`yarn refactor:check`；**若选方案 B**，须通过 Flutter 或书面「内部工具非 Flutter」经 Tech Lead 签字（否则默认须 Flutter）。
+**验收**：`cargo test` jobs 全绿；`yarn refactor:check`。
 
 ---
 
@@ -50,11 +50,10 @@
 
 **目标**：运维可复制粘贴执行：水平扩 worker、识别 **stuck `running`**、取消语义、与备份/迁移关系。
 
-- [ ] **Docs**：新建 `docs/plans/jobs-pg-queue-runbook.md`（或并入 [`roadmap-repo-contract-infra.md`](./roadmap-repo-contract-infra.md) WP-B 交叉链）。
-- [ ] **Docs**：章节至少包含：连接串与 worker 副本数、`SKIP LOCKED` 行为说明、`claimed_by` / 取消路径、**stuck running** 人工处理 SQL 模板、与 `GET /api/v1/jobs*` 对照读法。
-- [ ] **Docs**：**WP-A1 Gate** 书面阈值模板（例：p95 claim 延迟、PG 锁等待、写入 TPS）— 满足哪些指标才开 Redis/云队列评审。
+- [x] **Docs**：[**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)（指标字段、扩容、SQL、WP-A1 Gate、与 trace 关联）。
+- [x] **Docs**：与 [`roadmap-repo-contract-infra.md`](./roadmap-repo-contract-infra.md) **WP-B**、[`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) **WP-A0/A1** 交叉引用。
 
-**验收**：Reviewer 按 Runbook 能在 staging 走通一遍「扩副本 → 压测 → 读指标」。**无 Flutter**。
+**验收**：Reviewer 按 Runbook 能在 staging 走通「扩副本 → 读 `job_queue_metrics` → 对照 SQL」。**无 Flutter**。
 
 ---
 
@@ -72,7 +71,7 @@
 
 ## 完成定义（DoD）
 
-- [ ] Q1 + Q3 **必完成**；Q2 至少完成 **方案 A 或 B 之一**。
+- [x] Q1 + Q2 方案 A + Q3 **已完成**。
 - [ ] Q4：若 harness WP-F 已合并，则 **同一发布窗口** 内完成本清单字段核对；否则单独 PR 完成「job 日志可 join」最小核对，Runbook 注明待 WP-F 联调项。
-- [ ] [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-A0 表格可打勾「Runbook / 指标 / Gate 模板已落地」。
-- [ ] `yarn refactor:check` 全绿。
+- [x] [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) **WP-A0** 可标「Runbook / 扩展指标 / Gate 模板已落地」（Q4 仍可与 harness 联调）。
+- [x] `yarn refactor:check` 全绿（每批合并前执行）。

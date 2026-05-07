@@ -62,8 +62,12 @@ async fn log_queue_metrics(pool: &PgPool, worker_id: &str) {
             tracing::info!(
                 worker_id = %worker_id,
                 pending = stats.pending,
+                pending_claimable = stats.pending_claimable,
                 running = stats.running,
                 dead = stats.dead,
+                failed_last_24h = stats.failed_last_24h,
+                oldest_claimable_queued_age_secs = ?stats.oldest_claimable_queued_age_secs,
+                pending_by_kind = %stats.pending_by_kind_json,
                 event = "job_queue_metrics",
                 "PG job queue depth"
             );

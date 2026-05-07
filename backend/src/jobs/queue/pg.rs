@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use serde_json::{json, Map, Value};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
@@ -99,20 +100,66 @@ impl Queue for PgQueue {
     async fn stats(&self) -> anyhow::Result<QueueStats> {
         let row = sqlx::query(
             r#"
-            SELECT 
-                COUNT(*) FILTER (WHERE status = 'queued') as pending,
-                COUNT(*) FILTER (WHERE status = 'running') as running,
-                COUNT(*) FILTER (WHERE status = 'dead') as dead
-            FROM app_generation_job
+            WITH claimable AS (
+                SELECT id, created_at
+                FROM app_generation_job
+                WHERE status = 'queued'
+                  AND (
+                    payload->>'run_at_ms' IS NULL
+                    OR (
+                      (payload->>'run_at_ms') ~ '^[0-9]+$'
+                      AND (payload->>'run_at_ms')::bigint <= (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint
+                    )
+                  )
+            )
+            SELECT
+              (SELECT COUNT(*)::bigint FROM app_generation_job WHERE status = 'queued') AS pending,
+              (SELECT COUNT(*)::bigint FROM claimable) AS pending_claimable,
+              (SELECT COUNT(*)::bigint FROM app_generation_job WHERE status = 'running') AS running,
+              (SELECT COUNT(*)::bigint FROM app_generation_job WHERE status = 'dead') AS dead,
+              (
+                SELECT COUNT(*)::bigint
+                FROM app_generation_job
+                WHERE status = 'failed'
+                  AND updated_at >= NOW() - INTERVAL '24 hours'
+              ) AS failed_last_24h,
+              (
+                SELECT EXTRACT(EPOCH FROM (NOW() - MIN(created_at)))::bigint
+                FROM claimable
+              ) AS oldest_claimable_queued_age_secs
             "#,
         )
         .fetch_one(&self.pool)
         .await?;
 
+        let kind_rows = sqlx::query(
+            r#"
+            SELECT kind, COUNT(*)::bigint AS c
+            FROM app_generation_job
+            WHERE status = 'queued'
+            GROUP BY kind
+            ORDER BY c DESC, kind ASC
+            LIMIT 15
+            "#,
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        let mut by_kind: Map<String, Value> = Map::new();
+        for r in kind_rows {
+            let kind: String = r.get("kind");
+            let c: i64 = r.get("c");
+            by_kind.insert(kind, json!(c));
+        }
+
         Ok(QueueStats {
             pending: row.get("pending"),
+            pending_claimable: row.get("pending_claimable"),
             running: row.get("running"),
             dead: row.get("dead"),
+            failed_last_24h: row.get("failed_last_24h"),
+            oldest_claimable_queued_age_secs: row.get("oldest_claimable_queued_age_secs"),
+            pending_by_kind_json: Value::Object(by_kind),
         })
     }
 }
