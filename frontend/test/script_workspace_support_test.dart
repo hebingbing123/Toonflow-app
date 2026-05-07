@@ -36,6 +36,48 @@ void main() {
   );
 
   test(
+    'buildScriptWorkspaceRecipes prefers plan script drafts before wider reads',
+    () {
+      final recipes = buildScriptWorkspaceRecipes(
+        toolName: 'get_planData',
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'storySkeleton': '三幕骨架',
+            'adaptationStrategy': '先压后扬',
+            'script': const <Map<String, dynamic>>[
+              <String, dynamic>{
+                'id': 9,
+                'name': '第9集',
+                'content': '计划剧本草稿',
+              },
+            ],
+          },
+        },
+        scopeScriptId: 9,
+      );
+
+      expect(recipes.map((recipe) => recipe.title), contains('读取计划剧本草稿'));
+      final readPlanDraft = recipes.firstWhere(
+        (recipe) => recipe.title == '读取计划剧本草稿',
+      );
+      expect(readPlanDraft.domainTool, 'get_planData');
+      expect(readPlanDraft.args, <String, dynamic>{
+        'scriptId': 9,
+        'key': 'script',
+        'fields': <String>['id', 'name', 'content', 'extract_state'],
+        'lineStart': 1,
+        'lineEnd': 120,
+        'maxChars': 2200,
+        'limit': 1,
+      });
+      final runScript = recipes.firstWhere(
+        (recipe) => recipe.subAgentTool == 'run_sub_agent_script',
+      );
+      expect(runScript.prompt, contains('planData.script'));
+    },
+  );
+
+  test(
     'buildScriptWorkspaceArgumentSuggestions offers novel id fill chips',
     () {
       final suggestions = buildScriptWorkspaceArgumentSuggestions(

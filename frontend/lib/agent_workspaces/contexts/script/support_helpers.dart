@@ -62,6 +62,21 @@ Map<String, dynamic> _planSectionArgs(String key, {int maxChars = 1600}) {
   return <String, dynamic>{'key': key, 'maxChars': maxChars};
 }
 
+Map<String, dynamic> _planScriptWindowArgs(int? scopeScriptId) {
+  return <String, dynamic>{
+    ...switch (scopeScriptId) {
+      final int value => <String, dynamic>{'scriptId': value},
+      null => const <String, dynamic>{},
+    },
+    'key': 'script',
+    'fields': const <String>['id', 'name', 'content', 'extract_state'],
+    'lineStart': 1,
+    'lineEnd': 120,
+    'maxChars': 2200,
+    'limit': 1,
+  };
+}
+
 Map<String, dynamic> _novelTextWindowArgs(int? novelId) {
   return <String, dynamic>{
     ...switch (novelId) {

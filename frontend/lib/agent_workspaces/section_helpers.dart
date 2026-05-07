@@ -46,12 +46,12 @@ _scriptPromptPresets = <AgentWorkspacePromptPreset>[
   AgentWorkspacePromptPreset(
     label: '剧情骨架',
     prompt:
-        '先读取 get_planData 的 storySkeleton/adaptationStrategy 片段，再补最少的 get_novel_events 或剧本窗口，总结当前剧情骨架缺口。',
+        '先读取 get_planData 的 planData.script、storySkeleton、adaptationStrategy 片段，再补最少的 get_novel_events 或剧本窗口，总结当前剧情骨架缺口。',
   ),
   AgentWorkspacePromptPreset(
     label: '章节改编',
     prompt:
-        '基于 get_novel_text 与 get_script_content 的窗口片段，对当前章节做改编策略建议，输出 3 条可执行脚本改写项。',
+        '先用 get_planData 读取计划剧本草稿与改编策略，再结合 get_novel_text 与 get_script_content 的窗口片段，对当前章节做改写建议，输出 3 条可执行脚本改写项。',
   ),
 ];
 

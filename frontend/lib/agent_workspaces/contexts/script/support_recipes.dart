@@ -41,6 +41,7 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
   final adaptationStrategy =
       (data['adaptationStrategy'] as String?)?.trim() ?? '';
   final scriptRows = data['script'];
+  final hasPlanScriptDrafts = scriptRows is List && scriptRows.isNotEmpty;
   final recipes = <ScriptWorkspaceRecipe>[];
 
   if (storySkeleton.isEmpty) {
@@ -73,6 +74,16 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
       ),
     );
   }
+  if (hasPlanScriptDrafts) {
+    recipes.add(
+      ScriptWorkspaceRecipe(
+        title: '读取计划剧本草稿',
+        detail: 'planData.script 已有当前集草稿，先消费这份结构化草稿，再决定是否补读章节正文更省 token。',
+        domainTool: 'get_planData',
+        args: _planScriptWindowArgs(scopeScriptId),
+      ),
+    );
+  }
   if (scriptRows is List && scriptRows.isEmpty) {
     recipes.add(
       ScriptWorkspaceRecipe(
@@ -86,10 +97,10 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
     recipes.add(
       const ScriptWorkspaceRecipe(
         title: '生成下一版剧本',
-        detail: '计划信息已具备，可直接让 script 子代理输出下一版可写回正文。',
+        detail: '计划信息已具备，先消费计划剧本草稿和必要事件，再让 script 子代理输出下一版可写回正文。',
         subAgentTool: 'run_sub_agent_script',
         prompt:
-            '请先读当前集 storySkeleton、adaptationStrategy、目标章节事件；只有在衔接需要时才补读上一集尾段，其余细节不足再补章节正文窗口，然后输出可直接写回的完整剧本正文。',
+            '请先读取当前集 planData.script 草稿、storySkeleton、adaptationStrategy，再补最少的目标章节事件；只有细节或衔接不足时才补读上一集尾段或章节正文窗口，然后输出可直接写回的完整剧本正文。',
       ),
     );
   }
@@ -158,7 +169,8 @@ List<ScriptWorkspaceRecipe> _buildNovelEventRecipes(
       title: '生成剧本初稿',
       detail: '如果事件链路基本齐全，可直接让 script 子代理生成可写回正文。',
       subAgentTool: 'run_sub_agent_script',
-      prompt: '请先结合当前事件脉络，再按需补读计划片段与章节正文窗口，生成一版可直接写回的剧本正文。',
+      prompt:
+          '请先结合当前事件脉络，并优先读取 planData.script、storySkeleton 与 adaptationStrategy；只有细节不足时再补章节正文窗口，生成一版可直接写回的剧本正文。',
     ),
     if (scopeScriptId != null)
       ScriptWorkspaceRecipe(
@@ -180,7 +192,8 @@ List<ScriptWorkspaceRecipe> _buildScriptContentRecipes(
         title: '生成剧本正文',
         detail: '当前正文为空，直接让 script 子代理产出首版内容更合适。',
         subAgentTool: 'run_sub_agent_script',
-        prompt: '请先读取当前集计划与目标章节事件；只有细节不足时再补读正文窗口，然后生成一版完整剧本正文。',
+        prompt:
+            '请先读取当前集 planData.script、storySkeleton、adaptationStrategy 与目标章节事件；只有细节不足时再补读正文窗口，然后生成一版完整剧本正文。',
       ),
       ScriptWorkspaceRecipe(
         title: '刷新计划数据',

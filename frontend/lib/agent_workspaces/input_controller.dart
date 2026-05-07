@@ -9,7 +9,7 @@ class WorkspaceInputController {
   );
   final TextEditingController scriptPromptController = TextEditingController(
     text:
-        '先用 get_planData 读取 storySkeleton/adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。',
+        '先用 get_planData 读取 planData.script、storySkeleton、adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。',
   );
   final TextEditingController scriptDomainArgsController =
       TextEditingController(text: '{}');
