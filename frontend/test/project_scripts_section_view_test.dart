@@ -43,6 +43,7 @@ ProjectScriptsSectionViewModel buildModel({
 
 ProjectScriptsSectionViewCallbacks buildCallbacks({
   VoidCallback? onOpenWorkbench,
+  VoidCallback? onOpenPlanWorkbench,
   VoidCallback? onOpenBatchAddDialog,
   VoidCallback? onExportAll,
   VoidCallback? onPollAll,
@@ -52,6 +53,7 @@ ProjectScriptsSectionViewCallbacks buildCallbacks({
 }) {
   return ProjectScriptsSectionViewCallbacks(
     onOpenWorkbench: onOpenWorkbench ?? () {},
+    onOpenPlanWorkbench: onOpenPlanWorkbench ?? () {},
     onOpenBatchAddDialog: onOpenBatchAddDialog ?? () {},
     onExportAll: onExportAll ?? () {},
     onPollAll: onPollAll ?? () {},
@@ -115,6 +117,7 @@ void main() {
         ),
         callbacks: const ProjectScriptsSectionViewCallbacks(
           onOpenWorkbench: null,
+          onOpenPlanWorkbench: null,
           onOpenBatchAddDialog: null,
           onExportAll: null,
           onPollAll: null,
@@ -137,6 +140,7 @@ void main() {
     WidgetTester tester,
   ) async {
     var openWorkbenchCalls = 0;
+    var openPlanWorkbenchCalls = 0;
     var batchAddCalls = 0;
     var exportCalls = 0;
     var pollCalls = 0;
@@ -150,6 +154,7 @@ void main() {
         model: buildModel(overviewAction: () => overviewCalls += 1),
         callbacks: buildCallbacks(
           onOpenWorkbench: () => openWorkbenchCalls += 1,
+          onOpenPlanWorkbench: () => openPlanWorkbenchCalls += 1,
           onOpenBatchAddDialog: () => batchAddCalls += 1,
           onExportAll: () => exportCalls += 1,
           onPollAll: () => pollCalls += 1,
@@ -161,6 +166,8 @@ void main() {
     );
 
     await tester.tap(find.widgetWithText(FilledButton, '打开剧本批量工作台'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(OutlinedButton, '打开骨架工作台'));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, '打开工作台读取上下文'));
     await tester.pump();
@@ -179,6 +186,7 @@ void main() {
     await tester.pump();
 
     expect(openWorkbenchCalls, 1);
+    expect(openPlanWorkbenchCalls, 1);
     expect(overviewCalls, 1);
     expect(batchAddCalls, 1);
     expect(exportCalls, 1);
