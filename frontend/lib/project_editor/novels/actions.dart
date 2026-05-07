@@ -22,8 +22,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }
 
   Future<void> _crawlNovelSourcePreview({
+    required String token,
+    required ProjectRow project,
     required TextEditingController importUrlCtrl,
     required TextEditingController importRawTextCtrl,
+    required TextEditingController importExecutionSideCtrl,
     required void Function(String infoLine) applyInfoLine,
     required void Function(List<ParsedNovelChapter> rows, String message)
     applyImportPreview,
@@ -38,17 +41,34 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       throw const FormatException('抓取 URL 必须是合法的 http/https 地址');
     }
 
-    final response = await http.get(
-      uri,
-      headers: const <String, String>{
-        'User-Agent': 'Toonflow/1.0 content-intake crawler',
-      },
-    );
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw FormatException('抓取失败，HTTP ${response.statusCode}');
+    final side = importExecutionSideCtrl.text.trim().toLowerCase();
+    final _CrawlerPreviewPayload payload;
+    if (side == 'server') {
+      final preview = await postProjectNovelCrawlPreview(
+        token,
+        project.id,
+        url,
+      );
+      payload = _CrawlerPreviewPayload(
+        title: preview.title,
+        bodyText: preview.bodyText,
+        mode: preview.mode,
+        pageCount: preview.pageCount,
+      );
+    } else {
+      final response = await http.get(
+        uri,
+        headers: const <String, String>{
+          'User-Agent': 'Toonflow/1.0 content-intake crawler',
+        },
+      );
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw FormatException('抓取失败，HTTP ${response.statusCode}');
+      }
+
+      payload = await _crawlNovelSourceAdaptive(uri, response.body);
     }
 
-    final payload = await _crawlNovelSourceAdaptive(uri, response.body);
     importRawTextCtrl.text = payload.bodyText;
     final rows = _parseNovelImportPreview(payload.bodyText);
     applyImportPreview(
@@ -57,8 +77,9 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           ? '已抓取 ${payload.title}，但没有抽出可导入正文。'
           : '已抓取 ${payload.title}，抽出 ${rows.length} 条可导入章节。',
     );
+    final label = side == 'server' ? 'server-side crawl' : 'client-side crawl';
     applyInfoLine(
-      'client-side crawl 已完成：${payload.title}（模式 ${payload.mode}，抓取 ${payload.pageCount} 页）',
+      '$label 已完成：${payload.title}（模式 ${payload.mode}，抓取 ${payload.pageCount} 页）',
     );
   }
 

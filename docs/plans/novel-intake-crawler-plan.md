@@ -25,6 +25,7 @@
 - 导入前逐条修正：改标题、改正文、删误切、补漏切
 - 导入前自动重排序号与空正文拦截
 - `crawler_client` 首版：按 URL 抓网页、抽标题与正文、回填整本导入区
+- `POST /api/v1/projects/{project_id}/novels/crawl-preview`：托管端单页抓取预览（工作台「抓取执行端」选 server 时走该路径；完整 TOC/分页仍走 client）
 - `intake_source` / `intake_source_url` / `intake_status` / `intake_note`
 - 手动、整本、客户端爬虫三条入口统一写入 intake 元数据
 - 列表筛选与批量准入操作

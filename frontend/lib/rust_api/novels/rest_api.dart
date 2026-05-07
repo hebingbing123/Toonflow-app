@@ -185,3 +185,35 @@ Future<void> deleteProjectNovelByProjectIds(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
 }
+
+/// `POST /api/v1/projects/{project_id}/novels/crawl-preview` — see `postProjectNovelCrawlPreviewByProjectIdV1`.
+Future<NovelCrawlPreviewResponse> postProjectNovelCrawlPreview(
+  String accessToken,
+  String projectId,
+  String url,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-preview',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{'url': url}),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelCrawlPreviewResponse.fromJson(map);
+}

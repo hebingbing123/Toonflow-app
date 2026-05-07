@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
+use utoipa::ToSchema;
 
 /// PATCH JSON: distinguish **omitted** field (`None`) from explicit **`null`** (`Some(Null)`).
 fn deserialize_patch_field_value<'de, D>(deserializer: D) -> Result<Option<Value>, D::Error>
@@ -100,4 +101,20 @@ pub struct PatchNovelBody {
     pub intake_status: Option<Value>,
     #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub intake_note: Option<Value>,
+}
+
+/// Body for **`POST …/novels/crawl-preview`** — server-side HTML fetch + text extraction (preview only).
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct NovelCrawlPreviewBody {
+    pub url: String,
+}
+
+/// Response for **`POST …/novels/crawl-preview`**.
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NovelCrawlPreviewResponse {
+    pub title: String,
+    pub body_text: String,
+    pub mode: String,
+    pub page_count: i32,
 }

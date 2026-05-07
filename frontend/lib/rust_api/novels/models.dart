@@ -71,6 +71,30 @@ class ListNovelsResponse {
   }
 }
 
+/// Response for **`POST …/novels/crawl-preview`** — OpenAPI **`NovelCrawlPreviewResponse`**.
+class NovelCrawlPreviewResponse {
+  const NovelCrawlPreviewResponse({
+    required this.title,
+    required this.bodyText,
+    required this.mode,
+    required this.pageCount,
+  });
+
+  final String title;
+  final String bodyText;
+  final String mode;
+  final int pageCount;
+
+  factory NovelCrawlPreviewResponse.fromJson(Map<String, dynamic> json) {
+    return NovelCrawlPreviewResponse(
+      title: json['title'] as String? ?? '',
+      bodyText: json['body_text'] as String? ?? '',
+      mode: json['mode'] as String? ?? 'single',
+      pageCount: (json['page_count'] as num?)?.toInt() ?? 1,
+    );
+  }
+}
+
 /// Compat row (**`getNovelIndex`** shape); filled from **`GET …/projects/{uuid}/novels`**.
 class NovelWorkbenchIndexItem {
   const NovelWorkbenchIndexItem({
