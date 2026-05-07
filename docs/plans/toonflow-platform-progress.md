@@ -18,7 +18,7 @@
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
 - 当前最新完成竖切：团队 Workspace **W1.1–W1.7** — 创建/列表（含 **`include_archived`**）/详情/PATCH（改名、**归档/恢复**）、**active enterprise 配额**（env）、**current_workspace** 归档回落、Flutter **「团队工作区」**（含归档确认）、`pg_contract` + smoke；详见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) Phase W1
-- **下一大型竖切**（进行中）：**团队 Workspace 完整功能** — **Phase W2 已收口（W2.1–W2.9）**；**Phase W3 已收口（W3.1–W3.5）**，下一步进入 W4 资源范围收敛，见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)
+- **下一大型竖切**（进行中）：**团队 Workspace 完整功能** — **Phase W2、W3 已收口**；**W4.1 已落地（`GET /projects` 按 current workspace 过滤）**，继续 W4.2+，见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 

@@ -69,7 +69,7 @@
 > 原则：**`workspace_id` 为空间边界**；`owner_user_id` 保留为「创建者/责任人」，**可见性与写权限**由 **workspace 角色 + 可选项目级 ACL** 决定（见 W5）。  
 > **全栈**：每条 handler 变更须对应 **Flutter 工作台 / 项目编辑器** 与 **`rust_api`** 联调，禁止只改后端。
 
-- [ ] **W4.1** `GET /api/v1/projects`：**默认**按 `current_workspace_id` 过滤，且仅 **该 workspace 的 member** 可见（含他人创建的项目）
+- [x] **W4.1** `GET /api/v1/projects`：默认按 `current_workspace_id` 过滤；若 profile 指向失效则回退 personal（同 workspace 视角可见项目）
 - [ ] **W4.2** `POST /api/v1/projects`：`workspace_id` 默认当前 workspace；**禁止**写入非成员 workspace
 - [ ] **W4.3** `GET/PATCH/DELETE …/projects/{id}`：校验 **project.workspace_id** 与成员身份
 - [ ] **W4.4** 剧本 / 分镜 / 小说 / 资产 / workbench **所有** `project_id` 路径 handler：统一走 **「project ∈ workspace + 成员权限」** 中间件或 helper（避免漏网接口）
