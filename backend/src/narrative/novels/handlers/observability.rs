@@ -106,14 +106,12 @@ pub(crate) async fn get_novel_crawl_observability(
         r#"
         SELECT status::text as status, COUNT(*)::bigint as job_count
         FROM app_generation_job
-        WHERE owner_user_id = $1
-          AND kind = $2
-          AND payload->>'project_id' = $3
+        WHERE kind = $1
+          AND payload->>'project_id' = $2
         GROUP BY status
         ORDER BY job_count DESC
         "#,
     )
-    .bind(uid)
     .bind(JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH)
     .bind(project_id.to_string())
     .fetch_all(pool)

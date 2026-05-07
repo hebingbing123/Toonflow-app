@@ -228,14 +228,12 @@ pub(crate) async fn list_novel_crawl_schedules(
         r#"
         SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
-        WHERE owner_user_id = $1
-          AND kind = $2
-          AND payload->>'project_id' = $3
+        WHERE kind = $1
+          AND payload->>'project_id' = $2
         ORDER BY created_at DESC
         LIMIT 100
         "#,
     )
-    .bind(uid)
     .bind(JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH)
     .bind(project_id.to_string())
     .fetch_all(pool)
