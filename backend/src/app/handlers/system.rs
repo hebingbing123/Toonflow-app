@@ -6,7 +6,10 @@ use axum::Json;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::types::{HealthResponse, PingResponse, ReadyResponse, VersionResponse};
+use super::types::{
+    HealthResponse, PingResponse, ReadyHarnessIsolateMetrics, ReadyResponse, VersionResponse,
+};
+use crate::harness::isolate;
 
 #[utoipa::path(
     get,
@@ -59,17 +62,28 @@ pub(crate) async fn version() -> Json<VersionResponse> {
     operation_id = "readyV1",
     tag = "system",
     summary = "Readiness (optional database ping)",
-    description = "If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200).",
+    description = "If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200). Includes **`harness_isolate`** counters (see `isolate::metrics_snapshot`) for observability.",
     responses(
         (status = 200, description = "OK", body = ReadyResponse),
         (status = 503, description = "Database unreachable", body = crate::error::ErrorBody)
     )
 )]
 pub(crate) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyResponse>, ApiError> {
+    let snap = isolate::metrics_snapshot();
+    let harness_isolate = ReadyHarnessIsolateMetrics {
+        max_slots: snap.max_slots,
+        queue_depth_waiting: snap.queue_depth_waiting,
+        available_permits_snapshot: snap.available_permits_snapshot,
+        total_invocations: snap.total_invocations,
+        total_semaphore_wait_ms: snap.total_semaphore_wait_ms,
+        total_child_spawns: snap.total_child_spawns,
+        total_process_reuse_hits: snap.total_process_reuse_hits,
+    };
     match &state.pool {
         None => Ok(Json(ReadyResponse {
             status: "ok",
             database: "not_configured",
+            harness_isolate,
         })),
         Some(pool) => {
             sqlx::query_scalar::<_, i32>("SELECT 1")
@@ -79,6 +93,7 @@ pub(crate) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyRes
             Ok(Json(ReadyResponse {
                 status: "ok",
                 database: "connected",
+                harness_isolate,
             }))
         }
     }

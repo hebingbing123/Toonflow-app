@@ -28,10 +28,23 @@ pub(crate) struct VersionResponse {
     pub git_sha: Option<&'static str>,
 }
 
+/// Instant isolate / pool counters for **`GET /api/v1/ready`** observability (WP‑D).
+#[derive(Serialize, ToSchema)]
+pub(crate) struct ReadyHarnessIsolateMetrics {
+    pub max_slots: usize,
+    pub queue_depth_waiting: usize,
+    pub available_permits_snapshot: usize,
+    pub total_invocations: u64,
+    pub total_semaphore_wait_ms: u64,
+    pub total_child_spawns: u64,
+    pub total_process_reuse_hits: u64,
+}
+
 #[derive(Serialize, ToSchema)]
 pub(crate) struct ReadyResponse {
     pub status: &'static str,
     pub database: &'static str,
+    pub harness_isolate: ReadyHarnessIsolateMetrics,
 }
 
 #[derive(Serialize, ToSchema)]

@@ -32,4 +32,9 @@ async fn ready_without_database_reports_not_configured() {
     assert_eq!(status, StatusCode::OK);
     assert_eq!(v["status"], "ok");
     assert_eq!(v["database"], "not_configured");
+    let hi = v
+        .get("harness_isolate")
+        .expect("ready JSON must include harness_isolate");
+    assert!(hi["max_slots"].as_u64().is_some_and(|u| u > 0));
+    assert!(hi["total_child_spawns"].is_number());
 }

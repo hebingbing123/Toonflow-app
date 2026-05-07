@@ -37,6 +37,7 @@ use utoipa::OpenApi;
         crate::app::handlers::PingResponse,
         crate::app::handlers::VersionResponse,
         crate::app::handlers::ReadyResponse,
+        crate::app::handlers::ReadyHarnessIsolateMetrics,
         crate::app::handlers::MeResponse,
         crate::app::handlers::metrics::MetricsQuery,
         crate::app::handlers::metrics::MetricsResponse,

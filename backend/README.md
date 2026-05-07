@@ -78,7 +78,8 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
 
 就绪（可选连库）与鉴权探针：
 
-- `GET http://127.0.0.1:8666/api/v1/ready`
+- `GET http://127.0.0.1:8666/api/v1/ready` — **HTTP 200**；响应除 **`database`**（无 **`DATABASE_URL`** 时为 **`not_configured`**）外还带 **`harness_isolate`**（对齐进程内 **`harness::isolate::metrics_snapshot()`**，便于运维刮取）。
+- **`HARNESS_ISOLATE_MAX_CONCURRENT`**（默认 **4**）：**`isolated.echo`** isolate 并发槽 Semaphore。**`HARNESS_ISOLATE_POOL`**：**默认开启**子进程常驻帧协议（可复用工件进程）；设为 **`0` / `false` / `no` / `off`** 或 **`""`** 退回「每条 invoke **`spawn`** 一次」。**`HARNESS_ISOLATE_RUNNER_EXE`**（可选）：子进程可执行文件路径，默认为 API 进程的 **`current_exe`**；集成测试常设为 **`CARGO_BIN_EXE_toonflow-server`**。
 - `GET http://127.0.0.1:8666/api/v1/me` — 请求头 `Authorization: Bearer <Supabase access_token>`
 - `GET http://127.0.0.1:8666/api/v1/usage/summary` — 当前用户在 **`app_usage_event`** 中的条数（近 24h / 近 7 天）及近 7 天按 **`event_type`** 分组的 **`event_counts_last_7d`**；成功完成的生成任务由 worker 写入 **`generation_job.succeeded`**
 - 生成任务（**`app_generation_job`**；Bearer）：**`GET /api/v1/jobs`**（列表，可选 query **`kind`** / **`status`** 精确筛选）、**`GET /api/v1/jobs/kinds`**（**`kind`** 去重）、**`GET /api/v1/jobs/kinds/summary`**（按 **`kind`** 计数）、**`GET /api/v1/jobs/status/summary`**（按 **`status`** 计数）、**`POST /api/v1/jobs`** 等 — 详见 OpenAPI
@@ -95,7 +96,7 @@ WebSocket（JSON 信封见合并 OpenAPI 中 **`GET /api/v1/ws`**；仓库 **`do
 
 - 可选 **`HARNESS_WS_CHANNELS`**：逗号分隔的频道白名单（**`script`**、**`production`**）。未设置时两种 attach 均允许；设置后仅列表中的频道可通过 `agent.script.attach` / `agent.production.attach`（用于运维或阶段性关频道）。
 - `GET ws://127.0.0.1:8666/api/v1/ws` — 可选查询参数 `access_token=<jwt>`；否则首帧发 `session.auth`
-- 鉴权后可发 **`harness.tool.invoke`**（`schema_version` 1，`payload.name` / 可选 `arguments`）；**`echo`** 回显参数；**`isolated.echo`** 与 `echo` 语义相同但在**子进程**中执行（进程隔离；并发上限见 **`HARNESS_ISOLATE_MAX_CONCURRENT`**（默认 **4**）；可选 **`HARNESS_ISOLATE_RUNNER_EXE`** 指定子进程可执行文件，否则为 API 进程 **`current_exe`**；集成测试通常将其设为 **`CARGO_BIN_EXE_toonflow-server`**）。**可观测（WP‑D）**：每条 **`isolated.echo`** 结束前有 **`tracing`** 行（**`target = harness.isolate.metrics`**、**`event = harness_isolate_invoke`**：`queued_ahead`、`semaphore_wait_ms`、`child_execution_ms`、`available_slots_snapshot`/`max_slots`）；进程内累计见 **`harness::isolate::metrics_snapshot()`**（包含 `total_process_reuse_hits`，进程池到位前为 **0**）；**`skills.read`** 需 `arguments.path`（相对 `data/skills`，规则同 `GET /api/v1/skills/content`）；**`wasm.probe`** 在进程内用 **wasmi** 执行构建期生成的最小 WASM（`build.rs` → `OUT_DIR/probe.wasm`）；目录见 `GET /api/v1/harness/tools`
+- 鉴权后可发 **`harness.tool.invoke`**（`schema_version` 1，`payload.name` / 可选 `arguments`）；**`echo`** 回显参数；**`isolated.echo`** 与 `echo` 语义相同但在**子进程**中执行（进程隔离；并发与复用见上文 **`HARNESS_ISOLATE_*`**；集成测试通常将 **`HARNESS_ISOLATE_RUNNER_EXE`** 设为 **`CARGO_BIN_EXE_toonflow-server`**）。**可观测（WP‑D）**：每条 **`isolated.echo`** 结束前有 **`tracing`** 行（**`target = harness.isolate.metrics`**、**`event = harness_isolate_invoke`**：`queued_ahead`、`semaphore_wait_ms`、`child_execution_ms`、`available_slots_snapshot`/`max_slots`、`reuse_hit`、`process_reuse_hits_total`）；**`GET /api/v1/ready`** 与 **`metrics_snapshot()`** 均含累计字段（含 **`total_process_reuse_hits`**；池关闭时复用为 **0**）；**`skills.read`** 需 `arguments.path`（相对 `data/skills`，规则同 `GET /api/v1/skills/content`）；**`wasm.probe`** 在进程内用 **wasmi** 执行构建期生成的最小 WASM（`build.rs` → `OUT_DIR/probe.wasm`）；目录见 `GET /api/v1/harness/tools`
 - 已 attach **`agent.script.attach` / `agent.production.attach`** 且配置 LLM 密钥时，可发 **`harness.agent.run`**（`payload.content`，可选 **`max_tool_rounds`** 默认 8、限制 1–32）：服务端多轮 OpenAI **tools** 调用与 Harness 工具闭环，最终仍发 **`chat.message.*`** 文本信封
 
 技能 Markdown（只读，Bearer JWT）：

@@ -1,8 +1,8 @@
 //! Concurrency-slot behaviour: semaphore wait totals grow when parallel invokes exceed slots.
 //!
-//! Uses `HARNESS_ISOLATE_MAX_CONCURRENT=1` — isolate `LazyLock` must see env **before first use**
-//! (`metrics_snapshot`). Kept separate from `tests/harness_isolate_metrics.rs` so processes stay
-//! single-scenario without env races.
+//! Uses `HARNESS_ISOLATE_MAX_CONCURRENT=1` and **`HARNESS_ISOLATE_POOL=0`** — isolate `LazyLock` must
+//! see env **before first use** (`metrics_snapshot`), and spawn-per-invoke path stabilizes semaphore
+//! wait assertions vs pooled fast reuse.
 
 use std::sync::Arc;
 
@@ -38,9 +38,11 @@ async fn three_parallel_echoes_under_one_slot_accumulate_sem_wait() {
         std::env::var("CARGO_BIN_EXE_toonflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
     let _runner_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_RUNNER_EXE");
     let _max_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_MAX_CONCURRENT");
+    let _pool_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_POOL");
     unsafe {
         std::env::set_var("HARNESS_ISOLATE_RUNNER_EXE", &exe);
         std::env::set_var("HARNESS_ISOLATE_MAX_CONCURRENT", "1");
+        std::env::set_var("HARNESS_ISOLATE_POOL", "0");
     }
 
     let before = metrics_snapshot();

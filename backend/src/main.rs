@@ -13,6 +13,12 @@ async fn main() {
     if args.get(1).is_some_and(|s| s == "__harness_isolate_echo__") {
         harness::isolate::stdio_echo_child();
     }
+    if args
+        .get(1)
+        .is_some_and(|s| s == "__harness_isolate_echo_pool__")
+    {
+        harness::isolate::stdio_echo_pool_child();
+    }
 
     let _ = dotenvy::dotenv();
 

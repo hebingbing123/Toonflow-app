@@ -18,4 +18,7 @@ pub(crate) use metrics::{
 #[allow(unused_imports)]
 pub(crate) use system::{__path_health, __path_ping, __path_ready, __path_version};
 pub(crate) use system::{health, ping, ready, version};
-pub(crate) use types::{HealthResponse, MeResponse, PingResponse, ReadyResponse, VersionResponse};
+pub(crate) use types::{
+    HealthResponse, MeResponse, PingResponse, ReadyHarnessIsolateMetrics, ReadyResponse,
+    VersionResponse,
+};
