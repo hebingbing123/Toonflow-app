@@ -279,6 +279,34 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               return '字幕与时长未见明显错位。';
             }
 
+            // 计算当前总时长（实时更新）
+            int calculateCurrentTotalDuration() {
+              var total = 0;
+              for (final item in ordered) {
+                // 排除已暂停镜头
+                if (pausedStoryboardIds.contains(item.storyboardNumericId)) {
+                  continue;
+                }
+                final durationSec = parseDurationSeconds(item.durationText);
+                if (durationSec != null && durationSec > 0) {
+                  total += durationSec;
+                }
+              }
+              return total;
+            }
+
+            String formatDurationHHMMSS(int totalSeconds) {
+              final hours = totalSeconds ~/ 3600;
+              final minutes = (totalSeconds % 3600) ~/ 60;
+              final seconds = totalSeconds % 60;
+              return '${hours.toString().padLeft(2, '0')}:'
+                  '${minutes.toString().padLeft(2, '0')}:'
+                  '${seconds.toString().padLeft(2, '0')}';
+            }
+
+            final currentTotalDuration = calculateCurrentTotalDuration();
+            final currentTotalFormatted = formatDurationHHMMSS(currentTotalDuration);
+
             return AlertDialog(
               title: const Text('镜头基础操作'),
               content: SizedBox(
@@ -294,6 +322,31 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     Text(
                       '启停 / 替换会直接写回 J 媒体槽位；重排仅用于本次排障视图。',
                       style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
+                    // 显示成片总时长
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.timer_outlined,
+                            size: 20,
+                            color: Theme.of(ctx).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '成片总时长：$currentTotalDuration秒 ($currentTotalFormatted)',
+                            style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Align(

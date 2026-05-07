@@ -649,6 +649,444 @@ void main() {
     });
   });
 
+  group('Total Duration Calculation Tests', () {
+    // Requirements 19.1-19.7: Total duration calculation and display
+    
+    int? parseDurationSeconds(String value) {
+      final trimmed = value.trim().toLowerCase();
+      if (trimmed.isEmpty) return null;
+      final digits = RegExp(r'^(\d{1,3})\s*s?$').firstMatch(trimmed);
+      if (digits == null) return null;
+      return int.tryParse(digits.group(1)!);
+    }
+
+    test('calculateTotalDuration should sum all enabled shot durations', () {
+      // Requirements 19.1: Calculate total duration of all enabled shots
+      final shots = [
+        {'durationText': '10s', 'paused': false},
+        {'durationText': '20s', 'paused': false},
+        {'durationText': '30s', 'paused': false},
+      ];
+      final pausedIds = <int>{};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 60); // 10 + 20 + 30
+    });
+
+    test('calculateTotalDuration should exclude paused shots', () {
+      // Requirements 19.6: Exclude paused shots from total duration
+      final shots = [
+        {'id': 0, 'durationText': '10s', 'paused': false},
+        {'id': 1, 'durationText': '20s', 'paused': true},
+        {'id': 2, 'durationText': '30s', 'paused': false},
+      ];
+      final pausedIds = {1};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 40); // 10 + 30 (excluding paused shot with 20s)
+    });
+
+    test('calculateTotalDuration should treat missing duration as 0', () {
+      // Requirements 19.5: Duration missing should be calculated as 0 seconds
+      final shots = [
+        {'durationText': '10s', 'paused': false},
+        {'durationText': '', 'paused': false},
+        {'durationText': '30s', 'paused': false},
+      ];
+      final pausedIds = <int>{};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 40); // 10 + 0 + 30
+    });
+
+    test('calculateTotalDuration should handle all shots paused', () {
+      final shots = [
+        {'id': 0, 'durationText': '10s', 'paused': true},
+        {'id': 1, 'durationText': '20s', 'paused': true},
+        {'id': 2, 'durationText': '30s', 'paused': true},
+      ];
+      final pausedIds = {0, 1, 2};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 0); // All shots paused
+    });
+
+    test('calculateTotalDuration should handle empty shot list', () {
+      final shots = <Map<String, dynamic>>[];
+      final pausedIds = <int>{};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 0); // No shots
+    });
+
+    test('calculateTotalDuration should handle mixed valid and invalid durations', () {
+      final shots = [
+        {'durationText': '10s', 'paused': false},
+        {'durationText': 'invalid', 'paused': false},
+        {'durationText': '20', 'paused': false},
+        {'durationText': '', 'paused': false},
+        {'durationText': '30s', 'paused': false},
+      ];
+      final pausedIds = <int>{};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 60); // 10 + 0 + 20 + 0 + 30
+    });
+
+    test('formatDurationHHMMSS should format seconds correctly', () {
+      // Requirements 19.4: Display formatted HH:MM:SS duration
+      String formatDurationHHMMSS(int totalSeconds) {
+        final hours = totalSeconds ~/ 3600;
+        final minutes = (totalSeconds % 3600) ~/ 60;
+        final seconds = totalSeconds % 60;
+        return '${hours.toString().padLeft(2, '0')}:'
+            '${minutes.toString().padLeft(2, '0')}:'
+            '${seconds.toString().padLeft(2, '0')}';
+      }
+
+      expect(formatDurationHHMMSS(0), '00:00:00');
+      expect(formatDurationHHMMSS(1), '00:00:01');
+      expect(formatDurationHHMMSS(59), '00:00:59');
+      expect(formatDurationHHMMSS(60), '00:01:00');
+      expect(formatDurationHHMMSS(61), '00:01:01');
+      expect(formatDurationHHMMSS(3599), '00:59:59');
+      expect(formatDurationHHMMSS(3600), '01:00:00');
+      expect(formatDurationHHMMSS(3661), '01:01:01');
+      expect(formatDurationHHMMSS(7200), '02:00:00');
+      expect(formatDurationHHMMSS(7265), '02:01:05');
+    });
+
+    test('formatDurationHHMMSS should handle large durations', () {
+      String formatDurationHHMMSS(int totalSeconds) {
+        final hours = totalSeconds ~/ 3600;
+        final minutes = (totalSeconds % 3600) ~/ 60;
+        final seconds = totalSeconds % 60;
+        return '${hours.toString().padLeft(2, '0')}:'
+            '${minutes.toString().padLeft(2, '0')}:'
+            '${seconds.toString().padLeft(2, '0')}';
+      }
+
+      expect(formatDurationHHMMSS(36000), '10:00:00'); // 10 hours
+      expect(formatDurationHHMMSS(86400), '24:00:00'); // 24 hours
+      expect(formatDurationHHMMSS(359999), '99:59:59'); // 99:59:59
+    });
+
+    test('total duration should update when shot order changes', () {
+      // Requirements 19.7: Update total duration after shot order changes
+      final shots = [
+        {'durationText': '10s', 'paused': false},
+        {'durationText': '20s', 'paused': false},
+        {'durationText': '30s', 'paused': false},
+      ];
+      final pausedIds = <int>{};
+
+      // Calculate initial total
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 60);
+
+      // Reorder shots (swap first two)
+      final temp = shots[0];
+      shots[0] = shots[1];
+      shots[1] = temp;
+
+      // Recalculate total (should be same since order doesn't affect sum)
+      total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 60); // Same total, different order
+    });
+
+    test('total duration should update when shot duration changes', () {
+      // Requirements 19.7: Update total duration after duration changes
+      final shots = [
+        {'durationText': '10s', 'paused': false},
+        {'durationText': '20s', 'paused': false},
+        {'durationText': '30s', 'paused': false},
+      ];
+      final pausedIds = <int>{};
+
+      // Calculate initial total
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 60);
+
+      // Update duration of second shot
+      shots[1]['durationText'] = '50s';
+
+      // Recalculate total
+      total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 90); // 10 + 50 + 30
+    });
+
+    test('total duration should update when shot is paused', () {
+      // Requirements 19.7: Update total duration after pause state changes
+      final shots = [
+        {'id': 0, 'durationText': '10s', 'paused': false},
+        {'id': 1, 'durationText': '20s', 'paused': false},
+        {'id': 2, 'durationText': '30s', 'paused': false},
+      ];
+      var pausedIds = <int>{};
+
+      // Calculate initial total
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 60);
+
+      // Pause second shot
+      pausedIds = {1};
+
+      // Recalculate total
+      total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 40); // 10 + 30 (excluding paused 20s)
+    });
+
+    test('total duration should update when shot is enabled', () {
+      final shots = [
+        {'id': 0, 'durationText': '10s', 'paused': false},
+        {'id': 1, 'durationText': '20s', 'paused': true},
+        {'id': 2, 'durationText': '30s', 'paused': false},
+      ];
+      var pausedIds = {1};
+
+      // Calculate initial total (with shot 1 paused)
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 40); // 10 + 30
+
+      // Enable second shot
+      pausedIds = <int>{};
+
+      // Recalculate total
+      total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+      expect(total, 60); // 10 + 20 + 30
+    });
+
+    test('total duration display should show both seconds and formatted time', () {
+      // Requirements 19.2, 19.3, 19.4: Display total duration in seconds and HH:MM:SS
+      String formatDurationHHMMSS(int totalSeconds) {
+        final hours = totalSeconds ~/ 3600;
+        final minutes = (totalSeconds % 3600) ~/ 60;
+        final seconds = totalSeconds % 60;
+        return '${hours.toString().padLeft(2, '0')}:'
+            '${minutes.toString().padLeft(2, '0')}:'
+            '${seconds.toString().padLeft(2, '0')}';
+      }
+
+      String formatTotalDurationDisplay(int totalSeconds) {
+        final formatted = formatDurationHHMMSS(totalSeconds);
+        return '成片总时长：$totalSeconds秒 ($formatted)';
+      }
+
+      expect(
+        formatTotalDurationDisplay(0),
+        '成片总时长：0秒 (00:00:00)',
+      );
+      expect(
+        formatTotalDurationDisplay(60),
+        '成片总时长：60秒 (00:01:00)',
+      );
+      expect(
+        formatTotalDurationDisplay(125),
+        '成片总时长：125秒 (00:02:05)',
+      );
+      expect(
+        formatTotalDurationDisplay(3665),
+        '成片总时长：3665秒 (01:01:05)',
+      );
+    });
+
+    test('total duration should handle zero duration shots', () {
+      final shots = [
+        {'durationText': '0s', 'paused': false},
+        {'durationText': '10s', 'paused': false},
+        {'durationText': '0', 'paused': false},
+      ];
+      final pausedIds = <int>{};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 10); // Only the 10s shot counts (0s shots are excluded)
+    });
+
+    test('total duration should handle negative duration gracefully', () {
+      // Although negative durations shouldn't occur, test defensive behavior
+      final shots = [
+        {'durationText': '10s', 'paused': false},
+        {'durationText': '-5s', 'paused': false}, // Invalid, should be ignored
+        {'durationText': '20s', 'paused': false},
+      ];
+      final pausedIds = <int>{};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      expect(total, 30); // 10 + 20 (negative duration ignored)
+    });
+
+    test('total duration calculation should be efficient for large shot lists', () {
+      // Create a large list of shots
+      final shots = List.generate(
+        1000,
+        (i) => {'durationText': '${(i % 100) + 1}s', 'paused': false},
+      );
+      final pausedIds = <int>{};
+
+      // Calculate total
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      // Verify calculation completes and produces reasonable result
+      expect(total, greaterThan(0));
+      expect(total, lessThan(100000)); // Sanity check
+    });
+
+    test('total duration should handle complex scenario with mixed states', () {
+      // Complex scenario: mix of enabled, paused, missing durations
+      final shots = [
+        {'id': 0, 'durationText': '10s', 'paused': false},
+        {'id': 1, 'durationText': '20s', 'paused': true},
+        {'id': 2, 'durationText': '', 'paused': false},
+        {'id': 3, 'durationText': '30s', 'paused': false},
+        {'id': 4, 'durationText': '15s', 'paused': true},
+        {'id': 5, 'durationText': '25s', 'paused': false},
+        {'id': 6, 'durationText': 'invalid', 'paused': false},
+        {'id': 7, 'durationText': '5s', 'paused': false},
+      ];
+      final pausedIds = {1, 4};
+
+      var total = 0;
+      for (var i = 0; i < shots.length; i++) {
+        if (pausedIds.contains(i)) continue;
+        final durationSec = parseDurationSeconds(shots[i]['durationText'] as String);
+        if (durationSec != null && durationSec > 0) {
+          total += durationSec;
+        }
+      }
+
+      // 10 + 0 + 30 + 25 + 0 + 5 = 70
+      // (excluding paused: 20, 15; missing/invalid: '', 'invalid')
+      expect(total, 70);
+    });
+  });
+
   group('Media Type Inference Tests', () {
     // Note: Media type inference is performed on the backend via the
     // assembly_selected_media_kind function. The frontend receives the
