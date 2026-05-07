@@ -18,7 +18,10 @@ pub(super) async fn resolve_job_mutation_outcome(
     if let Some(mut row) = updated {
         hydrate_job_row(&mut row);
         let text = envelope_generation_job_updated(&row);
-        state.notify.broadcast_to_user(uid, text).await;
+        state
+            .notify
+            .broadcast_to_user(row.owner_user_id, text)
+            .await;
         return Ok(Json(row));
     }
 

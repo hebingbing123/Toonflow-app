@@ -166,7 +166,7 @@ pub(crate) async fn get_job_file(
             .and_then(|value| value.as_str())
             .filter(|value| !value.trim().is_empty())
             .ok_or(ApiError::NotFound)?;
-        let path = root.join(uid.to_string()).join(file_name);
+        let path = root.join(row.owner_user_id.to_string()).join(file_name);
         let bytes = tokio::fs::read(&path)
             .await
             .map_err(|_| ApiError::NotFound)?;
