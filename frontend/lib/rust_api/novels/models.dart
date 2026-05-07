@@ -95,6 +95,34 @@ class NovelCrawlPreviewResponse {
   }
 }
 
+/// Response for **`POST …/novels/crawl-import`**.
+class NovelCrawlImportResponse {
+  const NovelCrawlImportResponse({
+    required this.title,
+    required this.mode,
+    required this.pageCount,
+    required this.chaptersCreated,
+    required this.qualityWarnings,
+  });
+
+  final String title;
+  final String mode;
+  final int pageCount;
+  final int chaptersCreated;
+  final List<String> qualityWarnings;
+
+  factory NovelCrawlImportResponse.fromJson(Map<String, dynamic> json) {
+    final rawWarnings = json['quality_warnings'] as List<dynamic>? ?? const [];
+    return NovelCrawlImportResponse(
+      title: json['title'] as String? ?? '',
+      mode: json['mode'] as String? ?? 'single',
+      pageCount: (json['page_count'] as num?)?.toInt() ?? 0,
+      chaptersCreated: (json['chapters_created'] as num?)?.toInt() ?? 0,
+      qualityWarnings: rawWarnings.map((e) => e as String).toList(growable: false),
+    );
+  }
+}
+
 /// Compat row (**`getNovelIndex`** shape); filled from **`GET …/projects/{uuid}/novels`**.
 class NovelWorkbenchIndexItem {
   const NovelWorkbenchIndexItem({

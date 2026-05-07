@@ -217,3 +217,43 @@ Future<NovelCrawlPreviewResponse> postProjectNovelCrawlPreview(
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlPreviewResponse.fromJson(map);
 }
+
+/// `POST /api/v1/projects/{project_id}/novels/crawl-import` — see `postProjectNovelCrawlImportByProjectIdV1`.
+Future<NovelCrawlImportResponse> postProjectNovelCrawlImport(
+  String accessToken,
+  String projectId,
+  String url, {
+  required String intakeStatus,
+  String? intakeNote,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-import',
+  );
+  final body = <String, dynamic>{
+    'url': url,
+    'intake_status': intakeStatus,
+    // Rust `Option<String>` accepts `null` as missing/None.
+    'intake_note': intakeNote,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelCrawlImportResponse.fromJson(map);
+}

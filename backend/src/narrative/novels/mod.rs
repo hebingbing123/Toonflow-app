@@ -27,6 +27,10 @@ pub fn router() -> Router<AppState> {
             post(handlers::post_novel_crawl_preview),
         )
         .route(
+            "/api/v1/projects/{project_id}/novels/crawl-import",
+            post(handlers::post_novel_crawl_import),
+        )
+        .route(
             "/api/v1/projects/{project_id}/novels",
             get(handlers::list_novels_for_project).post(handlers::create_novel_for_project),
         )

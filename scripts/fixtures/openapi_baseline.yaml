@@ -132,6 +132,60 @@ components:
       - medium
       - low
       type: string
+    BatchArchiveDraftsBody:
+      description: 'P8: Batch archive multiple drafts'
+      properties:
+        draft_ids:
+          items:
+            format: uuid
+            type: string
+          type: array
+      required:
+      - draft_ids
+      type: object
+    BatchArchiveDraftsResponse:
+      properties:
+        archived:
+          format: int64
+          type: integer
+      required:
+      - archived
+      type: object
+    BatchOperationFailure:
+      properties:
+        draft_id:
+          format: uuid
+          type: string
+        reason:
+          type: string
+      required:
+      - draft_id
+      - reason
+      type: object
+    BatchPublishDraftsBody:
+      description: 'P8: Batch publish multiple drafts'
+      properties:
+        draft_ids:
+          items:
+            format: uuid
+            type: string
+          type: array
+      required:
+      - draft_ids
+      type: object
+    BatchPublishDraftsResponse:
+      properties:
+        enqueued:
+          format: int64
+          type: integer
+        failed:
+          items:
+            $ref: '#/components/schemas/BatchOperationFailure'
+          type: array
+      required:
+      - enqueued
+      - failed
+      type: object
     BatchScheduleDraftsBody:
       properties:
         draft_ids:
@@ -154,6 +208,34 @@ components:
           type: integer
       required:
       - updated
+      type: object
+    BatchValidateDraftsBody:
+      description: 'P8: Batch validate multiple drafts before operation'
+      properties:
+        draft_ids:
+          items:
+            format: uuid
+            type: string
+          type: array
+      required:
+      - draft_ids
+      type: object
+    BatchValidateDraftsResponse:
+      properties:
+        blocked_count:
+          format: int64
+          type: integer
+        blocked_drafts:
+          items:
+            $ref: '#/components/schemas/BlockedDraftSummary'
+          type: array
+        ready_count:
+          format: int64
+          type: integer
+      required:
+      - ready_count
+      - blocked_count
+      - blocked_drafts
       type: object
     BenchmarkCase:
       description: 基线样本记录
@@ -342,6 +424,46 @@ components:
       - duplicate
       - informational_event
       type: object
+    BlockedDraftSummary:
+      properties:
+        blocking_reasons:
+          items:
+            $ref: '#/components/schemas/PublishPrepareIssue'
+          type: array
+        draft_id:
+          format: uuid
+          type: string
+        title:
+          type: string
+      required:
+      - draft_id
+      - title
+      - blocking_reasons
+      type: object
+    BrandBible:
+      additionalProperties: false
+      properties:
+        brandName:
+          type:
+          - string
+          - 'null'
+        brandPromise:
+          type:
+          - string
+          - 'null'
+        continuityRules:
+          items:
+            type: string
+          type: array
+        forbiddenElements:
+          items:
+            type: string
+          type: array
+        visualMotifs:
+          items:
+            type: string
+          type: array
+      type: object
     CompressionRules:
       description: 压缩规则
       properties:
@@ -521,6 +643,10 @@ components:
           type:
           - string
           - 'null'
+        brandBible:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/BrandBible'
         directorManual:
           type:
           - string
@@ -551,6 +677,10 @@ components:
           type:
           - string
           - 'null'
+        projectBrief:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ProjectBrief'
         projectType:
           type:
           - string
@@ -1228,6 +1358,10 @@ components:
           type:
           - string
           - 'null'
+        current_workspace:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/WorkspaceSummary'
         daily_job_quota:
           description: Effective daily job quota for this user (null = unlimited, e.g. enterprise).
           format: int64
@@ -1422,6 +1556,73 @@ components:
       required:
       - modelName
       type: object
+    NovelCrawlImportBody:
+      additionalProperties: false
+      description: Body for **`POST …/novels/crawl-import`** — server-side crawl + parse + import.
+      properties:
+        intake_note:
+          type:
+          - string
+          - 'null'
+        intake_status:
+          type: string
+        url:
+          type: string
+      required:
+      - url
+      - intake_status
+      type: object
+    NovelCrawlImportResponse:
+      description: Response for **`POST …/novels/crawl-import`**.
+      properties:
+        chapters_created:
+          format: int32
+          type: integer
+        mode:
+          type: string
+        page_count:
+          format: int32
+          type: integer
+        quality_warnings:
+          items:
+            type: string
+          type: array
+        title:
+          type: string
+      required:
+      - title
+      - mode
+      - page_count
+      - chapters_created
+      - quality_warnings
+      type: object
+    NovelCrawlPreviewBody:
+      additionalProperties: false
+      description: Body for **`POST …/novels/crawl-preview`** — server-side HTML fetch + text extraction (preview only).
+      properties:
+        url:
+          type: string
+      required:
+      - url
+      type: object
+    NovelCrawlPreviewResponse:
+      description: Response for **`POST …/novels/crawl-preview`**.
+      properties:
+        body_text:
+          type: string
+        mode:
+          type: string
+        page_count:
+          format: int32
+          type: integer
+        title:
+          type: string
+      required:
+      - title
+      - body_text
+      - mode
+      - page_count
+      type: object
     ObservationAsset:
       description: 观察资产记录
       properties:
@@ -1540,6 +1741,7 @@ components:
           description: 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
         bgmStrategy:
           description: BGM 策略
+        brandBible: {}
         directorManual: {}
         durationStrategy:
           description: 时长策略（如 short, medium, long）
@@ -1548,6 +1750,7 @@ components:
         intro: {}
         mode: {}
         name: {}
+        projectBrief: {}
         projectType: {}
         qualityGateStrategy:
           description: Quality gate enforcement strategy (off/warn/block)
@@ -1686,6 +1889,30 @@ components:
       - candidate_counts
       - by_asset_type
       type: object
+    ProjectBrief:
+      additionalProperties: false
+      properties:
+        coreHook:
+          type:
+          - string
+          - 'null'
+        emotionalTone:
+          type:
+          - string
+          - 'null'
+        premise:
+          type:
+          - string
+          - 'null'
+        targetAudience:
+          type:
+          - string
+          - 'null'
+        visualDirection:
+          type:
+          - string
+          - 'null'
+      type: object
     ProjectDetailResponse:
       properties:
         project:
@@ -1697,6 +1924,70 @@ components:
       required:
       - project
       - scripts
+      type: object
+    ProjectHomeChecklistItem:
+      properties:
+        detail:
+          type:
+          - string
+          - 'null'
+        done:
+          type: boolean
+        key:
+          type: string
+        label:
+          type: string
+      required:
+      - key
+      - label
+      - done
+      type: object
+    ProjectHomeOnboarding:
+      properties:
+        checklist:
+          items:
+            $ref: '#/components/schemas/ProjectHomeChecklistItem'
+          type: array
+        complete:
+          type: boolean
+        next_step:
+          type:
+          - string
+          - 'null'
+      required:
+      - complete
+      - checklist
+      type: object
+    ProjectHomeResponse:
+      properties:
+        brand_bible:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/BrandBible'
+        onboarding:
+          $ref: '#/components/schemas/ProjectHomeOnboarding'
+        project:
+          $ref: '#/components/schemas/ProjectRow'
+        project_brief:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ProjectBrief'
+        readiness_score:
+          format: int32
+          type: integer
+        readiness_summary:
+          type: string
+        stats:
+          $ref: '#/components/schemas/ProjectStatsResponse'
+        style_bible_ready:
+          type: boolean
+      required:
+      - project
+      - stats
+      - readiness_score
+      - readiness_summary
+      - onboarding
+      - style_bible_ready
       type: object
     ProjectOverviewQuery:
       properties:
@@ -1898,6 +2189,11 @@ components:
           type:
           - string
           - 'null'
+        workspace_id:
+          format: uuid
+          type:
+          - string
+          - 'null'
       required:
       - id
       - numeric_id
@@ -1944,8 +2240,8 @@ components:
           items:
             $ref: '#/components/schemas/ShortVideoExportCheckIssue'
           type: array
-        quality_gate_placeholder:
-          $ref: '#/components/schemas/ShortVideoExportQualityGatePlaceholder'
+        quality_gate:
+          $ref: '#/components/schemas/ShortVideoExportQualityGate'
         schema_version:
           format: int32
           type: integer
@@ -1956,7 +2252,7 @@ components:
       - export_ready
       - summary
       - issues
-      - quality_gate_placeholder
+      - quality_gate
       type: object
     ProjectShortVideoReadinessResponse:
       description: '`GET /api/v1/projects/{project_id}/short-video-readiness`'
@@ -2607,6 +2903,22 @@ components:
       - narrative_grip
       - visual_continuity
       type: string
+    QualityGateBlockingReason:
+      description: 质量门禁阻断原因
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        rework_route:
+          description: 返工入口（前端路由或 deep link）
+          type:
+          - string
+          - 'null'
+      required:
+      - code
+      - message
+      type: object
     QualityMetrics:
       description: 质量指标
       properties:
@@ -3215,11 +3527,18 @@ components:
       - blocking_issue_count
       - warning_issue_count
       type: object
-    ShortVideoExportQualityGatePlaceholder:
-      description: D3：**导出前质量检查钩子占位**（只读观测 **`app_quality_review`** 坏例计数；策略强制执行二期）。
+    ShortVideoExportQualityGate:
+      description: '**P7**: 导出质量门禁（off/warn/block）'
       properties:
+        blocking_reasons:
+          description: block 模式下的阻断原因（结构化）
+          items:
+            $ref: '#/components/schemas/QualityGateBlockingReason'
+          type:
+          - array
+          - 'null'
         enforced:
-          description: 占位阶段固定 **`false`**；二期才可据此阻断导出。
+          description: 是否强制执行（block 模式下为 true）
           type: boolean
         pending_review_bad_case_count:
           description: 与 **`GET …/production-overview`** **`pending_review_bad_case_count`** 同源计数。
@@ -3228,8 +3547,13 @@ components:
         schema_version:
           format: int32
           type: integer
+        strategy:
+          description: 门禁策略：off（跳过检查）、warn（显示警告但允许）、block（阻断导出）
+          example: block
+          type: string
       required:
       - schema_version
+      - strategy
       - enforced
       - pending_review_bad_case_count
       type: object
@@ -3809,6 +4133,20 @@ components:
       required:
       - service
       - version
+      type: object
+    WorkspaceSummary:
+      properties:
+        id:
+          format: uuid
+          type: string
+        name:
+          type: string
+        workspace_type:
+          type: string
+      required:
+      - id
+      - name
+      - workspace_type
       type: object
   securitySchemes:
     bearerAuth:
@@ -10360,6 +10698,46 @@ paths:
       summary: Download asset image bytes or redirect (by project UUID)
       tags:
       - assets
+  /api/v1/projects/{project_id}/home:
+    get:
+      operationId: getProjectHomeByIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectHomeResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
   /api/v1/projects/{project_id}/novel-events:
     get:
       operationId: listProjectNovelEventsByProjectIdV1
@@ -10645,6 +11023,110 @@ paths:
                 $ref: ErrorBody
           description: Auth not configured, database error, or `DATABASE_URL` unset
       summary: Create novel chapter under a project (by project UUID)
+      tags:
+      - novels
+  /api/v1/projects/{project_id}/novels/crawl-import:
+    post:
+      operationId: postProjectNovelCrawlImportByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovelCrawlImportBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NovelCrawlImportResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - novels
+  /api/v1/projects/{project_id}/novels/crawl-preview:
+    post:
+      operationId: postProjectNovelCrawlPreviewByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovelCrawlPreviewBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NovelCrawlPreviewResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
       tags:
       - novels
   /api/v1/projects/{project_id}/novels/{novel_numeric_id}:
@@ -10981,6 +11463,88 @@ paths:
       - bearerAuth: []
       tags:
       - publish
+  /api/v1/projects/{project_id}/publish/drafts/batch-archive:
+    post:
+      operationId: batchArchivePublishDraftsV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchArchiveDraftsBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchArchiveDraftsResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+      security:
+      - bearerAuth: []
+      summary: 'P8: Batch archive multiple drafts'
+      tags:
+      - publish
+  /api/v1/projects/{project_id}/publish/drafts/batch-publish:
+    post:
+      operationId: batchPublishDraftsV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchPublishDraftsBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchPublishDraftsResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+      security:
+      - bearerAuth: []
+      summary: 'P8: Batch publish multiple drafts'
+      tags:
+      - publish
   /api/v1/projects/{project_id}/publish/drafts/batch-schedule:
     post:
       operationId: batchSchedulePublishDraftsV1
@@ -11019,6 +11583,47 @@ paths:
           description: Not found
       security:
       - bearerAuth: []
+      tags:
+      - publish
+  /api/v1/projects/{project_id}/publish/drafts/batch-validate:
+    post:
+      operationId: batchValidatePublishDraftsV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchValidateDraftsBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchValidateDraftsResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+      security:
+      - bearerAuth: []
+      summary: 'P8: Batch validate multiple drafts before operation'
       tags:
       - publish
   /api/v1/projects/{project_id}/publish/drafts/{draft_id}:

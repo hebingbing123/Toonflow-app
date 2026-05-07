@@ -118,3 +118,23 @@ pub struct NovelCrawlPreviewResponse {
     pub mode: String,
     pub page_count: i32,
 }
+
+/// Body for **`POST …/novels/crawl-import`** — server-side crawl + parse + import.
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct NovelCrawlImportBody {
+    pub url: String,
+    pub intake_status: String,
+    #[serde(default)]
+    pub intake_note: Option<String>,
+}
+
+/// Response for **`POST …/novels/crawl-import`**.
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NovelCrawlImportResponse {
+    pub title: String,
+    pub mode: String,
+    pub page_count: i32,
+    pub chapters_created: i32,
+    pub quality_warnings: Vec<String>,
+}
