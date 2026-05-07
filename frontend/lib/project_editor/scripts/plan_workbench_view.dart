@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
+import 'plan_workbench_support.dart';
 
 class ProjectScriptPlanWorkbenchViewModel {
   const ProjectScriptPlanWorkbenchViewModel({
@@ -10,6 +11,8 @@ class ProjectScriptPlanWorkbenchViewModel {
     required this.adaptationStrategyCtrl,
     required this.planData,
     required this.eventSummaryLine,
+    required this.draftSummaryLine,
+    required this.draftPackets,
   });
 
   final bool localBusy;
@@ -18,6 +21,8 @@ class ProjectScriptPlanWorkbenchViewModel {
   final TextEditingController adaptationStrategyCtrl;
   final ScriptAgentPlanData? planData;
   final String eventSummaryLine;
+  final String draftSummaryLine;
+  final List<ScriptDraftPacket> draftPackets;
 }
 
 class ProjectScriptPlanWorkbenchViewCallbacks {
@@ -26,6 +31,8 @@ class ProjectScriptPlanWorkbenchViewCallbacks {
     required this.onSave,
     required this.onFillStorySkeletonSeed,
     required this.onFillAdaptationStrategySeed,
+    required this.onGenerateDraftPackets,
+    required this.onWriteDraftPackets,
     required this.onClose,
   });
 
@@ -33,6 +40,8 @@ class ProjectScriptPlanWorkbenchViewCallbacks {
   final VoidCallback? onSave;
   final VoidCallback? onFillStorySkeletonSeed;
   final VoidCallback? onFillAdaptationStrategySeed;
+  final VoidCallback? onGenerateDraftPackets;
+  final VoidCallback? onWriteDraftPackets;
   final VoidCallback? onClose;
 }
 
@@ -76,6 +85,13 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                model.draftSummaryLine,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -92,6 +108,18 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                         ? null
                         : callbacks.onFillAdaptationStrategySeed,
                     child: const Text('用事件填充策略草稿'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: model.localBusy
+                        ? null
+                        : callbacks.onGenerateDraftPackets,
+                    child: const Text('生成剧本初稿包'),
+                  ),
+                  OutlinedButton(
+                    onPressed: model.localBusy || model.draftPackets.isEmpty
+                        ? null
+                        : callbacks.onWriteDraftPackets,
+                    child: const Text('写入剧本初稿'),
                   ),
                 ],
               ),
@@ -115,6 +143,54 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                   helperText: '记录改编取舍、人物弧光、节奏策略和风格约束',
                 ),
               ),
+              const SizedBox(height: 16),
+              Text('剧本初稿预览', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              if (model.draftPackets.isEmpty)
+                Text(
+                  '还没有生成初稿包，建议先整理骨架/策略后再生成。',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                )
+              else
+                ...model.draftPackets.take(4).map(
+                  (draft) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.25),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(draft.name, style: theme.textTheme.titleSmall),
+                          const SizedBox(height: 4),
+                          Text(
+                            '章节 ${draft.chapterIndexes.isEmpty ? '待补' : draft.chapterIndexes.join(', ')}'
+                            '${draft.eventNames.isEmpty ? '' : ' · ${draft.eventNames.take(3).join(' / ')}'}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          SelectableText(
+                            draft.content,
+                            maxLines: 10,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

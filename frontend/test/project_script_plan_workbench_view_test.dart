@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/project_editor/scripts/plan_workbench_support.dart';
 import 'package:openflow_app/project_editor/scripts/plan_workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -21,6 +22,15 @@ void main() {
             storySkeletonCtrl: storySkeletonCtrl,
             adaptationStrategyCtrl: adaptationStrategyCtrl,
             eventSummaryLine: '当前 3 条事件，覆盖 5/6 条章节',
+            draftSummaryLine: '已生成 1 份剧本初稿，覆盖 2 条章节',
+            draftPackets: const [
+              ScriptDraftPacket(
+                name: '第1集',
+                content: '【剧本定位】\n首集冲突起手',
+                chapterIndexes: [1, 2],
+                eventNames: ['主角撞见秘密'],
+              ),
+            ],
             planData: const ScriptAgentPlanData(
               planId: 12,
               storySkeleton: '三幕结构',
@@ -35,6 +45,8 @@ void main() {
             onSave: null,
             onFillStorySkeletonSeed: null,
             onFillAdaptationStrategySeed: null,
+            onGenerateDraftPackets: null,
+            onWriteDraftPackets: null,
             onClose: null,
           ),
         ),
@@ -46,10 +58,15 @@ void main() {
     expect(find.text('Adaptation Strategy'), findsOneWidget);
     expect(find.textContaining('planId 12'), findsOneWidget);
     expect(find.textContaining('覆盖 5/6 条章节'), findsOneWidget);
+    expect(find.textContaining('已生成 1 份剧本初稿'), findsOneWidget);
     expect(find.widgetWithText(TextField, '三幕结构'), findsOneWidget);
     expect(find.widgetWithText(TextField, '角色先压后扬'), findsOneWidget);
     expect(find.text('用事件填充骨架草稿'), findsOneWidget);
     expect(find.text('用事件填充策略草稿'), findsOneWidget);
+    expect(find.text('生成剧本初稿包'), findsOneWidget);
+    expect(find.text('写入剧本初稿'), findsOneWidget);
+    expect(find.text('剧本初稿预览'), findsOneWidget);
+    expect(find.text('第1集'), findsOneWidget);
     expect(find.text('刷新计划'), findsOneWidget);
     expect(find.text('保存计划'), findsOneWidget);
   });
