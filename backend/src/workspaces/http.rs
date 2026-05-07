@@ -275,6 +275,40 @@ fn max_enterprise_workspaces_per_user() -> i64 {
         .unwrap_or(50)
 }
 
+fn max_workspace_member_mutations_per_hour() -> i64 {
+    std::env::var("TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR")
+        .ok()
+        .and_then(|s| s.trim().parse::<i64>().ok())
+        .filter(|n| *n > 0)
+        .unwrap_or(120)
+}
+
+async fn guard_workspace_member_mutation_rate(
+    pool: &PgPool,
+    workspace_id: Uuid,
+) -> Result<(), ApiError> {
+    let cap = max_workspace_member_mutations_per_hour();
+    let used: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM public.app_workspace_audit
+        WHERE workspace_id = $1
+          AND action IN ('workspace_member_upserted', 'workspace_invite_created')
+          AND created_at >= NOW() - INTERVAL '1 hour'
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if used >= cap {
+        return Err(ApiError::QuotaExceeded(format!(
+            "workspace member/invite mutations exceed {cap} per hour (set TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR)"
+        )));
+    }
+    Ok(())
+}
+
 async fn count_owned_active_enterprise(
     pool: &PgPool,
     owner_user_id: Uuid,
@@ -706,6 +740,7 @@ pub(crate) async fn list_workspace_members(
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
         (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 429, description = "Quota exceeded", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
     security(("bearerAuth" = []))
@@ -719,6 +754,7 @@ pub(crate) async fn add_workspace_member(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+    guard_workspace_member_mutation_rate(pool, workspace_id).await?;
 
     let role = normalize_member_role(&body.role).ok_or_else(|| {
         ApiError::BadRequest("role must be admin or member (owner requires transfer flow)".into())
@@ -1015,6 +1051,7 @@ pub(crate) async fn leave_workspace(
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
         (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 429, description = "Quota exceeded", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
     security(("bearerAuth" = []))
@@ -1028,6 +1065,7 @@ pub(crate) async fn create_workspace_invite(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+    guard_workspace_member_mutation_rate(pool, workspace_id).await?;
 
     let role = normalize_member_role(&body.role)
         .ok_or_else(|| ApiError::BadRequest("role must be admin or member".into()))?;
