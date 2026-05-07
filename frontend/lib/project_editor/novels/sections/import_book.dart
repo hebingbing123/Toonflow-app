@@ -13,6 +13,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     required void Function(bool value) setLocalBusy,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required void Function(String value) updateInfoLine,
+    required TextEditingController importUrlCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
     required void Function(List<ParsedNovelChapter> rows, String message)
@@ -22,6 +23,36 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('整本导入', style: Theme.of(ctx).textTheme.labelLarge),
+        const SizedBox(height: 8),
+        TextField(
+          controller: importUrlCtrl,
+          decoration: const InputDecoration(
+            labelText: '抓取 URL',
+            helperText: 'client-side crawl：抓页面、抽正文、回填到下方整本导入区。',
+          ),
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton(
+            onPressed: localBusy
+                ? null
+                : () => _runNovelWorkbenchAction(
+                      ctx: ctx,
+                      setDialogState: setDialogState,
+                      setLocalState: setLocalState,
+                      novelsBusy: novelsBusy,
+                      setLocalBusy: setLocalBusy,
+                      action: () => _crawlNovelSourcePreview(
+                        importUrlCtrl: importUrlCtrl,
+                        importRawTextCtrl: importRawTextCtrl,
+                        applyInfoLine: updateInfoLine,
+                        applyImportPreview: applyImportPreview,
+                      ),
+                    ),
+            child: const Text('抓取并预解析'),
+          ),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: importRawTextCtrl,

@@ -42,6 +42,7 @@ Future<void> openNovelWorkbenchDialog({
     required void Function(bool value) setLocalBusy,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required void Function(String value) updateInfoLine,
+    required TextEditingController importUrlCtrl,
     required TextEditingController importRawTextCtrl,
     required TextEditingController importBatchSizeCtrl,
     required void Function(List<ParsedNovelChapter> rows, String message)
@@ -234,6 +235,7 @@ Future<void> openNovelWorkbenchDialog({
                         setLocalBusy: setLocalBusy,
                         refreshWorkbench: refreshWorkbench,
                         updateInfoLine: updateInfoLine,
+                        importUrlCtrl: ctrls.importUrlCtrl,
                         importRawTextCtrl: ctrls.importRawTextCtrl,
                         importBatchSizeCtrl: ctrls.importBatchSizeCtrl,
                         applyImportPreview: (rows, message) {

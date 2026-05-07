@@ -3,6 +3,7 @@ part of 'workbench_launcher.dart';
 class _NovelWorkbenchControllers {
   const _NovelWorkbenchControllers({
     required this.searchCtrl,
+    required this.importUrlCtrl,
     required this.importRawTextCtrl,
     required this.importBatchSizeCtrl,
     required this.createChapterCtrl,
@@ -23,6 +24,7 @@ class _NovelWorkbenchControllers {
   }) {
     return _NovelWorkbenchControllers(
       searchCtrl: TextEditingController(),
+      importUrlCtrl: TextEditingController(),
       importRawTextCtrl: TextEditingController(),
       importBatchSizeCtrl: TextEditingController(text: '10'),
       createChapterCtrl: TextEditingController(
@@ -50,6 +52,7 @@ class _NovelWorkbenchControllers {
   }
 
   final TextEditingController searchCtrl;
+  final TextEditingController importUrlCtrl;
   final TextEditingController importRawTextCtrl;
   final TextEditingController importBatchSizeCtrl;
   final TextEditingController createChapterCtrl;
@@ -64,6 +67,7 @@ class _NovelWorkbenchControllers {
 
   void dispose() {
     searchCtrl.dispose();
+    importUrlCtrl.dispose();
     importRawTextCtrl.dispose();
     importBatchSizeCtrl.dispose();
     createChapterCtrl.dispose();

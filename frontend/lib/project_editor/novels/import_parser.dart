@@ -1,3 +1,5 @@
+import 'package:html/parser.dart' as html_parser;
+
 class ParsedNovelChapter {
   const ParsedNovelChapter({
     required this.chapterIndex,
@@ -10,16 +12,52 @@ class ParsedNovelChapter {
   final String chapterData;
 }
 
+class ExtractedCrawlerContent {
+  const ExtractedCrawlerContent({
+    required this.title,
+    required this.bodyText,
+  });
+
+  final String title;
+  final String bodyText;
+}
+
 final RegExp _chapterHeaderPattern = RegExp(
   r'^\s*(第[0-9零一二三四五六七八九十百千万两〇]+[章节回集部篇卷][^\n\r]*)\s*$',
   multiLine: true,
 );
 
+ExtractedCrawlerContent extractCrawlerContentFromHtml(
+  String rawHtml, {
+  String fallbackTitle = '抓取正文',
+}) {
+  final document = html_parser.parse(rawHtml);
+  document.querySelectorAll('script,style,noscript').forEach((node) {
+    node.remove();
+  });
+
+  final title = (document.querySelector('title')?.text ?? fallbackTitle).trim();
+  final bodyText = _normalizeExtractedText(document.body?.text ?? '');
+  return ExtractedCrawlerContent(
+    title: title.isEmpty ? fallbackTitle : title,
+    bodyText: bodyText,
+  );
+}
+
+String _normalizeExtractedText(String raw) {
+  return raw
+      .replaceAll('\r\n', '\n')
+      .replaceAll('\r', '\n')
+      .replaceAll(RegExp(r'\n{3,}'), '\n\n')
+      .replaceAll(RegExp(r'[ \t]{2,}'), ' ')
+      .trim();
+}
+
 List<ParsedNovelChapter> parseWholeBookNovelText(
   String raw, {
   String fallbackChapterPrefix = '导入章节',
 }) {
-  final normalized = raw.replaceAll('\r\n', '\n').trim();
+  final normalized = _normalizeExtractedText(raw);
   if (normalized.isEmpty) {
     return const <ParsedNovelChapter>[];
   }

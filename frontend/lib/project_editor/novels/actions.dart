@@ -7,6 +7,48 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     return parseWholeBookNovelText(raw);
   }
 
+  Future<void> _crawlNovelSourcePreview({
+    required TextEditingController importUrlCtrl,
+    required TextEditingController importRawTextCtrl,
+    required void Function(String infoLine) applyInfoLine,
+    required void Function(List<ParsedNovelChapter> rows, String message)
+    applyImportPreview,
+  }) async {
+    final url = importUrlCtrl.text.trim();
+    if (url.isEmpty) {
+      throw const FormatException('请先输入抓取 URL');
+    }
+
+    final uri = Uri.tryParse(url);
+    if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
+      throw const FormatException('抓取 URL 必须是合法的 http/https 地址');
+    }
+
+    final response = await http.get(
+      uri,
+      headers: const <String, String>{
+        'User-Agent': 'Toonflow/1.0 content-intake crawler',
+      },
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw FormatException('抓取失败，HTTP ${response.statusCode}');
+    }
+
+    final extracted = extractCrawlerContentFromHtml(
+      response.body,
+      fallbackTitle: uri.host,
+    );
+    importRawTextCtrl.text = extracted.bodyText;
+    final rows = _parseNovelImportPreview(extracted.bodyText);
+    applyImportPreview(
+      rows,
+      rows.isEmpty
+          ? '已抓取 ${extracted.title}，但没有抽出可导入正文。'
+          : '已抓取 ${extracted.title}，抽出 ${rows.length} 条可导入章节。',
+    );
+    applyInfoLine('client-side crawl 已完成：${extracted.title}');
+  }
+
   Future<void> _runNovelWorkbenchAction({
     required BuildContext ctx,
     required StateSetter setDialogState,
