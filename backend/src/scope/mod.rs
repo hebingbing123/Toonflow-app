@@ -58,7 +58,7 @@ impl ScopeError {
     }
 }
 
-/// 解析 `owner_user_id` 拥有的项目主键（**`app_project.id`**），按 **`app_project.numeric_id`**。
+/// 解析当前 workspace 成员可访问的项目主键（**`app_project.id`**），按 **`app_project.numeric_id`**。
 pub async fn owned_project_id_by_numeric(
     pool: &PgPool,
     user_id: Uuid,
@@ -71,8 +71,13 @@ pub async fn owned_project_id_by_numeric(
         r#"
         SELECT p.id
         FROM app_project p
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(user_id)
@@ -83,7 +88,7 @@ pub async fn owned_project_id_by_numeric(
     .ok_or(ScopeError::NotFound)
 }
 
-/// 解析 `owner_user_id` 在 `project_numeric_id` 下对 `script_numeric_id` 的剧本 scope。
+/// 解析当前 workspace 成员在 `project_numeric_id` 下对 `script_numeric_id` 的剧本 scope。
 pub async fn owned_script_scope(
     pool: &PgPool,
     user_id: Uuid,
@@ -95,8 +100,13 @@ pub async fn owned_script_scope(
         SELECT p.id AS project_id, s.id AS script_id
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
           AND s.numeric_id = $3
         "#,
     )
@@ -109,7 +119,7 @@ pub async fn owned_script_scope(
     .ok_or(ScopeError::NotFound)
 }
 
-/// 解析 `owner_user_id` 在 **`project_id`（`app_project.id`）** 下对 `script_numeric_id` 的剧本 scope。
+/// 解析当前 workspace 成员在 **`project_id`（`app_project.id`）** 下对 `script_numeric_id` 的剧本 scope。
 pub async fn owned_script_in_project(
     pool: &PgPool,
     user_id: Uuid,
@@ -124,8 +134,13 @@ pub async fn owned_script_in_project(
           s.id AS script_id
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.id = $2
+        WHERE p.id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
           AND s.numeric_id = $3
         "#,
     )
@@ -164,7 +179,7 @@ pub async fn owned_storyboard_in_script_scope(
     .ok_or(ScopeError::NotFound)
 }
 
-/// 解析 `owner_user_id` 在 **`project_id`** 下对 **`storyboard_numeric_id`** 的分镜行（`app_storyboard.id`）。
+/// 解析当前 workspace 成员在 **`project_id`** 下对 **`storyboard_numeric_id`** 的分镜行（`app_storyboard.id`）。
 pub async fn owned_storyboard_in_project(
     pool: &PgPool,
     user_id: Uuid,
@@ -177,8 +192,13 @@ pub async fn owned_storyboard_in_project(
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.id = $2
+        WHERE p.id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
           AND sb.numeric_id = $3
         "#,
     )
@@ -211,8 +231,13 @@ pub async fn resolve_owned_script_numeric_from_uuid_or_legacy_id(
                 SELECT s.numeric_id
                 FROM app_script s
                 INNER JOIN app_project p ON p.id = s.project_id
-                WHERE p.owner_user_id = $1
-                  AND p.id = $2
+                WHERE p.id = $2
+                  AND EXISTS (
+                    SELECT 1
+                    FROM app_workspace_member wm
+                    WHERE wm.workspace_id = p.workspace_id
+                      AND wm.user_id = $1
+                  )
                   AND s.id = $3
                 "#,
             )
@@ -236,8 +261,13 @@ pub async fn resolve_owned_script_numeric_from_uuid_or_legacy_id(
                 SELECT s.numeric_id
                 FROM app_script s
                 INNER JOIN app_project p ON p.id = s.project_id
-                WHERE p.owner_user_id = $1
-                  AND p.id = $2
+                WHERE p.id = $2
+                  AND EXISTS (
+                    SELECT 1
+                    FROM app_workspace_member wm
+                    WHERE wm.workspace_id = p.workspace_id
+                      AND wm.user_id = $1
+                  )
                   AND s.id = $3
                 "#,
             )
