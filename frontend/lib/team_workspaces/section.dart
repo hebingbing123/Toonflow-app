@@ -143,6 +143,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     bool loading = true;
     bool adding = false;
     bool inviting = false;
+    String? mutatingMemberUserId;
 
     Future<void> loadMembers(StateSetter setModalState) async {
       setModalState(() {
@@ -315,6 +316,78 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             contentPadding: EdgeInsets.zero,
                             title: Text(m.userId),
                             subtitle: Text(m.role),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                DropdownButton<String>(
+                                  value: m.role,
+                                  items: const <DropdownMenuItem<String>>[
+                                    DropdownMenuItem(
+                                      value: 'member',
+                                      child: Text('member'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'admin',
+                                      child: Text('admin'),
+                                    ),
+                                  ],
+                                  onChanged: mutatingMemberUserId != null
+                                      ? null
+                                      : (v) async {
+                                          if (v == null || v == m.role) {
+                                            return;
+                                          }
+                                          setModalState(() {
+                                            mutatingMemberUserId = m.userId;
+                                            error = null;
+                                          });
+                                          try {
+                                            await patchWorkspaceMemberV1(
+                                              token,
+                                              row.workspace.id,
+                                              m.userId,
+                                              body: PatchWorkspaceMemberBody(
+                                                role: v,
+                                              ),
+                                            );
+                                            await loadMembers(setModalState);
+                                          } catch (e) {
+                                            setModalState(() => error = e.toString());
+                                          } finally {
+                                            setModalState(
+                                              () => mutatingMemberUserId = null,
+                                            );
+                                          }
+                                        },
+                                ),
+                                IconButton(
+                                  tooltip: '移除成员',
+                                  onPressed: mutatingMemberUserId != null
+                                      ? null
+                                      : () async {
+                                          setModalState(() {
+                                            mutatingMemberUserId = m.userId;
+                                            error = null;
+                                          });
+                                          try {
+                                            await removeWorkspaceMemberV1(
+                                              token,
+                                              row.workspace.id,
+                                              m.userId,
+                                            );
+                                            await loadMembers(setModalState);
+                                          } catch (e) {
+                                            setModalState(() => error = e.toString());
+                                          } finally {
+                                            setModalState(
+                                              () => mutatingMemberUserId = null,
+                                            );
+                                          }
+                                        },
+                                  icon: const Icon(Icons.person_remove_outlined),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                     ],

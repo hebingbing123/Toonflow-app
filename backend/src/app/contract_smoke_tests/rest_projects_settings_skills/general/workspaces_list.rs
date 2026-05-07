@@ -72,3 +72,23 @@ async fn workspace_invites_accept_requires_database_without_pool() {
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
+
+#[tokio::test]
+async fn workspace_members_patch_requires_database_without_pool() {
+    let token = test_jwt(Uuid::nil());
+    let id = Uuid::nil();
+    let uri = format!("/api/v1/workspaces/{id}/members/{id}");
+    let (status, v) = patch_json_bearer(&uri, &token, r#"{"role":"admin"}"#).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn workspace_members_delete_requires_database_without_pool() {
+    let token = test_jwt(Uuid::nil());
+    let id = Uuid::nil();
+    let uri = format!("/api/v1/workspaces/{id}/members/{id}");
+    let (status, v) = delete_empty_bearer(&uri, &token).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}

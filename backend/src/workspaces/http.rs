@@ -62,6 +62,13 @@ pub struct AddWorkspaceMemberBody {
     pub role: String,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PatchWorkspaceMemberBody {
+    /// Allowed: **`admin`** or **`member`**. (`owner` requires dedicated transfer flow.)
+    pub role: String,
+}
+
 #[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
 pub struct WorkspaceMemberResponse {
     pub workspace_id: Uuid,
@@ -147,6 +154,10 @@ pub(crate) fn router() -> Router<AppState> {
             get(list_workspace_members).post(add_workspace_member),
         )
         .route(
+            "/api/v1/workspaces/{workspace_id}/members/{user_id}",
+            axum::routing::patch(patch_workspace_member).delete(remove_workspace_member),
+        )
+        .route(
             "/api/v1/workspaces/{workspace_id}/invites",
             post(create_workspace_invite),
         )
@@ -208,6 +219,21 @@ fn parse_invite_expires_hours(expires_in_hours: Option<i64>) -> Result<i64, ApiE
         ));
     }
     Ok(hours)
+}
+
+async fn count_workspace_owners(pool: &PgPool, workspace_id: Uuid) -> Result<i64, ApiError> {
+    let n: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM public.app_workspace_member
+        WHERE workspace_id = $1 AND role = 'owner'
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(n)
 }
 
 fn max_enterprise_workspaces_per_user() -> i64 {
@@ -706,6 +732,139 @@ pub(crate) async fn add_workspace_member(
 }
 
 #[utoipa::path(
+    patch,
+    path = "/api/v1/workspaces/{workspace_id}/members/{user_id}",
+    operation_id = "patchWorkspaceMemberV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID"),
+        ("user_id" = Uuid, Path, description = "Member user UUID")
+    ),
+    request_body(content = PatchWorkspaceMemberBody, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceMemberResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn patch_workspace_member(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((workspace_id, user_id)): Path<(Uuid, Uuid)>,
+    Json(body): Json<PatchWorkspaceMemberBody>,
+) -> Result<Json<WorkspaceMemberResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+    let role = normalize_member_role(&body.role)
+        .ok_or_else(|| ApiError::BadRequest("role must be admin or member".into()))?;
+
+    let current_role: Option<String> = sqlx::query_scalar(
+        "SELECT role FROM public.app_workspace_member WHERE workspace_id = $1 AND user_id = $2",
+    )
+    .bind(workspace_id)
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some(current_role) = current_role else {
+        return Err(ApiError::NotFound);
+    };
+    if current_role == "owner" {
+        let owner_count = count_workspace_owners(pool, workspace_id).await?;
+        if owner_count <= 1 {
+            return Err(ApiError::Conflict(
+                "cannot demote the last workspace owner".into(),
+            ));
+        }
+    }
+
+    let row: WorkspaceMemberResponse = sqlx::query_as(
+        r#"
+        UPDATE public.app_workspace_member
+        SET role = $3, updated_at = NOW()
+        WHERE workspace_id = $1 AND user_id = $2
+        RETURNING workspace_id, user_id, role, created_at, updated_at
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(user_id)
+    .bind(role)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(row))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/workspaces/{workspace_id}/members/{user_id}",
+    operation_id = "removeWorkspaceMemberV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID"),
+        ("user_id" = Uuid, Path, description = "Member user UUID")
+    ),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceMemberResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn remove_workspace_member(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((workspace_id, user_id)): Path<(Uuid, Uuid)>,
+) -> Result<Json<WorkspaceMemberResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+
+    let current_role: Option<String> = sqlx::query_scalar(
+        "SELECT role FROM public.app_workspace_member WHERE workspace_id = $1 AND user_id = $2",
+    )
+    .bind(workspace_id)
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some(current_role) = current_role else {
+        return Err(ApiError::NotFound);
+    };
+    if current_role == "owner" {
+        let owner_count = count_workspace_owners(pool, workspace_id).await?;
+        if owner_count <= 1 {
+            return Err(ApiError::Conflict(
+                "cannot remove the last workspace owner".into(),
+            ));
+        }
+    }
+
+    let row: WorkspaceMemberResponse = sqlx::query_as(
+        r#"
+        DELETE FROM public.app_workspace_member
+        WHERE workspace_id = $1 AND user_id = $2
+        RETURNING workspace_id, user_id, role, created_at, updated_at
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(user_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(row))
+}
+
+#[utoipa::path(
     post,
     path = "/api/v1/workspaces/{workspace_id}/invites",
     operation_id = "createWorkspaceInviteV1",
@@ -867,6 +1026,8 @@ pub(crate) async fn accept_workspace_invite(
         patch_workspace,
         list_workspace_members,
         add_workspace_member,
+        patch_workspace_member,
+        remove_workspace_member,
         create_workspace_invite,
         accept_workspace_invite
     ),
@@ -877,6 +1038,7 @@ pub(crate) async fn accept_workspace_invite(
         WorkspaceInviteResponse,
         CreateWorkspaceBody,
         AddWorkspaceMemberBody,
+        PatchWorkspaceMemberBody,
         CreateWorkspaceInviteBody,
         AcceptWorkspaceInviteBody,
         PatchWorkspaceBody,

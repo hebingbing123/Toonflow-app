@@ -192,6 +192,17 @@ class AddWorkspaceMemberBody {
   };
 }
 
+/// `PATCH /api/v1/workspaces/{workspace_id}/members/{user_id}`
+class PatchWorkspaceMemberBody {
+  const PatchWorkspaceMemberBody({required this.role});
+
+  final String role;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'role': role,
+  };
+}
+
 /// `POST /api/v1/workspaces/{workspace_id}/invites`
 class CreateWorkspaceInviteBody {
   const CreateWorkspaceInviteBody({
@@ -298,6 +309,48 @@ Future<WorkspaceMemberResponse> addWorkspaceMemberV1(
         },
         body: jsonEncode(body.toJson()),
       )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceMemberResponse.fromJson(map);
+}
+
+Future<WorkspaceMemberResponse> patchWorkspaceMemberV1(
+  String accessToken,
+  String workspaceId,
+  String userId, {
+  required PatchWorkspaceMemberBody body,
+}) async {
+  final uri =
+      Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/$userId');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceMemberResponse.fromJson(map);
+}
+
+Future<WorkspaceMemberResponse> removeWorkspaceMemberV1(
+  String accessToken,
+  String workspaceId,
+  String userId,
+) async {
+  final uri =
+      Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/$userId');
+  final res = await http
+      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
