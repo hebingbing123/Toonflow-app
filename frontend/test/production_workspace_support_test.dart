@@ -270,6 +270,35 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceRecipes asks to refine scene intent before reading storyboard table',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
+③ 叙事结构与节奏规划
+前段尽快起冲突，中段连续抬压，结尾留钩子。
+</scriptPlan>
+''',
+        },
+      );
+
+      expect(recipes.last.title, '补足分场景意图');
+      expect(recipes.last.flowKey, 'storyboardTable');
+      expect(recipes.last.subAgentTool, 'run_sub_agent_director_plan');
+      expect(recipes.last.domainTool, isNull);
+      expect(recipes.last.prompt, contains('分场景情绪推进'));
+      expect(recipes.last.detail, contains('先补这层'));
+    },
+  );
+
+  test(
     'extractProductionActionCandidateIds restores asset ids from sub-agent prompt scope',
     () {
       final ids = extractProductionActionCandidateIds(

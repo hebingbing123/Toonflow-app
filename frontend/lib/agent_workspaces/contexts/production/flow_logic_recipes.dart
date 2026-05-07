@@ -293,6 +293,9 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
   final assetScope = summarizeProductionAssetScope(assetArgs);
   final scriptWindow = summarizeProductionPlanningScriptWindow();
   final directorPlanArgs = buildProductionScriptPlanSubAgentArgs(data);
+  final needsStoryboardIntentRefinement =
+      _productionScriptPlanAdvanceReady(data) &&
+      !_productionScriptPlanStoryboardReady(data);
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核导演计划',
@@ -330,11 +333,22 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
           : '请在当前 scriptPlan 上继续收束导演计划，优先围绕$assetScope安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。',
     ),
     ProductionWorkspaceRecipe(
-      title: '先看分镜表落地',
-      detail: '如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。',
+      title: needsStoryboardIntentRefinement ? '补足分场景意图' : '先看分镜表落地',
+      detail: needsStoryboardIntentRefinement
+          ? '当前导演计划还缺少足够明确的分场景情绪/画面意图，先补这层再拆 storyboardTable，能减少后续反复返工。'
+          : '如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。',
       flowKey: 'storyboardTable',
-      domainTool: 'get_flowData',
-      domainArgs: buildProductionStoryboardTableReadArgs(),
+      domainTool: needsStoryboardIntentRefinement ? null : 'get_flowData',
+      domainArgs: needsStoryboardIntentRefinement
+          ? null
+          : buildProductionStoryboardTableReadArgs(),
+      subAgentTool: needsStoryboardIntentRefinement
+          ? 'run_sub_agent_director_plan'
+          : null,
+      subAgentArgs: needsStoryboardIntentRefinement ? directorPlanArgs : null,
+      prompt: needsStoryboardIntentRefinement
+          ? '请继续细化当前 scriptPlan，优先补足分场景情绪推进、画面意图与镜头落点，再进入 storyboardTable 拆分。'
+          : null,
     ),
   ];
 }
