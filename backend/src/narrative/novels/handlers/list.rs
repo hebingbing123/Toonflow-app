@@ -56,6 +56,22 @@ fn validate_intake_status(value: &str) -> Result<(), ApiError> {
     }
 }
 
+pub(super) fn normalize_intake_source(raw: &str) -> Result<String, ApiError> {
+    let normalized = match raw {
+        "manual" => "manual",
+        "whole_book_import" | "import" => "whole_book_import",
+        "crawler_client" => "crawler_client",
+        "crawler_server" => "crawler_server",
+        _ => {
+            return Err(ApiError::BadRequest(
+                "intake_source must be one of manual, whole_book_import, import, crawler_client, crawler_server"
+                    .into(),
+            ))
+        }
+    };
+    Ok(normalized.to_string())
+}
+
 async fn count_novels_filtered(
     pool: &PgPool,
     project_id: Uuid,
@@ -159,6 +175,12 @@ async fn list_novels_inner(
     if let Some(status) = intake_status_ref {
         validate_intake_status(status)?;
     }
+    let intake_source = if let Some(source) = intake_source_ref {
+        Some(normalize_intake_source(source)?)
+    } else {
+        None
+    };
+    let intake_source_ref = intake_source.as_deref();
 
     let limit_clamped = match query.limit {
         None => None,
@@ -242,4 +264,37 @@ pub(crate) async fn list_novels_for_project(
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
     list_novels_inner(pool, uid, project_id, query).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_intake_source;
+    use crate::error::ApiError;
+
+    #[test]
+    fn normalize_intake_source_accepts_known_values_and_alias() {
+        assert_eq!(
+            normalize_intake_source("whole_book_import").expect("normalize"),
+            "whole_book_import"
+        );
+        assert_eq!(
+            normalize_intake_source("import").expect("normalize alias"),
+            "whole_book_import"
+        );
+        assert_eq!(
+            normalize_intake_source("crawler_client").expect("normalize"),
+            "crawler_client"
+        );
+    }
+
+    #[test]
+    fn normalize_intake_source_rejects_unknown_value() {
+        let err = normalize_intake_source("foo").expect_err("expect bad request");
+        match err {
+            ApiError::BadRequest(msg) => {
+                assert!(msg.contains("intake_source must be one of"), "{msg}");
+            }
+            other => panic!("unexpected error: {other:?}"),
+        }
+    }
 }

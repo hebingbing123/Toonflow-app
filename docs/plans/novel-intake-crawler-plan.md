@@ -144,6 +144,7 @@
 > - 导入质量门接入导入动作：字数不足、平均章节过短、重复正文过高时阻断导入
 > - intake 状态影响后续链路：`draft` / `pending_review` / `rejected` 章节禁止直接触发 `generate-events`
 > - 后端事件生成新增兜底质量门：正文字数过短章节会被直接拦截，避免绕过导入页后进入高成本抽取
+> - intake 来源契约后端白名单化：统一收敛到 `manual / whole_book_import / crawler_client / crawler_server`（兼容 `import` 别名）
 
 ### 1. 多来源抓取策略
 

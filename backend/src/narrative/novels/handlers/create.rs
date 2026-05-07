@@ -15,7 +15,7 @@ use crate::state::AppState;
 use super::super::dto::{CreateNovelBody, NovelRow};
 use super::super::ADV_LOCK_NOVEL_NUMERIC;
 
-use super::list::trim_opt;
+use super::list::{normalize_intake_source, trim_opt};
 
 fn validate_intake_status(value: &str) -> Result<(), ApiError> {
     match value {
@@ -66,6 +66,11 @@ async fn create_novel_inner(
         validate_intake_status(status)?;
     }
 
+    let intake_source = if let Some(source) = intake_source {
+        Some(normalize_intake_source(&source)?)
+    } else {
+        None
+    };
     let metadata =
         build_novel_intake_metadata(intake_source, intake_source_url, intake_status, intake_note);
 

@@ -16,6 +16,7 @@ use crate::http_kit::json_patch::{
 use crate::state::AppState;
 
 use super::super::super::dto::{NovelRow, PatchNovelBody};
+use super::super::list::normalize_intake_source;
 
 fn validate_intake_status(value: &str) -> Result<(), ApiError> {
     match value {
@@ -162,6 +163,11 @@ async fn patch_novel_inner(
     let new_intake_source = match &intake_source_patch {
         FieldPatch::Absent => current.intake_source.clone(),
         FieldPatch::Set(v) => v.clone(),
+    };
+    let new_intake_source = if let Some(source) = new_intake_source {
+        Some(normalize_intake_source(&source)?)
+    } else {
+        None
     };
     let new_intake_source_url = match &intake_source_url_patch {
         FieldPatch::Absent => current.intake_source_url.clone(),
