@@ -105,43 +105,35 @@ fn normalize_url_candidate(base_url: &url::Url, raw: &str) -> Option<String> {
         return None;
     }
     let joined = base_url.join(trimmed).ok()?;
+    if !(joined.scheme() == "http" || joined.scheme() == "https") {
+        return None;
+    }
+    // Keep crawler behavior aligned with the Flutter client:
+    // only allow URLs from the same host.
+    let base_host = base_url.host_str()?;
+    let joined_host = joined.host_str()?;
+    if !joined_host.eq_ignore_ascii_case(base_host) {
+        return None;
+    }
     Some(joined.to_string())
 }
 
-fn extract_links(document: &Html, base_url: &url::Url, selector: &str, cap: usize) -> Vec<String> {
-    let Ok(sel) = Selector::parse(selector) else {
-        return Vec::new();
-    };
-    let mut out = Vec::new();
-    let mut seen = HashSet::<String>::new();
-    for node in document.select(&sel) {
-        let Some(href) = node.value().attr("href") else {
-            continue;
-        };
-        let Some(url) = normalize_url_candidate(base_url, href) else {
-            continue;
-        };
-        if seen.insert(url.clone()) {
-            out.push(url);
-            if out.len() >= cap {
-                break;
-            }
-        }
-    }
-    out
-}
-
-fn extract_next_page(document: &Html, base_url: &url::Url) -> Option<String> {
+fn discover_next_page_url(document: &Html, base_url: &url::Url) -> Option<String> {
     let Ok(a_sel) = Selector::parse("a[href]") else {
         return None;
     };
     for node in document.select(&a_sel) {
         let anchor_text = node.text().collect::<String>();
         let text = anchor_text.trim().to_lowercase();
-        if text.contains("下一页")
-            || text.contains("next")
-            || text.contains("下页")
-            || text.contains("继续")
+        let rel = node
+            .value()
+            .attr("rel")
+            .unwrap_or_default()
+            .to_lowercase()
+            .trim()
+            .to_string();
+
+        if rel == "next" || text.contains("下一页") || text.contains("下页") || text == "next"
         {
             if let Some(href) = node.value().attr("href") {
                 if let Some(url) = normalize_url_candidate(base_url, href) {
@@ -151,6 +143,57 @@ fn extract_next_page(document: &Html, base_url: &url::Url) -> Option<String> {
         }
     }
     None
+}
+
+fn discover_chapter_urls(document: &Html, base_url: &url::Url, cap: usize) -> Vec<String> {
+    // Keep it in sync with the Flutter client logic:
+    // - label-based chapters: 第X章/序章/尾声/番外
+    // - href-based chapters: contains "/chapter" "/read" "chapter="
+    let chapter_label_pattern =
+        Regex::new(r"(?:第[0-9零一二三四五六七八九十百千万两〇]+[章节回集部篇卷]|序章|尾声|番外)")
+            .expect("chapter label regex");
+
+    let Ok(a_sel) = Selector::parse("a[href]") else {
+        return Vec::new();
+    };
+
+    let mut discovered = HashSet::<String>::new();
+    let mut out = Vec::<String>::new();
+    for node in document.select(&a_sel) {
+        let anchor_text = node.text().collect::<String>();
+        let href = node
+            .value()
+            .attr("href")
+            .unwrap_or_default()
+            .trim()
+            .to_string();
+        if href.is_empty() {
+            continue;
+        }
+
+        let anchor_text_trimmed = anchor_text.trim();
+        let seems_chapter = chapter_label_pattern.is_match(anchor_text_trimmed);
+
+        let lower_href = href.to_lowercase();
+        let seems_chapter_href = lower_href.contains("/chapter")
+            || lower_href.contains("/read")
+            || lower_href.contains("chapter=");
+
+        if !seems_chapter && !seems_chapter_href {
+            continue;
+        }
+
+        if let Some(url) = normalize_url_candidate(base_url, &href) {
+            if discovered.insert(url.clone()) {
+                out.push(url);
+                if out.len() >= cap {
+                    break;
+                }
+            }
+        }
+    }
+
+    out
 }
 
 fn extract_crawler_content(
@@ -176,22 +219,8 @@ fn extract_crawler_content(
         .unwrap_or_default();
     let body_text = normalize_extracted_text(&body_raw);
 
-    let chapter_urls = {
-        let mut links = extract_links(&document, page_url, "article a[href]", MAX_TOC_PAGES);
-        if links.is_empty() {
-            links = extract_links(
-                &document,
-                page_url,
-                ".chapter a[href], .list a[href], .catalog a[href]",
-                MAX_TOC_PAGES,
-            );
-        }
-        if links.is_empty() {
-            links = extract_links(&document, page_url, "a[href]", MAX_TOC_PAGES);
-        }
-        links
-    };
-    let next_page_url = extract_next_page(&document, page_url);
+    let chapter_urls = discover_chapter_urls(&document, page_url, 80);
+    let next_page_url = discover_next_page_url(&document, page_url);
 
     ExtractedCrawlerContent {
         title,
