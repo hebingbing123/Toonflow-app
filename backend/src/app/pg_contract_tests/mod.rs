@@ -14,6 +14,7 @@ mod e2e_regression_suite;
 mod narrative_suite;
 mod ops_suite;
 mod production_suite;
+mod project_dashboard_surface_roundtrip;
 mod projects_create_stats_roundtrip;
 mod projects_numeric_crud_roundtrip;
 mod projects_partial_patch_roundtrip;
