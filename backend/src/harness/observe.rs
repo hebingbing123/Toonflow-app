@@ -76,9 +76,30 @@ pub fn memory_http(user_id: Uuid, numeric_project_id: i32, op: &'static str) {
     tracing::debug!(%user_id, numeric_project_id, %op, "harness.memory.http");
 }
 
-/// Worker claimed or finished a row in **`app_generation_job`** (best-effort tracing).
-pub fn generation_job(user_id: Uuid, job_id: Uuid, phase: &'static str) {
-    tracing::debug!(%user_id, %job_id, %phase, "harness.job");
+/// Worker claimed or finished a row in **`app_generation_job`**.
+///
+/// Structured for log pipelines: filter on **`event = generation_job_phase`** and join on **`job_id`**
+/// (same UUID as `app_generation_job.id`). Optional **`client_request_id`** comes from job
+/// **`payload.client_request_id`** or **`payload.request_id`** when enqueue paths set it.
+pub fn generation_job(
+    user_id: Uuid,
+    job_id: Uuid,
+    kind: &str,
+    phase: &'static str,
+    worker_id: &str,
+    client_request_id: Option<&str>,
+) {
+    let rid = client_request_id.filter(|s| !s.is_empty());
+    tracing::info!(
+        user_id = %user_id,
+        job_id = %job_id,
+        kind = %kind,
+        phase,
+        worker_id = %worker_id,
+        client_request_id = rid.unwrap_or(""),
+        event = "generation_job_phase",
+        "app_generation_job lifecycle (worker)"
+    );
 }
 
 /// WASM invocation timing wrapper.

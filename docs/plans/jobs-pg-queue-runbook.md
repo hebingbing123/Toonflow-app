@@ -112,11 +112,23 @@ LIMIT 50;
 
 ## 9. 日志中按 `job_id` 关联
 
-- Worker 在 claim/succeed/fail 路径调用 `observe::generation_job`；集中日志用 **`job_id`**（UUID）与 **`worker_id`** join。
-- HTTP 请求用 `X-Request-Id`；与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) **WP-F** trace 策略对齐时，在 span 中携带同一 `job_id`。
+- Worker 在 claim / succeed / fail / cancel 路径调用 **`observe::generation_job`**，输出 **`tracing::info!`** 结构化字段（与 **`event = job_queue_metrics`** 同级，便于同一索引过滤）：
+
+| 字段 | 说明 |
+|------|------|
+| `event` | 常量 **`generation_job_phase`** |
+| `job_id` | **`app_generation_job.id`**（UUID） |
+| `user_id` | **`owner_user_id`** |
+| `kind` | **`app_generation_job.kind`** |
+| `phase` | **`claimed`** / **`succeeded`** / **`failed`** / **`cancelled`** |
+| `worker_id` | 与 **`claimed_by`** 一致的 worker 标签（**`WORKER_ID`** 或 **`default`**） |
+| `client_request_id` | 可选；来自入队 **`payload.client_request_id`** 或 **`payload.request_id`**（非空才用于 join；HTTP 若将 **`X-Request-Id`** 写入 payload 则可与网关日志关联） |
+
+- HTTP 请求用 **`X-Request-Id`**；与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) **WP-F** trace 策略对齐时，在 span 中携带同一 **`job_id`**（或把 request id 写入上表 **`payload`** 键以便 join）。
 
 ---
 
 ## 10. 修订记录
 
 - 与 **`tasks-pg-queue-observability` Q1–Q2** 同步：扩展 `QueueStats`、结构化 `job_queue_metrics`、本 Runbook 首版。
+- **Q4**：§9 补充 **`generation_job_phase`** 字段表与 **`client_request_id`** join 说明。

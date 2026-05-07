@@ -39,6 +39,15 @@ mod voiceover;
 
 pub(crate) use common::{job_ok, JobCompletion, JobRunError};
 
+/// Optional idempotency / trace bridge: HTTP may copy **`X-Request-Id`** into enqueue **`payload`**.
+fn client_request_id_from_payload(payload: &serde_json::Value) -> Option<&str> {
+    payload
+        .get("client_request_id")
+        .or_else(|| payload.get("request_id"))
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+}
+
 fn worker_id_label() -> String {
     std::env::var("WORKER_ID")
         .ok()
@@ -131,7 +140,16 @@ async fn process_one_job(
 
     hydrate_job_row(&mut row);
 
-    observe::generation_job(row.owner_user_id, row.id, "claimed");
+    let job_kind = row.kind.clone();
+    let client_rid = client_request_id_from_payload(&row.payload);
+    observe::generation_job(
+        row.owner_user_id,
+        row.id,
+        job_kind.as_str(),
+        "claimed",
+        worker_id,
+        client_rid,
+    );
 
     let text = envelope_generation_job_updated(&row);
     state
@@ -161,7 +179,14 @@ async fn process_one_job(
             .await?;
 
             if let Some(mut final_row) = updated {
-                observe::generation_job(owner, id, "succeeded");
+                observe::generation_job(
+                    owner,
+                    id,
+                    final_row.kind.as_str(),
+                    "succeeded",
+                    worker_id,
+                    client_request_id_from_payload(&final_row.payload),
+                );
                 if let Err(e) =
                     usage::record_generation_job_succeeded(pool, owner, id, &final_row.kind).await
                 {
@@ -178,7 +203,14 @@ async fn process_one_job(
             // If None: row was cancelled; cancel_job already sent WS.
         }
         Err(JobRunError::Cancelled) => {
-            observe::generation_job(owner, id, "cancelled");
+            observe::generation_job(
+                owner,
+                id,
+                job_kind.as_str(),
+                "cancelled",
+                worker_id,
+                client_rid,
+            );
             // Status is already `cancelled`; client was notified by cancel endpoint.
         }
         Err(JobRunError::Failed(msg)) => {
@@ -196,7 +228,14 @@ async fn process_one_job(
             .await?;
 
             if let Some(mut final_row) = updated {
-                observe::generation_job(owner, id, "failed");
+                observe::generation_job(
+                    owner,
+                    id,
+                    final_row.kind.as_str(),
+                    "failed",
+                    worker_id,
+                    client_request_id_from_payload(&final_row.payload),
+                );
                 hydrate_job_row(&mut final_row);
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
@@ -221,7 +260,14 @@ async fn process_one_job(
             .await?;
 
             if let Some(mut final_row) = updated {
-                observe::generation_job(owner, id, "failed");
+                observe::generation_job(
+                    owner,
+                    id,
+                    final_row.kind.as_str(),
+                    "failed",
+                    worker_id,
+                    client_request_id_from_payload(&final_row.payload),
+                );
                 hydrate_job_row(&mut final_row);
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;

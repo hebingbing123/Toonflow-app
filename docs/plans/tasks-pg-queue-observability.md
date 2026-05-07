@@ -62,8 +62,8 @@
 
 **目标**：`generation.job.*` 与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F 一致时，job_id **已进入** `observe::generation_job`；本竖切核对 **日志字段可被日志管道 join**（字段名与 span 约定与 harness PR 一并合并）。
 
-- [ ] **Backend**：核对 `observe` 与 worker 路径字段名；若缺 `job_id`/`kind` 统一键名，小补 `tracing` span。
-- [ ] **Docs**：Runbook 中写一句：如何在集中日志里按 `job_id` 过滤。
+- [x] **Backend**：**`observe::generation_job`** 输出 **`event = generation_job_phase`** 的 **`info`** 结构化字段（**`job_id`**、**`user_id`**、**`kind`**、**`phase`**、**`worker_id`**、可选 **`client_request_id`**）；worker 全路径已传入 **`kind`** / **`worker_id`**。
+- [x] **Docs**：Runbook **§9** 已写 **`job_id`** / **`event`** 过滤与可选 **`client_request_id`** join。
 - [ ] **Flutter**：若 harness PR 已暴露 **用户可见** trace/job 关联（如质量工作台），须同步 UI；否则本节 **Backend+Docs 为主**，与 harness WP-F 同一 PR 门禁。
 
 **验收**：与 harness 观测 PR 同一门禁绿即可。
@@ -73,6 +73,6 @@
 ## 完成定义（DoD）
 
 - [x] Q1 + Q2 方案 A + Q3 **已完成**。
-- [ ] Q4：若 harness WP-F 已合并，则 **同一发布窗口** 内完成本清单字段核对；否则单独 PR 完成「job 日志可 join」最小核对，Runbook 注明待 WP-F 联调项。
+- [x] Q4：**Backend + Runbook** 已完成「job 日志可 join」最小核对（**`generation_job_phase`**）；待 **harness WP-F** 或产品面再补 span / Flutter 可见关联。
 - [x] [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) **WP-A0** 可标「Runbook / 扩展指标 / Gate 模板已落地」（Q4 仍可与 harness 联调）。
 - [x] `yarn refactor:check` 全绿（每批合并前执行）。
