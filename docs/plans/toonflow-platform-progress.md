@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`f983ccd4`
-- 当前最新完成竖切：`资产与生产竖切 applied feedback 增量`
+- 当前最新完成 commit：`fc55433e`
+- 当前最新完成竖切：`资产与生产竖切 refresh 文案细化增量`
 
 ## Phase 1 进度
 
@@ -194,6 +194,7 @@
 - production stage / recipe 卡片的动作按钮文案现在也跟随 reason code 变化：例如 `待扩读` 会显示“扩读分镜表”，`回补导演计划` 会显示“细化导演计划”，减少用户把泛化按钮文案再翻译一遍的成本
 - production 的“下一步建议”面板现在也会在卡片列表上方给一句总述：当首要建议是扩读分镜表或先细化导演计划时，用户无需逐卡扫描标题，就能先知道当前系统推荐的最低成本路径
 - production 在“应用建议 / 应用阶段”后的状态反馈现在也会同步解释下一步：例如应用 `补足分场景意图` 后会明确提示“下一步先细化导演计划”，应用 `待扩读` 阶段动作后会提示“下一步先扩读关键分镜表窗口”，避免确认提示仍然停留在泛化标题回显
+- production 对“建议刷新”类 stage 动作的按钮文案现在也按范围细化：会区分“刷新导演计划 / 回读受影响资产 / 回读局部分镜表 / 回读缺帧状态”，减少用户在局部回读场景里还要自己判断读取范围
 
 本轮定向验证：
 
@@ -214,6 +215,7 @@
 - `4d4e926a` — align stage/recipe action button copy with storyboardTable fallback reasons
 - `0bf2ab20` — add a diagnosis headline above recipes for the current cheapest production path
 - `f983ccd4` — align applied feedback copy with storyboardTable fallback reasons
+- `fc55433e` — specialize refresh-stage button labels by scope
 
 ### 6. 质量与发布最小闭环竖切
 
