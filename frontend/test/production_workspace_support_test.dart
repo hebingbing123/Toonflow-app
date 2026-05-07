@@ -2047,7 +2047,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.statusLabel, '已抽样');
+      expect(tableStage.statusLabel, '待扩读');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'rowStart': 1,
@@ -2061,6 +2061,34 @@ void main() {
           'associateAssetsIds',
         ],
       });
+      expect(tableStage.detail, contains('覆盖还不够'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages keeps storyboard table as sampled when coverage is advance-ready',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'table': 'storyboardTable',
+            'rowStart': 1,
+            'rowCount': 12,
+            'totalRows': 15,
+            'rows': <Map<String, dynamic>>[
+              <String, dynamic>{'id': '1', 'description': '首镜'},
+            ],
+          },
+        },
+      );
+
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(tableStage.statusLabel, '已抽样');
+      expect(tableStage.detail, contains('适合继续审核或修订'));
     },
   );
 

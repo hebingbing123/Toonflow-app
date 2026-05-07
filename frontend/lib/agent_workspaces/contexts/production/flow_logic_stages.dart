@@ -475,12 +475,15 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   if (data is Map<String, dynamic>) {
     final rowCount = _readInt(data['rowCount']);
     final totalRows = _readInt(data['totalRows']);
+    final advanceReady = _productionStoryboardTableAdvanceReady(data);
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: '已抽样',
+      statusLabel: advanceReady ? '已抽样' : '待扩读',
       detail:
-          '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。',
+          advanceReady
+              ? '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。'
+              : '已窗口读取 $rowCount/$totalRows 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardTableReadArgs(),
       subAgentTool: 'run_sub_agent_production_supervision',
