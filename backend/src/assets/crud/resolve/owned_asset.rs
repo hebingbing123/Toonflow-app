@@ -6,7 +6,6 @@ use crate::error::ApiError;
 
 pub(crate) async fn resolve_owned_asset_id_for_project(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<Uuid, ApiError> {
@@ -21,12 +20,10 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = $3
+          AND a.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
@@ -36,7 +33,6 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
 
 pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<(Uuid, Value), ApiError> {
@@ -51,12 +47,10 @@ pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = $3
+          AND a.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await

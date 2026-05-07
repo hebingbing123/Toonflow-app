@@ -19,7 +19,6 @@ use super::resolve::ensure_owned_project_pk;
 
 async fn list_corner_scape_assets_inner(
     pool: &sqlx::PgPool,
-    uid: Uuid,
     project_id: Uuid,
     body: CornerScapeBody,
 ) -> Result<Json<CornerScapeResponse>, ApiError> {
@@ -58,8 +57,6 @@ async fn list_corner_scape_assets_inner(
         WHERE p.id = "#,
     );
     qb.push_bind(project_id);
-    qb.push(" AND p.owner_user_id = ");
-    qb.push_bind(uid);
     qb.push(
         r#"
           AND (
@@ -128,5 +125,5 @@ pub(crate) async fn list_corner_scape_assets_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    list_corner_scape_assets_inner(pool, uid, project_id, body).await
+    list_corner_scape_assets_inner(pool, project_id, body).await
 }
