@@ -21,6 +21,10 @@
 - 当前最新完成竖切：`内容接入竖切（小说爬虫 client/server + 托管调度 + 观测闭环）`
 - **下一大型竖切**（未开工）：**团队 Workspace 完整功能** — 全任务 W1–W11 见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)（生命周期、邀请、权限、全站 API、Flutter、Harness、计费策略、RLS/安全、观测、发布文档）
 
+## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
+
+- **Q1**（ops-only）：worker 周期性结构化日志 `job_queue_metrics` — 已实现（`JOB_QUEUE_METRICS_INTERVAL_SECS`，默认 60，0=关闭）；见 `backend/src/jobs/worker/mod.rs` 与 `backend/README.md`。
+
 ## Phase 1 进度
 
 ### 1. Workspace 基础竖切

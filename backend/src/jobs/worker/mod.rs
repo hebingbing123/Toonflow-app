@@ -18,6 +18,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::harness::observe;
+use crate::jobs::queue::{PgQueue, Queue};
 use crate::metering::usage;
 use crate::state::AppState;
 
@@ -46,6 +47,35 @@ fn worker_id_label() -> String {
         .unwrap_or_else(|| "default".to_string())
 }
 
+/// Seconds between structured `job_queue_metrics` logs (`0` = disabled). Default **60**.
+fn queue_metrics_interval_secs() -> u64 {
+    std::env::var("JOB_QUEUE_METRICS_INTERVAL_SECS")
+        .ok()
+        .and_then(|s| s.trim().parse::<u64>().ok())
+        .unwrap_or(60)
+}
+
+async fn log_queue_metrics(pool: &PgPool, worker_id: &str) {
+    let queue = PgQueue::new(pool.clone());
+    match queue.stats().await {
+        Ok(stats) => {
+            tracing::info!(
+                worker_id = %worker_id,
+                pending = stats.pending,
+                running = stats.running,
+                dead = stats.dead,
+                event = "job_queue_metrics",
+                "PG job queue depth"
+            );
+        }
+        Err(e) => tracing::warn!(
+            error = %e,
+            worker_id = %worker_id,
+            "job queue metrics query failed"
+        ),
+    }
+}
+
 pub async fn run(state: AppState) {
     let Some(pool) = state.pool.clone() else {
         tracing::info!("job worker: DATABASE_URL unset; worker not started");
@@ -53,10 +83,33 @@ pub async fn run(state: AppState) {
     };
 
     let wid = worker_id_label();
+    let metrics_secs = queue_metrics_interval_secs();
+    if metrics_secs == 0 {
+        tracing::info!(worker_id = %wid, "job worker: queue metrics logging disabled (JOB_QUEUE_METRICS_INTERVAL_SECS=0)");
+    } else {
+        tracing::info!(
+            worker_id = %wid,
+            interval_secs = metrics_secs,
+            "job worker: queue metrics interval (JOB_QUEUE_METRICS_INTERVAL_SECS)"
+        );
+    }
+
     tracing::info!(worker_id = %wid, "job worker: started (poll interval 500ms)");
     let mut interval = tokio::time::interval(Duration::from_millis(500));
+    let metrics_interval = if metrics_secs > 0 {
+        Some(Duration::from_secs(metrics_secs))
+    } else {
+        None
+    };
+    let mut last_metrics = std::time::Instant::now();
     loop {
         interval.tick().await;
+        if let Some(period) = metrics_interval {
+            if last_metrics.elapsed() >= period {
+                last_metrics = std::time::Instant::now();
+                log_queue_metrics(&pool, &wid).await;
+            }
+        }
         if let Err(e) = process_one_job(&state, &pool, &wid).await {
             tracing::warn!(error = %e, "job worker tick failed");
         }

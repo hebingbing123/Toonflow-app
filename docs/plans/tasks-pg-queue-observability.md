@@ -26,9 +26,9 @@
 
 **目标**：进程内周期性输出 **pending / running / dead**（调用现有 `stats()`），便于日志聚合与告警。
 
-- [ ] **Backend**：在 worker 或独立轻量任务中增加 **可配置间隔**（如 `JOB_QUEUE_METRICS_INTERVAL_SECS`，默认 60；0=关闭），避免每 500ms tick 打 DB。
-- [ ] **Backend**：使用 `tracing::info!`（结构化字段：`pending`, `running`, `dead`, `worker_id`）与现有 `worker_id_label()` 一致。
-- [ ] **Docs**：环境变量说明写入下方 Runbook 或 `backend/README.md` 小节。
+- [x] **Backend**：在 worker 中增加 **可配置间隔** `JOB_QUEUE_METRICS_INTERVAL_SECS`（默认 **60**；**0**=关闭），与 500ms 抢单 tick 解耦。
+- [x] **Backend**：使用 `tracing::info!`（结构化字段：`pending`, `running`, `dead`, `worker_id`, `event=job_queue_metrics`）。
+- [x] **Docs**：`backend/README.md` + `backend/.env.example` 已说明。
 
 **验收**：本地起 worker + DB，日志中可见间隔性指标；无 DB 时行为与现 worker 一致（不 panic）。**无 Flutter 交付物**（本节 ops-only）。
 
