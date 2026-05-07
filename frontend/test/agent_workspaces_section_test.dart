@@ -2279,6 +2279,7 @@ void main() {
     );
 
     expect(find.text('执行阶段'), findsOneWidget);
+    expect(find.textContaining('当前卡点：导演计划 · 待读取'), findsOneWidget);
     expect(find.text('待规划'), findsOneWidget);
     expect(find.text('资产准备'), findsOneWidget);
     expect(find.text('执行提示'), findsWidgets);

@@ -44,11 +44,19 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (stages.isEmpty) return const SizedBox.shrink();
+    final blockerSummary = summarizeProductionPrimaryBlocker(stages);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
         Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
+        if (blockerSummary.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 6),
+          Text(
+            blockerSummary,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
         const SizedBox(height: 6),
         ...stages.map(
           (ProductionWorkspaceStage stage) => Card(

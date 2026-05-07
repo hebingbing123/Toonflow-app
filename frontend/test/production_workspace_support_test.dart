@@ -2272,6 +2272,28 @@ void main() {
     );
   });
 
+  test('summarizeProductionPrimaryBlocker picks the first unresolved stage', () {
+    final summary = summarizeProductionPrimaryBlocker(
+      const <ProductionWorkspaceStage>[
+        ProductionWorkspaceStage(
+          title: '导演计划',
+          flowKey: 'scriptPlan',
+          statusLabel: '已完成',
+          detail: '导演计划可继续沿用。',
+        ),
+        ProductionWorkspaceStage(
+          title: '资产准备',
+          flowKey: 'assets',
+          statusLabel: '需补图',
+          detail: '资产 #12, 21 仍缺图，主资产 1/2 已就绪，衍生缺口 2 项。',
+        ),
+      ],
+    );
+
+    expect(summary, contains('当前卡点：资产准备 · 需补图'));
+    expect(summary, contains('资产 #12, 21 仍缺图'));
+  });
+
   test(
     'summarizeProductionFlowValue surfaces storyboard table coverage digest',
     () {

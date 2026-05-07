@@ -316,6 +316,20 @@ String summarizeProductionStoryboardTableCoverage({
   return parts.join('，');
 }
 
+String summarizeProductionPrimaryBlocker(List<ProductionWorkspaceStage> stages) {
+  if (stages.isEmpty) return '';
+  const resolvedStatuses = <String>{'已齐备', '已完成', '已抽样'};
+  final blocker = stages.firstWhere(
+    (stage) => !resolvedStatuses.contains(stage.statusLabel.trim()),
+    orElse: () => stages.last,
+  );
+  final normalizedDetail = blocker.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
+  final clippedDetail = normalizedDetail.length <= 72
+      ? normalizedDetail
+      : '${normalizedDetail.substring(0, 72)}...';
+  return '当前卡点：${blocker.title} · ${blocker.statusLabel}；$clippedDetail';
+}
+
 String buildProductionScriptPlanExecutionHint(
   Object? flowData, {
   int maxSections = 2,
