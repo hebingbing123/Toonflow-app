@@ -11,8 +11,15 @@ use super::super::{
 };
 
 #[derive(Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum MemoryCostOverviewScope {
+    User,
+}
+
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct MemoryCostOverview {
+    pub(crate) scope: MemoryCostOverviewScope,
     pub(crate) project_id: i32,
     pub(crate) automation_mode: String,
     pub(crate) style_bible_count: i64,
@@ -173,6 +180,7 @@ pub(crate) async fn get_memory_cost_overview(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(MemoryCostOverview {
+        scope: MemoryCostOverviewScope::User,
         project_id: numeric_project_id,
         automation_mode: policy.mode.as_str().to_string(),
         style_bible_count,

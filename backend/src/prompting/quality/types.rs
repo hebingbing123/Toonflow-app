@@ -111,6 +111,7 @@ pub struct ListQualityReviewsQuery {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityStatsResponse {
+    pub scope: String,
     pub target_type: String,
     pub total_reviews: i64,
     pub passed_count: i64,

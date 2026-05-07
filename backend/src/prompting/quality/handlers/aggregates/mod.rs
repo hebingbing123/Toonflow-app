@@ -39,6 +39,7 @@ pub(crate) async fn get_stats(
     let stats = sqlx::query_as::<_, QualityStatsResponse>(
         r#"
         SELECT
+            'user'::text as scope,
             target_type,
             COUNT(*) as total_reviews,
             COUNT(*) FILTER (WHERE passed = true) as passed_count,

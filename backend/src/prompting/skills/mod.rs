@@ -54,7 +54,14 @@ pub struct SkillContentResponse {
 
 /// Aggregate over `*.md` under `data/skills` (same walk cap as [`list_skills`]).
 #[derive(Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SkillsSummaryScope {
+    User,
+}
+
+#[derive(Serialize)]
 pub struct SkillsSummaryResponse {
+    pub scope: SkillsSummaryScope,
     pub markdown_file_count: u64,
     pub total_bytes: u64,
 }
@@ -112,6 +119,7 @@ fn scan_skill_markdown_aggregate() -> Result<SkillsSummaryResponse, ApiError> {
         }
     }
     Ok(SkillsSummaryResponse {
+        scope: SkillsSummaryScope::User,
         markdown_file_count: n as u64,
         total_bytes: total,
     })
