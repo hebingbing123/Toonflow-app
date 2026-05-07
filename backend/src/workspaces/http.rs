@@ -158,6 +158,10 @@ pub(crate) fn router() -> Router<AppState> {
             axum::routing::patch(patch_workspace_member).delete(remove_workspace_member),
         )
         .route(
+            "/api/v1/workspaces/{workspace_id}/members/me",
+            axum::routing::delete(leave_workspace),
+        )
+        .route(
             "/api/v1/workspaces/{workspace_id}/invites",
             post(create_workspace_invite),
         )
@@ -865,6 +869,75 @@ pub(crate) async fn remove_workspace_member(
 }
 
 #[utoipa::path(
+    delete,
+    path = "/api/v1/workspaces/{workspace_id}/members/me",
+    operation_id = "leaveWorkspaceV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID")
+    ),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceMemberResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn leave_workspace(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+) -> Result<Json<WorkspaceMemberResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let role = require_workspace_member_role(pool, uid, workspace_id).await?;
+
+    let ws_type: Option<String> =
+        sqlx::query_scalar("SELECT workspace_type::text FROM public.app_workspace WHERE id = $1")
+            .bind(workspace_id)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some(ws_type) = ws_type else {
+        return Err(ApiError::NotFound);
+    };
+    if ws_type == "personal" {
+        return Err(ApiError::BadRequest(
+            "cannot leave personal workspace".into(),
+        ));
+    }
+
+    if role == "owner" {
+        let owner_count = count_workspace_owners(pool, workspace_id).await?;
+        if owner_count <= 1 {
+            return Err(ApiError::Conflict(
+                "cannot leave workspace as the last owner".into(),
+            ));
+        }
+    }
+
+    let row: WorkspaceMemberResponse = sqlx::query_as(
+        r#"
+        DELETE FROM public.app_workspace_member
+        WHERE workspace_id = $1 AND user_id = $2
+        RETURNING workspace_id, user_id, role, created_at, updated_at
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    reset_current_workspace_if_matches(pool, uid, workspace_id).await?;
+    Ok(Json(row))
+}
+
+#[utoipa::path(
     post,
     path = "/api/v1/workspaces/{workspace_id}/invites",
     operation_id = "createWorkspaceInviteV1",
@@ -1028,6 +1101,7 @@ pub(crate) async fn accept_workspace_invite(
         add_workspace_member,
         patch_workspace_member,
         remove_workspace_member,
+        leave_workspace,
         create_workspace_invite,
         accept_workspace_invite
     ),

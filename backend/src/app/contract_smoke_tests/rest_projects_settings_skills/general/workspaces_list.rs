@@ -92,3 +92,13 @@ async fn workspace_members_delete_requires_database_without_pool() {
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
+
+#[tokio::test]
+async fn workspace_members_leave_requires_database_without_pool() {
+    let token = test_jwt(Uuid::nil());
+    let id = Uuid::nil();
+    let uri = format!("/api/v1/workspaces/{id}/members/me");
+    let (status, v) = delete_empty_bearer(&uri, &token).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}

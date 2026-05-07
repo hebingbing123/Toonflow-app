@@ -144,6 +144,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     bool adding = false;
     bool inviting = false;
     String? mutatingMemberUserId;
+    bool leaving = false;
 
     Future<void> loadMembers(StateSetter setModalState) async {
       setModalState(() {
@@ -395,6 +396,35 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 ),
               ),
               actions: <Widget>[
+                TextButton(
+                  onPressed: leaving
+                      ? null
+                      : () async {
+                          final navigator = Navigator.of(dialogContext);
+                          final messenger = ScaffoldMessenger.of(context);
+                          setModalState(() {
+                            leaving = true;
+                            error = null;
+                          });
+                          try {
+                            await leaveWorkspaceV1(token, row.workspace.id);
+                            if (!mounted) {
+                              return;
+                            }
+                            navigator.pop();
+                            messenger.showSnackBar(
+                              const SnackBar(content: Text('已退出该空间')),
+                            );
+                            await _load();
+                          } catch (e) {
+                            setModalState(() {
+                              error = e.toString();
+                              leaving = false;
+                            });
+                          }
+                        },
+                  child: Text(leaving ? '退出中…' : '退出该空间'),
+                ),
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
                   child: const Text('关闭'),

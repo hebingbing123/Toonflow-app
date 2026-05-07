@@ -359,6 +359,21 @@ Future<WorkspaceMemberResponse> removeWorkspaceMemberV1(
   return WorkspaceMemberResponse.fromJson(map);
 }
 
+Future<WorkspaceMemberResponse> leaveWorkspaceV1(
+  String accessToken,
+  String workspaceId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/me');
+  final res = await http
+      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceMemberResponse.fromJson(map);
+}
+
 Future<WorkspaceInviteResponse> createWorkspaceInviteV1(
   String accessToken,
   String workspaceId,
