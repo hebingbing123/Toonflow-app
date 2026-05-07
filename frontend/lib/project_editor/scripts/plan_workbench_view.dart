@@ -9,6 +9,7 @@ class ProjectScriptPlanWorkbenchViewModel {
     required this.storySkeletonCtrl,
     required this.adaptationStrategyCtrl,
     required this.planData,
+    required this.eventSummaryLine,
   });
 
   final bool localBusy;
@@ -16,17 +17,22 @@ class ProjectScriptPlanWorkbenchViewModel {
   final TextEditingController storySkeletonCtrl;
   final TextEditingController adaptationStrategyCtrl;
   final ScriptAgentPlanData? planData;
+  final String eventSummaryLine;
 }
 
 class ProjectScriptPlanWorkbenchViewCallbacks {
   const ProjectScriptPlanWorkbenchViewCallbacks({
     required this.onReload,
     required this.onSave,
+    required this.onFillStorySkeletonSeed,
+    required this.onFillAdaptationStrategySeed,
     required this.onClose,
   });
 
   final VoidCallback? onReload;
   final VoidCallback? onSave;
+  final VoidCallback? onFillStorySkeletonSeed;
+  final VoidCallback? onFillAdaptationStrategySeed;
   final VoidCallback? onClose;
 }
 
@@ -63,6 +69,32 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+              const SizedBox(height: 8),
+              Text(
+                model.eventSummaryLine,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton(
+                    onPressed: model.localBusy
+                        ? null
+                        : callbacks.onFillStorySkeletonSeed,
+                    child: const Text('用事件填充骨架草稿'),
+                  ),
+                  OutlinedButton(
+                    onPressed: model.localBusy
+                        ? null
+                        : callbacks.onFillAdaptationStrategySeed,
+                    child: const Text('用事件填充策略草稿'),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: model.storySkeletonCtrl,

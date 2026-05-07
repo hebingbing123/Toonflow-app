@@ -20,6 +20,7 @@ void main() {
             infoLine: '已载入 plan 12',
             storySkeletonCtrl: storySkeletonCtrl,
             adaptationStrategyCtrl: adaptationStrategyCtrl,
+            eventSummaryLine: '当前 3 条事件，覆盖 5/6 条章节',
             planData: const ScriptAgentPlanData(
               planId: 12,
               storySkeleton: '三幕结构',
@@ -32,6 +33,8 @@ void main() {
           callbacks: const ProjectScriptPlanWorkbenchViewCallbacks(
             onReload: null,
             onSave: null,
+            onFillStorySkeletonSeed: null,
+            onFillAdaptationStrategySeed: null,
             onClose: null,
           ),
         ),
@@ -42,8 +45,11 @@ void main() {
     expect(find.text('Story Skeleton'), findsOneWidget);
     expect(find.text('Adaptation Strategy'), findsOneWidget);
     expect(find.textContaining('planId 12'), findsOneWidget);
+    expect(find.textContaining('覆盖 5/6 条章节'), findsOneWidget);
     expect(find.widgetWithText(TextField, '三幕结构'), findsOneWidget);
     expect(find.widgetWithText(TextField, '角色先压后扬'), findsOneWidget);
+    expect(find.text('用事件填充骨架草稿'), findsOneWidget);
+    expect(find.text('用事件填充策略草稿'), findsOneWidget);
     expect(find.text('刷新计划'), findsOneWidget);
     expect(find.text('保存计划'), findsOneWidget);
   });

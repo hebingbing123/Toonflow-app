@@ -24,6 +24,7 @@ import 'project_editor/novels/workbench_launcher.dart';
 import 'project_editor/novels/events/workbench_launcher.dart';
 import 'project_editor/scripts/section_builder.dart';
 import 'project_editor/scripts/plan_workbench_view.dart';
+import 'project_editor/scripts/plan_workbench_support.dart';
 import 'project_editor/scripts/workbench/dialog_launcher.dart';
 import 'script_editor/edit_image/workbench_view.dart';
 import 'script_editor/workbench_view.dart';

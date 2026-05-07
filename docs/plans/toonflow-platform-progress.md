@@ -133,10 +133,12 @@
 - 前端可读取并编辑 `storySkeleton` / `adaptationStrategy`
 - 前端兼容 `script-agent/get-plan-data` 当前两种返回结构，避免首次读取和已有计划读取形状不一致
 - 保存走既有 `script-agent/set-plan-data` 契约，项目内可直接维护上游结构页
+- 骨架工作台联动当前小说章节 / 事件数据，展示事件覆盖摘要
+- 可用现有事件和章节生成“故事骨架草稿 / 改编策略草稿”，先用确定性模板压缩后续 AI 改写输入
 
 本轮定向验证：
 
-- `flutter test test/script_agent_plan_data_test.dart test/project_script_plan_workbench_view_test.dart`
+- `flutter test test/script_agent_plan_data_test.dart test/project_script_plan_workbench_view_test.dart test/project_script_plan_workbench_support_test.dart`
 - 触达文件 `flutter analyze` 通过
 
 ### 5. 资产与生产竖切
