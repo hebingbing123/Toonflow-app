@@ -7,6 +7,35 @@ import '../../config.dart';
 import '../core.dart';
 import 'publish_models.dart';
 
+/// `GET …/publish/overview` — aggregated publish slice. See `getPublishOverviewV1`.
+Future<PublishOverviewResponse> fetchPublishOverview(
+  String accessToken,
+  String projectId, {
+  String? draftId,
+  int auditLimit = 30,
+}) async {
+  final qp = <String, String>{};
+  if (draftId != null && draftId.trim().isNotEmpty) {
+    qp['draft_id'] = draftId.trim();
+  }
+  qp['audit_limit'] = '$auditLimit';
+  final base = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/publish/overview',
+  );
+  final uri = qp.isEmpty ? base : base.replace(queryParameters: qp);
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PublishOverviewResponse.fromJson(map);
+}
+
 
 /// `GET …/publish/platform-matrix`
 Future<PublishPlatformMatrixResponse> fetchPublishPlatformMatrix(

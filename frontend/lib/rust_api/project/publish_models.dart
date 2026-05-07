@@ -57,6 +57,53 @@ class PublishPlatformCapabilityRow {
   }
 }
 
+class PublishOverviewResponse {
+  const PublishOverviewResponse({
+    required this.matrix,
+    required this.drafts,
+    this.prepareCheck,
+    required this.jobs,
+    required this.performanceAlerts,
+    required this.audit,
+  });
+
+  final PublishPlatformMatrixResponse matrix;
+  final List<PublishDraftRow> drafts;
+  final PublishPrepareCheckResponse? prepareCheck;
+  final List<PublishJobRow> jobs;
+  final List<PublishPerformanceAlertRow> performanceAlerts;
+  final List<PublishAttemptAuditRow> audit;
+
+  factory PublishOverviewResponse.fromJson(Map<String, dynamic> json) {
+    final rawDrafts = json['drafts'] as List<dynamic>? ?? const <dynamic>[];
+    final rawJobs = json['jobs'] as List<dynamic>? ?? const <dynamic>[];
+    final rawPerf = json['performance_alerts'] as List<dynamic>? ?? const <dynamic>[];
+    final rawAudit = json['audit'] as List<dynamic>? ?? const <dynamic>[];
+    return PublishOverviewResponse(
+      matrix: PublishPlatformMatrixResponse.fromJson(
+        (json['matrix'] as Map<String, dynamic>?) ?? const <String, dynamic>{},
+      ),
+      drafts: rawDrafts
+          .map((e) => PublishDraftRow.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+      prepareCheck: json['prepare_check'] == null
+          ? null
+          : PublishPrepareCheckResponse.fromJson(
+              json['prepare_check'] as Map<String, dynamic>,
+            ),
+      jobs: rawJobs
+          .map((e) => PublishJobRow.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+      performanceAlerts: rawPerf
+          .map((e) => PublishPerformanceAlertRow.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+      audit: rawAudit
+          .map((e) => PublishAttemptAuditRow.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
+    );
+  }
+}
+
 class PublishDraftRow {
   const PublishDraftRow({
     required this.id,

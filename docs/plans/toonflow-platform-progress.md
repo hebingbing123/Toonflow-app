@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`c61c7f2f`
-- 当前最新完成竖切：`资产与生产竖切 refresh detail 对齐增量`
+- 当前最新完成 commit：`c9557011`
+- 当前最新完成竖切：`内容接入竖切（小说爬虫 client/server + 托管调度 + 观测闭环）`
 
 ## Phase 1 进度
 
@@ -86,13 +86,13 @@
 
 ### 3. 内容接入竖切（主路径）
 
-状态：`in_progress`
+状态：`completed`
 
 专项计划：
 
 - [novel-intake-crawler-plan.md](/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/novel-intake-crawler-plan.md)
 
-当前增量：
+当前增量（含小说爬虫四阶段收口）：
 
 - 章节工作台新增“整本导入”入口
 - 前端支持整本正文本地预解析（按章节标题自动切章）
@@ -109,16 +109,35 @@
 - 整本导入预解析结果支持逐条修正：改标题、改正文、删除误切章节、补充漏切章节
 - 导入前会自动重排章节序号，并拦截空正文章节，避免错误批量入库
 - 整本导入支持显式指定导入后的 `intake_status` 与共享 `intake_note`，方便先入 `pending_review` 再批量准入
+- 新增 server 侧小说爬虫：
+  - `POST /api/v1/projects/{project_id}/novels/crawl-preview`（托管预览，单本自适应 TOC/分页/单页）
+  - `POST /api/v1/projects/{project_id}/novels/crawl-import`（托管导入，server 端抓取+切章+质量门+落库）
+  - `POST /api/v1/projects/{project_id}/novels/crawl-import-batch`（批量托管导入，多 URL 结果+汇总）
+- novels 工作台支持“抓取执行端”切换：以 `client` 为主，`server` 用于托管预览 + 托管导入（增值）
+- novels 工作台新增：
+  - “托管导入（增值）”单 URL 按钮（尊重原有前端预解析+编辑主路径）
+  - “批量托管导入（增值）”多 URL 按钮
+  - “托管抓取计划”创建（延迟+重复间隔）与“查看托管计划”入口
+  - “刷新托管统计”入口：展示按 intake source/status 的章节分布、最近 server 导入样本、托管 crawl jobs 状态
+- server 托管导入写回 `intake_note` 时附带抓取审计摘要（模式/页数/候选章节链接数/正文字数）
+- novel crawl 质量门后移到后端共享实现：整体字数、章节均值、重复率等不达标会被拦截
+- 托管调度基于现有 `app_generation_job`：
+  - worker 仅在 `run_at_ms` 到点时 claim 对应 `novel.crawl.import_batch` 任务
+  - 支持 `repeat_interval_ms` 自动续约下一次抓取计划
+  - 调度任务可在任务中心统一观察、取消、重试
+- 新增 `GET /api/v1/projects/{project_id}/novels/crawl-observability`：
+  - 返回本项目章节总数、按 `intake_source`/`intake_status` 聚合计数
+  - 最近 `crawler_server` 导入样本（含 `intake_note` 审计）
+  - 本项目 `novel.crawl.import_batch` jobs 的状态分布
 
 本轮定向验证：
 
 - `flutter test test/novel_import_parser_test.dart`
 - `cargo test narrative::novels --lib`
 - `flutter test test/novel_workbench_support_test.dart`
-- 触达文件 `flutter analyze` 通过
-- 本轮额外确认：`yarn refactor:check` 已全绿；后续默认保留到整批任务完成后再统一执行
+- `yarn refactor:check`（含 OpenAPI drift / Rust clippy / Flutter analyze & test）已全绿
 
-已提交：
+已提交（按时间序约略）：
 
 - `76232801` — add whole-book intake preview + batch import on top of the existing chapter API
 - `c986cabf` — add crawler extraction regression coverage on the shared import path
@@ -126,6 +145,10 @@
 - `91170746` — unify intake source/admission metadata on the shared novel rail
 - `2cb8fd5e` — add intake filtering and batch admission actions on the shared workbench
 - `2aa14b75` — add editable import correction plus explicit import admission targeting
+- `ffb8c272` — add hosted batch novel crawl import（托管批量导入 API + 前端入口）
+- `bed5a42c` — add scheduled hosted novel crawl jobs（基于 jobs/worker 的定时与重复托管抓取）
+- `18c1d524` — add crawl observability endpoints（来源/状态/job 级统计与前端展示）
+- `c9557011` — harden scheduled novel crawl jobs（run_at_ms 防御、schedule 幂等键与稳定 error_code）
 
 ### 4. 改写与上游结构竖切
 
@@ -221,7 +244,16 @@
 
 ### 6. 质量与发布最小闭环竖切
 
-状态：`pending`
+状态：`completed`
+
+已完成：
+
+- 项目编辑器对话框新增“发布”入口：可直接跳转到「短剧空间 → 发布」工作台，并自动同步项目上下文
+- 轻量发布总览读取（`GET …/publish/overview`）可在项目对话框内快速确认 drafts/jobs 是否存在
+
+本轮定向验证：
+
+- `yarn refactor:check` 全绿（backend fmt/clippy/test + frontend analyze/test + OpenAPI drift）
 
 ## 当前阻塞与注意事项
 
