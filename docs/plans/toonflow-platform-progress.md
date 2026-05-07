@@ -19,7 +19,7 @@
 - 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
 - 当前最新完成竖切：团队 Workspace **W1.1–W1.7** — 创建/列表（含 **`include_archived`**）/详情/PATCH（改名、**归档/恢复**）、**active enterprise 配额**（env）、**current_workspace** 归档回落、Flutter **「团队工作区」**（含归档确认）、`pg_contract` + smoke；详见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) Phase W1
 - **下一大型竖切**（进行中）：**团队 Workspace 完整功能** — **Phase W2、W3 已收口**；**W4.1–W4.3 已落地**，**W4.4 进行中**（已抽 project workspace-membership helper 并接入 home/stats/style-config/overview/assets-overview/production-overview/short-video-assembly/short-video-export-check/short-video-readiness；资产域 `ensure_owned_project_pk` 与 `scope/mod.rs` script/storyboard/project 解析 helper 已切为 workspace 成员语义，小说 `project_id` CRUD + 小说事件 `project_id` 列表/删除/批删/生成查询已移除 owner 内联过滤，脚本导出/抽取轮询 `scripts/export-poll` 与小说抓取 schedule/observability 项目查询已切为 workspace 成员可见），见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)
-- **W4.5 已起步**：`app_generation_job` 先按 `project_id` 派生 workspace 可见范围，`GET /api/v1/jobs/page`、`GET /api/v1/jobs` 与 jobs 三个 summary 端点在传 `project_id` 时改为 workspace 成员可见项目内任务（未传 `project_id` 维持 owner 个人视图）
+- **W4.5 已起步**：`app_generation_job` 先按 `project_id` 派生 workspace 可见范围，`GET /api/v1/jobs/page`、`GET /api/v1/jobs`、jobs 三个 summary 端点，以及 jobs 详情/取消/重试链路已统一到 owner 或同 workspace 项目成员可见（未传 `project_id` 的列表/汇总仍保留 owner 个人视图）
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 

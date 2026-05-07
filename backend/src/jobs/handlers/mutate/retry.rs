@@ -51,7 +51,19 @@ pub(crate) async fn retry_job(
         r#"
         UPDATE app_generation_job
         SET status = 'queued', error_message = NULL, result = NULL, error_details = NULL, claimed_by = NULL, updated_at = NOW()
-        WHERE id = $1 AND owner_user_id = $2 AND status = 'failed'
+        WHERE id = $1
+          AND status = 'failed'
+          AND (
+            owner_user_id = $2
+            OR EXISTS (
+              SELECT 1
+              FROM app_project p
+              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+              WHERE wm.user_id = $2
+                AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
+                AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
+            )
+          )
         RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )

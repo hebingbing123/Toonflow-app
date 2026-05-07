@@ -23,7 +23,24 @@ pub(super) async fn resolve_job_mutation_outcome(
     }
 
     let exists: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM app_generation_job WHERE id = $1 AND owner_user_id = $2)",
+        r#"
+        SELECT EXISTS(
+          SELECT 1
+          FROM app_generation_job
+          WHERE id = $1
+            AND (
+              owner_user_id = $2
+              OR EXISTS (
+                SELECT 1
+                FROM app_project p
+                INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+                WHERE wm.user_id = $2
+                  AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
+                  AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
+              )
+            )
+        )
+        "#,
     )
     .bind(id)
     .bind(uid)

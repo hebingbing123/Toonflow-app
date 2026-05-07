@@ -134,11 +134,10 @@ pub(crate) async fn get_job_file(
         r#"
         SELECT result
         FROM app_generation_job
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1
         "#,
     )
     .bind(id)
-    .bind(uid)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?

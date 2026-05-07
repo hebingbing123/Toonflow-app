@@ -127,7 +127,18 @@ pub(crate) async fn fetch_job_by_numeric_task_id(
         r#"
         SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
-        WHERE owner_user_id = $1 AND numeric_task_id = $2
+        WHERE numeric_task_id = $2
+          AND (
+            owner_user_id = $1
+            OR EXISTS (
+              SELECT 1
+              FROM app_project p
+              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+              WHERE wm.user_id = $1
+                AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
+                AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
+            )
+          )
         "#,
     )
     .bind(uid)
@@ -149,7 +160,18 @@ pub(crate) async fn fetch_job_by_id(
         r#"
         SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1
+          AND (
+            owner_user_id = $2
+            OR EXISTS (
+              SELECT 1
+              FROM app_project p
+              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+              WHERE wm.user_id = $2
+                AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
+                AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
+            )
+          )
         "#,
     )
     .bind(id)
