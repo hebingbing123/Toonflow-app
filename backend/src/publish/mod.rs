@@ -38,7 +38,6 @@ pub fn router() -> Router<AppState> {
         .merge(callback_handlers::callback_router())
 }
 
-pub(crate) use access::require_project_owned;
 pub use openapi::PublishOpenApi;
 
 pub(crate) use types::{

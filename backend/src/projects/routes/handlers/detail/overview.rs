@@ -11,10 +11,10 @@ use crate::{
     auth::require_user_uuid,
     error::ApiError,
     http_kit::request_dedupe::{dedupe_project_overview, RequestDedupeKey},
+    projects::routes::common::require_project_workspace_member_scope,
     projects::routes::types::{
         ProjectAssetsOverviewResponse, ProjectProductionOverviewResponse, ProjectStatsResponse,
     },
-    publish::require_project_owned,
     state::AppState,
 };
 
@@ -77,6 +77,7 @@ pub struct ProjectOverviewResponse {
     responses(
         (status = 200, description = "OK", body = ProjectOverviewResponse),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody)
     ),
     security(("bearerAuth" = []))
@@ -89,7 +90,8 @@ pub(crate) async fn project_overview_by_id(
 ) -> Result<Json<ProjectOverviewResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let resolved_project_id = scope.id;
 
     // J.6: Deduplicate concurrent identical requests
     let mut query_flags = Vec::new();
@@ -102,7 +104,7 @@ pub(crate) async fn project_overview_by_id(
     if query.include_bad_cases {
         query_flags.push("include_bad_cases");
     }
-    let dedupe_key = RequestDedupeKey::project_overview(uid, project_id, &query_flags);
+    let dedupe_key = RequestDedupeKey::project_overview(uid, resolved_project_id, &query_flags);
 
     let result_json = dedupe_project_overview(dedupe_key, || async {
         // Fetch all core project data in parallel using tokio::try_join!
@@ -116,14 +118,14 @@ pub(crate) async fn project_overview_by_id(
             scene_count,
             clip_count,
         ) = tokio::try_join!(
-            fetch_project_stats(pool, project_id, uid),
-            fetch_production_overview(pool, project_id, uid),
-            fetch_assets_overview(pool, project_id, uid),
-            fetch_short_video_assembly(pool, project_id, uid),
-            fetch_short_video_export_check(pool, project_id, uid),
-            fetch_short_video_readiness(pool, project_id, uid),
-            fetch_asset_count(pool, project_id, uid, "scene"),
-            fetch_asset_count(pool, project_id, uid, "clip"),
+            fetch_project_stats(pool, resolved_project_id, uid),
+            fetch_production_overview(pool, resolved_project_id, uid),
+            fetch_assets_overview(pool, resolved_project_id, uid),
+            fetch_short_video_assembly(pool, resolved_project_id, uid),
+            fetch_short_video_export_check(pool, resolved_project_id, uid),
+            fetch_short_video_readiness(pool, resolved_project_id, uid),
+            fetch_asset_count(pool, resolved_project_id, uid, "scene"),
+            fetch_asset_count(pool, resolved_project_id, uid, "clip"),
         )?;
 
         // Optionally fetch quality, bad cases, and tasks in parallel
@@ -132,21 +134,21 @@ pub(crate) async fn project_overview_by_id(
                 tokio::try_join!(
                     async {
                         if query.include_quality {
-                            fetch_quality_scope_insights(pool, project_id, uid, 1).await
+                            fetch_quality_scope_insights(pool, resolved_project_id, uid, 1).await
                         } else {
                             Ok(None)
                         }
                     },
                     async {
                         if query.include_bad_cases {
-                            fetch_bad_case_stats(pool, project_id, uid, 3).await
+                            fetch_bad_case_stats(pool, resolved_project_id, uid, 3).await
                         } else {
                             Ok(None)
                         }
                     },
                     async {
                         if query.include_tasks {
-                            fetch_recent_tasks(pool, project_id, uid, 6).await
+                            fetch_recent_tasks(pool, resolved_project_id, uid, 6).await
                         } else {
                             Ok(None)
                         }

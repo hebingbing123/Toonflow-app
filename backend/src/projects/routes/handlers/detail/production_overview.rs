@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 use super::super::super::types::ProjectProductionOverviewResponse;
@@ -26,6 +27,7 @@ use super::super::super::types::ProjectProductionOverviewResponse;
     responses(
         (status = 200, description = "OK", body = ProjectProductionOverviewResponse),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -38,21 +40,8 @@ pub(crate) async fn project_production_overview_by_id(
 ) -> Result<Json<ProjectProductionOverviewResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-
-    let row: Option<(Uuid,)> = sqlx::query_as(
-        r#"
-        SELECT id
-        FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let (resolved_id,) = row.ok_or(ApiError::NotFound)?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let resolved_id = scope.id;
 
     let total_storyboard_count: i64 = sqlx::query_scalar(
         r#"

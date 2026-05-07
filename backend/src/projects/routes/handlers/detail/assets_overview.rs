@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 use super::super::super::types::{
@@ -41,6 +42,7 @@ struct AssetOverviewDbRow {
     responses(
         (status = 200, description = "OK", body = ProjectAssetsOverviewResponse),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -53,21 +55,8 @@ pub(crate) async fn project_assets_overview_by_id(
 ) -> Result<Json<ProjectAssetsOverviewResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-
-    let row: Option<(Uuid,)> = sqlx::query_as(
-        r#"
-        SELECT id
-        FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let (resolved_id,) = row.ok_or(ApiError::NotFound)?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let resolved_id = scope.id;
 
     let rows: Vec<AssetOverviewDbRow> = sqlx::query_as(
         r#"
@@ -82,7 +71,6 @@ pub(crate) async fn project_assets_overview_by_id(
             ARRAY[]::integer[]
           ) AS script_numeric_ids
         FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id AND p.owner_user_id = $2
         LEFT JOIN app_script_asset sa ON sa.asset_id = a.id
         LEFT JOIN app_script s ON s.id = sa.script_id AND s.project_id = a.project_id
         WHERE a.project_id = $1
@@ -91,7 +79,6 @@ pub(crate) async fn project_assets_overview_by_id(
         "#,
     )
     .bind(resolved_id)
-    .bind(uid)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
