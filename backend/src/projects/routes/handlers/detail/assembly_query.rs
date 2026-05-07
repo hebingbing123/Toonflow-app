@@ -45,21 +45,19 @@ pub(super) fn assembly_selected_media_kind(url: Option<&str>) -> &'static str {
         .next()
         .unwrap_or(raw);
     let lower = path.to_ascii_lowercase();
-    if lower.ends_with(".mp4")
-        || lower.ends_with(".mov")
-        || lower.ends_with(".webm")
-        || lower.ends_with(".mkv")
-    {
+    // Requirements 18.2: video types (mp4, mov, avi)
+    if lower.ends_with(".mp4") || lower.ends_with(".mov") || lower.ends_with(".avi") {
         return "video";
     }
+    // Requirements 18.3: image types (png, jpg, jpeg, webp)
     if lower.ends_with(".png")
         || lower.ends_with(".jpg")
         || lower.ends_with(".jpeg")
         || lower.ends_with(".webp")
-        || lower.ends_with(".gif")
     {
         return "image";
     }
+    // Requirements 18.5: other type (unrecognized formats)
     "other"
 }
 
@@ -297,4 +295,139 @@ pub(super) async fn fetch_quality_degradation_metrics(
     };
 
     Ok((degraded, rate))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_assembly_selected_media_kind_none() {
+        // Requirements 18.4: none type (URL is empty)
+        assert_eq!(assembly_selected_media_kind(None), "none");
+        assert_eq!(assembly_selected_media_kind(Some("")), "none");
+        assert_eq!(assembly_selected_media_kind(Some("   ")), "none");
+    }
+
+    #[test]
+    fn test_assembly_selected_media_kind_video() {
+        // Requirements 18.2: video types (mp4, mov, avi)
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.mp4")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.mov")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.avi")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.MP4")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.MOV")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.AVI")),
+            "video"
+        );
+    }
+
+    #[test]
+    fn test_assembly_selected_media_kind_image() {
+        // Requirements 18.3: image types (png, jpg, jpeg, webp)
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.png")),
+            "image"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.jpg")),
+            "image"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.jpeg")),
+            "image"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.webp")),
+            "image"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.PNG")),
+            "image"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.JPG")),
+            "image"
+        );
+    }
+
+    #[test]
+    fn test_assembly_selected_media_kind_other() {
+        // Requirements 18.5: other type (unrecognized formats)
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/file.txt")),
+            "other"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/file.pdf")),
+            "other"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/file.mkv")),
+            "other"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/file.webm")),
+            "other"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/file.gif")),
+            "other"
+        );
+    }
+
+    #[test]
+    fn test_assembly_selected_media_kind_with_query_params() {
+        // Test URL with query parameters
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.mp4?token=abc123")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.png?size=large")),
+            "image"
+        );
+    }
+
+    #[test]
+    fn test_assembly_selected_media_kind_with_fragment() {
+        // Test URL with fragment
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/video.mov#section")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("https://example.com/image.jpg#top")),
+            "image"
+        );
+    }
+
+    #[test]
+    fn test_assembly_selected_media_kind_with_whitespace() {
+        // Test URL with leading/trailing whitespace
+        assert_eq!(
+            assembly_selected_media_kind(Some("  https://example.com/video.mp4  ")),
+            "video"
+        );
+        assert_eq!(
+            assembly_selected_media_kind(Some("\thttps://example.com/image.png\n")),
+            "image"
+        );
+    }
 }

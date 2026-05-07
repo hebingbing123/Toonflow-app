@@ -17,8 +17,8 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 
 | 内容 | 状态 | 备注 |
 |------|------|------|
-| 更广端到端契约矩阵（关键用户路径） | `next` | **必做**；YAML 正文「仍缺更广…矩阵」 |
-| `video_count` 等与统计语义彻底对齐产品 | `next` | **必做**；schema/API/文案与产品定义一次性对齐 |
+| 更广端到端契约矩阵（关键用户路径） | `done` | PG：`project_dashboard_surface_roundtrip`（`#[ignore]`）等；见 WP-A |
+| `video_count` 等与统计语义彻底对齐产品 | `done` | **`app_video`** 终态计数 + 契约；见 WP-B / `bd6a4b5a` |
 
 ### harness-rust-core 加深
 
