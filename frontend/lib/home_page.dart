@@ -366,6 +366,7 @@ class _HomePageState extends State<HomePage> {
     _workspaceOutputController.reset();
     _workspaceInputController.projectIdController.clear();
     _workspaceInputController.projectUuidController.clear();
+    _workspaceInputController.workspaceUuidController.clear();
     _workspaceInputController.clearScriptScope();
     if (mounted) {
       setState(() {

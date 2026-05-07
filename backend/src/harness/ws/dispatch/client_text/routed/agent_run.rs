@@ -82,6 +82,7 @@ pub(super) async fn harness_agent_run(
         pool: state.pool.clone(),
         project_numeric_id,
         script_numeric_id,
+        workspace_id: sess.workspace_id,
         max_rounds,
         cancel,
         out_tx: out_tx.clone(),

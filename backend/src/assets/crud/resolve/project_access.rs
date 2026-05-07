@@ -126,13 +126,14 @@ pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
     }
 }
 
-/// Like [`resolve_owned_project_numeric_from_uuid_or_legacy_id`] but also returns **`app_project.id`** (UUID).
+/// Like [`resolve_owned_project_numeric_from_uuid_or_legacy_id`] but also returns **`app_project.id`** (UUID)
+/// and **`app_project.workspace_id`** for workspace-scoped Harness / REST alignment.
 pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
     pool: &PgPool,
     uid: Uuid,
     project_uuid: Option<Uuid>,
     project_numeric_id: Option<i32>,
-) -> Result<(Uuid, i32), ApiError> {
+) -> Result<(Uuid, i32, Uuid), ApiError> {
     match (project_uuid, project_numeric_id) {
         (Some(u), Some(n)) => {
             if n <= 0 {
@@ -140,9 +141,9 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                     "project_numeric_id must be positive".into(),
                 ));
             }
-            let row: Option<(Uuid, i32)> = sqlx::query_as(
+            let row: Option<(Uuid, i32, Uuid)> = sqlx::query_as(
                 r#"
-                SELECT p.id, p.numeric_id
+                SELECT p.id, p.numeric_id, p.workspace_id
                 FROM app_project p
                 WHERE p.id = $1
                   AND EXISTS (
@@ -158,18 +159,18 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
             .fetch_optional(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-            let (id, num) = row.ok_or(ApiError::NotFound)?;
+            let (id, num, workspace_id) = row.ok_or(ApiError::NotFound)?;
             if num != n {
                 return Err(ApiError::BadRequest(
                     "Project UUID and numeric project id must refer to the same project".into(),
                 ));
             }
-            Ok((id, num))
+            Ok((id, num, workspace_id))
         }
         (Some(u), None) => {
-            let row: Option<(Uuid, i32)> = sqlx::query_as(
+            let row: Option<(Uuid, i32, Uuid)> = sqlx::query_as(
                 r#"
-                SELECT p.id, p.numeric_id
+                SELECT p.id, p.numeric_id, p.workspace_id
                 FROM app_project p
                 WHERE p.id = $1
                   AND EXISTS (
@@ -193,9 +194,9 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                     "project_numeric_id must be positive".into(),
                 ));
             }
-            let row: Option<(Uuid, i32)> = sqlx::query_as(
+            let row: Option<(Uuid, i32, Uuid)> = sqlx::query_as(
                 r#"
-                SELECT p.id, p.numeric_id
+                SELECT p.id, p.numeric_id, p.workspace_id
                 FROM app_project p
                 WHERE p.numeric_id = $1
                   AND EXISTS (

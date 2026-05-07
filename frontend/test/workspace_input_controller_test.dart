@@ -48,6 +48,7 @@ void main() {
       scriptNumericId: 3,
       projectUuid: '550e8400-e29b-41d4-a716-446655440001',
       scriptUuid: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+      workspaceId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
     );
     expect(controller.projectIdController.text, '99');
     expect(controller.scriptIdController.text, '3');
@@ -58,6 +59,10 @@ void main() {
     expect(
       controller.scriptUuidController.text,
       '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+    );
+    expect(
+      controller.workspaceUuidController.text,
+      'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
     );
 
     controller.clearScriptScope();

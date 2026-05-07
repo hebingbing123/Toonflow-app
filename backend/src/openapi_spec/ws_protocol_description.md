@@ -118,7 +118,7 @@ Cancelling a **`running`** job via REST sets `cancelled` immediately; the in-pro
 
 ### `session.ack` (server → client)
 
-Generic success for attach / context update / cancel; carries `request_id` when the client sent one.
+Generic success for attach / context update / cancel; carries `request_id` when the client sent one. When the server resolved **`app_project.workspace_id`** from Postgres, **`payload.workspaceUuid`** echoes that UUID so clients can confirm the active Harness workspace boundary.
 
 ### `agent.chat.send` → LLM stream (server → client)
 
@@ -152,11 +152,12 @@ Previous Node stack used Socket.IO namespaces:
 | Wire field | Meaning |
 |------------|---------|
 | **`projectUuid`** (preferred) | `app_project.id` (UUID string) |
+| **`workspaceUuid`** (optional) | `app_workspace.id` / **`app_project.workspace_id`**; when sent, must match the resolved project's workspace (400 / WS `bad_request` if not); omit when using legacy numeric-only attach without DB |
 | **`project_id`** (legacy) | `app_project.numeric_id` (positive integer) |
 | **`scriptUuid`** (preferred) | `app_script.id` |
 | **`script_id`** (legacy) | `app_script.numeric_id` |
 
-Send **`projectUuid`** and/or **`project_id`** (same pairing rules as REST agent-memory: if both are sent they must refer to the same row). When Postgres is configured, legacy **`project_id` only** is verified against ownership; **`projectUuid`** resolution requires a database pool (attach fails with `bad_request` if the pool is absent). **`scriptUuid`** similarly requires DB + a resolved project UUID key server-side.
+Send **`projectUuid`** and/or **`project_id`** (same pairing rules as REST agent-memory: if both are sent they must refer to the same row). Optional **`workspaceUuid`** must match **`app_project.workspace_id`** when Postgres resolves the project (attach fails with `bad_request` on mismatch or when **`workspaceUuid`** is sent but the project was not resolved from the database). When Postgres is configured, legacy **`project_id` only** is verified against **workspace membership** (same as REST); **`projectUuid`** resolution requires a database pool (attach fails with `bad_request` if the pool is absent). **`scriptUuid`** similarly requires DB + a resolved project UUID key server-side.
 
 ## Client → server (previous names → target `type`)
 

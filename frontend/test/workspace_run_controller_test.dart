@@ -207,4 +207,66 @@ void main() {
     expect(payload['projectUuid'], uuid);
     expect(payload.containsKey('project_id'), isFalse);
   });
+
+  test('workspace run controller sends workspaceUuid when scope field set', () async {
+    final inputController = WorkspaceInputController();
+    final operationController = WorkspaceOperationController();
+    final outputController = WorkspaceOutputController();
+    addTearDown(inputController.dispose);
+
+    final sent = <List<Map<String, dynamic>>>[];
+    final controller = WorkspaceRunController(
+      inputController: inputController,
+      operationController: operationController,
+      outputController: outputController,
+      accessTokenProvider: () => 'token',
+      onErrorChanged: (_) {},
+      clearWsLog: () {},
+      resetWorkspaceOutputs: () {},
+      requestSender: (token, messages) async {
+        sent.add(messages);
+        return true;
+      },
+    );
+
+    const projectUuid = '550e8400-e29b-41d4-a716-446655440000';
+    const workspaceUuid = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+    inputController.projectIdController.clear();
+    inputController.projectUuidController.text = projectUuid;
+    inputController.workspaceUuidController.text = workspaceUuid;
+    inputController.scriptPromptController.text = 'hello';
+
+    await controller.runScriptWorkspaceAgent();
+
+    expect(sent, hasLength(1));
+    final payload = sent.single[0]['payload'] as Map<String, dynamic>;
+    expect(payload['workspaceUuid'], workspaceUuid);
+  });
+
+  test('workspace run controller rejects invalid workspaceUuid format', () async {
+    final inputController = WorkspaceInputController();
+    final operationController = WorkspaceOperationController();
+    final outputController = WorkspaceOutputController();
+    addTearDown(inputController.dispose);
+
+    String? lastError;
+    final controller = WorkspaceRunController(
+      inputController: inputController,
+      operationController: operationController,
+      outputController: outputController,
+      accessTokenProvider: () => 'token',
+      onErrorChanged: (e) => lastError = e,
+      clearWsLog: () {},
+      resetWorkspaceOutputs: () {},
+      requestSender: (token, messages) async => true,
+    );
+
+    inputController.projectIdController.text = '1';
+    inputController.workspaceUuidController.text = 'not-a-uuid';
+    inputController.scriptPromptController.text = 'x';
+
+    await controller.runScriptWorkspaceAgent();
+
+    expect(lastError, 'workspaceUuid 格式无效');
+  });
 }

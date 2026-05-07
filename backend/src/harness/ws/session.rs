@@ -9,7 +9,7 @@ use crate::error::ApiError;
 use crate::harness::permissions;
 use crate::harness::wire::{AttachProductionPayload, AttachScriptPayload};
 use crate::harness::ws::attach_resolve::{
-    resolve_ws_attach_project, resolve_ws_attach_script_production,
+    enforce_workspace_uuid_claim, resolve_ws_attach_project, resolve_ws_attach_script_production,
 };
 use crate::harness::ws::channel::WsAgentChannel;
 use crate::harness::ws::outbound::{send_envelope, send_error};
@@ -20,6 +20,7 @@ pub struct WsSessionBindState<'a> {
     pub isolation_key: &'a mut Option<String>,
     pub project_id: &'a mut Option<i64>,
     pub script_id: &'a mut Option<i64>,
+    pub workspace_id: &'a mut Option<Uuid>,
 }
 
 fn api_error_to_ws(err: ApiError) -> (&'static str, String) {
@@ -70,18 +71,20 @@ pub async fn handle_script_attach(
                 return;
             }
         };
+    if let Err(e) = enforce_workspace_uuid_claim(resolved.workspace_id, p.workspace_uuid) {
+        reply_attach_resolve_error(socket, e, request_id).await;
+        return;
+    }
     *st.channel = Some(WsAgentChannel::Script);
     *st.isolation_key = Some(p.isolation_key);
     *st.project_id = Some(i64::from(resolved.project_numeric));
     *st.script_id = None;
-    let _ = send_envelope(
-        socket,
-        "session.ack",
-        1,
-        json!({ "ok": true, "channel": "script" }),
-        request_id,
-    )
-    .await;
+    *st.workspace_id = resolved.workspace_id;
+    let mut ack = json!({ "ok": true, "channel": "script" });
+    if let Some(ws) = resolved.workspace_id {
+        ack["workspaceUuid"] = Value::String(ws.to_string());
+    }
+    let _ = send_envelope(socket, "session.ack", 1, ack, request_id).await;
 }
 
 pub async fn handle_production_attach(
@@ -114,6 +117,10 @@ pub async fn handle_production_attach(
             return;
         }
     };
+    if let Err(e) = enforce_workspace_uuid_claim(project.workspace_id, p.workspace_uuid) {
+        reply_attach_resolve_error(socket, e, request_id).await;
+        return;
+    }
     let script_numeric = match resolve_ws_attach_script_production(
         pool,
         user_id,
@@ -133,14 +140,12 @@ pub async fn handle_production_attach(
     *st.isolation_key = Some(p.isolation_key);
     *st.project_id = Some(i64::from(project.project_numeric));
     *st.script_id = Some(i64::from(script_numeric));
-    let _ = send_envelope(
-        socket,
-        "session.ack",
-        1,
-        json!({ "ok": true, "channel": "production" }),
-        request_id,
-    )
-    .await;
+    *st.workspace_id = project.workspace_id;
+    let mut ack = json!({ "ok": true, "channel": "production" });
+    if let Some(ws) = project.workspace_id {
+        ack["workspaceUuid"] = Value::String(ws.to_string());
+    }
+    let _ = send_envelope(socket, "session.ack", 1, ack, request_id).await;
 }
 
 pub async fn handle_context_update(
@@ -169,6 +174,10 @@ pub async fn handle_context_update(
             return;
         }
     };
+    if let Err(e) = enforce_workspace_uuid_claim(project.workspace_id, p.workspace_uuid) {
+        reply_attach_resolve_error(socket, e, request_id).await;
+        return;
+    }
     let script_numeric = match resolve_ws_attach_script_production(
         pool,
         user_id,
@@ -187,5 +196,10 @@ pub async fn handle_context_update(
     *st.isolation_key = Some(p.isolation_key);
     *st.project_id = Some(i64::from(project.project_numeric));
     *st.script_id = Some(i64::from(script_numeric));
-    let _ = send_envelope(socket, "session.ack", 1, json!({ "ok": true }), request_id).await;
+    *st.workspace_id = project.workspace_id;
+    let mut ack = json!({ "ok": true });
+    if let Some(ws) = project.workspace_id {
+        ack["workspaceUuid"] = Value::String(ws.to_string());
+    }
+    let _ = send_envelope(socket, "session.ack", 1, ack, request_id).await;
 }

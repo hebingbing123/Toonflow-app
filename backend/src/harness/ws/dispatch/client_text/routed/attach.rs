@@ -17,6 +17,7 @@ pub(super) async fn script_attach(
         isolation_key: &mut sess.isolation_key,
         project_id: &mut sess.project_id,
         script_id: &mut sess.script_id,
+        workspace_id: &mut sess.workspace_id,
     };
     session::handle_script_attach(
         socket,
@@ -40,6 +41,7 @@ pub(super) async fn production_attach(
         isolation_key: &mut sess.isolation_key,
         project_id: &mut sess.project_id,
         script_id: &mut sess.script_id,
+        workspace_id: &mut sess.workspace_id,
     };
     session::handle_production_attach(
         socket,
@@ -63,6 +65,7 @@ pub(super) async fn context_update(
         isolation_key: &mut sess.isolation_key,
         project_id: &mut sess.project_id,
         script_id: &mut sess.script_id,
+        workspace_id: &mut sess.workspace_id,
     };
     session::handle_context_update(
         socket,

@@ -10,12 +10,14 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
     required this.scriptIdController,
     required this.projectUuidController,
     required this.scriptUuidController,
+    required this.workspaceUuidController,
   });
 
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
   final TextEditingController projectUuidController;
   final TextEditingController scriptUuidController;
+  final TextEditingController workspaceUuidController;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +68,13 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: workspaceUuidController,
+          decoration: const InputDecoration(
+            labelText: '工作区 UUID（可选，WS workspaceUuid）',
+          ),
         ),
       ],
     );

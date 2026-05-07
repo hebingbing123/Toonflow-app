@@ -64,6 +64,7 @@ extension _HomePageBuildProductSections on _HomePageState {
       scriptIdController: _workspaceInputController.scriptIdController,
       projectUuidController: _workspaceInputController.projectUuidController,
       scriptUuidController: _workspaceInputController.scriptUuidController,
+      workspaceUuidController: _workspaceInputController.workspaceUuidController,
       scriptPromptController: _workspaceInputController.scriptPromptController,
       scriptDomainArgsController:
           _workspaceInputController.scriptDomainArgsController,
@@ -158,6 +159,7 @@ extension _HomePageBuildProductSections on _HomePageState {
           if (projectNumericId == null) {
             _workspaceInputController.projectIdController.clear();
             _workspaceInputController.projectUuidController.clear();
+            _workspaceInputController.workspaceUuidController.clear();
             _workspaceInputController.clearScriptScope();
             return;
           }

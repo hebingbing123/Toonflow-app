@@ -43,6 +43,8 @@ pub struct HarnessContext {
     pub project_numeric_id: Option<i32>,
     /// 当前脚本的遗留 ID（用于脚本范围工具）。
     pub script_numeric_id: Option<i32>,
+    /// **`app_project.workspace_id`** when attach resolved with Postgres（与 REST workspace 边界一致）.
+    pub workspace_id: Option<Uuid>,
     /// LLM 配置（用于需要 AI 调用的工具）。
     pub llm: Option<crate::llm::LlmConfig>,
     /// HTTP 客户端（用于需要外部 API 调用的工具）。
@@ -55,6 +57,7 @@ impl HarnessContext {
         pool: Option<sqlx::PgPool>,
         project_numeric_id: Option<i32>,
         script_numeric_id: Option<i32>,
+        workspace_id: Option<Uuid>,
         llm: Option<crate::llm::LlmConfig>,
         http_client: Option<reqwest::Client>,
     ) -> Self {
@@ -63,6 +66,7 @@ impl HarnessContext {
             pool,
             project_numeric_id,
             script_numeric_id,
+            workspace_id,
             llm,
             http_client,
         }

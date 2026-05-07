@@ -11,6 +11,8 @@ class WorkspaceInputController {
   );
   /// Preferred script key for production attach (**`app_script.id`**).
   final TextEditingController scriptUuidController = TextEditingController();
+  /// **`app_project.workspace_id`** for optional **`workspaceUuid`** on WS attach (team / REST 对齐).
+  final TextEditingController workspaceUuidController = TextEditingController();
   final TextEditingController scriptPromptController = TextEditingController(
     text:
         '先用 get_planData 读取 planData.script、storySkeleton、adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。',
@@ -40,6 +42,7 @@ class WorkspaceInputController {
     int? scriptNumericId,
     String? projectUuid,
     String? scriptUuid,
+    String? workspaceId,
   }) {
     projectIdController.text = projectNumericId.toString();
     final u = projectUuid?.trim();
@@ -47,6 +50,12 @@ class WorkspaceInputController {
       projectUuidController.text = u;
     } else {
       projectUuidController.clear();
+    }
+    final w = workspaceId?.trim();
+    if (w != null && w.isNotEmpty) {
+      workspaceUuidController.text = w;
+    } else {
+      workspaceUuidController.clear();
     }
     if (scriptNumericId != null && scriptNumericId > 0) {
       scriptIdController.text = scriptNumericId.toString();
@@ -80,6 +89,7 @@ class WorkspaceInputController {
   void dispose() {
     projectIdController.dispose();
     projectUuidController.dispose();
+    workspaceUuidController.dispose();
     scriptIdController.dispose();
     scriptUuidController.dispose();
     scriptPromptController.dispose();

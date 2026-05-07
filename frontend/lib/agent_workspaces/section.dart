@@ -23,6 +23,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.scriptIdController,
     this.projectUuidController,
     this.scriptUuidController,
+    this.workspaceUuidController,
     required this.scriptPromptController,
     required this.scriptDomainArgsController,
     required this.productionPromptController,
@@ -75,6 +76,8 @@ class AgentWorkspacesSection extends StatefulWidget {
   /// When both **`projectUuidController`** and **`scriptUuidController`** are null, the state creates internal controllers.
   final TextEditingController? projectUuidController;
   final TextEditingController? scriptUuidController;
+  /// When **`projectUuidController`** / **`scriptUuidController`** are supplied together, this must be non-null (WS **`workspaceUuid`**).
+  final TextEditingController? workspaceUuidController;
   final TextEditingController scriptPromptController;
   final TextEditingController scriptDomainArgsController;
   final TextEditingController productionPromptController;

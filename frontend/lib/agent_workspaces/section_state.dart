@@ -5,6 +5,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   late final TextEditingController _fallbackProductionSubAgentArgsController;
   late final TextEditingController _effectiveProjectUuidController;
   late final TextEditingController _effectiveScriptUuidController;
+  late final TextEditingController _effectiveWorkspaceUuidController;
   late final bool _ownsUuidScopeControllers;
   String _selectedScriptDomainTool = _scriptDomainToolPresets.first;
 
@@ -22,12 +23,22 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     final pu = widget.projectUuidController;
     final su = widget.scriptUuidController;
     if (pu != null && su != null) {
+      final wu = widget.workspaceUuidController;
+      if (wu == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'AgentWorkspacesSection.workspaceUuidController is required when projectUuidController and scriptUuidController are provided.',
+          ),
+        ]);
+      }
       _effectiveProjectUuidController = pu;
       _effectiveScriptUuidController = su;
+      _effectiveWorkspaceUuidController = wu;
       _ownsUuidScopeControllers = false;
     } else if (pu == null && su == null) {
       _effectiveProjectUuidController = TextEditingController();
       _effectiveScriptUuidController = TextEditingController();
+      _effectiveWorkspaceUuidController = TextEditingController();
       _ownsUuidScopeControllers = true;
     } else {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -262,6 +273,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           scriptIdController: widget.scriptIdController,
           projectUuidController: _effectiveProjectUuidController,
           scriptUuidController: _effectiveScriptUuidController,
+          workspaceUuidController: _effectiveWorkspaceUuidController,
         ),
         if (widget.showPaneSelector) ...<Widget>[
           const SizedBox(height: 12),
@@ -292,6 +304,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     if (_ownsUuidScopeControllers) {
       _effectiveProjectUuidController.dispose();
       _effectiveScriptUuidController.dispose();
+      _effectiveWorkspaceUuidController.dispose();
     }
     super.dispose();
   }

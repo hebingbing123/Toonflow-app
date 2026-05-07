@@ -32,7 +32,7 @@ mod tests {
     use uuid::Uuid;
 
     fn ctx() -> HarnessContext {
-        HarnessContext::with_runtime_scope(Uuid::nil(), None, None, None, None, None)
+        HarnessContext::with_runtime_scope(Uuid::nil(), None, None, None, None, None, None)
     }
 
     #[test]

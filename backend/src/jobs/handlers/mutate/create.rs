@@ -88,7 +88,7 @@ pub(crate) async fn create_job(
     let payload_project_uuid = payload_project_uuid(&payload);
     let payload_project_numeric = payload_project_numeric(&payload);
     if payload_project_uuid.is_some() || payload_project_numeric.is_some() {
-        let (project_uuid, project_numeric_id) =
+        let (project_uuid, project_numeric_id, _workspace_id) =
             resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                 pool,
                 uid,

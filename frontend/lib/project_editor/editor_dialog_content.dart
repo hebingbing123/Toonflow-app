@@ -124,6 +124,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                   _workspaceInputController.applyProjectScope(
                     p.numericId,
                     projectUuid: p.id,
+                    workspaceId: p.workspaceId,
                   );
                   _workspaceInputController.clearScriptScope();
                   _shellNavigationController.selectProductWorkspacePane(

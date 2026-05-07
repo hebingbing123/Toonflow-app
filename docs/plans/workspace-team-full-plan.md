@@ -105,10 +105,10 @@
 
 ## 八、Phase W7 — Harness / WebSocket
 
-- [ ] **W7.1** `HarnessContext`（或 attach payload）增加 **`workspace_id`**（UUID）与 **解析规则**（与 REST 一致）
-- [ ] **W7.2** `docs/websocket-events.md`：attach / context 更新事件字段表
-- [ ] **W7.3** 工具权限：`permissions` 模块按 workspace 成员校验 **读 production/script** 等 channel
-- [ ] **W7.4** Flutter WS 客户端：切换 workspace 后 **重 attach** 或刷新 context
+- [x] **W7.1** `HarnessContext`（或 attach payload）增加 **`workspace_id`**（UUID）与 **解析规则**（与 REST 一致）
+- [x] **W7.2** `docs/websocket-events.md`：attach / context 更新事件字段表（见 `openapi_spec/ws_protocol_description.md`、`docs/plans/harness-ws-context-matrix.md`）
+- [x] **W7.3** 工具权限：`permissions` 模块按 workspace 成员校验 **读 production/script** 等 channel（attach 解析已由 **`app_workspace_member`** 门禁；`ws_channel_allowed` 文档化与 env  allowlist 分工）
+- [x] **W7.4** Flutter WS 客户端：切换 workspace 后 **重 attach** 或刷新 context（团队上下文变更时清空项目/script/**workspaceUuid** 作用域；项目入口写入 **workspaceUuid** 随 attach 发送）
 - [ ] **W7.5** 回归：`agent_workspaces` 相关测试 + 手工矩阵
 
 ---

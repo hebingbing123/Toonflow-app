@@ -56,7 +56,12 @@ impl TraceContext {
 }
 
 pub fn ws_frame(ctx: &HarnessContext, msg_type: &str) {
-    tracing::debug!(user_id = %ctx.user_id, %msg_type, "harness.ws");
+    match ctx.workspace_id {
+        Some(ws) => {
+            tracing::debug!(user_id = %ctx.user_id, workspace_id = %ws, %msg_type, "harness.ws")
+        }
+        None => tracing::debug!(user_id = %ctx.user_id, %msg_type, "harness.ws"),
+    }
 }
 
 pub fn agent_llm_turn_requested(user_id: Uuid, content_len: usize) {
@@ -64,7 +69,12 @@ pub fn agent_llm_turn_requested(user_id: Uuid, content_len: usize) {
 }
 
 pub fn harness_tool_invoke(ctx: &HarnessContext, tool_name: &str) {
-    tracing::info!(user_id = %ctx.user_id, %tool_name, "harness.tool.invoke");
+    match ctx.workspace_id {
+        Some(ws) => {
+            tracing::info!(user_id = %ctx.user_id, workspace_id = %ws, %tool_name, "harness.tool.invoke")
+        }
+        None => tracing::info!(user_id = %ctx.user_id, %tool_name, "harness.tool.invoke"),
+    }
 }
 
 pub fn harness_tools_catalog_http(user_id: Uuid) {

@@ -19,6 +19,8 @@ pub struct WsConnectionSession {
     pub isolation_key: Option<String>,
     pub project_id: Option<i64>,
     pub script_id: Option<i64>,
+    /// Resolved **`app_project.workspace_id`** after successful attach / context update (requires PG).
+    pub workspace_id: Option<Uuid>,
     pub llm_cancel: CancellationToken,
     /// `(user_id, subscription_id)` for [`crate::state::WsNotifyHub`].
     pub ws_notify: Option<(Uuid, Uuid)>,
@@ -46,6 +48,7 @@ impl WsConnectionSession {
             isolation_key: None,
             project_id: None,
             script_id: None,
+            workspace_id: None,
             llm_cancel: CancellationToken::new(),
             ws_notify,
         }

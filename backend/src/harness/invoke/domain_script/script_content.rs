@@ -87,7 +87,15 @@ mod tests {
     use uuid::Uuid;
 
     fn ctx(script_numeric_id: Option<i32>) -> HarnessContext {
-        HarnessContext::with_runtime_scope(Uuid::nil(), None, None, script_numeric_id, None, None)
+        HarnessContext::with_runtime_scope(
+            Uuid::nil(),
+            None,
+            None,
+            script_numeric_id,
+            None,
+            None,
+            None,
+        )
     }
 
     #[test]

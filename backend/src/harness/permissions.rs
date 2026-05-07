@@ -33,6 +33,10 @@ fn ws_channel_allowed_inner(allowlist: &Option<HashSet<String>>, channel: &str) 
 }
 
 /// Whether the user may attach the given WebSocket agent channel (`script` / `production`).
+///
+/// Env allowlist only; **workspace membership** for a concrete project is enforced when the attach
+/// payload is resolved via [`crate::assets::resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id`]
+/// (`app_workspace_member` exists for **`app_project.workspace_id`**).
 pub fn ws_channel_allowed(user: Uuid, channel: &str) -> bool {
     let _ = user;
     ws_channel_allowed_inner(&ws_channel_allowlist_from_env(), channel)

@@ -74,6 +74,7 @@ pub(crate) async fn dispatch_client_text(
         state.pool.clone(),
         project_numeric_id,
         script_numeric_id,
+        sess.workspace_id,
         state.llm.clone(),
         Some(state.http_client.clone()),
     );

@@ -6,4 +6,4 @@
 
 This file stays in the repo so links from `AGENTS.md`, parity docs, and PR templates keep a stable path; when the protocol changes, update **`ws_protocol_description.md`** and refresh this pointer if needed.
 
-**Attach UUID 矩阵（人类可读）**：[`docs/plans/harness-ws-context-matrix.md`](plans/harness-ws-context-matrix.md) — `projectUuid` / `scriptUuid` 与 legacy **`project_id`** / **`script_id`** 的对照与 PG 依赖说明。
+**Attach / context（`agent.*.attach`、`agent.context.update`）**：除 **`openapi_spec/ws_protocol_description.md`** 中外，人类可读的 UUID 矩阵与可选 **`workspaceUuid`** 见 [`docs/plans/harness-ws-context-matrix.md`](plans/harness-ws-context-matrix.md)。成功 attach 后 **`session.ack`** 可含 **`payload.workspaceUuid`**（与 **`app_project.workspace_id`** 一致）。

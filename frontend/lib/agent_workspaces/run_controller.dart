@@ -48,6 +48,11 @@ class WorkspaceRunController {
       _onErrorChanged(proj.error);
       return;
     }
+    final wsScope = _parseOptionalWorkspaceUuid(_inputController);
+    if (wsScope.error != null) {
+      _onErrorChanged(wsScope.error);
+      return;
+    }
     final prompt = _inputController.scriptPromptController.text.trim();
     if (prompt.isEmpty) {
       _onErrorChanged('prompt 必须有效');
@@ -67,6 +72,7 @@ class WorkspaceRunController {
           isolationKey: 'flutter-script-workspace',
           projectUuid: proj.projectUuid,
           projectNumeric: proj.projectNumeric,
+          workspaceUuid: wsScope.workspaceUuid,
         ),
       },
       <String, dynamic>{
@@ -89,6 +95,11 @@ class WorkspaceRunController {
     final proj = _parseProjectAttachInputs(_inputController);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
+      return;
+    }
+    final wsScope = _parseOptionalWorkspaceUuid(_inputController);
+    if (wsScope.error != null) {
+      _onErrorChanged(wsScope.error);
       return;
     }
     final scriptId = _parsePositiveInt(
@@ -127,6 +138,7 @@ class WorkspaceRunController {
           isolationKey: 'flutter-script-domain-probe',
           projectUuid: proj.projectUuid,
           projectNumeric: proj.projectNumeric,
+          workspaceUuid: wsScope.workspaceUuid,
         ),
       },
       <String, dynamic>{
@@ -152,6 +164,11 @@ class WorkspaceRunController {
     final proj = _parseProjectAttachInputs(_inputController);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
+      return;
+    }
+    final wsScopeSub = _parseOptionalWorkspaceUuid(_inputController);
+    if (wsScopeSub.error != null) {
+      _onErrorChanged(wsScopeSub.error);
       return;
     }
     final scriptId = _parsePositiveInt(
@@ -182,6 +199,7 @@ class WorkspaceRunController {
           isolationKey: 'flutter-script-sub-agent-tool',
           projectUuid: proj.projectUuid,
           projectNumeric: proj.projectNumeric,
+          workspaceUuid: wsScopeSub.workspaceUuid,
         ),
       },
       <String, dynamic>{
@@ -204,6 +222,11 @@ class WorkspaceRunController {
     final proj = _parseProjectAttachInputs(_inputController);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
+      return;
+    }
+    final wsScopeProd = _parseOptionalWorkspaceUuid(_inputController);
+    if (wsScopeProd.error != null) {
+      _onErrorChanged(wsScopeProd.error);
       return;
     }
     final scr = _parseScriptAttachInputs(_inputController);
@@ -232,6 +255,7 @@ class WorkspaceRunController {
           projectNumeric: proj.projectNumeric,
           scriptUuid: scr.scriptUuid,
           scriptNumeric: scr.scriptNumeric,
+          workspaceUuid: wsScopeProd.workspaceUuid,
         ),
       },
       <String, dynamic>{
@@ -254,6 +278,11 @@ class WorkspaceRunController {
     final proj = _parseProjectAttachInputs(_inputController);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
+      return;
+    }
+    final wsScopeFlow = _parseOptionalWorkspaceUuid(_inputController);
+    if (wsScopeFlow.error != null) {
+      _onErrorChanged(wsScopeFlow.error);
       return;
     }
     final scr = _parseScriptAttachInputs(_inputController);
@@ -305,6 +334,7 @@ class WorkspaceRunController {
           projectNumeric: proj.projectNumeric,
           scriptUuid: scr.scriptUuid,
           scriptNumeric: scr.scriptNumeric,
+          workspaceUuid: wsScopeFlow.workspaceUuid,
         ),
       },
       <String, dynamic>{
@@ -327,6 +357,11 @@ class WorkspaceRunController {
     final proj = _parseProjectAttachInputs(_inputController);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
+      return;
+    }
+    final wsScopePa = _parseOptionalWorkspaceUuid(_inputController);
+    if (wsScopePa.error != null) {
+      _onErrorChanged(wsScopePa.error);
       return;
     }
     final scr = _parseScriptAttachInputs(_inputController);
@@ -371,6 +406,7 @@ class WorkspaceRunController {
           projectNumeric: proj.projectNumeric,
           scriptUuid: scr.scriptUuid,
           scriptNumeric: scr.scriptNumeric,
+          workspaceUuid: wsScopePa.workspaceUuid,
         ),
       },
       <String, dynamic>{

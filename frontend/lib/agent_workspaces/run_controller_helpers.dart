@@ -36,6 +36,17 @@ bool _looksLikeUuid(String raw) {
   return (projectUuid: uuidRaw, projectNumeric: numeric, error: null);
 }
 
+({String? workspaceUuid, String? error}) _parseOptionalWorkspaceUuid(
+  WorkspaceInputController input,
+) {
+  final raw = _trimmedNonEmpty(input.workspaceUuidController.text);
+  if (raw == null) return (workspaceUuid: null, error: null);
+  if (!_looksLikeUuid(raw)) {
+    return (workspaceUuid: null, error: 'workspaceUuid 格式无效');
+  }
+  return (workspaceUuid: raw, error: null);
+}
+
 ({String? scriptUuid, int? scriptNumeric, String? error}) _parseScriptAttachInputs(
   WorkspaceInputController input,
 ) {
@@ -58,6 +69,7 @@ Map<String, dynamic> _scriptAttachPayload({
   required String isolationKey,
   String? projectUuid,
   int? projectNumeric,
+  String? workspaceUuid,
 }) {
   final payload = <String, dynamic>{'isolation_key': isolationKey};
   final u = projectUuid?.trim();
@@ -66,6 +78,10 @@ Map<String, dynamic> _scriptAttachPayload({
   }
   if (projectNumeric != null && projectNumeric > 0) {
     payload['project_id'] = projectNumeric;
+  }
+  final wu = workspaceUuid?.trim();
+  if (wu != null && wu.isNotEmpty) {
+    payload['workspaceUuid'] = wu;
   }
   return payload;
 }
@@ -76,11 +92,13 @@ Map<String, dynamic> _productionAttachPayload({
   int? projectNumeric,
   String? scriptUuid,
   int? scriptNumeric,
+  String? workspaceUuid,
 }) {
   final payload = _scriptAttachPayload(
     isolationKey: isolationKey,
     projectUuid: projectUuid,
     projectNumeric: projectNumeric,
+    workspaceUuid: workspaceUuid,
   );
   final su = scriptUuid?.trim();
   if (su != null && su.isNotEmpty) {

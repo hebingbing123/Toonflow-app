@@ -18,6 +18,7 @@ pub struct HarnessAgentWsParams {
     pub pool: Option<sqlx::PgPool>,
     pub project_numeric_id: Option<i32>,
     pub script_numeric_id: Option<i32>,
+    pub workspace_id: Option<Uuid>,
     pub max_rounds: usize,
     pub cancel: CancellationToken,
     pub out_tx: UnboundedSender<String>,
@@ -33,6 +34,7 @@ pub fn spawn_harness_agent_run(p: HarnessAgentWsParams) {
             p.pool,
             p.project_numeric_id,
             p.script_numeric_id,
+            p.workspace_id,
             Some(p.cfg.clone()),
             Some(p.client.clone()),
         );

@@ -6,8 +6,9 @@
 
 | 字段（camelCase JSON） | REST / 产品含义 | 服务端写入会话 | DB 列 |
 |------------------------|-----------------|----------------|-------|
-| **`projectUuid`** | `GET /api/v1/projects` 行的 **`id`** | 解析为 **`project_numeric_id`**（并校验归属） | `app_project.id` → `app_project.numeric_id` |
-| **`project_id`** | Electron 兼容 **`numeric_id`** | 直接作会话 project scope；**有 PG 时校验归属** | `app_project.numeric_id` |
+| **`projectUuid`** | `GET /api/v1/projects` 行的 **`id`** | 解析为 **`project_numeric_id`**（并校验工作区成员） | `app_project.id` → `app_project.numeric_id` |
+| **`workspaceUuid`**（可选） | 与 **`app_project.workspace_id`** 一致时需与解析结果匹配；用于客户端与 REST 工作区边界对齐 | 写入会话 **`workspace_id`**；**`session.ack`** 回显 | `app_project.workspace_id` |
+| **`project_id`** | Electron 兼容 **`numeric_id`** | 直接作会话 project scope；**有 PG 时校验成员资格** | `app_project.numeric_id` |
 
 至少提供其一；二者同发须指向同一项目（400 / WS `bad_request`）。
 
@@ -16,6 +17,7 @@
 | 字段 | REST / 产品含义 | 服务端写入会话 | DB 列 |
 |------|-----------------|----------------|-------|
 | **`projectUuid`** | 同上 | 同上 | 同上 |
+| **`workspaceUuid`** | 可选；须与解析得到的 **`app_project.workspace_id`** 一致 | 写入会话；**`session.ack`** 回显 | `app_project.workspace_id` |
 | **`project_id`** | 同上 | 同上 | 同上 |
 | **`scriptUuid`** | 剧本主键 **`app_script.id`** | 解析为 **`script_numeric_id`** | `app_script.id` → `app_script.numeric_id` |
 | **`script_id`** | **`app_script.numeric_id`** | 校验位于当前 project 后写入会话 | `app_script.numeric_id` |

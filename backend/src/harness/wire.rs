@@ -22,6 +22,10 @@ pub struct AttachScriptPayload {
     #[serde(rename = "projectUuid")]
     #[serde(default)]
     pub project_uuid: Option<Uuid>,
+    /// Optional claim; when set, must match **`app_project.workspace_id`** after DB resolve.
+    #[serde(rename = "workspaceUuid")]
+    #[serde(default)]
+    pub workspace_uuid: Option<Uuid>,
     /// Legacy: **`app_project.numeric_id`**.
     #[serde(default)]
     pub project_id: Option<i64>,
@@ -33,6 +37,9 @@ pub struct AttachProductionPayload {
     #[serde(rename = "projectUuid")]
     #[serde(default)]
     pub project_uuid: Option<Uuid>,
+    #[serde(rename = "workspaceUuid")]
+    #[serde(default)]
+    pub workspace_uuid: Option<Uuid>,
     #[serde(default)]
     pub project_id: Option<i64>,
     #[serde(rename = "scriptUuid")]
@@ -96,5 +103,18 @@ mod attach_payload_tests {
         let p: AttachScriptPayload = serde_json::from_value(v).unwrap();
         assert_eq!(p.project_uuid, Some(u));
         assert_eq!(p.project_id, Some(3));
+    }
+
+    #[test]
+    fn attach_script_deserializes_workspace_uuid() {
+        let u = Uuid::nil();
+        let w = Uuid::from_u128(0xffee_ddcc_bbaa_9988776655443322);
+        let v = serde_json::json!({
+            "isolation_key": "k",
+            "projectUuid": u,
+            "workspaceUuid": w,
+        });
+        let p: AttachScriptPayload = serde_json::from_value(v).unwrap();
+        assert_eq!(p.workspace_uuid, Some(w));
     }
 }
