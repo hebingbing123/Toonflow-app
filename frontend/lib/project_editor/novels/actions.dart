@@ -258,29 +258,6 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    // Server-side crawl 落库：后端完成抓取/解析/质量门，再直接写入 app_novel。
-    if (intakeSourceMode == 'server') {
-      final url = intakeSourceUrl?.trim() ?? '';
-      if (url.isEmpty) {
-        throw const FormatException('请先输入抓取 URL');
-      }
-      final imported = await postProjectNovelCrawlImport(
-        token,
-        project.id,
-        url,
-        intakeStatus: intakeStatus,
-        intakeNote: intakeNote,
-      );
-      if (imported.qualityWarnings.isNotEmpty) {
-        applyInfoLine('导入质量提示：${imported.qualityWarnings.join('；')}');
-      }
-      await refreshWorkbench(setLocalState);
-      applyInfoLine(
-        'server-side crawl + import 已完成：${imported.title}（新增 ${imported.chaptersCreated} 条章节，模式 ${imported.mode}，抓取 ${imported.pageCount} 页）',
-      );
-      return;
-    }
-
     final normalizedChapters = reindexParsedNovelChapters(chapters);
     if (normalizedChapters.isEmpty) {
       throw const FormatException('请先预解析整本内容');
@@ -336,6 +313,36 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
 
     await refreshWorkbench(setLocalState);
     applyInfoLine('整本导入完成，共新增 ${normalizedChapters.length} 条章节。');
+  }
+
+  Future<void> _importNovelWorkbenchViaServerCrawl({
+    required String token,
+    required ProjectRow project,
+    required String intakeSourceUrl,
+    required String intakeStatus,
+    required String? intakeNote,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required StateSetter setLocalState,
+    required void Function(String infoLine) applyInfoLine,
+  }) async {
+    final url = intakeSourceUrl.trim();
+    if (url.isEmpty) {
+      throw const FormatException('请先输入抓取 URL');
+    }
+    final imported = await postProjectNovelCrawlImport(
+      token,
+      project.id,
+      url,
+      intakeStatus: intakeStatus,
+      intakeNote: intakeNote,
+    );
+    if (imported.qualityWarnings.isNotEmpty) {
+      applyInfoLine('导入质量提示：${imported.qualityWarnings.join('；')}');
+    }
+    await refreshWorkbench(setLocalState);
+    applyInfoLine(
+      'server 托管导入完成：${imported.title}（新增 ${imported.chaptersCreated} 条章节，模式 ${imported.mode}，抓取 ${imported.pageCount} 页）',
+    );
   }
 
   String _resolveImportSourceKind({

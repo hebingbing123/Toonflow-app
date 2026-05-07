@@ -44,7 +44,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           decoration: const InputDecoration(
             labelText: '抓取 URL',
             helperText:
-                'client/server 都支持自适应 TOC/分页（与下方抓取执行端联动）。',
+                '以 client 抓取+修正+导入为主；server 用于托管预览。',
           ),
         ),
         const SizedBox(height: 8),
@@ -138,6 +138,31 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       ),
                     ),
               child: const Text('导入预解析章节'),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              onPressed: localBusy || importExecutionSideCtrl.text.trim() != 'server'
+                  ? null
+                  : () => _runNovelWorkbenchAction(
+                      ctx: ctx,
+                      setDialogState: setDialogState,
+                      setLocalState: setLocalState,
+                      novelsBusy: novelsBusy,
+                      setLocalBusy: setLocalBusy,
+                      action: () => _importNovelWorkbenchViaServerCrawl(
+                        token: token,
+                        project: project,
+                        intakeSourceUrl: importUrlCtrl.text.trim(),
+                        intakeStatus: importIntakeStatusCtrl.text.trim(),
+                        intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
+                            ? null
+                            : importIntakeNoteCtrl.text.trim(),
+                        refreshWorkbench: refreshWorkbench,
+                        setLocalState: setLocalState,
+                        applyInfoLine: updateInfoLine,
+                      ),
+                    ),
+              child: const Text('托管导入（增值）'),
             ),
           ],
         ),
