@@ -444,6 +444,9 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   final scriptPlanAdvanceReady = _productionScriptPlanAdvanceReady(
     flowSnapshot['scriptPlan'],
   );
+  final scriptPlanStoryboardReady = _productionScriptPlanStoryboardReady(
+    flowSnapshot['scriptPlan'],
+  );
   if (data is String) {
     final trimmed = data.trim();
     if (trimmed.isEmpty) {
@@ -479,13 +482,21 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: advanceReady ? '已抽样' : '待扩读',
+      statusLabel: advanceReady
+          ? '已抽样'
+          : scriptPlanReady && !scriptPlanStoryboardReady
+          ? '回补导演计划'
+          : '待扩读',
       detail:
           advanceReady
               ? '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。'
+              : scriptPlanReady && !scriptPlanStoryboardReady
+              ? '已窗口读取 $rowCount/$totalRows 行关键列，但当前 scriptPlan 还缺少足够明确的分场景情绪或画面意图，先回补导演计划，再继续扩读 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。'
               : '已窗口读取 $rowCount/$totalRows 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。',
       domainTool: 'get_flowData',
-      domainArgs: buildProductionStoryboardTableReadArgs(),
+      domainArgs: scriptPlanReady && !scriptPlanStoryboardReady
+          ? _scriptPlanCompactArgs()
+          : buildProductionStoryboardTableReadArgs(),
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     );
@@ -559,6 +570,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
   );
   final storyboardTableAdvanceReady = _productionStoryboardTableAdvanceReady(
     flowSnapshot['storyboardTable'],
+  );
+  final scriptPlanStoryboardReady = _productionScriptPlanStoryboardReady(
+    flowSnapshot['scriptPlan'],
   );
   final executionHint = buildProductionScriptPlanExecutionHint(
     flowSnapshot['scriptPlan'],
@@ -698,6 +712,23 @@ ProductionWorkspaceStage _buildStoryboardStage({
   if (scriptPlanAdvanceReady &&
       storyboardTableReady &&
       !storyboardTableAdvanceReady &&
+      !scriptPlanStoryboardReady &&
+      activeKey != 'storyboard' &&
+      toolName != 'generate_storyboard' &&
+      toolName != 'run_sub_agent_storyboard_gen' &&
+      toolName != 'run_sub_agent_storyboard_panel') {
+    return ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: '回补导演计划',
+      detail: 'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。',
+      domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
+    );
+  }
+  if (scriptPlanAdvanceReady &&
+      storyboardTableReady &&
+      !storyboardTableAdvanceReady &&
       activeKey != 'storyboard' &&
       toolName != 'generate_storyboard' &&
       toolName != 'run_sub_agent_storyboard_gen' &&
@@ -798,6 +829,20 @@ bool _productionScriptPlanAdvanceReady(Object? value) {
   if (sectionCount >= 3) return true;
   if (sectionCount == 0 && trimmed.length >= 280) return true;
   return false;
+}
+
+bool _productionScriptPlanStoryboardReady(Object? value) {
+  if (value is! String) return false;
+  final sections = summarizeProductionScriptPlanSections(value, maxSections: 6);
+  if (sections.isEmpty) return false;
+  return sections.any((section) {
+    final normalized = section.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return normalized.contains('④') ||
+        normalized.contains('分场景') ||
+        normalized.contains('画面意图') ||
+        normalized.contains('镜头意图') ||
+        normalized.contains('情绪');
+  });
 }
 
 bool _productionStoryboardTableReady(Object? value) {

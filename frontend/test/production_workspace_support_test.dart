@@ -2093,6 +2093,58 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages routes storyboard-table sampling back to script plan when scene intent is thin',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: null,
+        suggestedFlowKey: null,
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'scriptPlan': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
+③ 叙事结构与节奏规划
+前段尽快起冲突，中段连续抬压，结尾留钩子。
+</scriptPlan>
+''',
+            'storyboardTable': <String, dynamic>{
+              'table': 'storyboardTable',
+              'rowStart': 1,
+              'rowCount': 8,
+              'totalRows': 24,
+              'rows': <Map<String, dynamic>>[
+                <String, dynamic>{'id': '1', 'description': '首镜'},
+              ],
+            },
+          },
+        },
+      );
+
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(tableStage.statusLabel, '回补导演计划');
+      expect(tableStage.domainArgs, <String, dynamic>{
+        'key': 'scriptPlan',
+        'maxChars': 2200,
+      });
+      expect(tableStage.detail, contains('先回补导演计划'));
+      expect(storyboardStage.statusLabel, '回补导演计划');
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'scriptPlan',
+        'maxChars': 2200,
+      });
+      expect(storyboardStage.detail, contains('分场景情绪或画面意图'));
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages narrows asset reads from storyboard table markdown text',
     () {
       final stages = buildProductionWorkspaceStages(
