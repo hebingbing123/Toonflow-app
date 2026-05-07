@@ -19,6 +19,18 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     required void Function(List<ParsedNovelChapter> rows, String message)
     applyImportPreview,
   }) {
+    void updatePreviewRows(
+      List<ParsedNovelChapter> rows,
+      String message, {
+      bool dropEmptyBodies = false,
+    }) {
+      final normalized = reindexParsedNovelChapters(
+        rows,
+        dropEmptyBodies: dropEmptyBodies,
+      );
+      applyImportPreview(normalized, message);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -131,24 +143,127 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('预解析预览（前 5 条）', style: Theme.of(ctx).textTheme.bodySmall),
-                const SizedBox(height: 8),
-                ...importPreviewRows
-                    .take(5)
-                    .map(
-                      (row) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          '#${row.chapterIndex} ${row.chapter}',
-                          style: Theme.of(ctx).textTheme.bodySmall,
-                        ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '预解析修正区（${importPreviewRows.length} 条）',
+                        style: Theme.of(ctx).textTheme.bodySmall,
                       ),
                     ),
-                if (importPreviewRows.length > 5)
+                    OutlinedButton(
+                      onPressed: localBusy
+                          ? null
+                          : () {
+                              updatePreviewRows([
+                                ...importPreviewRows,
+                                ParsedNovelChapter(
+                                  chapterIndex: importPreviewRows.length + 1,
+                                  chapter:
+                                      '补充章节 ${importPreviewRows.length + 1}',
+                                  chapterData: '',
+                                ),
+                              ], '已追加 1 条补充章节，请补全标题和正文后导入。');
+                            },
+                      child: const Text('补充章节'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ...importPreviewRows.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final row = entry.value;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(ctx).colorScheme.outlineVariant,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '#${row.chapterIndex}',
+                                style: Theme.of(ctx).textTheme.labelLarge,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: '删除该章节',
+                              onPressed: localBusy
+                                  ? null
+                                  : () {
+                                      final updated =
+                                          List<ParsedNovelChapter>.from(
+                                            importPreviewRows,
+                                          )..removeAt(index);
+                                      updatePreviewRows(
+                                        updated,
+                                        '已删除第 ${row.chapterIndex} 条预解析章节。',
+                                      );
+                                    },
+                              icon: const Icon(Icons.delete_outline),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          key: ValueKey(
+                            'import-preview-title-${row.chapterIndex}-${row.chapter}',
+                          ),
+                          initialValue: row.chapter,
+                          decoration: const InputDecoration(labelText: '章节标题'),
+                          onChanged: (value) {
+                            final updated = List<ParsedNovelChapter>.from(
+                              importPreviewRows,
+                            );
+                            updated[index] = row.copyWith(chapter: value);
+                            updatePreviewRows(
+                              updated,
+                              '已更新第 ${row.chapterIndex} 条预解析章节。',
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          key: ValueKey(
+                            'import-preview-body-${row.chapterIndex}-${row.chapterData.length}',
+                          ),
+                          initialValue: row.chapterData,
+                          minLines: 2,
+                          maxLines: 4,
+                          decoration: const InputDecoration(labelText: '章节正文'),
+                          onChanged: (value) {
+                            final updated = List<ParsedNovelChapter>.from(
+                              importPreviewRows,
+                            );
+                            updated[index] = row.copyWith(chapterData: value);
+                            updatePreviewRows(
+                              updated,
+                              '已更新第 ${row.chapterIndex} 条正文。',
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                Text(
+                  '导入时会自动重新编号；空正文章节会被拦下，需先在这里补全。',
+                  style: Theme.of(ctx).textTheme.bodySmall,
+                ),
+                if (importPreviewRows.length > 12) ...[
+                  const SizedBox(height: 4),
                   Text(
-                    '其余 ${importPreviewRows.length - 5} 条将在导入时按同样顺序写入。',
+                    '当前预览较长，继续向下滚动可逐条修正全部章节。',
                     style: Theme.of(ctx).textTheme.bodySmall,
                   ),
+                ],
               ],
             ),
           ),

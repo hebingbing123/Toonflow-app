@@ -146,18 +146,32 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    if (chapters.isEmpty) {
+    final normalizedChapters = reindexParsedNovelChapters(chapters);
+    if (normalizedChapters.isEmpty) {
       throw const FormatException('请先预解析整本内容');
     }
     if (batchSize <= 0) {
       throw const FormatException('批次大小必须大于 0');
     }
+    final emptyBodyChapter = normalizedChapters.firstWhere(
+      (chapter) => chapter.chapterData.trim().isEmpty,
+      orElse: () => const ParsedNovelChapter(
+        chapterIndex: 0,
+        chapter: '',
+        chapterData: '__ok__',
+      ),
+    );
+    if (emptyBodyChapter.chapterIndex > 0) {
+      throw FormatException(
+        '第 ${emptyBodyChapter.chapterIndex} 条章节正文为空，请先在预解析预览里修正后再导入',
+      );
+    }
 
-    for (var i = 0; i < chapters.length; i += batchSize) {
-      final end = (i + batchSize < chapters.length)
+    for (var i = 0; i < normalizedChapters.length; i += batchSize) {
+      final end = (i + batchSize < normalizedChapters.length)
           ? i + batchSize
-          : chapters.length;
-      final slice = chapters.sublist(i, end);
+          : normalizedChapters.length;
+      final slice = normalizedChapters.sublist(i, end);
       for (final chapter in slice) {
         final sourceKind =
             (intakeSourceUrl != null && intakeSourceUrl.isNotEmpty)
@@ -174,11 +188,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           intakeStatus: 'admitted',
         );
       }
-      applyInfoLine('已导入 $end/${chapters.length} 条章节…');
+      applyInfoLine('已导入 $end/${normalizedChapters.length} 条章节…');
     }
 
     await refreshWorkbench(setLocalState);
-    applyInfoLine('整本导入完成，共新增 ${chapters.length} 条章节。');
+    applyInfoLine('整本导入完成，共新增 ${normalizedChapters.length} 条章节。');
   }
 
   Future<void> _readNovelWorkbenchChapter({

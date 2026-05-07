@@ -10,13 +10,22 @@ class ParsedNovelChapter {
   final int chapterIndex;
   final String chapter;
   final String chapterData;
+
+  ParsedNovelChapter copyWith({
+    int? chapterIndex,
+    String? chapter,
+    String? chapterData,
+  }) {
+    return ParsedNovelChapter(
+      chapterIndex: chapterIndex ?? this.chapterIndex,
+      chapter: chapter ?? this.chapter,
+      chapterData: chapterData ?? this.chapterData,
+    );
+  }
 }
 
 class ExtractedCrawlerContent {
-  const ExtractedCrawlerContent({
-    required this.title,
-    required this.bodyText,
-  });
+  const ExtractedCrawlerContent({required this.title, required this.bodyText});
 
   final String title;
   final String bodyText;
@@ -53,6 +62,31 @@ String _normalizeExtractedText(String raw) {
       .trim();
 }
 
+List<ParsedNovelChapter> reindexParsedNovelChapters(
+  Iterable<ParsedNovelChapter> rows, {
+  bool dropEmptyBodies = false,
+  String fallbackChapterPrefix = '导入章节',
+}) {
+  final normalized = <ParsedNovelChapter>[];
+  for (final row in rows) {
+    final chapter = row.chapter.trim();
+    final chapterData = _normalizeExtractedText(row.chapterData);
+    if (dropEmptyBodies && chapterData.isEmpty) {
+      continue;
+    }
+    normalized.add(
+      ParsedNovelChapter(
+        chapterIndex: normalized.length + 1,
+        chapter: chapter.isEmpty
+            ? '$fallbackChapterPrefix ${normalized.length + 1}'
+            : chapter,
+        chapterData: chapterData,
+      ),
+    );
+  }
+  return normalized;
+}
+
 List<ParsedNovelChapter> parseWholeBookNovelText(
   String raw, {
   String fallbackChapterPrefix = '导入章节',
@@ -64,13 +98,17 @@ List<ParsedNovelChapter> parseWholeBookNovelText(
 
   final matches = _chapterHeaderPattern.allMatches(normalized).toList();
   if (matches.isEmpty) {
-    return <ParsedNovelChapter>[
-      ParsedNovelChapter(
-        chapterIndex: 1,
-        chapter: '$fallbackChapterPrefix 1',
-        chapterData: normalized,
-      ),
-    ];
+    return reindexParsedNovelChapters(
+      <ParsedNovelChapter>[
+        ParsedNovelChapter(
+          chapterIndex: 1,
+          chapter: '$fallbackChapterPrefix 1',
+          chapterData: normalized,
+        ),
+      ],
+      dropEmptyBodies: true,
+      fallbackChapterPrefix: fallbackChapterPrefix,
+    );
   }
 
   final chapters = <ParsedNovelChapter>[];
@@ -95,13 +133,21 @@ List<ParsedNovelChapter> parseWholeBookNovelText(
   }
 
   if (chapters.isEmpty) {
-    return <ParsedNovelChapter>[
-      ParsedNovelChapter(
-        chapterIndex: 1,
-        chapter: '$fallbackChapterPrefix 1',
-        chapterData: normalized,
-      ),
-    ];
+    return reindexParsedNovelChapters(
+      <ParsedNovelChapter>[
+        ParsedNovelChapter(
+          chapterIndex: 1,
+          chapter: '$fallbackChapterPrefix 1',
+          chapterData: normalized,
+        ),
+      ],
+      dropEmptyBodies: true,
+      fallbackChapterPrefix: fallbackChapterPrefix,
+    );
   }
-  return chapters;
+  return reindexParsedNovelChapters(
+    chapters,
+    dropEmptyBodies: true,
+    fallbackChapterPrefix: fallbackChapterPrefix,
+  );
 }
