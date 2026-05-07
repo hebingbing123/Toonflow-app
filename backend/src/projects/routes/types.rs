@@ -495,6 +495,9 @@ pub struct PatchStyleConfigBody {
 #[derive(Debug, Deserialize, Default, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CreateProjectBody {
+    /// Optional explicit workspace target (`workspaceId`). Omit to use current workspace context.
+    #[serde(default)]
+    pub workspace_id: Option<Uuid>,
     #[serde(default)]
     pub name: Option<String>,
     #[serde(default)]

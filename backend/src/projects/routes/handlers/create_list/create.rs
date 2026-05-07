@@ -26,6 +26,7 @@ use super::super::super::validation::{
         (status = 201, description = "Created", body = ProjectRow),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
     security(("bearerAuth" = []))
@@ -37,7 +38,63 @@ pub(crate) async fn create_project(
 ) -> Result<(StatusCode, Json<ProjectRow>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let workspace = ensure_personal_workspace(pool, uid).await?;
+    let personal = ensure_personal_workspace(pool, uid).await?;
+
+    let scope_workspace_id = if let Some(requested_workspace_id) = body.workspace_id {
+        let row: Option<(uuid::Uuid, Option<chrono::DateTime<chrono::Utc>>)> = sqlx::query_as(
+            r#"
+            SELECT w.id, w.archived_at
+            FROM public.app_workspace w
+            INNER JOIN public.app_workspace_member m ON m.workspace_id = w.id
+            WHERE w.id = $1 AND m.user_id = $2
+            LIMIT 1
+            "#,
+        )
+        .bind(requested_workspace_id)
+        .bind(uid)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        let Some((workspace_id, archived_at)) = row else {
+            return Err(ApiError::Forbidden(
+                "not a member of the target workspace".into(),
+            ));
+        };
+        if archived_at.is_some() {
+            return Err(ApiError::BadRequest(
+                "cannot create project in archived workspace".into(),
+            ));
+        }
+        workspace_id
+    } else {
+        sqlx::query_scalar(
+            r#"
+            SELECT COALESCE(
+              (
+                SELECT p.current_workspace_id
+                FROM public.app_user_profile p
+                INNER JOIN public.app_workspace w ON w.id = p.current_workspace_id
+                WHERE p.user_id = $1
+                  AND p.current_workspace_id IS NOT NULL
+                  AND w.archived_at IS NULL
+                  AND EXISTS (
+                    SELECT 1
+                    FROM public.app_workspace_member m
+                    WHERE m.workspace_id = p.current_workspace_id
+                      AND m.user_id = $1
+                  )
+                LIMIT 1
+              ),
+              $2
+            ) AS workspace_id
+            "#,
+        )
+        .bind(uid)
+        .bind(personal.workspace_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    };
 
     let target_platforms = body.target_platforms.as_ref().map(|platforms| {
         platforms
@@ -105,7 +162,7 @@ pub(crate) async fn create_project(
         "#,
     )
     .bind(uid)
-    .bind(workspace.workspace_id)
+    .bind(scope_workspace_id)
     .bind(next_numeric_id)
     .bind(trim_opt(body.name))
     .bind(trim_opt(body.intro))
