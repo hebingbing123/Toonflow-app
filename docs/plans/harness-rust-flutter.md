@@ -52,7 +52,7 @@ isProject: false
 
 # OpenFlow-app 技术 review 与 Rust / Harness Engineering 路线评估
 
-**建议阅读顺序**：**§0–§6**（目标与取舍）→ **§11**（单仓与 API/WS/CI 默认）→ **§7–§9**（已确认前提、仍待拍板、速查索引）→ **§8**（分支）→ **§12–§13**（SaaS/计费与工程加深项）。**§4.x** 在涉及库与 Auth 时细读。文首 YAML 的 **`product-shipping-bar`** 汇总「完整产品切换」门禁（parity、回归、blocking 子项、灰度），**完成态与 `decommission-electron` 对齐**，与 **`rust-backend-mvp`**（后端首条验收）区分。**Parity 主表**：[**`electron-node-parity.md`**](./electron-node-parity.md)。**按方向拆分的进度索引**（仓库、契约、后端、Harness、任务与计费、质量、Flutter、发版 parity）：[**`roadmap-index.md`**](./roadmap-index.md)。
+**建议阅读顺序**：**§0–§6**（目标与取舍）→ **§11**（单仓与 API/WS/CI 默认）→ **§7–§9**（已确认前提、仍待拍板、速查索引）→ **§8**（分支）→ **§12–§13**（SaaS/计费与工程加深项）。**§4.x** 在涉及库与 Auth 时细读。文首 YAML 的 **`product-shipping-bar`** 汇总「完整产品切换」门禁（parity、回归、blocking 子项、灰度），**完成态与 `decommission-electron` 对齐**，与 **`rust-backend-mvp`**（后端首条验收）区分。**Parity 主表**：[**`electron-node-parity.md`**](./electron-node-parity.md)。**按方向拆分的进度索引**（仓库、契约、后端、Harness、任务与计费、质量、Flutter、发版 parity）：[**`roadmap-index.md`**](./roadmap-index.md)。任务队列：**默认仍以 Postgres 为真源**（§7.1、YAML `jobs-and-webhook-hardening`）；**Redis / 云托管旁路队列仅在量化瓶颈 Gate 通过后立项**，执行拆解见 [**`roadmap-jobs-saas.md`**](./roadmap-jobs-saas.md)，避免将「拆分路线图里的必做」误解成「默认必须上 Redis」。
 
 **资产 workbench（旧 Electron `/api/assets` 兼容面）**：已**不再**注册顶层 **`POST /api/v1/assets/*`**；与旧栈对齐的读写在 **`POST /api/v1/projects/{project_id}/assets/workbench/*`**（**`project_id`** = **`app_project.id`**，UUID）。详见 parity 表中 **`/api/assets/*`** 一行；Rust 实现为 **`backend/src/assets/workbench_write.rs`** 与 **`workbench_query/`**。HTTP 收敛清单与后续阶段见 **[`http-api-cleanup.md`](./http-api-cleanup.md)**。
 

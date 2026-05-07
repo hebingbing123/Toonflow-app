@@ -46,7 +46,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 | **依赖** | `DATABASE_URL`、`SUPABASE_JWT_SECRET`；现有 `app::pg_contract_tests` 模式。 |
 | **PR 切片** | （1）在 `backend/src/app/mod.rs`（或专用 `pg_contract_tests` 子模块）新增 `#[ignore]` 场景；（2）每条路径独立测试函数，避免巨型单测。 |
 | **触点** | `backend/src/app/mod.rs`；各竖切 `handlers`；母文档 `rust-backend-mvp` 所列 REST。 |
-| **测试** | `cargo test -p <crate> <test_name> -- --ignored`（本地/CI nightly）；默认 CI 仍跑非 ignore 集合。 |
+| **测试** | `cd backend && cargo test <filter> -- --ignored`（本地/CI nightly）；默认 CI 仍跑非 ignore 集合。 |
 | **回滚** | 删除新增测试或标记 skip，不影响生产行为。 |
 
 ### WP-B：`video_count` 与统计语义对齐产品
@@ -90,7 +90,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 | **依赖** | 当前 LLM envelope 与 `harness.agent.run` 协议；**必做**：产品书面定稿并行工具与交错语义。 |
 | **PR 切片** | （1）wire 协议增量：`backend/src/harness/wire.rs`；（2）dispatch：`ws/dispatch` + `ws/agent.rs`；（3）Flutter 客户端解析；（4）文档。 |
 | **触点** | `backend/src/harness/wire.rs`；`backend/src/harness/ws/agent.rs`；`frontend/lib/agent_workspaces/`（或等价 WS 客户端）。 |
-| **测试** | 契约测试或集成 fake LLM；WS 顺序快照测试。 |
+| **测试** | **必做**：契约或 fake LLM 集成；**必做**：WS 顺序/快照回归（关键事件序列锁定）。 |
 | **回滚** | 协议版本协商：旧客户端走旧事件子集。 |
 
 ### WP-F：Trace / 结构化观测与 OTel 导出（必做）

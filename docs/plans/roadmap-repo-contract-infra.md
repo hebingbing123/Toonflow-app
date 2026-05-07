@@ -22,7 +22,8 @@ YAML：`git-branch`、`monorepo-layout`、`api-contract`、`postgres-ops`、`sup
 
 ## 验收
 
-- OpenAPI 可导出且与 `scripts/fixtures/openapi_baseline.yaml` 一致。
+- OpenAPI 可导出且与 `scripts/check_openapi_drift.sh` 所用 baseline（`scripts/fixtures/openapi_baseline.yaml`）一致。
+- `scripts/check_rust_api_consistency.sh`（由 `yarn refactor:check` 调用）无 drift。
 - `docs/websocket-events.md` 与实现一致（有变更则随门禁更新）。
 
 ## 执行计划与工作包

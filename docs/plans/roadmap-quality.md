@@ -47,7 +47,7 @@
 | **PR 切片** | （1）**必做**：导出工具（`scripts/` 或 `backend` 只读子命令）；（2）**必做**：`.github/workflows/` 定时或 `workflow_dispatch` job；（3）**必做**：golden 集更新说明与 CODEOWNER/review 规则。 |
 | **触点** | `backend/src/prompting/quality/handlers/bad_case_frequency.rs`；CI `ci.yml`。 |
 | **测试** | CI job 失败时输出 diff（哪些 id 退化）。 |
-| **回滚** | 关闭 workflow；不影响线上。 |
+| **回滚** | 仅故障或模板错误时暂停 job；**正常运行须保持 workflow 启用**，避免「必做门禁」名存实亡。 |
 
 ### WP-C：分环节通过率产品化面板
 

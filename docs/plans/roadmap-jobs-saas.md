@@ -14,10 +14,13 @@ YAML：`jobs-and-webhook-hardening`、`saas-product-spec`。
 
 ### Jobs / 队列
 
+与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) **§7.1 / YAML `jobs-and-webhook-hardening`** 一致：**默认真源为 Postgres**（`SKIP LOCKED`）；Redis / 云托管队列为 **旁路升级**，非默认里程碑。
+
 | 内容 | 状态 | 备注 |
 |------|------|------|
-| Redis / 托管队列第二后端 | `next` | **必做**；顺序在队列抽象与 PG 路径稳定之后；PG 保留兼容或降级路径 |
-| 全局限流与滥用防护（plan_tier） | `next` | **必做**；与各 tier 限额表一致 |
+| PG 队列：观测、容量 Runbook、队列抽象（trait/factory） | `next` | **必做**；未触发旁路 Gate 前持续交付 |
+| Redis / 云托管第二队列 | `blocked` | **架构 Gate**：仅当书面瓶颈指标（延迟、锁竞争、写入吞吐等）评审通过 → 转 `next` 并执行 WP-A1；否则维持 PG-only |
+| 全局限流与滥用防护（plan_tier） | `next` | **必做**；与各 tier 限额表一致；**默认不依赖 Redis**（见母文档 §13 / `tower_governor`） |
 
 ### SaaS / 收单
 
@@ -34,16 +37,27 @@ YAML：`jobs-and-webhook-hardening`、`saas-product-spec`。
 
 > **维护约定**：与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 及上文表格一致；落地时在同一竖切或跟进 PR 中更新对应 WP。与实现冲突处以代码与 OpenAPI 为准。
 
-### WP-A：Redis / 托管队列第二后端（必做，顺序后置）
+### WP-A0：PG 队列观测 + 队列抽象就绪（必做，默认路径）
 
 | 项 | 内容 |
 |----|------|
-| **目标** | **必做**落地第二队列实现（Redis 或云托管队列），支撑峰值与多实例运维目标；[`jobs/queue/pg.rs`](../../backend/src/jobs/queue/pg.rs) 保持 **兼容真源或降级路径**，Runbook 写明切换条件。 |
-| **依赖** | 运维确认目标队列产品；幂等、重复消费、可见性超时语义书面定稿。 |
-| **PR 切片** | （1）队列抽象补齐（trait / factory）；（2）第二后端实现 + 配置切换；（3）**必做**：双写或影子流量验证期，直至对比指标达标；（4）Runbook（切换、排空、故障降级）。 |
-| **触点** | `backend/src/jobs/queue/`；`backend/src/jobs/enqueue.rs`；`backend/src/jobs/worker/mod.rs`。 |
-| **测试** | **必做**：集成入队→消费；**必做**：故障注入（队列不可用 → 降级行为符合 Runbook）。 |
-| **回滚** | 配置切回 PG 路径；残留消息排空与数据对账步骤写入 Runbook。 |
+| **目标** | 在 **不实装 Redis** 的前提下，把 PG 队列跑清楚：**指标**（排队深度、claim 延迟、失败重试率）、**容量 Runbook**（如何水平扩 worker、如何读 PG 诊断）、**队列 trait/factory** 足以挂载第二后端（即便暂未启用）。 |
+| **依赖** | 现有 [`jobs/queue/pg.rs`](../../backend/src/jobs/queue/pg.rs)；运维愿保留 PG 为主要队列时的 SLO 定义。 |
+| **PR 切片** | （1）指标导出或日志字段（与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F 可共用 trace/job_id）；（2）文档：瓶颈 Gate 判定阈值（写入何种纪要即触发 WP-A1）；（3）代码：`jobs/queue/*` 抽象边界清晰。 |
+| **触点** | `backend/src/jobs/queue/`；`backend/src/jobs/worker/mod.rs`；`backend/src/jobs/enqueue.rs`。 |
+| **测试** | **必做**：现有集成路径保持绿；新增观测相关单测或烟雾（若有导出）。 |
+| **回滚** | 观测开关降级不影响任务执行。 |
+
+### WP-A1：Redis / 云托管第二队列（仅架构 Gate 通过后）
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 当 **WP-A0** 中书面 Gate 触发且评审签字后，落地第二后端（Redis 或云托管）；[`jobs/queue/pg.rs`](../../backend/src/jobs/queue/pg.rs) 保留 **降级或并行验证** 路径，Runbook 写明切换与排空。 |
+| **依赖** | Gate 纪要 + 运维选定产品；幂等、重复消费、可见性超时语义定稿。 |
+| **PR 切片** | （1）第二后端实现 + 配置切换；（2）双写或影子流量验证期至指标达标；（3）故障降级 Runbook。 |
+| **触点** | 同 WP-A0。 |
+| **测试** | **必做**：集成入队→消费；**必做**：故障注入（旁路不可用 → 符合 Runbook 的降级）。 |
+| **回滚** | 配置切回 PG-only；残留消息排空与对账写入 Runbook。 |
 
 ### WP-B：全局限流与滥用防护（plan_tier）
 
@@ -51,7 +65,7 @@ YAML：`jobs-and-webhook-hardening`、`saas-product-spec`。
 |----|------|
 | **目标** | 按 `plan_tier` / 用户 / IP 限制昂贵接口与 job 创建速率，与用量表一致。 |
 | **依赖** | 产品定义各 tier 限额；现有 `app_usage_event` 与 `/me` 字段。 |
-| **PR 切片** | （1）中间件或 handler 层计数（Redis 或 PG 滑动窗口）；（2）429 + 统一 `code`；（3）OpenAPI 描述；（4）Flutter 错误提示。 |
+| **PR 切片** | （1）中间件或 handler 层计数（**优先 PG / 进程内**；与母文档一致：**Redis 非 HTTP 限流默认路径**）；（2）429 + 统一 `code`；（3）OpenAPI 描述；（4）Flutter 错误提示。 |
 | **触点** | `backend/src/app/router/build.rs` 或各模块 `handlers`；`billing/` **须与订阅/tier 联动**；OpenAPI。 |
 | **测试** | **必做**：单元 + 烟雾覆盖超限码；回归现有契约路径不得静默损坏。 |
 | **回滚** | 临时调高限额须记 incident；长期禁止「永久关闭限流」作为常态。 |

@@ -3,7 +3,8 @@
 母文档：[`harness-rust-flutter.md`](./harness-rust-flutter.md)  
 YAML：`flutter-shell`。
 
-执行进度对照：[`toonflow-platform-progress.md`](./toonflow-platform-progress.md)（项目编辑器 / Agent 工作台 / 短剧空间等）。
+执行进度对照：[`toonflow-platform-progress.md`](./toonflow-platform-progress.md)（项目编辑器 / Agent 工作台 / 短剧空间等）。  
+小说 / 爬虫内容接入专项：[`novel-intake-crawler-plan.md`](./novel-intake-crawler-plan.md)（落地里程碑以进度文件为准）。
 
 ## 基线（当前分支）
 

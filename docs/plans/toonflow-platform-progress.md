@@ -16,7 +16,7 @@
 
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
-- 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
+- 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
 - 当前最新完成 commit：`c9557011`
 - 当前最新完成竖切：`内容接入竖切（小说爬虫 client/server + 托管调度 + 观测闭环）`
 

@@ -4,7 +4,8 @@
 YAML：`product-shipping-bar`、`master-detailed-parity-audit`、`decommission-electron`、`implementation-order`。
 
 主表：[`electron-node-parity.md`](./electron-node-parity.md)  
-审计：[`master-detailed-parity-audit.md`](./master-detailed-parity-audit.md)
+审计：[`master-detailed-parity-audit.md`](./master-detailed-parity-audit.md)  
+HTTP 收敛阶段：[`http-api-cleanup.md`](./http-api-cleanup.md)
 
 ## 基线（当前分支）
 
@@ -18,6 +19,7 @@ YAML：`product-shipping-bar`、`master-detailed-parity-audit`、`decommission-e
 | 内容 | 状态 | 备注 |
 |------|------|------|
 | Parity 表增量维护（新 REST/WS 必须回填） | `next` | **必做**；合并门禁 |
+| HTTP 收敛清单 / `http-api-cleanup` 阶段收口 | `next` | **必做**；与 OpenAPI、parity 表同步 |
 | 灰度 / 回滚 Runbook（部署拓扑、Feature flag） | `next` | **必做**；`product-shipping-bar` |
 | 九平台真实发布验收（P12） | `blocked` | **必做**；Gate：凭证/合规；见 [`.kiro/specs/short-video-space/P-SECTION-STATUS.md`](../../.kiro/specs/short-video-space/P-SECTION-STATUS.md) |
 
@@ -37,7 +39,7 @@ YAML：`product-shipping-bar`、`master-detailed-parity-audit`、`decommission-e
 | **目标** | 任意新增或语义变更的 REST/WS 在合并前更新 [`electron-node-parity.md`](./electron-node-parity.md)（或子表）与 OpenAPI/WS 文档。 |
 | **依赖** | Reviewer checklist **必做**；**必做**：Danger 或 GitHub bot **或** CI 校验 parity 片段变更——三者至少强化其一，禁止仅靠口头约定。 |
 | **PR 切片** | （1）PR 模板 checklist 一条「parity updated?」；（2）大功能：单独 docs commit。 |
-| **触点** | `electron-node-parity.md`；`docs/websocket-events.md`；`backend` OpenAPI 导出。 |
+| **触点** | `electron-node-parity.md`；[`http-api-cleanup.md`](./http-api-cleanup.md)；`docs/websocket-events.md`；`backend` OpenAPI 导出。 |
 | **测试** | `yarn refactor:check`；人工 diff parity 表与 router。 |
 | **回滚** | 文档 revert；不影响线上。 |
 
