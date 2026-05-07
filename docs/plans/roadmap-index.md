@@ -45,6 +45,8 @@
 | [`electron-node-parity.md`](./electron-node-parity.md) | 功能 parity 主表（发版前权威） |
 | [`master-detailed-parity-audit.md`](./master-detailed-parity-audit.md) | master 逐项审计结论 |
 | [仓库根 `AGENTS.md`](../../AGENTS.md) | Agent 门禁、`yarn refactor:check`、commit 约定 |
+| [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md) | PG 队列 WP-A0 竖切（指标、Runbook、旁路队列 Gate） |
+| [`tasks-http-api-cleanup.md`](./tasks-http-api-cleanup.md) | HTTP 收敛 **B·其余域** 竖切（H0–H5） |
 
 ## 你怎么用
 

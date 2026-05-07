@@ -39,6 +39,8 @@ YAML：`jobs-and-webhook-hardening`、`saas-product-spec`。
 
 ### WP-A0：PG 队列观测 + 队列抽象就绪（必做，默认路径）
 
+**竖切清单（勾选执行）**：[**`tasks-pg-queue-observability.md`**](./tasks-pg-queue-observability.md)。
+
 | 项 | 内容 |
 |----|------|
 | **目标** | 在 **不实装 Redis** 的前提下，把 PG 队列跑清楚：**指标**（排队深度、claim 延迟、失败重试率）、**容量 Runbook**（如何水平扩 worker、如何读 PG 诊断）、**队列 trait/factory** 足以挂载第二后端（即便暂未启用）。 |

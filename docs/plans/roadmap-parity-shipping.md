@@ -5,7 +5,7 @@ YAML：`product-shipping-bar`、`master-detailed-parity-audit`、`decommission-e
 
 主表：[`electron-node-parity.md`](./electron-node-parity.md)  
 审计：[`master-detailed-parity-audit.md`](./master-detailed-parity-audit.md)  
-HTTP 收敛阶段：[`http-api-cleanup.md`](./http-api-cleanup.md)
+HTTP 收敛阶段：[`http-api-cleanup.md`](./http-api-cleanup.md) · 执行清单：[`tasks-http-api-cleanup.md`](./tasks-http-api-cleanup.md)
 
 ## 基线（当前分支）
 
