@@ -152,17 +152,23 @@ pub(crate) async fn run_voiceover_generate(
 
 async fn load_project_voice_profile(
     pool: &PgPool,
-    owner_user_id: Uuid,
+    actor_user_id: Uuid,
     project_numeric_id: i32,
 ) -> Result<Option<String>, JobRunError> {
     let row = sqlx::query_scalar::<_, Option<String>>(
         r#"
         SELECT voice_profile
         FROM app_project
-        WHERE owner_user_id = $1 AND numeric_id = $2
+        WHERE numeric_id = $2
+          AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = app_project.workspace_id
+                  AND wm.user_id = $1
+          )
         "#,
     )
-    .bind(owner_user_id)
+    .bind(actor_user_id)
     .bind(project_numeric_id)
     .fetch_optional(pool)
     .await
@@ -181,7 +187,7 @@ fn payload_json_i32(payload: &Value, key: &str) -> Result<i32, JobRunError> {
 
 async fn load_storyboard_uuid(
     pool: &PgPool,
-    owner_user_id: Uuid,
+    actor_user_id: Uuid,
     project_numeric_id: i32,
     script_numeric_id: i32,
     storyboard_numeric_id: i32,
@@ -192,20 +198,25 @@ async fn load_storyboard_uuid(
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
+        WHERE EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $1
+          )
           AND p.numeric_id = $2
           AND sc.numeric_id = $3
           AND sb.numeric_id = $4
         "#,
     )
-    .bind(owner_user_id)
+    .bind(actor_user_id)
     .bind(project_numeric_id)
     .bind(script_numeric_id)
     .bind(storyboard_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| JobRunError::Failed(e.to_string()))?
-    .ok_or_else(|| JobRunError::Failed("storyboard not found in owned scope".into()))
+    .ok_or_else(|| JobRunError::Failed("storyboard not found in workspace member scope".into()))
 }
 
 async fn load_storyboard_seed(

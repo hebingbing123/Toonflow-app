@@ -58,7 +58,12 @@ pub(crate) async fn run_production_storyboard_batch_generate_image(
         FROM app_storyboard sb
         INNER JOIN app_script s ON s.id = sb.script_id
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
+        WHERE EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $1
+          )
           AND p.numeric_id = $2
           AND s.numeric_id = $3
           AND sb.numeric_id = $4
