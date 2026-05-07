@@ -9,9 +9,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
-use super::super::access::require_project_owned;
 use super::super::store::{fetch_draft, list_targets, replace_targets};
 use super::super::target_from_row;
 use super::super::types::{PublishTargetResponse, UpsertPublishTargetsBody};
@@ -39,7 +39,7 @@ pub(crate) async fn list_publish_targets(
 ) -> Result<Json<Vec<PublishTargetResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     if fetch_draft(pool, project_id, draft_id).await?.is_none() {
         return Err(ApiError::NotFound);
     }
@@ -72,7 +72,7 @@ pub(crate) async fn upsert_publish_targets(
 ) -> Result<Json<Vec<PublishTargetResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     if fetch_draft(pool, project_id, draft_id).await?.is_none() {
         return Err(ApiError::NotFound);
     }

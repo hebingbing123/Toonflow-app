@@ -37,20 +37,18 @@ pub(crate) async fn insert_publish_job(
 pub(crate) async fn list_jobs(
     pool: &PgPool,
     project_id: Uuid,
-    owner_user_id: Uuid,
 ) -> Result<Vec<PublishJobRow>, ApiError> {
     sqlx::query_as::<_, PublishJobRow>(
         r#"
         SELECT id, project_id, draft_id, owner_user_id, status, semi_auto_ack_at,
                payload, error_message, error_details, claimed_by, created_at, updated_at
         FROM app_publish_job
-        WHERE project_id = $1 AND owner_user_id = $2
+        WHERE project_id = $1
         ORDER BY created_at DESC
         LIMIT 100
         "#,
     )
     .bind(project_id)
-    .bind(owner_user_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
@@ -67,7 +65,6 @@ pub(crate) struct ListAttemptAuditFilter<'a> {
 pub(crate) async fn list_attempt_audit(
     pool: &PgPool,
     project_id: Uuid,
-    owner_user_id: Uuid,
     filter: ListAttemptAuditFilter<'_>,
 ) -> Result<Vec<PublishAttemptAuditRow>, ApiError> {
     let capped_limit = filter.limit.clamp(1, 200);
@@ -98,17 +95,15 @@ pub(crate) async fn list_attempt_audit(
         INNER JOIN app_publish_job AS j ON j.id = a.job_id
         INNER JOIN app_publish_target AS t ON t.id = a.target_id
         WHERE j.project_id = $1
-          AND j.owner_user_id = $2
-          AND ($3::uuid IS NULL OR j.draft_id = $3)
-          AND ($4::uuid IS NULL OR j.id = $4)
-          AND ($5::text IS NULL OR a.detail->>'delivery_mode' = $5)
-          AND ($6::text IS NULL OR COALESCE(a.detail->'evidence', '{}'::jsonb) ? $6)
+          AND ($2::uuid IS NULL OR j.draft_id = $2)
+          AND ($3::uuid IS NULL OR j.id = $3)
+          AND ($4::text IS NULL OR a.detail->>'delivery_mode' = $4)
+          AND ($5::text IS NULL OR COALESCE(a.detail->'evidence', '{}'::jsonb) ? $5)
         ORDER BY a.created_at DESC
-        LIMIT $7
+        LIMIT $6
         "#,
     )
     .bind(project_id)
-    .bind(owner_user_id)
     .bind(filter.draft_id)
     .bind(filter.job_id)
     .bind(delivery_mode)
@@ -122,7 +117,6 @@ pub(crate) async fn list_attempt_audit(
 pub(crate) async fn list_low_performance_alerts(
     pool: &PgPool,
     project_id: Uuid,
-    owner_user_id: Uuid,
     views_lt: i64,
     completion_rate_lt: f64,
     limit: i64,
@@ -149,19 +143,15 @@ pub(crate) async fn list_low_performance_alerts(
           WHERE project_id = $1
           ORDER BY target_id, synced_at DESC
         ) AS s
-        INNER JOIN app_publish_draft AS d ON d.id = s.draft_id
-        INNER JOIN app_project AS p ON p.id = d.project_id
-        WHERE p.owner_user_id = $2
-          AND (
-            COALESCE(s.views, 0) < $3
-            OR COALESCE(s.completion_rate, 0)::DOUBLE PRECISION < $4
-          )
+        WHERE (
+          COALESCE(s.views, 0) < $2
+          OR COALESCE(s.completion_rate, 0)::DOUBLE PRECISION < $3
+        )
         ORDER BY s.synced_at DESC
-        LIMIT $5
+        LIMIT $4
         "#,
     )
     .bind(project_id)
-    .bind(owner_user_id)
     .bind(capped_views)
     .bind(capped_cr)
     .bind(capped_limit)
@@ -174,19 +164,17 @@ pub(crate) async fn fetch_job_owned(
     pool: &PgPool,
     project_id: Uuid,
     job_id: Uuid,
-    owner_user_id: Uuid,
 ) -> Result<Option<PublishJobRow>, ApiError> {
     sqlx::query_as::<_, PublishJobRow>(
         r#"
         SELECT id, project_id, draft_id, owner_user_id, status, semi_auto_ack_at,
                payload, error_message, error_details, claimed_by, created_at, updated_at
         FROM app_publish_job
-        WHERE id = $1 AND project_id = $2 AND owner_user_id = $3
+        WHERE id = $1 AND project_id = $2
         "#,
     )
     .bind(job_id)
     .bind(project_id)
-    .bind(owner_user_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
@@ -196,18 +184,16 @@ pub(crate) async fn cancel_job_if_non_terminal(
     pool: &PgPool,
     project_id: Uuid,
     job_id: Uuid,
-    owner_user_id: Uuid,
 ) -> Result<bool, ApiError> {
     let res = sqlx::query(
         r#"
         UPDATE app_publish_job SET status = 'cancelled', updated_at = NOW()
-        WHERE id = $1 AND project_id = $2 AND owner_user_id = $3
+        WHERE id = $1 AND project_id = $2
           AND status NOT IN ('succeeded', 'failed', 'cancelled', 'partial_failed')
         "#,
     )
     .bind(job_id)
     .bind(project_id)
-    .bind(owner_user_id)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -218,7 +204,6 @@ pub(crate) async fn retry_job_if_allowed(
     pool: &PgPool,
     project_id: Uuid,
     job_id: Uuid,
-    owner_user_id: Uuid,
 ) -> Result<bool, ApiError> {
     let mut tx = pool
         .begin()
@@ -229,14 +214,13 @@ pub(crate) async fn retry_job_if_allowed(
         r#"
         SELECT draft_id
         FROM app_publish_job
-        WHERE id = $1 AND project_id = $2 AND owner_user_id = $3
+        WHERE id = $1 AND project_id = $2
           AND status IN ('failed', 'cancelled', 'partial_failed')
         FOR UPDATE
         "#,
     )
     .bind(job_id)
     .bind(project_id)
-    .bind(owner_user_id)
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -321,7 +305,6 @@ pub(crate) async fn confirm_semi_auto_job(
     pool: &PgPool,
     project_id: Uuid,
     job_id: Uuid,
-    owner_user_id: Uuid,
 ) -> Result<bool, ApiError> {
     let res = sqlx::query(
         r#"
@@ -329,13 +312,12 @@ pub(crate) async fn confirm_semi_auto_job(
           semi_auto_ack_at = NOW(),
           status = 'uploading',
           updated_at = NOW()
-        WHERE id = $1 AND project_id = $2 AND owner_user_id = $3
+        WHERE id = $1 AND project_id = $2
           AND status = 'awaiting_confirmation'
         "#,
     )
     .bind(job_id)
     .bind(project_id)
-    .bind(owner_user_id)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

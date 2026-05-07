@@ -11,9 +11,9 @@ use uuid::Uuid;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::http_kit::request_dedupe::{dedupe_publish_overview, RequestDedupeKey};
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
-use super::access::require_project_owned;
 use super::store::{
     fetch_draft, list_attempt_audit, list_drafts, list_jobs, list_low_performance_alerts,
     list_targets, ListAttemptAuditFilter,
@@ -165,7 +165,7 @@ pub(crate) async fn publish_overview(
 ) -> Result<Json<PublishOverviewResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     // J.6: Deduplicate concurrent identical requests
     let dedupe_key =
@@ -175,12 +175,11 @@ pub(crate) async fn publish_overview(
         // Fetch all data in parallel for optimal performance
         let (drafts_rows, jobs_rows, perf_alerts_rows, audit_rows) = tokio::try_join!(
             list_drafts(pool, project_id, None),
-            list_jobs(pool, project_id, uid),
-            list_low_performance_alerts(pool, project_id, uid, 1000, 0.45, 50),
+            list_jobs(pool, project_id),
+            list_low_performance_alerts(pool, project_id, 1000, 0.45, 50),
             list_attempt_audit(
                 pool,
                 project_id,
-                uid,
                 ListAttemptAuditFilter {
                     draft_id: None,
                     job_id: None,

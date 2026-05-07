@@ -9,9 +9,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
-use super::super::access::require_project_owned;
 use super::super::profile_from_row;
 use super::super::store::{
     delete_profile, fetch_profile, insert_profile, list_profiles, patch_profile_row,
@@ -39,7 +39,7 @@ pub(crate) async fn list_publish_profiles(
 ) -> Result<Json<Vec<PublishProfileResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     let rows = list_profiles(pool, project_id).await?;
     Ok(Json(rows.into_iter().map(profile_from_row).collect()))
 }
@@ -66,7 +66,7 @@ pub(crate) async fn create_publish_profile(
 ) -> Result<Json<PublishProfileResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     if body.name.trim().is_empty() {
         return Err(ApiError::BadRequest("name must not be empty".into()));
     }
@@ -96,7 +96,7 @@ pub(crate) async fn get_publish_profile(
 ) -> Result<Json<PublishProfileResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     let row = fetch_profile(pool, project_id, profile_id)
         .await?
         .ok_or(ApiError::NotFound)?;
@@ -127,7 +127,7 @@ pub(crate) async fn patch_publish_profile(
 ) -> Result<Json<PublishProfileResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     if let Some(ref name) = body.name {
         if name.trim().is_empty() {
             return Err(ApiError::BadRequest("name must not be empty".into()));
@@ -161,7 +161,7 @@ pub(crate) async fn delete_publish_profile(
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     if delete_profile(pool, project_id, profile_id).await? {
         Ok(axum::http::StatusCode::NO_CONTENT)
     } else {

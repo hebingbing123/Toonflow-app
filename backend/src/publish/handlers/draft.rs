@@ -10,11 +10,10 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
-use super::super::access::{
-    profile_belongs_to_project, require_project_owned, script_belongs_to_project,
-};
+use super::super::access::{profile_belongs_to_project, script_belongs_to_project};
 use super::super::draft_from_row;
 use super::super::store::{
     delete_draft, fetch_draft, insert_draft, list_drafts, patch_draft_row, ScheduledDraftUtcWindow,
@@ -56,7 +55,7 @@ pub(crate) async fn list_publish_drafts(
 ) -> Result<Json<Vec<PublishDraftResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     let window = resolve_scheduled_draft_window(&q)?;
     let rows = list_drafts(pool, project_id, window).await?;
     Ok(Json(rows.into_iter().map(draft_from_row).collect()))
@@ -119,7 +118,7 @@ pub(crate) async fn create_publish_draft(
 ) -> Result<Json<PublishDraftResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     validate_draft_status(body.draft_status.trim())?;
 
     if let Some(pid) = body.profile_id {
@@ -163,7 +162,7 @@ pub(crate) async fn get_publish_draft(
 ) -> Result<Json<PublishDraftResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     let row = fetch_draft(pool, project_id, draft_id)
         .await?
         .ok_or(ApiError::NotFound)?;
@@ -194,7 +193,7 @@ pub(crate) async fn patch_publish_draft(
 ) -> Result<Json<PublishDraftResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     if let Some(ref ds) = body.draft_status {
         validate_draft_status(ds.trim())?;
@@ -242,7 +241,7 @@ pub(crate) async fn delete_publish_draft_handler(
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     if delete_draft(pool, project_id, draft_id).await? {
         Ok(axum::http::StatusCode::NO_CONTENT)
     } else {

@@ -9,9 +9,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
-use super::super::access::require_project_owned;
 use super::super::platform_registry::capability_matrix;
 use super::super::store::{
     list_attempt_audit, list_low_performance_alerts, ListAttemptAuditFilter,
@@ -47,8 +47,8 @@ pub(crate) async fn publish_platform_matrix(
     headers: HeaderMap,
 ) -> Result<Json<PublishPlatformMatrixResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _pool = state.require_pool()?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     Ok(Json(platform_matrix_body()))
 }
 
@@ -79,11 +79,10 @@ pub(crate) async fn list_publish_audit(
 ) -> Result<Json<Vec<PublishAttemptAuditResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     let rows = list_attempt_audit(
         pool,
         project_id,
-        uid,
         ListAttemptAuditFilter {
             draft_id: q.draft_id,
             job_id: q.job_id,
@@ -121,16 +120,10 @@ pub(crate) async fn list_publish_performance_alerts(
 ) -> Result<Json<Vec<PublishPerformanceAlertResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
-    let rows = list_low_performance_alerts(
-        pool,
-        project_id,
-        uid,
-        q.views_lt,
-        q.completion_rate_lt,
-        q.limit,
-    )
-    .await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let rows =
+        list_low_performance_alerts(pool, project_id, q.views_lt, q.completion_rate_lt, q.limit)
+            .await?;
     Ok(Json(
         rows.into_iter().map(performance_alert_from_row).collect(),
     ))
@@ -163,7 +156,7 @@ pub(crate) async fn process_performance_alerts(
 ) -> Result<Json<Vec<crate::prompting::quality::QualityReview>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     let thresholds = super::super::performance_rework::PerformanceThresholds {
         min_views: query.views_lt,

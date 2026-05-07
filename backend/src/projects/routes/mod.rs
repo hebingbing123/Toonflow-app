@@ -2,7 +2,7 @@
 //!
 //! 项目 CRUD 和遗留项目端点的处理器。
 
-mod common;
+pub(crate) mod common;
 pub(crate) mod handlers;
 pub(crate) mod types;
 mod validation;

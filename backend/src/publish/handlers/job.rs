@@ -9,9 +9,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
-use super::super::access::require_project_owned;
 use super::super::job_from_row;
 use super::super::state_machine::{can_cancel, can_confirm_semi_auto, can_retry};
 use super::super::store::{
@@ -43,7 +43,7 @@ pub(crate) async fn publish_prepare_check(
 ) -> Result<Json<PublishPrepareCheckResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
     let draft = fetch_draft(pool, project_id, draft_id)
         .await?
         .ok_or(ApiError::NotFound)?;
@@ -82,7 +82,7 @@ pub(crate) async fn create_publish_job(
 ) -> Result<Json<PublishJobResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     let draft = fetch_draft(pool, project_id, draft_id)
         .await?
@@ -173,8 +173,8 @@ pub(crate) async fn list_publish_jobs(
 ) -> Result<Json<Vec<PublishJobResponse>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
-    let rows = list_jobs(pool, project_id, uid).await?;
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let rows = list_jobs(pool, project_id).await?;
     Ok(Json(rows.into_iter().map(job_from_row).collect()))
 }
 
@@ -201,14 +201,14 @@ pub(crate) async fn cancel_publish_job(
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
-    let job = fetch_job_owned(pool, project_id, job_id, uid)
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let job = fetch_job_owned(pool, project_id, job_id)
         .await?
         .ok_or(ApiError::NotFound)?;
     if !can_cancel(&job.status) {
         return Err(ApiError::Conflict("job already in terminal status".into()));
     }
-    if cancel_job_if_non_terminal(pool, project_id, job_id, uid).await? {
+    if cancel_job_if_non_terminal(pool, project_id, job_id).await? {
         Ok(axum::http::StatusCode::NO_CONTENT)
     } else {
         Err(ApiError::Conflict("job could not be cancelled".into()))
@@ -238,8 +238,8 @@ pub(crate) async fn retry_publish_job(
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
-    let job = fetch_job_owned(pool, project_id, job_id, uid)
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let job = fetch_job_owned(pool, project_id, job_id)
         .await?
         .ok_or(ApiError::NotFound)?;
     if !can_retry(&job.status) {
@@ -247,7 +247,7 @@ pub(crate) async fn retry_publish_job(
             "job cannot be retried from current status".into(),
         ));
     }
-    if retry_job_if_allowed(pool, project_id, job_id, uid).await? {
+    if retry_job_if_allowed(pool, project_id, job_id).await? {
         Ok(axum::http::StatusCode::NO_CONTENT)
     } else {
         Err(ApiError::Conflict("retry not applied".into()))
@@ -277,8 +277,8 @@ pub(crate) async fn confirm_publish_job_semi_auto(
 ) -> Result<Json<PublishJobResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    require_project_owned(pool, uid, project_id).await?;
-    let job = fetch_job_owned(pool, project_id, job_id, uid)
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let job = fetch_job_owned(pool, project_id, job_id)
         .await?
         .ok_or(ApiError::NotFound)?;
     if !can_confirm_semi_auto(&job.status) {
@@ -286,11 +286,11 @@ pub(crate) async fn confirm_publish_job_semi_auto(
             "job is not awaiting semi-auto confirmation".into(),
         ));
     }
-    if !confirm_semi_auto_job(pool, project_id, job_id, uid).await? {
+    if !confirm_semi_auto_job(pool, project_id, job_id).await? {
         return Err(ApiError::Conflict("confirmation not applied".into()));
     }
 
-    let updated = fetch_job_owned(pool, project_id, job_id, uid)
+    let updated = fetch_job_owned(pool, project_id, job_id)
         .await?
         .ok_or(ApiError::NotFound)?;
     Ok(Json(job_from_row(updated)))

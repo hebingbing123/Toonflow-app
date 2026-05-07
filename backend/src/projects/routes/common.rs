@@ -27,11 +27,11 @@ pub(super) fn merge_text_patch(
 }
 
 #[derive(Debug, Clone, Copy, sqlx::FromRow)]
-pub(super) struct ProjectAccessScope {
+pub(crate) struct ProjectAccessScope {
     pub id: Uuid,
 }
 
-pub(super) async fn require_project_workspace_member_scope(
+pub(crate) async fn require_project_workspace_member_scope(
     state: &AppState,
     user_id: Uuid,
     project_id: Uuid,
