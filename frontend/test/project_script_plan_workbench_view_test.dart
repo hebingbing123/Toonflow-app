@@ -31,6 +31,15 @@ void main() {
                 eventNames: ['主角撞见秘密'],
               ),
             ],
+            guidanceSummaryLine: '已生成 1 份结构化改写 guidance',
+            guidanceRows: const [
+              StructuredRewriteGuidance(
+                name: '第1集',
+                chapterIndexes: [1, 2],
+                eventNames: ['主角撞见秘密'],
+                content: '【改写目标】\n先把主冲突拉满',
+              ),
+            ],
             planData: const ScriptAgentPlanData(
               planId: 12,
               storySkeleton: '三幕结构',
@@ -47,6 +56,7 @@ void main() {
             onFillAdaptationStrategySeed: null,
             onGenerateDraftPackets: null,
             onWriteDraftPackets: null,
+            onGenerateGuidance: null,
             onClose: null,
           ),
         ),
@@ -59,14 +69,17 @@ void main() {
     expect(find.textContaining('planId 12'), findsOneWidget);
     expect(find.textContaining('覆盖 5/6 条章节'), findsOneWidget);
     expect(find.textContaining('已生成 1 份剧本初稿'), findsOneWidget);
+    expect(find.textContaining('已生成 1 份结构化改写 guidance'), findsOneWidget);
     expect(find.widgetWithText(TextField, '三幕结构'), findsOneWidget);
     expect(find.widgetWithText(TextField, '角色先压后扬'), findsOneWidget);
     expect(find.text('用事件填充骨架草稿'), findsOneWidget);
     expect(find.text('用事件填充策略草稿'), findsOneWidget);
     expect(find.text('生成剧本初稿包'), findsOneWidget);
+    expect(find.text('生成结构化改写 guidance'), findsOneWidget);
     expect(find.text('写入剧本初稿'), findsOneWidget);
     expect(find.text('剧本初稿预览'), findsOneWidget);
-    expect(find.text('第1集'), findsOneWidget);
+    expect(find.text('结构化改写 Guidance'), findsOneWidget);
+    expect(find.text('第1集'), findsNWidgets(2));
     expect(find.text('刷新计划'), findsOneWidget);
     expect(find.text('保存计划'), findsOneWidget);
   });

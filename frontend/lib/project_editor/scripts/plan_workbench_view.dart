@@ -13,6 +13,8 @@ class ProjectScriptPlanWorkbenchViewModel {
     required this.eventSummaryLine,
     required this.draftSummaryLine,
     required this.draftPackets,
+    required this.guidanceSummaryLine,
+    required this.guidanceRows,
   });
 
   final bool localBusy;
@@ -23,6 +25,8 @@ class ProjectScriptPlanWorkbenchViewModel {
   final String eventSummaryLine;
   final String draftSummaryLine;
   final List<ScriptDraftPacket> draftPackets;
+  final String guidanceSummaryLine;
+  final List<StructuredRewriteGuidance> guidanceRows;
 }
 
 class ProjectScriptPlanWorkbenchViewCallbacks {
@@ -33,6 +37,7 @@ class ProjectScriptPlanWorkbenchViewCallbacks {
     required this.onFillAdaptationStrategySeed,
     required this.onGenerateDraftPackets,
     required this.onWriteDraftPackets,
+    required this.onGenerateGuidance,
     required this.onClose,
   });
 
@@ -42,6 +47,7 @@ class ProjectScriptPlanWorkbenchViewCallbacks {
   final VoidCallback? onFillAdaptationStrategySeed;
   final VoidCallback? onGenerateDraftPackets;
   final VoidCallback? onWriteDraftPackets;
+  final VoidCallback? onGenerateGuidance;
   final VoidCallback? onClose;
 }
 
@@ -92,6 +98,13 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                model.guidanceSummaryLine,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -114,6 +127,12 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                         ? null
                         : callbacks.onGenerateDraftPackets,
                     child: const Text('生成剧本初稿包'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: model.localBusy
+                        ? null
+                        : callbacks.onGenerateGuidance,
+                    child: const Text('生成结构化改写 guidance'),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy || model.draftPackets.isEmpty
@@ -183,6 +202,57 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                           const SizedBox(height: 6),
                           SelectableText(
                             draft.content,
+                            maxLines: 10,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Text('结构化改写 Guidance', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              if (model.guidanceRows.isEmpty)
+                Text(
+                  '还没有生成结构化改写 guidance，建议在剧本初稿前后都跑一次，用来约束后续改稿。',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                )
+              else
+                ...model.guidanceRows.take(4).map(
+                  (guidance) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.2),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            guidance.name,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '章节 ${guidance.chapterIndexes.isEmpty ? '待补' : guidance.chapterIndexes.join(', ')}'
+                            '${guidance.eventNames.isEmpty ? '' : ' · ${guidance.eventNames.take(3).join(' / ')}'}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          SelectableText(
+                            guidance.content,
                             maxLines: 10,
                             style: theme.textTheme.bodySmall,
                           ),

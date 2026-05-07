@@ -14,6 +14,20 @@ class ScriptDraftPacket {
   final List<String> eventNames;
 }
 
+class StructuredRewriteGuidance {
+  const StructuredRewriteGuidance({
+    required this.name,
+    required this.chapterIndexes,
+    required this.eventNames,
+    required this.content,
+  });
+
+  final String name;
+  final List<int> chapterIndexes;
+  final List<String> eventNames;
+  final String content;
+}
+
 String summarizePlanEventCoverage({
   required List<NovelEventRow> events,
   required List<NovelRow> novels,
@@ -143,6 +157,53 @@ String summarizeScriptDraftPackets(List<ScriptDraftPacket> drafts) {
   final chapterCoverage = <int>{for (final draft in drafts) ...draft.chapterIndexes};
   final sample = drafts.take(3).map((draft) => draft.name).join(' / ');
   return '已生成 ${drafts.length} 份剧本初稿，覆盖 ${chapterCoverage.length} 条章节${sample.isEmpty ? '' : ' · $sample'}';
+}
+
+List<StructuredRewriteGuidance> buildStructuredRewriteGuidance({
+  required List<NovelEventRow> events,
+  required List<NovelRow> novels,
+  required String storySkeleton,
+  required String adaptationStrategy,
+  required List<ScriptAgentPlanScriptRow> existingScripts,
+}) {
+  final drafts = buildScriptDraftPackets(
+    events: events,
+    novels: novels,
+    storySkeleton: storySkeleton,
+    adaptationStrategy: adaptationStrategy,
+    existingScripts: existingScripts,
+  );
+  final sortedNovels = [...novels]..sort(
+    (left, right) => left.chapterIndex.compareTo(right.chapterIndex),
+  );
+  final novelByChapter = <int, NovelRow>{
+    for (final novel in sortedNovels) novel.chapterIndex: novel,
+  };
+  return drafts
+      .map(
+        (draft) => StructuredRewriteGuidance(
+          name: draft.name,
+          chapterIndexes: draft.chapterIndexes,
+          eventNames: draft.eventNames,
+          content: _buildStructuredRewriteContent(
+            draft: draft,
+            novelByChapter: novelByChapter,
+            storySkeleton: storySkeleton,
+            adaptationStrategy: adaptationStrategy,
+          ),
+        ),
+      )
+      .toList(growable: false);
+}
+
+String summarizeStructuredRewriteGuidance(
+  List<StructuredRewriteGuidance> guidanceRows,
+) {
+  if (guidanceRows.isEmpty) {
+    return '当前还没有结构化改写 guidance，先生成剧本初稿或补齐章节事件。';
+  }
+  final sample = guidanceRows.take(3).map((row) => row.name).join(' / ');
+  return '已生成 ${guidanceRows.length} 份结构化改写 guidance${sample.isEmpty ? '' : ' · $sample'}';
 }
 
 class _DraftChunk {
@@ -287,6 +348,59 @@ String _buildDraftContent({
     '',
     '【结尾钩子】',
     endingHook,
+  ].join('\n');
+}
+
+String _buildStructuredRewriteContent({
+  required ScriptDraftPacket draft,
+  required Map<int, NovelRow> novelByChapter,
+  required String storySkeleton,
+  required String adaptationStrategy,
+}) {
+  final skeletonHint = _firstMeaningfulLine(
+    storySkeleton,
+    fallback: '先把主角困局和最大冲突抛到最前面，别平推背景说明。',
+  );
+  final strategyHint = _firstMeaningfulLine(
+    adaptationStrategy,
+    fallback: '对白口语化、动作外化情绪、信息跟着冲突走。',
+  );
+  final chapterLines = draft.chapterIndexes.isEmpty
+      ? const <String>['- 优先围绕最强冲突改写，不够戏剧性的原文说明直接压缩。']
+      : draft.chapterIndexes.map((index) {
+          final novel = novelByChapter[index];
+          final excerpt = _compactText(novel?.chapterData ?? '', maxChars: 42);
+          final title = novel?.chapter.trim();
+          return '- 章节 $index${title == null || title.isEmpty ? '' : '《$title》'}：${excerpt.isEmpty ? '只保留能推动冲突或人物关系变化的动作。' : '围绕“$excerpt”改成可拍的动作和情绪交锋。'}';
+        }).toList(growable: false);
+  final eventLines = draft.eventNames.isEmpty
+      ? const <String>[
+          '- 先补出 3 个节点：抛钩子、压迫升级、尾部反转或悬念。',
+        ]
+      : draft.eventNames
+          .map((name) => '- 事件“$name”必须带来情绪或局势变化，不能只做信息通报。')
+          .toList(growable: false);
+  return [
+    '【改写目标】',
+    skeletonHint,
+    '',
+    '【改写策略】',
+    strategyHint,
+    '',
+    '【章节压缩指令】',
+    ...chapterLines,
+    '',
+    '【事件改写指令】',
+    ...eventLines,
+    '',
+    '【人物情绪】',
+    '- 主角每场都要有明确刺激、反应和下一步动作，情绪不能整集一个平面。',
+    '- 配角发言要推动主角选择，不留解释剧情的空对白。',
+    '',
+    '【去 AI 味约束】',
+    '- 少写总结句、价值判断句和书面连接词，改成口语化冲突表达。',
+    '- 画面先写动作、视线、停顿、压迫感来源，再补必要对白。',
+    '- 同一场里不要连续三句都在解释背景，让信息藏进试探、误会和逼问。',
   ].join('\n');
 }
 

@@ -168,4 +168,52 @@ void main() {
     expect(summary, contains('已生成 2 份剧本初稿'));
     expect(summary, contains('覆盖 3 条章节'));
   });
+
+  test('buildStructuredRewriteGuidance adds anti-ai rewrite constraints', () {
+    final guidanceRows = buildStructuredRewriteGuidance(
+      events: const [
+        NovelEventRow(
+          id: 'e1',
+          projectId: 'p1',
+          numericId: 1,
+          name: '主角撞见秘密',
+          detail: '身份暴露，关系开始失衡。',
+          chapterIndexes: [1, 2],
+        ),
+      ],
+      novels: [
+        NovelRow(
+          id: 'n1',
+          numericId: 1,
+          chapterIndex: 1,
+          chapter: '第一章',
+          chapterData: '主角在宴会上看见了不该看见的人。',
+          eventState: 0,
+        ),
+      ],
+      storySkeleton: '开场先抛钩子',
+      adaptationStrategy: '对白口语化，情绪先压后扬',
+      existingScripts: const [],
+    );
+
+    expect(guidanceRows, isNotEmpty);
+    expect(guidanceRows.first.content, contains('【去 AI 味约束】'));
+    expect(guidanceRows.first.content, contains('对白口语化'));
+    expect(guidanceRows.first.content, contains('主角每场都要有明确刺激'));
+  });
+
+  test('summarizeStructuredRewriteGuidance reports generated count', () {
+    final summary = summarizeStructuredRewriteGuidance(
+      const [
+        StructuredRewriteGuidance(
+          name: '第1集',
+          chapterIndexes: [1],
+          eventNames: ['事件1'],
+          content: 'a',
+        ),
+      ],
+    );
+
+    expect(summary, contains('已生成 1 份结构化改写 guidance'));
+  });
 }
