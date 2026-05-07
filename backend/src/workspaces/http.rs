@@ -240,6 +240,33 @@ async fn count_workspace_owners(pool: &PgPool, workspace_id: Uuid) -> Result<i64
     Ok(n)
 }
 
+async fn append_workspace_audit(
+    pool: &PgPool,
+    workspace_id: Uuid,
+    actor_user_id: Uuid,
+    action: &str,
+    target_user_id: Option<Uuid>,
+    details: Value,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_workspace_audit (
+          workspace_id, actor_user_id, action, target_user_id, details
+        )
+        VALUES ($1, $2, $3, $4, $5)
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(actor_user_id)
+    .bind(action)
+    .bind(target_user_id)
+    .bind(details)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
 fn max_enterprise_workspaces_per_user() -> i64 {
     std::env::var("TOONFLOW_MAX_ENTERPRISE_WORKSPACES_PER_USER")
         .ok()
@@ -732,6 +759,15 @@ pub(crate) async fn add_workspace_member(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_member_upserted",
+        Some(row.user_id),
+        serde_json::json!({ "role": row.role.clone() }),
+    )
+    .await?;
     Ok(Json(row))
 }
 
@@ -802,6 +838,15 @@ pub(crate) async fn patch_workspace_member(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_member_role_changed",
+        Some(row.user_id),
+        serde_json::json!({ "role": row.role.clone() }),
+    )
+    .await?;
     Ok(Json(row))
 }
 
@@ -865,6 +910,15 @@ pub(crate) async fn remove_workspace_member(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_member_removed",
+        Some(row.user_id),
+        serde_json::json!({ "role": row.role.clone() }),
+    )
+    .await?;
     Ok(Json(row))
 }
 
@@ -933,6 +987,15 @@ pub(crate) async fn leave_workspace(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_member_left",
+        Some(uid),
+        serde_json::json!({ "role": row.role.clone() }),
+    )
+    .await?;
     reset_current_workspace_if_matches(pool, uid, workspace_id).await?;
     Ok(Json(row))
 }
@@ -995,6 +1058,20 @@ pub(crate) async fn create_workspace_invite(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_invite_created",
+        None,
+        serde_json::json!({
+            "invite_id": row.id,
+            "email": row.email.clone(),
+            "role": row.role.clone(),
+            "expires_at": row.expires_at
+        }),
+    )
+    .await?;
 
     Ok(Json(row))
 }
@@ -1086,6 +1163,19 @@ pub(crate) async fn accept_workspace_invite(
     tx.commit()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    append_workspace_audit(
+        pool,
+        invite.workspace_id,
+        uid,
+        "workspace_invite_accepted",
+        Some(uid),
+        serde_json::json!({
+            "invite_id": invite.id,
+            "role": member.role.clone()
+        }),
+    )
+    .await?;
 
     Ok(Json(member))
 }

@@ -48,7 +48,7 @@
 - [x] **W2.4** `POST /api/v1/workspaces/invites/accept`：凭 token 加入 member（幂等 upsert + 过期/状态冲突校验）
 - [x] **W2.5** `DELETE …/members/{user_id}` / `PATCH …/members/{user_id}`：移除、改角色（已加“最后一个 owner 不可降级/移除”保护；owner 转让流程另列后续）
 - [x] **W2.6** 成员 **主动离开** workspace：`DELETE …/members/me` 已落地；`personal` 禁止离开、最后 owner 禁止离开、离开后命中 current workspace 自动回退 personal
-- [ ] **W2.7** 审计：`workspace_id` + actor + action + target_user + timestamp（可复用现有审计模式或新表）
+- [x] **W2.7** 审计：新增 `app_workspace_audit` 并在成员/邀请关键动作写入 `workspace_id + actor + action + target_user + details + timestamp`
 - [ ] **W2.8** 速率限制：邀请/添加成员防滥用（与 PG 限流策略一致）
 - [ ] **W2.9** OpenAPI + 契约测试 + **邮件/无邮件** 双路径说明写入 Runbook
 
