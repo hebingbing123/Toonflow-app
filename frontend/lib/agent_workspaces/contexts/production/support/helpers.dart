@@ -356,6 +356,54 @@ String _extractProductionCoverageDigest(String detail) {
   return match?.group(0) ?? '';
 }
 
+String productionStageDomainButtonLabel(ProductionWorkspaceStage stage) {
+  final status = stage.statusLabel.trim();
+  if (status == '待扩读' || status == '等待分镜表完善') {
+    return '扩读分镜表';
+  }
+  if (status == '回补导演计划' ||
+      status == '等待导演计划' ||
+      status == '等待导演计划完善') {
+    return '读取导演计划';
+  }
+  return '读取 flow';
+}
+
+String productionStageSubAgentButtonLabel(ProductionWorkspaceStage stage) {
+  final status = stage.statusLabel.trim();
+  if (status == '回补导演计划' ||
+      stage.subAgentTool == 'run_sub_agent_director_plan') {
+    return '细化导演计划';
+  }
+  if (stage.subAgentTool == 'run_sub_agent_storyboard_table') {
+    return '补分镜表';
+  }
+  return '推进阶段';
+}
+
+String productionRecipeDomainButtonLabel(ProductionWorkspaceRecipe recipe) {
+  final title = recipe.title.trim();
+  if (title == '抽样读取分镜表' || title == '先看分镜表落地') {
+    return '扩读分镜表';
+  }
+  if (recipe.flowKey == 'scriptPlan' && recipe.domainTool == 'get_flowData') {
+    return '读取导演计划';
+  }
+  return '读取 flow';
+}
+
+String productionRecipeSubAgentButtonLabel(ProductionWorkspaceRecipe recipe) {
+  final title = recipe.title.trim();
+  if (title == '补足分场景意图' ||
+      recipe.subAgentTool == 'run_sub_agent_director_plan') {
+    return '细化导演计划';
+  }
+  if (recipe.subAgentTool == 'run_sub_agent_storyboard_table') {
+    return '补分镜表';
+  }
+  return '运行子代理';
+}
+
 String buildProductionScriptPlanExecutionHint(
   Object? flowData, {
   int maxSections = 2,

@@ -102,14 +102,14 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                           onPressed: busy
                               ? null
                               : () => onRunStageDomainTool(stage),
-                          child: const Text('读取 flow'),
+                          child: Text(productionStageDomainButtonLabel(stage)),
                         ),
                       if (stage.subAgentTool != null)
                         FilledButton(
                           onPressed: busy
                               ? null
                               : () => onRunStageSubAgent(stage),
-                          child: const Text('推进阶段'),
+                          child: Text(productionStageSubAgentButtonLabel(stage)),
                         ),
                     ],
                   ),
@@ -210,14 +210,14 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                           onPressed: busy
                               ? null
                               : () => onRunRecipeDomainTool(recipe),
-                          child: const Text('读取 flow'),
+                          child: Text(productionRecipeDomainButtonLabel(recipe)),
                         ),
                       if (recipe.subAgentTool != null)
                         FilledButton(
                           onPressed: busy
                               ? null
                               : () => onRunRecipeSubAgent(recipe),
-                          child: const Text('运行子代理'),
+                          child: Text(productionRecipeSubAgentButtonLabel(recipe)),
                         ),
                     ],
                   ),

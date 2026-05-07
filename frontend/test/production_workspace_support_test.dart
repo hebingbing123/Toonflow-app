@@ -2705,6 +2705,46 @@ void main() {
     expect(summary, '当前卡点：分镜画面 · 回补导演计划；当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。');
   });
 
+  test('production stage button labels follow storyboard-table fallback states', () {
+    const expandStage = ProductionWorkspaceStage(
+      title: '分镜表',
+      flowKey: 'storyboardTable',
+      statusLabel: '待扩读',
+      detail: '先扩读关键镜头表。',
+      domainTool: 'get_flowData',
+      domainArgs: <String, dynamic>{'key': 'storyboardTable'},
+    );
+    const refineStage = ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: '回补导演计划',
+      detail: '先细化导演计划。',
+      subAgentTool: 'run_sub_agent_director_plan',
+    );
+
+    expect(productionStageDomainButtonLabel(expandStage), '扩读分镜表');
+    expect(productionStageSubAgentButtonLabel(refineStage), '细化导演计划');
+  });
+
+  test('production recipe button labels follow storyboard fallback actions', () {
+    const expandRecipe = ProductionWorkspaceRecipe(
+      title: '先看分镜表落地',
+      detail: '先扩读关键窗口。',
+      flowKey: 'storyboardTable',
+      domainTool: 'get_flowData',
+      domainArgs: <String, dynamic>{'key': 'storyboardTable'},
+    );
+    const refineRecipe = ProductionWorkspaceRecipe(
+      title: '补足分场景意图',
+      detail: '先补导演计划。',
+      flowKey: 'storyboardTable',
+      subAgentTool: 'run_sub_agent_director_plan',
+    );
+
+    expect(productionRecipeDomainButtonLabel(expandRecipe), '扩读分镜表');
+    expect(productionRecipeSubAgentButtonLabel(refineRecipe), '细化导演计划');
+  });
+
   test(
     'summarizeProductionFlowValue surfaces storyboard table coverage digest',
     () {
