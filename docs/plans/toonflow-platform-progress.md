@@ -17,7 +17,7 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`6acfab0e`
+- 当前最新完成 commit：`2cb8fd5e`
 - 当前最新完成竖切：`内容接入竖切（主路径）准入筛选与批量处理增量`
 
 ## Phase 1 进度
@@ -117,7 +117,7 @@
 - `c986cabf` — add crawler extraction regression coverage on the shared import path
 - `7a7bb497` — preserve explicit nulls in intake PATCH bodies for admission editing
 - `91170746` — unify intake source/admission metadata on the shared novel rail
-- `6acfab0e` — add intake filtering and batch admission actions on the shared workbench
+- `2cb8fd5e` — add intake filtering and batch admission actions on the shared workbench
 
 ### 4. 改写与上游结构竖切
 
