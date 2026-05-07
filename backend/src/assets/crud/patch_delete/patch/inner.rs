@@ -40,7 +40,6 @@ fn parse_candidate_status_patch(v: Option<Value>) -> Result<FieldPatch<String>, 
 
 pub(super) async fn patch_project_asset_inner(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     asset_numeric_id: i32,
     body: PatchAssetBody,
@@ -74,12 +73,10 @@ pub(super) async fn patch_project_asset_inner(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = $3
+          AND a.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
@@ -132,14 +129,12 @@ pub(super) async fn patch_project_asset_inner(
               FROM app_asset a
               INNER JOIN app_project p ON p.id = a.project_id
               WHERE p.id = $1
-                AND p.owner_user_id = $2
-                AND a.name = $3
-                AND a.numeric_id <> $4
+                AND a.name = $2
+                AND a.numeric_id <> $3
             )
             "#,
         )
         .bind(project_id)
-        .bind(uid)
         .bind(&new_name)
         .bind(asset_numeric_id)
         .fetch_one(pool)
@@ -164,8 +159,7 @@ pub(super) async fn patch_project_asset_inner(
         FROM app_project p
         WHERE a.project_id = p.id
           AND p.id = $6
-          AND p.owner_user_id = $7
-          AND a.numeric_id = $8
+          AND a.numeric_id = $7
         RETURNING a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms, a.candidate_status
         "#,
     )
@@ -175,7 +169,6 @@ pub(super) async fn patch_project_asset_inner(
     .bind(SqlxJson(new_metadata))
     .bind(&new_candidate_status)
     .bind(project_id)
-    .bind(uid)
     .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await

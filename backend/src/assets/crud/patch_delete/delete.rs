@@ -15,7 +15,6 @@ use super::super::resolve::ensure_owned_project_pk;
 
 async fn delete_project_asset_inner(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
@@ -29,12 +28,10 @@ async fn delete_project_asset_inner(
         USING app_project p
         WHERE a.project_id = p.id
           AND p.id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = $3
+          AND a.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(asset_numeric_id)
     .execute(pool)
     .await
@@ -58,5 +55,5 @@ pub(crate) async fn delete_project_asset_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_project_asset_inner(pool, uid, project_id, asset_numeric_id).await
+    delete_project_asset_inner(pool, project_id, asset_numeric_id).await
 }

@@ -10,7 +10,6 @@ use super::super::super::models::AssetRow;
 pub(super) async fn count_project_assets_filtered(
     pool: &PgPool,
     project_id: Uuid,
-    uid: Uuid,
     script_numeric_id: Option<i32>,
     asset_type: Option<&str>,
     name_ilike: Option<&str>,
@@ -26,8 +25,6 @@ pub(super) async fn count_project_assets_filtered(
             WHERE p.id = "#,
         );
         qb.push_bind(project_id);
-        qb.push(" AND p.owner_user_id = ");
-        qb.push_bind(uid);
         qb.push(" AND s.numeric_id = ");
         qb.push_bind(sid);
         qb
@@ -40,8 +37,6 @@ pub(super) async fn count_project_assets_filtered(
             WHERE p.id = "#,
         );
         qb.push_bind(project_id);
-        qb.push(" AND p.owner_user_id = ");
-        qb.push_bind(uid);
         qb
     };
     if let Some(t) = asset_type {
@@ -61,7 +56,6 @@ pub(super) async fn count_project_assets_filtered(
 pub(super) async fn select_project_assets_filtered(
     pool: &PgPool,
     project_id: Uuid,
-    uid: Uuid,
     script_numeric_id: Option<i32>,
     asset_type: Option<&str>,
     name_ilike: Option<&str>,
@@ -78,8 +72,6 @@ pub(super) async fn select_project_assets_filtered(
             WHERE p.id = "#,
         );
         qb.push_bind(project_id);
-        qb.push(" AND p.owner_user_id = ");
-        qb.push_bind(uid);
         qb.push(" AND s.numeric_id = ");
         qb.push_bind(sid);
         qb
@@ -92,8 +84,6 @@ pub(super) async fn select_project_assets_filtered(
             WHERE p.id = "#,
         );
         qb.push_bind(project_id);
-        qb.push(" AND p.owner_user_id = ");
-        qb.push_bind(uid);
         qb
     };
     if let Some(t) = asset_type {

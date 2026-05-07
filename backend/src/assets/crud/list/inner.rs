@@ -68,7 +68,6 @@ pub(super) async fn list_project_assets_inner(
         let total = count_project_assets_filtered(
             pool,
             project_id,
-            uid,
             query.script_numeric_id,
             type_ref,
             name_ref,
@@ -77,7 +76,6 @@ pub(super) async fn list_project_assets_inner(
         let items = select_project_assets_filtered(
             pool,
             project_id,
-            uid,
             query.script_numeric_id,
             type_ref,
             name_ref,
@@ -89,7 +87,6 @@ pub(super) async fn list_project_assets_inner(
         let items = select_project_assets_filtered(
             pool,
             project_id,
-            uid,
             query.script_numeric_id,
             type_ref,
             name_ref,

@@ -34,12 +34,10 @@ pub(crate) async fn get_project_asset_for_project(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = $3
+          AND a.numeric_id = $2
         "#,
     )
     .bind(project_id)
-    .bind(uid)
     .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
