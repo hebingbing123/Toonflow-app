@@ -24,4 +24,26 @@ void main() {
     expect(rows.first.chapter, '导入章节 1');
     expect(rows.first.chapterData, '没有章节标题，只有一整段正文。');
   });
+
+  test('extractCrawlerContentFromHtml removes script and keeps readable text', () {
+    final extracted = extractCrawlerContentFromHtml('''
+<html>
+  <head>
+    <title>测试小说</title>
+    <script>window.bad = true;</script>
+    <style>.hidden { display:none; }</style>
+  </head>
+  <body>
+    <article>
+      第一章 初见
+      她推开门。
+    </article>
+  </body>
+</html>
+''');
+
+    expect(extracted.title, '测试小说');
+    expect(extracted.bodyText, contains('第一章 初见'));
+    expect(extracted.bodyText, isNot(contains('window.bad')));
+  });
 }
