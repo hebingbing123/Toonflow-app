@@ -18,7 +18,7 @@ fn api_error_to_job_run(err: ApiError) -> JobRunError {
     match err {
         ApiError::BadRequest(msg) => JobRunError::Failed(msg),
         ApiError::NotFound => {
-            JobRunError::Failed("project not found or not owned for job payload".into())
+            JobRunError::Failed("project not found or not accessible for job payload".into())
         }
         ApiError::DatabaseError(msg) => JobRunError::Failed(msg),
         other => JobRunError::Failed(format!("project resolve error: {other:?}")),
@@ -30,7 +30,7 @@ fn api_error_to_job_run(err: ApiError) -> JobRunError {
 /// Matches HTTP-layer semantics from [`crate::assets::resolve_owned_project_numeric_from_uuid_or_legacy_id`].
 pub(crate) async fn resolve_project_numeric_from_job_payload(
     pool: &PgPool,
-    owner_user_id: Uuid,
+    actor_user_id: Uuid,
     payload: &Value,
 ) -> Result<i32, JobRunError> {
     let project_uuid = payload
@@ -44,7 +44,7 @@ pub(crate) async fn resolve_project_numeric_from_job_payload(
 
     resolve_owned_project_numeric_from_uuid_or_legacy_id(
         pool,
-        owner_user_id,
+        actor_user_id,
         project_uuid,
         project_numeric_id,
     )
