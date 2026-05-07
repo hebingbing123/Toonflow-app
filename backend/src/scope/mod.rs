@@ -190,3 +190,76 @@ pub async fn owned_storyboard_in_project(
     .map_err(|e| ScopeError::Database(e.to_string()))?
     .ok_or(ScopeError::NotFound)
 }
+
+/// Resolve **`app_script.numeric_id`** for a script owned by **`user_id`** under **`project_id`** (**`app_project.id`**).
+///
+/// Prefer UUID (**`app_script.id`**); legacy numeric id is **`app_script.numeric_id`**. If both are set they must agree.
+pub async fn resolve_owned_script_numeric_from_uuid_or_legacy_id(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: Uuid,
+    script_uuid: Option<Uuid>,
+    script_numeric_id: Option<i32>,
+) -> Result<i32, ApiError> {
+    match (script_uuid, script_numeric_id) {
+        (Some(u), Some(n)) => {
+            if n <= 0 {
+                return Err(ApiError::BadRequest("script_id must be positive".into()));
+            }
+            let found: Option<i32> = sqlx::query_scalar(
+                r#"
+                SELECT s.numeric_id
+                FROM app_script s
+                INNER JOIN app_project p ON p.id = s.project_id
+                WHERE p.owner_user_id = $1
+                  AND p.id = $2
+                  AND s.id = $3
+                "#,
+            )
+            .bind(user_id)
+            .bind(project_id)
+            .bind(u)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            let num = found.ok_or(ApiError::NotFound)?;
+            if num != n {
+                return Err(ApiError::BadRequest(
+                    "Script UUID and numeric script id must refer to the same script".into(),
+                ));
+            }
+            Ok(n)
+        }
+        (Some(u), None) => {
+            let v: Option<i32> = sqlx::query_scalar(
+                r#"
+                SELECT s.numeric_id
+                FROM app_script s
+                INNER JOIN app_project p ON p.id = s.project_id
+                WHERE p.owner_user_id = $1
+                  AND p.id = $2
+                  AND s.id = $3
+                "#,
+            )
+            .bind(user_id)
+            .bind(project_id)
+            .bind(u)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            v.ok_or(ApiError::NotFound)
+        }
+        (None, Some(n)) => {
+            if n <= 0 {
+                return Err(ApiError::BadRequest("script_id must be positive".into()));
+            }
+            owned_script_in_project(pool, user_id, project_id, n)
+                .await
+                .map_err(|e| e.into_api_error())?;
+            Ok(n)
+        }
+        (None, None) => Err(ApiError::BadRequest(
+            "Provide script UUID (preferred) or legacy numeric script_id".into(),
+        )),
+    }
+}

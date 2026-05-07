@@ -8,29 +8,64 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
     super.key,
     required this.projectIdController,
     required this.scriptIdController,
+    required this.projectUuidController,
+    required this.scriptUuidController,
   });
 
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
+  final TextEditingController projectUuidController;
+  final TextEditingController scriptUuidController;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Expanded(
-          child: TextField(
-            controller: projectIdController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: '项目 ID'),
-          ),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                controller: projectIdController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: '项目 ID（numeric）',
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: scriptIdController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: '剧本 ID（numeric）',
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: TextField(
-            controller: scriptIdController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: '剧本 ID'),
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                controller: projectUuidController,
+                decoration: const InputDecoration(
+                  labelText: '项目 UUID（可选，与 WS projectUuid 对齐）',
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: scriptUuidController,
+                decoration: const InputDecoration(
+                  labelText: '剧本 UUID（可选，制作 attach）',
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

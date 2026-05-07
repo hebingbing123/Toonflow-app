@@ -2,12 +2,14 @@ use axum::extract::ws::WebSocket;
 
 use crate::harness::ws::auth::WsConnectionSession;
 use crate::harness::ws::session::{self, WsSessionBindState};
+use crate::state::AppState;
 
 use crate::harness::ws::dispatch::envelope::ClientEnvelope;
 
 pub(super) async fn script_attach(
     env: ClientEnvelope,
     sess: &mut WsConnectionSession,
+    state: &AppState,
     socket: &mut WebSocket,
 ) {
     let mut st = WsSessionBindState {
@@ -19,6 +21,7 @@ pub(super) async fn script_attach(
     session::handle_script_attach(
         socket,
         sess.user_id,
+        state.pool.as_ref(),
         &mut st,
         &env.payload,
         env.request_id.as_deref(),
@@ -29,6 +32,7 @@ pub(super) async fn script_attach(
 pub(super) async fn production_attach(
     env: ClientEnvelope,
     sess: &mut WsConnectionSession,
+    state: &AppState,
     socket: &mut WebSocket,
 ) {
     let mut st = WsSessionBindState {
@@ -40,6 +44,7 @@ pub(super) async fn production_attach(
     session::handle_production_attach(
         socket,
         sess.user_id,
+        state.pool.as_ref(),
         &mut st,
         &env.payload,
         env.request_id.as_deref(),
@@ -50,6 +55,7 @@ pub(super) async fn production_attach(
 pub(super) async fn context_update(
     env: ClientEnvelope,
     sess: &mut WsConnectionSession,
+    state: &AppState,
     socket: &mut WebSocket,
 ) {
     let mut st = WsSessionBindState {
@@ -58,5 +64,13 @@ pub(super) async fn context_update(
         project_id: &mut sess.project_id,
         script_id: &mut sess.script_id,
     };
-    session::handle_context_update(socket, &mut st, &env.payload, env.request_id.as_deref()).await;
+    session::handle_context_update(
+        socket,
+        sess.user_id,
+        state.pool.as_ref(),
+        &mut st,
+        &env.payload,
+        env.request_id.as_deref(),
+    )
+    .await;
 }

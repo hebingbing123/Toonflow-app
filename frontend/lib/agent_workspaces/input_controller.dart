@@ -4,9 +4,13 @@ class WorkspaceInputController {
   final TextEditingController projectIdController = TextEditingController(
     text: '1',
   );
+  /// Preferred project key on WebSocket attach (**`app_project.id`**).
+  final TextEditingController projectUuidController = TextEditingController();
   final TextEditingController scriptIdController = TextEditingController(
     text: '1',
   );
+  /// Preferred script key for production attach (**`app_script.id`**).
+  final TextEditingController scriptUuidController = TextEditingController();
   final TextEditingController scriptPromptController = TextEditingController(
     text:
         '先用 get_planData 读取 planData.script、storySkeleton、adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。',
@@ -31,15 +35,38 @@ class WorkspaceInputController {
   final TextEditingController productionSubAgentArgsController =
       TextEditingController(text: '{}');
 
-  void applyProjectScope(int projectNumericId, {int? scriptNumericId}) {
+  void applyProjectScope(
+    int projectNumericId, {
+    int? scriptNumericId,
+    String? projectUuid,
+    String? scriptUuid,
+  }) {
     projectIdController.text = projectNumericId.toString();
+    final u = projectUuid?.trim();
+    if (u != null && u.isNotEmpty) {
+      projectUuidController.text = u;
+    } else {
+      projectUuidController.clear();
+    }
     if (scriptNumericId != null && scriptNumericId > 0) {
       scriptIdController.text = scriptNumericId.toString();
+      if (scriptUuid == null) {
+        scriptUuidController.clear();
+      }
+    }
+    if (scriptUuid != null) {
+      final su = scriptUuid.trim();
+      if (su.isEmpty) {
+        scriptUuidController.clear();
+      } else {
+        scriptUuidController.text = su;
+      }
     }
   }
 
   void clearScriptScope() {
     scriptIdController.clear();
+    scriptUuidController.clear();
   }
 
   void applySuggestedProductionFlowKey(String? flowKey) {
@@ -52,7 +79,9 @@ class WorkspaceInputController {
 
   void dispose() {
     projectIdController.dispose();
+    projectUuidController.dispose();
     scriptIdController.dispose();
+    scriptUuidController.dispose();
     scriptPromptController.dispose();
     scriptDomainArgsController.dispose();
     productionPromptController.dispose();

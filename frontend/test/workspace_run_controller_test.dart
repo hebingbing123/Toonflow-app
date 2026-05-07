@@ -100,10 +100,11 @@ void main() {
     );
 
     inputController.projectIdController.text = '';
+    inputController.projectUuidController.clear();
     inputController.scriptPromptController.text = '';
     await controller.runScriptWorkspaceAgent();
 
-    expect(lastError, 'project_id 与 prompt 必须有效');
+    expect(lastError, '请填写 projectUuid 或正整数 project_id');
     expect(operationController.hasPendingWork, isFalse);
   });
 
@@ -171,4 +172,39 @@ void main() {
       });
     },
   );
+
+  test('workspace run controller sends projectUuid when scope field set', () async {
+    final inputController = WorkspaceInputController();
+    final operationController = WorkspaceOperationController();
+    final outputController = WorkspaceOutputController();
+    addTearDown(inputController.dispose);
+
+    final sent = <List<Map<String, dynamic>>>[];
+    final controller = WorkspaceRunController(
+      inputController: inputController,
+      operationController: operationController,
+      outputController: outputController,
+      accessTokenProvider: () => 'token',
+      onErrorChanged: (_) {},
+      clearWsLog: () {},
+      resetWorkspaceOutputs: () {},
+      requestSender: (token, messages) async {
+        sent.add(messages);
+        return true;
+      },
+    );
+
+    const uuid = '550e8400-e29b-41d4-a716-446655440000';
+    inputController.projectIdController.clear();
+    inputController.projectUuidController.text = uuid;
+    inputController.scriptPromptController.text = 'hello';
+
+    await controller.runScriptWorkspaceAgent();
+
+    expect(sent, hasLength(1));
+    expect(sent.single[0]['type'], 'agent.script.attach');
+    final payload = sent.single[0]['payload'] as Map<String, dynamic>;
+    expect(payload['projectUuid'], uuid);
+    expect(payload.containsKey('project_id'), isFalse);
+  });
 }

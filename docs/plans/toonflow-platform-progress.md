@@ -17,8 +17,7 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
-- 当前最新完成 commit：`c9557011`
-- 当前最新完成竖切：`内容接入竖切（小说爬虫 client/server + 托管调度 + 观测闭环）`
+- 当前最新完成竖切：HTTP **H4**（Harness WS **`projectUuid`** / **`scriptUuid`** attach + Flutter **`agent_workspaces`** 双写；矩阵 [**`harness-ws-context-matrix.md`**](./harness-ws-context-matrix.md)；提交主题 **`feat(harness): WS attach projectUuid/scriptUuid`**）
 - **下一大型竖切**（未开工）：**团队 Workspace 完整功能** — 全任务 W1–W11 见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)（生命周期、邀请、权限、全站 API、Flutter、Harness、计费策略、RLS/安全、观测、发布文档）
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
@@ -26,7 +25,7 @@
 - **Q1–Q3**（ops-only，平台级可观测 + Runbook）：**已完成** — 扩展 `QueueStats` / `job_queue_metrics` 日志字段；[**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)（扩容、SQL、Gate、与 trace 关联）；代码 `backend/src/jobs/queue/pg.rs`、`worker/mod.rs`。
 - **Q4**：与 harness trace 字段联调 — **仍 open**（见任务清单 DoD）。
 
-- **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）。**H1**（`agent_memory` / `clear-agent-memories`：**`projectUuid`** 优先 + legacy **`projectId`**；无 DB 时缺项目先 **400**）已合 Rust + Flutter；**Harness `projectUuid`（H1 尾部 / H4）** 仍为待办。**H2**（`asset_extract`）已合。**H3**（**`assets-generate`** 入队 payload **v2**：`payload_schema_version` + **`project_uuid`** 双写 numeric；worker **`payload_project`** 兼容 v1）已合 — 设计 [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)。**H4**（Harness HTTP/WS UUID）下一高风险窗口。
+- **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）。**H1**（`agent_memory` / `clear-agent-memories`：**`projectUuid`** 优先 + legacy **`projectId`**）已合。**H2**（`asset_extract`）已合。**H3**（**`assets-generate`** 入队 payload **v2**）已合 — [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)。**H4**（Harness WS **`projectUuid`** / **`scriptUuid`** + legacy **`project_id`** / **`script_id`**；矩阵 [**`harness-ws-context-matrix.md`**](./harness-ws-context-matrix.md)；Flutter `agent_workspaces` 双写）已合。**H5**（阶段 C–D）下一窗口。
 
 ## Phase 1 进度
 

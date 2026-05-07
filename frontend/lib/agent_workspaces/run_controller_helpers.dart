@@ -6,6 +6,92 @@ int? _parsePositiveInt(String raw) {
   return value;
 }
 
+String? _trimmedNonEmpty(String raw) {
+  final t = raw.trim();
+  return t.isEmpty ? null : t;
+}
+
+bool _looksLikeUuid(String raw) {
+  final t = raw.trim();
+  return RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  ).hasMatch(t);
+}
+
+({String? projectUuid, int? projectNumeric, String? error}) _parseProjectAttachInputs(
+  WorkspaceInputController input,
+) {
+  final uuidRaw = _trimmedNonEmpty(input.projectUuidController.text);
+  if (uuidRaw != null && !_looksLikeUuid(uuidRaw)) {
+    return (projectUuid: null, projectNumeric: null, error: 'projectUuid 格式无效');
+  }
+  final numeric = _parsePositiveInt(input.projectIdController.text);
+  if (uuidRaw == null && numeric == null) {
+    return (
+      projectUuid: null,
+      projectNumeric: null,
+      error: '请填写 projectUuid 或正整数 project_id',
+    );
+  }
+  return (projectUuid: uuidRaw, projectNumeric: numeric, error: null);
+}
+
+({String? scriptUuid, int? scriptNumeric, String? error}) _parseScriptAttachInputs(
+  WorkspaceInputController input,
+) {
+  final uuidRaw = _trimmedNonEmpty(input.scriptUuidController.text);
+  if (uuidRaw != null && !_looksLikeUuid(uuidRaw)) {
+    return (scriptUuid: null, scriptNumeric: null, error: 'scriptUuid 格式无效');
+  }
+  final numeric = _parsePositiveInt(input.scriptIdController.text);
+  if (uuidRaw == null && numeric == null) {
+    return (
+      scriptUuid: null,
+      scriptNumeric: null,
+      error: '请填写 scriptUuid 或正整数 script_id',
+    );
+  }
+  return (scriptUuid: uuidRaw, scriptNumeric: numeric, error: null);
+}
+
+Map<String, dynamic> _scriptAttachPayload({
+  required String isolationKey,
+  String? projectUuid,
+  int? projectNumeric,
+}) {
+  final payload = <String, dynamic>{'isolation_key': isolationKey};
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    payload['projectUuid'] = u;
+  }
+  if (projectNumeric != null && projectNumeric > 0) {
+    payload['project_id'] = projectNumeric;
+  }
+  return payload;
+}
+
+Map<String, dynamic> _productionAttachPayload({
+  required String isolationKey,
+  String? projectUuid,
+  int? projectNumeric,
+  String? scriptUuid,
+  int? scriptNumeric,
+}) {
+  final payload = _scriptAttachPayload(
+    isolationKey: isolationKey,
+    projectUuid: projectUuid,
+    projectNumeric: projectNumeric,
+  );
+  final su = scriptUuid?.trim();
+  if (su != null && su.isNotEmpty) {
+    payload['scriptUuid'] = su;
+  }
+  if (scriptNumeric != null && scriptNumeric > 0) {
+    payload['script_id'] = scriptNumeric;
+  }
+  return payload;
+}
+
 Map<String, dynamic> _buildScriptSubAgentArguments({
   required String toolName,
   required String prompt,

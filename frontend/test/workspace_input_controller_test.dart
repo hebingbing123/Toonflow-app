@@ -43,7 +43,25 @@ void main() {
     expect(controller.projectIdController.text, '23');
     expect(controller.scriptIdController.text, '7');
 
+    controller.applyProjectScope(
+      99,
+      scriptNumericId: 3,
+      projectUuid: '550e8400-e29b-41d4-a716-446655440001',
+      scriptUuid: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+    );
+    expect(controller.projectIdController.text, '99');
+    expect(controller.scriptIdController.text, '3');
+    expect(
+      controller.projectUuidController.text,
+      '550e8400-e29b-41d4-a716-446655440001',
+    );
+    expect(
+      controller.scriptUuidController.text,
+      '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+    );
+
     controller.clearScriptScope();
     expect(controller.scriptIdController.text, isEmpty);
+    expect(controller.scriptUuidController.text, isEmpty);
   });
 }

@@ -26,7 +26,7 @@
 - [x] 产品/契约：**`projectUuid`**（`app_project.id`）与 legacy **`projectId`**（numeric）并存；OpenAPI 仍为 `serde_json::Value` 体/query 占位，行为以本仓库 REST 为准（H4 再收紧 Harness WS 矩阵）。
 - [x] 后端：UUID 优先解析 + 旧体兼容；冲突时 **400**；无 DB smoke 下缺 id **400**（先于 503）；单测与契约 smoke 覆盖。
 - [x] Flutter：主路径 **`projectUuid`**（列表匹配到 numeric 时）；仍支持仅 numeric（未匹配列表时）。
-- [ ] **Harness**：若 Agent attach 仍传整型项目 id，在本波或 **H4** 同一里程碑内定义 **WS `agent.context.update`** 是否增加 `projectUuid`（见主文档 §七）。
+- [x] **Harness**：**H4** 已增加 **`projectUuid`** / **`scriptUuid`**（见 [`harness-ws-context-matrix.md`](./harness-ws-context-matrix.md)）。
 
 **验收**：`yarn refactor:check`；相关 `contract_smoke` / widget 测试更新。
 
@@ -61,10 +61,10 @@
 
 **触点**：`backend/src/harness/http.rs`、`backend/src/harness/invoke/domain_*.rs`、`docs/websocket-events.md`、Flutter `agent_workspaces`。
 
-- [ ] 书面矩阵：每个 attach 字段 **REST 来源** vs **WS 载荷** vs **DB 列（legacy_id）**。
-- [ ] 实现：按矩阵补 UUID 或统一「仅 UUID path + 内部 resolve legacy」。
-- [ ] Flutter：attach 与工具探测参数同步改。
-- [ ] **禁止**：仅合并 REST 而不合并 WS 客户端可用路径。
+- [x] 书面矩阵：每个 attach 字段 **REST 来源** vs **WS 载荷** vs **DB 列（legacy_id）** — [`harness-ws-context-matrix.md`](./harness-ws-context-matrix.md)。
+- [x] 实现：WS **`projectUuid`** / **`scriptUuid`** + legacy **`project_id`** / **`script_id`**；有 PG 时校验归属（numeric-only 路径由 [`attach_resolve.rs`](../../backend/src/harness/ws/attach_resolve.rs) 收敛）。
+- [x] Flutter：`agent_workspaces` attach 双写 UUID（可选字段）+ numeric。
+- [x] **禁止**：仅合并 REST 而不合并 WS 客户端可用路径 — 本里程碑 Rust + Flutter 同 PR 门禁。
 
 **验收**：Harness 相关测试 + 手工 WS 探针清单；`yarn refactor:check`。
 

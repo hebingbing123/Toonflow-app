@@ -16,4 +16,5 @@ pub(crate) use owned_asset::{
 pub(crate) use project_access::{
     ensure_owned_project_numeric_id, ensure_owned_project_pk,
     resolve_owned_project_numeric_from_uuid_or_legacy_id,
+    resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id,
 };

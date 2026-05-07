@@ -121,7 +121,10 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                   // Close dialog first, then navigate.
                   Navigator.of(ctx).pop();
                   _productScopedProjectNumericId = p.numericId;
-                  _workspaceInputController.applyProjectScope(p.numericId);
+                  _workspaceInputController.applyProjectScope(
+                    p.numericId,
+                    projectUuid: p.id,
+                  );
                   _workspaceInputController.clearScriptScope();
                   _shellNavigationController.selectProductWorkspacePane(
                     ProductWorkspacePane.shortVideoSpace,

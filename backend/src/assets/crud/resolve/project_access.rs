@@ -96,3 +96,78 @@ pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
         )),
     }
 }
+
+/// Like [`resolve_owned_project_numeric_from_uuid_or_legacy_id`] but also returns **`app_project.id`** (UUID).
+pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
+    pool: &PgPool,
+    uid: Uuid,
+    project_uuid: Option<Uuid>,
+    project_numeric_id: Option<i32>,
+) -> Result<(Uuid, i32), ApiError> {
+    match (project_uuid, project_numeric_id) {
+        (Some(u), Some(n)) => {
+            if n <= 0 {
+                return Err(ApiError::BadRequest(
+                    "project_numeric_id must be positive".into(),
+                ));
+            }
+            let row: Option<(Uuid, i32)> = sqlx::query_as(
+                r#"
+                SELECT p.id, p.numeric_id
+                FROM app_project p
+                WHERE p.id = $1 AND p.owner_user_id = $2
+                "#,
+            )
+            .bind(u)
+            .bind(uid)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            let (id, num) = row.ok_or(ApiError::NotFound)?;
+            if num != n {
+                return Err(ApiError::BadRequest(
+                    "Project UUID and numeric project id must refer to the same project".into(),
+                ));
+            }
+            Ok((id, num))
+        }
+        (Some(u), None) => {
+            let row: Option<(Uuid, i32)> = sqlx::query_as(
+                r#"
+                SELECT p.id, p.numeric_id
+                FROM app_project p
+                WHERE p.id = $1 AND p.owner_user_id = $2
+                "#,
+            )
+            .bind(u)
+            .bind(uid)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            row.ok_or(ApiError::NotFound)
+        }
+        (None, Some(n)) => {
+            if n <= 0 {
+                return Err(ApiError::BadRequest(
+                    "project_numeric_id must be positive".into(),
+                ));
+            }
+            let row: Option<(Uuid, i32)> = sqlx::query_as(
+                r#"
+                SELECT p.id, p.numeric_id
+                FROM app_project p
+                WHERE p.numeric_id = $1 AND p.owner_user_id = $2
+                "#,
+            )
+            .bind(n)
+            .bind(uid)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            row.ok_or(ApiError::NotFound)
+        }
+        (None, None) => Err(ApiError::BadRequest(
+            "Provide project UUID (preferred) or legacy numeric project id".into(),
+        )),
+    }
+}

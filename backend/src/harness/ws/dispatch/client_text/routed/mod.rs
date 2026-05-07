@@ -25,13 +25,13 @@ pub(super) async fn dispatch_authenticated(
 ) {
     match env.msg_type.as_str() {
         "agent.script.attach" => {
-            attach::script_attach(env, sess, socket).await;
+            attach::script_attach(env, sess, state, socket).await;
         }
         "agent.production.attach" => {
-            attach::production_attach(env, sess, socket).await;
+            attach::production_attach(env, sess, state, socket).await;
         }
         "agent.context.update" => {
-            attach::context_update(env, sess, socket).await;
+            attach::context_update(env, sess, state, socket).await;
         }
         "harness.tool.invoke" => {
             tool::harness_tool_invoke(env, ctx, socket).await;

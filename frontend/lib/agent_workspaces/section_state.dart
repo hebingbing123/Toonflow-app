@@ -3,6 +3,9 @@ part of 'section.dart';
 class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   late AgentWorkspacePane _pane;
   late final TextEditingController _fallbackProductionSubAgentArgsController;
+  late final TextEditingController _effectiveProjectUuidController;
+  late final TextEditingController _effectiveScriptUuidController;
+  late final bool _ownsUuidScopeControllers;
   String _selectedScriptDomainTool = _scriptDomainToolPresets.first;
 
   TextEditingController get _productionSubAgentArgsController =>
@@ -16,6 +19,23 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     _fallbackProductionSubAgentArgsController = TextEditingController(
       text: '{}',
     );
+    final pu = widget.projectUuidController;
+    final su = widget.scriptUuidController;
+    if (pu != null && su != null) {
+      _effectiveProjectUuidController = pu;
+      _effectiveScriptUuidController = su;
+      _ownsUuidScopeControllers = false;
+    } else if (pu == null && su == null) {
+      _effectiveProjectUuidController = TextEditingController();
+      _effectiveScriptUuidController = TextEditingController();
+      _ownsUuidScopeControllers = true;
+    } else {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'AgentWorkspacesSection.projectUuidController and scriptUuidController must both be null or both non-null.',
+        ),
+      ]);
+    }
     _ensurePresetDefaults();
   }
 
@@ -240,6 +260,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         AgentWorkspaceScopeInputs(
           projectIdController: widget.projectIdController,
           scriptIdController: widget.scriptIdController,
+          projectUuidController: _effectiveProjectUuidController,
+          scriptUuidController: _effectiveScriptUuidController,
         ),
         if (widget.showPaneSelector) ...<Widget>[
           const SizedBox(height: 12),
@@ -267,6 +289,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   @override
   void dispose() {
     _fallbackProductionSubAgentArgsController.dispose();
+    if (_ownsUuidScopeControllers) {
+      _effectiveProjectUuidController.dispose();
+      _effectiveScriptUuidController.dispose();
+    }
     super.dispose();
   }
 }

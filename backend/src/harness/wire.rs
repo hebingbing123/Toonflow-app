@@ -4,6 +4,7 @@
 
 use serde::Deserialize;
 use serde_json::Value;
+use uuid::Uuid;
 
 // --- Session auth (`session.auth`) ---
 
@@ -17,14 +18,28 @@ pub struct SessionAuthPayload {
 #[derive(Debug, Deserialize)]
 pub struct AttachScriptPayload {
     pub isolation_key: String,
-    pub project_id: i64,
+    /// Preferred: **`app_project.id`** (camelCase **`projectUuid`** on the wire).
+    #[serde(rename = "projectUuid")]
+    #[serde(default)]
+    pub project_uuid: Option<Uuid>,
+    /// Legacy: **`app_project.numeric_id`**.
+    #[serde(default)]
+    pub project_id: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AttachProductionPayload {
     pub isolation_key: String,
-    pub project_id: i64,
-    pub script_id: i64,
+    #[serde(rename = "projectUuid")]
+    #[serde(default)]
+    pub project_uuid: Option<Uuid>,
+    #[serde(default)]
+    pub project_id: Option<i64>,
+    #[serde(rename = "scriptUuid")]
+    #[serde(default)]
+    pub script_uuid: Option<Uuid>,
+    #[serde(default)]
+    pub script_id: Option<i64>,
 }
 
 // --- Streaming chat (`agent.chat.send`) ---
@@ -52,4 +67,34 @@ pub struct HarnessAgentRunPayload {
     pub content: String,
     #[serde(default = "default_max_tool_rounds")]
     pub max_tool_rounds: usize,
+}
+
+#[cfg(test)]
+mod attach_payload_tests {
+    use super::*;
+
+    #[test]
+    fn attach_script_deserializes_legacy_numeric_only() {
+        let v = serde_json::json!({
+            "isolation_key": "k",
+            "project_id": 7_i64,
+        });
+        let p: AttachScriptPayload = serde_json::from_value(v).unwrap();
+        assert_eq!(p.isolation_key, "k");
+        assert!(p.project_uuid.is_none());
+        assert_eq!(p.project_id, Some(7));
+    }
+
+    #[test]
+    fn attach_script_deserializes_uuid_and_numeric_dual_write() {
+        let u = Uuid::nil();
+        let v = serde_json::json!({
+            "isolation_key": "k",
+            "projectUuid": u,
+            "project_id": 3_i64,
+        });
+        let p: AttachScriptPayload = serde_json::from_value(v).unwrap();
+        assert_eq!(p.project_uuid, Some(u));
+        assert_eq!(p.project_id, Some(3));
+    }
 }

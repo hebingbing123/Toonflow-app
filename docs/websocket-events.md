@@ -5,3 +5,5 @@
 **For humans:** use **Swagger UI** at `GET /api/v1/docs` and expand **GET /api/v1/ws**, or edit **`ws_protocol_description.md`** next to the handler’s OpenAPI macro.
 
 This file stays in the repo so links from `AGENTS.md`, parity docs, and PR templates keep a stable path; when the protocol changes, update **`ws_protocol_description.md`** and refresh this pointer if needed.
+
+**Attach UUID 矩阵（人类可读）**：[`docs/plans/harness-ws-context-matrix.md`](plans/harness-ws-context-matrix.md) — `projectUuid` / `scriptUuid` 与 legacy **`project_id`** / **`script_id`** 的对照与 PG 依赖说明。

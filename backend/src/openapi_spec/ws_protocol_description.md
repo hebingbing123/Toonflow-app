@@ -147,7 +147,16 @@ Previous Node stack used Socket.IO namespaces:
 | `agent.script.attach` | Former `scriptAgent` namespace |
 | `agent.production.attach` | Former `productionAgent` namespace |
 
-`payload` should carry `isolation_key`, `project_id`, and for production `script_id` where applicable (mirrors handshake `auth` fields today).
+`payload` should carry `isolation_key` plus **project scope** and (for production / `agent.context.update`) **script scope**:
+
+| Wire field | Meaning |
+|------------|---------|
+| **`projectUuid`** (preferred) | `app_project.id` (UUID string) |
+| **`project_id`** (legacy) | `app_project.numeric_id` (positive integer) |
+| **`scriptUuid`** (preferred) | `app_script.id` |
+| **`script_id`** (legacy) | `app_script.numeric_id` |
+
+Send **`projectUuid`** and/or **`project_id`** (same pairing rules as REST agent-memory: if both are sent they must refer to the same row). When Postgres is configured, legacy **`project_id` only** is verified against ownership; **`projectUuid`** resolution requires a database pool (attach fails with `bad_request` if the pool is absent). **`scriptUuid`** similarly requires DB + a resolved project UUID key server-side.
 
 ## Client → server (previous names → target `type`)
 
@@ -157,7 +166,7 @@ Previous Node stack used Socket.IO namespaces:
 | (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |
-| `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; previous implementation used ack callback — use `request_id` + optional `session.ack` server message |
+| `updateContext` | `agent.context.update` | Same payload shape as `agent.production.attach` (`isolation_key`, **`projectUuid`** / **`project_id`**, **`scriptUuid`** / **`script_id`**); previous implementation used ack callback — use `request_id` + optional `session.ack` server message |
 
 ## Server → client (previous names → target `type`)
 

@@ -61,6 +61,8 @@ extension _HomePageBuildProductSections on _HomePageState {
       sectionDescription: sectionDescription,
       projectIdController: _workspaceInputController.projectIdController,
       scriptIdController: _workspaceInputController.scriptIdController,
+      projectUuidController: _workspaceInputController.projectUuidController,
+      scriptUuidController: _workspaceInputController.scriptUuidController,
       scriptPromptController: _workspaceInputController.scriptPromptController,
       scriptDomainArgsController:
           _workspaceInputController.scriptDomainArgsController,
@@ -154,6 +156,7 @@ extension _HomePageBuildProductSections on _HomePageState {
           });
           if (projectNumericId == null) {
             _workspaceInputController.projectIdController.clear();
+            _workspaceInputController.projectUuidController.clear();
             _workspaceInputController.clearScriptScope();
             return;
           }

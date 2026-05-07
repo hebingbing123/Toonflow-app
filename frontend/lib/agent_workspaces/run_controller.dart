@@ -43,12 +43,14 @@ class WorkspaceRunController {
   Future<void> runScriptWorkspaceAgent() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
+    final proj = _parseProjectAttachInputs(_inputController);
+    if (proj.error != null) {
+      _onErrorChanged(proj.error);
+      return;
+    }
     final prompt = _inputController.scriptPromptController.text.trim();
-    if (projectId == null || prompt.isEmpty) {
-      _onErrorChanged('project_id 与 prompt 必须有效');
+    if (prompt.isEmpty) {
+      _onErrorChanged('prompt 必须有效');
       return;
     }
 
@@ -61,10 +63,11 @@ class WorkspaceRunController {
       <String, dynamic>{
         'type': 'agent.script.attach',
         'schema_version': 1,
-        'payload': <String, dynamic>{
-          'isolation_key': 'flutter-script-workspace',
-          'project_id': projectId,
-        },
+        'payload': _scriptAttachPayload(
+          isolationKey: 'flutter-script-workspace',
+          projectUuid: proj.projectUuid,
+          projectNumeric: proj.projectNumeric,
+        ),
       },
       <String, dynamic>{
         'type': 'harness.agent.run',
@@ -83,15 +86,17 @@ class WorkspaceRunController {
   Future<void> probeScriptDomainTool(String toolName, String rawArgs) async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
+    final proj = _parseProjectAttachInputs(_inputController);
+    if (proj.error != null) {
+      _onErrorChanged(proj.error);
+      return;
+    }
     final scriptId = _parsePositiveInt(
       _inputController.scriptIdController.text,
     );
     final normalizedTool = toolName.trim();
-    if (projectId == null || normalizedTool.isEmpty) {
-      _onErrorChanged('project_id/tool 必须有效');
+    if (normalizedTool.isEmpty) {
+      _onErrorChanged('tool 名称必须有效');
       return;
     }
     if (normalizedTool == 'get_script_content' && scriptId == null) {
@@ -118,10 +123,11 @@ class WorkspaceRunController {
       <String, dynamic>{
         'type': 'agent.script.attach',
         'schema_version': 1,
-        'payload': <String, dynamic>{
-          'isolation_key': 'flutter-script-domain-probe',
-          'project_id': projectId,
-        },
+        'payload': _scriptAttachPayload(
+          isolationKey: 'flutter-script-domain-probe',
+          projectUuid: proj.projectUuid,
+          projectNumeric: proj.projectNumeric,
+        ),
       },
       <String, dynamic>{
         'type': 'harness.tool.invoke',
@@ -143,16 +149,18 @@ class WorkspaceRunController {
   Future<void> runScriptSubAgentTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
+    final proj = _parseProjectAttachInputs(_inputController);
+    if (proj.error != null) {
+      _onErrorChanged(proj.error);
+      return;
+    }
     final scriptId = _parsePositiveInt(
       _inputController.scriptIdController.text,
     );
     final prompt = _inputController.scriptPromptController.text.trim();
     final toolName = _inputController.scriptSubAgentToolController.text.trim();
-    if (projectId == null || prompt.isEmpty || toolName.isEmpty) {
-      _onErrorChanged('project_id/prompt/tool 必须有效');
+    if (prompt.isEmpty || toolName.isEmpty) {
+      _onErrorChanged('prompt/tool 必须有效');
       return;
     }
 
@@ -170,10 +178,11 @@ class WorkspaceRunController {
       <String, dynamic>{
         'type': 'agent.script.attach',
         'schema_version': 1,
-        'payload': <String, dynamic>{
-          'isolation_key': 'flutter-script-sub-agent-tool',
-          'project_id': projectId,
-        },
+        'payload': _scriptAttachPayload(
+          isolationKey: 'flutter-script-sub-agent-tool',
+          projectUuid: proj.projectUuid,
+          projectNumeric: proj.projectNumeric,
+        ),
       },
       <String, dynamic>{
         'type': 'harness.tool.invoke',
@@ -192,15 +201,19 @@ class WorkspaceRunController {
   Future<void> runProductionWorkspaceAgent() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
-    final scriptId = _parsePositiveInt(
-      _inputController.scriptIdController.text,
-    );
+    final proj = _parseProjectAttachInputs(_inputController);
+    if (proj.error != null) {
+      _onErrorChanged(proj.error);
+      return;
+    }
+    final scr = _parseScriptAttachInputs(_inputController);
+    if (scr.error != null) {
+      _onErrorChanged(scr.error);
+      return;
+    }
     final prompt = _inputController.productionPromptController.text.trim();
-    if (projectId == null || scriptId == null || prompt.isEmpty) {
-      _onErrorChanged('project_id/script_id/prompt 必须有效');
+    if (prompt.isEmpty) {
+      _onErrorChanged('prompt 必须有效');
       return;
     }
 
@@ -213,11 +226,13 @@ class WorkspaceRunController {
       <String, dynamic>{
         'type': 'agent.production.attach',
         'schema_version': 1,
-        'payload': <String, dynamic>{
-          'isolation_key': 'flutter-production-workspace',
-          'project_id': projectId,
-          'script_id': scriptId,
-        },
+        'payload': _productionAttachPayload(
+          isolationKey: 'flutter-production-workspace',
+          projectUuid: proj.projectUuid,
+          projectNumeric: proj.projectNumeric,
+          scriptUuid: scr.scriptUuid,
+          scriptNumeric: scr.scriptNumeric,
+        ),
       },
       <String, dynamic>{
         'type': 'harness.agent.run',
@@ -236,16 +251,20 @@ class WorkspaceRunController {
   Future<void> probeProductionDomainTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
-    final scriptId = _parsePositiveInt(
-      _inputController.scriptIdController.text,
-    );
+    final proj = _parseProjectAttachInputs(_inputController);
+    if (proj.error != null) {
+      _onErrorChanged(proj.error);
+      return;
+    }
+    final scr = _parseScriptAttachInputs(_inputController);
+    if (scr.error != null) {
+      _onErrorChanged(scr.error);
+      return;
+    }
     final toolName = _inputController.productionDomainToolController.text
         .trim();
-    if (projectId == null || scriptId == null || toolName.isEmpty) {
-      _onErrorChanged('project_id/script_id/tool 必须有效');
+    if (toolName.isEmpty) {
+      _onErrorChanged('tool 名称必须有效');
       return;
     }
 
@@ -265,7 +284,10 @@ class WorkspaceRunController {
         return;
       }
       args.putIfAbsent('key', () => key);
-      args.putIfAbsent('scriptId', () => scriptId);
+      final scriptNumeric = scr.scriptNumeric;
+      if (scriptNumeric != null) {
+        args.putIfAbsent('scriptId', () => scriptNumeric);
+      }
     }
 
     _prepareWorkspaceRun();
@@ -277,11 +299,13 @@ class WorkspaceRunController {
       <String, dynamic>{
         'type': 'agent.production.attach',
         'schema_version': 1,
-        'payload': <String, dynamic>{
-          'isolation_key': 'flutter-production-flow-probe',
-          'project_id': projectId,
-          'script_id': scriptId,
-        },
+        'payload': _productionAttachPayload(
+          isolationKey: 'flutter-production-flow-probe',
+          projectUuid: proj.projectUuid,
+          projectNumeric: proj.projectNumeric,
+          scriptUuid: scr.scriptUuid,
+          scriptNumeric: scr.scriptNumeric,
+        ),
       },
       <String, dynamic>{
         'type': 'harness.tool.invoke',
@@ -300,12 +324,16 @@ class WorkspaceRunController {
   Future<void> runProductionSubAgentTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
-    final scriptId = _parsePositiveInt(
-      _inputController.scriptIdController.text,
-    );
+    final proj = _parseProjectAttachInputs(_inputController);
+    if (proj.error != null) {
+      _onErrorChanged(proj.error);
+      return;
+    }
+    final scr = _parseScriptAttachInputs(_inputController);
+    if (scr.error != null) {
+      _onErrorChanged(scr.error);
+      return;
+    }
     final prompt = _inputController.productionPromptController.text.trim();
     final toolName = _inputController.productionSubAgentToolController.text
         .trim();
@@ -315,12 +343,8 @@ class WorkspaceRunController {
       parseError: 'production sub-agent arguments JSON 解析失败',
       onErrorChanged: _onErrorChanged,
     );
-    if (projectId == null ||
-        scriptId == null ||
-        prompt.isEmpty ||
-        toolName.isEmpty ||
-        extraArgs == null) {
-      _onErrorChanged('project_id/script_id/prompt/tool 必须有效');
+    if (prompt.isEmpty || toolName.isEmpty || extraArgs == null) {
+      _onErrorChanged('prompt/tool 必须有效');
       return;
     }
 
@@ -331,18 +355,23 @@ class WorkspaceRunController {
     );
     final arguments = <String, dynamic>{
       'prompt': prompt,
-      'scriptId': scriptId,
       ...extraArgs,
     };
+    final scriptNumeric = scr.scriptNumeric;
+    if (scriptNumeric != null) {
+      arguments['scriptId'] = scriptNumeric;
+    }
     final sent = await _requestSender(token, <Map<String, dynamic>>[
       <String, dynamic>{
         'type': 'agent.production.attach',
         'schema_version': 1,
-        'payload': <String, dynamic>{
-          'isolation_key': 'flutter-production-sub-agent-tool',
-          'project_id': projectId,
-          'script_id': scriptId,
-        },
+        'payload': _productionAttachPayload(
+          isolationKey: 'flutter-production-sub-agent-tool',
+          projectUuid: proj.projectUuid,
+          projectNumeric: proj.projectNumeric,
+          scriptUuid: scr.scriptUuid,
+          scriptNumeric: scr.scriptNumeric,
+        ),
       },
       <String, dynamic>{
         'type': 'harness.tool.invoke',
