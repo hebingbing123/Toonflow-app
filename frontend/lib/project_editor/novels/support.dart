@@ -16,7 +16,7 @@ String summarizeNovelRows(Iterable<NovelRow> rows, {int maxItems = 4}) {
 String summarizeNovelIntakeRows(Iterable<NovelRow> rows) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '准入 admitted 0 / pending 0 / rejected 0 · crawler 0 条';
+    return '准入 admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0';
   }
   final admittedCount = items
       .where((row) => row.intakeStatus == 'admitted')
@@ -27,10 +27,13 @@ String summarizeNovelIntakeRows(Iterable<NovelRow> rows) {
   final rejectedCount = items
       .where((row) => row.intakeStatus == 'rejected')
       .length;
-  final crawlerCount = items
-      .where((row) => row.intakeSource == 'crawler_client')
-      .length;
-  return '准入 admitted $admittedCount / pending $pendingCount / rejected $rejectedCount · crawler $crawlerCount 条';
+  int countBySource(String source) =>
+      items.where((row) => row.intakeSource == source).length;
+  final manualCount = countBySource('manual');
+  final importCount = countBySource('whole_book_import');
+  final crawlerClientCount = countBySource('crawler_client');
+  final crawlerServerCount = countBySource('crawler_server');
+  return '准入 admitted $admittedCount / pending $pendingCount / rejected $rejectedCount · source manual $manualCount / import $importCount / crawler_client $crawlerClientCount / crawler_server $crawlerServerCount';
 }
 
 String summarizeNovelEventRows(

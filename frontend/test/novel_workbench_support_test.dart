@@ -54,7 +54,7 @@ void main() {
     expect(summarizeNovelRows(const []), '当前没有小说章节');
   });
 
-  test('summarizeNovelIntakeRows reports status and crawler counts', () {
+  test('summarizeNovelIntakeRows reports status and source distribution', () {
     final summary = summarizeNovelIntakeRows([
       NovelRow(
         id: 'n1',
@@ -86,15 +86,38 @@ void main() {
         intakeStatus: 'rejected',
         intakeSource: 'crawler_client',
       ),
+      NovelRow(
+        id: 'n4',
+        numericId: 14,
+        chapterIndex: 4,
+        chapter: '第四章',
+        chapterData: 'd',
+        eventState: 0,
+        intakeStatus: 'admitted',
+        intakeSource: 'whole_book_import',
+      ),
+      NovelRow(
+        id: 'n5',
+        numericId: 15,
+        chapterIndex: 5,
+        chapter: '第五章',
+        chapterData: 'e',
+        eventState: 0,
+        intakeStatus: 'pending_review',
+        intakeSource: 'crawler_server',
+      ),
     ]);
 
-    expect(summary, '准入 admitted 1 / pending 1 / rejected 1 · crawler 2 条');
+    expect(
+      summary,
+      '准入 admitted 2 / pending 2 / rejected 1 · source manual 1 / import 1 / crawler_client 2 / crawler_server 1',
+    );
   });
 
   test('summarizeNovelIntakeRows handles empty data', () {
     expect(
       summarizeNovelIntakeRows(const []),
-      '准入 admitted 0 / pending 0 / rejected 0 · crawler 0 条',
+      '准入 admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0',
     );
   });
 
