@@ -467,6 +467,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.onSaveProjectConfig,
     required this.onOpenProjects,
     required this.projectConfigLine,
+    required this.operationFeedbackIsSuccess,
     required this.loadingProjectOverview,
     required this.projectReadinessSummary,
     required this.visualLabel,
@@ -536,6 +537,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final VoidCallback onSaveProjectConfig;
   final VoidCallback onOpenProjects;
   final String? projectConfigLine;
+  final bool? operationFeedbackIsSuccess;
   final bool loadingProjectOverview;
   final String projectReadinessSummary;
   final String? visualLabel;
@@ -636,6 +638,7 @@ class ShortVideoSpaceView extends StatelessWidget {
           onSaveProjectConfig: onSaveProjectConfig,
           onOpenProjects: onOpenProjects,
           projectConfigLine: projectConfigLine,
+          operationFeedbackIsSuccess: operationFeedbackIsSuccess,
           loadingProjectOverview: loadingProjectOverview,
           projectReadinessSummary: projectReadinessSummary,
           visualLabel: visualLabel,

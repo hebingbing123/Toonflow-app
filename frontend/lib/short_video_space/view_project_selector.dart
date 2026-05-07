@@ -30,6 +30,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
     required this.onSaveProjectConfig,
     required this.onOpenProjects,
     required this.projectConfigLine,
+    required this.operationFeedbackIsSuccess,
     required this.loadingProjectOverview,
     required this.projectReadinessSummary,
     required this.visualLabel,
@@ -64,6 +65,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
   final VoidCallback onSaveProjectConfig;
   final VoidCallback onOpenProjects;
   final String? projectConfigLine;
+  final bool? operationFeedbackIsSuccess;
   final bool loadingProjectOverview;
   final String projectReadinessSummary;
   final String? visualLabel;
@@ -252,7 +254,56 @@ class _ProjectSelectorPanel extends StatelessWidget {
           ),
           if (projectConfigLine != null) ...[
             const SizedBox(height: 10),
-            Text(projectConfigLine!, style: theme.textTheme.bodySmall),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: operationFeedbackIsSuccess == true
+                    ? theme.colorScheme.primaryContainer
+                    : operationFeedbackIsSuccess == false
+                        ? theme.colorScheme.errorContainer
+                        : theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: operationFeedbackIsSuccess == true
+                      ? theme.colorScheme.primary
+                      : operationFeedbackIsSuccess == false
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.outline,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    operationFeedbackIsSuccess == true
+                        ? Icons.check_circle_outline
+                        : operationFeedbackIsSuccess == false
+                            ? Icons.error_outline
+                            : Icons.info_outline,
+                    size: 20,
+                    color: operationFeedbackIsSuccess == true
+                        ? theme.colorScheme.primary
+                        : operationFeedbackIsSuccess == false
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      projectConfigLine!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: operationFeedbackIsSuccess == true
+                            ? theme.colorScheme.onPrimaryContainer
+                            : operationFeedbackIsSuccess == false
+                                ? theme.colorScheme.onErrorContainer
+                                : theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
           const SizedBox(height: 10),
           Text(

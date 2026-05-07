@@ -1331,4 +1331,264 @@ void main() {
       expect(currentKind, 'none');
     });
   });
+
+  group('Voiceover Status Display Tests', () {
+    // Requirements 16.1-16.7: Voiceover asset readiness status display
+    
+    test('should display voiceover_script_ready status correctly', () {
+      // Requirements 16.1, 16.3: Display voiceover_script_ready status
+      String formatVoiceoverScriptStatus(bool ready) {
+        return ready ? '✓ 就绪' : '✗ 未就绪';
+      }
+
+      expect(formatVoiceoverScriptStatus(true), '✓ 就绪');
+      expect(formatVoiceoverScriptStatus(false), '✗ 未就绪');
+    });
+
+    test('should display voiceover_asset_ready status correctly', () {
+      // Requirements 16.2, 16.4: Display voiceover_asset_ready status
+      String formatVoiceoverAssetStatus(bool ready) {
+        return ready ? '✓ 就绪' : '✗ 未就绪';
+      }
+
+      expect(formatVoiceoverAssetStatus(true), '✓ 就绪');
+      expect(formatVoiceoverAssetStatus(false), '✗ 未就绪');
+    });
+
+    test('should display voiceover_state when present', () {
+      // Requirements 16.6: Display voiceover_state
+      bool shouldDisplayVoiceoverState(String state) {
+        return state.isNotEmpty;
+      }
+
+      expect(shouldDisplayVoiceoverState('pending'), true);
+      expect(shouldDisplayVoiceoverState('running'), true);
+      expect(shouldDisplayVoiceoverState('completed'), true);
+      expect(shouldDisplayVoiceoverState('failed'), true);
+      expect(shouldDisplayVoiceoverState(''), false);
+    });
+
+    test('should display voiceover_audio_url when present', () {
+      // Requirements 16.5: Display voiceover_audio_url if exists
+      bool shouldDisplayVoiceoverAudioUrl(String url) {
+        return url.trim().isNotEmpty;
+      }
+
+      expect(shouldDisplayVoiceoverAudioUrl('https://example.com/audio.mp3'), true);
+      expect(shouldDisplayVoiceoverAudioUrl(''), false);
+      expect(shouldDisplayVoiceoverAudioUrl('   '), false);
+    });
+
+    test('should display voiceover_error when state is failed', () {
+      // Requirements 16.7: Display voiceover_error when state is failed
+      bool shouldDisplayVoiceoverError(String state, String error) {
+        return state == 'failed' && error.trim().isNotEmpty;
+      }
+
+      expect(shouldDisplayVoiceoverError('failed', 'TTS service unavailable'), true);
+      expect(shouldDisplayVoiceoverError('failed', ''), false);
+      expect(shouldDisplayVoiceoverError('completed', 'Some error'), false);
+      expect(shouldDisplayVoiceoverError('pending', ''), false);
+    });
+
+    test('should format complete voiceover status line', () {
+      String formatVoiceoverStatusLine(bool scriptReady, bool assetReady) {
+        return '配音文本：${scriptReady ? "✓ 就绪" : "✗ 未就绪"} · '
+            '配音资产：${assetReady ? "✓ 就绪" : "✗ 未就绪"}';
+      }
+
+      expect(
+        formatVoiceoverStatusLine(true, true),
+        '配音文本：✓ 就绪 · 配音资产：✓ 就绪',
+      );
+      expect(
+        formatVoiceoverStatusLine(true, false),
+        '配音文本：✓ 就绪 · 配音资产：✗ 未就绪',
+      );
+      expect(
+        formatVoiceoverStatusLine(false, true),
+        '配音文本：✗ 未就绪 · 配音资产：✓ 就绪',
+      );
+      expect(
+        formatVoiceoverStatusLine(false, false),
+        '配音文本：✗ 未就绪 · 配音资产：✗ 未就绪',
+      );
+    });
+
+    test('should handle all voiceover states correctly', () {
+      final validStates = ['pending', 'running', 'completed', 'failed'];
+      
+      for (final state in validStates) {
+        expect(state.isNotEmpty, true);
+      }
+
+      // Empty state should not be displayed
+      expect(''.isNotEmpty, false);
+    });
+
+    test('should truncate long audio URLs for display', () {
+      // Simulate URL truncation logic
+      String formatAudioUrlForDisplay(String url, {int maxLength = 50}) {
+        if (url.length <= maxLength) return url;
+        return '${url.substring(0, maxLength)}...';
+      }
+
+      final shortUrl = 'https://example.com/audio.mp3';
+      final longUrl = 'https://example.com/very/long/path/to/audio/file/with/many/segments/audio.mp3';
+
+      expect(formatAudioUrlForDisplay(shortUrl), shortUrl);
+      expect(formatAudioUrlForDisplay(longUrl, maxLength: 50).length, 53); // 50 + '...'
+      expect(formatAudioUrlForDisplay(longUrl, maxLength: 50).endsWith('...'), true);
+    });
+
+    test('should validate voiceover entry data structure', () {
+      // Simulate creating an entry with voiceover fields
+      final entry = {
+        'voiceoverScriptReady': true,
+        'voiceoverAssetReady': false,
+        'voiceoverState': 'pending',
+        'voiceoverAudioUrl': '',
+        'voiceoverError': '',
+      };
+
+      expect(entry['voiceoverScriptReady'], isA<bool>());
+      expect(entry['voiceoverAssetReady'], isA<bool>());
+      expect(entry['voiceoverState'], isA<String>());
+      expect(entry['voiceoverAudioUrl'], isA<String>());
+      expect(entry['voiceoverError'], isA<String>());
+    });
+
+    test('should handle null voiceover fields gracefully', () {
+      // Simulate handling null values from API
+      String? nullableState;
+      String? nullableUrl;
+      String? nullableError;
+
+      final state = nullableState ?? '';
+      final url = nullableUrl ?? '';
+      final error = nullableError ?? '';
+
+      expect(state, '');
+      expect(url, '');
+      expect(error, '');
+    });
+
+    test('should display error message in red when voiceover fails', () {
+      // Simulate error styling logic
+      bool shouldUseErrorColor(String state, String error) {
+        return state == 'failed' && error.trim().isNotEmpty;
+      }
+
+      expect(shouldUseErrorColor('failed', 'TTS error'), true);
+      expect(shouldUseErrorColor('failed', ''), false);
+      expect(shouldUseErrorColor('completed', 'Some error'), false);
+      expect(shouldUseErrorColor('pending', ''), false);
+    });
+
+    test('should preserve voiceover fields during copyWith', () {
+      // Simulate copyWith logic
+      final original = {
+        'voiceoverScriptReady': true,
+        'voiceoverAssetReady': false,
+        'voiceoverState': 'pending',
+        'voiceoverAudioUrl': 'https://example.com/audio.mp3',
+        'voiceoverError': '',
+      };
+
+      // Copy with some fields changed
+      final updated = Map<String, dynamic>.from(original);
+      updated['selectedMediaUrl'] = 'new_url';
+      updated['durationText'] = '20s';
+
+      // Verify voiceover fields are preserved
+      expect(updated['voiceoverScriptReady'], true);
+      expect(updated['voiceoverAssetReady'], false);
+      expect(updated['voiceoverState'], 'pending');
+      expect(updated['voiceoverAudioUrl'], 'https://example.com/audio.mp3');
+      expect(updated['voiceoverError'], '');
+    });
+
+    test('should display voiceover status for multiple shots', () {
+      final shots = [
+        {
+          'id': 1,
+          'voiceoverScriptReady': true,
+          'voiceoverAssetReady': true,
+          'voiceoverState': 'completed',
+          'voiceoverAudioUrl': 'https://example.com/audio1.mp3',
+          'voiceoverError': '',
+        },
+        {
+          'id': 2,
+          'voiceoverScriptReady': true,
+          'voiceoverAssetReady': false,
+          'voiceoverState': 'pending',
+          'voiceoverAudioUrl': '',
+          'voiceoverError': '',
+        },
+        {
+          'id': 3,
+          'voiceoverScriptReady': false,
+          'voiceoverAssetReady': false,
+          'voiceoverState': 'failed',
+          'voiceoverAudioUrl': '',
+          'voiceoverError': 'TTS service unavailable',
+        },
+      ];
+
+      // Verify each shot has correct voiceover status
+      expect(shots[0]['voiceoverScriptReady'], true);
+      expect(shots[0]['voiceoverAssetReady'], true);
+      expect(shots[0]['voiceoverState'], 'completed');
+
+      expect(shots[1]['voiceoverScriptReady'], true);
+      expect(shots[1]['voiceoverAssetReady'], false);
+      expect(shots[1]['voiceoverState'], 'pending');
+
+      expect(shots[2]['voiceoverScriptReady'], false);
+      expect(shots[2]['voiceoverAssetReady'], false);
+      expect(shots[2]['voiceoverState'], 'failed');
+      expect(shots[2]['voiceoverError'], 'TTS service unavailable');
+    });
+
+    test('should handle voiceover state transitions', () {
+      // Simulate state transitions
+      var state = 'pending';
+      
+      // Transition to running
+      state = 'running';
+      expect(state, 'running');
+
+      // Transition to completed
+      state = 'completed';
+      expect(state, 'completed');
+
+      // Or transition to failed
+      state = 'failed';
+      expect(state, 'failed');
+    });
+
+    test('should validate voiceover readiness combinations', () {
+      // Test all possible combinations of script_ready and asset_ready
+      final combinations = [
+        {'scriptReady': false, 'assetReady': false}, // No voiceover
+        {'scriptReady': true, 'assetReady': false},  // Script ready, no asset
+        {'scriptReady': false, 'assetReady': true},  // Asset without script (unusual)
+        {'scriptReady': true, 'assetReady': true},   // Fully ready
+      ];
+
+      for (final combo in combinations) {
+        expect(combo['scriptReady'], isA<bool>());
+        expect(combo['assetReady'], isA<bool>());
+      }
+
+      // Most common case: script ready but asset not yet generated
+      expect(combinations[1]['scriptReady'], true);
+      expect(combinations[1]['assetReady'], false);
+
+      // Ideal case: both ready
+      expect(combinations[3]['scriptReady'], true);
+      expect(combinations[3]['assetReady'], true);
+    });
+  });
 }

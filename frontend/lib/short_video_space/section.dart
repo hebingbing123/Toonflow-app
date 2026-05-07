@@ -85,7 +85,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   int _publishCopyEditorRevision = 0;
   String? _selectedProjectId;
   String? _projectConfigLine;
-  
+  bool? _operationFeedbackIsSuccess;
+
   // P8: Multi-select state
   bool _multiSelectMode = false;
   Set<String> _selectedDraftIds = <String>{};
@@ -602,6 +603,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onSaveProjectConfig: _saveProjectConfig,
       onOpenProjects: widget.onOpenProjects,
       projectConfigLine: _projectConfigLine,
+      operationFeedbackIsSuccess: _operationFeedbackIsSuccess,
       loadingProjectOverview: _loadingProjectOverview,
       projectReadinessSummary: shortVideoProjectReadinessSummary(_projectStats),
       visualLabel: visualLabel,
