@@ -86,12 +86,12 @@ pub(super) fn build_project_role_video_observation_memories_with_bias(
     )
 }
 
-#[cfg_attr(not(test), allow(dead_code))]
+#[allow(dead_code)] // Unbiased entry points; production uses `*_with_bias`.
 fn build_script_video_observation_memory(rows: &[AgentMemoryRow]) -> Option<String> {
     build_script_video_observation_memory_with_bias(rows, None)
 }
 
-#[cfg_attr(not(test), allow(dead_code))]
+#[allow(dead_code)] // Unbiased entry points; production uses `*_with_bias`.
 fn build_project_video_observation_memory(rows: &[ScopedAgentMemoryRow]) -> Option<String> {
     build_project_video_observation_memory_with_bias(rows, None)
 }

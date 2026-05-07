@@ -15,7 +15,8 @@ use super::*;
 use serde_json::json;
 use tower::ServiceExt;
 
-/// Test data for end-to-end regression
+/// Test data for end-to-end regression.
+#[allow(dead_code)]
 struct E2ETestContext {
     pool: PgPool,
     app: axum::Router,
@@ -574,7 +575,7 @@ async fn test_e2e_performance_monitoring() {
         .expect("connect DATABASE_URL");
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
-    let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+    let _token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
     let app = build_router(contract_state(pool.clone(), secret));
 
     // Test metrics endpoint

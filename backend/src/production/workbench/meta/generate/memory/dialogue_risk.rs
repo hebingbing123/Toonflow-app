@@ -1,6 +1,6 @@
 use super::*;
 
-#[cfg_attr(not(test), allow(dead_code))]
+#[allow(dead_code)] // Exported within `generate`; not wired on all paths yet.
 pub(in crate::production::workbench::meta::generate) fn storyboard_dialogue_is_empty_row(
     row: &StoryboardPromptSeedRow,
 ) -> bool {
@@ -30,7 +30,7 @@ pub(in crate::production::workbench::meta::generate) fn storyboard_dialogue_is_e
         .any(|marker| normalized_ascii == marker)
 }
 
-#[cfg_attr(not(test), allow(dead_code))]
+#[allow(dead_code)] // Exported within `generate`; not wired on all paths yet.
 pub(in crate::production::workbench::meta::generate) fn storyboard_lacks_meaningful_spoken_dialogue(
     row: &StoryboardPromptSeedRow,
 ) -> bool {

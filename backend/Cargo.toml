@@ -34,7 +34,7 @@ serde = { version = "1", features = ["derive"] }
 subtle = "2"
 serde_json = "1"
 sha2 = "0.10"
-sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres", "tls-rustls-ring", "uuid", "json", "macros", "chrono"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres", "tls-rustls-ring", "uuid", "json", "macros", "chrono", "migrate"] }
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["rt"] }
 url = "2"
@@ -65,6 +65,7 @@ test = false
 
 [features]
 redis = []
+migrate = []
 
 [profile.test]
 debug = 0
