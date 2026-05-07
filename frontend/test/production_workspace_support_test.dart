@@ -123,7 +123,12 @@ void main() {
       'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       'limit': 12,
     });
-    expect(recipes[3].domainArgs, <String, dynamic>{
+    expect(recipes[3].title, '继续导演计划');
+    expect(recipes[3].subAgentTool, 'run_sub_agent_director_plan');
+    expect(recipes[3].subAgentArgs, <String, dynamic>{
+      'assetTypes': <String>['role', 'scene'],
+    });
+    expect(recipes[4].domainArgs, <String, dynamic>{
       'key': 'storyboardTable',
       'fields': <String>[
         'id',
@@ -136,8 +141,8 @@ void main() {
       'rowStart': 1,
       'rowCount': 8,
     });
-    expect(recipes[3].flowKey, 'storyboardTable');
-    expect(recipes[3].title, '先看分镜表落地');
+    expect(recipes[4].flowKey, 'storyboardTable');
+    expect(recipes[4].title, '先看分镜表落地');
   });
 
   test(
@@ -205,6 +210,10 @@ void main() {
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
       expect(recipes[2].detail, contains('资产 #5, 7, 12'));
+      expect(recipes[3].subAgentArgs, <String, dynamic>{
+        'assetIds': <int>[5, 7, 12],
+      });
+      expect(recipes[3].prompt, contains('资产 #5, 7, 12'));
     },
   );
 

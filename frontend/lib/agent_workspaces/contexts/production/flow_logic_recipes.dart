@@ -292,6 +292,7 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
   final assetArgs = buildProductionScriptPlanAssetArgs(data);
   final assetScope = summarizeProductionAssetScope(assetArgs);
   final scriptWindow = summarizeProductionPlanningScriptWindow();
+  final directorPlanArgs = buildProductionScriptPlanSubAgentArgs(data);
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核导演计划',
@@ -315,6 +316,18 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       flowKey: 'assets',
       domainTool: 'get_flowData',
       domainArgs: assetArgs,
+    ),
+    ProductionWorkspaceRecipe(
+      title: '继续导演计划',
+      detail: assetArgs.containsKey('ids')
+          ? '优先围绕$assetScope收束导演决策，让后续分镜和素材动作先继承这批受改写约束的重点。'
+          : '先围绕$assetScope继续收束导演决策，让后续分镜和素材动作继承当前改写约束。',
+      flowKey: 'scriptPlan',
+      subAgentTool: 'run_sub_agent_director_plan',
+      subAgentArgs: directorPlanArgs,
+      prompt: assetArgs.containsKey('ids')
+          ? '请在当前 scriptPlan 上继续收束导演计划，优先围绕$assetScope安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。'
+          : '请在当前 scriptPlan 上继续收束导演计划，优先围绕$assetScope安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。',
     ),
     ProductionWorkspaceRecipe(
       title: '先看分镜表落地',

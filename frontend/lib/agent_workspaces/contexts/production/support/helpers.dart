@@ -14,6 +14,12 @@ Map<String, dynamic> buildProductionScriptPlanAssetArgs(Object? flowData) {
   return buildProductionAssetTypeReadArgs(assetTypes: assetTypes);
 }
 
+Map<String, dynamic> buildProductionScriptPlanSubAgentArgs(Object? flowData) {
+  return _buildProductionSubAgentArgsFromAssetReadArgs(
+    buildProductionScriptPlanAssetArgs(flowData),
+  );
+}
+
 Map<String, dynamic> buildProductionAssetReadArgs({
   List<int> ids = const <int>[],
 }) {
