@@ -593,6 +593,24 @@ void main() {
   });
 
   test(
+    'buildProductionScriptPlanExecutionHint compacts rewrite constraints for downstream prompts',
+    () {
+      final hint = buildProductionScriptPlanExecutionHint('''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，前两场快速立目标，但情绪不能像念提纲。
+④ 分场景情绪与画面意图
+人物情绪要有递进起伏，镜头别平均用力。
+</scriptPlan>
+''');
+
+      expect(hint, contains('承接 scriptPlan'));
+      expect(hint, contains('人物情绪保持递进'));
+      expect(hint, contains('女主复仇线要压住爽感'));
+    },
+  );
+
+  test(
     'buildProductionStoryboardGenerationPrompt caps long storyboard id lists',
     () {
       final prompt = buildProductionStoryboardGenerationPrompt(
@@ -601,6 +619,46 @@ void main() {
 
       expect(prompt, contains('优先处理这 9 个镜头'));
       expect(prompt, isNot(contains('ids=')));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages inject script-plan execution hint into asset and storyboard prompts',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_director_plan',
+        suggestedFlowKey: null,
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'scriptPlan': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，情绪不能像念提纲。
+④ 分场景情绪与画面意图
+人物情绪要有递进起伏，镜头别平均用力。
+</scriptPlan>
+''',
+            'assets': <Map<String, dynamic>>[
+              <String, dynamic>{'id': 7, 'name': '玉佩'},
+            ],
+            'storyboard': <Map<String, dynamic>>[
+              <String, dynamic>{
+                'id': 11,
+                'associateAssetsIds': <int>[7],
+                'shouldGenerateImage': true,
+              },
+            ],
+          },
+        },
+      );
+
+      final assetStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(assetStage.prompt, contains('执行约束：承接 scriptPlan'));
+      expect(storyboardStage.prompt, contains('执行约束：承接 scriptPlan'));
+      expect(storyboardStage.prompt, contains('人物情绪保持递进'));
     },
   );
 

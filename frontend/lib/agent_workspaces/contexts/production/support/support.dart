@@ -452,6 +452,7 @@ String buildProductionStoryboardGenerationPrompt({
   required List<int> storyboardIds,
   List<int> assetIds = const <int>[],
   String? summary,
+  String? executionHint,
 }) {
   final scope = buildProductionStoryboardPromptScope(
     storyboardIds,
@@ -461,7 +462,11 @@ String buildProductionStoryboardGenerationPrompt({
   final assetHint = buildProductionStoryboardAssetHint(assetIds);
   final normalizedSummary = summary?.trim() ?? '';
   final summaryLine = normalizedSummary.isEmpty ? '' : '注意：$normalizedSummary';
-  return '$scope，不要重跑已有结果或 shouldGenerateImage=false 的镜头。$contextHint$assetHint$summaryLine';
+  final normalizedExecutionHint = executionHint?.trim() ?? '';
+  final executionLine = normalizedExecutionHint.isEmpty
+      ? ''
+      : '执行约束：$normalizedExecutionHint';
+  return '$scope，不要重跑已有结果或 shouldGenerateImage=false 的镜头。$contextHint$assetHint$summaryLine$executionLine';
 }
 
 String buildProductionStoryboardTableRevisionPrompt(

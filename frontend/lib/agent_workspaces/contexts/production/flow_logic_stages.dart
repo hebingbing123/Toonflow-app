@@ -212,6 +212,9 @@ ProductionWorkspaceStage _buildAssetsStage({
     );
   }
   final data = flowSnapshot['assets'];
+  final executionHint = buildProductionScriptPlanExecutionHint(
+    flowSnapshot['scriptPlan'],
+  );
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
     if (rows.isEmpty) {
@@ -242,6 +245,7 @@ ProductionWorkspaceStage _buildAssetsStage({
         subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),
         prompt: buildProductionAssetGenerationPrompt(
           assetIds: pendingDeriveIds,
+          executionHint: executionHint,
         ),
       );
     }
@@ -464,6 +468,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
   required Object? result,
   required Map<String, dynamic>? toolArguments,
 }) {
+  final executionHint = buildProductionScriptPlanExecutionHint(
+    flowSnapshot['scriptPlan'],
+  );
   if (review != null &&
       (review.nextAction == 'check_storyboard' ||
           review.nextAction == 'generate_storyboard')) {
@@ -495,7 +502,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
             )
           : null,
       prompt: review.nextAction == 'generate_storyboard'
-          ? '请根据最近审核意见继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: storyboardIds, assetIds: review.assetIds, summary: review.summary)}'
+          ? '请根据最近审核意见继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: storyboardIds, assetIds: review.assetIds, summary: review.summary, executionHint: executionHint)}'
           : null,
     );
   }
@@ -538,7 +545,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
           assetIds: promptAssetIds,
         ),
         prompt:
-            '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds, assetIds: promptAssetIds)}',
+            '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds, assetIds: promptAssetIds, executionHint: executionHint)}',
       );
     }
     return ProductionWorkspaceStage(

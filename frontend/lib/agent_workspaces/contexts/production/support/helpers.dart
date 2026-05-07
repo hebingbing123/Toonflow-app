@@ -264,6 +264,27 @@ String summarizeProductionAssetFocusIds(
   return '资产 #$visible 等 ${ids.length} 项';
 }
 
+String buildProductionScriptPlanExecutionHint(
+  Object? flowData, {
+  int maxSections = 2,
+}) {
+  final sections = summarizeProductionScriptPlanSections(
+    flowData,
+    maxSections: maxSections,
+  );
+  if (sections.isEmpty) {
+    return '';
+  }
+  final compactSections = sections
+      .map((section) => section.replaceAll(RegExp(r'\s+'), ' ').trim())
+      .where((section) => section.isNotEmpty)
+      .toList(growable: false);
+  if (compactSections.isEmpty) {
+    return '';
+  }
+  return '承接 scriptPlan：${compactSections.join('；')}。人物情绪保持递进，避免生硬直述。';
+}
+
 String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
   final args = buildProductionReviewAssetArgs(review);
   final scope = summarizeProductionAssetScope(args);
@@ -280,16 +301,21 @@ String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
 String buildProductionAssetGenerationPrompt({
   required List<int> assetIds,
   String? summary,
+  String? executionHint,
 }) {
   final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
   final normalizedSummary = summary?.trim() ?? '';
   final summaryLine = normalizedSummary.isEmpty
       ? ''
       : '优先解决：$normalizedSummary';
+  final normalizedExecutionHint = executionHint?.trim() ?? '';
+  final executionLine = normalizedExecutionHint.isEmpty
+      ? ''
+      : '执行约束：$normalizedExecutionHint';
   if (ids.isEmpty) {
-    return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。$summaryLine';
+    return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。$summaryLine$executionLine';
   }
-  return '请优先只核对并生成这 ${ids.length} 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。$summaryLine';
+  return '请优先只核对并生成这 ${ids.length} 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。$summaryLine$executionLine';
 }
 
 Map<String, dynamic> buildProductionSubAgentArgs({
