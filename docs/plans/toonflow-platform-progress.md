@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`cc5c9abc`
-- 当前最新完成竖切：`资产与生产竖切 storyboardTable 采样状态语义增量`
+- 当前最新完成 commit：`f52fb74f`
+- 当前最新完成竖切：`资产与生产竖切 storyboardTable 扩读/回补导演计划分流增量`
 
 ## Phase 1 进度
 
@@ -188,6 +188,7 @@
 - production stage 现在进一步区分“有导演计划”与“导演计划是否够完整”：薄的 `scriptPlan` 会显示“待完善”，下游阶段会显示“等待导演计划完善”，要求至少补到基础规划维度后再放行，避免为了省 token 过早进入素材和分镜链导致质量变差
 - production stage 现在进一步区分“已有 storyboardTable”与“storyboardTable 是否足够完整可推进”：仅抽样或覆盖不足的分镜表会让 storyboard 显示“等待分镜表完善”，要求先扩读或补齐关键镜头表，再推进出图
 - production stage 的 storyboardTable 卡片现在也同步表达推进语义：覆盖不足时显示“待扩读”，覆盖已够时才保留“已抽样”，减少用户在阶段卡之间来回推断
+- production stage 现在继续区分“分镜表覆盖不足”背后的原因：如果 `scriptPlan` 虽然过了基础完整度，但还缺少足够明确的分场景情绪/画面意图，则 storyboardTable 与 storyboard 会优先显示“回补导演计划”，而不是盲目继续扩读分镜表
 
 本轮定向验证：
 
@@ -202,6 +203,7 @@
 - `f1b3154b` — require a minimally complete scriptPlan before downstream stages can advance
 - `00637900` — require storyboardTable coverage to be sufficiently complete before storyboard can advance
 - `cc5c9abc` — surface storyboardTable sampled-vs-advance-ready states directly on the stage card
+- `f52fb74f` — split storyboardTable under-coverage into expand-table vs refine-scriptPlan paths
 
 ### 6. 质量与发布最小闭环竖切
 
