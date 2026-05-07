@@ -1,7 +1,16 @@
 //! 项目范围的小说 HTTP 类型和行映射。
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
+
+/// PATCH JSON: distinguish **omitted** field (`None`) from explicit **`null`** (`Some(Null)`).
+fn deserialize_patch_field_value<'de, D>(deserializer: D) -> Result<Option<Value>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let v = Value::deserialize(deserializer)?;
+    Ok(Some(v))
+}
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -19,6 +28,10 @@ pub struct NovelRow {
     pub event_state: i32,
     pub error_reason: Option<String>,
     pub create_time_ms: Option<i64>,
+    pub intake_source: Option<String>,
+    pub intake_source_url: Option<String>,
+    pub intake_status: Option<String>,
+    pub intake_note: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -48,23 +61,39 @@ pub struct CreateNovelBody {
     pub chapter: Option<String>,
     #[serde(default)]
     pub chapter_data: Option<String>,
+    #[serde(default)]
+    pub intake_source: Option<String>,
+    #[serde(default)]
+    pub intake_source_url: Option<String>,
+    #[serde(default)]
+    pub intake_status: Option<String>,
+    #[serde(default)]
+    pub intake_note: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
 pub struct PatchNovelBody {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub chapter_index: Option<Value>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub reel: Option<Value>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub chapter: Option<Value>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub chapter_data: Option<Value>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub event: Option<Value>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub event_state: Option<Value>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
     pub error_reason: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
+    pub intake_source: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
+    pub intake_source_url: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
+    pub intake_status: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_field_value")]
+    pub intake_note: Option<Value>,
 }
