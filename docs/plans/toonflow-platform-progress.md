@@ -88,6 +88,10 @@
 
 状态：`in_progress`
 
+专项计划：
+
+- [novel-intake-crawler-plan.md](/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/novel-intake-crawler-plan.md)
+
 当前增量：
 
 - 章节工作台新增“整本导入”入口
