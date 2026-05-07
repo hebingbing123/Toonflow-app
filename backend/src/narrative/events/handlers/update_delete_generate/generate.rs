@@ -72,13 +72,11 @@ pub(crate) async fn post_generate_novel_events_for_project(
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND n.numeric_id = ANY($3)
+          AND n.numeric_id = ANY($2)
         ORDER BY n.chapter_index ASC, n.numeric_id ASC
         "#,
     )
     .bind(project_uuid)
-    .bind(uid)
     .bind(&body.novel_ids)
     .fetch_all(pool)
     .await

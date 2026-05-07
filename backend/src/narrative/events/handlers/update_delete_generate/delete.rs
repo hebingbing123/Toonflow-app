@@ -17,7 +17,6 @@ use super::super::super::MAX_EVENT_BATCH_DELETE;
 
 async fn delete_novel_event_core(
     pool: &PgPool,
-    uid: Uuid,
     project_uuid: Uuid,
     event_numeric_id: i32,
 ) -> Result<JsonResponse<Value>, ApiError> {
@@ -31,12 +30,10 @@ async fn delete_novel_event_core(
         USING app_project p
         WHERE e.project_id = p.id
           AND p.id = $1
-          AND p.owner_user_id = $2
-          AND e.numeric_id = $3
+          AND e.numeric_id = $2
         "#,
     )
     .bind(project_uuid)
-    .bind(uid)
     .bind(event_numeric_id)
     .execute(pool)
     .await
@@ -62,12 +59,11 @@ pub(crate) async fn delete_novel_event_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_novel_event_core(pool, uid, project_id, event_numeric_id).await
+    delete_novel_event_core(pool, project_id, event_numeric_id).await
 }
 
 async fn batch_delete_novel_events_core(
     pool: &PgPool,
-    uid: Uuid,
     project_uuid: Uuid,
     body: BatchDeleteEventsBody,
 ) -> Result<JsonResponse<BatchDeleteEventsResponse>, ApiError> {
@@ -91,12 +87,10 @@ async fn batch_delete_novel_events_core(
         USING app_project p
         WHERE e.project_id = p.id
           AND p.id = $1
-          AND p.owner_user_id = $2
-          AND e.numeric_id = ANY($3)
+          AND e.numeric_id = ANY($2)
         "#,
     )
     .bind(project_uuid)
-    .bind(uid)
     .bind(&body.ids)
     .execute(&mut *tx)
     .await
@@ -127,5 +121,5 @@ pub(crate) async fn batch_delete_novel_events_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    batch_delete_novel_events_core(pool, uid, project_id, body).await
+    batch_delete_novel_events_core(pool, project_id, body).await
 }

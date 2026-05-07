@@ -28,7 +28,6 @@ pub(super) fn search_ilike(raw: Option<String>) -> Option<String> {
 pub(super) async fn count_novel_events(
     pool: &PgPool,
     project_id: Uuid,
-    uid: Uuid,
     search_pat: Option<&str>,
 ) -> Result<i64, ApiError> {
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
@@ -38,8 +37,6 @@ pub(super) async fn count_novel_events(
          WHERE p.id = ",
     );
     qb.push_bind(project_id);
-    qb.push(" AND p.owner_user_id = ");
-    qb.push_bind(uid);
     if let Some(pat) = search_pat {
         qb.push(" AND e.name ILIKE ");
         qb.push_bind(pat);
@@ -53,7 +50,6 @@ pub(super) async fn count_novel_events(
 pub(super) async fn list_event_rows(
     pool: &PgPool,
     project_id: Uuid,
-    uid: Uuid,
     limit: i64,
     offset: i64,
     search_pat: Option<&str>,
@@ -79,8 +75,6 @@ pub(super) async fn list_event_rows(
         WHERE p.id = "#,
     );
     qb.push_bind(project_id);
-    qb.push(" AND p.owner_user_id = ");
-    qb.push_bind(uid);
     if let Some(pat) = search_pat {
         qb.push(" AND e.name ILIKE ");
         qb.push_bind(pat);

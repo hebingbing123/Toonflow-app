@@ -19,7 +19,6 @@ use sqlx::PgPool;
 
 async fn list_novel_events_core(
     pool: &PgPool,
-    uid: Uuid,
     project_id: Uuid,
     query: ListNovelEventsQuery,
 ) -> Result<JsonResponse<ListNovelEventsResponse>, ApiError> {
@@ -36,8 +35,8 @@ async fn list_novel_events_core(
     let off = i64::from(page.saturating_sub(1)) * lim;
     let search_pat = search_ilike(query.search);
     let search_ref = search_pat.as_deref();
-    let total = count_novel_events(pool, project_id, uid, search_ref).await?;
-    let rows: Vec<EventWithChapters> = list_event_rows(pool, project_id, uid, lim, off, search_ref)
+    let total = count_novel_events(pool, project_id, search_ref).await?;
+    let rows: Vec<EventWithChapters> = list_event_rows(pool, project_id, lim, off, search_ref)
         .await?
         .into_iter()
         .map(EventWithChapters::from)
@@ -55,7 +54,7 @@ pub(crate) async fn list_novel_events_for_project(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    list_novel_events_core(pool, uid, project_id, query).await
+    list_novel_events_core(pool, project_id, query).await
 }
 
 async fn create_novel_event_core(
