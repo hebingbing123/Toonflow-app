@@ -18,6 +18,7 @@ use super::super::super::types::{
     BrandBible, ProjectBrief, ProjectHomeChecklistItem, ProjectHomeOnboarding, ProjectHomeResponse,
     ProjectRow, ProjectStatsResponse,
 };
+use super::super::super::video_count::count_completed_videos_for_project;
 
 #[derive(FromRow)]
 struct ProjectHomeRow {
@@ -243,22 +244,9 @@ pub(crate) async fn project_home_by_id(
             .fetch_one(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let video_count: i64 = sqlx::query_scalar(
-        r#"
-        SELECT COUNT(*)::bigint
-        FROM app_generation_job j
-        WHERE j.status = 'succeeded'
-          AND (j.kind ILIKE '%video%' OR j.kind ILIKE '%workbench%')
-          AND (j.payload->>'project_numeric_id') ~ '^[0-9]+$'
-          AND (j.payload->>'project_numeric_id')::int = (
-              SELECT numeric_id FROM app_project WHERE id = $1
-          )
-        "#,
-    )
-    .bind(scope.id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let video_count = count_completed_videos_for_project(pool, scope.id)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let style_bible_ready: bool = sqlx::query_scalar(
         r#"
         SELECT EXISTS (

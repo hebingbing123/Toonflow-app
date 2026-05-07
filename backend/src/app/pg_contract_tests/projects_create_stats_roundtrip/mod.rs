@@ -58,6 +58,65 @@ async fn projects_create_stats_delete_roundtrip() {
     assert_eq!(stats["novel_count"], 0);
     assert_eq!(stats["video_count"], 0);
 
+    let project_id = Uuid::parse_str(&project_uuid).expect("project uuid");
+    let ins = sqlx::query(
+        r#"
+        INSERT INTO app_video (project_id, numeric_id, state)
+        VALUES ($1, 7700001, 'succeeded')
+        "#,
+    )
+    .bind(project_id)
+    .execute(&pool_sql)
+    .await
+    .expect("insert app_video for video_count contract");
+    assert_eq!(ins.rows_affected(), 1);
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri(format!("/api/v1/projects/{project_uuid}/stats"))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, stats_after_video) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "stats_after_video={stats_after_video}"
+    );
+    assert_eq!(
+        stats_after_video["video_count"], 1,
+        "video_count uses completed app_video rows (WP-B)"
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/projects/summary")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, summary_after_video) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "summary_after_video={summary_after_video}"
+    );
+    assert!(
+        summary_after_video["video_count"].as_i64().unwrap_or(0) >= 1,
+        "summary aggregates completed videos across workspace-visible projects"
+    );
+
     let res = app
         .clone()
         .oneshot(

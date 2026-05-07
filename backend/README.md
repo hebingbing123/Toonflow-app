@@ -41,9 +41,9 @@ cargo run --bin toonflow-server
 
 项目删除：**`DELETE /api/v1/projects/{project_id}`**（Bearer；**`project_id`** 为项目 UUID）— 删除当前用户名下该项目；子表 **`app_script`** / **`app_storyboard`** / **`app_novel`** 等随 FK 级联删除；并清理 **`app_agent_memory`** 中同历史项目范围。
 
-全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 单次查询当前用户的 **`app_project`**、**`app_script`**、**`app_storyboard`**、**`app_novel`**、**`role_count`**（**`app_asset`** 且 **`asset_type = 'role'`**，与 **`…/stats`** 一致）、**`app_art_style`**、**`asset_count`**（全部 **`app_asset`**）、**`video_count`**（当前恒 **0**，与 **`…/stats`** 占位一致，待 PG 视频表）。
+全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 单次查询当前用户 **workspace 可见**的 **`app_project`**、**`app_script`**、**`app_storyboard`**、**`app_novel`**、**`role_count`**（**`app_asset`** 且 **`asset_type = 'role'`**，与 **`…/stats`** 一致）、**`app_art_style`**（**`owner_user_id`**）、**`asset_count`**（可见项目内全部 **`app_asset`**）、**`video_count`**（**`app_video`** 终态：**`state` ∈ `生成成功|已完成|succeeded|completed`**，与制作台 material-data 一致；跨可见项目汇总）。
 
-项目统计：**`GET /api/v1/projects/{project_id}/stats`**（Bearer；**`project_id`** UUID）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
+项目统计：**`GET /api/v1/projects/{project_id}/stats`**（Bearer；**`project_id`** UUID）— 返回该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 为该项目 **`app_video`** 终态条数（规则同 **`…/summary`**）。
 
 项目素材（**`app_asset`**）：**`GET`/`POST /api/v1/projects/{project_id}/assets`**（列表分页与筛选、创建）；**`GET`/`PATCH`/`DELETE …/assets/{asset_numeric_id}`**（**`asset_numeric_id`** = **`app_asset.numeric_id`**，与 OpenAPI 一致）。角景与图片子资源见 **`…/assets/corner-scape`**、**`…/assets/{asset_numeric_id}/images*`**。**旧 Electron 形 workbench**（nested 父子列表、image-bundle、clip 上传、material/batch-generation、polling、写删等）在 **`POST …/projects/{project_id}/assets/workbench/…`**；**无**顶层 **`POST /api/v1/assets/*`**。详见合并 OpenAPI（`GET /api/v1/openapi.yaml` 或 `cargo run --bin export-openapi`）与 [`docs/plans/electron-node-parity.md`](../docs/plans/electron-node-parity.md)。
 

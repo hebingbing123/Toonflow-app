@@ -138,7 +138,9 @@ pub struct ProjectDetailResponse {
 }
 
 /// Per-project counts for dashboards; aligns with Electron-era **`generalStatistics`** shape.
-/// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`** counts **`app_novel`** rows; **`video_count`** remains **`0`** until video rows exist in Postgres.
+/// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`**
+/// counts **`app_novel`** rows; **`video_count`** counts **`app_video`** rows in a terminal state
+/// (**`state` ∈ `生成成功|已完成|succeeded|completed`**), matching production workbench material-data.
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProjectStatsResponse {
     pub script_count: i64,
@@ -404,7 +406,7 @@ pub struct ProjectShortVideoExportCheckResponse {
     pub quality_gate: ShortVideoExportQualityGate,
 }
 
-/// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
+/// Aggregate counts across projects visible via **`app_workspace_member`** (current workspace context on the server uses the same visibility rules as list endpoints).
 #[derive(Serialize, ToSchema)]
 pub struct ProjectsSummaryResponse {
     pub project_count: i64,
@@ -415,7 +417,7 @@ pub struct ProjectsSummaryResponse {
     pub role_count: i64,
     pub art_style_count: i64,
     pub asset_count: i64,
-    /// Same as per-project **`GET …/stats`**: **`0`** until video rows exist in Postgres.
+    /// Completed **`app_video`** rows (**`state`** as in **`GET …/stats` `video_count`**) in visible projects.
     pub video_count: i64,
 }
 

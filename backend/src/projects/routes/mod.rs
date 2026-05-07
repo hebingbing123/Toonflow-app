@@ -6,6 +6,7 @@ pub(crate) mod common;
 pub(crate) mod handlers;
 pub(crate) mod types;
 mod validation;
+pub(crate) mod video_count;
 
 #[cfg(test)]
 mod validation_integration_test;

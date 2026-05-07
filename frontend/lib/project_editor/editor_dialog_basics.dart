@@ -276,8 +276,8 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         if (dialogState.statsRef[0] != null)
           Text(
             'GET …/stats：剧本 ${dialogState.statsRef[0]!.scriptCount} · 分镜 '
-            '${dialogState.statsRef[0]!.storyboardCount} · 小说 ${dialogState.statsRef[0]!.novelCount} · 角色/视频 '
-            '${dialogState.statsRef[0]!.roleCount}/${dialogState.statsRef[0]!.videoCount}（视频占位）',
+            '${dialogState.statsRef[0]!.storyboardCount} · 小说 ${dialogState.statsRef[0]!.novelCount} · 角色/成片视频 '
+            '${dialogState.statsRef[0]!.roleCount}/${dialogState.statsRef[0]!.videoCount}',
             style: Theme.of(ctx).textTheme.bodySmall,
           )
         else

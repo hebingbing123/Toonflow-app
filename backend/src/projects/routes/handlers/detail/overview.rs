@@ -15,6 +15,7 @@ use crate::{
     projects::routes::types::{
         ProjectAssetsOverviewResponse, ProjectProductionOverviewResponse, ProjectStatsResponse,
     },
+    projects::routes::video_count::count_completed_videos_for_project,
     state::AppState,
 };
 
@@ -188,7 +189,7 @@ pub(crate) async fn project_overview_by_id(
 async fn fetch_project_stats(
     pool: &sqlx::PgPool,
     project_id: Uuid,
-    uid: Uuid,
+    _uid: Uuid,
 ) -> Result<ProjectStatsResponse, ApiError> {
     let script_count: i64 = sqlx::query_scalar(
         r#"
@@ -239,23 +240,9 @@ async fn fetch_project_stats(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let video_count: i64 = sqlx::query_scalar(
-        r#"
-        SELECT COUNT(*)::bigint
-        FROM app_generation_job
-        WHERE owner_user_id = $2
-          AND status = 'succeeded'
-          AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
-          AND payload->>'project_numeric_id' = (
-              SELECT numeric_id::text FROM app_project WHERE id = $1
-          )
-        "#,
-    )
-    .bind(project_id)
-    .bind(uid)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let video_count = count_completed_videos_for_project(pool, project_id)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(ProjectStatsResponse {
         script_count,

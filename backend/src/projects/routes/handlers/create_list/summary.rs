@@ -5,6 +5,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::super::types::ProjectsSummaryResponse;
+use super::super::super::video_count::count_completed_videos_for_member_projects;
 
 #[utoipa::path(
     get,
@@ -79,19 +80,9 @@ pub(crate) async fn projects_summary(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let video_count: i64 = sqlx::query_scalar(
-        r#"
-        SELECT COUNT(*)::bigint
-        FROM app_generation_job
-        WHERE owner_user_id = $1
-          AND status = 'succeeded'
-          AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
-        "#,
-    )
-    .bind(uid)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let video_count = count_completed_videos_for_member_projects(pool, uid)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(ProjectsSummaryResponse {
         project_count: row.0,

@@ -1,5 +1,26 @@
 components:
   schemas:
+    AcceptWorkspaceInviteBody:
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+      required:
+      - token
+      type: object
+    AddWorkspaceMemberBody:
+      additionalProperties: false
+      properties:
+        role:
+          description: 'Allowed: **`admin`** or **`member`**. (`owner` requires dedicated transfer flow.)'
+          type: string
+        user_id:
+          format: uuid
+          type: string
+      required:
+      - user_id
+      - role
+      type: object
     ArtStyleRow:
       description: One `app_art_style` row (Electron-era `o_artStyle` subset).
       properties:
@@ -724,6 +745,12 @@ components:
           type:
           - string
           - 'null'
+        workspaceId:
+          description: Optional explicit workspace target (`workspaceId`). Omit to use current workspace context.
+          format: uuid
+          type:
+          - string
+          - 'null'
       type: object
     CreatePublishDraftBody:
       properties:
@@ -826,6 +853,33 @@ components:
       - memoryBudgetSnapshot
       - observationPolicySnapshot
       - modelRouteSnapshot
+      type: object
+    CreateWorkspaceBody:
+      additionalProperties: false
+      properties:
+        metadata: {}
+        name:
+          type: string
+      required:
+      - name
+      type: object
+    CreateWorkspaceInviteBody:
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        expires_in_hours:
+          description: Invite expiry window in hours (default **168** = 7d, max **720** = 30d).
+          format: int64
+          type:
+          - integer
+          - 'null'
+        role:
+          description: 'Allowed: **`admin`** or **`member`**.'
+          type: string
+      required:
+      - email
+      - role
       type: object
     CriticalPath:
       description: Critical user paths that have defined SLIs.
@@ -2118,6 +2172,29 @@ components:
         storyStylePack:
           description: 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`），传 null 清除
       type: object
+    PatchWorkspaceBody:
+      additionalProperties: false
+      properties:
+        archive:
+          description: Archive (**`true`**) or restore (**`false`**) an **enterprise** workspace. Omit for no change.
+          type:
+          - boolean
+          - 'null'
+        metadata: {}
+        name:
+          type:
+          - string
+          - 'null'
+      type: object
+    PatchWorkspaceMemberBody:
+      additionalProperties: false
+      properties:
+        role:
+          description: 'Allowed: **`admin`** or **`member`**. (`owner` requires dedicated transfer flow.)'
+          type: string
+      required:
+      - role
+      type: object
     PingResponse:
       description: Minimal JSON probe; replaces Electron-era **`GET /api/test/test`** (`"ok"` plain text).
       properties:
@@ -2536,7 +2613,9 @@ components:
     ProjectStatsResponse:
       description: |-
         Per-project counts for dashboards; aligns with Electron-era **`generalStatistics`** shape.
-        **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`** counts **`app_novel`** rows; **`video_count`** remains **`0`** until video rows exist in Postgres.
+        **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`**
+        counts **`app_novel`** rows; **`video_count`** counts **`app_video`** rows in a terminal state
+        (**`state` ∈ `生成成功|已完成|succeeded|completed`**), matching production workbench material-data.
       properties:
         novel_count:
           format: int64
@@ -2561,7 +2640,7 @@ components:
       - video_count
       type: object
     ProjectsSummaryResponse:
-      description: Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
+      description: Aggregate counts across projects visible via **`app_workspace_member`** (current workspace context on the server uses the same visibility rules as list endpoints).
       properties:
         art_style_count:
           format: int64
@@ -2586,7 +2665,7 @@ components:
           format: int64
           type: integer
         video_count:
-          description: 'Same as per-project **`GET …/stats`**: **`0`** until video rows exist in Postgres.'
+          description: Completed **`app_video`** rows (**`state`** as in **`GET …/stats` `video_count`**) in visible projects.
           format: int64
           type: integer
       required:
@@ -4303,12 +4382,20 @@ components:
           type:
           - integer
           - 'null'
+        scope:
+          $ref: '#/components/schemas/UsageSummaryScope'
+          description: Aggregation scope for this response. W4.6 currently locks this endpoint to `user`.
       required:
+      - scope
       - events_last_24h
       - events_last_7d
       - event_counts_last_7d
       - jobs_today
       type: object
+    UsageSummaryScope:
+      enum:
+      - user
+      type: string
     VariantCostDelta:
       description: 变体成本增量
       properties:
@@ -4395,6 +4482,121 @@ components:
       required:
       - service
       - version
+      type: object
+    WorkspaceInviteResponse:
+      properties:
+        accepted_at:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        accepted_by:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        created_at:
+          format: date-time
+          type: string
+        email:
+          type: string
+        expires_at:
+          format: date-time
+          type: string
+        id:
+          format: uuid
+          type: string
+        invited_by:
+          format: uuid
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        token:
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        workspace_id:
+          format: uuid
+          type: string
+      required:
+      - id
+      - workspace_id
+      - email
+      - token
+      - role
+      - invited_by
+      - status
+      - expires_at
+      - created_at
+      - updated_at
+      type: object
+    WorkspaceListItem:
+      allOf:
+      - $ref: '#/components/schemas/WorkspaceResponse'
+      - properties:
+          role:
+            type: string
+        required:
+        - role
+        type: object
+    WorkspaceMemberResponse:
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        role:
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        user_id:
+          format: uuid
+          type: string
+        workspace_id:
+          format: uuid
+          type: string
+      required:
+      - workspace_id
+      - user_id
+      - role
+      - created_at
+      - updated_at
+      type: object
+    WorkspaceResponse:
+      properties:
+        archived_at:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        created_at:
+          format: date-time
+          type: string
+        id:
+          format: uuid
+          type: string
+        metadata: {}
+        name:
+          type: string
+        owner_user_id:
+          format: uuid
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        workspace_type:
+          type: string
+      required:
+      - id
+      - owner_user_id
+      - name
+      - workspace_type
+      - metadata
+      - created_at
+      - updated_at
       type: object
     WorkspaceSummary:
       properties:
@@ -9775,6 +9977,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '503':
           content:
             application/json:
@@ -9831,6 +10039,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -9870,6 +10084,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -9921,6 +10141,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -10045,6 +10271,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -10984,6 +11216,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -11728,6 +11966,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -11762,6 +12006,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -13336,6 +13586,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -13376,6 +13632,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -13416,6 +13678,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -13456,6 +13724,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -13609,6 +13883,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
         '404':
           content:
             application/json:
@@ -15636,6 +15916,600 @@ paths:
       - bearerAuth: []
       tags:
       - webhooks
+  /api/v1/workspaces:
+    get:
+      operationId: listWorkspacesV1
+      parameters:
+      - description: Include rows with **`archived_at`** set (default **false**).
+        example: false
+        in: query
+        name: include_archived
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WorkspaceListItem'
+                type: array
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+    post:
+      operationId: createWorkspaceV1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Quota exceeded
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/invites/accept:
+    post:
+      operationId: acceptWorkspaceInviteV1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptWorkspaceInviteBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceMemberResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/{workspace_id}:
+    get:
+      operationId: getWorkspaceV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+    patch:
+      operationId: patchWorkspaceV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchWorkspaceBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/{workspace_id}/invites:
+    post:
+      operationId: createWorkspaceInviteV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceInviteBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceInviteResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Quota exceeded
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/{workspace_id}/members:
+    get:
+      operationId: listWorkspaceMembersV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WorkspaceMemberResponse'
+                type: array
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+    post:
+      operationId: addWorkspaceMemberV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddWorkspaceMemberBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceMemberResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Quota exceeded
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/{workspace_id}/members/me:
+    delete:
+      operationId: leaveWorkspaceV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceMemberResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/{workspace_id}/members/{user_id}:
+    delete:
+      operationId: removeWorkspaceMemberV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Member user UUID
+        in: path
+        name: user_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceMemberResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+    patch:
+      operationId: patchWorkspaceMemberV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Member user UUID
+        in: path
+        name: user_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchWorkspaceMemberBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceMemberResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
   /api/v1/ws:
     get:
       description: |
@@ -15759,7 +16633,7 @@ paths:
 
         ### `session.ack` (server → client)
 
-        Generic success for attach / context update / cancel; carries `request_id` when the client sent one.
+        Generic success for attach / context update / cancel; carries `request_id` when the client sent one. When the server resolved **`app_project.workspace_id`** from Postgres, **`payload.workspaceUuid`** echoes that UUID so clients can confirm the active Harness workspace boundary.
 
         ### `agent.chat.send` → LLM stream (server → client)
 
@@ -15788,7 +16662,17 @@ paths:
         | `agent.script.attach` | Former `scriptAgent` namespace |
         | `agent.production.attach` | Former `productionAgent` namespace |
 
-        `payload` should carry `isolation_key`, `project_id`, and for production `script_id` where applicable (mirrors handshake `auth` fields today).
+        `payload` should carry `isolation_key` plus **project scope** and (for production / `agent.context.update`) **script scope**:
+
+        | Wire field | Meaning |
+        |------------|---------|
+        | **`projectUuid`** (preferred) | `app_project.id` (UUID string) |
+        | **`workspaceUuid`** (optional) | `app_workspace.id` / **`app_project.workspace_id`**; when sent, must match the resolved project's workspace (400 / WS `bad_request` if not); omit when using legacy numeric-only attach without DB |
+        | **`project_id`** (legacy) | `app_project.numeric_id` (positive integer) |
+        | **`scriptUuid`** (preferred) | `app_script.id` |
+        | **`script_id`** (legacy) | `app_script.numeric_id` |
+
+        Send **`projectUuid`** and/or **`project_id`** (same pairing rules as REST agent-memory: if both are sent they must refer to the same row). Optional **`workspaceUuid`** must match **`app_project.workspace_id`** when Postgres resolves the project (attach fails with `bad_request` on mismatch or when **`workspaceUuid`** is sent but the project was not resolved from the database). When Postgres is configured, legacy **`project_id` only** is verified against **workspace membership** (same as REST); **`projectUuid`** resolution requires a database pool (attach fails with `bad_request` if the pool is absent). **`scriptUuid`** similarly requires DB + a resolved project UUID key server-side.
 
         ## Client → server (previous names → target `type`)
 
@@ -15798,7 +16682,7 @@ paths:
         | (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |
         | `chat` | `agent.chat.send` | `payload.content` (string) |
         | `stop` | `agent.run.cancel` | Abort current generation |
-        | `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; previous implementation used ack callback — use `request_id` + optional `session.ack` server message |
+        | `updateContext` | `agent.context.update` | Same payload shape as `agent.production.attach` (`isolation_key`, **`projectUuid`** / **`project_id`**, **`scriptUuid`** / **`script_id`**); previous implementation used ack callback — use `request_id` + optional `session.ack` server message |
 
         ## Server → client (previous names → target `type`)
 

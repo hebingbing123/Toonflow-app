@@ -13,6 +13,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::super::types::ProjectStatsResponse;
+use super::super::super::video_count::count_completed_videos_for_project;
 
 /// Internal function to fetch project stats without HTTP layer
 pub(crate) async fn project_stats_by_id_internal(
@@ -74,23 +75,9 @@ pub(crate) async fn project_stats_by_id_internal(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let video_count: i64 = sqlx::query_scalar(
-        r#"
-        SELECT COUNT(*)::bigint
-        FROM app_generation_job
-        WHERE owner_user_id = $2
-          AND status = 'succeeded'
-          AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
-          AND payload->>'project_numeric_id' = (
-              SELECT numeric_id::text FROM app_project WHERE id = $1
-          )
-        "#,
-    )
-    .bind(resolved_id)
-    .bind(uid)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let video_count = count_completed_videos_for_project(pool, resolved_id)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(ProjectStatsResponse {
         script_count,
