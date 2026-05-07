@@ -554,6 +554,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
   final storyboardTableReady = _productionStoryboardTableReady(
     flowSnapshot['storyboardTable'],
   );
+  final storyboardTableAdvanceReady = _productionStoryboardTableAdvanceReady(
+    flowSnapshot['storyboardTable'],
+  );
   final executionHint = buildProductionScriptPlanExecutionHint(
     flowSnapshot['scriptPlan'],
   );
@@ -689,6 +692,22 @@ ProductionWorkspaceStage _buildStoryboardStage({
       domainArgs: buildProductionStoryboardTableReadArgs(),
     );
   }
+  if (scriptPlanAdvanceReady &&
+      storyboardTableReady &&
+      !storyboardTableAdvanceReady &&
+      activeKey != 'storyboard' &&
+      toolName != 'generate_storyboard' &&
+      toolName != 'run_sub_agent_storyboard_gen' &&
+      toolName != 'run_sub_agent_storyboard_panel') {
+    return ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: '等待分镜表完善',
+      detail: 'storyboardTable 已有基础内容，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard，避免在镜头拆分未定型时直接出图。',
+      domainTool: 'get_flowData',
+      domainArgs: buildProductionStoryboardTableReadArgs(),
+    );
+  }
   if (activeKey == 'storyboard' ||
       toolName == 'generate_storyboard' ||
       toolName == 'run_sub_agent_storyboard_gen' ||
@@ -786,6 +805,25 @@ bool _productionStoryboardTableReady(Object? value) {
     final rowCount = _readInt(value['rowCount']);
     final totalRows = _readInt(value['totalRows']);
     return rowCount > 0 || totalRows > 0;
+  }
+  return false;
+}
+
+bool _productionStoryboardTableAdvanceReady(Object? value) {
+  if (value is String) {
+    return value.trim().isNotEmpty && countProductionStoryboardTableRows(value) >= 3;
+  }
+  if (value is Map<String, dynamic>) {
+    final rowCount = _readInt(value['rowCount']);
+    final totalRows = _readInt(value['totalRows']);
+    if (totalRows <= 0) {
+      return rowCount >= 3;
+    }
+    if (rowCount >= totalRows) {
+      return rowCount >= 3;
+    }
+    final remaining = totalRows - rowCount;
+    return rowCount >= 12 && remaining <= 4;
   }
   return false;
 }

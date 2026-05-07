@@ -2295,6 +2295,110 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages blocks storyboard until storyboard table coverage is sufficient',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: null,
+        suggestedFlowKey: null,
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'scriptPlan': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
+④ 分场景情绪与画面意图
+情绪起伏要递进，镜头别一上来全顶满。
+</scriptPlan>
+''',
+            'storyboardTable': <String, dynamic>{
+              'table': 'storyboardTable',
+              'rowStart': 1,
+              'rowCount': 8,
+              'totalRows': 24,
+              'rows': <Map<String, dynamic>>[
+                <String, dynamic>{'id': '1', 'description': '首镜'},
+              ],
+            },
+          },
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.statusLabel, '等待分镜表完善');
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+        'rowStart': 1,
+        'rowCount': 8,
+      });
+      expect(storyboardStage.detail, contains('覆盖还不够'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages allows storyboard to move past table gate when coverage is sufficient',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: null,
+        suggestedFlowKey: null,
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'scriptPlan': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+② 核心人物与关系拉扯
+角色关系要有压迫和反制，不要平均输出。
+④ 分场景情绪与画面意图
+情绪起伏要递进，镜头别一上来全顶满。
+</scriptPlan>
+''',
+            'storyboardTable': <String, dynamic>{
+              'table': 'storyboardTable',
+              'rowStart': 1,
+              'rowCount': 12,
+              'totalRows': 15,
+              'rows': <Map<String, dynamic>>[
+                <String, dynamic>{'id': '1', 'description': '首镜'},
+              ],
+            },
+          },
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.statusLabel, '待读取');
+      expect(storyboardStage.domainTool, 'get_flowData');
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+        'limit': 12,
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages uses focused script window in missing storyboard prompt',
     () {
       final stages = buildProductionWorkspaceStages(
