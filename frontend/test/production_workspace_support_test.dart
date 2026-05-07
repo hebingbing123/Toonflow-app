@@ -141,6 +141,24 @@ void main() {
   });
 
   test(
+    'summarizeProductionFlowValue marks script plan rewrite constraints as landed',
+    () {
+      final lines = summarizeProductionFlowValue(
+        '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+</scriptPlan>
+''',
+        flowKey: 'scriptPlan',
+      );
+
+      expect(lines, contains('规划维度 1/6'));
+      expect(lines, contains('已承接改写约束'));
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes adds tool asset scope when script plan mentions props',
     () {
       final recipes = buildProductionWorkspaceRecipes(

@@ -85,6 +85,28 @@ class ProductionContextSnapshotView extends StatelessWidget {
     return _plainTextDigest(body, maxLines: 8, maxChars: 420);
   }
 
+  String _scriptPlanRewriteConstraintDigest(Object body) {
+    if (body is! String) {
+      return '';
+    }
+    final sections = summarizeProductionScriptPlanSections(body, maxSections: 3);
+    if (sections.isEmpty) {
+      return '';
+    }
+    final assetScope = summarizeProductionAssetScope(
+      buildProductionScriptPlanAssetArgs(body),
+    );
+    final lines = <String>[
+      'scriptPlan 已承接上游改写约束，后续分镜与素材先服从当前导演计划。',
+      '改写重点：${sections.first}',
+      if (sections.length > 1) '视觉/节奏：${sections[1]}',
+      if (sections.length > 2) '补充约束：${sections[2]}',
+      '资产聚焦：$assetScope',
+      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。',
+    ];
+    return lines.join('\n');
+  }
+
   String _storyboardTableDigest(
     Object body, {
     Set<int> focusedStoryboardIds = const <int>{},
@@ -304,6 +326,18 @@ class ProductionContextSnapshotView extends StatelessWidget {
               ? focusedStoryboardIds
               : const <int>{},
         );
+        if (key == 'scriptPlan') {
+          final rewriteConstraintDigest = _scriptPlanRewriteConstraintDigest(
+            value,
+          );
+          if (rewriteConstraintDigest.trim().isNotEmpty) {
+            addPreviewCard(
+              title: '改写约束下沉',
+              subtitle: '由 scriptPlan 派生的 production 执行提示',
+              body: rewriteConstraintDigest,
+            );
+          }
+        }
       }
     } else if (toolName == 'get_flowData' &&
         data != null &&
@@ -315,6 +349,18 @@ class ProductionContextSnapshotView extends StatelessWidget {
         subtitle: '来自 $toolName',
         body: data,
       );
+      if (suggestedFlowKey == 'scriptPlan') {
+        final rewriteConstraintDigest = _scriptPlanRewriteConstraintDigest(
+          data,
+        );
+        if (rewriteConstraintDigest.trim().isNotEmpty) {
+          addPreviewCard(
+            title: '改写约束下沉',
+            subtitle: '由 scriptPlan 派生的 production 执行提示',
+            body: rewriteConstraintDigest,
+          );
+        }
+      }
     }
 
     final items = result['items'];

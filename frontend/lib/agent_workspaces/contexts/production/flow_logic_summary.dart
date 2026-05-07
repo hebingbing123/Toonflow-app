@@ -77,6 +77,7 @@ List<String> summarizeProductionFlowValue(Object? value, {String? flowKey}) {
         '文本 ${trimmed.length} 字',
         '$lines 行',
         if (sectionCount > 0) '规划维度 $sectionCount/6',
+        if (sectionCount > 0) '已承接改写约束',
       ];
     }
     if (normalizedKey == 'storyboardTable') {

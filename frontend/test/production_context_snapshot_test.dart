@@ -145,9 +145,12 @@ void main() {
       expect(find.text('flow[scriptPlan]'), findsOneWidget);
       expect(
         find.textContaining('① 主题立意与叙事核心：女主复仇线要压住爽感'),
-        findsOneWidget,
+        findsNWidgets(2),
       );
-      expect(find.textContaining('② 视觉风格与画面基调：冷金对比'), findsOneWidget);
+      expect(find.textContaining('② 视觉风格与画面基调：冷金对比'), findsNWidgets(2));
+      expect(find.text('改写约束下沉'), findsOneWidget);
+      expect(find.textContaining('scriptPlan 已承接上游改写约束'), findsOneWidget);
+      expect(find.textContaining('资产聚焦：角色/场景资产'), findsOneWidget);
       expect(find.text('审核摘要'), findsOneWidget);
       expect(find.textContaining('聚焦资产: 7, 12'), findsOneWidget);
       expect(find.textContaining('聚焦镜头: 3, 9'), findsOneWidget);
