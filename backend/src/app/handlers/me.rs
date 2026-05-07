@@ -4,6 +4,7 @@ use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::Json;
 use chrono::{DateTime, Utc};
+use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -14,6 +15,12 @@ use crate::state::{AppState, MemoryConfig};
 use crate::workspaces::ensure_personal_workspace;
 
 use super::types::{MeResponse, WorkspaceSummary};
+
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PatchCurrentWorkspaceBody {
+    pub workspace_id: Uuid,
+}
 
 #[derive(FromRow)]
 struct UserProfileRow {
@@ -182,5 +189,90 @@ pub(crate) async fn me(
         jobs_today,
         memory_config,
         current_workspace,
+    }))
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/me/current-workspace",
+    operation_id = "patchCurrentWorkspaceV1",
+    tag = "session",
+    request_body(content = PatchCurrentWorkspaceBody, content_type = "application/json"),
+    security(("bearerAuth" = [])),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceSummary),
+        (status = 401, description = "Missing or invalid Bearer token", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Database unavailable", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn patch_current_workspace(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<PatchCurrentWorkspaceBody>,
+) -> Result<Json<WorkspaceSummary>, ApiError> {
+    let claims = require_claims(&state, &headers)?;
+    let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
+    let pool = state.require_pool()?;
+    let workspace_id = body.workspace_id;
+
+    let exists: bool =
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM public.app_workspace WHERE id = $1)")
+            .bind(workspace_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if !exists {
+        return Err(ApiError::NotFound);
+    }
+
+    let is_member: bool = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM public.app_workspace_member WHERE workspace_id = $1 AND user_id = $2)",
+    )
+    .bind(workspace_id)
+    .bind(sub)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if !is_member {
+        return Err(ApiError::Forbidden(
+            "not a member of the target workspace".into(),
+        ));
+    }
+
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_user_profile (user_id, current_workspace_id)
+        VALUES ($1, $2)
+        ON CONFLICT (user_id) DO UPDATE
+        SET current_workspace_id = EXCLUDED.current_workspace_id, updated_at = NOW()
+        "#,
+    )
+    .bind(sub)
+    .bind(workspace_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let row: Option<(Uuid, String, String)> = sqlx::query_as(
+        r#"
+        SELECT id, name, workspace_type::text
+        FROM public.app_workspace
+        WHERE id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some((id, name, workspace_type)) = row else {
+        return Err(ApiError::NotFound);
+    };
+
+    Ok(Json(WorkspaceSummary {
+        id,
+        name,
+        workspace_type,
     }))
 }

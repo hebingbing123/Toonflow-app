@@ -41,3 +41,12 @@ async fn me_ok_without_pool_with_jwt() {
         "current_workspace should be absent without pool"
     );
 }
+
+#[tokio::test]
+async fn me_patch_current_workspace_requires_database_without_pool() {
+    let token = test_jwt(Uuid::nil());
+    let body = format!(r#"{{"workspace_id":"{}"}}"#, Uuid::nil());
+    let (status, v) = patch_json_bearer("/api/v1/me/current-workspace", &token, &body).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}

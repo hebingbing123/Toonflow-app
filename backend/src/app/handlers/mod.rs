@@ -9,7 +9,7 @@ mod system;
 mod types;
 
 #[allow(unused_imports)]
-pub(crate) use me::{__path_me, me};
+pub(crate) use me::{__path_me, __path_patch_current_workspace, me, patch_current_workspace};
 #[allow(unused_imports)]
 pub(crate) use metrics::{
     __path_get_metrics, __path_get_sli_definitions, __path_get_sli_status, get_metrics,

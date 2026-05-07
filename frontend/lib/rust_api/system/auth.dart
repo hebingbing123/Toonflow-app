@@ -60,6 +60,16 @@ class WorkspaceSummary {
   }
 }
 
+class PatchCurrentWorkspaceBody {
+  const PatchCurrentWorkspaceBody({required this.workspaceId});
+
+  final String workspaceId;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'workspace_id': workspaceId,
+  };
+}
+
 Future<MeResponse> fetchMeV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/me');
   final res = await http
@@ -70,6 +80,28 @@ Future<MeResponse> fetchMeV1(String accessToken) async {
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return MeResponse.fromJson(map);
+}
+
+Future<WorkspaceSummary> patchCurrentWorkspaceV1(
+  String accessToken,
+  PatchCurrentWorkspaceBody body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/me/current-workspace');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceSummary.fromJson(map);
 }
 
 /// OpenAPI **`SwitchAiDevToolResponse`** — prior **`getSwitchAiDevTool`**.

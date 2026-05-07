@@ -20,6 +20,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   bool _creating = false;
   bool _includeArchived = false;
   String? _patchingWorkspaceId;
+  String? _switchingWorkspaceId;
 
   @override
   void dispose() {
@@ -498,6 +499,39 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     }
   }
 
+  Future<void> _switchCurrentWorkspace(WorkspaceListItem row) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final id = row.workspace.id;
+    setState(() => _switchingWorkspaceId = id);
+    try {
+      await patchCurrentWorkspaceV1(
+        token,
+        PatchCurrentWorkspaceBody(workspaceId: id),
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('已切换到 ${row.workspace.name}')),
+      );
+      await _load();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('切换失败：$e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _switchingWorkspaceId = null);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final token = widget.accessToken;
@@ -592,6 +626,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               final row = items[index];
               final w = row.workspace;
               final busy = _patchingWorkspaceId == w.id;
+              final switching = _switchingWorkspaceId == w.id;
               final canManage = _canArchiveOrRestore(row);
               return ListTile(
                 dense: true,
@@ -609,6 +644,17 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             (_loading || busy) ? null : () => _openMembersDialog(row),
                         child: const Text('成员'),
                       ),
+                    TextButton(
+                      onPressed:
+                          (_loading || busy || switching) ? null : () => _switchCurrentWorkspace(row),
+                      child: switching
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('切换到此'),
+                    ),
                     if (canManage && w.archivedAt == null)
                       TextButton(
                         onPressed: (_loading || busy) ? null : () => _confirmArchive(row),

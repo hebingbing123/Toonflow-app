@@ -22,7 +22,7 @@ use crate::workspaces;
 use axum::{
     http::{header, HeaderName, Method},
     middleware::from_fn,
-    routing::get,
+    routing::{get, patch},
     Router,
 };
 
@@ -93,6 +93,10 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings::memory_config::router())
         .merge(settings::vendors::router())
         .route("/api/v1/me", get(handlers::me))
+        .route(
+            "/api/v1/me/current-workspace",
+            patch(handlers::patch_current_workspace),
+        )
         .route("/api/v1/ws", get(ws_upgrade))
         // Layer 1: Global IP-based rate limiting (~50 req/s per IP)
         .layer(governor_layer_from_env())
