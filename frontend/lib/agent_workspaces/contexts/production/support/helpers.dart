@@ -323,11 +323,37 @@ String summarizeProductionPrimaryBlocker(List<ProductionWorkspaceStage> stages) 
     (stage) => !resolvedStatuses.contains(stage.statusLabel.trim()),
     orElse: () => stages.last,
   );
+  final explicitReason = _summarizeProductionBlockerReason(blocker);
+  if (explicitReason.isNotEmpty) {
+    return '当前卡点：${blocker.title} · ${blocker.statusLabel}；$explicitReason';
+  }
   final normalizedDetail = blocker.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
   final clippedDetail = normalizedDetail.length <= 72
       ? normalizedDetail
       : '${normalizedDetail.substring(0, 72)}...';
   return '当前卡点：${blocker.title} · ${blocker.statusLabel}；$clippedDetail';
+}
+
+String _summarizeProductionBlockerReason(ProductionWorkspaceStage stage) {
+  final status = stage.statusLabel.trim();
+  final detail = stage.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
+  if (status == '待扩读') {
+    final coverage = _extractProductionCoverageDigest(detail);
+    return coverage.isEmpty ? '先继续扩读关键分镜表窗口，再决定是否推进下游出图。' : '先继续扩读关键分镜表窗口；$coverage。';
+  }
+  if (status == '回补导演计划') {
+    return '当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。';
+  }
+  if (status == '等待分镜表完善') {
+    final coverage = _extractProductionCoverageDigest(detail);
+    return coverage.isEmpty ? '分镜表已有基础内容，但覆盖还不够，先补齐关键镜头表再推进 storyboard。' : '分镜表已有基础内容，但覆盖还不够；$coverage。';
+  }
+  return '';
+}
+
+String _extractProductionCoverageDigest(String detail) {
+  final match = RegExp(r'分镜表已读 \d+/\d+ 行(?:，待展开 \d+ 行)?').firstMatch(detail);
+  return match?.group(0) ?? '';
 }
 
 String buildProductionScriptPlanExecutionHint(

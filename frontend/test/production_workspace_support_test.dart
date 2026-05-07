@@ -2675,6 +2675,36 @@ void main() {
     expect(summary, contains('资产 #12, 21 仍缺图'));
   });
 
+  test('summarizeProductionPrimaryBlocker explains storyboard table expansion', () {
+    final summary = summarizeProductionPrimaryBlocker(
+      const <ProductionWorkspaceStage>[
+        ProductionWorkspaceStage(
+          title: '分镜表',
+          flowKey: 'storyboardTable',
+          statusLabel: '待扩读',
+          detail: '已窗口读取 8/24 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。分镜表已读 8/24 行，待展开 16 行。',
+        ),
+      ],
+    );
+
+    expect(summary, '当前卡点：分镜表 · 待扩读；先继续扩读关键分镜表窗口；分镜表已读 8/24 行，待展开 16 行。');
+  });
+
+  test('summarizeProductionPrimaryBlocker explains when to refine script plan', () {
+    final summary = summarizeProductionPrimaryBlocker(
+      const <ProductionWorkspaceStage>[
+        ProductionWorkspaceStage(
+          title: '分镜画面',
+          flowKey: 'storyboard',
+          statusLabel: '回补导演计划',
+          detail: 'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。',
+        ),
+      ],
+    );
+
+    expect(summary, '当前卡点：分镜画面 · 回补导演计划；当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。');
+  });
+
   test(
     'summarizeProductionFlowValue surfaces storyboard table coverage digest',
     () {
