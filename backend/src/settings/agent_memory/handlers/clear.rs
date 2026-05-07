@@ -5,7 +5,9 @@ use crate::error::ApiError;
 use crate::harness::observe;
 use crate::state::AppState;
 
-use super::super::storage::{delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type};
+use super::super::storage::{
+    delete_all_agent_memory_rows, parse_agent_type, resolve_agent_memory_project_numeric_id,
+};
 use super::super::types::{ClearMemoryBody, ClearMemoryResponse};
 
 #[utoipa::path(
@@ -29,10 +31,17 @@ pub(crate) async fn clear_memory(
 ) -> Result<Json<ClearMemoryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
+    if body.project_uuid.is_none() && body.project_id.is_none() {
+        return Err(ApiError::BadRequest(
+            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        ));
+    }
     let pool = state.require_pool()?;
 
-    ensure_project_owned(pool, uid, body.project_id).await?;
-    observe::memory_http(uid, body.project_id, "clear");
+    let numeric_project_id =
+        resolve_agent_memory_project_numeric_id(pool, uid, body.project_uuid, body.project_id)
+            .await?;
+    observe::memory_http(uid, numeric_project_id, "clear");
 
     let mut tx = pool
         .begin()
@@ -44,7 +53,7 @@ pub(crate) async fn clear_memory(
             delete_all_agent_memory_rows(
                 &mut tx,
                 uid,
-                body.project_id,
+                numeric_project_id,
                 agent_type,
                 body.episodes_id,
             )
@@ -62,7 +71,7 @@ pub(crate) async fn clear_memory(
                 "#,
             )
             .bind(uid)
-            .bind(body.project_id)
+            .bind(numeric_project_id)
             .bind(agent_type)
             .bind(body.episodes_id)
             .execute(&mut *tx)
@@ -83,7 +92,7 @@ pub(crate) async fn clear_memory(
                 "#,
             )
             .bind(uid)
-            .bind(body.project_id)
+            .bind(numeric_project_id)
             .bind(agent_type)
             .bind(body.episodes_id)
             .execute(&mut *tx)
@@ -101,7 +110,7 @@ pub(crate) async fn clear_memory(
                 "#,
             )
             .bind(uid)
-            .bind(body.project_id)
+            .bind(numeric_project_id)
             .bind(agent_type)
             .bind(body.episodes_id)
             .execute(&mut *tx)

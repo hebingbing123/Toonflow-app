@@ -5,7 +5,7 @@ use crate::error::ApiError;
 use crate::harness::observe;
 use crate::state::AppState;
 
-use super::super::storage::{ensure_project_owned, parse_agent_type};
+use super::super::storage::{parse_agent_type, resolve_agent_memory_project_numeric_id};
 use super::super::types::{to_memory_history_item, MemoryHistoryItem, MessageRow, QueryMemoryBody};
 
 fn memory_tier_requires_scope(memory_tier: &str) -> bool {
@@ -84,10 +84,17 @@ pub(crate) async fn query_memory(
             "scopeSignature must contain at least one scope dimension".into(),
         ));
     }
+    if body.project_uuid.is_none() && body.project_id.is_none() {
+        return Err(ApiError::BadRequest(
+            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        ));
+    }
     let pool = state.require_pool()?;
 
-    ensure_project_owned(pool, uid, body.project_id).await?;
-    observe::memory_http(uid, body.project_id, "query");
+    let numeric_project_id =
+        resolve_agent_memory_project_numeric_id(pool, uid, body.project_uuid, body.project_id)
+            .await?;
+    observe::memory_http(uid, numeric_project_id, "query");
 
     let rows = if let Some(scope_signature) = body.scope_signature.as_ref() {
         sqlx::query_as::<_, MessageRow>(
@@ -105,7 +112,7 @@ pub(crate) async fn query_memory(
             "#,
         )
         .bind(uid)
-        .bind(body.project_id)
+        .bind(numeric_project_id)
         .bind(agent_type)
         .bind(body.episodes_id)
         .bind(memory_type)
@@ -129,7 +136,7 @@ pub(crate) async fn query_memory(
             "#,
         )
         .bind(uid)
-        .bind(body.project_id)
+        .bind(numeric_project_id)
         .bind(agent_type)
         .bind(body.episodes_id)
         .bind(memory_type)

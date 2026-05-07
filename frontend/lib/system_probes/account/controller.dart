@@ -163,17 +163,20 @@ class AccountProbesController extends ChangeNotifier {
           'POST -> "$message" · '
           'GET ragLimit=${interim.ragLimit} · restored';
       var numericIdForClear = 1;
+      String? uuidForClear;
       try {
         final projects = await fetchProjects(token);
         if (projects.isNotEmpty) {
           numericIdForClear = projects.first.numericId;
+          uuidForClear = projects.first.id;
         }
       } on RustApiException catch (_) {
         // Keep default project id 1 when project probing is unavailable.
       }
       final clearStatus = await postSettingsClearAgentMemoriesV1(
         token,
-        projectId: numericIdForClear,
+        projectUuid: uuidForClear,
+        projectId: uuidForClear != null ? null : numericIdForClear,
         agentType: 'scriptAgent',
       );
       if (!const [200, 404, 503].contains(clearStatus)) {

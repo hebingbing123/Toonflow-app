@@ -110,11 +110,27 @@ class AgentMemoryCostOverview {
   final String? lastInjectedAt;
 }
 
+void _putAgentMemoryProjectRef(Map<String, dynamic> body, {int? projectId, String? projectUuid}) {
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    body['projectUuid'] = u;
+    return;
+  }
+  if (projectId != null) {
+    body['projectId'] = projectId;
+    return;
+  }
+  throw ArgumentError('projectUuid or projectId is required for agent memory requests');
+}
+
 /// Agent memory query, append, and clear endpoints.
 /// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<List<AgentMemoryHistoryItem>> queryAgentMemory(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required String agentType,
   int? episodesId,
   String memoryType = 'message',
@@ -123,11 +139,11 @@ Future<List<AgentMemoryHistoryItem>> queryAgentMemory(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/query');
   final body = <String, dynamic>{
-    'projectId': projectId,
     'agentType': agentType,
     'episodesId': episodesId,
     'memoryType': memoryType,
   };
+  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
   if (memoryTier != null && memoryTier.isNotEmpty) {
     body['memoryTier'] = memoryTier;
   }
@@ -162,12 +178,22 @@ Future<List<AgentMemoryHistoryItem>> queryAgentMemory(
 
 Future<AgentMemoryCostOverview> getMemoryCostOverview(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required String agentType,
 }) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/agents/memory/cost-overview?projectId=$projectId&agentType=${Uri.encodeQueryComponent(agentType)}',
-  );
+  final u = projectUuid?.trim();
+  final String qs;
+  if (u != null && u.isNotEmpty) {
+    qs =
+        'projectUuid=${Uri.encodeQueryComponent(u)}&agentType=${Uri.encodeQueryComponent(agentType)}';
+  } else if (projectId != null) {
+    qs =
+        'projectId=$projectId&agentType=${Uri.encodeQueryComponent(agentType)}';
+  } else {
+    throw ArgumentError('projectUuid or projectId is required');
+  }
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/cost-overview?$qs');
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
@@ -186,17 +212,18 @@ Future<AgentMemoryCostOverview> getMemoryCostOverview(
 /// Alternate field **`type`** is also accepted by the server as an alias for **`clearType`**.
 Future<bool> clearAgentMemory(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required String agentType,
   int? episodesId,
   String clearType = 'all',
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/clear');
   final body = <String, dynamic>{
-    'projectId': projectId,
     'agentType': agentType,
     'clearType': clearType,
   };
+  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
   if (episodesId != null) body['episodesId'] = episodesId;
   final res = await http
       .post(
@@ -221,17 +248,18 @@ Future<bool> clearAgentMemory(
 /// `POST /api/v1/agents/memory/optimize` — optimize scoped production video memories without crossing project/script boundaries.
 Future<Map<String, dynamic>> optimizeAgentMemory(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required String agentType,
   required int episodesId,
   String? automationMode,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/optimize');
   final body = <String, dynamic>{
-    'projectId': projectId,
     'agentType': agentType,
     'episodesId': episodesId,
   };
+  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
   if (automationMode != null && automationMode.isNotEmpty) {
     body['automationMode'] = automationMode;
   }
@@ -257,7 +285,8 @@ Future<Map<String, dynamic>> optimizeAgentMemory(
 /// `POST /api/v1/agents/memory/append` — OpenAPI `appendAgentMemoryV1`; returns new message UUID.
 Future<String> appendAgentMemory(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required String agentType,
   required String content,
   int? episodesId,
@@ -270,12 +299,12 @@ Future<String> appendAgentMemory(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/append');
   final body = <String, dynamic>{
-    'projectId': projectId,
     'agentType': agentType,
     'content': content,
     'memoryType': memoryType,
     'role': role,
   };
+  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
   if (episodesId != null) body['episodesId'] = episodesId;
   if (name != null) body['name'] = name;
   if (createTime != null) body['createTime'] = createTime;

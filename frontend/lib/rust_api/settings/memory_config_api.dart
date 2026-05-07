@@ -108,7 +108,8 @@ Future<String> postMemoryConfigV1(
 /// `POST /api/v1/settings/memory-config/clear-agent-memories` — OpenAPI `postSettingsClearAgentMemoriesV1` (often **503** without DB).
 Future<int> postSettingsClearAgentMemoriesV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required String agentType,
   int? episodesId,
 }) async {
@@ -116,9 +117,16 @@ Future<int> postSettingsClearAgentMemoriesV1(
     '$kApiBaseUrl/api/v1/settings/memory-config/clear-agent-memories',
   );
   final body = <String, dynamic>{
-    'projectId': projectId,
     'agentType': agentType,
   };
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    body['projectUuid'] = u;
+  } else if (projectId != null) {
+    body['projectId'] = projectId;
+  } else {
+    throw ArgumentError('projectUuid or projectId is required');
+  }
   if (episodesId != null) {
     body['episodesId'] = episodesId;
   }

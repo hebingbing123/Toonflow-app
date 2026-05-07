@@ -21,11 +21,11 @@
 
 ## 波次 H1：`settings::agent_memory` 请求体与文档（中风险）
 
-**触点**：`backend/src/settings/agent_memory.rs`；Flutter `settings_memory_config_api.dart` / 工作台 `agent_memory.dart`。
+**触点**：`backend/src/settings/agent_memory/`；Flutter `rust_api/agents/memory.dart`、`settings_memory_config_api.dart`、工作台 `agent_memory.dart`。
 
-- [ ] 产品/契约：是否引入 **`project_id` UUID** 与旧整型 **并存期**； deprecation 策略写 OpenAPI。
-- [ ] 后端：实现 UUID 优先解析 + 旧体兼容（若仍需要）；单测覆盖。
-- [ ] Flutter：主路径改新体；折叠区保留兼容调用直至删除日。
+- [x] 产品/契约：**`projectUuid`**（`app_project.id`）与 legacy **`projectId`**（numeric）并存；OpenAPI 仍为 `serde_json::Value` 体/query 占位，行为以本仓库 REST 为准（H4 再收紧 Harness WS 矩阵）。
+- [x] 后端：UUID 优先解析 + 旧体兼容；冲突时 **400**；无 DB smoke 下缺 id **400**（先于 503）；单测与契约 smoke 覆盖。
+- [x] Flutter：主路径 **`projectUuid`**（列表匹配到 numeric 时）；仍支持仅 numeric（未匹配列表时）。
 - [ ] **Harness**：若 Agent attach 仍传整型项目 id，在本波或 **H4** 同一里程碑内定义 **WS `agent.context.update`** 是否增加 `projectUuid`（见主文档 §七）。
 
 **验收**：`yarn refactor:check`；相关 `contract_smoke` / widget 测试更新。

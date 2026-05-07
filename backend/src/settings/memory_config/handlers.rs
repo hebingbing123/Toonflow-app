@@ -80,10 +80,21 @@ pub(crate) async fn post_clear_agent_memories_type_field_alias(
     Json(body): Json<ClearAgentMemoriesSettingsBody>,
 ) -> Result<Json<ClearMemoryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
     let agent_type = agent_memory::parse_agent_type(&body.agent_type)?;
-    agent_memory::ensure_project_owned(pool, uid, body.project_id).await?;
-    observe::memory_http(uid, body.project_id, "clear");
+    if body.project_uuid.is_none() && body.project_id.is_none() {
+        return Err(ApiError::BadRequest(
+            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        ));
+    }
+    let pool = state.require_pool()?;
+    let numeric_project_id = agent_memory::resolve_agent_memory_project_numeric_id(
+        pool,
+        uid,
+        body.project_uuid,
+        body.project_id,
+    )
+    .await?;
+    observe::memory_http(uid, numeric_project_id, "clear");
     let mut tx = pool
         .begin()
         .await
@@ -91,7 +102,7 @@ pub(crate) async fn post_clear_agent_memories_type_field_alias(
     agent_memory::delete_all_agent_memory_rows(
         &mut tx,
         uid,
-        body.project_id,
+        numeric_project_id,
         agent_type,
         body.episodes_id,
     )

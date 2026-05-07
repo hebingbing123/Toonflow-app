@@ -8,7 +8,7 @@ use crate::harness::observe;
 use crate::state::AppState;
 
 use super::super::memory_tier::MemoryTier;
-use super::super::storage::{ensure_project_owned, parse_agent_type};
+use super::super::storage::{parse_agent_type, resolve_agent_memory_project_numeric_id};
 use super::super::summarize::maybe_summarize_messages;
 use super::super::types::{AppendMemoryBody, AppendMemoryResponse};
 
@@ -79,10 +79,17 @@ pub(crate) async fn append_memory(
         )));
     }
     let agent_type = parse_agent_type(&body.agent_type)?;
+    if body.project_uuid.is_none() && body.project_id.is_none() {
+        return Err(ApiError::BadRequest(
+            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        ));
+    }
     let pool = state.require_pool()?;
 
-    ensure_project_owned(pool, uid, body.project_id).await?;
-    observe::memory_http(uid, body.project_id, "append");
+    let numeric_project_id =
+        resolve_agent_memory_project_numeric_id(pool, uid, body.project_uuid, body.project_id)
+            .await?;
+    observe::memory_http(uid, numeric_project_id, "append");
 
     let create_time_ms = body
         .create_time
@@ -102,7 +109,7 @@ pub(crate) async fn append_memory(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(numeric_project_id)
     .bind(body.episodes_id)
     .bind(agent_type)
     .bind(&body.memory_type)
@@ -122,7 +129,7 @@ pub(crate) async fn append_memory(
         let pool_clone = pool.clone();
         let state_clone = state.clone();
         let uid_clone = uid;
-        let project_id = body.project_id;
+        let project_id = numeric_project_id;
         let episodes_id = body.episodes_id;
         let agent_type_str = agent_type.to_string();
         tokio::spawn(async move {

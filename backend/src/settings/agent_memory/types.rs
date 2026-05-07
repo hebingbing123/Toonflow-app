@@ -5,7 +5,12 @@ use uuid::Uuid;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct QueryMemoryBody {
-    pub(crate) project_id: i32,
+    /// Preferred: **`app_project.id`** (UUID), same as `/api/v1/projects/{project_id}`.
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
+    /// Legacy: **`app_project.numeric_id`** (Electron / SQLite-era).
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
     pub(crate) agent_type: String,
     #[serde(default)]
     pub(crate) episodes_id: Option<i32>,
@@ -27,7 +32,10 @@ fn default_query_memory_type() -> String {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ClearMemoryBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
     pub(crate) agent_type: String,
     #[serde(default)]
     pub(crate) episodes_id: Option<i32>,
@@ -43,7 +51,10 @@ fn default_clear_kind() -> String {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct OptimizeMemoryBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
     pub(crate) agent_type: String,
     #[serde(default)]
     pub(crate) episodes_id: Option<i32>,
@@ -54,7 +65,10 @@ pub(crate) struct OptimizeMemoryBody {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct AppendMemoryBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
     pub(crate) agent_type: String,
     #[serde(default)]
     pub(crate) episodes_id: Option<i32>,

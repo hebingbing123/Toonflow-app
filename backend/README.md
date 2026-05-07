@@ -85,10 +85,11 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
 - 静态模型目录（编译时嵌入 **`data/models_catalog.json`**；Bearer；对齐旧 **`modelSelect`** 的 **`type`** 过滤语义，无 Postgres **`o_vendorConfig`**）：
   - `GET /api/v1/models?type=text|image|video|all` — `all` 不含 `video`
   - `GET /api/v1/models/detail?model_id={vendor_id}:{model_name}` — 如 `1:gpt-4o-mini`
-- Agent 记忆（Postgres **`app_agent_memory`**；需已迁移；Bearer JWT；需用户拥有对应 **`app_project.numeric_id`**）：
+- Agent 记忆（Postgres **`app_agent_memory`**；需已迁移；Bearer JWT；请求体优先 **`projectUuid`**（**`app_project.id`**），兼容 legacy **`projectId`**（**`app_project.numeric_id`**）；若两者同发须指向同一项目）：
   - `POST /api/v1/agents/memory/query` — 默认列出 `message` 行；可用 `memoryType: message|summary|all` 读取自动摘要记忆或合并视图（camelCase body，对齐旧 **`/api/agents/getMemory`** 并扩展 summary 检查）
   - `POST /api/v1/agents/memory/clear` — 清除语义对齐旧 **`/api/agents/clearMemory`**（`type` 或 `clearType`：`all` / `message` / `summary`）
   - `POST /api/v1/agents/memory/append` — 追加一条 message（不做 Node 侧自动摘要压缩）
+  - `GET /api/v1/agents/memory/cost-overview` — query 同样支持 **`projectUuid`** 或 **`projectId`**
 
 WebSocket（JSON 信封见合并 OpenAPI 中 **`GET /api/v1/ws`**；仓库 **`docs/websocket-events.md`** 为稳定链接入口，正文以 OpenAPI 为准）：
 

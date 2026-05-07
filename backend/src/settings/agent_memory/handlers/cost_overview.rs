@@ -7,7 +7,7 @@ use crate::state::AppState;
 
 use super::super::{
     load_project_automation_memory_policy, load_project_memory_budget_snapshot,
-    storage::{ensure_project_owned, parse_agent_type},
+    storage::{parse_agent_type, resolve_agent_memory_project_numeric_id},
 };
 
 #[derive(Serialize)]
@@ -31,7 +31,10 @@ pub(crate) struct MemoryCostOverview {
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct CostOverviewQuery {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<uuid::Uuid>,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
     pub(crate) agent_type: String,
 }
 
@@ -41,7 +44,8 @@ pub(crate) struct CostOverviewQuery {
     operation_id = "getMemoryCostOverviewV1",
     tag = "agents",
     params(
-        ("projectId" = i32, Query, description = "Project ID"),
+        ("projectUuid" = Option<uuid::Uuid>, Query, description = "Project UUID (preferred; `app_project.id`)"),
+        ("projectId" = Option<i32>, Query, description = "Legacy numeric project id (`app_project.numeric_id`)"),
         ("agentType" = String, Query, description = "Agent type"),
     ),
     responses(
@@ -57,14 +61,22 @@ pub(crate) async fn get_memory_cost_overview(
     axum::extract::Query(params): axum::extract::Query<CostOverviewQuery>,
 ) -> Result<Json<MemoryCostOverview>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
     let agent_type = parse_agent_type(&params.agent_type)?;
+    if params.project_uuid.is_none() && params.project_id.is_none() {
+        return Err(ApiError::BadRequest(
+            "Provide projectUuid (preferred) or legacy numeric projectId query parameter".into(),
+        ));
+    }
+    let pool = state.require_pool()?;
 
-    ensure_project_owned(pool, uid, params.project_id).await?;
+    let numeric_project_id =
+        resolve_agent_memory_project_numeric_id(pool, uid, params.project_uuid, params.project_id)
+            .await?;
     let policy =
-        load_project_automation_memory_policy(pool, uid, params.project_id, agent_type).await?;
+        load_project_automation_memory_policy(pool, uid, numeric_project_id, agent_type).await?;
     let budget_snapshot =
-        load_project_memory_budget_snapshot(pool, uid, params.project_id, None, agent_type).await?;
+        load_project_memory_budget_snapshot(pool, uid, numeric_project_id, None, agent_type)
+            .await?;
 
     // 各层记忆条目数
     let counts: Vec<(String, i64)> = sqlx::query_as(
@@ -78,7 +90,7 @@ pub(crate) async fn get_memory_cost_overview(
         "#,
     )
     .bind(uid)
-    .bind(params.project_id)
+    .bind(numeric_project_id)
     .bind(agent_type)
     .fetch_all(pool)
     .await
@@ -114,7 +126,7 @@ pub(crate) async fn get_memory_cost_overview(
         "#,
     )
     .bind(uid)
-    .bind(params.project_id)
+    .bind(numeric_project_id)
     .bind(agent_type)
     .fetch_one(pool)
     .await
@@ -135,7 +147,7 @@ pub(crate) async fn get_memory_cost_overview(
         "#,
     )
     .bind(uid)
-    .bind(params.project_id)
+    .bind(numeric_project_id)
     .bind(agent_type)
     .fetch_one(pool)
     .await
@@ -154,14 +166,14 @@ pub(crate) async fn get_memory_cost_overview(
         "#,
     )
     .bind(uid)
-    .bind(params.project_id)
+    .bind(numeric_project_id)
     .bind(agent_type)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(MemoryCostOverview {
-        project_id: params.project_id,
+        project_id: numeric_project_id,
         automation_mode: policy.mode.as_str().to_string(),
         style_bible_count,
         stage_summary_count,

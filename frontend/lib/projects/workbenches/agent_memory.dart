@@ -107,6 +107,20 @@ class _ProjectsAgentMemoryWorkbenchDialogState
 
   int? get _projectId => int.tryParse(_projectIdCtrl.text.trim());
   int? get _episodesId => int.tryParse(_episodesIdCtrl.text.trim());
+
+  /// Prefer UUID from loaded project list when the numeric field matches a row.
+  ({String? projectUuid, int? projectId}) _agentMemoryProjectRef() {
+    final n = _projectId;
+    if (n == null) {
+      return (projectUuid: null, projectId: null);
+    }
+    for (final p in _projects) {
+      if (p.numericId == n) {
+        return (projectUuid: p.id, projectId: n);
+      }
+    }
+    return (projectUuid: null, projectId: n);
+  }
   bool get _canOptimizeVideoMemory =>
       _agentTypeCtrl.text.trim() == 'productionAgent' && _episodesId != null;
   String get _queryType => _normalizedSelection(
@@ -223,12 +237,17 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _queryMemory() async {
-    final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
     final memoryType = _queryType;
     final memoryTier = _memoryTier;
-    if (projectId == null || agentType.isEmpty) {
-      setState(() => _statusLine = '请填写合法的项目 numeric ID 和 agent type。');
+    final ref = _agentMemoryProjectRef();
+    if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
+        ref.projectId == null) {
+      setState(() => _statusLine = '请填写合法的项目 ID（numeric 或列表中可选 UUID）和 agent type。');
+      return;
+    }
+    if (agentType.isEmpty) {
+      setState(() => _statusLine = '请填写 agent type。');
       return;
     }
     setState(() {
@@ -238,7 +257,8 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     try {
       final rows = await queryAgentMemory(
         widget.accessToken,
-        projectId: projectId,
+        projectId: ref.projectId,
+        projectUuid: ref.projectUuid,
         agentType: agentType,
         episodesId: _episodesId,
         memoryType: memoryType,
@@ -271,10 +291,15 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _loadCostOverview() async {
-    final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
-    if (projectId == null || agentType.isEmpty) {
-      setState(() => _statusLine = '加载成本概览前请填写合法的项目 numeric ID 和 agent type。');
+    final ref = _agentMemoryProjectRef();
+    if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
+        ref.projectId == null) {
+      setState(() => _statusLine = '加载成本概览前请填写合法的项目 ID 和 agent type。');
+      return;
+    }
+    if (agentType.isEmpty) {
+      setState(() => _statusLine = '请填写 agent type。');
       return;
     }
     setState(() {
@@ -284,7 +309,8 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     try {
       final overview = await getMemoryCostOverview(
         widget.accessToken,
-        projectId: projectId,
+        projectId: ref.projectId,
+        projectUuid: ref.projectUuid,
         agentType: agentType,
       );
       if (!mounted) return;
@@ -309,7 +335,6 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _appendMemory() async {
-    final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
     final content = _appendContentCtrl.text.trim();
     final role = _appendRoleCtrl.text.trim();
@@ -320,11 +345,14 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       appendTier,
       actionLabel: '追加 scoped 记忆',
     );
-    if (projectId == null ||
-        agentType.isEmpty ||
-        content.isEmpty ||
-        role.isEmpty) {
-      setState(() => _statusLine = '追加记忆前请填写项目、agent type、role 和内容。');
+    final ref = _agentMemoryProjectRef();
+    if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
+        ref.projectId == null) {
+      setState(() => _statusLine = '追加记忆前请填写项目 ID、agent type、role 和内容。');
+      return;
+    }
+    if (agentType.isEmpty || content.isEmpty || role.isEmpty) {
+      setState(() => _statusLine = '追加记忆前请填写 agent type、role 和内容。');
       return;
     }
     setState(() {
@@ -334,7 +362,8 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     try {
       final id = await appendAgentMemory(
         widget.accessToken,
-        projectId: projectId,
+        projectId: ref.projectId,
+        projectUuid: ref.projectUuid,
         agentType: agentType,
         episodesId: _episodesId,
         memoryType: appendType,
@@ -367,11 +396,16 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _clearMemory() async {
-    final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
     final clearType = _clearType;
-    if (projectId == null || agentType.isEmpty) {
-      setState(() => _statusLine = '清理记忆前请填写项目和 agent type。');
+    final ref = _agentMemoryProjectRef();
+    if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
+        ref.projectId == null) {
+      setState(() => _statusLine = '清理记忆前请填写项目 ID 和 agent type。');
+      return;
+    }
+    if (agentType.isEmpty) {
+      setState(() => _statusLine = '请填写 agent type。');
       return;
     }
     setState(() {
@@ -381,7 +415,8 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     try {
       await clearAgentMemory(
         widget.accessToken,
-        projectId: projectId,
+        projectId: ref.projectId,
+        projectUuid: ref.projectUuid,
         agentType: agentType,
         episodesId: _episodesId,
         clearType: clearType,
@@ -408,11 +443,16 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _optimizeVideoMemory() async {
-    final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
     final episodesId = _episodesId;
-    if (projectId == null || agentType.isEmpty || episodesId == null) {
-      setState(() => _statusLine = '自动优化前请填写项目、agent type 和 episodes id。');
+    final ref = _agentMemoryProjectRef();
+    if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
+        ref.projectId == null) {
+      setState(() => _statusLine = '自动优化前请填写项目 ID、agent type 和 episodes id。');
+      return;
+    }
+    if (agentType.isEmpty || episodesId == null) {
+      setState(() => _statusLine = '自动优化前请填写 agent type 和 episodes id。');
       return;
     }
     setState(() {
@@ -422,7 +462,8 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     try {
       final result = await optimizeAgentMemory(
         widget.accessToken,
-        projectId: projectId,
+        projectId: ref.projectId,
+        projectUuid: ref.projectUuid,
         agentType: agentType,
         episodesId: episodesId,
         automationMode: _automationMode,

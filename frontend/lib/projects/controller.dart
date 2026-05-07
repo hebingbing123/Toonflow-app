@@ -77,11 +77,11 @@ class ProjectsController extends ChangeNotifier {
     final currentProjects = projects;
     if (currentProjects == null || currentProjects.isEmpty) {
       _setError(
-        'Load projects first (agent memory needs a project numeric ID).',
+        'Load projects first (agent memory needs a project id).',
       );
       return;
     }
-    final numericId = currentProjects.first.numericId;
+    final first = currentProjects.first;
     loadingAgentMemory = true;
     agentMemoryBody = null;
     _setError(null);
@@ -89,14 +89,16 @@ class ProjectsController extends ChangeNotifier {
     try {
       final rows = await queryAgentMemory(
         token,
-        projectId: numericId,
+        projectUuid: first.id,
+        projectId: first.numericId,
         agentType: 'scriptAgent',
       );
       var appendBit = '';
       try {
         final id = await appendAgentMemory(
           token,
-          projectId: numericId,
+          projectUuid: first.id,
+          projectId: first.numericId,
           agentType: 'scriptAgent',
           content: '[flutter probe] ${DateTime.now().toIso8601String()}',
         );
@@ -106,7 +108,7 @@ class ProjectsController extends ChangeNotifier {
         appendBit = ' · append -> ${e.statusCode}';
       }
       agentMemoryBody =
-          '${rows.length} message(s) for project $numericId$appendBit';
+          '${rows.length} message(s) for project ${first.id}$appendBit';
     } on RustApiException catch (e) {
       _setError(e.toString());
     } catch (e) {

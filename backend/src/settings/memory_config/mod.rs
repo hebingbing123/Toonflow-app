@@ -52,7 +52,8 @@ mod tests {
     fn clear_agent_memories_body_accepts_valid() {
         let b: ClearAgentMemoriesSettingsBody =
             serde_json::from_str(r#"{"projectId":1,"agentType":"script"}"#).unwrap();
-        assert_eq!(b.project_id, 1);
+        assert_eq!(b.project_id, Some(1));
+        assert!(b.project_uuid.is_none());
         assert_eq!(b.agent_type, "script");
         assert_eq!(b.episodes_id, None);
     }
@@ -61,9 +62,21 @@ mod tests {
     fn clear_agent_memories_body_accepts_with_episodes() {
         let b: ClearAgentMemoriesSettingsBody =
             serde_json::from_str(r#"{"projectId":1,"agentType":"script","episodesId":5}"#).unwrap();
-        assert_eq!(b.project_id, 1);
+        assert_eq!(b.project_id, Some(1));
         assert_eq!(b.agent_type, "script");
         assert_eq!(b.episodes_id, Some(5));
+    }
+
+    #[test]
+    fn clear_agent_memories_body_accepts_project_uuid() {
+        use uuid::Uuid;
+        let u = Uuid::from_u128(0xabc);
+        let b: ClearAgentMemoriesSettingsBody = serde_json::from_str(&format!(
+            r#"{{"projectUuid":"{u}","agentType":"scriptAgent"}}"#
+        ))
+        .unwrap();
+        assert_eq!(b.project_uuid, Some(u));
+        assert_eq!(b.project_id, None);
     }
 
     #[test]

@@ -26,7 +26,7 @@ pub use crud::{
 };
 
 /// Shared by other domains (e.g. narrative novels) that scope rows by **`app_project.id`**.
-pub(crate) use crud::ensure_owned_project_pk;
+pub(crate) use crud::{ensure_owned_project_numeric_id, ensure_owned_project_pk};
 
 pub use openapi::AssetsSchemasOpenApi;
 pub use router::router;

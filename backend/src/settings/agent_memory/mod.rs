@@ -35,6 +35,7 @@ pub(crate) use policy::{
 pub(crate) use storage::{
     delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,
     replace_named_summary_memory, replace_named_summary_memory_with_scope,
+    resolve_agent_memory_project_numeric_id,
 };
 pub(crate) use style_bible::{
     ensure_project_style_bible_template, load_project_style_bible_character_anchors,
@@ -59,6 +60,7 @@ mod tests {
     use super::types::{AppendMemoryBody, ClearMemoryBody, OptimizeMemoryBody, QueryMemoryBody};
     use proptest::prelude::*;
     use serde_json::json;
+    use uuid::Uuid;
 
     #[test]
     fn query_body_accepts_camel_case() {
@@ -66,10 +68,22 @@ mod tests {
             r#"{"projectId":1,"agentType":"scriptAgent","episodesId":2,"memoryType":"summary"}"#,
         )
         .unwrap();
-        assert_eq!(b.project_id, 1);
+        assert_eq!(b.project_id, Some(1));
+        assert!(b.project_uuid.is_none());
         assert_eq!(b.agent_type, "scriptAgent");
         assert_eq!(b.episodes_id, Some(2));
         assert_eq!(b.memory_type, "summary");
+    }
+
+    #[test]
+    fn query_body_accepts_project_uuid() {
+        let u = Uuid::from_u128(0x1234);
+        let b: QueryMemoryBody = serde_json::from_str(&format!(
+            r#"{{"projectUuid":"{u}","agentType":"scriptAgent"}}"#
+        ))
+        .unwrap();
+        assert_eq!(b.project_uuid, Some(u));
+        assert_eq!(b.project_id, None);
     }
 
     #[test]
@@ -130,7 +144,7 @@ mod tests {
         let body: OptimizeMemoryBody =
             serde_json::from_str(r#"{"projectId":1,"agentType":"productionAgent","episodesId":2}"#)
                 .unwrap();
-        assert_eq!(body.project_id, 1);
+        assert_eq!(body.project_id, Some(1));
         assert_eq!(body.agent_type, "productionAgent");
         assert_eq!(body.episodes_id, Some(2));
     }
@@ -224,7 +238,7 @@ mod tests {
 
     fn build_memory_isolation_scope(body: &QueryMemoryBody) -> MemoryIsolationScope {
         MemoryIsolationScope {
-            project_id: body.project_id,
+            project_id: body.project_id.unwrap_or(-1),
             agent_type: body.agent_type.clone(),
             episodes_id: body.episodes_id,
             memory_tier: body.memory_tier.clone(),
@@ -260,7 +274,8 @@ mod tests {
             }));
 
             let body_a = QueryMemoryBody {
-                project_id: project_a,
+                project_uuid: None,
+                project_id: Some(project_a),
                 agent_type: agent_a.to_string(),
                 episodes_id: episodes_a,
                 memory_type: "all".to_string(),
@@ -268,7 +283,8 @@ mod tests {
                 scope_signature: scope_a,
             };
             let body_b = QueryMemoryBody {
-                project_id: project_b,
+                project_uuid: None,
+                project_id: Some(project_b),
                 agent_type: agent_b.to_string(),
                 episodes_id: episodes_b,
                 memory_type: "all".to_string(),

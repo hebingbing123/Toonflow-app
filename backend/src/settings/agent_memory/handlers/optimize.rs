@@ -9,7 +9,7 @@ use crate::state::AppState;
 use super::super::types::{OptimizeMemoryBody, OptimizeMemoryResponse};
 use super::super::{
     optimize_project_memory_budget, save_project_automation_memory_policy,
-    storage::{ensure_project_owned, parse_agent_type},
+    storage::{parse_agent_type, resolve_agent_memory_project_numeric_id},
     AutomationMemoryMode, ProjectAutomationMemoryPolicy,
 };
 
@@ -34,10 +34,17 @@ pub(crate) async fn optimize_memory(
 ) -> Result<Json<OptimizeMemoryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
+    if body.project_uuid.is_none() && body.project_id.is_none() {
+        return Err(ApiError::BadRequest(
+            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        ));
+    }
     let pool = state.require_pool()?;
 
-    ensure_project_owned(pool, uid, body.project_id).await?;
-    observe::memory_http(uid, body.project_id, "optimize");
+    let numeric_project_id =
+        resolve_agent_memory_project_numeric_id(pool, uid, body.project_uuid, body.project_id)
+            .await?;
+    observe::memory_http(uid, numeric_project_id, "optimize");
 
     let automation_mode = if let Some(raw_mode) = body.automation_mode.as_deref() {
         let mode = AutomationMemoryMode::from_str(raw_mode).ok_or_else(|| {
@@ -46,24 +53,32 @@ pub(crate) async fn optimize_memory(
         save_project_automation_memory_policy(
             pool,
             uid,
-            body.project_id,
+            numeric_project_id,
             agent_type,
             &ProjectAutomationMemoryPolicy { mode },
         )
         .await?;
         mode
     } else {
-        super::super::load_project_automation_memory_policy(pool, uid, body.project_id, agent_type)
-            .await?
-            .mode
+        super::super::load_project_automation_memory_policy(
+            pool,
+            uid,
+            numeric_project_id,
+            agent_type,
+        )
+        .await?
+        .mode
     };
 
     let budget_result =
-        optimize_project_memory_budget(pool, uid, body.project_id, body.episodes_id, agent_type)
+        optimize_project_memory_budget(pool, uid, numeric_project_id, body.episodes_id, agent_type)
             .await?;
     let scoped_video_result = if agent_type == "productionAgent" {
         if let Some(script_numeric_id) = body.episodes_id {
-            Some(optimize_scoped_video_memory(pool, uid, body.project_id, script_numeric_id).await?)
+            Some(
+                optimize_scoped_video_memory(pool, uid, numeric_project_id, script_numeric_id)
+                    .await?,
+            )
         } else {
             None
         }

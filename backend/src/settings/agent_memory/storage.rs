@@ -18,6 +18,37 @@ pub(crate) fn parse_agent_type(raw: &str) -> Result<&'static str, ApiError> {
     }
 }
 
+/// Resolves **`app_project.numeric_id`** for agent-memory HTTP bodies.
+///
+/// Prefer **`projectUuid`** (path-aligned project id). Legacy **`projectId`** (numeric) remains
+/// supported. If both are sent, they must refer to the same project.
+pub(crate) async fn resolve_agent_memory_project_numeric_id(
+    pool: &PgPool,
+    uid: Uuid,
+    project_uuid: Option<Uuid>,
+    project_id_legacy: Option<i32>,
+) -> Result<i32, ApiError> {
+    match (project_uuid, project_id_legacy) {
+        (Some(u), Some(n)) => {
+            let resolved = crate::assets::ensure_owned_project_numeric_id(pool, uid, u).await?;
+            if resolved != n {
+                return Err(ApiError::BadRequest(
+                    "projectUuid and projectId must refer to the same project".into(),
+                ));
+            }
+            Ok(resolved)
+        }
+        (Some(u), None) => crate::assets::ensure_owned_project_numeric_id(pool, uid, u).await,
+        (None, Some(n)) => {
+            ensure_project_owned(pool, uid, n).await?;
+            Ok(n)
+        }
+        (None, None) => Err(ApiError::BadRequest(
+            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        )),
+    }
+}
+
 pub(crate) async fn ensure_project_owned(
     pool: &PgPool,
     uid: Uuid,
