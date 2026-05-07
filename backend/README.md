@@ -27,6 +27,8 @@ cargo run --bin toonflow-server
 
 异步任务 worker 多实例时设置不同 **`WORKER_ID`**，便于在任务行的 **`claimed_by`** 上区分认领实例（仍依赖 Postgres `SKIP LOCKED` 协调）。**`JOB_QUEUE_METRICS_INTERVAL_SECS`**（默认 **60**，设为 **0** 关闭）控制 worker 周期性输出结构化日志 **`event=job_queue_metrics`**（含 **`pending`**、**`pending_claimable`**、**`running`**、**`dead`**、**`failed_last_24h`**、**`oldest_claimable_queued_age_secs`**、**`pending_by_kind`** JSON、`worker_id`），便于日志聚合与旁路队列 Gate；与 500ms 抢单轮询解耦。字段语义与运维 Runbook 见 [`docs/plans/jobs-pg-queue-runbook.md`](../docs/plans/jobs-pg-queue-runbook.md)。
 
+**OTel（WP‑F 占位）**：若设置 **`TOONFLOW_OTEL_EXPORT_ENABLED=1`**（或 **`true`** / **`yes`** / **`on`**），进程在 **`tracing`** 初始化后会打 **`warn`**（**`target=toonflow.telemetry`**）说明 **本构建尚未接线 OTLP**，避免误以为已向 collector 导出；完整导出见路线图 **WP-F**。
+
 **请求关联：** 所有响应带 **`X-Request-Id`**（可客户端传入同名请求头，否则服务端生成 UUID）。`Content-Type: application/json` 的 **4xx/5xx** 若体为 OpenAPI 式 `code` + `message`，中间件会补上 **`request_id`**（与响应头一致），便于与日志对照。
 
 ### 旧库导入（SQLite → `import_staging`）
@@ -96,7 +98,7 @@ WebSocket（JSON 信封见合并 OpenAPI 中 **`GET /api/v1/ws`**；仓库 **`do
 
 - 可选 **`HARNESS_WS_CHANNELS`**：逗号分隔的频道白名单（**`script`**、**`production`**）。未设置时两种 attach 均允许；设置后仅列表中的频道可通过 `agent.script.attach` / `agent.production.attach`（用于运维或阶段性关频道）。
 - `GET ws://127.0.0.1:8666/api/v1/ws` — 可选查询参数 `access_token=<jwt>`；否则首帧发 `session.auth`
-- 鉴权后可发 **`harness.tool.invoke`**（`schema_version` 1，`payload.name` / 可选 `arguments`）；**`echo`** 回显参数；**`isolated.echo`** 与 `echo` 语义相同但在**子进程**中执行（进程隔离；并发与复用见上文 **`HARNESS_ISOLATE_*`**；集成测试通常将 **`HARNESS_ISOLATE_RUNNER_EXE`** 设为 **`CARGO_BIN_EXE_toonflow-server`**）。**可观测（WP‑D）**：每条 **`isolated.echo`** 结束前有 **`tracing`** 行（**`target = harness.isolate.metrics`**、**`event = harness_isolate_invoke`**：`queued_ahead`、`semaphore_wait_ms`、`child_execution_ms`、`available_slots_snapshot`/`max_slots`、`reuse_hit`、`process_reuse_hits_total`）；**`GET /api/v1/ready`** 与 **`metrics_snapshot()`** 均含累计字段（含 **`total_process_reuse_hits`**；池关闭时复用为 **0**）；**`skills.read`** 需 `arguments.path`（相对 `data/skills`，规则同 `GET /api/v1/skills/content`）；**`wasm.probe`** 在进程内用 **wasmi** 执行构建期生成的最小 WASM（`build.rs` → `OUT_DIR/probe.wasm`）；目录见 `GET /api/v1/harness/tools`
+- 鉴权后可发 **`harness.tool.invoke`**（`schema_version` 1，`payload.name` / 可选 `arguments`）；**`echo`** 回显参数；**`isolated.echo`** 与 `echo` 语义相同但在**子进程**中执行（进程隔离；并发与复用见上文 **`HARNESS_ISOLATE_*`**；集成测试通常将 **`HARNESS_ISOLATE_RUNNER_EXE`** 设为 **`CARGO_BIN_EXE_toonflow-server`**）。**可观测（WP‑D）**：每条 **`isolated.echo`** 结束前有 **`tracing`** 行（**`target = harness.isolate.metrics`**、**`event = harness_isolate_invoke`**：`queued_ahead`、`semaphore_wait_ms`、`child_execution_ms`、`available_slots_snapshot`/`max_slots`、`reuse_hit`、`process_reuse_hits_total`）；**`GET /api/v1/ready`** 与 **`metrics_snapshot()`** 均含累计字段（含 **`total_process_reuse_hits`**；池关闭时复用为 **0**）；**`skills.read`** 需 `arguments.path`（相对 `data/skills`，规则同 `GET /api/v1/skills/content`）；**`wasm.probe`** 在进程内用 **wasmi** 执行构建期生成的最小 WASM（`build.rs` → `OUT_DIR/probe.wasm`）；运维可设 **`HARNESS_WASM_PROBE_DISABLED=1`**（或 **`true`** / **`yes`** / **`on`**）拒绝 **`wasm.probe`** 调用；目录见 `GET /api/v1/harness/tools`
 - 已 attach **`agent.script.attach` / `agent.production.attach`** 且配置 LLM 密钥时，可发 **`harness.agent.run`**（`payload.content`，可选 **`max_tool_rounds`** 默认 8、限制 1–32）：服务端多轮 OpenAI **tools** 调用与 Harness 工具闭环，最终仍发 **`chat.message.*`** 文本信封
 
 技能 Markdown（只读，Bearer JWT）：

@@ -24,10 +24,11 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 
 | 内容 | 状态 | 备注 |
 |------|------|------|
-| 用户上传 WASM 策略（配额、签名、审计） | `next` | **必做**；YAML「仍缺…用户上传 WASM」 |
-| 隔离执行进程池预热/回收 | `next` | **必做**；与 `HARNESS_ISOLATE_MAX_CONCURRENT` 运维策略 |
+| 用户上传 WASM 策略（配额、签名、审计） | `next` | **必做**；YAML「仍缺…用户上传 WASM」；威胁模型草稿见 [`harness-user-wasm-threat-model.md`](./harness-user-wasm-threat-model.md) |
+| 隔离执行：指标 + 子进程池（idle 复用、`HARNESS_ISOLATE_*`、`/ready`） | `shipped` | **`9388ec3a`**（指标）、**`3b326f26`**（默认池 + 集成测）；与 `HARNESS_ISOLATE_MAX_CONCURRENT` 一致 |
+| 进程池启动预热（prefork）与扩展回收策略 | `next` | 当前为**按需 spawn** + **idle 队列归还**；无进程启动前预热线 |
 | LLM 流式工具调用融合 | `next` | **必做**；协议与产品规则须书面定稿 |
-| Trace / 结构化观测 + OTel 导出 | `next` | **必做**；与 `quality-bar`、运维 KPI 联动 |
+| Trace / 结构化观测 + OTel 导出 | `next` | **必做**；与 `quality-bar`、运维 KPI 联动；**占位**：`TOONFLOW_OTEL_EXPORT_ENABLED` + 启动日志见 `backend` README / `telemetry` 模块 |
 
 ## 验收
 
@@ -68,7 +69,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 |----|------|
 | **目标** | 允许受限场景下用户 supplied WASM 注册为 harness 工具，含配额、审计、禁止网络等策略。 |
 | **依赖** | 现有 `wasm_runtime.rs` / `wasm.probe`；安全评审结论。 |
-| **PR 切片** | （1）设计与威胁模型（短文档）；（2）DB 表或对象存储路径 + REST（上传/列出/吊销）；（3）WS `harness.tool.invoke` 分支与超时/内存限额；（4）运维开关 kill-switch。 |
+| **PR 切片** | （1）设计与威胁模型（短文档：[`harness-user-wasm-threat-model.md`](./harness-user-wasm-threat-model.md)）；（2）DB 表或对象存储路径 + REST（上传/列出/吊销）；（3）WS `harness.tool.invoke` 分支与超时/内存限额；（4）运维开关 kill-switch（内建 **`wasm.probe`** 已支持 **`HARNESS_WASM_PROBE_DISABLED`**）。 |
 | **触点** | `backend/src/harness/wasm_runtime.rs`；`backend/src/harness/ws/tool.rs`；`backend/src/harness/tools.rs`；`docs/websocket-events.md`。 |
 | **测试** | **必做**：畸形 WASM、超时、未授权上传；**必做**：体量上限测试（fuzz 或等价边界单测）。 |
 | **回滚** | Feature flag 关闭新工具类型；DB 吊销所有用户 WASM。 |
@@ -79,10 +80,10 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 |----|------|
 | **目标** | 降低 `isolated.*` 工具冷启动延迟；并发受控于 `HARNESS_ISOLATE_MAX_CONCURRENT` 且可观测。 |
 | **依赖** | 现有 `backend/src/harness/isolate.rs` 行为基线。 |
-| **PR 切片** | （1）**必做**：指标（队列深度、等待时间、进程复用次数）；（2）**必做**：进程池或 worker 常驻方案**择一**落地并文档化；（3）配置项与默认值写入运维说明。 |
+| **PR 切片** | （1）**已交付**：指标（队列深度、Semaphore 等待、子进程 spawn、**`process_reuse_hits`** 等）+ **`tracing`** / **`GET /ready`**（**`9388ec3a`**）；（2）**已交付**：默认 **`HARNESS_ISOLATE_POOL`** 常驻 worker + idle 复用（**`3b326f26`**）；运维说明见 **`backend/README.md`**；（3）**仍缺**：启动前 **prefork**、显式回收/老化策略与 Runbook 扩展。 |
 | **触点** | `backend/src/harness/isolate.rs`；`backend/src/harness/observe.rs`；环境变量 README。 |
 | **测试** | **必做**：`cargo test` 覆盖并发槽耗尽；负载或 bench 纳入 **nightly 或发版前清单**（书面固定频率）。 |
-| **回滚** | 配置关闭预热；回滚路径写入 Runbook。 |
+| **回滚** | **`HARNESS_ISOLATE_POOL`** 关闭即退回单次 spawn；完整 Runbook 待 prefork/老化策略落地后补全。 |
 
 ### WP-E：LLM 流式工具调用融合
 
@@ -101,7 +102,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 |----|------|
 | **目标** | 在 `request_id` 基础上，将 harness session / tool invoke / job **全链路透传 trace id**，并 **必做 OTel（或等价标准导出）管线**，供运维查询与 SLO。 |
 | **依赖** | 与 [`roadmap-quality.md`](./roadmap-quality.md) WP-D 的关联字段设计对齐；**顺序**：先贯通 trace id，再扩展业务关联字段。 |
-| **PR 切片** | （1）统一 `tracing` span 与 baggage 约定；（2）**必做**：可配置导出（环境区分 staging/prod，采样率可调但 prod 非零）；（3）**必做**：PII 脱敏与字段白名单评审。 |
+| **PR 切片** | （0）**stub**：`TOONFLOW_OTEL_EXPORT_ENABLED` 时启动 **`tracing::warn`**（无 OTLP 依赖，避免运维误以为已导出）；（1）统一 `tracing` span 与 baggage 约定；（2）**必做**：可配置导出（环境区分 staging/prod，采样率可调但 prod 非零）；（3）**必做**：PII 脱敏与字段白名单评审。 |
 | **触点** | `backend/src/harness/observe.rs`；HTTP 中间件；`jobs/worker` **必做**关联 `job_id`。 |
 | **测试** | **必做**：本地或 CI OTel collector 冒烟；单测 span 父子关系与采样边界。 |
 | **回滚** | 导出降为最低采样 + 磁盘日志兜底；不得在未知故障下静默关闭 trace id 传递。 |

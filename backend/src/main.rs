@@ -35,6 +35,8 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    toonflow_server::telemetry::log_otel_export_stub_if_requested();
+
     let state = state::AppState::from_env()
         .await
         .expect("failed to initialize app state (check DATABASE_URL)");

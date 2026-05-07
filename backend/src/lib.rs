@@ -23,6 +23,7 @@ pub mod scripting;
 pub mod settings;
 pub mod short_video;
 pub mod state;
+pub mod telemetry;
 pub mod vendor;
 pub mod workspaces;
 
