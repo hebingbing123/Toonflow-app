@@ -61,6 +61,16 @@ int? _parseDurationSecondsLoose(String raw) {
   return int.tryParse(m.group(1)!);
 }
 
+String formatDurationHHMMSS(int totalSeconds) {
+  final s = totalSeconds < 0 ? 0 : totalSeconds;
+  final hours = s ~/ 3600;
+  final minutes = (s % 3600) ~/ 60;
+  final secs = s % 60;
+  return '${hours.toString().padLeft(2, '0')}:'
+      '${minutes.toString().padLeft(2, '0')}:'
+      '${secs.toString().padLeft(2, '0')}';
+}
+
 /// Space 成片装配卡：消费 GET .../short-video-assembly
 ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   required bool projectSelected,
@@ -91,9 +101,6 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   for (final g in scripts) {
     totalShots += g.shots.length;
   }
-  final headline = scripts.isEmpty
-      ? '当前尚无剧本 / 分镜装配数据。'
-      : '${scripts.length} 个剧本 · $totalShots 条分镜（导出路径快照）';
   final d = assembly.projectDefaults;
   final eff = assembly.effectiveShortVideoDefaults;
   final defaultParts = <String>[
@@ -186,6 +193,14 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   final withinLimitedTracks = multiTrackTrackCount <= 4;
   final timelineMinutes = totalDurationSeconds / 60.0;
   final overProfessionalBoundary = !withinLimitedTracks || timelineMinutes > 8.0;
+  
+  // 更新 headline 以包含总时长信息
+  final totalDurationFormatted = formatDurationHHMMSS(totalDurationSeconds);
+  final headlineWithDuration = scripts.isEmpty
+      ? '当前尚无剧本 / 分镜装配数据。'
+      : '${scripts.length} 个剧本 · $totalShots 条分镜（导出路径快照）\n'
+        '成片总时长：$totalDurationSeconds秒 ($totalDurationFormatted)';
+  
   final multiTrackDecisionLines = <String>[
     '轨道占用估算：视频 1 + 字幕 ${shotsWithSubtitle > 0 ? 1 : 0} + 旁白 ${shotsWithVoiceover > 0 ? 1 : 0} + BGM ${hasBgm ? 1 : 0} = $multiTrackTrackCount 轨。',
     '素材就绪：视频镜头 $shotsWithVideo/$totalShots，字幕镜头 $shotsWithSubtitle/$totalShots，旁白镜头 $shotsWithVoiceover/$totalShots。',
@@ -198,7 +213,7 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   ];
   return ShortVideoAssemblyPanelUi(
     visible: true,
-    headline: headline,
+    headline: headlineWithDuration,
     defaultsLine:
         '${defaultParts.join(' · ')}\n生效 TTS（入队/worker）：${eff.ttsVoice}',
     qualityLines: qualityLines,

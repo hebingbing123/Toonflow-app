@@ -77,6 +77,32 @@ pub fn harness_tool_invoke(ctx: &HarnessContext, tool_name: &str) {
     }
 }
 
+/// One completed `isolated.echo` cycle (Semaphore wait + child process wall time).
+///
+/// Filter logs with **`event = harness_isolate_invoke`**; aggregate totals live in [`crate::harness::isolate::metrics_snapshot`].
+pub fn harness_isolate_invoke_finished(
+    queued_tasks_ahead_when_entered: usize,
+    semaphore_wait_ms: u64,
+    child_execution_ms: u64,
+    available_slots_snapshot: usize,
+    max_slots: usize,
+    reuse_hit: bool,
+    process_reuse_hits_total: u64,
+) {
+    tracing::info!(
+        target: "harness.isolate.metrics",
+        event = "harness_isolate_invoke",
+        queued_ahead = queued_tasks_ahead_when_entered,
+        semaphore_wait_ms,
+        child_execution_ms,
+        available_slots_snapshot,
+        max_slots,
+        reuse_hit,
+        process_reuse_hits_total,
+        "harness isolate invoke"
+    );
+}
+
 pub fn harness_tools_catalog_http(user_id: Uuid) {
     tracing::debug!(%user_id, "harness.http.tools_catalog");
 }

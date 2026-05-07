@@ -108,7 +108,7 @@ mod attach_payload_tests {
     #[test]
     fn attach_script_deserializes_workspace_uuid() {
         let u = Uuid::nil();
-        let w = Uuid::from_u128(0xffee_ddcc_bbaa_9988776655443322);
+        let w = Uuid::from_u128(0xffee_ddcc_bbaa_9988_7766_5544_3322);
         let v = serde_json::json!({
             "isolation_key": "k",
             "projectUuid": u,
