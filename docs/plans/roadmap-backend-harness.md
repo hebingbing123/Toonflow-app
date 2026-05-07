@@ -26,7 +26,8 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 |------|------|------|
 | 用户上传 WASM 策略（配额、签名、审计） | `next` | **必做**；YAML「仍缺…用户上传 WASM」；威胁模型草稿见 [`harness-user-wasm-threat-model.md`](./harness-user-wasm-threat-model.md) |
 | 隔离执行：指标 + 子进程池（idle 复用、`HARNESS_ISOLATE_*`、`/ready`） | `shipped` | **`9388ec3a`**（指标）、**`3b326f26`**（默认池 + 集成测）；与 `HARNESS_ISOLATE_MAX_CONCURRENT` 一致 |
-| 进程池启动预热（prefork）与扩展回收策略 | `next` | 当前为**按需 spawn** + **idle 队列归还**；无进程启动前预热线 |
+| 进程池启动预热（prefork） | `shipped` | **`HARNESS_ISOLATE_PREFORK`**（上限同并发槽；**`HARNESS_ISOLATE_POOL`** 关闭时不预热）；**`main`** 监听前 **`warm_isolate_pool_prefork`**；README + 集成测 |
+| 进程池扩展回收 / 老化（TTL、轮换） | `next` | 仍为 idle 队列归还；无显式 TTL / 轮换 Runbook |
 | LLM 流式工具调用融合 | `next` | **必做**；协议与产品规则须书面定稿 |
 | Trace / 结构化观测 + OTel 导出 | `next` | **必做**；与 `quality-bar`、运维 KPI 联动；**占位**：`TOONFLOW_OTEL_EXPORT_ENABLED` + 启动日志见 `backend` README / `telemetry` 模块 |
 
@@ -80,7 +81,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 |----|------|
 | **目标** | 降低 `isolated.*` 工具冷启动延迟；并发受控于 `HARNESS_ISOLATE_MAX_CONCURRENT` 且可观测。 |
 | **依赖** | 现有 `backend/src/harness/isolate.rs` 行为基线。 |
-| **PR 切片** | （1）**已交付**：指标（队列深度、Semaphore 等待、子进程 spawn、**`process_reuse_hits`** 等）+ **`tracing`** / **`GET /ready`**（**`9388ec3a`**）；（2）**已交付**：默认 **`HARNESS_ISOLATE_POOL`** 常驻 worker + idle 复用（**`3b326f26`**）；运维说明见 **`backend/README.md`**；（3）**仍缺**：启动前 **prefork**、显式回收/老化策略与 Runbook 扩展。 |
+| **PR 切片** | （1）**已交付**：指标（队列深度、Semaphore 等待、子进程 spawn、**`process_reuse_hits`** 等）+ **`tracing`** / **`GET /ready`**（**`9388ec3a`**）；（2）**已交付**：默认 **`HARNESS_ISOLATE_POOL`** 常驻 worker + idle 复用（**`3b326f26`**）；运维说明见 **`backend/README.md`**；（3）**已交付**：启动前 **prefork**（**`HARNESS_ISOLATE_PREFORK`** + **`warm_isolate_pool_prefork`**）；**仍缺**：显式回收/老化策略与 Runbook 扩展。 |
 | **触点** | `backend/src/harness/isolate.rs`；`backend/src/harness/observe.rs`；环境变量 README。 |
 | **测试** | **必做**：`cargo test` 覆盖并发槽耗尽；负载或 bench 纳入 **nightly 或发版前清单**（书面固定频率）。 |
 | **回滚** | **`HARNESS_ISOLATE_POOL`** 关闭即退回单次 spawn；完整 Runbook 待 prefork/老化策略落地后补全。 |

@@ -10,6 +10,9 @@
 //! **进程复用**：默认 **`HARNESS_ISOLATE_POOL` 启用**常驻子进程 `__harness_isolate_echo_pool__`（stdin 上以 `u32_be` 总长 + UTF‑8 JSON
 //! 成帧，`len=0` 或 stdin 关闭则 worker 退出）。设 **`HARNESS_ISOLATE_POOL=0|false|no|off`** 退回「每条 invoke 单次 spawn」（旧行为）。
 //!
+//! **启动预热（prefork）**：**`HARNESS_ISOLATE_PREFORK`** 为非负整数时，在 **`warm_isolate_pool_prefork`**（由服务器 **`main`** 在监听前调用）
+//! 中预先 **`spawn`** 至多 **`min(请求值, HARNESS_ISOLATE_MAX_CONCURRENT)`** 个池 worker 填入 idle 队列；池关闭或值为 **`0`/缺省时**不预热。
+//!
 //! 可选 **`HARNESS_ISOLATE_RUNNER_EXE`**：显式指定子进程二进制（默认为 [`std::env::current_exe`]）。集成测试常指向
 //! **`CARGO_BIN_EXE_toonflow-server`**。
 
@@ -53,7 +56,29 @@ static ISOLATE_MAX_SLOTS: LazyLock<usize> = LazyLock::new(parse_isolate_max_slot
 
 static ISOLATE_POOL_ENABLED: LazyLock<bool> = LazyLock::new(parse_isolate_pool_enabled);
 
+#[inline]
+fn parse_isolate_prefork_requested() -> usize {
+    std::env::var("HARNESS_ISOLATE_PREFORK")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .and_then(|s| s.parse::<usize>().ok())
+        .unwrap_or(0)
+}
+
+static ISOLATE_PREFORK_REQUESTED: LazyLock<usize> = LazyLock::new(parse_isolate_prefork_requested);
+
 static ISOLATE_SLOTS: LazyLock<Semaphore> = LazyLock::new(|| Semaphore::new(*ISOLATE_MAX_SLOTS));
+
+/// 有效预热目标个数：`HARNESS_ISOLATE_POOL` 关闭时为 **0**；否则 **`min(HARNESS_ISOLATE_PREFORK, HARNESS_ISOLATE_MAX_CONCURRENT)`**。
+#[must_use]
+#[inline]
+pub fn effective_isolate_prefork_target() -> usize {
+    if !*ISOLATE_POOL_ENABLED {
+        return 0;
+    }
+    (*ISOLATE_PREFORK_REQUESTED).min(*ISOLATE_MAX_SLOTS)
+}
 
 struct IsolateCounters {
     wait_queue_depth: AtomicUsize,
@@ -280,6 +305,65 @@ async fn spawn_pooled_echo_worker(exe: &std::path::Path) -> Result<PooledEchoCon
         stdin,
         stdout,
     })
+}
+
+/// 将至多 **`effective_isolate_prefork_target()`** 个子进程 worker 放入 idle 队列（已有 idle 计入目标，可安全重复调用）。
+///
+/// 由 **`toonflow-server` `main`** 在监听前调用；集成测试可在设置 env 后直接调用以断言首包复用。
+pub async fn warm_isolate_pool_prefork() {
+    let cap = effective_isolate_prefork_target();
+    if cap == 0 {
+        return;
+    }
+
+    let exe = match resolve_isolate_runner_exe() {
+        Ok(p) => p,
+        Err(e) => {
+            tracing::warn!(
+                target: "harness.isolate.prefork",
+                error = ?e,
+                "isolate pool prefork skipped (runner exe)"
+            );
+            return;
+        }
+    };
+
+    let to_spawn = {
+        let g = POOL_IDLE.lock().await;
+        cap.saturating_sub(g.len())
+    };
+
+    if to_spawn == 0 {
+        tracing::debug!(
+            target: "harness.isolate.prefork",
+            cap,
+            "isolate pool prefork noop (idle queue already warm)"
+        );
+        return;
+    }
+
+    let mut ok = 0usize;
+    for attempt in 0..to_spawn {
+        match spawn_pooled_echo_worker(exe.as_path()).await {
+            Ok(conn) => {
+                POOL_IDLE.lock().await.push(conn);
+                ok += 1;
+            }
+            Err(e) => tracing::warn!(
+                target: "harness.isolate.prefork",
+                attempt,
+                error = ?e,
+                "isolate pool prefork worker spawn failed"
+            ),
+        }
+    }
+
+    tracing::info!(
+        target: "harness.isolate.prefork",
+        spawned = ok,
+        requested_cap = cap,
+        "isolate pool prefork finished"
+    );
 }
 
 async fn acquire_pooled_echo_conn(

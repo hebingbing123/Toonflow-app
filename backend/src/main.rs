@@ -37,6 +37,8 @@ async fn main() {
 
     toonflow_server::telemetry::log_otel_export_stub_if_requested();
 
+    harness::isolate::warm_isolate_pool_prefork().await;
+
     let state = state::AppState::from_env()
         .await
         .expect("failed to initialize app state (check DATABASE_URL)");
