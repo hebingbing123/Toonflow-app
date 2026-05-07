@@ -133,6 +133,7 @@ pub struct QualityStatsResponse {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityScopeInsightResponse {
+    pub scope: String,
     pub scope_label: String,
     pub project_id: Option<i32>,
     pub script_id: Option<i32>,
@@ -165,6 +166,7 @@ pub struct QualityScopeInsightResponse {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct StagePassRateItem {
+    pub scope: String,
     pub target_type: String,
     pub review_date: chrono::DateTime<chrono::Utc>,
     pub total_reviews: i64,
@@ -186,6 +188,7 @@ pub struct StagePassRateItem {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct StageGradeDistributionItem {
+    pub scope: String,
     /// 生成阶段（story_skeleton / adaptation_strategy / director_planning / storyboard_table / storyboard_panel / video_prompt）
     pub stage: String,
     /// A 级数量
@@ -206,6 +209,7 @@ pub struct StageGradeDistributionItem {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityTokenEfficiencyResponse {
+    pub scope: String,
     pub target_type: String,
     pub stage: Option<String>,
     pub review_model_name: Option<String>,
@@ -240,6 +244,7 @@ pub struct QualityTokenEfficiencyResponse {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityTokenEfficiencySample {
+    pub scope: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub target_type: String,
     pub stage: Option<String>,

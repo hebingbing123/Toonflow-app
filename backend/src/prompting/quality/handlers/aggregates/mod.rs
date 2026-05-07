@@ -131,6 +131,7 @@ pub(crate) async fn get_stage_pass_rate(
     let items = sqlx::query_as::<_, StagePassRateItem>(
         r#"
         SELECT
+            'user'::text as scope,
             target_type,
             DATE_TRUNC('day', created_at) as review_date,
             COUNT(*) as total_reviews,
@@ -219,6 +220,7 @@ pub(crate) async fn get_stage_grade_distribution(
     let items = sqlx::query_as::<_, super::super::types::StageGradeDistributionItem>(
         r#"
         SELECT
+            'user'::text as scope,
             stage,
             COUNT(*) FILTER (WHERE grade = 'A') as grade_a_count,
             COUNT(*) FILTER (WHERE grade = 'B') as grade_b_count,

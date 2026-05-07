@@ -44,6 +44,7 @@ pub(crate) async fn get_scope_insights(
     let rows = sqlx::query_as::<_, QualityScopeInsightResponse>(
         r#"
         SELECT
+            'user'::text as scope,
             CASE
                 WHEN qr.project_id IS NOT NULL AND qr.script_id IS NOT NULL THEN 'P' || qr.project_id::text || '/S' || qr.script_id::text
                 WHEN qr.project_id IS NOT NULL THEN 'P' || qr.project_id::text
@@ -428,6 +429,7 @@ pub(crate) async fn get_token_efficiency(
     let rows = sqlx::query_as::<_, QualityTokenEfficiencyResponse>(
         r#"
         SELECT
+          'user'::text as scope,
           COALESCE(qr.target_type, usage.meta->'qualityReview'->>'targetType', 'unknown') as target_type,
           qr.stage as stage,
           COALESCE(qr.model_name, usage.meta->'qualityReview'->>'modelName') as review_model_name,
@@ -701,6 +703,7 @@ pub(crate) async fn get_token_efficiency_samples(
     let rows = sqlx::query_as::<_, QualityTokenEfficiencySample>(
         r#"
         SELECT
+          'user'::text as scope,
           usage.created_at,
           COALESCE(qr.target_type, usage.meta->'qualityReview'->>'targetType', 'unknown') as target_type,
           qr.stage as stage,

@@ -22,6 +22,7 @@
 - **W4.5 已起步**：`app_generation_job` 先按 `project_id` 派生 workspace 可见范围，`GET /api/v1/jobs/page`、`GET /api/v1/jobs`、jobs 三个 summary 端点，以及 jobs 详情/取消/重试链路已统一到 owner 或同 workspace 项目成员可见（未传 `project_id` 的列表/汇总仍保留 owner 个人视图）；`POST /api/v1/jobs` 在 payload 带 project 字段时会做成员校验并规范化 `project_uuid`/`project_numeric_id`；本地 artifact 下载目录与更新通知已改按 `job.owner_user_id` 对齐；worker 侧 `video/voiceover/asset-image` 的项目写回查询已切到 workspace 成员校验；并完成书面定稿：`app_generation_job` 暂不新增 `workspace_id`，由规范化 `project_*` 派生 workspace 可见性
 - **W4.6 已启动**：`GET /api/v1/usage/summary` 响应与 OpenAPI 已显式增加 `scope = user`，先固定用户聚合口径；memory / skills / quality 范围定义继续推进
 - **W4.6 持续推进**：`GET /api/v1/skills/summary`、`GET /api/v1/agents/memory/cost-overview`、`GET /api/v1/quality/stats` 已显式返回 `scope=user`，与 usage 端点对齐为用户口径
+- **W4.6 持续推进**：quality 其余聚合端点（`stage-pass-rate`、`stage-grade-distribution`、`scope-insights`、`token-efficiency`、`token-efficiency/samples`）已补 `scope=user`，`quality` 聚合口径统一为 user
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 

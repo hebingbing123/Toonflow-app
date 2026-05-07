@@ -350,6 +350,7 @@ proptest! {
         ]),
     ) {
         let response = QualityTokenEfficiencyResponse {
+            scope: "user".into(),
             target_type: "storyboard".into(),
             stage: stage.clone(),
             review_model_name: model_name.clone(),
@@ -386,6 +387,7 @@ proptest! {
 
         let value = serde_json::to_value(&response).expect("serialize aggregate");
 
+        prop_assert_eq!(value["scope"].as_str(), Some("user"));
         prop_assert_eq!(value["sampleCount"].as_i64(), Some(sample_count));
         prop_assert_eq!(value["highTokenLowQualitySampleCount"].as_i64(), Some(high_token_low_quality_count));
         prop_assert_eq!(value["roiBand"].as_str(), Some(response.roi_band.as_str()));
@@ -410,6 +412,7 @@ proptest! {
         ]),
     ) {
         let sample = QualityTokenEfficiencySample {
+            scope: "user".into(),
             created_at: Utc.timestamp_opt(1_715_000_000, 0).single().unwrap(),
             target_type: "storyboard".into(),
             stage: Some("video_prompt".into()),
@@ -437,6 +440,7 @@ proptest! {
 
         let value = serde_json::to_value(&sample).expect("serialize sample");
 
+        prop_assert_eq!(value["scope"].as_str(), Some("user"));
         prop_assert_eq!(value["totalTokens"].as_i64(), Some(total_tokens.into()));
         prop_assert_eq!(value["memoryStyleChars"].as_i64(), Some(memory_style_chars.into()));
         prop_assert_eq!(value["memorySharePercent"].as_f64(), Some(15.0));
