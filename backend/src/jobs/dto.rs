@@ -45,6 +45,8 @@ pub(super) struct ListJobsQuery {
     #[serde(default)]
     pub(super) status: Option<String>,
     #[serde(default)]
+    pub(super) project_id: Option<i32>,
+    #[serde(default)]
     pub(super) limit: Option<i64>,
     #[serde(default)]
     pub(super) offset: Option<i64>,
