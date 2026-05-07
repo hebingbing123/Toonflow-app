@@ -3,7 +3,7 @@
 更新时间：2026-05-07
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
-大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**、**[团队 Workspace MVP](./tasks-workspace-team-mvp.md)**。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
+大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**；团队 Workspace **完整功能**总表见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
 
 ## 状态约定
 
@@ -19,7 +19,7 @@
 - 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
 - 当前最新完成 commit：`c9557011`
 - 当前最新完成竖切：`内容接入竖切（小说爬虫 client/server + 托管调度 + 观测闭环）`
-- **下一候选竖切**（未开工）：**团队 Workspace MVP** — 验收 A1–A5 见 [**`tasks-workspace-team-mvp.md`**](./tasks-workspace-team-mvp.md)（enterprise 空间、按 `user_id` 加成员、切换当前 workspace、项目列表按 workspace 成员可见、Flutter 选择器）
+- **下一大型竖切**（未开工）：**团队 Workspace 完整功能** — 全任务 W1–W11 见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)（生命周期、邀请、权限、全站 API、Flutter、Harness、计费策略、RLS/安全、观测、发布文档）
 
 ## Phase 1 进度
 
@@ -256,23 +256,18 @@
 
 - `yarn refactor:check` 全绿（backend fmt/clippy/test + frontend analyze/test + OpenAPI drift）
 
-## 下一阶段：团队 Workspace MVP（`pending`）
+## 下一阶段：团队 Workspace 完整功能（`pending`）
 
-**目标**：在 **不削弱个人路径**（personal workspace 行为保持）的前提下，收口 **enterprise workspace + 成员 + 切换上下文 + 列表按 workspace**。
+**目标**：个人与团队 **双路径长期并存**；团队侧交付 **enterprise 全生命周期、邀请与成员、权限矩阵、全站资源与 Harness/计费/安全/观测** — 不以 MVP 为范围，以 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) **Phase W1–W11** 勾选为完成定义。
 
-**专项清单**：[**`tasks-workspace-team-mvp.md`**](./tasks-workspace-team-mvp.md)
+**进度**：在 `workspace-team-full-plan.md` 与各 Phase 内勾选；本文件仅记录 **当前主攻 Phase** 与 **里程碑 commit**（开工后填写）。
 
-| 验收项 | 状态 |
+| 跟踪项 | 状态 |
 |--------|------|
-| A1 创建 enterprise workspace | `pending` |
-| A2 owner/admin 按 `user_id` 添加成员 | `pending` |
-| A3 切换 `current_workspace` API | `pending` |
-| A4 `GET /api/v1/projects`（+ 本里程碑内一处写路径）按 workspace 成员规则 | `pending` |
-| A5 Flutter workspace 选择器 + 刷新 + 契约/parity | `pending` |
-
-**已提交**：_（本段随竖切更新 commit）_
-
-**备注**：首版 **不加邮件邀请**；邀请表、魔法链接可列为 Phase 2+。
+| 总表 `workspace-team-full-plan.md` | `pending`（随子 Phase 更新勾选） |
+| Phase W1–W4 核心 API + 项目范围 | `pending` |
+| Phase W5–W8 权限 / Flutter / Harness / 计费 | `pending` |
+| Phase W9–W11 安全 / 观测 / 发布文档 | `pending` |
 
 ## 当前阻塞与注意事项
 

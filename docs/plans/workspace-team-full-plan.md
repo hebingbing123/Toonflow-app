@@ -1,0 +1,160 @@
+# 团队 Workspace 完整功能 — 任务总表（非 MVP）
+
+**定位**：在 **个人路径（Personal Workspace）已落地** 的前提下，把 **enterprise 工作区、成员生命周期、权限、全站 API/前端/Harness/计费与观测** 做成 **可对外承诺的完整产品能力**，而不是「最小演示」。  
+**个人与团队并存**：任何改动 **不得破坏** 现有 `personal` 唯一性、`ensure_personal_workspace` 默认行为与既有项目归属。
+
+**关联**：[`harness-rust-flutter.md`](./harness-rust-flutter.md)（组织/工作区按阶段）、[`toonflow-platform-progress.md`](./toonflow-platform-progress.md) §1 基线、迁移 `supabase/migrations/*app_workspace*`。  
+**门禁**：凡动 `backend/` / `frontend/` / OpenAPI / 迁移 / WS 文档，合并前 **`yarn refactor:check`**。
+
+---
+
+## 一、当前基线（已实现，本计划不重复造轮子）
+
+- [x] `app_workspace`（`personal` | `enterprise`）、每人唯一 `personal`
+- [x] `app_workspace_member`（`owner` | `admin` | `member`）
+- [x] `app_user_profile.current_workspace_id`
+- [x] `app_project.workspace_id` + 创建时写入 personal workspace
+- [x] `GET /api/v1/me` 返回 `current_workspace`
+- [x] Flutter `WorkspaceContextView` + `WorkspaceSummary`
+- [x] Supabase RLS（workspace / member 表）；**须在后文 P9 与 Rust 连接方式对齐文档**
+
+---
+
+## 二、Phase W1 — Workspace 生命周期（企业空间本体）
+
+- [ ] **W1.1** `POST /api/v1/workspaces`：创建 `enterprise`（名称、可选描述/metadata、可选 slug/展示名规则）
+- [ ] **W1.2** `GET /api/v1/workspaces`：列出当前用户 **作为 member** 的全部 workspace（personal + enterprise）
+- [ ] **W1.3** `GET /api/v1/workspaces/{workspace_id}`：详情（仅 member 可读）
+- [ ] **W1.4** `PATCH /api/v1/workspaces/{workspace_id}`：改名、metadata（owner/admin）
+- [ ] **W1.5** 软删除或归档策略：`archived_at` / `deleted_at` + 列表过滤 + **不可再切换为当前**（需迁移或 product 规则文档）
+- [ ] **W1.6** 企业空间 **配额/数量上限**（每用户可创建 enterprise 数、每空间成员上限）— 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) 限流/plan 策略对齐或单列 env
+- [ ] **W1.7** OpenAPI + `pg_contract` + smoke
+
+---
+
+## 三、Phase W2 — 成员与邀请（完整闭环）
+
+- [ ] **W2.1** `POST …/workspaces/{id}/members`：**直接添加** 已存在用户（`user_id` + `role`），校验 inviter 为 owner/admin
+- [ ] **W2.2** 邀请表 `app_workspace_invite`（或等价）：`email` / `token` / `expires_at` / `role` / `invited_by` / 状态（pending/accepted/revoked）
+- [ ] **W2.3** `POST …/workspaces/{id}/invites`：生成邀请（邮件或仅返回一次性链接，**两种策略可配置**）
+- [ ] **W2.4** `POST /api/v1/workspaces/invites/accept`：凭 token 加入 member
+- [ ] **W2.5** `DELETE …/members/{user_id}` / `PATCH …/members/{user_id}`：移除、改角色（防删最后一个 owner、转让 owner 流程）
+- [ ] **W2.6** 成员 **主动离开** workspace（非 personal 或 personal 禁止离开的产品规则需书面化）
+- [ ] **W2.7** 审计：`workspace_id` + actor + action + target_user + timestamp（可复用现有审计模式或新表）
+- [ ] **W2.8** 速率限制：邀请/添加成员防滥用（与 PG 限流策略一致）
+- [ ] **W2.9** OpenAPI + 契约测试 + **邮件/无邮件** 双路径说明写入 Runbook
+
+---
+
+## 四、Phase W3 — 当前上下文与「个人/团队」切换
+
+- [ ] **W3.1** `PATCH /api/v1/me/current-workspace`（或等价）：切换 `current_workspace_id`，**必须**校验 membership
+- [ ] **W3.2** 切换后 **全客户端状态**：项目列表、选中 project、Harness attach、短剧空间上下文等 **统一刷新**（Flutter 架构层一次收口）
+- [ ] **W3.3** 首次登录默认 workspace 规则：无 enterprise 时 personal；曾加入团队则 **记忆上次 workspace**（`app_user_profile` 已有字段可扩展）
+- [ ] **W3.4** 错误码：非成员切换 → 明确 `403` + `code`
+- [ ] **W3.5** OpenAPI + widget/integration 测试
+
+---
+
+## 五、Phase W4 — 资源范围：项目为轴，扩展到全站
+
+> 原则：**`workspace_id` 为空间边界**；`owner_user_id` 保留为「创建者/责任人」，**可见性与写权限**由 **workspace 角色 + 可选项目级 ACL** 决定（见 W5）。
+
+- [ ] **W4.1** `GET /api/v1/projects`：**默认**按 `current_workspace_id` 过滤，且仅 **该 workspace 的 member** 可见（含他人创建的项目）
+- [ ] **W4.2** `POST /api/v1/projects`：`workspace_id` 默认当前 workspace；**禁止**写入非成员 workspace
+- [ ] **W4.3** `GET/PATCH/DELETE …/projects/{id}`：校验 **project.workspace_id** 与成员身份
+- [ ] **W4.4** 剧本 / 分镜 / 小说 / 资产 / workbench **所有** `project_id` 路径 handler：统一走 **「project ∈ workspace + 成员权限」** 中间件或 helper（避免漏网接口）
+- [ ] **W4.5** `app_generation_job`（及 payload）：是否挂 `workspace_id` 或由 `project_id` 派生 — **书面定稿** + 列表/取消/统计接口一致
+- [ ] **W4.6** `GET /api/v1/usage/summary`、memory、skills、quality 等：**定义**是否按 workspace 聚合或保持 user；**实现与 OpenAPI 一致**
+- [ ] **W4.7** Parity：[ `electron-node-parity.md`](./electron-node-parity.md) 更新「多用户可见范围」与旧栈差异说明
+
+---
+
+## 六、Phase W5 — 权限矩阵（项目级可选，workspace 级必选）
+
+- [ ] **W5.1** 文档化 **workspace 角色矩阵**：owner / admin / member 对「邀请、改计费、删空间、改全部项目」的布尔表
+- [ ] **W5.2**（可选加强）**项目级角色**：`editor` / `viewer` 仅针对单项目 — 新表 `app_project_member` 或 JSON policy
+- [ ] **W5.3** 默认策略：member 是否可 **创建** 项目、是否可 **删除他人项目** — 产品签字
+- [ ] **W5.4** 与 **计费 `plan_tier`** 关系：按 user 还是按 workspace 计费 — **财务/产品** 结论驱动 schema（`app_workspace` 增加 `plan_tier` 等或维持 user）
+- [ ] **W5.5** 单元测试覆盖矩阵边角（最后一个 owner、降级 admin 等）
+
+---
+
+## 七、Phase W6 — Flutter 产品面（完整 UX）
+
+- [ ] **W6.1** Workspace **选择器**（抽屉或设置页）：列表、当前高亮、切换
+- [ ] **W6.2** **创建企业空间** 流程（表单 + 错误提示）
+- [ ] **W6.3** **成员管理页**：列表、搜索用户、改角色、移除、邀请 pending 列表
+- [ ] **W6.4** **接受邀请** 深链 / 路由（Web + 桌面一致策略）
+- [ ] **W6.5** 空状态：无 enterprise 时的引导；无项目时的团队引导
+- [ ] **W6.6** `rust_api` 全量模型与生成/手写 client 与 OpenAPI **一致**（跑 `scripts/check_rust_api_consistency.sh`）
+- [ ] **W6.7** a11y / 国际化字符串（若产品要求）
+
+---
+
+## 八、Phase W7 — Harness / WebSocket
+
+- [ ] **W7.1** `HarnessContext`（或 attach payload）增加 **`workspace_id`**（UUID）与 **解析规则**（与 REST 一致）
+- [ ] **W7.2** `docs/websocket-events.md`：attach / context 更新事件字段表
+- [ ] **W7.3** 工具权限：`permissions` 模块按 workspace 成员校验 **读 production/script** 等 channel
+- [ ] **W7.4** Flutter WS 客户端：切换 workspace 后 **重 attach** 或刷新 context
+- [ ] **W7.5** 回归：`agent_workspaces` 相关测试 + 手工矩阵
+
+---
+
+## 九、Phase W8 — 计费、用量、任务配额（与空间绑定策略）
+
+- [ ] **W8.1** 结论落地文档：`plan_tier` / `daily_job_quota` / `jobs_today` **按 user 还是按 workspace**（或 hybrid）
+- [ ] **W8.2** 若按 workspace：`app_user_profile` vs `app_workspace` 字段迁移 + webhook 与 **`/me`** 响应形状变更策略（版本化）
+- [ ] **W8.3** Billing 运营视图是否按 workspace 过滤 — 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-D 对齐
+- [ ] **W8.4** 迁移与回填脚本 + 回滚 Runbook
+
+---
+
+## 十、Phase W9 — 安全：RLS、服务角色与双路径
+
+- [ ] **W9.1** 文档：**Rust `DATABASE_URL`** 是否使用 **service role**；若绕过 RLS，**应用层**必须 100% 复现成员规则（对照清单）
+- [ ] **W9.2** Supabase **直连客户端**（若有）与 RLS 策略一致性测试
+- [ ] **W9.3** 敏感操作二次确认（删空间、转 owner）— 产品流程
+- [ ] **W9.4** 安全评审：邀请 token 熵、过期、重放、速率限制
+
+---
+
+## 十一、Phase W10 — 观测与运维
+
+- [ ] **W10.1** 结构化日志 / trace：`workspace_id` 贯穿 HTTP、job、Harness（与 [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)、[`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F 对齐）
+- [ ] **W10.2** 管理指标：每 workspace 成员数、项目数、活跃 jobs（脱敏）
+- [ ] **W10.3** Runbook：成员无法访问、错误切换、数据修复 SQL 模板（只读/受控）
+
+---
+
+## 十二、Phase W11 — 发布、文档与门禁
+
+- [ ] **W11.1** [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 按 Phase 更新状态与 commit
+- [ ] **W11.2** [`roadmap-index.md`](./roadmap-index.md) 若拆出 `roadmap-workspace.md` 可再索引（当前以本文为真源）
+- [ ] **W11.3** 破坏性变更：**客户端版本** / 迁移公告
+- [ ] **W11.4** 全量 `yarn refactor:check` 纳入合并必跑
+
+---
+
+## 十三、建议实施顺序（依赖）
+
+```text
+W1 → W2 → W3 → W4（与 W7 尽量同一「大竖切」窗口内交替，防 REST/WS 断裂）
+→ W5（可与 W4 后半并行）
+→ W6（紧贴 W3/W4 API 稳定面）
+→ W8（待 W5 计费策略定稿）
+→ W9 / W10 / W11 贯穿各 Phase 文档与收口
+```
+
+---
+
+## 十四、完成定义（整计划）
+
+- [ ] **W1–W11** 各 Phase 勾选完成或明确 **「不做」** 并记录理由（产品签字）。
+- [ ] 个人用户 **零回归**（personal workspace、单用户项目主路径）。
+- [ ] `yarn refactor:check` 与 parity / WS 文档持续绿。
+
+---
+
+*维护：每完成一个可合并竖切，更新本文件勾选与 [`toonflow-platform-progress.md`](./toonflow-platform-progress.md)。*

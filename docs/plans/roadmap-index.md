@@ -47,7 +47,7 @@
 | [仓库根 `AGENTS.md`](../../AGENTS.md) | Agent 门禁、`yarn refactor:check`、commit 约定 |
 | [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md) | PG 队列 WP-A0 竖切（指标、Runbook、旁路队列 Gate） |
 | [`tasks-http-api-cleanup.md`](./tasks-http-api-cleanup.md) | HTTP 收敛 **B·其余域** 竖切（H0–H5） |
-| [`tasks-workspace-team-mvp.md`](./tasks-workspace-team-mvp.md) | 团队 enterprise workspace + 成员 + 切换 + 项目列表（A1–A5） |
+| [`workspace-team-full-plan.md`](./workspace-team-full-plan.md) | 团队 Workspace **完整功能**任务总表（W1–W11，非 MVP） |
 
 ## 你怎么用
 
