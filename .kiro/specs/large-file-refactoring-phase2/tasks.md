@@ -174,7 +174,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split memory_profiles/handlers.rs into handlers/ submodules (834→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [-] 15. Refactor backend/src/production/workbench/meta/generate/tests/select_tests.rs (857 lines → split following existing pattern)
+- [x] 15. Refactor backend/src/production/workbench/meta/generate/tests/select_tests.rs (857 lines → split following existing pattern)
   - Note: tests/ directory already uses the pattern `*_tests_part1.rs` / `*_tests_part2.rs` (e.g. memory_trim_part1.rs, observation_tests_part1.rs) — follow same convention
   - Analyze current structure and split into two files by test category
   - Create `tests/select_tests_part1.rs` (≈430 lines) with first half of tests (unit + basic integration)
@@ -185,7 +185,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split tests/select_tests.rs into part1/part2 (857→≤800 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 16. Refactor backend/src/production/workbench/video_prompt_memory/style_rank.rs (816 lines → 3 modules)
+- [x] 16. Refactor backend/src/production/workbench/video_prompt_memory/style_rank.rs (816 lines → 3 modules)
   - Note: video_prompt_memory/ already has style_build.rs, style_compact.rs, style_context.rs, style_notes.rs, style_role.rs — follow same `style_*.rs` naming pattern
   - Create `video_prompt_memory/style_rank/` directory; move style_rank.rs → `style_rank/mod.rs` (≈150 lines, public entry points, re-exports)
   - Create `style_rank/score.rs` (≈350 lines) with scoring and comparison logic
@@ -196,7 +196,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split video_prompt_memory/style_rank.rs into style_rank/ submodules (816→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 17. Refactor backend/src/publish/performance_rework.rs (812 lines → 3 modules)
+- [x] 17. Refactor backend/src/publish/performance_rework.rs (812 lines → 3 modules)
   - Note: publish/ already has performance_rework.rs alongside ab_testing.rs, copy_cache.rs etc. — create a subdir following the same pattern as store/ and handlers/
   - Create `publish/performance_rework/` directory; move performance_rework.rs → `performance_rework/mod.rs` (≈150 lines, public entry points, re-exports)
   - Create `performance_rework/metrics.rs` (≈350 lines) with metrics collection and aggregation logic
@@ -207,7 +207,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split publish/performance_rework.rs into performance_rework/ submodules (812→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 18. Refactor backend/src/production/workbench/meta/generate/builder/transformation.rs (802 lines → 3 modules)
+- [x] 18. Refactor backend/src/production/workbench/meta/generate/builder/transformation.rs (802 lines → 3 modules)
   - Note: builder/ already has anchors.rs, continuity.rs, core.rs, fields.rs, memory.rs, trimming.rs, validation.rs, utils.rs — follow same single-noun naming
   - Create `builder/transformation/` directory; move transformation.rs → `transformation/mod.rs` (≈150 lines, public entry points, re-exports)
   - Create `transformation/text.rs` (≈350 lines) with text transformation logic
@@ -218,7 +218,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split builder/transformation.rs into transformation/ submodules (802→150 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 19. Refactor backend/src/production/workbench/video/generate/tests/merge_budget_tests.rs (809 lines → split following existing pattern)
+- [x] 19. Refactor backend/src/production/workbench/video/generate/tests/merge_budget_tests.rs (809 lines → split following existing pattern)
   - Note: video/generate/tests/ follows the same `*_tests_part1.rs` / `*_tests_part2.rs` pattern
   - Analyze current structure and split into two files by test group
   - Create `tests/merge_budget_tests_part1.rs` (≈405 lines) with first half of merge budget tests
@@ -229,7 +229,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split tests/merge_budget_tests.rs into part1/part2 (809→≤800 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 20. Refactor backend/src/production/workbench/meta/generate/tests/memory_trim_part1.rs (804 lines → split following existing pattern)
+- [x] 20. Refactor backend/src/production/workbench/meta/generate/tests/memory_trim_part1.rs (804 lines → split following existing pattern)
   - Note: memory_trim_part1.rs already exists alongside memory_trim_part2.rs — this file itself has grown too large
   - Analyze current structure and extract the largest test groups
   - Create `tests/memory_trim_part1a.rs` (≈400 lines) with first subset of part1 tests
@@ -240,7 +240,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(backend): split tests/memory_trim_part1.rs into part1a/part1b (804→≤800 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.2, 8.1, 11.7_
 
-- [~] 21. Refactor frontend/lib/rust_api/project/overview.dart (978 lines → 3 modules)
+- [x] 21. Refactor frontend/lib/rust_api/project/overview.dart (978 lines → 3 modules)
   - Note: rust_api/project/ already has overview.dart, publish.dart, manuals.dart, visual_manual.dart — follow same flat naming, split into sibling files
   - Create `rust_api/project/overview_models.dart` (≈400 lines) with all data classes and fromJson/toJson
   - Create `rust_api/project/overview_api.dart` (≈500 lines) with all API call functions
@@ -250,7 +250,7 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(frontend): split rust_api/project/overview.dart into overview_models + overview_api (978→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.3, 8.1, 11.7_
 
-- [~] 22. Refactor frontend/lib/rust_api/project/publish.dart (969 lines → 3 modules)
+- [x] 22. Refactor frontend/lib/rust_api/project/publish.dart (969 lines → 3 modules)
   - Note: follow same pattern as Task 21 — sibling files with barrel export
   - Create `rust_api/project/publish_models.dart` (≈400 lines) with all data classes and fromJson/toJson
   - Create `rust_api/project/publish_api.dart` (≈500 lines) with all API call functions
@@ -260,12 +260,12 @@ This implementation plan systematically refactors 20 oversized files (15 Rust ba
   - Commit: `refactor(frontend): split rust_api/project/publish.dart into publish_models + publish_api (969→100 lines)`
   - _Requirements: 1.1, 1.2, 2.1, 3.1, 5.1, 5.2, 6.3, 8.1, 11.7_
 
-- [~] 23. Checkpoint - Phase 3 complete
+- [x] 23. Checkpoint - Phase 3 complete
   - Ensure all Phase 3 tests pass, ask the user if questions arise.
 
 ### Final Verification
 
-- [~] 24. Final gate check and verification
+- [x] 24. Final gate check and verification
   - Run full refactor gate check: `bash scripts/refactor-check.sh` from repository root
   - Verify all 20 files are now ≤800 lines
   - Verify OpenAPI specification is still valid: `cd backend && cargo run --bin export-openapi`

@@ -26,6 +26,11 @@
 2. Rust API wrapper 强化 typed request/response，减少契约漂移。  
 3. 受限多轨面板补“查看更多/分页”或“按脚本筛选”。
 
+### 维护说明：`section_*.dart` 与 `flutter analyze`
+
+- **`ShortVideoSpaceSection` 拆成 `part` + `extension on _ShortVideoSpaceSectionState`**：各 part 里调用 `setState` 在语义上合法（扩展的接收者就是 `State` 子类实例），但分析器会把 `this` 当成扩展类型，触发 **`invalid_use_of_protected_member`**。当前在对应 **`part` 文件顶部**使用 **`// ignore_for_file: invalid_use_of_protected_member`**（及少数文件的 **`library_private_types_in_public_api`**）压制误报。
+- **不推荐**用 `mixin X on _ShortVideoSpaceSectionStateBase` 拆到多个 part **且** 仍让 part 之间互相调用 `_foo()`：在 `on` 仅为 `StateBase` 时，**静态上**看不到定义在**其他 mixin** 上的私有方法（例如 `section_project` 调 `section_production` 的 `_loadProjectOverview`），会报 **undefined_method**。要彻底去掉 ignore，需要要么 **合并为单类**，要么在 **Base 上声明一整套 abstract 转发 API**（成本高）。
+
 ---
 
 ## 任务清单
