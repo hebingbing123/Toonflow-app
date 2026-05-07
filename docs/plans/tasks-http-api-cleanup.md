@@ -11,9 +11,9 @@
 
 ## 波次 H0：盘点与 parity 对齐（半日–1 日）
 
-- [ ] 对照 [`http-api-cleanup.md`](./http-api-cleanup.md) §四进度表，确认 **B·其余域** 子项在 [`electron-node-parity.md`](./electron-node-parity.md) 有对应行或子表（缺则补一行 🔀/备注）。
-- [ ] `rg "project_numeric_id|project_legacy_id|projectId"` 于 `backend/src/scripting/asset_extract`、`backend/src/settings/agent_memory.rs`、`backend/src/assets/generate.rs`、`backend/src/jobs/` 输出贴到 Issue 或本文件「附录」。
-- [ ] Flutter `rust_api` 侧 grep 同上字段，列 **文件 → 屏幕**（主文档 §二思路）。
+- [x] 对照 [`http-api-cleanup.md`](./http-api-cleanup.md) §四进度表，确认 **B·其余域** 子项在 [`electron-node-parity.md`](./electron-node-parity.md) 有对应行或子表（缺则补一行 🔀/备注）— **基线已读**；大改前须再 diff。
+- [x] **`rg` 基线**：命令与热点文件计数快照见 [**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md)（路径已更新为 `settings/agent_memory/` 目录）。
+- [x] Flutter `rust_api`：同快照 §3；**文件 → 屏幕** 细表随 **H1** 在 Issue/PR 中展开。
 
 **验收**：无代码行为变更或仅 docs；可单独 commit。
 

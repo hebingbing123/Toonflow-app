@@ -26,6 +26,8 @@
 - **Q1–Q3**（ops-only，平台级可观测 + Runbook）：**已完成** — 扩展 `QueueStats` / `job_queue_metrics` 日志字段；[**`jobs-pg-queue-runbook.md`**](./jobs-pg-queue-runbook.md)（扩容、SQL、Gate、与 trace 关联）；代码 `backend/src/jobs/queue/pg.rs`、`worker/mod.rs`。
 - **Q4**：与 harness trace 字段联调 — **仍 open**（见任务清单 DoD）。
 
+- **HTTP 收敛 H0**：[**`http-api-cleanup-h0-inventory.md`**](./http-api-cleanup-h0-inventory.md) 已落盘（`rg` 基线 + parity 读法）；**H1+** 未开工（全栈下一波）。
+
 ## Phase 1 进度
 
 ### 1. Workspace 基础竖切
