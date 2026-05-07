@@ -6,3 +6,4 @@ mod me_profile_subscription_and_jobs_today_roundtrip;
 mod promote_staging_populates_assets_and_links;
 mod prompts_list_patch_roundtrip;
 mod vendor_config_enable_update_roundtrip;
+mod workspaces_crud_roundtrip;

@@ -34,9 +34,9 @@
 - [x] **W1.2** `GET /api/v1/workspaces`：列出当前用户 **作为 member** 的全部 workspace（personal 优先排序 + enterprise）
 - [x] **W1.3** `GET /api/v1/workspaces/{workspace_id}`：详情（仅 member 可读）
 - [x] **W1.4** `PATCH /api/v1/workspaces/{workspace_id}`：改名、metadata（**owner/admin**）
-- [ ] **W1.5** 软删除或归档策略：`archived_at` / `deleted_at` + 列表过滤 + **不可再切换为当前**（需迁移或 product 规则文档）
-- [ ] **W1.6** 企业空间 **配额/数量上限**（每用户可创建 enterprise 数、每空间成员上限）— 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) 限流/plan 策略对齐或单列 env
-- [ ] **W1.7** OpenAPI + `pg_contract` + smoke
+- [x] **W1.5** 归档：`archived_at` + 列表默认过滤 + 归档时若命中 **current_workspace** 则重置到 **personal**（`PATCH` **`archive`**）
+- [x] **W1.6** 企业空间 **数量上限**：每用户拥有的 **active enterprise** 上限（**`TOONFLOW_MAX_ENTERPRISE_WORKSPACES_PER_USER`**，默认 50；超限 **429**）；每空间成员上限仍待 W2+
+- [x] **W1.7** OpenAPI + `pg_contract`（`workspaces_crud_roundtrip`，需迁移 DB **`#[ignore]`**）+ contract smoke（无 DB **503**）
 
 ---
 

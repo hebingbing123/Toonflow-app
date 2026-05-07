@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../rust_api.dart';
 
-/// Team / enterprise workspace lifecycle (**W1.1–W1.4** 最小入口)。
+/// Team / enterprise workspace lifecycle（**W1.1–W1.6**：列表/创建/归档与恢复/配额由后端约束）。
 class TeamWorkspacesSection extends StatefulWidget {
   const TeamWorkspacesSection({super.key, required this.accessToken});
 
@@ -18,6 +18,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   String? _error;
   bool _loading = false;
   bool _creating = false;
+  bool _includeArchived = false;
+  String? _patchingWorkspaceId;
 
   @override
   void dispose() {
@@ -62,7 +64,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       _error = null;
     });
     try {
-      final rows = await fetchWorkspacesV1(token);
+      final rows =
+          await fetchWorkspacesV1(token, includeArchived: _includeArchived);
       if (!mounted) {
         return;
       }
@@ -118,6 +121,73 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     }
   }
 
+  bool _canArchiveOrRestore(WorkspaceListItem row) {
+    final w = row.workspace;
+    if (w.workspaceType != 'enterprise') {
+      return false;
+    }
+    return row.role == 'owner' || row.role == 'admin';
+  }
+
+  Future<void> _confirmArchive(WorkspaceListItem row) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: const Text('归档企业空间？'),
+        content: const Text(
+          '归档后该空间将从默认列表隐藏；若其为当前工作区，将自动回到 Personal。',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('归档'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true && mounted) {
+      await _setArchive(row, true);
+    }
+  }
+
+  Future<void> _setArchive(WorkspaceListItem row, bool archive) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final id = row.workspace.id;
+    setState(() => _patchingWorkspaceId = id);
+    try {
+      await patchWorkspaceV1(
+        token,
+        id,
+        PatchWorkspaceBody(archive: archive),
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(archive ? '已归档' : '已恢复')),
+      );
+      await _load();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('操作失败：$e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _patchingWorkspaceId = null);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final token = widget.accessToken;
@@ -140,7 +210,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         ),
         const SizedBox(height: 8),
         Text(
-          '列出你可访问的空间（含 Personal），并创建新的 enterprise 空间。',
+          '列出你可访问的空间（含 Personal），创建 enterprise 空间；owner/admin 可归档或恢复企业空间。',
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 12),
@@ -164,6 +234,17 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           ],
         ),
         const SizedBox(height: 12),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('显示已归档企业空间'),
+          value: _includeArchived,
+          onChanged: _loading
+              ? null
+              : (bool v) {
+                  setState(() => _includeArchived = v);
+                  _load();
+                },
+        ),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
@@ -200,15 +281,41 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             itemBuilder: (context, index) {
               final row = items[index];
               final w = row.workspace;
+              final busy = _patchingWorkspaceId == w.id;
+              final canManage = _canArchiveOrRestore(row);
               return ListTile(
                 dense: true,
                 title: Text(w.name),
                 subtitle: Text(
-                  '${w.workspaceType} · 角色 ${row.role}',
+                  '${w.workspaceType} · ${row.role}'
+                  '${w.archivedAt != null ? ' · 已归档' : ''}',
                 ),
-                trailing: Chip(
-                  label: Text(row.role),
-                  visualDensity: VisualDensity.compact,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (canManage && w.archivedAt == null)
+                      TextButton(
+                        onPressed: (_loading || busy) ? null : () => _confirmArchive(row),
+                        child: busy
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('归档'),
+                      ),
+                    if (canManage && w.archivedAt != null)
+                      TextButton(
+                        onPressed: (_loading || busy) ? null : () => _setArchive(row, false),
+                        child: busy
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('恢复'),
+                      ),
+                  ],
                 ),
               );
             },

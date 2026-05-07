@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内可跑定向验证；**一旦合并涉及 `backend/`、`frontend/`、OpenAPI、`docs/websocket-events.md`、workflow、迁移等（见仓库根 [`AGENTS.md`](../../AGENTS.md)），须在宣称可合并前跑通 `yarn refactor:check`**
-- 当前最新完成竖切：团队 Workspace **W1.1–W1.4** 首包 — **`POST/GET/PATCH /api/v1/workspaces*`** + Flutter 产品区 **「团队工作区」** 列表/创建 + 契约 smoke；详见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) Phase W1
-- **下一大型竖切**（进行中）：**团队 Workspace 完整功能** — 余下 **W1.5+（归档/配额）**、**W2–W11** 见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)
+- 当前最新完成竖切：团队 Workspace **W1.1–W1.7** — 创建/列表（含 **`include_archived`**）/详情/PATCH（改名、**归档/恢复**）、**active enterprise 配额**（env）、**current_workspace** 归档回落、Flutter **「团队工作区」**（含归档确认）、`pg_contract` + smoke；详见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) Phase W1
+- **下一大型竖切**（进行中）：**团队 Workspace 完整功能** — **Phase W1 已收口**，继续 **W2–W11** 见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 
@@ -262,15 +262,15 @@
 
 - `yarn refactor:check` 全绿（backend fmt/clippy/test + frontend analyze/test + OpenAPI drift）
 
-## 下一阶段：团队 Workspace 完整功能（`pending`）
+## 下一阶段：团队 Workspace 完整功能（`in_progress`）
 
 **目标**：个人与团队 **双路径长期并存**；团队侧交付 **enterprise 全生命周期、邀请与成员、权限矩阵、全站资源与 Harness/计费/安全/观测** — 不以 MVP 为范围，以 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) **Phase W1–W11** 勾选为完成定义。
 
-**进度**：在 `workspace-team-full-plan.md` 与各 Phase 内勾选；本文件仅记录 **当前主攻 Phase** 与 **里程碑 commit**（开工后填写）。
+**进度**：**Phase W1（W1.1–W1.7）** 已在总表勾选；下一步主攻 **W2 成员与邀请**。在 `workspace-team-full-plan.md` 与各 Phase 内勾选；本文件仅记录 **当前主攻 Phase** 与 **里程碑 commit**（开工后填写）。
 
 | 跟踪项 | 状态 |
 |--------|------|
-| 总表 `workspace-team-full-plan.md` | `pending`（随子 Phase 更新勾选） |
+| 总表 `workspace-team-full-plan.md` | Phase **W1**（W1.1–W1.7）`completed`；**W2+** `pending` |
 | Phase W1–W4 核心 API + 项目范围 | `pending` |
 | Phase W5–W8 权限 / Flutter / Harness / 计费 | `pending` |
 | Phase W9–W11 安全 / 观测 / 发布文档 | `pending` |
