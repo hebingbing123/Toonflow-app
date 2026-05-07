@@ -60,7 +60,7 @@
 - [x] **W3.2** 切换后 **全客户端状态**：项目列表、选中 project、Harness attach、短剧空间上下文统一刷新（通过 `onWorkspaceContextChanged` 收口）
 - [x] **W3.3** 首次登录默认 workspace 规则：`/me` 优先读取 `current_workspace_id`（记忆上次）；若失效/非成员自动回退 personal 并修正 profile
 - [x] **W3.4** 错误码：非成员切换返回明确 `403`（`forbidden`）
-- [ ] **W3.5** OpenAPI + widget/integration 测试
+- [x] **W3.5** OpenAPI + integration：新增 `me_current_workspace_switch_roundtrip`（pg_contract `#[ignore]`）验证切换后 `/me.current_workspace` 回读一致
 
 ---
 
