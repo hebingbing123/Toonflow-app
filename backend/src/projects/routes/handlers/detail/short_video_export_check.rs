@@ -12,6 +12,7 @@ use crate::error::ApiError;
 use crate::production::{
     export_duration_warning_code, resolve_shot_script_source, resolve_shot_voiceover_ready,
 };
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 use super::super::super::types::{
@@ -155,6 +156,7 @@ fn evaluate_row(row: &super::assembly_query::AssemblyFlatRow) -> Vec<ShortVideoE
     responses(
         (status = 200, description = "OK", body = ProjectShortVideoExportCheckResponse),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -167,8 +169,10 @@ pub(crate) async fn project_short_video_export_check_by_id(
 ) -> Result<Json<ProjectShortVideoExportCheckResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let resolved_project_id = scope.id;
 
-    let header = fetch_project_assembly_header(pool, project_id, uid)
+    let header = fetch_project_assembly_header(pool, resolved_project_id)
         .await?
         .ok_or(ApiError::NotFound)?;
 

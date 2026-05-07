@@ -12,6 +12,7 @@ use uuid::Uuid;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::production::{resolve_shot_script_source, resolve_shot_voiceover_ready};
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 use super::super::super::types::{
@@ -37,6 +38,7 @@ use crate::short_video::defaults::resolve_tts_voice;
     responses(
         (status = 200, description = "OK", body = ProjectShortVideoAssemblyResponse),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 404, description = "Not found", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -49,8 +51,10 @@ pub(crate) async fn project_short_video_assembly_by_id(
 ) -> Result<Json<ProjectShortVideoAssemblyResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let resolved_project_id = scope.id;
 
-    let header = fetch_project_assembly_header(pool, project_id, uid)
+    let header = fetch_project_assembly_header(pool, resolved_project_id)
         .await?
         .ok_or(ApiError::NotFound)?;
 

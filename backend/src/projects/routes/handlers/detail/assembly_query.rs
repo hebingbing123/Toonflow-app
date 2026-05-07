@@ -66,17 +66,15 @@ pub(super) fn assembly_selected_media_kind(url: Option<&str>) -> &'static str {
 pub(super) async fn fetch_project_assembly_header(
     pool: &PgPool,
     project_id: Uuid,
-    owner_user_id: Uuid,
 ) -> Result<Option<ProjectAssemblyHeaderRow>, ApiError> {
     sqlx::query_as(
         r#"
         SELECT id, voice_profile, subtitle_style, bgm_strategy
         FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1
         "#,
     )
     .bind(project_id)
-    .bind(owner_user_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
@@ -267,11 +265,10 @@ pub(super) async fn fetch_quality_degradation_metrics(
         r#"
         SELECT numeric_id
         FROM app_project
-        WHERE id = $1 AND owner_user_id = $2
+        WHERE id = $1
         "#,
     )
     .bind(project_uuid)
-    .bind(user_id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
