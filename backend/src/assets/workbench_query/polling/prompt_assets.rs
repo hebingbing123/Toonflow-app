@@ -77,6 +77,12 @@ async fn run_polling_prompt_assets(
             END,
             '已完成'
           ) <> '生成中'
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         ORDER BY a.numeric_id ASC
         "#,
     )

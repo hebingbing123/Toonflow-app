@@ -126,7 +126,7 @@ pub(crate) async fn post_project_workbench_update_assets(
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
 
-    let current = resolve_owned_asset_metadata(pool, uid, body.id).await?;
+    let current = resolve_owned_asset_metadata(pool, uid, project_id, body.id).await?;
     let metadata = merge_workbench_asset_metadata(
         current.metadata.0,
         Some(normalize_optional_trimmed_text(body.prompt)),
@@ -145,6 +145,12 @@ pub(crate) async fn post_project_workbench_update_assets(
         WHERE a.project_id = p.id
           AND p.id = $4
           AND a.numeric_id = $5
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $6
+          )
         "#,
     )
     .bind(name)
@@ -152,6 +158,7 @@ pub(crate) async fn post_project_workbench_update_assets(
     .bind(SqlxJson(metadata))
     .bind(project_id)
     .bind(body.id)
+    .bind(uid)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

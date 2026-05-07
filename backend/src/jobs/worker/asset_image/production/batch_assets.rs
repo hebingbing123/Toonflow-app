@@ -44,7 +44,7 @@ pub(crate) async fn run_production_assets_batch_generate(
     )
     .await
     .map_err(|e| JobRunError::Failed(e.to_string()))?
-    .ok_or_else(|| JobRunError::Failed("asset not linked to script for owner".into()))?;
+    .ok_or_else(|| JobRunError::Failed("asset not linked to script or not accessible".into()))?;
 
     let body_text = asset_row.describe.as_deref().unwrap_or("");
     let image_model = resolve_openai_image_model(model_in);

@@ -34,10 +34,17 @@ pub(crate) async fn post_project_workbench_del_assets(
         WHERE a.project_id = p.id
           AND p.id = $1
           AND a.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $3
+          )
         "#,
     )
     .bind(project_id)
     .bind(body.id)
+    .bind(uid)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -72,10 +79,17 @@ pub(crate) async fn post_project_workbench_batch_delete_assets(
         WHERE a.project_id = p.id
           AND p.id = $1
           AND a.numeric_id = ANY($2)
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $3
+          )
         "#,
     )
     .bind(project_id)
     .bind(&body.id)
+    .bind(uid)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -110,10 +124,17 @@ pub(crate) async fn post_project_workbench_del_image(
           AND p.id = $1
           AND COALESCE(a.metadata->>'imageId', '') ~ '^[0-9]+$'
           AND (a.metadata->>'imageId')::integer = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $3
+          )
         "#,
     )
     .bind(project_id)
     .bind(body.id)
+    .bind(uid)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -126,10 +147,17 @@ pub(crate) async fn post_project_workbench_del_image(
           AND a.project_id = p.id
           AND p.id = $1
           AND ai.numeric_image_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $3
+          )
         "#,
     )
     .bind(project_id)
     .bind(body.id)
+    .bind(uid)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

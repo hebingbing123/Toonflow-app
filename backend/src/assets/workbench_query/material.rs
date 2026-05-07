@@ -16,6 +16,7 @@ use super::super::models::*;
 
 async fn run_get_material_data(
     pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
     project_numeric_id: i32,
 ) -> Result<WorkbenchGetMaterialDataResponse, ApiError> {
     let mut data: Vec<WorkbenchMaterialAssetItem> = sqlx::query_as(
@@ -47,11 +48,18 @@ async fn run_get_material_data(
             ai.id ASC
           LIMIT 1
         ) sel ON TRUE
-        WHERE p.numeric_id = $1
+        WHERE p.numeric_id = $2
           AND a.asset_type = 'clip'
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         ORDER BY a.create_time_ms DESC NULLS LAST, a.numeric_id DESC
         "#,
     )
+    .bind(uid)
     .bind(project_numeric_id)
     .fetch_all(pool)
     .await
@@ -79,11 +87,18 @@ async fn run_get_material_data(
           ) AS video_track_id
         FROM app_video v
         INNER JOIN app_project p ON p.id = v.project_id
-        WHERE p.numeric_id = $1
+        WHERE p.numeric_id = $2
           AND v.state IN ('生成成功', '已完成', 'succeeded', 'completed')
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         ORDER BY v.numeric_id DESC
         "#,
     )
+    .bind(uid)
     .bind(project_numeric_id)
     .fetch_all(pool)
     .await
@@ -101,6 +116,6 @@ pub(crate) async fn post_project_workbench_material_data(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
-    let out = run_get_material_data(pool, project_numeric_id).await?;
+    let out = run_get_material_data(pool, uid, project_numeric_id).await?;
     Ok(Json(out))
 }

@@ -1,10 +1,10 @@
 use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
-/// Background worker: resolve **`app_asset.id`** by numeric ids and project owner.
+/// Background worker: resolve **`app_asset.id`** by numeric ids inside workspace member scope.
 pub async fn resolve_asset_id_for_job(
     pool: &PgPool,
-    owner_user_id: Uuid,
+    actor_user_id: Uuid,
     project_numeric_id: i32,
     asset_numeric_id: i32,
 ) -> Result<Option<Uuid>, sqlx::Error> {
@@ -14,13 +14,18 @@ pub async fn resolve_asset_id_for_job(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.numeric_id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = $3
+          AND a.numeric_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $3
+          )
         "#,
     )
     .bind(project_numeric_id)
-    .bind(owner_user_id)
     .bind(asset_numeric_id)
+    .bind(actor_user_id)
     .fetch_optional(pool)
     .await
 }
@@ -37,7 +42,7 @@ pub struct OwnedScriptLinkedAssetJobRow {
 /// Resolve **`app_asset.id`** (and display fields) for jobs that must stay inside **`app_script_asset`** scope.
 pub async fn resolve_owned_script_linked_asset_row_for_job(
     pool: &PgPool,
-    owner_user_id: Uuid,
+    actor_user_id: Uuid,
     project_numeric_id: i32,
     script_numeric_id: i32,
     asset_numeric_id: i32,
@@ -49,12 +54,17 @@ pub async fn resolve_owned_script_linked_asset_row_for_job(
         INNER JOIN app_project p ON p.id = a.project_id
         INNER JOIN app_script s ON s.project_id = p.id AND s.numeric_id = $3
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = s.id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE p.numeric_id = $2
           AND a.numeric_id = $4
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
-    .bind(owner_user_id)
+    .bind(actor_user_id)
     .bind(project_numeric_id)
     .bind(script_numeric_id)
     .bind(asset_numeric_id)

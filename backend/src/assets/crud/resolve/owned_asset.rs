@@ -6,6 +6,7 @@ use crate::error::ApiError;
 
 pub(crate) async fn resolve_owned_asset_id_for_project(
     pool: &PgPool,
+    _uid: Uuid,
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<Uuid, ApiError> {
@@ -33,6 +34,7 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
 
 pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
     pool: &PgPool,
+    _uid: Uuid,
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<(Uuid, Value), ApiError> {

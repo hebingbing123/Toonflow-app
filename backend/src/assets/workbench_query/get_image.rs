@@ -17,6 +17,7 @@ use super::super::utils::metadata_cover_numeric_image_id;
 
 async fn run_get_image(
     pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
     project_numeric_id: i32,
     assets_id: i32,
 ) -> Result<WorkbenchGetImageResponse, ApiError> {
@@ -25,12 +26,19 @@ async fn run_get_image(
         SELECT a.id, a.numeric_id, a.asset_type, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.numeric_id = $1
-          AND a.numeric_id = $2
+        WHERE p.numeric_id = $2
+          AND a.numeric_id = $3
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         ORDER BY a.created_at DESC
         LIMIT 1
         "#,
     )
+    .bind(uid)
     .bind(project_numeric_id)
     .bind(assets_id)
     .fetch_optional(pool)
@@ -85,6 +93,6 @@ pub(crate) async fn post_project_workbench_image_bundle(
     }
     let pool = state.require_pool()?;
     let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
-    let out = run_get_image(pool, project_numeric_id, body.assets_id).await?;
+    let out = run_get_image(pool, uid, project_numeric_id, body.assets_id).await?;
     Ok(Json(out))
 }

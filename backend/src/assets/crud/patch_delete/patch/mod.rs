@@ -27,5 +27,5 @@ pub(crate) async fn patch_project_asset_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_project_asset_inner(pool, project_id, asset_numeric_id, body).await
+    patch_project_asset_inner(pool, uid, project_id, asset_numeric_id, body).await
 }

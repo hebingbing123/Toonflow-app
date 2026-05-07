@@ -40,8 +40,13 @@ pub(crate) async fn post_cancel_generate(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE ai.asset_id = a.id
-          AND p.owner_user_id = $1
           AND ai.numeric_image_id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
     .bind(uid)
@@ -57,8 +62,13 @@ pub(crate) async fn post_cancel_generate(
             FROM app_asset_image ai
             INNER JOIN app_asset a ON a.id = ai.asset_id
             INNER JOIN app_project p ON p.id = a.project_id
-            WHERE p.owner_user_id = $1
-              AND ai.numeric_image_id = $2
+            WHERE ai.numeric_image_id = $2
+              AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = p.workspace_id
+                  AND wm.user_id = $1
+              )
         ),
         cancelled AS (
             UPDATE app_generation_job j
@@ -107,7 +117,10 @@ pub(crate) async fn post_cancel_generate(
 
     for row in cancelled_jobs {
         let text = crate::jobs::envelope_generation_job_updated(&row);
-        state.notify.broadcast_to_user(uid, text).await;
+        state
+            .notify
+            .broadcast_to_user(row.owner_user_id, text)
+            .await;
     }
 
     Ok(JsonResponse(json!({ "message": "取消成功" })))

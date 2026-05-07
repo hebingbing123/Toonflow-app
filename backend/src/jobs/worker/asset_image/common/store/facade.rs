@@ -20,7 +20,7 @@ pub(crate) async fn generate_and_store_asset_image(
             .await
             .map_err(|e| JobRunError::Failed(e.to_string()))?
             .ok_or_else(|| {
-                JobRunError::Failed("asset not found for project or not owned".into())
+                JobRunError::Failed("asset not found for project or not accessible".into())
             })?;
 
     generate_and_store_asset_image_for_row(
@@ -36,14 +36,14 @@ pub(crate) async fn generate_and_store_asset_image(
 
 pub(crate) async fn ensure_script_scoped_asset_exists(
     pool: &PgPool,
-    owner_user_id: Uuid,
+    actor_user_id: Uuid,
     project_numeric_id: i32,
     script_numeric_id: i32,
     asset_numeric_id: i32,
 ) -> Result<(), JobRunError> {
     resolve_owned_script_linked_asset_row_for_job(
         pool,
-        owner_user_id,
+        actor_user_id,
         project_numeric_id,
         script_numeric_id,
         asset_numeric_id,

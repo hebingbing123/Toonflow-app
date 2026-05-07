@@ -53,10 +53,17 @@ pub(crate) async fn post_project_workbench_save_assets(
         SELECT a.id, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.id = $1
-          AND a.numeric_id = $2
+        WHERE p.id = $2
+          AND a.numeric_id = $3
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
         "#,
     )
+    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .fetch_optional(&mut *tx)
@@ -130,11 +137,18 @@ pub(crate) async fn post_project_workbench_save_assets(
         WHERE a.project_id = p.id
           AND p.id = $2
           AND a.numeric_id = $3
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $4
+          )
         "#,
     )
     .bind(SqlxJson(metadata))
     .bind(project_id)
     .bind(body.id)
+    .bind(uid)
     .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

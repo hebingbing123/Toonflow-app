@@ -256,7 +256,7 @@ pub struct ProjectAssetsOverviewResponse {
 }
 
 /// `GET /api/v1/projects/{project_id}/short-video-assembly` — D1 成片装配只读读模型。
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ShortVideoAssemblyProjectDefaults {
     pub voice_profile: Option<String>,
     pub subtitle_style: Option<String>,
@@ -264,7 +264,7 @@ pub struct ShortVideoAssemblyProjectDefaults {
 }
 
 /// D7：**成片侧生效默认**（当前等价项目列；旁白声线与 enqueue/worker 解析一致）。
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ShortVideoAssemblyEffectiveDefaults {
     /// 解析后的 TTS **`voice`**（显式覆盖 \| **`voice_profile`** \| **`alloy`**）。
     #[schema(example = "alloy")]
@@ -273,7 +273,7 @@ pub struct ShortVideoAssemblyEffectiveDefaults {
     pub bgm_strategy: Option<String>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ShortVideoAssemblyShot {
     pub storyboard_id: Uuid,
     pub storyboard_numeric_id: i32,
@@ -297,7 +297,7 @@ pub struct ShortVideoAssemblyShot {
     pub voiceover_asset_ready: bool,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ShortVideoAssemblyScriptGroup {
     pub script_numeric_id: i32,
     pub script_name: Option<String>,
@@ -305,7 +305,7 @@ pub struct ShortVideoAssemblyScriptGroup {
 }
 
 /// L3：**成片候选 / 分镜级**质量评审摘要（只读；与 **`GET /api/v1/quality/reviews`** 同一 `app_quality_review` 源）。
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ShortVideoQualityStageBucket {
     /// 空字符串表示 **`stage` IS NULL**。
     pub stage: String,
@@ -313,7 +313,7 @@ pub struct ShortVideoQualityStageBucket {
 }
 
 /// 与当前装配快照中的分镜（`storyboard_numeric_id` 集合）对齐的坏例与评审计数。
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ShortVideoCandidateQualitySummary {
     pub schema_version: i32,
     /// 与 **`GET …/production-overview`** **`pending_review_bad_case_count`** 同源（项目级坏例总数）。
@@ -333,7 +333,7 @@ pub struct ShortVideoCandidateQualitySummary {
     pub quality_degradation_rate_percent: f64,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ProjectShortVideoAssemblyResponse {
     pub schema_version: i32,
     /// Snapshot version for cross-panel consistency checking (ISO 8601 timestamp).
@@ -551,9 +551,67 @@ pub struct CreateProjectBody {
     pub brand_bible: Option<BrandBible>,
 }
 
+/// `POST /api/v1/workbench/select-video` 请求体 — 选择/替换当前采用视频
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[expect(dead_code)]
+pub struct WorkbenchSelectVideoRequest {
+    pub project_id: i32,
+    pub script_id: i32,
+    pub storyboard_id: i32,
+    pub video_url: String,
+}
+
+impl WorkbenchSelectVideoRequest {
+    /// Validates the request fields.
+    /// Returns an error message if validation fails.
+    pub fn validate(&self) -> Result<(), String> {
+        if self.video_url.trim().is_empty() {
+            return Err("video_url cannot be empty".to_string());
+        }
+        Ok(())
+    }
+}
+
+/// `POST /api/v1/workbench/delete-video` 请求体 — 清空当前采用视频(暂停镜头)
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[expect(dead_code)]
+pub struct WorkbenchDeleteVideoRequest {
+    pub project_id: i32,
+    pub script_id: i32,
+    pub storyboard_id: i32,
+}
+
+/// `POST /api/v1/storyboard/update-duration` 请求体 — 更新镜头时长
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[expect(dead_code)]
+pub struct StoryboardUpdateDurationRequest {
+    pub project_id: i32,
+    pub script_id: i32,
+    pub storyboard_id: i32,
+    pub duration: i32,
+}
+
+/// `POST /api/v1/production/save-flow-data` 请求体 — 保存生产流程数据(持久化镜头顺序)
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[expect(dead_code)]
+pub struct ProductionSaveFlowDataRequest {
+    pub project_id: i32,
+    pub episodes_id: i32,
+    pub data: Value,
+    /// Optional version timestamp (ISO 8601) for optimistic locking.
+    /// If provided, the save will fail with 409 Conflict if the current
+    /// `app_production_flow.updated_at` doesn't match this value.
+    #[serde(default)]
+    pub flow_version: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
-    use super::PatchStyleConfigBody;
+    use super::*;
     use serde_json::json;
 
     #[test]
@@ -578,5 +636,128 @@ mod tests {
             "unexpected": true
         }));
         assert!(body.is_err());
+    }
+
+    #[test]
+    fn workbench_select_video_request_deserializes_correctly() {
+        let body: WorkbenchSelectVideoRequest = serde_json::from_value(json!({
+            "projectId": 123,
+            "scriptId": 456,
+            "storyboardId": 789,
+            "videoUrl": "https://example.com/video.mp4"
+        }))
+        .expect("deserialize workbench select video request");
+
+        assert_eq!(body.project_id, 123);
+        assert_eq!(body.script_id, 456);
+        assert_eq!(body.storyboard_id, 789);
+        assert_eq!(body.video_url, "https://example.com/video.mp4");
+    }
+
+    #[test]
+    fn workbench_select_video_request_rejects_unknown_fields() {
+        let result: Result<WorkbenchSelectVideoRequest, _> = serde_json::from_value(json!({
+            "projectId": 123,
+            "scriptId": 456,
+            "storyboardId": 789,
+            "videoUrl": "https://example.com/video.mp4",
+            "unexpected": true
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn workbench_delete_video_request_deserializes_correctly() {
+        let body: WorkbenchDeleteVideoRequest = serde_json::from_value(json!({
+            "projectId": 123,
+            "scriptId": 456,
+            "storyboardId": 789
+        }))
+        .expect("deserialize workbench delete video request");
+
+        assert_eq!(body.project_id, 123);
+        assert_eq!(body.script_id, 456);
+        assert_eq!(body.storyboard_id, 789);
+    }
+
+    #[test]
+    fn workbench_delete_video_request_rejects_unknown_fields() {
+        let result: Result<WorkbenchDeleteVideoRequest, _> = serde_json::from_value(json!({
+            "projectId": 123,
+            "scriptId": 456,
+            "storyboardId": 789,
+            "unexpected": true
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn storyboard_update_duration_request_deserializes_correctly() {
+        let body: StoryboardUpdateDurationRequest = serde_json::from_value(json!({
+            "projectId": 123,
+            "scriptId": 456,
+            "storyboardId": 789,
+            "duration": 10
+        }))
+        .expect("deserialize storyboard update duration request");
+
+        assert_eq!(body.project_id, 123);
+        assert_eq!(body.script_id, 456);
+        assert_eq!(body.storyboard_id, 789);
+        assert_eq!(body.duration, 10);
+    }
+
+    #[test]
+    fn storyboard_update_duration_request_rejects_unknown_fields() {
+        let result: Result<StoryboardUpdateDurationRequest, _> = serde_json::from_value(json!({
+            "projectId": 123,
+            "scriptId": 456,
+            "storyboardId": 789,
+            "duration": 10,
+            "unexpected": true
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn production_save_flow_data_request_deserializes_correctly() {
+        let body: ProductionSaveFlowDataRequest = serde_json::from_value(json!({
+            "projectId": 123,
+            "episodesId": 456,
+            "data": {"storyboard": [{"id": 789}]}
+        }))
+        .expect("deserialize production save flow data request");
+
+        assert_eq!(body.project_id, 123);
+        assert_eq!(body.episodes_id, 456);
+        assert!(body.data.is_object());
+        assert_eq!(body.flow_version, None);
+    }
+
+    #[test]
+    fn production_save_flow_data_request_with_version_deserializes_correctly() {
+        let body: ProductionSaveFlowDataRequest = serde_json::from_value(json!({
+            "projectId": 123,
+            "episodesId": 456,
+            "data": {"storyboard": [{"id": 789}]},
+            "flowVersion": "2024-01-01T00:00:00Z"
+        }))
+        .expect("deserialize production save flow data request with version");
+
+        assert_eq!(body.project_id, 123);
+        assert_eq!(body.episodes_id, 456);
+        assert!(body.data.is_object());
+        assert_eq!(body.flow_version, Some("2024-01-01T00:00:00Z".to_string()));
+    }
+
+    #[test]
+    fn production_save_flow_data_request_rejects_unknown_fields() {
+        let result: Result<ProductionSaveFlowDataRequest, _> = serde_json::from_value(json!({
+            "projectId": 123,
+            "episodesId": 456,
+            "data": {"storyboard": [{"id": 789}]},
+            "unexpected": true
+        }));
+        assert!(result.is_err());
     }
 }

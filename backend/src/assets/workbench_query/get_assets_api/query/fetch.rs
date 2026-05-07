@@ -3,6 +3,7 @@ use crate::error::ApiError;
 
 pub(super) async fn count_nested_assets(
     pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
     project_numeric_id: i32,
     asset_type: &str,
     name_pattern: Option<&str>,
@@ -12,18 +13,25 @@ pub(super) async fn count_nested_assets(
         SELECT COUNT(*)::BIGINT
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.numeric_id = $1
-          AND a.asset_type = $2
+        WHERE p.numeric_id = $2
+          AND a.asset_type = $3
           AND (
             NOT (a.metadata ? 'assetsId')
             OR jsonb_typeof(a.metadata->'assetsId') = 'null'
           )
           AND (
-            $3::text IS NULL
-            OR a.name ILIKE $3
+            $4::text IS NULL
+            OR a.name ILIKE $4
+          )
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
           )
         "#,
     )
+    .bind(uid)
     .bind(project_numeric_id)
     .bind(asset_type)
     .bind(name_pattern)
@@ -35,6 +43,7 @@ pub(super) async fn count_nested_assets(
 
 pub(super) async fn fetch_parent_rows(
     pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
     project_numeric_id: i32,
     asset_type: &str,
     name_pattern: Option<&str>,
@@ -74,20 +83,27 @@ pub(super) async fn fetch_parent_rows(
              THEN (a.metadata->>'imageId')::integer
            ELSE NULL
          END
-        WHERE p.numeric_id = $1
-          AND a.asset_type = $2
+        WHERE p.numeric_id = $2
+          AND a.asset_type = $3
           AND (
             NOT (a.metadata ? 'assetsId')
             OR jsonb_typeof(a.metadata->'assetsId') = 'null'
           )
           AND (
-            $3::text IS NULL
-            OR a.name ILIKE $3
+            $4::text IS NULL
+            OR a.name ILIKE $4
+          )
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
           )
         ORDER BY a.numeric_id ASC
         LIMIT $5 OFFSET $6
         "#,
     )
+    .bind(uid)
     .bind(project_numeric_id)
     .bind(asset_type)
     .bind(name_pattern)
@@ -101,6 +117,7 @@ pub(super) async fn fetch_parent_rows(
 
 pub(super) async fn fetch_child_rows(
     pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
     project_numeric_id: i32,
     asset_type: &str,
     name_pattern: Option<&str>,
@@ -138,19 +155,26 @@ pub(super) async fn fetch_child_rows(
              THEN (a.metadata->>'imageId')::integer
            ELSE NULL
          END
-        WHERE p.numeric_id = $1
-          AND a.asset_type = $2
+        WHERE p.numeric_id = $2
+          AND a.asset_type = $3
           AND (
             a.metadata ? 'assetsId'
             AND jsonb_typeof(a.metadata->'assetsId') <> 'null'
           )
           AND (
-            $3::text IS NULL
-            OR a.name ILIKE $3
+            $4::text IS NULL
+            OR a.name ILIKE $4
+          )
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
           )
         ORDER BY a.numeric_id ASC
         "#,
     )
+    .bind(uid)
     .bind(project_numeric_id)
     .bind(asset_type)
     .bind(name_pattern)

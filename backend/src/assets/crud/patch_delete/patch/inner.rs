@@ -40,6 +40,7 @@ fn parse_candidate_status_patch(v: Option<Value>) -> Result<FieldPatch<String>, 
 
 pub(super) async fn patch_project_asset_inner(
     pool: &PgPool,
+    _uid: Uuid,
     project_id: Uuid,
     asset_numeric_id: i32,
     body: PatchAssetBody,
