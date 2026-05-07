@@ -6,12 +6,16 @@ class _CrawlerPreviewPayload {
     required this.bodyText,
     required this.mode,
     required this.pageCount,
+    required this.chapterUrlCount,
+    required this.bodyCharCount,
   });
 
   final String title;
   final String bodyText;
   final String mode;
   final int pageCount;
+  final int chapterUrlCount;
+  final int bodyCharCount;
 }
 
 /// Encapsulates chapter workbench mutations so the main novels workbench file
@@ -54,6 +58,8 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         bodyText: preview.bodyText,
         mode: preview.mode,
         pageCount: preview.pageCount,
+        chapterUrlCount: preview.chapterUrlCount,
+        bodyCharCount: preview.bodyCharCount,
       );
     } else {
       final response = await http.get(
@@ -79,7 +85,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     );
     final label = side == 'server' ? 'server-side crawl' : 'client-side crawl';
     applyInfoLine(
-      '$label 已完成：${payload.title}（模式 ${payload.mode}，抓取 ${payload.pageCount} 页）',
+      '$label 已完成：${payload.title}（模式 ${payload.mode}，抓取 ${payload.pageCount} 页，候选章节链接 ${payload.chapterUrlCount}，正文 ${payload.bodyCharCount} 字）',
     );
   }
 
@@ -108,6 +114,8 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           bodyText: chunks.join('\n\n'),
           mode: 'toc',
           pageCount: chunks.length,
+          chapterUrlCount: seed.chapterUrls.length,
+          bodyCharCount: chunks.join('\n\n').length,
         );
       }
     }
@@ -134,6 +142,8 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       bodyText: pages.join('\n\n'),
       mode: pages.length > 1 ? 'pagination' : 'single',
       pageCount: pages.length,
+      chapterUrlCount: seed.chapterUrls.length,
+      bodyCharCount: pages.join('\n\n').length,
     );
   }
 
@@ -341,7 +351,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     }
     await refreshWorkbench(setLocalState);
     applyInfoLine(
-      'server 托管导入完成：${imported.title}（新增 ${imported.chaptersCreated} 条章节，模式 ${imported.mode}，抓取 ${imported.pageCount} 页）',
+      'server 托管导入完成：${imported.title}（新增 ${imported.chaptersCreated} 条章节，模式 ${imported.mode}，抓取 ${imported.pageCount} 页，候选章节链接 ${imported.chapterUrlCount}，正文 ${imported.bodyCharCount} 字）',
     );
   }
 

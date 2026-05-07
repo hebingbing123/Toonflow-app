@@ -78,12 +78,16 @@ class NovelCrawlPreviewResponse {
     required this.bodyText,
     required this.mode,
     required this.pageCount,
+    required this.chapterUrlCount,
+    required this.bodyCharCount,
   });
 
   final String title;
   final String bodyText;
   final String mode;
   final int pageCount;
+  final int chapterUrlCount;
+  final int bodyCharCount;
 
   factory NovelCrawlPreviewResponse.fromJson(Map<String, dynamic> json) {
     return NovelCrawlPreviewResponse(
@@ -91,6 +95,8 @@ class NovelCrawlPreviewResponse {
       bodyText: json['body_text'] as String? ?? '',
       mode: json['mode'] as String? ?? 'single',
       pageCount: (json['page_count'] as num?)?.toInt() ?? 1,
+      chapterUrlCount: (json['chapter_url_count'] as num?)?.toInt() ?? 0,
+      bodyCharCount: (json['body_char_count'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -101,6 +107,8 @@ class NovelCrawlImportResponse {
     required this.title,
     required this.mode,
     required this.pageCount,
+    required this.chapterUrlCount,
+    required this.bodyCharCount,
     required this.chaptersCreated,
     required this.qualityWarnings,
   });
@@ -108,6 +116,8 @@ class NovelCrawlImportResponse {
   final String title;
   final String mode;
   final int pageCount;
+  final int chapterUrlCount;
+  final int bodyCharCount;
   final int chaptersCreated;
   final List<String> qualityWarnings;
 
@@ -117,6 +127,8 @@ class NovelCrawlImportResponse {
       title: json['title'] as String? ?? '',
       mode: json['mode'] as String? ?? 'single',
       pageCount: (json['page_count'] as num?)?.toInt() ?? 0,
+      chapterUrlCount: (json['chapter_url_count'] as num?)?.toInt() ?? 0,
+      bodyCharCount: (json['body_char_count'] as num?)?.toInt() ?? 0,
       chaptersCreated: (json['chapters_created'] as num?)?.toInt() ?? 0,
       qualityWarnings: rawWarnings.map((e) => e as String).toList(growable: false),
     );

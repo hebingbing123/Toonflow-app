@@ -1575,6 +1575,12 @@ components:
     NovelCrawlImportResponse:
       description: Response for **`POST …/novels/crawl-import`**.
       properties:
+        body_char_count:
+          format: int32
+          type: integer
+        chapter_url_count:
+          format: int32
+          type: integer
         chapters_created:
           format: int32
           type: integer
@@ -1593,6 +1599,8 @@ components:
       - title
       - mode
       - page_count
+      - chapter_url_count
+      - body_char_count
       - chapters_created
       - quality_warnings
       type: object
@@ -1608,8 +1616,14 @@ components:
     NovelCrawlPreviewResponse:
       description: Response for **`POST …/novels/crawl-preview`**.
       properties:
+        body_char_count:
+          format: int32
+          type: integer
         body_text:
           type: string
+        chapter_url_count:
+          format: int32
+          type: integer
         mode:
           type: string
         page_count:
@@ -1622,6 +1636,8 @@ components:
       - body_text
       - mode
       - page_count
+      - chapter_url_count
+      - body_char_count
       type: object
     ObservationAsset:
       description: 观察资产记录

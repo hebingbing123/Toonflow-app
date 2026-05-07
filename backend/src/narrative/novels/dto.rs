@@ -117,6 +117,8 @@ pub struct NovelCrawlPreviewResponse {
     pub body_text: String,
     pub mode: String,
     pub page_count: i32,
+    pub chapter_url_count: i32,
+    pub body_char_count: i32,
 }
 
 /// Body for **`POST …/novels/crawl-import`** — server-side crawl + parse + import.
@@ -135,6 +137,8 @@ pub struct NovelCrawlImportResponse {
     pub title: String,
     pub mode: String,
     pub page_count: i32,
+    pub chapter_url_count: i32,
+    pub body_char_count: i32,
     pub chapters_created: i32,
     pub quality_warnings: Vec<String>,
 }

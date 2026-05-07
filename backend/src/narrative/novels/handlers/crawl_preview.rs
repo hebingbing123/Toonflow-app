@@ -37,6 +37,14 @@ struct ExtractedCrawlerContent {
     next_page_url: Option<String>,
 }
 
+#[derive(Debug, Clone)]
+struct CrawlAuditSummary {
+    mode: String,
+    page_count: i32,
+    chapter_url_count: i32,
+    body_char_count: i32,
+}
+
 fn assert_fetchable_url(url: &url::Url) -> Result<(), ApiError> {
     match url.scheme() {
         "http" | "https" => {}
@@ -298,11 +306,14 @@ async fn crawl_preview_adaptive(
             chunks.push(format!("{}\n{}", chapter.title, chapter.body_text));
         }
         if !chunks.is_empty() {
+            let body_text = chunks.join("\n\n");
             return Ok(NovelCrawlPreviewResponse {
                 title: seed.title,
-                body_text: chunks.join("\n\n"),
+                body_text: body_text.clone(),
                 mode: "toc".into(),
                 page_count: chunks.len() as i32,
+                chapter_url_count: seed.chapter_urls.len() as i32,
+                body_char_count: body_text.chars().count() as i32,
             });
         }
     }
@@ -327,15 +338,18 @@ async fn crawl_preview_adaptive(
         next_url = page.next_page_url;
         hops += 1;
     }
+    let body_text = pages.join("\n\n");
     Ok(NovelCrawlPreviewResponse {
         title: seed.title,
-        body_text: pages.join("\n\n"),
+        body_text: body_text.clone(),
         mode: if pages.len() > 1 {
             "pagination".into()
         } else {
             "single".into()
         },
         page_count: pages.len() as i32,
+        chapter_url_count: seed.chapter_urls.len() as i32,
+        body_char_count: body_text.chars().count() as i32,
     })
 }
 
@@ -563,6 +577,7 @@ async fn insert_imported_novels_for_project(
     intake_status: &str,
     intake_note: Option<&str>,
     intake_source_url: &str,
+    crawl_audit: &CrawlAuditSummary,
 ) -> Result<i32, ApiError> {
     let intake_source = normalize_intake_source("crawler_server")?;
     let intake_source_url = trim_opt(Some(intake_source_url.to_string()))
@@ -585,11 +600,18 @@ async fn insert_imported_novels_for_project(
         m.insert("intakeSource".into(), Value::String(intake_source));
         m.insert("intakeSourceUrl".into(), Value::String(intake_source_url));
         m.insert("intakeStatus".into(), Value::String(intake_status));
-        if let Some(note) = intake_note {
-            if !note.is_empty() {
-                m.insert("intakeNote".into(), Value::String(note));
-            }
-        }
+        let audit_note = format!(
+            "server-crawl mode={} pages={} chapter_links={} chars={}",
+            crawl_audit.mode,
+            crawl_audit.page_count,
+            crawl_audit.chapter_url_count,
+            crawl_audit.body_char_count
+        );
+        let merged_note = match intake_note {
+            Some(note) if !note.is_empty() => format!("{note} | {audit_note}"),
+            _ => audit_note,
+        };
+        m.insert("intakeNote".into(), Value::String(merged_note));
         Value::Object(m)
     };
 
@@ -709,6 +731,12 @@ pub(crate) async fn post_novel_crawl_import(
         &body.intake_status,
         body.intake_note.as_deref(),
         raw_url,
+        &CrawlAuditSummary {
+            mode: preview.mode.clone(),
+            page_count: preview.page_count,
+            chapter_url_count: preview.chapter_url_count,
+            body_char_count: preview.body_char_count,
+        },
     )
     .await?;
 
@@ -716,6 +744,8 @@ pub(crate) async fn post_novel_crawl_import(
         title: preview.title,
         mode: preview.mode,
         page_count: preview.page_count,
+        chapter_url_count: preview.chapter_url_count,
+        body_char_count: preview.body_char_count,
         chapters_created: created,
         quality_warnings: warnings,
     }))
