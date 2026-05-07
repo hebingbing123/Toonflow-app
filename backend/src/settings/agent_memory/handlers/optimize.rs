@@ -6,7 +6,7 @@ use crate::harness::observe;
 use crate::production::optimize_scoped_video_memory;
 use crate::state::AppState;
 
-use super::super::types::{OptimizeMemoryBody, OptimizeMemoryResponse};
+use super::super::types::{AgentMemoryResponseScope, OptimizeMemoryBody, OptimizeMemoryResponse};
 use super::super::{
     optimize_project_memory_budget, save_project_automation_memory_policy,
     storage::{parse_agent_type, resolve_agent_memory_project_numeric_id},
@@ -86,6 +86,7 @@ pub(crate) async fn optimize_memory(
         None
     };
     Ok(Json(OptimizeMemoryResponse {
+        scope: AgentMemoryResponseScope::User,
         automation_mode: automation_mode.as_str().to_string(),
         removed_rows: budget_result.removed_rows
             + scoped_video_result

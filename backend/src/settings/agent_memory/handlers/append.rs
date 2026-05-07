@@ -10,7 +10,7 @@ use crate::state::AppState;
 use super::super::memory_tier::MemoryTier;
 use super::super::storage::{parse_agent_type, resolve_agent_memory_project_numeric_id};
 use super::super::summarize::maybe_summarize_messages;
-use super::super::types::{AppendMemoryBody, AppendMemoryResponse};
+use super::super::types::{AgentMemoryResponseScope, AppendMemoryBody, AppendMemoryResponse};
 
 fn scope_signature_has_any_dimension(scope_signature: &serde_json::Value) -> bool {
     let Some(object) = scope_signature.as_object() else {
@@ -149,7 +149,10 @@ pub(crate) async fn append_memory(
         });
     }
 
-    Ok(Json(AppendMemoryResponse { id: id.to_string() }))
+    Ok(Json(AppendMemoryResponse {
+        scope: AgentMemoryResponseScope::User,
+        id: id.to_string(),
+    }))
 }
 
 #[cfg(test)]

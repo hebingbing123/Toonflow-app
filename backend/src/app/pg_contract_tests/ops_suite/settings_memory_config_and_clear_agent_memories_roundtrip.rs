@@ -126,6 +126,7 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         let (status, appended) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "appended={appended}");
         assert!(appended["id"].as_str().is_some());
+        assert_eq!(appended["scope"].as_str(), Some("user"));
     }
 
     sqlx::query(
@@ -239,6 +240,7 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
     let (status, cleared) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "cleared={cleared}");
     assert_eq!(cleared["ok"].as_bool(), Some(true));
+    assert_eq!(cleared["scope"].as_str(), Some("user"));
 
     let res = app
         .clone()
@@ -357,6 +359,7 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         "cleared_messages={cleared_messages}"
     );
     assert_eq!(cleared_messages["ok"].as_bool(), Some(true));
+    assert_eq!(cleared_messages["scope"].as_str(), Some("user"));
 
     let res = app
         .clone()

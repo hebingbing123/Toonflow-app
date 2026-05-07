@@ -4,7 +4,7 @@ use axum::http::HeaderMap;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::harness::observe;
-use crate::settings::agent_memory::{self, ClearMemoryResponse};
+use crate::settings::agent_memory::{self, AgentMemoryResponseScope, ClearMemoryResponse};
 use crate::state::{AppState, MemoryConfig};
 
 use super::storage::{load_memory_config, save_memory_config};
@@ -110,5 +110,8 @@ pub(crate) async fn post_clear_agent_memories_type_field_alias(
     tx.commit()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(Json(ClearMemoryResponse { ok: true }))
+    Ok(Json(ClearMemoryResponse {
+        scope: AgentMemoryResponseScope::User,
+        ok: true,
+    }))
 }

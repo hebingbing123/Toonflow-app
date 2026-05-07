@@ -8,7 +8,7 @@ use crate::state::AppState;
 use super::super::storage::{
     delete_all_agent_memory_rows, parse_agent_type, resolve_agent_memory_project_numeric_id,
 };
-use super::super::types::{ClearMemoryBody, ClearMemoryResponse};
+use super::super::types::{AgentMemoryResponseScope, ClearMemoryBody, ClearMemoryResponse};
 
 #[utoipa::path(
     post,
@@ -128,5 +128,8 @@ pub(crate) async fn clear_memory(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(ClearMemoryResponse { ok: true }))
+    Ok(Json(ClearMemoryResponse {
+        scope: AgentMemoryResponseScope::User,
+        ok: true,
+    }))
 }

@@ -41,7 +41,7 @@ pub(crate) use style_bible::{
     ensure_project_style_bible_template, load_project_style_bible_character_anchors,
     maybe_fill_project_style_bible_from_assets, StyleBibleCharacterAnchor,
 };
-pub(crate) use types::ClearMemoryResponse;
+pub(crate) use types::{AgentMemoryResponseScope, ClearMemoryResponse};
 
 pub fn router() -> Router<AppState> {
     Router::new()
