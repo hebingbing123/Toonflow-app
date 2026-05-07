@@ -17,8 +17,8 @@
 - 当前阶段：`Phase 1 — 平台底座与最小主链`
 - 当前执行策略：按“前后端一并落地”的竖切推进
 - 当前验证策略：阶段内只跑定向验证；所有计划任务完成后统一执行一次 `yarn refactor:check`
-- 当前最新完成 commit：`0fe27522`
-- 当前最新完成竖切：`资产与生产竖切 recipe 分流对齐增量`
+- 当前最新完成 commit：`e9bb4938`
+- 当前最新完成竖切：`资产与生产竖切 blocker headline 分流增量`
 
 ## Phase 1 进度
 
@@ -190,6 +190,7 @@
 - production stage 的 storyboardTable 卡片现在也同步表达推进语义：覆盖不足时显示“待扩读”，覆盖已够时才保留“已抽样”，减少用户在阶段卡之间来回推断
 - production stage 现在继续区分“分镜表覆盖不足”背后的原因：如果 `scriptPlan` 虽然过了基础完整度，但还缺少足够明确的分场景情绪/画面意图，则 storyboardTable 与 storyboard 会优先显示“回补导演计划”，而不是盲目继续扩读分镜表
 - production recipe 现在与 stage gate 保持一致：当 `scriptPlan` 已够完整但仍缺少分场景意图时，scriptPlan 侧不再继续推荐“先看分镜表落地”，而是直接推荐“补足分场景意图”，把最省点击的下一步前置出来
+- production 顶部 blocker headline 现在也会直接解释卡点原因：对 `待扩读` 与 `回补导演计划` 这两类状态输出定制短句，不再只是裁剪卡片详情，用户在最上层就能知道应该扩读分镜表还是先细化导演计划
 
 本轮定向验证：
 
@@ -206,6 +207,7 @@
 - `cc5c9abc` — surface storyboardTable sampled-vs-advance-ready states directly on the stage card
 - `f52fb74f` — split storyboardTable under-coverage into expand-table vs refine-scriptPlan paths
 - `0fe27522` — align scriptPlan recipes with storyboardTable fallback routing
+- `e9bb4938` — teach blocker headline to explain storyboardTable expand vs refine-plan reasons
 
 ### 6. 质量与发布最小闭环竖切
 
