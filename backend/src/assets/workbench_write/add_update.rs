@@ -143,15 +143,13 @@ pub(crate) async fn post_project_workbench_update_assets(
             updated_at = NOW()
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.owner_user_id = $4
-          AND p.id = $5
-          AND a.numeric_id = $6
+          AND p.id = $4
+          AND a.numeric_id = $5
         "#,
     )
     .bind(name)
     .bind(describe)
     .bind(SqlxJson(metadata))
-    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .execute(pool)

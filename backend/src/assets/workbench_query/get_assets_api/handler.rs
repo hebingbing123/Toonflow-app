@@ -38,6 +38,6 @@ pub(crate) async fn post_project_workbench_nested_assets(
     }
     let pool = state.require_pool()?;
     let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
-    let out = run_get_assets_api(pool, uid, project_numeric_id, &body).await?;
+    let out = run_get_assets_api(pool, project_numeric_id, &body).await?;
     Ok(Json(out))
 }

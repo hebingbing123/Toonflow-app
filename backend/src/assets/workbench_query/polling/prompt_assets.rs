@@ -64,8 +64,7 @@ async fn run_polling_prompt_assets(
           ORDER BY j.updated_at DESC, j.created_at DESC, j.id DESC
           LIMIT 1
         ) pj ON TRUE
-        WHERE p.owner_user_id = $1
-          AND p.id = $2
+        WHERE p.id = $2
           AND a.numeric_id = ANY($3)
           AND COALESCE(
             CASE pj.status

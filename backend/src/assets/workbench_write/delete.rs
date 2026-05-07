@@ -32,12 +32,10 @@ pub(crate) async fn post_project_workbench_del_assets(
         DELETE FROM app_asset a
         USING app_project p
         WHERE a.project_id = p.id
-          AND p.owner_user_id = $1
-          AND p.id = $2
-          AND a.numeric_id = $3
+          AND p.id = $1
+          AND a.numeric_id = $2
         "#,
     )
-    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .execute(pool)
@@ -72,12 +70,10 @@ pub(crate) async fn post_project_workbench_batch_delete_assets(
         DELETE FROM app_asset a
         USING app_project p
         WHERE a.project_id = p.id
-          AND p.owner_user_id = $1
-          AND p.id = $2
-          AND a.numeric_id = ANY($3)
+          AND p.id = $1
+          AND a.numeric_id = ANY($2)
         "#,
     )
-    .bind(uid)
     .bind(project_id)
     .bind(&body.id)
     .execute(pool)
@@ -111,13 +107,11 @@ pub(crate) async fn post_project_workbench_del_image(
             updated_at = NOW()
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.owner_user_id = $1
-          AND p.id = $2
+          AND p.id = $1
           AND COALESCE(a.metadata->>'imageId', '') ~ '^[0-9]+$'
-          AND (a.metadata->>'imageId')::integer = $3
+          AND (a.metadata->>'imageId')::integer = $2
         "#,
     )
-    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .execute(pool)
@@ -130,12 +124,10 @@ pub(crate) async fn post_project_workbench_del_image(
         USING app_asset a, app_project p
         WHERE ai.asset_id = a.id
           AND a.project_id = p.id
-          AND p.owner_user_id = $1
-          AND p.id = $2
-          AND ai.numeric_image_id = $3
+          AND p.id = $1
+          AND ai.numeric_image_id = $2
         "#,
     )
-    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .execute(pool)

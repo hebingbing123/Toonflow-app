@@ -12,7 +12,6 @@ use fetch::{count_nested_assets, fetch_child_rows, fetch_parent_rows};
 
 pub(super) async fn run_get_assets_api(
     pool: &sqlx::PgPool,
-    uid: uuid::Uuid,
     project_numeric_id: i32,
     body: &WorkbenchNestedAssetsBody,
 ) -> Result<WorkbenchGetAssetsApiResponse, ApiError> {
@@ -31,7 +30,6 @@ pub(super) async fn run_get_assets_api(
 
     let total = count_nested_assets(
         pool,
-        uid,
         project_numeric_id,
         &asset_type,
         name_pattern.as_deref(),
@@ -40,7 +38,6 @@ pub(super) async fn run_get_assets_api(
 
     let parents = fetch_parent_rows(
         pool,
-        uid,
         project_numeric_id,
         &asset_type,
         name_pattern.as_deref(),
@@ -51,7 +48,6 @@ pub(super) async fn run_get_assets_api(
 
     let children = fetch_child_rows(
         pool,
-        uid,
         project_numeric_id,
         &asset_type,
         name_pattern.as_deref(),

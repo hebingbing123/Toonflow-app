@@ -17,7 +17,6 @@ use super::super::utils::{normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
 
 async fn run_batch_generation_data(
     pool: &sqlx::PgPool,
-    uid: uuid::Uuid,
     project_numeric_id: i32,
     body: &WorkbenchBatchGenerationDataBody,
 ) -> Result<WorkbenchBatchGenerationDataResponse, ApiError> {
@@ -29,13 +28,11 @@ async fn run_batch_generation_data(
         SELECT COUNT(*)::bigint
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND a.asset_type = $3
-          AND ($4::text IS NULL OR a.name ILIKE $4)
+        WHERE p.numeric_id = $1
+          AND a.asset_type = $2
+          AND ($3::text IS NULL OR a.name ILIKE $3)
         "#,
     )
-    .bind(uid)
     .bind(project_numeric_id)
     .bind(&asset_type)
     .bind(name.as_deref())
@@ -54,16 +51,14 @@ async fn run_batch_generation_data(
           a.create_time_ms AS create_time_ms
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND a.asset_type = $3
-          AND ($4::text IS NULL OR a.name ILIKE $4)
+        WHERE p.numeric_id = $1
+          AND a.asset_type = $2
+          AND ($3::text IS NULL OR a.name ILIKE $3)
         ORDER BY a.create_time_ms DESC NULLS LAST, a.numeric_id DESC
         OFFSET $5
         LIMIT $6
         "#,
     )
-    .bind(uid)
     .bind(project_numeric_id)
     .bind(asset_type)
     .bind(name.as_deref())
@@ -97,6 +92,6 @@ pub(crate) async fn post_project_workbench_batch_generation_data(
     }
     let pool = state.require_pool()?;
     let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
-    let out = run_batch_generation_data(pool, uid, project_numeric_id, &body).await?;
+    let out = run_batch_generation_data(pool, project_numeric_id, &body).await?;
     Ok(Json(out))
 }
