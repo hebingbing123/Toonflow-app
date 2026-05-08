@@ -42,6 +42,7 @@ class SkillsHarnessController extends ChangeNotifier {
   StreamSubscription<dynamic>? _wsSub;
 
   bool loadingHarnessTools = false;
+  bool loadingUserWasmValidate = false;
   bool loadingSkillsSummary = false;
   bool loadingSkillList = false;
   bool loadingSkillPreview = false;
@@ -58,6 +59,7 @@ class SkillsHarnessController extends ChangeNotifier {
   bool loadingWsSkillsRead = false;
   final List<String> wsLog = [];
   String? harnessToolsLine;
+  String? userWasmValidateLine;
   String? skillsAggregateLine;
   String? skillsListSummary;
   String? skillMutationLine;
@@ -76,6 +78,7 @@ class SkillsHarnessController extends ChangeNotifier {
     resetWsBusyFlags();
     wsLog.clear();
     harnessToolsLine = null;
+    userWasmValidateLine = null;
     skillsAggregateLine = null;
     skillsListSummary = null;
     skillMutationLine = null;
@@ -144,6 +147,27 @@ class SkillsHarnessController extends ChangeNotifier {
       _setError(e.toString());
     } finally {
       loadingHarnessTools = false;
+      _publish();
+    }
+  }
+
+  Future<void> validateUserWasmProbe() async {
+    final token = _accessToken;
+    if (token == null) return;
+    loadingUserWasmValidate = true;
+    _setError(null);
+    userWasmValidateLine = null;
+    _publish();
+    try {
+      final r = await validateHarnessUserWasm(token, kHarnessEmbeddedProbeWasm);
+      userWasmValidateLine =
+          'validated=${r.validated}, size_bytes=${r.sizeBytes} (embedded probe)';
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      loadingUserWasmValidate = false;
       _publish();
     }
   }
