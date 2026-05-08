@@ -345,6 +345,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   final _webhookUrlController = TextEditingController();
   bool _loadingBillingEvents = false;
   bool _loadingMoreBillingEvents = false;
+  bool _exportingAllBillingEvents = false;
   String? _billingEventsError;
   BillingWebhookEventsResponseV1? _billingEventsPage;
   final List<BillingWebhookEventItemV1> _billingEvents =
@@ -478,6 +479,13 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       limit: 30,
       offset: offset,
     );
+  }
+
+  Uri _billingEventsUri({int offset = 0}) {
+    final query = _buildBillingEventsQuery(offset: offset);
+    return Uri.parse(
+      '$kApiBaseUrl/api/v1/webhooks/billing/events',
+    ).replace(queryParameters: query.toQueryParameters());
   }
 
   Future<void> _loadBillingEvents({bool append = false}) async {
@@ -677,6 +685,169 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
     parts.add(item.isInformationalEvent ? 'informational' : 'stateful');
     return parts.join(' · ');
+  }
+
+  String _billingEventsQuerySummary() {
+    final parts = <String>[
+      'provider=${_billingProvider.isEmpty ? "all" : _billingProvider}',
+      'informational=${_billingInformationalOnly == null ? "all" : _billingInformationalOnly}',
+      'sort=$_billingSort',
+    ];
+    void addText(String label, TextEditingController controller) {
+      final value = controller.text.trim();
+      if (value.isNotEmpty) {
+        parts.add('$label=$value');
+      }
+    }
+
+    addText('event_type', _billingEventTypeController);
+    addText('provider_event_id', _billingProviderEventIdController);
+    addText(
+      'provider_event_id_prefix',
+      _billingProviderEventIdPrefixController,
+    );
+    addText('raw_event_id', _billingRawEventIdController);
+    addText('raw_event_id_prefix', _billingRawEventIdPrefixController);
+    addText('event_created_from', _billingEventCreatedFromController);
+    addText('event_created_to', _billingEventCreatedToController);
+    addText('created_from', _billingCreatedFromController);
+    addText('created_to', _billingCreatedToController);
+    return parts.join('\n');
+  }
+
+  String _buildBillingEventsCsv() {
+    final rows = <List<String>>[
+      <String>[
+        'id',
+        'provider_event_id',
+        'provider',
+        'raw_event_id',
+        'event_type',
+        'event_created_at',
+        'created_at',
+        'is_informational_event',
+      ],
+      ..._billingEvents.map(
+        (item) => <String>[
+          '${item.id}',
+          item.providerEventId,
+          item.provider ?? '',
+          item.rawEventId ?? '',
+          item.eventType ?? '',
+          item.eventCreatedAt?.toUtc().toIso8601String() ?? '',
+          item.createdAt.toUtc().toIso8601String(),
+          item.isInformationalEvent ? 'true' : 'false',
+        ],
+      ),
+    ];
+    return rows.map(_toCsvLine).join('\n');
+  }
+
+  String _toCsvLine(List<String> cells) {
+    return cells.map((cell) => '"${cell.replaceAll('"', '""')}"').join(',');
+  }
+
+  Future<void> _copyBillingEventsQuerySummary() async {
+    await Clipboard.setData(ClipboardData(text: _billingEventsQuerySummary()));
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('已复制当前查询摘要')));
+  }
+
+  Future<void> _copyAllBillingEventsCsv() async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _billingEventsError = '请先登录';
+      });
+      return;
+    }
+    setState(() {
+      _exportingAllBillingEvents = true;
+      _billingEventsError = null;
+    });
+    try {
+      final all = <BillingWebhookEventItemV1>[];
+      var offset = 0;
+      const pageSize = 200;
+      for (var page = 0; page < 20; page++) {
+        final response = await getBillingWebhookEventsV1(
+          token,
+          query: BillingWebhookEventsQueryV1(
+            informationalEvent: _billingInformationalOnly,
+            provider: _billingProvider,
+            rawEventId: _billingRawEventIdController.text,
+            rawEventIdPrefix: _billingRawEventIdPrefixController.text,
+            eventType: _billingEventTypeController.text,
+            providerEventId: _billingProviderEventIdController.text,
+            providerEventIdPrefix: _billingProviderEventIdPrefixController.text,
+            eventCreatedFrom: _billingEventCreatedFromController.text,
+            eventCreatedTo: _billingEventCreatedToController.text,
+            createdFrom: _billingCreatedFromController.text,
+            createdTo: _billingCreatedToController.text,
+            sort: _billingSort,
+            limit: pageSize,
+            offset: offset,
+          ),
+        );
+        all.addAll(response.items);
+        if (!response.hasMore || response.nextOffset == null) {
+          break;
+        }
+        offset = response.nextOffset!;
+      }
+      final rows = <List<String>>[
+        <String>['query_summary', _billingEventsQuerySummary()],
+        <String>[],
+        <String>[
+          'id',
+          'provider_event_id',
+          'provider',
+          'raw_event_id',
+          'event_type',
+          'event_created_at',
+          'created_at',
+          'is_informational_event',
+        ],
+        ...all.map(
+          (item) => <String>[
+            '${item.id}',
+            item.providerEventId,
+            item.provider ?? '',
+            item.rawEventId ?? '',
+            item.eventType ?? '',
+            item.eventCreatedAt?.toUtc().toIso8601String() ?? '',
+            item.createdAt.toUtc().toIso8601String(),
+            item.isInformationalEvent ? 'true' : 'false',
+          ],
+        ),
+      ];
+      await Clipboard.setData(
+        ClipboardData(text: rows.map(_toCsvLine).join('\n')),
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('已复制全量 billing 审计 CSV（${all.length} 条）')),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _billingEventsError = describeRustApiError(e);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _exportingAllBillingEvents = false;
+        });
+      }
+    }
   }
 
   @override
@@ -993,6 +1164,46 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         _loadBillingEvents();
                       },
                 child: const Text('重置并刷新'),
+              ),
+              OutlinedButton(
+                onPressed: _billingEvents.isEmpty
+                    ? null
+                    : () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: _buildBillingEventsCsv()),
+                        );
+                        if (!context.mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('已复制当前 billing 审计 CSV')),
+                        );
+                      },
+                child: const Text('复制 CSV'),
+              ),
+              OutlinedButton(
+                onPressed: _copyBillingEventsQuerySummary,
+                child: const Text('复制查询摘要'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  await Clipboard.setData(
+                    ClipboardData(text: _billingEventsUri().toString()),
+                  );
+                  if (!context.mounted) {
+                    return;
+                  }
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('已复制当前查询 URL')));
+                },
+                child: const Text('复制查询 URL'),
+              ),
+              OutlinedButton(
+                onPressed: _exportingAllBillingEvents
+                    ? null
+                    : _copyAllBillingEventsCsv,
+                child: Text(_exportingAllBillingEvents ? '导出中…' : '复制全量 CSV'),
               ),
             ],
           ),
