@@ -45,6 +45,7 @@
 
 若三类身份都已准备好，优先直接跑 [`scripts/workspace_rls_probe_matrix.sh`](../../scripts/workspace_rls_probe_matrix.sh) 收完整矩阵。
 若当前是在本地空库做最小验证，可直接先跑 [`scripts/workspace_rls_seed_and_probe_sample.sh`](../../scripts/workspace_rls_seed_and_probe_sample.sh)。
+若需要附发布记录，建议同时加 `OUTPUT_DIR=".tmp/workspace-rls-<date>"` 保存三份原始 probe 输出。
 
 最低要求：
 

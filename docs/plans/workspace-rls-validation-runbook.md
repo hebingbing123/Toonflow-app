@@ -130,6 +130,19 @@ OUTSIDER_USER_ID="$OUTSIDER_USER_ID" \
 bash scripts/workspace_rls_probe_matrix.sh
 ```
 
+若想顺手保留原始输出，可再加：
+
+```bash
+OUTPUT_DIR=".tmp/workspace-rls-$(date +%Y%m%d-%H%M%S)" \
+bash scripts/workspace_rls_probe_matrix.sh
+```
+
+会分别生成：
+
+- `owner.txt`
+- `member.txt`
+- `outsider.txt`
+
 ### 3.4 当前已验证的本地样本结论（2026-05-08）
 
 基于 `scripts/workspace_rls_seed_sample.sh` 插入的固定样本，已在本地迁移完成库上跑过一轮 probe。  
@@ -234,7 +247,7 @@ Unexpected deny paths:
 Follow-up:
 ```
 
-建议把原始输出临时落在 `.tmp/workspace-rls-<date>/`，不要把环境数据直接提交进仓库。
+建议通过 `OUTPUT_DIR=".tmp/workspace-rls-<date>"` 让矩阵脚本自动落盘原始输出，不要把环境数据直接提交进仓库。
 
 ## 7) 完成标准
 
