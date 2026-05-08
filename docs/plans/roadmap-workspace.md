@@ -31,7 +31,7 @@
 - W6–W7：Flutter 与 Harness/WS 客户端路径已对齐
 - W9.1：workspace 安全边界文档已补齐，见 [`workspace-security-boundary.md`](./workspace-security-boundary.md)
 - W9.2：workspace RLS 一致性矩阵已补齐，见 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)
-- W9.2：已新增 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md) 与 `scripts/workspace_rls_probe.sh`，可直接在本地 / staging 采集 policy snapshot 与 owner/member/outsider 可见性；发布前串联清单见 [`workspace-release-checklist.md`](./workspace-release-checklist.md)
+- W9.2：已新增 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md) 与 `scripts/workspace_rls_probe.sh`，可直接在本地 / staging 采集 policy snapshot 与 owner/member/outsider 可见性；`scripts/workspace_rls_probe_and_summarize.sh` 现会默认落出 `summary.md` / `summary.json` / `assertion.json` / `checklist-snippet.md` / `artifact-manifest.json`，发布前串联清单见 [`workspace-release-checklist.md`](./workspace-release-checklist.md)
 - W8.1：workspace 计费口径已定为 user-scope，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
 - W5.3：workspace 默认项目权限策略已补齐，见 [`workspace-project-permission-policy.md`](./workspace-project-permission-policy.md)
 - W9.3：敏感操作 Runbook 已补齐，见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
