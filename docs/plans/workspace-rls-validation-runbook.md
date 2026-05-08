@@ -47,6 +47,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 - 脚本：[`scripts/workspace_rls_probe.sh`](../../scripts/workspace_rls_probe.sh)
 - 矩阵脚本：[`scripts/workspace_rls_probe_matrix.sh`](../../scripts/workspace_rls_probe_matrix.sh)
 - 样本种子：[`scripts/workspace_rls_seed_sample.sh`](../../scripts/workspace_rls_seed_sample.sh)
+- 一键样本验证：[`scripts/workspace_rls_seed_and_probe_sample.sh`](../../scripts/workspace_rls_seed_and_probe_sample.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
 它做两件事：
@@ -69,6 +70,12 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 
 ```bash
 bash scripts/workspace_rls_seed_sample.sh
+```
+
+若只是想快速确认“本地当前 schema + 固定样本 + 三身份 probe”整条链路都通，也可直接运行：
+
+```bash
+bash scripts/workspace_rls_seed_and_probe_sample.sh
 ```
 
 它会插入固定 UUID 的三类用户：

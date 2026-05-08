@@ -44,6 +44,7 @@
 3. outsider
 
 若三类身份都已准备好，优先直接跑 [`scripts/workspace_rls_probe_matrix.sh`](../../scripts/workspace_rls_probe_matrix.sh) 收完整矩阵。
+若当前是在本地空库做最小验证，可直接先跑 [`scripts/workspace_rls_seed_and_probe_sample.sh`](../../scripts/workspace_rls_seed_and_probe_sample.sh)。
 
 最低要求：
 
