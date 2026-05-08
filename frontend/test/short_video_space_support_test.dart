@@ -133,6 +133,9 @@ void main() {
   test('export check issue codes map to Chinese labels', () {
     expect(shortVideoExportIssueLabelZh('candidate_pending'), '候选待确认');
     expect(shortVideoExportIssueLabelZh('missing_selected_media'), '未选成片媒体');
+    expect(shortVideoExportIssueLabelZh('subtitle_empty'), '字幕为空');
+    expect(shortVideoExportIssueLabelZh('duration_not_set'), '时长未设定');
+    expect(shortVideoExportIssueLabelZh('voiceover_not_ready'), '配音未就绪');
     expect(shortVideoExportIssueLabelZh('unknown_export_code'), 'unknown_export_code');
   });
 

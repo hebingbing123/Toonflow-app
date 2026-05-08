@@ -38,12 +38,18 @@ String shortVideoExportIssueLabelZh(String code) {
       return '所选媒体非视频';
     case 'subtitle_placeholder':
       return '字幕 / 口播文案缺失';
+    case 'subtitle_empty':
+      return '字幕为空';
     case 'voiceover_failed':
       return '旁白生成失败';
     case 'voiceover_audio_missing':
       return '旁白音频未就绪';
+    case 'voiceover_not_ready':
+      return '配音未就绪';
     case 'duration_not_explicit':
       return '时长未标明（导出默认）';
+    case 'duration_not_set':
+      return '时长未设定';
     case 'duration_unparsable':
       return '时长格式异常';
     case 'completion_uncertain':
