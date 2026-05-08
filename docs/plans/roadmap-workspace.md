@@ -21,7 +21,7 @@
 | W6 Flutter 产品面 | `baseline_done` | 选择器、创建、成员管理、接受邀请、空状态、`rust_api` 对齐 |
 | W7 Harness / WS | `baseline_done` | attach `workspaceUuid`、权限与回归矩阵 |
 | W8 计费与配额 | `next` | `plan_tier` / quota 仍待 user vs workspace 策略定稿 |
-| W9 安全 | `next` | RLS / service-role / 双路径一致性文档与评审未收口 |
+| W9 安全 | `next` | W9.1 安全边界文档已补；RLS 一致性测试与敏感操作流程仍待收口 |
 | W10 观测与运维 | `next` | W10.3 runbook 已完成；trace 与指标仍待补 |
 | W11 发布与门禁 | `next` | 本分册索引完成；版本公告与合并门禁收口仍待补 |
 
@@ -29,6 +29,7 @@
 
 - W1–W4：workspace 生命周期、成员关系、当前上下文、项目与 jobs 作用域已经落地
 - W6–W7：Flutter 与 Harness/WS 客户端路径已对齐
+- W9.1：workspace 安全边界文档已补齐，见 [`workspace-security-boundary.md`](./workspace-security-boundary.md)
 - W10.3：workspace 运维 Runbook 已补齐，见 [`workspace-operations-runbook.md`](./workspace-operations-runbook.md)
 - W11.2：本分册已建立，`roadmap-index.md` 可直接跳转到 workspace 方向
 
@@ -36,10 +37,10 @@
 
 优先继续以下低耦合或必须收口项：
 
-1. **W9.1**：补 Rust `DATABASE_URL` / RLS / service-role 责任边界文档
-2. **W10.1**：梳理 `workspace_id` 在 HTTP / jobs / Harness 的 trace 贯通计划
-3. **W10.2**：定义 workspace 级成员数 / 项目数 / 活跃 jobs 指标口径
-4. **W11.3–W11.4**：整理迁移公告与“全量 `yarn refactor:check` 为合并必跑”书面门禁
+1. **W10.1**：梳理 `workspace_id` 在 HTTP / jobs / Harness 的 trace 贯通计划
+2. **W10.2**：定义 workspace 级成员数 / 项目数 / 活跃 jobs 指标口径
+3. **W11.3–W11.4**：整理迁移公告与“全量 `yarn refactor:check` 为合并必跑”书面门禁
+4. **W9.2–W9.4**：补 Supabase 直连客户端一致性测试、敏感操作确认流程与邀请安全评审
 
 ## 执行与依赖
 
