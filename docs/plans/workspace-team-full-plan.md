@@ -96,7 +96,7 @@
 
 - [ ] **W5.2**（可选加强）**项目级角色**：`editor` / `viewer` 仅针对单项目 — 新表 `app_project_member` 或 JSON policy
 - [x] **W5.3** 默认策略：member 可创建项目、但不可删除他人项目（`admin/owner` 可删除任意项目）；后端已落地于 `backend/src/projects/routes/handlers/detail/delete.rs`，产品签字待补档
-- [ ] **W5.4** 与 **计费 `plan_tier`** 关系：按 user 还是按 workspace 计费 — **财务/产品** 结论驱动 schema（`app_workspace` 增加 `plan_tier` 等或维持 user）
+- [x] **W5.4** 与 **计费 `plan_tier`** 关系：当前按 **user-scope** 计费，不把 `plan_tier` / quota 提前挂到 `app_workspace`；书面结论见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)，后续若重开 workspace-scope billing 再进入 W8.2–W8.4
 - [x] **W5.5** 单元测试覆盖矩阵边角（最后一个 owner、降级 admin 等）—— `backend/src/workspaces/http.rs` 已补 `workspace_role_matrix_owner_admin_member` 与 `last_owner_transition_guard_matches_policy`
 
 ---
@@ -126,9 +126,9 @@
 ## 九、Phase W8 — 计费、用量、任务配额（与空间绑定策略）
 
 - [x] **W8.1** 结论落地文档：`plan_tier` / `daily_job_quota` / `jobs_today` **按 user 还是按 workspace**（或 hybrid）— 当前定稿为 **user-scope**，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
-- [ ] **W8.2** 若按 workspace：`app_user_profile` vs `app_workspace` 字段迁移 + webhook 与 **`/me`** 响应形状变更策略（版本化）
-- [ ] **W8.3** Billing 运营视图是否按 workspace 过滤 — 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-D 对齐
-- [ ] **W8.4** 迁移与回填脚本 + 回滚 Runbook
+- [ ] **W8.2** 若未来改为 workspace-scope：`app_user_profile` vs `app_workspace` 字段迁移 + webhook 与 **`/me`** 响应形状变更策略（版本化）
+- [ ] **W8.3** 若未来改为 workspace-scope：Billing 运营视图是否按 workspace 过滤 — 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-D 对齐
+- [ ] **W8.4** 若未来改为 workspace-scope：迁移与回填脚本 + 回滚 Runbook
 
 ---
 

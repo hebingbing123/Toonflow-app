@@ -17,7 +17,7 @@
 | W2 成员与邀请 | `baseline_done` | 成员增删改、邀请闭环、审计、速率限制、invite runbook |
 | W3 当前上下文切换 | `baseline_done` | `current_workspace` 切换、自动回退 personal、客户端刷新 |
 | W4 资源范围 | `baseline_done` | 项目/小说/资产/jobs 等按 workspace 成员语义收口 |
-| W5 权限矩阵 | `next` | 项目级角色与计费绑定仍未定稿；workspace 级默认矩阵已落地 |
+| W5 权限矩阵 | `next` | workspace 级默认矩阵与 billing 绑定口径已定稿；项目级角色 W5.2 仍待产品决定 |
 | W6 Flutter 产品面 | `baseline_done` | 选择器、创建、成员管理、接受邀请、空状态、`rust_api` 对齐 |
 | W7 Harness / WS | `baseline_done` | attach `workspaceUuid`、权限与回归矩阵 |
 | W8 计费与配额 | `next` | W8.1 已定为 user-scope；若改 workspace-scope 仍需迁移与运营面收口 |
@@ -51,7 +51,7 @@
 
 ## 执行与依赖
 
-- 计费与配额：W8 受产品/财务策略约束，默认晚于 W5.4 定稿
+- 计费与配额：W5.4 已由 W8.1 定稿为 user-scope；W8.2–W8.4 仅在未来重开 workspace-scope billing 时进入实现
 - 安全与观测：W9/W10 可并行推进，但文档必须锚定现有实现，不预支未来架构
 - 发布与门禁：W11 随各阶段收口同步更新，避免再次回到“只有总表、没有入口”的状态
 
