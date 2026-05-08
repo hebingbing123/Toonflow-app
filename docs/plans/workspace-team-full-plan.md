@@ -151,7 +151,7 @@
 
 ## 十二、Phase W11 — 发布、文档与门禁
 
-- [ ] **W11.1** [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 按 Phase 更新状态与 commit
+- [x] **W11.1** [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 按 Phase 更新状态与 commit（已同步 W1–W7 完成态、W11.1 收口状态与最近里程碑 commit，并清理过时阻塞说明）
 - [ ] **W11.2** [`roadmap-index.md`](./roadmap-index.md) 若拆出 `roadmap-workspace.md` 可再索引（当前以本文为真源）
 - [ ] **W11.3** 破坏性变更：**客户端版本** / 迁移公告
 - [ ] **W11.4** 全量 `yarn refactor:check` 纳入合并必跑

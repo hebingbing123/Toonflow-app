@@ -271,7 +271,7 @@
 
 **目标**：个人与团队 **双路径长期并存**；团队侧交付 **enterprise 全生命周期、邀请与成员、权限矩阵、全站资源与 Harness/计费/安全/观测** — 不以 MVP 为范围，以 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) **Phase W1–W11** 勾选为完成定义。
 
-**进度**：**Phase W1–W7 已在总表收口**；其中 **W6 Flutter 产品面** 已完成 workspace 选择/切换、企业空间创建、成员与邀请管理、接受邀请深链、空状态引导、`rust_api` 一致性，以及 W6.7 的 a11y / 文案收口；**W8–W11** 仍以计费口径、安全与观测收口为主。在 `workspace-team-full-plan.md` 与各 Phase 内勾选；本文件仅记录 **当前主攻 Phase** 与 **里程碑 commit**。
+**进度**：**Phase W1–W7 已在总表收口**；其中 **W6 Flutter 产品面** 已完成 workspace 选择/切换、企业空间创建、成员与邀请管理、接受邀请深链、空状态引导、`rust_api` 一致性，以及 W6.7 的 a11y / 文案收口；**W11.1** 已同步更新阶段状态与里程碑 commit；**W8–W11** 其余条目仍以计费口径、安全与观测收口为主。在 `workspace-team-full-plan.md` 与各 Phase 内勾选；本文件仅记录 **当前主攻 Phase** 与 **里程碑 commit**。
 
 | 跟踪项 | 状态 |
 |--------|------|
@@ -283,6 +283,8 @@
 
 近期里程碑 commit：
 
+- `6a06d0e9` — 首页邀请 deep link 自动跳转回归测试 + 短视频草稿管理 analyze 收口
+- `a9c1e1af` — 配音参数对话框抽成可测组件并补齐交互测试
 - `40280055` — 团队 workspace 邀请管理弹窗（筛选 / 分页 / 批量复制）
 - `e0848031` — 接受邀请深链与命中后自动跳转“团队工作区”
 - `6e08da49` — 团队 workspace / 项目区空状态引导
@@ -291,21 +293,10 @@
 
 ## 当前阻塞与注意事项
 
-### 已知非本轮新增阻塞
+### 当前门禁状态
 
-- frontend 全量 `flutter analyze` 仍有既存告警：
-  - `frontend/lib/short_video_space/section_production.dart`
-  - `frontend/lib/short_video_space/section_production_assembly.dart`
-  - `frontend/lib/short_video_space/section_project.dart`
-  - `frontend/lib/short_video_space/section_publish*.dart`
-
-这些问题会影响 `yarn refactor:check` 最终全绿，但不是 workspace 竖切引入。
-
-- backend 全量测试当前还存在既有基线失败，会让 `yarn refactor:check` 在 backend test 阶段退出：
-  - `app::contract_smoke_tests::rest_projects_settings_skills::skills_harness_jobs::jobs_harness::harness_user_wasm_persist_returns_database_error_without_pg`
-  - `app::contract_smoke_tests::rest_projects_settings_skills::skills_harness_jobs::jobs_harness::harness_validate_user_wasm_ok_for_embedded_probe`
-  - `app::contract_smoke_tests::rest_projects_settings_skills::skills_harness_jobs::jobs_harness::harness_validate_user_wasm_octet_stream_accepts_probe`
-  - `services::export_service::tests::test_acquire_permit_concurrency`
+- `yarn refactor:check` 当前已恢复全绿（OpenAPI drift、`rust_api` 一致性、backend `fmt/clippy/test`、frontend `analyze/test`）。
+- 团队 workspace 竖切相关的 W6 / W7 / W11.1 文档与前端回归测试已和当前实现重新对齐。
 
 ### 合约测试环境注意
 
