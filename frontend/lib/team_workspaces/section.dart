@@ -97,6 +97,32 @@ bool isCurrentWorkspaceRow(WorkspaceListItem row, String? currentWorkspaceId) {
   return row.workspace.id == current;
 }
 
+List<WorkspaceInviteResponse> paginateWorkspaceInvites(
+  List<WorkspaceInviteResponse> invites, {
+  required int pageIndex,
+  required int pageSize,
+}) {
+  if (invites.isEmpty || pageSize <= 0 || pageIndex < 0) {
+    return const <WorkspaceInviteResponse>[];
+  }
+  final start = pageIndex * pageSize;
+  if (start >= invites.length) {
+    return const <WorkspaceInviteResponse>[];
+  }
+  final end = (start + pageSize).clamp(0, invites.length);
+  return invites.sublist(start, end);
+}
+
+int workspaceInvitePageCount(
+  List<WorkspaceInviteResponse> invites, {
+  required int pageSize,
+}) {
+  if (invites.isEmpty || pageSize <= 0) {
+    return 0;
+  }
+  return ((invites.length - 1) ~/ pageSize) + 1;
+}
+
 List<WorkspaceInviteResponse> sortWorkspaceInvitesByExpiry(
   List<WorkspaceInviteResponse> invites,
 ) {
@@ -762,6 +788,371 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     inviteSearchController.dispose();
   }
 
+  Future<void> _openInvitesDialog(WorkspaceListItem row) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final inviteEmailController = TextEditingController();
+    final inviteSearchController = TextEditingController();
+    String role = 'member';
+    String statusFilter = 'pending';
+    final List<WorkspaceInviteResponse> invites = <WorkspaceInviteResponse>[];
+    final Set<String> selectedInviteIds = <String>{};
+    String? error;
+    bool loading = true;
+    bool inviting = false;
+    bool includeExpiredInvites = false;
+    int pageIndex = 0;
+    int pageSize = 10;
+
+    Future<void> loadInvites(StateSetter setModalState) async {
+      setModalState(() {
+        loading = true;
+        error = null;
+      });
+      try {
+        final rows = await fetchWorkspaceInvitesV1(
+          token,
+          row.workspace.id,
+          status: statusFilter == 'all' ? null : statusFilter,
+          limit: 200,
+        );
+        setModalState(() {
+          invites
+            ..clear()
+            ..addAll(rows);
+          selectedInviteIds.removeWhere(
+            (id) => !invites.any((invite) => invite.id == id),
+          );
+          pageIndex = 0;
+          loading = false;
+        });
+      } catch (e) {
+        setModalState(() {
+          error = e.toString();
+          loading = false;
+        });
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            if (loading && invites.isEmpty && error == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                loadInvites(setModalState);
+              });
+            }
+            final filteredInvites = sortWorkspaceInvitesByExpiry(
+              filterInvitesByExpiryVisibility(
+                filterWorkspaceInvites(invites, inviteSearchController.text),
+                includeExpired: includeExpiredInvites,
+              ),
+            );
+            final pageCount = workspaceInvitePageCount(
+              filteredInvites,
+              pageSize: pageSize,
+            );
+            final safePageIndex = pageCount == 0
+                ? 0
+                : pageIndex.clamp(0, pageCount - 1);
+            final pagedInvites = paginateWorkspaceInvites(
+              filteredInvites,
+              pageIndex: safePageIndex,
+              pageSize: pageSize,
+            );
+            return AlertDialog(
+              title: Text('邀请管理 · ${row.workspace.name}'),
+              content: SizedBox(
+                width: 560,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextField(
+                        controller: inviteEmailController,
+                        decoration: const InputDecoration(
+                          labelText: '邀请邮箱',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        initialValue: role,
+                        decoration: const InputDecoration(
+                          labelText: '角色',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const <DropdownMenuItem<String>>[
+                          DropdownMenuItem(
+                            value: 'member',
+                            child: Text('member'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'admin',
+                            child: Text('admin'),
+                          ),
+                        ],
+                        onChanged: inviting
+                            ? null
+                            : (v) => setModalState(() => role = v ?? 'member'),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: <Widget>[
+                          FilledButton.tonal(
+                            onPressed: inviting
+                                ? null
+                                : () async {
+                                    final email = inviteEmailController.text
+                                        .trim();
+                                    if (email.isEmpty) {
+                                      setModalState(() => error = '请输入邀请邮箱');
+                                      return;
+                                    }
+                                    setModalState(() {
+                                      inviting = true;
+                                      error = null;
+                                    });
+                                    try {
+                                      await createWorkspaceInviteV1(
+                                        token,
+                                        row.workspace.id,
+                                        CreateWorkspaceInviteBody(
+                                          email: email,
+                                          role: role,
+                                        ),
+                                      );
+                                      inviteEmailController.clear();
+                                      await loadInvites(setModalState);
+                                    } catch (e) {
+                                      setModalState(() => error = e.toString());
+                                    } finally {
+                                      setModalState(() => inviting = false);
+                                    }
+                                  },
+                            child: Text(inviting ? '生成中…' : '生成邀请'),
+                          ),
+                          OutlinedButton(
+                            onPressed: loading
+                                ? null
+                                : () => loadInvites(setModalState),
+                            child: const Text('刷新邀请'),
+                          ),
+                          OutlinedButton(
+                            onPressed: selectedInviteIds.isEmpty
+                                ? null
+                                : () async {
+                                    final messenger = ScaffoldMessenger.of(
+                                      context,
+                                    );
+                                    final text = invites
+                                        .where(
+                                          (invite) => selectedInviteIds
+                                              .contains(invite.id),
+                                        )
+                                        .map(buildInviteCopyText)
+                                        .join('\n---\n');
+                                    await Clipboard.setData(
+                                      ClipboardData(text: text),
+                                    );
+                                    if (!mounted) {
+                                      return;
+                                    }
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '已复制 ${selectedInviteIds.length} 条邀请',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                            child: const Text('批量复制'),
+                          ),
+                          TextButton(
+                            onPressed: selectedInviteIds.isEmpty
+                                ? null
+                                : () => setModalState(selectedInviteIds.clear),
+                            child: const Text('清空选择'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              initialValue: statusFilter,
+                              decoration: const InputDecoration(
+                                labelText: '状态',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: const <DropdownMenuItem<String>>[
+                                DropdownMenuItem(
+                                  value: 'pending',
+                                  child: Text('pending'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'accepted',
+                                  child: Text('accepted'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'revoked',
+                                  child: Text('revoked'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'all',
+                                  child: Text('all'),
+                                ),
+                              ],
+                              onChanged: loading
+                                  ? null
+                                  : (v) async {
+                                      setModalState(() {
+                                        statusFilter = v ?? 'pending';
+                                      });
+                                      await loadInvites(setModalState);
+                                    },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: DropdownButtonFormField<int>(
+                              initialValue: pageSize,
+                              decoration: const InputDecoration(
+                                labelText: '每页条数',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: const <DropdownMenuItem<int>>[
+                                DropdownMenuItem(value: 10, child: Text('10')),
+                                DropdownMenuItem(value: 20, child: Text('20')),
+                                DropdownMenuItem(value: 50, child: Text('50')),
+                              ],
+                              onChanged: (v) {
+                                if (v == null) {
+                                  return;
+                                }
+                                setModalState(() {
+                                  pageSize = v;
+                                  pageIndex = 0;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: const Text('显示已过期邀请'),
+                        value: includeExpiredInvites,
+                        onChanged: (v) {
+                          setModalState(() {
+                            includeExpiredInvites = v;
+                            pageIndex = 0;
+                          });
+                        },
+                      ),
+                      TextField(
+                        controller: inviteSearchController,
+                        decoration: const InputDecoration(
+                          labelText: '搜索邀请（邮箱 / 角色 / 状态）',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (_) => setModalState(() => pageIndex = 0),
+                      ),
+                      const SizedBox(height: 8),
+                      if (loading) const LinearProgressIndicator(),
+                      if (!loading && filteredInvites.isEmpty)
+                        const Text('当前筛选条件下暂无邀请。'),
+                      if (pagedInvites.isNotEmpty) ...<Widget>[
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              '第 ${pageCount == 0 ? 0 : safePageIndex + 1} / $pageCount 页 · 共 ${filteredInvites.length} 条',
+                            ),
+                            OutlinedButton(
+                              onPressed: safePageIndex <= 0
+                                  ? null
+                                  : () => setModalState(() => pageIndex -= 1),
+                              child: const Text('上一页'),
+                            ),
+                            OutlinedButton(
+                              onPressed: safePageIndex + 1 >= pageCount
+                                  ? null
+                                  : () => setModalState(() => pageIndex += 1),
+                              child: const Text('下一页'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ...pagedInvites.map((invite) {
+                          final selected = selectedInviteIds.contains(
+                            invite.id,
+                          );
+                          final label = inviteStatusLabel(invite);
+                          return CheckboxListTile(
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: selected,
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            onChanged: (checked) {
+                              setModalState(() {
+                                if (checked == true) {
+                                  selectedInviteIds.add(invite.id);
+                                } else {
+                                  selectedInviteIds.remove(invite.id);
+                                }
+                              });
+                            },
+                            title: Text('${invite.email} · ${invite.role}'),
+                            subtitle: SelectableText(
+                              '$label\n${formatWorkspaceInviteMeta(invite)}\ninvite token: ${invite.token}',
+                            ),
+                          );
+                        }),
+                      ],
+                      if (error != null) ...<Widget>[
+                        const SizedBox(height: 8),
+                        SelectableText(
+                          error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('关闭'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    inviteEmailController.dispose();
+    inviteSearchController.dispose();
+  }
+
   Future<void> _confirmArchive(WorkspaceListItem row) async {
     final ok = await showDialog<bool>(
       context: context,
@@ -1032,6 +1423,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             ? null
                             : () => _openMembersDialog(row),
                         child: const Text('成员'),
+                      ),
+                    if (canManage)
+                      TextButton(
+                        onPressed: (_loading || busy)
+                            ? null
+                            : () => _openInvitesDialog(row),
+                        child: const Text('邀请'),
                       ),
                     TextButton(
                       onPressed: (_loading || busy || switching || isCurrent)

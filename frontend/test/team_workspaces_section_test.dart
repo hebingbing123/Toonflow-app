@@ -344,10 +344,67 @@ void main() {
     expect(isCurrentWorkspaceRow(row, 'workspace-2'), isFalse);
     expect(isCurrentWorkspaceRow(row, '   '), isFalse);
   });
+
+  test('paginateWorkspaceInvites returns current page slice', () {
+    final rows = <WorkspaceInviteResponse>[
+      invite(email: 'a@example.com', role: 'member'),
+      invite(email: 'b@example.com', role: 'member').copyWithId('invite-2'),
+      invite(email: 'c@example.com', role: 'member').copyWithId('invite-3'),
+    ];
+
+    expect(
+      paginateWorkspaceInvites(
+        rows,
+        pageIndex: 0,
+        pageSize: 2,
+      ).map((e) => e.email).toList(),
+      <String>['a@example.com', 'b@example.com'],
+    );
+    expect(
+      paginateWorkspaceInvites(
+        rows,
+        pageIndex: 1,
+        pageSize: 2,
+      ).map((e) => e.email).toList(),
+      <String>['c@example.com'],
+    );
+    expect(paginateWorkspaceInvites(rows, pageIndex: 2, pageSize: 2), isEmpty);
+  });
+
+  test('workspaceInvitePageCount rounds up by page size', () {
+    final rows = <WorkspaceInviteResponse>[
+      invite(email: 'a@example.com', role: 'member'),
+      invite(email: 'b@example.com', role: 'member').copyWithId('invite-2'),
+      invite(email: 'c@example.com', role: 'member').copyWithId('invite-3'),
+    ];
+    expect(workspaceInvitePageCount(rows, pageSize: 2), 2);
+    expect(workspaceInvitePageCount(rows, pageSize: 10), 1);
+    expect(
+      workspaceInvitePageCount(const <WorkspaceInviteResponse>[], pageSize: 10),
+      0,
+    );
+  });
 }
 
 extension on WorkspaceInviteResponse {
   WorkspaceInviteResponse copyWithExpiresAt(DateTime expiresAt) {
+    return WorkspaceInviteResponse(
+      id: id,
+      workspaceId: workspaceId,
+      email: email,
+      token: token,
+      role: role,
+      invitedBy: invitedBy,
+      status: status,
+      expiresAt: expiresAt,
+      acceptedBy: acceptedBy,
+      acceptedAt: acceptedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
+
+  WorkspaceInviteResponse copyWithId(String id) {
     return WorkspaceInviteResponse(
       id: id,
       workspaceId: workspaceId,
