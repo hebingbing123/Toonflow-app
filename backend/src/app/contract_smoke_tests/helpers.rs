@@ -1,5 +1,6 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::OnceLock;
 
 use axum::body::Body;
@@ -28,6 +29,16 @@ pub(super) const NIL_JOB_UUID: &str = "00000000-0000-0000-0000-000000000000";
 
 /// Serialize billing webhook tests that read or write **`BILLING_WEBHOOK_SECRET`** (avoids parallel **`cargo test`** flakes).
 pub(super) static BILLING_WEBHOOK_TEST_MUTEX: OnceLock<tokio::sync::Mutex<()>> = OnceLock::new();
+
+/// Serialize **`TOONFLOW_INTERNAL_OPS_TOKEN`** mutation in **`job_queue_stats_*`** contract tests.
+static INTERNAL_OPS_QUEUE_STATS_MUTEX: OnceLock<Mutex<()>> = OnceLock::new();
+
+pub(super) fn internal_ops_queue_stats_test_lock() -> std::sync::MutexGuard<'static, ()> {
+    INTERNAL_OPS_QUEUE_STATS_MUTEX
+        .get_or_init(|| Mutex::new(()))
+        .lock()
+        .expect("internal ops queue stats test mutex poisoned")
+}
 pub(super) async fn billing_webhook_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
     BILLING_WEBHOOK_TEST_MUTEX
         .get_or_init(|| tokio::sync::Mutex::new(()))
@@ -114,6 +125,20 @@ pub(super) async fn get_json_bearer(uri: &str, token: &str) -> (StatusCode, Valu
             .unwrap(),
     )
     .await
+}
+
+/// `GET` with optional **`X-Toonflow-Internal-Token`** (Q2 运维队列 stats)。
+pub(super) async fn get_json_internal_ops(
+    uri: &str,
+    internal_token: Option<&str>,
+) -> (StatusCode, Value) {
+    let mut req = Request::builder()
+        .uri(uri)
+        .extension(ConnectInfo(test_addr()));
+    if let Some(t) = internal_token {
+        req = req.header("x-toonflow-internal-token", t);
+    }
+    oneshot_json(req.body(Body::empty()).unwrap()).await
 }
 
 pub(super) async fn get_bytes_bearer(

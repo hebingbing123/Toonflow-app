@@ -5,6 +5,7 @@
 mod common;
 mod listing;
 mod mutate;
+mod queue_stats;
 mod summaries;
 
 use axum::{
@@ -16,6 +17,7 @@ use crate::state::AppState;
 
 use listing::{get_job, get_job_file, get_job_task_detail_compat, list_jobs, list_jobs_page};
 use mutate::{cancel_job, create_job, retry_job};
+use queue_stats::get_job_queue_stats;
 use summaries::{list_job_kind_summaries, list_job_kinds, list_job_status_summaries};
 
 #[allow(unused_imports)]
@@ -26,6 +28,7 @@ pub(crate) use common::{
 
 pub(crate) fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/jobs/queue/stats", get(get_job_queue_stats))
         .route("/api/v1/jobs/page", get(list_jobs_page))
         .route(
             "/api/v1/jobs/task-detail/{task_id}",
@@ -47,6 +50,7 @@ pub(crate) fn router() -> Router<AppState> {
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(
+        queue_stats::get_job_queue_stats,
         listing::list_jobs_page,
         listing::get_job_task_detail_compat,
         summaries::list_job_kind_summaries,
@@ -59,7 +63,7 @@ pub(crate) fn router() -> Router<AppState> {
         mutate::cancel_job,
         mutate::retry_job,
     ),
-    components(schemas(crate::error::ErrorBody)),
+    components(schemas(crate::error::ErrorBody, queue_stats::JobQueueStatsResponse)),
     tags((name = "jobs", description = "Generation jobs"))
 )]
 pub struct JobsOpenApi;

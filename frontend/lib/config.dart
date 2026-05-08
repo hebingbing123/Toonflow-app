@@ -20,6 +20,13 @@ const String kSupabaseAnonKey = String.fromEnvironment(
 bool get kSupabaseConfigured =>
     kSupabaseUrl.isNotEmpty && kSupabaseAnonKey.isNotEmpty;
 
+/// Matches backend **`TOONFLOW_INTERNAL_OPS_TOKEN`** for **`GET /api/v1/jobs/queue/stats`** (Q2 B).
+/// Override: `flutter run --dart-define=INTERNAL_OPS_TOKEN=...` — empty = hide ops UI.
+const String kInternalOpsToken = String.fromEnvironment(
+  'INTERNAL_OPS_TOKEN',
+  defaultValue: '',
+);
+
 String resolveRustApiUrl(String pathOrUrl) {
   final raw = pathOrUrl.trim();
   if (raw.isEmpty) {

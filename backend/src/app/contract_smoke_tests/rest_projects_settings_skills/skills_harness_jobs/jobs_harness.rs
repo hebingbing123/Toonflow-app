@@ -4,12 +4,13 @@ use axum::extract::ConnectInfo;
 use axum::http::{header, Method, Request, StatusCode};
 use uuid::Uuid;
 
+use crate::harness::user_wasm_test_env_lock;
 use crate::harness::wasm_runtime::probe_wasm_bytes;
 
 const VALIDATE_USER_WASM_URI: &str = "/api/v1/harness/user-wasm/validate";
 const USER_WASM_STORE_URI: &str = "/api/v1/harness/user-wasm";
+const JOB_QUEUE_STATS_URI: &str = "/api/v1/jobs/queue/stats";
 const NIL_UUID: &str = "00000000-0000-0000-0000-000000000000";
-
 #[tokio::test]
 async fn harness_tools_unauthorized_without_bearer() {
     let (status, v) = get_json("/api/v1/harness/tools").await;
@@ -43,6 +44,7 @@ async fn job_retry_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn harness_validate_user_wasm_unauthorized_without_bearer() {
+    let _g = user_wasm_test_env_lock();
     let wasm = probe_wasm_bytes();
     let (status, v) = oneshot_json(
         Request::builder()
@@ -60,6 +62,7 @@ async fn harness_validate_user_wasm_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn harness_validate_user_wasm_ok_for_embedded_probe() {
+    let _g = user_wasm_test_env_lock();
     let token = test_jwt(Uuid::nil());
     let wasm = probe_wasm_bytes();
     let (status, v) =
@@ -71,6 +74,7 @@ async fn harness_validate_user_wasm_ok_for_embedded_probe() {
 
 #[tokio::test]
 async fn harness_validate_user_wasm_octet_stream_accepts_probe() {
+    let _g = user_wasm_test_env_lock();
     let token = test_jwt(Uuid::nil());
     let wasm = probe_wasm_bytes();
     let (status, v) = post_bytes_bearer_octet(
@@ -86,6 +90,7 @@ async fn harness_validate_user_wasm_octet_stream_accepts_probe() {
 
 #[tokio::test]
 async fn harness_validate_user_wasm_bad_request_empty_body() {
+    let _g = user_wasm_test_env_lock();
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_empty_bearer(VALIDATE_USER_WASM_URI, &token).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -99,12 +104,39 @@ async fn harness_validate_user_wasm_bad_request_empty_body() {
 
 #[tokio::test]
 async fn harness_validate_user_wasm_bad_request_garbage() {
+    let _g = user_wasm_test_env_lock();
     let token = test_jwt(Uuid::nil());
     let garbage = b"\0asm\x01\x00\x00\x00\xff";
     let (status, v) =
         post_bytes_bearer_octet(VALIDATE_USER_WASM_URI, &token, "application/wasm", garbage).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
+}
+
+#[tokio::test]
+async fn harness_validate_user_wasm_bad_request_oversize() {
+    let _g = user_wasm_test_env_lock();
+    std::env::set_var("HARNESS_USER_WASM_MAX_BYTES", "8");
+    let token = test_jwt(Uuid::nil());
+    let oversize = vec![0u8; 9];
+    let (status, v) = post_bytes_bearer_octet(
+        VALIDATE_USER_WASM_URI,
+        &token,
+        "application/wasm",
+        &oversize,
+    )
+    .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(v["code"], "bad_request");
+    assert!(
+        v["message"]
+            .as_str()
+            .unwrap_or_default()
+            .contains("exceeds max size"),
+        "msg={:?}",
+        v["message"]
+    );
+    std::env::remove_var("HARNESS_USER_WASM_MAX_BYTES");
 }
 
 #[tokio::test]
@@ -116,6 +148,7 @@ async fn harness_user_wasm_list_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn harness_user_wasm_persist_unauthorized_without_bearer() {
+    let _g = user_wasm_test_env_lock();
     let wasm = probe_wasm_bytes();
     let (status, v) = oneshot_json(
         Request::builder()
@@ -133,6 +166,7 @@ async fn harness_user_wasm_persist_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn harness_user_wasm_list_returns_database_error_without_pg() {
+    let _g = user_wasm_test_env_lock();
     let token = test_jwt(Uuid::nil());
     let (status, v) = get_json_bearer(USER_WASM_STORE_URI, &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -141,12 +175,34 @@ async fn harness_user_wasm_list_returns_database_error_without_pg() {
 
 #[tokio::test]
 async fn harness_user_wasm_persist_returns_database_error_without_pg() {
+    let _g = user_wasm_test_env_lock();
     let token = test_jwt(Uuid::nil());
     let wasm = probe_wasm_bytes();
     let (status, v) =
         post_bytes_bearer_octet(USER_WASM_STORE_URI, &token, "application/wasm", wasm).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn harness_user_wasm_persist_rejects_oversize_before_db() {
+    let _g = user_wasm_test_env_lock();
+    std::env::set_var("HARNESS_USER_WASM_MAX_BYTES", "8");
+    let token = test_jwt(Uuid::nil());
+    let oversize = vec![0u8; 9];
+    let (status, v) =
+        post_bytes_bearer_octet(USER_WASM_STORE_URI, &token, "application/wasm", &oversize).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(v["code"], "bad_request");
+    assert!(
+        v["message"]
+            .as_str()
+            .unwrap_or_default()
+            .contains("exceeds max size"),
+        "msg={:?}",
+        v["message"]
+    );
+    std::env::remove_var("HARNESS_USER_WASM_MAX_BYTES");
 }
 
 #[tokio::test]
@@ -173,4 +229,34 @@ async fn harness_user_wasm_revoke_returns_database_error_without_pg() {
     let (status, v) = delete_json_bearer(&uri, &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn job_queue_stats_internal_ops_token_gate_serial() {
+    let _lock = super::super::super::helpers::internal_ops_queue_stats_test_lock();
+    let prev = std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN").ok();
+
+    std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN");
+    let (status, v) = get_json(JOB_QUEUE_STATS_URI).await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+    assert_eq!(v["code"], "forbidden");
+
+    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "expected-secret");
+    let (status, v) = get_json_internal_ops(JOB_QUEUE_STATS_URI, Some("wrong")).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+
+    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "ops-test-token");
+    let (status, v) = get_json_internal_ops(JOB_QUEUE_STATS_URI, Some("ops-test-token")).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+
+    restore_ops_token(prev);
+}
+
+fn restore_ops_token(prev: Option<String>) {
+    match prev {
+        Some(s) => std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", s),
+        None => std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN"),
+    }
 }

@@ -74,6 +74,10 @@ pub struct HarnessAgentRunPayload {
     pub content: String,
     #[serde(default = "default_max_tool_rounds")]
     pub max_tool_rounds: usize,
+    /// When **`true`**, request WP‑E streaming fusion (tool calls interleaved with streamed assistant text).
+    /// Until **`HARNESS_AGENT_STREAMING_TOOLS`** enables the server path, omit this field or use **`false`**.
+    #[serde(default)]
+    pub stream: Option<bool>,
 }
 
 #[cfg(test)]
@@ -103,6 +107,17 @@ mod attach_payload_tests {
         let p: AttachScriptPayload = serde_json::from_value(v).unwrap();
         assert_eq!(p.project_uuid, Some(u));
         assert_eq!(p.project_id, Some(3));
+    }
+
+    #[test]
+    fn harness_agent_run_deserializes_optional_stream() {
+        let v = serde_json::json!({
+            "content": "hello",
+            "max_tool_rounds": 3,
+            "stream": true,
+        });
+        let p: HarnessAgentRunPayload = serde_json::from_value(v).unwrap();
+        assert_eq!(p.stream, Some(true));
     }
 
     #[test]

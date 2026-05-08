@@ -40,8 +40,8 @@
 
 - [x] **方案 A（已落地）**：扩展 **`QueueStats`** + **`PgQueue::stats()`**：`pending_claimable`、`failed_last_24h`、`oldest_claimable_queued_age_secs`、`pending_by_kind_json`（至多 15 kind）；并入 **`job_queue_metrics`** 日志。**Flutter**：无（ops-only）；若上 **方案 B** REST 再单列全栈 WP）。
 - [x] **与 H3 核对**：`assets-generate` payload v2 增加 **`project_uuid`** 不改变 **`kind`**；按 kind 聚合与 **`payload->>'project_numeric_id'`** 任务过滤仍有效（见 [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)）。
-- [ ] **方案 B**（可选）：**Backend** 内部运维 REST + **Flutter** 只读屏 + OpenAPI（见全栈约定）。
-- [ ] OpenAPI：仅方案 B 需要。
+- [x] **方案 B**（可选）：**Backend** `GET /api/v1/jobs/queue/stats` + **`TOONFLOW_INTERNAL_OPS_TOKEN` / `X-Toonflow-Internal-Token`** + OpenAPI + Flutter 只读卡片（`INTERNAL_OPS_TOKEN` dart-define）— 见 `backend/README.md`。
+- [x] OpenAPI：已含 `getJobQueueStatsV1` / `JobQueueStatsResponse`。
 
 **验收**：`cargo test` jobs 全绿；`yarn refactor:check`。
 

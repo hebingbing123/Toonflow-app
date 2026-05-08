@@ -46,6 +46,7 @@ pub fn build_router(state: AppState) -> Router {
             header::CONTENT_TYPE,
             header::ACCEPT,
             HeaderName::from_static("x-request-id"),
+            HeaderName::from_static("x-toonflow-internal-token"),
         ])
         .expose_headers([HeaderName::from_static("x-request-id")]);
 

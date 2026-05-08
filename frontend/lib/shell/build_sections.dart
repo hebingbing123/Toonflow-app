@@ -7,6 +7,10 @@ extension _HomePageBuildSections on _HomePageState {
     final signedIn = session != null;
     final widgets = <Widget>[
       _buildOverviewSection(),
+      if (kInternalOpsToken.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        const JobQueueStatsCard(),
+      ],
       _buildAuthSection(session, signedIn),
     ];
 

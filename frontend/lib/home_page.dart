@@ -42,6 +42,7 @@ import 'auth/controller.dart';
 import 'jobs/controller.dart';
 import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
+import 'shell/job_queue_stats_card.dart';
 import 'shell/navigation_controller.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_context_view.dart';

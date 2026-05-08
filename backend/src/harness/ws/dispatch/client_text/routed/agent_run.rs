@@ -50,6 +50,32 @@ pub(super) async fn harness_agent_run(
         return;
     }
 
+    if p.stream == Some(true) {
+        let allowed = std::env::var("HARNESS_AGENT_STREAMING_TOOLS")
+            .ok()
+            .map(|s| {
+                matches!(
+                    s.trim().to_ascii_lowercase().as_str(),
+                    "1" | "true" | "yes" | "on"
+                )
+            })
+            .unwrap_or(false);
+        if !allowed {
+            let _ = send_error(
+                socket,
+                "not_implemented",
+                "harness.agent.run payload.stream=true requires HARNESS_AGENT_STREAMING_TOOLS=1 (WP-E streaming tool fusion); omit stream or use false until enabled",
+                env.request_id.as_deref(),
+            )
+            .await;
+            return;
+        }
+        tracing::info!(
+            target: "harness.agent",
+            "WP-E: stream=true with HARNESS_AGENT_STREAMING_TOOLS — using non-streaming completion+tool loop until streamed deltas land"
+        );
+    }
+
     let Some(cfg) = state.llm.clone() else {
         let _ = send_error(
             socket,

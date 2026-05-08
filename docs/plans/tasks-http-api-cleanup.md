@@ -77,6 +77,9 @@
   - [x] **C1（测试重导出噪音）**：**`memory/style_selection/mod.rs`** 去掉未被子测试经 **`generate::`** 引用的 **`#[cfg(test)] pub(in generate) use …`** 项，避免 `cargo clippy --all-targets --all-features` 下 **unused_imports**（默认门禁仍为 `clippy` 无 `--all-features`）。
   - [x] **C2（cfg / sqlx / dead_code 小修）**：`Cargo.toml` 声明 **`migrate`** 空 feature（`check-cfg`）；**`sqlx`** 依赖增加 **`migrate`**（`#[sqlx::test]` + `PgPool` 在 **`--features migrate`** 下可用）；**`callback_validation_tests`** 修正 **`#[cfg(all(test, feature = "migrate"))]`** 多余括号笔误；**`dialogue_risk` / `observation`** 未接线符号改 **`#[allow(dead_code)]`**；**`e2e_regression_suite`** 忽略用例 **`_token`** + **`E2ETestContext`** **`#[allow(dead_code)]`**。
   - [x] **C3（all-features clippy）**：清理 **`cargo clippy --all-targets --all-features -D warnings`** 下的一批 lint（测试常量 assert、URI needless borrow、`module_inception`、视频生成测试 **`type_complexity`** 等）；提交 **`b306fe98`**。
+  - [x] **C4（未注册孤儿模块）**：删除 **`backend/src/services/video_encoder.rs`**（仅文件存在、未在 `services/mod.rs` 声明、模块树不可达、全仓无 `video_encoder` 调用点），避免后续误接线或重复实现。
+  - [x] **C5（窄域路由导出收口）**：在 `app/router`、`projects/routes`、`production/workbench/track`、`scripting/scripts` 及直接关联做窄扫描；确认本轮（含本次复扫）无“可安全整文件删除”的未注册孤儿模块。删除 `backend/src/production/workbench/track/mod.rs` 中未注册且无调用的 `batch-select-video` re-export（`__path_post_workbench_batch_select_video`、`post_workbench_batch_select_video`），保留 `videos.rs` 实现体待后续功能决策，避免误删潜在预留能力。
+  - [x] **C6（遗留 `.backup` 源文件）**：删除 `backend/src/production/workbench/video/generate.rs.backup`、`video_prompt_memory/mod.rs.backup`（未参与模块树，体积大且易与主线漂移）。
 - [ ] **D**：删 PG `legacy_id` 列 — **独立窗口**；依赖 `import_staging` / promote 方案（见主文档 §七）。
 
 **验收**：单独发布说明 + DBA 签字类流程（若适用）。
