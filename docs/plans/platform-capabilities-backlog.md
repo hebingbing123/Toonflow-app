@@ -23,7 +23,7 @@
 | ID | 能力 | Backend | Flutter / 产品面 | 备注 |
 |----|------|---------|-------------------|------|
 | P-B1 | **用户级或 workspace 级 API Key**（只读/读写 scope） | 签发、哈希存储、轮换、审计 | 设置页管理 keys、展示一次明文 | 与限流、审计联动 |
-| P-B2 | **出站 Webhook**（项目状态、任务完成 → 客户 URL） | 注册 URL、签名校验、重试、死信 | 配置 UI + 测试投递按钮 | SaaS 常见需求 |
+| P-B2 | **出站 Webhook**（项目状态、任务完成 → 客户 URL） | 注册 URL、签名校验、重试、死信 | 配置 UI + 测试投递按钮 | **tracked**：已落地最小版（settings CRUD + test 投递 + 迁移），commit `09bf5190` |
 | P-B3 | **公开只读 Status / Health 页**（非鉴权或弱鉴权） | 聚合 `/health`、队列深度、依赖项 | 静态页或 Flutter Web 路由 | 与客户支持联动 |
 
 ---
@@ -43,7 +43,7 @@
 | ID | 能力 | Backend | Flutter / 产品面 | 备注 |
 |----|------|---------|-------------------|------|
 | P-D1 | **产品文案 i18n 收口**（中英至少） | 错误码 `message` 多语言可选 | `l10n` 全覆盖主路径 | 与 [`roadmap-flutter-shell.md`](./roadmap-flutter-shell.md) 联动 |
-| P-D2 | **应用内帮助 / 文档 Hub** | 深链或 CDN 文档 URL 配置 | 帮助抽屉、外链 WebView | 降低支持成本 |
+| P-D2 | **应用内帮助 / 文档 Hub** | 深链或 CDN 文档 URL 配置 | 帮助抽屉、外链 WebView | **tracked**：已落地最小版（env 驱动 links + settings endpoint + Flutter pane），commit `d0ba94f2` |
 | P-D3 | **429 / 配额耗尽统一 UX** | 统一 `code` + `Retry-After` | 全局拦截器 + Snackbar/对话框 | 与限流 WP 联动 |
 
 ---

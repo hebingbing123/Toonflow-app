@@ -48,6 +48,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 - 矩阵脚本：[`scripts/workspace_rls_probe_matrix.sh`](../../scripts/workspace_rls_probe_matrix.sh)
 - 样本种子：[`scripts/workspace_rls_seed_sample.sh`](../../scripts/workspace_rls_seed_sample.sh)
 - 一键样本验证：[`scripts/workspace_rls_seed_and_probe_sample.sh`](../../scripts/workspace_rls_seed_and_probe_sample.sh)
+- 汇总脚本：[`scripts/workspace_rls_summarize.sh`](../../scripts/workspace_rls_summarize.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
 它做两件事：
@@ -142,6 +143,14 @@ bash scripts/workspace_rls_probe_matrix.sh
 - `owner.txt`
 - `member.txt`
 - `outsider.txt`
+
+若要把三份原始输出再整理成可贴工单的 Markdown，可继续运行：
+
+```bash
+INPUT_DIR=".tmp/workspace-rls-<date>" \
+OUTPUT_FILE=".tmp/workspace-rls-<date>/summary.md" \
+bash scripts/workspace_rls_summarize.sh
+```
 
 ### 3.4 当前已验证的本地样本结论（2026-05-08）
 
@@ -247,7 +256,7 @@ Unexpected deny paths:
 Follow-up:
 ```
 
-建议通过 `OUTPUT_DIR=".tmp/workspace-rls-<date>"` 让矩阵脚本自动落盘原始输出，不要把环境数据直接提交进仓库。
+建议通过 `OUTPUT_DIR=".tmp/workspace-rls-<date>"` 让矩阵脚本自动落盘原始输出，再用 `workspace_rls_summarize.sh` 生成 Markdown 摘要；不要把环境数据直接提交进仓库。
 
 ## 7) 完成标准
 
