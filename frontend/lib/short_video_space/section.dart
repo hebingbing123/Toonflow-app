@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../rust_api.dart';
+import 'components/filter_panel.dart';
+import 'state/operation_history.dart';
 import 'support.dart';
 import 'view.dart';
 
@@ -13,6 +16,8 @@ part 'section_publish.dart';
 part 'section_publish_scheduling.dart';
 part 'section_publish_copy.dart';
 part 'section_publish_batch.dart';
+part 'section_undo_redo.dart';
+part 'dialogs/voiceover_settings_dialog.dart';
 
 class ShortVideoSpaceSection extends StatefulWidget {
   const ShortVideoSpaceSection({
@@ -94,6 +99,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   
   // P11: Delivery mode state
   String? _deliveryModeFilter;
+
+  // P13.2: Operation history for undo/redo
+  final OperationHistory _operationHistory = OperationHistory();
 
   bool get _isAnimated => _mode == ShortVideoMode.animated;
 
@@ -537,8 +545,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             : '挂接制作工作区、任务中心和质量评审，重点补演员一致性与真实感复核。',
       ),
     ];
-    return ShortVideoSpaceView(
-      mode: _mode,
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        _handleUndoRedoKeyEvent(event);
+        return KeyEventResult.ignored;
+      },
+      child: ShortVideoSpaceView(
+        mode: _mode,
       modeTitle: modeTitle,
       modeSummary: modeSummary,
       modeAdvice: modeAdvice,
@@ -680,7 +694,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       },
       onOpenTasks: widget.onOpenTasks,
       onOpenQuality: widget.onOpenQuality,
+      ),
     );
   }
 }
-

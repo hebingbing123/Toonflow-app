@@ -91,6 +91,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
       for (final item in entries)
         if (item.selectedMediaUrl.isEmpty) item.storyboardNumericId,
     };
+    var filterState = FilterState.empty();
     var operationInProgress = false;
     if (!mounted) return;
     await showDialog<void>(
@@ -107,6 +108,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   storyboardId: item.storyboardNumericId,
                 );
                 pausedStoryboardIds.add(item.storyboardNumericId);
+                
+                // Record operation for undo/redo
+                _recordDisableOperation(
+                  scriptId: item.scriptNumericId,
+                  storyboardId: item.storyboardNumericId,
+                  previousVideoUrl: item.selectedMediaUrl,
+                );
+                
                 if (mounted) {
                   _showOperationFeedback(
                     '分镜 #${item.storyboardNumericId} 已暂停（清空当前视频）。',
@@ -142,6 +151,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 return;
               }
               try {
+                // Store previous URL for undo/redo
+                final previousUrl = item.selectedMediaUrl;
+                final isReplace = replacementUrl != null && previousUrl.isNotEmpty;
+                
                 await postWorkbenchSelectVideoV1(
                   token,
                   projectId: project.numericId,
@@ -149,6 +162,23 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   storyboardId: item.storyboardNumericId,
                   videoUrl: seedUrl,
                 );
+                
+                // Record operation for undo/redo
+                if (isReplace) {
+                  _recordReplaceOperation(
+                    scriptId: item.scriptNumericId,
+                    storyboardId: item.storyboardNumericId,
+                    previousVideoUrl: previousUrl,
+                    newVideoUrl: seedUrl,
+                  );
+                } else {
+                  _recordEnableOperation(
+                    scriptId: item.scriptNumericId,
+                    storyboardId: item.storyboardNumericId,
+                    videoUrl: seedUrl,
+                  );
+                }
+                
                 pausedStoryboardIds.remove(item.storyboardNumericId);
                 if (replacementUrl != null) {
                   final idx = ordered.indexWhere(
@@ -250,6 +280,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               int durationSeconds,
             ) async {
               try {
+                // Store previous duration for undo/redo
+                final previousDuration = int.tryParse(
+                  item.durationText.replaceAll(RegExp(r'[^0-9]'), ''),
+                ) ?? 0;
+                
                 final status = await postStoryboardUpdateDurationV1(
                   token,
                   projectId: project.numericId,
@@ -263,6 +298,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     statusCode: status,
                   );
                 }
+                
+                // Record operation for undo/redo
+                _recordDurationOperation(
+                  scriptId: item.scriptNumericId,
+                  storyboardId: item.storyboardNumericId,
+                  previousDuration: previousDuration,
+                  newDuration: durationSeconds,
+                );
+                
                 final idx = ordered.indexWhere(
                   (entry) =>
                       entry.storyboardNumericId == item.storyboardNumericId,
@@ -318,6 +362,126 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               return '字幕与时长未见明显错位。';
             }
 
+            bool hasQualityIssue(_AssemblyClipDeskOpEntry item) {
+              return item.voiceoverState == 'failed' ||
+                  subtitleMismatchLine(item) != '字幕与时长未见明显错位。';
+            }
+
+            bool matchesSearch(_AssemblyClipDeskOpEntry item) {
+              final keyword = filterState.searchKeyword.trim().toLowerCase();
+              if (keyword.isEmpty) {
+                return true;
+              }
+              final searchTargets = <String>[
+                item.storyboardNumericId.toString(),
+                item.scriptNumericId.toString(),
+                item.selectedMediaUrl,
+                if (filterState.searchInSubtitles) item.subtitleText,
+                if (filterState.searchInVoiceover) ...[
+                  item.voiceoverState,
+                  item.voiceoverError,
+                  item.voiceoverAudioUrl,
+                ],
+              ];
+              return searchTargets.any(
+                (value) => value.toLowerCase().contains(keyword),
+              );
+            }
+
+            bool matchesStatusFilters(_AssemblyClipDeskOpEntry item) {
+              if (filterState.statusFilters.isEmpty) {
+                return true;
+              }
+              final paused = pausedStoryboardIds.contains(item.storyboardNumericId);
+              final durationSec = parseDurationSeconds(item.durationText);
+              final hasSubtitle = item.subtitleText.isNotEmpty;
+              final hasVoiceover = item.voiceoverScriptReady || item.voiceoverAssetReady;
+              for (final filter in filterState.statusFilters) {
+                switch (filter) {
+                  case ShotStatusFilter.enabled:
+                    if (!paused) return true;
+                    break;
+                  case ShotStatusFilter.disabled:
+                    if (paused) return true;
+                    break;
+                  case ShotStatusFilter.hasVideo:
+                    if (item.selectedMediaUrl.isNotEmpty) return true;
+                    break;
+                  case ShotStatusFilter.noVideo:
+                    if (item.selectedMediaUrl.isEmpty) return true;
+                    break;
+                  case ShotStatusFilter.hasDuration:
+                    if ((durationSec ?? 0) > 0) return true;
+                    break;
+                  case ShotStatusFilter.noDuration:
+                    if ((durationSec ?? 0) <= 0) return true;
+                    break;
+                  case ShotStatusFilter.hasSubtitle:
+                    if (hasSubtitle) return true;
+                    break;
+                  case ShotStatusFilter.noSubtitle:
+                    if (!hasSubtitle) return true;
+                    break;
+                  case ShotStatusFilter.hasVoiceover:
+                    if (hasVoiceover) return true;
+                    break;
+                  case ShotStatusFilter.noVoiceover:
+                    if (!hasVoiceover) return true;
+                    break;
+                  case ShotStatusFilter.voiceoverFailed:
+                    if (item.voiceoverState == 'failed') return true;
+                    break;
+                }
+              }
+              return false;
+            }
+
+            bool matchesQualityFilters(_AssemblyClipDeskOpEntry item) {
+              if (filterState.qualityFilters.isEmpty) {
+                return true;
+              }
+              final qualityIssue = hasQualityIssue(item);
+              final postProductionReady =
+                  item.selectedMediaUrl.isNotEmpty &&
+                  parseDurationSeconds(item.durationText) != null;
+              for (final filter in filterState.qualityFilters) {
+                switch (filter) {
+                  case QualityFilter.hasBadExample:
+                    if (qualityIssue) return true;
+                    break;
+                  case QualityFilter.noBadExample:
+                    if (!qualityIssue) return true;
+                    break;
+                  case QualityFilter.generationStage:
+                    if (!postProductionReady) return true;
+                    break;
+                  case QualityFilter.postProductionStage:
+                    if (postProductionReady) return true;
+                    break;
+                  case QualityFilter.hasDegradation:
+                    if (qualityIssue || pausedStoryboardIds.contains(item.storyboardNumericId)) {
+                      return true;
+                    }
+                    break;
+                  case QualityFilter.noDegradation:
+                    if (!qualityIssue &&
+                        !pausedStoryboardIds.contains(item.storyboardNumericId)) {
+                      return true;
+                    }
+                    break;
+                }
+              }
+              return false;
+            }
+
+            List<_AssemblyClipDeskOpEntry> buildVisibleEntries() {
+              return ordered.where((item) {
+                return matchesSearch(item) &&
+                    matchesStatusFilters(item) &&
+                    matchesQualityFilters(item);
+              }).toList(growable: false);
+            }
+
             // 计算当前总时长（实时更新）
             int calculateCurrentTotalDuration() {
               var total = 0;
@@ -345,6 +509,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
 
             final currentTotalDuration = calculateCurrentTotalDuration();
             final currentTotalFormatted = formatDurationHHMMSS(currentTotalDuration);
+            final visibleEntries = buildVisibleEntries();
 
             return AlertDialog(
               title: const Text('镜头基础操作'),
@@ -388,6 +553,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                       ),
                     ),
                     const SizedBox(height: 8),
+                    FilterPanel(
+                      initialFilter: filterState,
+                      onFilterChanged: (nextFilter) {
+                        setLocalState(() {
+                          filterState = nextFilter;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Wrap(
@@ -409,21 +583,31 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             icon: const Icon(Icons.undo_outlined),
                             label: const Text('撤销到打开时'),
                           ),
+                          // Undo/Redo buttons
+                          _buildUndoRedoToolbar(),
                         ],
                       ),
                     ),
                     const SizedBox(height: 10),
                     Flexible(
-                      child: ListView.builder(
+                      child: visibleEntries.isEmpty
+                          ? Center(
+                              child: Text(
+                                '当前过滤条件下没有镜头，试试清空搜索或放宽条件。',
+                                style: Theme.of(ctx).textTheme.bodyMedium,
+                              ),
+                            )
+                          : ListView.builder(
                         shrinkWrap: true,
-                        itemCount: ordered.length,
+                        itemCount: visibleEntries.length,
                         itemBuilder: (ctx, idx) {
-                          final item = ordered[idx];
+                          final item = visibleEntries[idx];
+                          final actualIndex = ordered.indexOf(item);
                           final paused = pausedStoryboardIds.contains(
                             item.storyboardNumericId,
                           );
-                          final canMoveUp = idx > 0;
-                          final canMoveDown = idx < ordered.length - 1;
+                          final canMoveUp = actualIndex > 0;
+                          final canMoveDown = actualIndex < ordered.length - 1;
                           return Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             child: Padding(
@@ -432,7 +616,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${idx + 1}',
+                                    '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${actualIndex + 1}',
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -487,9 +671,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                       OutlinedButton(
                                         onPressed: (canMoveUp && !operationInProgress)
                                             ? () {
-                                                final current = ordered[idx];
-                                                ordered[idx] = ordered[idx - 1];
-                                                ordered[idx - 1] = current;
+                                                final current = ordered[actualIndex];
+                                                ordered[actualIndex] = ordered[actualIndex - 1];
+                                                ordered[actualIndex - 1] = current;
                                                 setLocalState(() {});
                                               }
                                             : null,
@@ -498,9 +682,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                       OutlinedButton(
                                         onPressed: (canMoveDown && !operationInProgress)
                                             ? () {
-                                                final current = ordered[idx];
-                                                ordered[idx] = ordered[idx + 1];
-                                                ordered[idx + 1] = current;
+                                                final current = ordered[actualIndex];
+                                                ordered[actualIndex] = ordered[actualIndex + 1];
+                                                ordered[actualIndex + 1] = current;
                                                 setLocalState(() {});
                                               }
                                             : null,

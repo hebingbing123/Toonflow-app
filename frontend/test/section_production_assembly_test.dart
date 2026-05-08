@@ -2068,4 +2068,90 @@ void main() {
       expect(uiState['metrics'], hasLength(4));
     });
   });
+
+  group('Assembly Filter Mapping Tests', () {
+    bool matchesSearch({
+      required String keyword,
+      required String subtitleText,
+      required String voiceoverState,
+      required String voiceoverError,
+      required String voiceoverAudioUrl,
+      required bool searchInSubtitles,
+      required bool searchInVoiceover,
+    }) {
+      final normalized = keyword.trim().toLowerCase();
+      if (normalized.isEmpty) {
+        return true;
+      }
+      final targets = <String>[
+        if (searchInSubtitles) subtitleText,
+        if (searchInVoiceover) ...[
+          voiceoverState,
+          voiceoverError,
+          voiceoverAudioUrl,
+        ],
+      ];
+      return targets.any((value) => value.toLowerCase().contains(normalized));
+    }
+
+    test('search can target subtitle text without matching voiceover fields', () {
+      expect(
+        matchesSearch(
+          keyword: '雨夜',
+          subtitleText: '雨夜追逐',
+          voiceoverState: 'ready',
+          voiceoverError: '',
+          voiceoverAudioUrl: '',
+          searchInSubtitles: true,
+          searchInVoiceover: false,
+        ),
+        isTrue,
+      );
+
+      expect(
+        matchesSearch(
+          keyword: '音频失败',
+          subtitleText: '雨夜追逐',
+          voiceoverState: 'failed',
+          voiceoverError: '音频失败',
+          voiceoverAudioUrl: '',
+          searchInSubtitles: true,
+          searchInVoiceover: false,
+        ),
+        isFalse,
+      );
+    });
+
+    test('quality degradation can be inferred from failed voiceover or mismatch', () {
+      bool hasQualityIssue({
+        required String voiceoverState,
+        required String mismatchLine,
+      }) {
+        return voiceoverState == 'failed' ||
+            mismatchLine != '字幕与时长未见明显错位。';
+      }
+
+      expect(
+        hasQualityIssue(
+          voiceoverState: 'failed',
+          mismatchLine: '字幕与时长未见明显错位。',
+        ),
+        isTrue,
+      );
+      expect(
+        hasQualityIssue(
+          voiceoverState: 'ready',
+          mismatchLine: '时长已设定，但字幕为空（可能有字幕轨缺口）。',
+        ),
+        isTrue,
+      );
+      expect(
+        hasQualityIssue(
+          voiceoverState: 'ready',
+          mismatchLine: '字幕与时长未见明显错位。',
+        ),
+        isFalse,
+      );
+    });
+  });
 }
