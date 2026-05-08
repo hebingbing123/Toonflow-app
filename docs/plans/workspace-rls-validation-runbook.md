@@ -49,6 +49,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 - 样本种子：[`scripts/workspace_rls_seed_sample.sh`](../../scripts/workspace_rls_seed_sample.sh)
 - 一键样本验证：[`scripts/workspace_rls_seed_and_probe_sample.sh`](../../scripts/workspace_rls_seed_and_probe_sample.sh)
 - 汇总脚本：[`scripts/workspace_rls_summarize.sh`](../../scripts/workspace_rls_summarize.sh)
+- 样本断言：[`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
 它做两件事：
@@ -78,6 +79,12 @@ bash scripts/workspace_rls_seed_sample.sh
 ```bash
 bash scripts/workspace_rls_seed_and_probe_sample.sh
 ```
+
+这条命令现在还会自动断言固定 sample 的期望形状：
+
+- `app_workspace` / `app_workspace_member`：owner=1, member=1, outsider=0
+- `app_project` / `app_script` / `app_asset` / `app_novel` / `app_generation_job`：owner=1, member=0, outsider=0
+- `app_agent_memory` / `app_art_style`：三者都为 0
 
 它会插入固定 UUID 的三类用户：
 
@@ -150,6 +157,13 @@ bash scripts/workspace_rls_probe_matrix.sh
 INPUT_DIR=".tmp/workspace-rls-<date>" \
 OUTPUT_FILE=".tmp/workspace-rls-<date>/summary.md" \
 bash scripts/workspace_rls_summarize.sh
+```
+
+若想只对固定样本结果做门槛断言，也可运行：
+
+```bash
+INPUT_DIR=".tmp/workspace-rls-<date>" \
+bash scripts/workspace_rls_assert_sample.sh
 ```
 
 ### 3.4 当前已验证的本地样本结论（2026-05-08）
