@@ -703,6 +703,46 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     return parts.join(' · ');
   }
 
+  Map<String, int> _billingEventCountsByProvider() {
+    final counts = <String, int>{};
+    for (final item in _billingEvents) {
+      final key = (item.provider ?? 'unknown').trim().isEmpty
+          ? 'unknown'
+          : item.provider!.trim();
+      counts.update(key, (value) => value + 1, ifAbsent: () => 1);
+    }
+    return counts;
+  }
+
+  Map<String, int> _billingEventCountsByType() {
+    final counts = <String, int>{};
+    for (final item in _billingEvents) {
+      final key = (item.eventType ?? 'unknown').trim().isEmpty
+          ? 'unknown'
+          : item.eventType!.trim();
+      counts.update(key, (value) => value + 1, ifAbsent: () => 1);
+    }
+    return counts;
+  }
+
+  String _billingEventsSnapshotSummary() {
+    final providerCounts = _billingEventCountsByProvider().entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final typeCounts = _billingEventCountsByType().entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final informational = _billingEvents
+        .where((e) => e.isInformationalEvent)
+        .length;
+    final stateful = _billingEvents.length - informational;
+    return [
+      'loaded=${_billingEvents.length}',
+      'informational=$informational',
+      'stateful=$stateful',
+      'providers=${providerCounts.map((e) => '${e.key}:${e.value}').join(', ')}',
+      'event_types=${typeCounts.take(8).map((e) => '${e.key}:${e.value}').join(', ')}',
+    ].join('\n');
+  }
+
   String _billingEventsQuerySummary() {
     final parts = <String>[
       'provider=${_billingProvider.isEmpty ? "all" : _billingProvider}',
@@ -771,6 +811,18 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('已复制当前查询摘要')));
+  }
+
+  Future<void> _copyBillingEventsSnapshotSummary() async {
+    await Clipboard.setData(
+      ClipboardData(text: _billingEventsSnapshotSummary()),
+    );
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('已复制当前审计摘要')));
   }
 
   Future<void> _copyAllBillingEventsCsv() async {
@@ -943,9 +995,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           const SizedBox(height: 8),
           TextField(
             controller: _webhookSecretController,
-            decoration: const InputDecoration(
-              labelText: 'Secret（可空，留空则服务端生成）',
-            ),
+            decoration: const InputDecoration(labelText: 'Secret（可空，留空则服务端生成）'),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -1262,6 +1312,57 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             Text(
               'total=${_billingEventsPage!.total} · loaded=${_billingEvents.length} · has_more=${_billingEventsPage!.hasMore}',
             ),
+          if (_billingEvents.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text('当前加载摘要', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ...(_billingEventCountsByProvider().entries.toList()
+                      ..sort((a, b) => b.value.compareTo(a.value)))
+                    .map(
+                      (entry) => Chip(
+                        label: Text('${entry.key} ${entry.value}'),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                Chip(
+                  label: Text(
+                    'informational ${_billingEvents.where((e) => e.isInformationalEvent).length}',
+                  ),
+                  visualDensity: VisualDensity.compact,
+                ),
+                Chip(
+                  label: Text(
+                    'stateful ${_billingEvents.where((e) => !e.isInformationalEvent).length}',
+                  ),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ...(_billingEventCountsByType().entries.toList()
+                      ..sort((a, b) => b.value.compareTo(a.value)))
+                    .take(8)
+                    .map(
+                      (entry) => Chip(
+                        label: Text('${entry.key} ${entry.value}'),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                OutlinedButton(
+                  onPressed: _copyBillingEventsSnapshotSummary,
+                  child: const Text('复制审计摘要'),
+                ),
+              ],
+            ),
+          ],
           ..._billingEvents.map(
             (item) => Card(
               child: Padding(
