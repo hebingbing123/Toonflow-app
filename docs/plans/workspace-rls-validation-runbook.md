@@ -88,6 +88,7 @@ bash scripts/workspace_rls_seed_and_probe_sample.sh
 - `member.txt`
 - `outsider.txt`
 - `summary.md`
+- `summary.json`
 
 并继续断言固定 sample 的期望形状：
 
@@ -147,7 +148,7 @@ OUTSIDER_USER_ID="$OUTSIDER_USER_ID" \
 bash scripts/workspace_rls_probe_matrix.sh
 ```
 
-若想一步拿到原始输出 + Markdown 摘要，也可直接：
+若想一步拿到原始输出 + Markdown/JSON 摘要，也可直接：
 
 ```bash
 DATABASE_URL=... \

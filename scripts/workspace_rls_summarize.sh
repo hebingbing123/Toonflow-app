@@ -3,6 +3,7 @@ set -euo pipefail
 
 INPUT_DIR="${INPUT_DIR:-}"
 OUTPUT_FILE="${OUTPUT_FILE:-}"
+JSON_OUTPUT_FILE="${JSON_OUTPUT_FILE:-}"
 
 if [[ -z "$INPUT_DIR" ]]; then
   echo "INPUT_DIR is required" >&2
@@ -191,10 +192,57 @@ Verdict hints:
 EOF
 }
 
+emit_json() {
+  local overall
+  overall="$(overall_verdict)"
+
+  printf '{\n'
+  printf '  "date": "%s",\n' "$(date '+%Y-%m-%d %H:%M:%S %z')"
+  printf '  "workspace_id": "%s",\n' "$workspace_id"
+  printf '  "overall_verdict": "%s",\n' "$overall"
+  printf '  "users": {\n'
+  printf '    "owner": "%s",\n' "$owner_user_id"
+  printf '    "member": "%s",\n' "$member_user_id"
+  printf '    "outsider": "%s"\n' "$outsider_user_id"
+  printf '  },\n'
+  printf '  "rows": [\n'
+
+  local table owner_count member_count outsider_count verdict first
+  first=1
+  for table in "${tables[@]}"; do
+    owner_count="$(get_count "$OWNER_FILE" "$table")"
+    member_count="$(get_count "$MEMBER_FILE" "$table")"
+    outsider_count="$(get_count "$OUTSIDER_FILE" "$table")"
+    verdict="$(classify_verdict "$table" "$owner_count" "$member_count" "$outsider_count")"
+
+    if [[ "$first" -eq 0 ]]; then
+      printf ',\n'
+    fi
+    first=0
+
+    printf '    {\n'
+    printf '      "table": "%s",\n' "$table"
+    printf '      "owner": %s,\n' "$owner_count"
+    printf '      "member": %s,\n' "$member_count"
+    printf '      "outsider": %s,\n' "$outsider_count"
+    printf '      "verdict": "%s"\n' "$verdict"
+    printf '    }'
+  done
+
+  printf '\n  ]\n'
+  printf '}\n'
+}
+
 if [[ -n "$OUTPUT_FILE" ]]; then
   mkdir -p "$(dirname "$OUTPUT_FILE")"
   emit_summary > "$OUTPUT_FILE"
   echo "saved summary to $OUTPUT_FILE"
 else
   emit_summary
+fi
+
+if [[ -n "$JSON_OUTPUT_FILE" ]]; then
+  mkdir -p "$(dirname "$JSON_OUTPUT_FILE")"
+  emit_json > "$JSON_OUTPUT_FILE"
+  echo "saved json summary to $JSON_OUTPUT_FILE"
 fi
