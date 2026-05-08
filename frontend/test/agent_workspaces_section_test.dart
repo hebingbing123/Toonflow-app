@@ -1639,7 +1639,9 @@ void main() {
     await tester.pump();
     expect(find.textContaining('已应用任务建议：先生成资产计划'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(OutlinedButton, '使用该 key'));
+    final useFlowKeyButton = find.widgetWithText(OutlinedButton, '使用该 key');
+    await tester.ensureVisible(useFlowKeyButton);
+    await tester.tap(useFlowKeyButton);
     await tester.pump();
     expect(flowKeyController.text, 'assets');
     expect(productionProbeCalls, 0);
