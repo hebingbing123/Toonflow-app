@@ -45,6 +45,7 @@ class SkillsHarnessController extends ChangeNotifier {
   bool loadingUserWasmValidate = false;
   bool loadingUserWasmPersist = false;
   bool loadingUserWasmList = false;
+  bool loadingUserWasmRevoke = false;
   bool loadingSkillsSummary = false;
   bool loadingSkillList = false;
   bool loadingSkillPreview = false;
@@ -64,6 +65,8 @@ class SkillsHarnessController extends ChangeNotifier {
   String? userWasmValidateLine;
   String? userWasmPersistLine;
   String? userWasmListLine;
+  String? userWasmRevokeTargetId;
+  String? userWasmRevokeLine;
   String? skillsAggregateLine;
   String? skillsListSummary;
   String? skillMutationLine;
@@ -85,6 +88,8 @@ class SkillsHarnessController extends ChangeNotifier {
     userWasmValidateLine = null;
     userWasmPersistLine = null;
     userWasmListLine = null;
+    userWasmRevokeTargetId = null;
+    userWasmRevokeLine = null;
     skillsAggregateLine = null;
     skillsListSummary = null;
     skillMutationLine = null;
@@ -192,6 +197,7 @@ class SkillsHarnessController extends ChangeNotifier {
           : r.wasmSha256Hex;
       userWasmPersistLine =
           'stored id=${r.id}, sha256=$shaShort, size=${r.sizeBytes}, at=${r.createdAt.toIso8601String()}';
+      userWasmRevokeTargetId = r.id;
     } on RustApiException catch (e) {
       _setError(e.toString());
     } catch (e) {
@@ -213,6 +219,7 @@ class SkillsHarnessController extends ChangeNotifier {
       final r = await listHarnessUserWasm(token);
       if (r.items.isEmpty) {
         userWasmListLine = '0 stored module(s)';
+        userWasmRevokeTargetId = null;
       } else {
         final preview = r.items
             .take(5)
@@ -220,6 +227,7 @@ class SkillsHarnessController extends ChangeNotifier {
             .join(', ');
         userWasmListLine =
             '${r.items.length} stored module(s) — $preview${r.items.length > 5 ? ', …' : ''}';
+        userWasmRevokeTargetId = r.items.first.id;
       }
     } on RustApiException catch (e) {
       _setError(e.toString());
@@ -227,6 +235,29 @@ class SkillsHarnessController extends ChangeNotifier {
       _setError(e.toString());
     } finally {
       loadingUserWasmList = false;
+      _publish();
+    }
+  }
+
+  Future<void> revokeUserWasmProbe() async {
+    final token = _accessToken;
+    final id = userWasmRevokeTargetId;
+    if (token == null || id == null) return;
+    loadingUserWasmRevoke = true;
+    _setError(null);
+    userWasmRevokeLine = null;
+    _publish();
+    try {
+      final r = await revokeHarnessUserWasm(token, id);
+      userWasmRevokeLine =
+          'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
+      userWasmRevokeTargetId = null;
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      loadingUserWasmRevoke = false;
       _publish();
     }
   }

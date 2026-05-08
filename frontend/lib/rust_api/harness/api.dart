@@ -116,6 +116,24 @@ class ListHarnessUserWasmResponse {
   }
 }
 
+/// **`revokeHarnessUserWasmV1`** — **200** JSON body.
+class RevokeHarnessUserWasmResponse {
+  const RevokeHarnessUserWasmResponse({
+    required this.id,
+    required this.revokedAt,
+  });
+
+  final String id;
+  final DateTime revokedAt;
+
+  factory RevokeHarnessUserWasmResponse.fromJson(Map<String, dynamic> json) {
+    return RevokeHarnessUserWasmResponse(
+      id: json['id'] as String,
+      revokedAt: DateTime.parse(json['revoked_at'] as String),
+    );
+  }
+}
+
 /// `GET /api/v1/harness/tools`. See `listHarnessToolsV1`.
 Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
@@ -190,4 +208,20 @@ Future<ListHarnessUserWasmResponse> listHarnessUserWasm(String accessToken) asyn
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListHarnessUserWasmResponse.fromJson(map);
+}
+
+/// **`DELETE /api/v1/harness/user-wasm/{id}`**. See `revokeHarnessUserWasmV1`.
+Future<RevokeHarnessUserWasmResponse> revokeHarnessUserWasm(
+  String accessToken,
+  String wasmRowId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/user-wasm/$wasmRowId');
+  final res = await http
+      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return RevokeHarnessUserWasmResponse.fromJson(map);
 }

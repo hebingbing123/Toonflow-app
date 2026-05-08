@@ -8,6 +8,7 @@ use crate::harness::wasm_runtime::probe_wasm_bytes;
 
 const VALIDATE_USER_WASM_URI: &str = "/api/v1/harness/user-wasm/validate";
 const USER_WASM_STORE_URI: &str = "/api/v1/harness/user-wasm";
+const NIL_UUID: &str = "00000000-0000-0000-0000-000000000000";
 
 #[tokio::test]
 async fn harness_tools_unauthorized_without_bearer() {
@@ -144,6 +145,23 @@ async fn harness_user_wasm_persist_returns_database_error_without_pg() {
     let wasm = probe_wasm_bytes();
     let (status, v) =
         post_bytes_bearer_octet(USER_WASM_STORE_URI, &token, "application/wasm", wasm).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn harness_user_wasm_revoke_unauthorized_without_bearer() {
+    let uri = format!("{USER_WASM_STORE_URI}/{NIL_UUID}");
+    let (status, v) = delete_json_no_bearer(&uri).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn harness_user_wasm_revoke_returns_database_error_without_pg() {
+    let token = test_jwt(Uuid::nil());
+    let uri = format!("{USER_WASM_STORE_URI}/{NIL_UUID}");
+    let (status, v) = delete_json_bearer(&uri, &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }

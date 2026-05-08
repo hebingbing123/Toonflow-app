@@ -131,6 +131,10 @@ pub fn harness_user_wasm_list_http(user_id: Uuid, returned: usize) {
     );
 }
 
+pub fn harness_user_wasm_revoke_http(user_id: Uuid, wasm_id: Uuid) {
+    tracing::debug!(%user_id, %wasm_id, "harness.http.user_wasm_revoke");
+}
+
 /// REST **`/api/v1/agents/memory/*`** (parity with Electron agent memory).
 pub fn memory_http(user_id: Uuid, numeric_project_id: i32, op: &'static str) {
     tracing::debug!(%user_id, numeric_project_id, %op, "harness.memory.http");

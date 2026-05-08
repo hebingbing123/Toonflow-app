@@ -3,10 +3,10 @@
 //! `/api/v1/harness/*` 下的 REST 路由（工具目录；未来的策略或管理端点保留在此处）。
 
 use axum::body::Bytes;
-use axum::extract::State;
+use axum::extract::{Path, State};
 use axum::http::HeaderMap;
 use axum::http::StatusCode;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post};
 use axum::{Json, Router};
 
 use chrono::{DateTime, Utc};
@@ -189,6 +189,43 @@ async fn list_user_wasm_meta(
     }))
 }
 
+#[derive(Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct HarnessUserWasmRevoked {
+    #[schema(example = "b3b4cb26-62d4-4d5c-9486-74c4c5c62c94")]
+    pub id: Uuid,
+    pub revoked_at: DateTime<Utc>,
+}
+
+/// **WP‑C:** soft-revoke one stored WASM row (**`revoked_at`** set; row retained for audit).
+#[utoipa::path(
+    delete,
+    path = "/api/v1/harness/user-wasm/{id}",
+    operation_id = "revokeHarnessUserWasmV1",
+    tag = "harness",
+    params(
+        ("id" = Uuid, Path, description = "Stored WASM row id")
+    ),
+    responses(
+        (status = 200, description = "Revoked or already revoked (idempotent)", body = HarnessUserWasmRevoked),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "No row for this id and owner", body = crate::error::ErrorBody),
+        (status = 503, description = "DATABASE_URL not configured / DB unavailable", body = crate::error::ErrorBody),
+    ),
+    security(("bearerAuth" = []))
+)]
+async fn revoke_user_wasm_by_id(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(id): Path<Uuid>,
+) -> Result<Json<HarnessUserWasmRevoked>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    observe::harness_user_wasm_revoke_http(uid, id);
+    let revoked_at = user_wasm_db::revoke_user_wasm_for_owner(pool, uid, id).await?;
+    Ok(Json(HarnessUserWasmRevoked { id, revoked_at }))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/harness/tools", get(list_harness_tools))
@@ -200,6 +237,10 @@ pub fn router() -> Router<AppState> {
             "/api/v1/harness/user-wasm/validate",
             post(validate_user_wasm_only),
         )
+        .route(
+            "/api/v1/harness/user-wasm/{id}",
+            delete(revoke_user_wasm_by_id),
+        )
 }
 
 #[derive(utoipa::OpenApi)]
@@ -208,7 +249,8 @@ pub fn router() -> Router<AppState> {
         list_harness_tools,
         validate_user_wasm_only,
         persist_user_wasm,
-        list_user_wasm_meta
+        list_user_wasm_meta,
+        revoke_user_wasm_by_id
     ),
     components(schemas(
         HarnessToolsResponse,
@@ -216,6 +258,7 @@ pub fn router() -> Router<AppState> {
         HarnessUserWasmPersisted,
         HarnessUserWasmRecord,
         HarnessUserWasmListResponse,
+        HarnessUserWasmRevoked,
         crate::harness::tools::HarnessToolInfo,
         crate::error::ErrorBody
     )),

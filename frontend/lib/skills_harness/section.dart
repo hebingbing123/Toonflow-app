@@ -7,6 +7,7 @@ class HarnessSection extends StatelessWidget {
     required this.loadingUserWasmValidate,
     required this.loadingUserWasmPersist,
     required this.loadingUserWasmList,
+    required this.loadingUserWasmRevoke,
     required this.loadingSkillsSummary,
     required this.loadingSkillList,
     required this.loadingSkillPreview,
@@ -26,6 +27,8 @@ class HarnessSection extends StatelessWidget {
     required this.userWasmValidateLine,
     required this.userWasmPersistLine,
     required this.userWasmListLine,
+    required this.userWasmRevokeTargetId,
+    required this.userWasmRevokeLine,
     required this.skillsAggregateLine,
     required this.skillsListSummary,
     required this.skillMutationLine,
@@ -36,6 +39,7 @@ class HarnessSection extends StatelessWidget {
     required this.onValidateUserWasmProbe,
     required this.onPersistUserWasmProbe,
     required this.onLoadUserWasmList,
+    required this.onRevokeUserWasmProbe,
     required this.onLoadSkillsAggregate,
     required this.onLoadSkillList,
     required this.onPreviewSkillFile,
@@ -55,6 +59,7 @@ class HarnessSection extends StatelessWidget {
   final bool loadingUserWasmValidate;
   final bool loadingUserWasmPersist;
   final bool loadingUserWasmList;
+  final bool loadingUserWasmRevoke;
   final bool loadingSkillsSummary;
   final bool loadingSkillList;
   final bool loadingSkillPreview;
@@ -74,6 +79,8 @@ class HarnessSection extends StatelessWidget {
   final String? userWasmValidateLine;
   final String? userWasmPersistLine;
   final String? userWasmListLine;
+  final String? userWasmRevokeTargetId;
+  final String? userWasmRevokeLine;
   final String? skillsAggregateLine;
   final String? skillsListSummary;
   final String? skillMutationLine;
@@ -84,6 +91,7 @@ class HarnessSection extends StatelessWidget {
   final VoidCallback onValidateUserWasmProbe;
   final VoidCallback onPersistUserWasmProbe;
   final VoidCallback onLoadUserWasmList;
+  final VoidCallback onRevokeUserWasmProbe;
   final VoidCallback onLoadSkillsAggregate;
   final VoidCallback onLoadSkillList;
   final VoidCallback onPreviewSkillFile;
@@ -137,6 +145,17 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              onPressed:
+                  loadingUserWasmRevoke || userWasmRevokeTargetId == null
+                  ? null
+                  : onRevokeUserWasmProbe,
+              child: Text(
+                loadingUserWasmRevoke
+                    ? '…'
+                    : 'DELETE …/user-wasm/${userWasmRevokeTargetId!.substring(0, 8)}…',
+              ),
+            ),
+            FilledButton.tonal(
               onPressed: loadingSkillsSummary ? null : onLoadSkillsAggregate,
               child: Text(
                 loadingSkillsSummary ? '…' : 'GET /api/v1/skills/summary',
@@ -173,6 +192,13 @@ class HarnessSection extends StatelessWidget {
           const SizedBox(height: 8),
           SelectableText(
             'user-wasm list: $userWasmListLine',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+        if (userWasmRevokeLine != null) ...[
+          const SizedBox(height: 8),
+          SelectableText(
+            'user-wasm revoke: $userWasmRevokeLine',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

@@ -1,4 +1,4 @@
-//! **WP‑C** Postgres stubs for **`app_harness_user_wasm`** (persist + list).
+//! **WP‑C** Postgres stubs for **`app_harness_user_wasm`** (persist, list active, revoke).
 
 use chrono::{DateTime, Utc};
 use sha2::{Digest, Sha256};
@@ -57,7 +57,10 @@ pub(crate) async fn persist_user_wasm_checked(
         INSERT INTO app_harness_user_wasm (owner_user_id, wasm_sha256, wasm_bytes, size_bytes)
         SELECT $1, $2, $3::bytea, $4::bigint
         WHERE (
-          SELECT COUNT(*)::bigint FROM app_harness_user_wasm WHERE owner_user_id = $1
+          SELECT COUNT(*)::bigint
+          FROM app_harness_user_wasm
+          WHERE owner_user_id = $1
+            AND revoked_at IS NULL
         ) < $5::bigint
         RETURNING id, size_bytes, created_at
         "#,
@@ -101,6 +104,7 @@ pub(crate) async fn list_user_wasm_for_owner(
         SELECT id, wasm_sha256, size_bytes, created_at
         FROM app_harness_user_wasm
         WHERE owner_user_id = $1
+          AND revoked_at IS NULL
         ORDER BY created_at DESC
         LIMIT $2
         "#,
@@ -120,4 +124,31 @@ pub(crate) async fn list_user_wasm_for_owner(
             created_at,
         })
         .collect())
+}
+
+/// Sets **`revoked_at`** if still active; idempotent if already revoked (**same** `revoked_at` returned).
+pub(crate) async fn revoke_user_wasm_for_owner(
+    pool: &PgPool,
+    owner_user_id: Uuid,
+    wasm_id: Uuid,
+) -> Result<DateTime<Utc>, ApiError> {
+    let row: Option<(DateTime<Utc>,)> = sqlx::query_as(
+        r#"
+        UPDATE app_harness_user_wasm
+        SET revoked_at = COALESCE(revoked_at, NOW())
+        WHERE id = $1
+          AND owner_user_id = $2
+        RETURNING revoked_at
+        "#,
+    )
+    .bind(wasm_id)
+    .bind(owner_user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let Some((revoked_at,)) = row else {
+        return Err(ApiError::NotFound);
+    };
+    Ok(revoked_at)
 }

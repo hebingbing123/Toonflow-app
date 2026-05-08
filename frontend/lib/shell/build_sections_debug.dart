@@ -12,6 +12,8 @@ extension _HomePageBuildDebugSections on _HomePageState {
           _skillsHarnessController.loadingUserWasmPersist,
       loadingUserWasmList:
           _skillsHarnessController.loadingUserWasmList,
+      loadingUserWasmRevoke:
+          _skillsHarnessController.loadingUserWasmRevoke,
       loadingSkillsSummary: _skillsHarnessController.loadingSkillsSummary,
       loadingSkillList: _skillsHarnessController.loadingSkillList,
       loadingSkillPreview: _skillsHarnessController.loadingSkillPreview,
@@ -31,6 +33,8 @@ extension _HomePageBuildDebugSections on _HomePageState {
       userWasmValidateLine: _skillsHarnessController.userWasmValidateLine,
       userWasmPersistLine: _skillsHarnessController.userWasmPersistLine,
       userWasmListLine: _skillsHarnessController.userWasmListLine,
+      userWasmRevokeTargetId: _skillsHarnessController.userWasmRevokeTargetId,
+      userWasmRevokeLine: _skillsHarnessController.userWasmRevokeLine,
       skillsAggregateLine: _skillsHarnessController.skillsAggregateLine,
       skillsListSummary: _skillsHarnessController.skillsListSummary,
       skillMutationLine: _skillsHarnessController.skillMutationLine,
@@ -41,6 +45,7 @@ extension _HomePageBuildDebugSections on _HomePageState {
       onValidateUserWasmProbe: _skillsHarnessController.validateUserWasmProbe,
       onPersistUserWasmProbe: _skillsHarnessController.persistUserWasmProbe,
       onLoadUserWasmList: _skillsHarnessController.loadUserWasmList,
+      onRevokeUserWasmProbe: _skillsHarnessController.revokeUserWasmProbe,
       onLoadSkillsAggregate: _skillsHarnessController.loadSkillsAggregate,
       onLoadSkillList: _skillsHarnessController.loadSkillList,
       onPreviewSkillFile: () =>

@@ -43,4 +43,13 @@ void main() {
     expect(r.items.length, 1);
     expect(r.items.first.sizeBytes, 38);
   });
+
+  test('RevokeHarnessUserWasmResponse parses OpenAPI-shaped JSON', () {
+    final r = RevokeHarnessUserWasmResponse.fromJson({
+      'id': 'b3b4cb26-62d4-4d5c-9486-74c4c5c62c94',
+      'revoked_at': '2026-05-08T12:00:00.000Z',
+    });
+    expect(r.id, 'b3b4cb26-62d4-4d5c-9486-74c4c5c62c94');
+    expect(r.revokedAt.toUtc().toIso8601String(), '2026-05-08T12:00:00.000Z');
+  });
 }
