@@ -125,7 +125,7 @@
 
 ## 九、Phase W8 — 计费、用量、任务配额（与空间绑定策略）
 
-- [ ] **W8.1** 结论落地文档：`plan_tier` / `daily_job_quota` / `jobs_today` **按 user 还是按 workspace**（或 hybrid）
+- [x] **W8.1** 结论落地文档：`plan_tier` / `daily_job_quota` / `jobs_today` **按 user 还是按 workspace**（或 hybrid）— 当前定稿为 **user-scope**，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
 - [ ] **W8.2** 若按 workspace：`app_user_profile` vs `app_workspace` 字段迁移 + webhook 与 **`/me`** 响应形状变更策略（版本化）
 - [ ] **W8.3** Billing 运营视图是否按 workspace 过滤 — 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-D 对齐
 - [ ] **W8.4** 迁移与回填脚本 + 回滚 Runbook

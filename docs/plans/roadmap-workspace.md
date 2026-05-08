@@ -20,7 +20,7 @@
 | W5 权限矩阵 | `next` | 项目级角色与计费绑定仍未定稿；workspace 级默认矩阵已落地 |
 | W6 Flutter 产品面 | `baseline_done` | 选择器、创建、成员管理、接受邀请、空状态、`rust_api` 对齐 |
 | W7 Harness / WS | `baseline_done` | attach `workspaceUuid`、权限与回归矩阵 |
-| W8 计费与配额 | `next` | `plan_tier` / quota 仍待 user vs workspace 策略定稿 |
+| W8 计费与配额 | `next` | W8.1 已定为 user-scope；若改 workspace-scope 仍需迁移与运营面收口 |
 | W9 安全 | `baseline_done` | W9.1–W9.4 已书面收口：安全边界、一致性矩阵、敏感操作流程、邀请安全评审 |
 | W10 观测与运维 | `next` | W10.1/W10.2 observability spec 已补；W10.3 runbook 已完成；trace 与指标实现仍待补 |
 | W11 发布与门禁 | `baseline_done` | W11.1–W11.4 已书面收口：进度同步、roadmap 索引、迁移公告、refactor gate 真源 |
@@ -31,6 +31,7 @@
 - W6–W7：Flutter 与 Harness/WS 客户端路径已对齐
 - W9.1：workspace 安全边界文档已补齐，见 [`workspace-security-boundary.md`](./workspace-security-boundary.md)
 - W9.2：workspace RLS 一致性矩阵已补齐，见 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)
+- W8.1：workspace 计费口径已定为 user-scope，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
 - W9.3：敏感操作 Runbook 已补齐，见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
 - W9.4：邀请安全评审已补齐，见 [`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
 - W10.1/W10.2：workspace observability spec 已补齐，见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
@@ -46,7 +47,7 @@
 1. **W10.1 实现**：按 [`workspace-observability-spec.md`](./workspace-observability-spec.md) 给 HTTP / jobs / Harness 补 `workspace_id` 结构化字段
 2. **W10.2 实现**：按同一 spec 落地 workspace 成员数 / 项目数 / 活跃 jobs 只读查询或内部接口
 3. **W9 验证**：按 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md) 做 staging 验证，并把敏感操作 / invite review 纳入发布清单
-4. **W8.1–W8.4**：待计费口径定稿后再收 workspace 级 plan / quota / webhook 变更
+4. **W8.2–W8.4**：仅在明确需要 workspace-scope billing 时，再收字段迁移、webhook 形状与运营视图
 
 ## 执行与依赖
 
@@ -59,6 +60,7 @@
 - 总表与勾选：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md)
 - 运维排障：[`workspace-operations-runbook.md`](./workspace-operations-runbook.md)
 - 观测规格：[`workspace-observability-spec.md`](./workspace-observability-spec.md)
+- 计费口径决策：[`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
 - RLS 一致性矩阵：[`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)
 - 敏感操作：[`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
 - 邀请安全评审：[`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
