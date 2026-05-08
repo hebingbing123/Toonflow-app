@@ -145,6 +145,12 @@ pub struct ProjectRow {
     /// Quality gate enforcement strategy (off/warn/block)
     #[schema(example = "block")]
     pub quality_gate_strategy: Option<String>,
+    /// Effective access mode for the caller in the current workspace context.
+    #[schema(example = "restricted")]
+    pub project_access_mode: String,
+    /// Effective access role resolved for the caller on this project.
+    #[schema(example = "editor")]
+    pub project_access_role: String,
 }
 
 #[derive(Debug, FromRow, Serialize, ToSchema)]

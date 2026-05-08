@@ -311,7 +311,9 @@ pub(crate) async fn patch_project_by_id(
                   director_manual, mode, video_ratio, create_time_ms,
                   art_style_pack, story_style_pack,
                   target_market, target_platforms, duration_strategy,
-                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
+                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+                  $23 AS project_access_mode,
+                  $24 AS project_access_role
         "#,
     )
     .bind(&new_name)
@@ -336,6 +338,8 @@ pub(crate) async fn patch_project_by_id(
     .bind(&new_project_brief)
     .bind(&new_brand_bible)
     .bind(current.id)
+    .bind(scope.access_mode_label())
+    .bind(scope.access_role_label())
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

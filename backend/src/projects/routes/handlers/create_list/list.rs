@@ -69,7 +69,42 @@ pub(crate) async fn list_projects(
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
+               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               CASE
+                 WHEN EXISTS (
+                   SELECT 1
+                   FROM public.app_project_member pm_any
+                   WHERE pm_any.project_id = app_project.id
+                 ) THEN 'restricted'
+                 ELSE 'inherited'
+               END AS project_access_mode,
+               CASE
+                 WHEN owner_user_id = $2 THEN 'project_owner'
+                 WHEN EXISTS (
+                   SELECT 1
+                   FROM public.app_workspace_member wm
+                   WHERE wm.workspace_id = app_project.workspace_id
+                     AND wm.user_id = $2
+                     AND wm.role = 'owner'
+                 ) THEN 'workspace_owner'
+                 WHEN EXISTS (
+                   SELECT 1
+                   FROM public.app_workspace_member wm
+                   WHERE wm.workspace_id = app_project.workspace_id
+                     AND wm.user_id = $2
+                     AND wm.role = 'admin'
+                 ) THEN 'workspace_admin'
+                 ELSE COALESCE(
+                   (
+                     SELECT pm.role
+                     FROM public.app_project_member pm
+                     WHERE pm.project_id = app_project.id
+                       AND pm.user_id = $2
+                     LIMIT 1
+                   ),
+                   'member'
+                 )
+               END AS project_access_role
         FROM app_project
         WHERE workspace_id = $1
           AND (

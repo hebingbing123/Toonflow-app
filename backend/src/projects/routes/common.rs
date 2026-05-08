@@ -82,6 +82,32 @@ impl ProjectAccessScope {
     fn is_project_owner(&self) -> bool {
         self.owner_user_id == self.actor_user_id
     }
+
+    pub(crate) fn access_mode_label(&self) -> &'static str {
+        if self.project_acl_enabled {
+            "restricted"
+        } else {
+            "inherited"
+        }
+    }
+
+    pub(crate) fn access_role_label(&self) -> &'static str {
+        if self.is_workspace_admin_or_owner() {
+            return match self.workspace_role {
+                ProjectWorkspaceRole::Owner => "workspace_owner",
+                ProjectWorkspaceRole::Admin => "workspace_admin",
+                ProjectWorkspaceRole::Member => "member",
+            };
+        }
+        if self.is_project_owner() {
+            return "project_owner";
+        }
+        match self.project_role {
+            Some(ProjectMemberRole::Editor) => "editor",
+            Some(ProjectMemberRole::Viewer) => "viewer",
+            None => "member",
+        }
+    }
 }
 
 #[derive(Debug, sqlx::FromRow)]

@@ -81,12 +81,16 @@ pub(crate) async fn patch_style_config(
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
+               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               $2 AS project_access_mode,
+               $3 AS project_access_role
         FROM app_project
         WHERE id = $1
         "#,
     )
     .bind(scope.id)
+    .bind(scope.access_mode_label())
+    .bind(scope.access_role_label())
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -120,12 +124,16 @@ pub(crate) async fn patch_style_config(
                   director_manual, mode, video_ratio, create_time_ms,
                   art_style_pack, story_style_pack,
                   target_market, target_platforms, duration_strategy,
-                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
+                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+                  $4 AS project_access_mode,
+                  $5 AS project_access_role
         "#,
     )
     .bind(&new_art_style_pack)
     .bind(&new_story_style_pack)
     .bind(current.id)
+    .bind(scope.access_mode_label())
+    .bind(scope.access_role_label())
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

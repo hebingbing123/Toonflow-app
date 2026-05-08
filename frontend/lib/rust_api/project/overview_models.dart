@@ -25,6 +25,8 @@ class ProjectRow {
     this.voiceProfile,
     this.subtitleStyle,
     this.bgmStrategy,
+    required this.projectAccessMode,
+    required this.projectAccessRole,
   });
 
   final String id;
@@ -53,6 +55,8 @@ class ProjectRow {
   final String? voiceProfile;
   final String? subtitleStyle;
   final String? bgmStrategy;
+  final String projectAccessMode;
+  final String projectAccessRole;
 
   factory ProjectRow.fromJson(Map<String, dynamic> json) {
     List<String>? platforms;
@@ -85,6 +89,9 @@ class ProjectRow {
       voiceProfile: json['voice_profile'] as String?,
       subtitleStyle: json['subtitle_style'] as String?,
       bgmStrategy: json['bgm_strategy'] as String?,
+      projectAccessMode:
+          json['project_access_mode'] as String? ?? 'inherited',
+      projectAccessRole: json['project_access_role'] as String? ?? 'member',
     );
   }
 }
@@ -501,4 +508,3 @@ class ProjectProductionOverview {
 }
 
 /// `GET /api/v1/projects/{project_id}/assets-overview` — see `getProjectAssetsOverviewByProjectIdV1`.
-

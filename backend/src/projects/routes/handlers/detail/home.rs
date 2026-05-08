@@ -45,6 +45,8 @@ struct ProjectHomeRow {
     subtitle_style: Option<String>,
     bgm_strategy: Option<String>,
     quality_gate_strategy: Option<String>,
+    project_access_mode: String,
+    project_access_role: String,
     project_brief: Option<Value>,
     brand_bible: Option<Value>,
 }
@@ -202,12 +204,16 @@ pub(crate) async fn project_home_by_id(
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
                voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               $2 AS project_access_mode,
+               $3 AS project_access_role,
                project_brief, brand_bible
         FROM app_project
         WHERE id = $1
         "#,
     )
     .bind(scope.id)
+    .bind(scope.access_mode_label())
+    .bind(scope.access_role_label())
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -315,6 +321,8 @@ pub(crate) async fn project_home_by_id(
             subtitle_style: row.subtitle_style,
             bgm_strategy: row.bgm_strategy,
             quality_gate_strategy: row.quality_gate_strategy,
+            project_access_mode: row.project_access_mode,
+            project_access_role: row.project_access_role,
         },
         stats,
         project_brief,

@@ -47,12 +47,16 @@ pub(crate) async fn get_project_by_id(
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
+               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               $2 AS project_access_mode,
+               $3 AS project_access_role
         FROM app_project p
         WHERE p.id = $1
         "#,
     )
     .bind(scope.id)
+    .bind(scope.access_mode_label())
+    .bind(scope.access_role_label())
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?

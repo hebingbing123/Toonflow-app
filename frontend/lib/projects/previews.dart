@@ -2,6 +2,34 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 
+String _projectAccessModeLabel(String mode) {
+  switch (mode) {
+    case 'restricted':
+      return '显式 ACL';
+    case 'inherited':
+    default:
+      return '继承 workspace';
+  }
+}
+
+String _projectAccessRoleLabel(String role) {
+  switch (role) {
+    case 'workspace_owner':
+      return 'workspace owner';
+    case 'workspace_admin':
+      return 'workspace admin';
+    case 'project_owner':
+      return '项目 owner';
+    case 'editor':
+      return 'editor';
+    case 'viewer':
+      return 'viewer';
+    case 'member':
+    default:
+      return 'member';
+  }
+}
+
 /// Groups the top-level project actions so the section stays focused on orchestration.
 class ProjectsActionsBar extends StatelessWidget {
   const ProjectsActionsBar({
@@ -256,8 +284,18 @@ class ProjectsListPreview extends StatelessWidget {
           (project) => ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            title: Text(project.name ?? '项目 #${project.numericId}'),
-            subtitle: Text('#${project.numericId} · ${project.id}'),
+            title: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(project.name ?? '项目 #${project.numericId}'),
+                _ProjectAccessBadge(project: project),
+              ],
+            ),
+            subtitle: Text(
+              '#${project.numericId} · ${project.id} · ${_projectAccessRoleLabel(project.projectAccessRole)}',
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => onOpenProjectDetail(project),
           ),
@@ -267,6 +305,35 @@ class ProjectsListPreview extends StatelessWidget {
           SelectableText('项目记忆：$agentMemoryBody'),
         ],
       ],
+    );
+  }
+}
+
+class _ProjectAccessBadge extends StatelessWidget {
+  const _ProjectAccessBadge({required this.project});
+
+  final ProjectRow project;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final restricted = project.projectAccessMode == 'restricted';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: restricted
+            ? colorScheme.tertiaryContainer
+            : colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        '${_projectAccessModeLabel(project.projectAccessMode)} · ${_projectAccessRoleLabel(project.projectAccessRole)}',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: restricted
+              ? colorScheme.onTertiaryContainer
+              : colorScheme.onSurfaceVariant,
+        ),
+      ),
     );
   }
 }
