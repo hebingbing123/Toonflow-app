@@ -21,13 +21,16 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 
 至少准备以下信息：
 
-- `DATABASE_URL`
+- `DATABASE_URL`（若主机已装 `psql`）
 - 一个目标 `workspace_id`
 - 三个测试用户：
   - `OWNER_USER_ID`
   - `MEMBER_USER_ID`
   - `OUTSIDER_USER_ID`
 - 同三位用户对应的 Rust API Bearer token（若做 REST 对照）
+- 一个**已迁移**的数据库：
+  - staging 上的目标库，或
+  - 已初始化 schema 的本地 `supabase start`
 
 建议目标 workspace 具备这些样本：
 
@@ -48,6 +51,15 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 
 1. 打印关键表的 RLS / policy 快照
 2. 在模拟 `authenticated` + `auth.uid() = <probe user>` 的上下文里，输出目标 workspace 下的可见行数
+
+脚本支持两种执行模式：
+
+1. 主机已装 `psql`
+   - 读取 `DATABASE_URL`
+2. 主机没装 `psql`，但本地 Supabase DB 容器在跑
+   - 自动 fallback 到 `docker exec ... psql`
+
+如果目标数据库里连 `app_workspace` 都还不存在，脚本会直接失败并提示“先迁移 schema”，避免把空库误判成 RLS deny。
 
 ### 3.1 owner
 
