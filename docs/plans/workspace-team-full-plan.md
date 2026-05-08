@@ -109,7 +109,7 @@
 - [x] **W6.4** **接受邀请** 深链 / 路由（Web + 桌面一致策略）（已完成：手动粘贴 token + URL query 自动预填 `invite_token|inviteToken|token` + 自动提示 + 接受成功后清理 query 参数 + 独立 `/join-workspace(/:token)` 深链最小实现 + 命中邀请入口时自动跳转到“团队工作区”）
 - [x] **W6.5** 空状态：无 enterprise 时的引导；无项目时的团队引导（已完成：团队工作区页补“仅 Personal”提示；项目区在 enterprise workspace 且无项目时补创建项目 / 打开团队工作区引导）
 - [x] **W6.6** `rust_api` 全量模型与生成/手写 client 与 OpenAPI **一致**（已完成：补 `ErrorBody` / metrics / SLI client，修正 `scripts/check_rust_api_consistency.sh` 提取规则，并补回 prompting quality OpenAPI 缺失 path；脚本已通过）
-- [ ] **W6.7** a11y / 国际化字符串（若产品要求）
+- [x] **W6.7** a11y / 国际化字符串（若产品要求）（已完成：W6 关键提示/空状态文案抽到 `team_workspaces/strings.dart` 统一管理；workspace 列表补语义标签，关键动作补 tooltip 说明，便于后续真正接入 `l10n`）
 
 ---
 

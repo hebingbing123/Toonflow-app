@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/rust_api/workspaces/workspaces.dart';
 import 'package:openflow_app/team_workspaces/invite_deep_link.dart';
 import 'package:openflow_app/team_workspaces/section.dart';
+import 'package:openflow_app/team_workspaces/strings.dart';
 
 void main() {
   WorkspaceMemberResponse member({
@@ -344,6 +345,56 @@ void main() {
     expect(isCurrentWorkspaceRow(row, 'workspace-2'), isFalse);
     expect(isCurrentWorkspaceRow(row, '   '), isFalse);
   });
+
+  test('buildWorkspaceRowSemanticsLabel describes current archived state', () {
+    final now = DateTime.utc(2026, 1, 1);
+    final row = WorkspaceListItem(
+      workspace: WorkspaceResponse(
+        id: 'workspace-1',
+        ownerUserId: 'user-owner',
+        name: 'Team Alpha',
+        workspaceType: 'enterprise',
+        metadata: const <String, dynamic>{},
+        archivedAt: now,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      role: 'admin',
+    );
+
+    expect(
+      buildWorkspaceRowSemanticsLabel(row, isCurrent: true),
+      'Team Alpha，enterprise 空间，你的角色是 admin，已归档，当前工作区',
+    );
+    expect(
+      buildWorkspaceRowSemanticsLabel(row, isCurrent: false),
+      'Team Alpha，enterprise 空间，你的角色是 admin，已归档',
+    );
+  });
+
+  test('buildWorkspaceActionTooltip includes workspace name', () {
+    expect(
+      buildWorkspaceActionTooltip(
+        actionLabel: '管理邀请',
+        workspaceName: 'Team Alpha',
+      ),
+      '管理邀请 Team Alpha',
+    );
+  });
+
+  test(
+    'buildEnterpriseProjectsEmptyStateBody falls back when name missing',
+    () {
+      expect(
+        buildEnterpriseProjectsEmptyStateBody('Team Alpha'),
+        contains('Team Alpha 还没有任何项目'),
+      );
+      expect(
+        buildEnterpriseProjectsEmptyStateBody('   '),
+        contains('这个 enterprise 空间 还没有任何项目'),
+      );
+    },
+  );
 
   test('paginateWorkspaceInvites returns current page slice', () {
     final rows = <WorkspaceInviteResponse>[

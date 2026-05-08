@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'create_project_dialog.dart';
 import 'controller.dart';
 import 'previews.dart';
+import '../team_workspaces/strings.dart';
 import 'workbenches/agent_memory.dart';
 import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
@@ -156,7 +157,7 @@ class ProjectsSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${currentWorkspaceName?.trim().isNotEmpty == true ? currentWorkspaceName!.trim() : '这个 enterprise 空间'} 还没有任何项目。可以先创建一个空项目作为团队母项目，再到团队工作区继续邀请成员和分配协作范围。',
+                    buildEnterpriseProjectsEmptyStateBody(currentWorkspaceName),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 10),

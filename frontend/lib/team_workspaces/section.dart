@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
+import 'strings.dart';
 
 /// Team / enterprise workspace lifecycle（**W1.1–W1.6**：列表/创建/归档与恢复/配额由后端约束）。
 List<WorkspaceMemberResponse> filterWorkspaceMembers(
@@ -1290,7 +1291,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         )) ...<Widget>[
           const SizedBox(height: 6),
           Text(
-            '已从链接自动填入邀请 token，可直接点击“接受邀请”。',
+            kInviteTokenAutofillHint,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.primary,
             ),
@@ -1368,10 +1369,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('当前只有 Personal 工作区', style: theme.textTheme.titleSmall),
+                Text(
+                  kOnlyPersonalWorkspaceTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 6),
                 Text(
-                  '若要开始团队协作，可先创建一个 enterprise 空间，再去成员管理里发邀请。创建后就能把项目、任务和 Agent 上下文切到同一个团队范围。',
+                  kOnlyPersonalWorkspaceBody,
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -1395,85 +1399,125 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 row,
                 widget.currentWorkspaceId,
               );
-              return ListTile(
-                dense: true,
+              return Semantics(
                 selected: isCurrent,
-                selectedTileColor: theme.colorScheme.primaryContainer
-                    .withValues(alpha: 0.35),
-                title: Text(w.name),
-                subtitle: Text(
-                  '${w.workspaceType} · ${row.role}'
-                  '${w.archivedAt != null ? ' · 已归档' : ''}',
+                label: buildWorkspaceRowSemanticsLabel(
+                  row,
+                  isCurrent: isCurrent,
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    if (isCurrent)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Chip(
-                          label: const Text('当前'),
-                          visualDensity: VisualDensity.compact,
-                          backgroundColor: theme.colorScheme.primaryContainer,
+                child: ListTile(
+                  dense: true,
+                  selected: isCurrent,
+                  selectedTileColor: theme.colorScheme.primaryContainer
+                      .withValues(alpha: 0.35),
+                  title: Text(w.name),
+                  subtitle: Text(
+                    '${w.workspaceType} · ${row.role}'
+                    '${w.archivedAt != null ? ' · 已归档' : ''}',
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      if (isCurrent)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Chip(
+                            label: const Text('当前'),
+                            visualDensity: VisualDensity.compact,
+                            backgroundColor: theme.colorScheme.primaryContainer,
+                          ),
+                        ),
+                      if (canManage)
+                        Tooltip(
+                          message: buildWorkspaceActionTooltip(
+                            actionLabel: '管理成员',
+                            workspaceName: w.name,
+                          ),
+                          child: TextButton(
+                            onPressed: (_loading || busy)
+                                ? null
+                                : () => _openMembersDialog(row),
+                            child: const Text('成员'),
+                          ),
+                        ),
+                      if (canManage)
+                        Tooltip(
+                          message: buildWorkspaceActionTooltip(
+                            actionLabel: '管理邀请',
+                            workspaceName: w.name,
+                          ),
+                          child: TextButton(
+                            onPressed: (_loading || busy)
+                                ? null
+                                : () => _openInvitesDialog(row),
+                            child: const Text('邀请'),
+                          ),
+                        ),
+                      Tooltip(
+                        message: buildWorkspaceActionTooltip(
+                          actionLabel: '切换到工作区',
+                          workspaceName: w.name,
+                        ),
+                        child: TextButton(
+                          onPressed:
+                              (_loading || busy || switching || isCurrent)
+                              ? null
+                              : () => _switchCurrentWorkspace(row),
+                          child: switching
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text('切换到此'),
                         ),
                       ),
-                    if (canManage)
-                      TextButton(
-                        onPressed: (_loading || busy)
-                            ? null
-                            : () => _openMembersDialog(row),
-                        child: const Text('成员'),
-                      ),
-                    if (canManage)
-                      TextButton(
-                        onPressed: (_loading || busy)
-                            ? null
-                            : () => _openInvitesDialog(row),
-                        child: const Text('邀请'),
-                      ),
-                    TextButton(
-                      onPressed: (_loading || busy || switching || isCurrent)
-                          ? null
-                          : () => _switchCurrentWorkspace(row),
-                      child: switching
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('切换到此'),
-                    ),
-                    if (canManage && w.archivedAt == null)
-                      TextButton(
-                        onPressed: (_loading || busy)
-                            ? null
-                            : () => _confirmArchive(row),
-                        child: busy
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text('归档'),
-                      ),
-                    if (canManage && w.archivedAt != null)
-                      TextButton(
-                        onPressed: (_loading || busy)
-                            ? null
-                            : () => _setArchive(row, false),
-                        child: busy
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text('恢复'),
-                      ),
-                  ],
+                      if (canManage && w.archivedAt == null)
+                        Tooltip(
+                          message: buildWorkspaceActionTooltip(
+                            actionLabel: '归档工作区',
+                            workspaceName: w.name,
+                          ),
+                          child: TextButton(
+                            onPressed: (_loading || busy)
+                                ? null
+                                : () => _confirmArchive(row),
+                            child: busy
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text('归档'),
+                          ),
+                        ),
+                      if (canManage && w.archivedAt != null)
+                        Tooltip(
+                          message: buildWorkspaceActionTooltip(
+                            actionLabel: '恢复工作区',
+                            workspaceName: w.name,
+                          ),
+                          child: TextButton(
+                            onPressed: (_loading || busy)
+                                ? null
+                                : () => _setArchive(row, false),
+                            child: busy
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text('恢复'),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },
