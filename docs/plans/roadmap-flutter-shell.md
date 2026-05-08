@@ -21,6 +21,7 @@ YAML：`flutter-shell`。
 | Web：CORS / token / 深链方案文档化 | `next` | **必做**；与 [`roadmap-repo-contract-infra.md`](./roadmap-repo-contract-infra.md) 联动 |
 | 大屏信息架构（减少单文件复杂度） | `next` | **必做**；≤800 行/file |
 | 429 / 配额耗尽统一 UX | `tracked` | 共享 `Retry-After` / `retry_after_ms` 解释层 + 全局 Snackbar；与 [`platform-capabilities-backlog.md`](./platform-capabilities-backlog.md) P-D3 联动 |
+| 公开只读 Status / Health 页 | `tracked` | Flutter `/status` 页聚合公开探针，带 `INTERNAL_OPS_TOKEN` 时附加内部队列统计；与 [`platform-capabilities-backlog.md`](./platform-capabilities-backlog.md) P-B3 联动 |
 
 ## 验收
 
@@ -75,3 +76,14 @@ YAML：`flutter-shell`。
 | **触点** | `frontend/lib/platform/`、`frontend/lib/*controller.dart`、团队 workspace 入口；必要时补 `rust_api/core.dart` 解析。 |
 | **测试** | 后续门禁时补 widget / controller 定向验证：`429`、`quota_exceeded`、普通 `404/403` 文案分流正确。 |
 | **回滚** | helper 与接入点按文件 revert，不影响后端协议。 |
+
+### WP-E：公开只读 Status / Health 页
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 提供一个可以直接打开的 Flutter `/status` 页面，公开展示服务存活、readiness 与版本信息；若注入 `INTERNAL_OPS_TOKEN`，则顺带展示队列统计。 |
+| **依赖** | 复用已有 `/health`、`/api/v1/health`、`/api/v1/ready`、`/api/v1/version`；队列统计复用 `GET /api/v1/jobs/queue/stats`。 |
+| **PR 切片** | （1）独立 `StatusPage`；（2）基于 `Uri.base.path` 的入口分流；（3）文档回链到平台补遗表。 |
+| **触点** | `frontend/lib/main.dart`、`frontend/lib/status_page.dart`、`frontend/lib/rust_api/system/`、`frontend/lib/rust_api/jobs/queue_stats.dart`。 |
+| **测试** | 后续门禁时补最小页面 smoke：`/status` 初始加载、公开接口失败态、带 token 队列统计显示。 |
+| **回滚** | 删除 `/status` 入口与页面文件，不影响业务主路径。 |
