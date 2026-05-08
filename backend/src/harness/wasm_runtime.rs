@@ -6,7 +6,7 @@
 //! **WP‑C**：[`validate_user_wasm_upload`] 为将来「用户投递 WASM」提供体量上限与模块解析校验（REST 接线前可单测与内部复用）。
 
 use serde_json::{json, Value};
-use wasmi::{Engine, Linker, Module, Store};
+use wasmi::{Config, Engine, Linker, Module, Store};
 
 const PROBE_WASM: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/probe.wasm"));
 
@@ -19,6 +19,8 @@ pub fn probe_wasm_bytes() -> &'static [u8] {
 
 /// Default cap for untrusted user-supplied WASM payloads (see **`HARNESS_USER_WASM_MAX_BYTES`**).
 const DEFAULT_USER_WASM_MAX_BYTES: usize = 512 * 1024;
+const DEFAULT_USER_WASM_FUEL_LIMIT: u64 = 50_000_000;
+const DEFAULT_USER_WASM_INVOKE_TIMEOUT_MS: u64 = 3_000;
 
 #[inline]
 fn user_wasm_max_bytes_from_env() -> usize {
@@ -28,6 +30,28 @@ fn user_wasm_max_bytes_from_env() -> usize {
             Ok(n) => n,
         },
         Err(_) => DEFAULT_USER_WASM_MAX_BYTES,
+    }
+}
+
+#[inline]
+fn user_wasm_fuel_limit_from_env() -> u64 {
+    match std::env::var("HARNESS_USER_WASM_FUEL_LIMIT") {
+        Ok(s) => match s.trim().parse::<u64>() {
+            Ok(0) | Err(_) => DEFAULT_USER_WASM_FUEL_LIMIT,
+            Ok(n) => n,
+        },
+        Err(_) => DEFAULT_USER_WASM_FUEL_LIMIT,
+    }
+}
+
+#[inline]
+pub fn user_wasm_invoke_timeout_ms_from_env() -> u64 {
+    match std::env::var("HARNESS_USER_WASM_INVOKE_TIMEOUT_MS") {
+        Ok(s) => match s.trim().parse::<u64>() {
+            Ok(0) | Err(_) => DEFAULT_USER_WASM_INVOKE_TIMEOUT_MS,
+            Ok(n) => n,
+        },
+        Err(_) => DEFAULT_USER_WASM_INVOKE_TIMEOUT_MS,
     }
 }
 
@@ -46,6 +70,61 @@ pub fn validate_user_wasm_upload(bytes: &[u8]) -> Result<(), String> {
     let engine = Engine::default();
     Module::new(&engine, bytes).map_err(|e| format!("user wasm: {e}"))?;
     Ok(())
+}
+
+#[inline]
+fn user_wasm_disabled_by_env() -> bool {
+    match std::env::var("HARNESS_USER_WASM_DISABLED") {
+        Ok(s) => {
+            let t = s.trim().to_ascii_lowercase();
+            matches!(t.as_str(), "1" | "true" | "yes" | "on")
+        }
+        Err(_) => false,
+    }
+}
+
+/// Runs a user-uploaded module export `probe() -> i32` with fuel protection.
+///
+/// This keeps ABI parity with the built-in `wasm.probe` tool while allowing
+/// WS dispatch to execute owner-scoped active WASM rows.
+pub fn invoke_user_probe(wasm_bytes: &[u8]) -> Result<Value, String> {
+    if user_wasm_disabled_by_env() {
+        return Err("user wasm disabled by HARNESS_USER_WASM_DISABLED".into());
+    }
+    #[cfg(test)]
+    {
+        if let Ok(s) = std::env::var("HARNESS_USER_WASM_TEST_SLEEP_MS") {
+            if let Ok(ms) = s.trim().parse::<u64>() {
+                if ms > 0 {
+                    std::thread::sleep(std::time::Duration::from_millis(ms));
+                }
+            }
+        }
+    }
+    validate_user_wasm_upload(wasm_bytes)?;
+
+    let mut cfg = Config::default();
+    cfg.consume_fuel(true);
+    let engine = Engine::new(&cfg);
+    let module = Module::new(&engine, wasm_bytes).map_err(|e| format!("user wasm module: {e}"))?;
+    let mut store = Store::new(&engine, ());
+    let fuel = user_wasm_fuel_limit_from_env();
+    store
+        .add_fuel(fuel)
+        .map_err(|e| format!("user wasm fuel setup: {e}"))?;
+    let linker = Linker::new(&engine);
+    let instance = linker
+        .instantiate(&mut store, &module)
+        .map_err(|e| format!("user wasm instantiate: {e}"))?
+        .start(&mut store)
+        .map_err(|e| format!("user wasm start: {e}"))?;
+    let probe = instance
+        .get_typed_func::<(), i32>(&mut store, "probe")
+        .map_err(|e| format!("user wasm export probe: {e}"))?;
+    let v = probe
+        .call(&mut store, ())
+        .map_err(|e| format!("user wasm trap: {e}"))?;
+    Ok(json!({ "ok": true, "value": v }))
 }
 
 #[inline]
@@ -85,9 +164,7 @@ pub fn invoke_probe() -> Result<Value, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Mutex;
-
-    static ENV_MUTEX: Mutex<()> = Mutex::new(());
+    use crate::harness::user_wasm_test_env_lock;
 
     #[test]
     fn user_wasm_validation_rejects_empty() {
@@ -97,7 +174,7 @@ mod tests {
 
     #[test]
     fn user_wasm_validation_rejects_oversize() {
-        let _g = ENV_MUTEX.lock().expect("lock");
+        let _g = user_wasm_test_env_lock();
         std::env::set_var("HARNESS_USER_WASM_MAX_BYTES", "16");
         let buf = vec![0u8; 17];
         let err = validate_user_wasm_upload(&buf).expect_err("oversize");
@@ -107,7 +184,7 @@ mod tests {
 
     #[test]
     fn user_wasm_validation_accepts_embedded_probe_when_under_cap() {
-        let _g = ENV_MUTEX.lock().expect("lock");
+        let _g = user_wasm_test_env_lock();
         std::env::set_var(
             "HARNESS_USER_WASM_MAX_BYTES",
             format!("{}", PROBE_WASM.len().max(1)),
@@ -118,7 +195,7 @@ mod tests {
 
     #[test]
     fn user_wasm_validation_rejects_garbage() {
-        let _g = ENV_MUTEX.lock().expect("lock");
+        let _g = user_wasm_test_env_lock();
         std::env::remove_var("HARNESS_USER_WASM_MAX_BYTES");
         let garbage = b"\0asm\x01\x00\x00\x00\xff";
         let err = validate_user_wasm_upload(garbage).expect_err("garbage");
@@ -127,7 +204,7 @@ mod tests {
 
     #[test]
     fn probe_returns_42() {
-        let _g = ENV_MUTEX.lock().expect("lock");
+        let _g = user_wasm_test_env_lock();
         std::env::remove_var("HARNESS_WASM_PROBE_DISABLED");
         let v = invoke_probe().unwrap();
         assert_eq!(v.get("ok").and_then(|x| x.as_bool()), Some(true));
@@ -136,7 +213,7 @@ mod tests {
 
     #[test]
     fn probe_respects_kill_switch() {
-        let _g = ENV_MUTEX.lock().expect("lock");
+        let _g = user_wasm_test_env_lock();
         std::env::set_var("HARNESS_WASM_PROBE_DISABLED", "1");
         let err = invoke_probe().expect_err("disabled");
         assert!(
@@ -144,5 +221,39 @@ mod tests {
             "unexpected err: {err}"
         );
         std::env::remove_var("HARNESS_WASM_PROBE_DISABLED");
+    }
+
+    #[test]
+    fn user_probe_respects_kill_switch() {
+        let _g = user_wasm_test_env_lock();
+        std::env::set_var("HARNESS_USER_WASM_DISABLED", "1");
+        let err = invoke_user_probe(PROBE_WASM).expect_err("disabled");
+        assert!(err.contains("HARNESS_USER_WASM_DISABLED"), "{err}");
+        std::env::remove_var("HARNESS_USER_WASM_DISABLED");
+    }
+
+    #[test]
+    fn user_probe_runs_probe_export() {
+        let _g = user_wasm_test_env_lock();
+        std::env::remove_var("HARNESS_USER_WASM_DISABLED");
+        std::env::set_var("HARNESS_USER_WASM_FUEL_LIMIT", "100000");
+        let out = invoke_user_probe(PROBE_WASM).expect("user probe ok");
+        assert_eq!(out.get("ok").and_then(|x| x.as_bool()), Some(true));
+        assert_eq!(out.get("value").and_then(|x| x.as_i64()), Some(42));
+        std::env::remove_var("HARNESS_USER_WASM_FUEL_LIMIT");
+    }
+
+    #[test]
+    fn user_probe_fuel_exhaustion_returns_err() {
+        let _g = user_wasm_test_env_lock();
+        std::env::remove_var("HARNESS_USER_WASM_DISABLED");
+        std::env::set_var("HARNESS_USER_WASM_FUEL_LIMIT", "1");
+        let err = invoke_user_probe(PROBE_WASM).expect_err("fuel should exhaust");
+        let lower = err.to_ascii_lowercase();
+        assert!(
+            lower.contains("fuel") || lower.contains("trap") || lower.contains("exhaust"),
+            "unexpected err: {err}"
+        );
+        std::env::remove_var("HARNESS_USER_WASM_FUEL_LIMIT");
     }
 }

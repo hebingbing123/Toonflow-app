@@ -201,6 +201,17 @@ void main() {
   });
 
   test(
+    'removeWorkspaceInviteTokenFromUri resets join-workspace path and keeps query',
+    () {
+      final cleaned = removeWorkspaceInviteTokenFromUri(
+        Uri.parse('https://example.com/join-workspace/tok123?foo=bar'),
+      );
+      expect(cleaned.path, '/');
+      expect(cleaned.queryParameters['foo'], 'bar');
+    },
+  );
+
+  test(
     'resolveWorkspaceInvitePrefill prefers explicit token over uri token',
     () {
       final prefill = resolveWorkspaceInvitePrefill(
@@ -259,14 +270,6 @@ void main() {
       );
     },
   );
-
-  test('removeWorkspaceInviteTokenFromUri resets dedicated deep-link path', () {
-    final cleaned = removeWorkspaceInviteTokenFromUri(
-      Uri.parse('https://example.com/join-workspace/abc123?foo=bar'),
-    );
-    expect(cleaned.path, '/');
-    expect(cleaned.queryParameters['foo'], 'bar');
-  });
 
   test('buildInviteCopyText includes key fields', () {
     final row = invite(
