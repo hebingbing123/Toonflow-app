@@ -78,6 +78,7 @@ pub(crate) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyRes
         total_semaphore_wait_ms: snap.total_semaphore_wait_ms,
         total_child_spawns: snap.total_child_spawns,
         total_process_reuse_hits: snap.total_process_reuse_hits,
+        total_pool_evictions: snap.total_pool_evictions,
     };
     match &state.pool {
         None => Ok(Json(ReadyResponse {

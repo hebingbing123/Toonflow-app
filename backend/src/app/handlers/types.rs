@@ -38,6 +38,8 @@ pub(crate) struct ReadyHarnessIsolateMetrics {
     pub total_semaphore_wait_ms: u64,
     pub total_child_spawns: u64,
     pub total_process_reuse_hits: u64,
+    /// Pooled workers evicted (idle TTL, max age, dead `try_wait`).
+    pub total_pool_evictions: u64,
 }
 
 #[derive(Serialize, ToSchema)]

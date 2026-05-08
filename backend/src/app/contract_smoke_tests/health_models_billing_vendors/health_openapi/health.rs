@@ -37,4 +37,5 @@ async fn ready_without_database_reports_not_configured() {
         .expect("ready JSON must include harness_isolate");
     assert!(hi["max_slots"].as_u64().is_some_and(|u| u > 0));
     assert!(hi["total_child_spawns"].is_number());
+    assert_eq!(hi["total_pool_evictions"], 0);
 }

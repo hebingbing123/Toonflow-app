@@ -13,6 +13,10 @@
 //! **启动预热（prefork）**：**`HARNESS_ISOLATE_PREFORK`** 为非负整数时，在 **`warm_isolate_pool_prefork`**（由服务器 **`main`** 在监听前调用）
 //! 中预先 **`spawn`** 至多 **`min(请求值, HARNESS_ISOLATE_MAX_CONCURRENT)`** 个池 worker 填入 idle 队列；池关闭或值为 **`0`/缺省时**不预热。
 //!
+//! **池回收 / 老化（可选）**：在归还 idle 前与从 idle 取用工件前会 **剔除**：① **`HARNESS_ISOLATE_POOL_IDLE_TTL_SECS`**（缺省或未设 = 不限制）
+//! 在 idle 队列中超过该秒数的 worker；② **`HARNESS_ISOLATE_POOL_MAX_WORKER_AGE_SECS`**（缺省或未设 = 不限制）自 **spawn** 起超过该秒数的 worker；
+//! ③ 已退出（**`try_wait`** 非空）的 worker。剔除计数见 **`metrics_snapshot`/`total_pool_evictions`** 与 **`GET /api/v1/ready`**。
+//!
 //! 可选 **`HARNESS_ISOLATE_RUNNER_EXE`**：显式指定子进程二进制（默认为 [`std::env::current_exe`]）。集成测试常指向
 //! **`CARGO_BIN_EXE_toonflow-server`**。
 
@@ -86,6 +90,7 @@ struct IsolateCounters {
     total_semaphore_wait_ms: AtomicU64,
     total_child_spawns: AtomicU64,
     total_process_reuse_hits: AtomicU64,
+    total_pool_evictions: AtomicU64,
 }
 
 impl IsolateCounters {
@@ -96,6 +101,7 @@ impl IsolateCounters {
             total_semaphore_wait_ms: AtomicU64::new(0),
             total_child_spawns: AtomicU64::new(0),
             total_process_reuse_hits: AtomicU64::new(0),
+            total_pool_evictions: AtomicU64::new(0),
         }
     }
 
@@ -126,6 +132,11 @@ impl IsolateCounters {
         self.total_process_reuse_hits
             .fetch_add(1, Ordering::Relaxed);
     }
+
+    #[inline]
+    fn record_pool_eviction(&self, n: u64) {
+        self.total_pool_evictions.fetch_add(n, Ordering::Relaxed);
+    }
 }
 
 static ISOLATE_COUNTERS: LazyLock<IsolateCounters> = LazyLock::new(IsolateCounters::new);
@@ -139,6 +150,8 @@ pub struct IsolateMetricsSnapshot {
     pub total_semaphore_wait_ms: u64,
     pub total_child_spawns: u64,
     pub total_process_reuse_hits: u64,
+    /// Pooled workers dropped due to idle TTL, max age, or dead-on-acquire (`try_wait`).
+    pub total_pool_evictions: u64,
 }
 
 impl IsolateMetricsSnapshot {
@@ -167,18 +180,23 @@ pub fn metrics_snapshot() -> IsolateMetricsSnapshot {
         total_process_reuse_hits: ISOLATE_COUNTERS
             .total_process_reuse_hits
             .load(Ordering::Relaxed),
+        total_pool_evictions: ISOLATE_COUNTERS
+            .total_pool_evictions
+            .load(Ordering::Relaxed),
     }
 }
 
 /// Max UTF‑8 JSON body size (`u32_be` length prefix) per pooled **`isolated.echo`** round-trip.
 pub const HARNESS_ISOLATE_POOL_MAX_PAYLOAD_BYTES: u32 = 4 * 1024 * 1024;
 
-#[allow(dead_code)]
 struct PooledEchoConn {
     /// Kept alive with piped stdin/stdout; drained on disconnect.
     child: Child,
     stdin: ChildStdin,
     stdout: ChildStdout,
+    spawned_at: Instant,
+    /// Last time this conn entered the idle queue (including immediately after spawn / prefork).
+    idle_since: Instant,
 }
 
 enum PoolAcquireKind {
@@ -187,6 +205,64 @@ enum PoolAcquireKind {
 }
 
 static POOL_IDLE: LazyLock<Mutex<Vec<PooledEchoConn>>> = LazyLock::new(|| Mutex::new(Vec::new()));
+
+/// Read on each prune so integration tests can vary policy without relying on `LazyLock` init order.
+#[inline]
+fn isolate_pool_idle_ttl() -> Option<Duration> {
+    std::env::var("HARNESS_ISOLATE_POOL_IDLE_TTL_SECS")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .and_then(|s| s.parse::<u64>().ok())
+        .filter(|&n| n > 0)
+        .map(Duration::from_secs)
+}
+
+#[inline]
+fn isolate_pool_max_worker_age() -> Option<Duration> {
+    std::env::var("HARNESS_ISOLATE_POOL_MAX_WORKER_AGE_SECS")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .and_then(|s| s.parse::<u64>().ok())
+        .filter(|&n| n > 0)
+        .map(Duration::from_secs)
+}
+
+#[inline]
+fn pool_conn_policy_evict(c: &PooledEchoConn) -> bool {
+    if let Some(ttl) = isolate_pool_idle_ttl() {
+        if c.idle_since.elapsed() > ttl {
+            return true;
+        }
+    }
+    if let Some(max_age) = isolate_pool_max_worker_age() {
+        if c.spawned_at.elapsed() > max_age {
+            return true;
+        }
+    }
+    false
+}
+
+/// Drops idle workers that exceed TTL / max lifetime. Returns how many were removed.
+fn prune_idle_queue_timeouts(queue: &mut Vec<PooledEchoConn>) -> u64 {
+    let before = queue.len();
+    queue.retain(|c| !pool_conn_policy_evict(c));
+    (before - queue.len()) as u64
+}
+
+fn record_pool_evictions_and_trace(n: u64, reason: &'static str) {
+    if n == 0 {
+        return;
+    }
+    ISOLATE_COUNTERS.record_pool_eviction(n);
+    tracing::debug!(
+        target: "harness.isolate.pool",
+        evicted = n,
+        reason,
+        "isolate pool workers evicted"
+    );
+}
 
 fn resolve_isolate_runner_exe() -> Result<PathBuf, InvokeError> {
     if let Ok(p) = std::env::var("HARNESS_ISOLATE_RUNNER_EXE") {
@@ -300,10 +376,13 @@ async fn spawn_pooled_echo_worker(exe: &std::path::Path) -> Result<PooledEchoCon
         .take()
         .ok_or_else(|| InvokeError::IsolationFailed("pool stdout missing".into()))?;
 
+    let now = Instant::now();
     Ok(PooledEchoConn {
         child,
         stdin,
         stdout,
+        spawned_at: now,
+        idle_since: now,
     })
 }
 
@@ -329,7 +408,9 @@ pub async fn warm_isolate_pool_prefork() {
     };
 
     let to_spawn = {
-        let g = POOL_IDLE.lock().await;
+        let mut g = POOL_IDLE.lock().await;
+        let pruned = prune_idle_queue_timeouts(&mut g);
+        record_pool_evictions_and_trace(pruned, "timeout_before_prefork");
         cap.saturating_sub(g.len())
     };
 
@@ -374,13 +455,42 @@ async fn acquire_pooled_echo_conn(
         PoolAcquireKind::ForceSpawnOnly => Ok((spawn_pooled_echo_worker(exe).await?, false)),
         PoolAcquireKind::PreferIdleElseSpawn => {
             let mut g = POOL_IDLE.lock().await;
-            if let Some(c) = g.pop() {
-                drop(g);
-                Ok((c, true))
-            } else {
-                drop(g);
-                Ok((spawn_pooled_echo_worker(exe).await?, false))
+            let pruned = prune_idle_queue_timeouts(&mut g);
+            record_pool_evictions_and_trace(pruned, "timeout_on_acquire");
+
+            while let Some(mut c) = g.pop() {
+                if pool_conn_policy_evict(&c) {
+                    record_pool_evictions_and_trace(1, "timeout_on_pop");
+                    drop(c);
+                    continue;
+                }
+                match c.child.try_wait() {
+                    Ok(Some(status)) => {
+                        record_pool_evictions_and_trace(1, "dead_on_acquire");
+                        tracing::debug!(
+                            target: "harness.isolate.pool",
+                            ?status,
+                            "evicted exited pool worker"
+                        );
+                        drop(c);
+                    }
+                    Ok(None) => {
+                        drop(g);
+                        return Ok((c, true));
+                    }
+                    Err(e) => {
+                        record_pool_evictions_and_trace(1, "try_wait_error");
+                        tracing::debug!(
+                            target: "harness.isolate.pool",
+                            error = ?e,
+                            "evicted pool worker (try_wait error)"
+                        );
+                        drop(c);
+                    }
+                }
             }
+            drop(g);
+            Ok((spawn_pooled_echo_worker(exe).await?, false))
         }
     }
 }
@@ -445,8 +555,12 @@ async fn pool_roundtrip_value(
         .map_err(|_| InvokeError::IsolationFailed("child timed out after 10s".into()))?
 }
 
-async fn return_idle_maybe(conn: PooledEchoConn) {
+async fn return_idle_maybe(mut conn: PooledEchoConn) {
+    let now = Instant::now();
+    conn.idle_since = now;
     let mut g = POOL_IDLE.lock().await;
+    let pruned = prune_idle_queue_timeouts(&mut g);
+    record_pool_evictions_and_trace(pruned, "timeout_before_return");
     if g.len() < *ISOLATE_MAX_SLOTS {
         g.push(conn);
     }
