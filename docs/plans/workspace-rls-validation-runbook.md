@@ -51,6 +51,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 - 一键样本验证：[`scripts/workspace_rls_seed_and_probe_sample.sh`](../../scripts/workspace_rls_seed_and_probe_sample.sh)
 - 汇总脚本：[`scripts/workspace_rls_summarize.sh`](../../scripts/workspace_rls_summarize.sh)
 - 样本断言：[`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh)
+- 摘要断言：[`scripts/workspace_rls_assert_summary.sh`](../../scripts/workspace_rls_assert_summary.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
 它做两件事：
@@ -150,7 +151,7 @@ OUTSIDER_USER_ID="$OUTSIDER_USER_ID" \
 bash scripts/workspace_rls_probe_and_summarize.sh
 ```
 
-它会默认把结果落到 `.tmp/workspace-rls-<timestamp>/`。
+它会默认把结果落到 `.tmp/workspace-rls-<timestamp>/`，并对 `summary.md` 再跑一层摘要断言。
 
 若想顺手保留原始输出，可再加：
 
@@ -181,6 +182,19 @@ bash scripts/workspace_rls_summarize.sh
 - `match_or_rls_widened`
 - `review_needed`
 - `security_bug`
+
+若要只对摘要做门槛断言，也可运行：
+
+```bash
+SUMMARY_FILE=".tmp/workspace-rls-<date>/summary.md" \
+bash scripts/workspace_rls_assert_summary.sh
+```
+
+默认规则：
+
+- 允许：`partial_match`、`expected_mismatch`、`match`
+- 失败：`review_needed`、`security_bug`
+- `match_or_rls_widened` 默认也失败；若本轮就是在验证 RLS 收口，可显式传 `ALLOW_MATCH_OR_RLS_WIDENED=1`
 
 若想只对固定样本结果做门槛断言，也可运行：
 

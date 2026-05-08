@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROBE_MATRIX_SCRIPT="$ROOT_DIR/scripts/workspace_rls_probe_matrix.sh"
 SUMMARIZE_SCRIPT="$ROOT_DIR/scripts/workspace_rls_summarize.sh"
+ASSERT_SUMMARY_SCRIPT="$ROOT_DIR/scripts/workspace_rls_assert_summary.sh"
 DEFAULT_OUTPUT_DIR="$ROOT_DIR/.tmp/workspace-rls-$(date +%Y%m%d-%H%M%S)"
 OUTPUT_DIR="${OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}"
 
@@ -14,6 +15,11 @@ fi
 
 if [[ ! -x "$SUMMARIZE_SCRIPT" ]]; then
   echo "workspace RLS summarize script not found or not executable: $SUMMARIZE_SCRIPT" >&2
+  exit 1
+fi
+
+if [[ ! -x "$ASSERT_SUMMARY_SCRIPT" ]]; then
+  echo "workspace RLS summary assert script not found or not executable: $ASSERT_SUMMARY_SCRIPT" >&2
   exit 1
 fi
 
@@ -47,5 +53,9 @@ bash "$PROBE_MATRIX_SCRIPT"
 INPUT_DIR="$OUTPUT_DIR" \
 OUTPUT_FILE="$OUTPUT_DIR/summary.md" \
 bash "$SUMMARIZE_SCRIPT"
+
+SUMMARY_FILE="$OUTPUT_DIR/summary.md" \
+ALLOW_MATCH_OR_RLS_WIDENED="${ALLOW_MATCH_OR_RLS_WIDENED:-0}" \
+bash "$ASSERT_SUMMARY_SCRIPT"
 
 echo "workspace RLS probe artifacts ready in $OUTPUT_DIR"

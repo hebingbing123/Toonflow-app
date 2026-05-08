@@ -49,6 +49,7 @@
 若需要附发布记录，建议同时加 `OUTPUT_DIR=".tmp/workspace-rls-<date>"` 保存三份原始 probe 输出。
 若需要贴工单或发布说明，继续用 [`scripts/workspace_rls_summarize.sh`](../../scripts/workspace_rls_summarize.sh) 产出 Markdown 摘要。
 若是固定 sample 回归，继续用 [`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh) 直接做 pass/fail 断言。
+若是 staging / 手工环境验收，继续用 [`scripts/workspace_rls_assert_summary.sh`](../../scripts/workspace_rls_assert_summary.sh) 对 `summary.md` 做 pass/fail 断言。
 
 最低要求：
 
