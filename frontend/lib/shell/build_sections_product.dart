@@ -351,7 +351,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       <BillingWebhookEventItemV1>[];
   final _billingEventTypeController = TextEditingController();
   final _billingProviderEventIdController = TextEditingController();
+  final _billingProviderEventIdPrefixController = TextEditingController();
   final _billingRawEventIdController = TextEditingController();
+  final _billingRawEventIdPrefixController = TextEditingController();
+  final _billingEventCreatedFromController = TextEditingController();
+  final _billingEventCreatedToController = TextEditingController();
   final _billingCreatedFromController = TextEditingController();
   final _billingCreatedToController = TextEditingController();
   String _billingProvider = '';
@@ -409,7 +413,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     _webhookUrlController.dispose();
     _billingEventTypeController.dispose();
     _billingProviderEventIdController.dispose();
+    _billingProviderEventIdPrefixController.dispose();
     _billingRawEventIdController.dispose();
+    _billingRawEventIdPrefixController.dispose();
+    _billingEventCreatedFromController.dispose();
+    _billingEventCreatedToController.dispose();
     _billingCreatedFromController.dispose();
     _billingCreatedToController.dispose();
     super.dispose();
@@ -458,8 +466,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       informationalEvent: _billingInformationalOnly,
       provider: _billingProvider,
       rawEventId: _billingRawEventIdController.text,
+      rawEventIdPrefix: _billingRawEventIdPrefixController.text,
       eventType: _billingEventTypeController.text,
       providerEventId: _billingProviderEventIdController.text,
+      providerEventIdPrefix: _billingProviderEventIdPrefixController.text,
+      eventCreatedFrom: _billingEventCreatedFromController.text,
+      eventCreatedTo: _billingEventCreatedToController.text,
       createdFrom: _billingCreatedFromController.text,
       createdTo: _billingCreatedToController.text,
       sort: _billingSort,
@@ -889,10 +901,46 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             ),
           ),
           const SizedBox(height: 8),
+          TextField(
+            controller: _billingProviderEventIdPrefixController,
+            decoration: const InputDecoration(
+              labelText: 'provider_event_id_prefix',
+              hintText: '例如 stripe:evt_',
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _billingRawEventIdPrefixController,
+            decoration: const InputDecoration(
+              labelText: 'raw_event_id_prefix',
+              hintText: '例如 evt_',
+            ),
+          ),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
+              SizedBox(
+                width: 280,
+                child: TextField(
+                  controller: _billingEventCreatedFromController,
+                  decoration: const InputDecoration(
+                    labelText: 'event_created_from',
+                    hintText: '2026-04-01T00:00:00Z',
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 280,
+                child: TextField(
+                  controller: _billingEventCreatedToController,
+                  decoration: const InputDecoration(
+                    labelText: 'event_created_to',
+                    hintText: '2026-04-30T23:59:59Z',
+                  ),
+                ),
+              ),
               SizedBox(
                 width: 280,
                 child: TextField(
@@ -934,7 +982,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           _billingSort = 'id_desc';
                           _billingEventTypeController.clear();
                           _billingProviderEventIdController.clear();
+                          _billingProviderEventIdPrefixController.clear();
                           _billingRawEventIdController.clear();
+                          _billingRawEventIdPrefixController.clear();
+                          _billingEventCreatedFromController.clear();
+                          _billingEventCreatedToController.clear();
                           _billingCreatedFromController.clear();
                           _billingCreatedToController.clear();
                         });
