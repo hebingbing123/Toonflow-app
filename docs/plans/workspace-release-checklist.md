@@ -50,6 +50,7 @@
 若需要贴工单或发布说明，继续用 [`scripts/workspace_rls_summarize.sh`](../../scripts/workspace_rls_summarize.sh) 产出 Markdown 摘要。
 若是固定 sample 回归，继续用 [`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh) 直接做 pass/fail 断言。
 若是 staging / 手工环境验收，继续用 [`scripts/workspace_rls_assert_summary.sh`](../../scripts/workspace_rls_assert_summary.sh) 对 `summary.md` 做 pass/fail 断言。
+若需要把结果回填到本清单或工单，继续用 [`scripts/workspace_rls_render_checklist_snippet.sh`](../../scripts/workspace_rls_render_checklist_snippet.sh) 从 `summary.json` / `assertion.json` 生成 Markdown 片段。
 
 推荐至少保留这一组产物：
 

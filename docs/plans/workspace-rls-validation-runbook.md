@@ -52,6 +52,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 - 汇总脚本：[`scripts/workspace_rls_summarize.sh`](../../scripts/workspace_rls_summarize.sh)
 - 样本断言：[`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh)
 - 摘要断言：[`scripts/workspace_rls_assert_summary.sh`](../../scripts/workspace_rls_assert_summary.sh)
+- checklist 片段：[`scripts/workspace_rls_render_checklist_snippet.sh`](../../scripts/workspace_rls_render_checklist_snippet.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
 它做两件事：
@@ -219,6 +220,16 @@ bash scripts/workspace_rls_assert_summary.sh
 - `match_or_rls_widened` 默认也失败；若本轮就是在验证 RLS 收口，可显式传 `ALLOW_MATCH_OR_RLS_WIDENED=1`
 
 若传入 `RESULT_JSON_FILE=...`，断言脚本还会顺手输出机器可读 gate 结果。
+
+若要直接生成可贴进发布记录 / checklist 的 Markdown 片段，也可运行：
+
+```bash
+SUMMARY_JSON_FILE=".tmp/workspace-rls-<date>/summary.json" \
+ASSERTION_JSON_FILE=".tmp/workspace-rls-<date>/assertion.json" \
+ENVIRONMENT_LABEL="staging" \
+RELEASE_LABEL="workspace release candidate" \
+bash scripts/workspace_rls_render_checklist_snippet.sh
+```
 
 若想只对固定样本结果做门槛断言，也可运行：
 

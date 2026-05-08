@@ -43,6 +43,7 @@
 - **最新补齐**：Workspace RLS overall verdict 已补齐 — `summary.md` 现在会额外给出 `Overall Verdict: pass|warning|fail`，`workspace_rls_assert_summary.sh` 会优先按这条总结果做门禁判断
 - **最新补齐**：Workspace RLS JSON 摘要已补齐 — `workspace_rls_summarize.sh` 现支持同时输出 `summary.json`，`workspace_rls_probe_and_summarize.sh` 会默认把 Markdown 与机器可读 JSON 一起落盘
 - **最新补齐**：Workspace RLS assertion JSON 已补齐 — `workspace_rls_assert_summary.sh` 现支持输出 `assertion.json`，`workspace_rls_probe_and_summarize.sh` 默认会把 gate 结果也落盘，方便后续接 CI 或自动汇总
+- **最新补齐**：Workspace RLS checklist 片段生成已补齐 — 新增 `scripts/workspace_rls_render_checklist_snippet.sh`，可把 `summary.json` 与 `assertion.json` 直接整理成发布清单 / 工单可贴的 Markdown 段落
 - **最新补齐**：Workspace RLS 摘要断言已补齐 — 新增 `scripts/workspace_rls_assert_summary.sh`；`workspace_rls_probe_and_summarize.sh` 现在会对 `summary.md` 再跑一层 Gate，默认允许 `partial_match` / `expected_mismatch` / `match`，并把 `review_needed` / `security_bug` 直接视为失败
 - **最新补齐**：Workspace RLS staging 包装脚本已补齐 — 新增 `scripts/workspace_rls_probe_and_summarize.sh`，可在 owner/member/outsider 参数已知时一步产出三份原始 probe 输出与 `summary.md`，减少 staging 演练时手工拼命令
 - **最新补齐**：Workspace RLS 样本断言已补齐 — 新增 `scripts/workspace_rls_assert_sample.sh`，可对固定 local sample 的 owner/member/outsider 期望计数做直接断言；`workspace_rls_seed_and_probe_sample.sh` 也已串上这层 pass/fail 检查
