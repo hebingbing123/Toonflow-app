@@ -4,6 +4,7 @@
 总表：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W9。  
 安全边界：[`workspace-security-boundary.md`](./workspace-security-boundary.md)。  
 路线图：[`roadmap-workspace.md`](./roadmap-workspace.md)。
+可执行验证步骤：[`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md)。
 
 ## 1) 为什么需要这张表
 
@@ -118,6 +119,8 @@ W9.2 的任务不是立刻把所有 RLS 改完，而是先把 **哪些一致、�
 - Rust API 与 RLS 在这类资源上应继续保持 user scope 一致
 
 ## 4) 建议测试矩阵
+
+若要直接执行而不是手工拼 SQL / curl，优先使用 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md) 里的探针脚本与记录模板。
 
 至少准备三类身份：
 
