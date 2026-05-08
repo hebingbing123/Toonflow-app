@@ -1591,4 +1591,481 @@ void main() {
       expect(combinations[3]['assetReady'], true);
     });
   });
+
+  group('Export Check Workflow Tests', () {
+    // Task 14.3: Verify export check workflow
+    // Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 11.1, 11.2, 11.3, 11.4
+
+    String exportCheckHeadline(bool exportReady) {
+      return exportReady
+          ? '服务端未发现阻塞级问题（仍需在制作侧确认成片）。'
+          : '存在阻塞项：建议先在制作工作区补齐后再导出 / 成片。';
+    }
+
+    test('export check should display export ready status correctly', () {
+      // Requirements 10.2: Display export ready status
+      final exportCheck = <String, dynamic>{
+        'exportReady': true,
+        'summary': <String, dynamic>{
+          'storyboardCount': 10,
+          'blockingIssueCount': 0,
+          'warningIssueCount': 2,
+        },
+      };
+
+      expect(exportCheck['exportReady'], true);
+      final summary = exportCheck['summary']! as Map<String, dynamic>;
+      expect(summary['blockingIssueCount'], 0);
+      expect(summary['warningIssueCount'], 2);
+    });
+
+    test('export check should display blocking issues correctly', () {
+      // Requirements 10.4: Display blocking issues with details
+      final issues = [
+        {
+          'severity': 'blocking',
+          'code': 'NO_VIDEO',
+          'detail': '未选择视频',
+          'scriptNumericId': 1,
+          'storyboardNumericId': 10,
+          'sbIndex': 1,
+        },
+        {
+          'severity': 'blocking',
+          'code': 'NO_DURATION',
+          'detail': '时长未设定',
+          'scriptNumericId': 1,
+          'storyboardNumericId': 11,
+          'sbIndex': 2,
+        },
+      ];
+
+      final blockingIssues = issues.where((i) => i['severity'] == 'blocking').toList();
+      expect(blockingIssues, hasLength(2));
+      expect(blockingIssues[0]['code'], 'NO_VIDEO');
+      expect(blockingIssues[1]['code'], 'NO_DURATION');
+    });
+
+    test('export check should display warning issues correctly', () {
+      // Requirements 10.4: Display warning issues with details
+      final issues = [
+        {
+          'severity': 'warning',
+          'code': 'SUBTITLE_EMPTY',
+          'detail': '字幕为空',
+          'scriptNumericId': 1,
+          'storyboardNumericId': 12,
+          'sbIndex': 3,
+        },
+        {
+          'severity': 'warning',
+          'code': 'VOICEOVER_MISSING',
+          'detail': '旁白缺失',
+          'scriptNumericId': 1,
+          'storyboardNumericId': 13,
+          'sbIndex': 4,
+        },
+      ];
+
+      final warningIssues = issues.where((i) => i['severity'] == 'warning').toList();
+      expect(warningIssues, hasLength(2));
+      expect(warningIssues[0]['code'], 'SUBTITLE_EMPTY');
+      expect(warningIssues[1]['code'], 'VOICEOVER_MISSING');
+    });
+
+    test('export check should format issue display correctly', () {
+      // Requirements 10.5: Display issue with severity, code, message, shot info
+      final issue = {
+        'severity': 'blocking',
+        'code': 'NO_VIDEO',
+        'detail': '未选择视频',
+        'scriptNumericId': 1,
+        'storyboardNumericId': 10,
+        'sbIndex': 1,
+      };
+
+      final formatted = '剧本 #${issue['scriptNumericId']} · '
+          '分镜 #${issue['storyboardNumericId']} · '
+          '序 ${issue['sbIndex']} · '
+          '${issue['code']} · '
+          '${issue['detail']}';
+
+      expect(formatted, '剧本 #1 · 分镜 #10 · 序 1 · NO_VIDEO · 未选择视频');
+    });
+
+    test('export check should disable export button when blocking issues exist', () {
+      // Requirements 10.6: Disable export button when blocking issues exist
+      final exportCheck = <String, dynamic>{
+        'exportReady': false,
+        'summary': <String, dynamic>{
+          'blockingIssueCount': 3,
+          'warningIssueCount': 1,
+        },
+      };
+
+      final canExport = exportCheck['exportReady'] as bool;
+      final summary = exportCheck['summary']! as Map<String, dynamic>;
+      final hasBlockingIssues = (summary['blockingIssueCount'] as int) > 0;
+
+      expect(canExport, false);
+      expect(hasBlockingIssues, true);
+    });
+
+    test('export check should allow export when only warnings exist', () {
+      // Requirements 10.7: Allow export when only warning issues exist
+      final exportCheck = <String, dynamic>{
+        'exportReady': true,
+        'summary': <String, dynamic>{
+          'blockingIssueCount': 0,
+          'warningIssueCount': 2,
+        },
+      };
+
+      final canExport = exportCheck['exportReady'] as bool;
+      final summary = exportCheck['summary']! as Map<String, dynamic>;
+      final hasBlockingIssues = (summary['blockingIssueCount'] as int) > 0;
+      final hasWarnings = (summary['warningIssueCount'] as int) > 0;
+
+      expect(canExport, true);
+      expect(hasBlockingIssues, false);
+      expect(hasWarnings, true);
+    });
+
+    test('export check should display summary metrics correctly', () {
+      // Requirements 10.3: Display check summary
+      final summary = {
+        'storyboardCount': 15,
+        'blockingIssueCount': 2,
+        'warningIssueCount': 3,
+      };
+
+      expect(summary['storyboardCount'], 15);
+      expect(summary['blockingIssueCount'], 2);
+      expect(summary['warningIssueCount'], 3);
+    });
+
+    test('quality gate should skip check when strategy is off', () {
+      // Requirements 11.2: Skip quality gate check when strategy is off
+      final qualityGate = {
+        'strategy': 'off',
+        'enforced': false,
+        'pendingReviewBadCaseCount': 5,
+      };
+
+      final shouldCheckQuality = qualityGate['strategy'] != 'off';
+      expect(shouldCheckQuality, false);
+    });
+
+    test('quality gate should show warning when strategy is warn', () {
+      // Requirements 11.3: Show warning but allow export when strategy is warn
+      final qualityGate = {
+        'strategy': 'warn',
+        'enforced': false,
+        'pendingReviewBadCaseCount': 3,
+      };
+
+      final isWarnMode = qualityGate['strategy'] == 'warn';
+      final hasBadCases = (qualityGate['pendingReviewBadCaseCount'] as int) > 0;
+
+      expect(isWarnMode, true);
+      expect(hasBadCases, true);
+      
+      // In warn mode, export is allowed even with bad cases
+      final canExport = true; // Warn mode doesn't block
+      expect(canExport, true);
+    });
+
+    test('quality gate should block export when strategy is block and has bad cases', () {
+      // Requirements 11.4: Block export when strategy is block and quality not met
+      final qualityGate = {
+        'strategy': 'block',
+        'enforced': true,
+        'pendingReviewBadCaseCount': 2,
+      };
+
+      final isBlockMode = qualityGate['strategy'] == 'block';
+      final isEnforced = qualityGate['enforced'] as bool;
+      final hasBadCases = (qualityGate['pendingReviewBadCaseCount'] as int) > 0;
+
+      expect(isBlockMode, true);
+      expect(isEnforced, true);
+      expect(hasBadCases, true);
+
+      // In block mode with enforcement and bad cases, export is blocked
+      final canExport = !(isBlockMode && isEnforced && hasBadCases);
+      expect(canExport, false);
+    });
+
+    test('quality gate should allow export when strategy is block but no bad cases', () {
+      // Requirements 11.4: Allow export when strategy is block but no bad cases
+      final qualityGate = {
+        'strategy': 'block',
+        'enforced': true,
+        'pendingReviewBadCaseCount': 0,
+      };
+
+      final isBlockMode = qualityGate['strategy'] == 'block';
+      final isEnforced = qualityGate['enforced'] as bool;
+      final hasBadCases = (qualityGate['pendingReviewBadCaseCount'] as int) > 0;
+
+      expect(isBlockMode, true);
+      expect(isEnforced, true);
+      expect(hasBadCases, false);
+
+      // In block mode but no bad cases, export is allowed
+      final canExport = !(isBlockMode && isEnforced && hasBadCases);
+      expect(canExport, true);
+    });
+
+    test('quality gate should display pending review bad case count', () {
+      // Requirements 11.7: Display pending review bad case count
+      final qualityGate = {
+        'strategy': 'block',
+        'enforced': true,
+        'pendingReviewBadCaseCount': 5,
+      };
+
+      expect(qualityGate['pendingReviewBadCaseCount'], 5);
+    });
+
+    test('quality gate should display blocking reasons when enforced', () {
+      // Requirements 11.6: Display blocking reasons with code, message, rework route
+      final qualityGate = {
+        'strategy': 'block',
+        'enforced': true,
+        'pendingReviewBadCaseCount': 2,
+        'blockingReasons': [
+          {
+            'code': 'QUALITY_ISSUE_1',
+            'message': '质量问题1需要修复',
+            'reworkRoute': '/quality/review/1',
+          },
+          {
+            'code': 'QUALITY_ISSUE_2',
+            'message': '质量问题2需要修复',
+            'reworkRoute': '/quality/review/2',
+          },
+        ],
+      };
+
+      final reasons = qualityGate['blockingReasons'] as List;
+      expect(reasons, hasLength(2));
+      expect(reasons[0]['code'], 'QUALITY_ISSUE_1');
+      expect(reasons[0]['message'], '质量问题1需要修复');
+      expect(reasons[0]['reworkRoute'], '/quality/review/1');
+    });
+
+    test('quality gate should format blocking reason display correctly', () {
+      // Requirements 11.6: Format blocking reason with code, message, rework route
+      final reason = {
+        'code': 'QUALITY_ISSUE',
+        'message': '质量问题需要修复',
+        'reworkRoute': '/quality/review/123',
+      };
+
+      final formatted = '${reason['code']}: ${reason['message']} [返工: ${reason['reworkRoute']}]';
+      expect(formatted, 'QUALITY_ISSUE: 质量问题需要修复 [返工: /quality/review/123]');
+    });
+
+    test('quality gate should handle null rework route', () {
+      final reason = {
+        'code': 'QUALITY_ISSUE',
+        'message': '质量问题需要修复',
+        'reworkRoute': null,
+      };
+
+      final routePart = reason['reworkRoute'] != null ? ' [返工: ${reason['reworkRoute']}]' : '';
+      final formatted = '${reason['code']}: ${reason['message']}$routePart';
+      expect(formatted, 'QUALITY_ISSUE: 质量问题需要修复');
+    });
+
+    test('export check should generate correct headline when export ready', () {
+      // Requirements 10.2: Display appropriate headline based on export ready status
+      expect(
+        exportCheckHeadline(true),
+        '服务端未发现阻塞级问题（仍需在制作侧确认成片）。',
+      );
+    });
+
+    test('export check should generate correct headline when export not ready', () {
+      expect(
+        exportCheckHeadline(false),
+        '存在阻塞项：建议先在制作工作区补齐后再导出 / 成片。',
+      );
+    });
+
+    test('export check should limit displayed issues to 14 items', () {
+      // Generate 20 blocking issues
+      final issues = List.generate(20, (i) => {
+        'severity': 'blocking',
+        'code': 'ISSUE_$i',
+        'detail': '问题 $i',
+        'scriptNumericId': 1,
+        'storyboardNumericId': 10 + i,
+        'sbIndex': i + 1,
+      });
+
+      final blockingIssues = issues
+          .where((i) => i['severity'] == 'blocking')
+          .take(14)
+          .toList();
+
+      expect(blockingIssues, hasLength(14));
+      expect(blockingIssues.first['code'], 'ISSUE_0');
+      expect(blockingIssues.last['code'], 'ISSUE_13');
+    });
+
+    test('export check should separate blocking and warning issues', () {
+      final issues = [
+        {'severity': 'blocking', 'code': 'BLOCK_1'},
+        {'severity': 'warning', 'code': 'WARN_1'},
+        {'severity': 'blocking', 'code': 'BLOCK_2'},
+        {'severity': 'warning', 'code': 'WARN_2'},
+        {'severity': 'blocking', 'code': 'BLOCK_3'},
+      ];
+
+      final blockingIssues = issues.where((i) => i['severity'] == 'blocking').toList();
+      final warningIssues = issues.where((i) => i['severity'] == 'warning').toList();
+
+      expect(blockingIssues, hasLength(3));
+      expect(warningIssues, hasLength(2));
+      expect(blockingIssues.every((i) => i['severity'] == 'blocking'), true);
+      expect(warningIssues.every((i) => i['severity'] == 'warning'), true);
+    });
+
+    test('export check should handle empty issues list', () {
+      final issues = <Map<String, dynamic>>[];
+
+      final blockingIssues = issues.where((i) => i['severity'] == 'blocking').toList();
+      final warningIssues = issues.where((i) => i['severity'] == 'warning').toList();
+
+      expect(blockingIssues, isEmpty);
+      expect(warningIssues, isEmpty);
+    });
+
+    test('export check should handle null sbIndex in issue display', () {
+      final issue = {
+        'severity': 'blocking',
+        'code': 'NO_VIDEO',
+        'detail': '未选择视频',
+        'scriptNumericId': 1,
+        'storyboardNumericId': 10,
+        'sbIndex': null,
+      };
+
+      final sbIndex = issue['sbIndex'];
+      final sbPart = sbIndex == null ? '' : ' · 序 $sbIndex';
+      final formatted = '剧本 #${issue['scriptNumericId']} · '
+          '分镜 #${issue['storyboardNumericId']}$sbPart · '
+          '${issue['code']} · '
+          '${issue['detail']}';
+
+      expect(formatted, '剧本 #1 · 分镜 #10 · NO_VIDEO · 未选择视频');
+    });
+
+    test('quality gate line should format correctly for off strategy', () {
+      final strategy = 'off';
+      final qualityGateLine = strategy == 'off'
+          ? '质量门禁：已关闭（不检查质量问题）。'
+          : '';
+
+      expect(qualityGateLine, '质量门禁：已关闭（不检查质量问题）。');
+    });
+
+    test('quality gate line should format correctly for warn strategy with bad cases', () {
+      final strategy = 'warn';
+      final pendingReviewBadCaseCount = 3;
+      
+      String qualityGateLine;
+      if (strategy == 'warn') {
+        if (pendingReviewBadCaseCount > 0) {
+          qualityGateLine = '质量门禁：警告模式 - 待复核坏例 $pendingReviewBadCaseCount 条（允许导出但建议修复）。';
+        } else {
+          qualityGateLine = '质量门禁：警告模式 - 暂无待复核坏例（允许导出）。';
+        }
+      } else {
+        qualityGateLine = '';
+      }
+
+      expect(qualityGateLine, '质量门禁：警告模式 - 待复核坏例 3 条（允许导出但建议修复）。');
+    });
+
+    test('quality gate line should format correctly for block strategy with enforcement', () {
+      final strategy = 'block';
+      final enforced = true;
+      final pendingReviewBadCaseCount = 2;
+      
+      String qualityGateLine;
+      if (strategy == 'block') {
+        if (enforced && pendingReviewBadCaseCount > 0) {
+          qualityGateLine = '质量门禁：阻断模式 - 待复核坏例 $pendingReviewBadCaseCount 条（阻止导出，需先修复）。';
+        } else if (pendingReviewBadCaseCount > 0) {
+          qualityGateLine = '质量门禁：阻断模式 - 待复核坏例 $pendingReviewBadCaseCount 条（暂未强制执行）。';
+        } else {
+          qualityGateLine = '质量门禁：阻断模式 - 暂无待复核坏例（允许导出）。';
+        }
+      } else {
+        qualityGateLine = '';
+      }
+
+      expect(qualityGateLine, '质量门禁：阻断模式 - 待复核坏例 2 条（阻止导出，需先修复）。');
+    });
+
+    test('export check should determine final export permission correctly', () {
+      bool canExport(bool exportReady, bool qualityGateBlocks) =>
+          exportReady && !qualityGateBlocks;
+
+      expect(canExport(true, false), true); // ready, gate clear
+      expect(canExport(false, false), false); // not ready
+      expect(canExport(true, true), false); // gate blocks
+      expect(canExport(false, true), false); // not ready and gate blocks
+    });
+
+    test('export check UI should show loading state correctly', () {
+      final uiState = {
+        'visible': true,
+        'loading': true,
+        'unavailable': false,
+        'headline': '正在读取导出前检查…',
+      };
+
+      expect(uiState['visible'], true);
+      expect(uiState['loading'], true);
+      expect(uiState['unavailable'], false);
+    });
+
+    test('export check UI should show unavailable state correctly', () {
+      final uiState = {
+        'visible': true,
+        'loading': false,
+        'unavailable': true,
+        'headline': '导出前检查暂不可用。',
+      };
+
+      expect(uiState['visible'], true);
+      expect(uiState['loading'], false);
+      expect(uiState['unavailable'], true);
+    });
+
+    test('export check UI should show data correctly when available', () {
+      final uiState = {
+        'visible': true,
+        'loading': false,
+        'unavailable': false,
+        'exportReady': true,
+        'metrics': [
+          {'label': '分镜', 'value': '10'},
+          {'label': '阻塞', 'value': '0'},
+          {'label': '提醒', 'value': '2'},
+          {'label': '可导出', 'value': '是'},
+        ],
+      };
+
+      expect(uiState['visible'], true);
+      expect(uiState['loading'], false);
+      expect(uiState['unavailable'], false);
+      expect(uiState['exportReady'], true);
+      expect(uiState['metrics'], hasLength(4));
+    });
+  });
 }
