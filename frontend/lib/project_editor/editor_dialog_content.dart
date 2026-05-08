@@ -48,6 +48,8 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             dialogState: dialogState,
           ),
           const SizedBox(height: 12),
+          ProjectMembersPanel(accessToken: token, projectId: p.id),
+          const SizedBox(height: 12),
           _buildProjectEditorNovelsAndEventsSection(
             ctx: ctx,
             setDialogState: setDialogState,
