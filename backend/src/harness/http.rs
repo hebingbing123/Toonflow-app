@@ -139,6 +139,8 @@ async fn persist_user_wasm(
 ) -> Result<(StatusCode, Json<HarnessUserWasmPersisted>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     observe::harness_user_wasm_persist_http(uid, body.len());
+    // Size / parse checks must run before pool acquisition so smoke tests without PG still see 400.
+    wasm_runtime::validate_user_wasm_upload(&body).map_err(ApiError::BadRequest)?;
     let pool = state.require_pool()?;
     let row = user_wasm_db::persist_user_wasm_checked(pool, uid, &body).await?;
 
@@ -204,10 +206,11 @@ pub struct HarnessUserWasmRevoked {
     operation_id = "revokeHarnessUserWasmV1",
     tag = "harness",
     params(
-        ("id" = Uuid, Path, description = "Stored WASM row id")
+        ("id" = String, Path, description = "Stored WASM row id (UUID)")
     ),
     responses(
         (status = 200, description = "Revoked or already revoked (idempotent)", body = HarnessUserWasmRevoked),
+        (status = 400, description = "Path id is not a valid UUID", body = crate::error::ErrorBody),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
         (status = 404, description = "No row for this id and owner", body = crate::error::ErrorBody),
         (status = 503, description = "DATABASE_URL not configured / DB unavailable", body = crate::error::ErrorBody),
@@ -217,8 +220,10 @@ pub struct HarnessUserWasmRevoked {
 async fn revoke_user_wasm_by_id(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Path(id): Path<Uuid>,
+    Path(id_raw): Path<String>,
 ) -> Result<Json<HarnessUserWasmRevoked>, ApiError> {
+    let id = Uuid::parse_str(id_raw.trim())
+        .map_err(|_| ApiError::BadRequest("harness user-wasm id must be a UUID".into()))?;
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     observe::harness_user_wasm_revoke_http(uid, id);

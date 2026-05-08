@@ -4,6 +4,11 @@
 //! 用于验证 WASM 堆栈路径。
 //!
 //! **WP‑C**：[`validate_user_wasm_upload`] 为将来「用户投递 WASM」提供体量上限与模块解析校验（REST 接线前可单测与内部复用）。
+//!
+//! Fuel-capped execution (`invoke_user_probe`) is staged for WS dispatch; Clippy
+//! would otherwise flag the whole helper cluster as dead until that path lands.
+
+#![allow(dead_code)]
 
 use serde_json::{json, Value};
 use wasmi::{Config, Engine, Linker, Module, Store};
@@ -246,6 +251,7 @@ mod tests {
     #[test]
     fn user_probe_fuel_exhaustion_returns_err() {
         let _g = user_wasm_test_env_lock();
+        std::env::remove_var("HARNESS_USER_WASM_MAX_BYTES");
         std::env::remove_var("HARNESS_USER_WASM_DISABLED");
         std::env::set_var("HARNESS_USER_WASM_FUEL_LIMIT", "1");
         let err = invoke_user_probe(PROBE_WASM).expect_err("fuel should exhaust");

@@ -175,4 +175,3 @@ async fn harness_user_wasm_revoke_soft_delete_and_list_filters_revoked() {
         "revoked rows must not be returned by list"
     );
 }
-

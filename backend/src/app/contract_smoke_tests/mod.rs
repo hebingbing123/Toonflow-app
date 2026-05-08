@@ -2,6 +2,8 @@
 //!
 //! 模块按**功能面**（路由/域）分组，而不是按运行顺序。旧的数字 `partN.rs` 名称被删除，改为描述性文件名。
 
+#![allow(clippy::await_holding_lock)]
+
 mod helpers;
 
 mod asset_jobs_tasks_smoke;

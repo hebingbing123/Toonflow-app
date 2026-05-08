@@ -220,6 +220,15 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             );
           },
         ),
+        const SizedBox(height: 16),
+        ShortDramaTargetsPanel(
+          accessToken: token,
+          project: detail.project,
+          onSaved: () async {
+            if (!mounted) return;
+            await _projectsController.loadProjects();
+          },
+        ),
         const SizedBox(height: 8),
         ExpansionTile(
           tilePadding: EdgeInsets.zero,

@@ -341,7 +341,7 @@ pub async fn harness_agent_run_streaming_tools(
                         request_id,
                     ));
 
-                    let tool_result = match invoke_tool_async(ctx, name, &args, request_id).await {
+                    let tool_result = match invoke_tool_async(ctx, name, &args).await {
                         Ok(r) => r,
                         Err(e) => json!({ "error": e.code(), "message": e.message() }),
                     };

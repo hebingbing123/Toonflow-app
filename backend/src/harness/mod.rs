@@ -22,6 +22,10 @@ pub mod permissions;
 mod sub_agent;
 pub mod tools;
 pub(crate) mod user_wasm_db;
+#[cfg(test)]
+mod user_wasm_env_lock;
+#[cfg(test)]
+pub use user_wasm_env_lock::user_wasm_test_env_lock;
 pub(crate) mod wasm_runtime;
 pub mod wire;
 pub mod ws;

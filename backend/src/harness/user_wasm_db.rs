@@ -8,6 +8,8 @@ use uuid::Uuid;
 use crate::error::ApiError;
 use crate::harness::wasm_runtime;
 
+type ActiveUserWasmSqlRow = (Uuid, Vec<u8>, Vec<u8>, i64, DateTime<Utc>);
+
 #[derive(Clone, Debug)]
 pub(crate) struct UserWasmPersistResult {
     pub id: Uuid,
@@ -173,7 +175,7 @@ pub(crate) async fn get_active_user_wasm_for_owner(
     owner_user_id: Uuid,
     wasm_id: Uuid,
 ) -> Result<UserWasmActiveRow, ApiError> {
-    let row: Option<(Uuid, Vec<u8>, Vec<u8>, i64, DateTime<Utc>)> = sqlx::query_as(
+    let row: Option<ActiveUserWasmSqlRow> = sqlx::query_as(
         r#"
         SELECT id, wasm_sha256, wasm_bytes, size_bytes, created_at
         FROM app_harness_user_wasm
@@ -203,6 +205,9 @@ pub(crate) async fn get_active_user_wasm_for_owner(
 
 #[cfg(test)]
 mod tests {
+    // Tests hold a std mutex across awaits to serialize env + temp PG table usage.
+    #![allow(clippy::await_holding_lock)]
+
     use super::*;
     use crate::harness::wasm_runtime;
     use sqlx::postgres::PgPoolOptions;
@@ -270,20 +275,24 @@ mod tests {
         let owner = Uuid::new_v4();
         let wasm = wasm_runtime::probe_wasm_bytes().to_vec();
 
-        let a = persist_user_wasm_checked(&pool, owner, &wasm).await.unwrap();
+        let a = persist_user_wasm_checked(&pool, owner, &wasm)
+            .await
+            .unwrap();
         assert_eq!(
             list_user_wasm_for_owner(&pool, owner).await.unwrap().len(),
             1
         );
 
-        let revoked_at = revoke_user_wasm_for_owner(&pool, owner, a.id).await.unwrap();
+        let revoked_at = revoke_user_wasm_for_owner(&pool, owner, a.id)
+            .await
+            .unwrap();
         assert!(revoked_at.timestamp() > 0);
 
         let items = list_user_wasm_for_owner(&pool, owner).await.unwrap();
         assert!(items.is_empty(), "revoked rows must not be listed");
 
-    std::env::remove_var("HARNESS_USER_WASM_MAX_STORED_PER_USER");
-    std::env::remove_var("HARNESS_USER_WASM_LIST_CAP");
+        std::env::remove_var("HARNESS_USER_WASM_MAX_STORED_PER_USER");
+        std::env::remove_var("HARNESS_USER_WASM_LIST_CAP");
     }
 
     #[tokio::test]
@@ -302,7 +311,9 @@ mod tests {
         let owner = Uuid::new_v4();
         let wasm = wasm_runtime::probe_wasm_bytes().to_vec();
 
-        let first = persist_user_wasm_checked(&pool, owner, &wasm).await.unwrap();
+        let first = persist_user_wasm_checked(&pool, owner, &wasm)
+            .await
+            .unwrap();
         assert_eq!(
             list_user_wasm_for_owner(&pool, owner).await.unwrap().len(),
             1
@@ -313,15 +324,17 @@ mod tests {
             .await
             .unwrap();
 
-        let second = persist_user_wasm_checked(&pool, owner, &wasm).await.unwrap();
+        let second = persist_user_wasm_checked(&pool, owner, &wasm)
+            .await
+            .unwrap();
         assert_ne!(second.id, first.id);
 
         let items = list_user_wasm_for_owner(&pool, owner).await.unwrap();
         assert_eq!(items.len(), 1);
         assert_eq!(items[0].id, second.id);
 
-    std::env::remove_var("HARNESS_USER_WASM_MAX_STORED_PER_USER");
-    std::env::remove_var("HARNESS_USER_WASM_LIST_CAP");
+        std::env::remove_var("HARNESS_USER_WASM_MAX_STORED_PER_USER");
+        std::env::remove_var("HARNESS_USER_WASM_LIST_CAP");
     }
 
     #[tokio::test]
@@ -340,16 +353,22 @@ mod tests {
         let owner = Uuid::new_v4();
         let wasm = wasm_runtime::probe_wasm_bytes().to_vec();
 
-        let row = persist_user_wasm_checked(&pool, owner, &wasm).await.unwrap();
-        let revoked_at_1 = revoke_user_wasm_for_owner(&pool, owner, row.id).await.unwrap();
-        let revoked_at_2 = revoke_user_wasm_for_owner(&pool, owner, row.id).await.unwrap();
+        let row = persist_user_wasm_checked(&pool, owner, &wasm)
+            .await
+            .unwrap();
+        let revoked_at_1 = revoke_user_wasm_for_owner(&pool, owner, row.id)
+            .await
+            .unwrap();
+        let revoked_at_2 = revoke_user_wasm_for_owner(&pool, owner, row.id)
+            .await
+            .unwrap();
 
         assert_eq!(
             revoked_at_1, revoked_at_2,
             "COALESCE(revoked_at, NOW()) must keep revoked_at stable"
         );
 
-    std::env::remove_var("HARNESS_USER_WASM_MAX_STORED_PER_USER");
-    std::env::remove_var("HARNESS_USER_WASM_LIST_CAP");
+        std::env::remove_var("HARNESS_USER_WASM_MAX_STORED_PER_USER");
+        std::env::remove_var("HARNESS_USER_WASM_LIST_CAP");
     }
 }

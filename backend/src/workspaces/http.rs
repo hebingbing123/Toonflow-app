@@ -78,6 +78,19 @@ pub struct WorkspaceMemberResponse {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+#[derive(Debug, Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
+pub struct ListWorkspaceInvitesQuery {
+    /// Filter by **`status`** (`pending`, `accepted`, `expired`, `canceled`).
+    #[serde(default)]
+    #[param(example = "pending")]
+    pub status: Option<String>,
+    /// Max rows (**1–200**, default **50**).
+    #[serde(default)]
+    #[param(example = 50)]
+    pub limit: Option<i64>,
+}
+
 #[derive(Debug, Deserialize, ToSchema)]
 #[serde(deny_unknown_fields)]
 pub struct CreateWorkspaceInviteBody {
@@ -163,7 +176,7 @@ pub(crate) fn router() -> Router<AppState> {
         )
         .route(
             "/api/v1/workspaces/{workspace_id}/invites",
-            post(create_workspace_invite),
+            get(list_workspace_invites).post(create_workspace_invite),
         )
         .route(
             "/api/v1/workspaces/invites/accept",
@@ -1036,6 +1049,74 @@ pub(crate) async fn leave_workspace(
     Ok(Json(row))
 }
 
+fn normalize_invite_list_status(raw: Option<String>) -> Result<Option<String>, ApiError> {
+    let Some(s) = raw else {
+        return Ok(None);
+    };
+    let t = s.trim().to_ascii_lowercase();
+    if t.is_empty() {
+        return Ok(None);
+    }
+    match t.as_str() {
+        "pending" | "accepted" | "expired" | "canceled" => Ok(Some(t)),
+        _ => Err(ApiError::BadRequest(
+            "status must be pending, accepted, expired, or canceled".into(),
+        )),
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/workspaces/{workspace_id}/invites",
+    operation_id = "listWorkspaceInvitesV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID"),
+        ListWorkspaceInvitesQuery
+    ),
+    responses(
+        (status = 200, description = "OK", body = [WorkspaceInviteResponse]),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_workspace_invites(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+    Query(q): Query<ListWorkspaceInvitesQuery>,
+) -> Result<Json<Vec<WorkspaceInviteResponse>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+
+    let status_filter = normalize_invite_list_status(q.status.clone())?;
+    let limit = q.limit.unwrap_or(50).clamp(1, 200);
+
+    let rows: Vec<WorkspaceInviteResponse> = sqlx::query_as(
+        r#"
+        SELECT
+          id, workspace_id, email, token, role, invited_by, status, expires_at,
+          accepted_by, accepted_at, created_at, updated_at
+        FROM public.app_workspace_invite
+        WHERE workspace_id = $1
+          AND ($2::text IS NULL OR status = $2)
+        ORDER BY created_at DESC, id DESC
+        LIMIT $3
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(status_filter)
+    .bind(limit)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(rows))
+}
+
 #[utoipa::path(
     post,
     path = "/api/v1/workspaces/{workspace_id}/invites",
@@ -1230,6 +1311,7 @@ pub(crate) async fn accept_workspace_invite(
         patch_workspace_member,
         remove_workspace_member,
         leave_workspace,
+        list_workspace_invites,
         create_workspace_invite,
         accept_workspace_invite
     ),

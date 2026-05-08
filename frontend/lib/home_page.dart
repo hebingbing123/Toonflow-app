@@ -26,6 +26,7 @@ import 'project_editor/scripts/section_builder.dart';
 import 'project_editor/scripts/plan_workbench_view.dart';
 import 'project_editor/scripts/plan_workbench_support.dart';
 import 'project_editor/scripts/workbench/dialog_launcher.dart';
+import 'project_editor/short_drama_targets_panel.dart';
 import 'script_editor/edit_image/workbench_view.dart';
 import 'script_editor/workbench_view.dart';
 import 'script_editor/storyboards/workbench_view.dart';

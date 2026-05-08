@@ -294,6 +294,34 @@ Future<List<WorkspaceMemberResponse>> fetchWorkspaceMembersV1(
       .toList(growable: false);
 }
 
+/// `GET /api/v1/workspaces/{workspace_id}/invites` — see `listWorkspaceInvitesV1`.
+Future<List<WorkspaceInviteResponse>> fetchWorkspaceInvitesV1(
+  String accessToken,
+  String workspaceId, {
+  String? status,
+  int? limit,
+}) async {
+  final qp = <String, String>{};
+  if (status != null && status.isNotEmpty) {
+    qp['status'] = status;
+  }
+  if (limit != null) {
+    qp['limit'] = '$limit';
+  }
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites')
+      .replace(queryParameters: qp.isEmpty ? null : qp);
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => WorkspaceInviteResponse.fromJson(e as Map<String, dynamic>))
+      .toList(growable: false);
+}
+
 Future<WorkspaceMemberResponse> addWorkspaceMemberV1(
   String accessToken,
   String workspaceId,
