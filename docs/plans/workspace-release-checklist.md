@@ -51,6 +51,15 @@
 若是固定 sample 回归，继续用 [`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh) 直接做 pass/fail 断言。
 若是 staging / 手工环境验收，继续用 [`scripts/workspace_rls_assert_summary.sh`](../../scripts/workspace_rls_assert_summary.sh) 对 `summary.md` 做 pass/fail 断言。
 
+推荐至少保留这一组产物：
+
+- `owner.txt`
+- `member.txt`
+- `outsider.txt`
+- `summary.md`
+- `summary.json`
+- `assertion.json`
+
 最低要求：
 
 - 至少保留一份 owner/member/outsider 的 probe 结果摘要

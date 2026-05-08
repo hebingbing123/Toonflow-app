@@ -76,6 +76,8 @@ frontend/.packages
 auto-refactor.sh
 cursorpro_watch_click.applescript
 .tmp_argtest*.applescript
+.tmp/workspace-rls-*/
+.tmp/workspace-rls-*
 
 # Optional local agent / Codex installer bundle under scripts/ (tracked files such as
 # scripts/refactor-check.sh and Electron glue remain in Git; see package.json "refactor:check").
