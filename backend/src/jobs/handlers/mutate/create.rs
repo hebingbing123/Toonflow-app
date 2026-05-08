@@ -1,11 +1,11 @@
 use axum::{extract::State, http::HeaderMap, Json};
-use serde_json::Value;
-use uuid::Uuid;
 
-use crate::assets::resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::dto::{CreateJobBody, JobRow};
+use crate::jobs::payload_project::{
+    normalize_project_scope_in_job_payload, resolved_workspace_id_from_job_payload,
+};
 use crate::jobs::{
     hydrate_job_row, merge_client_request_id_from_http_headers, merge_default_track_metadata,
 };
@@ -14,20 +14,6 @@ use crate::metering::usage;
 use crate::state::AppState;
 
 use super::super::common::{idempotency_key_header, is_unique_violation, require_pool};
-
-fn payload_project_uuid(payload: &Value) -> Option<Uuid> {
-    payload
-        .get("project_uuid")
-        .and_then(|v| v.as_str())
-        .and_then(|s| Uuid::parse_str(s.trim()).ok())
-}
-
-fn payload_project_numeric(payload: &Value) -> Option<i32> {
-    payload
-        .get("project_numeric_id")
-        .and_then(|v| v.as_i64())
-        .and_then(|n| i32::try_from(n).ok())
-}
 
 #[utoipa::path(
     post,
@@ -85,20 +71,8 @@ pub(crate) async fn create_job(
     let mut payload = body.payload;
     merge_client_request_id_from_http_headers(&headers, &mut payload);
     merge_default_track_metadata(kind, &mut payload);
-    let payload_project_uuid = payload_project_uuid(&payload);
-    let payload_project_numeric = payload_project_numeric(&payload);
-    if payload_project_uuid.is_some() || payload_project_numeric.is_some() {
-        let (project_uuid, project_numeric_id, _workspace_id) =
-            resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
-                pool,
-                uid,
-                payload_project_uuid,
-                payload_project_numeric,
-            )
-            .await?;
-        payload["project_uuid"] = Value::String(project_uuid.to_string());
-        payload["project_numeric_id"] = Value::Number(project_numeric_id.into());
-    }
+    let resolved_workspace_id =
+        normalize_project_scope_in_job_payload(pool, uid, &mut payload).await?;
 
     let insert = sqlx::query_as::<_, JobRow>(
         r#"
@@ -142,6 +116,25 @@ pub(crate) async fn create_job(
     };
 
     hydrate_job_row(&mut row);
+
+    if let Some(workspace_id) =
+        resolved_workspace_id.or_else(|| resolved_workspace_id_from_job_payload(&row.payload))
+    {
+        tracing::info!(
+            event = "generation_job_enqueued",
+            user_id = %uid,
+            job_id = %row.id,
+            kind = %row.kind,
+            workspace_id = %workspace_id,
+            client_request_id = row
+                .payload
+                .get("client_request_id")
+                .or_else(|| row.payload.get("request_id"))
+                .and_then(|v| v.as_str())
+                .unwrap_or(""),
+            "generation job enqueued"
+        );
+    }
 
     if let Err(e) = usage::record_generation_job_created(pool, uid, row.id, &row.kind).await {
         tracing::warn!(

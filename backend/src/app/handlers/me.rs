@@ -22,6 +22,14 @@ pub struct PatchCurrentWorkspaceBody {
     pub workspace_id: Uuid,
 }
 
+fn request_id_from_headers(headers: &HeaderMap) -> Option<&str> {
+    headers
+        .get("x-request-id")
+        .and_then(|v| v.to_str().ok())
+        .map(str::trim)
+        .filter(|v| !v.is_empty())
+}
+
 #[derive(FromRow)]
 struct UserProfileRow {
     plan_tier: String,
@@ -54,6 +62,7 @@ pub(crate) async fn me(
 ) -> Result<Json<MeResponse>, ApiError> {
     let claims = require_claims(&state, &headers)?;
     let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
+    let request_id = request_id_from_headers(&headers);
 
     let (
         plan_tier,
@@ -161,6 +170,16 @@ pub(crate) async fn me(
                 .await
                 .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+                tracing::info!(
+                    event = "current_workspace_fallback",
+                    request_id = request_id.unwrap_or(""),
+                    user_id = %sub,
+                    stale_workspace_id = %current_id,
+                    workspace_id = %personal_workspace.workspace_id,
+                    outcome = "fallback_personal",
+                    "current workspace healed to personal"
+                );
+
                 WorkspaceSummary {
                     id: personal_workspace.workspace_id,
                     name: personal_workspace.workspace_name.clone(),
@@ -266,6 +285,7 @@ pub(crate) async fn patch_current_workspace(
 ) -> Result<Json<WorkspaceSummary>, ApiError> {
     let claims = require_claims(&state, &headers)?;
     let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
+    let request_id = request_id_from_headers(&headers);
     let pool = state.require_pool()?;
     let workspace_id = body.workspace_id;
 
@@ -321,6 +341,15 @@ pub(crate) async fn patch_current_workspace(
     let Some((id, name, workspace_type)) = row else {
         return Err(ApiError::NotFound);
     };
+
+    tracing::info!(
+        event = "current_workspace_switch",
+        request_id = request_id.unwrap_or(""),
+        user_id = %sub,
+        workspace_id = %workspace_id,
+        outcome = "switched",
+        "current workspace switched"
+    );
 
     Ok(Json(WorkspaceSummary {
         id,

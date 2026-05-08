@@ -17,7 +17,7 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::harness::observe;
+use crate::jobs::payload_project::resolved_workspace_id_from_job_payload;
 use crate::jobs::queue::{PgQueue, Queue};
 use crate::metering::usage;
 use crate::state::AppState;
@@ -46,6 +46,41 @@ fn client_request_id_from_payload(payload: &serde_json::Value) -> Option<&str> {
         .or_else(|| payload.get("request_id"))
         .and_then(|v| v.as_str())
         .filter(|s| !s.is_empty())
+}
+
+fn log_generation_job_phase(
+    user_id: Uuid,
+    job_id: Uuid,
+    kind: &str,
+    phase: &'static str,
+    worker_id: &str,
+    workspace_id: Option<Uuid>,
+    client_request_id: Option<&str>,
+) {
+    let rid = client_request_id.unwrap_or("");
+    match workspace_id {
+        Some(workspace_id) => tracing::info!(
+            event = "generation_job_phase",
+            user_id = %user_id,
+            job_id = %job_id,
+            kind = %kind,
+            phase,
+            worker_id = %worker_id,
+            workspace_id = %workspace_id,
+            client_request_id = rid,
+            "app_generation_job lifecycle (worker)"
+        ),
+        None => tracing::info!(
+            event = "generation_job_phase",
+            user_id = %user_id,
+            job_id = %job_id,
+            kind = %kind,
+            phase,
+            worker_id = %worker_id,
+            client_request_id = rid,
+            "app_generation_job lifecycle (worker)"
+        ),
+    }
 }
 
 fn worker_id_label() -> String {
@@ -142,12 +177,13 @@ async fn process_one_job(
 
     let job_kind = row.kind.clone();
     let client_rid = client_request_id_from_payload(&row.payload);
-    observe::generation_job(
+    log_generation_job_phase(
         row.owner_user_id,
         row.id,
         job_kind.as_str(),
         "claimed",
         worker_id,
+        resolved_workspace_id_from_job_payload(&row.payload),
         client_rid,
     );
 
@@ -179,12 +215,13 @@ async fn process_one_job(
             .await?;
 
             if let Some(mut final_row) = updated {
-                observe::generation_job(
+                log_generation_job_phase(
                     owner,
                     id,
                     final_row.kind.as_str(),
                     "succeeded",
                     worker_id,
+                    resolved_workspace_id_from_job_payload(&final_row.payload),
                     client_request_id_from_payload(&final_row.payload),
                 );
                 if let Err(e) =
@@ -203,12 +240,13 @@ async fn process_one_job(
             // If None: row was cancelled; cancel_job already sent WS.
         }
         Err(JobRunError::Cancelled) => {
-            observe::generation_job(
+            log_generation_job_phase(
                 owner,
                 id,
                 job_kind.as_str(),
                 "cancelled",
                 worker_id,
+                resolved_workspace_id_from_job_payload(&row.payload),
                 client_rid,
             );
             // Status is already `cancelled`; client was notified by cancel endpoint.
@@ -228,12 +266,13 @@ async fn process_one_job(
             .await?;
 
             if let Some(mut final_row) = updated {
-                observe::generation_job(
+                log_generation_job_phase(
                     owner,
                     id,
                     final_row.kind.as_str(),
                     "failed",
                     worker_id,
+                    resolved_workspace_id_from_job_payload(&final_row.payload),
                     client_request_id_from_payload(&final_row.payload),
                 );
                 hydrate_job_row(&mut final_row);
@@ -260,12 +299,13 @@ async fn process_one_job(
             .await?;
 
             if let Some(mut final_row) = updated {
-                observe::generation_job(
+                log_generation_job_phase(
                     owner,
                     id,
                     final_row.kind.as_str(),
                     "failed",
                     worker_id,
+                    resolved_workspace_id_from_job_payload(&final_row.payload),
                     client_request_id_from_payload(&final_row.payload),
                 );
                 hydrate_job_row(&mut final_row);

@@ -29,6 +29,7 @@ pub(super) fn merge_text_patch(
 #[derive(Debug, Clone, Copy, sqlx::FromRow)]
 pub(crate) struct ProjectAccessScope {
     pub id: Uuid,
+    pub workspace_id: Uuid,
 }
 
 pub(crate) async fn require_project_workspace_member_scope(
@@ -48,7 +49,7 @@ pub(crate) async fn require_project_workspace_member_scope(
 
     let row: Option<ProjectAccessScope> = sqlx::query_as(
         r#"
-        SELECT p.id
+        SELECT p.id, p.workspace_id
         FROM app_project p
         WHERE p.id = $1
           AND EXISTS (
@@ -65,5 +66,15 @@ pub(crate) async fn require_project_workspace_member_scope(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    row.ok_or_else(|| ApiError::Forbidden("not a member of project workspace".into()))
+    let scope =
+        row.ok_or_else(|| ApiError::Forbidden("not a member of project workspace".into()))?;
+    tracing::debug!(
+        event = "project_workspace_scope_resolved",
+        user_id = %user_id,
+        project_id = %scope.id,
+        workspace_id = %scope.workspace_id,
+        outcome = "member_scope",
+        "project workspace scope resolved"
+    );
+    Ok(scope)
 }

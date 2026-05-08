@@ -38,6 +38,13 @@ async fn reply_attach_resolve_error(
     request_id: Option<&str>,
 ) {
     let (code, msg) = api_error_to_ws(err);
+    tracing::warn!(
+        event = "harness_attach",
+        request_id = request_id.unwrap_or(""),
+        error_code = code,
+        outcome = "error",
+        "harness attach failed"
+    );
     let _ = send_error(socket, code, &msg, request_id).await;
 }
 
@@ -80,6 +87,15 @@ pub async fn handle_script_attach(
     *st.project_id = Some(i64::from(resolved.project_numeric));
     *st.script_id = None;
     *st.workspace_id = resolved.workspace_id;
+    tracing::info!(
+        event = "harness_attach",
+        user_id = %user_id,
+        channel = "script",
+        workspace_id = ?resolved.workspace_id,
+        request_id = request_id.unwrap_or(""),
+        outcome = "ack",
+        "harness attach resolved"
+    );
     let mut ack = json!({ "ok": true, "channel": "script" });
     if let Some(ws) = resolved.workspace_id {
         ack["workspaceUuid"] = Value::String(ws.to_string());
@@ -141,6 +157,15 @@ pub async fn handle_production_attach(
     *st.project_id = Some(i64::from(project.project_numeric));
     *st.script_id = Some(i64::from(script_numeric));
     *st.workspace_id = project.workspace_id;
+    tracing::info!(
+        event = "harness_attach",
+        user_id = %user_id,
+        channel = "production",
+        workspace_id = ?project.workspace_id,
+        request_id = request_id.unwrap_or(""),
+        outcome = "ack",
+        "harness attach resolved"
+    );
     let mut ack = json!({ "ok": true, "channel": "production" });
     if let Some(ws) = project.workspace_id {
         ack["workspaceUuid"] = Value::String(ws.to_string());
@@ -197,6 +222,15 @@ pub async fn handle_context_update(
     *st.project_id = Some(i64::from(project.project_numeric));
     *st.script_id = Some(i64::from(script_numeric));
     *st.workspace_id = project.workspace_id;
+    tracing::info!(
+        event = "harness_attach",
+        user_id = %user_id,
+        channel = "context_update",
+        workspace_id = ?project.workspace_id,
+        request_id = request_id.unwrap_or(""),
+        outcome = "ack",
+        "harness attach resolved"
+    );
     let mut ack = json!({ "ok": true });
     if let Some(ws) = project.workspace_id {
         ack["workspaceUuid"] = Value::String(ws.to_string());
