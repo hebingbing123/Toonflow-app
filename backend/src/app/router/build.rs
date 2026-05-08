@@ -91,6 +91,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings::agent_deploy::router())
         .merge(settings::danger::router())
         .merge(settings::dev::router())
+        .merge(settings::help_hub::router())
         .merge(settings::memory_config::router())
         .merge(settings::vendors::router())
         .route("/api/v1/me", get(handlers::me))

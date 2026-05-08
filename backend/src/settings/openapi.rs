@@ -8,6 +8,7 @@ use utoipa::OpenApi;
     crate::settings::dev::put_switch_ai_dev_tool,
     crate::settings::about::post_check_update,
     crate::settings::about::post_download_app,
+    crate::settings::help_hub::get_help_hub_links,
     crate::settings::danger::post_delete_all_data,
     crate::settings::danger::post_clear_database,
     crate::settings::memory_config::get_memory_config,

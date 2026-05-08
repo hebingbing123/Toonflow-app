@@ -15,6 +15,7 @@ extension _HomePageBuildProductSections on _HomePageState {
       (ProductWorkspacePane.tasks, '任务中心'),
       (ProductWorkspacePane.jobs, '任务作业'),
       (ProductWorkspacePane.quality, '质量评审'),
+      (ProductWorkspacePane.helpHub, '帮助'),
     ];
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -144,6 +145,9 @@ extension _HomePageBuildProductSections on _HomePageState {
 
   List<Widget> _buildProductSections(BuildContext context) => [
     _buildProductPaneSelector(context),
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.helpHub)
+      _HelpHubSection(accessToken: _session?.accessToken),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.shortVideoSpace)
       ShortVideoSpaceSection(
@@ -314,4 +318,130 @@ extension _HomePageBuildProductSections on _HomePageState {
         initialProjectNumericId: _productScopedProjectNumericId,
       ),
   ];
+}
+
+class _HelpHubSection extends StatefulWidget {
+  const _HelpHubSection({required this.accessToken});
+
+  final String? accessToken;
+
+  @override
+  State<_HelpHubSection> createState() => _HelpHubSectionState();
+}
+
+class _HelpHubSectionState extends State<_HelpHubSection> {
+  bool _loading = false;
+  String? _error;
+  HelpHubLinksResponseV1? _resp;
+
+  Future<void> _load() async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _error = '请先登录';
+        _resp = null;
+      });
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final resp = await getSettingsHelpHubLinksV1(token);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _resp = resp;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _error = e.toString();
+        _resp = null;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('帮助 / 文档', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: _loading ? null : _load,
+                child: const Text('刷新'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_loading) const Text('加载中...'),
+          if (_error != null)
+            Text(_error!, style: const TextStyle(color: Colors.red)),
+          if (_resp != null)
+            ..._resp!.items.map(
+              (item) => Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item.title,
+                                style: Theme.of(context).textTheme.titleSmall),
+                            const SizedBox(height: 4),
+                            SelectableText(item.url),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        tooltip: '复制链接',
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: item.url),
+                          );
+                          if (!context.mounted) {
+                            return;
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('已复制')),
+                          );
+                        },
+                        icon: const Icon(Icons.copy),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

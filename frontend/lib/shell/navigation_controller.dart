@@ -13,6 +13,7 @@ enum ProductWorkspacePane {
   tasks,
   jobs,
   quality,
+  helpHub,
 }
 
 class ShellNavigationController extends ChangeNotifier {
