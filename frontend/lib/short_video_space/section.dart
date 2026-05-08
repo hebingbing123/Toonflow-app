@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../rust_api.dart';
 import 'components/filter_panel.dart';
+import 'components/version_manager.dart';
 import 'state/operation_history.dart';
 import 'support.dart';
 import 'view.dart';
@@ -12,6 +13,7 @@ import 'view.dart';
 part 'section_project.dart';
 part 'section_production.dart';
 part 'section_production_assembly.dart';
+part 'section_draft_management.dart';
 part 'section_publish.dart';
 part 'section_publish_scheduling.dart';
 part 'section_publish_copy.dart';
@@ -102,6 +104,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
 
   // P13.2: Operation history for undo/redo
   final OperationHistory _operationHistory = OperationHistory();
+
+  // Task 12.2: Draft management state
+  List<AssemblyDraft> _assemblyDrafts = const <AssemblyDraft>[];
 
   bool get _isAnimated => _mode == ShortVideoMode.animated;
 

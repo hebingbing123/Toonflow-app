@@ -130,6 +130,14 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+bool shouldAutoOpenTeamWorkspacesForInitialUri(Uri uri) {
+  final invitePrefill = resolveWorkspaceInvitePrefill(
+    initialInviteToken: null,
+    uriBase: uri,
+  );
+  return invitePrefill.shouldAutoOpenTeamWorkspace;
+}
+
 class _HomePageState extends State<HomePage> {
   String? _error;
   int? _productScopedProjectNumericId;
@@ -309,11 +317,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _applyInitialDeepLinkNavigation(Uri uri) {
-    final invitePrefill = resolveWorkspaceInvitePrefill(
-      initialInviteToken: null,
-      uriBase: uri,
-    );
-    if (!invitePrefill.shouldAutoOpenTeamWorkspace) {
+    if (!shouldAutoOpenTeamWorkspacesForInitialUri(uri)) {
       return;
     }
     _shellNavigationController.selectHomeSectionMode(HomeSectionMode.product);
