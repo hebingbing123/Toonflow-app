@@ -24,6 +24,7 @@
 - **W4.6 持续推进**：`GET /api/v1/skills/summary`、`GET /api/v1/agents/memory/cost-overview`、`GET /api/v1/quality/stats` 已显式返回 `scope=user`，与 usage 端点对齐为用户口径
 - **W4.6 持续推进**：quality 其余聚合端点（`stage-pass-rate`、`stage-grade-distribution`、`scope-insights`、`token-efficiency`、`token-efficiency/samples`）已补 `scope=user`，`quality` 聚合口径统一为 user
 - **W4.6 持续推进**：`POST /api/v1/agents/memory/query` 的 `MemoryHistoryItem` 已补 `scope=user`，memory 可见输出与 usage/skills/quality 口径对齐
+- **最新补齐**：Workspace 运维 Runbook **W10.3** 已落地 — 新增 [**`workspace-operations-runbook.md`**](./workspace-operations-runbook.md)，覆盖 workspace / member / current_workspace / project 可见性排障、邀请 accept 冲突判读，以及只读核查 / 受控修复 SQL 模板；不引入新 REST / WS / schema，纯收口现有语义
 
 ## 执行中：PG 队列观测（[`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)）
 

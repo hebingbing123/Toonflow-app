@@ -2,6 +2,8 @@
 
 本 Runbook 记录团队 Workspace 邀请的两条运营路径：**无邮件**（当前默认）与 **邮件发送**（后续可接入）。
 
+若排障已超出邀请本身（例如成员明明被接受却仍看不到 workspace、`current_workspace` 回退异常、项目可见性不对），转到 [`workspace-operations-runbook.md`](./workspace-operations-runbook.md)。
+
 ## 1) 现状（已上线）
 
 - 邀请创建：`POST /api/v1/workspaces/{workspace_id}/invites`
