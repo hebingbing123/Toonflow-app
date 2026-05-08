@@ -104,10 +104,53 @@ classify_verdict() {
   esac
 }
 
+is_allowed_verdict() {
+  local verdict="$1"
+  case "$verdict" in
+    partial_match|expected_mismatch|match)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+overall_verdict() {
+  local saw_soft_warning=0
+  local table owner_count member_count outsider_count verdict
+
+  for table in "${tables[@]}"; do
+    owner_count="$(get_count "$OWNER_FILE" "$table")"
+    member_count="$(get_count "$MEMBER_FILE" "$table")"
+    outsider_count="$(get_count "$OUTSIDER_FILE" "$table")"
+    verdict="$(classify_verdict "$table" "$owner_count" "$member_count" "$outsider_count")"
+
+    case "$verdict" in
+      security_bug|review_needed)
+        echo "fail"
+        return
+        ;;
+      match_or_rls_widened)
+        saw_soft_warning=1
+        ;;
+    esac
+  done
+
+  if [[ "$saw_soft_warning" -eq 1 ]]; then
+    echo "warning"
+  else
+    echo "pass"
+  fi
+}
+
 emit_summary() {
+  local overall
+  overall="$(overall_verdict)"
   cat <<EOF
 Date: $(date '+%Y-%m-%d %H:%M:%S %z')
 Workspace: $workspace_id
+Overall Verdict: $overall
 
 Users:
 - owner: $owner_user_id
@@ -142,6 +185,9 @@ Verdict hints:
 - `app_project` / `app_script` / `app_asset` / `app_novel` / `app_generation_job` showing `owner > 0`, `member = 0`, `outsider = 0` is the current expected Rust-only mismatch shape
 - `match_or_rls_widened` means member 直连也能看到项目域数据；这可能是预期收口，也可能代表 RLS 变更，需要结合本轮目标判读
 - Any unexpected `member > 0` or `outsider > 0` on those project-scoped tables should be reviewed before calling the run a match
+- `Overall Verdict: pass` means every row is in the currently allowed set
+- `Overall Verdict: warning` means no hard failure was found, but at least one row is `match_or_rls_widened`
+- `Overall Verdict: fail` means at least one row is `review_needed` or `security_bug`
 EOF
 }
 

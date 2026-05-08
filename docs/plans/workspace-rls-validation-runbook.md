@@ -190,6 +190,12 @@ bash scripts/workspace_rls_summarize.sh
 - `review_needed`
 - `security_bug`
 
+并在表头上方再给出一条：
+
+- `Overall Verdict: pass`
+- `Overall Verdict: warning`
+- `Overall Verdict: fail`
+
 若要只对摘要做门槛断言，也可运行：
 
 ```bash

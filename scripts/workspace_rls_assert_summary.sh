@@ -14,6 +14,28 @@ if [[ ! -f "$SUMMARY_FILE" ]]; then
   exit 1
 fi
 
+overall_verdict="$(awk -F': ' '/^Overall Verdict: /{print $2; exit}' "$SUMMARY_FILE")"
+if [[ -n "$overall_verdict" ]]; then
+  case "$overall_verdict" in
+    pass)
+      echo "workspace RLS summary assertions passed for $SUMMARY_FILE"
+      exit 0
+      ;;
+    warning)
+      if [[ "$ALLOW_MATCH_OR_RLS_WIDENED" == "1" ]]; then
+        echo "workspace RLS summary assertions passed for $SUMMARY_FILE (warning accepted)"
+        exit 0
+      fi
+      echo "workspace RLS summary assertions failed: overall verdict is warning" >&2
+      exit 1
+      ;;
+    fail)
+      echo "workspace RLS summary assertions failed: overall verdict is fail" >&2
+      exit 1
+      ;;
+  esac
+fi
+
 failures=0
 
 while IFS='|' read -r _ table owner member outsider verdict _; do
