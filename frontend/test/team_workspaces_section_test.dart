@@ -281,6 +281,48 @@ void main() {
     expect(text, contains('expires_at=2026-02-01T00:00:00.000Z'));
     expect(text, contains('token=token-1'));
   });
+
+  test('hasActiveEnterpriseWorkspace requires unarchived enterprise item', () {
+    final now = DateTime.utc(2026, 1, 1);
+    WorkspaceListItem row({
+      required String workspaceType,
+      DateTime? archivedAt,
+    }) {
+      return WorkspaceListItem(
+        workspace: WorkspaceResponse(
+          id: '$workspaceType-${archivedAt == null ? 'active' : 'archived'}',
+          ownerUserId: 'user-owner',
+          name: workspaceType,
+          workspaceType: workspaceType,
+          metadata: const <String, dynamic>{},
+          archivedAt: archivedAt,
+          createdAt: now,
+          updatedAt: now,
+        ),
+        role: 'owner',
+      );
+    }
+
+    expect(
+      hasActiveEnterpriseWorkspace(<WorkspaceListItem>[
+        row(workspaceType: 'personal'),
+      ]),
+      isFalse,
+    );
+    expect(
+      hasActiveEnterpriseWorkspace(<WorkspaceListItem>[
+        row(workspaceType: 'enterprise', archivedAt: now),
+      ]),
+      isFalse,
+    );
+    expect(
+      hasActiveEnterpriseWorkspace(<WorkspaceListItem>[
+        row(workspaceType: 'personal'),
+        row(workspaceType: 'enterprise'),
+      ]),
+      isTrue,
+    );
+  });
 }
 
 extension on WorkspaceInviteResponse {

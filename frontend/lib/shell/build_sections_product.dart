@@ -64,7 +64,8 @@ extension _HomePageBuildProductSections on _HomePageState {
       scriptIdController: _workspaceInputController.scriptIdController,
       projectUuidController: _workspaceInputController.projectUuidController,
       scriptUuidController: _workspaceInputController.scriptUuidController,
-      workspaceUuidController: _workspaceInputController.workspaceUuidController,
+      workspaceUuidController:
+          _workspaceInputController.workspaceUuidController,
       scriptPromptController: _workspaceInputController.scriptPromptController,
       scriptDomainArgsController:
           _workspaceInputController.scriptDomainArgsController,
@@ -192,7 +193,14 @@ extension _HomePageBuildProductSections on _HomePageState {
       ProjectsSection(
         accessToken: _session?.accessToken,
         controller: _projectsController,
+        currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
+        currentWorkspaceType: _sessionMe?.currentWorkspace?.workspaceType,
         onOpenProjectDetail: _openProjectDetail,
+        onOpenTeamWorkspaces: () {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.teamWorkspaces,
+          );
+        },
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.teamWorkspaces)

@@ -49,6 +49,7 @@ void main() {
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
+            onOpenTeamWorkspaces: () {},
           ),
         ),
       ),
@@ -86,6 +87,7 @@ void main() {
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
+            onOpenTeamWorkspaces: () {},
           ),
         ),
       ),
@@ -116,6 +118,7 @@ void main() {
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
+            onOpenTeamWorkspaces: () {},
           ),
         ),
       ),
@@ -144,6 +147,7 @@ void main() {
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
+            onOpenTeamWorkspaces: () {},
           ),
         ),
       ),
@@ -180,6 +184,7 @@ void main() {
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
+            onOpenTeamWorkspaces: () {},
           ),
         ),
       ),
@@ -195,6 +200,40 @@ void main() {
     expect(find.text('按当前 scope 追加记忆'), findsOneWidget);
     expect(find.text('清理记忆'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'scriptAgent'), findsOneWidget);
+    controller.dispose();
+  });
+
+  testWidgets('projects section shows enterprise empty-state guidance', (
+    WidgetTester tester,
+  ) async {
+    final controller = buildController(
+      projects: const <ProjectRow>[],
+      artStyles: const <ArtStyleRow>[],
+    );
+    var openedTeamWorkspaces = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsSection(
+            accessToken: 'token',
+            controller: controller,
+            currentWorkspaceName: 'Team Alpha',
+            currentWorkspaceType: 'enterprise',
+            onOpenProjectDetail: (_) {},
+            onOpenTeamWorkspaces: () => openedTeamWorkspaces++,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('当前团队空间还没有项目'), findsOneWidget);
+    expect(find.textContaining('Team Alpha'), findsOneWidget);
+    expect(find.text('先创建空项目'), findsOneWidget);
+    expect(find.text('打开团队工作区'), findsOneWidget);
+
+    await tester.tap(find.text('打开团队工作区'));
+    await tester.pump();
+    expect(openedTeamWorkspaces, 1);
     controller.dispose();
   });
 }

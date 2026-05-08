@@ -81,6 +81,14 @@ String buildInviteCopyText(WorkspaceInviteResponse invite) {
       'token=${invite.token}';
 }
 
+bool hasActiveEnterpriseWorkspace(List<WorkspaceListItem> items) {
+  return items.any(
+    (row) =>
+        row.workspace.workspaceType == 'enterprise' &&
+        row.workspace.archivedAt == null,
+  );
+}
+
 List<WorkspaceInviteResponse> sortWorkspaceInvitesByExpiry(
   List<WorkspaceInviteResponse> invites,
 ) {
@@ -945,6 +953,30 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           Text('尚无列表数据；点「刷新列表」。', style: theme.textTheme.bodySmall),
         if (items != null && items.isEmpty)
           Text('暂无空间（异常）；通常至少有 Personal。', style: theme.textTheme.bodySmall),
+        if (items != null &&
+            items.isNotEmpty &&
+            !hasActiveEnterpriseWorkspace(items)) ...<Widget>[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('当前只有 Personal 工作区', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 6),
+                Text(
+                  '若要开始团队协作，可先创建一个 enterprise 空间，再去成员管理里发邀请。创建后就能把项目、任务和 Agent 上下文切到同一个团队范围。',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
         if (items != null && items.isNotEmpty)
           ListView.separated(
             shrinkWrap: true,

@@ -20,11 +20,22 @@ class ProjectsSection extends StatelessWidget {
     required this.accessToken,
     required this.controller,
     required this.onOpenProjectDetail,
+    required this.onOpenTeamWorkspaces,
+    this.currentWorkspaceName,
+    this.currentWorkspaceType,
   });
 
   final String? accessToken;
   final ProjectsController controller;
   final ValueChanged<ProjectRow> onOpenProjectDetail;
+  final VoidCallback onOpenTeamWorkspaces;
+  final String? currentWorkspaceName;
+  final String? currentWorkspaceType;
+
+  bool get _showEnterpriseProjectEmptyState =>
+      currentWorkspaceType == 'enterprise' &&
+      controller.projects != null &&
+      controller.projects!.isEmpty;
 
   Future<void> _openArtStylesWorkbench(BuildContext context) async {
     final token = accessToken;
@@ -125,6 +136,52 @@ class ProjectsSection extends StatelessWidget {
             loadingAgentMemory: controller.loadingAgentMemory,
             onProbeAgentMemory: controller.probeAgentMemory,
           ),
+          if (_showEnterpriseProjectEmptyState) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '当前团队空间还没有项目',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${currentWorkspaceName?.trim().isNotEmpty == true ? currentWorkspaceName!.trim() : '这个 enterprise 空间'} 还没有任何项目。可以先创建一个空项目作为团队母项目，再到团队工作区继续邀请成员和分配协作范围。',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.tonal(
+                        onPressed: controller.creatingProject
+                            ? null
+                            : () => _createEmptyProject(context),
+                        child: Text(
+                          controller.creatingProject ? '创建中…' : '先创建空项目',
+                        ),
+                      ),
+                      OutlinedButton(
+                        onPressed: onOpenTeamWorkspaces,
+                        child: const Text('打开团队工作区'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
           ProjectsOverviewPreview(
             projectsSummaryLine: controller.projectsSummaryLine,
             artStylesLine: controller.artStylesLine,
