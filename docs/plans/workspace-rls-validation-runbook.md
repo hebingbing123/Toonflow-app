@@ -82,7 +82,14 @@ bash scripts/workspace_rls_seed_sample.sh
 bash scripts/workspace_rls_seed_and_probe_sample.sh
 ```
 
-这条命令现在还会自动断言固定 sample 的期望形状：
+这条命令现在会自动产出：
+
+- `owner.txt`
+- `member.txt`
+- `outsider.txt`
+- `summary.md`
+
+并继续断言固定 sample 的期望形状：
 
 - `app_workspace` / `app_workspace_member`：owner=1, member=1, outsider=0
 - `app_project` / `app_script` / `app_asset` / `app_novel` / `app_generation_job`：owner=1, member=0, outsider=0

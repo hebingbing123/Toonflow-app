@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SEED_SCRIPT="$ROOT_DIR/scripts/workspace_rls_seed_sample.sh"
-PROBE_MATRIX_SCRIPT="$ROOT_DIR/scripts/workspace_rls_probe_matrix.sh"
+PROBE_AND_SUMMARIZE_SCRIPT="$ROOT_DIR/scripts/workspace_rls_probe_and_summarize.sh"
 ASSERT_SCRIPT="$ROOT_DIR/scripts/workspace_rls_assert_sample.sh"
 DEFAULT_OUTPUT_DIR="$ROOT_DIR/.tmp/workspace-rls-sample"
 
@@ -12,8 +12,8 @@ if [[ ! -x "$SEED_SCRIPT" ]]; then
   exit 1
 fi
 
-if [[ ! -x "$PROBE_MATRIX_SCRIPT" ]]; then
-  echo "workspace RLS probe matrix script not found or not executable: $PROBE_MATRIX_SCRIPT" >&2
+if [[ ! -x "$PROBE_AND_SUMMARIZE_SCRIPT" ]]; then
+  echo "workspace RLS probe-and-summarize script not found or not executable: $PROBE_AND_SUMMARIZE_SCRIPT" >&2
   exit 1
 fi
 
@@ -29,6 +29,6 @@ OWNER_USER_ID="${OWNER_USER_ID:-10000000-0000-0000-0000-000000000001}" \
 MEMBER_USER_ID="${MEMBER_USER_ID:-10000000-0000-0000-0000-000000000002}" \
 OUTSIDER_USER_ID="${OUTSIDER_USER_ID:-10000000-0000-0000-0000-000000000003}" \
 OUTPUT_DIR="${OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}" \
-bash "$PROBE_MATRIX_SCRIPT"
+bash "$PROBE_AND_SUMMARIZE_SCRIPT"
 
 INPUT_DIR="${OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}" bash "$ASSERT_SCRIPT"
