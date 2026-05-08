@@ -83,11 +83,21 @@
 
 ## 六、Phase W5 — 权限矩阵（项目级可选，workspace 级必选）
 
-- [ ] **W5.1** 文档化 **workspace 角色矩阵**：owner / admin / member 对「邀请、改计费、删空间、改全部项目」的布尔表
+- [x] **W5.1** 文档化 **workspace 角色矩阵**：owner / admin / member 对「邀请、改计费、删空间、改全部项目」的布尔表（与 `backend/src/workspaces/http.rs` 的 `WorkspaceRoleAction` 一致）
+  
+  | 能力 | owner | admin | member |
+  | --- | --- | --- | --- |
+  | 邀请成员（`invite_members`） | ✅ | ✅ | ❌ |
+  | 成员管理（改角色/移除，`manage_members`） | ✅ | ✅ | ❌ |
+  | 改计费（`manage_billing`） | ✅ | ❌ | ❌ |
+  | 删空间（`delete_workspace`） | ✅ | ❌ | ❌ |
+  | 改全部项目（`delete_any_project`） | ✅ | ✅ | ❌ |
+  | 创建项目（`create_project`） | ✅ | ✅ | ✅ |
+
 - [ ] **W5.2**（可选加强）**项目级角色**：`editor` / `viewer` 仅针对单项目 — 新表 `app_project_member` 或 JSON policy
-- [ ] **W5.3** 默认策略：member 是否可 **创建** 项目、是否可 **删除他人项目** — 产品签字
+- [x] **W5.3** 默认策略：member 可创建项目、但不可删除他人项目（`admin/owner` 可删除任意项目）；后端已落地于 `backend/src/projects/routes/handlers/detail/delete.rs`，产品签字待补档
 - [ ] **W5.4** 与 **计费 `plan_tier`** 关系：按 user 还是按 workspace 计费 — **财务/产品** 结论驱动 schema（`app_workspace` 增加 `plan_tier` 等或维持 user）
-- [ ] **W5.5** 单元测试覆盖矩阵边角（最后一个 owner、降级 admin 等）
+- [x] **W5.5** 单元测试覆盖矩阵边角（最后一个 owner、降级 admin 等）—— `backend/src/workspaces/http.rs` 已补 `workspace_role_matrix_owner_admin_member` 与 `last_owner_transition_guard_matches_policy`
 
 ---
 
@@ -95,8 +105,8 @@
 
 - [ ] **W6.1** Workspace **选择器**（抽屉或设置页）：列表、当前高亮、切换
 - [ ] **W6.2** **创建企业空间** 流程（表单 + 错误提示）
-- [ ] **W6.3** **成员管理页**：列表、搜索用户、改角色、移除、邀请 pending 列表
-- [ ] **W6.4** **接受邀请** 深链 / 路由（Web + 桌面一致策略）
+- [ ] **W6.3** **成员管理页**：列表、搜索用户、改角色、移除、邀请 pending 列表（已完成：列表/改角色/移除 + 成员搜索 + 服务端 `GET /api/v1/workspaces/{workspace_id}/invites?status=pending` 持久化 pending 列表接入；待补：专用邀请管理页与分页/批量动作）
+- [x] **W6.4** **接受邀请** 深链 / 路由（Web + 桌面一致策略）（已完成：手动粘贴 token + URL query 自动预填 `invite_token|inviteToken|token` + 自动提示 + 接受成功后清理 query 参数 + 独立 `/join-workspace(/:token)` 深链最小实现 + 命中邀请入口时自动跳转到“团队工作区”）
 - [ ] **W6.5** 空状态：无 enterprise 时的引导；无项目时的团队引导
 - [ ] **W6.6** `rust_api` 全量模型与生成/手写 client 与 OpenAPI **一致**（跑 `scripts/check_rust_api_consistency.sh`）
 - [ ] **W6.7** a11y / 国际化字符串（若产品要求）
@@ -109,7 +119,7 @@
 - [x] **W7.2** `docs/websocket-events.md`：attach / context 更新事件字段表（见 `openapi_spec/ws_protocol_description.md`、`docs/plans/harness-ws-context-matrix.md`）
 - [x] **W7.3** 工具权限：`permissions` 模块按 workspace 成员校验 **读 production/script** 等 channel（attach 解析已由 **`app_workspace_member`** 门禁；`ws_channel_allowed` 文档化与 env  allowlist 分工）
 - [x] **W7.4** Flutter WS 客户端：切换 workspace 后 **重 attach** 或刷新 context（团队上下文变更时清空项目/script/**workspaceUuid** 作用域；项目入口写入 **workspaceUuid** 随 attach 发送）
-- [ ] **W7.5** 回归：`agent_workspaces` 相关测试 + 手工矩阵
+- [x] **W7.5** 回归：`agent_workspaces` 相关测试 + 手工矩阵（自动化：`frontend/test/agent_workspaces_section_test.dart`；手工矩阵：[`harness-agent-workspaces-regression-matrix.md`](./harness-agent-workspaces-regression-matrix.md)）
 
 ---
 

@@ -29,7 +29,7 @@
 推荐接入后端邮件服务（例如 Postmark/SES）并保持 API 不变：
 
 1. `create invite` 后由后端异步发送邮件（模板包含 `token` 或封装链接）。
-2. 邮件链接跳转到前端邀请接受页，前端提交 `token` 到接受接口。
+2. 邮件链接跳转到前端邀请接受页（当前最小路由：`/join-workspace` 或 `/join-workspace/<token>`；也兼容 `invite_token|inviteToken|token` query），前端提交 `token` 到接受接口。
 3. 失败重试与死信队列按现有 jobs 体系处理。
 
 建议补充：

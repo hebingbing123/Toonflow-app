@@ -52,6 +52,7 @@ import 'system_probes/content/controller.dart';
 import 'system_probes/models_catalog/controller.dart';
 import 'task_center/controller.dart';
 import 'task_center/support.dart';
+import 'team_workspaces/invite_deep_link.dart';
 import 'rust_api.dart';
 
 part 'project_editor/editor.dart';
@@ -300,10 +301,25 @@ class _HomePageState extends State<HomePage> {
     _shellNavigationController.addListener(_handleShellNavigationChanged);
     _workspaceOperationController.addListener(_handleWorkspaceOperationChanged);
     _workspaceOutputController.addListener(_handleWorkspaceOutputChanged);
+    _applyInitialDeepLinkNavigation(Uri.base);
     if (kSupabaseConfigured) {
       _authController.attachAuthListener();
     }
     _syncSessionContext();
+  }
+
+  void _applyInitialDeepLinkNavigation(Uri uri) {
+    final invitePrefill = resolveWorkspaceInvitePrefill(
+      initialInviteToken: null,
+      uriBase: uri,
+    );
+    if (!invitePrefill.shouldAutoOpenTeamWorkspace) {
+      return;
+    }
+    _shellNavigationController.selectHomeSectionMode(HomeSectionMode.product);
+    _shellNavigationController.selectProductWorkspacePane(
+      ProductWorkspacePane.teamWorkspaces,
+    );
   }
 
   void _handleAuthChanged() {

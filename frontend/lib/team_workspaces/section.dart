@@ -1,17 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../rust_api.dart';
+import 'invite_deep_link.dart';
 
 /// Team / enterprise workspace lifecycle（**W1.1–W1.6**：列表/创建/归档与恢复/配额由后端约束）。
+List<WorkspaceMemberResponse> filterWorkspaceMembers(
+  List<WorkspaceMemberResponse> members,
+  String keyword,
+) {
+  final needle = keyword.trim().toLowerCase();
+  if (needle.isEmpty) {
+    return members;
+  }
+  return members
+      .where(
+        (m) =>
+            m.userId.toLowerCase().contains(needle) ||
+            m.role.toLowerCase().contains(needle),
+      )
+      .toList(growable: false);
+}
+
+List<WorkspaceInviteResponse> filterWorkspaceInvites(
+  List<WorkspaceInviteResponse> invites,
+  String keyword,
+) {
+  final needle = keyword.trim().toLowerCase();
+  if (needle.isEmpty) {
+    return invites;
+  }
+  return invites
+      .where(
+        (invite) =>
+            invite.email.toLowerCase().contains(needle) ||
+            invite.role.toLowerCase().contains(needle) ||
+            invite.status.toLowerCase().contains(needle),
+      )
+      .toList(growable: false);
+}
+
+List<WorkspaceInviteResponse> filterInvitesByExpiryVisibility(
+  List<WorkspaceInviteResponse> invites, {
+  required bool includeExpired,
+}) {
+  if (includeExpired) {
+    return invites;
+  }
+  return invites
+      .where((invite) => !isWorkspaceInviteExpired(invite))
+      .toList(growable: false);
+}
+
+String formatWorkspaceInviteMeta(WorkspaceInviteResponse invite) {
+  final expiry = invite.expiresAt.toLocal().toIso8601String();
+  final stateText = inviteStatusLabel(invite);
+  return '状态: $stateText · 过期: $expiry';
+}
+
+bool isWorkspaceInviteExpired(WorkspaceInviteResponse invite) {
+  return invite.expiresAt.isBefore(DateTime.now().toUtc());
+}
+
+String inviteStatusLabel(WorkspaceInviteResponse invite) {
+  if (isWorkspaceInviteExpired(invite)) {
+    return '已过期';
+  }
+  if (invite.status == 'pending') {
+    return '有效';
+  }
+  return invite.status;
+}
+
+String buildInviteCopyText(WorkspaceInviteResponse invite) {
+  return 'workspace=${invite.workspaceId}\n'
+      'email=${invite.email}\n'
+      'role=${invite.role}\n'
+      'status=${invite.status}\n'
+      'expires_at=${invite.expiresAt.toUtc().toIso8601String()}\n'
+      'token=${invite.token}';
+}
+
+List<WorkspaceInviteResponse> sortWorkspaceInvitesByExpiry(
+  List<WorkspaceInviteResponse> invites,
+) {
+  final rows = List<WorkspaceInviteResponse>.of(invites);
+  rows.sort((a, b) {
+    final aExpired = isWorkspaceInviteExpired(a);
+    final bExpired = isWorkspaceInviteExpired(b);
+    if (aExpired != bExpired) {
+      return aExpired ? 1 : -1; // valid first
+    }
+    return a.expiresAt.compareTo(b.expiresAt);
+  });
+  return rows;
+}
+
 class TeamWorkspacesSection extends StatefulWidget {
   const TeamWorkspacesSection({
     super.key,
     required this.accessToken,
     this.onWorkspaceContextChanged,
+    this.initialInviteToken,
   });
 
   final String? accessToken;
   final Future<void> Function()? onWorkspaceContextChanged;
+  final String? initialInviteToken;
 
   @override
   State<TeamWorkspacesSection> createState() => _TeamWorkspacesSectionState();
@@ -19,10 +114,13 @@ class TeamWorkspacesSection extends StatefulWidget {
 
 class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   final _nameController = TextEditingController();
+  final _acceptInviteTokenController = TextEditingController();
   List<WorkspaceListItem>? _items;
   String? _error;
   bool _loading = false;
   bool _creating = false;
+  bool _acceptingInvite = false;
+  bool _inviteTokenFromUri = false;
   bool _includeArchived = false;
   String? _patchingWorkspaceId;
   String? _switchingWorkspaceId;
@@ -30,12 +128,21 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   @override
   void dispose() {
     _nameController.dispose();
+    _acceptInviteTokenController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    final invitePrefill = resolveWorkspaceInvitePrefill(
+      initialInviteToken: widget.initialInviteToken,
+      uriBase: Uri.base,
+    );
+    if (invitePrefill.token != null && invitePrefill.token!.isNotEmpty) {
+      _acceptInviteTokenController.text = invitePrefill.token!;
+      _inviteTokenFromUri = invitePrefill.tokenFromUri;
+    }
     final token = widget.accessToken;
     if (token != null && token.isNotEmpty) {
       _load();
@@ -70,8 +177,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       _error = null;
     });
     try {
-      final rows =
-          await fetchWorkspacesV1(token, includeArchived: _includeArchived);
+      final rows = await fetchWorkspacesV1(
+        token,
+        includeArchived: _includeArchived,
+      );
       if (!mounted) {
         return;
       }
@@ -97,9 +206,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     }
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入企业空间名称')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入企业空间名称')));
       return;
     }
     setState(() => _creating = true);
@@ -109,20 +218,68 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已创建企业空间')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已创建企业空间')));
       await _load();
     } catch (e) {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('创建失败：$e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('创建失败：$e')));
     } finally {
       if (mounted) {
         setState(() => _creating = false);
+      }
+    }
+  }
+
+  Future<void> _acceptInvite() async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final inviteToken = _acceptInviteTokenController.text.trim();
+    if (inviteToken.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入邀请 token')));
+      return;
+    }
+    setState(() => _acceptingInvite = true);
+    try {
+      await acceptWorkspaceInviteV1(
+        token,
+        AcceptWorkspaceInviteBody(token: inviteToken),
+      );
+      _acceptInviteTokenController.clear();
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已接受邀请并加入工作区')));
+      if (_inviteTokenFromUri) {
+        final cleaned = removeWorkspaceInviteTokenFromUri(Uri.base);
+        SystemNavigator.routeInformationUpdated(uri: cleaned);
+        _inviteTokenFromUri = false;
+      }
+      if (widget.onWorkspaceContextChanged != null) {
+        await widget.onWorkspaceContextChanged!();
+      }
+      await _load();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('接受邀请失败：$e')));
+    } finally {
+      if (mounted) {
+        setState(() => _acceptingInvite = false);
       }
     }
   }
@@ -142,15 +299,19 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     }
     final userIdController = TextEditingController();
     final inviteEmailController = TextEditingController();
+    final memberSearchController = TextEditingController();
+    final inviteSearchController = TextEditingController();
     String role = 'member';
     List<WorkspaceMemberResponse> members = <WorkspaceMemberResponse>[];
-    WorkspaceInviteResponse? latestInvite;
+    final List<WorkspaceInviteResponse> pendingInvites =
+        <WorkspaceInviteResponse>[];
     String? error;
     bool loading = true;
     bool adding = false;
     bool inviting = false;
     String? mutatingMemberUserId;
     bool leaving = false;
+    bool includeExpiredInvites = false;
 
     Future<void> loadMembers(StateSetter setModalState) async {
       setModalState(() {
@@ -159,8 +320,17 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       });
       try {
         final rows = await fetchWorkspaceMembersV1(token, row.workspace.id);
+        final invites = await fetchWorkspaceInvitesV1(
+          token,
+          row.workspace.id,
+          status: 'pending',
+          limit: 50,
+        );
         setModalState(() {
           members = rows;
+          pendingInvites
+            ..clear()
+            ..addAll(invites);
           loading = false;
         });
       } catch (e) {
@@ -208,8 +378,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           border: OutlineInputBorder(),
                         ),
                         items: const <DropdownMenuItem<String>>[
-                          DropdownMenuItem(value: 'member', child: Text('member')),
-                          DropdownMenuItem(value: 'admin', child: Text('admin')),
+                          DropdownMenuItem(
+                            value: 'member',
+                            child: Text('member'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'admin',
+                            child: Text('admin'),
+                          ),
                         ],
                         onChanged: adding
                             ? null
@@ -252,7 +428,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           ),
                           const SizedBox(width: 8),
                           TextButton(
-                            onPressed: loading ? null : () => loadMembers(setModalState),
+                            onPressed: loading
+                                ? null
+                                : () => loadMembers(setModalState),
                             child: const Text('刷新'),
                           ),
                         ],
@@ -288,7 +466,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       role: role,
                                     ),
                                   );
-                                  setModalState(() => latestInvite = invite);
+                                  setModalState(() {
+                                    pendingInvites.insert(0, invite);
+                                  });
                                   inviteEmailController.clear();
                                 } catch (e) {
                                   setModalState(() => error = e.toString());
@@ -298,26 +478,134 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               },
                         child: Text(inviting ? '生成邀请中…' : '生成邀请链接'),
                       ),
-                      if (latestInvite != null) ...<Widget>[
+                      if (pendingInvites.isNotEmpty) ...<Widget>[
                         const SizedBox(height: 8),
-                        SelectableText(
-                          'invite token: ${latestInvite!.token}',
-                          style: Theme.of(context).textTheme.bodySmall,
+                        Text(
+                          'pending 邀请（本次会话）',
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
+                        const SizedBox(height: 8),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          title: const Text('显示已过期邀请'),
+                          value: includeExpiredInvites,
+                          onChanged: (v) =>
+                              setModalState(() => includeExpiredInvites = v),
+                        ),
+                        TextField(
+                          controller: inviteSearchController,
+                          decoration: const InputDecoration(
+                            labelText: '搜索邀请（邮箱 / 角色 / 状态）',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (_) => setModalState(() {}),
+                        ),
+                        const SizedBox(height: 4),
+                        ...sortWorkspaceInvitesByExpiry(
+                          filterInvitesByExpiryVisibility(
+                            filterWorkspaceInvites(
+                              pendingInvites,
+                              inviteSearchController.text,
+                            ),
+                            includeExpired: includeExpiredInvites,
+                          ),
+                        ).map((invite) {
+                          final label = inviteStatusLabel(invite);
+                          final chipColor = label == '已过期'
+                              ? Theme.of(context).colorScheme.errorContainer
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.secondaryContainer;
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Wrap(
+                                      spacing: 6,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: <Widget>[
+                                        Text(
+                                          '${invite.email} · ${invite.role}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall,
+                                        ),
+                                        Chip(
+                                          label: Text(label),
+                                          visualDensity: VisualDensity.compact,
+                                          backgroundColor: chipColor,
+                                        ),
+                                      ],
+                                    ),
+                                    SelectableText(
+                                      '${formatWorkspaceInviteMeta(invite)}\ninvite token: ${invite.token}',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: '复制邀请信息',
+                                icon: const Icon(
+                                  Icons.copy_all_outlined,
+                                  size: 18,
+                                ),
+                                onPressed: () async {
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  await Clipboard.setData(
+                                    ClipboardData(
+                                      text: buildInviteCopyText(invite),
+                                    ),
+                                  );
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text('已复制邀请：${invite.email}'),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        }),
                       ],
                       if (error != null) ...<Widget>[
                         const SizedBox(height: 8),
                         SelectableText(
                           error!,
-                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
                         ),
                       ],
                       const SizedBox(height: 12),
-                      if (members.isEmpty && !loading)
-                        const Text('暂无成员（异常）。'),
+                      TextField(
+                        controller: memberSearchController,
+                        decoration: const InputDecoration(
+                          labelText: '搜索成员（UUID / 角色）',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (_) => setModalState(() {}),
+                      ),
+                      const SizedBox(height: 8),
+                      if (members.isEmpty && !loading) const Text('暂无成员（异常）。'),
                       if (loading) const LinearProgressIndicator(),
                       if (members.isNotEmpty)
-                        ...members.map(
+                        ...filterWorkspaceMembers(
+                          members,
+                          memberSearchController.text,
+                        ).map(
                           (m) => ListTile(
                             dense: true,
                             contentPadding: EdgeInsets.zero,
@@ -359,7 +647,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                             );
                                             await loadMembers(setModalState);
                                           } catch (e) {
-                                            setModalState(() => error = e.toString());
+                                            setModalState(
+                                              () => error = e.toString(),
+                                            );
                                           } finally {
                                             setModalState(
                                               () => mutatingMemberUserId = null,
@@ -384,14 +674,18 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                             );
                                             await loadMembers(setModalState);
                                           } catch (e) {
-                                            setModalState(() => error = e.toString());
+                                            setModalState(
+                                              () => error = e.toString(),
+                                            );
                                           } finally {
                                             setModalState(
                                               () => mutatingMemberUserId = null,
                                             );
                                           }
                                         },
-                                  icon: const Icon(Icons.person_remove_outlined),
+                                  icon: const Icon(
+                                    Icons.person_remove_outlined,
+                                  ),
                                 ),
                               ],
                             ),
@@ -446,6 +740,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     );
     userIdController.dispose();
     inviteEmailController.dispose();
+    memberSearchController.dispose();
+    inviteSearchController.dispose();
   }
 
   Future<void> _confirmArchive(WorkspaceListItem row) async {
@@ -453,9 +749,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
         title: const Text('归档企业空间？'),
-        content: const Text(
-          '归档后该空间将从默认列表隐藏；若其为当前工作区，将自动回到 Personal。',
-        ),
+        content: const Text('归档后该空间将从默认列表隐藏；若其为当前工作区，将自动回到 Personal。'),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -481,17 +775,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     final id = row.workspace.id;
     setState(() => _patchingWorkspaceId = id);
     try {
-      await patchWorkspaceV1(
-        token,
-        id,
-        PatchWorkspaceBody(archive: archive),
-      );
+      await patchWorkspaceV1(token, id, PatchWorkspaceBody(archive: archive));
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(archive ? '已归档' : '已恢复')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(archive ? '已归档' : '已恢复')));
       if (widget.onWorkspaceContextChanged != null) {
         await widget.onWorkspaceContextChanged!();
       }
@@ -500,9 +790,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('操作失败：$e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('操作失败：$e')));
     } finally {
       if (mounted) {
         setState(() => _patchingWorkspaceId = null);
@@ -525,9 +815,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已切换到 ${row.workspace.name}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('已切换到 ${row.workspace.name}')));
       if (widget.onWorkspaceContextChanged != null) {
         await widget.onWorkspaceContextChanged!();
       }
@@ -536,9 +826,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('切换失败：$e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('切换失败：$e')));
     } finally {
       if (mounted) {
         setState(() => _switchingWorkspaceId = null);
@@ -551,10 +841,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     final token = widget.accessToken;
     final theme = Theme.of(context);
     if (token == null || token.isEmpty) {
-      return Text(
-        '登录后可管理企业工作区。',
-        style: theme.textTheme.bodyMedium,
-      );
+      return Text('登录后可管理企业工作区。', style: theme.textTheme.bodyMedium);
     }
 
     final items = _items;
@@ -562,10 +849,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          '团队工作区',
-          style: theme.textTheme.titleMedium,
-        ),
+        Text('团队工作区', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         Text(
           '列出你可访问的空间（含 Personal），创建 enterprise 空间；owner/admin 可归档或恢复企业空间。',
@@ -588,6 +872,38 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             FilledButton(
               onPressed: _creating ? null : _create,
               child: Text(_creating ? '创建中…' : '创建'),
+            ),
+          ],
+        ),
+        if (shouldShowInviteTokenHint(
+          tokenAutoFilledFromUri: _inviteTokenFromUri,
+          tokenText: _acceptInviteTokenController.text,
+        )) ...<Widget>[
+          const SizedBox(height: 6),
+          Text(
+            '已从链接自动填入邀请 token，可直接点击“接受邀请”。',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                controller: _acceptInviteTokenController,
+                decoration: const InputDecoration(
+                  labelText: '邀请 token（接受加入）',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            FilledButton.tonal(
+              onPressed: _acceptingInvite ? null : _acceptInvite,
+              child: Text(_acceptingInvite ? '加入中…' : '接受邀请'),
             ),
           ],
         ),
@@ -654,13 +970,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                   children: <Widget>[
                     if (canManage)
                       TextButton(
-                        onPressed:
-                            (_loading || busy) ? null : () => _openMembersDialog(row),
+                        onPressed: (_loading || busy)
+                            ? null
+                            : () => _openMembersDialog(row),
                         child: const Text('成员'),
                       ),
                     TextButton(
-                      onPressed:
-                          (_loading || busy || switching) ? null : () => _switchCurrentWorkspace(row),
+                      onPressed: (_loading || busy || switching)
+                          ? null
+                          : () => _switchCurrentWorkspace(row),
                       child: switching
                           ? const SizedBox(
                               width: 16,
@@ -671,23 +989,31 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                     ),
                     if (canManage && w.archivedAt == null)
                       TextButton(
-                        onPressed: (_loading || busy) ? null : () => _confirmArchive(row),
+                        onPressed: (_loading || busy)
+                            ? null
+                            : () => _confirmArchive(row),
                         child: busy
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text('归档'),
                       ),
                     if (canManage && w.archivedAt != null)
                       TextButton(
-                        onPressed: (_loading || busy) ? null : () => _setArchive(row, false),
+                        onPressed: (_loading || busy)
+                            ? null
+                            : () => _setArchive(row, false),
                         child: busy
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text('恢复'),
                       ),
