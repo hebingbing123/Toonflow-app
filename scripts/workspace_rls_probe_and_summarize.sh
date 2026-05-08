@@ -57,6 +57,7 @@ bash "$SUMMARIZE_SCRIPT"
 
 SUMMARY_FILE="$OUTPUT_DIR/summary.md" \
 ALLOW_MATCH_OR_RLS_WIDENED="${ALLOW_MATCH_OR_RLS_WIDENED:-0}" \
+RESULT_JSON_FILE="$OUTPUT_DIR/assertion.json" \
 bash "$ASSERT_SUMMARY_SCRIPT"
 
 echo "workspace RLS probe artifacts ready in $OUTPUT_DIR"

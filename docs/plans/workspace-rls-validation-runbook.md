@@ -160,6 +160,14 @@ bash scripts/workspace_rls_probe_and_summarize.sh
 ```
 
 它会默认把结果落到 `.tmp/workspace-rls-<timestamp>/`，并对 `summary.md` 再跑一层摘要断言。
+当前默认产物包括：
+
+- `owner.txt`
+- `member.txt`
+- `outsider.txt`
+- `summary.md`
+- `summary.json`
+- `assertion.json`
 
 若想顺手保留原始输出，可再加：
 
@@ -209,6 +217,8 @@ bash scripts/workspace_rls_assert_summary.sh
 - 允许：`partial_match`、`expected_mismatch`、`match`
 - 失败：`review_needed`、`security_bug`
 - `match_or_rls_widened` 默认也失败；若本轮就是在验证 RLS 收口，可显式传 `ALLOW_MATCH_OR_RLS_WIDENED=1`
+
+若传入 `RESULT_JSON_FILE=...`，断言脚本还会顺手输出机器可读 gate 结果。
 
 若想只对固定样本结果做门槛断言，也可运行：
 
