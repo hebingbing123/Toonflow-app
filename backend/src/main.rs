@@ -5,8 +5,6 @@
 use std::net::SocketAddr;
 
 use toonflow_server::{app, harness, jobs, publish, state};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
-
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -30,12 +28,7 @@ async fn main() {
         return;
     }
 
-    tracing_subscriber::registry()
-        .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
-        .with(tracing_subscriber::fmt::layer())
-        .init();
-
-    toonflow_server::telemetry::log_otel_export_stub_if_requested();
+    toonflow_server::telemetry::init_tracing_subscriber();
 
     harness::isolate::warm_isolate_pool_prefork().await;
 

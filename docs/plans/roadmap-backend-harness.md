@@ -29,7 +29,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 | 进程池启动预热（prefork） | `shipped` | **`HARNESS_ISOLATE_PREFORK`**（上限同并发槽；**`HARNESS_ISOLATE_POOL`** 关闭时不预热）；**`main`** 监听前 **`warm_isolate_pool_prefork`**；README + 集成测 |
 | 进程池扩展回收 / 老化（TTL、轮换） | `shipped` | **`HARNESS_ISOLATE_POOL_IDLE_TTL_SECS`** / **`HARNESS_ISOLATE_POOL_MAX_WORKER_AGE_SECS`** + `total_pool_evictions`；idle 归还与 acquire 前 prune；**`try_wait`** 剔除已退出 worker；Runbook 仍可对齐 SLO 细调 |
 | LLM 流式工具调用融合 | `next` | **必做**；协议与产品规则须书面定稿 |
-| Trace / 结构化观测 + OTel 导出 | `next` | **必做**；与 `quality-bar`、运维 KPI 联动；**占位**：`TOONFLOW_OTEL_EXPORT_ENABLED` + 启动日志见 `backend` README / `telemetry` 模块 |
+| Trace / 结构化观测 + OTel 导出 | `shipped`（gRPC OTLP traces） | **必做**；与 `quality-bar`、运维 KPI 联动；**已实现**：`TOONFLOW_OTEL_EXPORT_ENABLED` + **`OTEL_EXPORTER_OTLP_*`** gRPC 导出 + `telemetry` 模块 + README + 单测 / ignored collector 烟测；采样率 / PII 白名单等见 WP-F PR 切片仍 **`next`** |
 
 ## 验收
 
@@ -103,7 +103,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 |----|------|
 | **目标** | 在 `request_id` 基础上，将 harness session / tool invoke / job **全链路透传 trace id**，并 **必做 OTel（或等价标准导出）管线**，供运维查询与 SLO。 |
 | **依赖** | 与 [`roadmap-quality.md`](./roadmap-quality.md) WP-D 的关联字段设计对齐；**顺序**：先贯通 trace id，再扩展业务关联字段。 |
-| **PR 切片** | （0）**stub**：`TOONFLOW_OTEL_EXPORT_ENABLED` 时启动 **`tracing::warn`**（无 OTLP 依赖，避免运维误以为已导出）；（1）统一 `tracing` span 与 baggage 约定；（2）**必做**：可配置导出（环境区分 staging/prod，采样率可调但 prod 非零）；（3）**必做**：PII 脱敏与字段白名单评审。 |
-| **触点** | `backend/src/harness/observe.rs`；HTTP 中间件；`jobs/worker` **必做**关联 `job_id`。 |
-| **测试** | **必做**：本地或 CI OTel collector 冒烟；单测 span 父子关系与采样边界。 |
+| **PR 切片** | （0）**stub**：~~`TOONFLOW_OTEL_EXPORT_ENABLED` 时仅 warn~~ **已替换**；（**OTLP gRPC traces**）`TOONFLOW_OTEL_EXPORT_ENABLED` + `OTEL_EXPORTER_OTLP_ENDPOINT` / `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` + `telemetry::init_tracing_subscriber` + README + 测试；（1）统一 `tracing` span 与 baggage 约定；（2）**必做**：可配置导出（环境区分 staging/prod，采样率可调但 prod 非零）；（3）**必做**：PII 脱敏与字段白名单评审。 |
+| **触点** | `backend/src/telemetry.rs`；`backend/src/main.rs`；`backend/src/harness/observe.rs`；HTTP 中间件；`jobs/worker` **必做**关联 `job_id`。 |
+| **测试** | **必做**：本地或 CI OTel collector 冒烟（**`tests/telemetry_otlp_collector_smoke.rs`**，`--ignored`）；单测 span 父子关系（**`telemetry` 模块**）。 |
 | **回滚** | 导出降为最低采样 + 磁盘日志兜底；不得在未知故障下静默关闭 trace id 传递。 |

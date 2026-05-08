@@ -27,7 +27,17 @@ cargo run --bin toonflow-server
 
 异步任务 worker 多实例时设置不同 **`WORKER_ID`**，便于在任务行的 **`claimed_by`** 上区分认领实例（仍依赖 Postgres `SKIP LOCKED` 协调）。**`JOB_QUEUE_METRICS_INTERVAL_SECS`**（默认 **60**，设为 **0** 关闭）控制 worker 周期性输出结构化日志 **`event=job_queue_metrics`**（含 **`pending`**、**`pending_claimable`**、**`running`**、**`dead`**、**`failed_last_24h`**、**`oldest_claimable_queued_age_secs`**、**`pending_by_kind`** JSON、`worker_id`），便于日志聚合与旁路队列 Gate；与 500ms 抢单轮询解耦。字段语义与运维 Runbook 见 [`docs/plans/jobs-pg-queue-runbook.md`](../docs/plans/jobs-pg-queue-runbook.md)。
 
-**OTel（WP‑F 占位）**：若设置 **`TOONFLOW_OTEL_EXPORT_ENABLED=1`**（或 **`true`** / **`yes`** / **`on`**），进程在 **`tracing`** 初始化后会打 **`warn`**（**`target=toonflow.telemetry`**）说明 **本构建尚未接线 OTLP**，避免误以为已向 collector 导出；完整导出见路线图 **WP-F**。
+**OTel / OTLP traces（WP‑F）**：设置 **`TOONFLOW_OTEL_EXPORT_ENABLED=1`**（或 **`true`** / **`yes`** / **`on`**）时，进程通过 **gRPC OTLP** 向 collector 导出 **`tracing` spans**（`opentelemetry-otlp` + `tracing-opentelemetry`）。可选环境变量：
+
+- **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`** 或 **`OTEL_EXPORTER_OTLP_ENDPOINT`**：collector 地址（默认 **`http://127.0.0.1:4317`**，与 OpenTelemetry Collector gRPC 端口一致）。
+- **`OTEL_SERVICE_NAME`**：`service.name` resource（默认 **`toonflow-server`**）。
+
+仍使用 **`RUST_LOG`**（`tracing_subscriber::EnvFilter`）控制控制台日志级别；OTel 导出与控制台是相互叠加的两个 sink。
+
+本地烟测（需本机起 collector）：`docker run --rm -p 4317:4317 otel/opentelemetry-collector:latest`，然后  
+`cd backend && TOONFLOW_OTEL_EXPORT_ENABLED=1 cargo test -p toonflow-server --test telemetry_otlp_collector_smoke otlp_export_reaches_collector -- --ignored --nocapture`（见测试文件头注释）。
+
+若 exporter 初始化失败，进程仍会启动并仅写控制台日志，同时打出 **`target=toonflow.telemetry`** 的 **warn**（并在启动前 **`eprintln!`**），避免静默失败。
 
 **请求关联：** 所有响应带 **`X-Request-Id`**（可客户端传入同名请求头，否则服务端生成 UUID）。`Content-Type: application/json` 的 **4xx/5xx** 若体为 OpenAPI 式 `code` + `message`，中间件会补上 **`request_id`**（与响应头一致），便于与日志对照。
 

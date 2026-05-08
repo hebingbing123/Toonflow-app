@@ -1,9 +1,19 @@
-//! 可观测性接线占位（路线图 **WP-F**）。
+//! 可观测性与 **OTLP trace** 导出（路线图 **WP-F**）。
 //!
-//! 完整 OTLP 导出尚未接入；见 `TOONFLOW_OTEL_EXPORT_ENABLED` 与 `backend/README.md`。
+//! - **`TOONFLOW_OTEL_EXPORT_ENABLED`**: `1` / `true` / `yes` / `on` 时启用 OTLP gRPC 导出。
+//! - **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`** 或 **`OTEL_EXPORTER_OTLP_ENDPOINT`**：collector 地址（默认 `http://127.0.0.1:4317`）。
+//! - **`OTEL_SERVICE_NAME`**：可选；默认 `toonflow-server`。
+
+use opentelemetry::global;
+use opentelemetry::KeyValue;
+use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_sdk::propagation::TraceContextPropagator;
+use opentelemetry_sdk::resource::Resource;
+use opentelemetry_sdk::trace::SdkTracerProvider;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Registry};
 
 #[inline]
-fn truthy_env(name: &str) -> bool {
+pub(crate) fn truthy_env(name: &str) -> bool {
     match std::env::var(name) {
         Ok(s) => {
             let t = s.trim().to_ascii_lowercase();
@@ -13,21 +23,106 @@ fn truthy_env(name: &str) -> bool {
     }
 }
 
-/// 若设置了 **`TOONFLOW_OTEL_EXPORT_ENABLED`**（`1` / `true` / `yes` / `on`），在 **`tracing`** 已初始化后打出一条 **warn**，
-/// 避免运维误以为本构建已向 collector 导出 OTLP。
-pub fn log_otel_export_stub_if_requested() {
+/// gRPC OTLP 默认端口（与 OpenTelemetry Collector 一致）。
+pub(crate) const DEFAULT_OTLP_GRPC_ENDPOINT: &str = "http://127.0.0.1:4317";
+
+pub(crate) fn resolve_otlp_grpc_endpoint() -> String {
+    if let Ok(v) = std::env::var("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") {
+        let t = v.trim();
+        if !t.is_empty() {
+            return t.to_string();
+        }
+    }
+    if let Ok(v) = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT") {
+        let t = v.trim();
+        if !t.is_empty() {
+            return t.to_string();
+        }
+    }
+    DEFAULT_OTLP_GRPC_ENDPOINT.to_string()
+}
+
+fn otel_service_name() -> String {
+    std::env::var("OTEL_SERVICE_NAME")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "toonflow-server".to_string())
+}
+
+fn try_init_otel_tracer_provider() -> anyhow::Result<()> {
+    let endpoint = resolve_otlp_grpc_endpoint();
+    let exporter = opentelemetry_otlp::SpanExporter::builder()
+        .with_tonic()
+        .with_endpoint(endpoint.clone())
+        .build()
+        .map_err(|e| anyhow::anyhow!("{e}"))?;
+
+    let resource = Resource::builder()
+        .with_attributes(vec![KeyValue::new("service.name", otel_service_name())])
+        .build();
+
+    let provider = SdkTracerProvider::builder()
+        .with_resource(resource)
+        .with_batch_exporter(exporter)
+        .build();
+
+    global::set_text_map_propagator(TraceContextPropagator::new());
+    global::set_tracer_provider(provider);
+    Ok(())
+}
+
+/// **`#[ignore]` 集成烟测**：向本机 collector 导出 trace（见 `tests/telemetry_otlp_collector_smoke.rs`）。
+#[doc(hidden)]
+pub fn init_otel_for_collector_smoke_test() -> anyhow::Result<()> {
+    try_init_otel_tracer_provider()
+}
+
+/// 初始化全局 `tracing` subscriber（控制台 + 可选 OTLP）。
+///
+/// **仅能调用一次**（与 `tracing_subscriber` 全局注册一致）。
+pub fn init_tracing_subscriber() {
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+
     if !truthy_env("TOONFLOW_OTEL_EXPORT_ENABLED") {
+        Registry::default()
+            .with(filter)
+            .with(tracing_subscriber::fmt::layer())
+            .init();
         return;
     }
-    tracing::warn!(
+
+    if let Err(err) = try_init_otel_tracer_provider() {
+        eprintln!("toonflow: OTLP exporter init failed ({err}); continuing with fmt logs only");
+        Registry::default()
+            .with(filter)
+            .with(tracing_subscriber::fmt::layer())
+            .init();
+        tracing::warn!(
+            target: "toonflow.telemetry",
+            error = %err,
+            "TOONFLOW_OTEL_EXPORT_ENABLED set but OTLP init failed; spans are not exported"
+        );
+        return;
+    }
+
+    let tracer = global::tracer("toonflow-server");
+    let otel_layer = tracing_opentelemetry::layer().with_tracer(tracer);
+    Registry::default()
+        .with(filter)
+        .with(otel_layer)
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+    tracing::info!(
         target: "toonflow.telemetry",
-        "TOONFLOW_OTEL_EXPORT_ENABLED is set but OTLP export is not wired in this build (WP-F); spans remain on the default fmt subscriber only."
+        endpoint = %resolve_otlp_grpc_endpoint(),
+        "TOONFLOW_OTEL_EXPORT_ENABLED: OTLP gRPC trace export initialized"
     );
 }
 
 #[cfg(test)]
 mod tests {
-    use super::truthy_env;
+    use super::*;
     use std::sync::Mutex;
 
     static ENV_MUTEX: Mutex<()> = Mutex::new(());
@@ -42,5 +137,69 @@ mod tests {
         std::env::set_var("TOONFLOW_OTEL_EXPORT_ENABLED", "no");
         assert!(!truthy_env("TOONFLOW_OTEL_EXPORT_ENABLED"));
         std::env::remove_var("TOONFLOW_OTEL_EXPORT_ENABLED");
+    }
+
+    #[test]
+    fn resolve_otlp_grpc_endpoint_prefers_traces_var() {
+        let _g = ENV_MUTEX.lock().expect("lock");
+        std::env::remove_var("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT");
+        std::env::remove_var("OTEL_EXPORTER_OTLP_ENDPOINT");
+        assert_eq!(resolve_otlp_grpc_endpoint(), DEFAULT_OTLP_GRPC_ENDPOINT);
+        std::env::set_var("OTEL_EXPORTER_OTLP_ENDPOINT", "http://example:4317");
+        assert_eq!(resolve_otlp_grpc_endpoint().as_str(), "http://example:4317");
+        std::env::set_var("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://traces:4317");
+        assert_eq!(resolve_otlp_grpc_endpoint().as_str(), "http://traces:4317");
+        std::env::remove_var("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT");
+        std::env::remove_var("OTEL_EXPORTER_OTLP_ENDPOINT");
+    }
+
+    #[test]
+    fn nested_tracing_spans_have_parent_id() {
+        let _g = ENV_MUTEX.lock().expect("lock");
+
+        #[derive(Clone, Default)]
+        struct CaptureLayer {
+            parent: std::sync::Arc<std::sync::Mutex<Option<tracing::span::Id>>>,
+            child: std::sync::Arc<std::sync::Mutex<Option<tracing::span::Id>>>,
+        }
+        impl<S> tracing_subscriber::Layer<S> for CaptureLayer
+        where
+            S: tracing::Subscriber + for<'a> tracing_subscriber::registry::LookupSpan<'a>,
+        {
+            fn on_new_span(
+                &self,
+                attrs: &tracing::span::Attributes<'_>,
+                id: &tracing::span::Id,
+                ctx: tracing_subscriber::layer::Context<'_, S>,
+            ) {
+                let name = attrs.metadata().name();
+                let span = ctx.span(id).expect("span");
+                let parent = span.parent().map(|p| p.id());
+                if name == "parent_op" {
+                    *self.parent.lock().expect("lock") = parent;
+                } else if name == "child_op" {
+                    *self.child.lock().expect("lock") = parent;
+                }
+            }
+        }
+
+        let parent_arc = std::sync::Arc::new(std::sync::Mutex::new(None));
+        let child_arc = std::sync::Arc::new(std::sync::Mutex::new(None));
+        let capture = CaptureLayer {
+            parent: parent_arc.clone(),
+            child: child_arc.clone(),
+        };
+
+        let _guard = tracing::subscriber::set_default(tracing_subscriber::registry().with(capture));
+
+        let root = tracing::info_span!("parent_op");
+        let _e = root.enter();
+        let child = tracing::info_span!("child_op");
+        let _c = child.enter();
+
+        let p = parent_arc.lock().expect("lock").clone();
+        let c = child_arc.lock().expect("lock").clone();
+        assert!(p.is_none(), "root span should have no tracing parent");
+        assert_eq!(c, root.id(), "child should record parent span id");
     }
 }
