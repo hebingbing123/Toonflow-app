@@ -343,6 +343,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   String? _webhooksError;
   OutboundWebhookListResponseV1? _webhooks;
   final _webhookUrlController = TextEditingController();
+  final _webhookSecretController = TextEditingController();
+  final _webhookTestEventTypeController = TextEditingController(
+    text: 'test.ping',
+  );
   bool _loadingBillingEvents = false;
   bool _loadingMoreBillingEvents = false;
   bool _exportingAllBillingEvents = false;
@@ -412,6 +416,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   @override
   void dispose() {
     _webhookUrlController.dispose();
+    _webhookSecretController.dispose();
+    _webhookTestEventTypeController.dispose();
     _billingEventTypeController.dispose();
     _billingProviderEventIdController.dispose();
     _billingProviderEventIdPrefixController.dispose();
@@ -568,12 +574,18 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     try {
       final created = await postSettingsOutboundWebhookCreateV1(
         token,
-        OutboundWebhookCreateBodyV1(url: url),
+        OutboundWebhookCreateBodyV1(
+          url: url,
+          secret: _webhookSecretController.text.trim().isEmpty
+              ? null
+              : _webhookSecretController.text.trim(),
+        ),
       );
       if (!mounted) {
         return;
       }
       _webhookUrlController.clear();
+      _webhookSecretController.clear();
       await Clipboard.setData(ClipboardData(text: created.secret));
       if (!mounted) {
         return;
@@ -642,7 +654,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       final res = await postSettingsOutboundWebhookTestV1(
         token,
         id,
-        const OutboundWebhookTestBodyV1(eventType: 'test.ping'),
+        OutboundWebhookTestBodyV1(
+          eventType: _webhookTestEventTypeController.text.trim().isEmpty
+              ? null
+              : _webhookTestEventTypeController.text.trim(),
+        ),
       );
       if (!mounted) {
         return;
@@ -925,6 +941,21 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             ),
           ),
           const SizedBox(height: 8),
+          TextField(
+            controller: _webhookSecretController,
+            decoration: const InputDecoration(
+              labelText: 'Secret（可空，留空则服务端生成）',
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _webhookTestEventTypeController,
+            decoration: const InputDecoration(
+              labelText: '测试 eventType',
+              hintText: 'test.ping',
+            ),
+          ),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -965,6 +996,19 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         ),
                       ),
                       const SizedBox(width: 8),
+                      IconButton(
+                        tooltip: '复制 URL',
+                        onPressed: () async {
+                          await Clipboard.setData(ClipboardData(text: wh.url));
+                          if (!context.mounted) {
+                            return;
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('已复制 Webhook URL')),
+                          );
+                        },
+                        icon: const Icon(Icons.copy_outlined),
+                      ),
                       OutlinedButton(
                         onPressed: _loadingWebhooks
                             ? null
