@@ -89,6 +89,14 @@ bool hasActiveEnterpriseWorkspace(List<WorkspaceListItem> items) {
   );
 }
 
+bool isCurrentWorkspaceRow(WorkspaceListItem row, String? currentWorkspaceId) {
+  final current = currentWorkspaceId?.trim();
+  if (current == null || current.isEmpty) {
+    return false;
+  }
+  return row.workspace.id == current;
+}
+
 List<WorkspaceInviteResponse> sortWorkspaceInvitesByExpiry(
   List<WorkspaceInviteResponse> invites,
 ) {
@@ -110,11 +118,13 @@ class TeamWorkspacesSection extends StatefulWidget {
     required this.accessToken,
     this.onWorkspaceContextChanged,
     this.initialInviteToken,
+    this.currentWorkspaceId,
   });
 
   final String? accessToken;
   final Future<void> Function()? onWorkspaceContextChanged;
   final String? initialInviteToken;
+  final String? currentWorkspaceId;
 
   @override
   State<TeamWorkspacesSection> createState() => _TeamWorkspacesSectionState();
@@ -990,8 +1000,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               final busy = _patchingWorkspaceId == w.id;
               final switching = _switchingWorkspaceId == w.id;
               final canManage = _canArchiveOrRestore(row);
+              final isCurrent = isCurrentWorkspaceRow(
+                row,
+                widget.currentWorkspaceId,
+              );
               return ListTile(
                 dense: true,
+                selected: isCurrent,
+                selectedTileColor: theme.colorScheme.primaryContainer
+                    .withValues(alpha: 0.35),
                 title: Text(w.name),
                 subtitle: Text(
                   '${w.workspaceType} · ${row.role}'
@@ -1000,6 +1017,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
+                    if (isCurrent)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Chip(
+                          label: const Text('当前'),
+                          visualDensity: VisualDensity.compact,
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                        ),
+                      ),
                     if (canManage)
                       TextButton(
                         onPressed: (_loading || busy)
@@ -1008,7 +1034,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         child: const Text('成员'),
                       ),
                     TextButton(
-                      onPressed: (_loading || busy || switching)
+                      onPressed: (_loading || busy || switching || isCurrent)
                           ? null
                           : () => _switchCurrentWorkspace(row),
                       child: switching

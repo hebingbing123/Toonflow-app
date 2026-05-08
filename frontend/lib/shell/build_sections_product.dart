@@ -207,6 +207,7 @@ extension _HomePageBuildProductSections on _HomePageState {
       TeamWorkspacesSection(
         accessToken: _session?.accessToken,
         onWorkspaceContextChanged: _handleWorkspaceContextChanged,
+        currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.scriptWorkspace)

@@ -323,6 +323,27 @@ void main() {
       isTrue,
     );
   });
+
+  test('isCurrentWorkspaceRow matches current workspace id', () {
+    final now = DateTime.utc(2026, 1, 1);
+    final row = WorkspaceListItem(
+      workspace: WorkspaceResponse(
+        id: 'workspace-1',
+        ownerUserId: 'user-owner',
+        name: 'Team Alpha',
+        workspaceType: 'enterprise',
+        metadata: const <String, dynamic>{},
+        archivedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      role: 'owner',
+    );
+
+    expect(isCurrentWorkspaceRow(row, 'workspace-1'), isTrue);
+    expect(isCurrentWorkspaceRow(row, 'workspace-2'), isFalse);
+    expect(isCurrentWorkspaceRow(row, '   '), isFalse);
+  });
 }
 
 extension on WorkspaceInviteResponse {

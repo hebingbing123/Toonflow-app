@@ -103,8 +103,8 @@
 
 ## 七、Phase W6 — Flutter 产品面（完整 UX）
 
-- [ ] **W6.1** Workspace **选择器**（抽屉或设置页）：列表、当前高亮、切换
-- [ ] **W6.2** **创建企业空间** 流程（表单 + 错误提示）
+- [x] **W6.1** Workspace **选择器**（抽屉或设置页）：列表、当前高亮、切换（已完成：团队工作区列表、当前 workspace 高亮 / “当前”标识、切换动作）
+- [x] **W6.2** **创建企业空间** 流程（表单 + 错误提示）（已完成：创建表单、空名校验、成功 / 失败反馈）
 - [ ] **W6.3** **成员管理页**：列表、搜索用户、改角色、移除、邀请 pending 列表（已完成：列表/改角色/移除 + 成员搜索 + 服务端 `GET /api/v1/workspaces/{workspace_id}/invites?status=pending` 持久化 pending 列表接入；待补：专用邀请管理页与分页/批量动作）
 - [x] **W6.4** **接受邀请** 深链 / 路由（Web + 桌面一致策略）（已完成：手动粘贴 token + URL query 自动预填 `invite_token|inviteToken|token` + 自动提示 + 接受成功后清理 query 参数 + 独立 `/join-workspace(/:token)` 深链最小实现 + 命中邀请入口时自动跳转到“团队工作区”）
 - [x] **W6.5** 空状态：无 enterprise 时的引导；无项目时的团队引导（已完成：团队工作区页补“仅 Personal”提示；项目区在 enterprise workspace 且无项目时补创建项目 / 打开团队工作区引导）
