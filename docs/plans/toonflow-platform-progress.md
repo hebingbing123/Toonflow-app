@@ -27,6 +27,7 @@
 - **最新补齐**：Workspace 运维 Runbook **W10.3** 已落地 — 新增 [**`workspace-operations-runbook.md`**](./workspace-operations-runbook.md)，覆盖 workspace / member / current_workspace / project 可见性排障、邀请 accept 冲突判读，以及只读核查 / 受控修复 SQL 模板；不引入新 REST / WS / schema，纯收口现有语义
 - **最新补齐**：Workspace 路线图索引 **W11.2** 已落地 — 新增 [**`roadmap-workspace.md`**](./roadmap-workspace.md) 作为团队 Workspace 方向入口；`workspace-team-full-plan.md` 继续保留为 W1–W11 勾选真源
 - **最新补齐**：Workspace 安全边界文档 **W9.1** 已落地 — 新增 [**`workspace-security-boundary.md`**](./workspace-security-boundary.md)，明确 Rust `DATABASE_URL` 直连 Postgres 时以应用层授权为真源、Supabase RLS 为直连客户端补充护栏，并列出 workspace / project / jobs / Harness 需显式复用的门禁 helper
+- **最新补齐**：Workspace RLS 一致性矩阵 **W9.2** 已落地 — 新增 [**`workspace-rls-consistency-matrix.md`**](./workspace-rls-consistency-matrix.md)，明确当前 Rust workspace 协作语义与 Supabase 直连客户端 owner-only RLS 之间的主要 mismatch，避免误把 Rust 可见性等同于直连可见性；本轮先补矩阵，不声称 staging 一致性验证已完成
 - **最新补齐**：Workspace 发布文档 **W11.3–W11.4** 已落地 — 新增 [**`workspace-migration-notice.md`**](./workspace-migration-notice.md) 说明客户端/迁移侧行为差异，并把 `yarn refactor:check` 的必跑门禁正式锚定到仓库根 `AGENTS.md` 与 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)
 - **最新补齐**：Workspace observability spec **W10.1/W10.2** 已落地 — 新增 [**`workspace-observability-spec.md`**](./workspace-observability-spec.md)，明确 `workspace_id` 在 HTTP / jobs / Harness 的统一日志字段与 trace join 约定，并锁定 workspace 成员数 / 项目数 / 活跃 jobs 的管理指标口径；本轮只补规格，不声称实现已完成
 

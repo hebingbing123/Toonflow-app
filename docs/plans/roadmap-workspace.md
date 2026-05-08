@@ -21,7 +21,7 @@
 | W6 Flutter 产品面 | `baseline_done` | 选择器、创建、成员管理、接受邀请、空状态、`rust_api` 对齐 |
 | W7 Harness / WS | `baseline_done` | attach `workspaceUuid`、权限与回归矩阵 |
 | W8 计费与配额 | `next` | `plan_tier` / quota 仍待 user vs workspace 策略定稿 |
-| W9 安全 | `next` | W9.1 安全边界文档已补；RLS 一致性测试与敏感操作流程仍待收口 |
+| W9 安全 | `next` | W9.1 边界文档、W9.2 一致性矩阵已补；RLS 收口与敏感操作流程仍待实现 |
 | W10 观测与运维 | `next` | W10.1/W10.2 observability spec 已补；W10.3 runbook 已完成；trace 与指标实现仍待补 |
 | W11 发布与门禁 | `baseline_done` | W11.1–W11.4 已书面收口：进度同步、roadmap 索引、迁移公告、refactor gate 真源 |
 
@@ -30,6 +30,7 @@
 - W1–W4：workspace 生命周期、成员关系、当前上下文、项目与 jobs 作用域已经落地
 - W6–W7：Flutter 与 Harness/WS 客户端路径已对齐
 - W9.1：workspace 安全边界文档已补齐，见 [`workspace-security-boundary.md`](./workspace-security-boundary.md)
+- W9.2：workspace RLS 一致性矩阵已补齐，见 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)
 - W10.1/W10.2：workspace observability spec 已补齐，见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
 - W10.3：workspace 运维 Runbook 已补齐，见 [`workspace-operations-runbook.md`](./workspace-operations-runbook.md)
 - W11.2：本分册已建立，`roadmap-index.md` 可直接跳转到 workspace 方向
@@ -42,7 +43,7 @@
 
 1. **W10.1 实现**：按 [`workspace-observability-spec.md`](./workspace-observability-spec.md) 给 HTTP / jobs / Harness 补 `workspace_id` 结构化字段
 2. **W10.2 实现**：按同一 spec 落地 workspace 成员数 / 项目数 / 活跃 jobs 只读查询或内部接口
-3. **W9.2–W9.4**：补 Supabase 直连客户端一致性测试、敏感操作确认流程与邀请安全评审
+3. **W9.2–W9.4**：按 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md) 做 staging 验证，并补敏感操作确认流程与邀请安全评审
 4. **W8.1–W8.4**：待计费口径定稿后再收 workspace 级 plan / quota / webhook 变更
 
 ## 执行与依赖
@@ -56,6 +57,7 @@
 - 总表与勾选：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md)
 - 运维排障：[`workspace-operations-runbook.md`](./workspace-operations-runbook.md)
 - 观测规格：[`workspace-observability-spec.md`](./workspace-observability-spec.md)
+- RLS 一致性矩阵：[`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)
 - 邀请专项：[`workspace-invite-runbook.md`](./workspace-invite-runbook.md)
 - 迁移公告：[`workspace-migration-notice.md`](./workspace-migration-notice.md)
 - WS 回归：[`harness-agent-workspaces-regression-matrix.md`](./harness-agent-workspaces-regression-matrix.md)
