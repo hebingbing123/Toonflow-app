@@ -4,6 +4,7 @@ use uuid::Uuid;
 use crate::error::ApiError;
 
 mod http;
+mod ops_stats;
 
 #[derive(Debug, Clone, FromRow)]
 pub struct WorkspaceContext {
@@ -13,10 +14,18 @@ pub struct WorkspaceContext {
 }
 
 pub fn router() -> axum::Router<crate::state::AppState> {
-    http::router()
+    http::router().merge(ops_stats::router())
 }
 
-pub use http::WorkspacesOpenApi;
+pub struct WorkspacesOpenApi;
+
+impl utoipa::OpenApi for WorkspacesOpenApi {
+    fn openapi() -> utoipa::openapi::OpenApi {
+        let mut doc = <http::WorkspacesOpenApi as utoipa::OpenApi>::openapi();
+        doc.merge(<ops_stats::WorkspaceOpsStatsOpenApi as utoipa::OpenApi>::openapi());
+        doc
+    }
+}
 
 pub async fn ensure_personal_workspace(
     pool: &PgPool,

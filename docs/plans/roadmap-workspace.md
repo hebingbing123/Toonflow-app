@@ -22,7 +22,7 @@
 | W7 Harness / WS | `baseline_done` | attach `workspaceUuid`、权限与回归矩阵 |
 | W8 计费与配额 | `next`（实现） | W8.1 已定为 user-scope；W8.2–W8.4 **规格草案**见 [`workspace-billing-future-workspace-scope.md`](./workspace-billing-future-workspace-scope.md)；若改 workspace-scope 再实施迁移与运营面收口 |
 | W9 安全 | `baseline_done` | W9.1–W9.4 已书面收口：安全边界、一致性矩阵、敏感操作流程、邀请安全评审 |
-| W10 观测与运维 | `next` | W10.1 已实现并打通关键 trace/log 字段；W10.2 指标实现仍待补；W10.3 runbook 已完成 |
+| W10 观测与运维 | `baseline_done` | W10.1 已实现并打通关键 trace/log 字段；W10.2 internal-ops workspace stats 已落地；W10.3 runbook 已完成 |
 | W11 发布与门禁 | `baseline_done` | W11.1–W11.4 已书面收口：进度同步、roadmap 索引、迁移公告、refactor gate 真源 |
 
 ## 已完成基线
@@ -36,7 +36,7 @@
 - W9.3：敏感操作 Runbook 已补齐，见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
 - W9.4：邀请安全评审已补齐，见 [`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
 - W10.1/W10.2：workspace observability spec 已补齐，见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
-- W10.1：workspace observability 关键字段已落地到 HTTP / jobs / Harness，W10.2 仍待补管理指标实现
+- W10.1：workspace observability 关键字段已落地到 HTTP / jobs / Harness；W10.2 已新增 internal-ops `GET /api/v1/workspaces/{workspace_id}/stats`，返回 workspace 成员数 / 项目数 / 活跃 jobs
 - W10.3：workspace 运维 Runbook 已补齐，见 [`workspace-operations-runbook.md`](./workspace-operations-runbook.md)
 - W11.2：本分册已建立，`roadmap-index.md` 可直接跳转到 workspace 方向
 - W11.3：workspace 迁移公告已补齐，见 [`workspace-migration-notice.md`](./workspace-migration-notice.md)
@@ -46,9 +46,9 @@
 
 优先继续以下低耦合或必须收口项：
 
-1. **W10.2 实现**：按 [`workspace-observability-spec.md`](./workspace-observability-spec.md) 落地 workspace 成员数 / 项目数 / 活跃 jobs 只读查询或内部接口
-2. **W9 验证**：按 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md) 做 staging 验证，并把敏感操作 / invite review 纳入发布清单
-3. **W8.2–W8.4**：仅在明确需要 workspace-scope billing 时，再收字段迁移、webhook 形状与运营视图
+1. **W9 验证**：按 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md) 做 staging 验证，并把敏感操作 / invite review 纳入发布清单
+2. **W8.2–W8.4**：仅在明确需要 workspace-scope billing 时，再收字段迁移、webhook 形状与运营视图
+3. **W5.2 取舍**：若未来真的需要项目级 `editor/viewer`，再单开设计与全栈交付窗口
 
 ## 执行与依赖
 

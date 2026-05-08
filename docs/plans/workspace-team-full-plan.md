@@ -144,7 +144,7 @@
 ## 十一、Phase W10 — 观测与运维
 
 - [x] **W10.1** 结构化日志 / trace：`workspace_id` 已贯穿关键 HTTP、job enqueue / worker phase、Harness attach / tool 链路（与 [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md)、[`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F 对齐）— 实施规格见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
-- [ ] **W10.2** 管理指标：每 workspace 成员数、项目数、活跃 jobs（脱敏）— 口径规格见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
+- [x] **W10.2** 管理指标：已新增 internal-ops 只读端点 `GET /api/v1/workspaces/{workspace_id}/stats`（`TOONFLOW_INTERNAL_OPS_TOKEN` + `X-Toonflow-Internal-Token`）返回每 workspace 成员数、项目数、活跃 jobs（脱敏；`queued`/`running` 且能由 job payload 解析到 project -> workspace 的任务）— 口径规格见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
 - [x] **W10.3** Runbook：成员无法访问、错误切换、数据修复 SQL 模板（只读/受控）— 见 [`workspace-operations-runbook.md`](./workspace-operations-runbook.md)
 
 ---
