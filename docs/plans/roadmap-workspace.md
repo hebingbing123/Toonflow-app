@@ -31,7 +31,7 @@
 - W6–W7：Flutter 与 Harness/WS 客户端路径已对齐
 - W9.1：workspace 安全边界文档已补齐，见 [`workspace-security-boundary.md`](./workspace-security-boundary.md)
 - W9.2：workspace RLS 一致性矩阵已补齐，见 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)
-- W9.2：已新增 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md) 与 `scripts/workspace_rls_probe.sh`，可直接在本地 / staging 采集 policy snapshot 与 owner/member/outsider 可见性
+- W9.2：已新增 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md) 与 `scripts/workspace_rls_probe.sh`，可直接在本地 / staging 采集 policy snapshot 与 owner/member/outsider 可见性；发布前串联清单见 [`workspace-release-checklist.md`](./workspace-release-checklist.md)
 - W8.1：workspace 计费口径已定为 user-scope，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
 - W5.3：workspace 默认项目权限策略已补齐，见 [`workspace-project-permission-policy.md`](./workspace-project-permission-policy.md)
 - W9.3：敏感操作 Runbook 已补齐，见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
@@ -47,7 +47,7 @@
 
 优先继续以下低耦合或必须收口项：
 
-1. **W9 验证**：按 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md) 在 staging 跑 owner/member/outsider 三身份验证，并把敏感操作 / invite review 纳入发布清单
+1. **W9 验证**：按 [`workspace-release-checklist.md`](./workspace-release-checklist.md) 在 staging 跑 owner/member/outsider 三身份验证，并把敏感操作 / invite review / current workspace fallback 一起收口
 2. **W8.2–W8.4**：仅在明确需要 workspace-scope billing 时，再收字段迁移、webhook 形状与运营视图
 3. **W5.2 取舍**：若未来真的需要项目级 `editor/viewer`，再单开设计与全栈交付窗口
 
@@ -68,6 +68,7 @@
 - 敏感操作：[`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
 - 邀请安全评审：[`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
 - 邀请专项：[`workspace-invite-runbook.md`](./workspace-invite-runbook.md)
+- 发布检查：[`workspace-release-checklist.md`](./workspace-release-checklist.md)
 - 迁移公告：[`workspace-migration-notice.md`](./workspace-migration-notice.md)
 - WS 回归：[`harness-agent-workspaces-regression-matrix.md`](./harness-agent-workspaces-regression-matrix.md)
 - 平台主进度：[`toonflow-platform-progress.md`](./toonflow-platform-progress.md)

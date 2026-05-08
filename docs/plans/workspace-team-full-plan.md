@@ -135,7 +135,7 @@
 ## 十、Phase W9 — 安全：RLS、服务角色与双路径
 
 - [x] **W9.1** 文档：**Rust `DATABASE_URL`** 是否使用 **service role**；若绕过 RLS，**应用层**必须 100% 复现成员规则（对照清单）— 见 [`workspace-security-boundary.md`](./workspace-security-boundary.md)
-- [ ] **W9.2** Supabase **直连客户端**（若有）与 RLS 策略一致性测试 — 测试矩阵见 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)
+- [ ] **W9.2** Supabase **直连客户端**（若有）与 RLS 策略一致性测试 — 测试矩阵见 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)，执行步骤见 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md)，发布前收口清单见 [`workspace-release-checklist.md`](./workspace-release-checklist.md)
 - [x] **W9.3** 敏感操作二次确认（删空间、转 owner）— 流程见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
 - [x] **W9.4** 安全评审：邀请 token 熵、过期、重放、速率限制 — 见 [`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
 

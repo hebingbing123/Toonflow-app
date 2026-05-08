@@ -1,7 +1,7 @@
 # Workspace RLS Validation Runbook（W9.2）
 
 **目的**：把 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md) 里的“应当如何判读”变成一套可执行验证步骤，供本地 `supabase start` 或 staging 直接使用。  
-关联：[`workspace-security-boundary.md`](./workspace-security-boundary.md)、[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W9。
+关联：[`workspace-security-boundary.md`](./workspace-security-boundary.md)、[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W9、[`workspace-release-checklist.md`](./workspace-release-checklist.md)。
 
 ## 1) 这份 Runbook 解决什么问题
 
@@ -206,6 +206,7 @@ W9.2 真正勾选完成，至少要满足：
 2. 已确认哪些 mismatch 是预期 Rust-only
 3. 若发现 Rust deny / RLS allow，必须先按安全 bug 处理
 4. 将验证摘要回填到 [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) 或发布记录
+5. 若准备进入 staging / 发布收口，再按 [`workspace-release-checklist.md`](./workspace-release-checklist.md) 串联敏感操作、invite 与 fallback 检查
 
 ## 8) 当前结论
 
