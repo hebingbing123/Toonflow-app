@@ -136,7 +136,8 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
           Text('短视频编排', style: theme.textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
-            '与短视频 Space 相同的项目级写回（PATCH …/projects），在此可从项目对话框直接调整。',
+            '与短视频 Space 相同的项目级写回（PATCH …/projects），在此可从项目对话框直接调整。'
+            '首页「短剧生产平台链」可一键跳到脚本 / 制作 / 任务 / 作业 / 质量 / 短视频。',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.outline,
             ),

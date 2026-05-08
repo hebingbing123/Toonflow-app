@@ -46,6 +46,12 @@ extension _HomePageBuildProductSections on _HomePageState {
                 })
                 .toList(growable: false),
           ),
+          const SizedBox(height: 10),
+          PlatformShortDramaPipelineStrip(
+            onSelectPane: (ProductWorkspacePane pane) {
+              _shellNavigationController.selectProductWorkspacePane(pane);
+            },
+          ),
         ],
       ),
     );

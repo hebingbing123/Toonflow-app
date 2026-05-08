@@ -140,6 +140,44 @@ class WorkspaceInviteResponse {
   }
 }
 
+/// `GET /api/v1/workspaces/{workspace_id}/invites` — see `listWorkspaceInvitesV1`.
+class WorkspaceInvitesListEnvelope {
+  const WorkspaceInvitesListEnvelope({
+    required this.items,
+    required this.hasMore,
+  });
+
+  final List<WorkspaceInviteResponse> items;
+  final bool hasMore;
+
+  factory WorkspaceInvitesListEnvelope.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>? ?? const <dynamic>[];
+    return WorkspaceInvitesListEnvelope(
+      items: raw
+          .map(
+            (e) => WorkspaceInviteResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      hasMore: json['has_more'] as bool? ?? false,
+    );
+  }
+}
+
+/// `POST /api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend`
+class ResendWorkspaceInviteBody {
+  const ResendWorkspaceInviteBody({this.expiresInHours});
+
+  final int? expiresInHours;
+
+  Map<String, dynamic> toJson() {
+    final m = <String, dynamic>{};
+    if (expiresInHours != null) {
+      m['expires_in_hours'] = expiresInHours;
+    }
+    return m;
+  }
+}
+
 /// `POST /api/v1/workspaces`
 class CreateWorkspaceBody {
   const CreateWorkspaceBody({required this.name, this.metadata});
@@ -295,11 +333,13 @@ Future<List<WorkspaceMemberResponse>> fetchWorkspaceMembersV1(
 }
 
 /// `GET /api/v1/workspaces/{workspace_id}/invites` — see `listWorkspaceInvitesV1`.
-Future<List<WorkspaceInviteResponse>> fetchWorkspaceInvitesV1(
+Future<WorkspaceInvitesListEnvelope> fetchWorkspaceInvitesPageV1(
   String accessToken,
   String workspaceId, {
   String? status,
   int? limit,
+  int? offset,
+  bool includeRevoked = false,
 }) async {
   final qp = <String, String>{};
   if (status != null && status.isNotEmpty) {
@@ -307,6 +347,12 @@ Future<List<WorkspaceInviteResponse>> fetchWorkspaceInvitesV1(
   }
   if (limit != null) {
     qp['limit'] = '$limit';
+  }
+  if (offset != null && offset > 0) {
+    qp['offset'] = '$offset';
+  }
+  if (includeRevoked) {
+    qp['include_revoked'] = 'true';
   }
   final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites')
       .replace(queryParameters: qp.isEmpty ? null : qp);
@@ -316,10 +362,82 @@ Future<List<WorkspaceInviteResponse>> fetchWorkspaceInvitesV1(
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  final list = jsonDecode(res.body) as List<dynamic>;
-  return list
-      .map((e) => WorkspaceInviteResponse.fromJson(e as Map<String, dynamic>))
-      .toList(growable: false);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceInvitesListEnvelope.fromJson(map);
+}
+
+/// Loads all pages (bounded) for admin views that need a full list client-side.
+Future<List<WorkspaceInviteResponse>> fetchWorkspaceInvitesAllV1(
+  String accessToken,
+  String workspaceId, {
+  String? status,
+  int pageSize = 100,
+  bool includeRevoked = false,
+  int maxPages = 20,
+}) async {
+  final out = <WorkspaceInviteResponse>[];
+  var offset = 0;
+  for (var i = 0; i < maxPages; i++) {
+    final page = await fetchWorkspaceInvitesPageV1(
+      accessToken,
+      workspaceId,
+      status: status,
+      limit: pageSize,
+      offset: offset,
+      includeRevoked: includeRevoked,
+    );
+    out.addAll(page.items);
+    if (!page.hasMore) {
+      break;
+    }
+    offset += page.items.length;
+  }
+  return out;
+}
+
+Future<WorkspaceInviteResponse> revokeWorkspaceInviteV1(
+  String accessToken,
+  String workspaceId,
+  String inviteId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites/$inviteId',
+  );
+  final res = await http
+      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceInviteResponse.fromJson(map);
+}
+
+Future<WorkspaceInviteResponse> resendWorkspaceInviteV1(
+  String accessToken,
+  String workspaceId,
+  String inviteId, {
+  ResendWorkspaceInviteBody? body,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites/$inviteId/resend',
+  );
+  final payload = body ?? const ResendWorkspaceInviteBody();
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(payload.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceInviteResponse.fromJson(map);
 }
 
 Future<WorkspaceMemberResponse> addWorkspaceMemberV1(

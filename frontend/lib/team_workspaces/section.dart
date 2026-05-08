@@ -64,11 +64,17 @@ bool isWorkspaceInviteExpired(WorkspaceInviteResponse invite) {
 }
 
 String inviteStatusLabel(WorkspaceInviteResponse invite) {
+  if (invite.status == 'revoked') {
+    return '已撤销';
+  }
   if (isWorkspaceInviteExpired(invite)) {
     return '已过期';
   }
   if (invite.status == 'pending') {
     return '有效';
+  }
+  if (invite.status == 'accepted') {
+    return '已接受';
   }
   return invite.status;
 }
@@ -355,33 +361,65 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     bool adding = false;
     bool inviting = false;
     String? mutatingMemberUserId;
+    String? inviteActionBusyId;
     bool leaving = false;
     bool includeExpiredInvites = false;
+    bool includeRevokedInvites = false;
+    int inviteOffset = 0;
+    bool inviteHasMore = false;
+    bool loadingMoreInvites = false;
 
-    Future<void> loadMembers(StateSetter setModalState) async {
-      setModalState(() {
-        loading = true;
-        error = null;
-      });
+    Future<void> loadMembers(StateSetter setModalState, {bool append = false}) async {
+      if (!append) {
+        setModalState(() {
+          loading = true;
+          error = null;
+          inviteOffset = 0;
+          inviteHasMore = false;
+        });
+      } else {
+        setModalState(() => loadingMoreInvites = true);
+      }
       try {
         final rows = await fetchWorkspaceMembersV1(token, row.workspace.id);
-        final invites = await fetchWorkspaceInvitesV1(
-          token,
-          row.workspace.id,
-          status: 'pending',
-          limit: 50,
-        );
-        setModalState(() {
-          members = rows;
-          pendingInvites
-            ..clear()
-            ..addAll(invites);
-          loading = false;
-        });
+        if (!append) {
+          final page = await fetchWorkspaceInvitesPageV1(
+            token,
+            row.workspace.id,
+            limit: 50,
+            offset: 0,
+            includeRevoked: includeRevokedInvites,
+          );
+          setModalState(() {
+            members = rows;
+            pendingInvites
+              ..clear()
+              ..addAll(page.items);
+            inviteHasMore = page.hasMore;
+            inviteOffset = page.items.length;
+            loading = false;
+          });
+        } else {
+          final page = await fetchWorkspaceInvitesPageV1(
+            token,
+            row.workspace.id,
+            limit: 50,
+            offset: inviteOffset,
+            includeRevoked: includeRevokedInvites,
+          );
+          setModalState(() {
+            members = rows;
+            pendingInvites.addAll(page.items);
+            inviteHasMore = page.hasMore;
+            inviteOffset += page.items.length;
+            loadingMoreInvites = false;
+          });
+        }
       } catch (e) {
         setModalState(() {
           error = e.toString();
           loading = false;
+          loadingMoreInvites = false;
         });
       }
     }
@@ -523,13 +561,25 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               },
                         child: Text(inviting ? '生成邀请中…' : '生成邀请链接'),
                       ),
-                      if (pendingInvites.isNotEmpty) ...<Widget>[
+                      if (row.role == 'owner' || row.role == 'admin') ...<Widget>[
                         const SizedBox(height: 8),
                         Text(
-                          'pending 邀请（本次会话）',
+                          '平台邀请（服务端）',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         const SizedBox(height: 8),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          title: const Text('包含已撤销邀请'),
+                          value: includeRevokedInvites,
+                          onChanged: loading
+                              ? null
+                              : (v) async {
+                                  setModalState(() => includeRevokedInvites = v);
+                                  await loadMembers(setModalState);
+                                },
+                        ),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
@@ -547,6 +597,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           onChanged: (_) => setModalState(() {}),
                         ),
                         const SizedBox(height: 4),
+                        if (pendingInvites.isEmpty && !loading)
+                          Text(
+                            '暂无邀请记录。生成或从服务端加载更多。',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                         ...sortWorkspaceInvitesByExpiry(
                           filterInvitesByExpiryVisibility(
                             filterWorkspaceInvites(
@@ -557,7 +612,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           ),
                         ).map((invite) {
                           final label = inviteStatusLabel(invite);
-                          final chipColor = label == '已过期'
+                          final chipColor = label == '已过期' || label == '已撤销'
                               ? Theme.of(context).colorScheme.errorContainer
                               : Theme.of(
                                   context,
@@ -596,6 +651,81 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   ],
                                 ),
                               ),
+                              if (invite.status == 'pending') ...<Widget>[
+                                IconButton(
+                                  tooltip: '刷新链接（延期并更换 token）',
+                                  icon: const Icon(Icons.refresh, size: 18),
+                                  onPressed: inviteActionBusyId != null
+                                      ? null
+                                      : () async {
+                                          setModalState(
+                                            () => inviteActionBusyId = invite.id,
+                                          );
+                                          try {
+                                            final next =
+                                                await resendWorkspaceInviteV1(
+                                              token,
+                                              row.workspace.id,
+                                              invite.id,
+                                            );
+                                            setModalState(() {
+                                              final i = pendingInvites.indexWhere(
+                                                (e) => e.id == invite.id,
+                                              );
+                                              if (i >= 0) {
+                                                pendingInvites[i] = next;
+                                              }
+                                            });
+                                          } catch (e) {
+                                            setModalState(() => error = e.toString());
+                                          } finally {
+                                            setModalState(
+                                              () => inviteActionBusyId = null,
+                                            );
+                                          }
+                                        },
+                                ),
+                                IconButton(
+                                  tooltip: '撤销邀请',
+                                  icon: const Icon(Icons.cancel_outlined, size: 18),
+                                  onPressed: inviteActionBusyId != null
+                                      ? null
+                                      : () async {
+                                          setModalState(
+                                            () => inviteActionBusyId = invite.id,
+                                          );
+                                          try {
+                                            final next =
+                                                await revokeWorkspaceInviteV1(
+                                              token,
+                                              row.workspace.id,
+                                              invite.id,
+                                            );
+                                            setModalState(() {
+                                              if (includeRevokedInvites) {
+                                                final i =
+                                                    pendingInvites.indexWhere(
+                                                  (e) => e.id == invite.id,
+                                                );
+                                                if (i >= 0) {
+                                                  pendingInvites[i] = next;
+                                                }
+                                              } else {
+                                                pendingInvites.removeWhere(
+                                                  (e) => e.id == invite.id,
+                                                );
+                                              }
+                                            });
+                                          } catch (e) {
+                                            setModalState(() => error = e.toString());
+                                          } finally {
+                                            setModalState(
+                                              () => inviteActionBusyId = null,
+                                            );
+                                          }
+                                        },
+                                ),
+                              ],
                               IconButton(
                                 tooltip: '复制邀请信息',
                                 icon: const Icon(
@@ -624,6 +754,21 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             ],
                           );
                         }),
+                        if (inviteHasMore)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: OutlinedButton(
+                              onPressed: loading || loadingMoreInvites
+                                  ? null
+                                  : () => loadMembers(
+                                        setModalState,
+                                        append: true,
+                                      ),
+                              child: Text(
+                                loadingMoreInvites ? '加载中…' : '加载更多邀请',
+                              ),
+                            ),
+                          ),
                       ],
                       if (error != null) ...<Widget>[
                         const SizedBox(height: 8),
@@ -803,6 +948,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     String? error;
     bool loading = true;
     bool inviting = false;
+    String? inviteMgmtBusyId;
     bool includeExpiredInvites = false;
     int pageIndex = 0;
     int pageSize = 10;
@@ -813,11 +959,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         error = null;
       });
       try {
-        final rows = await fetchWorkspaceInvitesV1(
+        final includeRevoked =
+            statusFilter == 'all' || statusFilter == 'revoked';
+        final rows = await fetchWorkspaceInvitesAllV1(
           token,
           row.workspace.id,
           status: statusFilter == 'all' ? null : statusFilter,
-          limit: 200,
+          pageSize: 120,
+          includeRevoked: includeRevoked,
+          maxPages: 40,
         );
         setModalState(() {
           invites
@@ -1105,24 +1255,114 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             invite.id,
                           );
                           final label = inviteStatusLabel(invite);
-                          return CheckboxListTile(
-                            controlAffinity: ListTileControlAffinity.leading,
-                            value: selected,
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            onChanged: (checked) {
-                              setModalState(() {
-                                if (checked == true) {
-                                  selectedInviteIds.add(invite.id);
-                                } else {
-                                  selectedInviteIds.remove(invite.id);
-                                }
-                              });
-                            },
-                            title: Text('${invite.email} · ${invite.role}'),
-                            subtitle: SelectableText(
-                              '$label\n${formatWorkspaceInviteMeta(invite)}\ninvite token: ${invite.token}',
-                            ),
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              CheckboxListTile(
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                value: selected,
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                onChanged: (checked) {
+                                  setModalState(() {
+                                    if (checked == true) {
+                                      selectedInviteIds.add(invite.id);
+                                    } else {
+                                      selectedInviteIds.remove(invite.id);
+                                    }
+                                  });
+                                },
+                                title: Text('${invite.email} · ${invite.role}'),
+                                subtitle: SelectableText(
+                                  '$label\n${formatWorkspaceInviteMeta(invite)}\ninvite token: ${invite.token}',
+                                ),
+                              ),
+                              if (invite.status == 'pending')
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 48,
+                                    bottom: 8,
+                                  ),
+                                  child: Wrap(
+                                    spacing: 8,
+                                    children: <Widget>[
+                                      TextButton(
+                                        onPressed: inviteMgmtBusyId != null
+                                            ? null
+                                            : () async {
+                                                setModalState(
+                                                  () => inviteMgmtBusyId =
+                                                      invite.id,
+                                                );
+                                                try {
+                                                  final next =
+                                                      await resendWorkspaceInviteV1(
+                                                    token,
+                                                    row.workspace.id,
+                                                    invite.id,
+                                                  );
+                                                  setModalState(() {
+                                                    final i = invites.indexWhere(
+                                                      (e) => e.id == invite.id,
+                                                    );
+                                                    if (i >= 0) {
+                                                      invites[i] = next;
+                                                    }
+                                                  });
+                                                } catch (e) {
+                                                  setModalState(
+                                                    () => error = e.toString(),
+                                                  );
+                                                } finally {
+                                                  setModalState(
+                                                    () => inviteMgmtBusyId =
+                                                        null,
+                                                  );
+                                                }
+                                              },
+                                        child: const Text('重发链接'),
+                                      ),
+                                      TextButton(
+                                        onPressed: inviteMgmtBusyId != null
+                                            ? null
+                                            : () async {
+                                                setModalState(
+                                                  () => inviteMgmtBusyId =
+                                                      invite.id,
+                                                );
+                                                try {
+                                                  final next =
+                                                      await revokeWorkspaceInviteV1(
+                                                    token,
+                                                    row.workspace.id,
+                                                    invite.id,
+                                                  );
+                                                  setModalState(() {
+                                                    final i = invites.indexWhere(
+                                                      (e) => e.id == invite.id,
+                                                    );
+                                                    if (i >= 0) {
+                                                      invites[i] = next;
+                                                    }
+                                                  });
+                                                } catch (e) {
+                                                  setModalState(
+                                                    () => error = e.toString(),
+                                                  );
+                                                } finally {
+                                                  setModalState(
+                                                    () => inviteMgmtBusyId =
+                                                        null,
+                                                  );
+                                                }
+                                              },
+                                        child: const Text('撤销'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           );
                         }),
                       ],

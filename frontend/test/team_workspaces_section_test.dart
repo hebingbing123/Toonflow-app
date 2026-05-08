@@ -121,6 +121,21 @@ void main() {
     expect(inviteStatusLabel(row), '有效');
   });
 
+  test('inviteStatusLabel shows revoked and accepted', () {
+    final revoked = invite(
+      email: 'r@example.com',
+      role: 'member',
+      status: 'revoked',
+    );
+    expect(inviteStatusLabel(revoked), '已撤销');
+    final accepted = invite(
+      email: 'a@example.com',
+      role: 'member',
+      status: 'accepted',
+    ).copyWithExpiresAt(DateTime.utc(2099, 1, 1));
+    expect(inviteStatusLabel(accepted), '已接受');
+  });
+
   test('filterInvitesByExpiryVisibility hides expired by default', () {
     final rows = <WorkspaceInviteResponse>[
       invite(

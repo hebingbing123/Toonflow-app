@@ -1,7 +1,7 @@
 use axum::{
     extract::{Path, Query, State},
     http::HeaderMap,
-    routing::{get, post},
+    routing::{delete, get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -81,7 +81,7 @@ pub struct WorkspaceMemberResponse {
 #[derive(Debug, Deserialize, IntoParams)]
 #[into_params(parameter_in = Query)]
 pub struct ListWorkspaceInvitesQuery {
-    /// Filter by **`status`** (`pending`, `accepted`, `expired`, `canceled`).
+    /// Filter by **`status`** (`pending`, `accepted`, `revoked`).
     #[serde(default)]
     #[param(example = "pending")]
     pub status: Option<String>,
@@ -89,6 +89,28 @@ pub struct ListWorkspaceInvitesQuery {
     #[serde(default)]
     #[param(example = 50)]
     pub limit: Option<i64>,
+    /// Pagination offset (default **0**).
+    #[serde(default)]
+    #[param(example = 0)]
+    pub offset: Option<i64>,
+    /// When **false** (default), rows with **`status = revoked`** are omitted unless **`status=revoked`** is set explicitly.
+    #[serde(default)]
+    #[param(example = false)]
+    pub include_revoked: bool,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ListWorkspaceInvitesEnvelope {
+    pub items: Vec<WorkspaceInviteResponse>,
+    pub has_more: bool,
+}
+
+#[derive(Debug, Default, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ResendWorkspaceInviteBody {
+    /// New expiry window in hours (default **168**, max **720**), same rules as create.
+    #[serde(default)]
+    pub expires_in_hours: Option<i64>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -173,6 +195,14 @@ pub(crate) fn router() -> Router<AppState> {
         .route(
             "/api/v1/workspaces/{workspace_id}/members/me",
             axum::routing::delete(leave_workspace),
+        )
+        .route(
+            "/api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend",
+            post(resend_workspace_invite),
+        )
+        .route(
+            "/api/v1/workspaces/{workspace_id}/invites/{invite_id}",
+            delete(revoke_workspace_invite),
         )
         .route(
             "/api/v1/workspaces/{workspace_id}/invites",
@@ -306,7 +336,12 @@ async fn guard_workspace_member_mutation_rate(
         SELECT COUNT(*)::bigint
         FROM public.app_workspace_audit
         WHERE workspace_id = $1
-          AND action IN ('workspace_member_upserted', 'workspace_invite_created')
+          AND action IN (
+            'workspace_member_upserted',
+            'workspace_invite_created',
+            'workspace_invite_resent',
+            'workspace_invite_revoked'
+          )
           AND created_at >= NOW() - INTERVAL '1 hour'
         "#,
     )
@@ -1058,9 +1093,9 @@ fn normalize_invite_list_status(raw: Option<String>) -> Result<Option<String>, A
         return Ok(None);
     }
     match t.as_str() {
-        "pending" | "accepted" | "expired" | "canceled" => Ok(Some(t)),
+        "pending" | "accepted" | "revoked" => Ok(Some(t)),
         _ => Err(ApiError::BadRequest(
-            "status must be pending, accepted, expired, or canceled".into(),
+            "status must be pending, accepted, or revoked".into(),
         )),
     }
 }
@@ -1075,7 +1110,7 @@ fn normalize_invite_list_status(raw: Option<String>) -> Result<Option<String>, A
         ListWorkspaceInvitesQuery
     ),
     responses(
-        (status = 200, description = "OK", body = [WorkspaceInviteResponse]),
+        (status = 200, description = "OK", body = ListWorkspaceInvitesEnvelope),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
         (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
@@ -1088,13 +1123,17 @@ pub(crate) async fn list_workspace_invites(
     headers: HeaderMap,
     Path(workspace_id): Path<Uuid>,
     Query(q): Query<ListWorkspaceInvitesQuery>,
-) -> Result<Json<Vec<WorkspaceInviteResponse>>, ApiError> {
+) -> Result<Json<ListWorkspaceInvitesEnvelope>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
 
     let status_filter = normalize_invite_list_status(q.status.clone())?;
-    let limit = q.limit.unwrap_or(50).clamp(1, 200);
+    let page_size = q.limit.unwrap_or(50).clamp(1, 200);
+    let offset = q.offset.unwrap_or(0).max(0);
+    let fetch_limit = page_size.saturating_add(1);
+
+    let include_revoked = q.include_revoked || status_filter.as_deref() == Some("revoked");
 
     let rows: Vec<WorkspaceInviteResponse> = sqlx::query_as(
         r#"
@@ -1104,17 +1143,205 @@ pub(crate) async fn list_workspace_invites(
         FROM public.app_workspace_invite
         WHERE workspace_id = $1
           AND ($2::text IS NULL OR status = $2)
+          AND ($3::bool OR status <> 'revoked')
         ORDER BY created_at DESC, id DESC
-        LIMIT $3
+        LIMIT $4 OFFSET $5
         "#,
     )
     .bind(workspace_id)
     .bind(status_filter)
-    .bind(limit)
+    .bind(include_revoked)
+    .bind(fetch_limit)
+    .bind(offset)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(Json(rows))
+
+    let mut rows = rows;
+    let has_more = (rows.len() as i64) > page_size;
+    if has_more {
+        rows.truncate(page_size as usize);
+    }
+
+    Ok(Json(ListWorkspaceInvitesEnvelope {
+        items: rows,
+        has_more,
+    }))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/workspaces/{workspace_id}/invites/{invite_id}",
+    operation_id = "revokeWorkspaceInviteV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID"),
+        ("invite_id" = String, Path, description = "Invite row UUID")
+    ),
+    responses(
+        (status = 200, description = "Revoked", body = WorkspaceInviteResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn revoke_workspace_invite(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((workspace_id, invite_id_raw)): Path<(Uuid, String)>,
+) -> Result<Json<WorkspaceInviteResponse>, ApiError> {
+    let invite_id = Uuid::parse_str(invite_id_raw.trim())
+        .map_err(|_| ApiError::BadRequest("invite_id must be a UUID".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+    guard_workspace_member_mutation_rate(pool, workspace_id).await?;
+
+    let row: Option<WorkspaceInviteResponse> = sqlx::query_as(
+        r#"
+        UPDATE public.app_workspace_invite
+        SET status = 'revoked', updated_at = NOW()
+        WHERE id = $1
+          AND workspace_id = $2
+          AND status = 'pending'
+        RETURNING
+          id, workspace_id, email, token, role, invited_by, status, expires_at,
+          accepted_by, accepted_at, created_at, updated_at
+        "#,
+    )
+    .bind(invite_id)
+    .bind(workspace_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let Some(row) = row else {
+        let exists: bool = sqlx::query_scalar(
+            "SELECT EXISTS(SELECT 1 FROM public.app_workspace_invite WHERE id = $1 AND workspace_id = $2)",
+        )
+        .bind(invite_id)
+        .bind(workspace_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        if exists {
+            return Err(ApiError::Conflict(
+                "invite cannot be revoked (not pending)".into(),
+            ));
+        }
+        return Err(ApiError::NotFound);
+    };
+
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_invite_revoked",
+        None,
+        serde_json::json!({ "invite_id": row.id, "email": row.email }),
+    )
+    .await?;
+
+    Ok(Json(row))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend",
+    operation_id = "resendWorkspaceInviteV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID"),
+        ("invite_id" = String, Path, description = "Invite row UUID")
+    ),
+    request_body = ResendWorkspaceInviteBody,
+    responses(
+        (status = 200, description = "OK", body = WorkspaceInviteResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Quota exceeded", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn resend_workspace_invite(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((workspace_id, invite_id_raw)): Path<(Uuid, String)>,
+    Json(body): Json<ResendWorkspaceInviteBody>,
+) -> Result<Json<WorkspaceInviteResponse>, ApiError> {
+    let invite_id = Uuid::parse_str(invite_id_raw.trim())
+        .map_err(|_| ApiError::BadRequest("invite_id must be a UUID".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+    guard_workspace_member_mutation_rate(pool, workspace_id).await?;
+
+    let expires_hours = parse_invite_expires_hours(body.expires_in_hours)?;
+    let new_token = Uuid::new_v4().to_string();
+
+    let row: Option<WorkspaceInviteResponse> = sqlx::query_as(
+        r#"
+        UPDATE public.app_workspace_invite
+        SET
+          token = $3,
+          expires_at = NOW() + make_interval(hours => $4),
+          updated_at = NOW()
+        WHERE id = $1
+          AND workspace_id = $2
+          AND status = 'pending'
+        RETURNING
+          id, workspace_id, email, token, role, invited_by, status, expires_at,
+          accepted_by, accepted_at, created_at, updated_at
+        "#,
+    )
+    .bind(invite_id)
+    .bind(workspace_id)
+    .bind(new_token)
+    .bind(expires_hours)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let Some(row) = row else {
+        let exists: bool = sqlx::query_scalar(
+            "SELECT EXISTS(SELECT 1 FROM public.app_workspace_invite WHERE id = $1 AND workspace_id = $2)",
+        )
+        .bind(invite_id)
+        .bind(workspace_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        if exists {
+            return Err(ApiError::Conflict(
+                "invite cannot be resent (not pending)".into(),
+            ));
+        }
+        return Err(ApiError::NotFound);
+    };
+
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_invite_resent",
+        None,
+        serde_json::json!({
+            "invite_id": row.id,
+            "email": row.email,
+            "expires_at": row.expires_at
+        }),
+    )
+    .await?;
+
+    Ok(Json(row))
 }
 
 #[utoipa::path(
@@ -1312,6 +1539,8 @@ pub(crate) async fn accept_workspace_invite(
         remove_workspace_member,
         leave_workspace,
         list_workspace_invites,
+        revoke_workspace_invite,
+        resend_workspace_invite,
         create_workspace_invite,
         accept_workspace_invite
     ),
@@ -1320,6 +1549,8 @@ pub(crate) async fn accept_workspace_invite(
         WorkspaceListItem,
         WorkspaceMemberResponse,
         WorkspaceInviteResponse,
+        ListWorkspaceInvitesEnvelope,
+        ResendWorkspaceInviteBody,
         CreateWorkspaceBody,
         AddWorkspaceMemberBody,
         PatchWorkspaceMemberBody,
