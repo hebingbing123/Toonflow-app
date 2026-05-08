@@ -90,6 +90,8 @@ bash scripts/workspace_rls_seed_and_probe_sample.sh
 - `outsider.txt`
 - `summary.md`
 - `summary.json`
+- `assertion.json`
+- `checklist-snippet.md`
 
 并继续断言固定 sample 的期望形状：
 
@@ -169,6 +171,7 @@ bash scripts/workspace_rls_probe_and_summarize.sh
 - `summary.md`
 - `summary.json`
 - `assertion.json`
+- `checklist-snippet.md`
 
 若想顺手保留原始输出，可再加：
 
@@ -230,6 +233,9 @@ ENVIRONMENT_LABEL="staging" \
 RELEASE_LABEL="workspace release candidate" \
 bash scripts/workspace_rls_render_checklist_snippet.sh
 ```
+
+而 `workspace_rls_probe_and_summarize.sh` 现在默认也会一起产出 `checklist-snippet.md`。
+因此本地 fixed sample 路径复用这层 wrapper 时，也会拿到同一套摘要 / gate / checklist 产物。
 
 若想只对固定样本结果做门槛断言，也可运行：
 

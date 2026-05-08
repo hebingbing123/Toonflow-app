@@ -5,8 +5,11 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROBE_MATRIX_SCRIPT="$ROOT_DIR/scripts/workspace_rls_probe_matrix.sh"
 SUMMARIZE_SCRIPT="$ROOT_DIR/scripts/workspace_rls_summarize.sh"
 ASSERT_SUMMARY_SCRIPT="$ROOT_DIR/scripts/workspace_rls_assert_summary.sh"
+RENDER_SNIPPET_SCRIPT="$ROOT_DIR/scripts/workspace_rls_render_checklist_snippet.sh"
 DEFAULT_OUTPUT_DIR="$ROOT_DIR/.tmp/workspace-rls-$(date +%Y%m%d-%H%M%S)"
 OUTPUT_DIR="${OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}"
+ENVIRONMENT_LABEL="${ENVIRONMENT_LABEL:-staging}"
+RELEASE_LABEL="${RELEASE_LABEL:-}"
 
 if [[ ! -x "$PROBE_MATRIX_SCRIPT" ]]; then
   echo "workspace RLS probe matrix script not found or not executable: $PROBE_MATRIX_SCRIPT" >&2
@@ -20,6 +23,11 @@ fi
 
 if [[ ! -x "$ASSERT_SUMMARY_SCRIPT" ]]; then
   echo "workspace RLS summary assert script not found or not executable: $ASSERT_SUMMARY_SCRIPT" >&2
+  exit 1
+fi
+
+if [[ ! -x "$RENDER_SNIPPET_SCRIPT" ]]; then
+  echo "workspace RLS checklist snippet script not found or not executable: $RENDER_SNIPPET_SCRIPT" >&2
   exit 1
 fi
 
@@ -59,5 +67,12 @@ SUMMARY_FILE="$OUTPUT_DIR/summary.md" \
 ALLOW_MATCH_OR_RLS_WIDENED="${ALLOW_MATCH_OR_RLS_WIDENED:-0}" \
 RESULT_JSON_FILE="$OUTPUT_DIR/assertion.json" \
 bash "$ASSERT_SUMMARY_SCRIPT"
+
+SUMMARY_JSON_FILE="$OUTPUT_DIR/summary.json" \
+ASSERTION_JSON_FILE="$OUTPUT_DIR/assertion.json" \
+ENVIRONMENT_LABEL="$ENVIRONMENT_LABEL" \
+RELEASE_LABEL="$RELEASE_LABEL" \
+OUTPUT_FILE="$OUTPUT_DIR/checklist-snippet.md" \
+bash "$RENDER_SNIPPET_SCRIPT"
 
 echo "workspace RLS probe artifacts ready in $OUTPUT_DIR"
