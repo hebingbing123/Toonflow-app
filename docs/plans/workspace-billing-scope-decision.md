@@ -125,3 +125,7 @@
 2. **W8.2–W8.4 = 暂不执行，等待 workspace-scope 的明确业务驱动**
 
 这样做的主要理由是：它和当前代码、观测、jobs 归属、Flutter 文案解释最一致，返工最少，风险也最低。
+
+## 8) 若未来切换 workspace-scope（仅占位）
+
+产品与财务触发重评后，实施提纲（字段、`/me` 版本化、webhook 双写、迁移阶段）见 **[`workspace-billing-future-workspace-scope.md`](./workspace-billing-future-workspace-scope.md)**；在该决策反转之前 **不写迁移代码**。

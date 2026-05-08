@@ -20,7 +20,7 @@
 | W5 权限矩阵 | `next` | workspace 级默认矩阵与 billing 绑定口径已定稿；项目级角色 W5.2 仍待产品决定 |
 | W6 Flutter 产品面 | `baseline_done` | 选择器、创建、成员管理、接受邀请、空状态、`rust_api` 对齐 |
 | W7 Harness / WS | `baseline_done` | attach `workspaceUuid`、权限与回归矩阵 |
-| W8 计费与配额 | `next` | W8.1 已定为 user-scope；若改 workspace-scope 仍需迁移与运营面收口 |
+| W8 计费与配额 | `next`（实现） | W8.1 已定为 user-scope；W8.2–W8.4 **规格草案**见 [`workspace-billing-future-workspace-scope.md`](./workspace-billing-future-workspace-scope.md)；若改 workspace-scope 再实施迁移与运营面收口 |
 | W9 安全 | `baseline_done` | W9.1–W9.4 已书面收口：安全边界、一致性矩阵、敏感操作流程、邀请安全评审 |
 | W10 观测与运维 | `next` | W10.1/W10.2 observability spec 已补；W10.3 runbook 已完成；trace 与指标实现仍待补 |
 | W11 发布与门禁 | `baseline_done` | W11.1–W11.4 已书面收口：进度同步、roadmap 索引、迁移公告、refactor gate 真源 |
