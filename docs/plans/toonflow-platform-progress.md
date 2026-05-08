@@ -1,6 +1,6 @@
 # Toonflow 平台执行进度
 
-更新时间：2026-05-07
+更新时间：2026-05-08
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
 大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**；团队 Workspace **完整功能**总表见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)。**全栈约定**（禁止只合后端）：[**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)；**平台级补遗池**：[**`platform-capabilities-backlog.md`**](./platform-capabilities-backlog.md)。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
@@ -271,14 +271,23 @@
 
 **目标**：个人与团队 **双路径长期并存**；团队侧交付 **enterprise 全生命周期、邀请与成员、权限矩阵、全站资源与 Harness/计费/安全/观测** — 不以 MVP 为范围，以 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md) **Phase W1–W11** 勾选为完成定义。
 
-**进度**：**Phase W1（W1.1–W1.7）** 已在总表勾选；下一步主攻 **W2 成员与邀请**。在 `workspace-team-full-plan.md` 与各 Phase 内勾选；本文件仅记录 **当前主攻 Phase** 与 **里程碑 commit**（开工后填写）。
+**进度**：**Phase W1–W7 已在总表收口**；其中 **W6 Flutter 产品面** 已完成 workspace 选择/切换、企业空间创建、成员与邀请管理、接受邀请深链、空状态引导、`rust_api` 一致性，以及 W6.7 的 a11y / 文案收口；**W8–W11** 仍以计费口径、安全与观测收口为主。在 `workspace-team-full-plan.md` 与各 Phase 内勾选；本文件仅记录 **当前主攻 Phase** 与 **里程碑 commit**。
 
 | 跟踪项 | 状态 |
 |--------|------|
-| 总表 `workspace-team-full-plan.md` | Phase **W1**（W1.1–W1.7）`completed`；**W2+** `pending` |
-| Phase W1–W4 核心 API + 项目范围 | `pending` |
-| Phase W5–W8 权限 / Flutter / Harness / 计费 | `pending` |
+| 总表 `workspace-team-full-plan.md` | Phase **W1–W7** `completed`；**W8–W11** `pending` |
+| Phase W1–W4 核心 API + 项目范围 | `completed` |
+| Phase W5–W7 权限 / Flutter / Harness | `completed` |
+| Phase W8 计费口径与迁移策略 | `pending` |
 | Phase W9–W11 安全 / 观测 / 发布文档 | `pending` |
+
+近期里程碑 commit：
+
+- `40280055` — 团队 workspace 邀请管理弹窗（筛选 / 分页 / 批量复制）
+- `e0848031` — 接受邀请深链与命中后自动跳转“团队工作区”
+- `6e08da49` — 团队 workspace / 项目区空状态引导
+- `0ea77e62` — `rust_api` / OpenAPI 一致性收口（metrics / ErrorBody / prompting quality paths）
+- `623c42ce` — W6.7 a11y / 文案收口（统一字符串入口、workspace 语义标签、关键 tooltip）
 
 ## 当前阻塞与注意事项
 
@@ -291,6 +300,12 @@
   - `frontend/lib/short_video_space/section_publish*.dart`
 
 这些问题会影响 `yarn refactor:check` 最终全绿，但不是 workspace 竖切引入。
+
+- backend 全量测试当前还存在既有基线失败，会让 `yarn refactor:check` 在 backend test 阶段退出：
+  - `app::contract_smoke_tests::rest_projects_settings_skills::skills_harness_jobs::jobs_harness::harness_user_wasm_persist_returns_database_error_without_pg`
+  - `app::contract_smoke_tests::rest_projects_settings_skills::skills_harness_jobs::jobs_harness::harness_validate_user_wasm_ok_for_embedded_probe`
+  - `app::contract_smoke_tests::rest_projects_settings_skills::skills_harness_jobs::jobs_harness::harness_validate_user_wasm_octet_stream_accepts_probe`
+  - `services::export_service::tests::test_acquire_permit_concurrency`
 
 ### 合约测试环境注意
 
