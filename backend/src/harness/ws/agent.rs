@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::harness::ws::outbound::error_occurred_json;
 use crate::harness::{observe, HarnessContext};
-use crate::llm::{harness_agent_run, LlmConfig};
+use crate::llm::{harness_agent_run, harness_agent_run_streaming_tools, LlmConfig};
 
 /// Inputs for [`spawn_harness_agent_run`] (grouped so the WebSocket layer stays a thin router).
 pub struct HarnessAgentWsParams {
@@ -20,6 +20,7 @@ pub struct HarnessAgentWsParams {
     pub script_numeric_id: Option<i32>,
     pub workspace_id: Option<Uuid>,
     pub max_rounds: usize,
+    pub stream: bool,
     pub cancel: CancellationToken,
     pub out_tx: UnboundedSender<String>,
     pub request_id: Option<String>,
@@ -38,19 +39,35 @@ pub fn spawn_harness_agent_run(p: HarnessAgentWsParams) {
             Some(p.cfg.clone()),
             Some(p.client.clone()),
         );
-        if let Err(e) = harness_agent_run(
-            &p.cfg,
-            &p.client,
-            &p.content,
-            p.assistant_name,
-            &ctx,
-            p.max_rounds,
-            p.cancel,
-            p.out_tx.clone(),
-            p.request_id.as_deref(),
-        )
-        .await
-        {
+        let res = if p.stream {
+            harness_agent_run_streaming_tools(
+                &p.cfg,
+                &p.client,
+                &p.content,
+                p.assistant_name,
+                &ctx,
+                p.max_rounds,
+                p.cancel,
+                p.out_tx.clone(),
+                p.request_id.as_deref(),
+            )
+            .await
+        } else {
+            harness_agent_run(
+                &p.cfg,
+                &p.client,
+                &p.content,
+                p.assistant_name,
+                &ctx,
+                p.max_rounds,
+                p.cancel,
+                p.out_tx.clone(),
+                p.request_id.as_deref(),
+            )
+            .await
+        };
+
+        if let Err(e) = res {
             let _ = p.out_tx.send(error_occurred_json(
                 "llm_error",
                 &e,

@@ -110,6 +110,7 @@ pub(super) async fn harness_agent_run(
         script_numeric_id,
         workspace_id: sess.workspace_id,
         max_rounds,
+        stream: p.stream.unwrap_or(false),
         cancel,
         out_tx: out_tx.clone(),
         request_id: env.request_id.clone(),
