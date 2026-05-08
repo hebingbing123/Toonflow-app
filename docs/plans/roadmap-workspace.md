@@ -49,7 +49,7 @@
 
 1. **W9 验证**：按 [`workspace-release-checklist.md`](./workspace-release-checklist.md) 在 staging 跑 owner/member/outsider 三身份验证，并把敏感操作 / invite review / current workspace fallback 一起收口
 2. **W8.2–W8.4**：仅在明确需要 workspace-scope billing 时，再收字段迁移、webhook 形状与运营视图
-3. **W5.2 收口**：后端已补 `app_project_member` 与 `viewer/editor` project ACL；下一步若继续推进，主要是 Flutter / `rust_api` 管理入口与回归矩阵
+3. **W5.2 收口**：`app_project_member`、`viewer/editor` project ACL、`rust_api` 封装与 Flutter 项目编辑器管理入口已补齐；下一步主要是回归矩阵与真实环境验收
 
 ## 执行与依赖
 

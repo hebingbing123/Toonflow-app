@@ -23,7 +23,7 @@ Map<String, dynamic> buildProjectStyleConfigPatchBody({
 }
 
 /// Primary project REST endpoints and summary payloads.
-/// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.
+/// `GET /api/v1/projects` — projects visible in the caller's current workspace scope.
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects');
   final res = await http

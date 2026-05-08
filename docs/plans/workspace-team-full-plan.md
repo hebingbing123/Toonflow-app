@@ -94,7 +94,7 @@
   | 改全部项目（`delete_any_project`） | ✅ | ✅ | ❌ |
   | 创建项目（`create_project`） | ✅ | ✅ | ✅ |
 
-- [ ] **W5.2**（进行中）**项目级角色**：`editor` / `viewer` 仅针对单项目 — 后端已落 `app_project_member` + project ACL helper + `/api/v1/projects/{project_id}/members*`；Flutter / `rust_api` 管理入口待补
+- [x] **W5.2** **项目级角色**：`editor` / `viewer` 仅针对单项目 — 已落 `app_project_member`、project ACL helper、`/api/v1/projects/{project_id}/members*`、`rust_api/project/members.dart` 与 Flutter 项目编辑器 `ProjectMembersPanel`
 - [x] **W5.3** 默认策略：member 可创建项目、但不可删除他人项目（`admin/owner` 可删除任意项目）；书面定稿见 [`workspace-project-permission-policy.md`](./workspace-project-permission-policy.md)
 - [x] **W5.4** 与 **计费 `plan_tier`** 关系：当前按 **user-scope** 计费，不把 `plan_tier` / quota 提前挂到 `app_workspace`；书面结论见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)，后续若重开 workspace-scope billing 再进入 W8.2–W8.4
 - [x] **W5.5** 单元测试覆盖矩阵边角（最后一个 owner、降级 admin 等）—— `backend/src/workspaces/http.rs` 已补 `workspace_role_matrix_owner_admin_member` 与 `last_owner_transition_guard_matches_policy`
