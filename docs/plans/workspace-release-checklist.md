@@ -51,7 +51,8 @@
 若是固定 sample 回归，继续用 [`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh) 直接做 pass/fail 断言。
 若是 staging / 手工环境验收，继续用 [`scripts/workspace_rls_assert_summary.sh`](../../scripts/workspace_rls_assert_summary.sh) 对 `summary.md` 做 pass/fail 断言。
 若需要把结果回填到本清单或工单，继续用 [`scripts/workspace_rls_render_checklist_snippet.sh`](../../scripts/workspace_rls_render_checklist_snippet.sh) 从 `summary.json` / `assertion.json` 生成 Markdown 片段。
-现在若直接跑 [`scripts/workspace_rls_probe_and_summarize.sh`](../../scripts/workspace_rls_probe_and_summarize.sh)，会默认把 `checklist-snippet.md` 一并产出。
+若需要把整组验证结果交给后续自动化或值班记录，可继续用 [`scripts/workspace_rls_write_artifact_manifest.sh`](../../scripts/workspace_rls_write_artifact_manifest.sh) 生成 JSON manifest。
+现在若直接跑 [`scripts/workspace_rls_probe_and_summarize.sh`](../../scripts/workspace_rls_probe_and_summarize.sh)，会默认把 `checklist-snippet.md` 与 `artifact-manifest.json` 一并产出。
 
 推荐至少保留这一组产物：
 
@@ -62,6 +63,7 @@
 - `summary.json`
 - `assertion.json`
 - `checklist-snippet.md`
+- `artifact-manifest.json`
 
 最低要求：
 

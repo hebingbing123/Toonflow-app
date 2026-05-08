@@ -6,6 +6,7 @@ PROBE_MATRIX_SCRIPT="$ROOT_DIR/scripts/workspace_rls_probe_matrix.sh"
 SUMMARIZE_SCRIPT="$ROOT_DIR/scripts/workspace_rls_summarize.sh"
 ASSERT_SUMMARY_SCRIPT="$ROOT_DIR/scripts/workspace_rls_assert_summary.sh"
 RENDER_SNIPPET_SCRIPT="$ROOT_DIR/scripts/workspace_rls_render_checklist_snippet.sh"
+WRITE_MANIFEST_SCRIPT="$ROOT_DIR/scripts/workspace_rls_write_artifact_manifest.sh"
 DEFAULT_OUTPUT_DIR="$ROOT_DIR/.tmp/workspace-rls-$(date +%Y%m%d-%H%M%S)"
 OUTPUT_DIR="${OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}"
 ENVIRONMENT_LABEL="${ENVIRONMENT_LABEL:-staging}"
@@ -28,6 +29,11 @@ fi
 
 if [[ ! -x "$RENDER_SNIPPET_SCRIPT" ]]; then
   echo "workspace RLS checklist snippet script not found or not executable: $RENDER_SNIPPET_SCRIPT" >&2
+  exit 1
+fi
+
+if [[ ! -x "$WRITE_MANIFEST_SCRIPT" ]]; then
+  echo "workspace RLS artifact manifest script not found or not executable: $WRITE_MANIFEST_SCRIPT" >&2
   exit 1
 fi
 
@@ -74,5 +80,15 @@ ENVIRONMENT_LABEL="$ENVIRONMENT_LABEL" \
 RELEASE_LABEL="$RELEASE_LABEL" \
 OUTPUT_FILE="$OUTPUT_DIR/checklist-snippet.md" \
 bash "$RENDER_SNIPPET_SCRIPT"
+
+OUTPUT_FILE="$OUTPUT_DIR/artifact-manifest.json" \
+OUTPUT_DIR="$OUTPUT_DIR" \
+WORKSPACE_ID="$PROBE_WORKSPACE_ID" \
+OWNER_USER_ID="$OWNER_USER_ID" \
+MEMBER_USER_ID="$MEMBER_USER_ID" \
+OUTSIDER_USER_ID="$OUTSIDER_USER_ID" \
+ENVIRONMENT_LABEL="$ENVIRONMENT_LABEL" \
+RELEASE_LABEL="$RELEASE_LABEL" \
+bash "$WRITE_MANIFEST_SCRIPT"
 
 echo "workspace RLS probe artifacts ready in $OUTPUT_DIR"

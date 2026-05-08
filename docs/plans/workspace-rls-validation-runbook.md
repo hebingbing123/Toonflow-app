@@ -53,6 +53,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 - 样本断言：[`scripts/workspace_rls_assert_sample.sh`](../../scripts/workspace_rls_assert_sample.sh)
 - 摘要断言：[`scripts/workspace_rls_assert_summary.sh`](../../scripts/workspace_rls_assert_summary.sh)
 - checklist 片段：[`scripts/workspace_rls_render_checklist_snippet.sh`](../../scripts/workspace_rls_render_checklist_snippet.sh)
+- artifact manifest：[`scripts/workspace_rls_write_artifact_manifest.sh`](../../scripts/workspace_rls_write_artifact_manifest.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
 它做两件事：
@@ -92,6 +93,7 @@ bash scripts/workspace_rls_seed_and_probe_sample.sh
 - `summary.json`
 - `assertion.json`
 - `checklist-snippet.md`
+- `artifact-manifest.json`
 
 并继续断言固定 sample 的期望形状：
 
@@ -172,6 +174,7 @@ bash scripts/workspace_rls_probe_and_summarize.sh
 - `summary.json`
 - `assertion.json`
 - `checklist-snippet.md`
+- `artifact-manifest.json`
 
 若想顺手保留原始输出，可再加：
 
@@ -234,8 +237,8 @@ RELEASE_LABEL="workspace release candidate" \
 bash scripts/workspace_rls_render_checklist_snippet.sh
 ```
 
-而 `workspace_rls_probe_and_summarize.sh` 现在默认也会一起产出 `checklist-snippet.md`。
-因此本地 fixed sample 路径复用这层 wrapper 时，也会拿到同一套摘要 / gate / checklist 产物。
+而 `workspace_rls_probe_and_summarize.sh` 现在默认也会一起产出 `checklist-snippet.md` 与 `artifact-manifest.json`。
+因此本地 fixed sample 路径复用这层 wrapper 时，也会拿到同一套摘要 / gate / checklist / manifest 产物。
 
 若想只对固定样本结果做门槛断言，也可运行：
 
