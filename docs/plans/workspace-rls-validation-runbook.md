@@ -173,6 +173,15 @@ OUTPUT_FILE=".tmp/workspace-rls-<date>/summary.md" \
 bash scripts/workspace_rls_summarize.sh
 ```
 
+生成的摘要表会直接带一列 `Verdict`，把当前结果标成：
+
+- `partial_match`
+- `expected_mismatch`
+- `match`
+- `match_or_rls_widened`
+- `review_needed`
+- `security_bug`
+
 若想只对固定样本结果做门槛断言，也可运行：
 
 ```bash

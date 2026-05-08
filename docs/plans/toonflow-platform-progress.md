@@ -39,6 +39,7 @@
 - **最新补齐**：Workspace 本地一键样本验证已补齐 — 新增 `scripts/workspace_rls_seed_and_probe_sample.sh`，把 seed sample 与三身份矩阵 probe 串成一条命令，方便本地空库快速确认 W9.2 验证链路可用
 - **最新补齐**：Workspace RLS 原始输出落盘已补齐 — `scripts/workspace_rls_probe_matrix.sh` 现支持 `OUTPUT_DIR`，可把 owner/member/outsider 三份 probe 原始结果自动落到 `.tmp/workspace-rls-*`，便于 staging 验证归档
 - **最新补齐**：Workspace RLS Markdown 汇总已补齐 — 新增 `scripts/workspace_rls_summarize.sh`，可把 `owner.txt` / `member.txt` / `outsider.txt` 自动整理成发布记录可复用的表格摘要
+- **最新补齐**：Workspace RLS 摘要 verdict 列已补齐 — `workspace_rls_summarize.sh` 现会按当前 workspace 基础表 / 项目域 / user-scope 预期形状自动标出 `partial_match`、`expected_mismatch`、`match_or_rls_widened`、`review_needed` 等结论，减少 reviewer 手工判读
 - **最新补齐**：Workspace RLS staging 包装脚本已补齐 — 新增 `scripts/workspace_rls_probe_and_summarize.sh`，可在 owner/member/outsider 参数已知时一步产出三份原始 probe 输出与 `summary.md`，减少 staging 演练时手工拼命令
 - **最新补齐**：Workspace RLS 样本断言已补齐 — 新增 `scripts/workspace_rls_assert_sample.sh`，可对固定 local sample 的 owner/member/outsider 期望计数做直接断言；`workspace_rls_seed_and_probe_sample.sh` 也已串上这层 pass/fail 检查
 - **最新补齐**：Workspace 发布检查单已补齐 — 新增 [**`workspace-release-checklist.md`**](./workspace-release-checklist.md)，把 W9.2 的 owner/member/outsider 验证、W9.3 敏感操作确认、W9.4 invite 边界核对，以及 W10.3 的 `current_workspace` fallback / `403` 排障点串成一套 staging / 发布前固定 Gate
