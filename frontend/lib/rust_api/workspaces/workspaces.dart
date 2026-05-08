@@ -216,6 +216,32 @@ class WorkspaceAuditListEnvelope {
   }
 }
 
+class WorkspaceStatsResponse {
+  const WorkspaceStatsResponse({
+    required this.workspaceId,
+    required this.workspaceMemberCount,
+    required this.workspaceProjectCount,
+    required this.workspaceActiveJobCount,
+  });
+
+  final String workspaceId;
+  final int workspaceMemberCount;
+  final int workspaceProjectCount;
+  final int workspaceActiveJobCount;
+
+  factory WorkspaceStatsResponse.fromJson(Map<String, dynamic> json) {
+    return WorkspaceStatsResponse(
+      workspaceId: json['workspace_id'] as String,
+      workspaceMemberCount:
+          (json['workspace_member_count'] as num?)?.toInt() ?? 0,
+      workspaceProjectCount:
+          (json['workspace_project_count'] as num?)?.toInt() ?? 0,
+      workspaceActiveJobCount:
+          (json['workspace_active_job_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 /// `POST /api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend`
 class ResendWorkspaceInviteBody {
   const ResendWorkspaceInviteBody({this.expiresInHours});
@@ -409,6 +435,19 @@ Future<WorkspaceAuditListEnvelope> fetchWorkspaceAuditPageV1(
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceAuditListEnvelope.fromJson(map);
+}
+
+Future<WorkspaceStatsResponse> fetchWorkspaceStatsV1(
+  String workspaceId, {
+  required String internalOpsToken,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/stats');
+  final res = await http
+      .get(uri, headers: {'x-toonflow-internal-token': internalOpsToken.trim()})
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceStatsResponse.fromJson(map);
 }
 
 /// `GET /api/v1/workspaces/{workspace_id}/invites` — see `listWorkspaceInvitesV1`.

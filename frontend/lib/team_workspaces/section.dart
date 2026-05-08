@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../config.dart';
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
@@ -451,6 +452,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     bool loadingMoreAudit = false;
     String currentOwnerUserId = row.workspace.ownerUserId;
     String currentWorkspaceRole = row.role;
+    final showWorkspaceOpsStats = kInternalOpsToken.trim().isNotEmpty;
+    WorkspaceStatsResponse? workspaceStats;
+    String? workspaceStatsError;
+    bool loadingWorkspaceStats = false;
 
     Future<bool> confirmOwnerTransfer(WorkspaceMemberResponse member) async {
       return await showDialog<bool>(
@@ -520,6 +525,36 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
     }
 
+    Future<void> loadWorkspaceStats(
+      StateSetter setModalState, {
+      bool silent = false,
+    }) async {
+      if (!showWorkspaceOpsStats) {
+        return;
+      }
+      setModalState(() {
+        if (!silent) {
+          loadingWorkspaceStats = true;
+        }
+        workspaceStatsError = null;
+      });
+      try {
+        final stats = await fetchWorkspaceStatsV1(
+          row.workspace.id,
+          internalOpsToken: kInternalOpsToken,
+        );
+        setModalState(() {
+          workspaceStats = stats;
+          loadingWorkspaceStats = false;
+        });
+      } catch (e) {
+        setModalState(() {
+          workspaceStatsError = describeRustApiError(e);
+          loadingWorkspaceStats = false;
+        });
+      }
+    }
+
     Future<void> loadMembers(StateSetter setModalState) async {
       setModalState(() {
         loading = true;
@@ -566,6 +601,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           loadingMoreInvites = false;
           loadingMoreAudit = false;
         });
+        await loadWorkspaceStats(setModalState, silent: true);
       } catch (e) {
         setModalState(() {
           error = describeRustApiError(e);
@@ -742,6 +778,60 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               },
                         child: Text(inviting ? '生成邀请中…' : '生成邀请链接'),
                       ),
+                      if (showWorkspaceOpsStats &&
+                          (currentWorkspaceRole == 'owner' ||
+                              currentWorkspaceRole == 'admin')) ...<Widget>[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: <Widget>[
+                            Text(
+                              '内部运维统计',
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton(
+                              onPressed: loadingWorkspaceStats
+                                  ? null
+                                  : () => loadWorkspaceStats(setModalState),
+                              child: Text(
+                                loadingWorkspaceStats ? '读取中…' : '刷新统计',
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (workspaceStats != null)
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: <Widget>[
+                              Chip(
+                                label: Text(
+                                  '成员 ${workspaceStats!.workspaceMemberCount}',
+                                ),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              Chip(
+                                label: Text(
+                                  '项目 ${workspaceStats!.workspaceProjectCount}',
+                                ),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              Chip(
+                                label: Text(
+                                  '活跃任务 ${workspaceStats!.workspaceActiveJobCount}',
+                                ),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ],
+                          ),
+                        if (workspaceStatsError != null)
+                          SelectableText(
+                            workspaceStatsError!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                      ],
                       if (currentWorkspaceRole == 'owner' ||
                           currentWorkspaceRole == 'admin') ...<Widget>[
                         const SizedBox(height: 8),

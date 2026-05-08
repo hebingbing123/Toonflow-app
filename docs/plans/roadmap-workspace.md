@@ -38,7 +38,7 @@
 - W2.10：owner transfer 产品流已补齐，`POST /api/v1/workspaces/{workspace_id}/owner-transfer` + Flutter 成员管理入口已落地
 - W9.4：邀请安全评审已补齐，见 [`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
 - W10.1/W10.2：workspace observability spec 已补齐，见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
-- W10.1：workspace observability 关键字段已落地到 HTTP / jobs / Harness；W10.2 已新增 internal-ops `GET /api/v1/workspaces/{workspace_id}/stats`，返回 workspace 成员数 / 项目数 / 活跃 jobs
+- W10.1：workspace observability 关键字段已落地到 HTTP / jobs / Harness；W10.2 已新增 internal-ops `GET /api/v1/workspaces/{workspace_id}/stats`，返回 workspace 成员数 / 项目数 / 活跃 jobs，且 Flutter 团队工作区治理面已在 internal build 暴露这组三指标
 - W10.3：workspace 运维 Runbook 已补齐，见 [`workspace-operations-runbook.md`](./workspace-operations-runbook.md)
 - W11.2：本分册已建立，`roadmap-index.md` 可直接跳转到 workspace 方向
 - W11.3：workspace 迁移公告已补齐，见 [`workspace-migration-notice.md`](./workspace-migration-notice.md)
