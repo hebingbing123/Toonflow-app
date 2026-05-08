@@ -105,6 +105,40 @@ pub struct ListWorkspaceInvitesEnvelope {
     pub has_more: bool,
 }
 
+#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
+pub struct WorkspaceAuditResponse {
+    pub id: i64,
+    pub workspace_id: Uuid,
+    pub actor_user_id: Uuid,
+    pub action: String,
+    pub target_user_id: Option<Uuid>,
+    pub details: Value,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Deserialize, IntoParams, ToSchema)]
+#[into_params(parameter_in = Query)]
+pub struct ListWorkspaceAuditQuery {
+    /// Filter by exact action name (for example `workspace_member_upserted`).
+    #[serde(default)]
+    #[param(example = "workspace_invite_created")]
+    pub action: Option<String>,
+    /// Max rows (**1–200**, default **50**).
+    #[serde(default)]
+    #[param(example = 50)]
+    pub limit: Option<i64>,
+    /// Pagination offset (default **0**).
+    #[serde(default)]
+    #[param(example = 0)]
+    pub offset: Option<i64>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ListWorkspaceAuditEnvelope {
+    pub items: Vec<WorkspaceAuditResponse>,
+    pub has_more: bool,
+}
+
 #[derive(Debug, Default, Deserialize, ToSchema)]
 #[serde(deny_unknown_fields)]
 pub struct ResendWorkspaceInviteBody {
@@ -195,6 +229,10 @@ pub(crate) fn router() -> Router<AppState> {
         .route(
             "/api/v1/workspaces/{workspace_id}/members/me",
             axum::routing::delete(leave_workspace),
+        )
+        .route(
+            "/api/v1/workspaces/{workspace_id}/audit",
+            get(list_workspace_audit),
         )
         .route(
             "/api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend",
@@ -1100,6 +1138,86 @@ fn normalize_invite_list_status(raw: Option<String>) -> Result<Option<String>, A
     }
 }
 
+fn normalize_workspace_audit_action(raw: Option<String>) -> Option<String> {
+    raw.and_then(|value| {
+        let trimmed = value.trim();
+        if trimmed.is_empty() {
+            None
+        } else {
+            Some(trimmed.to_owned())
+        }
+    })
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/workspaces/{workspace_id}/audit",
+    operation_id = "listWorkspaceAuditV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID"),
+        ListWorkspaceAuditQuery
+    ),
+    responses(
+        (status = 200, description = "OK", body = ListWorkspaceAuditEnvelope),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_workspace_audit(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+    Query(q): Query<ListWorkspaceAuditQuery>,
+) -> Result<Json<ListWorkspaceAuditEnvelope>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
+
+    let action_filter = normalize_workspace_audit_action(q.action);
+    let page_size = q.limit.unwrap_or(50).clamp(1, 200);
+    let offset = q.offset.unwrap_or(0).max(0);
+    let fetch_limit = page_size.saturating_add(1);
+
+    let rows: Vec<WorkspaceAuditResponse> = sqlx::query_as(
+        r#"
+        SELECT
+          id,
+          workspace_id,
+          actor_user_id,
+          action,
+          target_user_id,
+          details,
+          created_at
+        FROM public.app_workspace_audit
+        WHERE workspace_id = $1
+          AND ($2::text IS NULL OR action = $2)
+        ORDER BY created_at DESC, id DESC
+        LIMIT $3 OFFSET $4
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(action_filter)
+    .bind(fetch_limit)
+    .bind(offset)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut rows = rows;
+    let has_more = (rows.len() as i64) > page_size;
+    if has_more {
+        rows.truncate(page_size as usize);
+    }
+
+    Ok(Json(ListWorkspaceAuditEnvelope {
+        items: rows,
+        has_more,
+    }))
+}
+
 #[utoipa::path(
     get,
     path = "/api/v1/workspaces/{workspace_id}/invites",
@@ -1538,6 +1656,7 @@ pub(crate) async fn accept_workspace_invite(
         patch_workspace_member,
         remove_workspace_member,
         leave_workspace,
+        list_workspace_audit,
         list_workspace_invites,
         revoke_workspace_invite,
         resend_workspace_invite,
@@ -1549,7 +1668,9 @@ pub(crate) async fn accept_workspace_invite(
         WorkspaceListItem,
         WorkspaceMemberResponse,
         WorkspaceInviteResponse,
+        WorkspaceAuditResponse,
         ListWorkspaceInvitesEnvelope,
+        ListWorkspaceAuditEnvelope,
         ResendWorkspaceInviteBody,
         CreateWorkspaceBody,
         AddWorkspaceMemberBody,
@@ -1557,6 +1678,7 @@ pub(crate) async fn accept_workspace_invite(
         CreateWorkspaceInviteBody,
         AcceptWorkspaceInviteBody,
         PatchWorkspaceBody,
+        ListWorkspaceAuditQuery,
         crate::error::ErrorBody
     )),
     tags((name = "workspaces", description = "Workspace lifecycle (personal + enterprise)"))

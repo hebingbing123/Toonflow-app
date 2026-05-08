@@ -88,6 +88,49 @@ String buildInviteCopyText(WorkspaceInviteResponse invite) {
       'token=${invite.token}';
 }
 
+String workspaceAuditActionLabel(String action) {
+  switch (action) {
+    case 'workspace_member_upserted':
+      return '成员已添加或更新';
+    case 'workspace_member_role_changed':
+      return '成员角色已变更';
+    case 'workspace_member_removed':
+      return '成员已移除';
+    case 'workspace_member_left':
+      return '成员主动离开';
+    case 'workspace_invite_created':
+      return '邀请已创建';
+    case 'workspace_invite_resent':
+      return '邀请已重发';
+    case 'workspace_invite_revoked':
+      return '邀请已撤销';
+    case 'workspace_invite_accepted':
+      return '邀请已接受';
+    default:
+      return action;
+  }
+}
+
+String buildWorkspaceAuditSummary(WorkspaceAuditResponse audit) {
+  final parts = <String>[
+    'actor=${audit.actorUserId}',
+    if (audit.targetUserId != null) 'target=${audit.targetUserId}',
+  ];
+  final role = audit.details['role'];
+  if (role is String && role.isNotEmpty) {
+    parts.add('role=$role');
+  }
+  final email = audit.details['email'];
+  if (email is String && email.isNotEmpty) {
+    parts.add('email=$email');
+  }
+  final inviteId = audit.details['invite_id'];
+  if (inviteId is String && inviteId.isNotEmpty) {
+    parts.add('invite=$inviteId');
+  }
+  return parts.join(' · ');
+}
+
 bool hasActiveEnterpriseWorkspace(List<WorkspaceListItem> items) {
   return items.any(
     (row) =>
@@ -375,10 +418,12 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     final inviteEmailController = TextEditingController();
     final memberSearchController = TextEditingController();
     final inviteSearchController = TextEditingController();
+    final auditSearchController = TextEditingController();
     String role = 'member';
     List<WorkspaceMemberResponse> members = <WorkspaceMemberResponse>[];
     final List<WorkspaceInviteResponse> pendingInvites =
         <WorkspaceInviteResponse>[];
+    final List<WorkspaceAuditResponse> auditRows = <WorkspaceAuditResponse>[];
     String? error;
     bool loading = true;
     bool adding = false;
@@ -391,60 +436,125 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     int inviteOffset = 0;
     bool inviteHasMore = false;
     bool loadingMoreInvites = false;
+    int auditOffset = 0;
+    bool auditHasMore = false;
+    bool loadingMoreAudit = false;
 
-    Future<void> loadMembers(
+    Future<void> loadAuditPage(
       StateSetter setModalState, {
       bool append = false,
     }) async {
       if (!append) {
         setModalState(() {
-          loading = true;
-          error = null;
-          inviteOffset = 0;
-          inviteHasMore = false;
+          auditOffset = 0;
+          auditHasMore = false;
         });
       } else {
-        setModalState(() => loadingMoreInvites = true);
+        setModalState(() => loadingMoreAudit = true);
       }
       try {
-        final rows = await fetchWorkspaceMembersV1(token, row.workspace.id);
-        if (!append) {
-          final page = await fetchWorkspaceInvitesPageV1(
-            token,
-            row.workspace.id,
-            limit: 50,
-            offset: 0,
-            includeRevoked: includeRevokedInvites,
-          );
-          setModalState(() {
-            members = rows;
-            pendingInvites
+        final page = await fetchWorkspaceAuditPageV1(
+          token,
+          row.workspace.id,
+          limit: 30,
+          offset: append ? auditOffset : 0,
+        );
+        setModalState(() {
+          if (!append) {
+            auditRows
               ..clear()
               ..addAll(page.items);
-            inviteHasMore = page.hasMore;
-            inviteOffset = page.items.length;
-            loading = false;
-          });
-        } else {
-          final page = await fetchWorkspaceInvitesPageV1(
-            token,
-            row.workspace.id,
-            limit: 50,
-            offset: inviteOffset,
-            includeRevoked: includeRevokedInvites,
-          );
-          setModalState(() {
-            members = rows;
-            pendingInvites.addAll(page.items);
-            inviteHasMore = page.hasMore;
-            inviteOffset += page.items.length;
-            loadingMoreInvites = false;
-          });
-        }
+          } else {
+            auditRows.addAll(page.items);
+          }
+          auditHasMore = page.hasMore;
+          auditOffset = append
+              ? auditOffset + page.items.length
+              : page.items.length;
+          loadingMoreAudit = false;
+        });
       } catch (e) {
         setModalState(() {
-          error = e.toString();
+          error = describeRustApiError(e);
+          loadingMoreAudit = false;
+        });
+      }
+    }
+
+    Future<void> loadMembers(StateSetter setModalState) async {
+      setModalState(() {
+        loading = true;
+        error = null;
+        inviteOffset = 0;
+        inviteHasMore = false;
+        auditOffset = 0;
+        auditHasMore = false;
+      });
+      try {
+        final rows = await fetchWorkspaceMembersV1(token, row.workspace.id);
+        final invitesPage = await fetchWorkspaceInvitesPageV1(
+          token,
+          row.workspace.id,
+          limit: 50,
+          offset: 0,
+          includeRevoked: includeRevokedInvites,
+        );
+        final auditPage = (row.role == 'owner' || row.role == 'admin')
+            ? await fetchWorkspaceAuditPageV1(
+                token,
+                row.workspace.id,
+                limit: 30,
+                offset: 0,
+              )
+            : const WorkspaceAuditListEnvelope(
+                items: <WorkspaceAuditResponse>[],
+                hasMore: false,
+              );
+        setModalState(() {
+          members = rows;
+          pendingInvites
+            ..clear()
+            ..addAll(invitesPage.items);
+          auditRows
+            ..clear()
+            ..addAll(auditPage.items);
+          inviteHasMore = invitesPage.hasMore;
+          inviteOffset = invitesPage.items.length;
+          auditHasMore = auditPage.hasMore;
+          auditOffset = auditPage.items.length;
           loading = false;
+          loadingMoreInvites = false;
+          loadingMoreAudit = false;
+        });
+      } catch (e) {
+        setModalState(() {
+          error = describeRustApiError(e);
+          loading = false;
+          loadingMoreInvites = false;
+          loadingMoreAudit = false;
+        });
+      }
+    }
+
+    Future<void> loadMoreInvites(StateSetter setModalState) async {
+      setModalState(() => loadingMoreInvites = true);
+      try {
+        final page = await fetchWorkspaceInvitesPageV1(
+          token,
+          row.workspace.id,
+          limit: 50,
+          offset: inviteOffset,
+          includeRevoked: includeRevokedInvites,
+        );
+        setModalState(() {
+          pendingInvites.addAll(page.items);
+          inviteHasMore = page.hasMore;
+          inviteOffset += page.items.length;
+          loadingMoreInvites = false;
+        });
+      } catch (e) {
+        setModalState(() {
+          error = describeRustApiError(e);
           loadingMoreInvites = false;
         });
       }
@@ -528,7 +638,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       userIdController.clear();
                                       await loadMembers(setModalState);
                                     } catch (e) {
-                                      setModalState(() => error = e.toString());
+                                      setModalState(
+                                        () => error = describeRustApiError(e),
+                                      );
                                     } finally {
                                       setModalState(() => adding = false);
                                     }
@@ -578,9 +690,12 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   setModalState(() {
                                     pendingInvites.insert(0, invite);
                                   });
+                                  await loadAuditPage(setModalState);
                                   inviteEmailController.clear();
                                 } catch (e) {
-                                  setModalState(() => error = e.toString());
+                                  setModalState(
+                                    () => error = describeRustApiError(e),
+                                  );
                                 } finally {
                                   setModalState(() => inviting = false);
                                 }
@@ -707,9 +822,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                 pendingInvites[i] = next;
                                               }
                                             });
+                                            await loadAuditPage(setModalState);
                                           } catch (e) {
                                             setModalState(
-                                              () => error = e.toString(),
+                                              () => error =
+                                                  describeRustApiError(e),
                                             );
                                           } finally {
                                             setModalState(
@@ -753,9 +870,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                 );
                                               }
                                             });
+                                            await loadAuditPage(setModalState);
                                           } catch (e) {
                                             setModalState(
-                                              () => error = e.toString(),
+                                              () => error =
+                                                  describeRustApiError(e),
                                             );
                                           } finally {
                                             setModalState(
@@ -799,13 +918,75 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             child: OutlinedButton(
                               onPressed: loading || loadingMoreInvites
                                   ? null
-                                  : () => loadMembers(
-                                      setModalState,
-                                      append: true,
-                                    ),
+                                  : () => loadMoreInvites(setModalState),
                               child: Text(
                                 loadingMoreInvites ? '加载中…' : '加载更多邀请',
                               ),
+                            ),
+                          ),
+                        const SizedBox(height: 12),
+                        Text(
+                          '活动记录',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: auditSearchController,
+                          decoration: const InputDecoration(
+                            labelText:
+                                '搜索活动（动作 / actor / target / role / email）',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (_) => setModalState(() {}),
+                        ),
+                        const SizedBox(height: 6),
+                        if (auditRows.isEmpty && !loading)
+                          Text(
+                            '暂无活动记录。',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ...auditRows
+                            .where((audit) {
+                              final needle = auditSearchController.text
+                                  .trim()
+                                  .toLowerCase();
+                              if (needle.isEmpty) {
+                                return true;
+                              }
+                              final haystack = <String>[
+                                audit.action,
+                                workspaceAuditActionLabel(audit.action),
+                                audit.actorUserId,
+                                audit.targetUserId ?? '',
+                                '${audit.details['role'] ?? ''}',
+                                '${audit.details['email'] ?? ''}',
+                              ].join(' ').toLowerCase();
+                              return haystack.contains(needle);
+                            })
+                            .map((audit) {
+                              return ListTile(
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(
+                                  workspaceAuditActionLabel(audit.action),
+                                ),
+                                subtitle: SelectableText(
+                                  '${audit.createdAt.toLocal().toIso8601String()}\n${buildWorkspaceAuditSummary(audit)}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              );
+                            }),
+                        if (auditHasMore)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: OutlinedButton(
+                              onPressed: loading || loadingMoreAudit
+                                  ? null
+                                  : () => loadAuditPage(
+                                      setModalState,
+                                      append: true,
+                                    ),
+                              child: Text(loadingMoreAudit ? '加载中…' : '加载更多活动'),
                             ),
                           ),
                       ],
@@ -877,7 +1058,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                             await loadMembers(setModalState);
                                           } catch (e) {
                                             setModalState(
-                                              () => error = e.toString(),
+                                              () => error =
+                                                  describeRustApiError(e),
                                             );
                                           } finally {
                                             setModalState(
@@ -904,7 +1086,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                             await loadMembers(setModalState);
                                           } catch (e) {
                                             setModalState(
-                                              () => error = e.toString(),
+                                              () => error =
+                                                  describeRustApiError(e),
                                             );
                                           } finally {
                                             setModalState(

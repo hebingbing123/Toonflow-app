@@ -14,7 +14,7 @@
 | Phase | 状态 | 说明 |
 |------|------|------|
 | W1 Workspace 生命周期 | `baseline_done` | 企业空间创建、列表、详情、PATCH、归档/恢复、active enterprise 配额 |
-| W2 成员与邀请 | `baseline_done` | 成员增删改、邀请闭环、审计、速率限制、invite runbook |
+| W2 成员与邀请 | `baseline_done` | 成员增删改、邀请闭环、审计写入与活动记录读取、速率限制、invite runbook |
 | W3 当前上下文切换 | `baseline_done` | `current_workspace` 切换、自动回退 personal、客户端刷新 |
 | W4 资源范围 | `baseline_done` | 项目/小说/资产/jobs 等按 workspace 成员语义收口 |
 | W5 权限矩阵 | `baseline_done` | workspace 级默认矩阵、项目级 ACL 增强、计费绑定口径与产品面可见性已收口；后续主要剩回归矩阵与真实环境验收 |

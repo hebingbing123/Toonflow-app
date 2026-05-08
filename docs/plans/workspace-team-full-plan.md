@@ -48,7 +48,7 @@
 - [x] **W2.4** `POST /api/v1/workspaces/invites/accept`：凭 token 加入 member（幂等 upsert + 过期/状态冲突校验）
 - [x] **W2.5** `DELETE …/members/{user_id}` / `PATCH …/members/{user_id}`：移除、改角色（已加“最后一个 owner 不可降级/移除”保护；owner 转让流程另列后续）
 - [x] **W2.6** 成员 **主动离开** workspace：`DELETE …/members/me` 已落地；`personal` 禁止离开、最后 owner 禁止离开、离开后命中 current workspace 自动回退 personal
-- [x] **W2.7** 审计：新增 `app_workspace_audit` 并在成员/邀请关键动作写入 `workspace_id + actor + action + target_user + details + timestamp`
+- [x] **W2.7** 审计：新增 `app_workspace_audit` 并在成员/邀请关键动作写入 `workspace_id + actor + action + target_user + details + timestamp`；同时补齐 `GET /api/v1/workspaces/{workspace_id}/audit` 与 Flutter 团队工作区活动记录面板
 - [x] **W2.8** 速率限制：邀请/添加成员防滥用（基于 `app_workspace_audit` 的每 workspace 每小时上限，env：`TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR`）
 - [x] **W2.9** OpenAPI + 契约测试 + **邮件/无邮件** 双路径说明写入 Runbook（见 [`workspace-invite-runbook.md`](./workspace-invite-runbook.md)）
 

@@ -160,6 +160,62 @@ class WorkspaceInvitesListEnvelope {
   }
 }
 
+class WorkspaceAuditResponse {
+  const WorkspaceAuditResponse({
+    required this.id,
+    required this.workspaceId,
+    required this.actorUserId,
+    required this.action,
+    required this.details,
+    this.targetUserId,
+    required this.createdAt,
+  });
+
+  final int id;
+  final String workspaceId;
+  final String actorUserId;
+  final String action;
+  final String? targetUserId;
+  final Map<String, dynamic> details;
+  final DateTime createdAt;
+
+  factory WorkspaceAuditResponse.fromJson(Map<String, dynamic> json) {
+    return WorkspaceAuditResponse(
+      id: (json['id'] as num).toInt(),
+      workspaceId: json['workspace_id'] as String,
+      actorUserId: json['actor_user_id'] as String,
+      action: json['action'] as String,
+      targetUserId: json['target_user_id'] as String?,
+      details: (json['details'] is Map<String, dynamic>)
+          ? json['details'] as Map<String, dynamic>
+          : <String, dynamic>{},
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+class WorkspaceAuditListEnvelope {
+  const WorkspaceAuditListEnvelope({
+    required this.items,
+    required this.hasMore,
+  });
+
+  final List<WorkspaceAuditResponse> items;
+  final bool hasMore;
+
+  factory WorkspaceAuditListEnvelope.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>? ?? const <dynamic>[];
+    return WorkspaceAuditListEnvelope(
+      items: raw
+          .map(
+            (e) => WorkspaceAuditResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      hasMore: json['has_more'] as bool? ?? false,
+    );
+  }
+}
+
 /// `POST /api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend`
 class ResendWorkspaceInviteBody {
   const ResendWorkspaceInviteBody({this.expiresInHours});
@@ -314,6 +370,34 @@ Future<List<WorkspaceMemberResponse>> fetchWorkspaceMembersV1(
   return list
       .map((e) => WorkspaceMemberResponse.fromJson(e as Map<String, dynamic>))
       .toList(growable: false);
+}
+
+Future<WorkspaceAuditListEnvelope> fetchWorkspaceAuditPageV1(
+  String accessToken,
+  String workspaceId, {
+  String? action,
+  int? limit,
+  int? offset,
+}) async {
+  final qp = <String, String>{};
+  if (action != null && action.isNotEmpty) {
+    qp['action'] = action;
+  }
+  if (limit != null) {
+    qp['limit'] = '$limit';
+  }
+  if (offset != null && offset > 0) {
+    qp['offset'] = '$offset';
+  }
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/audit',
+  ).replace(queryParameters: qp.isEmpty ? null : qp);
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceAuditListEnvelope.fromJson(map);
 }
 
 /// `GET /api/v1/workspaces/{workspace_id}/invites` — see `listWorkspaceInvitesV1`.
