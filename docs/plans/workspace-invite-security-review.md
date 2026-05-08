@@ -4,6 +4,7 @@
 总表：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W9。  
 运行路径：[`workspace-invite-runbook.md`](./workspace-invite-runbook.md)。  
 安全边界：[`workspace-security-boundary.md`](./workspace-security-boundary.md)。
+发布收口：[`workspace-release-checklist.md`](./workspace-release-checklist.md)。
 
 ## 1) 当前实现摘要
 

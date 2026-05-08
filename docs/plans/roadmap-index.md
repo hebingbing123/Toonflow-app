@@ -53,6 +53,7 @@
 | [`tasks-http-api-cleanup.md`](./tasks-http-api-cleanup.md) | HTTP 收敛 **B·其余域** 竖切（H0–H5） |
 | [`http-api-cleanup-h0-inventory.md`](./http-api-cleanup-h0-inventory.md) | HTTP 收敛 H0：`rg` 基线与 parity 快照 |
 | [`workspace-team-full-plan.md`](./workspace-team-full-plan.md) | 团队 Workspace **完整功能**任务总表（W1–W11，非 MVP；`roadmap-workspace.md` 的真源） |
+| [`workspace-release-checklist.md`](./workspace-release-checklist.md) | Workspace staging / 发布前检查单（串联 W9.2 / W9.3 / W9.4 / W10.3） |
 | [`full-stack-delivery-covenant.md`](./full-stack-delivery-covenant.md) | **全栈交付约定**（禁止只合后端无 Flutter） |
 | [`platform-capabilities-backlog.md`](./platform-capabilities-backlog.md) | **平台级能力补遗**（全栈任务池，与主路线图正交） |
 

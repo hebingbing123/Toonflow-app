@@ -7,6 +7,7 @@
 
 - [`workspace-team-full-plan.md`](./workspace-team-full-plan.md) — W1–W11 总表
 - [`workspace-invite-runbook.md`](./workspace-invite-runbook.md) — 邀请专用运行手册
+- [`workspace-release-checklist.md`](./workspace-release-checklist.md) — staging / 发布前统一检查单
 - [`toonflow-platform-progress.md`](./toonflow-platform-progress.md) — 当前竖切进度
 
 ## 1) 当前语义速记

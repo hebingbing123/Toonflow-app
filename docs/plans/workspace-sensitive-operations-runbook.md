@@ -4,6 +4,7 @@
 总表：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W9。  
 安全边界：[`workspace-security-boundary.md`](./workspace-security-boundary.md)。  
 运维排障：[`workspace-operations-runbook.md`](./workspace-operations-runbook.md)。
+发布收口：[`workspace-release-checklist.md`](./workspace-release-checklist.md)。
 
 ## 1) 当前哪些动作算“敏感操作”
 

@@ -3,6 +3,7 @@
 本 Runbook 记录团队 Workspace 邀请的两条运营路径：**无邮件**（当前默认）与 **邮件发送**（后续可接入）。
 
 若排障已超出邀请本身（例如成员明明被接受却仍看不到 workspace、`current_workspace` 回退异常、项目可见性不对），转到 [`workspace-operations-runbook.md`](./workspace-operations-runbook.md)。
+若当前是在做 staging 演练或发布前收口，再回到 [`workspace-release-checklist.md`](./workspace-release-checklist.md) 串联 invite、fallback 与敏感操作检查。
 
 ## 1) 现状（已上线）
 
