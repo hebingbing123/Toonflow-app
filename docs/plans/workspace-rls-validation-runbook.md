@@ -45,6 +45,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 仓库已附带：
 
 - 脚本：[`scripts/workspace_rls_probe.sh`](../../scripts/workspace_rls_probe.sh)
+- 样本种子：[`scripts/workspace_rls_seed_sample.sh`](../../scripts/workspace_rls_seed_sample.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
 它做两件事：
@@ -60,6 +61,26 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
    - 自动 fallback 到 `docker exec ... psql`
 
 如果目标数据库里连 `app_workspace` 都还不存在，脚本会直接失败并提示“先迁移 schema”，避免把空库误判成 RLS deny。
+
+### 3.0 可选：先种一份本地最小样本
+
+若本地库是空的，可先运行：
+
+```bash
+bash scripts/workspace_rls_seed_sample.sh
+```
+
+它会插入固定 UUID 的三类用户：
+
+- owner：`10000000-0000-0000-0000-000000000001`
+- member：`10000000-0000-0000-0000-000000000002`
+- outsider：`10000000-0000-0000-0000-000000000003`
+
+以及一条 enterprise workspace：
+
+- `20000000-0000-0000-0000-000000000010`
+
+同时补一条 project / script / novel / asset / queued job，足够覆盖矩阵里的主要 mismatch 域。
 
 ### 3.1 owner
 

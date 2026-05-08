@@ -2,22 +2,12 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SQL_FILE="$ROOT_DIR/scripts/fixtures/workspace_rls_probe.sql"
+SQL_FILE="$ROOT_DIR/scripts/fixtures/workspace_rls_seed.sql"
 DEFAULT_DB_CONTAINER="supabase_db_$(basename "$ROOT_DIR")"
 DB_CONTAINER="${SUPABASE_DB_CONTAINER:-$DEFAULT_DB_CONTAINER}"
 
 if [[ ! -f "$SQL_FILE" ]]; then
-  echo "workspace RLS probe SQL not found: $SQL_FILE" >&2
-  exit 1
-fi
-
-if [[ -z "${PROBE_USER_ID:-}" ]]; then
-  echo "PROBE_USER_ID is required" >&2
-  exit 1
-fi
-
-if [[ -z "${PROBE_WORKSPACE_ID:-}" ]]; then
-  echo "PROBE_WORKSPACE_ID is required" >&2
+  echo "workspace RLS seed SQL not found: $SQL_FILE" >&2
   exit 1
 fi
 
@@ -33,7 +23,7 @@ elif command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' | grep
   USE_STDIN_SQL=1
 else
   cat >&2 <<EOF
-workspace RLS probe requires either:
+workspace RLS seed requires either:
   1. host 'psql' with DATABASE_URL set, or
   2. a running local Supabase DB container (default: $DB_CONTAINER)
 EOF
@@ -44,7 +34,7 @@ HAS_SCHEMA="$("${PSQL_CMD[@]}" -tA -c "select case when to_regclass('public.app_
 if [[ "$HAS_SCHEMA" != "1" ]]; then
   cat >&2 <<'EOF'
 workspace tables are missing in the target database.
-Run the probe against a migrated staging database, or initialize the local Supabase schema first.
+Apply migrations before seeding workspace RLS sample data.
 EOF
   exit 1
 fi
@@ -52,13 +42,9 @@ fi
 if [[ "$USE_STDIN_SQL" == "1" ]]; then
   "${PSQL_CMD[@]}" \
     -v ON_ERROR_STOP=1 \
-    -v probe_user_id="$PROBE_USER_ID" \
-    -v probe_workspace_id="$PROBE_WORKSPACE_ID" \
     -f - < "$SQL_FILE"
 else
   "${PSQL_CMD[@]}" \
     -v ON_ERROR_STOP=1 \
-    -v probe_user_id="$PROBE_USER_ID" \
-    -v probe_workspace_id="$PROBE_WORKSPACE_ID" \
     -f "$SQL_FILE"
 fi
