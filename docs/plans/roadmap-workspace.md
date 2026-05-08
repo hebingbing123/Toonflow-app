@@ -14,7 +14,7 @@
 | Phase | 状态 | 说明 |
 |------|------|------|
 | W1 Workspace 生命周期 | `baseline_done` | 企业空间创建、列表、详情、PATCH、归档/恢复、active enterprise 配额 |
-| W2 成员与邀请 | `baseline_done` | 成员增删改、邀请闭环、审计写入与活动记录读取、速率限制、invite runbook |
+| W2 成员与邀请 | `baseline_done` | 成员增删改、owner transfer、邀请闭环、审计写入与活动记录读取、速率限制、invite runbook |
 | W3 当前上下文切换 | `baseline_done` | `current_workspace` 切换、自动回退 personal、客户端刷新 |
 | W4 资源范围 | `baseline_done` | 项目/小说/资产/jobs 等按 workspace 成员语义收口 |
 | W5 权限矩阵 | `baseline_done` | workspace 级默认矩阵、项目级 ACL 增强、计费绑定口径与产品面可见性已收口；后续主要剩回归矩阵与真实环境验收 |
@@ -35,6 +35,7 @@
 - W8.1：workspace 计费口径已定为 user-scope，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
 - W5.3：workspace 默认项目权限策略已补齐，见 [`workspace-project-permission-policy.md`](./workspace-project-permission-policy.md)
 - W9.3：敏感操作 Runbook 已补齐，见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
+- W2.10：owner transfer 产品流已补齐，`POST /api/v1/workspaces/{workspace_id}/owner-transfer` + Flutter 成员管理入口已落地
 - W9.4：邀请安全评审已补齐，见 [`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
 - W10.1/W10.2：workspace observability spec 已补齐，见 [`workspace-observability-spec.md`](./workspace-observability-spec.md)
 - W10.1：workspace observability 关键字段已落地到 HTTP / jobs / Harness；W10.2 已新增 internal-ops `GET /api/v1/workspaces/{workspace_id}/stats`，返回 workspace 成员数 / 项目数 / 活跃 jobs
@@ -47,7 +48,7 @@
 
 优先继续以下低耦合或必须收口项：
 
-1. **W9 验证**：按 [`workspace-release-checklist.md`](./workspace-release-checklist.md) 在 staging 跑 owner/member/outsider 三身份验证，并把敏感操作 / invite review / current workspace fallback 一起收口
+1. **W9 验证**：按 [`workspace-release-checklist.md`](./workspace-release-checklist.md) 在 staging 跑 owner/member/outsider 三身份验证，并把敏感操作 / owner transfer / invite review / current workspace fallback 一起收口
 2. **W8.2–W8.4**：仅在明确需要 workspace-scope billing 时，再收字段迁移、webhook 形状与运营视图
 3. **W5.2 收口**：`app_project_member`、`viewer/editor` project ACL、`rust_api` 封装、Flutter 项目编辑器管理入口，以及项目列表 ACL 限制态/有效角色可见性已补齐；下一步主要是回归矩阵与真实环境验收
 

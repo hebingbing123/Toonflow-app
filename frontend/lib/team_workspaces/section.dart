@@ -98,6 +98,8 @@ String workspaceAuditActionLabel(String action) {
       return '成员已移除';
     case 'workspace_member_left':
       return '成员主动离开';
+    case 'workspace_owner_transferred':
+      return 'owner 已转让';
     case 'workspace_invite_created':
       return '邀请已创建';
     case 'workspace_invite_resent':
@@ -127,6 +129,14 @@ String buildWorkspaceAuditSummary(WorkspaceAuditResponse audit) {
   final inviteId = audit.details['invite_id'];
   if (inviteId is String && inviteId.isNotEmpty) {
     parts.add('invite=$inviteId');
+  }
+  final previousOwner = audit.details['previous_owner_user_id'];
+  if (previousOwner is String && previousOwner.isNotEmpty) {
+    parts.add('previous_owner=$previousOwner');
+  }
+  final newOwner = audit.details['new_owner_user_id'];
+  if (newOwner is String && newOwner.isNotEmpty) {
+    parts.add('new_owner=$newOwner');
   }
   return parts.join(' · ');
 }
@@ -439,6 +449,35 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     int auditOffset = 0;
     bool auditHasMore = false;
     bool loadingMoreAudit = false;
+    String currentOwnerUserId = row.workspace.ownerUserId;
+    String currentWorkspaceRole = row.role;
+
+    Future<bool> confirmOwnerTransfer(WorkspaceMemberResponse member) async {
+      return await showDialog<bool>(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('转让 owner'),
+                content: SelectableText(
+                  '将把 ${row.workspace.name} 的主 owner 从 $currentOwnerUserId\n'
+                  '转给 ${member.userId}。\n\n'
+                  '提交后当前主 owner 会自动降为 admin，目标成员会升为 owner。',
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('取消'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('确认转让'),
+                  ),
+                ],
+              );
+            },
+          ) ??
+          false;
+    }
 
     Future<void> loadAuditPage(
       StateSetter setModalState, {
@@ -499,7 +538,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           offset: 0,
           includeRevoked: includeRevokedInvites,
         );
-        final auditPage = (row.role == 'owner' || row.role == 'admin')
+        final auditPage =
+            (currentWorkspaceRole == 'owner' || currentWorkspaceRole == 'admin')
             ? await fetchWorkspaceAuditPageV1(
                 token,
                 row.workspace.id,
@@ -702,8 +742,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               },
                         child: Text(inviting ? '生成邀请中…' : '生成邀请链接'),
                       ),
-                      if (row.role == 'owner' ||
-                          row.role == 'admin') ...<Widget>[
+                      if (currentWorkspaceRole == 'owner' ||
+                          currentWorkspaceRole == 'admin') ...<Widget>[
                         const SizedBox(height: 8),
                         Text(
                           '平台邀请（服务端）',
@@ -960,6 +1000,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 audit.targetUserId ?? '',
                                 '${audit.details['role'] ?? ''}',
                                 '${audit.details['email'] ?? ''}',
+                                '${audit.details['previous_owner_user_id'] ?? ''}',
+                                '${audit.details['new_owner_user_id'] ?? ''}',
                               ].join(' ').toLowerCase();
                               return haystack.contains(needle);
                             })
@@ -1000,6 +1042,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         ),
                       ],
                       const SizedBox(height: 12),
+                      SelectableText(
+                        '当前主 owner: $currentOwnerUserId',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 8),
                       TextField(
                         controller: memberSearchController,
                         decoration: const InputDecoration(
@@ -1015,59 +1062,124 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         ...filterWorkspaceMembers(
                           members,
                           memberSearchController.text,
-                        ).map(
-                          (m) => ListTile(
+                        ).map((m) {
+                          final isPrimaryOwner = m.userId == currentOwnerUserId;
+                          final canTransferOwner =
+                              currentWorkspaceRole == 'owner' &&
+                              row.workspace.workspaceType == 'enterprise' &&
+                              !isPrimaryOwner;
+                          final canEditRole =
+                              m.role == 'member' || m.role == 'admin';
+                          return ListTile(
                             dense: true,
                             contentPadding: EdgeInsets.zero,
                             title: Text(m.userId),
-                            subtitle: Text(m.role),
+                            subtitle: Text(
+                              isPrimaryOwner
+                                  ? '${m.role} · primary owner'
+                                  : m.role,
+                            ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                DropdownButton<String>(
-                                  value: m.role,
-                                  items: const <DropdownMenuItem<String>>[
-                                    DropdownMenuItem(
-                                      value: 'member',
-                                      child: Text('member'),
+                                if (canEditRole)
+                                  DropdownButton<String>(
+                                    value: m.role,
+                                    items: const <DropdownMenuItem<String>>[
+                                      DropdownMenuItem(
+                                        value: 'member',
+                                        child: Text('member'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'admin',
+                                        child: Text('admin'),
+                                      ),
+                                    ],
+                                    onChanged: mutatingMemberUserId != null
+                                        ? null
+                                        : (v) async {
+                                            if (v == null || v == m.role) {
+                                              return;
+                                            }
+                                            setModalState(() {
+                                              mutatingMemberUserId = m.userId;
+                                              error = null;
+                                            });
+                                            try {
+                                              await patchWorkspaceMemberV1(
+                                                token,
+                                                row.workspace.id,
+                                                m.userId,
+                                                body: PatchWorkspaceMemberBody(
+                                                  role: v,
+                                                ),
+                                              );
+                                              await loadMembers(setModalState);
+                                            } catch (e) {
+                                              setModalState(
+                                                () => error =
+                                                    describeRustApiError(e),
+                                              );
+                                            } finally {
+                                              setModalState(
+                                                () =>
+                                                    mutatingMemberUserId = null,
+                                              );
+                                            }
+                                          },
+                                  )
+                                else
+                                  Chip(
+                                    label: Text(
+                                      isPrimaryOwner ? 'owner' : m.role,
                                     ),
-                                    DropdownMenuItem(
-                                      value: 'admin',
-                                      child: Text('admin'),
-                                    ),
-                                  ],
-                                  onChanged: mutatingMemberUserId != null
-                                      ? null
-                                      : (v) async {
-                                          if (v == null || v == m.role) {
-                                            return;
-                                          }
-                                          setModalState(() {
-                                            mutatingMemberUserId = m.userId;
-                                            error = null;
-                                          });
-                                          try {
-                                            await patchWorkspaceMemberV1(
-                                              token,
-                                              row.workspace.id,
-                                              m.userId,
-                                              body: PatchWorkspaceMemberBody(
-                                                role: v,
-                                              ),
-                                            );
-                                            await loadMembers(setModalState);
-                                          } catch (e) {
-                                            setModalState(
-                                              () => error =
-                                                  describeRustApiError(e),
-                                            );
-                                          } finally {
-                                            setModalState(
-                                              () => mutatingMemberUserId = null,
-                                            );
-                                          }
-                                        },
-                                ),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                if (canTransferOwner)
+                                  IconButton(
+                                    tooltip: '转让 owner',
+                                    onPressed: mutatingMemberUserId != null
+                                        ? null
+                                        : () async {
+                                            final confirmed =
+                                                await confirmOwnerTransfer(m);
+                                            if (!confirmed) {
+                                              return;
+                                            }
+                                            setModalState(() {
+                                              mutatingMemberUserId = m.userId;
+                                              error = null;
+                                            });
+                                            try {
+                                              final workspace =
+                                                  await transferWorkspaceOwnerV1(
+                                                    token,
+                                                    row.workspace.id,
+                                                    TransferWorkspaceOwnerBody(
+                                                      targetUserId: m.userId,
+                                                    ),
+                                                  );
+                                              setModalState(() {
+                                                currentOwnerUserId =
+                                                    workspace.ownerUserId;
+                                                currentWorkspaceRole = 'admin';
+                                              });
+                                              await loadMembers(setModalState);
+                                              await _load();
+                                            } catch (e) {
+                                              setModalState(
+                                                () => error =
+                                                    describeRustApiError(e),
+                                              );
+                                            } finally {
+                                              setModalState(
+                                                () =>
+                                                    mutatingMemberUserId = null,
+                                              );
+                                            }
+                                          },
+                                    icon: const Icon(Icons.swap_horiz_outlined),
+                                  ),
                                 IconButton(
                                   tooltip: '移除成员',
                                   onPressed: mutatingMemberUserId != null
@@ -1101,8 +1213,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 ),
                               ],
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                     ],
                   ),
                 ),

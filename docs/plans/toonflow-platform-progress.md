@@ -1,6 +1,6 @@
 # Toonflow 平台执行进度
 
-更新时间：2026-05-08
+更新时间：2026-05-09
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
 大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**；团队 Workspace **完整功能**总表见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)。**全栈约定**（禁止只合后端）：[**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)；**平台级补遗池**：[**`platform-capabilities-backlog.md`**](./platform-capabilities-backlog.md)。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
@@ -54,6 +54,7 @@
 - **最新补齐**：平台体验补遗 **P-D3** 已进入 tracked 并落地主路径 — 复用现有 `quota_exceeded` / `Retry-After` / `retry_after_ms` 协议，在 [`frontend/lib/platform/rust_api_feedback.dart`](../../frontend/lib/platform/rust_api_feedback.dart) 增加共享解释与 Snackbar 层，并把 Projects / Jobs / Task Center / Team Workspaces / System Probes 等入口统一接到同一套 429 / 配额耗尽 UX
 - **最新补齐**：平台公开状态页 **P-B3** 已进入 tracked 并可直接打开 — 新增 Flutter [`/status`](../../frontend/lib/status_page.dart) 页面，公开聚合 `/health`、`/api/v1/health`、`/api/v1/ready`、`/api/v1/version`，并在注入 `INTERNAL_OPS_TOKEN` 时附加 `GET /api/v1/jobs/queue/stats` 内部队列统计
 - **最新补齐**：Workspace 审计可见性 **W2.7** 已从“仅写入”扩到“可读活动记录” — 新增 `GET /api/v1/workspaces/{workspace_id}/audit` 分页读模型，并把 Flutter 团队工作区成员管理弹窗扩成包含活动记录的治理面，owner/admin 可直接查看成员 / 邀请关键动作时间线
+- **最新补齐**：Workspace owner transfer **W2.10 / W9.3** 已落地 — 新增 `POST /api/v1/workspaces/{workspace_id}/owner-transfer`，仅允许当前 primary owner 发起，目标用户必须已是 member，提交后 `app_workspace.owner_user_id` 切换到目标成员且原 owner 自动降为 `admin`；Flutter 成员管理弹窗已补确认式“转让 owner”入口，审计新增 `workspace_owner_transferred`
 - **最新补齐**：Workspace 安全操作文档 **W9.3/W9.4** 已落地 — 新增 [**`workspace-sensitive-operations-runbook.md`**](./workspace-sensitive-operations-runbook.md) 与 [**`workspace-invite-security-review.md`**](./workspace-invite-security-review.md)，分别固定成员移除/降级/归档等敏感操作的确认流程，以及当前 invite token 的真实安全边界、风险等级与后续加强项
 - **最新补齐**：Workspace 发布文档 **W11.3–W11.4** 已落地 — 新增 [**`workspace-migration-notice.md`**](./workspace-migration-notice.md) 说明客户端/迁移侧行为差异，并把 `yarn refactor:check` 的必跑门禁正式锚定到仓库根 `AGENTS.md` 与 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)
 - **最新补齐**：Workspace observability spec **W10.1/W10.2** 已落地 — 新增 [**`workspace-observability-spec.md`**](./workspace-observability-spec.md)，明确 `workspace_id` 在 HTTP / jobs / Harness 的统一日志字段与 trace join 约定，并锁定 workspace 成员数 / 项目数 / 活跃 jobs 的管理指标口径；本轮只补规格，不声称实现已完成

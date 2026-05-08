@@ -69,6 +69,12 @@ pub struct PatchWorkspaceMemberBody {
     pub role: String,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct TransferWorkspaceOwnerBody {
+    pub target_user_id: Uuid,
+}
+
 #[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
 pub struct WorkspaceMemberResponse {
     pub workspace_id: Uuid,
@@ -231,6 +237,10 @@ pub(crate) fn router() -> Router<AppState> {
             axum::routing::delete(leave_workspace),
         )
         .route(
+            "/api/v1/workspaces/{workspace_id}/owner-transfer",
+            post(transfer_workspace_owner),
+        )
+        .route(
             "/api/v1/workspaces/{workspace_id}/audit",
             get(list_workspace_audit),
         )
@@ -284,6 +294,19 @@ async fn require_workspace_admin_or_owner(
         Err(ApiError::Forbidden(
             "requires workspace owner or admin".into(),
         ))
+    }
+}
+
+async fn require_workspace_owner(
+    pool: &PgPool,
+    user_id: Uuid,
+    workspace_id: Uuid,
+) -> Result<(), ApiError> {
+    let role = require_workspace_member_role(pool, user_id, workspace_id).await?;
+    if role == "owner" {
+        Ok(())
+    } else {
+        Err(ApiError::Forbidden("requires workspace owner".into()))
     }
 }
 
@@ -376,6 +399,7 @@ async fn guard_workspace_member_mutation_rate(
         WHERE workspace_id = $1
           AND action IN (
             'workspace_member_upserted',
+            'workspace_owner_transferred',
             'workspace_invite_created',
             'workspace_invite_resent',
             'workspace_invite_revoked'
@@ -1122,6 +1146,159 @@ pub(crate) async fn leave_workspace(
     Ok(Json(row))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/workspaces/{workspace_id}/owner-transfer",
+    operation_id = "transferWorkspaceOwnerV1",
+    tag = "workspaces",
+    params(
+        ("workspace_id" = Uuid, Path, description = "Workspace UUID")
+    ),
+    request_body(content = TransferWorkspaceOwnerBody, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = WorkspaceResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn transfer_workspace_owner(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+    Json(body): Json<TransferWorkspaceOwnerBody>,
+) -> Result<Json<WorkspaceResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    require_workspace_owner(pool, uid, workspace_id).await?;
+    guard_workspace_member_mutation_rate(pool, workspace_id).await?;
+
+    if body.target_user_id == uid {
+        return Err(ApiError::Conflict(
+            "target owner must differ from current owner".into(),
+        ));
+    }
+
+    let workspace: Option<WorkspaceRow> = sqlx::query_as(
+        r#"
+        SELECT id, owner_user_id, name, workspace_type, metadata, archived_at, created_at, updated_at
+        FROM public.app_workspace
+        WHERE id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some(workspace) = workspace else {
+        return Err(ApiError::NotFound);
+    };
+
+    if workspace.workspace_type == "personal" {
+        return Err(ApiError::BadRequest(
+            "cannot transfer owner of a personal workspace".into(),
+        ));
+    }
+    if workspace.owner_user_id != uid {
+        return Err(ApiError::Conflict(
+            "only the current primary owner may transfer ownership".into(),
+        ));
+    }
+
+    let target_role: Option<String> = sqlx::query_scalar(
+        "SELECT role FROM public.app_workspace_member WHERE workspace_id = $1 AND user_id = $2",
+    )
+    .bind(workspace_id)
+    .bind(body.target_user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some(target_role) = target_role else {
+        return Err(ApiError::Conflict(
+            "target user must already be a workspace member".into(),
+        ));
+    };
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_workspace_member
+        SET role = 'owner', updated_at = NOW()
+        WHERE workspace_id = $1 AND user_id = $2
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.target_user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_workspace_member
+        SET role = 'admin', updated_at = NOW()
+        WHERE workspace_id = $1 AND user_id = $2
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(uid)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let row: WorkspaceRow = sqlx::query_as(
+        r#"
+        UPDATE public.app_workspace
+        SET owner_user_id = $2, updated_at = NOW()
+        WHERE id = $1
+        RETURNING id, owner_user_id, name, workspace_type, metadata, archived_at, created_at, updated_at
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.target_user_id)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    append_workspace_audit(
+        pool,
+        workspace_id,
+        uid,
+        "workspace_owner_transferred",
+        Some(body.target_user_id),
+        serde_json::json!({
+            "previous_owner_user_id": uid,
+            "new_owner_user_id": body.target_user_id,
+            "target_previous_role": target_role,
+            "previous_owner_new_role": "admin"
+        }),
+    )
+    .await?;
+
+    Ok(Json(WorkspaceResponse {
+        id: row.id,
+        owner_user_id: row.owner_user_id,
+        name: row.name,
+        workspace_type: row.workspace_type,
+        metadata: row.metadata,
+        archived_at: row.archived_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+    }))
+}
+
 fn normalize_invite_list_status(raw: Option<String>) -> Result<Option<String>, ApiError> {
     let Some(s) = raw else {
         return Ok(None);
@@ -1656,6 +1833,7 @@ pub(crate) async fn accept_workspace_invite(
         patch_workspace_member,
         remove_workspace_member,
         leave_workspace,
+        transfer_workspace_owner,
         list_workspace_audit,
         list_workspace_invites,
         revoke_workspace_invite,

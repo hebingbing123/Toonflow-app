@@ -289,6 +289,17 @@ class PatchWorkspaceMemberBody {
   Map<String, dynamic> toJson() => <String, dynamic>{'role': role};
 }
 
+/// `POST /api/v1/workspaces/{workspace_id}/owner-transfer`
+class TransferWorkspaceOwnerBody {
+  const TransferWorkspaceOwnerBody({required this.targetUserId});
+
+  final String targetUserId;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'target_user_id': targetUserId,
+  };
+}
+
 /// `POST /api/v1/workspaces/{workspace_id}/invites`
 class CreateWorkspaceInviteBody {
   const CreateWorkspaceInviteBody({
@@ -577,6 +588,29 @@ Future<WorkspaceMemberResponse> leaveWorkspaceV1(
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceMemberResponse.fromJson(map);
+}
+
+Future<WorkspaceResponse> transferWorkspaceOwnerV1(
+  String accessToken,
+  String workspaceId,
+  TransferWorkspaceOwnerBody body,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/owner-transfer',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkspaceResponse.fromJson(map);
 }
 
 Future<WorkspaceInviteResponse> createWorkspaceInviteV1(

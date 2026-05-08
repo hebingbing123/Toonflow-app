@@ -18,8 +18,8 @@
    - `DELETE /api/v1/workspaces/{workspace_id}/members/me`
 4. **归档 workspace**
    - `PATCH /api/v1/workspaces/{workspace_id}` 的 archive 语义
-5. **任何未来的 owner 转让 / 删除 workspace**
-   - 当前尚未开放 owner transfer 专用 flow，但一旦引入，应继承本文
+5. **owner 转让 / 删除 workspace**
+   - owner 转让现已通过 `POST /api/v1/workspaces/{workspace_id}/owner-transfer` 落地，删除 workspace 仍属未来能力
 
 这些操作的共同点：
 
@@ -41,6 +41,12 @@ Rust 应用层已内建的保护包括：
   - `cannot leave personal workspace`
 - **owner 角色不能通过普通成员 PATCH 直接设入**
   - `role must be admin or member (owner requires transfer flow)`
+- **owner 转让只能由当前 primary owner 发起**
+  - `only the current primary owner may transfer ownership`
+- **owner 转让目标必须已是 workspace 成员**
+  - `target user must already be a workspace member`
+- **personal workspace 不能转让 owner**
+  - `cannot transfer owner of a personal workspace`
 
 这些保护很重要，但它们**不等于**完整操作流程。  
 也就是说：系统能挡住最坏的几类误操作，但仍需要人类在执行前确认影响范围。
@@ -121,6 +127,22 @@ Rust 应用层已内建的保护包括：
 - 默认 `GET /api/v1/workspaces` 不再返回该 workspace
 - 命中该 workspace 的 `current_workspace_id` 已回退 personal
 
+### 4.5 owner 转让
+
+执行前确认：
+
+- 当前操作者就是 `app_workspace.owner_user_id`
+- 目标用户已在 `app_workspace_member` 中
+- 目标用户在转让后应获得 owner 级治理权限
+- 当前 owner 是否知晓自己会自动降为 `admin`
+
+执行后核查：
+
+- `app_workspace.owner_user_id` 已切到目标用户
+- 目标用户的 `app_workspace_member.role = 'owner'`
+- 原 owner 的 `app_workspace_member.role = 'admin'`
+- `app_workspace_audit` 有 `workspace_owner_transferred`
+
 ## 5) 推荐执行方式
 
 优先级从高到低：
@@ -181,9 +203,9 @@ LIMIT 50;
 
 ## 8) 当前明确禁止的做法
 
-在没有专门 owner transfer 产品流之前，禁止：
+即便已有专门 owner transfer 产品流，仍禁止：
 
-- 直接手工把任意成员改成 `owner`
+- 直接手工把任意成员改成 `owner` 来绕过产品/API 审计
 - 先把最后一个 owner 降级，再补第二个 owner
 - 为了“省事”删掉 workspace/member 数据再让用户重新进群
 - 用 SQL 绕过 `cannot demote/remove/leave the last workspace owner`

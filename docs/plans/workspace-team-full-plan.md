@@ -46,11 +46,12 @@
 - [x] **W2.2** 邀请表 `app_workspace_invite`：`email` / `token` / `expires_at` / `role` / `invited_by` / 状态（pending/accepted/revoked）已迁移
 - [x] **W2.3** `POST …/workspaces/{id}/invites`：生成邀请（当前先返回 token 链接形态；邮件发送待 W2.9 Runbook 补充）
 - [x] **W2.4** `POST /api/v1/workspaces/invites/accept`：凭 token 加入 member（幂等 upsert + 过期/状态冲突校验）
-- [x] **W2.5** `DELETE …/members/{user_id}` / `PATCH …/members/{user_id}`：移除、改角色（已加“最后一个 owner 不可降级/移除”保护；owner 转让流程另列后续）
+- [x] **W2.5** `DELETE …/members/{user_id}` / `PATCH …/members/{user_id}`：移除、改角色（已加“最后一个 owner 不可降级/移除”保护；`owner` 仍不能经普通成员 PATCH 直接设入，转让走 W2.10 专用 flow）
 - [x] **W2.6** 成员 **主动离开** workspace：`DELETE …/members/me` 已落地；`personal` 禁止离开、最后 owner 禁止离开、离开后命中 current workspace 自动回退 personal
 - [x] **W2.7** 审计：新增 `app_workspace_audit` 并在成员/邀请关键动作写入 `workspace_id + actor + action + target_user + details + timestamp`；同时补齐 `GET /api/v1/workspaces/{workspace_id}/audit` 与 Flutter 团队工作区活动记录面板
 - [x] **W2.8** 速率限制：邀请/添加成员防滥用（基于 `app_workspace_audit` 的每 workspace 每小时上限，env：`TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR`）
 - [x] **W2.9** OpenAPI + 契约测试 + **邮件/无邮件** 双路径说明写入 Runbook（见 [`workspace-invite-runbook.md`](./workspace-invite-runbook.md)）
+- [x] **W2.10** `POST …/workspaces/{id}/owner-transfer`：owner 专用转让 flow 已落地；仅当前 primary owner 可执行、目标用户必须已是 member、`personal` workspace 禁止转让、提交后 `app_workspace.owner_user_id` 切到目标用户且原 owner 自动降为 `admin`，并写入 `workspace_owner_transferred` 审计；Flutter 成员管理弹窗已提供确认入口
 
 ---
 
@@ -136,7 +137,7 @@
 
 - [x] **W9.1** 文档：**Rust `DATABASE_URL`** 是否使用 **service role**；若绕过 RLS，**应用层**必须 100% 复现成员规则（对照清单）— 见 [`workspace-security-boundary.md`](./workspace-security-boundary.md)
 - [ ] **W9.2** Supabase **直连客户端**（若有）与 RLS 策略一致性测试 — 测试矩阵见 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md)，执行步骤见 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md)，发布前收口清单见 [`workspace-release-checklist.md`](./workspace-release-checklist.md)；当前脚本链已可自动产出 `summary.md` / `summary.json` / `assertion.json` / `checklist-snippet.md` / `artifact-manifest.json`
-- [x] **W9.3** 敏感操作二次确认（删空间、转 owner）— 流程见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)
+- [x] **W9.3** 敏感操作二次确认（删空间、转 owner）— 流程见 [`workspace-sensitive-operations-runbook.md`](./workspace-sensitive-operations-runbook.md)；owner 转让产品流已由 W2.10 落地并继承本文确认要求
 - [x] **W9.4** 安全评审：邀请 token 熵、过期、重放、速率限制 — 见 [`workspace-invite-security-review.md`](./workspace-invite-security-review.md)
 
 ---
