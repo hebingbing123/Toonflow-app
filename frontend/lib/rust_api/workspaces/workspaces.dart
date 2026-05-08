@@ -284,9 +284,7 @@ Future<List<WorkspaceListItem>> fetchWorkspacesV1(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => WorkspaceListItem.fromJson(e as Map<String, dynamic>))
@@ -308,9 +306,7 @@ Future<WorkspaceResponse> createWorkspaceV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceResponse.fromJson(map);
 }
@@ -323,9 +319,7 @@ Future<List<WorkspaceMemberResponse>> fetchWorkspaceMembersV1(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => WorkspaceMemberResponse.fromJson(e as Map<String, dynamic>))
@@ -359,9 +353,7 @@ Future<WorkspaceInvitesListEnvelope> fetchWorkspaceInvitesPageV1(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceInvitesListEnvelope.fromJson(map);
 }
@@ -406,9 +398,7 @@ Future<WorkspaceInviteResponse> revokeWorkspaceInviteV1(
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceInviteResponse.fromJson(map);
 }
@@ -433,9 +423,7 @@ Future<WorkspaceInviteResponse> resendWorkspaceInviteV1(
         body: jsonEncode(payload.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceInviteResponse.fromJson(map);
 }
@@ -456,9 +444,7 @@ Future<WorkspaceMemberResponse> addWorkspaceMemberV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceMemberResponse.fromJson(map);
 }
@@ -481,9 +467,7 @@ Future<WorkspaceMemberResponse> patchWorkspaceMemberV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceMemberResponse.fromJson(map);
 }
@@ -498,9 +482,7 @@ Future<WorkspaceMemberResponse> removeWorkspaceMemberV1(
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceMemberResponse.fromJson(map);
 }
@@ -513,9 +495,7 @@ Future<WorkspaceMemberResponse> leaveWorkspaceV1(
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceMemberResponse.fromJson(map);
 }
@@ -536,9 +516,7 @@ Future<WorkspaceInviteResponse> createWorkspaceInviteV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceInviteResponse.fromJson(map);
 }
@@ -558,9 +536,7 @@ Future<WorkspaceMemberResponse> acceptWorkspaceInviteV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceMemberResponse.fromJson(map);
 }
@@ -585,9 +561,7 @@ Future<WorkspaceResponse> patchWorkspaceV1(
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceResponse.fromJson(map);
 }

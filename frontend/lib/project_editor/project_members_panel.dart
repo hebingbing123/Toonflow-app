@@ -442,7 +442,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _newRole,
+                  key: ValueKey<String>('newRole-$_newRole'),
+                  initialValue: _newRole,
                   decoration: const InputDecoration(
                     labelText: '授予角色',
                     isDense: true,
@@ -509,7 +510,10 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedWorkspaceCandidateUserId,
+                      key: ValueKey<String>(
+                        'ws-${_selectedWorkspaceCandidateUserId ?? ''}',
+                      ),
+                      initialValue: _selectedWorkspaceCandidateUserId,
                       isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: '从 workspace member 里添加',
@@ -656,7 +660,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: pendingRole,
+                    key: ValueKey<String>('${row.userId}-$pendingRole'),
+                    initialValue: pendingRole,
                     decoration: const InputDecoration(
                       labelText: '更新角色',
                       isDense: true,

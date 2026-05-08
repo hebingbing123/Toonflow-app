@@ -1,14 +1,55 @@
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
+
+/// Parses **`Retry-After`** as delay seconds (integer form per RFC 9110).
+/// HTTP-date form is not parsed here (returns null).
+int? parseRetryAfterHeaderSeconds(String? raw) {
+  if (raw == null) return null;
+  final s = raw.trim();
+  if (s.isEmpty) return null;
+  return int.tryParse(s);
+}
+
 /// Thrown when the Rust API returns a non-2xx or the body cannot be parsed.
 class RustApiException implements Exception {
-  RustApiException(this.message, {this.statusCode});
+  RustApiException(
+    this.message, {
+    this.statusCode,
+    this.retryAfterMsHint,
+  });
 
   final String message;
   final int? statusCode;
 
+  /// Milliseconds suggested by **`Retry-After`** header on **429** (when JSON body omits `retry_after_ms`).
+  final int? retryAfterMsHint;
+
+  factory RustApiException.fromHttpResponse(http.Response res) {
+    final hint = res.statusCode == 429
+        ? () {
+            final sec = parseRetryAfterHeaderSeconds(res.headers['retry-after']);
+            if (sec == null || sec < 0) return null;
+            return sec * 1000;
+          }()
+        : null;
+    return RustApiException(
+      res.body,
+      statusCode: res.statusCode,
+      retryAfterMsHint: hint,
+    );
+  }
+
   @override
   String toString() => 'RustApiException($statusCode): $message';
+}
+
+/// Treat **2xx** as success; otherwise throws [RustApiException.fromHttpResponse].
+void ensureHttpSuccess(http.Response res) {
+  if (res.statusCode >= 200 && res.statusCode < 300) {
+    return;
+  }
+  throw RustApiException.fromHttpResponse(res);
 }
 
 class RustApiErrorDetails {
@@ -98,12 +139,20 @@ String formatRustApiException(RustApiException error) {
   final details = RustApiErrorDetails.tryParse(error.message);
   if (details != null) {
     if (error.statusCode == 429 || details.code == 'quota_exceeded') {
-      final waitText = details.retryAfterMs == null
+      final waitMs = details.retryAfterMs ?? error.retryAfterMsHint;
+      final waitText = waitMs == null
           ? '请稍后重试'
-          : formatRetryAfterMs(details.retryAfterMs!);
+          : formatRetryAfterMs(waitMs);
       return '配额或频率已用尽，$waitText。';
     }
     return details.message;
+  }
+  if (error.statusCode == 429) {
+    final waitMs = error.retryAfterMsHint;
+    final waitText = waitMs == null
+        ? '请稍后重试'
+        : formatRetryAfterMs(waitMs);
+    return '请求过于频繁，$waitText。';
   }
   if (error.statusCode == 404) {
     return '未找到对应记录。';
