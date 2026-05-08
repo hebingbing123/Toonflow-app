@@ -1345,6 +1345,19 @@ components:
       - size_bytes
       - created_at
       type: object
+    HarnessUserWasmRevoked:
+      properties:
+        id:
+          example: b3b4cb26-62d4-4d5c-9486-74c4c5c62c94
+          format: uuid
+          type: string
+        revoked_at:
+          format: date-time
+          type: string
+      required:
+      - id
+      - revoked_at
+      type: object
     HealthResponse:
       properties:
         service:
@@ -6554,6 +6567,47 @@ paths:
       security:
       - bearerAuth: []
       summary: '**WP‑C:** HTTP surface for **`validate_user_wasm_upload`** (size cap + wasmi parse). Does not persist.'
+      tags:
+      - harness
+  /api/v1/harness/user-wasm/{id}:
+    delete:
+      operationId: revokeHarnessUserWasmV1
+      parameters:
+      - description: Stored WASM row id
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarnessUserWasmRevoked'
+          description: Revoked or already revoked (idempotent)
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: No row for this id and owner
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: DATABASE_URL not configured / DB unavailable
+      security:
+      - bearerAuth: []
+      summary: '**WP‑C:** soft-revoke one stored WASM row (**`revoked_at`** set; row retained for audit).'
       tags:
       - harness
   /api/v1/health:

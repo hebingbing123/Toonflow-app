@@ -46,6 +46,8 @@ extension _HomePageBuildDebugSections on _HomePageState {
       onPersistUserWasmProbe: _skillsHarnessController.persistUserWasmProbe,
       onLoadUserWasmList: _skillsHarnessController.loadUserWasmList,
       onRevokeUserWasmProbe: _skillsHarnessController.revokeUserWasmProbe,
+      onRevokeUserWasmProbeAndReloadList:
+          _skillsHarnessController.revokeUserWasmProbeAndReloadList,
       onLoadSkillsAggregate: _skillsHarnessController.loadSkillsAggregate,
       onLoadSkillList: _skillsHarnessController.loadSkillList,
       onPreviewSkillFile: () =>

@@ -262,6 +262,36 @@ class SkillsHarnessController extends ChangeNotifier {
     }
   }
 
+  /// Revoke the currently selected user WASM and then reload the list so
+  /// the UI can confirm the revoked item disappears.
+  Future<void> revokeUserWasmProbeAndReloadList() async {
+    final token = _accessToken;
+    final id = userWasmRevokeTargetId;
+    if (token == null || id == null) return;
+    if (loadingUserWasmRevoke || loadingUserWasmList) return;
+
+    loadingUserWasmRevoke = true;
+    _setError(null);
+    userWasmRevokeLine = null;
+    _publish();
+
+    try {
+      final r = await revokeHarnessUserWasm(token, id);
+      userWasmRevokeLine =
+          'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
+
+      // Reload so the list filtering (`revoked_at IS NULL`) is visibly verified.
+      await loadUserWasmList();
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      loadingUserWasmRevoke = false;
+      _publish();
+    }
+  }
+
   Future<void> loadSkillsAggregate() async {
     final token = _accessToken;
     if (token == null) return;

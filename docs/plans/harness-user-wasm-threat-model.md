@@ -21,7 +21,8 @@
 ## 运维开关
 
 - 内建 **`wasm.probe`**：环境变量 **`HARNESS_WASM_PROBE_DISABLED`** 为 **`1` / `true` / `yes` / `on`** 时拒绝执行（见 `backend/README.md`）。
-- **投递体量上限（WP‑C 薄切片）**：校验辅助函数读取 **`HARNESS_USER_WASM_MAX_BYTES`**（默认 512KiB；`0` 或未解析回退默认），与 **`validate_user_wasm_upload`** / **`POST /api/v1/harness/user-wasm/validate`** 配套（仅校验体积与模块解析；不写入存储）。**Stub 持久化**：**`POST /api/v1/harness/user-wasm`** 复用同一校验并按 **`HARNESS_USER_WASM_MAX_STORED_PER_USER`**（默认 **64** 行）写入 **`app_harness_user_wasm`**；列表 **`GET`** 上限 **`HARNESS_USER_WASM_LIST_CAP`**（默认 **100**）。**吊销**、对象存储 offload、调用审计仍为 **`next`**。
+- **投递体量上限（WP‑C 薄切片）**：校验辅助函数读取 **`HARNESS_USER_WASM_MAX_BYTES`**（默认 512KiB；`0` 或未解析回退默认），与 **`validate_user_wasm_upload`** / **`POST /api/v1/harness/user-wasm/validate`** 配套（仅校验体积与模块解析；不写入存储）。**Stub 持久化**：**`POST /api/v1/harness/user-wasm`** 复用同一校验并按 **`HARNESS_USER_WASM_MAX_STORED_PER_USER`**（默认 **64** 行）写入 **`app_harness_user_wasm`**；列表 **`GET`** 上限 **`HARNESS_USER_WASM_LIST_CAP`**（默认 **100**）。对象存储 offload、调用审计仍为 **`next`**。
+- **吊销（WP‑C 软删除）**：**`DELETE /api/v1/harness/user-wasm/{id}`** 设置 **`app_harness_user_wasm.revoked_at`**；行保留用于审计，但 **`GET /api/v1/harness/user-wasm`** 会按 **`revoked_at IS NULL`** 过滤并且 **吊销行不计入配额**。
 - 未来用户 WASM 注册路径须复用或扩展 **同一类** 全局 kill-switch（待 WP-C 实装）。
 
 ## 开放问题

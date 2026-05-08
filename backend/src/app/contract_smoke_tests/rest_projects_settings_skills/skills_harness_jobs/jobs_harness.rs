@@ -158,6 +158,15 @@ async fn harness_user_wasm_revoke_unauthorized_without_bearer() {
 }
 
 #[tokio::test]
+async fn harness_user_wasm_revoke_rejects_non_uuid_id_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let uri = format!("{USER_WASM_STORE_URI}/not-a-uuid");
+    let (status, v) = delete_json_bearer(&uri, &token).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(v["code"], "bad_request");
+}
+
+#[tokio::test]
 async fn harness_user_wasm_revoke_returns_database_error_without_pg() {
     let token = test_jwt(Uuid::nil());
     let uri = format!("{USER_WASM_STORE_URI}/{NIL_UUID}");

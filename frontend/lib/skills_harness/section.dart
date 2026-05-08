@@ -40,6 +40,7 @@ class HarnessSection extends StatelessWidget {
     required this.onPersistUserWasmProbe,
     required this.onLoadUserWasmList,
     required this.onRevokeUserWasmProbe,
+    required this.onRevokeUserWasmProbeAndReloadList,
     required this.onLoadSkillsAggregate,
     required this.onLoadSkillList,
     required this.onPreviewSkillFile,
@@ -92,6 +93,7 @@ class HarnessSection extends StatelessWidget {
   final VoidCallback onPersistUserWasmProbe;
   final VoidCallback onLoadUserWasmList;
   final VoidCallback onRevokeUserWasmProbe;
+  final VoidCallback onRevokeUserWasmProbeAndReloadList;
   final VoidCallback onLoadSkillsAggregate;
   final VoidCallback onLoadSkillList;
   final VoidCallback onPreviewSkillFile;
@@ -153,6 +155,18 @@ class HarnessSection extends StatelessWidget {
                 loadingUserWasmRevoke
                     ? '…'
                     : 'DELETE …/user-wasm/${userWasmRevokeTargetId!.substring(0, 8)}…',
+              ),
+            ),
+            FilledButton.tonal(
+              onPressed: (loadingUserWasmRevoke ||
+                      loadingUserWasmList ||
+                      userWasmRevokeTargetId == null)
+                  ? null
+                  : onRevokeUserWasmProbeAndReloadList,
+              child: Text(
+                (loadingUserWasmRevoke || loadingUserWasmList)
+                    ? '…'
+                    : 'DELETE+GET list …/${userWasmRevokeTargetId!.substring(0, 8)}…',
               ),
             ),
             FilledButton.tonal(
