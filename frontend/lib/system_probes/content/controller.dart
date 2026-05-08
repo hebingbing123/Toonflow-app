@@ -108,7 +108,10 @@ class ContentProbesController extends ChangeNotifier {
           totalChars += entry.data.length;
         }
       }
-      final sample = manual.styles.take(4).map((style) => style.name).join(', ');
+      final sample = manual.styles
+          .take(4)
+          .map((style) => style.name)
+          .join(', ');
       visualManualProbeBody =
           'GET+POST styles=${manual.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';

@@ -20,6 +20,7 @@ YAML：`flutter-shell`。
 | `short_video_space/*` 静态分析告警清零 | `next` | **必做** |
 | Web：CORS / token / 深链方案文档化 | `next` | **必做**；与 [`roadmap-repo-contract-infra.md`](./roadmap-repo-contract-infra.md) 联动 |
 | 大屏信息架构（减少单文件复杂度） | `next` | **必做**；≤800 行/file |
+| 429 / 配额耗尽统一 UX | `tracked` | 共享 `Retry-After` / `retry_after_ms` 解释层 + 全局 Snackbar；与 [`platform-capabilities-backlog.md`](./platform-capabilities-backlog.md) P-D3 联动 |
 
 ## 验收
 
@@ -63,3 +64,14 @@ YAML：`flutter-shell`。
 | **触点** | `frontend/lib/project_editor/`；`frontend/lib/agent_workspaces/`；`frontend/lib/short_video_space/`。 |
 | **测试** | `flutter analyze`；关键路径手动点测。 |
 | **回滚** | Git revert 单 PR。 |
+
+### WP-D：429 / 配额耗尽统一 UX
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 把 Rust API 的 `429`、`quota_exceeded`、`Retry-After`、`retry_after_ms` 统一翻译成用户可读提示，并让主路径默认走共享反馈层。 |
+| **依赖** | 后端错误体与 header 已存在；优先复用 [`frontend/lib/platform/rust_api_feedback.dart`](../../frontend/lib/platform/rust_api_feedback.dart)。 |
+| **PR 切片** | （1）共享错误解释 / Snackbar helper；（2）Projects / Jobs / Task Center / Team Workspaces / probes 接入；（3）文档回链到平台补遗表。 |
+| **触点** | `frontend/lib/platform/`、`frontend/lib/*controller.dart`、团队 workspace 入口；必要时补 `rust_api/core.dart` 解析。 |
+| **测试** | 后续门禁时补 widget / controller 定向验证：`429`、`quota_exceeded`、普通 `404/403` 文案分流正确。 |
+| **回滚** | helper 与接入点按文件 revert，不影响后端协议。 |

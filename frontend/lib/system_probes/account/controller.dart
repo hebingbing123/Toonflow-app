@@ -217,9 +217,7 @@ class AccountProbesController extends ChangeNotifier {
         reinstall: true,
       );
       if (downloadStatus != 200) {
-        throw StateError(
-          'POST download-app expected 200, got $downloadStatus',
-        );
+        throw StateError('POST download-app expected 200, got $downloadStatus');
       }
       aboutProbeBody =
           'check-update: needUpdate=${checkUpdate.needUpdate} '

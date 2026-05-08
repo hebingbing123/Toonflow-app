@@ -5,8 +5,8 @@ import '../rust_api/core.dart';
 /// Root [ScaffoldMessenger] for API errors when no local [BuildContext] is in scope.
 final GlobalKey<ScaffoldMessengerState> kRustApiRootScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>(
-  debugLabel: 'rustApiRootScaffoldMessenger',
-);
+      debugLabel: 'rustApiRootScaffoldMessenger',
+    );
 
 bool isRustApiQuotaOrRateError(Object error) {
   if (error is! RustApiException) {

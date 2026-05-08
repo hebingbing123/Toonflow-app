@@ -392,7 +392,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     bool inviteHasMore = false;
     bool loadingMoreInvites = false;
 
-    Future<void> loadMembers(StateSetter setModalState, {bool append = false}) async {
+    Future<void> loadMembers(
+      StateSetter setModalState, {
+      bool append = false,
+    }) async {
       if (!append) {
         setModalState(() {
           loading = true;
@@ -584,7 +587,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               },
                         child: Text(inviting ? '生成邀请中…' : '生成邀请链接'),
                       ),
-                      if (row.role == 'owner' || row.role == 'admin') ...<Widget>[
+                      if (row.role == 'owner' ||
+                          row.role == 'admin') ...<Widget>[
                         const SizedBox(height: 8),
                         Text(
                           '平台邀请（服务端）',
@@ -599,7 +603,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           onChanged: loading
                               ? null
                               : (v) async {
-                                  setModalState(() => includeRevokedInvites = v);
+                                  setModalState(
+                                    () => includeRevokedInvites = v,
+                                  );
                                   await loadMembers(setModalState);
                                 },
                         ),
@@ -682,25 +688,29 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       ? null
                                       : () async {
                                           setModalState(
-                                            () => inviteActionBusyId = invite.id,
+                                            () =>
+                                                inviteActionBusyId = invite.id,
                                           );
                                           try {
                                             final next =
                                                 await resendWorkspaceInviteV1(
-                                              token,
-                                              row.workspace.id,
-                                              invite.id,
-                                            );
+                                                  token,
+                                                  row.workspace.id,
+                                                  invite.id,
+                                                );
                                             setModalState(() {
-                                              final i = pendingInvites.indexWhere(
-                                                (e) => e.id == invite.id,
-                                              );
+                                              final i = pendingInvites
+                                                  .indexWhere(
+                                                    (e) => e.id == invite.id,
+                                                  );
                                               if (i >= 0) {
                                                 pendingInvites[i] = next;
                                               }
                                             });
                                           } catch (e) {
-                                            setModalState(() => error = e.toString());
+                                            setModalState(
+                                              () => error = e.toString(),
+                                            );
                                           } finally {
                                             setModalState(
                                               () => inviteActionBusyId = null,
@@ -710,26 +720,30 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 ),
                                 IconButton(
                                   tooltip: '撤销邀请',
-                                  icon: const Icon(Icons.cancel_outlined, size: 18),
+                                  icon: const Icon(
+                                    Icons.cancel_outlined,
+                                    size: 18,
+                                  ),
                                   onPressed: inviteActionBusyId != null
                                       ? null
                                       : () async {
                                           setModalState(
-                                            () => inviteActionBusyId = invite.id,
+                                            () =>
+                                                inviteActionBusyId = invite.id,
                                           );
                                           try {
                                             final next =
                                                 await revokeWorkspaceInviteV1(
-                                              token,
-                                              row.workspace.id,
-                                              invite.id,
-                                            );
+                                                  token,
+                                                  row.workspace.id,
+                                                  invite.id,
+                                                );
                                             setModalState(() {
                                               if (includeRevokedInvites) {
-                                                final i =
-                                                    pendingInvites.indexWhere(
-                                                  (e) => e.id == invite.id,
-                                                );
+                                                final i = pendingInvites
+                                                    .indexWhere(
+                                                      (e) => e.id == invite.id,
+                                                    );
                                                 if (i >= 0) {
                                                   pendingInvites[i] = next;
                                                 }
@@ -740,7 +754,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                               }
                                             });
                                           } catch (e) {
-                                            setModalState(() => error = e.toString());
+                                            setModalState(
+                                              () => error = e.toString(),
+                                            );
                                           } finally {
                                             setModalState(
                                               () => inviteActionBusyId = null,
@@ -784,9 +800,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               onPressed: loading || loadingMoreInvites
                                   ? null
                                   : () => loadMembers(
-                                        setModalState,
-                                        append: true,
-                                      ),
+                                      setModalState,
+                                      append: true,
+                                    ),
                               child: Text(
                                 loadingMoreInvites ? '加载中…' : '加载更多邀请',
                               ),
@@ -1321,14 +1337,16 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                 try {
                                                   final next =
                                                       await resendWorkspaceInviteV1(
-                                                    token,
-                                                    row.workspace.id,
-                                                    invite.id,
-                                                  );
+                                                        token,
+                                                        row.workspace.id,
+                                                        invite.id,
+                                                      );
                                                   setModalState(() {
-                                                    final i = invites.indexWhere(
-                                                      (e) => e.id == invite.id,
-                                                    );
+                                                    final i = invites
+                                                        .indexWhere(
+                                                          (e) =>
+                                                              e.id == invite.id,
+                                                        );
                                                     if (i >= 0) {
                                                       invites[i] = next;
                                                     }
@@ -1339,8 +1357,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                   );
                                                 } finally {
                                                   setModalState(
-                                                    () => inviteMgmtBusyId =
-                                                        null,
+                                                    () =>
+                                                        inviteMgmtBusyId = null,
                                                   );
                                                 }
                                               },
@@ -1357,14 +1375,16 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                 try {
                                                   final next =
                                                       await revokeWorkspaceInviteV1(
-                                                    token,
-                                                    row.workspace.id,
-                                                    invite.id,
-                                                  );
+                                                        token,
+                                                        row.workspace.id,
+                                                        invite.id,
+                                                      );
                                                   setModalState(() {
-                                                    final i = invites.indexWhere(
-                                                      (e) => e.id == invite.id,
-                                                    );
+                                                    final i = invites
+                                                        .indexWhere(
+                                                          (e) =>
+                                                              e.id == invite.id,
+                                                        );
                                                     if (i >= 0) {
                                                       invites[i] = next;
                                                     }
@@ -1375,8 +1395,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                   );
                                                 } finally {
                                                   setModalState(
-                                                    () => inviteMgmtBusyId =
-                                                        null,
+                                                    () =>
+                                                        inviteMgmtBusyId = null,
                                                   );
                                                 }
                                               },
