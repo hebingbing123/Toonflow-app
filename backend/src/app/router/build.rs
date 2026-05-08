@@ -93,6 +93,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings::dev::router())
         .merge(settings::help_hub::router())
         .merge(settings::memory_config::router())
+        .merge(settings::outbound_webhooks::router())
         .merge(settings::vendors::router())
         .route("/api/v1/me", get(handlers::me))
         .route(

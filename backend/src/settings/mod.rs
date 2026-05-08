@@ -13,6 +13,7 @@
 //! - `agent_deploy` — 代理部署
 //! - `agent_memory` — 代理记忆
 //! - `help_hub` — 应用内帮助 Hub
+//! - `outbound_webhooks` — 出站 Webhook
 
 pub mod about;
 pub mod agent_deploy;
@@ -22,6 +23,7 @@ pub mod dev;
 pub mod help_hub;
 pub mod memory_config;
 pub mod openapi;
+pub mod outbound_webhooks;
 pub mod vendors;
 
 pub use openapi::SettingsOpenApi;

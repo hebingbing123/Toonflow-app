@@ -18,7 +18,7 @@ COMMENT ON COLUMN public.app_agent_memory.scope_signature IS
 
 -- 为 memory_tier 添加索引，支持按层级过滤查询
 CREATE INDEX IF NOT EXISTS idx_app_agent_memory_tier
-    ON public.app_agent_memory (owner_user_id, legacy_project_id, agent_type, memory_tier);
+    ON public.app_agent_memory (owner_user_id, numeric_project_id, agent_type, memory_tier);
 
 -- ============================================================
 -- 2. app_skill_versions：新增技能文件版本管理表

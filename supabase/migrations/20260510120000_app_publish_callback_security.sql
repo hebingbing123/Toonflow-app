@@ -16,13 +16,11 @@ CREATE TABLE IF NOT EXISTS public.app_publish_callback_nonce (
 
 -- Index for efficient nonce lookup during validation
 CREATE INDEX IF NOT EXISTS idx_app_publish_callback_nonce_lookup 
-  ON public.app_publish_callback_nonce (nonce, platform_id, expires_at)
-  WHERE expires_at > NOW();
+  ON public.app_publish_callback_nonce (nonce, platform_id, expires_at);
 
 -- Index for cleanup of expired nonces
 CREATE INDEX IF NOT EXISTS idx_app_publish_callback_nonce_cleanup 
-  ON public.app_publish_callback_nonce (expires_at)
-  WHERE expires_at <= NOW();
+  ON public.app_publish_callback_nonce (expires_at);
 
 -- Table for storing platform-specific callback secrets
 CREATE TABLE IF NOT EXISTS public.app_publish_platform_secret (

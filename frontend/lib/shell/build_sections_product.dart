@@ -333,6 +333,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   bool _loading = false;
   String? _error;
   HelpHubLinksResponseV1? _resp;
+  bool _loadingWebhooks = false;
+  String? _webhooksError;
+  OutboundWebhookListResponseV1? _webhooks;
+  final _webhookUrlController = TextEditingController();
 
   Future<void> _load() async {
     final token = widget.accessToken;
@@ -376,6 +380,174 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   void initState() {
     super.initState();
     unawaited(_load());
+    unawaited(_loadWebhooks());
+  }
+
+  @override
+  void dispose() {
+    _webhookUrlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadWebhooks() async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _webhooksError = '请先登录';
+        _webhooks = null;
+      });
+      return;
+    }
+    setState(() {
+      _loadingWebhooks = true;
+      _webhooksError = null;
+    });
+    try {
+      final resp = await getSettingsOutboundWebhookListV1(token);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooks = resp;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooksError = e.toString();
+        _webhooks = null;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingWebhooks = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _createWebhook() async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final url = _webhookUrlController.text.trim();
+    if (url.isEmpty) {
+      setState(() {
+        _webhooksError = 'URL 不能为空';
+      });
+      return;
+    }
+    setState(() {
+      _loadingWebhooks = true;
+      _webhooksError = null;
+    });
+    try {
+      final created = await postSettingsOutboundWebhookCreateV1(
+        token,
+        OutboundWebhookCreateBodyV1(url: url),
+      );
+      if (!mounted) {
+        return;
+      }
+      _webhookUrlController.clear();
+      await Clipboard.setData(ClipboardData(text: created.secret));
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已创建；secret 已复制到剪贴板')),
+      );
+      await _loadWebhooks();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooksError = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingWebhooks = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteWebhook(String id) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    setState(() {
+      _loadingWebhooks = true;
+      _webhooksError = null;
+    });
+    try {
+      await deleteSettingsOutboundWebhookV1(token, id);
+      if (!mounted) {
+        return;
+      }
+      await _loadWebhooks();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooksError = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingWebhooks = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _testWebhook(String id) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    setState(() {
+      _loadingWebhooks = true;
+      _webhooksError = null;
+    });
+    try {
+      final res = await postSettingsOutboundWebhookTestV1(
+        token,
+        id,
+        const OutboundWebhookTestBodyV1(eventType: 'test.ping'),
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            res.delivered
+                ? '投递成功（${res.httpStatus ?? '-'}）'
+                : '投递失败：${res.error ?? 'unknown'}',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooksError = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingWebhooks = false;
+        });
+      }
+    }
   }
 
   @override
@@ -434,6 +606,72 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           );
                         },
                         icon: const Icon(Icons.copy),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+          Text('出站 Webhook', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _webhookUrlController,
+            decoration: const InputDecoration(
+              labelText: 'Webhook URL',
+              hintText: 'https://example.com/webhook',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.tonal(
+                onPressed: _loadingWebhooks ? null : _createWebhook,
+                child: Text(_loadingWebhooks ? '请求中…' : '创建'),
+              ),
+              OutlinedButton(
+                onPressed: _loadingWebhooks ? null : _loadWebhooks,
+                child: const Text('刷新列表'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_loadingWebhooks) const Text('加载中...'),
+          if (_webhooksError != null)
+            Text(_webhooksError!, style: const TextStyle(color: Colors.red)),
+          if (_webhooks != null)
+            ..._webhooks!.items.map(
+              (wh) => Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              wh.url,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Text('id: ${wh.id}'),
+                            Text('createdAt: ${wh.createdAt}'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed: _loadingWebhooks ? null : () => _testWebhook(wh.id),
+                        child: const Text('测试投递'),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed:
+                            _loadingWebhooks ? null : () => _deleteWebhook(wh.id),
+                        child: const Text('删除'),
                       ),
                     ],
                   ),

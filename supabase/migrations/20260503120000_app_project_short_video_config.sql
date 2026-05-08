@@ -28,13 +28,13 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
 DECLARE
   p_count bigint;
   s_count bigint;
 BEGIN
   INSERT INTO public.app_project (
-    legacy_id,
+    numeric_id,
     name,
     intro,
     project_type,
@@ -51,7 +51,7 @@ BEGIN
     voice_profile,
     subtitle_style,
     bgm_strategy,
-    legacy_user_id,
+    import_user_id,
     create_time_ms,
     owner_user_id,
     metadata
@@ -83,7 +83,7 @@ BEGIN
     m.supabase_user_id,
     COALESCE(s.payload, '{}'::jsonb)
   FROM import_staging.snapshot s
-  LEFT JOIN public.legacy_user_map m ON m.legacy_user_id = NULLIF (s.payload ->> 'userId', '')::integer
+  LEFT JOIN public.import_user_map m ON m.import_user_id = NULLIF (s.payload ->> 'userId', '')::integer
   WHERE
     s.source_table = 'o_project'
     AND s.payload ? 'id'
@@ -105,7 +105,7 @@ BEGIN
     voice_profile = EXCLUDED.voice_profile,
     subtitle_style = EXCLUDED.subtitle_style,
     bgm_strategy = EXCLUDED.bgm_strategy,
-    legacy_user_id = EXCLUDED.legacy_user_id,
+    import_user_id = EXCLUDED.import_user_id,
     create_time_ms = EXCLUDED.create_time_ms,
     owner_user_id = COALESCE(EXCLUDED.owner_user_id, public.app_project.owner_user_id),
     metadata = EXCLUDED.metadata,
@@ -121,7 +121,7 @@ BEGIN
     extract_state,
     create_time_ms,
     error_reason,
-    legacy_project_id,
+    numeric_project_id,
     metadata
   )
   SELECT
@@ -147,7 +147,7 @@ BEGIN
     extract_state = EXCLUDED.extract_state,
     create_time_ms = EXCLUDED.create_time_ms,
     error_reason = EXCLUDED.error_reason,
-    legacy_project_id = EXCLUDED.legacy_project_id,
+    numeric_project_id = EXCLUDED.numeric_project_id,
     metadata = EXCLUDED.metadata,
     updated_at = NOW();
 
@@ -156,6 +156,6 @@ BEGIN
   RETURN QUERY
   SELECT p_count, s_count;
 END;
-$;
+$$;
 
 COMMENT ON FUNCTION public.promote_legacy_from_staging IS 'Upsert app_project from o_project snapshots and app_script from o_script; run after import; service_role only';
