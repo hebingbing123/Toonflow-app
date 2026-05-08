@@ -93,6 +93,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
     };
     var filterState = FilterState.empty();
     var operationInProgress = false;
+    var selectedStoryboardIds = <int>{}; // Batch selection state
     if (!mounted) return;
     await showDialog<void>(
       context: context,
@@ -388,6 +389,75 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               );
             }
 
+            /// Build highlighted text widget for search results
+            Widget buildHighlightedText(
+              String text,
+              String keyword, {
+              TextStyle? style,
+            }) {
+              if (keyword.isEmpty || text.isEmpty) {
+                return Text(text, style: style);
+              }
+
+              final lowerText = text.toLowerCase();
+              final lowerKeyword = keyword.toLowerCase();
+              final matches = <int>[];
+              
+              // Find all occurrences of the keyword
+              var startIndex = 0;
+              while (true) {
+                final index = lowerText.indexOf(lowerKeyword, startIndex);
+                if (index == -1) break;
+                matches.add(index);
+                startIndex = index + lowerKeyword.length;
+              }
+
+              if (matches.isEmpty) {
+                return Text(text, style: style);
+              }
+
+              // Build text spans with highlighting
+              final spans = <TextSpan>[];
+              var currentIndex = 0;
+
+              for (final matchIndex in matches) {
+                // Add text before match
+                if (matchIndex > currentIndex) {
+                  spans.add(TextSpan(
+                    text: text.substring(currentIndex, matchIndex),
+                    style: style,
+                  ));
+                }
+
+                // Add highlighted match
+                spans.add(TextSpan(
+                  text: text.substring(
+                    matchIndex,
+                    matchIndex + lowerKeyword.length,
+                  ),
+                  style: (style ?? const TextStyle()).copyWith(
+                    backgroundColor: Theme.of(ctx).colorScheme.primaryContainer,
+                    color: Theme.of(ctx).colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ));
+
+                currentIndex = matchIndex + lowerKeyword.length;
+              }
+
+              // Add remaining text
+              if (currentIndex < text.length) {
+                spans.add(TextSpan(
+                  text: text.substring(currentIndex),
+                  style: style,
+                ));
+              }
+
+              return RichText(
+                text: TextSpan(children: spans),
+              );
+            }
+
             bool matchesStatusFilters(_AssemblyClipDeskOpEntry item) {
               if (filterState.statusFilters.isEmpty) {
                 return true;
@@ -562,6 +632,118 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                       },
                     ),
                     const SizedBox(height: 8),
+                    // Batch operation toolbar
+                    if (visibleEntries.isNotEmpty)
+                      BatchOperationToolbar(
+                        totalCount: visibleEntries.length,
+                        selectedIds: selectedStoryboardIds,
+                        onSelectionChanged: (newSelection) {
+                          setLocalState(() {
+                            selectedStoryboardIds = newSelection;
+                          });
+                        },
+                        onSelectAll: () {
+                          setLocalState(() {
+                            selectedStoryboardIds = visibleEntries
+                                .map((e) => e.storyboardNumericId)
+                                .toSet();
+                          });
+                        },
+                        onDeselectAll: () {
+                          setLocalState(() {
+                            selectedStoryboardIds.clear();
+                          });
+                        },
+                        onBatchEnable: () async {
+                          setLocalState(() {
+                            operationInProgress = true;
+                          });
+                          await _batchEnableShots(
+                            selectedStoryboardIds: selectedStoryboardIds,
+                            allEntries: ordered,
+                            projectId: project.numericId,
+                            scriptId: ordered.first.scriptNumericId,
+                            token: token,
+                            showFeedback: _showOperationFeedback,
+                            refreshData: _loadProjectOverview,
+                          );
+                          setLocalState(() {
+                            operationInProgress = false;
+                            selectedStoryboardIds.clear();
+                          });
+                        },
+                        onBatchDisable: () async {
+                          setLocalState(() {
+                            operationInProgress = true;
+                          });
+                          await _batchDisableShots(
+                            selectedStoryboardIds: selectedStoryboardIds,
+                            projectId: project.numericId,
+                            scriptId: ordered.first.scriptNumericId,
+                            token: token,
+                            showFeedback: _showOperationFeedback,
+                            refreshData: _loadProjectOverview,
+                          );
+                          setLocalState(() {
+                            operationInProgress = false;
+                            selectedStoryboardIds.clear();
+                          });
+                        },
+                        onBatchUpdateDuration: () async {
+                          setLocalState(() {
+                            operationInProgress = true;
+                          });
+                          await _batchUpdateDuration(
+                            selectedStoryboardIds: selectedStoryboardIds,
+                            projectId: project.numericId,
+                            scriptId: ordered.first.scriptNumericId,
+                            token: token,
+                            context: ctx,
+                            showFeedback: _showOperationFeedback,
+                            refreshData: _loadProjectOverview,
+                          );
+                          setLocalState(() {
+                            operationInProgress = false;
+                            selectedStoryboardIds.clear();
+                          });
+                        },
+                        onBatchReplace: () async {
+                          setLocalState(() {
+                            operationInProgress = true;
+                          });
+                          await _batchReplaceVideos(
+                            selectedStoryboardIds: selectedStoryboardIds,
+                            allEntries: ordered,
+                            projectId: project.numericId,
+                            scriptId: ordered.first.scriptNumericId,
+                            token: token,
+                            context: ctx,
+                            showFeedback: _showOperationFeedback,
+                            refreshData: _loadProjectOverview,
+                          );
+                          setLocalState(() {
+                            operationInProgress = false;
+                            selectedStoryboardIds.clear();
+                          });
+                        },
+                        onBatchGenerateVoiceover: () async {
+                          setLocalState(() {
+                            operationInProgress = true;
+                          });
+                          await _batchGenerateVoiceover(
+                            selectedStoryboardIds: selectedStoryboardIds,
+                            allEntries: ordered,
+                            context: ctx,
+                            showFeedback: _showOperationFeedback,
+                          );
+                          setLocalState(() {
+                            operationInProgress = false;
+                            selectedStoryboardIds.clear();
+                          });
+                        },
+                        isOperationInProgress: operationInProgress,
+                      ),
+                    const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Wrap(
@@ -612,9 +794,35 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             margin: const EdgeInsets.only(bottom: 8),
                             child: Padding(
                               padding: const EdgeInsets.all(8),
-                              child: Column(
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // Checkbox for batch selection
+                                  Checkbox(
+                                    value: selectedStoryboardIds.contains(
+                                      item.storyboardNumericId,
+                                    ),
+                                    onChanged: operationInProgress
+                                        ? null
+                                        : (checked) {
+                                            setLocalState(() {
+                                              if (checked == true) {
+                                                selectedStoryboardIds.add(
+                                                  item.storyboardNumericId,
+                                                );
+                                              } else {
+                                                selectedStoryboardIds.remove(
+                                                  item.storyboardNumericId,
+                                                );
+                                              }
+                                            });
+                                          },
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
                                   Text(
                                     '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${actualIndex + 1}',
                                   ),
@@ -625,9 +833,23 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                         : '状态：启用（${item.selectedMediaKind}）',
                                   ),
                                   const SizedBox(height: 2),
-                                  Text(
-                                    '时长：${item.durationText.isEmpty ? "未设定" : item.durationText} · '
-                                    '字幕：${item.subtitleText.isEmpty ? "空" : "已填"}',
+                                  Row(
+                                    children: [
+                                      const Text('时长：'),
+                                      buildHighlightedText(
+                                        item.durationText.isEmpty ? "未设定" : item.durationText,
+                                        filterState.searchKeyword,
+                                      ),
+                                      const Text(' · 字幕：'),
+                                      Flexible(
+                                        child: buildHighlightedText(
+                                          item.subtitleText.isEmpty ? "空" : item.subtitleText,
+                                          filterState.searchInSubtitles
+                                              ? filterState.searchKeyword
+                                              : '',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 2),
                                   // 配音状态展示
@@ -637,26 +859,53 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                   ),
                                   if (item.voiceoverState.isNotEmpty) ...[
                                     const SizedBox(height: 2),
-                                    Text(
-                                      '配音状态：${item.voiceoverState}',
+                                    Row(
+                                      children: [
+                                        const Text('配音状态：'),
+                                        buildHighlightedText(
+                                          item.voiceoverState,
+                                          filterState.searchInVoiceover
+                                              ? filterState.searchKeyword
+                                              : '',
+                                        ),
+                                      ],
                                     ),
                                   ],
                                   if (item.voiceoverAudioUrl.isNotEmpty) ...[
                                     const SizedBox(height: 2),
-                                    Text(
-                                      '配音音频：${item.voiceoverAudioUrl}',
-                                      style: Theme.of(ctx).textTheme.bodySmall,
-                                      overflow: TextOverflow.ellipsis,
+                                    Row(
+                                      children: [
+                                        const Text('配音音频：'),
+                                        Flexible(
+                                          child: buildHighlightedText(
+                                            item.voiceoverAudioUrl,
+                                            filterState.searchInVoiceover
+                                                ? filterState.searchKeyword
+                                                : '',
+                                            style: Theme.of(ctx).textTheme.bodySmall,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                   if (item.voiceoverState == 'failed' &&
                                       item.voiceoverError.isNotEmpty) ...[
                                     const SizedBox(height: 2),
-                                    Text(
-                                      '配音错误：${item.voiceoverError}',
-                                      style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                            color: Theme.of(ctx).colorScheme.error,
+                                    Row(
+                                      children: [
+                                        const Text('配音错误：'),
+                                        Flexible(
+                                          child: buildHighlightedText(
+                                            item.voiceoverError,
+                                            filterState.searchInVoiceover
+                                                ? filterState.searchKeyword
+                                                : '',
+                                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                                  color: Theme.of(ctx).colorScheme.error,
+                                                ),
                                           ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                   const SizedBox(height: 2),
@@ -778,7 +1027,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                 ],
                               ),
                             ),
-                          );
+                          ],
+                        ),
+                      ),
+                    );
                         },
                       ),
                     ),

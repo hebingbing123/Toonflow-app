@@ -356,6 +356,9 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
         _publishBusy = false;
         _publishCopyEditorRevision = 0;
       });
+      
+      // Load drafts and versions after assembly is loaded
+      await _loadDraftsAndVersions();
     } finally {
       if (mounted) {
         setState(() {

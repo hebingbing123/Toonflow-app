@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../rust_api.dart';
+import 'components/batch_operation_toolbar.dart';
 import 'components/filter_panel.dart';
 import 'components/version_manager.dart';
 import 'state/operation_history.dart';
@@ -13,6 +14,7 @@ import 'view.dart';
 part 'section_project.dart';
 part 'section_production.dart';
 part 'section_production_assembly.dart';
+part 'section_production_batch_operations.dart';
 part 'section_draft_management.dart';
 part 'section_publish.dart';
 part 'section_publish_scheduling.dart';
