@@ -167,3 +167,210 @@ Future<SelectVideoResponse> postWorkbenchSelectVideoV1(
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SelectVideoResponse.fromJson(map);
 }
+
+/// Batch operation result for a single storyboard
+class BatchOperationResult {
+  const BatchOperationResult({
+    required this.storyboardId,
+    required this.status,
+    this.videoUrl,
+    this.duration,
+    this.error,
+  });
+
+  final int storyboardId;
+  final String status; // 'success' or 'failed'
+  final String? videoUrl;
+  final int? duration;
+  final String? error;
+
+  factory BatchOperationResult.fromJson(Map<String, dynamic> json) {
+    return BatchOperationResult(
+      storyboardId: (json['storyboardId'] as num).toInt(),
+      status: json['status'] as String,
+      videoUrl: json['videoUrl'] as String?,
+      duration: (json['duration'] as num?)?.toInt(),
+      error: json['error'] as String?,
+    );
+  }
+}
+
+/// OpenAPI **`BatchSelectVideoResponse`**.
+class BatchSelectVideoResponse {
+  const BatchSelectVideoResponse({
+    required this.success,
+    required this.failed,
+    required this.results,
+    required this.message,
+  });
+
+  final int success;
+  final int failed;
+  final List<BatchOperationResult> results;
+  final String message;
+
+  factory BatchSelectVideoResponse.fromJson(Map<String, dynamic> json) {
+    return BatchSelectVideoResponse(
+      success: (json['success'] as num).toInt(),
+      failed: (json['failed'] as num).toInt(),
+      results: (json['results'] as List<dynamic>)
+          .map((item) => BatchOperationResult.fromJson(item as Map<String, dynamic>))
+          .toList(growable: false),
+      message: json['message'] as String,
+    );
+  }
+}
+
+/// `POST /api/v1/production/workbench/batch-select-video` — OpenAPI `postProductionWorkbenchBatchSelectVideoV1`.
+Future<BatchSelectVideoResponse> postProductionWorkbenchBatchSelectVideoV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required List<Map<String, dynamic>> operations,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/workbench/batch-select-video',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'operations': operations,
+        }),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return BatchSelectVideoResponse.fromJson(map);
+}
+
+/// OpenAPI **`BatchDeleteVideoResponse`**.
+class BatchDeleteVideoResponse {
+  const BatchDeleteVideoResponse({
+    required this.success,
+    required this.failed,
+    required this.results,
+    required this.message,
+  });
+
+  final int success;
+  final int failed;
+  final List<BatchOperationResult> results;
+  final String message;
+
+  factory BatchDeleteVideoResponse.fromJson(Map<String, dynamic> json) {
+    return BatchDeleteVideoResponse(
+      success: (json['success'] as num).toInt(),
+      failed: (json['failed'] as num).toInt(),
+      results: (json['results'] as List<dynamic>)
+          .map((item) => BatchOperationResult.fromJson(item as Map<String, dynamic>))
+          .toList(growable: false),
+      message: json['message'] as String,
+    );
+  }
+}
+
+/// `POST /api/v1/production/workbench/batch-delete-video` — OpenAPI `postProductionWorkbenchBatchDeleteVideoV1`.
+Future<BatchDeleteVideoResponse> postProductionWorkbenchBatchDeleteVideoV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required List<int> storyboardIds,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/workbench/batch-delete-video',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'storyboardIds': storyboardIds,
+        }),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return BatchDeleteVideoResponse.fromJson(map);
+}
+
+/// OpenAPI **`BatchUpdateDurationResponse`**.
+class BatchUpdateDurationResponse {
+  const BatchUpdateDurationResponse({
+    required this.success,
+    required this.failed,
+    required this.results,
+    required this.message,
+  });
+
+  final int success;
+  final int failed;
+  final List<BatchOperationResult> results;
+  final String message;
+
+  factory BatchUpdateDurationResponse.fromJson(Map<String, dynamic> json) {
+    return BatchUpdateDurationResponse(
+      success: (json['success'] as num).toInt(),
+      failed: (json['failed'] as num).toInt(),
+      results: (json['results'] as List<dynamic>)
+          .map((item) => BatchOperationResult.fromJson(item as Map<String, dynamic>))
+          .toList(growable: false),
+      message: json['message'] as String,
+    );
+  }
+}
+
+/// `POST /api/v1/production/workbench/batch-update-duration` — OpenAPI `postProductionWorkbenchBatchUpdateDurationV1`.
+Future<BatchUpdateDurationResponse> postProductionWorkbenchBatchUpdateDurationV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required List<Map<String, dynamic>> operations,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/workbench/batch-update-duration',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'operations': operations,
+        }),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return BatchUpdateDurationResponse.fromJson(map);
+}

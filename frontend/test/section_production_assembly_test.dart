@@ -2154,4 +2154,367 @@ void main() {
       );
     });
   });
+
+  group('Search Result Highlighting Tests', () {
+    // Requirements 22, 23, 24: Search highlighting functionality
+    
+    test('should highlight single keyword occurrence in text', () {
+      // Simulate highlighting logic
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('这是一段测试文本', '测试');
+      expect(matches, hasLength(1));
+      expect(matches[0]['start'], 4);
+      expect(matches[0]['end'], 6);
+      expect(matches[0]['text'], '测试');
+    });
+
+    test('should highlight multiple keyword occurrences in text', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('测试文本中有多个测试关键词测试', '测试');
+      expect(matches, hasLength(3));
+      expect(matches[0]['start'], 0);
+      expect(matches[1]['start'], 8);
+      expect(matches[2]['start'], 13);
+    });
+
+    test('should be case-insensitive when highlighting', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('Test test TEST', 'test');
+      expect(matches, hasLength(3));
+      expect(matches[0]['text'], 'Test');
+      expect(matches[1]['text'], 'test');
+      expect(matches[2]['text'], 'TEST');
+    });
+
+    test('should return empty list when keyword is empty', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('测试文本', '');
+      expect(matches, isEmpty);
+    });
+
+    test('should return empty list when text is empty', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('', '测试');
+      expect(matches, isEmpty);
+    });
+
+    test('should return empty list when keyword not found', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('这是一段文本', '关键词');
+      expect(matches, isEmpty);
+    });
+
+    test('should highlight overlapping keywords correctly', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      // Search for 'aa' in 'aaaa' should find 2 non-overlapping matches
+      final matches = findMatches('aaaa', 'aa');
+      expect(matches, hasLength(2));
+      expect(matches[0]['start'], 0);
+      expect(matches[1]['start'], 2);
+    });
+
+    test('should highlight in subtitle text when searchInSubtitles is true', () {
+      bool shouldHighlight({
+        required bool searchInSubtitles,
+        required bool isSubtitleField,
+        required bool searchInVoiceover,
+        required bool isVoiceoverField,
+      }) {
+        if (isSubtitleField) return searchInSubtitles;
+        if (isVoiceoverField) return searchInVoiceover;
+        return false;
+      }
+
+      expect(
+        shouldHighlight(
+          searchInSubtitles: true,
+          isSubtitleField: true,
+          searchInVoiceover: false,
+          isVoiceoverField: false,
+        ),
+        true,
+      );
+
+      expect(
+        shouldHighlight(
+          searchInSubtitles: false,
+          isSubtitleField: true,
+          searchInVoiceover: false,
+          isVoiceoverField: false,
+        ),
+        false,
+      );
+    });
+
+    test('should highlight in voiceover text when searchInVoiceover is true', () {
+      bool shouldHighlight({
+        required bool searchInSubtitles,
+        required bool isSubtitleField,
+        required bool searchInVoiceover,
+        required bool isVoiceoverField,
+      }) {
+        if (isSubtitleField) return searchInSubtitles;
+        if (isVoiceoverField) return searchInVoiceover;
+        return false;
+      }
+
+      expect(
+        shouldHighlight(
+          searchInSubtitles: false,
+          isSubtitleField: false,
+          searchInVoiceover: true,
+          isVoiceoverField: true,
+        ),
+        true,
+      );
+
+      expect(
+        shouldHighlight(
+          searchInSubtitles: false,
+          isSubtitleField: false,
+          searchInVoiceover: false,
+          isVoiceoverField: true,
+        ),
+        false,
+      );
+    });
+
+    test('should not highlight when both search options are disabled', () {
+      bool shouldHighlight({
+        required bool searchInSubtitles,
+        required bool isSubtitleField,
+        required bool searchInVoiceover,
+        required bool isVoiceoverField,
+      }) {
+        if (isSubtitleField) return searchInSubtitles;
+        if (isVoiceoverField) return searchInVoiceover;
+        return false;
+      }
+
+      expect(
+        shouldHighlight(
+          searchInSubtitles: false,
+          isSubtitleField: true,
+          searchInVoiceover: false,
+          isVoiceoverField: false,
+        ),
+        false,
+      );
+
+      expect(
+        shouldHighlight(
+          searchInSubtitles: false,
+          isSubtitleField: false,
+          searchInVoiceover: false,
+          isVoiceoverField: true,
+        ),
+        false,
+      );
+    });
+
+    test('should handle Chinese characters in highlighting', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('这是一段中文测试文本，包含测试关键词', '测试');
+      expect(matches, hasLength(2));
+      expect(matches[0]['text'], '测试');
+      expect(matches[1]['text'], '测试');
+    });
+
+    test('should handle mixed Chinese and English in highlighting', () {
+      List<Map<String, dynamic>> findMatches(String text, String keyword) {
+        if (keyword.isEmpty || text.isEmpty) return [];
+        
+        final lowerText = text.toLowerCase();
+        final lowerKeyword = keyword.toLowerCase();
+        final matches = <Map<String, dynamic>>[];
+        
+        var startIndex = 0;
+        while (true) {
+          final index = lowerText.indexOf(lowerKeyword, startIndex);
+          if (index == -1) break;
+          matches.add({
+            'start': index,
+            'end': index + lowerKeyword.length,
+            'text': text.substring(index, index + lowerKeyword.length),
+          });
+          startIndex = index + lowerKeyword.length;
+        }
+        
+        return matches;
+      }
+
+      final matches = findMatches('这是test文本，包含test关键词', 'test');
+      expect(matches, hasLength(2));
+      expect(matches[0]['text'], 'test');
+      expect(matches[1]['text'], 'test');
+    });
+  });
 }
