@@ -24,7 +24,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 
 | 内容 | 状态 | 备注 |
 |------|------|------|
-| 用户上传 WASM 策略（配额、签名、审计） | `next` | **薄切片**：`wasm_runtime::validate_user_wasm_upload` + **`HARNESS_USER_WASM_MAX_BYTES`**（默认 512KiB）+ 单测；完整上传 REST / 执行仍 **`next`**（YAML「仍缺…用户上传 WASM」）；威胁模型见 [`harness-user-wasm-threat-model.md`](./harness-user-wasm-threat-model.md) |
+| 用户上传 WASM 策略（配额、签名、审计） | `in_progress` | **薄切片**：`wasm_runtime::validate_user_wasm_upload` + **`HARNESS_USER_WASM_MAX_BYTES`** + **`POST /api/v1/harness/user-wasm/validate`**（JWT，无持久化）+ 单测 / 冒烟；列出 / 吊销 / 存储 / 执行仍为 **`next`**；威胁模型见 [`harness-user-wasm-threat-model.md`](./harness-user-wasm-threat-model.md) |
 | 隔离执行：指标 + 子进程池（idle 复用、`HARNESS_ISOLATE_*`、`/ready`） | `shipped` | **`9388ec3a`**（指标）、**`3b326f26`**（默认池 + 集成测）；与 `HARNESS_ISOLATE_MAX_CONCURRENT` 一致 |
 | 进程池启动预热（prefork） | `shipped` | **`HARNESS_ISOLATE_PREFORK`**（上限同并发槽；**`HARNESS_ISOLATE_POOL`** 关闭时不预热）；**`main`** 监听前 **`warm_isolate_pool_prefork`**；README + 集成测 |
 | 进程池扩展回收 / 老化（TTL、轮换） | `shipped` | **`HARNESS_ISOLATE_POOL_IDLE_TTL_SECS`** / **`HARNESS_ISOLATE_POOL_MAX_WORKER_AGE_SECS`** + `total_pool_evictions`；idle 归还与 acquire 前 prune；**`try_wait`** 剔除已退出 worker；Runbook 仍可对齐 SLO 细调 |
@@ -70,7 +70,7 @@ YAML：`rust-backend-mvp`、`harness-rust-core`。
 |----|------|
 | **目标** | 允许受限场景下用户 supplied WASM 注册为 harness 工具，含配额、审计、禁止网络等策略。 |
 | **依赖** | 现有 `wasm_runtime.rs` / `wasm.probe`；安全评审结论。 |
-| **PR 切片** | （0）**已起**：投递前校验 **`validate_user_wasm_upload`**（`HARNESS_USER_WASM_MAX_BYTES` + wasmi 解析）+ 单测；（1）设计与威胁模型（短文档：[`harness-user-wasm-threat-model.md`](./harness-user-wasm-threat-model.md)）；（2）DB 表或对象存储路径 + REST（上传/列出/吊销）；（3）WS `harness.tool.invoke` 分支与超时/内存限额；（4）运维开关 kill-switch（内建 **`wasm.probe`** 已支持 **`HARNESS_WASM_PROBE_DISABLED`**）。 |
+| **PR 切片** | （0）**进行中**：投递前 **`validate_user_wasm_upload`** + **`POST /api/v1/harness/user-wasm/validate`**（可单独验收；无 DB 写入）+ 体积单测；（1）设计与威胁模型（[`harness-user-wasm-threat-model.md`](./harness-user-wasm-threat-model.md)）；（2）DB 表或对象存储路径 + REST（持久化上传/列出/吊销）；（3）WS `harness.tool.invoke` 分支与超时/内存限额；（4）运维开关 kill-switch（内建 **`wasm.probe`** 已支持 **`HARNESS_WASM_PROBE_DISABLED`**）。 |
 | **触点** | `backend/src/harness/wasm_runtime.rs`；`backend/src/harness/ws/tool.rs`；`backend/src/harness/tools.rs`；`docs/websocket-events.md`。 |
 | **测试** | **必做**：畸形 WASM、超时、未授权上传；**必做**：体量上限测试（fuzz 或等价边界单测）。 |
 | **回滚** | Feature flag 关闭新工具类型；DB 吊销所有用户 WASM。 |

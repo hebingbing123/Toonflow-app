@@ -10,11 +10,16 @@ use wasmi::{Engine, Linker, Module, Store};
 
 const PROBE_WASM: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/probe.wasm"));
 
+/// Bytes of the build-time **`probe`** module; only needed for **`#[cfg(test)]`** smoke tests (**contract_smoke_tests**).
+#[cfg(test)]
+#[inline]
+pub fn probe_wasm_bytes() -> &'static [u8] {
+    PROBE_WASM
+}
+
 /// Default cap for untrusted user-supplied WASM payloads (see **`HARNESS_USER_WASM_MAX_BYTES`**).
-#[allow(dead_code)] // Used by `validate_user_wasm_upload`; non-test lib has no upload handler yet (WP‑C).
 const DEFAULT_USER_WASM_MAX_BYTES: usize = 512 * 1024;
 
-#[allow(dead_code)]
 #[inline]
 fn user_wasm_max_bytes_from_env() -> usize {
     match std::env::var("HARNESS_USER_WASM_MAX_BYTES") {
@@ -30,7 +35,6 @@ fn user_wasm_max_bytes_from_env() -> usize {
 ///
 /// Enforces **`HARNESS_USER_WASM_MAX_BYTES`** (default **512 KiB**) then
 /// **`wasmi::Module::new`** so garbage after the magic/version fails fast.
-#[allow(dead_code)] // Upload REST / registration will call; exercised in unit tests until wired.
 pub fn validate_user_wasm_upload(bytes: &[u8]) -> Result<(), String> {
     if bytes.is_empty() {
         return Err("user wasm: empty module".into());

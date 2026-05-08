@@ -226,6 +226,26 @@ pub(super) async fn post_empty_bearer(uri: &str, token: &str) -> (StatusCode, Va
     .await
 }
 
+/// POST **`application/wasm`** or **`application/octet-stream`** binary body (`MAX_PROBE_BYTES`).
+pub(super) async fn post_bytes_bearer_octet(
+    uri: &str,
+    token: &str,
+    mime: &str,
+    body: &[u8],
+) -> (StatusCode, Value) {
+    oneshot_json(
+        Request::builder()
+            .method(Method::POST)
+            .uri(uri)
+            .header(header::AUTHORIZATION, format!("Bearer {token}"))
+            .header(header::CONTENT_TYPE, mime)
+            .extension(ConnectInfo(test_addr()))
+            .body(Body::from(body.to_vec()))
+            .unwrap(),
+    )
+    .await
+}
+
 pub(super) async fn put_empty_no_bearer(uri: &str) -> (StatusCode, Value) {
     oneshot_json(
         Request::builder()

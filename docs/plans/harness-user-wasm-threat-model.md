@@ -21,7 +21,7 @@
 ## 运维开关
 
 - 内建 **`wasm.probe`**：环境变量 **`HARNESS_WASM_PROBE_DISABLED`** 为 **`1` / `true` / `yes` / `on`** 时拒绝执行（见 `backend/README.md`）。
-- **投递体量上限（WP‑C 薄切片）**：校验辅助函数读取 **`HARNESS_USER_WASM_MAX_BYTES`**（默认 512KiB；`0` 或未解析回退默认），与 **`validate_user_wasm_upload`** 配套；完整上传 REST 落地前由后续 PR 接线。
+- **投递体量上限（WP‑C 薄切片）**：校验辅助函数读取 **`HARNESS_USER_WASM_MAX_BYTES`**（默认 512KiB；`0` 或未解析回退默认），与 **`validate_user_wasm_upload`** / **`POST /api/v1/harness/user-wasm/validate`** 配套（仅校验体积与模块解析；不写入存储）；持久化上传 / 列出 / 吊销仍为后续 PR。
 - 未来用户 WASM 注册路径须复用或扩展 **同一类** 全局 kill-switch（待 WP-C 实装）。
 
 ## 开放问题

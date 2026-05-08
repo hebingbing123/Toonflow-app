@@ -1,5 +1,12 @@
 use super::super::super::helpers::*;
-use axum::http::StatusCode;
+use axum::body::Body;
+use axum::extract::ConnectInfo;
+use axum::http::{header, Method, Request, StatusCode};
+use uuid::Uuid;
+
+use crate::harness::wasm_runtime::probe_wasm_bytes;
+
+const VALIDATE_USER_WASM_URI: &str = "/api/v1/harness/user-wasm/validate";
 
 #[tokio::test]
 async fn harness_tools_unauthorized_without_bearer() {
@@ -30,4 +37,70 @@ async fn job_retry_unauthorized_without_bearer() {
     let (status, v) = post_empty_no_bearer(&uri).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn harness_validate_user_wasm_unauthorized_without_bearer() {
+    let wasm = probe_wasm_bytes();
+    let (status, v) = oneshot_json(
+        Request::builder()
+            .method(Method::POST)
+            .uri(VALIDATE_USER_WASM_URI)
+            .header(header::CONTENT_TYPE, "application/wasm")
+            .extension(ConnectInfo(test_addr()))
+            .body(Body::from(wasm.to_vec()))
+            .unwrap(),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn harness_validate_user_wasm_ok_for_embedded_probe() {
+    let token = test_jwt(Uuid::nil());
+    let wasm = probe_wasm_bytes();
+    let (status, v) =
+        post_bytes_bearer_octet(VALIDATE_USER_WASM_URI, &token, "application/wasm", wasm).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(v["validated"], true);
+    assert_eq!(v["size_bytes"].as_u64(), Some(wasm.len() as u64));
+}
+
+#[tokio::test]
+async fn harness_validate_user_wasm_octet_stream_accepts_probe() {
+    let token = test_jwt(Uuid::nil());
+    let wasm = probe_wasm_bytes();
+    let (status, v) = post_bytes_bearer_octet(
+        VALIDATE_USER_WASM_URI,
+        &token,
+        "application/octet-stream",
+        wasm,
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(v["validated"], true);
+}
+
+#[tokio::test]
+async fn harness_validate_user_wasm_bad_request_empty_body() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = post_empty_bearer(VALIDATE_USER_WASM_URI, &token).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(v["code"], "bad_request");
+    assert!(
+        v["message"].as_str().unwrap_or_default().contains("empty"),
+        "msg={:?}",
+        v["message"]
+    );
+}
+
+#[tokio::test]
+async fn harness_validate_user_wasm_bad_request_garbage() {
+    let token = test_jwt(Uuid::nil());
+    let garbage = b"\0asm\x01\x00\x00\x00\xff";
+    let (status, v) =
+        post_bytes_bearer_octet(VALIDATE_USER_WASM_URI, &token, "application/wasm", garbage).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(v["code"], "bad_request");
 }
