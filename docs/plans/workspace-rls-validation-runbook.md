@@ -46,6 +46,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 
 - 脚本：[`scripts/workspace_rls_probe.sh`](../../scripts/workspace_rls_probe.sh)
 - 矩阵脚本：[`scripts/workspace_rls_probe_matrix.sh`](../../scripts/workspace_rls_probe_matrix.sh)
+- 矩阵 + 摘要：[`scripts/workspace_rls_probe_and_summarize.sh`](../../scripts/workspace_rls_probe_and_summarize.sh)
 - 样本种子：[`scripts/workspace_rls_seed_sample.sh`](../../scripts/workspace_rls_seed_sample.sh)
 - 一键样本验证：[`scripts/workspace_rls_seed_and_probe_sample.sh`](../../scripts/workspace_rls_seed_and_probe_sample.sh)
 - 汇总脚本：[`scripts/workspace_rls_summarize.sh`](../../scripts/workspace_rls_summarize.sh)
@@ -137,6 +138,19 @@ MEMBER_USER_ID="$MEMBER_USER_ID" \
 OUTSIDER_USER_ID="$OUTSIDER_USER_ID" \
 bash scripts/workspace_rls_probe_matrix.sh
 ```
+
+若想一步拿到原始输出 + Markdown 摘要，也可直接：
+
+```bash
+DATABASE_URL=... \
+PROBE_WORKSPACE_ID="$WORKSPACE_ID" \
+OWNER_USER_ID="$OWNER_USER_ID" \
+MEMBER_USER_ID="$MEMBER_USER_ID" \
+OUTSIDER_USER_ID="$OUTSIDER_USER_ID" \
+bash scripts/workspace_rls_probe_and_summarize.sh
+```
+
+它会默认把结果落到 `.tmp/workspace-rls-<timestamp>/`。
 
 若想顺手保留原始输出，可再加：
 
