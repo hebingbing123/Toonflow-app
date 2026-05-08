@@ -10,7 +10,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::projects::routes::common::require_project_workspace_member_scope;
+use crate::projects::routes::common::{
+    require_project_workspace_member_scope, require_project_write_scope,
+};
 use crate::state::AppState;
 
 use super::super::access::{profile_belongs_to_project, script_belongs_to_project};
@@ -118,7 +120,7 @@ pub(crate) async fn create_publish_draft(
 ) -> Result<Json<PublishDraftResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
     validate_draft_status(body.draft_status.trim())?;
 
     if let Some(pid) = body.profile_id {
@@ -193,7 +195,7 @@ pub(crate) async fn patch_publish_draft(
 ) -> Result<Json<PublishDraftResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
     if let Some(ref ds) = body.draft_status {
         validate_draft_status(ds.trim())?;
@@ -241,7 +243,7 @@ pub(crate) async fn delete_publish_draft_handler(
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
     if delete_draft(pool, project_id, draft_id).await? {
         Ok(axum::http::StatusCode::NO_CONTENT)
     } else {

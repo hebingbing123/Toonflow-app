@@ -72,11 +72,33 @@ pub(crate) async fn list_projects(
                voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         FROM app_project
         WHERE workspace_id = $1
+          AND (
+            owner_user_id = $2
+            OR EXISTS (
+              SELECT 1
+              FROM public.app_workspace_member wm
+              WHERE wm.workspace_id = app_project.workspace_id
+                AND wm.user_id = $2
+                AND wm.role IN ('owner', 'admin')
+            )
+            OR NOT EXISTS (
+              SELECT 1
+              FROM public.app_project_member pm_any
+              WHERE pm_any.project_id = app_project.id
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM public.app_project_member pm
+              WHERE pm.project_id = app_project.id
+                AND pm.user_id = $2
+            )
+          )
         ORDER BY create_time_ms DESC NULLS LAST, numeric_id DESC
-        LIMIT $2 OFFSET $3
+        LIMIT $3 OFFSET $4
         "#,
     )
     .bind(scope_workspace_id)
+    .bind(uid)
     .bind(limit)
     .bind(offset)
     .fetch_all(pool)

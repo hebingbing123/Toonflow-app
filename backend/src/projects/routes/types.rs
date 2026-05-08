@@ -76,6 +76,31 @@ pub struct ListProjectsQuery {
     pub offset: Option<i64>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CreateProjectMemberBody {
+    pub user_id: Uuid,
+    /// Allowed: **`editor`** or **`viewer`**.
+    pub role: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PatchProjectMemberBody {
+    /// Allowed: **`editor`** or **`viewer`**.
+    pub role: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMemberResponse {
+    pub project_id: Uuid,
+    pub user_id: Uuid,
+    pub role: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
 #[derive(Debug, FromRow, Serialize, ToSchema)]
 #[schema(
     title = "ProjectRow",

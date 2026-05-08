@@ -9,6 +9,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 use super::super::super::types::{ProjectDetailResponse, ProjectRow, ScriptBrief};
@@ -37,6 +38,7 @@ pub(crate) async fn get_project_by_id(
 ) -> Result<Json<ProjectDetailResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     let project = sqlx::query_as::<_, ProjectRow>(
         r#"
@@ -48,16 +50,9 @@ pub(crate) async fn get_project_by_id(
                voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         FROM app_project p
         WHERE p.id = $1
-          AND EXISTS (
-            SELECT 1
-            FROM public.app_workspace_member m
-            WHERE m.workspace_id = p.workspace_id
-              AND m.user_id = $2
-          )
         "#,
     )
-    .bind(project_id)
-    .bind(uid)
+    .bind(scope.id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?

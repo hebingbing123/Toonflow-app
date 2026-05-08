@@ -12,7 +12,9 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::http_kit::request_dedupe::{dedupe_platform_copy, RequestDedupeKey};
 use crate::metering::llm_usage::record_llm_usage;
-use crate::projects::routes::common::require_project_workspace_member_scope;
+use crate::projects::routes::common::{
+    require_project_workspace_member_scope, require_project_write_scope,
+};
 use crate::state::AppState;
 
 use super::copy_validate::adapter_copy_issues_for_inputs;
@@ -116,7 +118,7 @@ pub(crate) async fn batch_schedule_publish_drafts(
 ) -> Result<Json<BatchScheduleDraftsResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
     let n =
         batch_set_draft_scheduled_at(pool, project_id, &body.draft_ids, body.scheduled_at).await?;
@@ -149,7 +151,7 @@ pub(crate) async fn suggest_publish_platform_copy(
 ) -> Result<Json<SuggestPlatformCopyResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
     let Some(draft) = fetch_draft(pool, project_id, draft_id).await? else {
         return Err(ApiError::NotFound);
@@ -266,7 +268,7 @@ pub(crate) async fn batch_publish_drafts(
 ) -> Result<Json<BatchPublishDraftsResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
     let mut enqueued = 0i64;
     let mut failed = Vec::new();
@@ -320,7 +322,7 @@ pub(crate) async fn batch_archive_publish_drafts(
 ) -> Result<Json<BatchArchiveDraftsResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
     let archived = batch_archive_drafts(pool, project_id, &body.draft_ids).await?;
     Ok(Json(BatchArchiveDraftsResponse { archived }))

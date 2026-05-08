@@ -5,6 +5,7 @@ pub(crate) mod assets_overview;
 pub(crate) mod delete;
 pub(crate) mod get;
 pub(crate) mod home;
+pub(crate) mod members;
 pub(crate) mod overview;
 pub(crate) mod patch;
 pub(crate) mod production_overview;
@@ -18,6 +19,9 @@ pub(crate) use assets_overview::project_assets_overview_by_id;
 pub(crate) use delete::delete_project_by_id;
 pub(crate) use get::get_project_by_id;
 pub(crate) use home::project_home_by_id;
+pub(crate) use members::{
+    create_project_member, delete_project_member, list_project_members, patch_project_member,
+};
 pub(crate) use overview::project_overview_by_id;
 pub(crate) use patch::patch_project_by_id;
 pub(crate) use production_overview::project_production_overview_by_id;

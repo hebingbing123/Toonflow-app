@@ -13,7 +13,7 @@ use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 use serde_json::Value;
 
-use super::super::super::common::{merge_text_patch, trim_opt};
+use super::super::super::common::{merge_text_patch, require_project_write_scope, trim_opt};
 use super::super::super::types::{BrandBible, PatchProjectBody, ProjectBrief, ProjectRow};
 use super::super::super::validation::{
     validate_duration_strategy, validate_mode, validate_quality_gate_strategy,
@@ -105,6 +105,7 @@ pub(crate) async fn patch_project_by_id(
 ) -> Result<Json<ProjectRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let scope = require_project_write_scope(&state, uid, project_id).await?;
 
     let name_patch = trim_text_patch(parse_optional_text_field(body.name, "name")?);
     let intro_patch = trim_text_patch(parse_optional_text_field(body.intro, "intro")?);
@@ -251,16 +252,9 @@ pub(crate) async fn patch_project_by_id(
                project_brief, brand_bible
         FROM app_project p
         WHERE p.id = $1
-          AND EXISTS (
-            SELECT 1
-            FROM public.app_workspace_member m
-            WHERE m.workspace_id = p.workspace_id
-              AND m.user_id = $2
-          )
         "#,
     )
-    .bind(project_id)
-    .bind(uid)
+    .bind(scope.id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?

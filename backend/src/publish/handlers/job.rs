@@ -9,7 +9,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::projects::routes::common::require_project_workspace_member_scope;
+use crate::projects::routes::common::{
+    require_project_workspace_member_scope, require_project_write_scope,
+};
 use crate::state::AppState;
 
 use super::super::job_from_row;
@@ -82,7 +84,7 @@ pub(crate) async fn create_publish_job(
 ) -> Result<Json<PublishJobResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
     let draft = fetch_draft(pool, project_id, draft_id)
         .await?
@@ -201,7 +203,7 @@ pub(crate) async fn cancel_publish_job(
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
     let job = fetch_job_owned(pool, project_id, job_id)
         .await?
         .ok_or(ApiError::NotFound)?;
@@ -238,7 +240,7 @@ pub(crate) async fn retry_publish_job(
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
     let job = fetch_job_owned(pool, project_id, job_id)
         .await?
         .ok_or(ApiError::NotFound)?;
@@ -277,7 +279,7 @@ pub(crate) async fn confirm_publish_job_semi_auto(
 ) -> Result<Json<PublishJobResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
     let job = fetch_job_owned(pool, project_id, job_id)
         .await?
         .ok_or(ApiError::NotFound)?;

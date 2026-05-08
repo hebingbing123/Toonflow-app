@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -34,6 +35,13 @@ pub(crate) async fn delete_project_by_id(
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+
+    if !scope.can_delete_project() {
+        return Err(ApiError::Forbidden(
+            "only the project owner or workspace owner/admin can delete this project".into(),
+        ));
+    }
 
     let mut tx = pool
         .begin()
@@ -45,16 +53,9 @@ pub(crate) async fn delete_project_by_id(
         SELECT p.numeric_id
         FROM app_project p
         WHERE p.id = $1
-          AND EXISTS (
-            SELECT 1
-            FROM public.app_workspace_member m
-            WHERE m.workspace_id = p.workspace_id
-              AND m.user_id = $2
-          )
         "#,
     )
-    .bind(project_id)
-    .bind(uid)
+    .bind(scope.id)
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

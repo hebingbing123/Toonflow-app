@@ -40,6 +40,27 @@ pub(crate) async fn count_completed_videos_for_member_projects(
             WHERE wm.workspace_id = p.workspace_id
               AND wm.user_id = $1
           )
+          AND (
+            p.owner_user_id = $1
+            OR EXISTS (
+              SELECT 1
+              FROM app_workspace_member wm
+              WHERE wm.workspace_id = p.workspace_id
+                AND wm.user_id = $1
+                AND wm.role IN ('owner', 'admin')
+            )
+            OR NOT EXISTS (
+              SELECT 1
+              FROM app_project_member pm_any
+              WHERE pm_any.project_id = p.id
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM app_project_member pm
+              WHERE pm.project_id = p.id
+                AND pm.user_id = $1
+            )
+          )
         "#,
     )
     .bind(user_id)

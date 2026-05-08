@@ -12,9 +12,7 @@ use crate::error::ApiError;
 use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
-use super::super::super::common::{
-    merge_text_patch, require_project_workspace_member_scope, trim_opt,
-};
+use super::super::super::common::{merge_text_patch, require_project_write_scope, trim_opt};
 use super::super::super::types::{PatchStyleConfigBody, ProjectRow};
 
 fn trim_text_patch(patch: FieldPatch<String>) -> FieldPatch<String> {
@@ -55,7 +53,7 @@ pub(crate) async fn patch_style_config(
 ) -> Result<Json<ProjectRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let scope = require_project_write_scope(&state, uid, project_id).await?;
 
     if body.art_style_pack.is_none() && body.story_style_pack.is_none() {
         return Err(ApiError::BadRequest(

@@ -9,7 +9,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::projects::routes::common::require_project_workspace_member_scope;
+use crate::projects::routes::common::{
+    require_project_workspace_member_scope, require_project_write_scope,
+};
 use crate::state::AppState;
 
 use super::super::platform_registry::capability_matrix;
@@ -156,7 +158,7 @@ pub(crate) async fn process_performance_alerts(
 ) -> Result<Json<Vec<crate::prompting::quality::QualityReview>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
     let thresholds = super::super::performance_rework::PerformanceThresholds {
         min_views: query.views_lt,
