@@ -52,6 +52,70 @@ class ValidateHarnessUserWasmResponse {
   }
 }
 
+/// `persistHarnessUserWasmV1` — **201** JSON body.
+class PersistHarnessUserWasmResponse {
+  const PersistHarnessUserWasmResponse({
+    required this.id,
+    required this.wasmSha256Hex,
+    required this.sizeBytes,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String wasmSha256Hex;
+  final int sizeBytes;
+  final DateTime createdAt;
+
+  factory PersistHarnessUserWasmResponse.fromJson(Map<String, dynamic> json) {
+    return PersistHarnessUserWasmResponse(
+      id: json['id'] as String,
+      wasmSha256Hex: json['wasm_sha256_hex'] as String,
+      sizeBytes: (json['size_bytes'] as num).toInt(),
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+/// One row returned by **`listHarnessUserWasmV1`** (**no** `wasm_bytes`).
+class HarnessUserWasmRecordView {
+  const HarnessUserWasmRecordView({
+    required this.id,
+    required this.wasmSha256Hex,
+    required this.sizeBytes,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String wasmSha256Hex;
+  final int sizeBytes;
+  final DateTime createdAt;
+
+  factory HarnessUserWasmRecordView.fromJson(Map<String, dynamic> json) {
+    return HarnessUserWasmRecordView(
+      id: json['id'] as String,
+      wasmSha256Hex: json['wasm_sha256_hex'] as String,
+      sizeBytes: (json['size_bytes'] as num).toInt(),
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+/// **`listHarnessUserWasmV1`** — **200** JSON body (`items`).
+class ListHarnessUserWasmResponse {
+  const ListHarnessUserWasmResponse({required this.items});
+
+  final List<HarnessUserWasmRecordView> items;
+
+  factory ListHarnessUserWasmResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>;
+    return ListHarnessUserWasmResponse(
+      items: raw
+          .map((e) => HarnessUserWasmRecordView.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 /// `GET /api/v1/harness/tools`. See `listHarnessToolsV1`.
 Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
@@ -89,4 +153,41 @@ Future<ValidateHarnessUserWasmResponse> validateHarnessUserWasm(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ValidateHarnessUserWasmResponse.fromJson(map);
+}
+
+/// **`POST /api/v1/harness/user-wasm`**. See `persistHarnessUserWasmV1`.
+Future<PersistHarnessUserWasmResponse> persistHarnessUserWasm(
+  String accessToken,
+  List<int> wasmBytes, {
+  String contentType = 'application/wasm',
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/user-wasm');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': contentType,
+        },
+        body: wasmBytes,
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PersistHarnessUserWasmResponse.fromJson(map);
+}
+
+/// **`GET /api/v1/harness/user-wasm`**. See `listHarnessUserWasmV1`.
+Future<ListHarnessUserWasmResponse> listHarnessUserWasm(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/user-wasm');
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ListHarnessUserWasmResponse.fromJson(map);
 }

@@ -5,19 +5,24 @@
 use axum::body::Bytes;
 use axum::extract::State;
 use axum::http::HeaderMap;
+use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 
+use chrono::{DateTime, Utc};
 use serde::Serialize;
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::harness::observe;
 use crate::harness::tools::{HarnessToolInfo, ToolRegistry};
+use crate::harness::user_wasm_db;
 use crate::harness::wasm_runtime;
 use crate::state::AppState;
 
 #[derive(Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "snake_case")]
 pub struct HarnessToolsResponse {
     pub tools: &'static [HarnessToolInfo],
 }
@@ -45,6 +50,7 @@ async fn list_harness_tools(
 }
 
 #[derive(Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "snake_case")]
 pub struct ValidateUserWasmResponse {
     /// Always **true** on **200**; present for forwards-compatible tooling.
     pub validated: bool,
@@ -67,7 +73,7 @@ pub struct ValidateUserWasmResponse {
     ),
     security(("bearerAuth" = []))
 )]
-async fn validate_user_wasm(
+async fn validate_user_wasm_only(
     State(state): State<AppState>,
     headers: HeaderMap,
     body: Bytes,
@@ -82,24 +88,137 @@ async fn validate_user_wasm(
     }))
 }
 
+#[derive(Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct HarnessUserWasmPersisted {
+    #[schema(example = "b3b4cb26-62d4-4d5c-9486-74c4c5c62c94")]
+    pub id: Uuid,
+    #[schema(example = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")]
+    pub wasm_sha256_hex: String,
+    #[schema(example = 38)]
+    pub size_bytes: u64,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct HarnessUserWasmRecord {
+    #[schema(example = "b3b4cb26-62d4-4d5c-9486-74c4c5c62c94")]
+    pub id: Uuid,
+    #[schema(example = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")]
+    pub wasm_sha256_hex: String,
+    #[schema(example = 38)]
+    pub size_bytes: u64,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct HarnessUserWasmListResponse {
+    pub items: Vec<HarnessUserWasmRecord>,
+}
+
+/// **WP‑C:** persist validated WASM to **`app_harness_user_wasm`** (JWT + Postgres).
+#[utoipa::path(
+    post,
+    path = "/api/v1/harness/user-wasm",
+    operation_id = "persistHarnessUserWasmV1",
+    tag = "harness",
+    request_body(content = Vec<u8>, description = "Raw WebAssembly module", content_type = "application/wasm"),
+    responses(
+        (status = 201, description = "Stored", body = HarnessUserWasmPersisted),
+        (status = 400, description = "Empty, oversized, malformed WASM, or per-user stored row limit", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "DATABASE_URL not configured / DB unavailable", body = crate::error::ErrorBody),
+    ),
+    security(("bearerAuth" = []))
+)]
+async fn persist_user_wasm(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> Result<(StatusCode, Json<HarnessUserWasmPersisted>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    observe::harness_user_wasm_persist_http(uid, body.len());
+    let pool = state.require_pool()?;
+    let row = user_wasm_db::persist_user_wasm_checked(pool, uid, &body).await?;
+
+    Ok((
+        StatusCode::CREATED,
+        Json(HarnessUserWasmPersisted {
+            id: row.id,
+            wasm_sha256_hex: row.wasm_sha256_hex,
+            size_bytes: row.size_bytes,
+            created_at: row.created_at,
+        }),
+    ))
+}
+
+/// **WP‑C:** list stored WASM metadata for the JWT subject (**does not return** `wasm_bytes`).
+#[utoipa::path(
+    get,
+    path = "/api/v1/harness/user-wasm",
+    operation_id = "listHarnessUserWasmV1",
+    tag = "harness",
+    responses(
+        (status = 200, description = "OK", body = HarnessUserWasmListResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "DATABASE_URL not configured / DB unavailable", body = crate::error::ErrorBody),
+    ),
+    security(("bearerAuth" = []))
+)]
+async fn list_user_wasm_meta(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<HarnessUserWasmListResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let rows = user_wasm_db::list_user_wasm_for_owner(pool, uid).await?;
+
+    observe::harness_user_wasm_list_http(uid, rows.len());
+
+    Ok(Json(HarnessUserWasmListResponse {
+        items: rows
+            .into_iter()
+            .map(|r| HarnessUserWasmRecord {
+                id: r.id,
+                wasm_sha256_hex: r.wasm_sha256_hex,
+                size_bytes: r.size_bytes,
+                created_at: r.created_at,
+            })
+            .collect(),
+    }))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/harness/tools", get(list_harness_tools))
         .route(
+            "/api/v1/harness/user-wasm",
+            get(list_user_wasm_meta).post(persist_user_wasm),
+        )
+        .route(
             "/api/v1/harness/user-wasm/validate",
-            post(validate_user_wasm),
+            post(validate_user_wasm_only),
         )
 }
 
 #[derive(utoipa::OpenApi)]
 #[openapi(
-    paths(list_harness_tools, validate_user_wasm),
+    paths(
+        list_harness_tools,
+        validate_user_wasm_only,
+        persist_user_wasm,
+        list_user_wasm_meta
+    ),
     components(schemas(
         HarnessToolsResponse,
         ValidateUserWasmResponse,
+        HarnessUserWasmPersisted,
+        HarnessUserWasmRecord,
+        HarnessUserWasmListResponse,
         crate::harness::tools::HarnessToolInfo,
         crate::error::ErrorBody
     )),
-    tags((name = "harness", description = "Harness tools (catalog, user WASM validation); invoke tools via WebSocket"))
+    tags((name = "harness", description = "Harness tools (catalog, user WASM validation/storage); invoke tools via WebSocket"))
 )]
 pub struct HarnessOpenApi;

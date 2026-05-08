@@ -1290,6 +1290,61 @@ components:
       required:
       - tools
       type: object
+    HarnessUserWasmListResponse:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/HarnessUserWasmRecord'
+          type: array
+      required:
+      - items
+      type: object
+    HarnessUserWasmPersisted:
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        id:
+          example: b3b4cb26-62d4-4d5c-9486-74c4c5c62c94
+          format: uuid
+          type: string
+        size_bytes:
+          example: 38
+          format: int64
+          minimum: 0
+          type: integer
+        wasm_sha256_hex:
+          example: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+          type: string
+      required:
+      - id
+      - wasm_sha256_hex
+      - size_bytes
+      - created_at
+      type: object
+    HarnessUserWasmRecord:
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        id:
+          example: b3b4cb26-62d4-4d5c-9486-74c4c5c62c94
+          format: uuid
+          type: string
+        size_bytes:
+          example: 38
+          format: int64
+          minimum: 0
+          type: integer
+        wasm_sha256_hex:
+          example: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+          type: string
+      required:
+      - id
+      - wasm_sha256_hex
+      - size_bytes
+      - created_at
+      type: object
     HealthResponse:
       properties:
         service:
@@ -3305,15 +3360,61 @@ components:
       - badCaseRecurrenceCount
       - badCaseRecurrenceDelta
       type: object
+    ReadyHarnessIsolateMetrics:
+      description: Instant isolate / pool counters for **`GET /api/v1/ready`** observability (WP‑D).
+      properties:
+        available_permits_snapshot:
+          minimum: 0
+          type: integer
+        max_slots:
+          minimum: 0
+          type: integer
+        queue_depth_waiting:
+          minimum: 0
+          type: integer
+        total_child_spawns:
+          format: int64
+          minimum: 0
+          type: integer
+        total_invocations:
+          format: int64
+          minimum: 0
+          type: integer
+        total_pool_evictions:
+          description: Pooled workers evicted (idle TTL, max age, dead `try_wait`).
+          format: int64
+          minimum: 0
+          type: integer
+        total_process_reuse_hits:
+          format: int64
+          minimum: 0
+          type: integer
+        total_semaphore_wait_ms:
+          format: int64
+          minimum: 0
+          type: integer
+      required:
+      - max_slots
+      - queue_depth_waiting
+      - available_permits_snapshot
+      - total_invocations
+      - total_semaphore_wait_ms
+      - total_child_spawns
+      - total_process_reuse_hits
+      - total_pool_evictions
+      type: object
     ReadyResponse:
       properties:
         database:
           type: string
+        harness_isolate:
+          $ref: '#/components/schemas/ReadyHarnessIsolateMetrics'
         status:
           type: string
       required:
       - status
       - database
+      - harness_isolate
       type: object
     RetentionBuckets:
       description: 保留桶配置
@@ -4396,6 +4497,21 @@ components:
       enum:
       - user
       type: string
+    ValidateUserWasmResponse:
+      properties:
+        size_bytes:
+          description: Bytes received in the request body.
+          example: 64
+          format: int64
+          minimum: 0
+          type: integer
+        validated:
+          description: Always **true** on **200**; present for forwards-compatible tooling.
+          type: boolean
+      required:
+      - validated
+      - size_bytes
+      type: object
     VariantCostDelta:
       description: 变体成本增量
       properties:
@@ -6330,6 +6446,114 @@ paths:
           description: Unauthorized
       security:
       - bearerAuth: []
+      tags:
+      - harness
+  /api/v1/harness/user-wasm:
+    get:
+      operationId: listHarnessUserWasmV1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarnessUserWasmListResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: DATABASE_URL not configured / DB unavailable
+      security:
+      - bearerAuth: []
+      summary: '**WP‑C:** list stored WASM metadata for the JWT subject (**does not return** `wasm_bytes`).'
+      tags:
+      - harness
+    post:
+      operationId: persistHarnessUserWasmV1
+      requestBody:
+        content:
+          application/wasm:
+            schema:
+              items:
+                format: int32
+                minimum: 0
+                type: integer
+              type: array
+        description: Raw WebAssembly module
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarnessUserWasmPersisted'
+          description: Stored
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Empty, oversized, malformed WASM, or per-user stored row limit
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: DATABASE_URL not configured / DB unavailable
+      security:
+      - bearerAuth: []
+      summary: '**WP‑C:** persist validated WASM to **`app_harness_user_wasm`** (JWT + Postgres).'
+      tags:
+      - harness
+  /api/v1/harness/user-wasm/validate:
+    post:
+      operationId: validateHarnessUserWasmV1
+      requestBody:
+        content:
+          application/wasm:
+            schema:
+              items:
+                format: int32
+                minimum: 0
+                type: integer
+              type: array
+        description: Raw WebAssembly module
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateUserWasmResponse'
+          description: Module passes validation
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Empty, oversized, or malformed WASM
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+      summary: '**WP‑C:** HTTP surface for **`validate_user_wasm_upload`** (size cap + wasmi parse). Does not persist.'
       tags:
       - harness
   /api/v1/health:
@@ -14379,7 +14603,7 @@ paths:
       - quality
   /api/v1/ready:
     get:
-      description: 'If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200).'
+      description: 'If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200). Includes **`harness_isolate`** counters (see `isolate::metrics_snapshot`) for observability.'
       operationId: readyV1
       responses:
         '200':

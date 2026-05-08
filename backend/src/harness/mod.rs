@@ -21,6 +21,7 @@ pub mod observe;
 pub mod permissions;
 mod sub_agent;
 pub mod tools;
+pub(crate) mod user_wasm_db;
 pub(crate) mod wasm_runtime;
 pub mod wire;
 pub mod ws;

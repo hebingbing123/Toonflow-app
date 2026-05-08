@@ -1,6 +1,6 @@
 # Harness：用户上传 WASM — 威胁模型（草稿）
 
-> 与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) **WP-C** 对齐；实现以代码与安全评审为准。当前仓库仅内置 **`wasm.probe`**（构建期嵌入的微型模块），**非**用户上传路径。
+> 与 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) **WP-C** 对齐；实现以代码与安全评审为准。当前仓库：**`wasm.probe`** 为嵌入探针模块；REST 另有 **`validate`**（不落库）与 **`persist`/`list`**：**通过校验的用户 WASM** 写入 **`app_harness_user_wasm`**（仍为 **stub**，未接 WS `invoke`/吊销）。
 
 ## 信任边界
 
@@ -21,7 +21,7 @@
 ## 运维开关
 
 - 内建 **`wasm.probe`**：环境变量 **`HARNESS_WASM_PROBE_DISABLED`** 为 **`1` / `true` / `yes` / `on`** 时拒绝执行（见 `backend/README.md`）。
-- **投递体量上限（WP‑C 薄切片）**：校验辅助函数读取 **`HARNESS_USER_WASM_MAX_BYTES`**（默认 512KiB；`0` 或未解析回退默认），与 **`validate_user_wasm_upload`** / **`POST /api/v1/harness/user-wasm/validate`** 配套（仅校验体积与模块解析；不写入存储）；持久化上传 / 列出 / 吊销仍为后续 PR。
+- **投递体量上限（WP‑C 薄切片）**：校验辅助函数读取 **`HARNESS_USER_WASM_MAX_BYTES`**（默认 512KiB；`0` 或未解析回退默认），与 **`validate_user_wasm_upload`** / **`POST /api/v1/harness/user-wasm/validate`** 配套（仅校验体积与模块解析；不写入存储）。**Stub 持久化**：**`POST /api/v1/harness/user-wasm`** 复用同一校验并按 **`HARNESS_USER_WASM_MAX_STORED_PER_USER`**（默认 **64** 行）写入 **`app_harness_user_wasm`**；列表 **`GET`** 上限 **`HARNESS_USER_WASM_LIST_CAP`**（默认 **100**）。**吊销**、对象存储 offload、调用审计仍为 **`next`**。
 - 未来用户 WASM 注册路径须复用或扩展 **同一类** 全局 kill-switch（待 WP-C 实装）。
 
 ## 开放问题

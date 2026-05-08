@@ -110,7 +110,7 @@ mod tests {
         let _g = ENV_MUTEX.lock().expect("lock");
         std::env::set_var(
             "HARNESS_USER_WASM_MAX_BYTES",
-            &format!("{}", PROBE_WASM.len().max(1)),
+            format!("{}", PROBE_WASM.len().max(1)),
         );
         validate_user_wasm_upload(PROBE_WASM).expect("probe should parse");
         std::env::remove_var("HARNESS_USER_WASM_MAX_BYTES");

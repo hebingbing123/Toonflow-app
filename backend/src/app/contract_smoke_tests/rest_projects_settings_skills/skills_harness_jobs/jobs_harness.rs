@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::harness::wasm_runtime::probe_wasm_bytes;
 
 const VALIDATE_USER_WASM_URI: &str = "/api/v1/harness/user-wasm/validate";
+const USER_WASM_STORE_URI: &str = "/api/v1/harness/user-wasm";
 
 #[tokio::test]
 async fn harness_tools_unauthorized_without_bearer() {
@@ -103,4 +104,46 @@ async fn harness_validate_user_wasm_bad_request_garbage() {
         post_bytes_bearer_octet(VALIDATE_USER_WASM_URI, &token, "application/wasm", garbage).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
+}
+
+#[tokio::test]
+async fn harness_user_wasm_list_unauthorized_without_bearer() {
+    let (status, v) = get_json(USER_WASM_STORE_URI).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn harness_user_wasm_persist_unauthorized_without_bearer() {
+    let wasm = probe_wasm_bytes();
+    let (status, v) = oneshot_json(
+        Request::builder()
+            .method(Method::POST)
+            .uri(USER_WASM_STORE_URI)
+            .header(header::CONTENT_TYPE, "application/wasm")
+            .extension(ConnectInfo(test_addr()))
+            .body(Body::from(wasm.to_vec()))
+            .unwrap(),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn harness_user_wasm_list_returns_database_error_without_pg() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(USER_WASM_STORE_URI, &token).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn harness_user_wasm_persist_returns_database_error_without_pg() {
+    let token = test_jwt(Uuid::nil());
+    let wasm = probe_wasm_bytes();
+    let (status, v) =
+        post_bytes_bearer_octet(USER_WASM_STORE_URI, &token, "application/wasm", wasm).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
 }

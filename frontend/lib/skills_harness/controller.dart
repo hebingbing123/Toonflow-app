@@ -43,6 +43,8 @@ class SkillsHarnessController extends ChangeNotifier {
 
   bool loadingHarnessTools = false;
   bool loadingUserWasmValidate = false;
+  bool loadingUserWasmPersist = false;
+  bool loadingUserWasmList = false;
   bool loadingSkillsSummary = false;
   bool loadingSkillList = false;
   bool loadingSkillPreview = false;
@@ -60,6 +62,8 @@ class SkillsHarnessController extends ChangeNotifier {
   final List<String> wsLog = [];
   String? harnessToolsLine;
   String? userWasmValidateLine;
+  String? userWasmPersistLine;
+  String? userWasmListLine;
   String? skillsAggregateLine;
   String? skillsListSummary;
   String? skillMutationLine;
@@ -79,6 +83,8 @@ class SkillsHarnessController extends ChangeNotifier {
     wsLog.clear();
     harnessToolsLine = null;
     userWasmValidateLine = null;
+    userWasmPersistLine = null;
+    userWasmListLine = null;
     skillsAggregateLine = null;
     skillsListSummary = null;
     skillMutationLine = null;
@@ -168,6 +174,59 @@ class SkillsHarnessController extends ChangeNotifier {
       _setError(e.toString());
     } finally {
       loadingUserWasmValidate = false;
+      _publish();
+    }
+  }
+
+  Future<void> persistUserWasmProbe() async {
+    final token = _accessToken;
+    if (token == null) return;
+    loadingUserWasmPersist = true;
+    _setError(null);
+    userWasmPersistLine = null;
+    _publish();
+    try {
+      final r = await persistHarnessUserWasm(token, kHarnessEmbeddedProbeWasm);
+      final shaShort = r.wasmSha256Hex.length > 12
+          ? '${r.wasmSha256Hex.substring(0, 12)}…'
+          : r.wasmSha256Hex;
+      userWasmPersistLine =
+          'stored id=${r.id}, sha256=$shaShort, size=${r.sizeBytes}, at=${r.createdAt.toIso8601String()}';
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      loadingUserWasmPersist = false;
+      _publish();
+    }
+  }
+
+  Future<void> loadUserWasmList() async {
+    final token = _accessToken;
+    if (token == null) return;
+    loadingUserWasmList = true;
+    _setError(null);
+    userWasmListLine = null;
+    _publish();
+    try {
+      final r = await listHarnessUserWasm(token);
+      if (r.items.isEmpty) {
+        userWasmListLine = '0 stored module(s)';
+      } else {
+        final preview = r.items
+            .take(5)
+            .map((row) => '${row.id}:${row.sizeBytes}b')
+            .join(', ');
+        userWasmListLine =
+            '${r.items.length} stored module(s) — $preview${r.items.length > 5 ? ', …' : ''}';
+      }
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      loadingUserWasmList = false;
       _publish();
     }
   }
