@@ -133,9 +133,21 @@ done
 # Check 6: Verify no stale endpoint references
 echo "Check 6: Stale endpoint detection..." | tee -a "$CONSISTENCY_REPORT"
 # Extract all /api/v1/* paths from Dart files
-DART_ENDPOINTS=$(grep -r -h "'/api/v1/" frontend/lib/rust_api/ 2>/dev/null | \
-    sed -n "s/.*'\(\/api\/v1\/[^']*\)'.*/\1/p" | \
-    sort -u || echo "")
+DART_ENDPOINTS=$(
+    ruby 2>/dev/null <<'RUBY' || echo ""
+paths = Dir.glob('frontend/lib/rust_api/**/*.dart').sort
+found = []
+paths.each do |path|
+  text = File.read(path)
+  text.scan(/['"](\/api\/v1\/[^'"]*)['"]/).each do |match|
+    endpoint = match.first
+    endpoint = endpoint.gsub(/\$[A-Za-z_][A-Za-z0-9_]*/, '{param}')
+    found << endpoint
+  end
+end
+puts found.uniq.sort
+RUBY
+)
 
 if [ -n "$DART_ENDPOINTS" ]; then
     while IFS= read -r dart_endpoint; do

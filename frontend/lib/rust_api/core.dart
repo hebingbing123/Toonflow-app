@@ -53,6 +53,29 @@ class RustApiErrorDetails {
   }
 }
 
+class ErrorBody {
+  const ErrorBody({
+    required this.code,
+    required this.message,
+    this.retryAfterMs,
+  });
+
+  final String code;
+  final String message;
+  final int? retryAfterMs;
+
+  factory ErrorBody.fromJson(Map<String, dynamic> json) {
+    return ErrorBody(
+      code: json['code'] as String,
+      message: json['message'] as String,
+      retryAfterMs: switch (json['retry_after_ms']) {
+        final num value => value.toInt(),
+        _ => null,
+      },
+    );
+  }
+}
+
 String formatRetryAfterMs(int retryAfterMs) {
   if (retryAfterMs <= 0) {
     return '稍后重试';
@@ -115,6 +138,7 @@ class JobRow {
   final Map<String, dynamic> payload;
   final Map<String, dynamic>? result;
   final String? errorMessage;
+
   /// Structured worker diagnostics: **`failed`** jobs (e.g. export codes + deep_links), or **`succeeded`**
   /// jobs where provider output did not fully write back (e.g. `production.video_file_writeback` / J4).
   final Map<String, dynamic>? errorDetails;
