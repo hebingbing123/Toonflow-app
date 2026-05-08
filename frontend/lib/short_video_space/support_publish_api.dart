@@ -262,17 +262,54 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
   final headline = exportCheck.exportReady
       ? '服务端未发现阻塞级问题（仍需在制作侧确认成片）。'
       : '存在阻塞项：建议先在制作工作区补齐后再导出 / 成片。';
-  final qg = exportCheck.qualityGatePlaceholder;
-  final qualityGateLine = qg.pendingReviewBadCaseCount > 0
-      ? '质量观测（占位）：待复核坏例 ${qg.pendingReviewBadCaseCount} 条（当前未强制拦截导出）。'
-      : '质量观测（占位）：暂无待复核坏例计数（未强制拦截导出）。';
+  final qg = exportCheck.qualityGate;
+  
+  // Build quality gate line based on strategy
+  String qualityGateLine;
+  if (qg.strategy == 'off') {
+    qualityGateLine = '质量门禁：已关闭（不检查质量问题）。';
+  } else if (qg.strategy == 'warn') {
+    if (qg.pendingReviewBadCaseCount > 0) {
+      qualityGateLine = '质量门禁：警告模式 - 待复核坏例 ${qg.pendingReviewBadCaseCount} 条（允许导出但建议修复）。';
+    } else {
+      qualityGateLine = '质量门禁：警告模式 - 暂无待复核坏例（允许导出）。';
+    }
+  } else if (qg.strategy == 'block') {
+    if (qg.enforced && qg.pendingReviewBadCaseCount > 0) {
+      qualityGateLine = '质量门禁：阻断模式 - 待复核坏例 ${qg.pendingReviewBadCaseCount} 条（阻止导出，需先修复）。';
+    } else if (qg.pendingReviewBadCaseCount > 0) {
+      qualityGateLine = '质量门禁：阻断模式 - 待复核坏例 ${qg.pendingReviewBadCaseCount} 条（暂未强制执行）。';
+    } else {
+      qualityGateLine = '质量门禁：阻断模式 - 暂无待复核坏例（允许导出）。';
+    }
+  } else {
+    qualityGateLine = '质量门禁：未知策略 "${qg.strategy}"。';
+  }
+  
+  // Collect blocking reasons if in block mode
+  final qualityGateBlockingLines = <String>[];
+  if (qg.strategy == 'block' && qg.enforced && qg.blockingReasons != null) {
+    for (final reason in qg.blockingReasons!) {
+      final routePart = reason.reworkRoute != null ? ' [返工: ${reason.reworkRoute}]' : '';
+      qualityGateBlockingLines.add('${reason.code}: ${reason.message}$routePart');
+    }
+  }
   final blockingLines = exportCheck.issues
       .where((i) => i.severity == 'blocking')
       .take(14)
       .map((i) {
         final sb = i.sbIndex;
         final sbPart = sb == null ? '' : ' · 序 $sb';
-        return '剧本 #${i.scriptNumericId} · 分镜 #${i.storyboardNumericId}$sbPart · ${shortVideoExportIssueLabelZh(i.code)}';
+        return '剧本 #${i.scriptNumericId} · 分镜 #${i.storyboardNumericId}$sbPart · ${shortVideoExportIssueLabelZh(i.code)} · ${i.detail}';
+      })
+      .toList(growable: false);
+  final warningLines = exportCheck.issues
+      .where((i) => i.severity == 'warning')
+      .take(14)
+      .map((i) {
+        final sb = i.sbIndex;
+        final sbPart = sb == null ? '' : ' · 序 $sb';
+        return '剧本 #${i.scriptNumericId} · 分镜 #${i.storyboardNumericId}$sbPart · ${shortVideoExportIssueLabelZh(i.code)} · ${i.detail}';
       })
       .toList(growable: false);
   final detail = exportCheck.exportReady
@@ -283,8 +320,11 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
     headline: headline,
     metrics: metrics,
     qualityGateLine: qualityGateLine,
+    qualityGateBlockingLines: qualityGateBlockingLines,
     blockingLines: blockingLines,
+    warningLines: warningLines,
     detail: detail,
+    exportReady: exportCheck.exportReady,
   );
 }
 
@@ -412,6 +452,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
           : (exportCheck.summary.blockingIssueCount <= 0
                 ? '导出检查：当前无阻塞项。'
                 : '导出检查：仍有 ${exportCheck.summary.blockingIssueCount} 条阻塞项。'),
+      exportReady: exportCheck?.exportReady ?? true,
       detail:
           '确认 Supabase 已应用 `app_publish_*` 迁移后再试；Rust worker 会在后台消化发布作业队列。',
       onRefreshPublish: onRefreshPublish,
@@ -424,6 +465,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       : (exportCheck.summary.blockingIssueCount <= 0
             ? '导出检查：无阻塞项（**E13**：可从成片链路进入发布准备）。'
             : '导出检查：仍有 ${exportCheck.summary.blockingIssueCount} 条阻塞项；可先补齐字段再投递作业。');
+  
+  final exportReadyStatus = exportCheck?.exportReady ?? true;
 
   final matrixDomesticLines = <String>[];
   final matrixOverseasLines = <String>[];
@@ -576,6 +619,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     visible: true,
     headline: '已连接发布 API：${drafts.length} 张草稿 · ${jobs.length} 条作业。',
     exportGateHint: gate,
+    exportReady: exportReadyStatus,
     matrixDomesticLines: matrixDomesticLines,
     matrixOverseasLines: matrixOverseasLines,
     prepareLines: prepareLines,

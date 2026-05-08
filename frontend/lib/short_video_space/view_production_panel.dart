@@ -348,6 +348,28 @@ class _ProductionPanel extends StatelessWidget {
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
+                  if (exportCheckPanelUi.qualityGateBlockingLines.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '质量门禁阻断原因',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: outline,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in exportCheckPanelUi.qualityGateBlockingLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
                   if (exportCheckPanelUi.blockingLines.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -362,7 +384,29 @@ class _ProductionPanel extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           line,
-                          style: theme.textTheme.bodySmall,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ),
+                  ],
+                  if (exportCheckPanelUi.warningLines.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '警告项（按接口顺序节选）',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: outline,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final line in exportCheckPanelUi.warningLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.orange,
+                          ),
                         ),
                       ),
                   ],

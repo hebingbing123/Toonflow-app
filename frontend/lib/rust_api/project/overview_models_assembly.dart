@@ -423,25 +423,56 @@ class ShortVideoExportCheckIssue {
   }
 }
 
-class ShortVideoExportQualityGatePlaceholder {
-  const ShortVideoExportQualityGatePlaceholder({
+class QualityGateBlockingReason {
+  const QualityGateBlockingReason({
+    required this.code,
+    required this.message,
+    this.reworkRoute,
+  });
+
+  final String code;
+  final String message;
+  final String? reworkRoute;
+
+  factory QualityGateBlockingReason.fromJson(Map<String, dynamic> json) {
+    return QualityGateBlockingReason(
+      code: json['code'] as String,
+      message: json['message'] as String,
+      reworkRoute: json['rework_route'] as String?,
+    );
+  }
+}
+
+class ShortVideoExportQualityGate {
+  const ShortVideoExportQualityGate({
     required this.schemaVersion,
+    required this.strategy,
     required this.enforced,
     required this.pendingReviewBadCaseCount,
+    this.blockingReasons,
   });
 
   final int schemaVersion;
+  /// 门禁策略：off（跳过检查）、warn（显示警告但允许）、block（阻断导出）
+  final String strategy;
   final bool enforced;
   final int pendingReviewBadCaseCount;
+  final List<QualityGateBlockingReason>? blockingReasons;
 
-  factory ShortVideoExportQualityGatePlaceholder.fromJson(
+  factory ShortVideoExportQualityGate.fromJson(
     Map<String, dynamic> json,
   ) {
-    return ShortVideoExportQualityGatePlaceholder(
+    final blockingReasonsRaw = json['blocking_reasons'] as List<dynamic>?;
+    return ShortVideoExportQualityGate(
       schemaVersion: (json['schema_version'] as num).toInt(),
+      strategy: json['strategy'] as String,
       enforced: json['enforced'] as bool,
       pendingReviewBadCaseCount: (json['pending_review_bad_case_count'] as num)
           .toInt(),
+      blockingReasons: blockingReasonsRaw
+          ?.map((e) =>
+              QualityGateBlockingReason.fromJson(e as Map<String, dynamic>))
+          .toList(growable: false),
     );
   }
 }
@@ -449,23 +480,26 @@ class ShortVideoExportQualityGatePlaceholder {
 class ProjectShortVideoExportCheck {
   const ProjectShortVideoExportCheck({
     required this.schemaVersion,
+    this.dataVersion,
     required this.exportReady,
     required this.summary,
     required this.issues,
-    required this.qualityGatePlaceholder,
+    required this.qualityGate,
   });
 
   final int schemaVersion;
+  final String? dataVersion;
   final bool exportReady;
   final ShortVideoExportCheckSummary summary;
   final List<ShortVideoExportCheckIssue> issues;
-  final ShortVideoExportQualityGatePlaceholder qualityGatePlaceholder;
+  final ShortVideoExportQualityGate qualityGate;
 
   factory ProjectShortVideoExportCheck.fromJson(Map<String, dynamic> json) {
     final raw = json['issues'] as List<dynamic>? ?? const <dynamic>[];
-    final qgRaw = json['quality_gate_placeholder'];
+    final qgRaw = json['quality_gate'];
     return ProjectShortVideoExportCheck(
       schemaVersion: (json['schema_version'] as num).toInt(),
+      dataVersion: json['data_version'] as String?,
       exportReady: json['export_ready'] as bool,
       summary: ShortVideoExportCheckSummary.fromJson(
         json['summary'] as Map<String, dynamic>,
@@ -476,10 +510,11 @@ class ProjectShortVideoExportCheck {
                 ShortVideoExportCheckIssue.fromJson(e as Map<String, dynamic>),
           )
           .toList(growable: false),
-      qualityGatePlaceholder: qgRaw is Map<String, dynamic>
-          ? ShortVideoExportQualityGatePlaceholder.fromJson(qgRaw)
-          : const ShortVideoExportQualityGatePlaceholder(
+      qualityGate: qgRaw is Map<String, dynamic>
+          ? ShortVideoExportQualityGate.fromJson(qgRaw)
+          : const ShortVideoExportQualityGate(
               schemaVersion: 1,
+              strategy: 'off',
               enforced: false,
               pendingReviewBadCaseCount: 0,
             ),

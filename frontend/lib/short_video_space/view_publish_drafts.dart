@@ -450,7 +450,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onEnqueuePublishJob != null)
                     FilledButton.icon(
-                      onPressed: publishPanelUi.publishBusy
+                      onPressed: (publishPanelUi.publishBusy || !publishPanelUi.exportReady)
                           ? null
                           : publishPanelUi.onEnqueuePublishJob,
                       icon: publishPanelUi.publishBusy
@@ -460,14 +460,14 @@ class _PublishDraftsPanel extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.cloud_upload_outlined),
-                      label: const Text('投递发布作业'),
+                      label: Text(publishPanelUi.exportReady ? '投递发布作业' : '投递发布作业（存在阻塞项）'),
                     ),
                   if (publishPanelUi.onEnqueueAllDrafts != null)
                     FilledButton.tonal(
-                      onPressed: publishPanelUi.publishBusy
+                      onPressed: (publishPanelUi.publishBusy || !publishPanelUi.exportReady)
                           ? null
                           : publishPanelUi.onEnqueueAllDrafts,
-                      child: const Text('批量投递全部草稿'),
+                      child: Text(publishPanelUi.exportReady ? '批量投递全部草稿' : '批量投递全部草稿（存在阻塞项）'),
                     ),
                   if (publishPanelUi.onRetryFailedPublishJobs != null)
                     FilledButton.tonal(

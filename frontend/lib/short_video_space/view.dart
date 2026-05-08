@@ -125,8 +125,11 @@ class ShortVideoExportCheckPanelUi {
     this.headline = '',
     this.metrics = const <ShortVideoMetricData>[],
     this.qualityGateLine = '',
+    this.qualityGateBlockingLines = const <String>[],
     this.blockingLines = const <String>[],
+    this.warningLines = const <String>[],
     this.detail = '',
+    this.exportReady = false,
   });
 
   final bool visible;
@@ -135,8 +138,11 @@ class ShortVideoExportCheckPanelUi {
   final String headline;
   final List<ShortVideoMetricData> metrics;
   final String qualityGateLine;
+  final List<String> qualityGateBlockingLines;
   final List<String> blockingLines;
+  final List<String> warningLines;
   final String detail;
+  final bool exportReady;
 }
 
 class ShortVideoCandidateCompareItemUi {
@@ -189,6 +195,7 @@ class ShortVideoPublishPanelUi {
     this.unavailable = false,
     this.headline = '',
     this.exportGateHint = '',
+    this.exportReady = true,
     this.detail = '',
     this.matrixDomesticLines = const <String>[],
     this.matrixOverseasLines = const <String>[],
@@ -247,6 +254,7 @@ class ShortVideoPublishPanelUi {
   final bool unavailable;
   final String headline;
   final String exportGateHint;
+  final bool exportReady;
   final String detail;
   final List<String> matrixDomesticLines;
   final List<String> matrixOverseasLines;
