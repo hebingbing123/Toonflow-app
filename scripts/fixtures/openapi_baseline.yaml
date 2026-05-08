@@ -4612,6 +4612,28 @@ components:
       - service
       - version
       type: object
+    ListWorkspaceInvitesEnvelope:
+      properties:
+        has_more:
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/WorkspaceInviteResponse'
+          type: array
+      required:
+      - items
+      - has_more
+      type: object
+    ResendWorkspaceInviteBody:
+      additionalProperties: false
+      properties:
+        expires_in_hours:
+          description: New expiry window in hours (default **168**, max **720**), same rules as create.
+          format: int64
+          type:
+          - integer
+          - 'null'
+      type: object
     WorkspaceInviteResponse:
       properties:
         accepted_at:
@@ -16433,6 +16455,81 @@ paths:
       tags:
       - workspaces
   /api/v1/workspaces/{workspace_id}/invites:
+    get:
+      operationId: listWorkspaceInvitesV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Filter by **`status`** (`pending`, `accepted`, `revoked`).
+        example: pending
+        in: query
+        name: status
+        required: false
+        schema:
+          type: string
+      - description: Max rows (**1–200**, default **50**).
+        example: 50
+        in: query
+        name: limit
+        required: false
+        schema:
+          format: int64
+          type: integer
+      - description: Pagination offset (default **0**).
+        example: 0
+        in: query
+        name: offset
+        required: false
+        schema:
+          format: int64
+          type: integer
+      - description: When **false** (default), rows with **`status = revoked`** are omitted unless **`status=revoked`** is set explicitly.
+        example: false
+        in: query
+        name: include_revoked
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListWorkspaceInvitesEnvelope'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
     post:
       operationId: createWorkspaceInviteV1
       parameters:
@@ -16480,6 +16577,146 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Not found
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Quota exceeded
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/{workspace_id}/invites/{invite_id}:
+    delete:
+      operationId: revokeWorkspaceInviteV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Invite row UUID
+        in: path
+        name: invite_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceInviteResponse'
+          description: Revoked
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
+  /api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend:
+    post:
+      operationId: resendWorkspaceInviteV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Invite row UUID
+        in: path
+        name: invite_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendWorkspaceInviteBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceInviteResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
         '429':
           content:
             application/json:

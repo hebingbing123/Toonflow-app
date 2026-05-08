@@ -86,6 +86,38 @@ async fn workspace_invites_create_requires_database_without_pool() {
 }
 
 #[tokio::test]
+async fn workspace_invites_list_requires_database_without_pool() {
+    let token = test_jwt(Uuid::nil());
+    let id = Uuid::nil();
+    let uri = format!("/api/v1/workspaces/{id}/invites?limit=50&offset=0");
+    let (status, v) = get_json_bearer(&uri, &token).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn workspace_invites_revoke_requires_database_without_pool() {
+    let token = test_jwt(Uuid::nil());
+    let ws = Uuid::nil();
+    let invite = Uuid::nil();
+    let uri = format!("/api/v1/workspaces/{ws}/invites/{invite}");
+    let (status, v) = delete_empty_bearer(&uri, &token).await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn workspace_invites_resend_requires_database_without_pool() {
+    let token = test_jwt(Uuid::nil());
+    let ws = Uuid::nil();
+    let invite = Uuid::nil();
+    let uri = format!("/api/v1/workspaces/{ws}/invites/{invite}/resend");
+    let (status, v) = post_json_bearer(&uri, &token, "{}").await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
 async fn workspace_invites_accept_requires_database_without_pool() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(

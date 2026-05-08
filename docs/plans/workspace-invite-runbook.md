@@ -8,10 +8,16 @@
 ## 1) 现状（已上线）
 
 - 邀请创建：`POST /api/v1/workspaces/{workspace_id}/invites`
+- 邀请列表：`GET /api/v1/workspaces/{workspace_id}/invites`  
+  - 响应体为 **`{ "items": [...], "has_more": bool }`**（分页），不是裸数组。  
+  - 查询参数：`status`（`pending` \| `accepted` \| `revoked`）、`limit`、`offset`、`include_revoked`（默认不返回已撤销行，除非显式筛选或 `include_revoked=true`）。
+- 邀请撤销：`DELETE /api/v1/workspaces/{workspace_id}/invites/{invite_id}`（仅 **`pending`** 可撤销为 `revoked`）
+- 邀请重发：`POST /api/v1/workspaces/{workspace_id}/invites/{invite_id}/resend`  
+  - 请求体可选：`{ "expires_in_hours": <1..720> }`；空对象 `{}` 使用默认续期窗口（与创建邀请一致）。
 - 邀请接受：`POST /api/v1/workspaces/invites/accept`
 - 数据表：`app_workspace_invite`（`pending/accepted/revoked`）
-- 速率限制：`TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR`（默认 120 / workspace / hour）
-- 审计：`app_workspace_audit` 记录邀请创建、接受、成员变更
+- 速率限制：`TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR`（默认 120 / workspace / hour；**撤销、重发**计入同一 workspace 的 mutation 配额）
+- 审计：`app_workspace_audit` 记录邀请创建、接受、**撤销、重发**、成员变更
 
 ## 2) 无邮件路径（默认）
 

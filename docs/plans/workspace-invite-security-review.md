@@ -20,11 +20,15 @@
    - token 不存在 -> `404`
    - `status != pending` 或已过期 -> `409`
    - 接受成功后 upsert membership，并把 invite 标记为 `accepted`
+3. `GET /api/v1/workspaces/{workspace_id}/invites`（owner/admin）  
+   - 分页信封 `items` + `has_more`；旧客户端若仍按数组解析会失败，需升级。
+4. `DELETE …/invites/{invite_id}`：`pending` → `revoked`；非 pending 返回冲突类错误。
+5. `POST …/invites/{invite_id}/resend`：**轮换 token** 并按请求体或默认规则延长 `expires_at`；旧 token 即刻失效。
 
 辅助控制：
 
 - `TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR`
-- `app_workspace_audit`
+- `app_workspace_audit`（含 `workspace_invite_revoked` / `workspace_invite_resent` 等）
 
 ## 2) 当前已有防线
 
@@ -41,8 +45,8 @@
 
 ### 2.3 滥用限制
 
-- workspace 维度 mutation rate limit
-- 审计日志记录 invite create / accept
+- workspace 维度 mutation rate limit（含 create / accept / **revoke** / **resend**）
+- 审计日志记录 invite create / accept / **revoke** / **resend**
 
 ## 3) 当前主要风险
 
