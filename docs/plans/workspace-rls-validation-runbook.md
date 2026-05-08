@@ -109,6 +109,23 @@ PROBE_WORKSPACE_ID="$WORKSPACE_ID" \
 bash scripts/workspace_rls_probe.sh
 ```
 
+### 3.4 当前已验证的本地样本结论（2026-05-08）
+
+基于 `scripts/workspace_rls_seed_sample.sh` 插入的固定样本，已在本地迁移完成库上跑过一轮 probe。  
+当前观察结果可作为 staging 判读前的基线：
+
+| 身份 | `app_workspace` | `app_workspace_member` | `app_project` / `app_script` / `app_asset` / `app_novel` / `app_generation_job` |
+|------|------------------|------------------------|-----------------------------------------------------------------------------------|
+| owner | 1 | 1 | 都可见 |
+| member | 1 | 1 | 都不可见 |
+| outsider | 0 | 0 | 都不可见 |
+
+这说明当前本地样本下：
+
+- workspace 基础表是 `partial_match`
+- project / script / asset / novel / job 仍是典型 `Rust allow，RLS deny`
+- staging 若出现更宽的 member 直连可见性，应先视为异常而不是默认“终于对了”
+
 ## 4) Rust API 对照
 
 至少核对下列接口：

@@ -122,6 +122,14 @@ W9.2 的任务不是立刻把所有 RLS 改完，而是先把 **哪些一致、�
 
 若要直接执行而不是手工拼 SQL / curl，优先使用 [`workspace-rls-validation-runbook.md`](./workspace-rls-validation-runbook.md) 里的探针脚本与记录模板。
 
+当前还已有一轮本地 seeded 样本基线（2026-05-08）：
+
+- owner：可见目标 workspace、本人 membership，以及 project / script / asset / novel / generation job
+- member：可见目标 workspace 与本人 membership，但看不到 project / script / asset / novel / generation job
+- outsider：上述目标表均不可见
+
+这轮结果再次确认：当前 workspace 协作主语义仍在 Rust API 层，而不是 Supabase 直连 RLS 层。
+
 至少准备三类身份：
 
 1. **workspace owner**
