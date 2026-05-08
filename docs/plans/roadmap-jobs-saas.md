@@ -89,7 +89,7 @@ YAML：`jobs-and-webhook-hardening`、`saas-product-spec`。
 
 | 项 | 内容 |
 |----|------|
-| **目标** | **必做**：运营可按币种 / provider / 时间窗审计订阅与 webhook（API + 最小可用 UI 或受控导出）；能力建立在 `GET …/webhooks/billing/events` 等现有接口之上，缺口则 **必扩 query**。 |
+| **目标** | **必做**：运营可按币种 / provider / 时间窗审计订阅与 webhook（API + 最小可用 UI 或受控导出）；能力建立在 `GET …/webhooks/billing/events` 等现有接口之上，缺口则 **必扩 query**。当前 Flutter「帮助 / 出站 Webhook」页已补最小可用 billing webhook 审计 UI（provider / informational / event_type / event id / 时间窗 + 分页）。 |
 | **依赖** | **staging 先做满**；生产 Gate（商户号、合规）标记 `blocked` 时不减免实现，仅减免 prod URL。 |
 | **PR 切片** | （1）API 筛选维度补齐；（2）**必做**：Flutter 内部页 **或** 等效导出流水（CSV）至少一种；（3）**必做**：RBAC（admin / 限定 workspace role）。 |
 | **触点** | `backend/src/billing/events_list/`；billing handlers；`frontend/` 内部入口（无则新建最小屏）。 |

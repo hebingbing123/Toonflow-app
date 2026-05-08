@@ -343,6 +343,20 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   String? _webhooksError;
   OutboundWebhookListResponseV1? _webhooks;
   final _webhookUrlController = TextEditingController();
+  bool _loadingBillingEvents = false;
+  bool _loadingMoreBillingEvents = false;
+  String? _billingEventsError;
+  BillingWebhookEventsResponseV1? _billingEventsPage;
+  final List<BillingWebhookEventItemV1> _billingEvents =
+      <BillingWebhookEventItemV1>[];
+  final _billingEventTypeController = TextEditingController();
+  final _billingProviderEventIdController = TextEditingController();
+  final _billingRawEventIdController = TextEditingController();
+  final _billingCreatedFromController = TextEditingController();
+  final _billingCreatedToController = TextEditingController();
+  String _billingProvider = '';
+  bool? _billingInformationalOnly;
+  String _billingSort = 'id_desc';
 
   Future<void> _load() async {
     final token = widget.accessToken;
@@ -387,11 +401,17 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     super.initState();
     unawaited(_load());
     unawaited(_loadWebhooks());
+    unawaited(_loadBillingEvents());
   }
 
   @override
   void dispose() {
     _webhookUrlController.dispose();
+    _billingEventTypeController.dispose();
+    _billingProviderEventIdController.dispose();
+    _billingRawEventIdController.dispose();
+    _billingCreatedFromController.dispose();
+    _billingCreatedToController.dispose();
     super.dispose();
   }
 
@@ -433,6 +453,82 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
   }
 
+  BillingWebhookEventsQueryV1 _buildBillingEventsQuery({int offset = 0}) {
+    return BillingWebhookEventsQueryV1(
+      informationalEvent: _billingInformationalOnly,
+      provider: _billingProvider,
+      rawEventId: _billingRawEventIdController.text,
+      eventType: _billingEventTypeController.text,
+      providerEventId: _billingProviderEventIdController.text,
+      createdFrom: _billingCreatedFromController.text,
+      createdTo: _billingCreatedToController.text,
+      sort: _billingSort,
+      limit: 30,
+      offset: offset,
+    );
+  }
+
+  Future<void> _loadBillingEvents({bool append = false}) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _billingEventsError = '请先登录';
+        _billingEventsPage = null;
+        _billingEvents.clear();
+      });
+      return;
+    }
+    setState(() {
+      if (append) {
+        _loadingMoreBillingEvents = true;
+      } else {
+        _loadingBillingEvents = true;
+      }
+      _billingEventsError = null;
+    });
+    try {
+      final response = await getBillingWebhookEventsV1(
+        token,
+        query: _buildBillingEventsQuery(
+          offset: append
+              ? (_billingEventsPage?.nextOffset ?? _billingEvents.length)
+              : 0,
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _billingEventsPage = response;
+        if (append) {
+          _billingEvents.addAll(response.items);
+        } else {
+          _billingEvents
+            ..clear()
+            ..addAll(response.items);
+        }
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _billingEventsError = describeRustApiError(e);
+        if (!append) {
+          _billingEventsPage = null;
+          _billingEvents.clear();
+        }
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingBillingEvents = false;
+          _loadingMoreBillingEvents = false;
+        });
+      }
+    }
+  }
+
   Future<void> _createWebhook() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
@@ -462,16 +558,16 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已创建；secret 已复制到剪贴板')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已创建；secret 已复制到剪贴板')));
       await _loadWebhooks();
     } catch (e) {
       if (!mounted) {
         return;
       }
       setState(() {
-        _webhooksError = e.toString();
+        _webhooksError = describeRustApiError(e);
       });
     } finally {
       if (mounted) {
@@ -502,7 +598,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = e.toString();
+        _webhooksError = describeRustApiError(e);
       });
     } finally {
       if (mounted) {
@@ -545,7 +641,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = e.toString();
+        _webhooksError = describeRustApiError(e);
       });
     } finally {
       if (mounted) {
@@ -554,6 +650,21 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         });
       }
     }
+  }
+
+  String _formatBillingEventMeta(BillingWebhookEventItemV1 item) {
+    final parts = <String>[
+      'provider=${item.provider ?? '-'}',
+      'type=${item.eventType ?? '-'}',
+      'created=${item.createdAt.toLocal().toIso8601String()}',
+    ];
+    if (item.eventCreatedAt != null) {
+      parts.add(
+        'event_created=${item.eventCreatedAt!.toLocal().toIso8601String()}',
+      );
+    }
+    parts.add(item.isInformationalEvent ? 'informational' : 'stateful');
+    return parts.join(' · ');
   }
 
   @override
@@ -590,8 +701,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(item.title,
-                                style: Theme.of(context).textTheme.titleSmall),
+                            Text(
+                              item.title,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
                             const SizedBox(height: 4),
                             SelectableText(item.url),
                           ],
@@ -607,9 +720,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           if (!context.mounted) {
                             return;
                           }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('已复制')),
-                          );
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(const SnackBar(content: Text('已复制')));
                         },
                         icon: const Icon(Icons.copy),
                       ),
@@ -670,19 +783,205 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton(
-                        onPressed: _loadingWebhooks ? null : () => _testWebhook(wh.id),
+                        onPressed: _loadingWebhooks
+                            ? null
+                            : () => _testWebhook(wh.id),
                         child: const Text('测试投递'),
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton(
-                        onPressed:
-                            _loadingWebhooks ? null : () => _deleteWebhook(wh.id),
+                        onPressed: _loadingWebhooks
+                            ? null
+                            : () => _deleteWebhook(wh.id),
                         child: const Text('删除'),
                       ),
                     ],
                   ),
                 ),
               ),
+            ),
+          const SizedBox(height: 16),
+          Text(
+            'Billing Webhook 审计',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: 180,
+                child: DropdownButtonFormField<String>(
+                  initialValue: _billingProvider,
+                  decoration: const InputDecoration(labelText: 'Provider'),
+                  items: const [
+                    DropdownMenuItem(value: '', child: Text('全部')),
+                    DropdownMenuItem(value: 'stripe', child: Text('stripe')),
+                    DropdownMenuItem(value: 'alipay', child: Text('alipay')),
+                    DropdownMenuItem(value: 'paddle', child: Text('paddle')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _billingProvider = value ?? '';
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 180,
+                child: DropdownButtonFormField<String>(
+                  initialValue: _billingSort,
+                  decoration: const InputDecoration(labelText: '排序'),
+                  items: const [
+                    DropdownMenuItem(value: 'id_desc', child: Text('最新优先')),
+                    DropdownMenuItem(value: 'id_asc', child: Text('最早优先')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _billingSort = value ?? 'id_desc';
+                    });
+                  },
+                ),
+              ),
+              FilterChip(
+                label: const Text('仅 informational'),
+                selected: _billingInformationalOnly == true,
+                onSelected: (selected) {
+                  setState(() {
+                    _billingInformationalOnly = selected ? true : null;
+                  });
+                },
+              ),
+              FilterChip(
+                label: const Text('仅 stateful'),
+                selected: _billingInformationalOnly == false,
+                onSelected: (selected) {
+                  setState(() {
+                    _billingInformationalOnly = selected ? false : null;
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _billingEventTypeController,
+            decoration: const InputDecoration(
+              labelText: 'event_type',
+              hintText: '例如 invoice.paid / subscription.expired',
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _billingProviderEventIdController,
+            decoration: const InputDecoration(
+              labelText: 'provider_event_id',
+              hintText: '例如 stripe:evt_123',
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _billingRawEventIdController,
+            decoration: const InputDecoration(
+              labelText: 'raw_event_id',
+              hintText: '例如 evt_123',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: 280,
+                child: TextField(
+                  controller: _billingCreatedFromController,
+                  decoration: const InputDecoration(
+                    labelText: 'created_from',
+                    hintText: '2026-04-01T00:00:00Z',
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 280,
+                child: TextField(
+                  controller: _billingCreatedToController,
+                  decoration: const InputDecoration(
+                    labelText: 'created_to',
+                    hintText: '2026-04-30T23:59:59Z',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.tonal(
+                onPressed: _loadingBillingEvents ? null : _loadBillingEvents,
+                child: Text(_loadingBillingEvents ? '读取中…' : '查询审计'),
+              ),
+              OutlinedButton(
+                onPressed: _loadingBillingEvents || _loadingMoreBillingEvents
+                    ? null
+                    : () {
+                        setState(() {
+                          _billingProvider = '';
+                          _billingInformationalOnly = null;
+                          _billingSort = 'id_desc';
+                          _billingEventTypeController.clear();
+                          _billingProviderEventIdController.clear();
+                          _billingRawEventIdController.clear();
+                          _billingCreatedFromController.clear();
+                          _billingCreatedToController.clear();
+                        });
+                        _loadBillingEvents();
+                      },
+                child: const Text('重置并刷新'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_loadingBillingEvents) const Text('加载 billing 审计中...'),
+          if (_billingEventsError != null)
+            Text(
+              _billingEventsError!,
+              style: const TextStyle(color: Colors.red),
+            ),
+          if (_billingEventsPage != null)
+            Text(
+              'total=${_billingEventsPage!.total} · loaded=${_billingEvents.length} · has_more=${_billingEventsPage!.hasMore}',
+            ),
+          ..._billingEvents.map(
+            (item) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.providerEventId,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(_formatBillingEventMeta(item)),
+                    if (item.rawEventId != null && item.rawEventId!.isNotEmpty)
+                      SelectableText('raw_event_id=${item.rawEventId}'),
+                    SelectableText('id=${item.id}'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (_billingEventsPage?.hasMore == true)
+            OutlinedButton(
+              onPressed: _loadingBillingEvents || _loadingMoreBillingEvents
+                  ? null
+                  : () => _loadBillingEvents(append: true),
+              child: Text(_loadingMoreBillingEvents ? '加载中…' : '加载更多审计'),
             ),
         ],
       ),
