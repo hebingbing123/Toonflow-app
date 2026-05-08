@@ -36,9 +36,7 @@ Future<List<JobRow>> fetchJobs(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list.map((e) => JobRow.fromJson(e as Map<String, dynamic>)).toList();
 }
@@ -49,9 +47,7 @@ Future<List<String>> fetchJobKinds(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list.map((e) => e as String).toList();
 }
@@ -76,9 +72,7 @@ Future<List<JobKindSummary>> fetchJobKindSummaries(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => JobKindSummary.fromJson(e as Map<String, dynamic>))
@@ -107,9 +101,7 @@ Future<List<JobStatusSummary>> fetchJobStatusSummaries(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => JobStatusSummary.fromJson(e as Map<String, dynamic>))
@@ -125,9 +117,7 @@ Future<JobRow> fetchJob(String accessToken, String jobId) async {
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobRow.fromJson(map);
 }
@@ -159,11 +149,9 @@ Future<JobRow> createJob(
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobRow.fromJson(map);
 }
@@ -180,9 +168,7 @@ Future<JobRow> cancelJob(String accessToken, String jobId) async {
   if (res.statusCode == 409) {
     throw RustApiException(res.body, statusCode: 409);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobRow.fromJson(map);
 }
@@ -199,9 +185,7 @@ Future<JobRow> retryJob(String accessToken, String jobId) async {
   if (res.statusCode == 409) {
     throw RustApiException(res.body, statusCode: 409);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobRow.fromJson(map);
 }

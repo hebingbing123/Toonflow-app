@@ -29,9 +29,7 @@ Future<List<ProjectRow>> fetchProjects(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => ProjectRow.fromJson(e as Map<String, dynamic>))
@@ -90,9 +88,7 @@ Future<ProjectsSummary> fetchProjectsSummary(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectsSummary.fromJson(map);
 }
@@ -114,11 +110,9 @@ Future<ProjectRow> createProject(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectRow.fromJson(map);
 }
@@ -146,11 +140,9 @@ Future<ProjectRow> updateProjectByProjectId(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectRow.fromJson(map);
 }
@@ -181,11 +173,9 @@ Future<ProjectRow> patchProjectStyleConfigByProjectId(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectRow.fromJson(map);
 }
@@ -202,7 +192,5 @@ Future<void> deleteProjectByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }

@@ -37,11 +37,9 @@ postProductionAssetsBatchGenerateAssetsImageV1(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return BatchGenerateAssetsImageResponseV1.fromJson(map);
 }
@@ -72,11 +70,9 @@ postProductionAssetsDeleteAssetsDerivativeV1(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return DeleteAssetsDerivativeResponseV1.fromJson(map);
 }
@@ -111,11 +107,9 @@ Future<AssetsDataResponseV1> postProductionAssetsGetAssetsDataV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetsDataResponseV1.fromJson(map);
 }
@@ -143,11 +137,9 @@ Future<AssetsPollingImageResponseV1> postProductionAssetsPollingImageV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetsPollingImageResponseV1.fromJson(map);
 }
@@ -179,11 +171,9 @@ Future<UpdateAssetsUrlResponseV1> postProductionAssetsUpdateAssetsUrlV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return UpdateAssetsUrlResponseV1.fromJson(map);
 }

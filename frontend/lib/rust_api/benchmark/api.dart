@@ -23,9 +23,7 @@ Future<List<BenchmarkCaseV1>> fetchBenchmarkCases(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! List) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -65,7 +63,7 @@ Future<BenchmarkCaseV1> promoteBenchmarkCaseFromReview(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode != 201 && res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
@@ -90,9 +88,7 @@ Future<List<ExperimentRunV1>> fetchBenchmarkExperiments(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! List) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -113,9 +109,7 @@ Future<ExperimentDetailV1> fetchBenchmarkExperimentDetail(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -151,9 +145,7 @@ Future<ExperimentDetailV1> createBenchmarkExperiment(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -171,9 +163,7 @@ Future<ExperimentDetailV1> startBenchmarkExperiment(
   final res = await http
       .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -191,9 +181,7 @@ Future<ExperimentDetailV1> cancelBenchmarkExperiment(
   final res = await http
       .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -208,9 +196,7 @@ Future<List<ReviewQueueItemV1>> fetchBenchmarkReviewQueue(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! List) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -241,9 +227,7 @@ Future<ReviewQueueItemV1> submitBenchmarkReview(
         body: jsonEncode({'submittedScore': submittedScore}),
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -273,9 +257,7 @@ Future<ReviewQueueItemV1> skipBenchmarkReview(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -290,9 +272,7 @@ Future<MemoryProfilesResponseV1> fetchBenchmarkMemoryProfiles(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -310,9 +290,7 @@ Future<RoiEvidenceSummaryV1> fetchBenchmarkExperimentRoi(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -330,9 +308,7 @@ Future<GateDecisionEnvelopeV1> fetchBenchmarkGate(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -371,9 +347,7 @@ Future<GateDecisionRecordV1> submitBenchmarkGateDecision(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -391,9 +365,7 @@ Future<BenchmarkTrendsResponseV1> fetchBenchmarkTrends(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');

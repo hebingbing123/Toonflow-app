@@ -75,9 +75,7 @@ Future<ListArtStylesResponse> fetchArtStyles(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListArtStylesResponse.fromJson(map);
 }
@@ -106,11 +104,9 @@ Future<ArtStyleRow> createArtStyle(
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ArtStyleRow.fromJson(map);
 }
@@ -125,11 +121,9 @@ Future<ArtStyleRow> fetchArtStyleByNumericId(
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ArtStyleRow.fromJson(map);
 }
@@ -146,11 +140,9 @@ Future<Uint8List> fetchArtStyleCoverByNumericId(
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   return res.bodyBytes;
 }
 
@@ -178,11 +170,9 @@ Future<ArtStyleRow> patchArtStyleByNumericId(
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ArtStyleRow.fromJson(map);
 }
@@ -197,11 +187,9 @@ Future<void> deleteArtStyleByNumericId(
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }
 
 /// `POST /api/v1/art-styles/extract-prompt` — vision LLM; see `extractArtStylePromptV1`.
@@ -223,11 +211,9 @@ Future<ExtractArtStylePromptResponse> extractArtStylePrompt(
       )
       .timeout(const Duration(seconds: 120));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ExtractArtStylePromptResponse.fromJson(map);
 }

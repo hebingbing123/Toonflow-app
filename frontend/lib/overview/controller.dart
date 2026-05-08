@@ -48,7 +48,7 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchHealthV1();
       healthBody = 'status=${response.status} service=${response.service}';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -66,7 +66,7 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchHealthRoot();
       healthRootBody = 'status=${response.status} service=${response.service}';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -84,7 +84,7 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchPingV1();
       pingBody = 'ok=${response.ok}';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -109,7 +109,7 @@ class OverviewController extends ChangeNotifier {
       }
       versionBody = parts.join(' · ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -127,7 +127,7 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchReadyV1();
       readyBody = 'status=${response.status}, database=${response.database}';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {

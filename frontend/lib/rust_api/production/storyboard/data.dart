@@ -32,11 +32,9 @@ Future<StoryboardAddResponse> postStoryboardAddV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return StoryboardAddResponse.fromJson(map);
 }
@@ -66,11 +64,9 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return StoryboardBatchAddInfoResponse.fromJson(map);
 }
@@ -103,7 +99,7 @@ Future<int> postStoryboardEditInfoV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
   return res.statusCode;
 }
@@ -131,11 +127,9 @@ Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProductionStoryboardItemV1.fromJson(map);
 }
@@ -165,7 +159,7 @@ Future<int> postStoryboardRemoveFrameV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
   return res.statusCode;
 }
@@ -227,11 +221,9 @@ postStoryboardUpdateLiveActionReferenceV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return UpdateStoryboardLiveActionReferenceResponseV1.fromJson(map);
 }
@@ -263,7 +255,7 @@ Future<int> postStoryboardUpdateDurationV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
   return res.statusCode;
 }
@@ -286,11 +278,9 @@ Future<ProductionGetProductionDataResponseV1> postProductionGetStoryboardDataV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProductionGetProductionDataResponseV1.fromJson(map);
 }

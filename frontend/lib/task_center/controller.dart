@@ -64,7 +64,7 @@ class TaskCenterController extends ChangeNotifier {
     try {
       taskProjects = await postTasksGetProject(token);
     } on RustApiException catch (e) {
-      _onErrorChanged(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
       _onErrorChanged(e.toString());
     } finally {
@@ -86,7 +86,7 @@ class TaskCenterController extends ChangeNotifier {
           ? '(empty)'
           : rows.map((row) => row.taskClass).join(', ');
     } on RustApiException catch (e) {
-      _onErrorChanged(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
       _onErrorChanged(e.toString());
     } finally {
@@ -124,7 +124,7 @@ class TaskCenterController extends ChangeNotifier {
           ' · total=${rows.total} · page_rows=${rows.data.length}'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } on RustApiException catch (e) {
-      _onErrorChanged(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
       _onErrorChanged(e.toString());
     } finally {
@@ -153,7 +153,7 @@ class TaskCenterController extends ChangeNotifier {
       taskDetailNumericIdLine =
           'taskId=${row.numericTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
     } on RustApiException catch (e) {
-      _onErrorChanged(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
       _onErrorChanged(e.toString());
     } finally {
@@ -182,7 +182,7 @@ class TaskCenterController extends ChangeNotifier {
       }
       taskDetailUuidLine = parts.join(' · ');
     } on RustApiException catch (e) {
-      _onErrorChanged(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
       _onErrorChanged(e.toString());
     } finally {

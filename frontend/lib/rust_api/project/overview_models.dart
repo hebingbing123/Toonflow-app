@@ -1,6 +1,5 @@
 // Project overview data models - Part 1: Core project and readiness models
 
-
 class ProjectRow {
   const ProjectRow({
     required this.id,
@@ -89,8 +88,7 @@ class ProjectRow {
       voiceProfile: json['voice_profile'] as String?,
       subtitleStyle: json['subtitle_style'] as String?,
       bgmStrategy: json['bgm_strategy'] as String?,
-      projectAccessMode:
-          json['project_access_mode'] as String? ?? 'inherited',
+      projectAccessMode: json['project_access_mode'] as String? ?? 'inherited',
       projectAccessRole: json['project_access_role'] as String? ?? 'member',
     );
   }

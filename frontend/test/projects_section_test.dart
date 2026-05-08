@@ -173,6 +173,8 @@ void main() {
           numericId: 11,
           name: '项目一',
           createTimeMs: 1,
+          projectAccessMode: 'inherited',
+          projectAccessRole: 'member',
         ),
       ],
       artStyles: const <ArtStyleRow>[],

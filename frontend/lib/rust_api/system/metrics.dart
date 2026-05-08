@@ -184,9 +184,7 @@ Future<MetricsResponse> fetchMetricsV1({int windowMinutes = 60}) async {
     queryParameters: <String, String>{'windowMinutes': '$windowMinutes'},
   );
   final res = await http.get(uri).timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return MetricsResponse.fromJson(map);
 }
@@ -196,9 +194,7 @@ Future<SliStatusResponse> fetchSliStatusV1({int windowMinutes = 60}) async {
     queryParameters: <String, String>{'windowMinutes': '$windowMinutes'},
   );
   final res = await http.get(uri).timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SliStatusResponse.fromJson(map);
 }
@@ -206,9 +202,7 @@ Future<SliStatusResponse> fetchSliStatusV1({int windowMinutes = 60}) async {
 Future<List<SliDefinitionResponse>> fetchSliDefinitionsV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/metrics/sli/definitions');
   final res = await http.get(uri).timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map(

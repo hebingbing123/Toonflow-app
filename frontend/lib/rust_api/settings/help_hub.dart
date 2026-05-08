@@ -55,9 +55,7 @@ Future<HelpHubLinksResponseV1> getSettingsHelpHubLinksV1(
         },
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return HelpHubLinksResponseV1.fromJson(map);
 }

@@ -239,6 +239,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         _items = rows;
         _loading = false;
       });
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      showRustApiErrorSnackBar(e);
+      setState(() {
+        _error = describeRustApiError(e);
+        _loading = false;
+      });
     } catch (e) {
       if (!mounted) {
         return;
@@ -273,6 +282,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         context,
       ).showSnackBar(const SnackBar(content: Text('已创建企业空间')));
       await _load();
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('创建失败：${describeRustApiError(e)}')),
+      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -321,6 +337,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         await widget.onWorkspaceContextChanged!();
       }
       await _load();
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('接受邀请失败：${describeRustApiError(e)}')),
+      );
     } catch (e) {
       if (!mounted) {
         return;

@@ -25,8 +25,7 @@ class StoryboardMediaSlotsSummaryV1 {
     return StoryboardMediaSlotsSummaryV1(
       schemaVersion: (json['schemaVersion'] as num).toInt(),
       currentVideoUrl: json['currentVideoUrl'] as String?,
-      referenceOrPreviewFrameUrl:
-          json['referenceOrPreviewFrameUrl'] as String?,
+      referenceOrPreviewFrameUrl: json['referenceOrPreviewFrameUrl'] as String?,
       legacyAmbiguousMediaUrl: json['legacyAmbiguousMediaUrl'] as String?,
       voiceoverAudioUrl: json['voiceoverAudioUrl'] as String?,
       voiceoverState: json['voiceoverState'] as String?,

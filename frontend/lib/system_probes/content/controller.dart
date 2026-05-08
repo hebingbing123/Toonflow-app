@@ -75,7 +75,7 @@ class ContentProbesController extends ChangeNotifier {
       promptsProbeBody =
           'count=${rows.length} · types=$types · data_chars_total=$totalChars$roundtrip';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -113,7 +113,7 @@ class ContentProbesController extends ChangeNotifier {
           'GET+POST styles=${manual.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -147,7 +147,7 @@ class ContentProbesController extends ChangeNotifier {
           'folders=${list.data.length} · slot_data_chars=$slotChars · image_paths=$imagePaths'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -176,7 +176,7 @@ class ContentProbesController extends ChangeNotifier {
       skillsBinaryProbeBody =
           'path=$path · bytes=${bytes.length} · png_magic=$magicOk';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -222,7 +222,7 @@ class ContentProbesController extends ChangeNotifier {
           '${patched == null ? ' · PATCH skipped (single text model)' : ' · PATCH=$alternative'}'
           ' · reset=${reset.defaultModelId}';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -243,7 +243,7 @@ class ContentProbesController extends ChangeNotifier {
       modelDetailBody =
           '${detail.name} (${detail.modelName}) type=${detail.type} · vendor ${detail.vendorName} [${detail.vendorId}]';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {

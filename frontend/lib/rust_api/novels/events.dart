@@ -25,9 +25,7 @@ Future<ListNovelEventsResponse> fetchProjectNovelEventsByProjectId(
   if (limit != null) {
     qp['limit'] = '$limit';
   }
-  var uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/novel-events',
-  );
+  var uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/novel-events');
   if (qp.isNotEmpty) {
     uri = uri.replace(queryParameters: qp);
   }
@@ -38,11 +36,9 @@ Future<ListNovelEventsResponse> fetchProjectNovelEventsByProjectId(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListNovelEventsResponse.fromJson(map);
 }
@@ -55,9 +51,7 @@ Future<Map<String, dynamic>> createProjectNovelEventUnderProject(
   String? detail,
   List<int>? chapterIds,
 }) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/novel-events',
-  );
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/novel-events');
   final body = <String, dynamic>{'name': name};
   if (detail != null) {
     body['detail'] = detail;
@@ -79,11 +73,9 @@ Future<Map<String, dynamic>> createProjectNovelEventUnderProject(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   return jsonDecode(res.body) as Map<String, dynamic>;
 }
 
@@ -111,11 +103,9 @@ Future<String> patchProjectNovelEventByProjectIds(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['message'] as String? ?? '';
 }
@@ -136,11 +126,9 @@ Future<String> deleteProjectNovelEventByProjectIds(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['message'] as String? ?? '';
 }
@@ -165,14 +153,12 @@ Future<String> postProjectNovelEventsBatchDeleteByProjectId(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
   if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['message'] as String? ?? '';
 }

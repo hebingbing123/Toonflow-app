@@ -61,7 +61,7 @@ class ProjectsController extends ChangeNotifier {
       await loadProjects();
       return true;
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -110,7 +110,7 @@ class ProjectsController extends ChangeNotifier {
       agentMemoryBody =
           '${rows.length} message(s) for project ${first.id}$appendBit';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -129,7 +129,7 @@ class ProjectsController extends ChangeNotifier {
     try {
       projects = await fetchProjects(token);
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -150,7 +150,7 @@ class ProjectsController extends ChangeNotifier {
       projectsSummaryLine =
           'projects=${summary.projectCount} scripts=${summary.scriptCount} storyboards=${summary.storyboardCount} novels=${summary.novelCount} roles=${summary.roleCount} art_styles=${summary.artStyleCount} assets=${summary.assetCount} videos=${summary.videoCount}';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -189,7 +189,7 @@ class ProjectsController extends ChangeNotifier {
       artStyles = response.items;
       artStylesLine = line;
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {

@@ -50,11 +50,9 @@ Future<UpdateStoryboardUrlResponseV1> postStoryboardUpdateUrlV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return UpdateStoryboardUrlResponseV1.fromJson(map);
 }
@@ -104,11 +102,9 @@ Future<PreviewImageResponseV1> postStoryboardPreviewImageV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PreviewImageResponseV1.fromJson(map);
 }
@@ -158,11 +154,9 @@ Future<DownPreviewImageResponseV1> postStoryboardDownPreviewImageV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return DownPreviewImageResponseV1.fromJson(map);
 }

@@ -374,9 +374,7 @@ Future<List<QualityStatsRow>> fetchQualityStats(String accessToken) async {
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => QualityStatsRow.fromJson(e as Map<String, dynamic>))
@@ -402,9 +400,7 @@ Future<List<QualityScopeInsightRow>> fetchQualityScopeInsights(
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => QualityScopeInsightRow.fromJson(e as Map<String, dynamic>))
@@ -420,9 +416,7 @@ Future<List<StagePassRateRow>> fetchQualityStagePassRate(
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => StagePassRateRow.fromJson(e as Map<String, dynamic>))
@@ -438,9 +432,7 @@ Future<List<StageGradeDistributionRow>> fetchQualityStageGradeDistribution(
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => StageGradeDistributionRow.fromJson(e as Map<String, dynamic>))
@@ -464,9 +456,7 @@ Future<List<QualityTokenEfficiencyRow>> fetchQualityTokenEfficiency(
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => QualityTokenEfficiencyRow.fromJson(e as Map<String, dynamic>))
@@ -502,9 +492,7 @@ fetchQualityTokenEfficiencySamples(
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map(
@@ -551,9 +539,7 @@ Future<List<BadCaseStatItem>> fetchBadCaseStats(
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => BadCaseStatItem.fromJson(e as Map<String, dynamic>))

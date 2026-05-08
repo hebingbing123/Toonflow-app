@@ -13,9 +13,7 @@ Future<List<PromptTemplateRowV1>> fetchPromptsV1(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 60));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map((e) => PromptTemplateRowV1.fromJson(e as Map<String, dynamic>))
@@ -34,9 +32,7 @@ Future<PromptTemplateRowV1> fetchPromptByNumericIdV1(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PromptTemplateRowV1.fromJson(map);
 }
@@ -61,11 +57,9 @@ Future<PromptTemplateRowV1> patchPromptByNumericIdV1(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PromptTemplateRowV1.fromJson(map);
 }

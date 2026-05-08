@@ -23,9 +23,7 @@ Future<ImageFlowResponseV1> postProductionEditImageGetImageFlowV1(
         body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ImageFlowResponseV1.fromJson(map);
 }
@@ -46,9 +44,7 @@ postProductionEditImageGetImageDefaultModelV1(String accessToken) async {
         body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ImageDefaultModelResponseV1.fromJson(map);
 }
@@ -73,11 +69,9 @@ Future<SaveImageFlowResponseV1> postProductionEditImageSaveImageFlowV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SaveImageFlowResponseV1.fromJson(map);
 }
@@ -107,11 +101,9 @@ Future<UpdateImageFlowResponseV1> postProductionEditImageUpdateImageFlowV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return UpdateImageFlowResponseV1.fromJson(map);
 }
@@ -146,11 +138,9 @@ Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return GenerateFlowImageResponseV1.fromJson(map);
 }
@@ -180,11 +170,9 @@ Future<EditImageUploadImageResponseV1> postProductionEditImageUploadImageV1(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return EditImageUploadImageResponseV1.fromJson(map);
 }

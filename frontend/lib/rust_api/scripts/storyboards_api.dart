@@ -19,9 +19,7 @@ Future<List<StoryboardRow>> fetchStoryboardsForProjectScript(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => StoryboardRow.fromJson(e as Map<String, dynamic>))
@@ -49,14 +47,12 @@ Future<StoryboardRow> createStoryboardUnderProjectScript(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return StoryboardRow.fromJson(map);
 }
@@ -76,9 +72,7 @@ Future<StoryboardRow> fetchStoryboardByProjectAndNumericId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return StoryboardRow.fromJson(map);
 }
@@ -107,11 +101,9 @@ Future<StoryboardRow> updateStoryboardByProjectAndNumericId(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return StoryboardRow.fromJson(map);
 }
@@ -131,7 +123,5 @@ Future<void> deleteStoryboardByProjectAndNumericId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }

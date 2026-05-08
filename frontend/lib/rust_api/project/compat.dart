@@ -84,9 +84,7 @@ Future<List<ProjectRow>> fetchAllProjectsPaged(String accessToken) async {
     final res = await http
         .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
         .timeout(const Duration(seconds: 20));
-    if (res.statusCode != 200) {
-      throw RustApiException(res.body, statusCode: res.statusCode);
-    }
+    ensureHttpSuccess(res);
     final list = jsonDecode(res.body) as List<dynamic>;
     final batch = list
         .map((e) => ProjectRow.fromJson(e as Map<String, dynamic>))
@@ -103,10 +101,7 @@ Future<List<ProjectRow>> fetchAllProjectsPaged(String accessToken) async {
   return out;
 }
 
-Future<String> projectIdForNumericId(
-  String accessToken,
-  int numericId,
-) async {
+Future<String> projectIdForNumericId(String accessToken, int numericId) async {
   final rows = await fetchAllProjectsPaged(accessToken);
   for (final r in rows) {
     if (r.numericId == numericId) {
@@ -183,21 +178,17 @@ Future<String> postProjectEditProject(
 }) async {
   final projectId = await projectIdForNumericId(accessToken, id);
   final modeOut = _effectiveProjectMode(type, mode);
-  await updateProjectByProjectId(
-    accessToken,
-    projectId,
-    <String, dynamic>{
-      'name': name,
-      'intro': intro,
-      'project_type': projectType,
-      'art_style': artStyle,
-      'director_manual': directorManual,
-      'video_ratio': videoRatio,
-      'image_model': imageModel,
-      'video_model': videoModel,
-      'image_quality': imageQuality,
-      'mode': modeOut,
-    },
-  );
+  await updateProjectByProjectId(accessToken, projectId, <String, dynamic>{
+    'name': name,
+    'intro': intro,
+    'project_type': projectType,
+    'art_style': artStyle,
+    'director_manual': directorManual,
+    'video_ratio': videoRatio,
+    'image_model': imageModel,
+    'video_model': videoModel,
+    'image_quality': imageQuality,
+    'mode': modeOut,
+  });
   return '编辑项目成功';
 }

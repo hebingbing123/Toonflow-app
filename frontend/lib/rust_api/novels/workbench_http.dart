@@ -111,11 +111,9 @@ Future<String> postNovelEventsGenerateEvents(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['message'] as String? ?? '';
 }

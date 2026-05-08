@@ -13,11 +13,7 @@ int? parseRetryAfterHeaderSeconds(String? raw) {
 
 /// Thrown when the Rust API returns a non-2xx or the body cannot be parsed.
 class RustApiException implements Exception {
-  RustApiException(
-    this.message, {
-    this.statusCode,
-    this.retryAfterMsHint,
-  });
+  RustApiException(this.message, {this.statusCode, this.retryAfterMsHint});
 
   final String message;
   final int? statusCode;
@@ -28,7 +24,9 @@ class RustApiException implements Exception {
   factory RustApiException.fromHttpResponse(http.Response res) {
     final hint = res.statusCode == 429
         ? () {
-            final sec = parseRetryAfterHeaderSeconds(res.headers['retry-after']);
+            final sec = parseRetryAfterHeaderSeconds(
+              res.headers['retry-after'],
+            );
             if (sec == null || sec < 0) return null;
             return sec * 1000;
           }()
@@ -47,6 +45,14 @@ class RustApiException implements Exception {
 /// Treat **2xx** as success; otherwise throws [RustApiException.fromHttpResponse].
 void ensureHttpSuccess(http.Response res) {
   if (res.statusCode >= 200 && res.statusCode < 300) {
+    return;
+  }
+  throw RustApiException.fromHttpResponse(res);
+}
+
+/// Success only when [res.statusCode] equals [expected] (e.g. **201** create, **204** delete).
+void ensureHttpStatus(http.Response res, int expected) {
+  if (res.statusCode == expected) {
     return;
   }
   throw RustApiException.fromHttpResponse(res);
@@ -140,18 +146,14 @@ String formatRustApiException(RustApiException error) {
   if (details != null) {
     if (error.statusCode == 429 || details.code == 'quota_exceeded') {
       final waitMs = details.retryAfterMs ?? error.retryAfterMsHint;
-      final waitText = waitMs == null
-          ? '请稍后重试'
-          : formatRetryAfterMs(waitMs);
+      final waitText = waitMs == null ? '请稍后重试' : formatRetryAfterMs(waitMs);
       return '配额或频率已用尽，$waitText。';
     }
     return details.message;
   }
   if (error.statusCode == 429) {
     final waitMs = error.retryAfterMsHint;
-    final waitText = waitMs == null
-        ? '请稍后重试'
-        : formatRetryAfterMs(waitMs);
+    final waitText = waitMs == null ? '请稍后重试' : formatRetryAfterMs(waitMs);
     return '请求过于频繁，$waitText。';
   }
   if (error.statusCode == 404) {

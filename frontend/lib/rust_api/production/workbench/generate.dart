@@ -177,8 +177,7 @@ class GenerateVideoPromptDiagnostics {
           (json['memoryOptimizationRemovedDuplicateRows'] as num?)?.toInt() ??
           0,
       memoryOptimizationRemovedLowValueRows:
-          (json['memoryOptimizationRemovedLowValueRows'] as num?)?.toInt() ??
-          0,
+          (json['memoryOptimizationRemovedLowValueRows'] as num?)?.toInt() ?? 0,
       directorManualYieldedToMemory:
           json['directorManualYieldedToMemory'] == true,
       directorManualYieldedChars:
@@ -290,11 +289,9 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return GenerateVideoPromptResponse.fromJson(map);
 }
@@ -329,12 +326,15 @@ class VideoBatchWritebackSummary {
       schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? 1,
       scriptStoryboardCount:
           (json['scriptStoryboardCount'] as num?)?.toInt() ?? 0,
-      storyboardNumericIdsWithPersistedVideo:
-          intList('storyboardNumericIdsWithPersistedVideo'),
-      storyboardNumericIdsWithInFlightGeneration:
-          intList('storyboardNumericIdsWithInFlightGeneration'),
-      storyboardNumericIdsPendingWriteback:
-          intList('storyboardNumericIdsPendingWriteback'),
+      storyboardNumericIdsWithPersistedVideo: intList(
+        'storyboardNumericIdsWithPersistedVideo',
+      ),
+      storyboardNumericIdsWithInFlightGeneration: intList(
+        'storyboardNumericIdsWithInFlightGeneration',
+      ),
+      storyboardNumericIdsPendingWriteback: intList(
+        'storyboardNumericIdsPendingWriteback',
+      ),
       inFlightGenerationJobCount:
           (json['inFlightGenerationJobCount'] as num?)?.toInt() ?? 0,
     );
@@ -396,11 +396,9 @@ Future<GetGenerateDataResponse> postWorkbenchGetGenerateDataV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return GetGenerateDataResponse.fromJson(map);
 }
@@ -439,11 +437,9 @@ Future<WorkbenchGenerateVoiceoverResponse> postWorkbenchGenerateVoiceoverV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchGenerateVoiceoverResponse.fromJson(map);
 }

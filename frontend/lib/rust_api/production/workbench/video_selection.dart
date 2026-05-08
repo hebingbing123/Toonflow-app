@@ -95,11 +95,9 @@ Future<DeleteVideoResponse> postWorkbenchDeleteVideoV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return DeleteVideoResponse.fromJson(map);
 }
@@ -159,11 +157,9 @@ Future<SelectVideoResponse> postWorkbenchSelectVideoV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SelectVideoResponse.fromJson(map);
 }
@@ -214,7 +210,10 @@ class BatchSelectVideoResponse {
       success: (json['success'] as num).toInt(),
       failed: (json['failed'] as num).toInt(),
       results: (json['results'] as List<dynamic>)
-          .map((item) => BatchOperationResult.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                BatchOperationResult.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false),
       message: json['message'] as String,
     );
@@ -246,11 +245,9 @@ Future<BatchSelectVideoResponse> postProductionWorkbenchBatchSelectVideoV1(
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return BatchSelectVideoResponse.fromJson(map);
 }
@@ -274,7 +271,10 @@ class BatchDeleteVideoResponse {
       success: (json['success'] as num).toInt(),
       failed: (json['failed'] as num).toInt(),
       results: (json['results'] as List<dynamic>)
-          .map((item) => BatchOperationResult.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                BatchOperationResult.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false),
       message: json['message'] as String,
     );
@@ -306,11 +306,9 @@ Future<BatchDeleteVideoResponse> postProductionWorkbenchBatchDeleteVideoV1(
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return BatchDeleteVideoResponse.fromJson(map);
 }
@@ -334,7 +332,10 @@ class BatchUpdateDurationResponse {
       success: (json['success'] as num).toInt(),
       failed: (json['failed'] as num).toInt(),
       results: (json['results'] as List<dynamic>)
-          .map((item) => BatchOperationResult.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                BatchOperationResult.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false),
       message: json['message'] as String,
     );
@@ -342,7 +343,8 @@ class BatchUpdateDurationResponse {
 }
 
 /// `POST /api/v1/production/workbench/batch-update-duration` — OpenAPI `postProductionWorkbenchBatchUpdateDurationV1`.
-Future<BatchUpdateDurationResponse> postProductionWorkbenchBatchUpdateDurationV1(
+Future<BatchUpdateDurationResponse>
+postProductionWorkbenchBatchUpdateDurationV1(
   String accessToken, {
   required int projectId,
   required int scriptId,
@@ -366,11 +368,9 @@ Future<BatchUpdateDurationResponse> postProductionWorkbenchBatchUpdateDurationV1
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return BatchUpdateDurationResponse.fromJson(map);
 }

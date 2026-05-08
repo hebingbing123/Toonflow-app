@@ -20,9 +20,7 @@ Future<ProjectDetail> fetchProjectByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectDetail.fromJson(map);
 }
@@ -39,9 +37,7 @@ Future<ProjectStats> fetchProjectStatsByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectStats.fromJson(map);
 }
@@ -57,9 +53,7 @@ Future<ProjectHome> fetchProjectHomeByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectHome.fromJson(map);
 }
@@ -78,9 +72,7 @@ Future<ProjectShortVideoReadiness> fetchProjectShortVideoReadinessByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectShortVideoReadiness.fromJson(map);
 }
@@ -99,9 +91,7 @@ Future<ProjectProductionOverview> fetchProjectProductionOverviewByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectProductionOverview.fromJson(map);
 }
@@ -120,9 +110,7 @@ Future<ProjectAssetsOverview> fetchProjectAssetsOverviewByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectAssetsOverview.fromJson(map);
 }
@@ -141,9 +129,7 @@ Future<ProjectShortVideoAssembly> fetchProjectShortVideoAssemblyByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectShortVideoAssembly.fromJson(map);
 }
@@ -163,9 +149,7 @@ fetchProjectShortVideoExportCheckByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectShortVideoExportCheck.fromJson(map);
 }

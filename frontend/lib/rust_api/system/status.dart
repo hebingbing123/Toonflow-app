@@ -25,9 +25,7 @@ class HealthResponse {
 Future<HealthResponse> fetchHealthV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/health');
   final res = await http.get(uri).timeout(const Duration(seconds: 5));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return HealthResponse.fromJson(map);
 }
@@ -36,9 +34,7 @@ Future<HealthResponse> fetchHealthV1() async {
 Future<HealthResponse> fetchHealthRoot() async {
   final uri = Uri.parse('$kApiBaseUrl/health');
   final res = await http.get(uri).timeout(const Duration(seconds: 5));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return HealthResponse.fromJson(map);
 }
@@ -58,9 +54,7 @@ class PingResponse {
 Future<PingResponse> fetchPingV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/ping');
   final res = await http.get(uri).timeout(const Duration(seconds: 5));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PingResponse.fromJson(map);
 }
@@ -89,9 +83,7 @@ class VersionResponse {
 Future<VersionResponse> fetchVersionV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/version');
   final res = await http.get(uri).timeout(const Duration(seconds: 5));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VersionResponse.fromJson(map);
 }
@@ -114,9 +106,7 @@ class ReadyV1Response {
 Future<ReadyV1Response> fetchReadyV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/ready');
   final res = await http.get(uri).timeout(const Duration(seconds: 10));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ReadyV1Response.fromJson(map);
 }

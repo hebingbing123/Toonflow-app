@@ -10,8 +10,9 @@ class PublishPlatformMatrixResponse {
     return PublishPlatformMatrixResponse(
       platforms: raw
           .map(
-            (e) =>
-                PublishPlatformCapabilityRow.fromJson(e as Map<String, dynamic>),
+            (e) => PublishPlatformCapabilityRow.fromJson(
+              e as Map<String, dynamic>,
+            ),
           )
           .toList(growable: false),
     );
@@ -33,6 +34,7 @@ class PublishPlatformCapabilityRow {
 
   final String platformId;
   final String labelZh;
+
   /// `domestic` | `overseas`
   final String marketRegion;
   final String automationMode;
@@ -50,7 +52,8 @@ class PublishPlatformCapabilityRow {
       automationMode: json['automation_mode'] as String? ?? '',
       titleMaxChars: (json['title_max_chars'] as num?)?.toInt() ?? 0,
       tagsMax: (json['tags_max'] as num?)?.toInt() ?? 0,
-      descriptionMaxChars: (json['description_max_chars'] as num?)?.toInt() ?? 0,
+      descriptionMaxChars:
+          (json['description_max_chars'] as num?)?.toInt() ?? 0,
       requiresCover: json['requires_cover'] as bool? ?? false,
       notes: json['notes'] as String? ?? '',
     );
@@ -77,7 +80,8 @@ class PublishOverviewResponse {
   factory PublishOverviewResponse.fromJson(Map<String, dynamic> json) {
     final rawDrafts = json['drafts'] as List<dynamic>? ?? const <dynamic>[];
     final rawJobs = json['jobs'] as List<dynamic>? ?? const <dynamic>[];
-    final rawPerf = json['performance_alerts'] as List<dynamic>? ?? const <dynamic>[];
+    final rawPerf =
+        json['performance_alerts'] as List<dynamic>? ?? const <dynamic>[];
     final rawAudit = json['audit'] as List<dynamic>? ?? const <dynamic>[];
     return PublishOverviewResponse(
       matrix: PublishPlatformMatrixResponse.fromJson(
@@ -95,10 +99,15 @@ class PublishOverviewResponse {
           .map((e) => PublishJobRow.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),
       performanceAlerts: rawPerf
-          .map((e) => PublishPerformanceAlertRow.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) =>
+                PublishPerformanceAlertRow.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
       audit: rawAudit
-          .map((e) => PublishAttemptAuditRow.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => PublishAttemptAuditRow.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }
@@ -204,7 +213,9 @@ class BatchSchedulePublishDraftsResponse {
 
   final int updated;
 
-  factory BatchSchedulePublishDraftsResponse.fromJson(Map<String, dynamic> json) {
+  factory BatchSchedulePublishDraftsResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return BatchSchedulePublishDraftsResponse(
       updated: (json['updated'] as num?)?.toInt() ?? 0,
     );
@@ -212,7 +223,6 @@ class BatchSchedulePublishDraftsResponse {
 }
 
 /// `POST …/publish/drafts/batch-validate`
-
 
 class PublishBatchValidationResponse {
   const PublishBatchValidationResponse({
@@ -261,10 +271,7 @@ class PublishBlockedDraft {
 }
 
 class PublishBlockingReason {
-  const PublishBlockingReason({
-    required this.code,
-    required this.message,
-  });
+  const PublishBlockingReason({required this.code, required this.message});
 
   final String code;
   final String message;

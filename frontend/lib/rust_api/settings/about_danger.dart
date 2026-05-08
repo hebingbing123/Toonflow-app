@@ -80,9 +80,7 @@ Future<AboutCheckUpdateResponseV1> postAboutCheckUpdateV1(
         body: jsonEncode({'source': source}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AboutCheckUpdateResponseV1.fromJson(map);
 }

@@ -13,9 +13,7 @@ Future<VisualManualResponseV1> fetchVisualManualV1(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 120));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VisualManualResponseV1.fromJson(map);
 }
@@ -35,9 +33,7 @@ Future<VisualManualResponseV1> fetchVisualManualPostV1(
         body: '{}',
       )
       .timeout(const Duration(seconds: 120));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VisualManualResponseV1.fromJson(map);
 }

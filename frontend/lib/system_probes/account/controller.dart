@@ -68,7 +68,7 @@ class AccountProbesController extends ChangeNotifier {
       }
       meBody = parts.join(' · ');
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -91,7 +91,7 @@ class AccountProbesController extends ChangeNotifier {
           'events_last_7d=${summary.eventsLast7d} · '
           'event_counts_last_7d=${summary.eventCountsLast7d}';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -123,7 +123,7 @@ class AccountProbesController extends ChangeNotifier {
           'PUT body {value:$target} -> ${updated.value} · '
           'GET value=${after.value}';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -193,7 +193,7 @@ class AccountProbesController extends ChangeNotifier {
       };
       memoryConfigProbeBody = '$line · clear-agent-memories -> $clearNote';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {
@@ -226,7 +226,7 @@ class AccountProbesController extends ChangeNotifier {
           'latest=${checkUpdate.latestVersion} · '
           'download-app -> $downloadStatus';
     } on RustApiException catch (error) {
-      _onErrorChanged(error.toString());
+      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
       _onErrorChanged(error.toString());
     } finally {

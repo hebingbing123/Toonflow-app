@@ -130,7 +130,9 @@ class NovelCrawlImportResponse {
       chapterUrlCount: (json['chapter_url_count'] as num?)?.toInt() ?? 0,
       bodyCharCount: (json['body_char_count'] as num?)?.toInt() ?? 0,
       chaptersCreated: (json['chapters_created'] as num?)?.toInt() ?? 0,
-      qualityWarnings: rawWarnings.map((e) => e as String).toList(growable: false),
+      qualityWarnings: rawWarnings
+          .map((e) => e as String)
+          .toList(growable: false),
     );
   }
 }
@@ -175,7 +177,9 @@ class NovelCrawlImportBatchItem {
       chapterUrlCount: (json['chapter_url_count'] as num?)?.toInt(),
       bodyCharCount: (json['body_char_count'] as num?)?.toInt(),
       chaptersCreated: (json['chapters_created'] as num?)?.toInt(),
-      qualityWarnings: rawWarnings.map((e) => e as String).toList(growable: false),
+      qualityWarnings: rawWarnings
+          .map((e) => e as String)
+          .toList(growable: false),
     );
   }
 }
@@ -200,7 +204,10 @@ class NovelCrawlImportBatchResponse {
       succeeded: (json['succeeded'] as num?)?.toInt() ?? 0,
       failed: (json['failed'] as num?)?.toInt() ?? 0,
       items: rawItems
-          .map((e) => NovelCrawlImportBatchItem.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) =>
+                NovelCrawlImportBatchItem.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }
@@ -248,7 +255,10 @@ class NovelCrawlScheduleRow {
 }
 
 class NovelIntakeSourceCount {
-  const NovelIntakeSourceCount({required this.intakeSource, required this.chapterCount});
+  const NovelIntakeSourceCount({
+    required this.intakeSource,
+    required this.chapterCount,
+  });
   final String? intakeSource;
   final int chapterCount;
 
@@ -261,7 +271,10 @@ class NovelIntakeSourceCount {
 }
 
 class NovelIntakeStatusCount {
-  const NovelIntakeStatusCount({required this.intakeStatus, required this.chapterCount});
+  const NovelIntakeStatusCount({
+    required this.intakeStatus,
+    required this.chapterCount,
+  });
   final String? intakeStatus;
   final int chapterCount;
 
@@ -274,7 +287,10 @@ class NovelIntakeStatusCount {
 }
 
 class NovelCrawlJobStatusCount {
-  const NovelCrawlJobStatusCount({required this.status, required this.jobCount});
+  const NovelCrawlJobStatusCount({
+    required this.status,
+    required this.jobCount,
+  });
   final String status;
   final int jobCount;
 
@@ -327,21 +343,30 @@ class NovelCrawlObservabilityResponse {
   factory NovelCrawlObservabilityResponse.fromJson(Map<String, dynamic> json) {
     final rawSources = json['intake_sources'] as List<dynamic>? ?? const [];
     final rawStatuses = json['intake_statuses'] as List<dynamic>? ?? const [];
-    final rawImports = json['recent_server_imports'] as List<dynamic>? ?? const [];
+    final rawImports =
+        json['recent_server_imports'] as List<dynamic>? ?? const [];
     final rawJobs = json['crawl_job_statuses'] as List<dynamic>? ?? const [];
     return NovelCrawlObservabilityResponse(
       totalChapters: (json['total_chapters'] as num?)?.toInt() ?? 0,
       intakeSources: rawSources
-          .map((e) => NovelIntakeSourceCount.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => NovelIntakeSourceCount.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
       intakeStatuses: rawStatuses
-          .map((e) => NovelIntakeStatusCount.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => NovelIntakeStatusCount.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
       recentServerImports: rawImports
-          .map((e) => NovelCrawlAuditSampleRow.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => NovelCrawlAuditSampleRow.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
       crawlJobStatuses: rawJobs
-          .map((e) => NovelCrawlJobStatusCount.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => NovelCrawlJobStatusCount.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }

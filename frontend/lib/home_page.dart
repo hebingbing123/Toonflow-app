@@ -367,7 +367,11 @@ class _HomePageState extends State<HomePage> {
       });
     } on RustApiException catch (error) {
       if (_lastSessionAccessToken == token) {
-        _setSharedError(error.toString());
+        reportRustApiError(
+          error,
+          onErrorChanged: _setSharedError,
+          showGlobalSnackBar: false,
+        );
       }
     } catch (error) {
       if (_lastSessionAccessToken == token) {

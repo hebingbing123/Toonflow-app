@@ -69,9 +69,7 @@ Future<List<QualityReview>> fetchQualityReviews(
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => QualityReview.fromJson(e as Map<String, dynamic>))
@@ -92,9 +90,7 @@ Future<QualityReview> createQualityReview(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return QualityReview.fromJson(map);
 }
@@ -112,9 +108,7 @@ Future<QualityReview> fetchQualityReviewById(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return QualityReview.fromJson(map);
 }

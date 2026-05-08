@@ -22,7 +22,12 @@ void main() {
       accessTokenProvider: () => 'token',
       onErrorChanged: (error) => lastError = error,
       fetchProjects: (token, projectNumericId) async => const <ProjectRow>[
-        ProjectRow(id: 'project-uuid', numericId: 3),
+        ProjectRow(
+          id: 'project-uuid',
+          numericId: 3,
+          projectAccessMode: 'inherited',
+          projectAccessRole: 'member',
+        ),
       ],
       updateScript: (token, projectId, scriptNumericId, body) async {
         updatedContent = body['content'] as String;

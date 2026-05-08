@@ -106,7 +106,7 @@ class JobsController extends ChangeNotifier {
     try {
       jobs = await fetchJobs(token, kind: kind, status: status);
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -126,7 +126,7 @@ class JobsController extends ChangeNotifier {
       final kinds = await fetchJobKinds(token);
       jobKindsLine = kinds.isEmpty ? '(empty)' : kinds.join(', ');
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -148,7 +148,7 @@ class JobsController extends ChangeNotifier {
           ? '(empty)'
           : rows.map((r) => '${r.kind}: ${r.jobCount}').join(', ');
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -170,7 +170,7 @@ class JobsController extends ChangeNotifier {
           ? '(empty)'
           : rows.map((r) => '${r.status}: ${r.jobCount}').join(', ');
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -202,7 +202,7 @@ class JobsController extends ChangeNotifier {
       }
       jobByIdLine = parts.join(' · ');
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -223,7 +223,7 @@ class JobsController extends ChangeNotifier {
       final updated = await cancelJob(token, job.id);
       _upsertJob(updated);
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -242,7 +242,7 @@ class JobsController extends ChangeNotifier {
       final updated = await retryJob(token, job.id);
       _upsertJob(updated);
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -278,7 +278,7 @@ class JobsController extends ChangeNotifier {
       }
       _upsertJob(secondJob);
     } on RustApiException catch (e) {
-      _setError(formatRustApiException(e));
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {

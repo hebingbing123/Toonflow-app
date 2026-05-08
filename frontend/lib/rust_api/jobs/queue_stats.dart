@@ -10,13 +10,10 @@ Future<JobQueueStatsV1> fetchJobQueueStatsV1({
   required String internalOpsToken,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/queue/stats');
-  final res = await http.get(
-    uri,
-    headers: {'x-toonflow-internal-token': internalOpsToken.trim()},
-  ).timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  final res = await http
+      .get(uri, headers: {'x-toonflow-internal-token': internalOpsToken.trim()})
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobQueueStatsV1.fromJson(map);
 }

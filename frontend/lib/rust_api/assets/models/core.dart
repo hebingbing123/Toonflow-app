@@ -16,6 +16,7 @@ class AssetRow {
   final String assetType;
   final String? description;
   final int? createTimeMs;
+
   /// `pending` / `linked` / `ignored` when this asset is in the candidate flow.
   final String? candidateStatus;
 

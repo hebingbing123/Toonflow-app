@@ -83,10 +83,7 @@ class NovelEventPageRow {
 
 /// Compat **`{ list, total }`**; built from **`GET …/novel-events`**.
 class NovelEventsPageResponse {
-  const NovelEventsPageResponse({
-    required this.list,
-    required this.total,
-  });
+  const NovelEventsPageResponse({required this.list, required this.total});
 
   final List<NovelEventPageRow> list;
   final int total;

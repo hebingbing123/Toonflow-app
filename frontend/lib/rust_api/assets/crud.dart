@@ -42,9 +42,7 @@ Future<ListAssetsResponse> fetchProjectAssetsByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListAssetsResponse.fromJson(map);
 }
@@ -64,9 +62,7 @@ Future<AssetRow> fetchProjectAssetByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetRow.fromJson(map);
 }
@@ -101,11 +97,9 @@ Future<AssetRow> createProjectAssetUnderProject(
     throw RustApiException(res.body, statusCode: 409);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetRow.fromJson(map);
 }
@@ -136,11 +130,9 @@ Future<AssetRow> patchProjectAssetByProjectIds(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetRow.fromJson(map);
 }
@@ -160,9 +152,7 @@ Future<void> deleteProjectAssetByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }
 
 /// `PUT …/projects/{project_id}/scripts/{script_numeric_id}/assets/{asset_numeric_id}` — see `linkScriptAssetByProjectIdV1`.
@@ -181,9 +171,7 @@ Future<void> linkScriptToAssetByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }
 
 /// `DELETE …/projects/{project_id}/scripts/...` — see `unlinkScriptAssetByProjectIdV1`.
@@ -202,7 +190,5 @@ Future<void> unlinkScriptFromAssetByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }

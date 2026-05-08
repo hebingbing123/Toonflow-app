@@ -47,10 +47,7 @@ class WorkspaceResponse {
 
 /// **`GET /api/v1/workspaces`** list row — flattened workspace + **`role`**.
 class WorkspaceListItem {
-  const WorkspaceListItem({
-    required this.workspace,
-    required this.role,
-  });
+  const WorkspaceListItem({required this.workspace, required this.role});
 
   final WorkspaceResponse workspace;
   final String role;
@@ -216,10 +213,7 @@ class PatchWorkspaceBody {
 
 /// `POST /api/v1/workspaces/{workspace_id}/members`
 class AddWorkspaceMemberBody {
-  const AddWorkspaceMemberBody({
-    required this.userId,
-    required this.role,
-  });
+  const AddWorkspaceMemberBody({required this.userId, required this.role});
 
   final String userId;
   final String role;
@@ -236,9 +230,7 @@ class PatchWorkspaceMemberBody {
 
   final String role;
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'role': role,
-  };
+  Map<String, dynamic> toJson() => <String, dynamic>{'role': role};
 }
 
 /// `POST /api/v1/workspaces/{workspace_id}/invites`
@@ -266,9 +258,7 @@ class AcceptWorkspaceInviteBody {
 
   final String token;
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'token': token,
-  };
+  Map<String, dynamic> toJson() => <String, dynamic>{'token': token};
 }
 
 Future<List<WorkspaceListItem>> fetchWorkspacesV1(
@@ -277,9 +267,9 @@ Future<List<WorkspaceListItem>> fetchWorkspacesV1(
 }) async {
   final base = Uri.parse('$kApiBaseUrl/api/v1/workspaces');
   final uri = includeArchived
-      ? base.replace(queryParameters: <String, String>{
-          'include_archived': 'true',
-        })
+      ? base.replace(
+          queryParameters: <String, String>{'include_archived': 'true'},
+        )
       : base;
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -348,8 +338,9 @@ Future<WorkspaceInvitesListEnvelope> fetchWorkspaceInvitesPageV1(
   if (includeRevoked) {
     qp['include_revoked'] = 'true';
   }
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites')
-      .replace(queryParameters: qp.isEmpty ? null : qp);
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites',
+  ).replace(queryParameters: qp.isEmpty ? null : qp);
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
@@ -455,8 +446,9 @@ Future<WorkspaceMemberResponse> patchWorkspaceMemberV1(
   String userId, {
   required PatchWorkspaceMemberBody body,
 }) async {
-  final uri =
-      Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/$userId');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/$userId',
+  );
   final res = await http
       .patch(
         uri,
@@ -477,8 +469,9 @@ Future<WorkspaceMemberResponse> removeWorkspaceMemberV1(
   String workspaceId,
   String userId,
 ) async {
-  final uri =
-      Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/$userId');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/$userId',
+  );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
@@ -491,7 +484,9 @@ Future<WorkspaceMemberResponse> leaveWorkspaceV1(
   String accessToken,
   String workspaceId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/me');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/me',
+  );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));

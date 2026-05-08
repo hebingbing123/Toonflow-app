@@ -12,6 +12,11 @@ void main() {
     expect(s, contains('分'));
   });
 
+  test('ensureHttpStatus throws fromHttpResponse on mismatch', () {
+    final res = http.Response('{}', 200);
+    expect(() => ensureHttpStatus(res, 201), throwsA(isA<RustApiException>()));
+  });
+
   test('formatRustApiException prefers JSON retry_after_ms over header', () {
     final ex = RustApiException.fromHttpResponse(
       http.Response(

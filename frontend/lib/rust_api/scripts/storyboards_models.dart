@@ -37,10 +37,7 @@ class ScriptRow {
 
 /// Linked asset brief on **`POST …/projects/{project_id}/scripts/get-script-api`** — JSON **`id`** = **`app_asset`** numeric id.
 class ScriptRelatedAssetBrief {
-  const ScriptRelatedAssetBrief({
-    required this.numericId,
-    required this.name,
-  });
+  const ScriptRelatedAssetBrief({required this.numericId, required this.name});
 
   final int numericId;
   final String name;
@@ -88,9 +85,7 @@ class ScriptWorkbenchDetailRow {
           : (json['createTime'] as num).toInt(),
       relatedAssets: raw
           .map(
-            (e) => ScriptRelatedAssetBrief.fromJson(
-              e as Map<String, dynamic>,
-            ),
+            (e) => ScriptRelatedAssetBrief.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
     );

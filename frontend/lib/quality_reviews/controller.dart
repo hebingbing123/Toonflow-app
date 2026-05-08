@@ -85,7 +85,7 @@ class QualityReviewsController extends ChangeNotifier {
         limit: 20,
       );
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -112,7 +112,7 @@ class QualityReviewsController extends ChangeNotifier {
         await fetchSelectedQualityReview();
       }
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -141,7 +141,7 @@ class QualityReviewsController extends ChangeNotifier {
         if (row.badCaseCategory != null) 'badCase=${row.badCaseCategory}',
       ].join(' · ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -168,7 +168,7 @@ class QualityReviewsController extends ChangeNotifier {
                 )
                 .join(' | ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -196,7 +196,7 @@ class QualityReviewsController extends ChangeNotifier {
                 )
                 .join(' | ');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
       _setError(e.toString());
     } finally {

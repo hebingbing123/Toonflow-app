@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../config.dart';
+import '../core.dart';
 
 class ScriptAgentPlanScriptRow {
   const ScriptAgentPlanScriptRow({
@@ -105,9 +106,7 @@ Future<ScriptAgentPlanData> fetchScriptAgentPlanDataV1(
         body: jsonEncode({'projectId': projectId, 'agentType': 'scriptAgent'}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw Exception('script-agent/get-plan-data failed: ${res.statusCode}');
-  }
+  ensureHttpSuccess(res);
   return parseScriptAgentPlanDataResponse(
     jsonDecode(res.body) as Map<String, dynamic>,
   );

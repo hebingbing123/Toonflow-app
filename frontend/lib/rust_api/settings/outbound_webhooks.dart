@@ -6,19 +6,13 @@ import '../../config.dart';
 import '../core.dart';
 
 class OutboundWebhookCreateBodyV1 {
-  const OutboundWebhookCreateBodyV1({
-    required this.url,
-    this.secret,
-  });
+  const OutboundWebhookCreateBodyV1({required this.url, this.secret});
 
   final String url;
   final String? secret;
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'url': url,
-      if (secret != null) 'secret': secret,
-    };
+    return <String, dynamic>{'url': url, if (secret != null) 'secret': secret};
   }
 }
 
@@ -84,9 +78,7 @@ class OutboundWebhookTestBodyV1 {
   final String? eventType;
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      if (eventType != null) 'eventType': eventType,
-    };
+    return <String, dynamic>{if (eventType != null) 'eventType': eventType};
   }
 }
 
@@ -126,9 +118,7 @@ Future<OutboundWebhookCreatedResponseV1> postSettingsOutboundWebhookCreateV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return OutboundWebhookCreatedResponseV1.fromJson(map);
 }
@@ -138,10 +128,9 @@ Future<OutboundWebhookListResponseV1> getSettingsOutboundWebhookListV1(
   String accessToken, {
   int? limit,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/webhooks/outbound')
-      .replace(queryParameters: {
-    if (limit != null) 'limit': limit.toString(),
-  });
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/settings/webhooks/outbound',
+  ).replace(queryParameters: {if (limit != null) 'limit': limit.toString()});
   final res = await http
       .get(
         uri,
@@ -151,9 +140,7 @@ Future<OutboundWebhookListResponseV1> getSettingsOutboundWebhookListV1(
         },
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return OutboundWebhookListResponseV1.fromJson(map);
 }
@@ -173,9 +160,7 @@ Future<void> deleteSettingsOutboundWebhookV1(
         },
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
 }
 
 /// `POST /api/v1/settings/webhooks/outbound/{id}/test` — OpenAPI `postSettingsOutboundWebhookTestV1`.
@@ -184,7 +169,9 @@ Future<OutboundWebhookTestResponseV1> postSettingsOutboundWebhookTestV1(
   String id,
   OutboundWebhookTestBodyV1 body,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/webhooks/outbound/$id/test');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/settings/webhooks/outbound/$id/test',
+  );
   final res = await http
       .post(
         uri,
@@ -195,9 +182,7 @@ Future<OutboundWebhookTestResponseV1> postSettingsOutboundWebhookTestV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return OutboundWebhookTestResponseV1.fromJson(map);
 }

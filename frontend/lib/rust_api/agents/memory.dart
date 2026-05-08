@@ -110,7 +110,11 @@ class AgentMemoryCostOverview {
   final String? lastInjectedAt;
 }
 
-void _putAgentMemoryProjectRef(Map<String, dynamic> body, {int? projectId, String? projectUuid}) {
+void _putAgentMemoryProjectRef(
+  Map<String, dynamic> body, {
+  int? projectId,
+  String? projectUuid,
+}) {
   final u = projectUuid?.trim();
   if (u != null && u.isNotEmpty) {
     body['projectUuid'] = u;
@@ -120,7 +124,9 @@ void _putAgentMemoryProjectRef(Map<String, dynamic> body, {int? projectId, Strin
     body['projectId'] = projectId;
     return;
   }
-  throw ArgumentError('projectUuid or projectId is required for agent memory requests');
+  throw ArgumentError(
+    'projectUuid or projectId is required for agent memory requests',
+  );
 }
 
 /// Agent memory query, append, and clear endpoints.
@@ -143,7 +149,11 @@ Future<List<AgentMemoryHistoryItem>> queryAgentMemory(
     'episodesId': episodesId,
     'memoryType': memoryType,
   };
-  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
+  _putAgentMemoryProjectRef(
+    body,
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (memoryTier != null && memoryTier.isNotEmpty) {
     body['memoryTier'] = memoryTier;
   }
@@ -160,9 +170,7 @@ Future<List<AgentMemoryHistoryItem>> queryAgentMemory(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! List) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -197,9 +205,7 @@ Future<AgentMemoryCostOverview> getMemoryCostOverview(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -223,7 +229,11 @@ Future<bool> clearAgentMemory(
     'agentType': agentType,
     'clearType': clearType,
   };
-  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
+  _putAgentMemoryProjectRef(
+    body,
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (episodesId != null) body['episodesId'] = episodesId;
   final res = await http
       .post(
@@ -236,11 +246,9 @@ Future<bool> clearAgentMemory(
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['ok'] == true;
 }
@@ -259,7 +267,11 @@ Future<Map<String, dynamic>> optimizeAgentMemory(
     'agentType': agentType,
     'episodesId': episodesId,
   };
-  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
+  _putAgentMemoryProjectRef(
+    body,
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (automationMode != null && automationMode.isNotEmpty) {
     body['automationMode'] = automationMode;
   }
@@ -274,11 +286,9 @@ Future<Map<String, dynamic>> optimizeAgentMemory(
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   return jsonDecode(res.body) as Map<String, dynamic>;
 }
 
@@ -304,7 +314,11 @@ Future<String> appendAgentMemory(
     'memoryType': memoryType,
     'role': role,
   };
-  _putAgentMemoryProjectRef(body, projectId: projectId, projectUuid: projectUuid);
+  _putAgentMemoryProjectRef(
+    body,
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (episodesId != null) body['episodesId'] = episodesId;
   if (name != null) body['name'] = name;
   if (createTime != null) body['createTime'] = createTime;
@@ -325,11 +339,9 @@ Future<String> appendAgentMemory(
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['id'] as String;
 }

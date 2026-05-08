@@ -119,9 +119,7 @@ Future<SkillsSummary> fetchSkillsSummary(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 60));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SkillsSummary.fromJson(map);
 }
@@ -132,9 +130,7 @@ Future<List<SkillFileMeta>> fetchSkills(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 60));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => SkillFileMeta.fromJson(e as Map<String, dynamic>))
@@ -155,9 +151,7 @@ Future<SkillContentResponse> fetchSkillContent(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SkillContentResponse.fromJson(map);
 }
@@ -178,9 +172,7 @@ Future<List<SkillVersion>> fetchSkillVersions(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! List) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -215,9 +207,7 @@ Future<RollbackSkillVersionResponse> rollbackSkillVersion(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map) {
     throw RustApiException('Unexpected response: ${res.body}');
@@ -246,11 +236,9 @@ Future<SkillContentResponse> saveSkillContent(
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SkillContentResponse.fromJson(map);
 }
@@ -277,11 +265,9 @@ Future<SkillContentResponse> createSkillContent(
     throw RustApiException('conflict', statusCode: 409);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SkillContentResponse.fromJson(map);
 }
@@ -299,9 +285,7 @@ Future<void> deleteSkillContent(String accessToken, String relativePath) async {
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }

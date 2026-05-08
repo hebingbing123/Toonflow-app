@@ -34,16 +34,11 @@ Future<List<ScriptWorkbenchDetailRow>> postScriptsGetScriptApiByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   final data = map['data'] as List<dynamic>;
   return data
-      .map(
-        (e) =>
-            ScriptWorkbenchDetailRow.fromJson(e as Map<String, dynamic>),
-      )
+      .map((e) => ScriptWorkbenchDetailRow.fromJson(e as Map<String, dynamic>))
       .toList();
 }
 
@@ -63,17 +58,13 @@ Future<BatchAddScriptResponseV1> postScriptsBatchAddByProjectId(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'data': data.map((e) => e.toJson()).toList(),
-        }),
+        body: jsonEncode({'data': data.map((e) => e.toJson()).toList()}),
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return BatchAddScriptResponseV1.fromJson(map);
 }
@@ -93,9 +84,7 @@ Future<ScriptRow> fetchScriptByProjectAndNumericId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ScriptRow.fromJson(map);
 }
@@ -124,11 +113,9 @@ Future<ScriptRow> updateScriptByProjectAndNumericId(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ScriptRow.fromJson(map);
 }
@@ -148,9 +135,7 @@ Future<void> deleteScriptByProjectAndNumericId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }
 
 /// `POST /api/v1/projects/{project_id}/scripts` — see `createScriptUnderProjectByProjectIdV1`.
@@ -171,14 +156,12 @@ Future<ScriptRow> createScriptUnderProject(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ScriptRow.fromJson(map);
 }
@@ -199,9 +182,7 @@ Future<Uint8List> exportScriptsZip(
         body: jsonEncode({'numeric_ids': numericIds}),
       )
       .timeout(const Duration(seconds: 120));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   return res.bodyBytes;
 }
 
@@ -221,9 +202,7 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
         body: jsonEncode({'numeric_ids': numericIds}),
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => ScriptExtractStatePollRow.fromJson(e as Map<String, dynamic>))
@@ -241,9 +220,7 @@ Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
   int? groupSize,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-assets');
-  final body = <String, dynamic>{
-    'script_numeric_ids': scriptNumericIds,
-  };
+  final body = <String, dynamic>{'script_numeric_ids': scriptNumericIds};
   final u = projectUuid?.trim();
   if (u != null && u.isNotEmpty) {
     body['project_uuid'] = u;
@@ -266,11 +243,9 @@ Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ExtractAssetsAcceptedResponse.fromJson(map);
 }

@@ -262,9 +262,7 @@ Future<ProductionPatchResponse> postProductionPatchV1(
         body: jsonEncode(request.toJson()),
       )
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map<String, dynamic>) {
     throw RustApiException('invalid production patch payload');
@@ -310,9 +308,7 @@ Future<Map<String, dynamic>> fetchProductionFlowDataV1(
         body: jsonEncode({'projectId': projectId, 'episodesId': episodesId}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map<String, dynamic>) {
     throw RustApiException('invalid flow payload');
@@ -389,11 +385,9 @@ Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchGenerateVideoResponse.fromJson(map);
 }
@@ -437,11 +431,9 @@ postProductionWorkbenchBatchGenerateCandidateClipsV1(
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return BatchGenerateCandidateClipsResponseV1.fromJson(map);
 }
@@ -522,9 +514,7 @@ Future<ProductionExportZipResponse> fetchProductionExportImageZipV1(
         }),
       )
       .timeout(const Duration(seconds: 120));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   return ProductionExportZipResponse(
     filename: _parseAttachmentFilename(res.headers['content-disposition']),
     bytes: res.bodyBytes,

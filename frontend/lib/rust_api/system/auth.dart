@@ -75,9 +75,7 @@ Future<MeResponse> fetchMeV1(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 5));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return MeResponse.fromJson(map);
 }
@@ -97,9 +95,7 @@ Future<WorkspaceSummary> patchCurrentWorkspaceV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkspaceSummary.fromJson(map);
 }
@@ -121,9 +117,7 @@ Future<SwitchAiDevToolV1> fetchSwitchAiDevToolV1(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SwitchAiDevToolV1.fromJson(map);
 }
@@ -144,9 +138,7 @@ Future<SwitchAiDevToolV1> putSwitchAiDevToolV1(
         body: jsonEncode({'value': value}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SwitchAiDevToolV1.fromJson(map);
 }

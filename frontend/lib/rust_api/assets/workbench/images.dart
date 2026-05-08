@@ -43,11 +43,9 @@ Future<WorkbenchAssetTreeResponse> postWorkbenchAssetsGetAssetsApi(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchAssetTreeResponse.fromJson(map);
 }
@@ -72,14 +70,12 @@ Future<WorkbenchImageBundleResponse> postWorkbenchAssetsGetImage(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchImageBundleResponse.fromJson(map);
 }
@@ -110,14 +106,12 @@ Future<WorkbenchAssetUploadClipResponse> postWorkbenchAssetsUploadClip(
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchAssetUploadClipResponse.fromJson(map);
 }
@@ -141,11 +135,9 @@ Future<WorkbenchAssetMaterialDataResponse> postWorkbenchAssetsGetMaterialData(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchAssetMaterialDataResponse.fromJson(map);
 }
@@ -182,11 +174,9 @@ postWorkbenchAssetsBatchGenerationData(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchAssetBatchGenerationResponse.fromJson(map);
 }
@@ -212,11 +202,9 @@ postWorkbenchAssetsPollingImageAssets(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map(
@@ -247,11 +235,9 @@ postWorkbenchAssetsPollingPromptAssets(
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map(

@@ -76,11 +76,9 @@ Future<StoryboardMediaOpResponse> postWorkbenchStoryboardMediaOpV1(
       )
       .timeout(const Duration(seconds: 25));
   if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return StoryboardMediaOpResponse.fromJson(map);
 }

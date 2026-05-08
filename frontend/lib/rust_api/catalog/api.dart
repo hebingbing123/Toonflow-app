@@ -18,9 +18,7 @@ Future<List<ModelListEntry>> fetchModelsCatalog(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => ModelListEntry.fromJson(e as Map<String, dynamic>))
@@ -35,9 +33,7 @@ Future<VendorsSummaryResponseV1> fetchVendorsSummaryV1(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VendorsSummaryResponseV1.fromJson(map);
 }
@@ -53,9 +49,7 @@ Future<ModelDetailResponse> fetchModelDetail(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ModelDetailResponse.fromJson(map);
 }
@@ -66,9 +60,7 @@ Future<TextModelDefaultV1> fetchTextModelDefaultV1(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return TextModelDefaultV1.fromJson(map);
 }
@@ -89,9 +81,7 @@ Future<TextModelDefaultV1> patchTextModelDefaultV1(
         body: jsonEncode(<String, dynamic>{'model_id': modelId}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return TextModelDefaultV1.fromJson(map);
 }

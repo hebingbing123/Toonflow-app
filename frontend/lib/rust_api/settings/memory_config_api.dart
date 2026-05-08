@@ -75,9 +75,7 @@ Future<MemoryConfigV1> fetchMemoryConfigV1(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return MemoryConfigV1.fromJson(map);
 }
@@ -98,9 +96,7 @@ Future<String> postMemoryConfigV1(
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['message'] as String;
 }
@@ -116,9 +112,7 @@ Future<int> postSettingsClearAgentMemoriesV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/settings/memory-config/clear-agent-memories',
   );
-  final body = <String, dynamic>{
-    'agentType': agentType,
-  };
+  final body = <String, dynamic>{'agentType': agentType};
   final u = projectUuid?.trim();
   if (u != null && u.isNotEmpty) {
     body['projectUuid'] = u;

@@ -23,9 +23,7 @@ Future<ListAssetImagesResponse> fetchProjectAssetImagesByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListAssetImagesResponse.fromJson(map);
 }
@@ -46,9 +44,7 @@ Future<AssetImageRow> fetchProjectAssetImageByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetImageRow.fromJson(map);
 }
@@ -79,12 +75,7 @@ Future<Uint8List> fetchProjectAssetImageFileByProjectIds(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 120));
-  if (res.statusCode != 200) {
-    throw RustApiException(
-      res.body.isNotEmpty ? res.body : 'binary response ${res.statusCode}',
-      statusCode: res.statusCode,
-    );
-  }
+  ensureHttpSuccess(res);
   return res.bodyBytes;
 }
 
@@ -161,11 +152,9 @@ Future<AssetImageRow> createProjectAssetImageForProject(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetImageRow.fromJson(map);
 }
@@ -195,11 +184,9 @@ Future<AssetImageRow> patchProjectAssetImageByProjectIds(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return AssetImageRow.fromJson(map);
 }
@@ -221,9 +208,7 @@ Future<void> deleteProjectAssetImageByProjectIds(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }

@@ -29,9 +29,7 @@ Future<CornerScapeResponse> fetchCornerScapeAssetsByProjectId(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return CornerScapeResponse.fromJson(map);
 }

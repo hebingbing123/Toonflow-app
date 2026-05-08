@@ -29,13 +29,10 @@ Future<PublishOverviewResponse> fetchPublishOverview(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishOverviewResponse.fromJson(map);
 }
-
 
 /// `GET …/publish/platform-matrix`
 Future<PublishPlatformMatrixResponse> fetchPublishPlatformMatrix(
@@ -51,9 +48,7 @@ Future<PublishPlatformMatrixResponse> fetchPublishPlatformMatrix(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishPlatformMatrixResponse.fromJson(map);
 }
@@ -82,9 +77,7 @@ Future<List<PublishDraftRow>> fetchPublishDrafts(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map((e) => PublishDraftRow.fromJson(e as Map<String, dynamic>))
@@ -103,9 +96,7 @@ Future<PublishPrepareCheckResponse> fetchPublishPrepareCheck(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishPrepareCheckResponse.fromJson(map);
 }
@@ -129,9 +120,7 @@ Future<PublishDraftRow> createPublishDraft(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishDraftRow.fromJson(map);
 }
@@ -148,9 +137,7 @@ Future<PublishDraftRow> fetchPublishDraft(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishDraftRow.fromJson(map);
 }
@@ -175,9 +162,7 @@ Future<PublishDraftRow> patchPublishDraft(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishDraftRow.fromJson(map);
 }
@@ -202,9 +187,7 @@ Future<List<PublishTargetRow>> upsertPublishTargets(
         body: jsonEncode(<String, dynamic>{'targets': targets}),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map((e) => PublishTargetRow.fromJson(e as Map<String, dynamic>))
@@ -216,15 +199,11 @@ Future<List<PublishJobRow>> fetchPublishJobs(
   String accessToken,
   String projectId,
 ) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs',
-  );
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs');
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map((e) => PublishJobRow.fromJson(e as Map<String, dynamic>))
@@ -252,9 +231,7 @@ Future<List<PublishAttemptAuditRow>> fetchPublishAudit(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map((e) => PublishAttemptAuditRow.fromJson(e as Map<String, dynamic>))
@@ -269,22 +246,25 @@ Future<List<PublishPerformanceAlertRow>> fetchPublishPerformanceAlerts(
   double completionRateLt = 0.45,
   int limit = 50,
 }) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/publish/performance-alerts',
-  ).replace(queryParameters: <String, String>{
-    'views_lt': viewsLt.toString(),
-    'completion_rate_lt': completionRateLt.toString(),
-    'limit': limit.toString(),
-  });
+  final uri =
+      Uri.parse(
+        '$kApiBaseUrl/api/v1/projects/$projectId/publish/performance-alerts',
+      ).replace(
+        queryParameters: <String, String>{
+          'views_lt': viewsLt.toString(),
+          'completion_rate_lt': completionRateLt.toString(),
+          'limit': limit.toString(),
+        },
+      );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
-      .map((e) => PublishPerformanceAlertRow.fromJson(e as Map<String, dynamic>))
+      .map(
+        (e) => PublishPerformanceAlertRow.fromJson(e as Map<String, dynamic>),
+      )
       .toList(growable: false);
 }
 
@@ -308,9 +288,7 @@ Future<PublishJobRow> createPublishJob(
         body: jsonEncode(<String, dynamic>{'payload': payload}),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishJobRow.fromJson(map);
 }
@@ -325,14 +303,9 @@ Future<PublishJobRow> confirmSemiAutoPublishJob(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs/$jobId/confirm-semi-auto',
   );
   final res = await http
-      .post(
-        uri,
-        headers: {'Authorization': 'Bearer $accessToken'},
-      )
+      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishJobRow.fromJson(map);
 }
@@ -347,14 +320,9 @@ Future<void> retryPublishJob(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs/$jobId/retry',
   );
   final res = await http
-      .post(
-        uri,
-        headers: {'Authorization': 'Bearer $accessToken'},
-      )
+      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }
 
 /// `POST …/publish/validate-copy`
@@ -380,9 +348,7 @@ Future<PublishValidateCopyResponse> validatePublishCopy(
         }),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishValidateCopyResponse.fromJson(map);
 }
@@ -412,9 +378,7 @@ Future<SuggestPlatformCopyResponse> suggestPublishPlatformCopy(
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 60));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return SuggestPlatformCopyResponse.fromJson(map);
 }
@@ -442,13 +406,10 @@ Future<BatchSchedulePublishDraftsResponse> batchSchedulePublishDrafts(
         }),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return BatchSchedulePublishDraftsResponse.fromJson(map);
 }
-
 
 Future<PublishBatchValidationResponse> batchValidatePublishDrafts(
   String accessToken,
@@ -465,14 +426,10 @@ Future<PublishBatchValidationResponse> batchValidatePublishDrafts(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(<String, dynamic>{
-          'draft_ids': draftIds,
-        }),
+        body: jsonEncode(<String, dynamic>{'draft_ids': draftIds}),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishBatchValidationResponse.fromJson(map);
 }
@@ -500,9 +457,7 @@ Future<PublishBatchPublishResponse> batchPublishDrafts(
         }),
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishBatchPublishResponse.fromJson(map);
 }
@@ -523,14 +478,10 @@ Future<PublishBatchArchiveResponse> batchArchivePublishDrafts(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(<String, dynamic>{
-          'draft_ids': draftIds,
-        }),
+        body: jsonEncode(<String, dynamic>{'draft_ids': draftIds}),
       )
       .timeout(const Duration(seconds: 25));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PublishBatchArchiveResponse.fromJson(map);
 }

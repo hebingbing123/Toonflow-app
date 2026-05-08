@@ -84,10 +84,7 @@ Future<TaskCenterGetTaskApiResult> postTasksGetTaskApi(
   String? taskClass,
   int? projectId,
 }) async {
-  final qp = <String, String>{
-    'page': '$page',
-    'limit': '$limit',
-  };
+  final qp = <String, String>{'page': '$page', 'limit': '$limit'};
   if (state != null && state.trim().isNotEmpty) {
     qp['state'] = state.trim();
   }
@@ -104,11 +101,9 @@ Future<TaskCenterGetTaskApiResult> postTasksGetTaskApi(
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return TaskCenterGetTaskApiResult.fromJson(map);
 }
@@ -124,9 +119,7 @@ Future<JobRow> postTasksTaskDetails(String accessToken, int taskId) async {
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobRow.fromJson(map);
 }

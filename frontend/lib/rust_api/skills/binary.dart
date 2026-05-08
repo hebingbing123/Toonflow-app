@@ -22,11 +22,6 @@ Future<Uint8List> fetchSkillsBinaryV1(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 120));
-  if (res.statusCode != 200) {
-    throw RustApiException(
-      res.body.isNotEmpty ? res.body : 'binary response ${res.statusCode}',
-      statusCode: res.statusCode,
-    );
-  }
+  ensureHttpSuccess(res);
   return res.bodyBytes;
 }

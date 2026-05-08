@@ -54,9 +54,7 @@ class VendorMutationResponseV1 {
 Future<VendorMutationResponseV1> _decodeVendorMutationResponse(
   http.Response res,
 ) async {
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VendorMutationResponseV1.fromJson(map);
 }

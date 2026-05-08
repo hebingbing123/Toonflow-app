@@ -54,9 +54,7 @@ class DirectorManualStyleRow {
       directorManual: json['directorManual'] as String,
       data: slots
           .map(
-            (e) => DirectorManualDataSlot.fromJson(
-              e as Map<String, dynamic>,
-            ),
+            (e) => DirectorManualDataSlot.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
     );
@@ -74,9 +72,7 @@ class DirectorManualListResponse {
     return DirectorManualListResponse(
       data: raw
           .map(
-            (e) => DirectorManualStyleRow.fromJson(
-              e as Map<String, dynamic>,
-            ),
+            (e) => DirectorManualStyleRow.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
     );
@@ -84,9 +80,7 @@ class DirectorManualListResponse {
 }
 
 void expectEmptyObjectResponse(http.Response res) {
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
   if (decoded is! Map<String, dynamic>) {
     throw RustApiException('expected JSON object', statusCode: res.statusCode);

@@ -453,15 +453,14 @@ class ShortVideoExportQualityGate {
   });
 
   final int schemaVersion;
+
   /// 门禁策略：off（跳过检查）、warn（显示警告但允许）、block（阻断导出）
   final String strategy;
   final bool enforced;
   final int pendingReviewBadCaseCount;
   final List<QualityGateBlockingReason>? blockingReasons;
 
-  factory ShortVideoExportQualityGate.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory ShortVideoExportQualityGate.fromJson(Map<String, dynamic> json) {
     final blockingReasonsRaw = json['blocking_reasons'] as List<dynamic>?;
     return ShortVideoExportQualityGate(
       schemaVersion: (json['schema_version'] as num).toInt(),
@@ -470,8 +469,10 @@ class ShortVideoExportQualityGate {
       pendingReviewBadCaseCount: (json['pending_review_bad_case_count'] as num)
           .toInt(),
       blockingReasons: blockingReasonsRaw
-          ?.map((e) =>
-              QualityGateBlockingReason.fromJson(e as Map<String, dynamic>))
+          ?.map(
+            (e) =>
+                QualityGateBlockingReason.fromJson(e as Map<String, dynamic>),
+          )
           .toList(growable: false),
     );
   }
@@ -521,4 +522,3 @@ class ProjectShortVideoExportCheck {
     );
   }
 }
-

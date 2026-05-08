@@ -59,9 +59,7 @@ Future<List<AgentDeployListItemV1>> postAgentDeployListV1(
         body: '{}',
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => AgentDeployListItemV1.fromJson(e as Map<String, dynamic>))

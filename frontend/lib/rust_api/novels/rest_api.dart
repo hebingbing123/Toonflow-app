@@ -42,9 +42,7 @@ Future<ListNovelsResponse> fetchProjectNovelsByProjectId(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListNovelsResponse.fromJson(map);
 }
@@ -64,9 +62,7 @@ Future<NovelRow> fetchProjectNovelByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelRow.fromJson(map);
 }
@@ -124,11 +120,9 @@ Future<NovelRow> createProjectNovelUnderProject(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelRow.fromJson(map);
 }
@@ -157,11 +151,9 @@ Future<NovelRow> patchProjectNovelByProjectIds(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelRow.fromJson(map);
 }
@@ -181,9 +173,7 @@ Future<void> deleteProjectNovelByProjectIds(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }
 
 /// `POST /api/v1/projects/{project_id}/novels/crawl-preview` — see `postProjectNovelCrawlPreviewByProjectIdV1`.
@@ -209,11 +199,9 @@ Future<NovelCrawlPreviewResponse> postProjectNovelCrawlPreview(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlPreviewResponse.fromJson(map);
 }
@@ -249,11 +237,9 @@ Future<NovelCrawlImportResponse> postProjectNovelCrawlImport(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlImportResponse.fromJson(map);
 }
@@ -288,11 +274,9 @@ Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlImportBatchResponse.fromJson(map);
 }
@@ -333,11 +317,9 @@ Future<NovelCrawlScheduleRow> postProjectNovelCrawlScheduleCreate(
     throw RustApiException('not found', statusCode: 404);
   }
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlScheduleRow.fromJson(map);
 }
@@ -356,9 +338,7 @@ Future<List<NovelCrawlScheduleRow>> fetchProjectNovelCrawlSchedules(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
       .map((e) => NovelCrawlScheduleRow.fromJson(e as Map<String, dynamic>))
@@ -379,9 +359,7 @@ Future<NovelCrawlObservabilityResponse> fetchProjectNovelCrawlObservability(
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return NovelCrawlObservabilityResponse.fromJson(map);
 }

@@ -15,6 +15,8 @@ void main() {
         mode: 'live_action.short_drama',
         artStylePack: 'art_skills/modern_cn',
         createTimeMs: 1,
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
       ),
       stats: const ProjectStats(
         scriptCount: 1,
@@ -50,6 +52,8 @@ void main() {
         artStylePack: 'art_skills/modern_cn',
         directorManual: 'spoken-showcase',
         createTimeMs: 1,
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
       ),
       stats: const ProjectStats(
         scriptCount: 1,
@@ -82,6 +86,8 @@ void main() {
         artStyle: '国风二次元',
         directorManual: 'heroic',
         createTimeMs: 1,
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
       ),
       stats: const ProjectStats(
         scriptCount: 2,

@@ -36,9 +36,7 @@ class VendorCredentialResponseV1 {
 Future<VendorCredentialResponseV1> _decodeVendorCredentialResponse(
   http.Response res,
 ) async {
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VendorCredentialResponseV1.fromJson(map);
 }
@@ -46,9 +44,7 @@ Future<VendorCredentialResponseV1> _decodeVendorCredentialResponse(
 Future<VendorMutationResponseV1> _decodeVendorCredentialMutationResponse(
   http.Response res,
 ) async {
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VendorMutationResponseV1.fromJson(map);
 }

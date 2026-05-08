@@ -41,14 +41,10 @@ Future<List<ProjectMemberResponse>> fetchProjectMembersV1(
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
   return list
-      .map(
-        (e) => ProjectMemberResponse.fromJson(e as Map<String, dynamic>),
-      )
+      .map((e) => ProjectMemberResponse.fromJson(e as Map<String, dynamic>))
       .toList();
 }
 
@@ -70,9 +66,7 @@ Future<ProjectMemberResponse> createProjectMemberV1(
         body: jsonEncode(<String, dynamic>{'userId': userId, 'role': role}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectMemberResponse.fromJson(map);
 }
@@ -84,8 +78,9 @@ Future<ProjectMemberResponse> patchProjectMemberV1(
   String userId, {
   required String role,
 }) async {
-  final uri =
-      Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/members/$userId');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/members/$userId',
+  );
   final res = await http
       .patch(
         uri,
@@ -96,9 +91,7 @@ Future<ProjectMemberResponse> patchProjectMemberV1(
         body: jsonEncode(<String, dynamic>{'role': role}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectMemberResponse.fromJson(map);
 }
@@ -109,12 +102,11 @@ Future<void> deleteProjectMemberV1(
   String projectId,
   String userId,
 ) async {
-  final uri =
-      Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/members/$userId');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/members/$userId',
+  );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 204);
 }

@@ -4,7 +4,13 @@ import 'package:openflow_app/projects/workbenches/agent_memory_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
 ProjectRow buildProject({required int numericId, required String name}) {
-  return ProjectRow(id: 'project-$numericId', numericId: numericId, name: name);
+  return ProjectRow(
+    id: 'project-$numericId',
+    numericId: numericId,
+    name: name,
+    projectAccessMode: 'inherited',
+    projectAccessRole: 'member',
+  );
 }
 
 ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({

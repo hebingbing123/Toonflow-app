@@ -110,7 +110,10 @@ class ListHarnessUserWasmResponse {
     final raw = json['items'] as List<dynamic>;
     return ListHarnessUserWasmResponse(
       items: raw
-          .map((e) => HarnessUserWasmRecordView.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) =>
+                HarnessUserWasmRecordView.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -140,9 +143,7 @@ Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return HarnessToolsResponse.fromJson(map);
 }
@@ -166,9 +167,7 @@ Future<ValidateHarnessUserWasmResponse> validateHarnessUserWasm(
         body: wasmBytes,
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ValidateHarnessUserWasmResponse.fromJson(map);
 }
@@ -190,22 +189,20 @@ Future<PersistHarnessUserWasmResponse> persistHarnessUserWasm(
         body: wasmBytes,
       )
       .timeout(const Duration(seconds: 30));
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpStatus(res, 201);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return PersistHarnessUserWasmResponse.fromJson(map);
 }
 
 /// **`GET /api/v1/harness/user-wasm`**. See `listHarnessUserWasmV1`.
-Future<ListHarnessUserWasmResponse> listHarnessUserWasm(String accessToken) async {
+Future<ListHarnessUserWasmResponse> listHarnessUserWasm(
+  String accessToken,
+) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/user-wasm');
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListHarnessUserWasmResponse.fromJson(map);
 }
@@ -219,9 +216,7 @@ Future<RevokeHarnessUserWasmResponse> revokeHarnessUserWasm(
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return RevokeHarnessUserWasmResponse.fromJson(map);
 }

@@ -22,11 +22,9 @@ Future<DirectorManualListResponse> postProjectQueryDirectorManual(
       )
       .timeout(const Duration(seconds: 120));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return DirectorManualListResponse.fromJson(map);
 }
@@ -57,7 +55,7 @@ Future<void> postProjectAddDirectorManual(
       )
       .timeout(const Duration(seconds: 120));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
   expectEmptyObjectResponse(res);
 }
@@ -88,7 +86,7 @@ Future<void> postProjectEditDirectorManual(
       )
       .timeout(const Duration(seconds: 120));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
   expectEmptyObjectResponse(res);
 }
@@ -110,11 +108,9 @@ Future<String> postProjectDeleteDirectorManual(
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+    throw RustApiException.fromHttpResponse(res);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
+  ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return map['message'] as String? ?? '';
 }
