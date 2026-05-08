@@ -43,6 +43,8 @@
 2. member
 3. outsider
 
+若三类身份都已准备好，优先直接跑 [`scripts/workspace_rls_probe_matrix.sh`](../../scripts/workspace_rls_probe_matrix.sh) 收完整矩阵。
+
 最低要求：
 
 - 至少保留一份 owner/member/outsider 的 probe 结果摘要

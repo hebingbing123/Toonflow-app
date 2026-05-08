@@ -45,6 +45,7 @@ W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：
 仓库已附带：
 
 - 脚本：[`scripts/workspace_rls_probe.sh`](../../scripts/workspace_rls_probe.sh)
+- 矩阵脚本：[`scripts/workspace_rls_probe_matrix.sh`](../../scripts/workspace_rls_probe_matrix.sh)
 - 样本种子：[`scripts/workspace_rls_seed_sample.sh`](../../scripts/workspace_rls_seed_sample.sh)
 - SQL：[`scripts/fixtures/workspace_rls_probe.sql`](../../scripts/fixtures/workspace_rls_probe.sql)
 
@@ -107,6 +108,19 @@ DATABASE_URL=... \
 PROBE_USER_ID="$OUTSIDER_USER_ID" \
 PROBE_WORKSPACE_ID="$WORKSPACE_ID" \
 bash scripts/workspace_rls_probe.sh
+```
+
+### 3.3.1 一次性跑完整矩阵
+
+若 owner/member/outsider 都已准备好，也可直接：
+
+```bash
+DATABASE_URL=... \
+PROBE_WORKSPACE_ID="$WORKSPACE_ID" \
+OWNER_USER_ID="$OWNER_USER_ID" \
+MEMBER_USER_ID="$MEMBER_USER_ID" \
+OUTSIDER_USER_ID="$OUTSIDER_USER_ID" \
+bash scripts/workspace_rls_probe_matrix.sh
 ```
 
 ### 3.4 当前已验证的本地样本结论（2026-05-08）
