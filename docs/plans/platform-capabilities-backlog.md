@@ -13,7 +13,7 @@
 |----|------|---------|-------------------|------|
 | P-A1 | **应用内通知中心**（任务完成、成员邀请、计费事件摘要） | 事件表或复用 WS + REST 列表 | 铃铛/列表、已读、深链跳转 | **tracked**：已新增 `app_notification`、`GET /api/v1/settings/notifications`、`POST /api/v1/settings/notifications/mark-read`、`POST /api/v1/settings/notifications/mark-all-read`，并接入 WS `settings.notification.created` / `settings.notification.updated`；当前生产者覆盖 skills 变更、jobs 终态、workspace invite 生命周期，Flutter 主导航已补「通知中心」pane 与未读计数 |
 | P-A2 | **全局搜索**（跨项目标题、剧本、资产元数据） | 搜索 API + 索引策略（PG `tsvector` 或外包） | 统一搜索框、结果分组 | 注意权限按 workspace |
-| P-A3 | **账户：导出数据 / 删除账号**（合规） | 异步导出 job + 下载链接；删号 CASCADE 策略 | 设置页危险操作 + 二次确认 | GDPR 类诉求 |
+| P-A3 | **账户：导出数据 / 删除账号**（合规） | 异步导出 job + 下载链接；删号 CASCADE 策略 | 设置页危险操作 + 二次确认 | **tracked**：已新增 `POST /api/v1/settings/account/export`、`GET /api/v1/settings/account/exports`、`GET /api/v1/settings/account/exports/{job_id}/file`、`POST /api/v1/settings/account/delete`；账户导出复用 `app_generation_job` 生成 zip，当前覆盖 profile / workspace / project / script / storyboard / asset / novel / jobs / usage / memory / vendor credential metadata / notification 等用户域数据，并在 Flutter 主导航补齐「账户」pane、导出历史、下载到本机与强确认删号 |
 | P-A4 | **功能开关 / 远程配置**（按 plan 或 workspace） | 配置 API + 缓存 | 客户端拉取与 UI 灰显 | **tracked**：已新增 `GET/POST /api/v1/settings/platform-config` 与 Flutter「平台配置」产品面；当前 `effective` 已按 `defaults <- plan override <- current workspace override <- user override` 合成，其中 plan override 来自 `TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON`，workspace override 复用 `app_workspace.metadata.platform_config`，并支持 `has*Override` / `reset=true` 的显式继承回退；运维配置约定见 [`platform-config-plan-overrides.md`](./platform-config-plan-overrides.md) |
 
 ---

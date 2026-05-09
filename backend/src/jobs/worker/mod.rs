@@ -20,14 +20,15 @@ use uuid::Uuid;
 use crate::jobs::payload_project::resolved_workspace_id_from_job_payload;
 use crate::jobs::queue::{PgQueue, Queue};
 use crate::metering::usage;
+use crate::settings::account::build_account_export_artifact;
 use crate::state::AppState;
 
 use super::{
     envelope_generation_job_updated, hydrate_job_row, record_job_notification, JobRow,
     JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
     JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_FLUTTER_PROBE, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
-    JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE,
-    JOB_KIND_VOICEOVER_GENERATE,
+    JOB_KIND_SETTINGS_ACCOUNT_EXPORT, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT,
+    JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
 };
 
 mod asset_image;
@@ -407,6 +408,9 @@ async fn execute_kind(
             vendor::run_vendor_model_test(state, pool, row)
                 .await
                 .map(job_ok)
+        }
+        k if k == JOB_KIND_SETTINGS_ACCOUNT_EXPORT => {
+            build_account_export_artifact(pool, row.owner_user_id, id, &row.payload).await
         }
         k if k == JOB_KIND_VIDEO_GENERATE => video::run_video_generate(state, pool, id, row).await,
         k if k == JOB_KIND_VIDEO_EXPORT => video::run_video_export(state, pool, id, row).await,

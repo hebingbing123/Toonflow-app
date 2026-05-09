@@ -96,6 +96,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(prompting::benchmark::memory_profiles_routes())
         .merge(prompting::benchmark::promotion_gate_routes())
         .merge(settings::about::router())
+        .merge(settings::account::router())
         .merge(settings::agent_deploy::router())
         .merge(settings::danger::router())
         .merge(settings::dev::router())

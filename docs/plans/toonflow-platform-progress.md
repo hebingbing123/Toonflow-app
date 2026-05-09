@@ -1,6 +1,6 @@
 # Toonflow 平台执行进度
 
-更新时间：2026-05-09
+更新时间：2026-05-10
 
 这个文件用于记录“平台实施落地计划（竖切执行版）”的实际落地进度。  
 大路线图仍以 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md) 为总蓝图；按工程方向拆分的跟踪表见 [`roadmap-index.md`](./roadmap-index.md)。可执行的竖切勾选清单：**[PG 队列观测](./tasks-pg-queue-observability.md)**、**[HTTP 收敛 B·其余域](./tasks-http-api-cleanup.md)**；团队 Workspace **完整功能**总表见 [**`workspace-team-full-plan.md`**](./workspace-team-full-plan.md)。**全栈约定**（禁止只合后端）：[**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)；**平台级补遗池**：[**`platform-capabilities-backlog.md`**](./platform-capabilities-backlog.md)。这里单独记录当前做到了哪一条、下一条是什么、还有哪些阻塞。
@@ -31,6 +31,7 @@
 - **最新补齐**：Workspace observability 实现 **W10.2** 已落地 — 新增 internal-ops 只读端点 `GET /api/v1/workspaces/{workspace_id}/stats`，沿用 `TOONFLOW_INTERNAL_OPS_TOKEN` + `X-Toonflow-Internal-Token` 门禁，返回 `workspace_member_count` / `workspace_project_count` / `workspace_active_job_count`；其中 active jobs 仅统计 `queued` / `running` 且能由 job payload 解析到 project -> workspace 的任务；Flutter 团队工作区成员治理弹窗现已在 internal build 中直接展示这组三指标
 - **最新补齐**：Workspace 运维 Runbook **W10.3** 已落地 — 新增 [**`workspace-operations-runbook.md`**](./workspace-operations-runbook.md)，覆盖 workspace / member / current_workspace / project 可见性排障、邀请 accept 冲突判读，以及只读核查 / 受控修复 SQL 模板；不引入新 REST / WS / schema，纯收口现有语义
 - **最新补齐**：平台通知中心 **P-A1** 已落地 — 新增 `app_notification` 与 settings inbox API（`GET /api/v1/settings/notifications`、`POST /mark-read`、`POST /mark-all-read`），并通过 WS `settings.notification.created` / `settings.notification.updated` 把 skills 变更、jobs 终态、workspace invite 生命周期推到 Flutter 主导航「通知中心」pane；支持未读计数、列表筛选、已读回写与深链打开 jobs / team workspaces / projects
+- **最新补齐**：账户导出 / 删号 **P-A3** 已落地 — 新增 `POST /api/v1/settings/account/export`、`GET /api/v1/settings/account/exports`、`GET /api/v1/settings/account/exports/{job_id}/file`、`POST /api/v1/settings/account/delete`；后端复用 `app_generation_job` 生成账户 zip 导出（profile / workspace / projects / scripts / storyboards / assets / novels / jobs / usage / memory / vendor credential metadata / notifications 等），并在 Flutter 主导航补齐「账户」pane、导出历史、下载到本机与强确认删号
 - **最新补齐**：Workspace 路线图索引 **W11.2** 已落地 — 新增 [**`roadmap-workspace.md`**](./roadmap-workspace.md) 作为团队 Workspace 方向入口；`workspace-team-full-plan.md` 继续保留为 W1–W11 勾选真源
 - **最新补齐**：Workspace 安全边界文档 **W9.1** 已落地 — 新增 [**`workspace-security-boundary.md`**](./workspace-security-boundary.md)，明确 Rust `DATABASE_URL` 直连 Postgres 时以应用层授权为真源、Supabase RLS 为直连客户端补充护栏，并列出 workspace / project / jobs / Harness 需显式复用的门禁 helper
 - **最新补齐**：Workspace RLS 一致性矩阵 **W9.2** 已落地 — 新增 [**`workspace-rls-consistency-matrix.md`**](./workspace-rls-consistency-matrix.md)，明确当前 Rust workspace 协作语义与 Supabase 直连客户端 owner-only RLS 之间的主要 mismatch，避免误把 Rust 可见性等同于直连可见性；本轮先补矩阵，不声称 staging 一致性验证已完成

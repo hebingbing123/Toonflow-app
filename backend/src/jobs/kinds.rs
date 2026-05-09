@@ -24,6 +24,9 @@ pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
 /// Electron-era **`modelTest`** probe (**`POST …/settings/vendors/model-test`**); worker performs a live
 /// text/image/video vendor probe using stored credentials when present, otherwise server env fallbacks.
 pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_test";
+/// Account data export (**`POST /api/v1/settings/account/export`**); worker snapshots current-user
+/// structured data into a local zip artifact and returns a settings download path.
+pub const JOB_KIND_SETTINGS_ACCOUNT_EXPORT: &str = "settings.account.export";
 /// Flutter / integration probe (**`POST /api/v1/jobs`**); worker sleeps ~1s then **`succeeded`** with **`{ ok, probe }`**.
 pub const JOB_KIND_FLUTTER_PROBE: &str = "flutter.probe";
 /// Video generation (**`POST …/production/workbench/generate-video`**); worker generates video from storyboard items.

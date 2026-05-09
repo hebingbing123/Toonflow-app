@@ -188,6 +188,12 @@ extension _HomePageBuildProductSections on _HomePageState {
         },
       ),
     if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.account)
+      AccountSection(
+        controller: _accountController,
+        onAccountDeleted: _handleAccountDeleted,
+      ),
+    if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.notifications)
       NotificationsSection(
         controller: _notificationsController,
@@ -400,6 +406,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
     final paneEntries = <(ProductWorkspacePane, String, int?)>[
       (ProductWorkspacePane.shortVideoSpace, '短视频 Space', null),
       (ProductWorkspacePane.projects, '项目', null),
+      (ProductWorkspacePane.account, '账户', null),
       (ProductWorkspacePane.notifications, '通知中心', widget.unreadNotifications),
       (ProductWorkspacePane.platformStatus, '平台状态', null),
       (ProductWorkspacePane.teamWorkspaces, '团队工作区', null),

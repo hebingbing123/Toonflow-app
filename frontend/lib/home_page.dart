@@ -10,6 +10,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'config.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
 import 'global_search/global_search_bar.dart';
+import 'global_search/search_results_page.dart';
+import 'navigation/search_deep_link.dart';
 import 'project_editor/assets/clip_upload_launcher.dart';
 import 'project_editor/assets/upload_edit_image_launcher.dart';
 import 'project_editor/assets/link_dialog_launcher.dart';
@@ -44,6 +46,7 @@ import 'agent_workspaces/runtime_output_controller.dart';
 import 'agent_workspaces/ws_event_controller.dart';
 import 'agent_workspaces/writeback_controller.dart';
 import 'auth/controller.dart';
+import 'account/controller.dart';
 import 'jobs/controller.dart';
 import 'notifications/controller.dart';
 import 'notifications/section.dart';
@@ -178,6 +181,11 @@ class _HomePageState extends State<HomePage> {
   );
 
   late final JobsController _jobsController = JobsController(
+    accessTokenProvider: () => _session?.accessToken,
+    onErrorChanged: _setSharedError,
+  );
+
+  late final AccountController _accountController = AccountController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
   );
@@ -354,12 +362,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _applyInitialDeepLinkNavigation(Uri uri) {
+    final searchLink = ProductSearchDeepLink.tryParse(uri);
+    if (searchLink != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        _openGlobalSearchResults(searchLink.query);
+      });
+      return;
+    }
     if (!shouldAutoOpenTeamWorkspacesForInitialUri(uri)) {
       return;
     }
     _shellNavigationController.selectHomeSectionMode(HomeSectionMode.product);
     _shellNavigationController.selectProductWorkspacePane(
       ProductWorkspacePane.teamWorkspaces,
+    );
+  }
+
+  void _openGlobalSearchResults(String query) {
+    final token = _session?.accessToken;
+    unawaited(
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (context) =>
+              SearchResultsPage(query: query, accessToken: token),
+        ),
+      ),
     );
   }
 
@@ -373,6 +403,13 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     final path = uri.path;
+    if (path == '/product/search') {
+      final q = uri.queryParameters['q']?.trim() ?? '';
+      if (q.length >= 2) {
+        _openGlobalSearchResults(q);
+      }
+      return;
+    }
     if (path == '/product/jobs') {
       final jobId = uri.queryParameters['jobId'];
       if (jobId != null && jobId.isNotEmpty) {
@@ -657,6 +694,7 @@ class _HomePageState extends State<HomePage> {
     _workspaceOutputController.reset();
     _projectsController.reset();
     _jobsController.reset();
+    _accountController.reset();
     _notificationsController.reset();
     _taskCenterController.reset();
     _qualityReviewsController.reset();
@@ -666,6 +704,25 @@ class _HomePageState extends State<HomePage> {
     _lastSessionAccessToken = null;
     _loadingSessionMe = false;
     _platformConfig = PlatformConfigToggleSetV1.defaults;
+  }
+
+  Future<void> _handleAccountDeleted(AccountDeleteResponseV1 response) async {
+    try {
+      await Supabase.instance.client.auth.signOut();
+    } catch (_) {}
+    await _handleSignedOut();
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '账号已删除：workspace ${response.ownedWorkspaceCount} · '
+          'project ${response.ownedProjectCount} · '
+          'job ${response.generationJobCount}',
+        ),
+      ),
+    );
   }
 
   @override
@@ -688,6 +745,7 @@ class _HomePageState extends State<HomePage> {
     _contentProbesController.dispose();
     _modelsCatalogController.dispose();
     _overviewController.dispose();
+    _accountController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
     _notificationsController.dispose();
@@ -713,7 +771,10 @@ class _HomePageState extends State<HomePage> {
           if (session != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: GlobalSearchBar(accessToken: session.accessToken),
+              child: GlobalSearchBar(
+                accessToken: session.accessToken,
+                onNavigateToResults: _openGlobalSearchResults,
+              ),
             ),
           const RiskyOperationConfirmPrefsOverflowMenu(),
         ],

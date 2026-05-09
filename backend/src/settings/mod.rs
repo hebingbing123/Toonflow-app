@@ -6,6 +6,7 @@
 //!
 //! 子模块：
 //! - `about` — 关于（检查更新、下载应用）
+//! - `account` — 账户导出 / 删号
 //! - `vendors` — 提供商配置
 //! - `dev` — 开发设置
 //! - `danger` — 危险操作
@@ -18,6 +19,7 @@
 //! - `platform_config` — 平台配置 / 功能开关
 
 pub mod about;
+pub mod account;
 pub mod agent_deploy;
 pub mod agent_memory;
 pub mod danger;

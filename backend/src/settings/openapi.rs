@@ -4,6 +4,10 @@ use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(paths(
+    crate::settings::account::post_account_export,
+    crate::settings::account::get_account_exports,
+    crate::settings::account::get_account_export_file,
+    crate::settings::account::post_account_delete,
     crate::settings::dev::get_switch_ai_dev_tool,
     crate::settings::dev::put_switch_ai_dev_tool,
     crate::settings::about::post_check_update,
