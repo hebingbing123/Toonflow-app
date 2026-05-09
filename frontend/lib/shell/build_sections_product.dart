@@ -342,6 +342,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   bool _loadingWebhooks = false;
   String? _webhooksError;
   OutboundWebhookListResponseV1? _webhooks;
+  OutboundWebhookCreatedResponseV1? _latestCreatedWebhook;
   final _webhookUrlController = TextEditingController();
   final _webhookSecretController = TextEditingController();
   final _webhookTestEventTypeController = TextEditingController(
@@ -584,8 +585,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      _webhookUrlController.clear();
-      _webhookSecretController.clear();
+      setState(() {
+        _latestCreatedWebhook = created;
+        _webhookUrlController.clear();
+        _webhookSecretController.clear();
+      });
       await Clipboard.setData(ClipboardData(text: created.secret));
       if (!mounted) {
         return;
@@ -746,7 +750,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   String _billingEventsQuerySummary() {
     final parts = <String>[
       'provider=${_billingProvider.isEmpty ? "all" : _billingProvider}',
-      'informational=${_billingInformationalOnly == null ? "all" : _billingInformationalOnly}',
+      'informational=${_billingInformationalOnly ?? "all"}',
       'sort=$_billingSort',
     ];
     void addText(String label, TextEditingController controller) {
@@ -1038,6 +1042,67 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               hintText: 'test.ping',
             ),
           ),
+          if (_latestCreatedWebhook != null) ...[
+            const SizedBox(height: 8),
+            Card(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '最近创建的 Webhook 凭据',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: '关闭',
+                          onPressed: () {
+                            setState(() {
+                              _latestCreatedWebhook = null;
+                            });
+                          },
+                          icon: const Icon(Icons.close, size: 18),
+                        ),
+                      ],
+                    ),
+                    SelectableText('id: ${_latestCreatedWebhook!.id}'),
+                    SelectableText('url: ${_latestCreatedWebhook!.url}'),
+                    SelectableText('secret: ${_latestCreatedWebhook!.secret}'),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton(
+                          onPressed: () => Clipboard.setData(
+                            ClipboardData(text: _latestCreatedWebhook!.id),
+                          ),
+                          child: const Text('复制 ID'),
+                        ),
+                        OutlinedButton(
+                          onPressed: () => Clipboard.setData(
+                            ClipboardData(text: _latestCreatedWebhook!.url),
+                          ),
+                          child: const Text('复制 URL'),
+                        ),
+                        OutlinedButton(
+                          onPressed: () => Clipboard.setData(
+                            ClipboardData(text: _latestCreatedWebhook!.secret),
+                          ),
+                          child: const Text('复制 Secret'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -1424,7 +1489,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           ),
                           child: const Text('复制 provider_event_id'),
                         ),
-                        if (item.rawEventId != null && item.rawEventId!.isNotEmpty)
+                        if (item.rawEventId != null &&
+                            item.rawEventId!.isNotEmpty)
                           OutlinedButton(
                             onPressed: () => _copyBillingAuditText(
                               item.rawEventId!,
@@ -1432,14 +1498,16 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             ),
                             child: const Text('复制 raw_event_id'),
                           ),
-                        if (item.provider != null && item.provider!.trim().isNotEmpty)
+                        if (item.provider != null &&
+                            item.provider!.trim().isNotEmpty)
                           FilledButton.tonal(
                             onPressed: () => _applyBillingRowFilters(
                               provider: item.provider,
                             ),
                             child: Text('按 ${item.provider} 过滤'),
                           ),
-                        if (item.eventType != null && item.eventType!.trim().isNotEmpty)
+                        if (item.eventType != null &&
+                            item.eventType!.trim().isNotEmpty)
                           FilledButton.tonal(
                             onPressed: () => _applyBillingRowFilters(
                               eventType: item.eventType,
