@@ -36,6 +36,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
     required this.visualLabel,
     required this.directionLabel,
     required this.projectMetrics,
+    this.onResetConfirmationDontShowAgain,
   });
 
   final ShortVideoMode mode;
@@ -71,6 +72,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
   final String? visualLabel;
   final String? directionLabel;
   final List<ShortVideoMetricData> projectMetrics;
+  final void Function(BuildContext context)? onResetConfirmationDontShowAgain;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +118,20 @@ class _ProjectSelectorPanel extends StatelessWidget {
               ),
             ],
           ),
+          if (onResetConfirmationDontShowAgain != null) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => onResetConfirmationDontShowAgain!.call(context),
+                icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                label: const Text('恢复高风险确认提示'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
           const SizedBox(height: 12),

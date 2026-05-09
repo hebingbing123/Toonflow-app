@@ -516,9 +516,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           : null,
       onCompareDrafts: _publishDrafts.isNotEmpty ? _compareDrafts : null,
       batchValidation: _batchValidation,
-      onResetConfirmationDontShowAgain: project != null
-          ? (ctx) => unawaited(_resetConfirmationDontShowAgain(ctx))
-          : null,
+      onResetConfirmationDontShowAgain: (ctx) =>
+          unawaited(_resetConfirmationDontShowAgain(ctx)),
       // P11: Delivery mode
       deliveryModeFilter: _deliveryModeFilter,
       onDeliveryModeFilterChanged: _onDeliveryModeFilterChanged,
@@ -747,6 +746,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       },
       onOpenTasks: widget.onOpenTasks,
       onOpenQuality: widget.onOpenQuality,
+      onResetConfirmationDontShowAgain: (ctx) =>
+          unawaited(_resetConfirmationDontShowAgain(ctx)),
       ),
     );
   }

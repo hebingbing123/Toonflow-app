@@ -519,6 +519,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.onOpenProductionWorkspace,
     required this.onOpenTasks,
     required this.onOpenQuality,
+    this.onResetConfirmationDontShowAgain,
   });
 
   final String targetMarket;
@@ -593,6 +594,8 @@ class ShortVideoSpaceView extends StatelessWidget {
   final VoidCallback onOpenProductionWorkspace;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenQuality;
+  /// Clears local destructive-confirm "don't show again" prefs (always available).
+  final void Function(BuildContext context)? onResetConfirmationDontShowAgain;
 
   @override
   Widget build(BuildContext context) {
@@ -663,6 +666,7 @@ class ShortVideoSpaceView extends StatelessWidget {
           visualLabel: visualLabel,
           directionLabel: directionLabel,
           projectMetrics: projectMetrics,
+          onResetConfirmationDontShowAgain: onResetConfirmationDontShowAgain,
         ),
         const SizedBox(height: 16),
         _ProductionPanel(
