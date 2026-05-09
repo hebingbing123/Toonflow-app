@@ -16,7 +16,7 @@
 |------|------|------|
 | 人工抽检量表固化（维度、阈值、抽样批次） | `next` | **必做**；母文档 §6 |
 | Bad case 集版本化与发版前回归门禁 | `next` | **必做**；须挂钩 CI workflow |
-| 分环节通过率面板（产品化，不仅是 API） | `next` | **必做**；含图表化展示 |
+| 分环节通过率面板（产品化，不仅是 API） | `tracked` | Flutter 质量页 / 工作台已接入统计、阶段分布、scope 榜单、坏例热点、token 效率等聚合面；后续主要收口图表与回归 |
 | Harness trace ↔ 评测样本关联（skill 版本、模型参数） | `next` | **必做**；依赖 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F |
 
 ## 验收
@@ -55,7 +55,7 @@
 
 | 项 | 内容 |
 |----|------|
-| **目标** | Flutter 质量工作台展示趋势（按 stage、按周），不仅列表 API。 |
+| **目标** | Flutter 质量工作台与主质量页展示趋势与聚合（按 stage、按周、按 scope），不仅列表 API。当前主质量页已补运营看板入口：一键刷新质量统计、阶段通过率 / 等级分布、scope 榜单、坏例热点、token 效率，并支持复制看板摘要；工作台继续承接更深筛选与详情。 |
 | **依赖** | 若聚合不足，**必做**先扩 REST（与本 WP 同一里程碑收口）。 |
 | **PR 切片** | （1）`rust_api` 模型与 client；（2）**必做**：图表库选型并落地趋势视图（stage/周）；（3）缓存/防抖。 |
 | **触点** | `frontend/lib/rust_api/`；质量相关 `*_section` / dialog；`backend/src/prompting/quality/handlers/`。 |

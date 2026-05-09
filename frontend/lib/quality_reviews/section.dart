@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'controller.dart';
 import 'previews.dart';
@@ -65,11 +66,15 @@ class QualityReviewsSection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           QualityReviewsActionsBar(
+            loadingQualityDashboard: controller.loadingQualityDashboard,
             loadingQualityReviews: controller.loadingQualityReviews,
             loadingQualityBadCases: controller.loadingQualityBadCases,
             loadingQualityStats: controller.loadingQualityStats,
             loadingQualityStagePassRate: controller.loadingQualityStagePassRate,
             onOpenWorkbench: () => _openQualityWorkbench(context),
+            onLoadQualityDashboard: () => controller.loadQualityDashboard(
+              projectId: initialProjectNumericId,
+            ),
             onLoadQualityReviews: controller.loadQualityReviews,
             onLoadQualityBadCases: controller.loadQualityBadCases,
             onLoadQualityStats: controller.loadQualityStats,
@@ -79,6 +84,36 @@ class QualityReviewsSection extends StatelessWidget {
           QualityReviewsSummaryPreview(
             outlineColor: outline,
             reviewSummary: reviewSummary,
+          ),
+          const SizedBox(height: 8),
+          Text('质量运营看板', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 6),
+          if (controller.qualityDashboardLine != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton(
+                onPressed: () async {
+                  await Clipboard.setData(
+                    ClipboardData(text: controller.qualityDashboardLine!),
+                  );
+                  if (!context.mounted) {
+                    return;
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('已复制质量看板摘要')),
+                  );
+                },
+                child: const Text('复制看板摘要'),
+              ),
+            ),
+          QualityReviewsOpsDashboardPreview(
+            outlineColor: outline,
+            dashboardSummary: controller.qualityDashboardLine,
+            qualityStatsRows: controller.qualityStatsRows,
+            stageGradeRows: controller.qualityStageGradeRows,
+            scopeInsightRows: controller.qualityScopeInsightRows,
+            tokenEfficiencyRows: controller.qualityTokenEfficiencyRows,
+            badCaseStats: controller.qualityBadCaseStatItems,
           ),
           const SizedBox(height: 8),
           QualityReviewsCompatibilityPanel(
@@ -112,6 +147,22 @@ class QualityReviewsSection extends StatelessWidget {
           if (controller.qualityStagePassRateLine != null) ...[
             const SizedBox(height: 8),
             SelectableText('阶段通过率：${controller.qualityStagePassRateLine}'),
+          ],
+          if (controller.qualityStageGradeLine != null) ...[
+            const SizedBox(height: 8),
+            SelectableText('阶段等级分布：${controller.qualityStageGradeLine}'),
+          ],
+          if (controller.qualityScopeInsightsLine != null) ...[
+            const SizedBox(height: 8),
+            SelectableText('Scope榜单：${controller.qualityScopeInsightsLine}'),
+          ],
+          if (controller.qualityTokenEfficiencyLine != null) ...[
+            const SizedBox(height: 8),
+            SelectableText('Token效率：${controller.qualityTokenEfficiencyLine}'),
+          ],
+          if (controller.qualityBadCaseStatsLine != null) ...[
+            const SizedBox(height: 8),
+            SelectableText('坏例热点：${controller.qualityBadCaseStatsLine}'),
           ],
           if (controller.qualityReviews != null) ...[
             QualityReviewsListPreview(

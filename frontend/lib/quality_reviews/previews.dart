@@ -6,22 +6,26 @@ import '../../rust_api.dart';
 class QualityReviewsActionsBar extends StatelessWidget {
   const QualityReviewsActionsBar({
     super.key,
+    required this.loadingQualityDashboard,
     required this.loadingQualityReviews,
     required this.loadingQualityBadCases,
     required this.loadingQualityStats,
     required this.loadingQualityStagePassRate,
     required this.onOpenWorkbench,
+    required this.onLoadQualityDashboard,
     required this.onLoadQualityReviews,
     required this.onLoadQualityBadCases,
     required this.onLoadQualityStats,
     required this.onLoadQualityStagePassRate,
   });
 
+  final bool loadingQualityDashboard;
   final bool loadingQualityReviews;
   final bool loadingQualityBadCases;
   final bool loadingQualityStats;
   final bool loadingQualityStagePassRate;
   final VoidCallback onOpenWorkbench;
+  final VoidCallback onLoadQualityDashboard;
   final VoidCallback onLoadQualityReviews;
   final VoidCallback onLoadQualityBadCases;
   final VoidCallback onLoadQualityStats;
@@ -36,6 +40,10 @@ class QualityReviewsActionsBar extends StatelessWidget {
         FilledButton.tonal(
           onPressed: onOpenWorkbench,
           child: const Text('打开质量工作台'),
+        ),
+        FilledButton(
+          onPressed: loadingQualityDashboard ? null : onLoadQualityDashboard,
+          child: Text(loadingQualityDashboard ? '…' : '刷新质量看板'),
         ),
         FilledButton.tonal(
           onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
@@ -55,6 +63,145 @@ class QualityReviewsActionsBar extends StatelessWidget {
               : onLoadQualityStagePassRate,
           child: Text(loadingQualityStagePassRate ? '…' : '查看阶段通过率'),
         ),
+      ],
+    );
+  }
+}
+
+class QualityReviewsOpsDashboardPreview extends StatelessWidget {
+  const QualityReviewsOpsDashboardPreview({
+    super.key,
+    required this.outlineColor,
+    required this.dashboardSummary,
+    required this.qualityStatsRows,
+    required this.stageGradeRows,
+    required this.scopeInsightRows,
+    required this.tokenEfficiencyRows,
+    required this.badCaseStats,
+  });
+
+  final Color outlineColor;
+  final String? dashboardSummary;
+  final List<QualityStatsRow>? qualityStatsRows;
+  final List<StageGradeDistributionRow>? stageGradeRows;
+  final List<QualityScopeInsightRow>? scopeInsightRows;
+  final List<QualityTokenEfficiencyRow>? tokenEfficiencyRows;
+  final List<BadCaseStatItem>? badCaseStats;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasAnything =
+        dashboardSummary != null ||
+        (qualityStatsRows?.isNotEmpty ?? false) ||
+        (stageGradeRows?.isNotEmpty ?? false) ||
+        (scopeInsightRows?.isNotEmpty ?? false) ||
+        (tokenEfficiencyRows?.isNotEmpty ?? false) ||
+        (badCaseStats?.isNotEmpty ?? false);
+    if (!hasAnything) {
+      return Text(
+        '质量看板尚未加载。可直接刷新聚合统计、坏例热点、阶段分布与 token 效率。',
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: outlineColor),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (dashboardSummary != null) ...[
+          SelectableText(
+            dashboardSummary!,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (qualityStatsRows?.isNotEmpty == true) ...[
+          Text('目标类型', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: qualityStatsRows!
+                .take(4)
+                .map(
+                  (row) => Chip(
+                    label: Text(
+                      '${row.targetType} ${row.passRatePercent.toStringAsFixed(1)}% · ${row.totalReviews}条',
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                )
+                .toList(growable: false),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (stageGradeRows?.isNotEmpty == true) ...[
+          Text('阶段等级', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: stageGradeRows!
+                .take(4)
+                .map(
+                  (row) => Chip(
+                    label: Text(
+                      '${row.stage} A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount}',
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                )
+                .toList(growable: false),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (badCaseStats?.isNotEmpty == true) ...[
+          Text('坏例热点', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: badCaseStats!
+                .take(4)
+                .map(
+                  (row) => Chip(
+                    label: Text(
+                      '${row.badCaseCategory ?? "未分类"} ${row.count}',
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                )
+                .toList(growable: false),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (scopeInsightRows?.isNotEmpty == true) ...[
+          Text('Scope 榜单', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 6),
+          ...scopeInsightRows!.take(3).map(
+            (row) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                '${row.scopeLabel} · pass=${row.passRatePercent.toStringAsFixed(1)}% · total=${row.totalReviews} · bad_case=${row.badCaseCount}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (tokenEfficiencyRows?.isNotEmpty == true) ...[
+          Text('Token 效率', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 6),
+          ...tokenEfficiencyRows!.take(3).map(
+            (row) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                '${row.targetType} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

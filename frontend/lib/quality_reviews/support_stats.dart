@@ -286,6 +286,71 @@ String summarizeStagePassRateRows(
   return '$visible$suffix';
 }
 
+String summarizeStageGradeDistributionRows(
+  Iterable<StageGradeDistributionRow> rows, {
+  int maxItems = 4,
+}) {
+  final items = rows.toList(growable: false);
+  if (items.isEmpty) {
+    return '当前没有阶段等级分布';
+  }
+  final visible = items
+      .take(maxItems)
+      .map(
+        (row) =>
+            '${row.stage}: A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount} · pass=${row.passRatePercent.toStringAsFixed(1)}%',
+      )
+      .join(' | ');
+  final suffix = items.length > maxItems ? ' | …' : '';
+  return '$visible$suffix';
+}
+
+String summarizeBadCaseStatItems(
+  Iterable<BadCaseStatItem> items, {
+  int maxItems = 4,
+}) {
+  final rows = items.toList(growable: false);
+  if (rows.isEmpty) {
+    return '当前没有坏例热点';
+  }
+  final visible = rows
+      .take(maxItems)
+      .map(
+        (row) =>
+            '${row.badCaseCategory ?? "未分类"} ${row.count}条 · pass=${row.passRatePercent.toStringAsFixed(1)}% · avg=${row.avgScore.toStringAsFixed(1)}',
+      )
+      .join(' | ');
+  final suffix = rows.length > maxItems ? ' | …' : '';
+  return '$visible$suffix';
+}
+
+String? buildQualityDashboardSummary({
+  String? statsSummary,
+  String? stagePassRateSummary,
+  String? stageGradeSummary,
+  String? scopeInsightsSummary,
+  String? tokenEfficiencySummary,
+  String? badCaseStatsSummary,
+}) {
+  final parts = <String>[
+    if (statsSummary != null && statsSummary.isNotEmpty) '统计: $statsSummary',
+    if (stagePassRateSummary != null && stagePassRateSummary.isNotEmpty)
+      '阶段: $stagePassRateSummary',
+    if (stageGradeSummary != null && stageGradeSummary.isNotEmpty)
+      '等级: $stageGradeSummary',
+    if (scopeInsightsSummary != null && scopeInsightsSummary.isNotEmpty)
+      'Scope: $scopeInsightsSummary',
+    if (tokenEfficiencySummary != null && tokenEfficiencySummary.isNotEmpty)
+      'Token: $tokenEfficiencySummary',
+    if (badCaseStatsSummary != null && badCaseStatsSummary.isNotEmpty)
+      '坏例: $badCaseStatsSummary',
+  ];
+  if (parts.isEmpty) {
+    return null;
+  }
+  return parts.join('\n');
+}
+
 String formatQualityReviewCoreDetails(QualityReview row) {
   return [
     row.id,
