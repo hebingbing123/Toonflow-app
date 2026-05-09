@@ -1,0 +1,385 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import '../rust_api.dart';
+
+class PlatformStatusSection extends StatefulWidget {
+  const PlatformStatusSection({
+    super.key,
+    this.onOverallHealthChanged,
+  });
+
+  final void Function(bool overallHealthy, List<String> degradedEndpoints)?
+      onOverallHealthChanged;
+
+  @override
+  State<PlatformStatusSection> createState() => _PlatformStatusSectionState();
+}
+
+class _PlatformStatusSectionState extends State<PlatformStatusSection> {
+  bool _loading = false;
+  String? _error;
+  int _windowMinutes = 60;
+  bool _autoRefreshEnabled = true;
+  HealthResponse? _health;
+  ReadyV1Response? _ready;
+  VersionResponse? _version;
+  SliStatusResponse? _sliStatus;
+  MetricsResponse? _metrics;
+  DateTime? _lastUpdatedAt;
+  bool? _previousHealthy;
+  Timer? _autoRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoRefreshTimer();
+    unawaited(_refresh());
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAutoRefreshTimer() {
+    _autoRefreshTimer?.cancel();
+    if (!_autoRefreshEnabled) {
+      return;
+    }
+    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      unawaited(_refresh());
+    });
+  }
+
+  Future<void> _refresh() async {
+    if (_loading) {
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final results = await Future.wait<Object>([
+        fetchHealthV1(),
+        fetchReadyV1(),
+        fetchVersionV1(),
+        fetchSliStatusV1(windowMinutes: _windowMinutes),
+        fetchMetricsV1(windowMinutes: _windowMinutes),
+      ]);
+      if (!mounted) {
+        return;
+      }
+      final nextHealth = _resolveOverallHealthy(
+        health: results[0] as HealthResponse,
+        ready: results[1] as ReadyV1Response,
+        sli: results[3] as SliStatusResponse,
+      );
+      final nextDegradedEndpoints =
+          _degradedEndpointNames(results[4] as MetricsResponse);
+      final previousHealthy = _previousHealthy;
+      setState(() {
+        _health = results[0] as HealthResponse;
+        _ready = results[1] as ReadyV1Response;
+        _version = results[2] as VersionResponse;
+        _sliStatus = results[3] as SliStatusResponse;
+        _metrics = results[4] as MetricsResponse;
+        _lastUpdatedAt = DateTime.now();
+        _previousHealthy = nextHealth;
+      });
+      if (previousHealthy != null && previousHealthy != nextHealth) {
+        widget.onOverallHealthChanged?.call(nextHealth, nextDegradedEndpoints);
+        final messenger = ScaffoldMessenger.maybeOf(context);
+        if (messenger != null) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                nextHealth ? '平台状态已恢复健康' : '平台状态出现降级，请关注 SLI 与热点端点',
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    } on RustApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _error = describeRustApiError(error);
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _error = error.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  bool _resolveOverallHealthy({
+    required HealthResponse health,
+    required ReadyV1Response ready,
+    required SliStatusResponse sli,
+  }) {
+    return health.status == 'ok' && ready.status == 'ok' && sli.healthy;
+  }
+
+  List<String> _degradedEndpointNames(MetricsResponse metrics) {
+    return metrics.endpoints.entries
+        .where((e) =>
+            e.value.serverErrorCount > 0 || e.value.successRate < 0.995)
+        .map((e) => e.key)
+        .toList(growable: false);
+  }
+
+  String _formatUpdatedAt(DateTime? value) {
+    if (value == null) {
+      return '未刷新';
+    }
+    final local = value.toLocal();
+    final hh = local.hour.toString().padLeft(2, '0');
+    final mm = local.minute.toString().padLeft(2, '0');
+    final ss = local.second.toString().padLeft(2, '0');
+    return '$hh:$mm:$ss';
+  }
+
+  Color _statusColor(bool healthy) {
+    if (healthy) {
+      return Colors.green;
+    }
+    return Colors.orange;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final sliStatus = _sliStatus;
+    final metrics = _metrics;
+    final endpointCount = metrics?.endpoints.length ?? 0;
+    final degradedEndpoints =
+        metrics == null ? 0 : _degradedEndpointNames(metrics).length;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text('平台状态', style: theme.textTheme.titleMedium),
+              ),
+              DropdownButton<int>(
+                value: _windowMinutes,
+                onChanged: _loading
+                    ? null
+                    : (next) {
+                        if (next == null || next == _windowMinutes) {
+                          return;
+                        }
+                        setState(() {
+                          _windowMinutes = next;
+                        });
+                        _refresh();
+                      },
+                items: const <DropdownMenuItem<int>>[
+                  DropdownMenuItem(value: 15, child: Text('15 分钟窗口')),
+                  DropdownMenuItem(value: 60, child: Text('60 分钟窗口')),
+                  DropdownMenuItem(value: 180, child: Text('3 小时窗口')),
+                ],
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: _loading ? null : _refresh,
+                icon: _loading
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
+                label: const Text('刷新'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '查看健康检查、就绪状态、版本、SLI 健康度与端点请求概览。',
+            style: theme.textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  '最近刷新：${_formatUpdatedAt(_lastUpdatedAt)}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+              Switch(
+                value: _autoRefreshEnabled,
+                onChanged: (value) {
+                  setState(() {
+                    _autoRefreshEnabled = value;
+                  });
+                  _startAutoRefreshTimer();
+                },
+              ),
+              const Text('自动轮询'),
+            ],
+          ),
+          if (_error != null) ...<Widget>[
+            const SizedBox(height: 10),
+            Text(
+              _error!,
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              _StatusChip(
+                title: 'Health',
+                value: _health?.status ?? '-',
+                color: _statusColor((_health?.status ?? '') == 'ok'),
+              ),
+              _StatusChip(
+                title: 'Ready',
+                value: _ready?.status ?? '-',
+                color: _statusColor((_ready?.status ?? '') == 'ok'),
+              ),
+              _StatusChip(
+                title: 'SLI',
+                value: sliStatus == null
+                    ? '-'
+                    : (sliStatus.healthy ? 'healthy' : 'degraded'),
+                color: _statusColor(sliStatus?.healthy == true),
+              ),
+              _StatusChip(
+                title: 'Endpoints',
+                value: '$endpointCount',
+                color: theme.colorScheme.primary,
+              ),
+              _StatusChip(
+                title: 'Degraded',
+                value: '$degradedEndpoints',
+                color: _statusColor(degradedEndpoints == 0),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_version != null)
+            Text(
+              '版本：${_version!.service} ${_version!.version}${_version!.gitSha == null ? '' : ' (${_version!.gitSha})'}',
+              style: theme.textTheme.bodySmall,
+            ),
+          if (sliStatus != null) ...<Widget>[
+            const SizedBox(height: 12),
+            Text('SLI 快照', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 8),
+            ...sliStatus.slis.take(5).map(
+              (sli) => _SliTile(snapshot: sli),
+            ),
+          ],
+          if (metrics != null) ...<Widget>[
+            const SizedBox(height: 12),
+            Text('热点端点', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 8),
+            ...metrics.endpoints.values
+                .toList(growable: false)
+                .sorted((a, b) => b.totalRequests.compareTo(a.totalRequests))
+                .take(5)
+                .map((endpoint) => _EndpointTile(endpoint: endpoint)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({
+    required this.title,
+    required this.value,
+    required this.color,
+  });
+
+  final String title;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.6)),
+      ),
+      child: Text('$title: $value'),
+    );
+  }
+}
+
+class _SliTile extends StatelessWidget {
+  const _SliTile({required this.snapshot});
+
+  final SliSnapshotResponse snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    final healthy = snapshot.healthy;
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+      leading: Icon(
+        healthy ? Icons.check_circle_outline : Icons.warning_amber_outlined,
+        color: healthy ? Colors.green : Colors.orange,
+      ),
+      title: Text(snapshot.definition.name),
+      subtitle: Text(
+        '${snapshot.path} · P95 ${snapshot.currentP95LatencyMs}ms · 成功率 ${(snapshot.currentSuccessRate * 100).toStringAsFixed(2)}%',
+      ),
+      trailing: Text('请求 ${snapshot.totalRequests}'),
+    );
+  }
+}
+
+class _EndpointTile extends StatelessWidget {
+  const _EndpointTile({required this.endpoint});
+
+  final EndpointMetricsResponse endpoint;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+      title: Text(endpoint.path),
+      subtitle: Text(
+        '总请求 ${endpoint.totalRequests} · 成功率 ${(endpoint.successRate * 100).toStringAsFixed(2)}% · P95 ${endpoint.p95LatencyMs}ms',
+      ),
+      trailing: Text('5xx ${endpoint.serverErrorCount}'),
+    );
+  }
+}
+
+extension<T> on List<T> {
+  List<T> sorted(int Function(T a, T b) compare) {
+    final copy = List<T>.from(this);
+    copy.sort(compare);
+    return copy;
+  }
+}

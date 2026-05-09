@@ -1328,10 +1328,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 token,
                 items: workspaceItems,
               )
-            : await postSettingsHelpHubUserLinksV1(
-                token,
-                items: userItems,
-              );
+            : await postSettingsHelpHubUserLinksV1(token, items: userItems);
         if (!mounted) {
           return;
         }
@@ -1355,7 +1352,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setInner) {
-            final canManageWorkspace = _helpHubConfig?.canManageWorkspace ?? false;
+            final canManageWorkspace =
+                _helpHubConfig?.canManageWorkspace ?? false;
             final activeIsWorkspace = canManageWorkspace && useWorkspaceTab;
             final activeItems = activeIsWorkspace ? workspaceItems : userItems;
 
@@ -1371,7 +1369,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               }
               setInner(() {
                 errorText = '';
-                activeItems.add(HelpHubLinkItemV1(id: id, title: title, url: url));
+                activeItems.add(
+                  HelpHubLinkItemV1(id: id, title: title, url: url),
+                );
                 _helpHubNewIdController.text = '';
                 _helpHubNewTitleController.text = '';
                 _helpHubNewUrlController.text = '';
@@ -1471,11 +1471,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '${item.title} (${item.id})',
-                                        style: Theme.of(ctx).textTheme.titleSmall,
+                                        style: Theme.of(
+                                          ctx,
+                                        ).textTheme.titleSmall,
                                       ),
                                       const SizedBox(height: 4),
                                       SelectableText(item.url),
@@ -1488,22 +1491,25 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   onPressed: (_savingHelpHubLinks || idx == 0)
                                       ? null
                                       : () => setInner(() {
-                                            final tmp = activeItems[idx - 1];
-                                            activeItems[idx - 1] = activeItems[idx];
-                                            activeItems[idx] = tmp;
-                                          }),
+                                          final tmp = activeItems[idx - 1];
+                                          activeItems[idx - 1] =
+                                              activeItems[idx];
+                                          activeItems[idx] = tmp;
+                                        }),
                                   icon: const Icon(Icons.arrow_upward),
                                 ),
                                 IconButton(
                                   tooltip: '下移',
-                                  onPressed: (_savingHelpHubLinks ||
+                                  onPressed:
+                                      (_savingHelpHubLinks ||
                                           idx >= activeItems.length - 1)
                                       ? null
                                       : () => setInner(() {
-                                            final tmp = activeItems[idx + 1];
-                                            activeItems[idx + 1] = activeItems[idx];
-                                            activeItems[idx] = tmp;
-                                          }),
+                                          final tmp = activeItems[idx + 1];
+                                          activeItems[idx + 1] =
+                                              activeItems[idx];
+                                          activeItems[idx] = tmp;
+                                        }),
                                   icon: const Icon(Icons.arrow_downward),
                                 ),
                                 IconButton(
@@ -1511,8 +1517,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   onPressed: _savingHelpHubLinks
                                       ? null
                                       : () => setInner(() {
-                                            activeItems.removeAt(idx);
-                                          }),
+                                          activeItems.removeAt(idx);
+                                        }),
                                   icon: const Icon(Icons.delete_outline),
                                 ),
                               ],
@@ -1526,7 +1532,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               ),
               actions: [
                 TextButton(
-                  onPressed: _savingHelpHubLinks ? null : () => Navigator.pop(ctx),
+                  onPressed: _savingHelpHubLinks
+                      ? null
+                      : () => Navigator.pop(ctx),
                   child: const Text('关闭'),
                 ),
                 FilledButton(

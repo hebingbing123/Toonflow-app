@@ -391,6 +391,12 @@ class _HomePageState extends State<HomePage> {
       );
       return;
     }
+    if (path == '/product/platform-status') {
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.platformStatus,
+      );
+      return;
+    }
     if (path == '/product/projects') {
       final projectNumericId = int.tryParse(
         uri.queryParameters['projectNumericId'] ?? '',
@@ -707,9 +713,7 @@ class _HomePageState extends State<HomePage> {
           if (session != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: GlobalSearchBar(
-                accessToken: session.accessToken,
-              ),
+              child: GlobalSearchBar(accessToken: session.accessToken),
             ),
           const RiskyOperationConfirmPrefsOverflowMenu(),
         ],

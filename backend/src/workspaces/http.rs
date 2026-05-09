@@ -397,7 +397,7 @@ async fn record_workspace_invite_notification(
     message: String,
     payload: Value,
 ) -> Result<(), ApiError> {
-    record_notification(
+    let _ = record_notification(
         state.require_pool()?,
         Some(&state.notify),
         NotificationRecordPayload {

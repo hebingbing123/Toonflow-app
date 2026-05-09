@@ -50,6 +50,8 @@ pub struct ListNotificationsQuery {
     pub limit: Option<i64>,
     #[serde(default)]
     pub before_id: Option<i64>,
+    #[serde(default)]
+    pub include_muted: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
@@ -76,6 +78,21 @@ pub struct MarkAllNotificationsReadResponse {
     pub unread_count: i64,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[schema(rename_all = "camelCase")]
+pub struct DeleteNotificationsBody {
+    pub ids: Vec<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
+pub struct DeleteNotificationsResponse {
+    pub deleted_count: i64,
+    pub unread_count: i64,
+}
+
 #[derive(Debug, Clone)]
 pub struct NotificationRecordPayload {
     pub user_id: Uuid,
@@ -90,4 +107,76 @@ pub struct NotificationRecordPayload {
     pub payload: Value,
     pub file_path: Option<String>,
     pub changed_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[schema(rename_all = "camelCase")]
+pub struct NotificationPreferences {
+    #[serde(default)]
+    pub muted_notification_types: Vec<String>,
+    #[serde(default)]
+    pub muted_workspace_ids: Vec<Uuid>,
+    #[serde(default)]
+    pub muted_project_ids: Vec<Uuid>,
+    #[serde(default = "default_true")]
+    pub deliver_critical_even_muted: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[schema(rename_all = "camelCase")]
+pub struct NotificationPreferencesAuditMeta {
+    pub updated_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub updated_by: String,
+    #[serde(default)]
+    pub source: String,
+}
+
+impl Default for NotificationPreferencesAuditMeta {
+    fn default() -> Self {
+        Self {
+            updated_at: None,
+            updated_by: "self".to_string(),
+            source: "manual".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[schema(rename_all = "camelCase")]
+pub struct NotificationPreferencesEnvelope {
+    pub preferences: NotificationPreferences,
+    pub audit: NotificationPreferencesAuditMeta,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[schema(rename_all = "camelCase")]
+pub struct ImportNotificationPreferencesBody {
+    pub envelope: NotificationPreferencesEnvelope,
+}
+
+const fn default_true() -> bool {
+    true
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[schema(rename_all = "camelCase")]
+pub struct ApplyNotificationPreferencesTemplateBody {
+    pub template: String,
+}
+
+impl Default for NotificationPreferences {
+    fn default() -> Self {
+        Self {
+            muted_notification_types: Vec::new(),
+            muted_workspace_ids: Vec::new(),
+            muted_project_ids: Vec::new(),
+            deliver_critical_even_muted: true,
+        }
+    }
 }

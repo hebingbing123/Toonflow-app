@@ -9,18 +9,18 @@ class NotificationRecordV1 {
   const NotificationRecordV1({
     required this.id,
     required this.userId,
-    this.workspaceId,
-    this.projectId,
-    this.projectNumericId,
-    this.jobId,
+    required this.workspaceId,
+    required this.projectId,
+    required this.projectNumericId,
+    required this.jobId,
     required this.notificationType,
     required this.title,
     required this.message,
-    this.linkPath,
+    required this.linkPath,
     required this.payload,
-    this.filePath,
-    this.changedAt,
-    this.readAt,
+    required this.filePath,
+    required this.changedAt,
+    required this.readAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -42,11 +42,10 @@ class NotificationRecordV1 {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  bool get isRead => readAt != null;
+  bool get isUnread => readAt == null;
 
   factory NotificationRecordV1.fromJson(Map<String, dynamic> json) {
-    DateTime? parseOptionalDateTime(String key) {
-      final raw = json[key];
+    DateTime? parseNullableDateTime(Object? raw) {
       if (raw is! String || raw.trim().isEmpty) {
         return null;
       }
@@ -58,31 +57,28 @@ class NotificationRecordV1 {
       userId: json['userId'] as String,
       workspaceId: json['workspaceId'] as String?,
       projectId: json['projectId'] as String?,
-      projectNumericId: switch (json['projectNumericId']) {
-        final num value => value.toInt(),
-        _ => null,
-      },
+      projectNumericId: (json['projectNumericId'] as num?)?.toInt(),
       jobId: json['jobId'] as String?,
-      notificationType: json['notificationType'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      message: json['message'] as String? ?? '',
+      notificationType: json['notificationType'] as String,
+      title: json['title'] as String,
+      message: json['message'] as String,
       linkPath: json['linkPath'] as String?,
-      payload: (json['payload'] as Map<String, dynamic>?) ?? const {},
+      payload: Map<String, dynamic>.from(json['payload'] as Map? ?? {}),
       filePath: json['filePath'] as String?,
-      changedAt: parseOptionalDateTime('changedAt'),
-      readAt: parseOptionalDateTime('readAt'),
+      changedAt: parseNullableDateTime(json['changedAt']),
+      readAt: parseNullableDateTime(json['readAt']),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
 }
 
-class ListNotificationsEnvelopeV1 {
-  const ListNotificationsEnvelopeV1({
+class NotificationsListEnvelopeV1 {
+  const NotificationsListEnvelopeV1({
     required this.items,
     required this.unreadCount,
     required this.hasMore,
-    this.nextBeforeId,
+    required this.nextBeforeId,
   });
 
   final List<NotificationRecordV1> items;
@@ -90,75 +86,19 @@ class ListNotificationsEnvelopeV1 {
   final bool hasMore;
   final int? nextBeforeId;
 
-  factory ListNotificationsEnvelopeV1.fromJson(Map<String, dynamic> json) {
-    final rawItems = json['items'] as List<dynamic>? ?? const [];
-    return ListNotificationsEnvelopeV1(
+  factory NotificationsListEnvelopeV1.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'] as List<dynamic>? ?? const <dynamic>[];
+    return NotificationsListEnvelopeV1(
       items: rawItems
-          .cast<Map<String, dynamic>>()
-          .map(NotificationRecordV1.fromJson)
+          .map(
+            (item) =>
+                NotificationRecordV1.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false),
-      unreadCount: (json['unreadCount'] as num? ?? 0).toInt(),
-      hasMore: json['hasMore'] as bool? ?? false,
-      nextBeforeId: switch (json['nextBeforeId']) {
-        final num value => value.toInt(),
-        _ => null,
-      },
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
+      hasMore: json['hasMore'] == true,
+      nextBeforeId: (json['nextBeforeId'] as num?)?.toInt(),
     );
-  }
-}
-
-class ListNotificationsQueryV1 {
-  const ListNotificationsQueryV1({
-    this.notificationType,
-    this.unreadOnly,
-    this.query,
-    this.limit,
-    this.beforeId,
-  });
-
-  final String? notificationType;
-  final bool? unreadOnly;
-  final String? query;
-  final int? limit;
-  final int? beforeId;
-
-  Map<String, String> toQueryParameters() {
-    final out = <String, String>{};
-    final typeText = notificationType?.trim();
-    if (typeText != null && typeText.isNotEmpty) {
-      out['notificationType'] = typeText;
-    }
-    if (unreadOnly != null) {
-      out['unreadOnly'] = '$unreadOnly';
-    }
-    final queryText = query?.trim();
-    if (queryText != null && queryText.isNotEmpty) {
-      out['query'] = queryText;
-    }
-    if (limit != null) {
-      out['limit'] = '$limit';
-    }
-    if (beforeId != null && beforeId! > 0) {
-      out['beforeId'] = '$beforeId';
-    }
-    return out;
-  }
-}
-
-class MarkNotificationsReadBodyV1 {
-  const MarkNotificationsReadBodyV1({
-    required this.ids,
-    this.read,
-  });
-
-  final List<int> ids;
-  final bool? read;
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'ids': ids,
-      if (read != null) 'read': read,
-    };
   }
 }
 
@@ -172,13 +112,15 @@ class MarkNotificationsReadEnvelopeV1 {
   final int unreadCount;
 
   factory MarkNotificationsReadEnvelopeV1.fromJson(Map<String, dynamic> json) {
-    final rawItems = json['items'] as List<dynamic>? ?? const [];
+    final rawItems = json['items'] as List<dynamic>? ?? const <dynamic>[];
     return MarkNotificationsReadEnvelopeV1(
       items: rawItems
-          .cast<Map<String, dynamic>>()
-          .map(NotificationRecordV1.fromJson)
+          .map(
+            (item) =>
+                NotificationRecordV1.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false),
-      unreadCount: (json['unreadCount'] as num? ?? 0).toInt(),
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -196,32 +138,50 @@ class MarkAllNotificationsReadResponseV1 {
     Map<String, dynamic> json,
   ) {
     return MarkAllNotificationsReadResponseV1(
-      updatedCount: (json['updatedCount'] as num? ?? 0).toInt(),
-      unreadCount: (json['unreadCount'] as num? ?? 0).toInt(),
+      updatedCount: (json['updatedCount'] as num?)?.toInt() ?? 0,
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
     );
   }
 }
 
-Future<ListNotificationsEnvelopeV1> getSettingsNotificationsV1(
+Future<NotificationsListEnvelopeV1> fetchNotificationsV1(
   String accessToken, {
-  ListNotificationsQueryV1 query = const ListNotificationsQueryV1(),
+  String? notificationType,
+  bool unreadOnly = false,
+  String? query,
+  int limit = 50,
+  int? beforeId,
 }) async {
+  final queryParameters = <String, String>{'limit': '$limit'};
+  if (notificationType != null && notificationType.trim().isNotEmpty) {
+    queryParameters['notificationType'] = notificationType.trim();
+  }
+  if (unreadOnly) {
+    queryParameters['unreadOnly'] = 'true';
+  }
+  if (query != null && query.trim().isNotEmpty) {
+    queryParameters['query'] = query.trim();
+  }
+  if (beforeId != null) {
+    queryParameters['beforeId'] = '$beforeId';
+  }
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/settings/notifications',
-  ).replace(queryParameters: query.toQueryParameters());
+  ).replace(queryParameters: queryParameters);
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
-  return ListNotificationsEnvelopeV1.fromJson(
+  return NotificationsListEnvelopeV1.fromJson(
     jsonDecode(res.body) as Map<String, dynamic>,
   );
 }
 
-Future<MarkNotificationsReadEnvelopeV1> postSettingsNotificationsMarkReadV1(
+Future<MarkNotificationsReadEnvelopeV1> markNotificationsReadV1(
   String accessToken,
-  MarkNotificationsReadBodyV1 body,
-) async {
+  List<int> ids, {
+  bool read = true,
+}) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/notifications/mark-read');
   final res = await http
       .post(
@@ -230,7 +190,7 @@ Future<MarkNotificationsReadEnvelopeV1> postSettingsNotificationsMarkReadV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(body.toJson()),
+        body: jsonEncode(<String, dynamic>{'ids': ids, 'read': read}),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -239,8 +199,9 @@ Future<MarkNotificationsReadEnvelopeV1> postSettingsNotificationsMarkReadV1(
   );
 }
 
-Future<MarkAllNotificationsReadResponseV1>
-postSettingsNotificationsMarkAllReadV1(String accessToken) async {
+Future<MarkAllNotificationsReadResponseV1> markAllNotificationsReadV1(
+  String accessToken,
+) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/settings/notifications/mark-all-read',
   );

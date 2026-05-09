@@ -9,3 +9,5 @@ This file stays in the repo so links from `AGENTS.md`, parity docs, and PR templ
 **Attach / context（`agent.*.attach`、`agent.context.update`）**：除 **`openapi_spec/ws_protocol_description.md`** 中外，人类可读的 UUID 矩阵与可选 **`workspaceUuid`** 见 [`docs/plans/harness-ws-context-matrix.md`](plans/harness-ws-context-matrix.md)。成功 attach 后 **`session.ack`** 可含 **`payload.workspaceUuid`**（与 **`app_project.workspace_id`** 一致）。
 
 **应用内通知中心（`settings.notification.created` / `settings.notification.updated`）**：通知列表与已读状态通过 **`GET/POST /api/v1/settings/notifications*`** 管理，实时推送仍以 `GET /api/v1/ws` 的协议正文为准；事件说明见 **`backend/src/openapi_spec/ws_protocol_description.md`**。
+
+通知对象的 `linkPath`（`/product/*` 深链）见 [`docs/product-deep-links.md`](product-deep-links.md)。

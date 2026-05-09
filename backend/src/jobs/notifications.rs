@@ -21,7 +21,7 @@ pub(crate) async fn record_job_notification(
     let project_id = payload_uuid(&row.payload, "project_uuid");
     let project_numeric_id = payload_i32(&row.payload, "project_numeric_id");
     let link_path = format!("/product/jobs?jobId={}", row.id);
-    record_notification(
+    let _ = record_notification(
         state.require_pool()?,
         Some(&state.notify),
         NotificationRecordPayload {

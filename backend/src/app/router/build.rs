@@ -2,7 +2,8 @@ use crate::assets;
 use crate::billing;
 use crate::harness;
 use crate::http_kit::rate_limit::{
-    governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
+    governor_layer_from_env, search_governor_layer, strict_endpoint_governor_layer,
+    user_governor_layer,
 };
 use crate::http_kit::request_id_mw::inject_request_id_into_json_errors;
 use crate::jobs;
@@ -14,6 +15,7 @@ use crate::projects;
 use crate::prompting;
 use crate::publish;
 use crate::scripting;
+use crate::search;
 use crate::settings;
 use crate::state::AppState;
 use crate::vendor;
@@ -56,9 +58,15 @@ pub fn build_router(state: AppState) -> Router {
         .merge(jobs::router())
         .layer(strict_endpoint_governor_layer());
 
+    // Search-specific rate limiting: 60 req/min per user (Requirement 9.7)
+    let search_limited = Router::new()
+        .merge(search::routes::router())
+        .layer(search_governor_layer());
+
     // Layer 2: Per-user rate limiting (~10 req/s per user)
     let user_limited = Router::new()
         .merge(strict_limited)
+        .merge(search_limited)
         .merge(workspaces::router())
         .merge(settings::agent_memory::router())
         .merge(vendor::catalog::router())

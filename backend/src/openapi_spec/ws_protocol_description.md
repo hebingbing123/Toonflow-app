@@ -121,6 +121,8 @@ Cancelling a **`running`** job via REST sets `cancelled` immediately; the in-pro
 
 Pushed when the authenticated user receives a new inbox row or when an existing inbox row changes read state. **`payload`** is the full notification object (camelCase: `id`, `userId`, `workspaceId`, `projectId`, `projectNumericId`, `jobId`, `notificationType`, `title`, `message`, `linkPath`, `payload`, `filePath`, `changedAt`, `readAt`, `createdAt`, `updatedAt`).
 
+Client-side `linkPath` (product deep links) are documented in `docs/product-deep-links.md`.
+
 Current producers include:
 
 1. skill file / pack change notices

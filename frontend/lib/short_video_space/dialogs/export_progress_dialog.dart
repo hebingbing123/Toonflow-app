@@ -25,6 +25,7 @@ extension _ShortVideoSpaceSectionExportProgressDialog
       builder: (dialogContext) {
         return ExportProgressDialog(
           taskId: taskId,
+          accessToken: widget.accessToken,
         );
       },
     );
@@ -42,8 +43,10 @@ enum ExportTaskStatus {
 
   static ExportTaskStatus fromString(String value) {
     switch (value.toLowerCase()) {
+      case 'pending':
       case 'queued':
         return ExportTaskStatus.queued;
+      case 'running':
       case 'processing':
         return ExportTaskStatus.processing;
       case 'completed':
@@ -88,6 +91,7 @@ enum ExportTaskStage {
 
   static ExportTaskStage fromString(String value) {
     switch (value.toLowerCase()) {
+      case 'preparing':
       case 'initializing':
         return ExportTaskStage.initializing;
       case 'loading_assets':
@@ -162,9 +166,11 @@ class ExportProgressDialog extends StatefulWidget {
   const ExportProgressDialog({
     super.key,
     required this.taskId,
+    required this.accessToken,
   });
 
   final String taskId;
+  final String? accessToken;
 
   @override
   State<ExportProgressDialog> createState() => _ExportProgressDialogState();
@@ -202,8 +208,6 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     if (!mounted) return;
 
     try {
-      // TODO: Replace with actual API call when backend endpoint is ready
-      // For now, simulate progress
       final progress = await _fetchExportProgress(widget.taskId);
 
       if (!mounted) return;
@@ -230,74 +234,30 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     } catch (e) {
       if (!mounted) return;
 
+      _pollTimer?.cancel();
+      _pollTimer = null;
+
       setState(() {
         _errorMessage = '获取进度失败: $e';
       });
     }
   }
 
-  /// Fetch export progress from backend
-  ///
-  /// TODO: Replace with actual API call when backend endpoint is ready
-  /// Expected endpoint: GET /api/v1/export/tasks/{taskId}
+  /// Polls [GET /api/v1/export/tasks/:id] via [getExportTaskByIdV1].
   Future<ExportTaskProgress> _fetchExportProgress(String taskId) async {
-    // Simulate API call with mock data
-    // Remove the delay in tests to avoid timer issues
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
-      // In debug/test mode, use minimal delay
-      await Future.delayed(Duration.zero);
-    } else {
-      await Future.delayed(const Duration(milliseconds: 100));
+    final token = widget.accessToken?.trim();
+    if (token == null || token.isEmpty) {
+      throw Exception('会话已失效，请重新登录');
     }
-
-    // Mock progressive status for demonstration
-    // In real implementation, this would call the backend API
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final elapsed = (now % 10000) / 10000.0; // 0.0 to 1.0 over 10 seconds
-
-    if (elapsed < 0.2) {
-      return ExportTaskProgress(
-        taskId: taskId,
-        status: ExportTaskStatus.queued,
-        progress: 0.0,
-      );
-    } else if (elapsed < 0.4) {
-      return ExportTaskProgress(
-        taskId: taskId,
-        status: ExportTaskStatus.processing,
-        stage: ExportTaskStage.initializing,
-        progress: 0.1,
-      );
-    } else if (elapsed < 0.6) {
-      return ExportTaskProgress(
-        taskId: taskId,
-        status: ExportTaskStatus.processing,
-        stage: ExportTaskStage.loadingAssets,
-        progress: 0.3,
-      );
-    } else if (elapsed < 0.8) {
-      return ExportTaskProgress(
-        taskId: taskId,
-        status: ExportTaskStatus.processing,
-        stage: ExportTaskStage.encoding,
-        progress: 0.6,
-      );
-    } else if (elapsed < 0.9) {
-      return ExportTaskProgress(
-        taskId: taskId,
-        status: ExportTaskStatus.processing,
-        stage: ExportTaskStage.uploading,
-        progress: 0.85,
-      );
-    } else {
-      return ExportTaskProgress(
-        taskId: taskId,
-        status: ExportTaskStatus.completed,
-        stage: ExportTaskStage.finalizing,
-        progress: 1.0,
-        outputUrl: 'https://example.com/export/video.mp4',
-      );
-    }
+    final task = await getExportTaskByIdV1(token, taskId);
+    return ExportTaskProgress(
+      taskId: task.id,
+      status: ExportTaskStatus.fromString(task.status),
+      stage: task.stage == null ? null : ExportTaskStage.fromString(task.stage!),
+      progress: (task.progress / 100).clamp(0.0, 1.0),
+      errorMessage: task.error,
+      outputUrl: task.outputUrl,
+    );
   }
 
   Future<void> _cancelExport() async {
@@ -305,7 +265,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
     final confirmed = await showCancelExportConfirmation(
       context,
-      showDontShowAgain: false, // TODO: Enable after proper SharedPreferences setup
+      showDontShowAgain: true,
     );
 
     if (confirmed != true || !mounted) return;
@@ -315,8 +275,6 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     });
 
     try {
-      // TODO: Replace with actual API call when backend endpoint is ready
-      // Expected endpoint: POST /api/v1/export/cancel
       await _cancelExportTask(widget.taskId);
 
       if (!mounted) return;
@@ -334,16 +292,13 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     }
   }
 
-  /// Cancel export task
-  ///
-  /// TODO: Replace with actual API call when backend endpoint is ready
+  /// Calls [POST /api/v1/export/cancel] via [postExportCancelV1].
   Future<void> _cancelExportTask(String taskId) async {
-    // Simulate API call with minimal delay in tests
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
-      await Future.delayed(Duration.zero);
-    } else {
-      await Future.delayed(const Duration(milliseconds: 500));
+    final token = widget.accessToken?.trim();
+    if (token == null || token.isEmpty) {
+      throw Exception('会话已失效，请重新登录');
     }
+    await postExportCancelV1(token, taskId);
   }
 
   @override
@@ -375,15 +330,30 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (progress == null) ...[
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: CircularProgressIndicator(),
+              if (_errorMessage != null) ...[
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: theme.colorScheme.error,
                 ),
-              ),
-              const Center(
-                child: Text('正在获取导出状态...'),
-              ),
+                const SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ] else ...[
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                const Center(
+                  child: Text('正在获取导出状态...'),
+                ),
+              ],
             ] else ...[
               // Progress bar
               LinearProgressIndicator(
@@ -485,21 +455,26 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                   ),
                 ),
               ],
-
-              // Task ID (for debugging)
-              const SizedBox(height: 12),
-              Text(
-                '任务 ID: ${widget.taskId}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontFamily: 'monospace',
-                ),
-              ),
             ],
+
+            // Task ID (for debugging) — show in loading / error / progress states
+            const SizedBox(height: 12),
+            Text(
+              '任务 ID: ${widget.taskId}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontFamily: 'monospace',
+              ),
+            ),
           ],
         ),
       ),
       actions: [
+        if (progress == null && _errorMessage != null)
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('关闭'),
+          ),
         if (progress != null && !progress.status.isTerminal)
           TextButton(
             onPressed: _cancelling ? null : _cancelExport,

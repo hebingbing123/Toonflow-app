@@ -61,6 +61,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   @override
   void initState() {
     super.initState();
+    final token = widget.accessToken?.trim();
+    if (token != null && token.isNotEmpty) {
+      // First frame shows loading skeleton (avoid a flash of empty-state before setState).
+      _isLoading = true;
+    }
     _performSearch();
     // Request focus for keyboard navigation
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -419,11 +424,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Build loading skeleton screen
   Widget _buildLoadingState() {
-    return ListView.builder(
+    // Eager children (not ListView.builder) so first frame builds placeholders.
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Card(
+      children: List<Widget>.generate(
+        6,
+        (index) => Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -488,8 +494,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

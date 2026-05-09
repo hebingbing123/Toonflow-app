@@ -236,7 +236,7 @@ async fn insert_notification_table_row(
 ) -> Result<(), ApiError> {
     let changed_at = chrono::DateTime::from_timestamp_millis(changed_at_ms)
         .ok_or_else(|| ApiError::BadRequest("invalid changed_at timestamp".into()))?;
-    record_notification(
+    let _ = record_notification(
         pool,
         Some(notify),
         NotificationRecordPayload {

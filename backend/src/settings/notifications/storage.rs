@@ -6,7 +6,8 @@ use crate::error::ApiError;
 use crate::state::WsNotifyHub;
 
 use super::types::{
-    ListNotificationsEnvelope, ListNotificationsQuery, NotificationRecord,
+    ListNotificationsEnvelope, ListNotificationsQuery, NotificationPreferences,
+    NotificationPreferencesAuditMeta, NotificationPreferencesEnvelope, NotificationRecord,
     NotificationRecordPayload,
 };
 
@@ -14,7 +15,11 @@ pub async fn record_notification(
     pool: &PgPool,
     notify: Option<&WsNotifyHub>,
     entry: NotificationRecordPayload,
-) -> Result<NotificationRecord, ApiError> {
+) -> Result<Option<NotificationRecord>, ApiError> {
+    if is_notification_muted(pool, &entry).await? {
+        return Ok(None);
+    }
+
     let row: NotificationRecord = sqlx::query_as(
         r#"
         INSERT INTO public.app_notification (
@@ -72,7 +77,7 @@ pub async fn record_notification(
             .await;
     }
 
-    Ok(row)
+    Ok(Some(row))
 }
 
 pub async fn list_notifications(
@@ -83,8 +88,31 @@ pub async fn list_notifications(
     let page_size = query.limit.unwrap_or(50).clamp(1, 200);
     let fetch_limit = page_size.saturating_add(1);
     let unread_only = query.unread_only.unwrap_or(false);
+    let include_muted = query.include_muted.unwrap_or(false);
     let notification_type = normalize_optional_string(query.notification_type.clone());
     let search = normalize_optional_string(query.query.clone());
+    let prefs = get_notification_preferences(pool, user_id).await?;
+    let muted_types = if include_muted {
+        Vec::new()
+    } else {
+        prefs
+            .muted_notification_types
+            .iter()
+            .map(|item| item.trim().to_owned())
+            .filter(|item| !item.is_empty())
+            .collect::<Vec<_>>()
+    };
+    let muted_workspace_ids = if include_muted {
+        Vec::new()
+    } else {
+        prefs.muted_workspace_ids.clone()
+    };
+    let muted_project_ids = if include_muted {
+        Vec::new()
+    } else {
+        prefs.muted_project_ids.clone()
+    };
+    let deliver_critical_even_muted = prefs.deliver_critical_even_muted;
 
     let rows: Vec<NotificationRecord> = sqlx::query_as(
         r#"
@@ -111,6 +139,26 @@ pub async fn list_notifications(
           AND (NOT $3::bool OR read_at IS NULL)
           AND ($4::bigint IS NULL OR id < $4)
           AND (
+            ($10::bool AND COALESCE(payload->>'severity', '') = 'critical')
+            OR
+            COALESCE(array_length($7::text[], 1), 0) = 0
+            OR NOT (notification_type = ANY($7))
+          )
+          AND (
+            ($10::bool AND COALESCE(payload->>'severity', '') = 'critical')
+            OR
+            COALESCE(array_length($8::uuid[], 1), 0) = 0
+            OR workspace_id IS NULL
+            OR NOT (workspace_id = ANY($8))
+          )
+          AND (
+            ($10::bool AND COALESCE(payload->>'severity', '') = 'critical')
+            OR
+            COALESCE(array_length($9::uuid[], 1), 0) = 0
+            OR project_id IS NULL
+            OR NOT (project_id = ANY($9))
+          )
+          AND (
             $5::text IS NULL
             OR title ILIKE '%' || $5 || '%'
             OR message ILIKE '%' || $5 || '%'
@@ -127,6 +175,10 @@ pub async fn list_notifications(
     .bind(query.before_id)
     .bind(search)
     .bind(fetch_limit)
+    .bind(&muted_types)
+    .bind(muted_workspace_ids.clone())
+    .bind(muted_project_ids.clone())
+    .bind(deliver_critical_even_muted)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -137,9 +189,33 @@ pub async fn list_notifications(
         FROM public.app_notification
         WHERE user_id = $1
           AND read_at IS NULL
+          AND (
+            ($5::bool AND COALESCE(payload->>'severity', '') = 'critical')
+            OR
+            COALESCE(array_length($2::text[], 1), 0) = 0
+            OR NOT (notification_type = ANY($2))
+          )
+          AND (
+            ($5::bool AND COALESCE(payload->>'severity', '') = 'critical')
+            OR
+            COALESCE(array_length($3::uuid[], 1), 0) = 0
+            OR workspace_id IS NULL
+            OR NOT (workspace_id = ANY($3))
+          )
+          AND (
+            ($5::bool AND COALESCE(payload->>'severity', '') = 'critical')
+            OR
+            COALESCE(array_length($4::uuid[], 1), 0) = 0
+            OR project_id IS NULL
+            OR NOT (project_id = ANY($4))
+          )
         "#,
     )
     .bind(user_id)
+    .bind(muted_types)
+    .bind(muted_workspace_ids)
+    .bind(muted_project_ids)
+    .bind(deliver_critical_even_muted)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -258,6 +334,51 @@ pub async fn mark_all_notifications_read(
     Ok(rows.len() as i64)
 }
 
+pub async fn delete_notifications(
+    pool: &PgPool,
+    user_id: Uuid,
+    ids: &[i64],
+) -> Result<i64, ApiError> {
+    let deleted: i64 = sqlx::query_scalar(
+        r#"
+        WITH deleted_rows AS (
+          DELETE FROM public.app_notification
+          WHERE user_id = $1
+            AND id = ANY($2)
+          RETURNING id
+        )
+        SELECT COUNT(*)::bigint
+        FROM deleted_rows
+        "#,
+    )
+    .bind(user_id)
+    .bind(ids)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(deleted)
+}
+
+pub async fn delete_read_notifications(pool: &PgPool, user_id: Uuid) -> Result<i64, ApiError> {
+    let deleted: i64 = sqlx::query_scalar(
+        r#"
+        WITH deleted_rows AS (
+          DELETE FROM public.app_notification
+          WHERE user_id = $1
+            AND read_at IS NOT NULL
+          RETURNING id
+        )
+        SELECT COUNT(*)::bigint
+        FROM deleted_rows
+        "#,
+    )
+    .bind(user_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(deleted)
+}
+
 pub async fn unread_notification_count(pool: &PgPool, user_id: Uuid) -> Result<i64, ApiError> {
     sqlx::query_scalar(
         r#"
@@ -271,6 +392,189 @@ pub async fn unread_notification_count(pool: &PgPool, user_id: Uuid) -> Result<i
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
+pub async fn get_notification_preferences(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<NotificationPreferences, ApiError> {
+    let raw: Option<sqlx::types::Json<NotificationPreferences>> = sqlx::query_scalar(
+        r#"
+        SELECT notification_preferences
+        FROM public.app_user_profile
+        WHERE user_id = $1
+        "#,
+    )
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(raw.map_or_else(NotificationPreferences::default, |v| v.0))
+}
+
+pub async fn get_notification_preferences_envelope(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<NotificationPreferencesEnvelope, ApiError> {
+    type PreferencesRow = (
+        Option<sqlx::types::Json<NotificationPreferences>>,
+        Option<sqlx::types::Json<serde_json::Value>>,
+        Option<chrono::DateTime<chrono::Utc>>,
+    );
+
+    let row: Option<PreferencesRow> = sqlx::query_as(
+        r#"
+        SELECT notification_preferences, notification_preferences_meta, updated_at
+        FROM public.app_user_profile
+        WHERE user_id = $1
+        LIMIT 1
+        "#,
+    )
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some((prefs_raw, meta_raw, updated_at)) = row else {
+        return Ok(NotificationPreferencesEnvelope {
+            preferences: NotificationPreferences::default(),
+            audit: NotificationPreferencesAuditMeta::default(),
+        });
+    };
+    let mut audit = NotificationPreferencesAuditMeta {
+        updated_at,
+        ..Default::default()
+    };
+    if let Some(meta) = meta_raw.and_then(|v| v.0.as_object().cloned()) {
+        if let Some(updated_by) = meta.get("updatedBy").and_then(|v| v.as_str()) {
+            let trimmed = updated_by.trim();
+            if !trimmed.is_empty() {
+                audit.updated_by = trimmed.to_string();
+            }
+        }
+        if let Some(source) = meta.get("source").and_then(|v| v.as_str()) {
+            let trimmed = source.trim();
+            if !trimmed.is_empty() {
+                audit.source = trimmed.to_string();
+            }
+        }
+    }
+    Ok(NotificationPreferencesEnvelope {
+        preferences: prefs_raw.map_or_else(NotificationPreferences::default, |v| v.0),
+        audit,
+    })
+}
+
+pub async fn upsert_notification_preferences(
+    pool: &PgPool,
+    user_id: Uuid,
+    prefs: &NotificationPreferences,
+    source: &str,
+) -> Result<NotificationPreferences, ApiError> {
+    let cleaned = NotificationPreferences {
+        muted_notification_types: prefs
+            .muted_notification_types
+            .iter()
+            .map(|item| item.trim().to_owned())
+            .filter(|item| !item.is_empty())
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>(),
+        muted_workspace_ids: prefs
+            .muted_workspace_ids
+            .iter()
+            .copied()
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>(),
+        muted_project_ids: prefs
+            .muted_project_ids
+            .iter()
+            .copied()
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>(),
+        deliver_critical_even_muted: prefs.deliver_critical_even_muted,
+    };
+    let saved: sqlx::types::Json<NotificationPreferences> = sqlx::query_scalar(
+        r#"
+        INSERT INTO public.app_user_profile (user_id, notification_preferences, notification_preferences_meta)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (user_id) DO UPDATE
+        SET notification_preferences = EXCLUDED.notification_preferences,
+            notification_preferences_meta = EXCLUDED.notification_preferences_meta,
+            updated_at = NOW()
+        RETURNING notification_preferences
+        "#,
+    )
+    .bind(user_id)
+    .bind(sqlx::types::Json(cleaned))
+    .bind(sqlx::types::Json(json!({
+        "updatedBy": "self",
+        "source": source.trim(),
+    })))
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(saved.0)
+}
+
+pub async fn reset_notification_preferences(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<NotificationPreferences, ApiError> {
+    upsert_notification_preferences(pool, user_id, &NotificationPreferences::default(), "reset")
+        .await
+}
+
+pub async fn apply_notification_preferences_template(
+    pool: &PgPool,
+    user_id: Uuid,
+    template_raw: &str,
+) -> Result<NotificationPreferences, ApiError> {
+    let template = template_raw.trim().to_ascii_lowercase();
+    if template.is_empty() {
+        return Err(ApiError::BadRequest("template must not be empty".into()));
+    }
+    let known_types: Vec<String> = sqlx::query_scalar(
+        r#"
+        SELECT DISTINCT notification_type
+        FROM public.app_notification
+        WHERE user_id = $1
+          AND notification_type <> ''
+        ORDER BY notification_type ASC
+        "#,
+    )
+    .bind(user_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    const INCIDENT_TYPES: &[&str] = &["platform.status", "job_failed", "job_cancelled"];
+    let prefs = match template.as_str() {
+        "default" => NotificationPreferences::default(),
+        "quiet" => NotificationPreferences {
+            muted_notification_types: known_types,
+            muted_workspace_ids: Vec::new(),
+            muted_project_ids: Vec::new(),
+            deliver_critical_even_muted: true,
+        },
+        "incident" => NotificationPreferences {
+            muted_notification_types: known_types
+                .into_iter()
+                .filter(|item| !INCIDENT_TYPES.contains(&item.as_str()))
+                .collect::<Vec<_>>(),
+            muted_workspace_ids: Vec::new(),
+            muted_project_ids: Vec::new(),
+            deliver_critical_even_muted: true,
+        },
+        _ => {
+            return Err(ApiError::BadRequest(
+                "template must be one of: default, quiet, incident".into(),
+            ))
+        }
+    };
+    upsert_notification_preferences(pool, user_id, &prefs, &format!("template:{template}")).await
 }
 
 pub fn notification_created_envelope(row: &NotificationRecord) -> String {
@@ -300,4 +604,39 @@ fn normalize_optional_string(raw: Option<String>) -> Option<String> {
             Some(trimmed.to_owned())
         }
     })
+}
+
+async fn is_notification_muted(
+    pool: &PgPool,
+    entry: &NotificationRecordPayload,
+) -> Result<bool, ApiError> {
+    let prefs = get_notification_preferences(pool, entry.user_id).await?;
+    if prefs.deliver_critical_even_muted
+        && entry
+            .payload
+            .get("severity")
+            .and_then(|value| value.as_str())
+            .map(|value| value.trim().eq_ignore_ascii_case("critical"))
+            .unwrap_or(false)
+    {
+        return Ok(false);
+    }
+    if prefs
+        .muted_notification_types
+        .iter()
+        .any(|item| item.trim() == entry.notification_type)
+    {
+        return Ok(true);
+    }
+    if let Some(workspace_id) = entry.workspace_id {
+        if prefs.muted_workspace_ids.contains(&workspace_id) {
+            return Ok(true);
+        }
+    }
+    if let Some(project_id) = entry.project_id {
+        if prefs.muted_project_ids.contains(&project_id) {
+            return Ok(true);
+        }
+    }
+    Ok(false)
 }
