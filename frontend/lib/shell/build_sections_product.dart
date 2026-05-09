@@ -414,7 +414,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _error = e.toString();
+        _error = describeRustApiError(e);
         _resp = null;
       });
     } finally {
@@ -478,7 +478,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = e.toString();
+        _webhooksError = describeRustApiError(e);
         _webhooks = null;
       });
     } finally {
@@ -718,6 +718,23 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           return haystack.contains(needle);
         })
         .toList(growable: false);
+  }
+
+  int _countWebhookActivity(String action) {
+    return _webhookActivity.where((entry) => entry.action == action).length;
+  }
+
+  String _webhookInventorySummary() {
+    final total = _webhooks?.items.length ?? 0;
+    final filtered = _filteredWebhooks().length;
+    final latest = _latestCreatedWebhook?.id;
+    return [
+      'total=$total',
+      'filtered=$filtered',
+      'session test ok=${_countWebhookActivity("test_success")}',
+      'session test failed=${_countWebhookActivity("test_failed")}',
+      if (latest != null) 'latest=$latest',
+    ].join(' · ');
   }
 
   void _appendWebhookActivity({
@@ -1243,109 +1260,127 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           if (_loadingWebhooks) const Text('加载中...'),
           if (_webhooksError != null)
             Text(_webhooksError!, style: const TextStyle(color: Colors.red)),
-          if (_webhooks != null)
-            Text(
-              'total=${_webhooks!.items.length} · filtered=${_filteredWebhooks().length}'
-              '${_latestCreatedWebhook != null ? ' · latest=${_latestCreatedWebhook!.id}' : ''}',
-            ),
+          if (_webhooks != null) Text(_webhookInventorySummary()),
           if (_webhookActivity.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text('最近操作', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
-            ..._webhookActivity.take(6).map(
-              (entry) => ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text('${entry.action} · ${entry.webhookId}'),
-                subtitle: SelectableText(
-                  '${entry.at.toLocal().toIso8601String()}\n${entry.summary}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                trailing: IconButton(
-                  tooltip: '复制记录',
-                  onPressed: () => _copyBillingAuditText(
-                    '${entry.action}\n${entry.webhookId}\n${entry.summary}',
-                    ' webhook 操作记录',
+            ..._webhookActivity
+                .take(6)
+                .map(
+                  (entry) => ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('${entry.action} · ${entry.webhookId}'),
+                    subtitle: SelectableText(
+                      '${entry.at.toLocal().toIso8601String()}\n${entry.summary}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    trailing: IconButton(
+                      tooltip: '复制记录',
+                      onPressed: () => _copyBillingAuditText(
+                        '${entry.action}\n${entry.webhookId}\n${entry.summary}',
+                        ' webhook 操作记录',
+                      ),
+                      icon: const Icon(Icons.copy_outlined),
+                    ),
                   ),
-                  icon: const Icon(Icons.copy_outlined),
                 ),
-              ),
-            ),
           ],
+          if (_webhooks != null && _webhooks!.items.isEmpty)
+            Text(
+              '当前还没有配置任何出站 Webhook。可直接在上方创建，并在此处测试投递与删除。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          if (_webhooks != null &&
+              _webhooks!.items.isNotEmpty &&
+              _filteredWebhooks().isEmpty)
+            Text(
+              '当前筛选没有命中任何 Webhook，请调整 URL / id / createdAt 搜索关键字。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           if (_webhooks != null)
             ..._filteredWebhooks().map(
-              (wh) => Card(
-                color: _latestCreatedWebhook?.id == wh.id
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              wh.url,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            const SizedBox(height: 4),
-                            if (_latestCreatedWebhook?.id == wh.id)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Chip(
-                                  label: const Text('最近创建'),
-                                  visualDensity: VisualDensity.compact,
+                  (wh) => Card(
+                    color: _latestCreatedWebhook?.id == wh.id
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  wh.url,
+                                  style: Theme.of(context).textTheme.titleSmall,
                                 ),
-                              ),
-                            Text('id: ${wh.id}'),
-                            Text('createdAt: ${wh.createdAt}'),
-                            if (_webhookLastTestResultById[wh.id] != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  _formatWebhookTestResult(
-                                    _webhookLastTestResultById[wh.id]!,
+                                const SizedBox(height: 4),
+                                if (_latestCreatedWebhook?.id == wh.id)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Chip(
+                                      label: const Text('最近创建'),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
                                   ),
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                Text('id: ${wh.id}'),
+                                Text('createdAt: ${wh.createdAt}'),
+                                if (_webhookLastTestResultById[wh.id] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      _formatWebhookTestResult(
+                                        _webhookLastTestResultById[wh.id]!,
+                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            tooltip: '复制 URL',
+                            onPressed: () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: wh.url),
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('已复制 Webhook URL'),
                                 ),
-                              ),
-                          ],
-                        ),
+                              );
+                            },
+                            icon: const Icon(Icons.copy_outlined),
+                          ),
+                          OutlinedButton(
+                            onPressed: _loadingWebhooks || _webhookBusyId != null
+                                ? null
+                                : () => _testWebhook(wh.id),
+                            child: Text(
+                              _webhookBusyId == wh.id ? '处理中…' : '测试投递',
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          OutlinedButton(
+                            onPressed: _loadingWebhooks || _webhookBusyId != null
+                                ? null
+                                : () => _deleteWebhook(wh.id),
+                            child: Text(_webhookBusyId == wh.id ? '处理中…' : '删除'),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        tooltip: '复制 URL',
-                        onPressed: () async {
-                          await Clipboard.setData(ClipboardData(text: wh.url));
-                          if (!context.mounted) {
-                            return;
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('已复制 Webhook URL')),
-                          );
-                        },
-                        icon: const Icon(Icons.copy_outlined),
-                      ),
-                      OutlinedButton(
-                        onPressed: _loadingWebhooks || _webhookBusyId != null
-                            ? null
-                            : () => _testWebhook(wh.id),
-                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '测试投递'),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton(
-                        onPressed: _loadingWebhooks || _webhookBusyId != null
-                            ? null
-                            : () => _deleteWebhook(wh.id),
-                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '删除'),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
           const SizedBox(height: 16),
           Text(
             'Billing Webhook 审计',
@@ -1580,6 +1615,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           if (_billingEventsPage != null)
             Text(
               'total=${_billingEventsPage!.total} · loaded=${_billingEvents.length} · has_more=${_billingEventsPage!.hasMore}',
+            ),
+          if (_billingEventsPage != null &&
+              _billingEvents.isEmpty &&
+              !_loadingBillingEvents &&
+              _billingEventsError == null)
+            Text(
+              '当前查询没有命中任何 billing webhook 审计事件，可调整 provider、event id、时间窗或 informational 条件后重试。',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           if (_billingEvents.isNotEmpty) ...[
             const SizedBox(height: 8),
