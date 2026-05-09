@@ -43,7 +43,7 @@
 | ID | 能力 | Backend | Flutter / 产品面 | 备注 |
 |----|------|---------|-------------------|------|
 | P-D1 | **产品文案 i18n 收口**（中英至少） | 错误码 `message` 多语言可选 | `l10n` 全覆盖主路径 | 与 [`roadmap-flutter-shell.md`](./roadmap-flutter-shell.md) 联动 |
-| P-D2 | **应用内帮助 / 文档 Hub** | 深链或 CDN 文档 URL 配置 | 帮助抽屉、外链 WebView | **tracked**：已落地最小版（env 驱动 links + settings endpoint + Flutter pane），commit `d0ba94f2` |
+| P-D2 | **应用内帮助 / 文档 Hub** | 深链或 CDN 文档 URL 配置 | 帮助抽屉、外链 WebView | **tracked**：Flutter [`帮助`](../../frontend/lib/shell/build_sections_product.dart) 已从最小平铺链接扩到可检索知识入口，覆盖 env 驱动 links + settings endpoint、title/id/url 搜索、分类摘要、空态提示，以及单链接 / 标题+链接 handoff 复制 |
 | P-D3 | **429 / 配额耗尽统一 UX** | 统一 `code` + `Retry-After` | 全局拦截器 + Snackbar/对话框 | **tracked**：已接入共享 `rust_api_feedback` 处理层与 Projects / Jobs / Task Center / Team Workspaces / System Probes 主路径；见 [`roadmap-flutter-shell.md`](./roadmap-flutter-shell.md) WP-D |
 
 ---

@@ -363,6 +363,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   final _webhookTestEventTypeController = TextEditingController(
     text: 'test.ping',
   );
+  final _helpHubSearchController = TextEditingController();
   String? _webhookBusyId;
   final Map<String, OutboundWebhookTestResponseV1> _webhookLastTestResultById =
       <String, OutboundWebhookTestResponseV1>{};
@@ -440,6 +441,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     _webhookSecretController.dispose();
     _webhookSearchController.dispose();
     _webhookTestEventTypeController.dispose();
+    _helpHubSearchController.dispose();
     _billingEventTypeController.dispose();
     _billingProviderEventIdController.dispose();
     _billingProviderEventIdPrefixController.dispose();
@@ -488,6 +490,53 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         });
       }
     }
+  }
+
+  List<HelpHubLinkItemV1> _filteredHelpHubLinks() {
+    final items = _resp?.items ?? const <HelpHubLinkItemV1>[];
+    final needle = _helpHubSearchController.text.trim().toLowerCase();
+    if (needle.isEmpty) {
+      return items;
+    }
+    return items.where((item) {
+      final haystack = '${item.id} ${item.title} ${item.url}'.toLowerCase();
+      return haystack.contains(needle);
+    }).toList(growable: false);
+  }
+
+  String _helpHubCategoryFor(HelpHubLinkItemV1 item) {
+    final key = '${item.id} ${item.title} ${item.url}'.toLowerCase();
+    if (key.contains('runbook') || key.contains('guide')) {
+      return 'Runbook';
+    }
+    if (key.contains('webhook') || key.contains('billing')) {
+      return 'Billing/Webhook';
+    }
+    if (key.contains('workspace') || key.contains('team')) {
+      return 'Workspace';
+    }
+    if (key.contains('quality') || key.contains('review')) {
+      return 'Quality';
+    }
+    if (key.contains('status') || key.contains('health')) {
+      return 'Status';
+    }
+    return 'General';
+  }
+
+  String _helpHubInventorySummary() {
+    final items = _resp?.items ?? const <HelpHubLinkItemV1>[];
+    final filtered = _filteredHelpHubLinks();
+    final counts = <String, int>{};
+    for (final item in filtered) {
+      counts.update(
+        _helpHubCategoryFor(item),
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    final categories = counts.entries.map((e) => '${e.key}:${e.value}').join(', ');
+    return 'total=${items.length} · filtered=${filtered.length}${categories.isEmpty ? '' : ' · $categories'}';
   }
 
   BillingWebhookEventsQueryV1 _buildBillingEventsQuery({int offset = 0}) {
@@ -1080,8 +1129,30 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           if (_loading) const Text('加载中...'),
           if (_error != null)
             Text(_error!, style: const TextStyle(color: Colors.red)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _helpHubSearchController,
+            decoration: const InputDecoration(
+              labelText: '搜索帮助文档（title / id / url）',
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+          if (_resp != null) Text(_helpHubInventorySummary()),
+          if (_resp != null && _resp!.items.isEmpty)
+            Text(
+              '当前没有可用的帮助入口，请检查 settings/help/hub 配置。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          if (_resp != null &&
+              _resp!.items.isNotEmpty &&
+              _filteredHelpHubLinks().isEmpty)
+            Text(
+              '当前搜索没有命中文档入口，请调整关键词后重试。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           if (_resp != null)
-            ..._resp!.items.map(
+            ..._filteredHelpHubLinks().map(
               (item) => Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -1094,6 +1165,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             Text(
                               item.title,
                               style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Chip(
+                              label: Text(_helpHubCategoryFor(item)),
+                              visualDensity: VisualDensity.compact,
                             ),
                             const SizedBox(height: 4),
                             SelectableText(item.url),
@@ -1115,6 +1191,21 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           ).showSnackBar(const SnackBar(content: Text('已复制')));
                         },
                         icon: const Icon(Icons.copy),
+                      ),
+                      IconButton(
+                        tooltip: '复制标题+链接',
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: '${item.title}\n${item.url}'),
+                          );
+                          if (!context.mounted) {
+                            return;
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('已复制文档 handoff')),
+                          );
+                        },
+                        icon: const Icon(Icons.copy_all_outlined),
                       ),
                     ],
                   ),
