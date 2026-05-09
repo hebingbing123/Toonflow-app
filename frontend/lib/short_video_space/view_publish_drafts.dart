@@ -21,7 +21,26 @@ class _PublishDraftsPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('发布准备', style: theme.textTheme.titleSmall),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('发布准备', style: theme.textTheme.titleSmall),
+              const Spacer(),
+              if (publishPanelUi.onResetConfirmationDontShowAgain != null)
+                TextButton(
+                  onPressed: publishPanelUi.publishBusy
+                      ? null
+                      : () => publishPanelUi.onResetConfirmationDontShowAgain!
+                          .call(context),
+                  child: Text(
+                    '重置「不再提示」',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 8),
           if (publishPanelUi.exportGateHint.trim().isNotEmpty) ...[
             Text(

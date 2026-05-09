@@ -10,6 +10,7 @@ import 'components/batch_operation_toolbar.dart';
 import 'components/filter_panel.dart';
 import 'components/version_manager.dart';
 import 'dialogs/confirmation_dialogs.dart';
+import 'dialogs/publish_draft_compare_dialog.dart';
 import 'state/operation_history.dart';
 import 'support.dart';
 import 'view.dart';
@@ -69,6 +70,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool _batchCandidateBusy = false;
   bool _creatingProject = false;
   bool _savingProjectConfig = false;
+  bool _exportActionBusy = false;
   List<ProjectRow> _projects = const <ProjectRow>[];
   ProjectStats? _projectStats;
   TaskCenterGetTaskApiResult? _recentProjectTasks;
@@ -117,6 +119,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
 
   // Task 12.2: Draft management state
   List<AssemblyDraft> _assemblyDrafts = const <AssemblyDraft>[];
+  List<AssemblyVersion> _assemblyVersions = const <AssemblyVersion>[];
+  String _currentAssemblyVersionId = 'default';
+  VoiceoverSettings? _ttsRetrySettings;
+  String _ttsTaskCenterStatusFilter = '';
+  bool _ttsTaskCenterGroupedByShot = true;
+  String _ttsTaskCenterKeyword = '';
 
   bool get _isAnimated => _mode == ShortVideoMode.animated;
 
@@ -330,6 +338,22 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       loadingProjectOverview: _loadingProjectOverview,
       assembly: _shortVideoAssembly,
     );
+    final Widget? assemblyVersionManagerPanel =
+        project != null &&
+                _shortVideoAssembly != null &&
+                _shortVideoAssembly!.scripts.isNotEmpty
+            ? VersionManager(
+                versions: _assemblyVersions,
+                currentVersionId: _currentAssemblyVersionId,
+                drafts: _assemblyDrafts,
+                onCreateVersion: _handleCreateVersion,
+                onSwitchVersion: _handleSwitchVersion,
+                onDeleteVersion: _handleDeleteVersion,
+                onSaveDraft: _handleSaveDraft,
+                onRestoreDraft: _handleRestoreDraft,
+                onDeleteDraft: _handleDeleteDraft,
+              )
+            : null;
     final exportCheckPanelUi = buildShortVideoExportCheckPanelUi(
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
@@ -492,6 +516,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           : null,
       onCompareDrafts: _publishDrafts.isNotEmpty ? _compareDrafts : null,
       batchValidation: _batchValidation,
+      onResetConfirmationDontShowAgain: project != null
+          ? (ctx) => unawaited(_resetConfirmationDontShowAgain(ctx))
+          : null,
       // P11: Delivery mode
       deliveryModeFilter: _deliveryModeFilter,
       onDeliveryModeFilterChanged: _onDeliveryModeFilterChanged,
@@ -654,6 +681,17 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       assetsOverviewPanelUi: assetsOverviewPanelUi,
       assemblyPanelUi: assemblyPanelUi,
       exportCheckPanelUi: exportCheckPanelUi,
+      onStartExport: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty
+          ? () => unawaited(_startExportFlow())
+          : null,
+      onOpenExportHistory: project != null &&
+              accessToken != null &&
+              accessToken.isNotEmpty
+          ? () => unawaited(_openExportHistoryFlow())
+          : null,
+      exportActionBusy: _exportActionBusy,
       publishPanelUi: publishPanelUi,
       onOpenProductionForAssemblyExport: project == null
           ? null
@@ -669,6 +707,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onOpenAssemblyDefaultsEditor: project == null || _shortVideoAssembly == null
           ? null
           : () => unawaited(_openAssemblyDefaultsEditor()),
+      assemblyVersionManagerPanel: assemblyVersionManagerPanel,
       candidateCardUi: candidateCardUi,
       candidateComparePanelUi: candidateComparePanelUi,
       onOpenProjectsForCandidateAssets:

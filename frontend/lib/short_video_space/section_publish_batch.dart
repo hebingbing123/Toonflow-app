@@ -286,22 +286,10 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
       return;
     }
     
-    final proceed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('批量归档确认'),
-        content: Text('确定要归档 ${_selectedDraftIds.length} 张草稿吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('确认归档'),
-          ),
-        ],
-      ),
+    final proceed = await showBatchArchivePublishConfirmation(
+      context,
+      draftCount: _selectedDraftIds.length,
+      showDontShowAgain: true,
     );
     
     if (proceed != true || !mounted) {
@@ -361,10 +349,42 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
       );
       return;
     }
-    
-    // TODO: Implement draft comparison view
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('草稿对比功能：已选择 ${_selectedDraftIds.length} 张草稿')),
+
+    final order = _selectedDraftIds.toList();
+    final selected = <PublishDraftRow>[];
+    for (final id in order) {
+      for (final d in _publishDrafts) {
+        if (d.id == id) {
+          selected.add(d);
+          break;
+        }
+      }
+    }
+    if (selected.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('部分选中草稿已不存在，请刷新发布区后重试。')),
+      );
+      return;
+    }
+
+    unawaited(showPublishDraftCompareDialog(context, drafts: selected));
+  }
+
+  Future<void> _resetConfirmationDontShowAgain(BuildContext outerContext) async {
+    final ok = await showResetConfirmationDontShowAgainDialog(outerContext);
+    if (ok != true) {
+      return;
+    }
+    await resetAllConfirmationPreferences();
+    if (!outerContext.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(outerContext).showSnackBar(
+      const SnackBar(
+        content: Text(
+          '已清除本机高风险操作的「不再提示」偏好；后续将重新弹出确认。',
+        ),
+      ),
     );
   }
 

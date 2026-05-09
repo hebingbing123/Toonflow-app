@@ -432,6 +432,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   VoidCallback? onBatchArchiveDrafts,
   VoidCallback? onCompareDrafts,
   PublishBatchValidationResponse? batchValidation,
+  void Function(BuildContext context)? onResetConfirmationDontShowAgain,
   // P11: Delivery mode parameters
   Map<String, int> jobsByDeliveryMode = const <String, int>{},
   String? deliveryModeFilter,
@@ -463,6 +464,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
           '确认 Supabase 已应用 `app_publish_*` 迁移后再试；Rust worker 会在后台消化发布作业队列。',
       onRefreshPublish: onRefreshPublish,
       publishBusy: publishBusy,
+      onResetConfirmationDontShowAgain: onResetConfirmationDontShowAgain,
     );
   }
 
@@ -675,6 +677,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     onBatchArchiveDrafts: onBatchArchiveDrafts,
     onCompareDrafts: onCompareDrafts,
     batchValidation: batchValidation,
+    onResetConfirmationDontShowAgain: onResetConfirmationDontShowAgain,
     jobsByDeliveryMode: jobsByDeliveryModeMap,
     deliveryModeFilter: deliveryModeFilter,
     onDeliveryModeFilterChanged: onDeliveryModeFilterChanged,

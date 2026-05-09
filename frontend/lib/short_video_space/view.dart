@@ -243,6 +243,7 @@ class ShortVideoPublishPanelUi {
     this.onBatchArchiveDrafts,
     this.onCompareDrafts,
     this.batchValidation,
+    this.onResetConfirmationDontShowAgain,
     // P11: Delivery mode breakdown
     this.jobsByDeliveryMode = const <String, int>{},
     this.deliveryModeFilter,
@@ -305,6 +306,8 @@ class ShortVideoPublishPanelUi {
   final VoidCallback? onBatchArchiveDrafts;
   final VoidCallback? onCompareDrafts;
   final PublishBatchValidationResponse? batchValidation;
+  /// Clears local SharedPreferences for all short-video destructive confirms.
+  final void Function(BuildContext context)? onResetConfirmationDontShowAgain;
   
   // P11: Delivery mode breakdown
   final Map<String, int> jobsByDeliveryMode;
@@ -489,10 +492,14 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.assetsOverviewPanelUi,
     required this.assemblyPanelUi,
     required this.exportCheckPanelUi,
+    this.onStartExport,
+    this.onOpenExportHistory,
+    this.exportActionBusy = false,
     required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
     this.onOpenAssemblyClipDeskOps,
     this.onOpenAssemblyDefaultsEditor,
+    this.assemblyVersionManagerPanel,
     required this.candidateCardUi,
     required this.candidateComparePanelUi,
     this.onOpenProjectsForCandidateAssets,
@@ -559,10 +566,14 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
+  final VoidCallback? onStartExport;
+  final VoidCallback? onOpenExportHistory;
+  final bool exportActionBusy;
   final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final VoidCallback? onOpenAssemblyClipDeskOps;
   final VoidCallback? onOpenAssemblyDefaultsEditor;
+  final Widget? assemblyVersionManagerPanel;
   final ShortVideoCandidateCardUi candidateCardUi;
   final ShortVideoCandidateComparePanelUi candidateComparePanelUi;
   final VoidCallback? onOpenProjectsForCandidateAssets;
@@ -663,9 +674,13 @@ class ShortVideoSpaceView extends StatelessWidget {
           assetsOverviewPanelUi: assetsOverviewPanelUi,
           assemblyPanelUi: assemblyPanelUi,
           exportCheckPanelUi: exportCheckPanelUi,
+          onStartExport: onStartExport,
+          onOpenExportHistory: onOpenExportHistory,
+          exportActionBusy: exportActionBusy,
           onOpenProductionForAssemblyExport: onOpenProductionForAssemblyExport,
           onOpenAssemblyClipDeskOps: onOpenAssemblyClipDeskOps,
           onOpenAssemblyDefaultsEditor: onOpenAssemblyDefaultsEditor,
+          assemblyVersionManagerPanel: assemblyVersionManagerPanel,
         ),
         _PublishDraftsPanel(publishPanelUi: publishPanelUi),
         _PublishCalendarPanel(publishPanelUi: publishPanelUi),
