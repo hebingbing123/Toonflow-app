@@ -349,6 +349,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   final _webhookTestEventTypeController = TextEditingController(
     text: 'test.ping',
   );
+  String? _webhookBusyId;
+  final Map<String, OutboundWebhookTestResponseV1> _webhookLastTestResultById =
+      <String, OutboundWebhookTestResponseV1>{};
   bool _loadingBillingEvents = false;
   bool _loadingMoreBillingEvents = false;
   bool _exportingAllBillingEvents = false;
@@ -621,15 +624,44 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (token == null || token.isEmpty) {
       return;
     }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('删除 Webhook'),
+          content: SelectableText('即将删除 webhook：$id\n此操作会移除该目标地址。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('确认删除'),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true) {
+      return;
+    }
     setState(() {
       _loadingWebhooks = true;
       _webhooksError = null;
+      _webhookBusyId = id;
     });
     try {
       await deleteSettingsOutboundWebhookV1(token, id);
       if (!mounted) {
         return;
       }
+      setState(() {
+        _webhookLastTestResultById.remove(id);
+        if (_latestCreatedWebhook?.id == id) {
+          _latestCreatedWebhook = null;
+        }
+      });
       await _loadWebhooks();
     } catch (e) {
       if (!mounted) {
@@ -642,6 +674,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (mounted) {
         setState(() {
           _loadingWebhooks = false;
+          _webhookBusyId = null;
         });
       }
     }
@@ -653,10 +686,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (needle.isEmpty) {
       return items;
     }
-    return items.where((wh) {
-      final haystack = '${wh.id} ${wh.url} ${wh.createdAt}'.toLowerCase();
-      return haystack.contains(needle);
-    }).toList(growable: false);
+    return items
+        .where((wh) {
+          final haystack = '${wh.id} ${wh.url} ${wh.createdAt}'.toLowerCase();
+          return haystack.contains(needle);
+        })
+        .toList(growable: false);
   }
 
   Future<void> _testWebhook(String id) async {
@@ -667,6 +702,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     setState(() {
       _loadingWebhooks = true;
       _webhooksError = null;
+      _webhookBusyId = id;
     });
     try {
       final res = await postSettingsOutboundWebhookTestV1(
@@ -681,6 +717,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
+      setState(() {
+        _webhookLastTestResultById[id] = res;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -701,9 +740,17 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (mounted) {
         setState(() {
           _loadingWebhooks = false;
+          _webhookBusyId = null;
         });
       }
     }
+  }
+
+  String _formatWebhookTestResult(OutboundWebhookTestResponseV1 result) {
+    if (result.delivered) {
+      return '最近测试: success (${result.httpStatus ?? "-"})';
+    }
+    return '最近测试: failed (${result.httpStatus ?? "-"}) ${result.error ?? "unknown"}';
   }
 
   String _formatBillingEventMeta(BillingWebhookEventItemV1 item) {
@@ -1178,6 +1225,16 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               ),
                             Text('id: ${wh.id}'),
                             Text('createdAt: ${wh.createdAt}'),
+                            if (_webhookLastTestResultById[wh.id] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  _formatWebhookTestResult(
+                                    _webhookLastTestResultById[wh.id]!,
+                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -1196,17 +1253,17 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         icon: const Icon(Icons.copy_outlined),
                       ),
                       OutlinedButton(
-                        onPressed: _loadingWebhooks
+                        onPressed: _loadingWebhooks || _webhookBusyId != null
                             ? null
                             : () => _testWebhook(wh.id),
-                        child: const Text('测试投递'),
+                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '测试投递'),
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton(
-                        onPressed: _loadingWebhooks
+                        onPressed: _loadingWebhooks || _webhookBusyId != null
                             ? null
                             : () => _deleteWebhook(wh.id),
-                        child: const Text('删除'),
+                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '删除'),
                       ),
                     ],
                   ),
