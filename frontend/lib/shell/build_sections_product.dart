@@ -825,6 +825,39 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     ).showSnackBar(const SnackBar(content: Text('已复制当前审计摘要')));
   }
 
+  Future<void> _copyBillingAuditText(String text, String label) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('已复制$label')));
+  }
+
+  Future<void> _applyBillingRowFilters({
+    String? provider,
+    String? eventType,
+    String? providerEventId,
+    String? rawEventId,
+  }) async {
+    setState(() {
+      if (provider != null) {
+        _billingProvider = provider.trim();
+      }
+      if (eventType != null) {
+        _billingEventTypeController.text = eventType.trim();
+      }
+      if (providerEventId != null) {
+        _billingProviderEventIdController.text = providerEventId.trim();
+      }
+      if (rawEventId != null) {
+        _billingRawEventIdController.text = rawEventId.trim();
+      }
+    });
+    await _loadBillingEvents();
+  }
+
   Future<void> _copyAllBillingEventsCsv() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
@@ -1379,6 +1412,49 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     if (item.rawEventId != null && item.rawEventId!.isNotEmpty)
                       SelectableText('raw_event_id=${item.rawEventId}'),
                     SelectableText('id=${item.id}'),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton(
+                          onPressed: () => _copyBillingAuditText(
+                            item.providerEventId,
+                            ' provider_event_id',
+                          ),
+                          child: const Text('复制 provider_event_id'),
+                        ),
+                        if (item.rawEventId != null && item.rawEventId!.isNotEmpty)
+                          OutlinedButton(
+                            onPressed: () => _copyBillingAuditText(
+                              item.rawEventId!,
+                              ' raw_event_id',
+                            ),
+                            child: const Text('复制 raw_event_id'),
+                          ),
+                        if (item.provider != null && item.provider!.trim().isNotEmpty)
+                          FilledButton.tonal(
+                            onPressed: () => _applyBillingRowFilters(
+                              provider: item.provider,
+                            ),
+                            child: Text('按 ${item.provider} 过滤'),
+                          ),
+                        if (item.eventType != null && item.eventType!.trim().isNotEmpty)
+                          FilledButton.tonal(
+                            onPressed: () => _applyBillingRowFilters(
+                              eventType: item.eventType,
+                            ),
+                            child: Text('按 ${item.eventType} 过滤'),
+                          ),
+                        FilledButton.tonal(
+                          onPressed: () => _applyBillingRowFilters(
+                            providerEventId: item.providerEventId,
+                            rawEventId: item.rawEventId,
+                          ),
+                          child: const Text('仅看这一事件'),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
