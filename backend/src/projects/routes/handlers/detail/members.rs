@@ -7,6 +7,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::audit::{
+    append_project_audit, project_acl_details, AppendProjectAudit,
+};
 use crate::projects::routes::common::require_project_member_admin_scope;
 use crate::state::AppState;
 
@@ -131,6 +134,20 @@ pub(crate) async fn create_project_member(
     let role = normalize_project_member_role(&body.role)
         .ok_or_else(|| ApiError::BadRequest("role must be editor or viewer".into()))?;
 
+    let previous_role: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT role
+        FROM public.app_project_member
+        WHERE project_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(scope.id)
+    .bind(body.user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     ensure_assignable_workspace_member(pool, scope.workspace_id, scope.owner_user_id, body.user_id)
         .await?;
 
@@ -149,6 +166,25 @@ pub(crate) async fn create_project_member(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let action = if previous_role.is_some() {
+        "project_member_role_changed"
+    } else {
+        "project_member_added"
+    };
+    append_project_audit(
+        pool,
+        AppendProjectAudit {
+            project_id: scope.id,
+            workspace_id: scope.workspace_id,
+            project_numeric_id: None,
+            actor_user_id: uid,
+            action,
+            target_user_id: Some(body.user_id),
+            details: project_acl_details(role, "create_or_upsert", previous_role.as_deref()),
+        },
+    )
+    .await?;
 
     Ok(Json(row))
 }
@@ -184,6 +220,20 @@ pub(crate) async fn patch_project_member(
     let role = normalize_project_member_role(&body.role)
         .ok_or_else(|| ApiError::BadRequest("role must be editor or viewer".into()))?;
 
+    let previous_role: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT role
+        FROM public.app_project_member
+        WHERE project_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(scope.id)
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     ensure_assignable_workspace_member(pool, scope.workspace_id, scope.owner_user_id, user_id)
         .await?;
 
@@ -203,6 +253,20 @@ pub(crate) async fn patch_project_member(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
+
+    append_project_audit(
+        pool,
+        AppendProjectAudit {
+            project_id: scope.id,
+            workspace_id: scope.workspace_id,
+            project_numeric_id: None,
+            actor_user_id: uid,
+            action: "project_member_role_changed",
+            target_user_id: Some(user_id),
+            details: project_acl_details(role, "patch", previous_role.as_deref()),
+        },
+    )
+    .await?;
 
     Ok(Json(row))
 }
@@ -232,6 +296,19 @@ pub(crate) async fn delete_project_member(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     let scope = require_project_member_admin_scope(&state, uid, project_id).await?;
+    let previous_role: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT role
+        FROM public.app_project_member
+        WHERE project_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(scope.id)
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let result = sqlx::query(
         r#"
@@ -249,6 +326,24 @@ pub(crate) async fn delete_project_member(
     if result.rows_affected() == 0 {
         return Err(ApiError::NotFound);
     }
+
+    append_project_audit(
+        pool,
+        AppendProjectAudit {
+            project_id: scope.id,
+            workspace_id: scope.workspace_id,
+            project_numeric_id: None,
+            actor_user_id: uid,
+            action: "project_member_removed",
+            target_user_id: Some(user_id),
+            details: project_acl_details(
+                previous_role.as_deref().unwrap_or("viewer"),
+                "delete",
+                previous_role.as_deref(),
+            ),
+        },
+    )
+    .await?;
 
     Ok(axum::http::StatusCode::NO_CONTENT)
 }

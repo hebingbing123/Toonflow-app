@@ -338,12 +338,42 @@ pub struct QualityBadCaseStatResponse {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityDashboardResponse {
+    pub meta: QualityDashboardMeta,
     pub stats: Vec<QualityDashboardTargetStat>,
     pub stage_pass_rate: Vec<QualityDashboardStagePassRateItem>,
     pub stage_grade_distribution: Vec<QualityDashboardStageGradeItem>,
     pub scope_insights: Vec<QualityDashboardScopeInsightItem>,
     pub token_efficiency: Vec<QualityDashboardTokenEfficiencyItem>,
     pub bad_case_stats: Vec<QualityBadCaseStatResponse>,
+}
+
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardMeta {
+    pub refreshed_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub snapshot_row_count: i64,
+    pub source_review_count: i64,
+    pub source_usage_count: i64,
+    pub source_max_review_created_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub source_max_usage_created_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub age_seconds: Option<i64>,
+    pub stale: bool,
+    pub stale_reason: Option<String>,
+    pub refresh_mode: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardRefreshResponse {
+    pub refreshed_at: chrono::DateTime<chrono::Utc>,
+    pub row_count: i64,
+    pub mode: String,
+    pub performed: bool,
+    pub stale_before_refresh: bool,
+    pub source_review_count: i64,
+    pub source_usage_count: i64,
+    pub source_max_review_created_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub source_max_usage_created_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 /// 高频 bad case 统计条目（需求 14.3）

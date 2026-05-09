@@ -5,16 +5,42 @@ import 'package:flutter/material.dart';
 /// 
 /// Provides multi-dimensional filtering and search functionality:
 /// - Search input field with 300ms debounce
-/// - Status filter dropdown (enabled/disabled, has video, has duration, has subtitle, has voiceover)
-/// - Quality filter dropdown (has bad examples, review stage, quality degradation)
+/// - Status filter dropdown with 200ms debounce (enabled/disabled, has video, has duration, has subtitle, has voiceover)
+/// - Quality filter dropdown with 200ms debounce (has bad examples, review stage, quality degradation)
 /// - Active filter tags display
 /// - Clear all filters button
-/// - Filter preset support
+/// - Filter preset support (save, load, delete presets)
+/// 
+/// ## Filter Preset Usage
+/// 
+/// Filter presets allow users to save commonly used filter combinations for quick access:
+/// 
+/// 1. **Save Preset**: When filters are active, click "保存预设" button to save current filters
+/// 2. **Apply Preset**: Click the bookmarks icon to see saved presets and select one to apply
+/// 3. **Delete Preset**: In the presets dropdown, click the delete icon next to a preset to remove it
+/// 4. **Clear Filters**: Click "清除" button to remove all active filters
+/// 
+/// Example:
+/// ```dart
+/// FilterPanel(
+///   initialFilter: FilterState.empty(),
+///   onFilterChanged: (filter) {
+///     // Handle filter changes
+///   },
+///   presets: savedPresets,
+///   onPresetsChanged: (newPresets) {
+///     // Save presets to persistent storage
+///   },
+/// )
+/// ```
 class FilterPanel extends StatefulWidget {
   const FilterPanel({
     super.key,
     required this.onFilterChanged,
     this.initialFilter,
+    this.presets = const [],
+    this.onPresetsChanged,
+    this.onSearchFocusNodeCreated,
   });
 
   /// Callback when filter criteria changes
@@ -23,35 +49,54 @@ class FilterPanel extends StatefulWidget {
   /// Initial filter state
   final FilterState? initialFilter;
 
+  /// List of saved filter presets
+  final List<FilterPreset> presets;
+
+  /// Callback when presets are modified (save/delete)
+  final ValueChanged<List<FilterPreset>>? onPresetsChanged;
+
+  /// Callback when search focus node is created (for keyboard shortcuts)
+  final ValueChanged<FocusNode>? onSearchFocusNodeCreated;
+
   @override
   State<FilterPanel> createState() => _FilterPanelState();
 }
 
 class _FilterPanelState extends State<FilterPanel> {
   late final TextEditingController _searchController;
+  late final FocusNode _searchFocusNode;
   late FilterState _currentFilter;
-  Timer? _debounceTimer;
+  Timer? _searchDebounceTimer;
+  Timer? _filterDebounceTimer;
 
   @override
   void initState() {
     super.initState();
     _currentFilter = widget.initialFilter ?? FilterState.empty();
     _searchController = TextEditingController(text: _currentFilter.searchKeyword);
+    _searchFocusNode = FocusNode();
+    
+    // Notify parent about the focus node for keyboard shortcuts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onSearchFocusNodeCreated?.call(_searchFocusNode);
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _debounceTimer?.cancel();
+    _searchFocusNode.dispose();
+    _searchDebounceTimer?.cancel();
+    _filterDebounceTimer?.cancel();
     super.dispose();
   }
 
   void _onSearchChanged(String value) {
     // Cancel previous timer
-    _debounceTimer?.cancel();
+    _searchDebounceTimer?.cancel();
 
     // Start new debounce timer (300ms)
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
       setState(() {
         _currentFilter = _currentFilter.copyWith(searchKeyword: value.trim());
       });
@@ -63,14 +108,28 @@ class _FilterPanelState extends State<FilterPanel> {
     setState(() {
       _currentFilter = _currentFilter.copyWith(statusFilters: filters);
     });
-    widget.onFilterChanged(_currentFilter);
+    
+    // Cancel previous filter debounce timer
+    _filterDebounceTimer?.cancel();
+    
+    // Start new debounce timer (200ms) for filter changes
+    _filterDebounceTimer = Timer(const Duration(milliseconds: 200), () {
+      widget.onFilterChanged(_currentFilter);
+    });
   }
 
   void _onQualityFilterChanged(Set<QualityFilter> filters) {
     setState(() {
       _currentFilter = _currentFilter.copyWith(qualityFilters: filters);
     });
-    widget.onFilterChanged(_currentFilter);
+    
+    // Cancel previous filter debounce timer
+    _filterDebounceTimer?.cancel();
+    
+    // Start new debounce timer (200ms) for filter changes
+    _filterDebounceTimer = Timer(const Duration(milliseconds: 200), () {
+      widget.onFilterChanged(_currentFilter);
+    });
   }
 
   void _onSearchInSubtitlesChanged(bool value) {
@@ -115,6 +174,54 @@ class _FilterPanelState extends State<FilterPanel> {
       _currentFilter = FilterState.empty();
     });
     widget.onFilterChanged(_currentFilter);
+  }
+
+  void _savePreset() {
+    if (_currentFilter.isEmpty) {
+      _showMessage('当前没有活动的过滤条件');
+      return;
+    }
+
+    // Show dialog to input preset name
+    showDialog<String>(
+      context: context,
+      builder: (context) => _SavePresetDialog(),
+    ).then((name) {
+      if (name != null && name.isNotEmpty) {
+        final newPreset = FilterPreset(
+          name: name,
+          filter: _currentFilter,
+          createdAt: DateTime.now(),
+        );
+        final updatedPresets = [...widget.presets, newPreset];
+        widget.onPresetsChanged?.call(updatedPresets);
+        _showMessage('预设 "$name" 已保存');
+      }
+    });
+  }
+
+  void _applyPreset(FilterPreset preset) {
+    setState(() {
+      _currentFilter = preset.filter;
+      _searchController.text = preset.filter.searchKeyword;
+    });
+    widget.onFilterChanged(_currentFilter);
+    _showMessage('已应用预设 "${preset.name}"');
+  }
+
+  void _deletePreset(FilterPreset preset) {
+    final updatedPresets = widget.presets.where((p) => p != preset).toList();
+    widget.onPresetsChanged?.call(updatedPresets);
+    _showMessage('预设 "${preset.name}" 已删除');
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   List<FilterTag> _getActiveFilterTags() {
@@ -177,9 +284,10 @@ class _FilterPanelState extends State<FilterPanel> {
                 flex: 3,
                 child: TextField(
                   controller: _searchController,
+                  focusNode: _searchFocusNode,
                   onChanged: _onSearchChanged,
                   decoration: InputDecoration(
-                    hintText: '搜索字幕或旁白内容...',
+                    hintText: '搜索字幕或旁白内容... (Ctrl+F / Cmd+F)',
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -227,6 +335,62 @@ class _FilterPanelState extends State<FilterPanel> {
                   icon: const Icon(Icons.clear_all, size: 18),
                   label: const Text('清除'),
                 ),
+              
+              // Save preset button
+              if (hasActiveFilters)
+                const SizedBox(width: 8),
+              if (hasActiveFilters)
+                OutlinedButton.icon(
+                  onPressed: _savePreset,
+                  icon: const Icon(Icons.bookmark_add, size: 18),
+                  label: const Text('保存预设'),
+                ),
+
+              // Presets dropdown
+              if (widget.presets.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                PopupMenuButton<FilterPreset>(
+                  tooltip: '应用预设',
+                  icon: const Icon(Icons.bookmarks),
+                  onSelected: _applyPreset,
+                  itemBuilder: (context) => [
+                    for (final preset in widget.presets)
+                      PopupMenuItem<FilterPreset>(
+                        value: preset,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    preset.name,
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                  Text(
+                                    preset.description,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, size: 18),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _deletePreset(preset);
+                              },
+                              tooltip: '删除预设',
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ],
           ),
 
@@ -482,4 +646,141 @@ enum FilterTagType {
   search,
   status,
   quality,
+}
+
+/// Filter preset model
+class FilterPreset {
+  const FilterPreset({
+    required this.name,
+    required this.filter,
+    required this.createdAt,
+  });
+
+  /// Preset name
+  final String name;
+
+  /// Filter state
+  final FilterState filter;
+
+  /// Creation timestamp
+  final DateTime createdAt;
+
+  /// Get preset description (summary of filters)
+  String get description {
+    final parts = <String>[];
+    
+    if (filter.searchKeyword.isNotEmpty) {
+      parts.add('搜索: ${filter.searchKeyword}');
+    }
+    
+    if (filter.statusFilters.isNotEmpty) {
+      parts.add('${filter.statusFilters.length}个状态');
+    }
+    
+    if (filter.qualityFilters.isNotEmpty) {
+      parts.add('${filter.qualityFilters.length}个质量');
+    }
+    
+    return parts.isEmpty ? '无过滤条件' : parts.join(', ');
+  }
+
+  /// Convert to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'filter': {
+        'searchKeyword': filter.searchKeyword,
+        'statusFilters': filter.statusFilters.map((f) => f.name).toList(),
+        'qualityFilters': filter.qualityFilters.map((f) => f.name).toList(),
+        'searchInSubtitles': filter.searchInSubtitles,
+        'searchInVoiceover': filter.searchInVoiceover,
+      },
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  /// Create from JSON
+  factory FilterPreset.fromJson(Map<String, dynamic> json) {
+    return FilterPreset(
+      name: json['name'] as String,
+      filter: FilterState(
+        searchKeyword: json['filter']['searchKeyword'] as String? ?? '',
+        statusFilters: (json['filter']['statusFilters'] as List<dynamic>?)
+                ?.map((name) => ShotStatusFilter.values.firstWhere(
+                      (f) => f.name == name,
+                      orElse: () => ShotStatusFilter.enabled,
+                    ))
+                .toSet() ??
+            {},
+        qualityFilters: (json['filter']['qualityFilters'] as List<dynamic>?)
+                ?.map((name) => QualityFilter.values.firstWhere(
+                      (f) => f.name == name,
+                      orElse: () => QualityFilter.hasBadExample,
+                    ))
+                .toSet() ??
+            {},
+        searchInSubtitles: json['filter']['searchInSubtitles'] as bool? ?? true,
+        searchInVoiceover: json['filter']['searchInVoiceover'] as bool? ?? true,
+      ),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+}
+
+/// Dialog for saving a filter preset
+class _SavePresetDialog extends StatefulWidget {
+  @override
+  State<_SavePresetDialog> createState() => _SavePresetDialogState();
+}
+
+class _SavePresetDialogState extends State<_SavePresetDialog> {
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('保存过滤预设'),
+      content: TextField(
+        controller: _nameController,
+        autofocus: true,
+        decoration: const InputDecoration(
+          labelText: '预设名称',
+          hintText: '例如：已启用且有视频',
+          border: OutlineInputBorder(),
+        ),
+        onSubmitted: (value) {
+          if (value.trim().isNotEmpty) {
+            Navigator.of(context).pop(value.trim());
+          }
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('取消'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final name = _nameController.text.trim();
+            if (name.isNotEmpty) {
+              Navigator.of(context).pop(name);
+            }
+          },
+          child: const Text('保存'),
+        ),
+      ],
+    );
+  }
 }

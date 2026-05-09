@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../core.dart';
+import 'models.dart';
 import 'stats.dart';
 
 class QualityDashboardTargetStat {
@@ -148,8 +149,8 @@ class QualityDashboardTokenEfficiencyItem {
       sampleCount: (json['sampleCount'] as num).toInt(),
       avgPromptChars: (json['avgPromptChars'] as num).toDouble(),
       avgMemoryStyleChars: (json['avgMemoryStyleChars'] as num).toDouble(),
-      avgMemoryDeliveryChars:
-          (json['avgMemoryDeliveryChars'] as num).toDouble(),
+      avgMemoryDeliveryChars: (json['avgMemoryDeliveryChars'] as num)
+          .toDouble(),
       memoryAction: json['memoryAction'] as String,
     );
   }
@@ -157,6 +158,7 @@ class QualityDashboardTokenEfficiencyItem {
 
 class QualityDashboardResponse {
   const QualityDashboardResponse({
+    required this.meta,
     required this.stats,
     required this.stagePassRate,
     required this.stageGradeDistribution,
@@ -165,6 +167,7 @@ class QualityDashboardResponse {
     required this.badCaseStats,
   });
 
+  final QualityDashboardMeta meta;
   final List<QualityDashboardTargetStat> stats;
   final List<QualityDashboardStagePassRateItem> stagePassRate;
   final List<QualityDashboardStageGradeItem> stageGradeDistribution;
@@ -184,6 +187,9 @@ class QualityDashboardResponse {
     }
 
     return QualityDashboardResponse(
+      meta: QualityDashboardMeta.fromJson(
+        json['meta'] as Map<String, dynamic>? ?? const <String, dynamic>{},
+      ),
       stats: parseList('stats', QualityDashboardTargetStat.fromJson),
       stagePassRate: parseList(
         'stagePassRate',
@@ -202,6 +208,99 @@ class QualityDashboardResponse {
         QualityDashboardTokenEfficiencyItem.fromJson,
       ),
       badCaseStats: parseList('badCaseStats', BadCaseStatItem.fromJson),
+    );
+  }
+}
+
+class QualityDashboardMeta {
+  const QualityDashboardMeta({
+    required this.refreshedAt,
+    required this.snapshotRowCount,
+    required this.sourceReviewCount,
+    required this.sourceUsageCount,
+    required this.sourceMaxReviewCreatedAt,
+    required this.sourceMaxUsageCreatedAt,
+    required this.ageSeconds,
+    required this.stale,
+    required this.staleReason,
+    required this.refreshMode,
+  });
+
+  final DateTime? refreshedAt;
+  final int snapshotRowCount;
+  final int sourceReviewCount;
+  final int sourceUsageCount;
+  final DateTime? sourceMaxReviewCreatedAt;
+  final DateTime? sourceMaxUsageCreatedAt;
+  final int? ageSeconds;
+  final bool stale;
+  final String? staleReason;
+  final String refreshMode;
+
+  factory QualityDashboardMeta.fromJson(Map<String, dynamic> json) {
+    DateTime? parseDate(String key) {
+      final value = json[key];
+      if (value is! String || value.isEmpty) {
+        return null;
+      }
+      return DateTime.parse(value);
+    }
+
+    return QualityDashboardMeta(
+      refreshedAt: parseDate('refreshedAt'),
+      snapshotRowCount: (json['snapshotRowCount'] as num? ?? 0).toInt(),
+      sourceReviewCount: (json['sourceReviewCount'] as num? ?? 0).toInt(),
+      sourceUsageCount: (json['sourceUsageCount'] as num? ?? 0).toInt(),
+      sourceMaxReviewCreatedAt: parseDate('sourceMaxReviewCreatedAt'),
+      sourceMaxUsageCreatedAt: parseDate('sourceMaxUsageCreatedAt'),
+      ageSeconds: (json['ageSeconds'] as num?)?.toInt(),
+      stale: json['stale'] as bool? ?? true,
+      staleReason: json['staleReason'] as String?,
+      refreshMode:
+          json['refreshMode'] as String? ??
+          'materialized_view_concurrent_refresh',
+    );
+  }
+}
+
+class QualityDashboardRefreshResponse {
+  const QualityDashboardRefreshResponse({
+    required this.refreshedAt,
+    required this.rowCount,
+    required this.mode,
+    required this.performed,
+    required this.staleBeforeRefresh,
+    required this.sourceReviewCount,
+    required this.sourceUsageCount,
+    required this.sourceMaxReviewCreatedAt,
+    required this.sourceMaxUsageCreatedAt,
+  });
+
+  final DateTime refreshedAt;
+  final int rowCount;
+  final String mode;
+  final bool performed;
+  final bool staleBeforeRefresh;
+  final int sourceReviewCount;
+  final int sourceUsageCount;
+  final DateTime? sourceMaxReviewCreatedAt;
+  final DateTime? sourceMaxUsageCreatedAt;
+
+  factory QualityDashboardRefreshResponse.fromJson(Map<String, dynamic> json) {
+    return QualityDashboardRefreshResponse(
+      refreshedAt: DateTime.parse(json['refreshedAt'] as String),
+      rowCount: (json['rowCount'] as num).toInt(),
+      mode: json['mode'] as String,
+      performed: json['performed'] as bool? ?? true,
+      staleBeforeRefresh: json['staleBeforeRefresh'] as bool? ?? true,
+      sourceReviewCount: (json['sourceReviewCount'] as num? ?? 0).toInt(),
+      sourceUsageCount: (json['sourceUsageCount'] as num? ?? 0).toInt(),
+      sourceMaxReviewCreatedAt: json['sourceMaxReviewCreatedAt'] is String
+          ? DateTime.parse(json['sourceMaxReviewCreatedAt'] as String)
+          : null,
+      sourceMaxUsageCreatedAt: json['sourceMaxUsageCreatedAt'] is String
+          ? DateTime.parse(json['sourceMaxUsageCreatedAt'] as String)
+          : null,
     );
   }
 }
@@ -230,4 +329,20 @@ Future<QualityDashboardResponse> fetchQualityDashboard(
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return QualityDashboardResponse.fromJson(map);
+}
+
+Future<QualityDashboardRefreshResponse> refreshQualityDashboardReadModel(
+  String accessToken, {
+  bool onlyIfStale = false,
+}) async {
+  final uri = qualityUri(
+    '/api/v1/quality/dashboard',
+    queryParameters: onlyIfStale ? const {'onlyIfStale': 'true'} : null,
+  );
+  final res = await http
+      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 60));
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return QualityDashboardRefreshResponse.fromJson(map);
 }

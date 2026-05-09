@@ -8,6 +8,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::audit::{
+    append_project_audit, project_deleted_details, AppendProjectAudit,
+};
 use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
@@ -48,9 +51,9 @@ pub(crate) async fn delete_project_by_id(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let numeric_id: Option<i32> = sqlx::query_scalar(
+    let project_row: Option<(i32, Option<String>)> = sqlx::query_as(
         r#"
-        SELECT p.numeric_id
+        SELECT p.numeric_id, p.name
         FROM app_project p
         WHERE p.id = $1
         "#,
@@ -60,7 +63,7 @@ pub(crate) async fn delete_project_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let Some(numeric_id) = numeric_id else {
+    let Some((numeric_id, project_name)) = project_row else {
         tx.rollback()
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -95,6 +98,20 @@ pub(crate) async fn delete_project_by_id(
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
         return Err(ApiError::NotFound);
     }
+
+    append_project_audit(
+        &mut *tx,
+        AppendProjectAudit {
+            project_id: scope.id,
+            workspace_id: scope.workspace_id,
+            project_numeric_id: Some(numeric_id),
+            actor_user_id: uid,
+            action: "project_deleted",
+            target_user_id: None,
+            details: project_deleted_details(project_name.as_deref(), numeric_id),
+        },
+    )
+    .await?;
 
     tx.commit()
         .await

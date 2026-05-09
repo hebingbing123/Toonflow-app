@@ -6,6 +6,7 @@ use axum::{
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::audit::{append_project_audit, AppendProjectAudit};
 use crate::settings::agent_memory::ensure_project_style_bible_template;
 use crate::state::AppState;
 use crate::workspaces::ensure_personal_workspace;
@@ -202,6 +203,24 @@ pub(crate) async fn create_project(
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    append_project_audit(
+        &mut *tx,
+        AppendProjectAudit {
+            project_id: row.id,
+            workspace_id: scope_workspace_id,
+            project_numeric_id: Some(row.numeric_id),
+            actor_user_id: uid,
+            action: "project_created",
+            target_user_id: None,
+            details: serde_json::json!({
+                "project_name": row.name.clone(),
+                "project_numeric_id": row.numeric_id,
+                "workspace_id": scope_workspace_id,
+            }),
+        },
+    )
+    .await?;
 
     tx.commit()
         .await

@@ -4,6 +4,8 @@ import 'package:openflow_app/quality_reviews/controller.dart';
 import 'package:openflow_app/quality_reviews/section.dart';
 import 'package:openflow_app/rust_api.dart';
 
+const _testPlatformConfig = PlatformConfigToggleSetV1.defaults;
+
 QualityReviewsController buildController({
   List<QualityReview>? qualityReviews,
   String? qualityStatsLine,
@@ -48,6 +50,7 @@ void main() {
             accessToken: 'token',
             controller: controller,
             initialProjectNumericId: 9,
+            platformConfig: _testPlatformConfig,
           ),
         ),
       ),
@@ -87,6 +90,7 @@ void main() {
             accessToken: 'token',
             controller: controller,
             initialProjectNumericId: 9,
+            platformConfig: _testPlatformConfig,
           ),
         ),
       ),

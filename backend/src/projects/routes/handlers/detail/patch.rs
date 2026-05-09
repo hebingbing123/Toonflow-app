@@ -10,6 +10,9 @@ use uuid::Uuid;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
+use crate::projects::routes::audit::{
+    append_project_audit, project_field_change_details, AppendProjectAudit,
+};
 use crate::state::AppState;
 use serde_json::Value;
 
@@ -294,6 +297,71 @@ pub(crate) async fn patch_project_by_id(
         FieldPatch::Set(v) => v,
     };
 
+    let mut changed_fields = Vec::new();
+    if current.name != new_name {
+        changed_fields.push("name");
+    }
+    if current.intro != new_intro {
+        changed_fields.push("intro");
+    }
+    if current.project_type != new_project_type {
+        changed_fields.push("project_type");
+    }
+    if current.image_model != new_image_model {
+        changed_fields.push("image_model");
+    }
+    if current.image_quality != new_image_quality {
+        changed_fields.push("image_quality");
+    }
+    if current.video_model != new_video_model {
+        changed_fields.push("video_model");
+    }
+    if current.art_style != new_art_style {
+        changed_fields.push("art_style");
+    }
+    if current.director_manual != new_director_manual {
+        changed_fields.push("director_manual");
+    }
+    if current.mode != new_mode {
+        changed_fields.push("mode");
+    }
+    if current.video_ratio != new_video_ratio {
+        changed_fields.push("video_ratio");
+    }
+    if current.art_style_pack != new_art_style_pack {
+        changed_fields.push("art_style_pack");
+    }
+    if current.story_style_pack != new_story_style_pack {
+        changed_fields.push("story_style_pack");
+    }
+    if current.target_market != new_target_market {
+        changed_fields.push("target_market");
+    }
+    if current.target_platforms != new_target_platforms {
+        changed_fields.push("target_platforms");
+    }
+    if current.duration_strategy != new_duration_strategy {
+        changed_fields.push("duration_strategy");
+    }
+    if current.voice_profile != new_voice_profile {
+        changed_fields.push("voice_profile");
+    }
+    if current.subtitle_style != new_subtitle_style {
+        changed_fields.push("subtitle_style");
+    }
+    if current.bgm_strategy != new_bgm_strategy {
+        changed_fields.push("bgm_strategy");
+    }
+    if current.quality_gate_strategy != new_quality_gate_strategy {
+        changed_fields.push("quality_gate_strategy");
+    }
+    if current.project_brief != new_project_brief {
+        changed_fields.push("project_brief");
+    }
+    if current.brand_bible != new_brand_bible {
+        changed_fields.push("brand_bible");
+    }
+
     let row = sqlx::query_as::<_, ProjectRow>(
         r#"
         UPDATE app_project
@@ -343,6 +411,24 @@ pub(crate) async fn patch_project_by_id(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    append_project_audit(
+        pool,
+        AppendProjectAudit {
+            project_id: scope.id,
+            workspace_id: scope.workspace_id,
+            project_numeric_id: Some(current.numeric_id),
+            actor_user_id: uid,
+            action: "project_updated",
+            target_user_id: None,
+            details: project_field_change_details(
+                &changed_fields,
+                current.name.as_deref(),
+                row.name.as_deref(),
+            ),
+        },
+    )
+    .await?;
 
     Ok(Json(row))
 }

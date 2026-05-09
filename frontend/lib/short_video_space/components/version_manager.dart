@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../dialogs/confirmation_dialogs.dart';
+import 'version_comparison.dart';
 
 /// 成片版本数据模型
 class AssemblyVersion {
@@ -203,6 +205,14 @@ class _VersionManagerState extends State<VersionManager> {
                     ),
                   ),
                   const Spacer(),
+                  if (widget.versions.length >= 2)
+                    FilledButton.tonalIcon(
+                      onPressed: _isLoading ? null : _showCompareVersionsDialog,
+                      icon: const Icon(Icons.compare_arrows, size: 18),
+                      label: const Text('对比版本'),
+                    ),
+                  if (widget.versions.length >= 2)
+                    const SizedBox(width: 8),
                   FilledButton.tonalIcon(
                     onPressed: _isLoading ? null : _showCreateVersionDialog,
                     icon: const Icon(Icons.add, size: 18),
@@ -605,30 +615,10 @@ class _VersionManagerState extends State<VersionManager> {
   /// 处理删除版本
   Future<void> _handleDeleteVersion(AssemblyVersion version) async {
     // 显示确认对话框
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('确认删除'),
-          content: Text(
-            '确定要删除版本 "${version.name}" 吗？\n\n'
-            '此操作无法撤销。',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-              child: const Text('删除'),
-            ),
-          ],
-        );
-      },
+    final confirmed = await showDeleteVersionConfirmation(
+      context,
+      versionName: version.name,
+      showDontShowAgain: false, // TODO: Enable after proper SharedPreferences setup
     );
 
     if (confirmed != true) {
@@ -879,27 +869,10 @@ class _VersionManagerState extends State<VersionManager> {
   /// 处理恢复草稿
   Future<void> _handleRestoreDraft(AssemblyDraft draft) async {
     // 显示确认对话框
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('确认恢复草稿'),
-          content: Text(
-            '确定要恢复草稿 "${draft.name}" 吗？\n\n'
-            '当前未保存的编辑状态将会丢失。',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('恢复'),
-            ),
-          ],
-        );
-      },
+    final confirmed = await showRestoreDraftConfirmation(
+      context,
+      draftName: draft.name,
+      showDontShowAgain: false, // TODO: Enable after proper SharedPreferences setup
     );
 
     if (confirmed != true) {
@@ -997,5 +970,129 @@ class _VersionManagerState extends State<VersionManager> {
         });
       }
     }
+  }
+
+  /// 显示版本对比对话框
+  Future<void> _showCompareVersionsDialog() async {
+    if (widget.versions.length < 2) {
+      return;
+    }
+
+    // 选择两个版本进行对比
+    AssemblyVersion? baseVersion;
+    AssemblyVersion? compareVersion;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              title: const Text('选择要对比的版本'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('选择基准版本（旧版本）：'),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      hint: const Text('选择基准版本'),
+                      initialValue: baseVersion?.id,
+                      items: widget.versions.map((version) {
+                        return DropdownMenuItem(
+                          value: version.id,
+                          child: Text(
+                            '${version.name} (${version.shotCount} 镜头)',
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          baseVersion = widget.versions.firstWhere(
+                            (v) => v.id == value,
+                          );
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('选择对比版本（新版本）：'),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      hint: const Text('选择对比版本'),
+                      initialValue: compareVersion?.id,
+                      items: widget.versions.map((version) {
+                        return DropdownMenuItem(
+                          value: version.id,
+                          child: Text(
+                            '${version.name} (${version.shotCount} 镜头)',
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          compareVersion = widget.versions.firstWhere(
+                            (v) => v.id == value,
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('取消'),
+                ),
+                FilledButton(
+                  onPressed: baseVersion != null && 
+                             compareVersion != null && 
+                             baseVersion!.id != compareVersion!.id
+                      ? () {
+                          Navigator.of(dialogContext).pop();
+                          _showVersionComparison(baseVersion!, compareVersion!);
+                        }
+                      : null,
+                  child: const Text('开始对比'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// 显示版本对比界面
+  void _showVersionComparison(
+    AssemblyVersion baseVersion,
+    AssemblyVersion compareVersion,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return VersionComparison(
+          baseVersion: baseVersion,
+          compareVersion: compareVersion,
+          onClose: () => Navigator.of(context).pop(),
+        );
+      },
+    );
   }
 }

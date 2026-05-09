@@ -12,15 +12,16 @@ void main() {
         home: Scaffold(
           body: PlatformShortDramaPipelineStrip(
             onSelectPane: (pane) => last = pane,
+            jobsPaneEnabled: true,
           ),
         ),
       ),
     );
-    await tester.tap(find.text('脚本'));
+    await tester.tap(find.widgetWithText(ActionChip, '脚本'));
     await tester.pump();
     expect(last, ProductWorkspacePane.scriptWorkspace);
 
-    await tester.tap(find.text('短视频'));
+    await tester.tap(find.widgetWithText(ActionChip, '短视频'));
     await tester.pump();
     expect(last, ProductWorkspacePane.shortVideoSpace);
   });

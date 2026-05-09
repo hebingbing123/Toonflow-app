@@ -13,6 +13,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     required String token,
     required Function(String message, {required bool isSuccess}) showFeedback,
     required Future<void> Function() refreshData,
+    BuildContext? dialogContext,
   }) async {
     if (selectedStoryboardIds.isEmpty) {
       showFeedback('请先选择要启用的镜头', isSuccess: false);
@@ -43,30 +44,56 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       return;
     }
 
-    try {
-      final response = await postProductionWorkbenchBatchSelectVideoV1(
-        token,
-        projectId: projectId,
-        scriptId: scriptId,
+    // Show progress dialog if context is provided
+    if (dialogContext != null && dialogContext.mounted) {
+      await _showBatchOperationProgress(
+        context: dialogContext,
+        title: '批量启用镜头',
         operations: operations,
+        executeOperation: (operation) async {
+          await postWorkbenchSelectVideoV1(
+            token,
+            projectId: projectId,
+            scriptId: scriptId,
+            storyboardId: operation['storyboardId'] as int,
+            videoUrl: operation['videoUrl'] as String,
+          );
+        },
+        onComplete: (successful, failed, failedItems) async {
+          showFeedback(
+            '批量启用完成：成功 $successful 个，失败 $failed 个',
+            isSuccess: failed == 0,
+          );
+          await refreshData();
+        },
       );
+    } else {
+      // Fallback to old behavior if no context
+      try {
+        final response = await postProductionWorkbenchBatchSelectVideoV1(
+          token,
+          projectId: projectId,
+          scriptId: scriptId,
+          operations: operations,
+        );
 
-      showFeedback(
-        '批量启用完成：成功 ${response.success} 个，失败 ${response.failed} 个',
-        isSuccess: response.failed == 0,
-      );
+        showFeedback(
+          '批量启用完成：成功 ${response.success} 个，失败 ${response.failed} 个',
+          isSuccess: response.failed == 0,
+        );
 
-      await refreshData();
-    } on RustApiException catch (e) {
-      showFeedback(
-        '批量启用失败：${e.statusCode ?? '-'}',
-        isSuccess: false,
-      );
-    } catch (e) {
-      showFeedback(
-        '批量启用失败：$e',
-        isSuccess: false,
-      );
+        await refreshData();
+      } on RustApiException catch (e) {
+        showFeedback(
+          '批量启用失败：${e.statusCode ?? '-'}',
+          isSuccess: false,
+        );
+      } catch (e) {
+        showFeedback(
+          '批量启用失败：$e',
+          isSuccess: false,
+        );
+      }
     }
   }
 
@@ -78,36 +105,80 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     required String token,
     required Function(String message, {required bool isSuccess}) showFeedback,
     required Future<void> Function() refreshData,
+    BuildContext? dialogContext,
   }) async {
     if (selectedStoryboardIds.isEmpty) {
       showFeedback('请先选择要禁用的镜头', isSuccess: false);
       return;
     }
 
-    try {
-      final response = await postProductionWorkbenchBatchDeleteVideoV1(
-        token,
-        projectId: projectId,
-        scriptId: scriptId,
-        storyboardIds: selectedStoryboardIds.toList(),
+    // Show confirmation dialog
+    if (dialogContext != null && dialogContext.mounted) {
+      final confirmed = await showBatchDisableConfirmation(
+        dialogContext,
+        shotCount: selectedStoryboardIds.length,
+        showDontShowAgain: false, // TODO: Enable after proper SharedPreferences setup
       );
 
-      showFeedback(
-        '批量禁用完成：成功 ${response.success} 个，失败 ${response.failed} 个',
-        isSuccess: response.failed == 0,
-      );
+      if (confirmed != true) {
+        return;
+      }
+    }
 
-      await refreshData();
-    } on RustApiException catch (e) {
-      showFeedback(
-        '批量禁用失败：${e.statusCode ?? '-'}',
-        isSuccess: false,
+    // Build operations list
+    final operations = selectedStoryboardIds
+        .map((id) => {'storyboardId': id})
+        .toList();
+
+    // Show progress dialog if context is provided
+    if (dialogContext != null && dialogContext.mounted) {
+      await _showBatchOperationProgress(
+        context: dialogContext,
+        title: '批量禁用镜头',
+        operations: operations,
+        executeOperation: (operation) async {
+          await postWorkbenchDeleteVideoV1(
+            token,
+            projectId: projectId,
+            scriptId: scriptId,
+            storyboardId: operation['storyboardId'] as int,
+          );
+        },
+        onComplete: (successful, failed, failedItems) async {
+          showFeedback(
+            '批量禁用完成：成功 $successful 个，失败 $failed 个',
+            isSuccess: failed == 0,
+          );
+          await refreshData();
+        },
       );
-    } catch (e) {
-      showFeedback(
-        '批量禁用失败：$e',
-        isSuccess: false,
-      );
+    } else {
+      // Fallback to old behavior if no context
+      try {
+        final response = await postProductionWorkbenchBatchDeleteVideoV1(
+          token,
+          projectId: projectId,
+          scriptId: scriptId,
+          storyboardIds: selectedStoryboardIds.toList(),
+        );
+
+        showFeedback(
+          '批量禁用完成：成功 ${response.success} 个，失败 ${response.failed} 个',
+          isSuccess: response.failed == 0,
+        );
+
+        await refreshData();
+      } on RustApiException catch (e) {
+        showFeedback(
+          '批量禁用失败：${e.statusCode ?? '-'}',
+          isSuccess: false,
+        );
+      } catch (e) {
+        showFeedback(
+          '批量禁用失败：$e',
+          isSuccess: false,
+        );
+      }
     }
   }
 
@@ -170,29 +241,28 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
             })
         .toList();
 
-    try {
-      final response = await postProductionWorkbenchBatchUpdateDurationV1(
-        token,
-        projectId: projectId,
-        scriptId: scriptId,
+    // Show progress dialog
+    if (context.mounted) {
+      await _showBatchOperationProgress(
+        context: context,
+        title: '批量时长对齐',
         operations: operations,
-      );
-
-      showFeedback(
-        '批量时长对齐完成：成功 ${response.success} 个，失败 ${response.failed} 个',
-        isSuccess: response.failed == 0,
-      );
-
-      await refreshData();
-    } on RustApiException catch (e) {
-      showFeedback(
-        '批量时长对齐失败：${e.statusCode ?? '-'}',
-        isSuccess: false,
-      );
-    } catch (e) {
-      showFeedback(
-        '批量时长对齐失败：$e',
-        isSuccess: false,
+        executeOperation: (operation) async {
+          await postStoryboardUpdateDurationV1(
+            token,
+            projectId: projectId,
+            scriptId: scriptId,
+            storyboardId: operation['storyboardId'] as int,
+            duration: operation['duration'] as int,
+          );
+        },
+        onComplete: (successful, failed, failedItems) async {
+          showFeedback(
+            '批量时长对齐完成：成功 $successful 个，失败 $failed 个',
+            isSuccess: failed == 0,
+          );
+          await refreshData();
+        },
       );
     }
   }
@@ -344,6 +414,14 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     required BuildContext context,
     required Function(String message, {required bool isSuccess}) showFeedback,
   }) async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    
+    if (token == null || token.isEmpty || project == null) {
+      showFeedback('无法获取项目信息', isSuccess: false);
+      return;
+    }
+
     if (selectedStoryboardIds.isEmpty) {
       showFeedback('请先选择要生成配音的镜头', isSuccess: false);
       return;
@@ -361,12 +439,393 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       return;
     }
 
-    showFeedback(
-      '批量配音生成功能即将推出（已选择 ${eligibleShots.length} 个有配音文本的镜头）',
-      isSuccess: true,
+    // Show voiceover settings dialog to configure TTS parameters
+    final settings = await _openVoiceoverSettingsDialog(
+      context: context,
+      initialSettings: null, // Use default settings
     );
 
-    // TODO: Implement TTS batch generation when backend API is ready
-    // This will call the TTS service for each selected shot
+    if (settings == null) {
+      // User cancelled
+      return;
+    }
+
+    // Group shots by script ID for batch API calls
+    final shotsByScript = <int, List<int>>{};
+    for (final shot in eligibleShots) {
+      shotsByScript
+          .putIfAbsent(shot.scriptNumericId, () => <int>[])
+          .add(shot.storyboardNumericId);
+    }
+
+    // Show progress dialog
+    var totalProcessed = 0;
+    var totalSuccessful = 0;
+    var totalFailed = 0;
+    final failedItems = <BatchOperationFailedItem>[];
+
+    if (!context.mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            final progress = eligibleShots.isEmpty
+                ? 0.0
+                : totalProcessed / eligibleShots.length;
+            final progressPercent = (progress * 100).toStringAsFixed(0);
+
+            return AlertDialog(
+              title: const Text('批量生成配音'),
+              content: SizedBox(
+                width: 480,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LinearProgressIndicator(value: progress),
+                    const SizedBox(height: 16),
+                    Text(
+                      '进度：$totalProcessed / ${eligibleShots.length} ($progressPercent%)',
+                      style: Theme.of(ctx).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '成功：$totalSuccessful · 失败：$totalFailed',
+                      style: Theme.of(ctx).textTheme.bodyMedium,
+                    ),
+                    if (failedItems.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '失败项：',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 120,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: failedItems.length,
+                          itemBuilder: (ctx, idx) {
+                            final item = failedItems[idx];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                '分镜 #${item.shotId}: ${item.errorMessage}',
+                                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(ctx).colorScheme.error,
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                if (totalProcessed >= eligibleShots.length)
+                  FilledButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('完成'),
+                  )
+                else
+                  const SizedBox.shrink(),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    // Execute batch generation for each script
+    for (final entry in shotsByScript.entries) {
+      final scriptId = entry.key;
+      final storyboardIds = entry.value;
+
+      try {
+        final response = await postWorkbenchGenerateVoiceoverV1(
+          token,
+          projectId: project.numericId,
+          scriptId: scriptId,
+          storyboardIds: storyboardIds,
+          voice: settings.voiceId,
+          speed: settings.speed,
+        );
+
+        // Update progress
+        totalProcessed += storyboardIds.length;
+        totalSuccessful += response.total;
+
+        // Show feedback for this batch
+        if (response.total > 0) {
+          showFeedback(
+            '已为 ${response.total} 个镜头入队配音生成任务',
+            isSuccess: true,
+          );
+        }
+      } on RustApiException catch (e) {
+        // Mark all shots in this batch as failed
+        totalProcessed += storyboardIds.length;
+        totalFailed += storyboardIds.length;
+
+        for (final storyboardId in storyboardIds) {
+          failedItems.add(
+            BatchOperationFailedItem(
+              shotId: storyboardId,
+              errorMessage: '${e.statusCode ?? "未知错误"}: ${e.message}',
+            ),
+          );
+        }
+
+        showFeedback(
+          '剧本 #$scriptId 的配音生成失败：${e.statusCode ?? "-"}',
+          isSuccess: false,
+        );
+      } catch (e) {
+        // Mark all shots in this batch as failed
+        totalProcessed += storyboardIds.length;
+        totalFailed += storyboardIds.length;
+
+        for (final storyboardId in storyboardIds) {
+          failedItems.add(
+            BatchOperationFailedItem(
+              shotId: storyboardId,
+              errorMessage: e.toString(),
+            ),
+          );
+        }
+
+        showFeedback(
+          '剧本 #$scriptId 的配音生成失败：$e',
+          isSuccess: false,
+        );
+      }
+    }
+
+    // Final feedback
+    if (totalFailed == 0) {
+      showFeedback(
+        '批量配音生成完成：已为 $totalSuccessful 个镜头入队任务',
+        isSuccess: true,
+      );
+    } else {
+      showFeedback(
+        '批量配音生成完成：成功 $totalSuccessful，失败 $totalFailed',
+        isSuccess: false,
+      );
+    }
+
+    // Refresh project data to show updated voiceover status
+    await _loadProjectOverview();
+  }
+
+  /// Generate voiceover for a single shot
+  Future<void> _generateSingleVoiceover({
+    required _AssemblyClipDeskOpEntry item,
+    required BuildContext context,
+    required Function(String message, {required bool isSuccess}) showFeedback,
+  }) async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    
+    if (token == null || token.isEmpty || project == null) {
+      showFeedback('无法获取项目信息', isSuccess: false);
+      return;
+    }
+
+    if (!item.voiceoverScriptReady) {
+      showFeedback('该镜头没有可用的配音文本', isSuccess: false);
+      return;
+    }
+
+    // Show voiceover settings dialog to configure TTS parameters
+    final settings = await _openVoiceoverSettingsDialog(
+      context: context,
+      initialSettings: null, // Use default settings
+    );
+
+    if (settings == null) {
+      // User cancelled
+      return;
+    }
+
+    // Show progress indicator
+    if (!context.mounted) return;
+    
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('正在生成配音...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      final response = await postWorkbenchGenerateVoiceoverV1(
+        token,
+        projectId: project.numericId,
+        scriptId: item.scriptNumericId,
+        storyboardIds: [item.storyboardNumericId],
+        voice: settings.voiceId,
+        speed: settings.speed,
+      );
+
+      // Close progress dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (response.total > 0) {
+        showFeedback(
+          '分镜 #${item.storyboardNumericId} 配音生成任务已入队',
+          isSuccess: true,
+        );
+        
+        // Refresh project data to show updated voiceover status
+        await _loadProjectOverview();
+      } else {
+        showFeedback(
+          '配音生成失败：未能创建任务',
+          isSuccess: false,
+        );
+      }
+    } on RustApiException catch (e) {
+      // Close progress dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+      
+      showFeedback(
+        '配音生成失败：${e.statusCode ?? "-"} - ${e.message}',
+        isSuccess: false,
+      );
+    } catch (e) {
+      // Close progress dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+      
+      showFeedback(
+        '配音生成失败：$e',
+        isSuccess: false,
+      );
+    }
+  }
+
+  /// Show batch operation progress dialog
+  /// 
+  /// Executes operations one by one and displays real-time progress
+  Future<void> _showBatchOperationProgress({
+    required BuildContext context,
+    required String title,
+    required List<Map<String, dynamic>> operations,
+    required Future<void> Function(Map<String, dynamic> operation) executeOperation,
+    required Future<void> Function(int successful, int failed, List<BatchOperationFailedItem> failedItems) onComplete,
+  }) async {
+    var completed = 0;
+    var successful = 0;
+    var failed = 0;
+    final failedItems = <BatchOperationFailedItem>[];
+    var isCancelled = false;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            // Execute operations asynchronously
+            Future<void> executeOperations() async {
+              for (final operation in operations) {
+                if (isCancelled) break;
+
+                try {
+                  await executeOperation(operation);
+                  successful++;
+                } catch (e) {
+                  failed++;
+                  final storyboardId = operation['storyboardId'] as int;
+                  final errorMessage = e is RustApiException
+                      ? '错误代码: ${e.statusCode ?? '-'}'
+                      : e.toString();
+                  failedItems.add(BatchOperationFailedItem(
+                    shotId: storyboardId,
+                    errorMessage: errorMessage,
+                  ));
+                }
+
+                completed++;
+                if (ctx.mounted) {
+                  setState(() {});
+                }
+              }
+
+              // Call onComplete callback
+              await onComplete(successful, failed, failedItems);
+            }
+
+            // Start execution if not already started
+            if (completed == 0 && !isCancelled) {
+              executeOperations();
+            }
+
+            final isComplete = completed >= operations.length || isCancelled;
+
+            return BatchOperationProgressDialog(
+              title: title,
+              total: operations.length,
+              completed: completed,
+              successful: successful,
+              failed: failed,
+              failedItems: failedItems,
+              isComplete: isComplete,
+              onCancel: isComplete
+                  ? null
+                  : () {
+                      setState(() {
+                        isCancelled = true;
+                      });
+                    },
+              onRetryFailed: failedItems.isEmpty
+                  ? null
+                  : () async {
+                      // Close current dialog
+                      Navigator.of(ctx).pop();
+
+                      // Retry failed operations
+                      final retryOperations = failedItems
+                          .map((item) => operations.firstWhere(
+                                (op) => op['storyboardId'] == item.shotId,
+                              ))
+                          .toList();
+
+                      if (context.mounted) {
+                        await _showBatchOperationProgress(
+                          context: context,
+                          title: '$title（重试）',
+                          operations: retryOperations,
+                          executeOperation: executeOperation,
+                          onComplete: onComplete,
+                        );
+                      }
+                    },
+            );
+          },
+        );
+      },
+    );
   }
 }

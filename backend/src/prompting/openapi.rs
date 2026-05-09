@@ -11,6 +11,8 @@ use utoipa::OpenApi;
     crate::prompting::quality::list_reviews,
     crate::prompting::quality::get_review,
     crate::prompting::quality::get_stats,
+    crate::prompting::quality::get_dashboard,
+    crate::prompting::quality::post_dashboard_refresh,
     crate::prompting::quality::get_scope_insights,
     crate::prompting::quality::get_token_efficiency,
     crate::prompting::quality::get_token_efficiency_samples,

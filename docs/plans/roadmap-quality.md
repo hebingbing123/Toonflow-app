@@ -55,7 +55,7 @@
 
 | 项 | 内容 |
 |----|------|
-| **目标** | Flutter 质量工作台与主质量页展示趋势与聚合（按 stage、按周、按 scope），不仅列表 API。当前主质量页已补运营看板入口：一键刷新质量统计、阶段通过率 / 等级分布、scope 榜单、坏例热点、token 效率，并支持复制看板摘要；同时后端已新增 `GET /api/v1/quality/dashboard` 单接口读模型，把主面板从多路聚合请求收口为一次读取，工作台继续承接更深筛选与详情。 |
+| **目标** | Flutter 质量工作台与主质量页展示趋势与聚合（按 stage、按周、按 scope），不仅列表 API。当前主质量页已补运营看板入口：一键刷新质量统计、阶段通过率 / 等级分布、scope 榜单、坏例热点、token 效率，并支持复制看板摘要；后端已新增 `GET /api/v1/quality/dashboard` 单接口读模型，并进一步落地 `app_quality_dashboard_review_fact` 物化视图 + `POST /api/v1/quality/dashboard` refresh 通路，把主面板从多路聚合请求收口为“刷新底层快照 / 读取聚合面板”的两段式读模型链路；同时 `GET` 响应已补 freshness meta（`refreshedAt` / `ageSeconds` / `stale` / source max created_at），`POST` 也支持 `onlyIfStale=true`，让运营知道当前看板是不是陈旧、是否需要刷新，并避免无意义重算。 |
 | **依赖** | 若聚合不足，**必做**先扩 REST（与本 WP 同一里程碑收口）。 |
 | **PR 切片** | （1）`rust_api` 模型与 client；（2）**必做**：图表库选型并落地趋势视图（stage/周）；（3）缓存/防抖。 |
 | **触点** | `frontend/lib/rust_api/`；质量相关 `*_section` / dialog；`backend/src/prompting/quality/handlers/`。 |

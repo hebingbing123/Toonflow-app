@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_list_view/flutter_list_view.dart';
 
 import '../rust_api.dart';
 import 'components/batch_operation_toolbar.dart';
 import 'components/filter_panel.dart';
 import 'components/version_manager.dart';
+import 'dialogs/confirmation_dialogs.dart';
 import 'state/operation_history.dart';
 import 'support.dart';
 import 'view.dart';
@@ -21,7 +24,12 @@ part 'section_publish_scheduling.dart';
 part 'section_publish_copy.dart';
 part 'section_publish_batch.dart';
 part 'section_undo_redo.dart';
+part 'section_keyboard_shortcuts.dart';
 part 'dialogs/voiceover_settings_dialog.dart';
+part 'dialogs/export_settings_dialog.dart';
+part 'dialogs/export_progress_dialog.dart';
+part 'dialogs/export_history_dialog.dart';
+part 'components/audio_preview_player.dart';
 
 class ShortVideoSpaceSection extends StatefulWidget {
   const ShortVideoSpaceSection({
@@ -555,8 +563,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     return Focus(
       autofocus: true,
       onKeyEvent: (node, event) {
-        _handleUndoRedoKeyEvent(event);
-        return KeyEventResult.ignored;
+        return _handleKeyboardShortcuts(event);
       },
       child: ShortVideoSpaceView(
         mode: _mode,

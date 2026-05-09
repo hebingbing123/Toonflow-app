@@ -15,9 +15,17 @@ class NotificationsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<NotificationRecordV1>>(
-      valueListenable: controller.notifications,
-      builder: (context, notifications, _) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        final notifications = controller.items;
+        
+        if (controller.loading && notifications.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
         if (notifications.isEmpty) {
           return const Center(
             child: Text('No notifications'),
@@ -29,8 +37,8 @@ class NotificationsSection extends StatelessWidget {
           itemBuilder: (context, index) {
             final notification = notifications[index];
             return ListTile(
-              title: Text(notification.title ?? 'Notification'),
-              subtitle: Text(notification.message ?? ''),
+              title: Text(notification.title),
+              subtitle: Text(notification.message),
               onTap: () => onOpenNotification(notification),
             );
           },

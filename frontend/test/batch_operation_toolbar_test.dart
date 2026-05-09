@@ -483,6 +483,173 @@ void main() {
       final checkbox = tester.widget<Checkbox>(find.byType(Checkbox));
       expect(checkbox.value, isFalse);
     });
+
+    testWidgets('throttles batch operations with 1000ms delay', (
+      WidgetTester tester,
+    ) async {
+      var batchEnableCallCount = 0;
+      var currentTime = DateTime(2026, 1, 1, 0, 0, 0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BatchOperationToolbar(
+              totalCount: 10,
+              selectedIds: const {1, 2},
+              onSelectionChanged: (_) {},
+              onSelectAll: () {},
+              onDeselectAll: () {},
+              onBatchEnable: () {
+                batchEnableCallCount++;
+              },
+              onBatchDisable: () {},
+              onBatchUpdateDuration: () {},
+              onBatchReplace: () {},
+              onBatchGenerateVoiceover: () {},
+              nowProvider: () => currentTime,
+            ),
+          ),
+        ),
+      );
+
+      // First tap should succeed
+      await tester.tap(find.text('批量启用'));
+      await tester.pump();
+      expect(batchEnableCallCount, 1);
+
+      // Second tap within 1000ms should be throttled
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.text('批量启用'));
+      await tester.pump();
+      expect(batchEnableCallCount, 1); // Still 1, not incremented
+
+      // Third tap after 1000ms should succeed
+      currentTime = currentTime.add(const Duration(milliseconds: 1100));
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.tap(find.text('批量启用'));
+      await tester.pump();
+      expect(batchEnableCallCount, 2);
+    });
+
+    testWidgets('shows throttle message when operation is throttled', (
+      WidgetTester tester,
+    ) async {
+      final currentTime = DateTime(2026, 1, 1, 0, 0, 0);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BatchOperationToolbar(
+              totalCount: 10,
+              selectedIds: const {1, 2},
+              onSelectionChanged: (_) {},
+              onSelectAll: () {},
+              onDeselectAll: () {},
+              onBatchEnable: () {},
+              onBatchDisable: () {},
+              onBatchUpdateDuration: () {},
+              onBatchReplace: () {},
+              onBatchGenerateVoiceover: () {},
+              nowProvider: () => currentTime,
+            ),
+          ),
+        ),
+      );
+
+      // First tap
+      await tester.tap(find.text('批量启用'));
+      await tester.pump();
+
+      // Second tap within 1000ms should show throttle message
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.text('批量启用'));
+      await tester.pump();
+
+      expect(find.text('操作过于频繁，请稍后再试'), findsOneWidget);
+    });
+
+    testWidgets('throttles different batch operations independently', (
+      WidgetTester tester,
+    ) async {
+      var batchEnableCallCount = 0;
+      var batchDisableCallCount = 0;
+      var currentTime = DateTime(2026, 1, 1, 0, 0, 0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BatchOperationToolbar(
+              totalCount: 10,
+              selectedIds: const {1, 2},
+              onSelectionChanged: (_) {},
+              onSelectAll: () {},
+              onDeselectAll: () {},
+              onBatchEnable: () {
+                batchEnableCallCount++;
+              },
+              onBatchDisable: () {
+                batchDisableCallCount++;
+              },
+              onBatchUpdateDuration: () {},
+              onBatchReplace: () {},
+              onBatchGenerateVoiceover: () {},
+              nowProvider: () => currentTime,
+            ),
+          ),
+        ),
+      );
+
+      // Tap batch enable
+      await tester.tap(find.text('批量启用'));
+      await tester.pump();
+      expect(batchEnableCallCount, 1);
+
+      // Tap batch disable within 1000ms - should also be throttled
+      // because throttle is shared across all batch operations
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.text('批量禁用'));
+      await tester.pump();
+      expect(batchDisableCallCount, 0); // Throttled
+
+      // After 1000ms from first operation, batch disable should work
+      currentTime = currentTime.add(const Duration(milliseconds: 1100));
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.tap(find.text('批量禁用'));
+      await tester.pump();
+      expect(batchDisableCallCount, 1);
+    });
+
+    testWidgets('does not throttle when operation is in progress', (
+      WidgetTester tester,
+    ) async {
+      var batchEnableCallCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BatchOperationToolbar(
+              totalCount: 10,
+              selectedIds: const {1, 2},
+              onSelectionChanged: (_) {},
+              onSelectAll: () {},
+              onDeselectAll: () {},
+              onBatchEnable: () {
+                batchEnableCallCount++;
+              },
+              onBatchDisable: () {},
+              onBatchUpdateDuration: () {},
+              onBatchReplace: () {},
+              onBatchGenerateVoiceover: () {},
+              isOperationInProgress: true,
+            ),
+          ),
+        ),
+      );
+
+      // Tap should not work because operation is in progress
+      await tester.tap(find.text('批量启用'));
+      await tester.pump();
+      expect(batchEnableCallCount, 0);
+    });
   });
 
   group('ShotSelectionCheckbox', () {

@@ -37,9 +37,40 @@
 //! 2. 服务器自动生成 UUID 作为 request ID（如果客户端未提供）
 //! 3. Request ID 在响应头和错误体中返回
 //! 4. 所有日志记录包含 request ID 以便关联
+//!
+//! ## 错误日志记录
+//!
+//! 所有错误在转换为 HTTP 响应时自动记录日志：
+//! - 5xx 错误（Internal、DatabaseError）记录为 `error` 级别
+//! - 配置错误（AuthNotConfigured、LlmNotConfigured）记录为 `warn` 级别
+//! - 4xx 错误（BadRequest、NotFound、Unauthorized）记录为 `info` 或 `debug` 级别
+//!
+//! ## 错误处理辅助函数
+//!
+//! 使用 `helpers` 模块中的辅助函数可以简化错误处理：
+//!
+//! ```ignore
+//! use crate::error::helpers::{db_error, validate_non_empty_string, validate_range};
+//!
+//! // 数据库错误处理
+//! let user = sqlx::query_as("SELECT * FROM users WHERE id = $1")
+//!     .bind(user_id)
+//!     .fetch_one(pool)
+//!     .await
+//!     .map_err(|e| db_error("Failed to fetch user", e))?;
+//!
+//! // 输入验证
+//! validate_non_empty_string(&body.name, "name")?;
+//! validate_range(body.duration, 1, 300, "duration")?;
+//! ```
 
 mod api_error;
+mod helpers;
 
 // `ErrorBody` is part of the stable JSON contract but only referenced from docs / future callers.
 #[allow(unused_imports)]
 pub use api_error::{ApiError, ErrorBody};
+pub use helpers::{
+    db_error, internal_error, validate_enum, validate_input, validate_non_empty_string,
+    validate_range,
+};

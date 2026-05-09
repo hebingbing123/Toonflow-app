@@ -100,7 +100,6 @@ pub struct ProjectMemberResponse {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
-
 #[derive(Debug, FromRow, Serialize, ToSchema)]
 #[schema(
     title = "ProjectRow",

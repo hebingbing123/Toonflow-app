@@ -215,6 +215,7 @@ async fn put_skill_content(
     // pool.clone() 是 Arc 内部 clone，开销极低
     if let Ok(pool) = state.require_pool() {
         let pool = pool.clone();
+        let notify = state.notify.clone();
         let path = doc.path.clone();
         let content = doc.content.clone();
         let old = old_content;
@@ -232,7 +233,9 @@ async fn put_skill_content(
             {
                 tracing::warn!(error = %e, path = %path, "failed to record skill version");
             }
-            if let Err(e) = change_notify::notify_skill_change(&pool, &path, changed_at_ms).await {
+            if let Err(e) =
+                change_notify::notify_skill_change(&pool, &notify, &path, changed_at_ms).await
+            {
                 tracing::warn!(error = ?e, path = %path, "failed to notify skill change");
             }
         });
@@ -253,6 +256,7 @@ async fn post_skill_content(
     // 新建文件后自动记录版本（需求 24.1, 24.2）
     if let Ok(pool) = state.require_pool() {
         let pool = pool.clone();
+        let notify = state.notify.clone();
         let path = doc.path.clone();
         let content = doc.content.clone();
         let changed_at_ms = chrono::Utc::now().timestamp_millis();
@@ -269,7 +273,9 @@ async fn post_skill_content(
             {
                 tracing::warn!(error = %e, path = %path, "failed to record skill version on create");
             }
-            if let Err(e) = change_notify::notify_skill_change(&pool, &path, changed_at_ms).await {
+            if let Err(e) =
+                change_notify::notify_skill_change(&pool, &notify, &path, changed_at_ms).await
+            {
                 tracing::warn!(error = ?e, path = %path, "failed to notify created skill change");
             }
         });

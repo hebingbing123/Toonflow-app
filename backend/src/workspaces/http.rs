@@ -12,6 +12,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::settings::notifications::{record_notification, NotificationRecordPayload};
 use crate::state::AppState;
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -368,6 +369,62 @@ async fn append_workspace_audit(
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
+async fn load_workspace_name(pool: &PgPool, workspace_id: Uuid) -> Result<String, ApiError> {
+    sqlx::query_scalar(
+        r#"
+        SELECT name
+        FROM public.app_workspace
+        WHERE id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn record_workspace_invite_notification(
+    state: &AppState,
+    user_id: Uuid,
+    workspace_id: Uuid,
+    workspace_name: &str,
+    notification_type: &str,
+    title: String,
+    message: String,
+    payload: Value,
+) -> Result<(), ApiError> {
+    record_notification(
+        state.require_pool()?,
+        Some(&state.notify),
+        NotificationRecordPayload {
+            user_id,
+            workspace_id: Some(workspace_id),
+            project_id: None,
+            project_numeric_id: None,
+            job_id: None,
+            notification_type: notification_type.to_string(),
+            title,
+            message,
+            link_path: Some(format!(
+                "/product/team-workspaces?workspaceId={workspace_id}"
+            )),
+            payload,
+            file_path: None,
+            changed_at: None,
+        },
+    )
+    .await?;
+    tracing::debug!(
+        user_id = %user_id,
+        workspace_id = %workspace_id,
+        workspace_name = workspace_name,
+        notification_type,
+        "workspace invite notification recorded"
+    );
     Ok(())
 }
 
@@ -1540,6 +1597,25 @@ pub(crate) async fn revoke_workspace_invite(
         serde_json::json!({ "invite_id": row.id, "email": row.email }),
     )
     .await?;
+    let workspace_name = load_workspace_name(pool, workspace_id).await?;
+    record_workspace_invite_notification(
+        &state,
+        uid,
+        workspace_id,
+        &workspace_name,
+        "workspace_invite_revoked",
+        format!("邀请已撤销 · {workspace_name}"),
+        format!("已撤销发往 {} 的团队邀请。", row.email),
+        serde_json::json!({
+            "inviteId": row.id,
+            "workspaceId": workspace_id,
+            "workspaceName": workspace_name,
+            "email": row.email,
+            "role": row.role,
+            "status": row.status,
+        }),
+    )
+    .await?;
 
     Ok(Json(row))
 }
@@ -1635,6 +1711,26 @@ pub(crate) async fn resend_workspace_invite(
         }),
     )
     .await?;
+    let workspace_name = load_workspace_name(pool, workspace_id).await?;
+    record_workspace_invite_notification(
+        &state,
+        uid,
+        workspace_id,
+        &workspace_name,
+        "workspace_invite_resent",
+        format!("邀请已重发 · {workspace_name}"),
+        format!("已向 {} 重发团队邀请。", row.email),
+        serde_json::json!({
+            "inviteId": row.id,
+            "workspaceId": workspace_id,
+            "workspaceName": workspace_name,
+            "email": row.email,
+            "role": row.role,
+            "status": row.status,
+            "expiresAt": row.expires_at,
+        }),
+    )
+    .await?;
 
     Ok(Json(row))
 }
@@ -1710,6 +1806,26 @@ pub(crate) async fn create_workspace_invite(
             "email": row.email.clone(),
             "role": row.role.clone(),
             "expires_at": row.expires_at
+        }),
+    )
+    .await?;
+    let workspace_name = load_workspace_name(pool, workspace_id).await?;
+    record_workspace_invite_notification(
+        &state,
+        uid,
+        workspace_id,
+        &workspace_name,
+        "workspace_invite_created",
+        format!("邀请已创建 · {workspace_name}"),
+        format!("已向 {} 发送团队邀请，角色 {}。", row.email, row.role),
+        serde_json::json!({
+            "inviteId": row.id,
+            "workspaceId": workspace_id,
+            "workspaceName": workspace_name,
+            "email": row.email,
+            "role": row.role,
+            "status": row.status,
+            "expiresAt": row.expires_at,
         }),
     )
     .await?;
@@ -1817,6 +1933,45 @@ pub(crate) async fn accept_workspace_invite(
         }),
     )
     .await?;
+    let workspace_name = load_workspace_name(pool, invite.workspace_id).await?;
+    record_workspace_invite_notification(
+        &state,
+        uid,
+        invite.workspace_id,
+        &workspace_name,
+        "workspace_invite_accepted",
+        format!("已加入团队工作区 · {workspace_name}"),
+        format!("你已接受团队邀请，当前角色 {}。", member.role),
+        serde_json::json!({
+            "inviteId": invite.id,
+            "workspaceId": invite.workspace_id,
+            "workspaceName": workspace_name,
+            "role": member.role,
+            "status": "accepted",
+        }),
+    )
+    .await?;
+    if invite.invited_by != uid {
+        record_workspace_invite_notification(
+            &state,
+            invite.invited_by,
+            invite.workspace_id,
+            &workspace_name,
+            "workspace_invite_accepted",
+            format!("邀请已接受 · {workspace_name}"),
+            format!("{} 已接受团队邀请，角色 {}。", invite.email, member.role),
+            serde_json::json!({
+                "inviteId": invite.id,
+                "workspaceId": invite.workspace_id,
+                "workspaceName": workspace_name,
+                "email": invite.email,
+                "acceptedBy": uid,
+                "role": member.role,
+                "status": "accepted",
+            }),
+        )
+        .await?;
+    }
 
     Ok(Json(member))
 }

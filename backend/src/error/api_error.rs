@@ -8,6 +8,7 @@ use axum::{
     Json,
 };
 use serde::Serialize;
+use tracing::{error, warn};
 use utoipa::ToSchema;
 
 #[derive(Serialize, ToSchema)]
@@ -74,6 +75,141 @@ fn secs_until_utc_midnight() -> u64 {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
+        // Log errors before converting to response
+        match &self {
+            // 5xx errors - log as errors with full context
+            ApiError::Internal => {
+                error!(
+                    target: "toonflow.api.error",
+                    error_type = "internal_error",
+                    status = 500,
+                    "Internal server error occurred"
+                );
+            }
+            ApiError::DatabaseError(msg) => {
+                error!(
+                    target: "toonflow.api.error",
+                    error_type = "database_error",
+                    status = 503,
+                    message = %msg,
+                    "Database error occurred"
+                );
+            }
+            // Configuration errors - log as warnings
+            ApiError::AuthNotConfigured => {
+                warn!(
+                    target: "toonflow.api.error",
+                    error_type = "auth_not_configured",
+                    status = 503,
+                    "SUPABASE_JWT_SECRET is not set"
+                );
+            }
+            ApiError::WebhookNotConfigured => {
+                warn!(
+                    target: "toonflow.api.error",
+                    error_type = "webhook_not_configured",
+                    status = 503,
+                    "BILLING_WEBHOOK_SECRET is not set"
+                );
+            }
+            ApiError::LlmNotConfigured => {
+                warn!(
+                    target: "toonflow.api.error",
+                    error_type = "llm_not_configured",
+                    status = 503,
+                    "LLM API key is not configured"
+                );
+            }
+            // 4xx errors - log as info/debug (client errors, not server issues)
+            ApiError::Unauthorized => {
+                tracing::debug!(
+                    target: "toonflow.api.error",
+                    error_type = "unauthorized",
+                    status = 401,
+                    "Unauthorized request - missing or invalid Authorization header"
+                );
+            }
+            ApiError::BadToken => {
+                tracing::debug!(
+                    target: "toonflow.api.error",
+                    error_type = "invalid_token",
+                    status = 401,
+                    "JWT verification failed"
+                );
+            }
+            ApiError::Forbidden(msg) => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "forbidden",
+                    status = 403,
+                    message = %msg,
+                    "Forbidden - authenticated but not allowed"
+                );
+            }
+            ApiError::NotFound => {
+                tracing::debug!(
+                    target: "toonflow.api.error",
+                    error_type = "not_found",
+                    status = 404,
+                    "Resource not found"
+                );
+            }
+            ApiError::Conflict(msg) => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "conflict",
+                    status = 409,
+                    message = %msg,
+                    "Conflict error"
+                );
+            }
+            ApiError::ConflictWithDetails { message, details } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "conflict",
+                    status = 409,
+                    message = %message,
+                    details = ?details,
+                    "Conflict error with details"
+                );
+            }
+            ApiError::BadRequest(msg) => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "bad_request",
+                    status = 400,
+                    message = %msg,
+                    "Bad request"
+                );
+            }
+            ApiError::InvalidWebhookSignature => {
+                tracing::warn!(
+                    target: "toonflow.api.error",
+                    error_type = "invalid_webhook_signature",
+                    status = 401,
+                    "Webhook HMAC verification failed"
+                );
+            }
+            ApiError::NotImplemented(msg) => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "not_implemented",
+                    status = 501,
+                    message = %msg,
+                    "Not implemented"
+                );
+            }
+            ApiError::QuotaExceeded(msg) => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "quota_exceeded",
+                    status = 429,
+                    message = %msg,
+                    "Quota exceeded"
+                );
+            }
+        }
+
         let (status, code, message, details) = match &self {
             ApiError::Unauthorized => (
                 StatusCode::UNAUTHORIZED,

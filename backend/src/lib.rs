@@ -13,6 +13,8 @@ pub mod jobs;
 pub mod llm;
 pub mod manuals;
 pub mod metering;
+pub mod metrics;
+pub mod middleware;
 pub mod narrative;
 pub mod production;
 pub mod projects;

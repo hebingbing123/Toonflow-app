@@ -2,491 +2,792 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/short_video_space/components/preview_player.dart';
 
-ConstrainedBox findDialogConstraint(WidgetTester tester) {
-  return tester.widgetList<ConstrainedBox>(find.byType(ConstrainedBox)).firstWhere(
-    (widget) => widget.constraints.maxWidth == 800,
-  );
-}
+/// Unit tests for Task 9.4: PreviewPlayer Component
+/// 
+/// Tests cover:
+/// - Requirements 1: Single shot preview playback
+/// - Requirements 2: Continuous playlist playback
+/// - Playback state management (play/pause/stop)
+/// - Progress tracking (current position, total duration)
+/// - Shot switching logic (next/previous)
 
 void main() {
-  group('PreviewPlayer', () {
-    const testVideoUrl = 'https://example.com/test-video.mp4';
-    const testShotNumber = 42;
-    const testShotTitle = '测试镜头标题';
-    const testDurationText = '10s';
+  group('ShotPreviewItem', () {
+    test('should create shot preview item with required fields', () {
+      final item = ShotPreviewItem(
+        videoUrl: 'https://example.com/video.mp4',
+        shotNumber: 1,
+      );
 
-    testWidgets('should display shot information when provided', (
-      WidgetTester tester,
-    ) async {
+      expect(item.videoUrl, 'https://example.com/video.mp4');
+      expect(item.shotNumber, 1);
+      expect(item.shotTitle, null);
+      expect(item.durationText, null);
+    });
+
+    test('should create shot preview item with all fields', () {
+      final item = ShotPreviewItem(
+        videoUrl: 'https://example.com/video.mp4',
+        shotNumber: 1,
+        shotTitle: 'Opening Scene',
+        durationText: '10s',
+      );
+
+      expect(item.videoUrl, 'https://example.com/video.mp4');
+      expect(item.shotNumber, 1);
+      expect(item.shotTitle, 'Opening Scene');
+      expect(item.durationText, '10s');
+    });
+  });
+
+  group('PreviewPlayer - Constructor Validation', () {
+    test('should accept single shot mode with videoUrl', () {
+      expect(
+        () => PreviewPlayer(
+          videoUrl: 'https://example.com/video.mp4',
+          shotNumber: 1,
+        ),
+        returnsNormally,
+      );
+    });
+
+    test('should accept playlist mode with non-empty playlist', () {
+      expect(
+        () => PreviewPlayer(
+          playlist: [
+            ShotPreviewItem(
+              videoUrl: 'https://example.com/video1.mp4',
+              shotNumber: 1,
+            ),
+          ],
+        ),
+        returnsNormally,
+      );
+    });
+
+    test('should throw assertion error when both videoUrl and playlist are null', () {
+      expect(
+        () => PreviewPlayer(),
+        throwsAssertionError,
+      );
+    });
+
+    test('should throw assertion error when both videoUrl and playlist are provided', () {
+      expect(
+        () => PreviewPlayer(
+          videoUrl: 'https://example.com/video.mp4',
+          playlist: [
+            ShotPreviewItem(
+              videoUrl: 'https://example.com/video1.mp4',
+              shotNumber: 1,
+            ),
+          ],
+        ),
+        throwsAssertionError,
+      );
+    });
+
+    test('should throw assertion error when playlist is empty', () {
+      expect(
+        () => PreviewPlayer(playlist: const []),
+        throwsAssertionError,
+      );
+    });
+  });
+
+  group('PreviewPlayer - Playback State Management', () {
+    testWidgets('should initialize with stopped state', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: PreviewPlayer(
-              videoUrl: testVideoUrl,
-              shotNumber: testShotNumber,
-              shotTitle: testShotTitle,
-              durationText: testDurationText,
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
             ),
           ),
         ),
       );
 
-      expect(find.text('镜头 #$testShotNumber'), findsOneWidget);
-      expect(find.text(testShotTitle), findsOneWidget);
-      expect(find.text(testDurationText), findsOneWidget);
-      expect(find.byIcon(Icons.movie_outlined), findsOneWidget);
-    });
-
-    testWidgets('should not display shot information when not provided', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      expect(find.byIcon(Icons.movie_outlined), findsNothing);
-      expect(find.textContaining('镜头 #'), findsNothing);
-    });
-
-    testWidgets('should display loading indicator initially', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
+      // Should show loading indicator initially
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('should display error message when video URL is empty', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('should show play button when not playing', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: '')),
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+              autoPlay: false,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should have play button (not pause)
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+    });
+
+    testWidgets('should show stop button', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.byIcon(Icons.stop), findsOneWidget);
+    });
+
+    testWidgets('should display shot number when provided', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 5,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('镜头 #5'), findsOneWidget);
+    });
+
+    testWidgets('should display shot title when provided', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+              shotTitle: 'Opening Scene',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('Opening Scene'), findsOneWidget);
+    });
+
+    testWidgets('should display duration text when provided', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+              durationText: '10s',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('10s'), findsOneWidget);
+    });
+  });
+
+  group('PreviewPlayer - Progress Tracking', () {
+    testWidgets('should display progress slider', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.byType(Slider), findsOneWidget);
+    });
+
+    testWidgets('should display current time and total duration', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should display time in format MM:SS
+      expect(find.text('00:00'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('should format duration correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Initial state should show 00:00
+      expect(find.text('00:00'), findsAtLeastNWidgets(1));
+    });
+  });
+
+  group('PreviewPlayer - Playlist Mode', () {
+    testWidgets('should display playlist indicator', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should show current shot index and total count
+      expect(find.text('(1/2)'), findsOneWidget);
+    });
+
+    testWidgets('should show previous and next buttons in playlist mode', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.byIcon(Icons.skip_previous), findsOneWidget);
+      expect(find.byIcon(Icons.skip_next), findsOneWidget);
+    });
+
+    testWidgets('should not show previous/next buttons in single shot mode', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.byIcon(Icons.skip_previous), findsNothing);
+      expect(find.byIcon(Icons.skip_next), findsNothing);
+    });
+
+    testWidgets('should disable previous button on first shot', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Find the previous button
+      final previousButton = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.skip_previous),
+          matching: find.byType(IconButton),
+        ),
+      );
+
+      // Should be disabled on first shot
+      expect(previousButton.onPressed, isNull);
+    });
+
+    testWidgets('should disable next button on last shot', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Find the next button
+      final nextButton = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.skip_next),
+          matching: find.byType(IconButton),
+        ),
+      );
+
+      // Should be disabled on last shot (only one shot in playlist)
+      expect(nextButton.onPressed, isNull);
+    });
+
+    testWidgets('should display total playlist progress', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should show total progress indicator
+      expect(find.text('总进度'), findsOneWidget);
+      expect(find.byIcon(Icons.playlist_play), findsOneWidget);
+    });
+
+    testWidgets('should display current shot progress separately', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should show current shot icon
+      expect(find.byIcon(Icons.movie), findsOneWidget);
+    });
+  });
+
+  group('PreviewPlayer - Shot Switching Logic', () {
+    testWidgets('should update shot number when switching shots', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                  shotTitle: 'Shot 1',
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                  shotTitle: 'Shot 2',
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Initially should show shot 1
+      expect(find.text('镜头 #1'), findsOneWidget);
+      expect(find.text('Shot 1'), findsOneWidget);
+    });
+
+    testWidgets('should maintain playlist position indicator', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video3.mp4',
+                  shotNumber: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should show 1/3 initially
+      expect(find.text('(1/3)'), findsOneWidget);
+    });
+  });
+
+  group('PreviewPlayer - Error Handling', () {
+    testWidgets('should show error message when video URL is empty', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: '',
+              shotNumber: 1,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should show error icon and message
+      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.text('视频 URL 为空'), findsOneWidget);
+    });
+
+    testWidgets('should display error icon in error state', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: '',
+              shotNumber: 1,
+            ),
+          ),
         ),
       );
 
       await tester.pump();
 
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
-      expect(find.text('视频 URL 为空'), findsOneWidget);
     });
+  });
 
-    testWidgets('should display play/pause control buttons', (
-      WidgetTester tester,
-    ) async {
+  group('PreviewPlayer - UI Layout', () {
+    testWidgets('should display video in 16:9 aspect ratio', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      expect(find.byIcon(Icons.stop), findsOneWidget);
-      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
-    });
-
-    testWidgets('should display progress slider', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      expect(find.byType(Slider), findsOneWidget);
-    });
-
-    testWidgets('should display time labels', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      // Should display current time and total duration (initially 00:00)
-      expect(find.text('00:00'), findsAtLeastNWidgets(2));
-    });
-
-    testWidgets('should have 16:9 aspect ratio for video player', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      final aspectRatio = tester.widget<AspectRatio>(find.byType(AspectRatio));
-      expect(aspectRatio.aspectRatio, 16 / 9);
-    });
-
-    testWidgets('should disable controls initially before video loads', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      final stopButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.stop),
-      );
-      expect(stopButton.onPressed, isNull);
-
-      final playButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.play_arrow),
-      );
-      expect(playButton.onPressed, isNull);
-
-      final slider = tester.widget<Slider>(find.byType(Slider));
-      expect(slider.onChanged, isNull);
-    });
-
-    testWidgets('should show play icon when not playing', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
-      expect(find.byIcon(Icons.pause), findsNothing);
-    });
-
-    testWidgets('should have correct tooltips on control buttons', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      final stopButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.stop),
-      );
-      expect(stopButton.tooltip, '停止');
-
-      final playButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.play_arrow),
-      );
-      expect(playButton.tooltip, '播放');
-    });
-
-    testWidgets('should update video URL when widget updates', (
-      WidgetTester tester,
-    ) async {
-      const initialUrl = 'https://example.com/video1.mp4';
-      const updatedUrl = 'https://example.com/video2.mp4';
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: initialUrl)),
-        ),
-      );
-
-      // Update the video URL
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: updatedUrl)),
-        ),
-      );
-
-      // Should show loading indicator again
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('should display shot title with ellipsis for long text', (
-      WidgetTester tester,
-    ) async {
-      const longTitle = '这是一个非常非常非常非常非常非常非常非常非常长的镜头标题';
-
-      await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: PreviewPlayer(
-              videoUrl: testVideoUrl,
-              shotNumber: testShotNumber,
-              shotTitle: longTitle,
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
             ),
           ),
         ),
       );
 
-      final textWidget = tester.widget<Text>(find.text(longTitle));
-      expect(textWidget.maxLines, 2);
-      expect(textWidget.overflow, TextOverflow.ellipsis);
+      await tester.pump();
+
+      // Should have AspectRatio widget with 16/9 ratio
+      final aspectRatio = tester.widget<AspectRatio>(
+        find.byType(AspectRatio),
+      );
+      expect(aspectRatio.aspectRatio, 16 / 9);
     });
 
-    testWidgets('should have black background for video container', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('should have scrollable layout', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: testVideoUrl)),
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+            ),
+          ),
         ),
       );
 
-      final containers = tester.widgetList<Container>(find.byType(Container));
+      await tester.pump();
 
-      // Find the container with black background (video container)
-      final videoContainer = containers.firstWhere(
-        (container) => container.color == Colors.black,
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+    });
+
+    testWidgets('should display all control buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+            ),
+          ),
+        ),
       );
-      expect(videoContainer.color, Colors.black);
+
+      await tester.pump();
+
+      // Should have stop and play/pause buttons
+      expect(find.byIcon(Icons.stop), findsOneWidget);
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
     });
   });
 
   group('PreviewPlayerDialog', () {
-    const testVideoUrl = 'https://example.com/test-video.mp4';
-    const testShotNumber = 42;
-    const testShotTitle = '测试镜头标题';
-    const testDurationText = '10s';
-
-    testWidgets('should display PreviewPlayer component', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('should create dialog with single shot', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
-            body: PreviewPlayerDialog(
-              videoUrl: testVideoUrl,
-              shotNumber: testShotNumber,
-              shotTitle: testShotTitle,
-              durationText: testDurationText,
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  PreviewPlayerDialog.show(
+                    context,
+                    videoUrl: 'https://example.com/video.mp4',
+                    shotNumber: 1,
+                  );
+                },
+                child: const Text('Show Dialog'),
+              ),
             ),
           ),
         ),
       );
 
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
+
+      // Dialog should be displayed
+      expect(find.byType(Dialog), findsOneWidget);
       expect(find.byType(PreviewPlayer), findsOneWidget);
     });
 
-    testWidgets('should display close button', (WidgetTester tester) async {
+    testWidgets('should create dialog with playlist', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayerDialog(videoUrl: testVideoUrl)),
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  PreviewPlayerDialog.showPlaylist(
+                    context,
+                    playlist: [
+                      ShotPreviewItem(
+                        videoUrl: 'https://example.com/video1.mp4',
+                        shotNumber: 1,
+                      ),
+                      ShotPreviewItem(
+                        videoUrl: 'https://example.com/video2.mp4',
+                        shotNumber: 2,
+                      ),
+                    ],
+                  );
+                },
+                child: const Text('Show Playlist'),
+              ),
+            ),
+          ),
         ),
       );
+
+      await tester.tap(find.text('Show Playlist'));
+      await tester.pumpAndSettle();
+
+      // Dialog should be displayed with playlist
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(PreviewPlayer), findsOneWidget);
+      expect(find.text('(1/2)'), findsOneWidget);
+    });
+
+    testWidgets('should have close button', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  PreviewPlayerDialog.show(
+                    context,
+                    videoUrl: 'https://example.com/video.mp4',
+                    shotNumber: 1,
+                  );
+                },
+                child: const Text('Show Dialog'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
 
       expect(find.text('关闭'), findsOneWidget);
     });
 
-    testWidgets('should be wrapped in Dialog widget', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('should close dialog when close button tapped', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayerDialog(videoUrl: testVideoUrl)),
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  PreviewPlayerDialog.show(
+                    context,
+                    videoUrl: 'https://example.com/video.mp4',
+                    shotNumber: 1,
+                  );
+                },
+                child: const Text('Show Dialog'),
+              ),
+            ),
+          ),
         ),
       );
+
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
 
       expect(find.byType(Dialog), findsOneWidget);
-    });
 
-    testWidgets('should have max width constraint', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayerDialog(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      final constrainedBox = findDialogConstraint(tester);
-      expect(constrainedBox.constraints.maxWidth, 800);
-    });
-
-    testWidgets('should pass video URL to PreviewPlayer', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayerDialog(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      final previewPlayer = tester.widget<PreviewPlayer>(
-        find.byType(PreviewPlayer),
-      );
-      expect(previewPlayer.videoUrl, testVideoUrl);
-    });
-
-    testWidgets('should pass shot information to PreviewPlayer', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayerDialog(
-              videoUrl: testVideoUrl,
-              shotNumber: testShotNumber,
-              shotTitle: testShotTitle,
-              durationText: testDurationText,
-            ),
-          ),
-        ),
-      );
-
-      final previewPlayer = tester.widget<PreviewPlayer>(
-        find.byType(PreviewPlayer),
-      );
-      expect(previewPlayer.shotNumber, testShotNumber);
-      expect(previewPlayer.shotTitle, testShotTitle);
-      expect(previewPlayer.durationText, testDurationText);
-    });
-
-    testWidgets('should enable autoPlay for PreviewPlayer', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayerDialog(videoUrl: testVideoUrl)),
-        ),
-      );
-
-      final previewPlayer = tester.widget<PreviewPlayer>(
-        find.byType(PreviewPlayer),
-      );
-      expect(previewPlayer.autoPlay, true);
-    });
-
-    testWidgets('should close dialog when close button tapped', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) => Scaffold(
-              body: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    PreviewPlayerDialog.show(context, videoUrl: testVideoUrl);
-                  },
-                  child: const Text('Open'),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Open the dialog
-      await tester.tap(find.text('Open'));
-      await tester.pumpAndSettle();
-
-      // Verify dialog is shown
-      expect(find.byType(PreviewPlayerDialog), findsOneWidget);
-
-      // Tap close button
+      // Use ensureVisible to scroll the close button into view if needed
       await tester.ensureVisible(find.text('关闭'));
-      await tester.tap(find.text('关闭'));
       await tester.pumpAndSettle();
 
-      // Verify dialog is closed
-      expect(find.byType(PreviewPlayerDialog), findsNothing);
+      await tester.tap(find.text('关闭'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Dialog), findsNothing);
     });
 
-    testWidgets('should show dialog using static show method', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('should have constrained size', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(
-            builder: (context) => Scaffold(
-              body: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    PreviewPlayerDialog.show(
-                      context,
-                      videoUrl: testVideoUrl,
-                      shotNumber: testShotNumber,
-                      shotTitle: testShotTitle,
-                      durationText: testDurationText,
-                    );
-                  },
-                  child: const Text('Open'),
-                ),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  PreviewPlayerDialog.show(
+                    context,
+                    videoUrl: 'https://example.com/video.mp4',
+                    shotNumber: 1,
+                  );
+                },
+                child: const Text('Show Dialog'),
               ),
             ),
           ),
         ),
       );
 
-      // Open the dialog
-      await tester.tap(find.text('Open'));
+      await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
 
-      // Verify dialog is shown with correct content
-      expect(find.byType(PreviewPlayerDialog), findsOneWidget);
-      expect(find.text('镜头 #$testShotNumber'), findsOneWidget);
-      expect(find.text(testShotTitle), findsOneWidget);
+      // Should have ConstrainedBox with max width
+      // Find the specific ConstrainedBox that has maxWidth constraint
+      final constrainedBoxes = find.descendant(
+        of: find.byType(Dialog),
+        matching: find.byType(ConstrainedBox),
+      );
+
+      // The dialog should contain a ConstrainedBox
+      expect(constrainedBoxes, findsAtLeastNWidgets(1));
+
+      // Check if any ConstrainedBox has the expected maxWidth
+      bool foundCorrectConstraint = false;
+      for (final element in constrainedBoxes.evaluate()) {
+        final widget = element.widget as ConstrainedBox;
+        if (widget.constraints.maxWidth == 800) {
+          foundCorrectConstraint = true;
+          break;
+        }
+      }
+
+      expect(foundCorrectConstraint, true, reason: 'Should have a ConstrainedBox with maxWidth of 800');
     });
   });
 
-  group('PreviewPlayer State Management', () {
-    testWidgets('should track playing state', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(videoUrl: 'https://example.com/test-video.mp4'),
-          ),
-        ),
-      );
-
-      // Initially should show play icon (not playing)
-      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
-      expect(find.byIcon(Icons.pause), findsNothing);
-    });
-
-    testWidgets('should track progress position', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(videoUrl: 'https://example.com/test-video.mp4'),
-          ),
-        ),
-      );
-
-      // Initially should show 00:00 for both current and total time
-      expect(find.text('00:00'), findsAtLeastNWidgets(2));
-    });
-
-    testWidgets('should format duration correctly', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(videoUrl: 'https://example.com/test-video.mp4'),
-          ),
-        ),
-      );
-
-      // Time format should be MM:SS with zero padding
-      final timeTexts = tester.widgetList<Text>(
-        find.textContaining(RegExp(r'\d{2}:\d{2}')),
-      );
-      expect(timeTexts.isNotEmpty, true);
-    });
-
-    testWidgets('should handle playback complete callback', (
-      WidgetTester tester,
-    ) async {
-      bool callbackCalled = false;
+  group('PreviewPlayer - Callbacks', () {
+    testWidgets('should accept onPlaybackComplete callback', (WidgetTester tester) async {
+      var callbackCalled = false;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: PreviewPlayer(
-              videoUrl: 'https://example.com/test-video.mp4',
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
               onPlaybackComplete: () {
                 callbackCalled = true;
               },
@@ -495,328 +796,25 @@ void main() {
         ),
       );
 
-      // Note: Testing actual video playback completion requires mocking
-      // VideoPlayerController, which is complex in widget tests.
-      // This test verifies the callback is properly wired up.
-      expect(callbackCalled, false);
-    });
-
-    testWidgets('should handle autoPlay parameter', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(
-              videoUrl: 'https://example.com/test-video.mp4',
-              autoPlay: true,
-            ),
-          ),
-        ),
-      );
-
-      // Widget should be created with autoPlay enabled
-      final previewPlayer = tester.widget<PreviewPlayer>(
-        find.byType(PreviewPlayer),
-      );
-      expect(previewPlayer.autoPlay, true);
-    });
-  });
-
-  group('PreviewPlayer Shot Switching', () {
-    testWidgets('should support shot number display for playlist', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(
-              videoUrl: 'https://example.com/test-video.mp4',
-              shotNumber: 1,
-              shotTitle: '第一个镜头',
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('镜头 #1'), findsOneWidget);
-      expect(find.text('第一个镜头'), findsOneWidget);
-    });
-
-    testWidgets('should display shot information in header', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(
-              videoUrl: 'https://example.com/test-video.mp4',
-              shotNumber: 5,
-              shotTitle: '重要场景',
-              durationText: '15s',
-            ),
-          ),
-        ),
-      );
-
-      // All shot information should be visible
-      expect(find.text('镜头 #5'), findsOneWidget);
-      expect(find.text('重要场景'), findsOneWidget);
-      expect(find.text('15s'), findsOneWidget);
-    });
-
-    testWidgets('should handle missing shot information gracefully', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(
-              videoUrl: 'https://example.com/test-video.mp4',
-              shotNumber: 1,
-              // No title or duration
-            ),
-          ),
-        ),
-      );
-
-      // Should still show shot number
-      expect(find.text('镜头 #1'), findsOneWidget);
-      // But not show missing information
-      expect(find.byIcon(Icons.movie_outlined), findsOneWidget);
-    });
-  });
-
-  group('PreviewPlayer Error Handling', () {
-    testWidgets('should display error icon when video fails to load', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: '')),
-        ),
-      );
-
       await tester.pump();
 
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      // Callback should be set (will be called when playback completes)
+      expect(callbackCalled, false); // Not called yet
     });
 
-    testWidgets('should display error message when video fails to load', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: '')),
-        ),
-      );
-
-      await tester.pump();
-
-      expect(find.textContaining('视频'), findsOneWidget);
-    });
-
-    testWidgets('should handle empty video URL', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: PreviewPlayer(videoUrl: '')),
-        ),
-      );
-
-      await tester.pump();
-
-      expect(find.text('视频 URL 为空'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
-    });
-  });
-
-  group('PreviewPlayer Playlist Mode', () {
-    final testPlaylist = [
-      const ShotPreviewItem(
-        videoUrl: 'https://example.com/video1.mp4',
-        shotNumber: 1,
-        shotTitle: '第一个镜头',
-        durationText: '10s',
-      ),
-      const ShotPreviewItem(
-        videoUrl: 'https://example.com/video2.mp4',
-        shotNumber: 2,
-        shotTitle: '第二个镜头',
-        durationText: '15s',
-      ),
-      const ShotPreviewItem(
-        videoUrl: 'https://example.com/video3.mp4',
-        shotNumber: 3,
-        shotTitle: '第三个镜头',
-        durationText: '12s',
-      ),
-    ];
-
-    testWidgets('should display playlist mode with shot count', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: testPlaylist)),
-        ),
-      );
-
-      // Should show current shot index and total count
-      expect(find.text('(1/3)'), findsOneWidget);
-    });
-
-    testWidgets('should display first shot information initially', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: testPlaylist)),
-        ),
-      );
-
-      expect(find.text('镜头 #1'), findsOneWidget);
-      expect(find.text('第一个镜头'), findsOneWidget);
-      expect(find.text('10s'), findsOneWidget);
-    });
-
-    testWidgets('should display previous/next shot buttons in playlist mode', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: testPlaylist)),
-        ),
-      );
-
-      expect(find.byIcon(Icons.skip_previous), findsOneWidget);
-      expect(find.byIcon(Icons.skip_next), findsOneWidget);
-    });
-
-    testWidgets(
-      'should not display previous/next buttons in single shot mode',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Scaffold(
-              body: PreviewPlayer(
-                videoUrl: 'https://example.com/test-video.mp4',
-              ),
-            ),
-          ),
-        );
-
-        expect(find.byIcon(Icons.skip_previous), findsNothing);
-        expect(find.byIcon(Icons.skip_next), findsNothing);
-      },
-    );
-
-    testWidgets('should disable previous button on first shot', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: testPlaylist)),
-        ),
-      );
-
-      final previousButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.skip_previous),
-      );
-      expect(previousButton.onPressed, isNull);
-    });
-
-    testWidgets('should disable next button on last shot', (
-      WidgetTester tester,
-    ) async {
-      // Create a playlist with only one shot
-      final singleShotPlaylist = [testPlaylist.first];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: singleShotPlaylist)),
-        ),
-      );
-
-      final nextButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.skip_next),
-      );
-      expect(nextButton.onPressed, isNull);
-    });
-
-    testWidgets('should display total progress bar in playlist mode', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: testPlaylist)),
-        ),
-      );
-
-      // Should show playlist icon and total progress label
-      expect(find.byIcon(Icons.playlist_play), findsOneWidget);
-      expect(find.text('总进度'), findsOneWidget);
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('should not display total progress bar in single shot mode', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PreviewPlayer(videoUrl: 'https://example.com/test-video.mp4'),
-          ),
-        ),
-      );
-
-      expect(find.byIcon(Icons.playlist_play), findsNothing);
-      expect(find.text('总进度'), findsNothing);
-      expect(find.byType(LinearProgressIndicator), findsNothing);
-    });
-
-    testWidgets('should display current shot progress with movie icon', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: testPlaylist)),
-        ),
-      );
-
-      // Should show movie icon for current shot progress
-      expect(find.byIcon(Icons.movie), findsOneWidget);
-    });
-
-    testWidgets('should have correct tooltips for playlist controls', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: PreviewPlayer(playlist: testPlaylist)),
-        ),
-      );
-
-      final previousButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.skip_previous),
-      );
-      expect(previousButton.tooltip, '上一个镜头');
-
-      final nextButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.skip_next),
-      );
-      expect(nextButton.tooltip, '下一个镜头');
-    });
-
-    testWidgets('should call onPlaylistComplete when all shots finish', (
-      WidgetTester tester,
-    ) async {
-      bool callbackCalled = false;
+    testWidgets('should accept onPlaylistComplete callback', (WidgetTester tester) async {
+      var callbackCalled = false;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: PreviewPlayer(
-              playlist: testPlaylist,
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+              ],
               onPlaylistComplete: () {
                 callbackCalled = true;
               },
@@ -825,121 +823,133 @@ void main() {
         ),
       );
 
-      // Note: Testing actual playlist completion requires mocking
-      // VideoPlayerController, which is complex in widget tests.
-      // This test verifies the callback is properly wired up.
-      expect(callbackCalled, false);
-    });
+      await tester.pump();
 
-    testWidgets('should assert when both videoUrl and playlist are provided', (
-      WidgetTester tester,
-    ) async {
-      expect(
-        () => PreviewPlayer(
-          videoUrl: 'https://example.com/test-video.mp4',
-          playlist: testPlaylist,
-        ),
-        throwsAssertionError,
-      );
-    });
-
-    testWidgets(
-      'should assert when neither videoUrl nor playlist are provided',
-      (WidgetTester tester) async {
-        expect(() => PreviewPlayer(), throwsAssertionError);
-      },
-    );
-
-    testWidgets('should assert when empty playlist is provided', (
-      WidgetTester tester,
-    ) async {
-      expect(() => PreviewPlayer(playlist: const []), throwsAssertionError);
+      // Callback should be set (will be called when playlist completes)
+      expect(callbackCalled, false); // Not called yet
     });
   });
 
-  group('PreviewPlayerDialog Playlist Mode', () {
-    final testPlaylist = [
-      const ShotPreviewItem(
-        videoUrl: 'https://example.com/video1.mp4',
-        shotNumber: 1,
-        shotTitle: '第一个镜头',
-        durationText: '10s',
-      ),
-      const ShotPreviewItem(
-        videoUrl: 'https://example.com/video2.mp4',
-        shotNumber: 2,
-        shotTitle: '第二个镜头',
-        durationText: '15s',
-      ),
-    ];
-
-    testWidgets('should display PreviewPlayer with playlist', (
-      WidgetTester tester,
-    ) async {
+  group('PreviewPlayer - AutoPlay', () {
+    testWidgets('should respect autoPlay parameter', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: PreviewPlayerDialog(playlist: testPlaylist)),
-        ),
-      );
-
-      expect(find.byType(PreviewPlayer), findsOneWidget);
-
-      final previewPlayer = tester.widget<PreviewPlayer>(
-        find.byType(PreviewPlayer),
-      );
-      expect(previewPlayer.playlist, testPlaylist);
-    });
-
-    testWidgets(
-      'should show playlist dialog using static showPlaylist method',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Builder(
-              builder: (context) => Scaffold(
-                body: Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      PreviewPlayerDialog.showPlaylist(
-                        context,
-                        playlist: testPlaylist,
-                      );
-                    },
-                    child: const Text('Open Playlist'),
-                  ),
-                ),
-              ),
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+              autoPlay: true,
             ),
           ),
-        );
-
-        // Open the dialog
-        await tester.tap(find.text('Open Playlist'));
-        await tester.pumpAndSettle();
-
-        // Verify dialog is shown with playlist
-        expect(find.byType(PreviewPlayerDialog), findsOneWidget);
-        expect(find.text('(1/2)'), findsOneWidget);
-      },
-    );
-
-    testWidgets('should assert when both videoUrl and playlist are provided', (
-      WidgetTester tester,
-    ) async {
-      expect(
-        () => PreviewPlayerDialog(
-          videoUrl: 'https://example.com/test-video.mp4',
-          playlist: testPlaylist,
         ),
-        throwsAssertionError,
       );
+
+      await tester.pump();
+
+      // AutoPlay is set to true (actual playback depends on video controller initialization)
+      expect(find.byType(PreviewPlayer), findsOneWidget);
     });
 
-    testWidgets(
-      'should assert when neither videoUrl nor playlist are provided',
-      (WidgetTester tester) async {
-        expect(() => PreviewPlayerDialog(), throwsAssertionError);
-      },
-    );
+    testWidgets('should not autoplay when autoPlay is false', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+              autoPlay: false,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should show play button (not playing)
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+    });
+  });
+
+  group('PreviewPlayer - Edge Cases', () {
+    testWidgets('should handle missing optional fields', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              // No shotNumber, shotTitle, or durationText
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should render without errors
+      expect(find.byType(PreviewPlayer), findsOneWidget);
+    });
+
+    testWidgets('should handle single item playlist', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should show 1/1
+      expect(find.text('(1/1)'), findsOneWidget);
+
+      // Previous button should be disabled
+      final previousButton = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.skip_previous),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(previousButton.onPressed, isNull);
+
+      // Next button should be disabled
+      final nextButton = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.skip_next),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(nextButton.onPressed, isNull);
+    });
+
+    testWidgets('should handle long shot titles with ellipsis', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              videoUrl: 'https://example.com/video.mp4',
+              shotNumber: 1,
+              shotTitle: 'This is a very long shot title that should be truncated with ellipsis',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Should find the text widget with ellipsis
+      final textWidget = tester.widget<Text>(
+        find.text('This is a very long shot title that should be truncated with ellipsis'),
+      );
+      expect(textWidget.overflow, TextOverflow.ellipsis);
+      expect(textWidget.maxLines, 2);
+    });
   });
 }

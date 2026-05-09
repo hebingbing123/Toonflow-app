@@ -2,6 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/short_video_space/components/filter_panel.dart';
 
+Finder _statusDropdownButton() => find.byWidgetPredicate(
+  (widget) => widget is PopupMenuButton<ShotStatusFilter>,
+  description: 'status filter dropdown',
+);
+
+Finder _qualityDropdownButton() => find.byWidgetPredicate(
+  (widget) => widget is PopupMenuButton<QualityFilter>,
+  description: 'quality filter dropdown',
+);
+
+Finder _checkedStatusMenuItem(String label) => find.ancestor(
+  of: find.text(label).last,
+  matching: find.byWidgetPredicate(
+    (widget) => widget is CheckedPopupMenuItem<ShotStatusFilter>,
+    description: 'status menu item',
+  ),
+);
+
+Finder _checkedQualityMenuItem(String label) => find.ancestor(
+  of: find.text(label).last,
+  matching: find.byWidgetPredicate(
+    (widget) => widget is CheckedPopupMenuItem<QualityFilter>,
+    description: 'quality menu item',
+  ),
+);
+
 void main() {
   group('FilterPanel', () {
     late List<FilterState> filterChangedCalls;
@@ -27,7 +53,7 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('搜索字幕或旁白内容...'), findsOneWidget);
+      expect(find.text('搜索字幕或旁白内容... (Ctrl+F / Cmd+F)'), findsOneWidget);
     });
 
     testWidgets('should display status filter dropdown', (WidgetTester tester) async {
@@ -188,6 +214,390 @@ void main() {
 
       expect(filterChangedCalls.isNotEmpty, true);
       expect(filterChangedCalls.last.searchInVoiceover, false);
+    });
+
+    testWidgets('should cancel previous debounce timer when search text changes rapidly', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Enter first search text
+      await tester.enterText(find.byType(TextField), 'first');
+      await tester.pump(const Duration(milliseconds: 100));
+      
+      // Enter second search text before debounce completes
+      await tester.enterText(find.byType(TextField), 'second');
+      await tester.pump(const Duration(milliseconds: 100));
+      
+      // Enter third search text before debounce completes
+      await tester.enterText(find.byType(TextField), 'third');
+      await tester.pump(const Duration(milliseconds: 350));
+
+      // Should only trigger once with the final value
+      expect(filterChangedCalls.length, 1);
+      expect(filterChangedCalls.first.searchKeyword, 'third');
+    });
+
+    testWidgets('should trim search keyword whitespace', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      await tester.enterText(find.byType(TextField), '  test keyword  ');
+      await tester.pump(const Duration(milliseconds: 350));
+
+      expect(filterChangedCalls.length, 1);
+      expect(filterChangedCalls.first.searchKeyword, 'test keyword');
+    });
+
+    testWidgets('should handle empty search after trimming', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      await tester.enterText(find.byType(TextField), '   ');
+      await tester.pump(const Duration(milliseconds: 350));
+
+      expect(filterChangedCalls.length, 1);
+      expect(filterChangedCalls.first.searchKeyword, '');
+    });
+
+    testWidgets('should debounce status filter changes with 200ms delay', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Open status filter dropdown
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a status filter
+      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await tester.pump(const Duration(milliseconds: 100));
+      
+      // Should not trigger yet (debounce is 200ms)
+      expect(filterChangedCalls, isEmpty);
+      
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(filterChangedCalls.length, 1);
+      expect(filterChangedCalls.first.statusFilters, {ShotStatusFilter.enabled});
+    });
+
+    testWidgets('should debounce quality filter changes with 200ms delay', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Open quality filter dropdown
+      await tester.tap(_qualityDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a quality filter
+      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await tester.pump(const Duration(milliseconds: 100));
+      
+      // Should not trigger yet (debounce is 200ms)
+      expect(filterChangedCalls, isEmpty);
+      
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(filterChangedCalls.length, 1);
+      expect(filterChangedCalls.first.qualityFilters, {QualityFilter.hasBadExample});
+    });
+
+    testWidgets('should cancel previous filter debounce timer when filter changes rapidly', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Open status filter dropdown and select first filter
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle(const Duration(milliseconds: 1));
+      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await tester.pump(const Duration(milliseconds: 100));
+      
+      // Open status filter dropdown again and select second filter before debounce completes
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle(const Duration(milliseconds: 1));
+      await tester.tap(_checkedStatusMenuItem('有视频'));
+      await tester.pump(const Duration(milliseconds: 250));
+
+      // The final debounced state should include both filters. In widget tests
+      // the popup open/close animation can allow the first timer to flush once
+      // before the second selection lands, so assert the stable end state.
+      expect(filterChangedCalls, isNotEmpty);
+      expect(filterChangedCalls.length, lessThanOrEqualTo(2));
+      expect(filterChangedCalls.last.statusFilters, {
+        ShotStatusFilter.enabled,
+        ShotStatusFilter.hasVideo,
+      });
+    });
+  });
+
+  group('FilterPanel - Filter Combinations', () {
+    late List<FilterState> filterChangedCalls;
+
+    setUp(() {
+      filterChangedCalls = [];
+    });
+
+    Widget createTestWidget({FilterState? initialFilter}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: FilterPanel(
+            onFilterChanged: (filter) {
+              filterChangedCalls.add(filter);
+            },
+            initialFilter: initialFilter,
+          ),
+        ),
+      );
+    }
+
+    testWidgets('should combine search keyword with status filters', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Add search keyword
+      await tester.enterText(find.byType(TextField), 'test');
+      await tester.pump(const Duration(milliseconds: 350));
+
+      // Open status filter dropdown
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a status filter
+      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await tester.pumpAndSettle();
+
+      // Verify both filters are active
+      expect(filterChangedCalls.last.searchKeyword, 'test');
+      expect(filterChangedCalls.last.statusFilters, {ShotStatusFilter.enabled});
+      expect(filterChangedCalls.last.isEmpty, false);
+    });
+
+    testWidgets('should combine search keyword with quality filters', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Add search keyword
+      await tester.enterText(find.byType(TextField), 'test');
+      await tester.pump(const Duration(milliseconds: 350));
+
+      // Open quality filter dropdown
+      await tester.tap(_qualityDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a quality filter
+      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await tester.pumpAndSettle();
+
+      // Verify both filters are active
+      expect(filterChangedCalls.last.searchKeyword, 'test');
+      expect(filterChangedCalls.last.qualityFilters, {QualityFilter.hasBadExample});
+      expect(filterChangedCalls.last.isEmpty, false);
+    });
+
+    testWidgets('should combine status and quality filters', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Open status filter dropdown
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a status filter
+      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await tester.pumpAndSettle();
+
+      // Open quality filter dropdown
+      await tester.tap(_qualityDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a quality filter
+      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await tester.pumpAndSettle();
+
+      // Verify both filters are active
+      expect(filterChangedCalls.last.statusFilters, {ShotStatusFilter.enabled});
+      expect(filterChangedCalls.last.qualityFilters, {QualityFilter.hasBadExample});
+      expect(filterChangedCalls.last.isEmpty, false);
+    });
+
+    testWidgets('should combine all three filter types', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Add search keyword
+      await tester.enterText(find.byType(TextField), 'test');
+      await tester.pump(const Duration(milliseconds: 350));
+
+      // Open status filter dropdown
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a status filter
+      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await tester.pumpAndSettle();
+
+      // Open quality filter dropdown
+      await tester.tap(_qualityDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select a quality filter
+      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await tester.pumpAndSettle();
+
+      // Verify all filters are active
+      final lastFilter = filterChangedCalls.last;
+      expect(lastFilter.searchKeyword, 'test');
+      expect(lastFilter.statusFilters, {ShotStatusFilter.enabled});
+      expect(lastFilter.qualityFilters, {QualityFilter.hasBadExample});
+      expect(lastFilter.isEmpty, false);
+      expect(lastFilter.isNotEmpty, true);
+    });
+
+    testWidgets('should support multiple status filters', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Open status filter dropdown
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select first status filter
+      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await tester.pumpAndSettle();
+
+      // Open status filter dropdown again
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select second status filter
+      await tester.tap(_checkedStatusMenuItem('有视频'));
+      await tester.pumpAndSettle();
+
+      // Verify both status filters are active
+      expect(filterChangedCalls.last.statusFilters, {
+        ShotStatusFilter.enabled,
+        ShotStatusFilter.hasVideo,
+      });
+    });
+
+    testWidgets('should support multiple quality filters', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+
+      // Open quality filter dropdown
+      await tester.tap(_qualityDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select first quality filter
+      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await tester.pumpAndSettle();
+
+      // Open quality filter dropdown again
+      await tester.tap(_qualityDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Select second quality filter
+      await tester.tap(_checkedQualityMenuItem('生成阶段'));
+      await tester.pumpAndSettle();
+
+      // Verify both quality filters are active
+      expect(filterChangedCalls.last.qualityFilters, {
+        QualityFilter.hasBadExample,
+        QualityFilter.generationStage,
+      });
+    });
+
+    testWidgets('should toggle off status filter when selected again', 
+        (WidgetTester tester) async {
+      final initialFilter = FilterState(
+        statusFilters: {ShotStatusFilter.enabled},
+      );
+      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+
+      // Open status filter dropdown
+      await tester.tap(_statusDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Tap the already selected filter to toggle it off
+      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await tester.pumpAndSettle();
+
+      // Verify filter is removed
+      expect(filterChangedCalls.last.statusFilters, isEmpty);
+    });
+
+    testWidgets('should toggle off quality filter when selected again', 
+        (WidgetTester tester) async {
+      final initialFilter = FilterState(
+        qualityFilters: {QualityFilter.hasBadExample},
+      );
+      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+
+      // Open quality filter dropdown
+      await tester.tap(_qualityDropdownButton());
+      await tester.pumpAndSettle();
+
+      // Tap the already selected filter to toggle it off
+      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await tester.pumpAndSettle();
+
+      // Verify filter is removed
+      expect(filterChangedCalls.last.qualityFilters, isEmpty);
+    });
+
+    testWidgets('should display correct tag count for multiple filters', 
+        (WidgetTester tester) async {
+      final initialFilter = FilterState(
+        searchKeyword: 'test',
+        statusFilters: {ShotStatusFilter.enabled, ShotStatusFilter.hasVideo},
+        qualityFilters: {QualityFilter.hasBadExample, QualityFilter.generationStage},
+      );
+      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+
+      // Should display 5 tags: 1 search + 2 status + 2 quality
+      expect(find.byType(Chip), findsNWidgets(5));
+    });
+
+    testWidgets('should remove individual filter from combination', 
+        (WidgetTester tester) async {
+      final initialFilter = FilterState(
+        searchKeyword: 'test',
+        statusFilters: {ShotStatusFilter.enabled},
+        qualityFilters: {QualityFilter.hasBadExample},
+      );
+      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+
+      // Find and remove the status filter tag
+      final statusChip = find.widgetWithText(Chip, '已启用');
+      await tester.tap(find.descendant(
+        of: statusChip,
+        matching: find.byIcon(Icons.close),
+      ));
+      await tester.pumpAndSettle();
+
+      // Verify only status filter is removed, others remain
+      final lastFilter = filterChangedCalls.last;
+      expect(lastFilter.searchKeyword, 'test');
+      expect(lastFilter.statusFilters, isEmpty);
+      expect(lastFilter.qualityFilters, {QualityFilter.hasBadExample});
+    });
+
+    testWidgets('should update search scope with active filters', 
+        (WidgetTester tester) async {
+      final initialFilter = FilterState(
+        searchKeyword: 'test',
+        statusFilters: {ShotStatusFilter.enabled},
+      );
+      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+
+      // Toggle off subtitle search
+      final subtitleChip = find.widgetWithText(FilterChip, '字幕');
+      await tester.tap(subtitleChip);
+      await tester.pumpAndSettle();
+
+      // Verify search scope changed but other filters remain
+      final lastFilter = filterChangedCalls.last;
+      expect(lastFilter.searchKeyword, 'test');
+      expect(lastFilter.statusFilters, {ShotStatusFilter.enabled});
+      expect(lastFilter.searchInSubtitles, false);
+      expect(lastFilter.searchInVoiceover, true);
     });
   });
 

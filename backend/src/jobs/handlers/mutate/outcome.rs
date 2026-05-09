@@ -5,6 +5,7 @@ use crate::error::ApiError;
 use crate::jobs::dto::JobRow;
 use crate::jobs::enqueue::envelope_generation_job_updated;
 use crate::jobs::hydrate_job_row;
+use crate::jobs::record_job_notification;
 use crate::state::AppState;
 
 pub(super) async fn resolve_job_mutation_outcome(
@@ -17,6 +18,7 @@ pub(super) async fn resolve_job_mutation_outcome(
 ) -> Result<Json<JobRow>, ApiError> {
     if let Some(mut row) = updated {
         hydrate_job_row(&mut row);
+        record_job_notification(state, &row).await?;
         let text = envelope_generation_job_updated(&row);
         state
             .notify

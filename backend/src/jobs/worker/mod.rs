@@ -23,10 +23,11 @@ use crate::metering::usage;
 use crate::state::AppState;
 
 use super::{
-    envelope_generation_job_updated, hydrate_job_row, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
-    JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
-    JOB_KIND_FLUTTER_PROBE, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
-    JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
+    envelope_generation_job_updated, hydrate_job_row, record_job_notification, JobRow,
+    JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
+    JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_FLUTTER_PROBE, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
+    JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE,
+    JOB_KIND_VOICEOVER_GENERATE,
 };
 
 mod asset_image;
@@ -234,6 +235,9 @@ async fn process_one_job(
                     );
                 }
                 hydrate_job_row(&mut final_row);
+                if let Err(error) = record_job_notification(state, &final_row).await {
+                    tracing::warn!(error = ?error, job_id = %final_row.id, "failed to record succeeded job notification");
+                }
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }
@@ -276,6 +280,9 @@ async fn process_one_job(
                     client_request_id_from_payload(&final_row.payload),
                 );
                 hydrate_job_row(&mut final_row);
+                if let Err(error) = record_job_notification(state, &final_row).await {
+                    tracing::warn!(error = ?error, job_id = %final_row.id, "failed to record failed job notification");
+                }
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }
@@ -309,6 +316,9 @@ async fn process_one_job(
                     client_request_id_from_payload(&final_row.payload),
                 );
                 hydrate_job_row(&mut final_row);
+                if let Err(error) = record_job_notification(state, &final_row).await {
+                    tracing::warn!(error = ?error, job_id = %final_row.id, "failed to record structured failed job notification");
+                }
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }

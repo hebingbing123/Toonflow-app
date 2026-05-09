@@ -54,6 +54,8 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             workspaceId: p.workspaceId ?? detail.project.workspaceId,
           ),
           const SizedBox(height: 12),
+          ProjectAuditPanel(accessToken: token, projectId: p.id),
+          const SizedBox(height: 12),
           _buildProjectEditorNovelsAndEventsSection(
             ctx: ctx,
             setDialogState: setDialogState,
@@ -80,11 +82,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             scriptList: scriptList,
           ),
           const SizedBox(height: 12),
-          _buildProjectEditorPublishSection(
-            ctx: ctx,
-            token: token,
-            p: p,
-          ),
+          _buildProjectEditorPublishSection(ctx: ctx, token: token, p: p),
         ],
       ),
     );
@@ -101,10 +99,9 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(12),
-        color: Theme.of(ctx)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.35),
+        color: Theme.of(
+          ctx,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,9 +155,9 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     );
                   } catch (e) {
                     if (!ctx.mounted) return;
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text('读取发布总览失败：$e')),
-                    );
+                    ScaffoldMessenger.of(
+                      ctx,
+                    ).showSnackBar(SnackBar(content: Text('读取发布总览失败：$e')));
                   }
                 },
                 child: const Text('查看发布总览'),

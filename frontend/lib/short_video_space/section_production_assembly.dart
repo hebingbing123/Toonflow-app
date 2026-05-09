@@ -57,6 +57,30 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
     return result;
   }
 
+  /// Show audio preview dialog for voiceover
+  ///
+  /// **Validates: Requirements 5**
+  void _showAudioPreviewDialog({
+    required BuildContext context,
+    required String audioUrl,
+  }) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: AudioPreviewPlayer(
+              audioUrl: audioUrl,
+              autoPlay: false,
+              onClose: () => Navigator.of(dialogContext).pop(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _openAssemblyClipDeskOps() async {
     final token = widget.accessToken;
     final project = _selectedProject;
@@ -92,6 +116,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
         if (item.selectedMediaUrl.isEmpty) item.storyboardNumericId,
     };
     var filterState = FilterState.empty();
+    var filterPresets = <FilterPreset>[]; // Filter presets storage
     var operationInProgress = false;
     var selectedStoryboardIds = <int>{}; // Batch selection state
     if (!mounted) return;
@@ -630,6 +655,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           filterState = nextFilter;
                         });
                       },
+                      presets: filterPresets,
+                      onPresetsChanged: (newPresets) {
+                        setLocalState(() {
+                          filterPresets = newPresets;
+                        });
+                      },
+                      onSearchFocusNodeCreated: (focusNode) {
+                        _setSearchFocusNode(focusNode);
+                      },
                     ),
                     const SizedBox(height: 8),
                     // Batch operation toolbar
@@ -666,6 +700,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             token: token,
                             showFeedback: _showOperationFeedback,
                             refreshData: _loadProjectOverview,
+                            dialogContext: ctx,
                           );
                           setLocalState(() {
                             operationInProgress = false;
@@ -683,6 +718,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             token: token,
                             showFeedback: _showOperationFeedback,
                             refreshData: _loadProjectOverview,
+                            dialogContext: ctx,
                           );
                           setLocalState(() {
                             operationInProgress = false;
@@ -779,260 +815,22 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                 style: Theme.of(ctx).textTheme.bodyMedium,
                               ),
                             )
-                          : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: visibleEntries.length,
-                        itemBuilder: (ctx, idx) {
-                          final item = visibleEntries[idx];
-                          final actualIndex = ordered.indexOf(item);
-                          final paused = pausedStoryboardIds.contains(
-                            item.storyboardNumericId,
-                          );
-                          final canMoveUp = actualIndex > 0;
-                          final canMoveDown = actualIndex < ordered.length - 1;
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Checkbox for batch selection
-                                  Checkbox(
-                                    value: selectedStoryboardIds.contains(
-                                      item.storyboardNumericId,
-                                    ),
-                                    onChanged: operationInProgress
-                                        ? null
-                                        : (checked) {
-                                            setLocalState(() {
-                                              if (checked == true) {
-                                                selectedStoryboardIds.add(
-                                                  item.storyboardNumericId,
-                                                );
-                                              } else {
-                                                selectedStoryboardIds.remove(
-                                                  item.storyboardNumericId,
-                                                );
-                                              }
-                                            });
-                                          },
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                  Text(
-                                    '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${actualIndex + 1}',
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    paused
-                                        ? '状态：暂停'
-                                        : '状态：启用（${item.selectedMediaKind}）',
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Row(
-                                    children: [
-                                      const Text('时长：'),
-                                      buildHighlightedText(
-                                        item.durationText.isEmpty ? "未设定" : item.durationText,
-                                        filterState.searchKeyword,
-                                      ),
-                                      const Text(' · 字幕：'),
-                                      Flexible(
-                                        child: buildHighlightedText(
-                                          item.subtitleText.isEmpty ? "空" : item.subtitleText,
-                                          filterState.searchInSubtitles
-                                              ? filterState.searchKeyword
-                                              : '',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 2),
-                                  // 配音状态展示
-                                  Text(
-                                    '配音文本：${item.voiceoverScriptReady ? "✓ 就绪" : "✗ 未就绪"} · '
-                                    '配音资产：${item.voiceoverAssetReady ? "✓ 就绪" : "✗ 未就绪"}',
-                                  ),
-                                  if (item.voiceoverState.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        const Text('配音状态：'),
-                                        buildHighlightedText(
-                                          item.voiceoverState,
-                                          filterState.searchInVoiceover
-                                              ? filterState.searchKeyword
-                                              : '',
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                  if (item.voiceoverAudioUrl.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        const Text('配音音频：'),
-                                        Flexible(
-                                          child: buildHighlightedText(
-                                            item.voiceoverAudioUrl,
-                                            filterState.searchInVoiceover
-                                                ? filterState.searchKeyword
-                                                : '',
-                                            style: Theme.of(ctx).textTheme.bodySmall,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                  if (item.voiceoverState == 'failed' &&
-                                      item.voiceoverError.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        const Text('配音错误：'),
-                                        Flexible(
-                                          child: buildHighlightedText(
-                                            item.voiceoverError,
-                                            filterState.searchInVoiceover
-                                                ? filterState.searchKeyword
-                                                : '',
-                                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                                  color: Theme.of(ctx).colorScheme.error,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '错位检查：${subtitleMismatchLine(item)}',
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      OutlinedButton(
-                                        onPressed: (canMoveUp && !operationInProgress)
-                                            ? () {
-                                                final current = ordered[actualIndex];
-                                                ordered[actualIndex] = ordered[actualIndex - 1];
-                                                ordered[actualIndex - 1] = current;
-                                                setLocalState(() {});
-                                              }
-                                            : null,
-                                        child: const Text('上移'),
-                                      ),
-                                      OutlinedButton(
-                                        onPressed: (canMoveDown && !operationInProgress)
-                                            ? () {
-                                                final current = ordered[actualIndex];
-                                                ordered[actualIndex] = ordered[actualIndex + 1];
-                                                ordered[actualIndex + 1] = current;
-                                                setLocalState(() {});
-                                              }
-                                            : null,
-                                        child: const Text('下移'),
-                                      ),
-                                      FilledButton.tonal(
-                                        onPressed: operationInProgress ? null : () {
-                                          if (paused) {
-                                            unawaited(runEnableOrReplace(item));
-                                          } else {
-                                            unawaited(runDisable(item));
-                                          }
-                                        },
-                                        child: Text(paused ? '启用' : '暂停'),
-                                      ),
-                                      OutlinedButton(
-                                        onPressed: operationInProgress ? null : () async {
-                                          final ctrl = TextEditingController(
-                                            text: parseDurationSeconds(
-                                                      item.durationText,
-                                                    )?.toString() ??
-                                                '',
-                                          );
-                                          final picked = await showDialog<int>(
-                                            context: ctx,
-                                            builder: (dCtx) => AlertDialog(
-                                              title: const Text('单镜头时长对齐'),
-                                              content: TextField(
-                                                controller: ctrl,
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                decoration: const InputDecoration(
-                                                  labelText: '时长（秒）',
-                                                  hintText: '输入 1~300',
-                                                ),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(
-                                                    dCtx,
-                                                  ).pop(),
-                                                  child: const Text('取消'),
-                                                ),
-                                                FilledButton(
-                                                  onPressed: () {
-                                                    final sec = int.tryParse(
-                                                      ctrl.text.trim(),
-                                                    );
-                                                    Navigator.of(
-                                                      dCtx,
-                                                    ).pop(sec);
-                                                  },
-                                                  child: const Text('对齐并写回'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                          ctrl.dispose();
-                                          if (picked == null ||
-                                              picked <= 0 ||
-                                              picked > 300) {
-                                            return;
-                                          }
-                                          unawaited(
-                                            runAlignDuration(item, picked),
-                                          );
-                                        },
-                                        child: const Text('时长对齐'),
-                                      ),
-                                      OutlinedButton(
-                                        onPressed: operationInProgress ? null : () async {
-                                          final nextUrl =
-                                              await _promptReplacementVideoUrl(
-                                            ctx,
-                                            initialValue: item.selectedMediaUrl,
-                                          );
-                                          if ((nextUrl ?? '').trim().isEmpty) {
-                                            return;
-                                          }
-                                          unawaited(
-                                            runEnableOrReplace(
-                                              item,
-                                              replacementUrl: nextUrl,
-                                            ),
-                                          );
-                                        },
-                                        child: const Text('替换当前版本'),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                          : _buildVirtualScrollList(
+                              visibleEntries: visibleEntries,
+                              ordered: ordered,
+                              pausedStoryboardIds: pausedStoryboardIds,
+                              selectedStoryboardIds: selectedStoryboardIds,
+                              operationInProgress: operationInProgress,
+                              filterState: filterState,
+                              ctx: ctx,
+                              setLocalState: setLocalState,
+                              runDisable: runDisable,
+                              runEnableOrReplace: runEnableOrReplace,
+                              runAlignDuration: runAlignDuration,
+                              parseDurationSeconds: parseDurationSeconds,
+                              subtitleMismatchLine: subtitleMismatchLine,
+                              buildHighlightedText: buildHighlightedText,
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                        },
-                      ),
                     ),
                   ],
                 ),
@@ -1047,6 +845,373 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
           },
         );
       },
+    );
+  }
+
+  /// Build virtual scroll list with FlutterListView for efficient rendering
+  /// 
+  /// **Validates: Requirements 29**
+  /// 
+  /// Automatically enables virtual scrolling when item count > 100
+  Widget _buildVirtualScrollList({
+    required List<_AssemblyClipDeskOpEntry> visibleEntries,
+    required List<_AssemblyClipDeskOpEntry> ordered,
+    required Set<int> pausedStoryboardIds,
+    required Set<int> selectedStoryboardIds,
+    required bool operationInProgress,
+    required FilterState filterState,
+    required BuildContext ctx,
+    required void Function(void Function()) setLocalState,
+    required Future<void> Function(_AssemblyClipDeskOpEntry) runDisable,
+    required Future<void> Function(_AssemblyClipDeskOpEntry, {String? replacementUrl}) runEnableOrReplace,
+    required Future<void> Function(_AssemblyClipDeskOpEntry, int) runAlignDuration,
+    required int? Function(String) parseDurationSeconds,
+    required String Function(_AssemblyClipDeskOpEntry) subtitleMismatchLine,
+    required Widget Function(String, String, {TextStyle? style}) buildHighlightedText,
+  }) {
+    // Use virtual scrolling when item count > 100 for performance
+    final useVirtualScrolling = visibleEntries.length > 100;
+
+    if (useVirtualScrolling) {
+      // Use FlutterListView for virtual scrolling
+      return FlutterListView(
+        delegate: FlutterListViewDelegate(
+          (context, idx) {
+            final item = visibleEntries[idx];
+            return _buildShotCard(
+              item: item,
+              ordered: ordered,
+              pausedStoryboardIds: pausedStoryboardIds,
+              selectedStoryboardIds: selectedStoryboardIds,
+              operationInProgress: operationInProgress,
+              filterState: filterState,
+              ctx: ctx,
+              setLocalState: setLocalState,
+              runDisable: runDisable,
+              runEnableOrReplace: runEnableOrReplace,
+              runAlignDuration: runAlignDuration,
+              parseDurationSeconds: parseDurationSeconds,
+              subtitleMismatchLine: subtitleMismatchLine,
+              buildHighlightedText: buildHighlightedText,
+            );
+          },
+          childCount: visibleEntries.length,
+          // Configure cache extent for better performance
+          // This determines how many pixels of content to cache outside the viewport
+          onItemKey: (idx) => visibleEntries[idx].storyboardNumericId.toString(),
+        ),
+      );
+    } else {
+      // Use standard ListView.builder for smaller lists
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: visibleEntries.length,
+        itemBuilder: (context, idx) {
+          final item = visibleEntries[idx];
+          return _buildShotCard(
+            item: item,
+            ordered: ordered,
+            pausedStoryboardIds: pausedStoryboardIds,
+            selectedStoryboardIds: selectedStoryboardIds,
+            operationInProgress: operationInProgress,
+            filterState: filterState,
+            ctx: ctx,
+            setLocalState: setLocalState,
+            runDisable: runDisable,
+            runEnableOrReplace: runEnableOrReplace,
+            runAlignDuration: runAlignDuration,
+            parseDurationSeconds: parseDurationSeconds,
+            subtitleMismatchLine: subtitleMismatchLine,
+            buildHighlightedText: buildHighlightedText,
+          );
+        },
+      );
+    }
+  }
+
+  /// Build a single shot card widget
+  Widget _buildShotCard({
+    required _AssemblyClipDeskOpEntry item,
+    required List<_AssemblyClipDeskOpEntry> ordered,
+    required Set<int> pausedStoryboardIds,
+    required Set<int> selectedStoryboardIds,
+    required bool operationInProgress,
+    required FilterState filterState,
+    required BuildContext ctx,
+    required void Function(void Function()) setLocalState,
+    required Future<void> Function(_AssemblyClipDeskOpEntry) runDisable,
+    required Future<void> Function(_AssemblyClipDeskOpEntry, {String? replacementUrl}) runEnableOrReplace,
+    required Future<void> Function(_AssemblyClipDeskOpEntry, int) runAlignDuration,
+    required int? Function(String) parseDurationSeconds,
+    required String Function(_AssemblyClipDeskOpEntry) subtitleMismatchLine,
+    required Widget Function(String, String, {TextStyle? style}) buildHighlightedText,
+  }) {
+    final actualIndex = ordered.indexOf(item);
+    final paused = pausedStoryboardIds.contains(item.storyboardNumericId);
+    final canMoveUp = actualIndex > 0;
+    final canMoveDown = actualIndex < ordered.length - 1;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Checkbox for batch selection
+            Checkbox(
+              value: selectedStoryboardIds.contains(item.storyboardNumericId),
+              onChanged: operationInProgress
+                  ? null
+                  : (checked) {
+                      setLocalState(() {
+                        if (checked == true) {
+                          selectedStoryboardIds.add(item.storyboardNumericId);
+                        } else {
+                          selectedStoryboardIds.remove(item.storyboardNumericId);
+                        }
+                      });
+                    },
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${actualIndex + 1}',
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    paused
+                        ? '状态：暂停'
+                        : '状态：启用（${item.selectedMediaKind}）',
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      const Text('时长：'),
+                      buildHighlightedText(
+                        item.durationText.isEmpty ? "未设定" : item.durationText,
+                        filterState.searchKeyword,
+                      ),
+                      const Text(' · 字幕：'),
+                      Flexible(
+                        child: buildHighlightedText(
+                          item.subtitleText.isEmpty ? "空" : item.subtitleText,
+                          filterState.searchInSubtitles
+                              ? filterState.searchKeyword
+                              : '',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  // 配音状态展示
+                  Text(
+                    '配音文本：${item.voiceoverScriptReady ? "✓ 就绪" : "✗ 未就绪"} · '
+                    '配音资产：${item.voiceoverAssetReady ? "✓ 就绪" : "✗ 未就绪"}',
+                  ),
+                  if (item.voiceoverState.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Text('配音状态：'),
+                        buildHighlightedText(
+                          item.voiceoverState,
+                          filterState.searchInVoiceover
+                              ? filterState.searchKeyword
+                              : '',
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (item.voiceoverAudioUrl.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Text('配音音频：'),
+                        Flexible(
+                          child: buildHighlightedText(
+                            item.voiceoverAudioUrl,
+                            filterState.searchInVoiceover
+                                ? filterState.searchKeyword
+                                : '',
+                            style: Theme.of(ctx).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (item.voiceoverState == 'failed' &&
+                      item.voiceoverError.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Text('配音错误：'),
+                        Flexible(
+                          child: buildHighlightedText(
+                            item.voiceoverError,
+                            filterState.searchInVoiceover
+                                ? filterState.searchKeyword
+                                : '',
+                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(ctx).colorScheme.error,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 2),
+                  Text(
+                    '错位检查：${subtitleMismatchLine(item)}',
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton(
+                        onPressed: (canMoveUp && !operationInProgress)
+                            ? () {
+                                final current = ordered[actualIndex];
+                                ordered[actualIndex] = ordered[actualIndex - 1];
+                                ordered[actualIndex - 1] = current;
+                                setLocalState(() {});
+                              }
+                            : null,
+                        child: const Text('上移'),
+                      ),
+                      OutlinedButton(
+                        onPressed: (canMoveDown && !operationInProgress)
+                            ? () {
+                                final current = ordered[actualIndex];
+                                ordered[actualIndex] = ordered[actualIndex + 1];
+                                ordered[actualIndex + 1] = current;
+                                setLocalState(() {});
+                              }
+                            : null,
+                        child: const Text('下移'),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: operationInProgress
+                            ? null
+                            : () {
+                                if (paused) {
+                                  unawaited(runEnableOrReplace(item));
+                                } else {
+                                  unawaited(runDisable(item));
+                                }
+                              },
+                        child: Text(paused ? '启用' : '暂停'),
+                      ),
+                      OutlinedButton(
+                        onPressed: operationInProgress
+                            ? null
+                            : () async {
+                                final ctrl = TextEditingController(
+                                  text: parseDurationSeconds(item.durationText)
+                                          ?.toString() ??
+                                      '',
+                                );
+                                final picked = await showDialog<int>(
+                                  context: ctx,
+                                  builder: (dCtx) => AlertDialog(
+                                    title: const Text('单镜头时长对齐'),
+                                    content: TextField(
+                                      controller: ctrl,
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                        labelText: '时长（秒）',
+                                        hintText: '输入 1~300',
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(dCtx).pop(),
+                                        child: const Text('取消'),
+                                      ),
+                                      FilledButton(
+                                        onPressed: () {
+                                          final sec =
+                                              int.tryParse(ctrl.text.trim());
+                                          Navigator.of(dCtx).pop(sec);
+                                        },
+                                        child: const Text('对齐并写回'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                ctrl.dispose();
+                                if (picked == null ||
+                                    picked <= 0 ||
+                                    picked > 300) {
+                                  return;
+                                }
+                                unawaited(runAlignDuration(item, picked));
+                              },
+                        child: const Text('时长对齐'),
+                      ),
+                      OutlinedButton(
+                        onPressed: operationInProgress
+                            ? null
+                            : () async {
+                                final nextUrl = await _promptReplacementVideoUrl(
+                                  ctx,
+                                  initialValue: item.selectedMediaUrl,
+                                );
+                                if ((nextUrl ?? '').trim().isEmpty) {
+                                  return;
+                                }
+                                unawaited(
+                                  runEnableOrReplace(
+                                    item,
+                                    replacementUrl: nextUrl,
+                                  ),
+                                );
+                              },
+                        child: const Text('替换当前版本'),
+                      ),
+                      // Generate voiceover button
+                      if (item.voiceoverScriptReady)
+                        FilledButton.icon(
+                          onPressed: operationInProgress
+                              ? null
+                              : () async {
+                                  await _generateSingleVoiceover(
+                                    item: item,
+                                    context: ctx,
+                                    showFeedback: _showOperationFeedback,
+                                  );
+                                  setLocalState(() {});
+                                },
+                          icon: const Icon(Icons.record_voice_over),
+                          label: const Text('生成配音'),
+                        ),
+                      // Preview voiceover audio button
+                      if (item.voiceoverAudioUrl.isNotEmpty)
+                        OutlinedButton.icon(
+                          onPressed: operationInProgress
+                              ? null
+                              : () {
+                                  _showAudioPreviewDialog(
+                                    context: ctx,
+                                    audioUrl: item.voiceoverAudioUrl,
+                                  );
+                                },
+                          icon: const Icon(Icons.play_circle_outline),
+                          label: const Text('预览配音'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

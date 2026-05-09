@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 /// - Selected count indicator
 /// - Range selection (Shift+click)
 /// - Batch operation buttons (enable/disable/duration/replace/voiceover)
+/// - 1000ms throttling for batch operations to prevent rapid repeated calls
 class BatchOperationToolbar extends StatefulWidget {
   const BatchOperationToolbar({
     super.key,
@@ -23,6 +24,7 @@ class BatchOperationToolbar extends StatefulWidget {
     required this.onBatchReplace,
     required this.onBatchGenerateVoiceover,
     this.isOperationInProgress = false,
+    this.nowProvider = DateTime.now,
   });
 
   /// Total number of shots
@@ -58,11 +60,47 @@ class BatchOperationToolbar extends StatefulWidget {
   /// Whether a batch operation is currently in progress
   final bool isOperationInProgress;
 
+  /// Clock injection for deterministic throttling in tests.
+  final DateTime Function() nowProvider;
+
   @override
   State<BatchOperationToolbar> createState() => _BatchOperationToolbarState();
 }
 
 class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
+  DateTime? _lastBatchOperationTime;
+  
+  /// Throttle batch operations to prevent rapid repeated calls
+  /// Returns true if the operation should proceed, false if throttled
+  bool _shouldAllowBatchOperation() {
+    final now = widget.nowProvider();
+    if (_lastBatchOperationTime == null) {
+      _lastBatchOperationTime = now;
+      return true;
+    }
+    
+    final timeSinceLastOperation = now.difference(_lastBatchOperationTime!);
+    if (timeSinceLastOperation.inMilliseconds >= 1000) {
+      _lastBatchOperationTime = now;
+      return true;
+    }
+    
+    // Show a brief message that operation is throttled
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('操作过于频繁，请稍后再试'),
+        duration: Duration(milliseconds: 1500),
+      ),
+    );
+    return false;
+  }
+  
+  void _handleBatchOperation(VoidCallback operation) {
+    if (!widget.isOperationInProgress && _shouldAllowBatchOperation()) {
+      operation();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasSelection = widget.selectedIds.isNotEmpty;
@@ -148,35 +186,45 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                 children: [
                   // Batch enable
                   FilledButton.tonalIcon(
-                    onPressed: widget.isOperationInProgress ? null : widget.onBatchEnable,
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchEnable),
                     icon: const Icon(Icons.play_arrow, size: 18),
                     label: const Text('批量启用'),
                   ),
                   
                   // Batch disable
                   OutlinedButton.icon(
-                    onPressed: widget.isOperationInProgress ? null : widget.onBatchDisable,
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchDisable),
                     icon: const Icon(Icons.pause, size: 18),
                     label: const Text('批量禁用'),
                   ),
                   
                   // Batch update duration
                   OutlinedButton.icon(
-                    onPressed: widget.isOperationInProgress ? null : widget.onBatchUpdateDuration,
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchUpdateDuration),
                     icon: const Icon(Icons.timer, size: 18),
                     label: const Text('时长对齐'),
                   ),
                   
                   // Batch replace
                   OutlinedButton.icon(
-                    onPressed: widget.isOperationInProgress ? null : widget.onBatchReplace,
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchReplace),
                     icon: const Icon(Icons.swap_horiz, size: 18),
                     label: const Text('批量替换'),
                   ),
                   
                   // Batch generate voiceover
                   OutlinedButton.icon(
-                    onPressed: widget.isOperationInProgress ? null : widget.onBatchGenerateVoiceover,
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchGenerateVoiceover),
                     icon: const Icon(Icons.record_voice_over, size: 18),
                     label: const Text('批量配音'),
                   ),

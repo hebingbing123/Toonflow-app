@@ -24,6 +24,7 @@ class QualityReviewsController extends ChangeNotifier {
   bool loadingQualityStats = false;
   bool loadingQualityStagePassRate = false;
   bool loadingQualityDashboard = false;
+  bool refreshingQualityDashboardReadModel = false;
   bool creatingQualityReview = false;
   bool loadingQualityReviewById = false;
   String? qualityStatsLine;
@@ -33,6 +34,8 @@ class QualityReviewsController extends ChangeNotifier {
   String? qualityTokenEfficiencyLine;
   String? qualityBadCaseStatsLine;
   String? qualityDashboardLine;
+  String? qualityDashboardRefreshLine;
+  String? qualityDashboardFreshnessLine;
   String? qualityReviewByIdLine;
   List<QualityReview>? qualityReviews;
   List<QualityDashboardTargetStat>? qualityStatsRows;
@@ -41,8 +44,60 @@ class QualityReviewsController extends ChangeNotifier {
   List<QualityDashboardScopeInsightItem>? qualityScopeInsightRows;
   List<QualityDashboardTokenEfficiencyItem>? qualityTokenEfficiencyRows;
   List<BadCaseStatItem>? qualityBadCaseStatItems;
+  QualityDashboardMeta? qualityDashboardMeta;
 
   String? get _accessToken => _accessTokenProvider();
+
+  List<QualityDashboardTargetStat> _mapStatsRowsToDashboardStats(
+    List<QualityStatsRow> rows,
+  ) {
+    return rows
+        .map(
+          (row) => QualityDashboardTargetStat(
+            scope: 'user',
+            targetType: row.targetType,
+            totalReviews: row.totalReviews,
+            passRatePercent: row.passRatePercent,
+            avgOverallScore: row.avgOverallScore,
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  List<QualityDashboardStagePassRateItem> _mapStagePassRateRows(
+    List<StagePassRateRow> rows,
+  ) {
+    return rows
+        .map(
+          (row) => QualityDashboardStagePassRateItem(
+            scope: 'user',
+            targetType: row.targetType,
+            reviewDate: DateTime.parse(row.reviewDate),
+            totalReviews: row.totalReviews,
+            passRatePercent: row.passRatePercent ?? 0,
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  List<QualityDashboardStageGradeItem> _mapStageGradeRows(
+    List<StageGradeDistributionRow> rows,
+  ) {
+    return rows
+        .map(
+          (row) => QualityDashboardStageGradeItem(
+            scope: 'user',
+            stage: row.stage,
+            gradeACount: row.gradeACount,
+            gradeBCount: row.gradeBCount,
+            gradeCCount: row.gradeCCount,
+            gradeDCount: row.gradeDCount,
+            totalCount: row.totalCount,
+            passRatePercent: row.passRatePercent,
+          ),
+        )
+        .toList(growable: false);
+  }
 
   void _setError(String? error) {
     _onErrorChanged(error);
@@ -63,6 +118,7 @@ class QualityReviewsController extends ChangeNotifier {
     loadingQualityStats = false;
     loadingQualityStagePassRate = false;
     loadingQualityDashboard = false;
+    refreshingQualityDashboardReadModel = false;
     creatingQualityReview = false;
     loadingQualityReviewById = false;
     qualityStatsLine = null;
@@ -72,6 +128,8 @@ class QualityReviewsController extends ChangeNotifier {
     qualityTokenEfficiencyLine = null;
     qualityBadCaseStatsLine = null;
     qualityDashboardLine = null;
+    qualityDashboardRefreshLine = null;
+    qualityDashboardFreshnessLine = null;
     qualityReviewByIdLine = null;
     qualityReviews = null;
     qualityStatsRows = null;
@@ -80,6 +138,7 @@ class QualityReviewsController extends ChangeNotifier {
     qualityScopeInsightRows = null;
     qualityTokenEfficiencyRows = null;
     qualityBadCaseStatItems = null;
+    qualityDashboardMeta = null;
     qualityReviewIdController.clear();
     notifyListeners();
   }
@@ -184,7 +243,7 @@ class QualityReviewsController extends ChangeNotifier {
     notifyListeners();
     try {
       final rows = await fetchQualityStats(token);
-      qualityStatsRows = rows;
+      qualityStatsRows = _mapStatsRowsToDashboardStats(rows);
       qualityStatsLine = rows.isEmpty
           ? '(empty)'
           : summarizeQualityStatsRows(rows, maxItems: 4);
@@ -209,8 +268,8 @@ class QualityReviewsController extends ChangeNotifier {
     try {
       final rows = await fetchQualityStagePassRate(token);
       final gradeRows = await fetchQualityStageGradeDistribution(token);
-      qualityStagePassRateRows = rows;
-      qualityStageGradeRows = gradeRows;
+      qualityStagePassRateRows = _mapStagePassRateRows(rows);
+      qualityStageGradeRows = _mapStageGradeRows(gradeRows);
       qualityStagePassRateLine = rows.isEmpty
           ? '(empty)'
           : summarizeStagePassRateRows(rows, maxItems: 6);
@@ -229,19 +288,35 @@ class QualityReviewsController extends ChangeNotifier {
     }
   }
 
-  Future<void> loadQualityDashboard({int? projectId}) async {
+  Future<void> loadQualityDashboard({
+    int? projectId,
+    bool refreshReadModel = false,
+  }) async {
     final token = _accessToken;
     if (token == null) return;
     loadingQualityDashboard = true;
+    if (refreshReadModel) {
+      refreshingQualityDashboardReadModel = true;
+    }
     _setError(null);
     notifyListeners();
     try {
+      if (refreshReadModel) {
+        final refresh = await refreshQualityDashboardReadModel(
+          token,
+          onlyIfStale: true,
+        );
+        qualityDashboardRefreshLine = refresh.performed
+            ? '底层快照已刷新 ${refresh.rowCount} 条 review fact · reviews=${refresh.sourceReviewCount} · usage=${refresh.sourceUsageCount} · ${refresh.refreshedAt.toLocal().toString().substring(0, 19)}'
+            : '底层快照保持现状 · fresh snapshot skipped refresh · ${refresh.refreshedAt.toLocal().toString().substring(0, 19)}';
+      }
       final dashboard = await fetchQualityDashboard(
         token,
         projectId: projectId,
         scriptId: null,
       );
 
+      qualityDashboardMeta = dashboard.meta;
       qualityStatsRows = dashboard.stats;
       qualityStatsLine = dashboard.stats.isEmpty
           ? '当前没有质量统计'
@@ -280,6 +355,9 @@ class QualityReviewsController extends ChangeNotifier {
         dashboard.badCaseStats,
         maxItems: 5,
       );
+      qualityDashboardFreshnessLine = _buildQualityDashboardFreshnessLine(
+        dashboard.meta,
+      );
       _refreshQualityDashboardLine();
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
@@ -287,8 +365,29 @@ class QualityReviewsController extends ChangeNotifier {
       _setError(e.toString());
     } finally {
       loadingQualityDashboard = false;
+      refreshingQualityDashboardReadModel = false;
       notifyListeners();
     }
+  }
+
+  String _buildQualityDashboardFreshnessLine(QualityDashboardMeta meta) {
+    final age = meta.ageSeconds == null
+        ? 'unknown_age'
+        : meta.ageSeconds! < 60
+        ? '${meta.ageSeconds}s'
+        : '${(meta.ageSeconds! / 60).floor()}m';
+    final refreshedAt = meta.refreshedAt == null
+        ? 'never'
+        : meta.refreshedAt!.toLocal().toString().substring(0, 19);
+    final reviewMax = meta.sourceMaxReviewCreatedAt == null
+        ? 'none'
+        : meta.sourceMaxReviewCreatedAt!.toLocal().toString().substring(0, 19);
+    final usageMax = meta.sourceMaxUsageCreatedAt == null
+        ? 'none'
+        : meta.sourceMaxUsageCreatedAt!.toLocal().toString().substring(0, 19);
+    final verdict = meta.stale ? 'STALE' : 'fresh';
+    final reason = meta.staleReason == null ? '' : ' · ${meta.staleReason}';
+    return '$verdict · age=$age · refreshed=$refreshedAt · snapshot=${meta.snapshotRowCount} · source reviews=${meta.sourceReviewCount} @ $reviewMax · usage=${meta.sourceUsageCount} @ $usageMax$reason';
   }
 
   void _refreshQualityDashboardLine() {

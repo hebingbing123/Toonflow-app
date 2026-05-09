@@ -3,6 +3,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::settings::notifications::{record_notification, NotificationRecordPayload};
+use crate::state::WsNotifyHub;
 
 const DEDUPE_WINDOW_MS: i64 = 60_000;
 
@@ -26,7 +28,10 @@ enum SkillChangeKind {
 #[derive(Debug, Clone, sqlx::FromRow)]
 struct AffectedProjectRow {
     owner_user_id: Uuid,
+    project_id: Uuid,
+    workspace_id: Uuid,
     numeric_id: i32,
+    name: Option<String>,
 }
 
 fn pack_display_name(pack_path: &str) -> String {
@@ -111,7 +116,7 @@ async fn select_affected_projects(
         SkillChangeKind::Core { .. } => {
             sqlx::query_as::<_, AffectedProjectRow>(
                 r#"
-                SELECT owner_user_id, numeric_id
+                SELECT owner_user_id, id AS project_id, workspace_id, numeric_id, name
                 FROM app_project
                 WHERE mode IS NULL
                    OR mode = ANY($1)
@@ -125,7 +130,7 @@ async fn select_affected_projects(
         SkillChangeKind::ArtPack { pack_path, .. } => {
             sqlx::query_as::<_, AffectedProjectRow>(
                 r#"
-                SELECT owner_user_id, numeric_id
+                SELECT owner_user_id, id AS project_id, workspace_id, numeric_id, name
                 FROM app_project
                 WHERE art_style_pack = $1
                   AND (mode IS NULL OR mode = ANY($2))
@@ -140,7 +145,7 @@ async fn select_affected_projects(
         SkillChangeKind::StoryPack { pack_path, .. } => {
             sqlx::query_as::<_, AffectedProjectRow>(
                 r#"
-                SELECT owner_user_id, numeric_id
+                SELECT owner_user_id, id AS project_id, workspace_id, numeric_id, name
                 FROM app_project
                 WHERE story_style_pack = $1
                   AND (mode IS NULL OR mode = ANY($2))
@@ -160,27 +165,26 @@ async fn select_affected_projects(
 async fn recent_notification_exists_in_table(
     pool: &PgPool,
     user_id: Uuid,
-    project_id: i32,
+    project_numeric_id: i32,
     path: &str,
     changed_at_ms: i64,
 ) -> Result<bool, ApiError> {
     let changed_at = chrono::DateTime::from_timestamp_millis(changed_at_ms)
         .ok_or_else(|| ApiError::BadRequest("invalid changed_at timestamp".into()))?;
-    let changed_at = changed_at.naive_utc();
     sqlx::query_scalar(
         r#"
         SELECT EXISTS(
           SELECT 1
           FROM app_notification
           WHERE user_id = $1
-            AND project_id = $2
+            AND project_numeric_id = $2
             AND file_path = $3
             AND changed_at >= $4 - INTERVAL '1 minute'
         )
         "#,
     )
     .bind(user_id)
-    .bind(project_id)
+    .bind(project_numeric_id)
     .bind(path)
     .bind(changed_at)
     .fetch_one(pool)
@@ -217,31 +221,54 @@ async fn recent_notification_exists_in_memory(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn insert_notification_table_row(
     pool: &PgPool,
+    notify: &WsNotifyHub,
     user_id: Uuid,
-    project_id: i32,
+    workspace_id: Uuid,
+    project_uuid: Uuid,
+    project_numeric_id: i32,
+    project_name: Option<&str>,
     path: &str,
     changed_at_ms: i64,
     message: &str,
 ) -> Result<(), ApiError> {
     let changed_at = chrono::DateTime::from_timestamp_millis(changed_at_ms)
         .ok_or_else(|| ApiError::BadRequest("invalid changed_at timestamp".into()))?;
-    let changed_at = changed_at.naive_utc();
-    sqlx::query(
-        r#"
-        INSERT INTO app_notification (user_id, project_id, file_path, changed_at, message)
-        VALUES ($1, $2, $3, $4, $5)
-        "#,
+    record_notification(
+        pool,
+        Some(notify),
+        NotificationRecordPayload {
+            user_id,
+            workspace_id: Some(workspace_id),
+            project_id: Some(project_uuid),
+            project_numeric_id: Some(project_numeric_id),
+            job_id: None,
+            notification_type: "skill_change".to_string(),
+            title: "技能包发生变更".to_string(),
+            message: match project_name {
+                Some(project_name) if !project_name.trim().is_empty() => {
+                    format!("{message} 受影响项目：{project_name}。")
+                }
+                _ => message.to_string(),
+            },
+            link_path: Some(format!(
+                "/product/projects?projectNumericId={project_numeric_id}"
+            )),
+            payload: json!({
+                "filePath": path,
+                "changedAt": changed_at_ms,
+                "projectId": project_uuid,
+                "workspaceId": workspace_id,
+                "projectNumericId": project_numeric_id,
+                "projectName": project_name,
+            }),
+            file_path: Some(path.to_string()),
+            changed_at: Some(changed_at),
+        },
     )
-    .bind(user_id)
-    .bind(project_id)
-    .bind(path)
-    .bind(changed_at)
-    .bind(message)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .await?;
     Ok(())
 }
 
@@ -288,6 +315,7 @@ async fn insert_notification_memory_row(
 
 pub(super) async fn notify_skill_change(
     pool: &PgPool,
+    notify: &WsNotifyHub,
     path: &str,
     changed_at_ms: i64,
 ) -> Result<(), ApiError> {
@@ -327,8 +355,12 @@ pub(super) async fn notify_skill_change(
         let inserted_to_table = if table_exists {
             match insert_notification_table_row(
                 pool,
+                notify,
                 project.owner_user_id,
+                project.workspace_id,
+                project.project_id,
                 project.numeric_id,
+                project.name.as_deref(),
                 path,
                 changed_at_ms,
                 &message,

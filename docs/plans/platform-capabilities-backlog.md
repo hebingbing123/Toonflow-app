@@ -11,10 +11,10 @@
 
 | ID | 能力 | Backend | Flutter / 产品面 | 备注 |
 |----|------|---------|-------------------|------|
-| P-A1 | **应用内通知中心**（任务完成、成员邀请、计费事件摘要） | 事件表或复用 WS + REST 列表 | 铃铛/列表、已读、深链跳转 | 可与 jobs/billing 事件对齐 |
+| P-A1 | **应用内通知中心**（任务完成、成员邀请、计费事件摘要） | 事件表或复用 WS + REST 列表 | 铃铛/列表、已读、深链跳转 | **tracked**：已新增 `app_notification`、`GET /api/v1/settings/notifications`、`POST /api/v1/settings/notifications/mark-read`、`POST /api/v1/settings/notifications/mark-all-read`，并接入 WS `settings.notification.created` / `settings.notification.updated`；当前生产者覆盖 skills 变更、jobs 终态、workspace invite 生命周期，Flutter 主导航已补「通知中心」pane 与未读计数 |
 | P-A2 | **全局搜索**（跨项目标题、剧本、资产元数据） | 搜索 API + 索引策略（PG `tsvector` 或外包） | 统一搜索框、结果分组 | 注意权限按 workspace |
 | P-A3 | **账户：导出数据 / 删除账号**（合规） | 异步导出 job + 下载链接；删号 CASCADE 策略 | 设置页危险操作 + 二次确认 | GDPR 类诉求 |
-| P-A4 | **功能开关 / 远程配置**（按 plan 或 workspace） | 配置 API + 缓存 | 客户端拉取与 UI 灰显 | 与 feature flag Runbook 联动 |
+| P-A4 | **功能开关 / 远程配置**（按 plan 或 workspace） | 配置 API + 缓存 | 客户端拉取与 UI 灰显 | **tracked**：已新增 `GET/POST /api/v1/settings/platform-config` 与 Flutter「平台配置」产品面；当前 `effective` 已按 `defaults <- plan override <- current workspace override <- user override` 合成，其中 plan override 来自 `TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON`，workspace override 复用 `app_workspace.metadata.platform_config`，并支持 `has*Override` / `reset=true` 的显式继承回退；运维配置约定见 [`platform-config-plan-overrides.md`](./platform-config-plan-overrides.md) |
 
 ---
 
@@ -34,7 +34,7 @@
 |----|------|---------|-------------------|------|
 | P-C1 | **管理台扩展**（超越 billing events 列表） | 用户/空间只读、封禁、配额调整 API | 内部路由或独立 build | RBAC 须极严 |
 | P-C2 | **内容与合规队列**（举报、人工审核） | 表 + 工作流 API | 审核台 UI | 母文档 § 合规提及 |
-| P-C3 | **审计日志用户可见切片**（「谁改了我的项目」） | 读模型 API | 项目设置 / 活动时间线 | 与 W2.7 审计表可共用 |
+| P-C3 | **审计日志用户可见切片**（「谁改了我的项目」） | 读模型 API | 项目设置 / 活动时间线 | **tracked**：已新增 `app_project_audit` 与 `GET /api/v1/projects/{project_id}/audit`，当前覆盖项目创建 / 基础信息修改 / 删除，以及项目 ACL `viewer` / `editor` 增删改；Flutter 项目编辑器已补 [`ProjectAuditPanel`](../../frontend/lib/project_editor/project_audit_panel.dart) 活动时间线，支持动作过滤、搜索、分页追加与刷新 |
 
 ---
 

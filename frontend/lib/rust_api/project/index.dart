@@ -1,4 +1,5 @@
 export 'compat.dart';
+export 'audit.dart';
 export 'members.dart';
 export 'manuals.dart';
 export 'manuals_director.dart';

@@ -6,26 +6,34 @@ import '../../rust_api.dart';
 class QualityReviewsActionsBar extends StatelessWidget {
   const QualityReviewsActionsBar({
     super.key,
+    required this.showDashboardControls,
+    required this.showRefreshControls,
     required this.loadingQualityDashboard,
+    required this.refreshingQualityDashboardReadModel,
     required this.loadingQualityReviews,
     required this.loadingQualityBadCases,
     required this.loadingQualityStats,
     required this.loadingQualityStagePassRate,
     required this.onOpenWorkbench,
     required this.onLoadQualityDashboard,
+    required this.onRefreshQualityDashboardReadModel,
     required this.onLoadQualityReviews,
     required this.onLoadQualityBadCases,
     required this.onLoadQualityStats,
     required this.onLoadQualityStagePassRate,
   });
 
+  final bool showDashboardControls;
+  final bool showRefreshControls;
   final bool loadingQualityDashboard;
+  final bool refreshingQualityDashboardReadModel;
   final bool loadingQualityReviews;
   final bool loadingQualityBadCases;
   final bool loadingQualityStats;
   final bool loadingQualityStagePassRate;
   final VoidCallback onOpenWorkbench;
   final VoidCallback onLoadQualityDashboard;
+  final VoidCallback onRefreshQualityDashboardReadModel;
   final VoidCallback onLoadQualityReviews;
   final VoidCallback onLoadQualityBadCases;
   final VoidCallback onLoadQualityStats;
@@ -41,10 +49,18 @@ class QualityReviewsActionsBar extends StatelessWidget {
           onPressed: onOpenWorkbench,
           child: const Text('打开质量工作台'),
         ),
-        FilledButton(
-          onPressed: loadingQualityDashboard ? null : onLoadQualityDashboard,
-          child: Text(loadingQualityDashboard ? '…' : '刷新质量看板'),
-        ),
+        if (showDashboardControls)
+          FilledButton(
+            onPressed: loadingQualityDashboard ? null : onLoadQualityDashboard,
+            child: Text(loadingQualityDashboard ? '…' : '读取当前看板'),
+          ),
+        if (showDashboardControls && showRefreshControls)
+          FilledButton.tonal(
+            onPressed: refreshingQualityDashboardReadModel
+                ? null
+                : onRefreshQualityDashboardReadModel,
+            child: Text(refreshingQualityDashboardReadModel ? '…' : '刷新底层读模型'),
+          ),
         FilledButton.tonal(
           onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
           child: Text(loadingQualityReviews ? '…' : '加载评审列表'),
@@ -73,6 +89,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     super.key,
     required this.outlineColor,
     required this.dashboardSummary,
+    required this.refreshSummary,
+    required this.freshnessSummary,
     required this.qualityStatsRows,
     required this.stageGradeRows,
     required this.scopeInsightRows,
@@ -82,6 +100,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
 
   final Color outlineColor;
   final String? dashboardSummary;
+  final String? refreshSummary;
+  final String? freshnessSummary;
   final List<QualityDashboardTargetStat>? qualityStatsRows;
   final List<QualityDashboardStageGradeItem>? stageGradeRows;
   final List<QualityDashboardScopeInsightItem>? scopeInsightRows;
@@ -92,6 +112,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasAnything =
         dashboardSummary != null ||
+        refreshSummary != null ||
+        freshnessSummary != null ||
         (qualityStatsRows?.isNotEmpty ?? false) ||
         (stageGradeRows?.isNotEmpty ?? false) ||
         (scopeInsightRows?.isNotEmpty ?? false) ||
@@ -108,6 +130,24 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (refreshSummary != null) ...[
+          Text(
+            refreshSummary!,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: outlineColor),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (freshnessSummary != null) ...[
+          SelectableText(
+            freshnessSummary!,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: outlineColor),
+          ),
+          const SizedBox(height: 8),
+        ],
         if (dashboardSummary != null) ...[
           SelectableText(
             dashboardSummary!,
@@ -165,9 +205,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                 .take(4)
                 .map(
                   (row) => Chip(
-                    label: Text(
-                      '${row.badCaseCategory ?? "未分类"} ${row.count}',
-                    ),
+                    label: Text('${row.badCaseCategory ?? "未分类"} ${row.count}'),
                     visualDensity: VisualDensity.compact,
                   ),
                 )
@@ -178,29 +216,33 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
         if (scopeInsightRows?.isNotEmpty == true) ...[
           Text('Scope 榜单', style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
-          ...scopeInsightRows!.take(3).map(
-            (row) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                '${row.scopeLabel} · pass=${row.passRatePercent.toStringAsFixed(1)}% · total=${row.totalReviews} · bad_case=${row.badCaseCount}',
-                style: Theme.of(context).textTheme.bodySmall,
+          ...scopeInsightRows!
+              .take(3)
+              .map(
+                (row) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '${row.scopeLabel} · pass=${row.passRatePercent.toStringAsFixed(1)}% · total=${row.totalReviews} · bad_case=${row.badCaseCount}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
               ),
-            ),
-          ),
           const SizedBox(height: 8),
         ],
         if (tokenEfficiencyRows?.isNotEmpty == true) ...[
           Text('Token 效率', style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
-          ...tokenEfficiencyRows!.take(3).map(
-            (row) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                '${row.targetType} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
-                style: Theme.of(context).textTheme.bodySmall,
+          ...tokenEfficiencyRows!
+              .take(3)
+              .map(
+                (row) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '${row.targetType} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
               ),
-            ),
-          ),
         ],
       ],
     );

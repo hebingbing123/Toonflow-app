@@ -7,6 +7,7 @@ mod dto;
 mod enqueue;
 mod handlers;
 mod kinds;
+mod notifications;
 pub(crate) mod payload_project;
 mod track_metadata;
 
@@ -22,6 +23,7 @@ pub use kinds::{
     JOB_KIND_SUBTITLE_GENERATE, JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE,
     JOB_KIND_VOICEOVER_GENERATE,
 };
+pub(crate) use notifications::record_job_notification;
 pub(crate) use track_metadata::{
     hydrate_job_row, hydrate_job_rows, merge_client_request_id_from_http_headers,
     merge_default_track_metadata,
