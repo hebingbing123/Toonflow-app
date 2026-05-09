@@ -2218,6 +2218,22 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         children: [
           Text('帮助 / 文档', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
+          Text(
+            '本机：需要重新显示删除版本、归档、取消导出等高风险二次确认时，可使用下方按钮（与服务器配置无关）。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
+              },
+              icon: const Icon(Icons.notifications_active_outlined, size: 18),
+              label: const Text('恢复高风险操作确认提示'),
+            ),
+          ),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
