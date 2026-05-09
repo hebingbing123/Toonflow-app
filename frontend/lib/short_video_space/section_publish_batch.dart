@@ -370,24 +370,6 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     unawaited(showPublishDraftCompareDialog(context, drafts: selected));
   }
 
-  Future<void> _resetConfirmationDontShowAgain(BuildContext outerContext) async {
-    final ok = await showResetConfirmationDontShowAgainDialog(outerContext);
-    if (ok != true) {
-      return;
-    }
-    await resetAllConfirmationPreferences();
-    if (!outerContext.mounted) {
-      return;
-    }
-    ScaffoldMessenger.of(outerContext).showSnackBar(
-      const SnackBar(
-        content: Text(
-          '已清除本机高风险操作的「不再提示」偏好；后续将重新弹出确认。',
-        ),
-      ),
-    );
-  }
-
   // P11: Delivery mode handlers
   void _onDeliveryModeFilterChanged(String mode) {
     setState(() {

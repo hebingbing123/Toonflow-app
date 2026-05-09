@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_list_view/flutter_list_view.dart';
 
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'components/batch_operation_toolbar.dart';
 import 'components/filter_panel.dart';
@@ -517,7 +518,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onCompareDrafts: _publishDrafts.isNotEmpty ? _compareDrafts : null,
       batchValidation: _batchValidation,
       onResetConfirmationDontShowAgain: (ctx) =>
-          unawaited(_resetConfirmationDontShowAgain(ctx)),
+          unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
       // P11: Delivery mode
       deliveryModeFilter: _deliveryModeFilter,
       onDeliveryModeFilterChanged: _onDeliveryModeFilterChanged,
@@ -747,7 +748,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onOpenTasks: widget.onOpenTasks,
       onOpenQuality: widget.onOpenQuality,
       onResetConfirmationDontShowAgain: (ctx) =>
-          unawaited(_resetConfirmationDontShowAgain(ctx)),
+          unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
       ),
     );
   }

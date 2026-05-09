@@ -8,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'local_prefs/risky_operation_confirm_prefs.dart';
+import 'global_search/global_search_bar.dart';
 import 'project_editor/assets/clip_upload_launcher.dart';
 import 'project_editor/assets/upload_edit_image_launcher.dart';
 import 'project_editor/assets/link_dialog_launcher.dart';
@@ -246,6 +248,20 @@ class _HomePageState extends State<HomePage> {
         operationController: _workspaceOperationController,
         outputController: _workspaceOutputController,
         inputController: _workspaceInputController,
+        onRawEvent: (event) {
+          final type = event['type'];
+          final payload = event['payload'];
+          if (type is! String || payload is! Map<String, dynamic>) {
+            return;
+          }
+          if (type == 'settings.notification.created' ||
+              type == 'settings.notification.updated') {
+            try {
+              final record = NotificationRecordV1.fromJson(payload);
+              _notificationsController.ingestWsNotificationEvent(record);
+            } catch (_) {}
+          }
+        },
       );
   late final WorkspaceWritebackController _workspaceWritebackController =
       WorkspaceWritebackController(
@@ -265,6 +281,9 @@ class _HomePageState extends State<HomePage> {
         },
         onWsLifecycleSettled: () {
           _workspaceWsEventController.resetWsOperationFlags();
+        },
+        onWsConnectionChanged: (connected) {
+          _notificationsController.setRealtimeConnection(connected);
         },
       );
 
@@ -287,6 +306,7 @@ class _HomePageState extends State<HomePage> {
   String? get _pingBody => _overviewController.pingBody;
   String? get _versionBody => _overviewController.versionBody;
   String? get _readyBody => _overviewController.readyBody;
+  Session? get _session => _authController.session;
 
   Future<WebSocketChannel?> _openHarnessChannel(String token) =>
       _skillsHarnessController.openHarnessChannel(token);
@@ -359,8 +379,9 @@ class _HomePageState extends State<HomePage> {
         _jobsController.jobIdController.text = jobId;
         unawaited(_jobsController.fetchJobById());
       }
-      _shellNavigationController.selectProductWorkspacePane(
+      _selectProductPaneWithGate(
         ProductWorkspacePane.jobs,
+        disabledReason: '当前平台配置已关闭 jobs 面板，可在「平台配置」中重新开启。',
       );
       return;
     }
@@ -385,6 +406,64 @@ class _HomePageState extends State<HomePage> {
       );
       return;
     }
+    if (path == '/product/platform-status') {
+      _selectProductPaneWithGate(
+        ProductWorkspacePane.platformStatus,
+        disabledReason: '当前平台配置已关闭平台状态入口，可在「平台配置」中重新开启。',
+      );
+      return;
+    }
+    if (path == '/product/quality') {
+      _selectProductPaneWithGate(
+        ProductWorkspacePane.quality,
+        disabledReason: '当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。',
+      );
+      return;
+    }
+    if (path == '/product/help') {
+      _selectProductPaneWithGate(
+        ProductWorkspacePane.helpHub,
+        disabledReason: '当前平台配置已关闭帮助 Hub，可在「平台配置」中重新开启。',
+      );
+      return;
+    }
+    if (path == '/product/benchmark') {
+      _selectProductPaneWithGate(
+        ProductWorkspacePane.benchmark,
+        disabledReason: '当前平台配置已关闭评测基线入口，可在「平台配置」中重新开启。',
+      );
+      return;
+    }
+    if (path == '/product/workspace-activity') {
+      _selectProductPaneWithGate(
+        ProductWorkspacePane.workspaceActivity,
+        disabledReason: '当前平台配置已关闭执行动态面板，可在「平台配置」中重新开启。',
+      );
+      return;
+    }
+    if (path == '/product/platform-config') {
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.platformConfig,
+      );
+      return;
+    }
+  }
+
+  void _selectProductPaneWithGate(
+    ProductWorkspacePane pane, {
+    required String disabledReason,
+  }) {
+    if (_isProductPaneEnabledForConfig(pane, _platformConfig)) {
+      _shellNavigationController.selectProductWorkspacePane(pane);
+      return;
+    }
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger != null) {
+      messenger.showSnackBar(SnackBar(content: Text(disabledReason)));
+    }
+    _shellNavigationController.selectProductWorkspacePane(
+      ProductWorkspacePane.platformConfig,
+    );
   }
 
   void _handleAuthChanged() {
@@ -400,12 +479,16 @@ class _HomePageState extends State<HomePage> {
     switch (pane) {
       case ProductWorkspacePane.helpHub:
         return config.helpHubEnabled;
+      case ProductWorkspacePane.platformStatus:
+        return config.platformStatusEnabled;
       case ProductWorkspacePane.workspaceActivity:
         return config.workspaceActivityEnabled;
       case ProductWorkspacePane.benchmark:
         return config.benchmarkPaneEnabled;
       case ProductWorkspacePane.jobs:
         return config.jobsPaneEnabled;
+      case ProductWorkspacePane.quality:
+        return config.qualityDashboardEnabled;
       default:
         return true;
     }
@@ -429,6 +512,7 @@ class _HomePageState extends State<HomePage> {
     }
     _lastSessionAccessToken = token;
     if (token == null) {
+      _skillsHarnessController.stopAutoSessionWs();
       if (!mounted) return;
       setState(() {
         _sessionMe = null;
@@ -461,6 +545,7 @@ class _HomePageState extends State<HomePage> {
         _applyPlatformConfig(platformConfig);
       });
       unawaited(_notificationsController.prime());
+      unawaited(_skillsHarnessController.startAutoSessionWs());
     } on RustApiException catch (error) {
       if (_lastSessionAccessToken == token) {
         reportRustApiError(
@@ -556,6 +641,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleSignedOut() async {
+    _skillsHarnessController.stopAutoSessionWs();
     await _skillsHarnessController.closeChannel();
     _accountProbesController.reset();
     _contentProbesController.reset();
@@ -614,7 +700,19 @@ class _HomePageState extends State<HomePage> {
     final session = _authController.session;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('OpenFlow')),
+      appBar: AppBar(
+        title: const Text('OpenFlow'),
+        actions: [
+          // Global Search Bar
+          if (session != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: GlobalSearchBar(
+                accessToken: session.accessToken,
+              ),
+            ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: _buildHomePageSections(context, session),

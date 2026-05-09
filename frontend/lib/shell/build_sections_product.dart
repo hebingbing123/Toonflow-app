@@ -167,8 +167,9 @@ extension _HomePageBuildProductSections on _HomePageState {
           );
         },
         onOpenQuality: () {
-          _shellNavigationController.selectProductWorkspacePane(
+          _selectProductPaneWithGate(
             ProductWorkspacePane.quality,
+            disabledReason: '当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。',
           );
         },
       ),
@@ -191,6 +192,21 @@ extension _HomePageBuildProductSections on _HomePageState {
       NotificationsSection(
         controller: _notificationsController,
         onOpenNotification: _openNotificationLink,
+      ),
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.platformStatus)
+      _buildFeatureGatedPane(
+        enabled: _platformConfig.platformStatusEnabled,
+        title: '平台状态',
+        reason: '当前平台配置已关闭平台状态入口，可在「平台配置」中重新开启。',
+        child: PlatformStatusSection(
+          onOverallHealthChanged: (healthy, degradedEndpoints) {
+            _notificationsController.addPlatformStatusTransitionNotification(
+              healthy: healthy,
+              degradedEndpoints: degradedEndpoints,
+            );
+          },
+        ),
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.teamWorkspaces)
@@ -313,11 +329,16 @@ extension _HomePageBuildProductSections on _HomePageState {
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.quality)
-      QualityReviewsSection(
-        accessToken: _session?.accessToken,
-        controller: _qualityReviewsController,
-        initialProjectNumericId: _productScopedProjectNumericId,
-        platformConfig: _platformConfig,
+      _buildFeatureGatedPane(
+        enabled: _platformConfig.qualityDashboardEnabled,
+        title: '质量评审',
+        reason: '当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。',
+        child: QualityReviewsSection(
+          accessToken: _session?.accessToken,
+          controller: _qualityReviewsController,
+          initialProjectNumericId: _productScopedProjectNumericId,
+          platformConfig: _platformConfig,
+        ),
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.platformConfig)
@@ -359,12 +380,16 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
     switch (pane) {
       case ProductWorkspacePane.helpHub:
         return widget.config.helpHubEnabled;
+      case ProductWorkspacePane.platformStatus:
+        return widget.config.platformStatusEnabled;
       case ProductWorkspacePane.workspaceActivity:
         return widget.config.workspaceActivityEnabled;
       case ProductWorkspacePane.benchmark:
         return widget.config.benchmarkPaneEnabled;
       case ProductWorkspacePane.jobs:
         return widget.config.jobsPaneEnabled;
+      case ProductWorkspacePane.quality:
+        return widget.config.qualityDashboardEnabled;
       default:
         return true;
     }
@@ -376,6 +401,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
       (ProductWorkspacePane.shortVideoSpace, '短视频 Space', null),
       (ProductWorkspacePane.projects, '项目', null),
       (ProductWorkspacePane.notifications, '通知中心', widget.unreadNotifications),
+      (ProductWorkspacePane.platformStatus, '平台状态', null),
       (ProductWorkspacePane.teamWorkspaces, '团队工作区', null),
       (ProductWorkspacePane.scriptWorkspace, '脚本工作区', null),
       (ProductWorkspacePane.productionWorkspace, '制作工作区', null),
@@ -425,6 +451,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
           PlatformShortDramaPipelineStrip(
             onSelectPane: widget.onSelectPane,
             jobsPaneEnabled: widget.config.jobsPaneEnabled,
+            qualityPaneEnabled: widget.config.qualityDashboardEnabled,
           ),
         ],
       ),
@@ -889,6 +916,14 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           subtitle: const Text('控制物化读模型 refresh 相关按钮与入口'),
         ),
         SwitchListTile(
+          value: draft.platformStatusEnabled,
+          onChanged: onChanged == null
+              ? null
+              : (v) => onChanged(draft.copyWith(platformStatusEnabled: v)),
+          title: const Text('平台状态'),
+          subtitle: const Text('控制平台状态（Health/Ready/SLI/Metrics）入口'),
+        ),
+        SwitchListTile(
           value: draft.workspaceActivityEnabled,
           onChanged: onChanged == null
               ? null
@@ -943,6 +978,21 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         Text(
           '管理产品壳层的功能开关与运营面可见性。effective 现按 defaults <- plan override <- current workspace override <- user override 合成。',
           style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 16),
+        Text('本机客户端偏好', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 4),
+        Text(
+          '下列项仅影响当前设备上的本应用本地存储，与服务器侧平台配置无关。',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () {
+            unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
+          },
+          icon: const Icon(Icons.notifications_active_outlined, size: 18),
+          label: const Text('恢复高风险操作的确认提示'),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -1129,6 +1179,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   bool _loading = false;
   String? _error;
   HelpHubLinksResponseV1? _resp;
+  HelpHubConfigResponseV1? _helpHubConfig;
+  bool _savingHelpHubLinks = false;
   bool _loadingWebhooks = false;
   String? _webhooksError;
   OutboundWebhookListResponseV1? _webhooks;
@@ -1140,6 +1192,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     text: 'test.ping',
   );
   final _helpHubSearchController = TextEditingController();
+  final _helpHubNewIdController = TextEditingController();
+  final _helpHubNewTitleController = TextEditingController();
+  final _helpHubNewUrlController = TextEditingController();
   String? _webhookBusyId;
   final Map<String, OutboundWebhookTestResponseV1> _webhookLastTestResultById =
       <String, OutboundWebhookTestResponseV1>{};
@@ -1171,6 +1226,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       setState(() {
         _error = '请先登录';
         _resp = null;
+        _helpHubConfig = null;
       });
       return;
     }
@@ -1179,12 +1235,13 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       _error = null;
     });
     try {
-      final resp = await getSettingsHelpHubLinksV1(token);
+      final cfg = await getSettingsHelpHubConfigV1(token);
       if (!mounted) {
         return;
       }
       setState(() {
-        _resp = resp;
+        _helpHubConfig = cfg;
+        _resp = HelpHubLinksResponseV1(items: cfg.effectiveItems);
       });
     } catch (e) {
       if (!mounted) {
@@ -1193,6 +1250,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       setState(() {
         _error = describeRustApiError(e);
         _resp = null;
+        _helpHubConfig = null;
       });
     } finally {
       if (mounted) {
@@ -1218,6 +1276,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     _webhookSearchController.dispose();
     _webhookTestEventTypeController.dispose();
     _helpHubSearchController.dispose();
+    _helpHubNewIdController.dispose();
+    _helpHubNewTitleController.dispose();
+    _helpHubNewUrlController.dispose();
     _billingEventTypeController.dispose();
     _billingProviderEventIdController.dispose();
     _billingProviderEventIdPrefixController.dispose();
@@ -1228,6 +1289,268 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     _billingCreatedFromController.dispose();
     _billingCreatedToController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openHelpHubManageDialog() async {
+    final token = widget.accessToken;
+    final cfg = _helpHubConfig;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    if (cfg == null) {
+      await _load();
+      if (!mounted) {
+        return;
+      }
+    }
+
+    final initial = _helpHubConfig;
+    if (initial == null) {
+      return;
+    }
+
+    var userItems = initial.userItems.toList(growable: true);
+    var workspaceItems = initial.workspaceItems.toList(growable: true);
+    var useWorkspaceTab = initial.canManageWorkspace;
+    var errorText = '';
+
+    _helpHubNewIdController.text = '';
+    _helpHubNewTitleController.text = '';
+    _helpHubNewUrlController.text = '';
+
+    Future<void> saveScope({required bool workspace}) async {
+      setState(() {
+        _savingHelpHubLinks = true;
+      });
+      try {
+        final resp = workspace
+            ? await postSettingsHelpHubWorkspaceLinksV1(
+                token,
+                items: workspaceItems,
+              )
+            : await postSettingsHelpHubUserLinksV1(
+                token,
+                items: userItems,
+              );
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _helpHubConfig = resp;
+          _resp = HelpHubLinksResponseV1(items: resp.effectiveItems);
+        });
+      } catch (e) {
+        errorText = describeRustApiError(e);
+      } finally {
+        if (mounted) {
+          setState(() {
+            _savingHelpHubLinks = false;
+          });
+        }
+      }
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setInner) {
+            final canManageWorkspace = _helpHubConfig?.canManageWorkspace ?? false;
+            final activeIsWorkspace = canManageWorkspace && useWorkspaceTab;
+            final activeItems = activeIsWorkspace ? workspaceItems : userItems;
+
+            void addNew() {
+              final id = _helpHubNewIdController.text.trim();
+              final title = _helpHubNewTitleController.text.trim();
+              final url = _helpHubNewUrlController.text.trim();
+              if (id.isEmpty || title.isEmpty || url.isEmpty) {
+                setInner(() {
+                  errorText = 'id / title / url 不能为空';
+                });
+                return;
+              }
+              setInner(() {
+                errorText = '';
+                activeItems.add(HelpHubLinkItemV1(id: id, title: title, url: url));
+                _helpHubNewIdController.text = '';
+                _helpHubNewTitleController.text = '';
+                _helpHubNewUrlController.text = '';
+              });
+            }
+
+            return AlertDialog(
+              title: const Text('管理帮助入口（个人 / 工作区）'),
+              content: SizedBox(
+                width: 720,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '生效顺序：个人覆盖 > 工作区覆盖 > 环境默认。'
+                        '${canManageWorkspace ? '' : '（当前工作区不可配置，只有个人覆盖可用）'}',
+                        style: Theme.of(ctx).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 12),
+                      if (canManageWorkspace)
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            FilterChip(
+                              label: const Text('个人覆盖'),
+                              selected: !activeIsWorkspace,
+                              onSelected: (v) => setInner(() {
+                                useWorkspaceTab = !v;
+                                errorText = '';
+                              }),
+                            ),
+                            FilterChip(
+                              label: const Text('工作区覆盖'),
+                              selected: activeIsWorkspace,
+                              onSelected: (v) => setInner(() {
+                                useWorkspaceTab = v;
+                                errorText = '';
+                              }),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _helpHubNewIdController,
+                        decoration: const InputDecoration(
+                          labelText: 'id（用于去重/覆盖）',
+                          hintText: 'runbook-quality',
+                        ),
+                        enabled: !_savingHelpHubLinks,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _helpHubNewTitleController,
+                        decoration: const InputDecoration(labelText: '标题'),
+                        enabled: !_savingHelpHubLinks,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _helpHubNewUrlController,
+                        decoration: const InputDecoration(
+                          labelText: 'URL',
+                          hintText: 'https://docs.example.com/runbook',
+                        ),
+                        enabled: !_savingHelpHubLinks,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.tonal(
+                            onPressed: _savingHelpHubLinks ? null : addNew,
+                            child: const Text('添加'),
+                          ),
+                          if (errorText.isNotEmpty)
+                            Text(
+                              errorText,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (activeItems.isEmpty)
+                        Text(
+                          '当前范围没有自定义入口。',
+                          style: Theme.of(ctx).textTheme.bodySmall,
+                        ),
+                      ...activeItems.asMap().entries.map((entry) {
+                        final idx = entry.key;
+                        final item = entry.value;
+                        return Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${item.title} (${item.id})',
+                                        style: Theme.of(ctx).textTheme.titleSmall,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      SelectableText(item.url),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  tooltip: '上移',
+                                  onPressed: (_savingHelpHubLinks || idx == 0)
+                                      ? null
+                                      : () => setInner(() {
+                                            final tmp = activeItems[idx - 1];
+                                            activeItems[idx - 1] = activeItems[idx];
+                                            activeItems[idx] = tmp;
+                                          }),
+                                  icon: const Icon(Icons.arrow_upward),
+                                ),
+                                IconButton(
+                                  tooltip: '下移',
+                                  onPressed: (_savingHelpHubLinks ||
+                                          idx >= activeItems.length - 1)
+                                      ? null
+                                      : () => setInner(() {
+                                            final tmp = activeItems[idx + 1];
+                                            activeItems[idx + 1] = activeItems[idx];
+                                            activeItems[idx] = tmp;
+                                          }),
+                                  icon: const Icon(Icons.arrow_downward),
+                                ),
+                                IconButton(
+                                  tooltip: '删除',
+                                  onPressed: _savingHelpHubLinks
+                                      ? null
+                                      : () => setInner(() {
+                                            activeItems.removeAt(idx);
+                                          }),
+                                  icon: const Icon(Icons.delete_outline),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: _savingHelpHubLinks ? null : () => Navigator.pop(ctx),
+                  child: const Text('关闭'),
+                ),
+                FilledButton(
+                  onPressed: _savingHelpHubLinks
+                      ? null
+                      : () async {
+                          await saveScope(workspace: activeIsWorkspace);
+                          if (!ctx.mounted) {
+                            return;
+                          }
+                          if (errorText.isNotEmpty) {
+                            setInner(() {});
+                            return;
+                          }
+                          Navigator.pop(ctx);
+                        },
+                  child: Text(_savingHelpHubLinks ? '保存中…' : '保存'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _loadWebhooks() async {
@@ -1902,6 +2225,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               OutlinedButton(
                 onPressed: _loading ? null : _load,
                 child: const Text('刷新'),
+              ),
+              OutlinedButton(
+                onPressed: (_loading || _helpHubConfig == null)
+                    ? null
+                    : _openHelpHubManageDialog,
+                child: const Text('管理入口'),
               ),
             ],
           ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../local_prefs/risky_operation_confirm_prefs.dart';
+
 /// Confirmation dialog utilities for short video editing operations
 ///
 /// Provides reusable confirmation dialogs with "Don't show again" functionality
@@ -19,14 +21,11 @@ class ConfirmationResult {
   });
 }
 
-/// Preference keys for "don't show again" settings
-class ConfirmationPreferenceKeys {
-  static const String deleteVersion = 'confirmDeleteVersion';
-  static const String batchDisable = 'confirmBatchDisable';
-  static const String restoreDraft = 'confirmRestoreDraft';
-  static const String cancelExport = 'confirmCancelExport';
-  static const String batchArchivePublish = 'confirmBatchArchivePublish';
-}
+/// Preference keys for "don't show again" settings (short-video destructive flows).
+///
+/// Prefer [RiskyOperationConfirmPreferenceKeys] for new code; this alias keeps
+/// imports stable under `confirmation_dialogs.dart`.
+typedef ConfirmationPreferenceKeys = RiskyOperationConfirmPreferenceKeys;
 
 /// Show confirmation dialog for deleting a version
 ///
@@ -40,7 +39,9 @@ Future<bool?> showDeleteVersionConfirmation(
   if (showDontShowAgain) {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final dontShow = prefs.getBool(ConfirmationPreferenceKeys.deleteVersion) ?? false;
+      final dontShow =
+          prefs.getBool(RiskyOperationConfirmPreferenceKeys.deleteVersion) ??
+              false;
       if (dontShow) {
         return true; // Auto-confirm if user chose "don't show again"
       }
@@ -242,111 +243,19 @@ Future<bool?> showBatchArchivePublishConfirmation(
   return result?.confirmed;
 }
 
-/// Reset all "don't show again" preferences
-Future<void> resetAllConfirmationPreferences() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove(ConfirmationPreferenceKeys.deleteVersion);
-  await prefs.remove(ConfirmationPreferenceKeys.batchDisable);
-  await prefs.remove(ConfirmationPreferenceKeys.restoreDraft);
-  await prefs.remove(ConfirmationPreferenceKeys.cancelExport);
-  await prefs.remove(ConfirmationPreferenceKeys.batchArchivePublish);
-}
+/// Reset all "don't show again" preferences (delegates to platform-local prefs).
+Future<void> resetAllConfirmationPreferences() =>
+    resetAllRiskyOperationConfirmPreferences();
 
 /// Human-readable snapshot of stored "don't show again" toggles (for ops UI).
-Future<List<String>> listActiveConfirmationDontShowAgainLabels() async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final labels = <String>[];
-    if (prefs.getBool(ConfirmationPreferenceKeys.deleteVersion) ?? false) {
-      labels.add('删除成片版本');
-    }
-    if (prefs.getBool(ConfirmationPreferenceKeys.batchDisable) ?? false) {
-      labels.add('批量禁用镜头');
-    }
-    if (prefs.getBool(ConfirmationPreferenceKeys.restoreDraft) ?? false) {
-      labels.add('恢复草稿覆盖');
-    }
-    if (prefs.getBool(ConfirmationPreferenceKeys.cancelExport) ?? false) {
-      labels.add('取消成片导出');
-    }
-    if (prefs.getBool(ConfirmationPreferenceKeys.batchArchivePublish) ?? false) {
-      labels.add('批量归档发布草稿');
-    }
-    return labels;
-  } catch (_) {
-    return [];
-  }
-}
+Future<List<String>> listActiveConfirmationDontShowAgainLabels() =>
+    listActiveRiskyOperationConfirmDontShowLabels();
 
 /// Confirm clearing all local "don't show again" confirmations (platform recovery).
-///
-/// Returns `true` if user confirms reset.
 Future<bool?> showResetConfirmationDontShowAgainDialog(
   BuildContext context,
-) async {
-  final active = await listActiveConfirmationDontShowAgainLabels();
-
-  if (!context.mounted) {
-    return null;
-  }
-
-  return showDialog<bool>(
-    context: context,
-    builder: (ctx) {
-      return AlertDialog(
-        title: const Text('恢复快风险确认框'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '将清除本机「不再提示」记录。此后删除版本、归档、取消导出等操作'
-                '会重新弹出确认（仅影响当前设备上的本应用）。',
-              ),
-              const SizedBox(height: 12),
-              Text(
-                active.isEmpty ? '当前无已保存的「不再提示」条目。仍可清除可能的残留键。'
-                    : '当前已静默确认的项目：',
-                style: Theme.of(ctx).textTheme.labelMedium,
-              ),
-              if (active.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                ...active.map(
-                  (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.notifications_active_outlined,
-                          size: 18,
-                          color: Theme.of(ctx).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(s)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('清除并恢复'),
-          ),
-        ],
-      );
-    },
-  );
-}
+) =>
+    showResetRiskyOperationConfirmPrefsDialog(context);
 
 // Private dialog widgets
 
