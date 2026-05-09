@@ -345,6 +345,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   OutboundWebhookCreatedResponseV1? _latestCreatedWebhook;
   final _webhookUrlController = TextEditingController();
   final _webhookSecretController = TextEditingController();
+  final _webhookSearchController = TextEditingController();
   final _webhookTestEventTypeController = TextEditingController(
     text: 'test.ping',
   );
@@ -418,6 +419,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   void dispose() {
     _webhookUrlController.dispose();
     _webhookSecretController.dispose();
+    _webhookSearchController.dispose();
     _webhookTestEventTypeController.dispose();
     _billingEventTypeController.dispose();
     _billingProviderEventIdController.dispose();
@@ -643,6 +645,18 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         });
       }
     }
+  }
+
+  List<OutboundWebhookListItemV1> _filteredWebhooks() {
+    final items = _webhooks?.items ?? const <OutboundWebhookListItemV1>[];
+    final needle = _webhookSearchController.text.trim().toLowerCase();
+    if (needle.isEmpty) {
+      return items;
+    }
+    return items.where((wh) {
+      final haystack = '${wh.id} ${wh.url} ${wh.createdAt}'.toLowerCase();
+      return haystack.contains(needle);
+    }).toList(growable: false);
   }
 
   Future<void> _testWebhook(String id) async {
@@ -1119,12 +1133,28 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             ],
           ),
           const SizedBox(height: 8),
+          TextField(
+            controller: _webhookSearchController,
+            decoration: const InputDecoration(
+              labelText: '搜索 Webhook（URL / id / createdAt）',
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
           if (_loadingWebhooks) const Text('加载中...'),
           if (_webhooksError != null)
             Text(_webhooksError!, style: const TextStyle(color: Colors.red)),
           if (_webhooks != null)
-            ..._webhooks!.items.map(
+            Text(
+              'total=${_webhooks!.items.length} · filtered=${_filteredWebhooks().length}'
+              '${_latestCreatedWebhook != null ? ' · latest=${_latestCreatedWebhook!.id}' : ''}',
+            ),
+          if (_webhooks != null)
+            ..._filteredWebhooks().map(
               (wh) => Card(
+                color: _latestCreatedWebhook?.id == wh.id
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
@@ -1138,6 +1168,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(height: 4),
+                            if (_latestCreatedWebhook?.id == wh.id)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Chip(
+                                  label: const Text('最近创建'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ),
                             Text('id: ${wh.id}'),
                             Text('createdAt: ${wh.createdAt}'),
                           ],
