@@ -335,6 +335,20 @@ class _HelpHubSection extends StatefulWidget {
   State<_HelpHubSection> createState() => _HelpHubSectionState();
 }
 
+class _WebhookActivityEntry {
+  const _WebhookActivityEntry({
+    required this.at,
+    required this.action,
+    required this.webhookId,
+    required this.summary,
+  });
+
+  final DateTime at;
+  final String action;
+  final String webhookId;
+  final String summary;
+}
+
 class _HelpHubSectionState extends State<_HelpHubSection> {
   bool _loading = false;
   String? _error;
@@ -352,6 +366,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   String? _webhookBusyId;
   final Map<String, OutboundWebhookTestResponseV1> _webhookLastTestResultById =
       <String, OutboundWebhookTestResponseV1>{};
+  final List<_WebhookActivityEntry> _webhookActivity =
+      <_WebhookActivityEntry>[];
   bool _loadingBillingEvents = false;
   bool _loadingMoreBillingEvents = false;
   bool _exportingAllBillingEvents = false;
@@ -594,6 +610,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _latestCreatedWebhook = created;
         _webhookUrlController.clear();
         _webhookSecretController.clear();
+        _appendWebhookActivity(
+          action: 'created',
+          webhookId: created.id,
+          summary: created.url,
+        );
       });
       await Clipboard.setData(ClipboardData(text: created.secret));
       if (!mounted) {
@@ -661,6 +682,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         if (_latestCreatedWebhook?.id == id) {
           _latestCreatedWebhook = null;
         }
+        _appendWebhookActivity(
+          action: 'deleted',
+          webhookId: id,
+          summary: 'webhook deleted',
+        );
       });
       await _loadWebhooks();
     } catch (e) {
@@ -694,6 +720,25 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         .toList(growable: false);
   }
 
+  void _appendWebhookActivity({
+    required String action,
+    required String webhookId,
+    required String summary,
+  }) {
+    _webhookActivity.insert(
+      0,
+      _WebhookActivityEntry(
+        at: DateTime.now(),
+        action: action,
+        webhookId: webhookId,
+        summary: summary,
+      ),
+    );
+    if (_webhookActivity.length > 20) {
+      _webhookActivity.removeRange(20, _webhookActivity.length);
+    }
+  }
+
   Future<void> _testWebhook(String id) async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
@@ -719,6 +764,13 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhookLastTestResultById[id] = res;
+        _appendWebhookActivity(
+          action: res.delivered ? 'test_success' : 'test_failed',
+          webhookId: id,
+          summary: res.delivered
+              ? 'http=${res.httpStatus ?? "-"}'
+              : 'http=${res.httpStatus ?? "-"} error=${res.error ?? "unknown"}',
+        );
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1196,6 +1248,30 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               'total=${_webhooks!.items.length} · filtered=${_filteredWebhooks().length}'
               '${_latestCreatedWebhook != null ? ' · latest=${_latestCreatedWebhook!.id}' : ''}',
             ),
+          if (_webhookActivity.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text('最近操作', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            ..._webhookActivity.take(6).map(
+              (entry) => ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text('${entry.action} · ${entry.webhookId}'),
+                subtitle: SelectableText(
+                  '${entry.at.toLocal().toIso8601String()}\n${entry.summary}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                trailing: IconButton(
+                  tooltip: '复制记录',
+                  onPressed: () => _copyBillingAuditText(
+                    '${entry.action}\n${entry.webhookId}\n${entry.summary}',
+                    ' webhook 操作记录',
+                  ),
+                  icon: const Icon(Icons.copy_outlined),
+                ),
+              ),
+            ),
+          ],
           if (_webhooks != null)
             ..._filteredWebhooks().map(
               (wh) => Card(
