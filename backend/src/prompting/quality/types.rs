@@ -108,7 +108,7 @@ pub struct ListQualityReviewsQuery {
 }
 
 /// 质量统计响应
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityStatsResponse {
     pub scope: String,
@@ -130,7 +130,7 @@ pub struct QualityStatsResponse {
 }
 
 /// Scope-level quality insight row aggregated by project/script scope.
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityScopeInsightResponse {
     pub scope: String,
@@ -163,7 +163,7 @@ pub struct QualityScopeInsightResponse {
 }
 
 /// 分环节通过率条目
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct StagePassRateItem {
     pub scope: String,
@@ -185,7 +185,7 @@ pub struct StagePassRateItem {
 }
 
 /// 按 stage + grade 分布的统计条目（需求 6.4）
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct StageGradeDistributionItem {
     pub scope: String,
@@ -206,7 +206,7 @@ pub struct StageGradeDistributionItem {
 }
 
 /// Token efficiency aggregate response (derived from auto quality reviews).
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityTokenEfficiencyResponse {
     pub scope: String,
@@ -268,6 +268,82 @@ pub struct QualityTokenEfficiencySample {
     pub memory_share_percent: f64,
     pub delivery_memory_share_percent: f64,
     pub memory_delivery_priority_applied: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardTargetStat {
+    pub scope: String,
+    pub target_type: String,
+    pub total_reviews: i64,
+    pub pass_rate_percent: f64,
+    pub avg_overall_score: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardStagePassRateItem {
+    pub scope: String,
+    pub target_type: String,
+    pub review_date: chrono::DateTime<chrono::Utc>,
+    pub total_reviews: i64,
+    pub pass_rate_percent: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardStageGradeItem {
+    pub scope: String,
+    pub stage: String,
+    pub grade_a_count: i64,
+    pub grade_b_count: i64,
+    pub grade_c_count: i64,
+    pub grade_d_count: i64,
+    pub total_count: i64,
+    pub pass_rate_percent: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardScopeInsightItem {
+    pub scope: String,
+    pub scope_label: String,
+    pub total_reviews: i64,
+    pub bad_case_count: i64,
+    pub pass_rate_percent: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardTokenEfficiencyItem {
+    pub scope: String,
+    pub target_type: String,
+    pub sample_count: i64,
+    pub avg_prompt_chars: f64,
+    pub avg_memory_style_chars: f64,
+    pub avg_memory_delivery_chars: f64,
+    pub memory_action: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityBadCaseStatResponse {
+    pub scope: String,
+    pub bad_case_category: Option<String>,
+    pub count: i64,
+    pub pass_rate_percent: f64,
+    pub avg_score: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QualityDashboardResponse {
+    pub stats: Vec<QualityDashboardTargetStat>,
+    pub stage_pass_rate: Vec<QualityDashboardStagePassRateItem>,
+    pub stage_grade_distribution: Vec<QualityDashboardStageGradeItem>,
+    pub scope_insights: Vec<QualityDashboardScopeInsightItem>,
+    pub token_efficiency: Vec<QualityDashboardTokenEfficiencyItem>,
+    pub bad_case_stats: Vec<QualityBadCaseStatResponse>,
 }
 
 /// 高频 bad case 统计条目（需求 14.3）

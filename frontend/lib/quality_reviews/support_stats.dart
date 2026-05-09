@@ -305,6 +305,63 @@ String summarizeStageGradeDistributionRows(
   return '$visible$suffix';
 }
 
+String summarizeDashboardStageGradeDistributionRows(
+  Iterable<QualityDashboardStageGradeItem> rows, {
+  int maxItems = 4,
+}) {
+  final items = rows.toList(growable: false);
+  if (items.isEmpty) {
+    return '当前没有阶段等级分布';
+  }
+  final visible = items
+      .take(maxItems)
+      .map(
+        (row) =>
+            '${row.stage}: A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount} · pass=${row.passRatePercent.toStringAsFixed(1)}%',
+      )
+      .join(' | ');
+  final suffix = items.length > maxItems ? ' | …' : '';
+  return '$visible$suffix';
+}
+
+String summarizeDashboardScopeInsightRows(
+  Iterable<QualityDashboardScopeInsightItem> rows, {
+  int maxItems = 4,
+}) {
+  final items = rows.toList(growable: false);
+  if (items.isEmpty) {
+    return '当前没有 scope 榜单';
+  }
+  final visible = items
+      .take(maxItems)
+      .map(
+        (row) =>
+            '${row.scopeLabel} ${row.totalReviews}条 · pass=${row.passRatePercent.toStringAsFixed(1)}% · 坏例${row.badCaseCount}',
+      )
+      .join(' | ');
+  final suffix = items.length > maxItems ? ' | …' : '';
+  return '$visible$suffix';
+}
+
+String summarizeDashboardTokenEfficiencyRows(
+  Iterable<QualityDashboardTokenEfficiencyItem> rows, {
+  int maxItems = 4,
+}) {
+  final items = rows.toList(growable: false);
+  if (items.isEmpty) {
+    return '当前没有 token 效率统计';
+  }
+  final visible = items
+      .take(maxItems)
+      .map(
+        (row) =>
+            '${row.targetType}: prompt=${row.avgPromptChars.toStringAsFixed(0)}, memory=${row.avgMemoryStyleChars.toStringAsFixed(0)}, delivery=${row.avgMemoryDeliveryChars.toStringAsFixed(0)} · action=${row.memoryAction}',
+      )
+      .join(' | ');
+  final suffix = items.length > maxItems ? ' | …' : '';
+  return '$visible$suffix';
+}
+
 String summarizeBadCaseStatItems(
   Iterable<BadCaseStatItem> items, {
   int maxItems = 4,

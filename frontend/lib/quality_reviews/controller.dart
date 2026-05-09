@@ -35,11 +35,11 @@ class QualityReviewsController extends ChangeNotifier {
   String? qualityDashboardLine;
   String? qualityReviewByIdLine;
   List<QualityReview>? qualityReviews;
-  List<QualityStatsRow>? qualityStatsRows;
-  List<StagePassRateRow>? qualityStagePassRateRows;
-  List<StageGradeDistributionRow>? qualityStageGradeRows;
-  List<QualityScopeInsightRow>? qualityScopeInsightRows;
-  List<QualityTokenEfficiencyRow>? qualityTokenEfficiencyRows;
+  List<QualityDashboardTargetStat>? qualityStatsRows;
+  List<QualityDashboardStagePassRateItem>? qualityStagePassRateRows;
+  List<QualityDashboardStageGradeItem>? qualityStageGradeRows;
+  List<QualityDashboardScopeInsightItem>? qualityScopeInsightRows;
+  List<QualityDashboardTokenEfficiencyItem>? qualityTokenEfficiencyRows;
   List<BadCaseStatItem>? qualityBadCaseStatItems;
 
   String? get _accessToken => _accessTokenProvider();
@@ -236,56 +236,48 @@ class QualityReviewsController extends ChangeNotifier {
     _setError(null);
     notifyListeners();
     try {
-      final statsFuture = fetchQualityStats(token);
-      final stagePassRateFuture = fetchQualityStagePassRate(token);
-      final stageGradeFuture = fetchQualityStageGradeDistribution(token);
-      final scopeInsightsFuture = fetchQualityScopeInsights(
+      final dashboard = await fetchQualityDashboard(
         token,
         projectId: projectId,
-        limit: 5,
-      );
-      final tokenEfficiencyFuture = fetchQualityTokenEfficiency(
-        token,
-        projectId: projectId,
-      );
-      final badCaseStatsFuture = fetchBadCaseStats(
-        token,
-        projectId: projectId,
-        limit: 5,
+        scriptId: null,
       );
 
-      final stats = await statsFuture;
-      final stagePassRate = await stagePassRateFuture;
-      final stageGrade = await stageGradeFuture;
-      final scopeInsights = await scopeInsightsFuture;
-      final tokenEfficiency = await tokenEfficiencyFuture;
-      final badCaseStats = await badCaseStatsFuture;
-
-      qualityStatsRows = stats;
-      qualityStatsLine = summarizeQualityStatsRows(stats, maxItems: 4);
-      qualityStagePassRateRows = stagePassRate;
-      qualityStagePassRateLine = summarizeStagePassRateRows(
-        stagePassRate,
+      qualityStatsRows = dashboard.stats;
+      qualityStatsLine = dashboard.stats.isEmpty
+          ? '当前没有质量统计'
+          : dashboard.stats
+                .map(
+                  (row) =>
+                      '${row.targetType}: total=${row.totalReviews}, pass=${row.passRatePercent.toStringAsFixed(1)}%, avg=${row.avgOverallScore.toStringAsFixed(1)}',
+                )
+                .join(' | ');
+      qualityStagePassRateRows = dashboard.stagePassRate;
+      qualityStagePassRateLine = dashboard.stagePassRate.isEmpty
+          ? '当前没有阶段通过率'
+          : dashboard.stagePassRate
+                .map(
+                  (row) =>
+                      '${row.reviewDate.toIso8601String().substring(0, 10)} ${row.targetType}: pass=${row.passRatePercent.toStringAsFixed(1)}%, total=${row.totalReviews}',
+                )
+                .join(' | ');
+      qualityStageGradeRows = dashboard.stageGradeDistribution;
+      qualityStageGradeLine = summarizeDashboardStageGradeDistributionRows(
+        dashboard.stageGradeDistribution,
         maxItems: 6,
       );
-      qualityStageGradeRows = stageGrade;
-      qualityStageGradeLine = summarizeStageGradeDistributionRows(
-        stageGrade,
-        maxItems: 6,
-      );
-      qualityScopeInsightRows = scopeInsights;
-      qualityScopeInsightsLine = summarizeQualityScopeInsightRows(
-        scopeInsights,
+      qualityScopeInsightRows = dashboard.scopeInsights;
+      qualityScopeInsightsLine = summarizeDashboardScopeInsightRows(
+        dashboard.scopeInsights,
         maxItems: 4,
       );
-      qualityTokenEfficiencyRows = tokenEfficiency;
-      qualityTokenEfficiencyLine = summarizeQualityTokenEfficiencyRows(
-        tokenEfficiency,
+      qualityTokenEfficiencyRows = dashboard.tokenEfficiency;
+      qualityTokenEfficiencyLine = summarizeDashboardTokenEfficiencyRows(
+        dashboard.tokenEfficiency,
         maxItems: 4,
       );
-      qualityBadCaseStatItems = badCaseStats;
+      qualityBadCaseStatItems = dashboard.badCaseStats;
       qualityBadCaseStatsLine = summarizeBadCaseStatItems(
-        badCaseStats,
+        dashboard.badCaseStats,
         maxItems: 5,
       );
       _refreshQualityDashboardLine();

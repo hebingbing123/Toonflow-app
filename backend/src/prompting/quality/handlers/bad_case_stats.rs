@@ -1,11 +1,10 @@
 //! GET /api/v1/quality/bad-case-stats — bad case 按类别聚合 top-N（需求 2.1）。
 
 use axum::{extract::State, http::HeaderMap, Json};
-use serde::Serialize;
-use sqlx::FromRow;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::prompting::quality::types::QualityBadCaseStatResponse;
 use crate::state::AppState;
 
 use axum::extract::Query;
@@ -17,16 +16,6 @@ pub struct BadCaseStatsQuery {
     pub project_id: Option<i32>,
     pub script_id: Option<i32>,
     pub limit: Option<i64>,
-}
-
-#[derive(Debug, Serialize, FromRow)]
-#[serde(rename_all = "camelCase")]
-pub struct BadCaseStatItem {
-    pub scope: String,
-    pub bad_case_category: Option<String>,
-    pub count: i64,
-    pub pass_rate_percent: f64,
-    pub avg_score: f64,
 }
 
 /// GET /api/v1/quality/bad-case-stats
@@ -49,12 +38,12 @@ pub(crate) async fn get_bad_case_stats(
     State(state): State<AppState>,
     headers: HeaderMap,
     Query(query): Query<BadCaseStatsQuery>,
-) -> Result<Json<Vec<BadCaseStatItem>>, ApiError> {
+) -> Result<Json<Vec<QualityBadCaseStatResponse>>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     let limit = query.limit.unwrap_or(5).clamp(1, 20);
 
-    let items = sqlx::query_as::<_, BadCaseStatItem>(
+    let items = sqlx::query_as::<_, QualityBadCaseStatResponse>(
         r#"
         SELECT
             'user'::text as scope,

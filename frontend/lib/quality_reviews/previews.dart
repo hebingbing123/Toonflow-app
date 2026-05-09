@@ -82,10 +82,10 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
 
   final Color outlineColor;
   final String? dashboardSummary;
-  final List<QualityStatsRow>? qualityStatsRows;
-  final List<StageGradeDistributionRow>? stageGradeRows;
-  final List<QualityScopeInsightRow>? scopeInsightRows;
-  final List<QualityTokenEfficiencyRow>? tokenEfficiencyRows;
+  final List<QualityDashboardTargetStat>? qualityStatsRows;
+  final List<QualityDashboardStageGradeItem>? stageGradeRows;
+  final List<QualityDashboardScopeInsightItem>? scopeInsightRows;
+  final List<QualityDashboardTokenEfficiencyItem>? tokenEfficiencyRows;
   final List<BadCaseStatItem>? badCaseStats;
 
   @override

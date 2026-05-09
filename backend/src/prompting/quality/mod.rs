@@ -25,10 +25,12 @@ mod next_action_tests;
 mod tests;
 
 pub use types::{
-    BadCaseFrequencyItem, CreateQualityReviewBody, ListQualityReviewsQuery, QualityReview,
-    QualityScopeInsightResponse, QualityStatsResponse, QualityTokenEfficiencyResponse,
-    QualityTokenEfficiencySample, SkillVersionComparisonItem, StageGradeDistributionItem,
-    StagePassRateItem,
+    BadCaseFrequencyItem, CreateQualityReviewBody, ListQualityReviewsQuery, QualityBadCaseStatResponse,
+    QualityDashboardResponse, QualityDashboardScopeInsightItem, QualityDashboardStageGradeItem,
+    QualityDashboardStagePassRateItem, QualityDashboardTargetStat,
+    QualityDashboardTokenEfficiencyItem, QualityReview, QualityScopeInsightResponse,
+    QualityStatsResponse, QualityTokenEfficiencyResponse, QualityTokenEfficiencySample,
+    SkillVersionComparisonItem, StageGradeDistributionItem, StagePassRateItem,
 };
 
 pub use next_action::NextAction;
@@ -37,10 +39,11 @@ pub use next_action::NextAction;
 #[allow(unused_imports)]
 pub(crate) use handlers::{
     __path_create_review, __path_get_bad_case_frequency, __path_get_bad_case_stats,
-    __path_get_review, __path_get_scope_insights, __path_get_skill_version_comparison,
-    __path_get_stage_grade_distribution, __path_get_stage_pass_rate, __path_get_stats,
-    __path_get_token_efficiency, __path_get_token_efficiency_samples, __path_list_reviews,
-    create_review, get_bad_case_frequency, get_bad_case_stats, get_review, get_scope_insights,
+    __path_get_dashboard, __path_get_review, __path_get_scope_insights,
+    __path_get_skill_version_comparison, __path_get_stage_grade_distribution,
+    __path_get_stage_pass_rate, __path_get_stats, __path_get_token_efficiency,
+    __path_get_token_efficiency_samples, __path_list_reviews, create_review, get_bad_case_frequency,
+    get_bad_case_stats, get_dashboard, get_review, get_scope_insights,
     get_skill_version_comparison, get_stage_grade_distribution, get_stage_pass_rate, get_stats,
     get_token_efficiency, get_token_efficiency_samples, list_reviews,
 };
@@ -53,6 +56,7 @@ pub fn routes() -> Router<AppState> {
         )
         .route("/api/v1/quality/reviews/{id}", get(handlers::get_review))
         .route("/api/v1/quality/stats", get(handlers::get_stats))
+        .route("/api/v1/quality/dashboard", get(handlers::get_dashboard))
         .route(
             "/api/v1/quality/scope-insights",
             get(handlers::get_scope_insights),

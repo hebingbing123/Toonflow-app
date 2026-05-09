@@ -5,7 +5,9 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::types::{QualityStatsResponse, StagePassRateItem};
+use super::super::types::{
+    QualityDashboardResponse, QualityStatsResponse, StagePassRateItem,
+};
 
 mod utils;
 
@@ -105,6 +107,252 @@ pub(crate) async fn get_stats(
 pub struct StagePassRateQuery {
     /// 按技能版本哈希过滤（可选，用于版本变更前后对比）
     pub skill_version_hash: Option<String>,
+}
+
+#[derive(Debug, serde::Deserialize, utoipa::IntoParams)]
+#[serde(rename_all = "camelCase")]
+#[into_params(parameter_in = Query, rename_all = "camelCase")]
+pub struct QualityDashboardQuery {
+    pub project_id: Option<i32>,
+    pub script_id: Option<i32>,
+}
+
+/// GET /api/v1/quality/dashboard - 主面板聚合读模型
+#[utoipa::path(
+    get,
+    path = "/api/v1/quality/dashboard",
+    operation_id = "getQualityDashboardV1",
+    tag = "quality",
+    params(QualityDashboardQuery),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_dashboard(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(query): Query<QualityDashboardQuery>,
+) -> Result<Json<QualityDashboardResponse>, ApiError> {
+    let user_id = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+
+    let payload = sqlx::query_scalar::<_, serde_json::Value>(
+        r#"
+        WITH filtered_reviews AS MATERIALIZED (
+            SELECT *
+            FROM app_quality_review
+            WHERE user_id = $1
+              AND ($2::int IS NULL OR project_id = $2)
+              AND ($3::int IS NULL OR script_id = $3)
+        ),
+        filtered_auto_reviews AS MATERIALIZED (
+            SELECT *
+            FROM filtered_reviews
+            WHERE source = 'auto'
+              AND model_params ? 'diagnostics'
+        ),
+        filtered_token_usage AS MATERIALIZED (
+            SELECT
+                usage.*,
+                qr.target_type,
+                qr.stage,
+                qr.overall_score,
+                qr.passed,
+                qr.dialogue_naturalness,
+                qr.visual_quality,
+                qr.comments,
+                qr.model_params
+            FROM app_llm_usage_log usage
+            INNER JOIN filtered_auto_reviews qr ON qr.id = usage.quality_review_id
+            WHERE usage.user_id = $1
+              AND usage.quality_review_id IS NOT NULL
+              AND ($2::int IS NULL OR usage.project_id = $2)
+              AND ($3::int IS NULL OR usage.script_id = $3)
+        )
+        SELECT jsonb_build_object(
+            'stats',
+            COALESCE((
+                SELECT jsonb_agg(to_jsonb(s))
+                FROM (
+                    SELECT
+                        'user'::text as scope,
+                        fr.target_type as "targetType",
+                        COUNT(*)::bigint as "totalReviews",
+                        COALESCE(ROUND(
+                            COUNT(*) FILTER (WHERE fr.passed = true) * 100.0 / NULLIF(COUNT(*), 0),
+                            2
+                        ), 0)::float8 as "passRatePercent",
+                        COALESCE(ROUND(AVG(fr.overall_score), 2), 0)::float8 as "avgOverallScore"
+                    FROM filtered_reviews fr
+                    WHERE (
+                        fr.passed IS NOT NULL
+                        OR fr.overall_score IS NOT NULL
+                        OR fr.is_bad_case = true
+                        OR fr.bad_case_category IS NOT NULL
+                        OR fr.grade IS NOT NULL
+                    )
+                    GROUP BY fr.target_type
+                    ORDER BY COUNT(*) DESC, fr.target_type
+                    LIMIT 4
+                ) s
+            ), '[]'::jsonb),
+            'stagePassRate',
+            COALESCE((
+                SELECT jsonb_agg(to_jsonb(s))
+                FROM (
+                    SELECT
+                        'user'::text as scope,
+                        fr.target_type as "targetType",
+                        DATE_TRUNC('day', fr.created_at) as "reviewDate",
+                        COUNT(*)::bigint as "totalReviews",
+                        COALESCE(ROUND(
+                            COUNT(*) FILTER (WHERE fr.passed = true) * 100.0 / NULLIF(COUNT(*), 0),
+                            2
+                        ), 0)::float8 as "passRatePercent"
+                    FROM filtered_reviews fr
+                    WHERE (
+                        fr.passed IS NOT NULL
+                        OR fr.overall_score IS NOT NULL
+                        OR fr.is_bad_case = true
+                        OR fr.bad_case_category IS NOT NULL
+                        OR fr.grade IS NOT NULL
+                    )
+                    GROUP BY fr.target_type, DATE_TRUNC('day', fr.created_at)
+                    ORDER BY DATE_TRUNC('day', fr.created_at) DESC, COUNT(*) DESC
+                    LIMIT 6
+                ) s
+            ), '[]'::jsonb),
+            'stageGradeDistribution',
+            COALESCE((
+                SELECT jsonb_agg(to_jsonb(s))
+                FROM (
+                    SELECT
+                        'user'::text as scope,
+                        fr.stage as stage,
+                        COUNT(*) FILTER (WHERE fr.grade = 'A')::bigint as "gradeACount",
+                        COUNT(*) FILTER (WHERE fr.grade = 'B')::bigint as "gradeBCount",
+                        COUNT(*) FILTER (WHERE fr.grade = 'C')::bigint as "gradeCCount",
+                        COUNT(*) FILTER (WHERE fr.grade = 'D')::bigint as "gradeDCount",
+                        COUNT(*)::bigint as "totalCount",
+                        COALESCE(ROUND(
+                            COUNT(*) FILTER (WHERE fr.grade IN ('A', 'B')) * 100.0 / NULLIF(COUNT(*), 0),
+                            2
+                        ), 0)::float8 as "passRatePercent"
+                    FROM filtered_reviews fr
+                    WHERE fr.stage IS NOT NULL
+                      AND fr.grade IS NOT NULL
+                    GROUP BY fr.stage
+                    ORDER BY
+                        CASE fr.stage
+                            WHEN 'story_skeleton' THEN 1
+                            WHEN 'adaptation_strategy' THEN 2
+                            WHEN 'director_planning' THEN 3
+                            WHEN 'storyboard_table' THEN 4
+                            WHEN 'storyboard_panel' THEN 5
+                            WHEN 'video_prompt' THEN 6
+                            ELSE 7
+                        END
+                    LIMIT 6
+                ) s
+            ), '[]'::jsonb),
+            'scopeInsights',
+            COALESCE((
+                SELECT jsonb_agg(to_jsonb(s))
+                FROM (
+                    SELECT
+                        'user'::text as scope,
+                        CASE
+                            WHEN fr.project_id IS NOT NULL AND fr.script_id IS NOT NULL THEN 'P' || fr.project_id::text || '/S' || fr.script_id::text
+                            WHEN fr.project_id IS NOT NULL THEN 'P' || fr.project_id::text
+                            WHEN fr.script_id IS NOT NULL THEN 'S' || fr.script_id::text
+                            ELSE fr.target_type
+                        END as "scopeLabel",
+                        COUNT(*)::bigint as "totalReviews",
+                        COUNT(*) FILTER (WHERE fr.is_bad_case = true)::bigint as "badCaseCount",
+                        COALESCE(ROUND(
+                            COUNT(*) FILTER (WHERE fr.passed = true) * 100.0 / NULLIF(COUNT(*), 0),
+                            2
+                        ), 0)::float8 as "passRatePercent"
+                    FROM filtered_reviews fr
+                    GROUP BY 2
+                    ORDER BY COUNT(*) DESC, COUNT(*) FILTER (WHERE fr.is_bad_case = true) DESC
+                    LIMIT 4
+                ) s
+            ), '[]'::jsonb),
+            'tokenEfficiency',
+            COALESCE((
+                SELECT jsonb_agg(to_jsonb(s))
+                FROM (
+                    SELECT
+                        'user'::text as scope,
+                        ftu.target_type as "targetType",
+                        COUNT(*)::bigint as "sampleCount",
+                        COALESCE(AVG((COALESCE(ftu.model_params, '{}'::jsonb)->'diagnostics'->>'promptChars')::int), 0)::float8 as "avgPromptChars",
+                        COALESCE(AVG((COALESCE(ftu.model_params, '{}'::jsonb)->'diagnostics'->>'memoryStyleChars')::int), 0)::float8 as "avgMemoryStyleChars",
+                        COALESCE(AVG((COALESCE(ftu.model_params, '{}'::jsonb)->'diagnostics'->>'memoryDeliveryChars')::int), 0)::float8 as "avgMemoryDeliveryChars",
+                        CASE
+                            WHEN COUNT(*) FILTER (
+                                WHERE (ftu.dialogue_naturalness IS NOT NULL AND ftu.dialogue_naturalness < 8)
+                                   OR ftu.comments ILIKE '%生硬%'
+                                   OR ftu.comments ILIKE '%朗读%'
+                                   OR ftu.comments ILIKE '%没情绪%'
+                                   OR ftu.comments ILIKE '%无情绪%'
+                            ) > 0 THEN 'keep_delivery_memory'
+                            WHEN COUNT(*) FILTER (
+                                WHERE (ftu.visual_quality IS NOT NULL AND ftu.visual_quality < 8)
+                                   OR ftu.comments ILIKE '%穿帮%'
+                                   OR ftu.comments ILIKE '%不自然%'
+                                   OR ftu.comments ILIKE '%ai%'
+                                   OR ftu.comments ILIKE '%假%'
+                            ) > 0 THEN 'reuse_negative_memory'
+                            WHEN COALESCE(AVG((COALESCE(ftu.model_params, '{}'::jsonb)->'diagnostics'->>'memoryStyleChars')::int), 0) >= 96
+                            THEN 'trim_generic_style_memory'
+                            WHEN COUNT(*) FILTER (WHERE ftu.passed = true) > 0
+                            THEN 'promote_selected_memory'
+                            ELSE 'observe'
+                        END as "memoryAction"
+                    FROM filtered_token_usage ftu
+                    GROUP BY ftu.target_type
+                    ORDER BY COUNT(*) DESC, AVG(ftu.total_tokens) DESC
+                    LIMIT 4
+                ) s
+            ), '[]'::jsonb),
+            'badCaseStats',
+            COALESCE((
+                SELECT jsonb_agg(to_jsonb(s))
+                FROM (
+                    SELECT
+                        'user'::text as scope,
+                        fr.bad_case_category as "badCaseCategory",
+                        COUNT(*)::bigint as count,
+                        COALESCE(ROUND(
+                            COUNT(*) FILTER (WHERE fr.passed = true) * 100.0 / NULLIF(COUNT(*), 0),
+                            2
+                        ), 0)::float8 as "passRatePercent",
+                        COALESCE(ROUND(AVG(fr.overall_score), 2), 0)::float8 as "avgScore"
+                    FROM filtered_reviews fr
+                    WHERE fr.is_bad_case = true
+                    GROUP BY fr.bad_case_category
+                    ORDER BY COUNT(*) DESC, fr.bad_case_category
+                    LIMIT 5
+                ) s
+            ), '[]'::jsonb)
+        )
+        "#,
+    )
+    .bind(user_id)
+    .bind(query.project_id)
+    .bind(query.script_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let dashboard: QualityDashboardResponse =
+        serde_json::from_value(payload).map_err(|_| ApiError::Internal)?;
+    Ok(Json(dashboard))
 }
 
 /// GET /api/v1/quality/stage-pass-rate - 分环节通过率（按日期聚合）
