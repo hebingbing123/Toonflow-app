@@ -117,6 +117,16 @@ The server registers the connection for push after auth (`?access_token=` or `se
 
 Cancelling a **`running`** job via REST sets `cancelled` immediately; the in-process worker will not apply `succeeded` / `failed` if the row is no longer `running`.
 
+### `settings.notification.created` / `settings.notification.updated` (server → client)
+
+Pushed when the authenticated user receives a new inbox row or when an existing inbox row changes read state. **`payload`** is the full notification object (camelCase: `id`, `userId`, `workspaceId`, `projectId`, `projectNumericId`, `jobId`, `notificationType`, `title`, `message`, `linkPath`, `payload`, `filePath`, `changedAt`, `readAt`, `createdAt`, `updatedAt`).
+
+Current producers include:
+
+1. skill file / pack change notices
+2. job terminal-state summaries (`succeeded` / `failed` / `cancelled`)
+3. workspace invite lifecycle summaries (`created` / `resent` / `revoked` / `accepted`)
+
 ### `session.ack` (server → client)
 
 Generic success for attach / context update / cancel; carries `request_id` when the client sent one. When the server resolved **`app_project.workspace_id`** from Postgres, **`payload.workspaceUuid`** echoes that UUID so clients can confirm the active Harness workspace boundary.

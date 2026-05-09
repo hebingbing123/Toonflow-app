@@ -3,57 +3,26 @@
 part of '../../home_page.dart';
 
 extension _HomePageBuildProductSections on _HomePageState {
+  Widget _buildFeatureGatedPane({
+    required bool enabled,
+    required String title,
+    required String reason,
+    required Widget child,
+  }) {
+    if (enabled) {
+      return child;
+    }
+    return _PlatformPaneDisabledNotice(title: title, reason: reason);
+  }
+
   Widget _buildProductPaneSelector(BuildContext context) {
-    final paneEntries = <(ProductWorkspacePane, String)>[
-      (ProductWorkspacePane.shortVideoSpace, '短视频 Space'),
-      (ProductWorkspacePane.projects, '项目'),
-      (ProductWorkspacePane.teamWorkspaces, '团队工作区'),
-      (ProductWorkspacePane.scriptWorkspace, '脚本工作区'),
-      (ProductWorkspacePane.productionWorkspace, '制作工作区'),
-      (ProductWorkspacePane.workspaceActivity, '工作区动态'),
-      (ProductWorkspacePane.benchmark, '评测基线'),
-      (ProductWorkspacePane.tasks, '任务中心'),
-      (ProductWorkspacePane.jobs, '任务作业'),
-      (ProductWorkspacePane.quality, '质量评审'),
-      (ProductWorkspacePane.helpHub, '帮助'),
-    ];
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text('产品导航', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: paneEntries
-                .map((entry) {
-                  final pane = entry.$1;
-                  return ChoiceChip(
-                    label: Text(entry.$2),
-                    selected:
-                        _shellNavigationController.productWorkspacePane == pane,
-                    onSelected: (selected) {
-                      if (!selected) {
-                        return;
-                      }
-                      _shellNavigationController.selectProductWorkspacePane(
-                        pane,
-                      );
-                    },
-                  );
-                })
-                .toList(growable: false),
-          ),
-          const SizedBox(height: 10),
-          PlatformShortDramaPipelineStrip(
-            onSelectPane: (ProductWorkspacePane pane) {
-              _shellNavigationController.selectProductWorkspacePane(pane);
-            },
-          ),
-        ],
-      ),
+    return _ProductPaneSelector(
+      config: _platformConfig,
+      unreadNotifications: _notificationsController.unreadCount,
+      selectedPane: _shellNavigationController.productWorkspacePane,
+      onSelectPane: (pane) {
+        _shellNavigationController.selectProductWorkspacePane(pane);
+      },
     );
   }
 
@@ -153,7 +122,12 @@ extension _HomePageBuildProductSections on _HomePageState {
     _buildProductPaneSelector(context),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.helpHub)
-      _HelpHubSection(accessToken: _session?.accessToken),
+      _buildFeatureGatedPane(
+        enabled: _platformConfig.helpHubEnabled,
+        title: '帮助',
+        reason: '当前平台配置已关闭帮助 Hub，可在「平台配置」中重新开启。',
+        child: _HelpHubSection(accessToken: _session?.accessToken),
+      ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.shortVideoSpace)
       ShortVideoSpaceSection(
@@ -213,6 +187,12 @@ extension _HomePageBuildProductSections on _HomePageState {
         },
       ),
     if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.notifications)
+      NotificationsSection(
+        controller: _notificationsController,
+        onOpenNotification: _openNotificationLink,
+      ),
+    if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.teamWorkspaces)
       TeamWorkspacesSection(
         accessToken: _session?.accessToken,
@@ -235,14 +215,24 @@ extension _HomePageBuildProductSections on _HomePageState {
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.workspaceActivity)
-      _buildAgentWorkspacePane(
-        initialPane: AgentWorkspacePane.activity,
-        sectionTitle: '执行动态',
-        sectionDescription: '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。',
+      _buildFeatureGatedPane(
+        enabled: _platformConfig.workspaceActivityEnabled,
+        title: '工作区动态',
+        reason: '当前平台配置已关闭执行动态面板，可在「平台配置」中重新开启。',
+        child: _buildAgentWorkspacePane(
+          initialPane: AgentWorkspacePane.activity,
+          sectionTitle: '执行动态',
+          sectionDescription: '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。',
+        ),
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.benchmark)
-      BenchmarkSection(accessToken: _session?.accessToken),
+      _buildFeatureGatedPane(
+        enabled: _platformConfig.benchmarkPaneEnabled,
+        title: '评测基线',
+        reason: '当前平台配置已关闭评测基线入口，可在「平台配置」中重新开启。',
+        child: BenchmarkSection(accessToken: _session?.accessToken),
+      ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.tasks)
       TaskCenterSection(
@@ -315,15 +305,801 @@ extension _HomePageBuildProductSections on _HomePageState {
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.jobs)
-      JobsSection(controller: _jobsController),
+      _buildFeatureGatedPane(
+        enabled: _platformConfig.jobsPaneEnabled,
+        title: '任务作业',
+        reason: '当前平台配置已关闭 jobs 面板，可在「平台配置」中重新开启。',
+        child: JobsSection(controller: _jobsController),
+      ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.quality)
       QualityReviewsSection(
         accessToken: _session?.accessToken,
         controller: _qualityReviewsController,
         initialProjectNumericId: _productScopedProjectNumericId,
+        platformConfig: _platformConfig,
+      ),
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.platformConfig)
+      _PlatformConfigSection(
+        accessToken: _session?.accessToken,
+        currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
+        initialConfig: _platformConfig,
+        onConfigSaved: (config) {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _applyPlatformConfig(config);
+          });
+        },
       ),
   ];
+}
+
+class _ProductPaneSelector extends StatefulWidget {
+  const _ProductPaneSelector({
+    required this.config,
+    required this.unreadNotifications,
+    required this.selectedPane,
+    required this.onSelectPane,
+  });
+
+  final PlatformConfigToggleSetV1 config;
+  final int unreadNotifications;
+  final ProductWorkspacePane selectedPane;
+  final ValueChanged<ProductWorkspacePane> onSelectPane;
+
+  @override
+  State<_ProductPaneSelector> createState() => _ProductPaneSelectorState();
+}
+
+class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
+  bool _isPaneEnabled(ProductWorkspacePane pane) {
+    switch (pane) {
+      case ProductWorkspacePane.helpHub:
+        return widget.config.helpHubEnabled;
+      case ProductWorkspacePane.workspaceActivity:
+        return widget.config.workspaceActivityEnabled;
+      case ProductWorkspacePane.benchmark:
+        return widget.config.benchmarkPaneEnabled;
+      case ProductWorkspacePane.jobs:
+        return widget.config.jobsPaneEnabled;
+      default:
+        return true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final paneEntries = <(ProductWorkspacePane, String, int?)>[
+      (ProductWorkspacePane.shortVideoSpace, '短视频 Space', null),
+      (ProductWorkspacePane.projects, '项目', null),
+      (ProductWorkspacePane.notifications, '通知中心', widget.unreadNotifications),
+      (ProductWorkspacePane.teamWorkspaces, '团队工作区', null),
+      (ProductWorkspacePane.scriptWorkspace, '脚本工作区', null),
+      (ProductWorkspacePane.productionWorkspace, '制作工作区', null),
+      (ProductWorkspacePane.workspaceActivity, '工作区动态', null),
+      (ProductWorkspacePane.benchmark, '评测基线', null),
+      (ProductWorkspacePane.tasks, '任务中心', null),
+      (ProductWorkspacePane.jobs, '任务作业', null),
+      (ProductWorkspacePane.quality, '质量评审', null),
+      (ProductWorkspacePane.platformConfig, '平台配置', null),
+      (ProductWorkspacePane.helpHub, '帮助', null),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('产品导航', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: paneEntries
+                .map((entry) {
+                  final pane = entry.$1;
+                  final enabled = _isPaneEnabled(pane);
+                  final unread = entry.$3;
+                  return ChoiceChip(
+                    label: Text(
+                      unread != null && unread > 0
+                          ? '${entry.$2} ($unread)'
+                          : entry.$2,
+                    ),
+                    selected: widget.selectedPane == pane,
+                    onSelected: enabled
+                        ? (selected) {
+                            if (!selected) {
+                              return;
+                            }
+                            widget.onSelectPane(pane);
+                          }
+                        : null,
+                  );
+                })
+                .toList(growable: false),
+          ),
+          const SizedBox(height: 10),
+          PlatformShortDramaPipelineStrip(
+            onSelectPane: widget.onSelectPane,
+            jobsPaneEnabled: widget.config.jobsPaneEnabled,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlatformPaneDisabledNotice extends StatelessWidget {
+  const _PlatformPaneDisabledNotice({
+    required this.title,
+    required this.reason,
+  });
+
+  final String title;
+  final String reason;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final outline = theme.colorScheme.outline;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: theme.textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: outline.withValues(alpha: 0.45)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(reason, style: theme.textTheme.bodySmall),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlatformConfigSection extends StatefulWidget {
+  const _PlatformConfigSection({
+    required this.accessToken,
+    required this.currentWorkspaceId,
+    required this.initialConfig,
+    required this.onConfigSaved,
+  });
+
+  final String? accessToken;
+  final String? currentWorkspaceId;
+  final PlatformConfigToggleSetV1 initialConfig;
+  final ValueChanged<PlatformConfigToggleSetV1> onConfigSaved;
+
+  @override
+  State<_PlatformConfigSection> createState() => _PlatformConfigSectionState();
+}
+
+class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
+  bool _loading = false;
+  bool _savingUser = false;
+  bool _savingWorkspace = false;
+  String? _error;
+  int _loadRequestEpoch = 0;
+  PlatformConfigResponseV1? _response;
+  PlatformConfigToggleSetV1? _userDraft;
+  PlatformConfigToggleSetV1? _workspaceDraft;
+
+  @override
+  void initState() {
+    super.initState();
+    _userDraft = widget.initialConfig;
+    unawaited(_load());
+  }
+
+  @override
+  void didUpdateWidget(covariant _PlatformConfigSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final contextChanged =
+        oldWidget.accessToken != widget.accessToken ||
+        oldWidget.currentWorkspaceId != widget.currentWorkspaceId;
+    if (oldWidget.initialConfig != widget.initialConfig &&
+        !_savingUser &&
+        !_savingWorkspace &&
+        _response == null) {
+      _userDraft = widget.initialConfig;
+    }
+    if (contextChanged) {
+      _response = null;
+      _error = null;
+      _savingUser = false;
+      _savingWorkspace = false;
+      _userDraft = widget.initialConfig;
+      _workspaceDraft = null;
+      unawaited(_load());
+    }
+  }
+
+  bool _isCurrentLoadRequest(
+    int requestEpoch,
+    String token,
+    String? workspaceId,
+  ) {
+    return mounted &&
+        requestEpoch == _loadRequestEpoch &&
+        widget.accessToken == token &&
+        widget.currentWorkspaceId == workspaceId;
+  }
+
+  bool _isCurrentMutationContext(String token, String? workspaceId) {
+    return mounted &&
+        widget.accessToken == token &&
+        widget.currentWorkspaceId == workspaceId;
+  }
+
+  PlatformConfigToggleSetV1? _workspaceDraftForResponse(
+    PlatformConfigResponseV1 response,
+  ) {
+    return response.workspaceOverride ??
+        (response.currentWorkspace?.canManageOverride == true
+            ? PlatformConfigToggleSetV1.defaults
+            : null);
+  }
+
+  void _applyResponse(PlatformConfigResponseV1 response) {
+    _response = response;
+    _userDraft = response.userOverride;
+    _workspaceDraft = _workspaceDraftForResponse(response);
+  }
+
+  Future<void> _load() async {
+    final token = widget.accessToken;
+    final workspaceId = widget.currentWorkspaceId;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _error = '请先登录';
+        _response = null;
+        _userDraft = null;
+        _workspaceDraft = null;
+      });
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final requestEpoch = ++_loadRequestEpoch;
+    try {
+      final res = await fetchPlatformConfigV1(token);
+      if (!_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _applyResponse(res);
+      });
+      widget.onConfigSaved(res.effective);
+    } on RustApiException catch (e) {
+      if (!_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = describeRustApiError(e);
+      });
+    } catch (e) {
+      if (!_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveUser() async {
+    final token = widget.accessToken;
+    final workspaceId = widget.currentWorkspaceId;
+    final draft = _userDraft;
+    final messenger = ScaffoldMessenger.of(context);
+    if (token == null || token.isEmpty || draft == null) {
+      return;
+    }
+    setState(() {
+      _savingUser = true;
+      _error = null;
+    });
+    try {
+      final res = await postPlatformConfigV1(token, draft, scope: 'user');
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _applyResponse(res);
+      });
+      widget.onConfigSaved(res.effective);
+      messenger.showSnackBar(const SnackBar(content: Text('已保存用户平台配置')));
+    } on RustApiException catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = describeRustApiError(e);
+      });
+    } catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingUser = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _resetUser() async {
+    final token = widget.accessToken;
+    final workspaceId = widget.currentWorkspaceId;
+    final messenger = ScaffoldMessenger.of(context);
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    setState(() {
+      _savingUser = true;
+      _error = null;
+    });
+    try {
+      final res = await postPlatformConfigV1(
+        token,
+        null,
+        scope: 'user',
+        reset: true,
+      );
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _applyResponse(res);
+      });
+      widget.onConfigSaved(res.effective);
+      messenger.showSnackBar(const SnackBar(content: Text('已重置用户覆盖层')));
+    } on RustApiException catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = describeRustApiError(e);
+      });
+    } catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingUser = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveWorkspace() async {
+    final token = widget.accessToken;
+    final workspaceId = widget.currentWorkspaceId;
+    final draft = _workspaceDraft;
+    final workspace = _response?.currentWorkspace;
+    final messenger = ScaffoldMessenger.of(context);
+    if (token == null ||
+        token.isEmpty ||
+        draft == null ||
+        workspace == null ||
+        !workspace.canManageOverride) {
+      return;
+    }
+    setState(() {
+      _savingWorkspace = true;
+      _error = null;
+    });
+    try {
+      final res = await postPlatformConfigV1(token, draft, scope: 'workspace');
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _applyResponse(res);
+      });
+      widget.onConfigSaved(res.effective);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('已保存当前 workspace 平台配置')),
+      );
+    } on RustApiException catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = describeRustApiError(e);
+      });
+    } catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingWorkspace = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _resetWorkspace() async {
+    final token = widget.accessToken;
+    final workspaceId = widget.currentWorkspaceId;
+    final workspace = _response?.currentWorkspace;
+    final messenger = ScaffoldMessenger.of(context);
+    if (token == null ||
+        token.isEmpty ||
+        workspace == null ||
+        !workspace.canManageOverride) {
+      return;
+    }
+    setState(() {
+      _savingWorkspace = true;
+      _error = null;
+    });
+    try {
+      final res = await postPlatformConfigV1(
+        token,
+        null,
+        scope: 'workspace',
+        reset: true,
+      );
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _applyResponse(res);
+      });
+      widget.onConfigSaved(res.effective);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('已重置 workspace 覆盖层')),
+      );
+    } on RustApiException catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = describeRustApiError(e);
+      });
+    } catch (e) {
+      if (!_isCurrentMutationContext(token, workspaceId)) {
+        return;
+      }
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingWorkspace = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _copyConfig() async {
+    final response = _response;
+    if (response == null) {
+      return;
+    }
+    await Clipboard.setData(
+      ClipboardData(
+        text: const JsonEncoder.withIndent('  ').convert(<String, dynamic>{
+          'scope': response.scope,
+          'schemaVersion': response.schemaVersion,
+          'effective': response.effective.toJson(),
+          'planTier': response.planTier,
+          'planOverride': response.planOverride?.toJson(),
+          'hasPlanOverride': response.hasPlanOverride,
+          'userOverride': response.userOverride.toJson(),
+          'hasUserOverride': response.hasUserOverride,
+          'workspaceOverride': response.workspaceOverride?.toJson(),
+          'hasWorkspaceOverride': response.hasWorkspaceOverride,
+          'currentWorkspace': response.currentWorkspace == null
+              ? null
+              : <String, dynamic>{
+                  'id': response.currentWorkspace!.id,
+                  'name': response.currentWorkspace!.name,
+                  'workspaceType': response.currentWorkspace!.workspaceType,
+                  'role': response.currentWorkspace!.role,
+                  'canManageOverride':
+                      response.currentWorkspace!.canManageOverride,
+                },
+        }),
+      ),
+    );
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('已复制平台配置 JSON')));
+  }
+
+  void _patchUserDraft(PlatformConfigToggleSetV1 next) {
+    setState(() {
+      _userDraft = next;
+    });
+  }
+
+  void _patchWorkspaceDraft(PlatformConfigToggleSetV1 next) {
+    setState(() {
+      _workspaceDraft = next;
+    });
+  }
+
+  Widget _buildToggleEditor({
+    required PlatformConfigToggleSetV1 draft,
+    required ValueChanged<PlatformConfigToggleSetV1>? onChanged,
+  }) {
+    return Column(
+      children: [
+        SwitchListTile(
+          value: draft.helpHubEnabled,
+          onChanged: onChanged == null
+              ? null
+              : (v) => onChanged(draft.copyWith(helpHubEnabled: v)),
+          title: const Text('帮助 Hub'),
+          subtitle: const Text('控制帮助 / 文档产品入口的可见性'),
+        ),
+        SwitchListTile(
+          value: draft.qualityDashboardEnabled,
+          onChanged: onChanged == null
+              ? null
+              : (v) => onChanged(draft.copyWith(qualityDashboardEnabled: v)),
+          title: const Text('质量主面板'),
+          subtitle: const Text('控制质量运营看板与主面板摘要区'),
+        ),
+        SwitchListTile(
+          value: draft.qualityRefreshControlsEnabled,
+          onChanged: onChanged == null
+              ? null
+              : (v) =>
+                    onChanged(draft.copyWith(qualityRefreshControlsEnabled: v)),
+          title: const Text('质量刷新控制'),
+          subtitle: const Text('控制物化读模型 refresh 相关按钮与入口'),
+        ),
+        SwitchListTile(
+          value: draft.workspaceActivityEnabled,
+          onChanged: onChanged == null
+              ? null
+              : (v) => onChanged(draft.copyWith(workspaceActivityEnabled: v)),
+          title: const Text('工作区动态'),
+          subtitle: const Text('控制 Agent Workspace Activity 导航入口'),
+        ),
+        SwitchListTile(
+          value: draft.benchmarkPaneEnabled,
+          onChanged: onChanged == null
+              ? null
+              : (v) => onChanged(draft.copyWith(benchmarkPaneEnabled: v)),
+          title: const Text('评测基线'),
+          subtitle: const Text('控制 benchmark / 评测相关产品入口'),
+        ),
+        SwitchListTile(
+          value: draft.jobsPaneEnabled,
+          onChanged: onChanged == null
+              ? null
+              : (v) => onChanged(draft.copyWith(jobsPaneEnabled: v)),
+          title: const Text('任务作业'),
+          subtitle: const Text('控制 jobs 面板导航入口'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userDraft = _userDraft;
+    final workspaceDraft = _workspaceDraft;
+    final workspace = _response?.currentWorkspace;
+    final userDraftDirty =
+        userDraft != null &&
+        _response != null &&
+        userDraft != _response!.userOverride;
+    final workspaceBaseline =
+        _response?.workspaceOverride ??
+        ((_response?.currentWorkspace?.canManageOverride ?? false)
+            ? PlatformConfigToggleSetV1.defaults
+            : null);
+    final workspaceDraftDirty =
+        workspaceDraft != null &&
+        workspaceBaseline != null &&
+        workspaceDraft != workspaceBaseline;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text('平台配置', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          '管理产品壳层的功能开关与运营面可见性。effective 现按 defaults <- plan override <- current workspace override <- user override 合成。',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton.tonal(
+              onPressed: _loading ? null : _load,
+              child: Text(_loading ? '加载中…' : '刷新配置'),
+            ),
+            FilledButton(
+              onPressed: _savingUser || !userDraftDirty ? null : _saveUser,
+              child: Text(_savingUser ? '保存中…' : '保存用户配置'),
+            ),
+            OutlinedButton(
+              onPressed: _savingUser || !(_response?.hasUserOverride ?? false)
+                  ? null
+                  : _resetUser,
+              child: const Text('重置用户覆盖'),
+            ),
+            FilledButton.tonal(
+              onPressed:
+                  _savingWorkspace ||
+                      !workspaceDraftDirty ||
+                      workspace == null ||
+                      !workspace.canManageOverride
+                  ? null
+                  : _saveWorkspace,
+              child: Text(_savingWorkspace ? '保存中…' : '保存 workspace 配置'),
+            ),
+            OutlinedButton(
+              onPressed:
+                  _savingWorkspace ||
+                      workspace == null ||
+                      !workspace.canManageOverride ||
+                      !(_response?.hasWorkspaceOverride ?? false)
+                  ? null
+                  : _resetWorkspace,
+              child: const Text('重置 workspace 覆盖'),
+            ),
+            OutlinedButton(
+              onPressed: _response == null ? null : _copyConfig,
+              child: const Text('复制 JSON'),
+            ),
+          ],
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 8),
+          Text(_error!, style: const TextStyle(color: Colors.red)),
+        ],
+        if (_response != null) ...[
+          const SizedBox(height: 8),
+          SelectableText(
+            'scope=${_response!.scope} · schema=v${_response!.schemaVersion}',
+          ),
+          const SizedBox(height: 4),
+          SelectableText(
+            'plan_tier=${_response!.planTier} · has_plan_override=${_response!.hasPlanOverride}',
+          ),
+          if (workspace != null) ...[
+            const SizedBox(height: 4),
+            SelectableText(
+              'current_workspace=${workspace.name} (${workspace.workspaceType}) · role=${workspace.role} · can_manage_override=${workspace.canManageOverride}',
+            ),
+          ],
+        ],
+        if (_response != null) ...[
+          const SizedBox(height: 12),
+          Text('Plan Override', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 4),
+          Text(
+            '套餐层是只读覆盖层，来自服务端环境配置；适合先做分层收口，再由 workspace / user 继续细调。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'env: TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _response!.hasPlanOverride
+                ? '当前状态：plan override 已生效'
+                : '当前状态：未配置 plan override，直接继承 defaults',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          if (_response!.planOverride != null) ...[
+            const SizedBox(height: 12),
+            _buildToggleEditor(
+              draft: _response!.planOverride!,
+              onChanged: null,
+            ),
+          ],
+        ],
+        if (workspace != null && workspaceDraft != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Workspace Override',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            workspace.canManageOverride
+                ? '当前 enterprise workspace 的公共覆盖层，会先于个人配置参与 effective 合成。'
+                : '当前 workspace 仅展示公共覆盖层；只有 enterprise owner/admin 可以修改。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            (_response?.hasWorkspaceOverride ?? false)
+                ? '当前状态：已写入 workspace override'
+                : '当前状态：继承 defaults，再叠个人覆盖',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          _buildToggleEditor(
+            draft: workspaceDraft,
+            onChanged: workspace.canManageOverride
+                ? _patchWorkspaceDraft
+                : null,
+          ),
+        ],
+        if (workspace != null && workspaceDraft == null) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Workspace Override',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            workspace.workspaceType == 'enterprise'
+                ? '当前 workspace 没有可编辑的公共覆盖层。请先切到 enterprise owner/admin 身份，或等待公共覆盖配置下发。'
+                : '当前 workspace 为 personal。workspace 级公共覆盖层仅对 enterprise workspace 开放。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+        if (userDraft != null) ...[
+          const SizedBox(height: 12),
+          Text('User Override', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 4),
+          Text(
+            '个人覆盖层始终最后生效，适合放自己的运营视图与工具偏好。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            (_response?.hasUserOverride ?? false)
+                ? '当前状态：已写入 user override'
+                : '当前状态：直接继承 workspace/defaults',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          _buildToggleEditor(draft: userDraft, onChanged: _patchUserDraft),
+        ],
+      ],
+    );
+  }
 }
 
 class _HelpHubSection extends StatefulWidget {
@@ -498,10 +1274,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (needle.isEmpty) {
       return items;
     }
-    return items.where((item) {
-      final haystack = '${item.id} ${item.title} ${item.url}'.toLowerCase();
-      return haystack.contains(needle);
-    }).toList(growable: false);
+    return items
+        .where((item) {
+          final haystack = '${item.id} ${item.title} ${item.url}'.toLowerCase();
+          return haystack.contains(needle);
+        })
+        .toList(growable: false);
   }
 
   String _helpHubCategoryFor(HelpHubLinkItemV1 item) {
@@ -535,7 +1313,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         ifAbsent: () => 1,
       );
     }
-    final categories = counts.entries.map((e) => '${e.key}:${e.value}').join(', ');
+    final categories = counts.entries
+        .map((e) => '${e.key}:${e.value}')
+        .join(', ');
     return 'total=${items.length} · filtered=${filtered.length}${categories.isEmpty ? '' : ' · $categories'}';
   }
 
@@ -1365,86 +2145,78 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             ),
           if (_webhooks != null)
             ..._filteredWebhooks().map(
-                  (wh) => Card(
-                    color: _latestCreatedWebhook?.id == wh.id
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : null,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  wh.url,
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                ),
-                                const SizedBox(height: 4),
-                                if (_latestCreatedWebhook?.id == wh.id)
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 4),
-                                    child: Chip(
-                                      label: const Text('最近创建'),
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                  ),
-                                Text('id: ${wh.id}'),
-                                Text('createdAt: ${wh.createdAt}'),
-                                if (_webhookLastTestResultById[wh.id] != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      _formatWebhookTestResult(
-                                        _webhookLastTestResultById[wh.id]!,
-                                      ),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall,
-                                    ),
-                                  ),
-                              ],
+              (wh) => Card(
+                color: _latestCreatedWebhook?.id == wh.id
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              wh.url,
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            tooltip: '复制 URL',
-                            onPressed: () async {
-                              await Clipboard.setData(
-                                ClipboardData(text: wh.url),
-                              );
-                              if (!context.mounted) {
-                                return;
-                              }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('已复制 Webhook URL'),
+                            const SizedBox(height: 4),
+                            if (_latestCreatedWebhook?.id == wh.id)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Chip(
+                                  label: const Text('最近创建'),
+                                  visualDensity: VisualDensity.compact,
                                 ),
-                              );
-                            },
-                            icon: const Icon(Icons.copy_outlined),
-                          ),
-                          OutlinedButton(
-                            onPressed: _loadingWebhooks || _webhookBusyId != null
-                                ? null
-                                : () => _testWebhook(wh.id),
-                            child: Text(
-                              _webhookBusyId == wh.id ? '处理中…' : '测试投递',
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          OutlinedButton(
-                            onPressed: _loadingWebhooks || _webhookBusyId != null
-                                ? null
-                                : () => _deleteWebhook(wh.id),
-                            child: Text(_webhookBusyId == wh.id ? '处理中…' : '删除'),
-                          ),
-                        ],
+                              ),
+                            Text('id: ${wh.id}'),
+                            Text('createdAt: ${wh.createdAt}'),
+                            if (_webhookLastTestResultById[wh.id] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  _formatWebhookTestResult(
+                                    _webhookLastTestResultById[wh.id]!,
+                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        tooltip: '复制 URL',
+                        onPressed: () async {
+                          await Clipboard.setData(ClipboardData(text: wh.url));
+                          if (!context.mounted) {
+                            return;
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('已复制 Webhook URL')),
+                          );
+                        },
+                        icon: const Icon(Icons.copy_outlined),
+                      ),
+                      OutlinedButton(
+                        onPressed: _loadingWebhooks || _webhookBusyId != null
+                            ? null
+                            : () => _testWebhook(wh.id),
+                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '测试投递'),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed: _loadingWebhooks || _webhookBusyId != null
+                            ? null
+                            : () => _deleteWebhook(wh.id),
+                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '删除'),
+                      ),
+                    ],
                   ),
                 ),
+              ),
+            ),
           const SizedBox(height: 16),
           Text(
             'Billing Webhook 审计',

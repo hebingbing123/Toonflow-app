@@ -19,6 +19,7 @@ import 'project_editor/assets/generation/section_launcher.dart';
 import 'project_editor/assets/images/workbench_launcher.dart';
 import 'project_editor/assets/corner_scape_launcher.dart';
 import 'project_editor/assets/workbench/dialog_launcher.dart';
+import 'project_editor/project_audit_panel.dart';
 import 'project_editor/novels/support.dart';
 import 'project_editor/novels/workbench_launcher.dart';
 import 'project_editor/novels/events/workbench_launcher.dart';
@@ -42,6 +43,8 @@ import 'agent_workspaces/ws_event_controller.dart';
 import 'agent_workspaces/writeback_controller.dart';
 import 'auth/controller.dart';
 import 'jobs/controller.dart';
+import 'notifications/controller.dart';
+import 'notifications/section.dart';
 import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
 import 'shell/job_queue_stats_card.dart';
@@ -149,6 +152,8 @@ class _HomePageState extends State<HomePage> {
   MeResponse? _sessionMe;
   String? _lastSessionAccessToken;
   bool _loadingSessionMe = false;
+  PlatformConfigToggleSetV1 _platformConfig =
+      PlatformConfigToggleSetV1.defaults;
   final _workspaceInputController = WorkspaceInputController();
   final _workspaceOperationController = WorkspaceOperationController();
   late final WorkspaceRunController _workspaceRunController =
@@ -174,6 +179,12 @@ class _HomePageState extends State<HomePage> {
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
   );
+
+  late final NotificationsController _notificationsController =
+      NotificationsController(
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+      );
 
   late final TaskCenterController _taskCenterController = TaskCenterController(
     accessTokenProvider: () => _session?.accessToken,
@@ -310,6 +321,7 @@ class _HomePageState extends State<HomePage> {
     _modelsCatalogController.addListener(_handleModelsCatalogChanged);
     _overviewController.addListener(_handleOverviewChanged);
     _taskCenterController.addListener(_handleTaskCenterChanged);
+    _notificationsController.addListener(_handleNotificationsChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     _shellNavigationController.addListener(_handleShellNavigationChanged);
     _workspaceOperationController.addListener(_handleWorkspaceOperationChanged);
@@ -331,10 +343,83 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _openNotificationLink(NotificationRecordV1 notification) {
+    final raw = notification.linkPath?.trim();
+    if (raw == null || raw.isEmpty) {
+      return;
+    }
+    final uri = Uri.tryParse(raw);
+    if (uri == null) {
+      return;
+    }
+    final path = uri.path;
+    if (path == '/product/jobs') {
+      final jobId = uri.queryParameters['jobId'];
+      if (jobId != null && jobId.isNotEmpty) {
+        _jobsController.jobIdController.text = jobId;
+        unawaited(_jobsController.fetchJobById());
+      }
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.jobs,
+      );
+      return;
+    }
+    if (path == '/product/team-workspaces') {
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.teamWorkspaces,
+      );
+      return;
+    }
+    if (path == '/product/projects') {
+      final projectNumericId = int.tryParse(
+        uri.queryParameters['projectNumericId'] ?? '',
+      );
+      if (projectNumericId != null) {
+        setState(() {
+          _productScopedProjectNumericId = projectNumericId;
+        });
+        _workspaceInputController.applyProjectScope(projectNumericId);
+      }
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.projects,
+      );
+      return;
+    }
+  }
+
   void _handleAuthChanged() {
     _syncSessionContext();
     if (!mounted) return;
     setState(() {});
+  }
+
+  bool _isProductPaneEnabledForConfig(
+    ProductWorkspacePane pane,
+    PlatformConfigToggleSetV1 config,
+  ) {
+    switch (pane) {
+      case ProductWorkspacePane.helpHub:
+        return config.helpHubEnabled;
+      case ProductWorkspacePane.workspaceActivity:
+        return config.workspaceActivityEnabled;
+      case ProductWorkspacePane.benchmark:
+        return config.benchmarkPaneEnabled;
+      case ProductWorkspacePane.jobs:
+        return config.jobsPaneEnabled;
+      default:
+        return true;
+    }
+  }
+
+  void _applyPlatformConfig(PlatformConfigToggleSetV1 config) {
+    _platformConfig = config;
+    final currentPane = _shellNavigationController.productWorkspacePane;
+    if (_isProductPaneEnabledForConfig(currentPane, config)) {
+      return;
+    }
+    _shellNavigationController.selectProductWorkspacePane(
+      ProductWorkspacePane.platformConfig,
+    );
   }
 
   Future<void> _syncSessionContext({bool force = false}) async {
@@ -348,7 +433,9 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _sessionMe = null;
         _loadingSessionMe = false;
+        _platformConfig = PlatformConfigToggleSetV1.defaults;
       });
+      _notificationsController.reset();
       return;
     }
 
@@ -360,12 +447,20 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final me = await fetchMeV1(token);
+      PlatformConfigToggleSetV1 platformConfig =
+          PlatformConfigToggleSetV1.defaults;
+      try {
+        final platformConfigResponse = await fetchPlatformConfigV1(token);
+        platformConfig = platformConfigResponse.effective;
+      } catch (_) {}
       if (!mounted || _lastSessionAccessToken != token) {
         return;
       }
       setState(() {
         _sessionMe = me;
+        _applyPlatformConfig(platformConfig);
       });
+      unawaited(_notificationsController.prime());
     } on RustApiException catch (error) {
       if (_lastSessionAccessToken == token) {
         reportRustApiError(
@@ -390,6 +485,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _handleWorkspaceContextChanged() async {
     _projectsController.reset();
     _jobsController.reset();
+    _notificationsController.reset();
     _taskCenterController.reset();
     _qualityReviewsController.reset();
     _workspaceOutputController.reset();
@@ -444,6 +540,11 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleNotificationsChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   void _handleWorkspaceOutputChanged() {
     if (!mounted) return;
     setState(() {});
@@ -464,6 +565,7 @@ class _HomePageState extends State<HomePage> {
     _workspaceOutputController.reset();
     _projectsController.reset();
     _jobsController.reset();
+    _notificationsController.reset();
     _taskCenterController.reset();
     _qualityReviewsController.reset();
     _workspaceOperationController.reset();
@@ -471,6 +573,7 @@ class _HomePageState extends State<HomePage> {
     _sessionMe = null;
     _lastSessionAccessToken = null;
     _loadingSessionMe = false;
+    _platformConfig = PlatformConfigToggleSetV1.defaults;
   }
 
   @override
@@ -481,6 +584,7 @@ class _HomePageState extends State<HomePage> {
     _modelsCatalogController.removeListener(_handleModelsCatalogChanged);
     _overviewController.removeListener(_handleOverviewChanged);
     _taskCenterController.removeListener(_handleTaskCenterChanged);
+    _notificationsController.removeListener(_handleNotificationsChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _shellNavigationController.removeListener(_handleShellNavigationChanged);
     _workspaceOperationController.removeListener(
@@ -494,6 +598,7 @@ class _HomePageState extends State<HomePage> {
     _overviewController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
+    _notificationsController.dispose();
     _taskCenterController.dispose();
     _qualityReviewsController.dispose();
     _skillsHarnessController.dispose();

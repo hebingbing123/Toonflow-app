@@ -13,7 +13,9 @@
 //! - `agent_deploy` — 代理部署
 //! - `agent_memory` — 代理记忆
 //! - `help_hub` — 应用内帮助 Hub
+//! - `notifications` — 应用内通知中心
 //! - `outbound_webhooks` — 出站 Webhook
+//! - `platform_config` — 平台配置 / 功能开关
 
 pub mod about;
 pub mod agent_deploy;
@@ -22,8 +24,10 @@ pub mod danger;
 pub mod dev;
 pub mod help_hub;
 pub mod memory_config;
+pub mod notifications;
 pub mod openapi;
 pub mod outbound_webhooks;
+pub mod platform_config;
 pub mod vendors;
 
 pub use openapi::SettingsOpenApi;
