@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'support.dart';
 
@@ -80,6 +81,14 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     }),
   );
   final _reviewSkipReasonCtrl = TextEditingController();
+  final _abCompareCasesCtrl = TextEditingController(
+    text: 'video_prompt_case_001,00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000002',
+  );
+  final _abMinTokenReductionCtrl = TextEditingController(text: '10');
+  final _abMaxQualityDropCtrl = TextEditingController(text: '5');
+  final _abMinQualityScoreCtrl = TextEditingController(text: '70');
+  final _abSignificanceCtrl = TextEditingController(text: '0.05');
+  final _abCompareNameCtrl = TextEditingController(text: 'token-opt-compare');
 
   bool _busy = false;
   String? _statusLine;
@@ -94,8 +103,47 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   RoiEvidenceSummaryV1? _roiSummary;
   GateDecisionEnvelopeV1? _gateSummary;
   BenchmarkTrendsResponseV1? _trends;
+  ABCompareResponseV1? _abCompare;
+  List<ABCompareRunRowV1> _abRuns = const [];
+  ABCompareRunDetailV1? _abRunDetail;
+  String? _selectedAbRunId;
 
   String? get _token => widget.accessToken;
+
+  List<ABCompareCaseV1> _parseAbCompareCases() {
+    return _abCompareCasesCtrl.text
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .map((line) {
+          final parts = line.split(',').map((e) => e.trim()).toList();
+          if (parts.length != 3) {
+            throw FormatException('无效案例行：$line');
+          }
+          return ABCompareCaseV1(
+            testCaseId: parts[0],
+            baselineJobId: parts[1],
+            optimizedJobId: parts[2],
+          );
+        })
+        .toList(growable: false);
+  }
+
+  ABCompareConfigV1 _parseAbCompareConfig() {
+    final minToken = double.tryParse(_abMinTokenReductionCtrl.text.trim());
+    final maxDrop = double.tryParse(_abMaxQualityDropCtrl.text.trim());
+    final minScore = double.tryParse(_abMinQualityScoreCtrl.text.trim());
+    final p = double.tryParse(_abSignificanceCtrl.text.trim());
+    if (minToken == null || maxDrop == null || minScore == null || p == null) {
+      throw const FormatException('A/B 阈值参数格式错误');
+    }
+    return ABCompareConfigV1(
+      minTokenReductionPct: minToken,
+      maxQualityDrop: maxDrop,
+      minQualityScore: minScore,
+      significanceThreshold: p,
+    );
+  }
 
   Future<void> _runAction(
     String label,
@@ -162,6 +210,12 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     _reviewQueueIdCtrl.dispose();
     _reviewScoreJsonCtrl.dispose();
     _reviewSkipReasonCtrl.dispose();
+    _abCompareCasesCtrl.dispose();
+    _abMinTokenReductionCtrl.dispose();
+    _abMaxQualityDropCtrl.dispose();
+    _abMinQualityScoreCtrl.dispose();
+    _abSignificanceCtrl.dispose();
+    _abCompareNameCtrl.dispose();
     super.dispose();
   }
 
@@ -174,7 +228,20 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          Text('质量基线与实验', style: Theme.of(context).textTheme.titleSmall),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  '质量基线与实验',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              const RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: '本机客户端偏好',
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(
             '在同一入口管理样本池、实验运行、人工复核、ROI、放行门和趋势，避免后续质量优化只靠感觉判断。',
@@ -252,6 +319,8 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           _buildReviewCard(context),
           const SizedBox(height: 12),
           _buildGateCard(context),
+          const SizedBox(height: 12),
+          _buildABCompareCard(context),
           const SizedBox(height: 12),
           SelectableText(
             summarizeBenchmarkCases(_cases),
@@ -371,6 +440,46 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 '${item.weekStart} · 质量 ${item.avgQualityScore.toStringAsFixed(1)} · token ${item.totalTokens} · approved ${item.approvedCount} / blocked ${item.blockedCount}',
               ),
             ),
+          ],
+          if (_abCompare != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              'A/B 汇总：${_abCompare!.passed ? "通过" : "未通过"} · '
+              '通过 ${_abCompare!.passedCases}/${_abCompare!.totalCases} · '
+              '平均 token 降幅 ${_abCompare!.avgTokenReductionPct.toStringAsFixed(1)}% · '
+              '平均质量差 ${_abCompare!.avgQualityDiff.toStringAsFixed(2)}',
+            ),
+            const SizedBox(height: 6),
+            ..._abCompare!.comparisons.take(12).map(
+              (item) => Text(
+                '${item.testCaseId} · ${item.passed ? "PASS" : "FAIL"} · '
+                'tokenΔ ${item.tokenReductionPct.toStringAsFixed(1)}% · '
+                'qualityΔ ${(item.qualityScoreDiff ?? 0).toStringAsFixed(2)}'
+                '${item.failureReasons.isEmpty ? '' : ' · ${item.failureReasons.join(" | ")}'}',
+              ),
+            ),
+          ],
+          if (_abRunDetail != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              '历史回放：${_abRunDetail!.run.name ?? _abRunDetail!.run.id} · ${_abRunDetail!.run.createdAt}',
+            ),
+            const SizedBox(height: 6),
+            ..._abRunDetail!.cases.take(12).map((item) {
+              final cmp = item.comparison;
+              final passed = cmp['passed'] == true;
+              final tokenDelta = (cmp['tokenReductionPct'] as num?)?.toDouble();
+              final qualityDelta = (cmp['qualityScoreDiff'] as num?)?.toDouble();
+              final reasons = (cmp['failureReasons'] is List)
+                  ? (cmp['failureReasons'] as List).map((e) => e.toString()).toList()
+                  : const <String>[];
+              return Text(
+                '${item.testCaseId} · ${passed ? "PASS" : "FAIL"} · '
+                'tokenΔ ${(tokenDelta ?? 0).toStringAsFixed(1)}% · '
+                'qualityΔ ${(qualityDelta ?? 0).toStringAsFixed(2)}'
+                '${reasons.isEmpty ? "" : " · ${reasons.join(" | ")}"}',
+              );
+            }),
           ],
         ],
       ),
@@ -736,6 +845,205 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       );
                     }),
               child: const Text('提交放行决策'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildABCompareCard(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('A/B 对比评估', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _abCompareNameCtrl,
+              decoration: const InputDecoration(labelText: '保存名称（可选）'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _abCompareCasesCtrl,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                labelText: '案例列表（每行：testCaseId,baselineJobId,optimizedJobId）',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                SizedBox(
+                  width: 180,
+                  child: TextField(
+                    controller: _abMinTokenReductionCtrl,
+                    decoration: const InputDecoration(labelText: '最小 token 降幅 %'),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                SizedBox(
+                  width: 180,
+                  child: TextField(
+                    controller: _abMaxQualityDropCtrl,
+                    decoration: const InputDecoration(labelText: '最大质量下降'),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                SizedBox(
+                  width: 180,
+                  child: TextField(
+                    controller: _abMinQualityScoreCtrl,
+                    decoration: const InputDecoration(labelText: '最小质量分'),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                SizedBox(
+                  width: 180,
+                  child: TextField(
+                    controller: _abSignificanceCtrl,
+                    decoration: const InputDecoration(labelText: '显著性阈值 p'),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            FilledButton.tonal(
+              onPressed: _busy
+                  ? null
+                  : () => _runAction('执行 A/B 对比', (token) async {
+                      final cases = _parseAbCompareCases();
+                      final config = _parseAbCompareConfig();
+                      _abCompare = await compareBenchmarkABJobs(
+                        token,
+                        cases: cases,
+                        config: config,
+                      );
+                    }),
+              child: const Text('执行 A/B 对比'),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.tonal(
+              onPressed: _busy
+                  ? null
+                  : () => _runAction('保存并执行 A/B 对比', (token) async {
+                      final cases = _parseAbCompareCases();
+                      final config = _parseAbCompareConfig();
+                      _abCompare = await compareBenchmarkABJobs(
+                        token,
+                        persist: true,
+                        name: _abCompareNameCtrl.text.trim(),
+                        cases: cases,
+                        config: config,
+                      );
+                      _abRuns = await fetchBenchmarkABCompareRuns(token);
+                    }),
+              child: const Text('保存并执行'),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonal(
+                  onPressed: _busy
+                      ? null
+                      : () => _runAction('读取 A/B 历史', (token) async {
+                          _abRuns = await fetchBenchmarkABCompareRuns(token);
+                          if (_selectedAbRunId == null && _abRuns.isNotEmpty) {
+                            _selectedAbRunId = _abRuns.first.id;
+                          }
+                        }),
+                  child: const Text('读取历史'),
+                ),
+                if (_abRuns.isNotEmpty)
+                  DropdownButton<String>(
+                    value: _selectedAbRunId,
+                    items: _abRuns
+                        .take(20)
+                        .map(
+                          (r) => DropdownMenuItem(
+                            value: r.id,
+                            child: Text(r.name ?? r.id.substring(0, 8)),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: _busy
+                        ? null
+                        : (value) {
+                            setState(() {
+                              _selectedAbRunId = value;
+                            });
+                          },
+                  ),
+                FilledButton.tonal(
+                  onPressed: _busy || _selectedAbRunId == null
+                      ? null
+                      : () => _runAction('读取 A/B 详情', (token) async {
+                          final detail = await fetchBenchmarkABCompareRunDetail(
+                            token,
+                            _selectedAbRunId!,
+                          );
+                          _abRunDetail = detail;
+                          // Refill controls for replay.
+                          final cfg = detail.run.config;
+                          _abMinTokenReductionCtrl.text =
+                              '${cfg['minTokenReductionPct'] ?? _abMinTokenReductionCtrl.text}';
+                          _abMaxQualityDropCtrl.text =
+                              '${cfg['maxQualityDrop'] ?? _abMaxQualityDropCtrl.text}';
+                          _abMinQualityScoreCtrl.text =
+                              '${cfg['minQualityScore'] ?? _abMinQualityScoreCtrl.text}';
+                          _abSignificanceCtrl.text =
+                              '${cfg['significanceThreshold'] ?? _abSignificanceCtrl.text}';
+                          _abCompareCasesCtrl.text = detail.cases
+                              .map(
+                                (c) =>
+                                    '${c.testCaseId},${c.baselineJobId},${c.optimizedJobId}',
+                              )
+                              .join('\n');
+                        }),
+                  child: const Text('读取详情并回填'),
+                ),
+                FilledButton.tonal(
+                  onPressed: _busy || _abRunDetail == null
+                      ? null
+                      : () => _runAction('复跑并保存', (token) async {
+                          final cases = _parseAbCompareCases();
+                          final config = _parseAbCompareConfig();
+                          final baseName = (_abCompareNameCtrl.text.trim().isNotEmpty)
+                              ? _abCompareNameCtrl.text.trim()
+                              : (_abRunDetail!.run.name ??
+                                  'ab-replay-${_abRunDetail!.run.id.substring(0, 8)}');
+                          final ts = DateTime.now()
+                              .toIso8601String()
+                              .replaceAll(':', '')
+                              .split('.')
+                              .first;
+                          final name = '$baseName-replay-$ts';
+                          _abCompare = await compareBenchmarkABJobs(
+                            token,
+                            persist: true,
+                            name: name,
+                            cases: cases,
+                            config: config,
+                          );
+                          _abRuns = await fetchBenchmarkABCompareRuns(token);
+                          if (_abCompare?.runId != null) {
+                            _selectedAbRunId = _abCompare!.runId;
+                            _abRunDetail = await fetchBenchmarkABCompareRunDetail(
+                              token,
+                              _selectedAbRunId!,
+                            );
+                          }
+                        }),
+                  child: const Text('回放参数复跑并保存'),
+                ),
+              ],
             ),
           ],
         ),

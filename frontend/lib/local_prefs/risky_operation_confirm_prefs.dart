@@ -55,6 +55,64 @@ Future<List<String>> listActiveRiskyOperationConfirmDontShowLabels() async {
   }
 }
 
+/// Read-only summary: which destructive confirms are currently silenced on this device.
+Future<void> showActiveRiskyOperationConfirmPrefsSummary(
+  BuildContext context,
+) async {
+  final active = await listActiveRiskyOperationConfirmDontShowLabels();
+  if (!context.mounted) {
+    return;
+  }
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) {
+      return AlertDialog(
+        title: const Text('已静默的高风险确认'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                active.isEmpty
+                    ? '当前没有勾选「不再提示」的记录。'
+                    : '以下操作在本机将不再弹出确认框（可随时在「恢复高风险操作确认提示」中清除）：',
+                style: Theme.of(ctx).textTheme.bodyMedium,
+              ),
+              if (active.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                ...active.map(
+                  (s) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 18,
+                          color: Theme.of(ctx).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(s)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('关闭'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 /// Confirm clearing all local "don't show again" confirmations (platform recovery).
 ///
 /// Returns `true` if user confirms reset.
@@ -147,7 +205,10 @@ Future<void> runResetRiskyOperationConfirmPrefsFlow(
   );
 }
 
-enum _RiskyPrefsOverflowValue { resetDestructiveConfirms }
+enum _RiskyPrefsOverflowValue {
+  viewActiveSilences,
+  resetDestructiveConfirms,
+}
 
 /// AppBar / toolbar entry: one menu item that runs [runResetRiskyOperationConfirmPrefsFlow].
 ///
@@ -168,11 +229,30 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
       tooltip: tooltip,
       icon: Icon(icon),
       onSelected: (value) {
-        if (value == _RiskyPrefsOverflowValue.resetDestructiveConfirms) {
+        if (value == _RiskyPrefsOverflowValue.viewActiveSilences) {
+          unawaited(showActiveRiskyOperationConfirmPrefsSummary(context));
+        } else if (value == _RiskyPrefsOverflowValue.resetDestructiveConfirms) {
           unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
         }
       },
       itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _RiskyPrefsOverflowValue.viewActiveSilences,
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            leading: Icon(
+              Icons.visibility_outlined,
+              size: 22,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: const Text('查看已静默的高风险确认'),
+            subtitle: Text(
+              '只读列表，不影响设置',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
         PopupMenuItem(
           value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
           child: ListTile(

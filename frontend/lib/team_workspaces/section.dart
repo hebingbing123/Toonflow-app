@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../config.dart';
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
@@ -1927,7 +1928,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('团队工作区', style: theme.textTheme.titleMedium),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(child: Text('团队工作区', style: theme.textTheme.titleMedium)),
+            const RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: '本机客户端偏好（查看已静默 / 恢复确认）',
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Text(
           '列出你可访问的空间（含 Personal），创建 enterprise 空间；owner/admin 可归档或恢复企业空间。',

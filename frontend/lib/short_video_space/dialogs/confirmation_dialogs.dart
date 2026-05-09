@@ -251,6 +251,10 @@ Future<void> resetAllConfirmationPreferences() =>
 Future<List<String>> listActiveConfirmationDontShowAgainLabels() =>
     listActiveRiskyOperationConfirmDontShowLabels();
 
+/// Read-only dialog listing current silenced confirms (delegates to platform prefs).
+Future<void> showActiveConfirmationDontShowAgainSummary(BuildContext context) =>
+    showActiveRiskyOperationConfirmPrefsSummary(context);
+
 /// Confirm clearing all local "don't show again" confirmations (platform recovery).
 Future<bool?> showResetConfirmationDontShowAgainDialog(
   BuildContext context,

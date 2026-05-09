@@ -16,6 +16,7 @@ import '../rust_api.dart';
 /// - Keyboard shortcut support (Ctrl/Cmd + K to focus)
 /// - Loading state indicator
 /// - Search history dropdown (displays recent 5 entries)
+/// - Debounced live suggestions (top matches from the same search API)
 /// - Navigation to search results page with query parameters
 class GlobalSearchBar extends StatefulWidget {
   const GlobalSearchBar({
@@ -39,8 +40,11 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final LayerLink _layerLink = LayerLink();
-  
-  final bool _isLoading = false;
+
+  bool _loadingHistory = false;
+  bool _loadingSuggestions = false;
+  Timer? _suggestionDebounce;
+  List<SearchResult> _suggestions = [];
   bool _showHistory = false;
   List<HistoryEntry> _history = [];
   OverlayEntry? _overlayEntry;
@@ -57,6 +61,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   @override
   void dispose() {
+    _suggestionDebounce?.cancel();
     _removeOverlay();
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
@@ -67,11 +72,74 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   void _onTextChanged() {
     setState(() {});
+    _scheduleSuggestionFetch();
+  }
+
+  void _scheduleSuggestionFetch() {
+    _suggestionDebounce?.cancel();
+    final q = _controller.text.trim();
+    if (q.length < _minQueryLength) {
+      setState(() {
+        _suggestions = [];
+        _loadingSuggestions = false;
+      });
+      if (_focusNode.hasFocus && (_history.isNotEmpty || _loadingHistory)) {
+        _showOverlay();
+      } else if (_focusNode.hasFocus && q.isEmpty) {
+        _showOverlay();
+      }
+      return;
+    }
+    _suggestionDebounce = Timer(const Duration(milliseconds: 400), () {
+      unawaited(_fetchSuggestions(q));
+    });
+  }
+
+  Future<void> _fetchSuggestions(String q) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty || q.length < _minQueryLength) {
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _loadingSuggestions = true;
+    });
+    try {
+      final response = await search(
+        token,
+        query: q,
+        pageSize: 8,
+        page: 1,
+      );
+      if (!mounted) return;
+      setState(() {
+        _suggestions = response.results;
+        _loadingSuggestions = false;
+      });
+      if (_focusNode.hasFocus) {
+        _showOverlay();
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _suggestions = [];
+        _loadingSuggestions = false;
+      });
+      if (_focusNode.hasFocus) {
+        _showOverlay();
+      }
+    }
   }
 
   void _onFocusChanged() {
     if (_focusNode.hasFocus) {
-      _loadHistory();
+      final token = widget.accessToken;
+      if (token == null || token.isEmpty) {
+        _showOverlay();
+      } else {
+        unawaited(_loadHistory());
+      }
+      _scheduleSuggestionFetch();
     } else {
       _hideHistory();
     }
@@ -85,25 +153,30 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     }
 
     try {
+      setState(() => _loadingHistory = true);
       final history = await getHistory(token);
       if (!mounted) return;
-      
+
       setState(() {
+        _loadingHistory = false;
         // Show only the 5 most recent entries
         _history = history.take(5).toList();
         _showHistory = _history.isNotEmpty;
       });
-
-      if (_showHistory) {
+      if (mounted && _focusNode.hasFocus) {
         _showOverlay();
       }
     } catch (e) {
       // Silently fail - history is not critical
       if (mounted) {
         setState(() {
+          _loadingHistory = false;
           _history = [];
           _showHistory = false;
         });
+      }
+      if (mounted && _focusNode.hasFocus) {
+        _showOverlay();
       }
     }
   }
@@ -111,6 +184,15 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   /// Show history dropdown overlay
   void _showOverlay() {
     _removeOverlay();
+
+    final queryLen = _controller.text.trim().length;
+    final showSuggestionsPanel =
+        queryLen >= _minQueryLength &&
+            (_loadingSuggestions || _suggestions.isNotEmpty);
+    final headerStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        );
 
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
@@ -123,7 +205,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             elevation: 8,
             borderRadius: BorderRadius.circular(8),
             child: Container(
-              constraints: const BoxConstraints(maxHeight: 300),
+              constraints: const BoxConstraints(maxHeight: 420),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
@@ -131,14 +213,100 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
-              child: ListView.builder(
+              child: ListView(
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: _history.length + 1, // +1 for clear button
-                itemBuilder: (context, index) {
-                  if (index == _history.length) {
-                    // Clear history button
-                    return ListTile(
+                children: [
+                  if (_loadingSuggestions && queryLen >= _minQueryLength)
+                    const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    ),
+                  if (showSuggestionsPanel) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                      child: Text('实时建议', style: headerStyle),
+                    ),
+                    ..._suggestions.map(
+                      (r) => ListTile(
+                        dense: true,
+                        leading: Icon(
+                          switch (r.resultType) {
+                            ResultType.project => Icons.folder_outlined,
+                            ResultType.script => Icons.article_outlined,
+                            ResultType.asset => Icons.widgets_outlined,
+                          },
+                          size: 20,
+                        ),
+                        title: Text(
+                          r.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        subtitle: Text(
+                          switch (r.resultType) {
+                            ResultType.project => '项目',
+                            ResultType.script => '剧本',
+                            ResultType.asset => '资产',
+                          },
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        onTap: _performSearch,
+                      ),
+                    ),
+                    if (_showHistory)
+                      Divider(
+                        height: 1,
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                  ],
+                  if (_loadingHistory)
+                    const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Center(
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    ),
+                  if (_showHistory) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                      child: Text('最近搜索', style: headerStyle),
+                    ),
+                    ..._history.map(
+                      (entry) => ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.history, size: 20),
+                        title: Text(
+                          entry.query,
+                          style: const TextStyle(fontSize: 14),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          '${entry.resultCount} 个结果',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        onTap: () => _selectHistoryEntry(entry.query),
+                      ),
+                    ),
+                    ListTile(
                       dense: true,
                       leading: const Icon(Icons.delete_outline, size: 20),
                       title: const Text(
@@ -146,29 +314,22 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                         style: TextStyle(fontSize: 14),
                       ),
                       onTap: _clearHistory,
-                    );
-                  }
-
-                  final entry = _history[index];
-                  return ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.history, size: 20),
-                    title: Text(
-                      entry.query,
-                      style: const TextStyle(fontSize: 14),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: Text(
-                      '${entry.resultCount} 个结果',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ],
+                  if (!showSuggestionsPanel &&
+                      !_showHistory &&
+                      !_loadingHistory &&
+                      !_loadingSuggestions)
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        queryLen >= _minQueryLength
+                            ? '暂无匹配预览，按 Enter 查看完整结果'
+                            : '输入至少 2 个字符以搜索',
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
-                    onTap: () => _selectHistoryEntry(entry.query),
-                  );
-                },
+                ],
               ),
             ),
           ),
@@ -187,6 +348,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   /// Hide history dropdown
   void _hideHistory() {
+    _suggestionDebounce?.cancel();
     setState(() {
       _showHistory = false;
     });
@@ -240,7 +402,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   /// Check if search can be triggered
   bool get _canSearch {
     final query = _controller.text.trim();
-    return query.length >= _minQueryLength && !_isLoading;
+    return query.length >= _minQueryLength;
   }
 
   /// Perform search and navigate to results page
@@ -372,20 +534,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   },
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  Icons.notifications_active_outlined,
-                  size: 20,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                tooltip: '恢复本机高风险操作确认提示',
-                onPressed: () =>
-                    unawaited(runResetRiskyOperationConfirmPrefsFlow(context)),
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              const RiskyOperationConfirmPrefsOverflowMenu(
+                icon: Icons.tune,
+                tooltip: '本机客户端偏好（查看已静默 / 恢复确认）',
               ),
               // Loading indicator or search button
-              if (_isLoading)
+              if (_loadingSuggestions)
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: SizedBox(

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 
 class PlatformStatusSection extends StatefulWidget {
@@ -209,6 +210,10 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                       )
                     : const Icon(Icons.refresh),
                 label: const Text('刷新'),
+              ),
+              const SizedBox(width: 4),
+              const RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: '本机客户端偏好（与上方服务状态无关）',
               ),
             ],
           ),

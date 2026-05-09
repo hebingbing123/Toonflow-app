@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 
@@ -119,6 +120,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       )
                     : const Icon(Icons.done_all_outlined),
                 label: const Text('全部已读'),
+              ),
+              const SizedBox(width: 4),
+              const RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: '本机客户端偏好（短视频等高风险「不再提示」）',
               ),
             ],
           ),

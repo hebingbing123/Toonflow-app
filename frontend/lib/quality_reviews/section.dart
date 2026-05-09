@@ -6,6 +6,7 @@ import 'previews.dart';
 import 'support.dart';
 import 'workbench_view.dart';
 import '../../rust_api.dart';
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
 
 part 'section_workbench.dart';
@@ -59,7 +60,20 @@ class QualityReviewsSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('质量评审', style: Theme.of(context).textTheme.titleSmall),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    '质量评审',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                const RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: '本机客户端偏好',
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             Text(
               '查看评审列表、坏例与阶段通过率；低分坏例会回写负向记忆，高分通过会晋升正向记忆。',
@@ -122,6 +136,8 @@ class QualityReviewsSection extends StatelessWidget {
               QualityReviewsOpsDashboardPreview(
                 outlineColor: outline,
                 dashboardSummary: controller.qualityDashboardLine,
+                refreshControlsEnabled:
+                    platformConfig.qualityRefreshControlsEnabled,
                 refreshSummary: platformConfig.qualityRefreshControlsEnabled
                     ? controller.qualityDashboardRefreshLine
                     : null,
