@@ -711,6 +711,7 @@ class _HomePageState extends State<HomePage> {
                 accessToken: session.accessToken,
               ),
             ),
+          const RiskyOperationConfirmPrefsOverflowMenu(),
         ],
       ),
       body: ListView(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'config.dart';
+import 'local_prefs/risky_operation_confirm_prefs.dart';
 import 'rust_api.dart';
 
 class StatusPage extends StatefulWidget {
@@ -91,6 +92,7 @@ class _StatusPageState extends State<StatusPage> {
             onPressed: _loading ? null : _refresh,
             icon: const Icon(Icons.refresh),
           ),
+          const RiskyOperationConfirmPrefsOverflowMenu(),
         ],
       ),
       body: ListView(

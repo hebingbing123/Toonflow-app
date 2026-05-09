@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -143,4 +145,48 @@ Future<void> runResetRiskyOperationConfirmPrefsFlow(
       ),
     ),
   );
+}
+
+enum _RiskyPrefsOverflowValue { resetDestructiveConfirms }
+
+/// AppBar / toolbar entry: one menu item that runs [runResetRiskyOperationConfirmPrefsFlow].
+///
+/// Use wherever shell needs a compact cross-cut without duplicating strings.
+class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
+  const RiskyOperationConfirmPrefsOverflowMenu({
+    super.key,
+    this.icon = Icons.more_vert,
+    this.tooltip = '本机客户端偏好',
+  });
+
+  final IconData icon;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_RiskyPrefsOverflowValue>(
+      tooltip: tooltip,
+      icon: Icon(icon),
+      onSelected: (value) {
+        if (value == _RiskyPrefsOverflowValue.resetDestructiveConfirms) {
+          unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            leading: const Icon(Icons.notifications_active_outlined, size: 22),
+            title: const Text('恢复高风险操作确认提示'),
+            subtitle: Text(
+              '仅本机，与服务器配置无关',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
