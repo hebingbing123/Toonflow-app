@@ -721,20 +721,20 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   }
 
   int _countWebhookActivity(String action) {
-    return _webhookActivity.where((entry) => entry.action == action).length;
+    return countWebhookActivity(
+      _webhookActivity.map((entry) => entry.action),
+      action,
+    );
   }
 
   String _webhookInventorySummary() {
-    final total = _webhooks?.items.length ?? 0;
-    final filtered = _filteredWebhooks().length;
-    final latest = _latestCreatedWebhook?.id;
-    return [
-      'total=$total',
-      'filtered=$filtered',
-      'session test ok=${_countWebhookActivity("test_success")}',
-      'session test failed=${_countWebhookActivity("test_failed")}',
-      if (latest != null) 'latest=$latest',
-    ].join(' · ');
+    return buildWebhookInventorySummary(
+      total: _webhooks?.items.length ?? 0,
+      filtered: _filteredWebhooks().length,
+      sessionTestOkCount: _countWebhookActivity('test_success'),
+      sessionTestFailedCount: _countWebhookActivity('test_failed'),
+      latestWebhookId: _latestCreatedWebhook?.id,
+    );
   }
 
   void _appendWebhookActivity({
@@ -838,43 +838,15 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   }
 
   Map<String, int> _billingEventCountsByProvider() {
-    final counts = <String, int>{};
-    for (final item in _billingEvents) {
-      final key = (item.provider ?? 'unknown').trim().isEmpty
-          ? 'unknown'
-          : item.provider!.trim();
-      counts.update(key, (value) => value + 1, ifAbsent: () => 1);
-    }
-    return counts;
+    return countBillingEventsByProvider(_billingEvents);
   }
 
   Map<String, int> _billingEventCountsByType() {
-    final counts = <String, int>{};
-    for (final item in _billingEvents) {
-      final key = (item.eventType ?? 'unknown').trim().isEmpty
-          ? 'unknown'
-          : item.eventType!.trim();
-      counts.update(key, (value) => value + 1, ifAbsent: () => 1);
-    }
-    return counts;
+    return countBillingEventsByType(_billingEvents);
   }
 
   String _billingEventsSnapshotSummary() {
-    final providerCounts = _billingEventCountsByProvider().entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final typeCounts = _billingEventCountsByType().entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final informational = _billingEvents
-        .where((e) => e.isInformationalEvent)
-        .length;
-    final stateful = _billingEvents.length - informational;
-    return [
-      'loaded=${_billingEvents.length}',
-      'informational=$informational',
-      'stateful=$stateful',
-      'providers=${providerCounts.map((e) => '${e.key}:${e.value}').join(', ')}',
-      'event_types=${typeCounts.take(8).map((e) => '${e.key}:${e.value}').join(', ')}',
-    ].join('\n');
+    return buildBillingEventsSnapshotSummary(_billingEvents);
   }
 
   String _billingEventsQuerySummary() {
@@ -1287,16 +1259,17 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                   ),
                 ),
           ],
-          if (_webhooks != null && _webhooks!.items.isEmpty)
-            Text(
-              '当前还没有配置任何出站 Webhook。可直接在上方创建，并在此处测试投递与删除。',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
           if (_webhooks != null &&
-              _webhooks!.items.isNotEmpty &&
-              _filteredWebhooks().isEmpty)
+              describeOutboundWebhookEmptyState(
+                    total: _webhooks!.items.length,
+                    filtered: _filteredWebhooks().length,
+                  ) !=
+                  null)
             Text(
-              '当前筛选没有命中任何 Webhook，请调整 URL / id / createdAt 搜索关键字。',
+              describeOutboundWebhookEmptyState(
+                total: _webhooks!.items.length,
+                filtered: _filteredWebhooks().length,
+              )!,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (_webhooks != null)
@@ -1616,12 +1589,20 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             Text(
               'total=${_billingEventsPage!.total} · loaded=${_billingEvents.length} · has_more=${_billingEventsPage!.hasMore}',
             ),
-          if (_billingEventsPage != null &&
-              _billingEvents.isEmpty &&
-              !_loadingBillingEvents &&
-              _billingEventsError == null)
+          if (describeBillingWebhookEmptyState(
+                hasPage: _billingEventsPage != null,
+                loaded: _billingEvents.length,
+                isLoading: _loadingBillingEvents,
+                error: _billingEventsError,
+              ) !=
+              null)
             Text(
-              '当前查询没有命中任何 billing webhook 审计事件，可调整 provider、event id、时间窗或 informational 条件后重试。',
+              describeBillingWebhookEmptyState(
+                hasPage: _billingEventsPage != null,
+                loaded: _billingEvents.length,
+                isLoading: _loadingBillingEvents,
+                error: _billingEventsError,
+              )!,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (_billingEvents.isNotEmpty) ...[

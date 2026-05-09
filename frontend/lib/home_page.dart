@@ -45,6 +45,7 @@ import 'jobs/controller.dart';
 import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
 import 'shell/job_queue_stats_card.dart';
+import 'shell/help_hub_support.dart';
 import 'shell/navigation_controller.dart';
 import 'shell/platform_short_drama_pipeline_strip.dart';
 import 'shell/sections.dart';
