@@ -46,8 +46,12 @@ import 'agent_workspaces/runtime_output_controller.dart';
 import 'agent_workspaces/ws_event_controller.dart';
 import 'agent_workspaces/writeback_controller.dart';
 import 'auth/controller.dart';
+import 'admin_console/controller.dart';
+import 'admin_console/section.dart';
 import 'account/controller.dart';
 import 'api_keys/controller.dart';
+import 'content_compliance/controller.dart';
+import 'content_compliance/section.dart';
 import 'jobs/controller.dart';
 import 'notifications/controller.dart';
 import 'notifications/section.dart';
@@ -217,6 +221,14 @@ class _HomePageState extends State<HomePage> {
     onErrorChanged: _setSharedError,
   );
 
+  late final AdminConsoleController _adminConsoleController =
+      AdminConsoleController(onErrorChanged: _setSharedError);
+  late final ContentComplianceController _contentComplianceController =
+      ContentComplianceController(
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+      );
+
   late final AccountProbesController _accountProbesController =
       AccountProbesController(
         accessTokenProvider: () => _session?.accessToken,
@@ -374,7 +386,15 @@ class _HomePageState extends State<HomePage> {
         if (!mounted) {
           return;
         }
-        _openGlobalSearchResults(searchLink.query);
+        _openGlobalSearchResults(
+          searchLink.query,
+          initialResultTypes: searchLink.resultTypes
+              .map(_resultTypeFromWireName)
+              .whereType<ResultType>()
+              .toList(growable: false),
+          initialTimeFrom: searchLink.timeFrom,
+          initialTimeTo: searchLink.timeTo,
+        );
       });
       return;
     }
@@ -387,7 +407,29 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _openGlobalSearchResults(String query) {
+  ResultType? _resultTypeFromWireName(String raw) {
+    switch (raw) {
+      case 'project':
+        return ResultType.project;
+      case 'script':
+        return ResultType.script;
+      case 'asset':
+        return ResultType.asset;
+      case 'novel':
+        return ResultType.novel;
+      case 'novel_event':
+        return ResultType.novelEvent;
+      default:
+        return null;
+    }
+  }
+
+  void _openGlobalSearchResults(
+    String query, {
+    List<ResultType> initialResultTypes = const <ResultType>[],
+    DateTime? initialTimeFrom,
+    DateTime? initialTimeTo,
+  }) {
     final token = _session?.accessToken;
     unawaited(
       Navigator.of(context).push<void>(
@@ -395,6 +437,10 @@ class _HomePageState extends State<HomePage> {
           builder: (context) => SearchResultsPage(
             query: query,
             accessToken: token,
+            currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
+            initialResultTypes: initialResultTypes,
+            initialTimeFrom: initialTimeFrom,
+            initialTimeTo: initialTimeTo,
             onNavigateToDetail: (type, id, {metadata}) {
               Navigator.of(context).pop();
               _handleSearchResultNavigation(type, id, metadata: metadata);
@@ -884,6 +930,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: GlobalSearchBar(
                 accessToken: session.accessToken,
+                currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
                 onNavigateToResults: _openGlobalSearchResults,
               ),
             ),

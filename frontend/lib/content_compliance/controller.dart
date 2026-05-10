@@ -1,0 +1,613 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../config.dart';
+import '../platform/rust_api_feedback.dart';
+import '../rust_api/core.dart';
+
+typedef ContentComplianceAccessTokenProvider = String? Function();
+typedef ContentComplianceErrorSink = void Function(String? error);
+
+class ContentComplianceReportItemV1 {
+  const ContentComplianceReportItemV1({
+    required this.id,
+    required this.reporterUserId,
+    required this.reporterEmail,
+    required this.targetType,
+    required this.targetId,
+    required this.workspaceId,
+    required this.workspaceName,
+    required this.projectId,
+    required this.projectName,
+    required this.category,
+    required this.severity,
+    required this.status,
+    required this.detail,
+    required this.claimedByLabel,
+    required this.claimedAt,
+    required this.resolutionLabel,
+    required this.resolutionNote,
+    required this.resolvedAt,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String reporterUserId;
+  final String? reporterEmail;
+  final String targetType;
+  final String targetId;
+  final String? workspaceId;
+  final String? workspaceName;
+  final String? projectId;
+  final String? projectName;
+  final String category;
+  final String severity;
+  final String status;
+  final String? detail;
+  final String? claimedByLabel;
+  final String? claimedAt;
+  final String? resolutionLabel;
+  final String? resolutionNote;
+  final String? resolvedAt;
+  final String createdAt;
+
+  factory ContentComplianceReportItemV1.fromJson(Map<String, dynamic> json) {
+    return ContentComplianceReportItemV1(
+      id: json['id'] as String? ?? '',
+      reporterUserId: json['reporterUserId'] as String? ?? '',
+      reporterEmail: json['reporterEmail'] as String?,
+      targetType: json['targetType'] as String? ?? '',
+      targetId: json['targetId'] as String? ?? '',
+      workspaceId: json['workspaceId'] as String?,
+      workspaceName: json['workspaceName'] as String?,
+      projectId: json['projectId'] as String?,
+      projectName: json['projectName'] as String?,
+      category: json['category'] as String? ?? '',
+      severity: json['severity'] as String? ?? '',
+      status: json['status'] as String? ?? '',
+      detail: json['detail'] as String?,
+      claimedByLabel: json['claimedByLabel'] as String?,
+      claimedAt: json['claimedAt'] as String?,
+      resolutionLabel: json['resolutionLabel'] as String?,
+      resolutionNote: json['resolutionNote'] as String?,
+      resolvedAt: json['resolvedAt'] as String?,
+      createdAt: json['createdAt'] as String? ?? '',
+    );
+  }
+}
+
+class ContentComplianceQueueSummaryV1 {
+  const ContentComplianceQueueSummaryV1({
+    required this.pending,
+    required this.claimed,
+    required this.resolved,
+    required this.dismissed,
+    required this.critical,
+    required this.high,
+  });
+
+  final int pending;
+  final int claimed;
+  final int resolved;
+  final int dismissed;
+  final int critical;
+  final int high;
+
+  factory ContentComplianceQueueSummaryV1.fromJson(Map<String, dynamic> json) {
+    return ContentComplianceQueueSummaryV1(
+      pending: (json['pending'] as num?)?.toInt() ?? 0,
+      claimed: (json['claimed'] as num?)?.toInt() ?? 0,
+      resolved: (json['resolved'] as num?)?.toInt() ?? 0,
+      dismissed: (json['dismissed'] as num?)?.toInt() ?? 0,
+      critical: (json['critical'] as num?)?.toInt() ?? 0,
+      high: (json['high'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class ContentComplianceQueueSlaSummaryV1 {
+  const ContentComplianceQueueSlaSummaryV1({
+    required this.openOver24h,
+    required this.openOver72h,
+    required this.claimedOver24h,
+    required this.unclaimedCritical,
+    required this.oldestOpenAgeHours,
+  });
+
+  final int openOver24h;
+  final int openOver72h;
+  final int claimedOver24h;
+  final int unclaimedCritical;
+  final int oldestOpenAgeHours;
+
+  factory ContentComplianceQueueSlaSummaryV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentComplianceQueueSlaSummaryV1(
+      openOver24h: (json['openOver24h'] as num?)?.toInt() ?? 0,
+      openOver72h: (json['openOver72h'] as num?)?.toInt() ?? 0,
+      claimedOver24h: (json['claimedOver24h'] as num?)?.toInt() ?? 0,
+      unclaimedCritical: (json['unclaimedCritical'] as num?)?.toInt() ?? 0,
+      oldestOpenAgeHours: (json['oldestOpenAgeHours'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class ContentComplianceWorkspaceSummaryV1 {
+  const ContentComplianceWorkspaceSummaryV1({
+    required this.workspaceId,
+    required this.workspaceName,
+    required this.openCount,
+    required this.pendingCount,
+    required this.claimedCount,
+    required this.criticalOpenCount,
+    required this.highOpenCount,
+    required this.slaBreachedCount,
+    required this.oldestOpenAgeHours,
+  });
+
+  final String? workspaceId;
+  final String? workspaceName;
+  final int openCount;
+  final int pendingCount;
+  final int claimedCount;
+  final int criticalOpenCount;
+  final int highOpenCount;
+  final int slaBreachedCount;
+  final int oldestOpenAgeHours;
+
+  factory ContentComplianceWorkspaceSummaryV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentComplianceWorkspaceSummaryV1(
+      workspaceId: json['workspaceId'] as String?,
+      workspaceName: json['workspaceName'] as String?,
+      openCount: (json['openCount'] as num?)?.toInt() ?? 0,
+      pendingCount: (json['pendingCount'] as num?)?.toInt() ?? 0,
+      claimedCount: (json['claimedCount'] as num?)?.toInt() ?? 0,
+      criticalOpenCount: (json['criticalOpenCount'] as num?)?.toInt() ?? 0,
+      highOpenCount: (json['highOpenCount'] as num?)?.toInt() ?? 0,
+      slaBreachedCount: (json['slaBreachedCount'] as num?)?.toInt() ?? 0,
+      oldestOpenAgeHours: (json['oldestOpenAgeHours'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class ContentComplianceQueueResponseV1 {
+  const ContentComplianceQueueResponseV1({
+    required this.summary,
+    required this.sla,
+    required this.workspaceSummaries,
+    required this.items,
+  });
+
+  final ContentComplianceQueueSummaryV1 summary;
+  final ContentComplianceQueueSlaSummaryV1 sla;
+  final List<ContentComplianceWorkspaceSummaryV1> workspaceSummaries;
+  final List<ContentComplianceReportItemV1> items;
+
+  factory ContentComplianceQueueResponseV1.fromJson(Map<String, dynamic> json) {
+    return ContentComplianceQueueResponseV1(
+      summary: ContentComplianceQueueSummaryV1.fromJson(
+        Map<String, dynamic>.from(json['summary'] as Map? ?? const {}),
+      ),
+      sla: ContentComplianceQueueSlaSummaryV1.fromJson(
+        Map<String, dynamic>.from(json['sla'] as Map? ?? const {}),
+      ),
+      workspaceSummaries: (json['workspaceSummaries'] as List? ?? const [])
+          .map(
+            (item) => ContentComplianceWorkspaceSummaryV1.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false),
+      items: (json['items'] as List? ?? const [])
+          .map(
+            (item) => ContentComplianceReportItemV1.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class ContentComplianceAuditItemV1 {
+  const ContentComplianceAuditItemV1({
+    required this.id,
+    required this.reportId,
+    required this.actorUserId,
+    required this.actorLabel,
+    required this.action,
+    required this.fromStatus,
+    required this.toStatus,
+    required this.disposition,
+    required this.details,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String reportId;
+  final String? actorUserId;
+  final String actorLabel;
+  final String action;
+  final String? fromStatus;
+  final String? toStatus;
+  final String? disposition;
+  final Map<String, dynamic> details;
+  final String createdAt;
+
+  factory ContentComplianceAuditItemV1.fromJson(Map<String, dynamic> json) {
+    return ContentComplianceAuditItemV1(
+      id: json['id'] as String? ?? '',
+      reportId: json['reportId'] as String? ?? '',
+      actorUserId: json['actorUserId'] as String?,
+      actorLabel: json['actorLabel'] as String? ?? '',
+      action: json['action'] as String? ?? '',
+      fromStatus: json['fromStatus'] as String?,
+      toStatus: json['toStatus'] as String?,
+      disposition: json['disposition'] as String?,
+      details: Map<String, dynamic>.from(
+        json['details'] as Map? ?? const <String, dynamic>{},
+      ),
+      createdAt: json['createdAt'] as String? ?? '',
+    );
+  }
+}
+
+class ContentComplianceBatchMutateResponseV1 {
+  const ContentComplianceBatchMutateResponseV1({
+    required this.requestedCount,
+    required this.succeededCount,
+    required this.failedCount,
+  });
+
+  final int requestedCount;
+  final int succeededCount;
+  final int failedCount;
+
+  factory ContentComplianceBatchMutateResponseV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentComplianceBatchMutateResponseV1(
+      requestedCount: (json['requestedCount'] as num?)?.toInt() ?? 0,
+      succeededCount: (json['succeededCount'] as num?)?.toInt() ?? 0,
+      failedCount: (json['failedCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class ContentComplianceController extends ChangeNotifier {
+  ContentComplianceController({
+    required ContentComplianceAccessTokenProvider accessTokenProvider,
+    required ContentComplianceErrorSink onErrorChanged,
+  }) : _accessTokenProvider = accessTokenProvider,
+       _onErrorChanged = onErrorChanged;
+
+  final ContentComplianceAccessTokenProvider _accessTokenProvider;
+  final ContentComplianceErrorSink _onErrorChanged;
+
+  bool submittingReport = false;
+  bool loadingQueue = false;
+  bool mutatingQueue = false;
+  String? loadingAuditReportId;
+  ContentComplianceQueueResponseV1? queue;
+  String? queueStatusFilter;
+  String? queueCategoryFilter;
+  String? queueTargetTypeFilter;
+  String? queueWorkspaceIdFilter;
+  String? queueWorkspaceNameFilter;
+  bool queueClaimedOnly = false;
+
+  bool get queueEnabled => kInternalOpsToken.trim().isNotEmpty;
+
+  void _setError(String? value) => _onErrorChanged(value);
+
+  Future<void> submitReport({
+    required String targetType,
+    required String targetId,
+    required String category,
+    required String severity,
+    String? detail,
+  }) async {
+    final token = _accessTokenProvider()?.trim();
+    if (token == null || token.isEmpty || submittingReport) {
+      return;
+    }
+    submittingReport = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$kApiBaseUrl/api/v1/content/reports'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(<String, dynamic>{
+              'targetType': targetType,
+              'targetId': targetId.trim(),
+              'category': category,
+              'severity': severity,
+              if ((detail ?? '').trim().isNotEmpty) 'detail': detail!.trim(),
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+      ensureHttpSuccess(res);
+      if (queueEnabled) {
+        await loadQueue();
+      }
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } catch (error) {
+      _setError('$error');
+    } finally {
+      submittingReport = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadQueue({
+    String? status,
+    String? category,
+    String? targetType,
+    String? workspaceId,
+    String? workspaceName,
+    bool? claimedOnly,
+  }) async {
+    if (!queueEnabled || loadingQueue) {
+      return;
+    }
+    queueStatusFilter = _normalizeQueueFilter(status) ?? queueStatusFilter;
+    queueCategoryFilter =
+        _normalizeQueueFilter(category) ?? queueCategoryFilter;
+    queueTargetTypeFilter =
+        _normalizeQueueFilter(targetType) ?? queueTargetTypeFilter;
+    queueWorkspaceIdFilter =
+        _normalizeQueueFilter(workspaceId) ?? queueWorkspaceIdFilter;
+    queueWorkspaceNameFilter =
+        _normalizeQueueFilter(workspaceName) ?? queueWorkspaceNameFilter;
+    queueClaimedOnly = claimedOnly ?? queueClaimedOnly;
+    loadingQueue = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      final uri = Uri.parse('$kApiBaseUrl/api/v1/internal/compliance/reports')
+          .replace(
+            queryParameters: <String, String>{
+              if ((queueStatusFilter ?? '').isNotEmpty)
+                'status': queueStatusFilter!,
+              if ((queueCategoryFilter ?? '').isNotEmpty)
+                'category': queueCategoryFilter!,
+              if ((queueTargetTypeFilter ?? '').isNotEmpty)
+                'targetType': queueTargetTypeFilter!,
+              if ((queueWorkspaceIdFilter ?? '').isNotEmpty)
+                'workspaceId': queueWorkspaceIdFilter!,
+              if (queueClaimedOnly) 'claimedOnly': 'true',
+            },
+          );
+      final res = await http
+          .get(
+            uri,
+            headers: {'x-toonflow-internal-token': kInternalOpsToken.trim()},
+          )
+          .timeout(const Duration(seconds: 15));
+      ensureHttpSuccess(res);
+      queue = ContentComplianceQueueResponseV1.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } catch (error) {
+      _setError('$error');
+    } finally {
+      loadingQueue = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> claimReport(
+    String id, {
+    String actorLabel = 'internal_ops',
+  }) async {
+    await _mutateQueue(
+      '$kApiBaseUrl/api/v1/internal/compliance/reports/$id/claim',
+      <String, dynamic>{'actorLabel': actorLabel},
+    );
+  }
+
+  Future<void> resolveReport(
+    String id, {
+    required String status,
+    String actorLabel = 'internal_ops',
+    String? resolutionNote,
+    String disposition = 'none',
+  }) async {
+    await _mutateQueue(
+      '$kApiBaseUrl/api/v1/internal/compliance/reports/$id/resolve',
+      <String, dynamic>{
+        'status': status,
+        'actorLabel': actorLabel,
+        'disposition': disposition,
+        if ((resolutionNote ?? '').trim().isNotEmpty)
+          'resolutionNote': resolutionNote!.trim(),
+      },
+    );
+  }
+
+  Future<void> _mutateQueue(String url, Map<String, dynamic> body) async {
+    if (!queueEnabled || mutatingQueue) {
+      return;
+    }
+    mutatingQueue = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      final res = await http
+          .post(
+            Uri.parse(url),
+            headers: {
+              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'content-type': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 15));
+      ensureHttpSuccess(res);
+      await loadQueue();
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } catch (error) {
+      _setError('$error');
+    } finally {
+      mutatingQueue = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> applyQueueFilters({
+    String? status,
+    String? category,
+    String? targetType,
+    String? workspaceId,
+    String? workspaceName,
+    required bool claimedOnly,
+  }) async {
+    queueStatusFilter = _normalizeQueueFilter(status);
+    queueCategoryFilter = _normalizeQueueFilter(category);
+    queueTargetTypeFilter = _normalizeQueueFilter(targetType);
+    queueWorkspaceIdFilter = _normalizeQueueFilter(workspaceId);
+    queueWorkspaceNameFilter = _normalizeQueueFilter(workspaceName);
+    queueClaimedOnly = claimedOnly;
+    notifyListeners();
+    await loadQueue(
+      status: queueStatusFilter,
+      category: queueCategoryFilter,
+      targetType: queueTargetTypeFilter,
+      workspaceId: queueWorkspaceIdFilter,
+      workspaceName: queueWorkspaceNameFilter,
+      claimedOnly: queueClaimedOnly,
+    );
+  }
+
+  Future<void> clearQueueFilters() async {
+    queueStatusFilter = null;
+    queueCategoryFilter = null;
+    queueTargetTypeFilter = null;
+    queueWorkspaceIdFilter = null;
+    queueWorkspaceNameFilter = null;
+    queueClaimedOnly = false;
+    notifyListeners();
+    await loadQueue(
+      status: '',
+      category: '',
+      targetType: '',
+      workspaceId: '',
+      workspaceName: '',
+      claimedOnly: false,
+    );
+  }
+
+  Future<ContentComplianceBatchMutateResponseV1?> batchMutateReports({
+    required List<String> reportIds,
+    required String action,
+    String actorLabel = 'internal_ops',
+    String? resolutionNote,
+    String disposition = 'none',
+  }) async {
+    if (!queueEnabled || mutatingQueue || reportIds.isEmpty) {
+      return null;
+    }
+    mutatingQueue = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      final res = await http
+          .post(
+            Uri.parse(
+              '$kApiBaseUrl/api/v1/internal/compliance/reports/batch-mutate',
+            ),
+            headers: {
+              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'content-type': 'application/json',
+            },
+            body: jsonEncode(<String, dynamic>{
+              'reportIds': reportIds,
+              'action': action,
+              'actorLabel': actorLabel,
+              'disposition': disposition,
+              if ((resolutionNote ?? '').trim().isNotEmpty)
+                'resolutionNote': resolutionNote!.trim(),
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+      ensureHttpSuccess(res);
+      final response = ContentComplianceBatchMutateResponseV1.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+      await loadQueue();
+      return response;
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+      return null;
+    } catch (error) {
+      _setError('$error');
+      return null;
+    } finally {
+      mutatingQueue = false;
+      notifyListeners();
+    }
+  }
+
+  String? _normalizeQueueFilter(String? raw) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty || value == 'all') {
+      return null;
+    }
+    return value;
+  }
+
+  Future<List<ContentComplianceAuditItemV1>> fetchReportAudit(
+    String reportId, {
+    int limit = 30,
+  }) async {
+    if (!queueEnabled) {
+      return const <ContentComplianceAuditItemV1>[];
+    }
+    loadingAuditReportId = reportId;
+    _setError(null);
+    notifyListeners();
+    try {
+      final uri = Uri.parse(
+        '$kApiBaseUrl/api/v1/internal/compliance/reports/$reportId/audit?limit=$limit',
+      );
+      final res = await http
+          .get(
+            uri,
+            headers: {'x-toonflow-internal-token': kInternalOpsToken.trim()},
+          )
+          .timeout(const Duration(seconds: 15));
+      ensureHttpSuccess(res);
+      final list = jsonDecode(res.body) as List<dynamic>;
+      return list
+          .map(
+            (item) => ContentComplianceAuditItemV1.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false);
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+      return const <ContentComplianceAuditItemV1>[];
+    } catch (error) {
+      _setError('$error');
+      return const <ContentComplianceAuditItemV1>[];
+    } finally {
+      loadingAuditReportId = null;
+      notifyListeners();
+    }
+  }
+}

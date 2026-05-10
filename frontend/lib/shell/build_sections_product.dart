@@ -3,6 +3,78 @@
 part of '../../home_page.dart';
 
 extension _HomePageBuildProductSections on _HomePageState {
+  Future<void> _openComplianceProductTarget(
+    ContentComplianceReportItemV1 item,
+  ) async {
+    if (!mounted) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    switch (item.targetType) {
+      case 'user':
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.account,
+        );
+        messenger.showSnackBar(
+          const SnackBar(content: Text('已切到账户面板；用户治理仍建议在内部管理台处理。')),
+        );
+        return;
+      default:
+        break;
+    }
+
+    final token = _session?.accessToken;
+    final projectId =
+        item.projectId ?? (item.targetType == 'project' ? item.targetId : null);
+    if (token == null || token.isEmpty) {
+      messenger.showSnackBar(const SnackBar(content: Text('当前未登录，无法打开目标上下文。')));
+      return;
+    }
+    if (projectId == null || projectId.isEmpty) {
+      if ((item.workspaceId ?? '').isNotEmpty) {
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.teamWorkspaces,
+        );
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '该举报已切到团队工作区上下文；workspace ${item.workspaceName ?? item.workspaceId!}',
+            ),
+          ),
+        );
+        return;
+      }
+      messenger.showSnackBar(const SnackBar(content: Text('该举报没有可打开的项目上下文。')));
+      return;
+    }
+
+    try {
+      final detail = await fetchProjectByProjectId(token, projectId);
+      if (!mounted) {
+        return;
+      }
+      final row = detail.project;
+      setState(() {
+        _productScopedProjectNumericId = row.numericId;
+      });
+      _workspaceInputController.applyProjectScope(
+        row.numericId,
+        projectUuid: row.id,
+        workspaceId: row.workspaceId,
+      );
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.projects,
+      );
+      await _openProjectDetail(row);
+    } on RustApiException catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('打开目标失败：${error.message}')),
+      );
+    } catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text('打开目标失败：$error')));
+    }
+  }
+
   Widget _buildFeatureGatedPane({
     required bool enabled,
     required String title,
@@ -201,6 +273,12 @@ extension _HomePageBuildProductSections on _HomePageState {
       NotificationsSection(
         controller: _notificationsController,
         onOpenNotification: _openNotificationLink,
+      ),
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.contentCompliance)
+      ContentComplianceSection(
+        controller: _contentComplianceController,
+        onOpenTarget: _openComplianceProductTarget,
       ),
     if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.platformStatus)
@@ -412,6 +490,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
       (ProductWorkspacePane.account, '账户', null),
       (ProductWorkspacePane.apiKeys, 'API 密钥', null),
       (ProductWorkspacePane.notifications, '通知中心', widget.unreadNotifications),
+      (ProductWorkspacePane.contentCompliance, '内容合规', null),
       (ProductWorkspacePane.platformStatus, '平台状态', null),
       (ProductWorkspacePane.teamWorkspaces, '团队工作区', null),
       (ProductWorkspacePane.scriptWorkspace, '脚本工作区', null),

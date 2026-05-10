@@ -8,6 +8,7 @@ enum ProductWorkspacePane {
   account,
   apiKeys,
   notifications,
+  contentCompliance,
   platformStatus,
   teamWorkspaces,
   scriptWorkspace,

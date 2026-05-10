@@ -101,6 +101,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings::api_keys::router())
         .merge(settings::account::router())
         .merge(settings::agent_deploy::router())
+        .merge(settings::content_compliance::router())
         .merge(settings::danger::router())
         .merge(settings::dev::router())
         .merge(settings::help_hub::router())

@@ -25,6 +25,7 @@ pub mod admin_console;
 pub mod agent_deploy;
 pub mod agent_memory;
 pub mod api_keys;
+pub mod content_compliance;
 pub mod danger;
 pub mod dev;
 pub mod help_hub;

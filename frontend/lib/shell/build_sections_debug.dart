@@ -3,17 +3,52 @@
 part of '../../home_page.dart';
 
 extension _HomePageBuildDebugSections on _HomePageState {
+  Future<void> _openComplianceOpsTarget(
+    ContentComplianceReportItemV1 item,
+  ) async {
+    if (!mounted) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    _shellNavigationController.selectHomeSectionMode(HomeSectionMode.debug);
+    switch (item.targetType) {
+      case 'user':
+        await _adminConsoleController.loadUser(item.targetId);
+        return;
+      case 'project':
+        await _adminConsoleController.loadProject(item.targetId);
+        return;
+      default:
+        if ((item.projectId ?? '').isNotEmpty) {
+          await _adminConsoleController.loadProject(item.projectId!);
+          return;
+        }
+        if ((item.workspaceId ?? '').isNotEmpty) {
+          await _adminConsoleController.loadWorkspace(item.workspaceId!);
+          return;
+        }
+        messenger.showSnackBar(
+          const SnackBar(content: Text('该举报没有可打开的管理台上下文。')),
+        );
+    }
+  }
+
   List<Widget> _buildDebugSections() => [
+    if (kInternalOpsToken.isNotEmpty)
+      AdminConsoleSection(controller: _adminConsoleController),
+    if (kInternalOpsToken.isNotEmpty) const SizedBox(height: 16),
+    ContentComplianceSection(
+      controller: _contentComplianceController,
+      onOpenTarget: _openComplianceOpsTarget,
+      onOpenOpsTarget: _openComplianceOpsTarget,
+    ),
+    const SizedBox(height: 16),
     HarnessSection(
       loadingHarnessTools: _skillsHarnessController.loadingHarnessTools,
-      loadingUserWasmValidate:
-          _skillsHarnessController.loadingUserWasmValidate,
-      loadingUserWasmPersist:
-          _skillsHarnessController.loadingUserWasmPersist,
-      loadingUserWasmList:
-          _skillsHarnessController.loadingUserWasmList,
-      loadingUserWasmRevoke:
-          _skillsHarnessController.loadingUserWasmRevoke,
+      loadingUserWasmValidate: _skillsHarnessController.loadingUserWasmValidate,
+      loadingUserWasmPersist: _skillsHarnessController.loadingUserWasmPersist,
+      loadingUserWasmList: _skillsHarnessController.loadingUserWasmList,
+      loadingUserWasmRevoke: _skillsHarnessController.loadingUserWasmRevoke,
       loadingSkillsSummary: _skillsHarnessController.loadingSkillsSummary,
       loadingSkillList: _skillsHarnessController.loadingSkillList,
       loadingSkillPreview: _skillsHarnessController.loadingSkillPreview,
