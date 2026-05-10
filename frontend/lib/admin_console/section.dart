@@ -20,6 +20,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   final _workspaceOpsNoteController = TextEditingController();
   final _projectOpsNoteController = TextEditingController();
   final _workspaceMemberUserIdController = TextEditingController();
+  final _workspaceOwnerUserIdController = TextEditingController();
+  final _projectOwnerUserIdController = TextEditingController();
   String? _governanceDraftFingerprint;
   String? _workspaceGovernanceDraftFingerprint;
   String? _projectGovernanceDraftFingerprint;
@@ -61,6 +63,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     _workspaceOpsNoteController.dispose();
     _projectOpsNoteController.dispose();
     _workspaceMemberUserIdController.dispose();
+    _workspaceOwnerUserIdController.dispose();
+    _projectOwnerUserIdController.dispose();
     super.dispose();
   }
 
@@ -158,7 +162,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           Text('管理台', style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(
-            '内部治理面。统一检索用户、workspace、project、job；支持用户治理与 workspace 上下文修复，以及 workspace / project 归档与内部备注。',
+            '内部治理面。统一检索用户、workspace、project、job；支持用户治理、workspace 上下文修复、成员修复，以及 workspace / project ownership / 归档 / 内部备注治理。',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -941,6 +945,91 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     );
   }
 
+  Widget _buildWorkspaceOwnerTransferPanel(
+    BuildContext context,
+    AdminWorkspaceDetailResponseV1 detail,
+  ) {
+    final theme = Theme.of(context);
+    final isPersonal = detail.workspaceType == 'personal';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Owner 补救', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          isPersonal
+              ? 'personal workspace 不允许 owner transfer。'
+              : 'internal ops 可直接修复 workspace owner；目标用户必须已是该 workspace 成员，原 owner 会自动降为 admin。',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        if (!isPersonal) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SizedBox(
+                width: 260,
+                child: TextField(
+                  controller: _workspaceOwnerUserIdController,
+                  decoration: const InputDecoration(
+                    labelText: '目标 owner userId',
+                    hintText: '输入目标成员 UUID',
+                  ),
+                ),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: widget.controller.savingOwnershipRemediation
+                    ? null
+                    : () => widget.controller.transferWorkspaceOwner(
+                        workspaceId: detail.workspaceId,
+                        targetUserId: _workspaceOwnerUserIdController.text,
+                      ),
+                icon: const Icon(Icons.swap_horiz_outlined),
+                label: Text(
+                  widget.controller.savingOwnershipRemediation
+                      ? '处理中…'
+                      : '转让 owner',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...detail.members
+              .where((member) => member.role != 'owner')
+              .map(
+                (member) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        '${member.email ?? member.userId} · ${member.role}',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      OutlinedButton(
+                        onPressed: widget.controller.savingOwnershipRemediation
+                            ? null
+                            : () => widget.controller.transferWorkspaceOwner(
+                                workspaceId: detail.workspaceId,
+                                targetUserId: member.userId,
+                              ),
+                        child: const Text('设为 owner'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildWorkspaceDetail(
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
@@ -967,6 +1056,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               : detail.opsNote!,
         }),
         _buildWorkspaceGovernancePanel(context, detail),
+        _buildWorkspaceOwnerTransferPanel(context, detail),
         _buildWorkspaceMemberRemediationPanel(context, detail),
         _subList(
           context,
@@ -1014,6 +1104,58 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
 
   bool get _projectOpsNoteRequiresValue =>
       _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set;
+
+  Widget _buildProjectOwnerTransferPanel(
+    BuildContext context,
+    AdminProjectDetailResponseV1 detail,
+  ) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Project Owner 补救', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          'internal ops 可直接修复 project owner；目标用户必须已是该 project 所属 workspace 成员。若该项目已启用 ACL，旧 owner 为普通 member 时会自动保留 editor 访问。',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            SizedBox(
+              width: 260,
+              child: TextField(
+                controller: _projectOwnerUserIdController,
+                decoration: const InputDecoration(
+                  labelText: '目标 owner userId',
+                  hintText: '输入目标 workspace 成员 UUID',
+                ),
+              ),
+            ),
+            FilledButton.tonalIcon(
+              onPressed: widget.controller.savingOwnershipRemediation
+                  ? null
+                  : () => widget.controller.transferProjectOwner(
+                      projectId: detail.projectId,
+                      targetUserId: _projectOwnerUserIdController.text,
+                    ),
+              icon: const Icon(Icons.swap_horizontal_circle_outlined),
+              label: Text(
+                widget.controller.savingOwnershipRemediation
+                    ? '处理中…'
+                    : '修复 project owner',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   Widget _buildProjectGovernancePanel(
     BuildContext context,
@@ -1174,6 +1316,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           'createdAt': detail.createdAt == null ? '-' : _fmt(detail.createdAt!),
           'updatedAt': detail.updatedAt == null ? '-' : _fmt(detail.updatedAt!),
         }),
+        _buildProjectOwnerTransferPanel(context, detail),
         _buildProjectGovernancePanel(context, detail),
         _subList(
           context,
@@ -1291,12 +1434,24 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       final currentWorkspaceReset = item.nextState['currentWorkspaceReset'];
       return 'action=$action · user=${targetUserId ?? '-'} · role=${targetRole ?? '-'} · prunedAcl=${prunedProjectAclCount ?? 0} · reset=${currentWorkspaceReset ?? false}';
     }
+    final newOwnerUserId = item.nextState['newOwnerUserId'];
+    if (newOwnerUserId != null) {
+      final previousOwnerUserId = item.nextState['previousOwnerUserId'];
+      return 'owner=${previousOwnerUserId ?? '-'} -> ${newOwnerUserId ?? '-'}';
+    }
     final nextArchived = item.nextState['archivedAt'];
     final nextNote = item.nextState['opsNote'];
     return 'archivedAt=$nextArchived · opsNote=${nextNote ?? 'null'}';
   }
 
   String _projectAuditSummary(AdminProjectGovernanceAuditSummaryV1 item) {
+    final newOwnerUserId = item.nextState['newOwnerUserId'];
+    if (newOwnerUserId != null) {
+      final previousOwnerUserId = item.nextState['previousOwnerUserId'];
+      final preservedAccess =
+          item.nextState['preservedPreviousOwnerEditorAccess'];
+      return 'owner=${previousOwnerUserId ?? '-'} -> ${newOwnerUserId ?? '-'} · preserveOldEditor=${preservedAccess ?? false}';
+    }
     final nextArchived = item.nextState['archivedAt'];
     final nextNote = item.nextState['opsNote'];
     return 'archivedAt=$nextArchived · opsNote=${nextNote ?? 'null'}';

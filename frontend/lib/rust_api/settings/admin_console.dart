@@ -851,6 +851,30 @@ Future<AdminWorkspaceDetailResponseV1> updateAdminWorkspaceMemberRemediationV1(
   );
 }
 
+Future<AdminWorkspaceDetailResponseV1> updateAdminWorkspaceOwnerTransferV1(
+  String internalOpsToken, {
+  required String workspaceId,
+  required String targetUserId,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/internal/admin/workspaces/$workspaceId/owner-transfer',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          ..._internalHeaders(internalOpsToken),
+          'content-type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{'targetUserId': targetUserId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  return AdminWorkspaceDetailResponseV1.fromJson(
+    jsonDecode(res.body) as Map<String, dynamic>,
+  );
+}
+
 Future<AdminProjectDetailResponseV1> updateAdminProjectGovernanceV1(
   String internalOpsToken, {
   required String projectId,
@@ -884,6 +908,30 @@ Future<AdminProjectDetailResponseV1> updateAdminProjectGovernanceV1(
           'content-type': 'application/json',
         },
         body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  return AdminProjectDetailResponseV1.fromJson(
+    jsonDecode(res.body) as Map<String, dynamic>,
+  );
+}
+
+Future<AdminProjectDetailResponseV1> updateAdminProjectOwnerTransferV1(
+  String internalOpsToken, {
+  required String projectId,
+  required String targetUserId,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/internal/admin/projects/$projectId/owner-transfer',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          ..._internalHeaders(internalOpsToken),
+          'content-type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{'targetUserId': targetUserId}),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);

@@ -7,6 +7,7 @@ static PLATFORM_CONFIG_ENV_MUTEX: std::sync::OnceLock<std::sync::Mutex<()>> =
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test settings_platform_config_roundtrip -- --ignored"]
+#[allow(clippy::await_holding_lock)] // std mutex serializes env overrides for this ignored DB test.
 async fn settings_platform_config_roundtrip() {
     let _ = dotenvy::dotenv();
     let _env_guard = PLATFORM_CONFIG_ENV_MUTEX

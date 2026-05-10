@@ -16,6 +16,7 @@ class AdminConsoleController extends ChangeNotifier {
   bool savingGovernance = false;
   bool savingWorkspaceContext = false;
   bool savingWorkspaceMembership = false;
+  bool savingOwnershipRemediation = false;
   String? selectedKind;
   String? selectedId;
   AdminSearchResponseV1? searchResult;
@@ -443,6 +444,122 @@ class AdminConsoleController extends ChangeNotifier {
     }
   }
 
+  Future<void> transferWorkspaceOwner({
+    required String workspaceId,
+    required String targetUserId,
+  }) async {
+    if (!enabled || savingOwnershipRemediation) {
+      return;
+    }
+    final trimmedTarget = targetUserId.trim();
+    if (trimmedTarget.isEmpty) {
+      _setError('目标 owner userId 不能为空');
+      notifyListeners();
+      return;
+    }
+    savingOwnershipRemediation = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      workspaceDetail = await updateAdminWorkspaceOwnerTransferV1(
+        _internalOpsToken,
+        workspaceId: workspaceId,
+        targetUserId: trimmedTarget,
+      );
+      final current = searchResult;
+      if (current != null) {
+        searchResult = AdminSearchResponseV1(
+          query: current.query,
+          users: current.users,
+          workspaces: current.workspaces
+              .map(
+                (item) => item.workspaceId == workspaceId
+                    ? AdminWorkspaceSearchHitV1(
+                        workspaceId: item.workspaceId,
+                        name: item.name,
+                        workspaceType: item.workspaceType,
+                        archivedAt: item.archivedAt,
+                        ownerUserId: workspaceDetail!.ownerUserId,
+                        ownerEmail: workspaceDetail!.ownerEmail,
+                        memberCount: workspaceDetail!.memberCount,
+                        projectCount: item.projectCount,
+                        activeJobCount: item.activeJobCount,
+                      )
+                    : item,
+              )
+              .toList(growable: false),
+          projects: current.projects,
+          jobs: current.jobs,
+        );
+      }
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } catch (error) {
+      _setError('$error');
+    } finally {
+      savingOwnershipRemediation = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> transferProjectOwner({
+    required String projectId,
+    required String targetUserId,
+  }) async {
+    if (!enabled || savingOwnershipRemediation) {
+      return;
+    }
+    final trimmedTarget = targetUserId.trim();
+    if (trimmedTarget.isEmpty) {
+      _setError('目标 owner userId 不能为空');
+      notifyListeners();
+      return;
+    }
+    savingOwnershipRemediation = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      projectDetail = await updateAdminProjectOwnerTransferV1(
+        _internalOpsToken,
+        projectId: projectId,
+        targetUserId: trimmedTarget,
+      );
+      final current = searchResult;
+      if (current != null) {
+        searchResult = AdminSearchResponseV1(
+          query: current.query,
+          users: current.users,
+          workspaces: current.workspaces,
+          projects: current.projects
+              .map(
+                (item) => item.projectId == projectId
+                    ? AdminProjectSearchHitV1(
+                        projectId: item.projectId,
+                        numericId: item.numericId,
+                        name: item.name,
+                        workspaceId: item.workspaceId,
+                        workspaceName: item.workspaceName,
+                        ownerUserId: projectDetail!.ownerUserId,
+                        ownerEmail: projectDetail!.ownerEmail,
+                        archivedAt: projectDetail!.archivedAt,
+                        updatedAt: item.updatedAt,
+                      )
+                    : item,
+              )
+              .toList(growable: false),
+          jobs: current.jobs,
+        );
+      }
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } catch (error) {
+      _setError('$error');
+    } finally {
+      savingOwnershipRemediation = false;
+      notifyListeners();
+    }
+  }
+
   void clearDetail() {
     selectedKind = null;
     selectedId = null;
@@ -452,6 +569,7 @@ class AdminConsoleController extends ChangeNotifier {
     savingGovernance = false;
     savingWorkspaceContext = false;
     savingWorkspaceMembership = false;
+    savingOwnershipRemediation = false;
     notifyListeners();
   }
 }

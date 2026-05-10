@@ -8,16 +8,19 @@ use crate::state::AppState;
 use crate::workspaces::ensure_personal_workspace;
 
 use super::types::{
-    AdminJobSearchHit, AdminJobSummary, AdminOperationalStatusDto, AdminProjectDetailResponse,
-    AdminProjectGovernanceAuditSummary, AdminProjectGovernanceUpdateBody, AdminProjectSearchHit,
-    AdminProjectSummary, AdminQuotaOverrideActionDto, AdminSearchResponse, AdminUserDetailResponse,
-    AdminUserGovernanceAuditSummary, AdminUserGovernanceUpdateBody, AdminUserMembershipSummary,
-    AdminUserSearchHit, AdminUserWorkspaceContextActionDto, AdminUserWorkspaceContextUpdateBody,
+    AdminJobSearchHit, AdminJobSummary, AdminOperationalStatusDto, AdminProjectAclMemberSummary,
+    AdminProjectDetailResponse, AdminProjectGovernanceAuditSummary,
+    AdminProjectGovernanceUpdateBody, AdminProjectOwnerTransferBody, AdminProjectSearchHit,
+    AdminProjectSummary, AdminProjectWorkspaceMemberCandidateSummary, AdminQuotaOverrideActionDto,
+    AdminSearchResponse, AdminUserDetailResponse, AdminUserGovernanceAuditSummary,
+    AdminUserGovernanceUpdateBody, AdminUserMembershipSummary, AdminUserSearchHit,
+    AdminUserWorkspaceContextActionDto, AdminUserWorkspaceContextUpdateBody,
     AdminWorkspaceDetailResponse, AdminWorkspaceGovernanceAuditSummary,
     AdminWorkspaceGovernanceUpdateBody, AdminWorkspaceLifecycleActionDto,
     AdminWorkspaceMemberRemediationActionDto, AdminWorkspaceMemberRemediationBody,
     AdminWorkspaceMemberRoleDto, AdminWorkspaceMemberSummary, AdminWorkspaceOpsNoteActionDto,
-    AdminWorkspaceRef, AdminWorkspaceSearchHit,
+    AdminWorkspaceOwnerTransferBody, AdminWorkspaceProjectAclSummary, AdminWorkspaceRef,
+    AdminWorkspaceSearchHit,
 };
 
 #[derive(Debug, FromRow)]
@@ -175,6 +178,37 @@ struct ProjectDetailRow {
 struct ProjectGovernanceCurrentRow {
     archived_at: Option<DateTime<Utc>>,
     metadata: serde_json::Value,
+}
+
+#[derive(Debug, FromRow)]
+struct WorkspaceProjectAclSummaryRow {
+    project_id: Uuid,
+    numeric_id: i32,
+    name: Option<String>,
+    owner_user_id: Uuid,
+    owner_email: Option<String>,
+    archived_at: Option<DateTime<Utc>>,
+    explicit_acl_count: i64,
+    editor_count: i64,
+    viewer_count: i64,
+}
+
+#[derive(Debug, FromRow)]
+struct ProjectAclMemberRow {
+    user_id: Uuid,
+    email: Option<String>,
+    workspace_role: String,
+    project_role: String,
+    created_at: DateTime<Utc>,
+    updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, FromRow)]
+struct ProjectWorkspaceMemberCandidateRow {
+    user_id: Uuid,
+    email: Option<String>,
+    workspace_role: String,
+    explicit_project_role: Option<String>,
 }
 
 fn search_pattern(query: &str) -> String {
@@ -843,6 +877,66 @@ pub async fn get_admin_workspace_detail(
     })
     .collect();
 
+    let workspace_role_breakdown: serde_json::Value = sqlx::query_scalar(
+        r#"
+        SELECT jsonb_build_object(
+          'owner', COUNT(*) FILTER (WHERE role = 'owner'),
+          'admin', COUNT(*) FILTER (WHERE role = 'admin'),
+          'member', COUNT(*) FILTER (WHERE role = 'member')
+        )
+        FROM public.app_workspace_member
+        WHERE workspace_id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let project_acl_summaries = sqlx::query_as::<_, WorkspaceProjectAclSummaryRow>(
+        r#"
+        SELECT
+          p.id AS project_id,
+          p.numeric_id,
+          p.name,
+          p.owner_user_id,
+          owner.email AS owner_email,
+          p.archived_at,
+          COUNT(pm.user_id)::bigint AS explicit_acl_count,
+          COUNT(pm.user_id) FILTER (WHERE pm.role = 'editor')::bigint AS editor_count,
+          COUNT(pm.user_id) FILTER (WHERE pm.role = 'viewer')::bigint AS viewer_count
+        FROM public.app_project p
+        LEFT JOIN auth.users owner ON owner.id = p.owner_user_id
+        LEFT JOIN public.app_project_member pm ON pm.project_id = p.id
+        WHERE p.workspace_id = $1
+        GROUP BY p.id, p.numeric_id, p.name, p.owner_user_id, owner.email, p.archived_at
+        ORDER BY p.archived_at NULLS FIRST, p.update_time DESC NULLS LAST, p.create_time_ms DESC NULLS LAST
+        LIMIT 25
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .into_iter()
+    .map(|row| AdminWorkspaceProjectAclSummary {
+        project_id: row.project_id,
+        numeric_id: row.numeric_id,
+        name: row.name,
+        owner_user_id: row.owner_user_id,
+        owner_email: row.owner_email,
+        archived_at: row.archived_at,
+        acl_mode: if row.explicit_acl_count > 0 {
+            "restricted".into()
+        } else {
+            "inherited".into()
+        },
+        explicit_acl_count: row.explicit_acl_count,
+        editor_count: row.editor_count,
+        viewer_count: row.viewer_count,
+    })
+    .collect();
+
     let recent_projects = sqlx::query_as::<_, ProjectSummaryRow>(
         r#"
         SELECT
@@ -956,6 +1050,8 @@ pub async fn get_admin_workspace_detail(
         project_count: row.project_count,
         active_job_count: row.active_job_count,
         members,
+        workspace_role_breakdown,
+        project_acl_summaries,
         recent_projects,
         recent_jobs,
         governance_audit,
@@ -1268,6 +1364,133 @@ pub async fn update_admin_workspace_member_remediation(
     get_admin_workspace_detail(state, workspace_id).await
 }
 
+pub async fn transfer_admin_workspace_owner(
+    state: &AppState,
+    workspace_id: Uuid,
+    body: AdminWorkspaceOwnerTransferBody,
+) -> Result<AdminWorkspaceDetailResponse, ApiError> {
+    let pool = state.require_pool()?;
+
+    let workspace: Option<(String, Uuid)> = sqlx::query_as(
+        r#"
+        SELECT workspace_type, owner_user_id
+        FROM public.app_workspace
+        WHERE id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some((workspace_type, owner_user_id)) = workspace else {
+        return Err(ApiError::NotFound);
+    };
+
+    if workspace_type == "personal" {
+        return Err(ApiError::BadRequest(
+            "cannot transfer owner of a personal workspace".into(),
+        ));
+    }
+    if body.target_user_id == owner_user_id {
+        return Err(ApiError::Conflict(
+            "target owner must differ from current owner".into(),
+        ));
+    }
+
+    let target_role: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT role
+        FROM public.app_workspace_member
+        WHERE workspace_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.target_user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some(target_previous_role) = target_role else {
+        return Err(ApiError::Conflict(
+            "target user must already be a workspace member".into(),
+        ));
+    };
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_workspace_member
+        SET role = 'owner', updated_at = NOW()
+        WHERE workspace_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.target_user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_workspace_member
+        SET role = 'admin', updated_at = NOW()
+        WHERE workspace_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(owner_user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_workspace
+        SET owner_user_id = $2, updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.target_user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    append_internal_workspace_governance_audit(
+        pool,
+        workspace_id,
+        "owner_transferred_internal",
+        json!({
+            "previousOwnerUserId": owner_user_id,
+            "newOwnerUserId": body.target_user_id,
+            "targetPreviousRole": target_previous_role,
+            "previousOwnerNewRole": "admin",
+            "workspaceType": workspace_type,
+        }),
+        json!({
+            "previousOwnerUserId": owner_user_id,
+            "newOwnerUserId": body.target_user_id,
+            "targetPreviousRole": target_previous_role,
+            "targetRole": "owner",
+            "previousOwnerNewRole": "admin",
+            "workspaceType": workspace_type,
+        }),
+    )
+    .await?;
+
+    get_admin_workspace_detail(state, workspace_id).await
+}
+
 pub async fn get_admin_project_detail(
     state: &AppState,
     project_id: Uuid,
@@ -1373,6 +1596,98 @@ pub async fn get_admin_project_detail(
     .map(map_job)
     .collect();
 
+    let acl_members = sqlx::query_as::<_, ProjectAclMemberRow>(
+        r#"
+        SELECT
+          pm.user_id,
+          u.email,
+          wm.role AS workspace_role,
+          pm.role AS project_role,
+          pm.created_at,
+          pm.updated_at
+        FROM public.app_project_member pm
+        INNER JOIN public.app_project p ON p.id = pm.project_id
+        INNER JOIN public.app_workspace_member wm
+          ON wm.workspace_id = p.workspace_id
+         AND wm.user_id = pm.user_id
+        LEFT JOIN auth.users u ON u.id = pm.user_id
+        WHERE pm.project_id = $1
+        ORDER BY
+          CASE pm.role
+            WHEN 'editor' THEN 0
+            ELSE 1
+          END,
+          pm.created_at ASC
+        "#,
+    )
+    .bind(project_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .into_iter()
+    .map(|row| AdminProjectAclMemberSummary {
+        user_id: row.user_id,
+        email: row.email,
+        workspace_role: row.workspace_role,
+        project_role: row.project_role,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+    })
+    .collect::<Vec<_>>();
+
+    let workspace_member_candidates = sqlx::query_as::<_, ProjectWorkspaceMemberCandidateRow>(
+        r#"
+        SELECT
+          wm.user_id,
+          u.email,
+          wm.role AS workspace_role,
+          pm.role AS explicit_project_role
+        FROM public.app_project p
+        INNER JOIN public.app_workspace_member wm ON wm.workspace_id = p.workspace_id
+        LEFT JOIN public.app_project_member pm
+          ON pm.project_id = p.id
+         AND pm.user_id = wm.user_id
+        LEFT JOIN auth.users u ON u.id = wm.user_id
+        WHERE p.id = $1
+        ORDER BY
+          CASE wm.role
+            WHEN 'owner' THEN 0
+            WHEN 'admin' THEN 1
+            ELSE 2
+          END,
+          u.email ASC NULLS LAST,
+          wm.user_id ASC
+        LIMIT 40
+        "#,
+    )
+    .bind(project_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .into_iter()
+    .map(|row| AdminProjectWorkspaceMemberCandidateSummary {
+        user_id: row.user_id,
+        email: row.email,
+        workspace_role: row.workspace_role,
+        explicit_project_role: row.explicit_project_role,
+    })
+    .collect::<Vec<_>>();
+
+    let explicit_acl_count = acl_members.len() as i64;
+    let editor_count = acl_members
+        .iter()
+        .filter(|member| member.project_role == "editor")
+        .count() as i64;
+    let viewer_count = acl_members
+        .iter()
+        .filter(|member| member.project_role == "viewer")
+        .count() as i64;
+    let project_acl_mode = if explicit_acl_count > 0 {
+        "restricted".to_string()
+    } else {
+        "inherited".to_string()
+    };
+
     let governance_audit = sqlx::query_as::<_, GovernanceAuditRow>(
         r#"
         SELECT
@@ -1423,6 +1738,12 @@ pub async fn get_admin_project_detail(
         asset_count: row.asset_count,
         job_count: row.job_count,
         active_job_count: row.active_job_count,
+        project_acl_mode,
+        explicit_acl_count,
+        editor_count,
+        viewer_count,
+        acl_members,
+        workspace_member_candidates,
         recent_jobs,
         governance_audit,
     })
@@ -1530,6 +1851,250 @@ pub async fn update_admin_project_governance(
     .bind(json!({
         "archivedAt": next_archived,
         "opsNote": next_ops,
+    }))
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    get_admin_project_detail(state, project_id).await
+}
+
+#[allow(dead_code)]
+pub async fn update_admin_project_batch_governance(
+    state: &AppState,
+    body: super::types::AdminProjectBatchGovernanceUpdateBody,
+) -> Result<super::types::AdminProjectBatchGovernanceResponse, ApiError> {
+    let _pool = state.require_pool()?;
+    let requested_count = body.project_ids.len() as i64;
+    if body.project_ids.is_empty() {
+        return Err(ApiError::BadRequest("projectIds must not be empty".into()));
+    }
+    if body.project_ids.len() > 50 {
+        return Err(ApiError::BadRequest(
+            "projectIds must not contain more than 50 items".into(),
+        ));
+    }
+
+    let next_ops = match body.ops_note_action {
+        AdminWorkspaceOpsNoteActionDto::Preserve => None,
+        AdminWorkspaceOpsNoteActionDto::Clear => Some(None),
+        AdminWorkspaceOpsNoteActionDto::Set => {
+            let normalized = normalize_optional_text(body.ops_note.clone());
+            if normalized.is_none() {
+                return Err(ApiError::BadRequest(
+                    "opsNote is required when opsNoteAction is set".into(),
+                ));
+            }
+            Some(normalized)
+        }
+    };
+
+    let mut updated_ids = Vec::new();
+    for project_id in &body.project_ids {
+        let detail = update_admin_project_governance(
+            state,
+            *project_id,
+            AdminProjectGovernanceUpdateBody {
+                project_lifecycle: body.project_lifecycle.clone(),
+                ops_note_action: body.ops_note_action.clone(),
+                ops_note: next_ops.clone().flatten(),
+            },
+        )
+        .await;
+
+        match detail {
+            Ok(_) => updated_ids.push(*project_id),
+            Err(ApiError::BadRequest(message)) if message == "no governance changes requested" => {}
+            Err(error) => return Err(error),
+        }
+    }
+
+    let mut projects = Vec::new();
+    for project_id in &updated_ids {
+        projects.push(get_admin_project_detail(state, *project_id).await?);
+    }
+
+    Ok(super::types::AdminProjectBatchGovernanceResponse {
+        requested_count,
+        updated_count: updated_ids.len() as i64,
+        projects,
+    })
+}
+
+pub async fn transfer_admin_project_owner(
+    state: &AppState,
+    project_id: Uuid,
+    body: AdminProjectOwnerTransferBody,
+) -> Result<AdminProjectDetailResponse, ApiError> {
+    let pool = state.require_pool()?;
+
+    let project: Option<(Uuid, Uuid)> = sqlx::query_as(
+        r#"
+        SELECT workspace_id, owner_user_id
+        FROM public.app_project
+        WHERE id = $1
+        "#,
+    )
+    .bind(project_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some((workspace_id, owner_user_id)) = project else {
+        return Err(ApiError::NotFound);
+    };
+
+    if body.target_user_id == owner_user_id {
+        return Err(ApiError::Conflict(
+            "target owner must differ from current owner".into(),
+        ));
+    }
+
+    let target_workspace_role: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT role
+        FROM public.app_workspace_member
+        WHERE workspace_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.target_user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some(target_workspace_role) = target_workspace_role else {
+        return Err(ApiError::Conflict(
+            "target user must already be a workspace member".into(),
+        ));
+    };
+
+    let target_previous_project_role: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT role
+        FROM public.app_project_member
+        WHERE project_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(project_id)
+    .bind(body.target_user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let previous_owner_workspace_role: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT role
+        FROM public.app_workspace_member
+        WHERE workspace_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(owner_user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let project_acl_enabled: bool = sqlx::query_scalar(
+        r#"
+        SELECT EXISTS(
+          SELECT 1
+          FROM public.app_project_member
+          WHERE project_id = $1
+        )
+        "#,
+    )
+    .bind(project_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_project
+        SET owner_user_id = $2, updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(project_id)
+    .bind(body.target_user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let removed_target_acl_count = sqlx::query(
+        r#"
+        DELETE FROM public.app_project_member
+        WHERE project_id = $1
+          AND user_id = $2
+        "#,
+    )
+    .bind(project_id)
+    .bind(body.target_user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .rows_affected();
+
+    let preserved_previous_owner_acl = if project_acl_enabled
+        && matches!(previous_owner_workspace_role.as_deref(), Some("member"))
+    {
+        sqlx::query(
+            r#"
+            INSERT INTO public.app_project_member (project_id, user_id, role)
+            VALUES ($1, $2, 'editor')
+            ON CONFLICT (project_id, user_id)
+            DO UPDATE SET role = EXCLUDED.role, updated_at = NOW()
+            "#,
+        )
+        .bind(project_id)
+        .bind(owner_user_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        true
+    } else {
+        false
+    };
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_project_governance_audit (
+          project_id,
+          event_type,
+          actor_label,
+          previous_state,
+          next_state
+        )
+        VALUES ($1, 'owner_transferred_internal', 'internal_ops', $2, $3)
+        "#,
+    )
+    .bind(project_id)
+    .bind(json!({
+        "previousOwnerUserId": owner_user_id,
+        "newOwnerUserId": body.target_user_id,
+        "targetWorkspaceRole": target_workspace_role,
+        "targetPreviousProjectRole": target_previous_project_role,
+        "projectAclEnabled": project_acl_enabled,
+    }))
+    .bind(json!({
+        "previousOwnerUserId": owner_user_id,
+        "newOwnerUserId": body.target_user_id,
+        "targetWorkspaceRole": target_workspace_role,
+        "targetPreviousProjectRole": target_previous_project_role,
+        "projectAclEnabled": project_acl_enabled,
+        "removedTargetProjectAclCount": removed_target_acl_count as i64,
+        "preservedPreviousOwnerEditorAccess": preserved_previous_owner_acl,
     }))
     .execute(pool)
     .await

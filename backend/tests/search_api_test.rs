@@ -1031,11 +1031,7 @@ mod tests {
         // - 突发 5 个请求
         // - 超过限制自动返回 HTTP 429
 
-        // 此测试验证速率限制的文档和配置存在
-        assert!(
-            true,
-            "Rate limit configuration is documented and applied in production code"
-        );
+        // 文档即契约：生产路由已挂 tower_governor（见 http_kit/rate_limit/layer/search.rs）。
     }
 
     // ============================================================================

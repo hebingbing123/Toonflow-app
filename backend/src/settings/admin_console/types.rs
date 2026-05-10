@@ -173,6 +173,21 @@ pub struct AdminWorkspaceGovernanceAuditSummary {
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
+pub struct AdminWorkspaceProjectAclSummary {
+    pub project_id: Uuid,
+    pub numeric_id: i32,
+    pub name: Option<String>,
+    pub owner_user_id: Uuid,
+    pub owner_email: Option<String>,
+    pub archived_at: Option<DateTime<Utc>>,
+    pub acl_mode: String,
+    pub explicit_acl_count: i64,
+    pub editor_count: i64,
+    pub viewer_count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct AdminWorkspaceDetailResponse {
     pub workspace_id: Uuid,
     pub name: String,
@@ -185,6 +200,8 @@ pub struct AdminWorkspaceDetailResponse {
     pub project_count: i64,
     pub active_job_count: i64,
     pub members: Vec<AdminWorkspaceMemberSummary>,
+    pub workspace_role_breakdown: serde_json::Value,
+    pub project_acl_summaries: Vec<AdminWorkspaceProjectAclSummary>,
     pub recent_projects: Vec<AdminProjectSummary>,
     pub recent_jobs: Vec<AdminJobSummary>,
     pub governance_audit: Vec<AdminWorkspaceGovernanceAuditSummary>,
@@ -198,6 +215,26 @@ pub struct AdminProjectGovernanceAuditSummary {
     pub created_at: DateTime<Utc>,
     pub previous_state: serde_json::Value,
     pub next_state: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminProjectAclMemberSummary {
+    pub user_id: Uuid,
+    pub email: Option<String>,
+    pub workspace_role: String,
+    pub project_role: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminProjectWorkspaceMemberCandidateSummary {
+    pub user_id: Uuid,
+    pub email: Option<String>,
+    pub workspace_role: String,
+    pub explicit_project_role: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -217,6 +254,12 @@ pub struct AdminProjectDetailResponse {
     pub asset_count: i64,
     pub job_count: i64,
     pub active_job_count: i64,
+    pub project_acl_mode: String,
+    pub explicit_acl_count: i64,
+    pub editor_count: i64,
+    pub viewer_count: i64,
+    pub acl_members: Vec<AdminProjectAclMemberSummary>,
+    pub workspace_member_candidates: Vec<AdminProjectWorkspaceMemberCandidateSummary>,
     pub recent_jobs: Vec<AdminJobSummary>,
     pub governance_audit: Vec<AdminProjectGovernanceAuditSummary>,
 }
@@ -317,6 +360,8 @@ pub struct AdminWorkspaceMemberRemediationBody {
     pub role: Option<AdminWorkspaceMemberRoleDto>,
 }
 
+/// Request body for internal owner transfer; only built via JSON deserialization.
+#[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AdminWorkspaceOwnerTransferBody {
@@ -337,8 +382,33 @@ pub struct AdminProjectGovernanceUpdateBody {
     pub ops_note: Option<String>,
 }
 
+/// Request body for internal project owner transfer; only built via JSON deserialization.
+#[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AdminProjectOwnerTransferBody {
     pub target_user_id: Uuid,
+}
+
+/// Batch project governance (internal); wired when REST handler is added.
+#[allow(dead_code)]
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdminProjectBatchGovernanceUpdateBody {
+    pub project_ids: Vec<Uuid>,
+    #[serde(default)]
+    pub project_lifecycle: AdminProjectLifecycleActionDto,
+    #[serde(default)]
+    pub ops_note_action: AdminProjectOpsNoteActionDto,
+    #[serde(default)]
+    pub ops_note: Option<String>,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminProjectBatchGovernanceResponse {
+    pub requested_count: i64,
+    pub updated_count: i64,
+    pub projects: Vec<AdminProjectDetailResponse>,
 }
