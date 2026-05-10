@@ -34,6 +34,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   String _queueTargetType = 'all';
   String? _queueWorkspaceId;
   String? _queueWorkspaceName;
+  String? _queueClaimedByLabel;
+  String? _queueSlaBucket;
   bool _queueClaimedOnly = false;
   final Set<String> _selectedReportIds = <String>{};
 
@@ -79,6 +81,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     _queueTargetType = widget.controller.queueTargetTypeFilter ?? 'all';
     _queueWorkspaceId = widget.controller.queueWorkspaceIdFilter;
     _queueWorkspaceName = widget.controller.queueWorkspaceNameFilter;
+    _queueClaimedByLabel = widget.controller.queueClaimedByLabelFilter;
+    _queueSlaBucket = widget.controller.queueSlaBucketFilter;
     _queueClaimedOnly = widget.controller.queueClaimedOnly;
     final activeIds =
         widget.controller.queue?.items.map((item) => item.id).toSet() ??
@@ -167,6 +171,44 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       targetType: _queueTargetType,
       workspaceId: item.workspaceId,
       workspaceName: item.workspaceName,
+      claimedByLabel: _queueClaimedByLabel,
+      slaBucket: _queueSlaBucket,
+      claimedOnly: _queueClaimedOnly,
+    );
+  }
+
+  String _ownerSummaryLabel(ContentComplianceOwnerSummaryV1 item) {
+    return item.ownerLabel == 'unclaimed' ? '未认领' : item.ownerLabel;
+  }
+
+  Future<void> _applyOwnerFilter(ContentComplianceOwnerSummaryV1 item) async {
+    setState(() {
+      _queueClaimedByLabel = item.ownerLabel;
+    });
+    await widget.controller.applyQueueFilters(
+      status: _queueStatus,
+      category: _queueCategory,
+      targetType: _queueTargetType,
+      workspaceId: _queueWorkspaceId,
+      workspaceName: _queueWorkspaceName,
+      claimedByLabel: item.ownerLabel,
+      slaBucket: _queueSlaBucket,
+      claimedOnly: _queueClaimedOnly,
+    );
+  }
+
+  Future<void> _applySlaBucketFilter(String? bucket) async {
+    setState(() {
+      _queueSlaBucket = bucket;
+    });
+    await widget.controller.applyQueueFilters(
+      status: _queueStatus,
+      category: _queueCategory,
+      targetType: _queueTargetType,
+      workspaceId: _queueWorkspaceId,
+      workspaceName: _queueWorkspaceName,
+      claimedByLabel: _queueClaimedByLabel,
+      slaBucket: bucket,
       claimedOnly: _queueClaimedOnly,
     );
   }
@@ -435,7 +477,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 _queueStatus == 'all' &&
                                 _queueCategory == 'all' &&
                                 _queueTargetType == 'all' &&
-                                (_queueWorkspaceId ?? '').isEmpty)
+                                (_queueWorkspaceId ?? '').isEmpty &&
+                                (_queueClaimedByLabel ?? '').isEmpty &&
+                                (_queueSlaBucket ?? '').isEmpty)
                         ? null
                         : widget.controller.clearQueueFilters,
                     icon: const Icon(Icons.filter_alt_off_outlined),
@@ -480,6 +524,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           targetType: _queueTargetType,
                           workspaceId: _queueWorkspaceId,
                           workspaceName: _queueWorkspaceName,
+                          claimedByLabel: _queueClaimedByLabel,
+                          slaBucket: _queueSlaBucket,
                           claimedOnly: _queueClaimedOnly,
                         );
                       },
@@ -514,6 +560,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           targetType: _queueTargetType,
                           workspaceId: _queueWorkspaceId,
                           workspaceName: _queueWorkspaceName,
+                          claimedByLabel: _queueClaimedByLabel,
+                          slaBucket: _queueSlaBucket,
                           claimedOnly: _queueClaimedOnly,
                         );
                       },
@@ -544,6 +592,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           targetType: value,
                           workspaceId: _queueWorkspaceId,
                           workspaceName: _queueWorkspaceName,
+                          claimedByLabel: _queueClaimedByLabel,
+                          slaBucket: _queueSlaBucket,
                           claimedOnly: _queueClaimedOnly,
                         );
                       },
@@ -561,6 +611,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           targetType: _queueTargetType,
                           workspaceId: _queueWorkspaceId,
                           workspaceName: _queueWorkspaceName,
+                          claimedByLabel: _queueClaimedByLabel,
+                          slaBucket: _queueSlaBucket,
                           claimedOnly: selected,
                         );
                       },
@@ -580,6 +632,50 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             targetType: _queueTargetType,
                             workspaceId: '',
                             workspaceName: '',
+                            claimedByLabel: _queueClaimedByLabel,
+                            slaBucket: _queueSlaBucket,
+                            claimedOnly: _queueClaimedOnly,
+                          );
+                        },
+                      ),
+                    if ((_queueClaimedByLabel ?? '').isNotEmpty)
+                      InputChip(
+                        label: Text(
+                          _queueClaimedByLabel == 'unclaimed'
+                              ? 'owner: 未认领'
+                              : 'owner: ${_queueClaimedByLabel!}',
+                        ),
+                        onDeleted: () {
+                          setState(() {
+                            _queueClaimedByLabel = null;
+                          });
+                          widget.controller.applyQueueFilters(
+                            status: _queueStatus,
+                            category: _queueCategory,
+                            targetType: _queueTargetType,
+                            workspaceId: _queueWorkspaceId,
+                            workspaceName: _queueWorkspaceName,
+                            claimedByLabel: '',
+                            slaBucket: _queueSlaBucket,
+                            claimedOnly: _queueClaimedOnly,
+                          );
+                        },
+                      ),
+                    if ((_queueSlaBucket ?? '').isNotEmpty)
+                      InputChip(
+                        label: Text('SLA: ${_queueSlaBucket!}'),
+                        onDeleted: () {
+                          setState(() {
+                            _queueSlaBucket = null;
+                          });
+                          widget.controller.applyQueueFilters(
+                            status: _queueStatus,
+                            category: _queueCategory,
+                            targetType: _queueTargetType,
+                            workspaceId: _queueWorkspaceId,
+                            workspaceName: _queueWorkspaceName,
+                            claimedByLabel: _queueClaimedByLabel,
+                            slaBucket: '',
                             claimedOnly: _queueClaimedOnly,
                           );
                         },
@@ -597,14 +693,42 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     Chip(label: Text('dismissed ${queue.summary.dismissed}')),
                     Chip(label: Text('critical ${queue.summary.critical}')),
                     Chip(label: Text('high ${queue.summary.high}')),
-                    Chip(label: Text('open>24h ${queue.sla.openOver24h}')),
-                    Chip(label: Text('open>72h ${queue.sla.openOver72h}')),
-                    Chip(
-                      label: Text('claimed>24h ${queue.sla.claimedOver24h}'),
+                    FilterChip(
+                      label: Text('open>24h ${queue.sla.openOver24h}'),
+                      selected: _queueSlaBucket == 'open_over_24h',
+                      onSelected: (_) => _applySlaBucketFilter(
+                        _queueSlaBucket == 'open_over_24h'
+                            ? null
+                            : 'open_over_24h',
+                      ),
                     ),
-                    Chip(
+                    FilterChip(
+                      label: Text('open>72h ${queue.sla.openOver72h}'),
+                      selected: _queueSlaBucket == 'open_over_72h',
+                      onSelected: (_) => _applySlaBucketFilter(
+                        _queueSlaBucket == 'open_over_72h'
+                            ? null
+                            : 'open_over_72h',
+                      ),
+                    ),
+                    FilterChip(
+                      label: Text('claimed>24h ${queue.sla.claimedOver24h}'),
+                      selected: _queueSlaBucket == 'claimed_over_24h',
+                      onSelected: (_) => _applySlaBucketFilter(
+                        _queueSlaBucket == 'claimed_over_24h'
+                            ? null
+                            : 'claimed_over_24h',
+                      ),
+                    ),
+                    FilterChip(
                       label: Text(
                         'critical未claim ${queue.sla.unclaimedCritical}',
+                      ),
+                      selected: _queueSlaBucket == 'unclaimed_critical',
+                      onSelected: (_) => _applySlaBucketFilter(
+                        _queueSlaBucket == 'unclaimed_critical'
+                            ? null
+                            : 'unclaimed_critical',
                       ),
                     ),
                     Chip(
@@ -612,6 +736,57 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                   ],
                 ),
+                if (queue.ownerSummaries.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'reviewer / owner 负载',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: queue.ownerSummaries
+                        .map(
+                          (owner) => SizedBox(
+                            width: 220,
+                            child: OutlinedButton(
+                              onPressed: widget.controller.loadingQueue
+                                  ? null
+                                  : () => _applyOwnerFilter(owner),
+                              style: OutlinedButton.styleFrom(
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.all(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _ownerSummaryLabel(owner),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleSmall,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'pending ${owner.pendingCount} · claimed ${owner.claimedCount}',
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'critical ${owner.criticalOpenCount} · overdue ${owner.overdueCount} · oldest ${owner.oldestOpenAgeHours}h',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
+                ],
                 if (queue.workspaceSummaries.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text('workspace 热点', style: theme.textTheme.titleSmall),

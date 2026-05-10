@@ -130,6 +130,12 @@ pub struct ListContentComplianceReportsQuery {
     #[serde(default)]
     claimed_only: Option<bool>,
     #[serde(default)]
+    #[allow(dead_code)] // TODO: Implement claimed_by_label filter
+    claimed_by_label: Option<String>,
+    #[serde(default)]
+    #[allow(dead_code)] // TODO: Implement sla_bucket filter
+    sla_bucket: Option<String>,
+    #[serde(default)]
     workspace_id: Option<Uuid>,
     #[serde(default)]
     limit: Option<i64>,
@@ -261,12 +267,24 @@ pub struct ContentComplianceWorkspaceSummary {
     oldest_open_age_hours: i64,
 }
 
+#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentComplianceOwnerSummary {
+    owner_label: String,
+    pending_count: i64,
+    claimed_count: i64,
+    critical_open_count: i64,
+    overdue_count: i64,
+    oldest_open_age_hours: i64,
+}
+
 #[derive(Debug, Clone, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ListContentComplianceReportsResponse {
     summary: ContentComplianceQueueSummary,
     sla: ContentComplianceQueueSlaSummary,
     workspace_summaries: Vec<ContentComplianceWorkspaceSummary>,
+    owner_summaries: Vec<ContentComplianceOwnerSummary>,
     items: Vec<ContentComplianceReportItem>,
 }
 
@@ -357,6 +375,14 @@ fn normalize_optional_text(raw: Option<String>) -> Option<String> {
         .filter(|value| !value.is_empty())
 }
 
+#[allow(dead_code)] // TODO: Use this function when implementing claimed_by_label/sla_bucket filters
+fn normalize_optional_filter(raw: Option<&str>) -> Option<String> {
+    raw.map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(ToOwned::to_owned)
+}
+
+#[allow(clippy::too_many_arguments)]
 async fn append_content_compliance_audit<'e, E>(
     executor: E,
     report_id: Uuid,
@@ -780,6 +806,8 @@ pub(crate) async fn list_content_reports(
     require_internal_ops_token(&headers)?;
     let pool = state.require_pool()?;
     let limit = query.limit.unwrap_or(50).clamp(1, 200);
+    let claimed_by_label_filter = normalize_optional_filter(query.claimed_by_label.as_deref());
+    let sla_bucket_filter = normalize_optional_filter(query.sla_bucket.as_deref());
 
     let mut qb = QueryBuilder::<Postgres>::new(
         r#"
@@ -828,6 +856,29 @@ pub(crate) async fn list_content_reports(
         if claimed_only {
             qb.push(" AND r.claimed_at IS NOT NULL");
         }
+    }
+    if let Some(claimed_by_label) = claimed_by_label_filter.as_deref() {
+        if claimed_by_label == "unclaimed" {
+            qb.push(" AND r.status = 'pending' AND r.claimed_by_label IS NULL");
+        } else {
+            qb.push(" AND r.claimed_by_label = ");
+            qb.push_bind(claimed_by_label);
+        }
+    }
+    if let Some(sla_bucket) = sla_bucket_filter.as_deref() {
+        match sla_bucket {
+            "open_over_24h" => qb.push(
+                " AND r.status IN ('pending', 'claimed') AND r.created_at <= NOW() - INTERVAL '24 hours'",
+            ),
+            "open_over_72h" => qb.push(
+                " AND r.status IN ('pending', 'claimed') AND r.created_at <= NOW() - INTERVAL '72 hours'",
+            ),
+            "claimed_over_24h" => qb.push(
+                " AND r.status = 'claimed' AND r.claimed_at IS NOT NULL AND r.claimed_at <= NOW() - INTERVAL '24 hours'",
+            ),
+            "unclaimed_critical" => qb.push(" AND r.status = 'pending' AND r.severity = 'critical'"),
+            _ => &mut qb,
+        };
     }
     if let Some(workspace_id) = query.workspace_id {
         qb.push(" AND r.workspace_id = ");
@@ -936,6 +987,59 @@ pub(crate) async fn list_content_reports(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    let owner_summaries = sqlx::query_as::<_, ContentComplianceOwnerSummary>(
+        r#"
+        SELECT
+          CASE
+            WHEN status = 'pending' THEN 'unclaimed'
+            ELSE COALESCE(NULLIF(TRIM(claimed_by_label), ''), 'unclaimed')
+          END AS owner_label,
+          COUNT(*) FILTER (WHERE status = 'pending')::bigint AS pending_count,
+          COUNT(*) FILTER (WHERE status = 'claimed')::bigint AS claimed_count,
+          COUNT(*) FILTER (
+            WHERE status IN ('pending', 'claimed')
+              AND severity = 'critical'
+          )::bigint AS critical_open_count,
+          COUNT(*) FILTER (
+            WHERE
+              (status = 'pending' AND created_at <= NOW() - INTERVAL '24 hours')
+              OR (
+                status = 'claimed'
+                AND claimed_at IS NOT NULL
+                AND claimed_at <= NOW() - INTERVAL '24 hours'
+              )
+          )::bigint AS overdue_count,
+          COALESCE(
+            MAX(
+              FLOOR(
+                EXTRACT(
+                  EPOCH FROM (
+                    NOW() - CASE
+                      WHEN status = 'claimed' AND claimed_at IS NOT NULL THEN claimed_at
+                      ELSE created_at
+                    END
+                  )
+                ) / 3600
+              )
+            ) FILTER (WHERE status IN ('pending', 'claimed'))::bigint,
+            0
+          ) AS oldest_open_age_hours
+        FROM public.app_content_compliance_report
+        WHERE status IN ('pending', 'claimed')
+        GROUP BY 1
+        ORDER BY
+          overdue_count DESC,
+          critical_open_count DESC,
+          claimed_count DESC,
+          pending_count DESC,
+          owner_label ASC
+        LIMIT 12
+        "#,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ListContentComplianceReportsResponse {
         summary: ContentComplianceQueueSummary {
             pending: summary.pending,
@@ -953,6 +1057,7 @@ pub(crate) async fn list_content_reports(
             oldest_open_age_hours: sla.oldest_open_age_hours,
         },
         workspace_summaries,
+        owner_summaries,
         items,
     }))
 }

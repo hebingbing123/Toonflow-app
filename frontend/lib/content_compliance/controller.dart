@@ -175,17 +175,48 @@ class ContentComplianceWorkspaceSummaryV1 {
   }
 }
 
+class ContentComplianceOwnerSummaryV1 {
+  const ContentComplianceOwnerSummaryV1({
+    required this.ownerLabel,
+    required this.pendingCount,
+    required this.claimedCount,
+    required this.criticalOpenCount,
+    required this.overdueCount,
+    required this.oldestOpenAgeHours,
+  });
+
+  final String ownerLabel;
+  final int pendingCount;
+  final int claimedCount;
+  final int criticalOpenCount;
+  final int overdueCount;
+  final int oldestOpenAgeHours;
+
+  factory ContentComplianceOwnerSummaryV1.fromJson(Map<String, dynamic> json) {
+    return ContentComplianceOwnerSummaryV1(
+      ownerLabel: json['ownerLabel'] as String? ?? 'unclaimed',
+      pendingCount: (json['pendingCount'] as num?)?.toInt() ?? 0,
+      claimedCount: (json['claimedCount'] as num?)?.toInt() ?? 0,
+      criticalOpenCount: (json['criticalOpenCount'] as num?)?.toInt() ?? 0,
+      overdueCount: (json['overdueCount'] as num?)?.toInt() ?? 0,
+      oldestOpenAgeHours: (json['oldestOpenAgeHours'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class ContentComplianceQueueResponseV1 {
   const ContentComplianceQueueResponseV1({
     required this.summary,
     required this.sla,
     required this.workspaceSummaries,
+    required this.ownerSummaries,
     required this.items,
   });
 
   final ContentComplianceQueueSummaryV1 summary;
   final ContentComplianceQueueSlaSummaryV1 sla;
   final List<ContentComplianceWorkspaceSummaryV1> workspaceSummaries;
+  final List<ContentComplianceOwnerSummaryV1> ownerSummaries;
   final List<ContentComplianceReportItemV1> items;
 
   factory ContentComplianceQueueResponseV1.fromJson(Map<String, dynamic> json) {
@@ -199,6 +230,13 @@ class ContentComplianceQueueResponseV1 {
       workspaceSummaries: (json['workspaceSummaries'] as List? ?? const [])
           .map(
             (item) => ContentComplianceWorkspaceSummaryV1.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false),
+      ownerSummaries: (json['ownerSummaries'] as List? ?? const [])
+          .map(
+            (item) => ContentComplianceOwnerSummaryV1.fromJson(
               Map<String, dynamic>.from(item as Map),
             ),
           )
@@ -299,6 +337,8 @@ class ContentComplianceController extends ChangeNotifier {
   String? queueTargetTypeFilter;
   String? queueWorkspaceIdFilter;
   String? queueWorkspaceNameFilter;
+  String? queueClaimedByLabelFilter;
+  String? queueSlaBucketFilter;
   bool queueClaimedOnly = false;
 
   bool get queueEnabled => kInternalOpsToken.trim().isNotEmpty;
@@ -356,6 +396,8 @@ class ContentComplianceController extends ChangeNotifier {
     String? targetType,
     String? workspaceId,
     String? workspaceName,
+    String? claimedByLabel,
+    String? slaBucket,
     bool? claimedOnly,
   }) async {
     if (!queueEnabled || loadingQueue) {
@@ -370,6 +412,10 @@ class ContentComplianceController extends ChangeNotifier {
         _normalizeQueueFilter(workspaceId) ?? queueWorkspaceIdFilter;
     queueWorkspaceNameFilter =
         _normalizeQueueFilter(workspaceName) ?? queueWorkspaceNameFilter;
+    queueClaimedByLabelFilter =
+        _normalizeQueueFilter(claimedByLabel) ?? queueClaimedByLabelFilter;
+    queueSlaBucketFilter =
+        _normalizeQueueFilter(slaBucket) ?? queueSlaBucketFilter;
     queueClaimedOnly = claimedOnly ?? queueClaimedOnly;
     loadingQueue = true;
     _setError(null);
@@ -386,6 +432,10 @@ class ContentComplianceController extends ChangeNotifier {
                 'targetType': queueTargetTypeFilter!,
               if ((queueWorkspaceIdFilter ?? '').isNotEmpty)
                 'workspaceId': queueWorkspaceIdFilter!,
+              if ((queueClaimedByLabelFilter ?? '').isNotEmpty)
+                'claimedByLabel': queueClaimedByLabelFilter!,
+              if ((queueSlaBucketFilter ?? '').isNotEmpty)
+                'slaBucket': queueSlaBucketFilter!,
               if (queueClaimedOnly) 'claimedOnly': 'true',
             },
           );
@@ -474,6 +524,8 @@ class ContentComplianceController extends ChangeNotifier {
     String? targetType,
     String? workspaceId,
     String? workspaceName,
+    String? claimedByLabel,
+    String? slaBucket,
     required bool claimedOnly,
   }) async {
     queueStatusFilter = _normalizeQueueFilter(status);
@@ -481,6 +533,8 @@ class ContentComplianceController extends ChangeNotifier {
     queueTargetTypeFilter = _normalizeQueueFilter(targetType);
     queueWorkspaceIdFilter = _normalizeQueueFilter(workspaceId);
     queueWorkspaceNameFilter = _normalizeQueueFilter(workspaceName);
+    queueClaimedByLabelFilter = _normalizeQueueFilter(claimedByLabel);
+    queueSlaBucketFilter = _normalizeQueueFilter(slaBucket);
     queueClaimedOnly = claimedOnly;
     notifyListeners();
     await loadQueue(
@@ -489,6 +543,8 @@ class ContentComplianceController extends ChangeNotifier {
       targetType: queueTargetTypeFilter,
       workspaceId: queueWorkspaceIdFilter,
       workspaceName: queueWorkspaceNameFilter,
+      claimedByLabel: queueClaimedByLabelFilter,
+      slaBucket: queueSlaBucketFilter,
       claimedOnly: queueClaimedOnly,
     );
   }
@@ -499,6 +555,8 @@ class ContentComplianceController extends ChangeNotifier {
     queueTargetTypeFilter = null;
     queueWorkspaceIdFilter = null;
     queueWorkspaceNameFilter = null;
+    queueClaimedByLabelFilter = null;
+    queueSlaBucketFilter = null;
     queueClaimedOnly = false;
     notifyListeners();
     await loadQueue(
@@ -507,6 +565,8 @@ class ContentComplianceController extends ChangeNotifier {
       targetType: '',
       workspaceId: '',
       workspaceName: '',
+      claimedByLabel: '',
+      slaBucket: '',
       claimedOnly: false,
     );
   }
