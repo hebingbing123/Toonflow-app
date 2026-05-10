@@ -34,6 +34,28 @@ yarn refactor:check
 
 须 **合并后 OpenAPI 可解析**（`cargo run --bin export-openapi`，由 `scripts/refactor-check.sh` 执行）+ **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。与 CI 任务 **`refactor-monorepo`**（[`.github/workflows/ci.yml`](.github/workflows/ci.yml)，内部即 **`scripts/refactor-check.sh`**）一致；不含 Supabase 起库与旧栈 **`yarn lint`**。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
 
+### 重构门禁优化模式（2025-01 新增）
+
+为提升开发效率，`refactor-check.sh` 现支持三种模式：
+
+```bash
+# 完整检查（默认，CI 使用）- 包含所有测试
+yarn refactor:check
+
+# 快速检查 - 跳过测试，只验证格式和类型
+yarn refactor:quick
+
+# 增量检查 - 只检查修改的文件（最快）
+yarn refactor:incremental
+```
+
+**推荐使用**：
+- 开发过程中频繁验证 → `yarn refactor:incremental`（~1 分钟）
+- 提交前快速检查 → `yarn refactor:quick`（~3 分钟）
+- 提交前最终验证 / CI → `yarn refactor:check`（~8 分钟）
+
+详见 [`scripts/REFACTOR_CHECK_MODES.md`](scripts/REFACTOR_CHECK_MODES.md)。
+
 ## 为什么人类端还会觉得「每一步都要确认」？
 
 1. **Cursor 产品设置**：终端/网络等操作可能弹出「Run / Allow」——在 Cursor **Settings** 里对当前工作区开启 **自动运行 / 减少审批**（具体名称随版本变化，如 *Auto-run*、*YOLO*、*Agent* 模式），可减少每次点确认。

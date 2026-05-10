@@ -19,7 +19,9 @@
   },
   "scripts": {
     "lint": "tsc --noEmit",
-    "refactor:check": "bash scripts/refactor-check.sh"
+    "refactor:check": "bash scripts/refactor-check.sh",
+    "refactor:quick": "bash scripts/refactor-check.sh --quick",
+    "refactor:incremental": "bash scripts/refactor-check.sh --incremental"
   },
   "dependencies": {},
   "devDependencies": {
