@@ -194,6 +194,9 @@ extension _HomePageBuildProductSections on _HomePageState {
         onAccountDeleted: _handleAccountDeleted,
       ),
     if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.apiKeys)
+      ApiKeysSection(controller: _apiKeysController),
+    if (_shellNavigationController.productWorkspacePane ==
         ProductWorkspacePane.notifications)
       NotificationsSection(
         controller: _notificationsController,
@@ -407,6 +410,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
       (ProductWorkspacePane.shortVideoSpace, '短视频 Space', null),
       (ProductWorkspacePane.projects, '项目', null),
       (ProductWorkspacePane.account, '账户', null),
+      (ProductWorkspacePane.apiKeys, 'API 密钥', null),
       (ProductWorkspacePane.notifications, '通知中心', widget.unreadNotifications),
       (ProductWorkspacePane.platformStatus, '平台状态', null),
       (ProductWorkspacePane.teamWorkspaces, '团队工作区', null),
@@ -980,7 +984,20 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text('平台配置', style: Theme.of(context).textTheme.titleSmall),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                '平台配置',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            const RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: '本机客户端偏好（与各主面板标题旁 ⋯ 相同）',
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Text(
           '管理产品壳层的功能开关与运营面可见性。effective 现按 defaults <- plan override <- current workspace override <- user override 合成。',
@@ -990,16 +1007,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         Text('本机客户端偏好', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 4),
         Text(
-          '下列项仅影响当前设备上的本应用本地存储，与服务器侧平台配置无关。',
+          '下列项仅影响当前设备上的本应用本地存储，与服务器侧平台配置无关。'
+          '需要恢复删除版本、归档、导出等二次确认时，请点上方标题栏 ⋯ 菜单。',
           style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          onPressed: () {
-            unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
-          },
-          icon: const Icon(Icons.notifications_active_outlined, size: 18),
-          label: const Text('恢复高风险操作的确认提示'),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -2231,22 +2241,24 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('帮助 / 文档', style: Theme.of(context).textTheme.titleMedium),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  '帮助 / 文档',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              const RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: '本机客户端偏好（与各主面板标题旁 ⋯ 相同）',
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(
-            '本机：需要重新显示删除版本、归档、取消导出等高风险二次确认时，可使用下方按钮（与服务器配置无关）。',
+            '本机：需要重新显示删除版本、归档、取消导出等高风险二次确认时，请点标题栏 ⋯ 菜单（与服务器配置无关）。',
             style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 6),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
-              },
-              icon: const Icon(Icons.notifications_active_outlined, size: 18),
-              label: const Text('恢复高风险操作确认提示'),
-            ),
           ),
           const SizedBox(height: 8),
           Wrap(
