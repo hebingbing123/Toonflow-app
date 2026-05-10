@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 
@@ -76,7 +77,20 @@ class _AccountSectionState extends State<AccountSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('账户与隐私', style: theme.textTheme.titleMedium),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  '账户与隐私',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              const RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: '本机客户端偏好（删号、导出等「不再提示」与恢复确认）',
+              ),
+            ],
+          ),
           const SizedBox(height: 4),
           Text(
             '统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。',
