@@ -34,6 +34,7 @@ pub(crate) async fn count_completed_videos_for_member_projects(
         FROM app_video v
         INNER JOIN app_project p ON p.id = v.project_id
         WHERE v.state IN ('生成成功', '已完成', 'succeeded', 'completed')
+          AND p.archived_at IS NULL
           AND EXISTS (
             SELECT 1
             FROM app_workspace_member wm

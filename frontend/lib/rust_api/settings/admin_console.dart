@@ -87,6 +87,8 @@ enum AdminWorkspaceLifecycleActionV1 { preserve, archive, restore }
 
 enum AdminWorkspaceOpsNoteActionV1 { preserve, set, clear }
 
+enum AdminProjectLifecycleActionV1 { preserve, archive, restore }
+
 enum AdminUserWorkspaceContextActionV1 { resetToPersonal, setToWorkspace }
 
 class AdminWorkspaceSearchHitV1 {
@@ -136,6 +138,7 @@ class AdminProjectSearchHitV1 {
     required this.workspaceName,
     required this.ownerUserId,
     required this.ownerEmail,
+    required this.archivedAt,
     required this.updatedAt,
   });
 
@@ -146,6 +149,7 @@ class AdminProjectSearchHitV1 {
   final String? workspaceName;
   final String ownerUserId;
   final String? ownerEmail;
+  final String? archivedAt;
   final String? updatedAt;
 
   factory AdminProjectSearchHitV1.fromJson(Map<String, dynamic> json) {
@@ -157,6 +161,7 @@ class AdminProjectSearchHitV1 {
       workspaceName: json['workspaceName'] as String?,
       ownerUserId: json['ownerUserId'] as String? ?? '',
       ownerEmail: json['ownerEmail'] as String?,
+      archivedAt: json['archivedAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
     );
   }
@@ -509,6 +514,38 @@ class AdminWorkspaceDetailResponseV1 {
   }
 }
 
+class AdminProjectGovernanceAuditSummaryV1 {
+  const AdminProjectGovernanceAuditSummaryV1({
+    required this.auditId,
+    required this.actorLabel,
+    required this.createdAt,
+    required this.previousState,
+    required this.nextState,
+  });
+
+  final String auditId;
+  final String actorLabel;
+  final String createdAt;
+  final Map<String, dynamic> previousState;
+  final Map<String, dynamic> nextState;
+
+  factory AdminProjectGovernanceAuditSummaryV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return AdminProjectGovernanceAuditSummaryV1(
+      auditId: json['auditId'] as String? ?? '',
+      actorLabel: json['actorLabel'] as String? ?? 'internal_ops',
+      createdAt: json['createdAt'] as String? ?? '',
+      previousState: Map<String, dynamic>.from(
+        json['previousState'] as Map? ?? const {},
+      ),
+      nextState: Map<String, dynamic>.from(
+        json['nextState'] as Map? ?? const {},
+      ),
+    );
+  }
+}
+
 class AdminProjectDetailResponseV1 {
   const AdminProjectDetailResponseV1({
     required this.projectId,
@@ -517,6 +554,8 @@ class AdminProjectDetailResponseV1 {
     required this.ownerUserId,
     required this.ownerEmail,
     required this.workspace,
+    required this.archivedAt,
+    required this.opsNote,
     required this.createdAt,
     required this.updatedAt,
     required this.scriptCount,
@@ -524,6 +563,7 @@ class AdminProjectDetailResponseV1 {
     required this.jobCount,
     required this.activeJobCount,
     required this.recentJobs,
+    required this.governanceAudit,
   });
 
   final String projectId;
@@ -532,6 +572,8 @@ class AdminProjectDetailResponseV1 {
   final String ownerUserId;
   final String? ownerEmail;
   final AdminWorkspaceRefV1? workspace;
+  final String? archivedAt;
+  final String? opsNote;
   final String? createdAt;
   final String? updatedAt;
   final int scriptCount;
@@ -539,6 +581,7 @@ class AdminProjectDetailResponseV1 {
   final int jobCount;
   final int activeJobCount;
   final List<AdminJobSummaryV1> recentJobs;
+  final List<AdminProjectGovernanceAuditSummaryV1> governanceAudit;
 
   factory AdminProjectDetailResponseV1.fromJson(Map<String, dynamic> json) {
     return AdminProjectDetailResponseV1(
@@ -552,6 +595,8 @@ class AdminProjectDetailResponseV1 {
               Map<String, dynamic>.from(json['workspace'] as Map),
             )
           : null,
+      archivedAt: json['archivedAt'] as String?,
+      opsNote: json['opsNote'] as String?,
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
       scriptCount: (json['scriptCount'] as num?)?.toInt() ?? 0,
@@ -561,6 +606,10 @@ class AdminProjectDetailResponseV1 {
       recentJobs: _listOf(
         json['recentJobs'],
         (item) => AdminJobSummaryV1.fromJson(item),
+      ),
+      governanceAudit: _listOf(
+        json['governanceAudit'],
+        (item) => AdminProjectGovernanceAuditSummaryV1.fromJson(item),
       ),
     );
   }
@@ -755,6 +804,47 @@ Future<AdminWorkspaceDetailResponseV1> updateAdminWorkspaceGovernanceV1(
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return AdminWorkspaceDetailResponseV1.fromJson(
+    jsonDecode(res.body) as Map<String, dynamic>,
+  );
+}
+
+Future<AdminProjectDetailResponseV1> updateAdminProjectGovernanceV1(
+  String internalOpsToken, {
+  required String projectId,
+  required AdminProjectLifecycleActionV1 projectLifecycle,
+  required AdminWorkspaceOpsNoteActionV1 opsNoteAction,
+  String? opsNote,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/internal/admin/projects/$projectId/governance',
+  );
+  final body = <String, dynamic>{
+    'projectLifecycle': switch (projectLifecycle) {
+      AdminProjectLifecycleActionV1.preserve => 'preserve',
+      AdminProjectLifecycleActionV1.archive => 'archive',
+      AdminProjectLifecycleActionV1.restore => 'restore',
+    },
+    'opsNoteAction': switch (opsNoteAction) {
+      AdminWorkspaceOpsNoteActionV1.preserve => 'preserve',
+      AdminWorkspaceOpsNoteActionV1.set => 'set',
+      AdminWorkspaceOpsNoteActionV1.clear => 'clear',
+    },
+  };
+  if (opsNote != null) {
+    body['opsNote'] = opsNote;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          ..._internalHeaders(internalOpsToken),
+          'content-type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  return AdminProjectDetailResponseV1.fromJson(
     jsonDecode(res.body) as Map<String, dynamic>,
   );
 }

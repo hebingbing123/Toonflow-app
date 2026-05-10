@@ -1,3 +1,5 @@
+use chrono::{DateTime, Utc};
+
 use crate::http_kit::json_patch::FieldPatch;
 use crate::{error::ApiError, state::AppState};
 use uuid::Uuid;
@@ -148,13 +150,20 @@ async fn load_project_access_scope(
     project_id: Uuid,
 ) -> Result<ProjectAccessScope, ApiError> {
     let pool = state.require_pool()?;
-    let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM app_project WHERE id = $1)")
-        .bind(project_id)
-        .fetch_one(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    if !exists {
-        return Err(ApiError::NotFound);
+    let project_archived_at: Option<Option<DateTime<Utc>>> =
+        sqlx::query_scalar("SELECT archived_at FROM public.app_project WHERE id = $1")
+            .bind(project_id)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    match project_archived_at {
+        None => return Err(ApiError::NotFound),
+        Some(Some(_)) => {
+            return Err(ApiError::Forbidden(
+                "project has been archived by platform operators".into(),
+            ));
+        }
+        Some(None) => {}
     }
 
     let row: Option<ProjectAccessRow> = sqlx::query_as(

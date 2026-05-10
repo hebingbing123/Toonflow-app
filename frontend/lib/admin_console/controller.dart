@@ -309,6 +309,71 @@ class AdminConsoleController extends ChangeNotifier {
     }
   }
 
+  Future<void> updateProjectGovernance({
+    required String projectId,
+    required AdminProjectLifecycleActionV1 projectLifecycle,
+    required AdminWorkspaceOpsNoteActionV1 opsNoteAction,
+    String? opsNote,
+  }) async {
+    if (!enabled || savingGovernance) {
+      return;
+    }
+    final trimmed = opsNote?.trim();
+    if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
+        (trimmed == null || trimmed.isEmpty)) {
+      _setError('设置内部备注时必须填写内容');
+      notifyListeners();
+      return;
+    }
+    savingGovernance = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      projectDetail = await updateAdminProjectGovernanceV1(
+        _internalOpsToken,
+        projectId: projectId,
+        projectLifecycle: projectLifecycle,
+        opsNoteAction: opsNoteAction,
+        opsNote: opsNoteAction == AdminWorkspaceOpsNoteActionV1.set
+            ? trimmed
+            : null,
+      );
+      final current = searchResult;
+      if (current != null) {
+        searchResult = AdminSearchResponseV1(
+          query: current.query,
+          users: current.users,
+          workspaces: current.workspaces,
+          projects: current.projects
+              .map(
+                (item) => item.projectId == projectId
+                    ? AdminProjectSearchHitV1(
+                        projectId: item.projectId,
+                        numericId: item.numericId,
+                        name: item.name,
+                        workspaceId: item.workspaceId,
+                        workspaceName: item.workspaceName,
+                        ownerUserId: item.ownerUserId,
+                        ownerEmail: item.ownerEmail,
+                        archivedAt: projectDetail!.archivedAt,
+                        updatedAt: item.updatedAt,
+                      )
+                    : item,
+              )
+              .toList(growable: false),
+          jobs: current.jobs,
+        );
+      }
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } catch (error) {
+      _setError('$error');
+    } finally {
+      savingGovernance = false;
+      notifyListeners();
+    }
+  }
+
   void clearDetail() {
     selectedKind = null;
     selectedId = null;

@@ -10,9 +10,10 @@ use crate::state::AppState;
 
 use super::storage;
 use super::types::{
-    AdminProjectDetailResponse, AdminSearchQuery, AdminSearchResponse, AdminUserDetailResponse,
-    AdminUserGovernanceUpdateBody, AdminUserWorkspaceContextUpdateBody,
-    AdminWorkspaceDetailResponse, AdminWorkspaceGovernanceUpdateBody,
+    AdminProjectDetailResponse, AdminProjectGovernanceUpdateBody, AdminSearchQuery,
+    AdminSearchResponse, AdminUserDetailResponse, AdminUserGovernanceUpdateBody,
+    AdminUserWorkspaceContextUpdateBody, AdminWorkspaceDetailResponse,
+    AdminWorkspaceGovernanceUpdateBody,
 };
 
 fn internal_ops_token_expected() -> Option<String> {
@@ -198,6 +199,36 @@ pub(crate) async fn post_admin_workspace_governance(
 ) -> Result<Json<AdminWorkspaceDetailResponse>, ApiError> {
     require_internal_ops_token(&headers)?;
     let response = storage::update_admin_workspace_governance(&state, workspace_id, body).await?;
+    Ok(Json(response))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/internal/admin/projects/{project_id}/governance",
+    operation_id = "postInternalAdminProjectGovernanceV1",
+    tag = "settings",
+    params(("project_id" = Uuid, Path, description = "Project UUID")),
+    request_body(
+        content = AdminProjectGovernanceUpdateBody,
+        content_type = "application/json"
+    ),
+    responses(
+        (status = 200, description = "OK", body = AdminProjectDetailResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn post_admin_project_governance(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(project_id): Path<Uuid>,
+    Json(body): Json<AdminProjectGovernanceUpdateBody>,
+) -> Result<Json<AdminProjectDetailResponse>, ApiError> {
+    require_internal_ops_token(&headers)?;
+    let response = storage::update_admin_project_governance(&state, project_id, body).await?;
     Ok(Json(response))
 }
 

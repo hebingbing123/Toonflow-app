@@ -9,13 +9,14 @@ use crate::workspaces::ensure_personal_workspace;
 
 use super::types::{
     AdminJobSearchHit, AdminJobSummary, AdminOperationalStatusDto, AdminProjectDetailResponse,
-    AdminProjectSearchHit, AdminProjectSummary, AdminQuotaOverrideActionDto, AdminSearchResponse,
-    AdminUserDetailResponse, AdminUserGovernanceAuditSummary, AdminUserGovernanceUpdateBody,
-    AdminUserMembershipSummary, AdminUserSearchHit, AdminUserWorkspaceContextActionDto,
-    AdminUserWorkspaceContextUpdateBody, AdminWorkspaceDetailResponse,
-    AdminWorkspaceGovernanceAuditSummary, AdminWorkspaceGovernanceUpdateBody,
-    AdminWorkspaceLifecycleActionDto, AdminWorkspaceMemberSummary, AdminWorkspaceOpsNoteActionDto,
-    AdminWorkspaceRef, AdminWorkspaceSearchHit,
+    AdminProjectGovernanceAuditSummary, AdminProjectGovernanceUpdateBody, AdminProjectSearchHit,
+    AdminProjectSummary, AdminQuotaOverrideActionDto, AdminSearchResponse, AdminUserDetailResponse,
+    AdminUserGovernanceAuditSummary, AdminUserGovernanceUpdateBody, AdminUserMembershipSummary,
+    AdminUserSearchHit, AdminUserWorkspaceContextActionDto, AdminUserWorkspaceContextUpdateBody,
+    AdminWorkspaceDetailResponse, AdminWorkspaceGovernanceAuditSummary,
+    AdminWorkspaceGovernanceUpdateBody, AdminWorkspaceLifecycleActionDto,
+    AdminWorkspaceMemberSummary, AdminWorkspaceOpsNoteActionDto, AdminWorkspaceRef,
+    AdminWorkspaceSearchHit,
 };
 
 #[derive(Debug, FromRow)]
@@ -52,6 +53,7 @@ struct ProjectSearchRow {
     workspace_name: Option<String>,
     owner_user_id: Uuid,
     owner_email: Option<String>,
+    archived_at: Option<DateTime<Utc>>,
     updated_at: Option<DateTime<Utc>>,
 }
 
@@ -158,12 +160,20 @@ struct ProjectDetailRow {
     workspace_name: Option<String>,
     workspace_type: Option<String>,
     workspace_archived_at: Option<DateTime<Utc>>,
+    project_archived_at: Option<DateTime<Utc>>,
+    ops_note: Option<String>,
     created_at: Option<DateTime<Utc>>,
     updated_at: Option<DateTime<Utc>>,
     script_count: i64,
     asset_count: i64,
     job_count: i64,
     active_job_count: i64,
+}
+
+#[derive(Debug, FromRow)]
+struct ProjectGovernanceCurrentRow {
+    archived_at: Option<DateTime<Utc>>,
+    metadata: serde_json::Value,
 }
 
 fn search_pattern(query: &str) -> String {
@@ -201,7 +211,7 @@ fn internal_ops_note_from_metadata(metadata: &serde_json::Value) -> Option<Strin
         .filter(|s| !s.is_empty())
 }
 
-fn apply_workspace_ops_note_to_metadata(
+fn apply_internal_ops_note_to_metadata(
     mut metadata: serde_json::Value,
     next_note: Option<&str>,
 ) -> serde_json::Value {
@@ -403,6 +413,7 @@ pub async fn search_admin_console(
           w.name AS workspace_name,
           p.owner_user_id,
           owner.email AS owner_email,
+          p.archived_at,
           p.update_time AS updated_at
         FROM public.app_project p
         LEFT JOIN public.app_workspace w ON w.id = p.workspace_id
@@ -430,6 +441,7 @@ pub async fn search_admin_console(
         workspace_name: row.workspace_name,
         owner_user_id: row.owner_user_id,
         owner_email: row.owner_email,
+        archived_at: row.archived_at,
         updated_at: row.updated_at,
     })
     .collect();
@@ -949,7 +961,7 @@ pub async fn update_admin_workspace_governance(
     }
 
     let next_metadata = if meta_changed {
-        apply_workspace_ops_note_to_metadata(cur.metadata.clone(), next_ops.as_deref())
+        apply_internal_ops_note_to_metadata(cur.metadata.clone(), next_ops.as_deref())
     } else {
         cur.metadata.clone()
     };
@@ -1016,6 +1028,11 @@ pub async fn get_admin_project_detail(
           w.name AS workspace_name,
           w.workspace_type,
           w.archived_at AS workspace_archived_at,
+          p.archived_at AS project_archived_at,
+          NULLIF(
+            BTRIM(COALESCE(p.metadata->'internalOps'->>'opsNote', '')),
+            ''
+          ) AS ops_note,
           TO_TIMESTAMP(NULLIF(p.create_time_ms, 0) / 1000.0) AT TIME ZONE 'UTC' AS created_at,
           p.update_time AS updated_at,
           (
@@ -1099,6 +1116,34 @@ pub async fn get_admin_project_detail(
     .map(map_job)
     .collect();
 
+    let governance_audit = sqlx::query_as::<_, GovernanceAuditRow>(
+        r#"
+        SELECT
+          id AS audit_id,
+          actor_label,
+          created_at,
+          previous_state,
+          next_state
+        FROM public.app_project_governance_audit
+        WHERE project_id = $1
+        ORDER BY created_at DESC
+        LIMIT 10
+        "#,
+    )
+    .bind(project_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .into_iter()
+    .map(|audit| AdminProjectGovernanceAuditSummary {
+        audit_id: audit.audit_id,
+        actor_label: audit.actor_label,
+        created_at: audit.created_at,
+        previous_state: audit.previous_state,
+        next_state: audit.next_state,
+    })
+    .collect();
+
     Ok(AdminProjectDetailResponse {
         project_id: row.project_id,
         numeric_id: row.numeric_id,
@@ -1113,6 +1158,8 @@ pub async fn get_admin_project_detail(
             workspace_type: row.workspace_type.unwrap_or_else(|| "unknown".into()),
             archived_at: row.workspace_archived_at,
         }),
+        archived_at: row.project_archived_at,
+        ops_note: row.ops_note,
         created_at: row.created_at,
         updated_at: row.updated_at,
         script_count: row.script_count,
@@ -1120,7 +1167,118 @@ pub async fn get_admin_project_detail(
         job_count: row.job_count,
         active_job_count: row.active_job_count,
         recent_jobs,
+        governance_audit,
     })
+}
+
+pub async fn update_admin_project_governance(
+    state: &AppState,
+    project_id: Uuid,
+    body: AdminProjectGovernanceUpdateBody,
+) -> Result<AdminProjectDetailResponse, ApiError> {
+    let pool = state.require_pool()?;
+
+    let cur = sqlx::query_as::<_, ProjectGovernanceCurrentRow>(
+        r#"
+        SELECT archived_at, metadata
+        FROM public.app_project
+        WHERE id = $1
+        "#,
+    )
+    .bind(project_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let next_archived = match body.project_lifecycle {
+        AdminWorkspaceLifecycleActionDto::Preserve => cur.archived_at,
+        AdminWorkspaceLifecycleActionDto::Archive => match cur.archived_at {
+            Some(ts) => Some(ts),
+            None => Some(Utc::now()),
+        },
+        AdminWorkspaceLifecycleActionDto::Restore => None,
+    };
+
+    let current_ops = internal_ops_note_from_metadata(&cur.metadata);
+
+    let next_ops: Option<String> = match body.ops_note_action {
+        AdminWorkspaceOpsNoteActionDto::Preserve => current_ops.clone(),
+        AdminWorkspaceOpsNoteActionDto::Clear => None,
+        AdminWorkspaceOpsNoteActionDto::Set => {
+            let normalized = normalize_optional_text(body.ops_note.clone());
+            if normalized.is_none() {
+                return Err(ApiError::BadRequest(
+                    "opsNote is required when opsNoteAction is set".into(),
+                ));
+            }
+            normalized
+        }
+    };
+
+    let meta_changed = match body.ops_note_action {
+        AdminWorkspaceOpsNoteActionDto::Preserve => false,
+        AdminWorkspaceOpsNoteActionDto::Clear => current_ops.is_some(),
+        AdminWorkspaceOpsNoteActionDto::Set => next_ops != current_ops,
+    };
+
+    let archived_changed = next_archived != cur.archived_at;
+
+    if !meta_changed && !archived_changed {
+        return Err(ApiError::BadRequest(
+            "no governance changes requested".into(),
+        ));
+    }
+
+    let next_metadata = if meta_changed {
+        apply_internal_ops_note_to_metadata(cur.metadata.clone(), next_ops.as_deref())
+    } else {
+        cur.metadata.clone()
+    };
+
+    sqlx::query(
+        r#"
+        UPDATE public.app_project
+        SET
+          archived_at = $1,
+          metadata = $2,
+          updated_at = NOW()
+        WHERE id = $3
+        "#,
+    )
+    .bind(next_archived)
+    .bind(next_metadata)
+    .bind(project_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_project_governance_audit (
+          project_id,
+          event_type,
+          actor_label,
+          previous_state,
+          next_state
+        )
+        VALUES ($1, 'governance_updated', 'internal_ops', $2, $3)
+        "#,
+    )
+    .bind(project_id)
+    .bind(json!({
+        "archivedAt": cur.archived_at,
+        "opsNote": current_ops,
+    }))
+    .bind(json!({
+        "archivedAt": next_archived,
+        "opsNote": next_ops,
+    }))
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    get_admin_project_detail(state, project_id).await
 }
 
 pub async fn update_admin_user_governance(

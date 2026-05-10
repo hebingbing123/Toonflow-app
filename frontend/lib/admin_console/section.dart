@@ -18,13 +18,19 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   final _opsNoteController = TextEditingController();
   final _dailyQuotaController = TextEditingController();
   final _workspaceOpsNoteController = TextEditingController();
+  final _projectOpsNoteController = TextEditingController();
   String? _governanceDraftFingerprint;
   String? _workspaceGovernanceDraftFingerprint;
+  String? _projectGovernanceDraftFingerprint;
   AdminOperationalStatusV1 _operationalStatus = AdminOperationalStatusV1.active;
   AdminQuotaOverrideActionV1 _quotaAction = AdminQuotaOverrideActionV1.preserve;
   AdminWorkspaceLifecycleActionV1 _workspaceLifecycle =
       AdminWorkspaceLifecycleActionV1.preserve;
   AdminWorkspaceOpsNoteActionV1 _workspaceOpsNoteAction =
+      AdminWorkspaceOpsNoteActionV1.preserve;
+  AdminProjectLifecycleActionV1 _projectLifecycle =
+      AdminProjectLifecycleActionV1.preserve;
+  AdminWorkspaceOpsNoteActionV1 _projectOpsNoteAction =
       AdminWorkspaceOpsNoteActionV1.preserve;
 
   @override
@@ -50,6 +56,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     _opsNoteController.dispose();
     _dailyQuotaController.dispose();
     _workspaceOpsNoteController.dispose();
+    _projectOpsNoteController.dispose();
     super.dispose();
   }
 
@@ -85,6 +92,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             : AdminQuotaOverrideActionV1.set;
       }
       _workspaceGovernanceDraftFingerprint = null;
+      _projectGovernanceDraftFingerprint = null;
       return;
     }
     _governanceDraftFingerprint = null;
@@ -104,9 +112,28 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         _workspaceLifecycle = AdminWorkspaceLifecycleActionV1.preserve;
         _workspaceOpsNoteAction = AdminWorkspaceOpsNoteActionV1.preserve;
       }
+      _projectGovernanceDraftFingerprint = null;
       return;
     }
     _workspaceGovernanceDraftFingerprint = null;
+
+    final projectDetail = widget.controller.projectDetail;
+    if (projectDetail != null) {
+      final fingerprint = [
+        projectDetail.projectId,
+        projectDetail.archivedAt ?? '',
+        projectDetail.opsNote ?? '',
+        projectDetail.governanceAudit.length.toString(),
+      ].join('|');
+      if (fingerprint != _projectGovernanceDraftFingerprint) {
+        _projectGovernanceDraftFingerprint = fingerprint;
+        _projectOpsNoteController.text = projectDetail.opsNote ?? '';
+        _projectLifecycle = AdminProjectLifecycleActionV1.preserve;
+        _projectOpsNoteAction = AdminWorkspaceOpsNoteActionV1.preserve;
+      }
+      return;
+    }
+    _projectGovernanceDraftFingerprint = null;
   }
 
   bool get _statusRequiresReason =>
@@ -127,7 +154,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           Text('管理台', style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(
-            '内部治理面。统一检索用户、workspace、project、job；支持用户治理与 workspace 上下文修复，以及企业 workspace 归档/解档与内部备注。',
+            '内部治理面。统一检索用户、workspace、project、job；支持用户治理与 workspace 上下文修复，以及 workspace / project 归档与内部备注。',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -309,7 +336,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             : '#${item.numericId}',
       ),
       subtitle: Text(
-        '#${item.numericId} · ${item.workspaceName ?? 'no workspace'} · ${item.ownerEmail ?? item.ownerUserId}',
+        '#${item.numericId} · ${item.workspaceName ?? 'no workspace'} · ${item.ownerEmail ?? item.ownerUserId}'
+        '${item.archivedAt == null ? '' : ' · archived'}',
         style: theme.textTheme.bodySmall,
       ),
       trailing: const Icon(Icons.chevron_right),
@@ -841,6 +869,138 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     );
   }
 
+  bool get _projectOpsNoteRequiresValue =>
+      _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set;
+
+  Widget _buildProjectGovernancePanel(
+    BuildContext context,
+    AdminProjectDetailResponseV1 detail,
+  ) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Project 治理', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          '归档后该项目从成员列表与汇总统计中隐藏，且所有需 project scope 的 API 返回 403；解档恢复。内部备注写入 metadata.internalOps。',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              label: const Text('不动归档状态'),
+              selected:
+                  _projectLifecycle == AdminProjectLifecycleActionV1.preserve,
+              onSelected: (_) {
+                setState(() {
+                  _projectLifecycle = AdminProjectLifecycleActionV1.preserve;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('归档'),
+              selected:
+                  _projectLifecycle == AdminProjectLifecycleActionV1.archive,
+              onSelected: (_) {
+                setState(() {
+                  _projectLifecycle = AdminProjectLifecycleActionV1.archive;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('解档'),
+              selected:
+                  _projectLifecycle == AdminProjectLifecycleActionV1.restore,
+              onSelected: (_) {
+                setState(() {
+                  _projectLifecycle = AdminProjectLifecycleActionV1.restore;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text('内部备注', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              label: const Text('不变'),
+              selected:
+                  _projectOpsNoteAction ==
+                  AdminWorkspaceOpsNoteActionV1.preserve,
+              onSelected: (_) {
+                setState(() {
+                  _projectOpsNoteAction =
+                      AdminWorkspaceOpsNoteActionV1.preserve;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('清除'),
+              selected:
+                  _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.clear,
+              onSelected: (_) {
+                setState(() {
+                  _projectOpsNoteAction = AdminWorkspaceOpsNoteActionV1.clear;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('写入/更新'),
+              selected:
+                  _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set,
+              onSelected: (_) {
+                setState(() {
+                  _projectOpsNoteAction = AdminWorkspaceOpsNoteActionV1.set;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _projectOpsNoteController,
+          enabled: _projectOpsNoteRequiresValue,
+          maxLines: 3,
+          decoration: InputDecoration(
+            labelText: '内部备注正文',
+            hintText: _projectOpsNoteRequiresValue
+                ? '仅在选择「写入/更新」时提交'
+                : '选择「写入/更新」后可编辑',
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.tonalIcon(
+          onPressed: widget.controller.savingGovernance
+              ? null
+              : () => widget.controller.updateProjectGovernance(
+                  projectId: detail.projectId,
+                  projectLifecycle: _projectLifecycle,
+                  opsNoteAction: _projectOpsNoteAction,
+                  opsNote: _projectOpsNoteController.text,
+                ),
+          icon: widget.controller.savingGovernance
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.folder_special_outlined),
+          label: Text(widget.controller.savingGovernance ? '保存中…' : '保存治理'),
+        ),
+      ],
+    );
+  }
+
   Widget _buildProjectDetail(
     BuildContext context,
     AdminProjectDetailResponseV1 detail,
@@ -855,15 +1015,23 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         'asset ${detail.assetCount}',
         'job ${detail.jobCount}',
         'active job ${detail.activeJobCount}',
+        if (detail.archivedAt != null) 'archived',
       ],
       sections: [
         _kvWrap({
           'projectId': detail.projectId,
           'owner': detail.ownerEmail ?? detail.ownerUserId,
           'workspace': detail.workspace?.name ?? '-',
+          'projectArchivedAt': detail.archivedAt == null
+              ? '-'
+              : _fmt(detail.archivedAt!),
+          'opsNote': detail.opsNote == null || detail.opsNote!.trim().isEmpty
+              ? '-'
+              : detail.opsNote!,
           'createdAt': detail.createdAt == null ? '-' : _fmt(detail.createdAt!),
           'updatedAt': detail.updatedAt == null ? '-' : _fmt(detail.updatedAt!),
         }),
+        _buildProjectGovernancePanel(context, detail),
         _subList(
           context,
           title: '最近作业',
@@ -871,6 +1039,16 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               .map(
                 (job) =>
                     '${job.kind} · ${job.status} · ${job.ownerEmail ?? job.ownerUserId} · ${_fmt(job.createdAt)}',
+              )
+              .toList(growable: false),
+        ),
+        _subList(
+          context,
+          title: '治理审计',
+          items: detail.governanceAudit
+              .map(
+                (item) =>
+                    '${_fmt(item.createdAt)} · ${item.actorLabel} · ${_projectAuditSummary(item)}',
               )
               .toList(growable: false),
         ),
@@ -960,6 +1138,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   String _workspaceAuditSummary(AdminWorkspaceGovernanceAuditSummaryV1 item) {
+    final nextArchived = item.nextState['archivedAt'];
+    final nextNote = item.nextState['opsNote'];
+    return 'archivedAt=$nextArchived · opsNote=${nextNote ?? 'null'}';
+  }
+
+  String _projectAuditSummary(AdminProjectGovernanceAuditSummaryV1 item) {
     final nextArchived = item.nextState['archivedAt'];
     final nextNote = item.nextState['opsNote'];
     return 'archivedAt=$nextArchived · opsNote=${nextNote ?? 'null'}';

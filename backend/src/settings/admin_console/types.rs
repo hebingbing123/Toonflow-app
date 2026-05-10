@@ -58,6 +58,7 @@ pub struct AdminProjectSearchHit {
     pub workspace_name: Option<String>,
     pub owner_user_id: Uuid,
     pub owner_email: Option<String>,
+    pub archived_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -191,6 +192,16 @@ pub struct AdminWorkspaceDetailResponse {
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
+pub struct AdminProjectGovernanceAuditSummary {
+    pub audit_id: Uuid,
+    pub actor_label: String,
+    pub created_at: DateTime<Utc>,
+    pub previous_state: serde_json::Value,
+    pub next_state: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct AdminProjectDetailResponse {
     pub project_id: Uuid,
     pub numeric_id: i32,
@@ -198,6 +209,8 @@ pub struct AdminProjectDetailResponse {
     pub owner_user_id: Uuid,
     pub owner_email: Option<String>,
     pub workspace: Option<AdminWorkspaceRef>,
+    pub archived_at: Option<DateTime<Utc>>,
+    pub ops_note: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,
     pub script_count: i64,
@@ -205,6 +218,7 @@ pub struct AdminProjectDetailResponse {
     pub job_count: i64,
     pub active_job_count: i64,
     pub recent_jobs: Vec<AdminJobSummary>,
+    pub governance_audit: Vec<AdminProjectGovernanceAuditSummary>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema, PartialEq, Eq)]
@@ -276,6 +290,20 @@ pub struct AdminWorkspaceGovernanceUpdateBody {
     pub workspace_lifecycle: AdminWorkspaceLifecycleActionDto,
     #[serde(default)]
     pub ops_note_action: AdminWorkspaceOpsNoteActionDto,
+    #[serde(default)]
+    pub ops_note: Option<String>,
+}
+
+pub type AdminProjectLifecycleActionDto = AdminWorkspaceLifecycleActionDto;
+pub type AdminProjectOpsNoteActionDto = AdminWorkspaceOpsNoteActionDto;
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdminProjectGovernanceUpdateBody {
+    #[serde(default)]
+    pub project_lifecycle: AdminProjectLifecycleActionDto,
+    #[serde(default)]
+    pub ops_note_action: AdminProjectOpsNoteActionDto,
     #[serde(default)]
     pub ops_note: Option<String>,
 }

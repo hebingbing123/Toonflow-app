@@ -107,6 +107,7 @@ pub(crate) async fn list_projects(
                END AS project_access_role
         FROM app_project
         WHERE workspace_id = $1
+          AND app_project.archived_at IS NULL
           AND (
             owner_user_id = $2
             OR EXISTS (
