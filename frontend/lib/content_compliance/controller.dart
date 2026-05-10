@@ -317,6 +317,31 @@ class ContentComplianceBatchMutateResponseV1 {
   }
 }
 
+class ContentComplianceReassignResponseV1 {
+  const ContentComplianceReassignResponseV1({
+    required this.requestedCount,
+    required this.succeededCount,
+    required this.failedCount,
+    required this.assigneeLabel,
+  });
+
+  final int requestedCount;
+  final int succeededCount;
+  final int failedCount;
+  final String assigneeLabel;
+
+  factory ContentComplianceReassignResponseV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentComplianceReassignResponseV1(
+      requestedCount: (json['requestedCount'] as num?)?.toInt() ?? 0,
+      succeededCount: (json['succeededCount'] as num?)?.toInt() ?? 0,
+      failedCount: (json['failedCount'] as num?)?.toInt() ?? 0,
+      assigneeLabel: json['assigneeLabel'] as String? ?? '',
+    );
+  }
+}
+
 class ContentComplianceController extends ChangeNotifier {
   ContentComplianceController({
     required ContentComplianceAccessTokenProvider accessTokenProvider,
@@ -606,6 +631,60 @@ class ContentComplianceController extends ChangeNotifier {
           .timeout(const Duration(seconds: 20));
       ensureHttpSuccess(res);
       final response = ContentComplianceBatchMutateResponseV1.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+      await loadQueue();
+      return response;
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+      return null;
+    } catch (error) {
+      _setError('$error');
+      return null;
+    } finally {
+      mutatingQueue = false;
+      notifyListeners();
+    }
+  }
+
+  Future<ContentComplianceReassignResponseV1?> reassignReports({
+    required List<String> reportIds,
+    required String assigneeLabel,
+    String actorLabel = 'internal_ops',
+    String? note,
+  }) async {
+    if (!queueEnabled || mutatingQueue || reportIds.isEmpty) {
+      return null;
+    }
+    final trimmedAssignee = assigneeLabel.trim();
+    if (trimmedAssignee.isEmpty) {
+      _setError('改派 reviewer 不能为空');
+      notifyListeners();
+      return null;
+    }
+    mutatingQueue = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      final res = await http
+          .post(
+            Uri.parse(
+              '$kApiBaseUrl/api/v1/internal/compliance/reports/reassign',
+            ),
+            headers: {
+              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'content-type': 'application/json',
+            },
+            body: jsonEncode(<String, dynamic>{
+              'reportIds': reportIds,
+              'assigneeLabel': trimmedAssignee,
+              'actorLabel': actorLabel,
+              if ((note ?? '').trim().isNotEmpty) 'note': note!.trim(),
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+      ensureHttpSuccess(res);
+      final response = ContentComplianceReassignResponseV1.fromJson(
         jsonDecode(res.body) as Map<String, dynamic>,
       );
       await loadQueue();

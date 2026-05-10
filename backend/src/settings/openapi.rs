@@ -17,6 +17,7 @@ use utoipa::OpenApi;
     crate::settings::content_compliance::claim_content_report,
     crate::settings::content_compliance::resolve_content_report,
     crate::settings::content_compliance::batch_mutate_content_reports,
+    crate::settings::content_compliance::reassign_content_reports,
     crate::settings::admin_console::get_admin_search,
     crate::settings::admin_console::get_admin_user_detail,
     crate::settings::admin_console::post_admin_user_governance,

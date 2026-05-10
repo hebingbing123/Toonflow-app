@@ -130,10 +130,8 @@ pub struct ListContentComplianceReportsQuery {
     #[serde(default)]
     claimed_only: Option<bool>,
     #[serde(default)]
-    #[allow(dead_code)] // TODO: Implement claimed_by_label filter
     claimed_by_label: Option<String>,
     #[serde(default)]
-    #[allow(dead_code)] // TODO: Implement sla_bucket filter
     sla_bucket: Option<String>,
     #[serde(default)]
     workspace_id: Option<Uuid>,
@@ -152,6 +150,17 @@ pub struct BatchMutateContentReportsBody {
     resolution_note: Option<String>,
     #[serde(default)]
     disposition: Option<ContentReportDisposition>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ReassignContentReportsBody {
+    report_ids: Vec<Uuid>,
+    assignee_label: String,
+    #[serde(default)]
+    actor_label: Option<String>,
+    #[serde(default)]
+    note: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, IntoParams, ToSchema)]
@@ -322,6 +331,16 @@ pub struct BatchMutateContentReportsResponse {
     results: Vec<BatchMutateContentReportsResultItem>,
 }
 
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ReassignContentReportsResponse {
+    requested_count: i64,
+    succeeded_count: i64,
+    failed_count: i64,
+    assignee_label: String,
+    results: Vec<BatchMutateContentReportsResultItem>,
+}
+
 #[derive(Debug, FromRow)]
 struct SummaryRow {
     pending: i64,
@@ -375,7 +394,6 @@ fn normalize_optional_text(raw: Option<String>) -> Option<String> {
         .filter(|value| !value.is_empty())
 }
 
-#[allow(dead_code)] // TODO: Use this function when implementing claimed_by_label/sla_bucket filters
 fn normalize_optional_filter(raw: Option<&str>) -> Option<String> {
     raw.map(str::trim)
         .filter(|value| !value.is_empty())
@@ -1634,6 +1652,131 @@ pub(crate) async fn batch_mutate_content_reports(
     }))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/internal/compliance/reports/reassign",
+    operation_id = "postInternalContentComplianceReassignV1",
+    tag = "settings",
+    request_body(content = ReassignContentReportsBody, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = ReassignContentReportsResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn reassign_content_reports(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<ReassignContentReportsBody>,
+) -> Result<Json<ReassignContentReportsResponse>, ApiError> {
+    require_internal_ops_token(&headers)?;
+    if body.report_ids.is_empty() {
+        return Err(ApiError::BadRequest("reportIds must not be empty".into()));
+    }
+    if body.report_ids.len() > 100 {
+        return Err(ApiError::BadRequest(
+            "reportIds exceeds the maximum batch size of 100".into(),
+        ));
+    }
+    let assignee_label = body.assignee_label.trim().to_string();
+    if assignee_label.is_empty() {
+        return Err(ApiError::BadRequest(
+            "assigneeLabel must not be empty".into(),
+        ));
+    }
+    let actor_label = normalize_actor_label(body.actor_label);
+    let note = normalize_optional_text(body.note);
+    let pool = state.require_pool()?;
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let mut results = Vec::with_capacity(body.report_ids.len());
+
+    for report_id in &body.report_ids {
+        let Some(current) =
+            fetch_content_compliance_report_for_update(&mut *tx, *report_id).await?
+        else {
+            results.push(BatchMutateContentReportsResultItem {
+                report_id: *report_id,
+                ok: false,
+                action: "reassign".into(),
+                status: None,
+                message: Some("report not found".into()),
+            });
+            continue;
+        };
+        if current.status != "pending" && current.status != "claimed" {
+            results.push(BatchMutateContentReportsResultItem {
+                report_id: *report_id,
+                ok: false,
+                action: "reassign".into(),
+                status: Some(current.status),
+                message: Some("report is no longer open".into()),
+            });
+            continue;
+        }
+        let previous_label = current.claimed_by_label.clone();
+        let next_status = "claimed";
+        sqlx::query(
+            r#"
+            UPDATE public.app_content_compliance_report
+            SET
+              status = 'claimed',
+              claimed_by_label = $2,
+              claimed_at = COALESCE(claimed_at, NOW()),
+              updated_at = NOW()
+            WHERE id = $1
+            "#,
+        )
+        .bind(*report_id)
+        .bind(&assignee_label)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        append_content_compliance_audit(
+            &mut *tx,
+            *report_id,
+            None,
+            &actor_label,
+            "reassigned",
+            Some(current.status.as_str()),
+            Some(next_status),
+            None,
+            json!({
+                "fromClaimedByLabel": previous_label,
+                "toClaimedByLabel": assignee_label.clone(),
+                "note": note.clone(),
+                "targetType": current.target_type,
+                "targetId": current.target_id,
+            }),
+        )
+        .await?;
+        results.push(BatchMutateContentReportsResultItem {
+            report_id: *report_id,
+            ok: true,
+            action: "reassign".into(),
+            status: Some(next_status.into()),
+            message: None,
+        });
+    }
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let succeeded_count = results.iter().filter(|item| item.ok).count() as i64;
+    let failed_count = results.len() as i64 - succeeded_count;
+    Ok(Json(ReassignContentReportsResponse {
+        requested_count: body.report_ids.len() as i64,
+        succeeded_count,
+        failed_count,
+        assignee_label,
+        results,
+    }))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/content/reports", post(create_content_report))
@@ -1644,6 +1787,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/internal/compliance/reports/batch-mutate",
             post(batch_mutate_content_reports),
+        )
+        .route(
+            "/api/v1/internal/compliance/reports/reassign",
+            post(reassign_content_reports),
         )
         .route(
             "/api/v1/internal/compliance/reports/{id}/claim",

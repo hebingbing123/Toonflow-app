@@ -25,6 +25,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   final _targetIdController = TextEditingController();
   final _detailController = TextEditingController();
   final _resolutionNoteController = TextEditingController();
+  final _reassignReviewerController = TextEditingController();
   String _targetType = 'project';
   String _category = 'other';
   String _severity = 'medium';
@@ -65,6 +66,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     _targetIdController.dispose();
     _detailController.dispose();
     _resolutionNoteController.dispose();
+    _reassignReviewerController.dispose();
     super.dispose();
   }
 
@@ -262,6 +264,116 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       SnackBar(
         content: Text(
           '$verb 完成：成功 ${response.succeededCount}，失败 ${response.failedCount}',
+        ),
+      ),
+    );
+  }
+
+  String _csvCell(String value) {
+    final escaped = value.replaceAll('"', '""');
+    return '"$escaped"';
+  }
+
+  Future<void> _copyCurrentQueueCsv() async {
+    final queue = widget.controller.queue;
+    if (queue == null) {
+      return;
+    }
+    final rows = <List<String>>[
+      <String>[
+        'report_id',
+        'status',
+        'severity',
+        'category',
+        'claimed_by',
+        'workspace_name',
+        'project_name',
+        'target_type',
+        'target_id',
+        'reporter',
+        'created_at',
+        'claimed_at',
+        'resolved_at',
+        'detail',
+      ],
+      ...queue.items.map(
+        (item) => <String>[
+          item.id,
+          item.status,
+          item.severity,
+          item.category,
+          item.claimedByLabel ?? '',
+          item.workspaceName ?? '',
+          item.projectName ?? '',
+          item.targetType,
+          item.targetId,
+          item.reporterEmail ?? item.reporterUserId,
+          item.createdAt,
+          item.claimedAt ?? '',
+          item.resolvedAt ?? '',
+          item.detail ?? '',
+        ],
+      ),
+    ];
+    await Clipboard.setData(
+      ClipboardData(
+        text: rows.map((row) => row.map(_csvCell).join(',')).join('\n'),
+      ),
+    );
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('已复制当前筛选结果 CSV（${queue.items.length} 条）')),
+    );
+  }
+
+  Future<void> _runReassign() async {
+    if (_selectedReportIds.isEmpty) {
+      return;
+    }
+    final assignee = _reassignReviewerController.text.trim();
+    if (assignee.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请先填写目标 reviewer')));
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('批量改派'),
+        content: Text('确定将 ${_selectedReportIds.length} 条举报改派给 $assignee 吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('继续'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) {
+      return;
+    }
+    final response = await widget.controller.reassignReports(
+      reportIds: _selectedReportIds.toList(growable: false),
+      assigneeLabel: assignee,
+      note: _resolutionNoteController.text,
+    );
+    if (!mounted || response == null) {
+      return;
+    }
+    setState(() {
+      _selectedReportIds.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '已改派给 ${response.assigneeLabel}：成功 ${response.succeededCount}，失败 ${response.failedCount}',
         ),
       ),
     );
@@ -491,6 +603,13 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         : widget.controller.loadQueue,
                     icon: const Icon(Icons.refresh),
                     label: const Text('刷新'),
+                  ),
+                  TextButton.icon(
+                    onPressed: queue == null || queue.items.isEmpty
+                        ? null
+                        : _copyCurrentQueueCsv,
+                    icon: const Icon(Icons.download_outlined),
+                    label: const Text('复制 CSV'),
                   ),
                 ],
               ),
@@ -1034,6 +1153,14 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   ),
                 if (queue.items.isNotEmpty) ...[
                   const SizedBox(height: 8),
+                  TextField(
+                    controller: _reassignReviewerController,
+                    decoration: const InputDecoration(
+                      labelText: '批量改派 reviewer',
+                      hintText: '例如 internal_ops_cn_shift_b',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -1070,6 +1197,14 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 _selectedReportIds.clear();
                               }),
                         child: const Text('清空选择'),
+                      ),
+                      FilledButton.tonal(
+                        onPressed:
+                            widget.controller.mutatingQueue ||
+                                _selectedReportIds.isEmpty
+                            ? null
+                            : _runReassign,
+                        child: const Text('批量改派'),
                       ),
                       FilledButton.tonal(
                         onPressed:
