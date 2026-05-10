@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'create_project_dialog.dart';
 import 'controller.dart';
 import 'previews.dart';
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../team_workspaces/strings.dart';
 import 'workbenches/agent_memory.dart';
 import 'workbenches/art_styles_view.dart';
@@ -107,7 +108,20 @@ class ProjectsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          Text('项目列表', style: Theme.of(context).textTheme.titleSmall),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  '项目列表',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              const RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: '本机客户端偏好',
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(
             '查看项目、摘要、美术风格与创作手册，并进入项目详情继续编辑。',

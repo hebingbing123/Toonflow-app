@@ -11,9 +11,13 @@ class _ProductionPanel extends StatelessWidget {
     required this.assetsOverviewPanelUi,
     required this.assemblyPanelUi,
     required this.exportCheckPanelUi,
+    required this.onStartExport,
+    required this.onOpenExportHistory,
+    required this.exportActionBusy,
     required this.onOpenProductionForAssemblyExport,
     required this.onOpenAssemblyClipDeskOps,
     required this.onOpenAssemblyDefaultsEditor,
+    this.assemblyVersionManagerPanel,
   });
 
   final String spaceOverviewSummary;
@@ -24,9 +28,13 @@ class _ProductionPanel extends StatelessWidget {
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
+  final VoidCallback? onStartExport;
+  final VoidCallback? onOpenExportHistory;
+  final bool exportActionBusy;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final VoidCallback? onOpenAssemblyClipDeskOps;
   final VoidCallback? onOpenAssemblyDefaultsEditor;
+  final Widget? assemblyVersionManagerPanel;
 
   @override
   Widget build(BuildContext context) {
@@ -305,6 +313,10 @@ class _ProductionPanel extends StatelessWidget {
             ),
           ),
         ],
+        if (assemblyVersionManagerPanel != null) ...[
+          const SizedBox(height: 16),
+          assemblyVersionManagerPanel!,
+        ],
         if (exportCheckPanelUi.visible) ...[
           const SizedBox(height: 16),
           _Panel(
@@ -415,6 +427,31 @@ class _ProductionPanel extends StatelessWidget {
                 Text(
                   exportCheckPanelUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton.icon(
+                      onPressed: exportActionBusy || !exportCheckPanelUi.exportReady
+                          ? null
+                          : onStartExport,
+                      icon: exportActionBusy
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.file_upload_outlined),
+                      label: Text(exportActionBusy ? '导出中…' : '开始导出'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: exportActionBusy ? null : onOpenExportHistory,
+                      icon: const Icon(Icons.history),
+                      label: const Text('导出历史'),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'workbench_view.dart';
 import 'previews.dart';
 import '../../rust_api.dart';
@@ -104,7 +105,20 @@ class TaskCenterSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text('任务中心', style: Theme.of(context).textTheme.titleSmall),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                '任务中心',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            const RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: '本机客户端偏好',
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Text(
           '用正式工作台完成任务项目、分类、筛选列表和详情查看，主区不再依赖首条/UUID probe 按钮。',

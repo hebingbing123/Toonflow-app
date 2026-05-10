@@ -40,6 +40,7 @@ pub(super) async fn resolve_job_mutation_outcome(
                 FROM app_project p
                 INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
                 WHERE wm.user_id = $2
+                  AND p.archived_at IS NULL
                   AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
                   AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
               )

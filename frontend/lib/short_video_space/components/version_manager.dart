@@ -618,7 +618,7 @@ class _VersionManagerState extends State<VersionManager> {
     final confirmed = await showDeleteVersionConfirmation(
       context,
       versionName: version.name,
-      showDontShowAgain: false, // TODO: Enable after proper SharedPreferences setup
+      showDontShowAgain: true,
     );
 
     if (confirmed != true) {
@@ -872,7 +872,7 @@ class _VersionManagerState extends State<VersionManager> {
     final confirmed = await showRestoreDraftConfirmation(
       context,
       draftName: draft.name,
-      showDontShowAgain: false, // TODO: Enable after proper SharedPreferences setup
+      showDontShowAgain: true,
     );
 
     if (confirmed != true) {

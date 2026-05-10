@@ -6,6 +6,7 @@ enum ProductWorkspacePane {
   shortVideoSpace,
   projects,
   account,
+  apiKeys,
   notifications,
   platformStatus,
   teamWorkspaces,

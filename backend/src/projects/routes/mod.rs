@@ -36,6 +36,10 @@ pub fn router() -> Router<AppState> {
         )
         .route("/api/v1/export/tasks", get(export::list_export_tasks))
         .route(
+            "/api/v1/export/tasks/{task_id}",
+            get(export::get_export_task),
+        )
+        .route(
             "/api/v1/export/cancel",
             axum::routing::post(export::cancel_export),
         )
@@ -47,6 +51,16 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/tts/batch-generate",
             axum::routing::post(tts::batch_generate_tts),
+        )
+        .route("/api/v1/tts/tasks", get(tts::list_tts_tasks))
+        .route("/api/v1/tts/tasks/{task_id}", get(tts::get_tts_task))
+        .route(
+            "/api/v1/tts/cancel",
+            axum::routing::post(tts::cancel_tts_task),
+        )
+        .route(
+            "/api/v1/tts/retry",
+            axum::routing::post(tts::retry_tts_task),
         )
         // Existing project routes
         .route("/api/v1/projects/summary", get(projects_summary))

@@ -4,6 +4,78 @@ part of 'section.dart';
 
 /// Assembly and clip desk operations for ShortVideoSpaceSection
 extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpaceSectionState {
+  Future<void> _startExportFlow() async {
+    final token = widget.accessToken?.trim();
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null || _exportActionBusy) {
+      return;
+    }
+
+    final settings = await _openExportSettingsDialog(context: context);
+    if (settings == null || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _exportActionBusy = true;
+    });
+    try {
+      final task = await postExportStartV1(
+        token,
+        CreateExportTaskRequestV1(
+          projectId: project.id,
+          format: settings.format,
+          quality: ExportQualityV1(
+            resolution: settings.resolution,
+            bitrate: getBitrateValue(settings.bitrate),
+            framerate: settings.framerate,
+          ),
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      final completed = await _openExportProgressDialog(
+        context: context,
+        taskId: task.id,
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(completed ? '导出已完成。' : '导出未完成或已取消。'),
+        ),
+      );
+      await _loadProjectOverview();
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      reportRustApiError(e, onErrorChanged: (_) {});
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text('导出启动失败：$e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _exportActionBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _openExportHistoryFlow() async {
+    if (_selectedProject == null || _exportActionBusy) {
+      return;
+    }
+    await _openExportHistoryDialog(context: context);
+  }
+
   /// Show operation feedback with auto-dismiss after 3 seconds
   void _showOperationFeedback(String message, {required bool isSuccess}) {
     setState(() {
@@ -93,6 +165,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
         for (final shot in group.shots)
           _AssemblyClipDeskOpEntry(
             scriptNumericId: group.scriptNumericId,
+            storyboardId: shot.storyboardId,
             storyboardNumericId: shot.storyboardNumericId,
             sbIndex: shot.sbIndex,
             selectedMediaUrl: (shot.selectedMediaUrl ?? '').trim(),
@@ -801,6 +874,20 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             icon: const Icon(Icons.undo_outlined),
                             label: const Text('撤销到打开时'),
                           ),
+                          OutlinedButton.icon(
+                            onPressed: operationInProgress
+                                ? null
+                                : () => unawaited(
+                                      _openTtsTaskCenterDialog(
+                                        context: ctx,
+                                        token: token,
+                                        projectId: project.id,
+                                        entries: ordered,
+                                      ),
+                                    ),
+                            icon: const Icon(Icons.record_voice_over_outlined),
+                            label: const Text('配音任务'),
+                          ),
                           // Undo/Redo buttons
                           _buildUndoRedoToolbar(),
                         ],
@@ -846,6 +933,440 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
         );
       },
     );
+  }
+
+  Future<void> _openTtsTaskCenterDialog({
+    required BuildContext context,
+    required String token,
+    required String projectId,
+    required List<_AssemblyClipDeskOpEntry> entries,
+  }) async {
+    final shotNumericById = <String, int>{
+      for (final item in entries)
+        if (item.storyboardId.trim().isNotEmpty)
+          item.storyboardId: item.storyboardNumericId,
+    };
+    final scriptByShotNumeric = <int, int>{
+      for (final item in entries) item.storyboardNumericId: item.scriptNumericId,
+    };
+    var tasks = const <TtsTaskV1>[];
+    var loading = true;
+    var requestBusy = false;
+    var statusFilter = _ttsTaskCenterStatusFilter;
+    var groupedByShot = _ttsTaskCenterGroupedByShot;
+    var keyword = _ttsTaskCenterKeyword;
+    String? errorMessage;
+    StateSetter? updateDialogState;
+    Timer? poller;
+
+    Future<void> loadTasks() async {
+      final setState = updateDialogState;
+      if (setState == null) return;
+      setState(() {
+        loading = true;
+      });
+      try {
+        final next = await getTtsTasksV1(
+          token,
+          projectId: projectId,
+          status: statusFilter.isEmpty ? null : statusFilter,
+          limit: 100,
+          offset: 0,
+        );
+        setState(() {
+          tasks = next;
+          errorMessage = null;
+          loading = false;
+        });
+      } on RustApiException catch (e) {
+        setState(() {
+          errorMessage = '加载失败：${e.statusCode ?? '-'}';
+          loading = false;
+        });
+      } catch (e) {
+        setState(() {
+          errorMessage = '加载失败：$e';
+          loading = false;
+        });
+      }
+    }
+
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) {
+          return StatefulBuilder(
+            builder: (ctx, setState) {
+              updateDialogState = setState;
+              poller ??= Timer.periodic(
+                const Duration(seconds: 4),
+                (_) => unawaited(loadTasks()),
+              );
+              if (tasks.isEmpty && loading && errorMessage == null) {
+                unawaited(loadTasks());
+              }
+              final latestTaskByShotId = <String, TtsTaskV1>{};
+              if (!loading && groupedByShot) {
+                for (final task in tasks) {
+                  final shotId = (task.shotId ?? '').trim();
+                  if (shotId.isEmpty) continue;
+                  final current = latestTaskByShotId[shotId];
+                  if (current == null || current.updatedAt.isBefore(task.updatedAt)) {
+                    latestTaskByShotId[shotId] = task;
+                  }
+                }
+              }
+              final visibleTasks = groupedByShot
+                  ? latestTaskByShotId.values.toList(growable: false)
+                  : tasks;
+              bool matchesKeyword(TtsTaskV1 task) {
+                final q = keyword.trim().toLowerCase();
+                if (q.isEmpty) return true;
+                final taskIdHit = task.taskId.toLowerCase().contains(q);
+                final shotNumeric = task.shotId == null
+                    ? null
+                    : shotNumericById[task.shotId!];
+                final scriptNumeric = shotNumeric == null
+                    ? null
+                    : scriptByShotNumeric[shotNumeric];
+                final shotHit = shotNumeric?.toString().contains(q) == true;
+                final scriptHit = scriptNumeric?.toString().contains(q) == true;
+                return taskIdHit || shotHit || scriptHit;
+              }
+              final filteredTasks = visibleTasks
+                  .where(matchesKeyword)
+                  .toList(growable: false);
+              final retryableFilteredTasks = filteredTasks
+                  .where(
+                    (task) =>
+                        task.status == 'failed' &&
+                        task.taskId.trim().isNotEmpty,
+                  )
+                  .toList(growable: false);
+              return AlertDialog(
+                title: const Text('配音任务中心'),
+                content: SizedBox(
+                  width: 760,
+                  height: 420,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          DropdownButton<String>(
+                            value: statusFilter,
+                            items: const [
+                              DropdownMenuItem(value: '', child: Text('全部状态')),
+                              DropdownMenuItem(value: 'queued', child: Text('queued')),
+                              DropdownMenuItem(value: 'running', child: Text('running')),
+                              DropdownMenuItem(value: 'succeeded', child: Text('succeeded')),
+                              DropdownMenuItem(value: 'failed', child: Text('failed')),
+                              DropdownMenuItem(value: 'cancelled', child: Text('cancelled')),
+                            ],
+                            onChanged: requestBusy
+                                ? null
+                                : (next) {
+                                    setState(() {
+                                      statusFilter = next ?? '';
+                                      _ttsTaskCenterStatusFilter = statusFilter;
+                                    });
+                                    unawaited(loadTasks());
+                                  },
+                          ),
+                          const SizedBox(width: 8),
+                          OutlinedButton.icon(
+                            onPressed:
+                                (loading || requestBusy) ? null : () => unawaited(loadTasks()),
+                            icon: const Icon(Icons.refresh_outlined),
+                            label: const Text('刷新'),
+                          ),
+                          const SizedBox(width: 8),
+                          FilterChip(
+                            selected: groupedByShot,
+                            label: const Text('按分镜聚合'),
+                            onSelected: requestBusy
+                                ? null
+                                : (selected) {
+                                    setState(() {
+                                      groupedByShot = selected;
+                                      _ttsTaskCenterGroupedByShot = groupedByShot;
+                                    });
+                                  },
+                          ),
+                          const SizedBox(width: 8),
+                          OutlinedButton.icon(
+                            onPressed: (loading || requestBusy || retryableFilteredTasks.isEmpty)
+                                ? null
+                                : () async {
+                                    final retrySettings =
+                                        await _openVoiceoverSettingsDialog(
+                                      context: ctx,
+                                      initialSettings: _ttsRetrySettings,
+                                    );
+                                    if (retrySettings == null) {
+                                      return;
+                                    }
+                                    _ttsRetrySettings = retrySettings;
+                                    setState(() {
+                                      requestBusy = true;
+                                    });
+                                    var succeeded = 0;
+                                    var failed = 0;
+                                    for (final task in retryableFilteredTasks) {
+                                      try {
+                                        await postTtsRetryV1(
+                                          token,
+                                          TtsRetryRequestV1(
+                                            taskId: task.taskId,
+                                            provider: retrySettings.provider,
+                                            voiceId: retrySettings.voiceId,
+                                            emotion: retrySettings.emotion,
+                                            speed: retrySettings.speed,
+                                          ),
+                                        );
+                                        succeeded += 1;
+                                      } catch (_) {
+                                        failed += 1;
+                                      }
+                                    }
+                                    if (!mounted) return;
+                                    _showOperationFeedback(
+                                      '批量重试完成：成功 $succeeded，失败 $failed',
+                                      isSuccess: failed == 0,
+                                    );
+                                    await loadTasks();
+                                    setState(() {
+                                      requestBusy = false;
+                                    });
+                                  },
+                            icon: const Icon(Icons.replay_outlined),
+                            label: Text('批量重试失败 (${retryableFilteredTasks.length})'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        enabled: !requestBusy,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          prefixIcon: Icon(Icons.search),
+                          hintText: '筛选：任务ID / 剧本号 / 分镜号',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            keyword = value;
+                            _ttsTaskCenterKeyword = keyword;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      if (errorMessage != null)
+                        Text(
+                          errorMessage!,
+                          style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+                        ),
+                      const SizedBox(height: 8),
+                      if (!loading && tasks.isNotEmpty)
+                        Text(
+                          '共 ${tasks.length} 条 · '
+                          'queued ${tasks.where((t) => t.status == "queued").length} · '
+                          'running ${tasks.where((t) => t.status == "running").length} · '
+                          'succeeded ${tasks.where((t) => t.status == "succeeded").length} · '
+                          'failed ${tasks.where((t) => t.status == "failed").length} · '
+                          'cancelled ${tasks.where((t) => t.status == "cancelled").length} · '
+                          '展示 ${filteredTasks.length}/${visibleTasks.length}',
+                          style: Theme.of(ctx).textTheme.bodySmall,
+                        ),
+                      if (!loading && tasks.isNotEmpty) const SizedBox(height: 8),
+                      Expanded(
+                        child: loading
+                            ? const Center(child: CircularProgressIndicator())
+                            : tasks.isEmpty
+                                ? const Center(child: Text('暂无配音任务'))
+                                : ListView.separated(
+                                    itemCount: groupedByShot
+                                        ? filteredTasks.length
+                                        : filteredTasks.length,
+                                    separatorBuilder: (context, _) =>
+                                        const Divider(height: 1),
+                                    itemBuilder: (_, index) {
+                                      final task = filteredTasks[index];
+                                      final shotNumeric = task.shotId == null
+                                          ? null
+                                          : shotNumericById[task.shotId!];
+                                      final scriptNumeric = shotNumeric == null
+                                          ? null
+                                          : scriptByShotNumeric[shotNumeric];
+                                      final canCancel = task.status == 'queued' ||
+                                          task.status == 'running';
+                                      final hasAudio = (task.audioUrl ?? '')
+                                          .trim()
+                                          .isNotEmpty;
+                                      final canRetry = task.status == 'failed' &&
+                                          task.taskId.trim().isNotEmpty;
+                                      return ListTile(
+                                        dense: true,
+                                        title: Text(
+                                          '${groupedByShot ? "最近任务" : "任务"} ${task.taskId.substring(0, 8)} · 状态 ${task.status}',
+                                        ),
+                                        subtitle: Text(
+                                          '剧本 #${scriptNumeric ?? "-"} · 分镜 #${shotNumeric ?? "-"}'
+                                          '${task.audioUrl != null && task.audioUrl!.isNotEmpty ? ' · 音频就绪' : ''}'
+                                          '${task.error != null && task.error!.isNotEmpty ? ' · 错误: ${task.error}' : ''}',
+                                        ),
+                                        trailing: Wrap(
+                                          spacing: 4,
+                                          children: [
+                                            if (hasAudio)
+                                              IconButton(
+                                                tooltip: '预览音频',
+                                                onPressed: () {
+                                                  _showAudioPreviewDialog(
+                                                    context: ctx,
+                                                    audioUrl: task.audioUrl!.trim(),
+                                                  );
+                                                },
+                                                icon: const Icon(
+                                                  Icons.play_circle_outline,
+                                                ),
+                                              ),
+                                            if (hasAudio)
+                                              IconButton(
+                                                tooltip: '复制音频链接',
+                                                onPressed: () async {
+                                                  await Clipboard.setData(
+                                                    ClipboardData(
+                                                      text: task.audioUrl!.trim(),
+                                                    ),
+                                                  );
+                                                  if (!mounted) return;
+                                                  _showOperationFeedback(
+                                                    '已复制音频链接',
+                                                    isSuccess: true,
+                                                  );
+                                                },
+                                                icon: const Icon(Icons.link),
+                                              ),
+                                            if (canCancel)
+                                              TextButton(
+                                                onPressed: requestBusy
+                                                    ? null
+                                                    : () async {
+                                                        setState(() {
+                                                          requestBusy = true;
+                                                        });
+                                                        try {
+                                                          await postTtsCancelV1(
+                                                            token,
+                                                            task.taskId,
+                                                          );
+                                                          if (!mounted) return;
+                                                          _showOperationFeedback(
+                                                            '已取消配音任务 ${task.taskId.substring(0, 8)}',
+                                                            isSuccess: true,
+                                                          );
+                                                          await loadTasks();
+                                                        } on RustApiException catch (e) {
+                                                          if (!mounted) return;
+                                                          _showOperationFeedback(
+                                                            '取消失败：${e.statusCode ?? '-'}',
+                                                            isSuccess: false,
+                                                          );
+                                                        } catch (e) {
+                                                          if (!mounted) return;
+                                                          _showOperationFeedback(
+                                                            '取消失败：$e',
+                                                            isSuccess: false,
+                                                          );
+                                                        } finally {
+                                                          setState(() {
+                                                            requestBusy = false;
+                                                          });
+                                                        }
+                                                      },
+                                                child: const Text('取消'),
+                                              ),
+                                            if (canRetry)
+                                              TextButton(
+                                                onPressed: requestBusy
+                                                    ? null
+                                                    : () async {
+                                                        final retrySettings =
+                                                            await _openVoiceoverSettingsDialog(
+                                                          context: ctx,
+                                                          initialSettings:
+                                                              _ttsRetrySettings,
+                                                        );
+                                                        if (retrySettings == null) {
+                                                          return;
+                                                        }
+                                                        _ttsRetrySettings =
+                                                            retrySettings;
+                                                        setState(() {
+                                                          requestBusy = true;
+                                                        });
+                                                        try {
+                                                          final response =
+                                                              await postTtsRetryV1(
+                                                            token,
+                                                            TtsRetryRequestV1(
+                                                              taskId: task.taskId,
+                                                              provider: retrySettings.provider,
+                                                              voiceId: retrySettings.voiceId,
+                                                              emotion: retrySettings.emotion,
+                                                              speed: retrySettings.speed,
+                                                            ),
+                                                          );
+                                                          if (!mounted) return;
+                                                          _showOperationFeedback(
+                                                            '已重试，任务 ${response.taskId.substring(0, 8)} 已入队',
+                                                            isSuccess: true,
+                                                          );
+                                                          await loadTasks();
+                                                        } on RustApiException catch (e) {
+                                                          if (!mounted) return;
+                                                          _showOperationFeedback(
+                                                            '重试失败：${e.statusCode ?? '-'}',
+                                                            isSuccess: false,
+                                                          );
+                                                        } catch (e) {
+                                                          if (!mounted) return;
+                                                          _showOperationFeedback(
+                                                            '重试失败：$e',
+                                                            isSuccess: false,
+                                                          );
+                                                        } finally {
+                                                          setState(() {
+                                                            requestBusy = false;
+                                                          });
+                                                        }
+                                                      },
+                                                child: const Text('重试'),
+                                              ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('关闭'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } finally {
+      poller?.cancel();
+    }
   }
 
   /// Build virtual scroll list with FlutterListView for efficient rendering
@@ -1321,6 +1842,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
 class _AssemblyClipDeskOpEntry {
   const _AssemblyClipDeskOpEntry({
     required this.scriptNumericId,
+    required this.storyboardId,
     required this.storyboardNumericId,
     required this.sbIndex,
     required this.selectedMediaUrl,
@@ -1335,6 +1857,7 @@ class _AssemblyClipDeskOpEntry {
   });
 
   final int scriptNumericId;
+  final String storyboardId;
   final int storyboardNumericId;
   final int? sbIndex;
   final String selectedMediaUrl;
@@ -1354,6 +1877,7 @@ class _AssemblyClipDeskOpEntry {
   }) {
     return _AssemblyClipDeskOpEntry(
       scriptNumericId: scriptNumericId,
+      storyboardId: storyboardId,
       storyboardNumericId: storyboardNumericId,
       sbIndex: sbIndex,
       selectedMediaUrl: selectedMediaUrl ?? this.selectedMediaUrl,

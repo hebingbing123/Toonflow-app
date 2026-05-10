@@ -1,4 +1,6 @@
-part of 'support.dart';
+import '../../rust_api.dart';
+import 'support_models.dart';
+import 'support_actions.dart';
 
 String? summarizeTokenEfficiencyFromQualityReviews(
   Iterable<QualityReview> rows, {
@@ -59,7 +61,7 @@ String? summarizePromptDiagnosticsFromQualityReviews(
 }) {
   final samples = rows
       .where((row) => row.source == 'auto')
-      .map((row) => _qualityDiagnosticsMap(row))
+      .map((row) => qualityDiagnosticsMap(row))
       .whereType<Map<String, dynamic>>()
       .take(maxSamples)
       .toList(growable: false);
@@ -78,27 +80,27 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   final suppressedBuckets = <String, int>{};
 
   for (final sample in samples) {
-    totalPrompt += _diagnosticInt(sample, 'promptChars');
-    totalMemory += _diagnosticInt(sample, 'memoryStyleChars');
-    totalVisual += _diagnosticInt(sample, 'memoryVisualChars');
-    totalDelivery += _diagnosticInt(sample, 'memoryDeliveryChars');
-    if (_diagnosticBool(sample, 'memoryDeliveryPriorityApplied')) {
+    totalPrompt += diagnosticInt(sample, 'promptChars');
+    totalMemory += diagnosticInt(sample, 'memoryStyleChars');
+    totalVisual += diagnosticInt(sample, 'memoryVisualChars');
+    totalDelivery += diagnosticInt(sample, 'memoryDeliveryChars');
+    if (diagnosticBool(sample, 'memoryDeliveryPriorityApplied')) {
       deliveryPriorityHits += 1;
     }
-    if (_diagnosticBool(sample, 'directorManualYieldedToMemory')) {
+    if (diagnosticBool(sample, 'directorManualYieldedToMemory')) {
       directorYieldHits += 1;
     }
-    if (_diagnosticBool(sample, 'usesReferenceFrame')) {
+    if (diagnosticBool(sample, 'usesReferenceFrame')) {
       referenceFrameHits += 1;
     }
-    if (_diagnosticInt(sample, 'continuityNoteCount') > 0) {
+    if (diagnosticInt(sample, 'continuityNoteCount') > 0) {
       continuityHits += 1;
     }
-    final source = _diagnosticString(sample, 'autoNegativeSource');
+    final source = diagnosticString(sample, 'autoNegativeSource');
     if (source != null) {
       negativeSources.update(source, (count) => count + 1, ifAbsent: () => 1);
     }
-    final hitCounts = _diagnosticStringIntMap(sample, 'memoryHitBucketCounts');
+    final hitCounts = diagnosticStringIntMap(sample, 'memoryHitBucketCounts');
     if (hitCounts.isNotEmpty) {
       for (final entry in hitCounts.entries) {
         memoryHitBuckets.update(
@@ -108,7 +110,7 @@ String? summarizePromptDiagnosticsFromQualityReviews(
         );
       }
     } else {
-      for (final bucket in _diagnosticStringList(sample, 'memoryHitBuckets')) {
+      for (final bucket in diagnosticStringList(sample, 'memoryHitBuckets')) {
         memoryHitBuckets.update(
           bucket,
           (count) => count + 1,
@@ -116,7 +118,7 @@ String? summarizePromptDiagnosticsFromQualityReviews(
         );
       }
     }
-    final suppressedCounts = _diagnosticStringIntMap(
+    final suppressedCounts = diagnosticStringIntMap(
       sample,
       'memorySuppressedBucketCounts',
     );
@@ -129,7 +131,7 @@ String? summarizePromptDiagnosticsFromQualityReviews(
         );
       }
     } else {
-      for (final bucket in _diagnosticStringList(
+      for (final bucket in diagnosticStringList(
         sample,
         'memorySuppressedBuckets',
       )) {
@@ -161,14 +163,14 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   ];
   if (topNegativeSource != null) {
     parts.add(
-      '${_describeAutoNegativeSource(topNegativeSource.key)} ${topNegativeSource.value} 次',
+      '${describeAutoNegativeSource(topNegativeSource.key)} ${topNegativeSource.value} 次',
     );
   }
-  final hitBucketSummary = _joinTopBucketCounts(memoryHitBuckets);
+  final hitBucketSummary = joinTopBucketCounts(memoryHitBuckets);
   if (hitBucketSummary.isNotEmpty) {
     parts.add('命中记忆 $hitBucketSummary');
   }
-  final suppressedBucketSummary = _joinTopBucketCounts(suppressedBuckets);
+  final suppressedBucketSummary = joinTopBucketCounts(suppressedBuckets);
   if (suppressedBucketSummary.isNotEmpty) {
     parts.add('压缩桶 $suppressedBucketSummary');
   }
@@ -185,68 +187,68 @@ String? summarizePromptDiagnosticsFromQualityReviews(
 }
 
 String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
-  final diagnostics = _qualityDiagnosticsMap(row);
+  final diagnostics = qualityDiagnosticsMap(row);
   if (diagnostics == null) return null;
 
-  final promptChars = _diagnosticInt(diagnostics, 'promptChars');
-  final memoryChars = _diagnosticInt(diagnostics, 'memoryStyleChars');
-  final visualChars = _diagnosticInt(diagnostics, 'memoryVisualChars');
-  final deliveryChars = _diagnosticInt(diagnostics, 'memoryDeliveryChars');
-  final directorSaved = _diagnosticInt(diagnostics, 'directorAnchorSavedChars');
-  final continuityCount = _diagnosticInt(diagnostics, 'continuityNoteCount');
-  final negativeSavedChars = _diagnosticInt(diagnostics, 'negativeSavedChars');
-  final negativeSavedFragments = _diagnosticInt(
+  final promptChars = diagnosticInt(diagnostics, 'promptChars');
+  final memoryChars = diagnosticInt(diagnostics, 'memoryStyleChars');
+  final visualChars = diagnosticInt(diagnostics, 'memoryVisualChars');
+  final deliveryChars = diagnosticInt(diagnostics, 'memoryDeliveryChars');
+  final directorSaved = diagnosticInt(diagnostics, 'directorAnchorSavedChars');
+  final continuityCount = diagnosticInt(diagnostics, 'continuityNoteCount');
+  final negativeSavedChars = diagnosticInt(diagnostics, 'negativeSavedChars');
+  final negativeSavedFragments = diagnosticInt(
     diagnostics,
     'negativeSavedFragmentCount',
   );
-  final projectScopeRows = _diagnosticInt(
+  final projectScopeRows = diagnosticInt(
     diagnostics,
     'memoryProjectScopeRowCount',
   );
-  final scriptScopeRows = _diagnosticInt(
+  final scriptScopeRows = diagnosticInt(
     diagnostics,
     'memoryScriptScopeRowCount',
   );
-  final roleScopeRows = _diagnosticInt(diagnostics, 'memoryRoleScopeRowCount');
+  final roleScopeRows = diagnosticInt(diagnostics, 'memoryRoleScopeRowCount');
   final parts = <String>[
     'prompt=$promptChars',
     'memory=$memoryChars(v=$visualChars,d=$deliveryChars)',
   ];
 
-  final negativeSource = _diagnosticString(diagnostics, 'autoNegativeSource');
+  final negativeSource = diagnosticString(diagnostics, 'autoNegativeSource');
   if (negativeSource != null) {
-    parts.add(_describeAutoNegativeSource(negativeSource));
+    parts.add(describeAutoNegativeSource(negativeSource));
   }
-  if (_diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
+  if (diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
     parts.add('delivery优先');
   }
-  final memoryHitBucketCounts = _diagnosticStringIntMap(
+  final memoryHitBucketCounts = diagnosticStringIntMap(
     diagnostics,
     'memoryHitBucketCounts',
   );
-  final memoryHitBuckets = _diagnosticStringList(
+  final memoryHitBuckets = diagnosticStringList(
     diagnostics,
     'memoryHitBuckets',
   );
   if (memoryHitBuckets.isNotEmpty) {
     parts.add(
-      '命中=${_joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts)}',
+      '命中=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts)}',
     );
   }
-  final memorySuppressedBucketCounts = _diagnosticStringIntMap(
+  final memorySuppressedBucketCounts = diagnosticStringIntMap(
     diagnostics,
     'memorySuppressedBucketCounts',
   );
-  final memorySuppressedBuckets = _diagnosticStringList(
+  final memorySuppressedBuckets = diagnosticStringList(
     diagnostics,
     'memorySuppressedBuckets',
   );
   if (memorySuppressedBuckets.isNotEmpty) {
     parts.add(
-      '压缩=${_joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts)}',
+      '压缩=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts)}',
     );
   }
-  if (_diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
+  if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
     parts.add('导演让位');
   }
   if (directorSaved > 0) {
@@ -255,7 +257,7 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   if (negativeSavedChars > 0 || negativeSavedFragments > 0) {
     parts.add('负向精简=$negativeSavedFragments条/$negativeSavedChars chars');
   }
-  final scopeSummary = _describeMemoryScopeRows(
+  final scopeSummary = describeMemoryScopeRows(
     projectScopeRows: projectScopeRows,
     scriptScopeRows: scriptScopeRows,
     roleScopeRows: roleScopeRows,
@@ -266,25 +268,25 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   if (continuityCount > 0) {
     parts.add('连续性$continuityCount');
   }
-  if (_diagnosticBool(diagnostics, 'usesReferenceFrame')) {
+  if (diagnosticBool(diagnostics, 'usesReferenceFrame')) {
     parts.add('参考帧');
   }
   return parts.join(' · ');
 }
 
 String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
-  final feedback = _feedbackMemoryMap(row);
+  final feedback = feedbackMemoryMap(row);
   if (feedback == null) return null;
 
-  final action = _diagnosticString(feedback, 'action');
-  final memoryName = _diagnosticString(feedback, 'memoryName');
-  final clearedMemoryName = _diagnosticString(feedback, 'clearedMemoryName');
-  final storyboardId = _diagnosticInt(feedback, 'storyboardId');
-  final removedRows = _diagnosticInt(feedback, 'removedRows');
-  final removedChars = _diagnosticInt(feedback, 'removedChars');
-  final removedVisualRows = _diagnosticInt(feedback, 'removedVisualRows');
-  final removedDuplicateRows = _diagnosticInt(feedback, 'removedDuplicateRows');
-  final focusTags = _diagnosticStringList(feedback, 'focusTags');
+  final action = diagnosticString(feedback, 'action');
+  final memoryName = diagnosticString(feedback, 'memoryName');
+  final clearedMemoryName = diagnosticString(feedback, 'clearedMemoryName');
+  final storyboardId = diagnosticInt(feedback, 'storyboardId');
+  final removedRows = diagnosticInt(feedback, 'removedRows');
+  final removedChars = diagnosticInt(feedback, 'removedChars');
+  final removedVisualRows = diagnosticInt(feedback, 'removedVisualRows');
+  final removedDuplicateRows = diagnosticInt(feedback, 'removedDuplicateRows');
+  final focusTags = diagnosticStringList(feedback, 'focusTags');
 
   final parts = <String>[];
   switch (action) {
@@ -321,7 +323,7 @@ String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
       '（重复 $removedDuplicateRows / 纯视觉 $removedVisualRows）',
     );
   }
-  final focusSummary = _summarizeFeedbackFocusTags(focusTags);
+  final focusSummary = summarizeFeedbackFocusTags(focusTags);
   if (focusSummary != null) {
     parts.add('关注=$focusSummary');
   }
@@ -338,9 +340,9 @@ String? summarizeMemoryScopePressureFromQualityReviews(
         ({int reviews, Map<String, int> hits, Map<String, int> suppressed})
       >{};
   for (final row in rows.where((item) => item.source == 'auto')) {
-    final diagnostics = _qualityDiagnosticsMap(row);
+    final diagnostics = qualityDiagnosticsMap(row);
     if (diagnostics == null) continue;
-    final scope = _formatQualityScopeLabel(row);
+    final scope = formatQualityScopeLabel(row);
     final current =
         scopes[scope] ??
         (reviews: 0, hits: <String, int>{}, suppressed: <String, int>{});
@@ -348,7 +350,7 @@ String? summarizeMemoryScopePressureFromQualityReviews(
     final nextHits = Map<String, int>.from(current.hits);
     final nextSuppressed = Map<String, int>.from(current.suppressed);
 
-    final hitCounts = _diagnosticStringIntMap(
+    final hitCounts = diagnosticStringIntMap(
       diagnostics,
       'memoryHitBucketCounts',
     );
@@ -361,7 +363,7 @@ String? summarizeMemoryScopePressureFromQualityReviews(
         );
       }
     }
-    final suppressedCounts = _diagnosticStringIntMap(
+    final suppressedCounts = diagnosticStringIntMap(
       diagnostics,
       'memorySuppressedBucketCounts',
     );
@@ -396,8 +398,8 @@ String? summarizeMemoryScopePressureFromQualityReviews(
   return items
       .take(maxScopes)
       .map((entry) {
-        final hitSummary = _joinTopBucketCounts(entry.value.hits, maxItems: 2);
-        final suppressedSummary = _joinTopBucketCounts(
+        final hitSummary = joinTopBucketCounts(entry.value.hits, maxItems: 2);
+        final suppressedSummary = joinTopBucketCounts(
           entry.value.suppressed,
           maxItems: 2,
         );
@@ -429,26 +431,26 @@ String? summarizeMemoryOptimizationSavingsFromQualityReviews(
         })
       >{};
   for (final row in rows.where((item) => item.source == 'auto')) {
-    final diagnostics = _qualityDiagnosticsMap(row);
+    final diagnostics = qualityDiagnosticsMap(row);
     if (diagnostics == null) continue;
-    final removedChars = _diagnosticInt(
+    final removedChars = diagnosticInt(
       diagnostics,
       'memoryOptimizationRemovedChars',
     );
-    final removedRows = _diagnosticInt(
+    final removedRows = diagnosticInt(
       diagnostics,
       'memoryOptimizationRemovedRows',
     );
-    final removedVisualRows = _diagnosticInt(
+    final removedVisualRows = diagnosticInt(
       diagnostics,
       'memoryOptimizationRemovedVisualRows',
     );
-    final removedDuplicateRows = _diagnosticInt(
+    final removedDuplicateRows = diagnosticInt(
       diagnostics,
       'memoryOptimizationRemovedDuplicateRows',
     );
     if (removedChars <= 0 && removedRows <= 0) continue;
-    final scope = _formatQualityScopeLabel(row);
+    final scope = formatQualityScopeLabel(row);
     final current =
         scopes[scope] ??
         (
@@ -505,7 +507,7 @@ String? summarizeScopeRepairQueueFromQualityReviews(
   bool hasDialogueRisk(QualityReview row) {
     final comments = (row.comments ?? '').toLowerCase();
     return (row.dialogueNaturalness != null &&
-            _qualityScorePercent(row.dialogueNaturalness) < 80) ||
+            qualityScorePercent(row.dialogueNaturalness) < 80) ||
         comments.contains('生硬') ||
         comments.contains('朗读') ||
         comments.contains('没情绪') ||
@@ -515,7 +517,7 @@ String? summarizeScopeRepairQueueFromQualityReviews(
   bool hasVisualRisk(QualityReview row) {
     final comments = (row.comments ?? '').toLowerCase();
     return (row.visualQuality != null &&
-            _qualityScorePercent(row.visualQuality) < 80) ||
+            qualityScorePercent(row.visualQuality) < 80) ||
         comments.contains('穿帮') ||
         comments.contains('不自然') ||
         comments.contains('ai') ||
@@ -523,11 +525,11 @@ String? summarizeScopeRepairQueueFromQualityReviews(
   }
 
   for (final row in rows) {
-    final scope = _formatQualityScopeLabel(row);
-    final diagnostics = _qualityDiagnosticsMap(row);
+    final scope = formatQualityScopeLabel(row);
+    final diagnostics = qualityDiagnosticsMap(row);
     final removedChars = diagnostics == null
         ? 0
-        : _diagnosticInt(diagnostics, 'memoryOptimizationRemovedChars');
+        : diagnosticInt(diagnostics, 'memoryOptimizationRemovedChars');
     final suggestions = buildQualityReviewRepairSuggestions(row);
     final dialogueRisk = hasDialogueRisk(row);
     final visualRisk = hasVisualRisk(row);

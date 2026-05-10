@@ -67,6 +67,7 @@ async fn fetch_workspace_stats(
             SELECT COUNT(*)::bigint
             FROM public.app_project p
             WHERE p.workspace_id = w.id
+              AND p.archived_at IS NULL
           ) AS workspace_project_count,
           (
             SELECT COUNT(*)::bigint
@@ -76,6 +77,7 @@ async fn fetch_workspace_stats(
                 SELECT 1
                 FROM public.app_project p
                 WHERE p.workspace_id = w.id
+                  AND p.archived_at IS NULL
                   AND (
                     (j.payload->>'project_uuid') = p.id::text
                     OR (

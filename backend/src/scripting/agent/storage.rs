@@ -32,6 +32,7 @@ pub(super) async fn resolve_owned_project_uuid(
         r#"
         SELECT id FROM app_project
         WHERE numeric_id = $1 AND owner_user_id = $2
+          AND archived_at IS NULL
         "#,
     )
     .bind(project_numeric_id)

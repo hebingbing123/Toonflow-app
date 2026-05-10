@@ -23,6 +23,7 @@ extension _ShortVideoSpaceSectionExportHistoryDialog
       builder: (dialogContext) {
         return ExportHistoryDialog(
           projectId: _selectedProjectId ?? '',
+          accessToken: widget.accessToken,
         );
       },
     );
@@ -182,9 +183,11 @@ class ExportHistoryDialog extends StatefulWidget {
   const ExportHistoryDialog({
     super.key,
     required this.projectId,
+    required this.accessToken,
   });
 
   final String projectId;
+  final String? accessToken;
 
   @override
   State<ExportHistoryDialog> createState() => _ExportHistoryDialogState();
@@ -213,8 +216,6 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     });
 
     try {
-      // TODO: Replace with actual API call when backend endpoint is ready
-      // Expected endpoint: GET /api/v1/export/tasks?project_id={projectId}&status={status}&start_date={date}
       final items = await _fetchExportHistory(
         projectId: widget.projectId,
         statusFilter: _statusFilter,
@@ -238,81 +239,48 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }
 
   /// Fetch export history from backend
-  ///
-  /// TODO: Replace with actual API call when backend endpoint is ready
-  /// Expected endpoint: GET /api/v1/export/tasks
   Future<List<ExportHistoryItem>> _fetchExportHistory({
     required String projectId,
     required ExportHistoryStatusFilter statusFilter,
     required ExportHistoryTimeFilter timeFilter,
   }) async {
-    // Simulate API call with mock data
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Mock data for demonstration
-    final now = DateTime.now();
-    final mockItems = <ExportHistoryItem>[
-      ExportHistoryItem(
-        taskId: 'task-001',
-        status: ExportTaskStatus.completed,
-        format: 'mp4',
-        resolution: '1080p',
-        bitrate: 'high',
-        framerate: 30,
-        createdAt: now.subtract(const Duration(hours: 2)),
-        completedAt: now.subtract(const Duration(hours: 1, minutes: 55)),
-        outputUrl: 'https://example.com/exports/video-001.mp4',
-        fileSize: 52428800, // 50 MB
-      ),
-      ExportHistoryItem(
-        taskId: 'task-002',
-        status: ExportTaskStatus.failed,
-        format: 'mov',
-        resolution: '720p',
-        bitrate: 'medium',
-        framerate: 24,
-        createdAt: now.subtract(const Duration(days: 1)),
-        completedAt: now.subtract(const Duration(days: 1)),
-        errorMessage: '编码失败：视频素材损坏',
-      ),
-      ExportHistoryItem(
-        taskId: 'task-003',
-        status: ExportTaskStatus.completed,
-        format: 'webm',
-        resolution: '1080p',
-        bitrate: 'medium',
-        framerate: 30,
-        createdAt: now.subtract(const Duration(days: 3)),
-        completedAt: now.subtract(const Duration(days: 3)),
-        outputUrl: 'https://example.com/exports/video-003.webm',
-        fileSize: 41943040, // 40 MB
-      ),
-      ExportHistoryItem(
-        taskId: 'task-004',
-        status: ExportTaskStatus.cancelled,
-        format: 'mp4',
-        resolution: '480p',
-        bitrate: 'low',
-        framerate: 30,
-        createdAt: now.subtract(const Duration(days: 7)),
-        completedAt: now.subtract(const Duration(days: 7)),
-      ),
-      ExportHistoryItem(
-        taskId: 'task-005',
-        status: ExportTaskStatus.completed,
-        format: 'mp4',
-        resolution: '1080p',
-        bitrate: 'high',
-        framerate: 60,
-        createdAt: now.subtract(const Duration(days: 15)),
-        completedAt: now.subtract(const Duration(days: 15)),
-        outputUrl: 'https://example.com/exports/video-005.mp4',
-        fileSize: 104857600, // 100 MB
-      ),
-    ];
+    final token = widget.accessToken?.trim();
+    if (token == null || token.isEmpty) {
+      throw Exception('会话已失效，请重新登录');
+    }
+    final String? status = switch (statusFilter) {
+      ExportHistoryStatusFilter.all => null,
+      ExportHistoryStatusFilter.completed => 'completed',
+      ExportHistoryStatusFilter.failed => 'failed',
+      ExportHistoryStatusFilter.cancelled => 'cancelled',
+    };
+    final tasks = await getExportTasksV1(
+      token,
+      projectId: projectId,
+      status: status,
+      limit: 200,
+      offset: 0,
+    );
+    final items = tasks
+        .map(
+          (task) => ExportHistoryItem(
+            taskId: task.id,
+            status: ExportTaskStatus.fromString(task.status),
+            format: task.format,
+            resolution: (task.quality['resolution'] as String? ?? '1080p'),
+            bitrate: _bitrateLabelFromQuality(task.quality),
+            framerate: (task.quality['framerate'] as num?)?.toInt() ?? 30,
+            createdAt: task.createdAt,
+            completedAt: task.completedAt,
+            outputUrl: task.outputUrl,
+            errorMessage: task.error,
+            fileSize: (task.quality['estimatedFileSizeBytes'] as num?)?.toInt(),
+          ),
+        )
+        .toList(growable: false);
 
     // Apply filters
-    var filtered = mockItems.where((item) {
+    var filtered = items.where((item) {
       // Status filter
       if (!statusFilter.matches(item.status)) return false;
 
@@ -331,6 +299,24 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     return filtered;
   }
 
+  String _bitrateLabelFromQuality(Map<String, dynamic> quality) {
+    final raw = quality['bitrate'];
+    if (raw is num) {
+      if (raw >= 7000) {
+        return 'high';
+      }
+      if (raw >= 3000) {
+        return 'medium';
+      }
+      return 'low';
+    }
+    final text = quality['bitrateLabel'] as String?;
+    if (text != null && text.trim().isNotEmpty) {
+      return text.trim();
+    }
+    return 'medium';
+  }
+
   Future<void> _downloadExport(ExportHistoryItem item) async {
     if (item.outputUrl == null || _downloadingTasks.contains(item.taskId)) {
       return;
@@ -341,15 +327,13 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     });
 
     try {
-      // TODO: Replace with actual download logic when backend is ready
-      // This should trigger a browser download or save to device
       await _triggerDownload(item.outputUrl!, item.taskId);
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('开始下载 ${item.format.toUpperCase()} 文件'),
+          content: Text('已复制下载链接（${item.format.toUpperCase()}）'),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -372,19 +356,9 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     }
   }
 
-  /// Trigger file download
-  ///
-  /// TODO: Implement actual download logic
-  /// For web: use html.AnchorElement with download attribute
-  /// For mobile: use path_provider and http to save file
   Future<void> _triggerDownload(String url, String taskId) async {
-    // Simulate download delay
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    // In a real implementation:
-    // - For web: Create an anchor element and trigger click
-    // - For mobile: Download file to device storage using http and path_provider
-    debugPrint('Downloading from: $url for task: $taskId');
+    await Clipboard.setData(ClipboardData(text: url));
+    debugPrint('Export download url for task $taskId: $url');
   }
 
   @override

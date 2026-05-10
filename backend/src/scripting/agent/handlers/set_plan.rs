@@ -42,6 +42,7 @@ pub(super) async fn post_set_plan_data(
         r#"
         SELECT id FROM app_project
         WHERE numeric_id = $1 AND owner_user_id = $2
+          AND archived_at IS NULL
         "#,
     )
     .bind(body.project_id)

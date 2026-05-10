@@ -5,6 +5,7 @@ import 'config.dart';
 import 'home_page.dart';
 import 'platform/rust_api_feedback.dart';
 import 'status_page.dart';
+import 'global_search/search_results_page.dart';
 
 bool shouldOpenStatusPageForInitialUri(Uri uri) {
   final path = uri.path.trim();
@@ -37,6 +38,23 @@ class OpenFlowApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: home,
+      routes: {
+        '/search': (context) {
+          // Extract query from route arguments
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          final query = args?['query'] as String? ?? '';
+          
+          // Get access token from Supabase session
+          final accessToken = kSupabaseConfigured
+              ? Supabase.instance.client.auth.currentSession?.accessToken
+              : null;
+          
+          return SearchResultsPage(
+            query: query,
+            accessToken: accessToken,
+          );
+        },
+      },
     );
   }
 }

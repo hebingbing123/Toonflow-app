@@ -9,6 +9,7 @@ export 'novels/index.dart';
 export 'production.dart';
 export 'project/index.dart';
 export 'quality/index.dart';
+export 'search/index.dart';
 export 'settings/index.dart';
 export 'shared_kernel/index.dart';
 export 'skills/index.dart';

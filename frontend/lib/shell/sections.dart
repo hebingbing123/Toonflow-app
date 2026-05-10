@@ -1,4 +1,5 @@
 export '../account/section.dart';
+export '../api_keys/section.dart';
 export '../agent_workspaces/section.dart';
 export '../auth/section.dart';
 export '../benchmark/section.dart';

@@ -474,3 +474,208 @@ class BenchmarkTrendsResponseV1 {
 
   final List<BenchmarkTrendPointV1> weeks;
 }
+
+class ABCompareCaseV1 {
+  const ABCompareCaseV1({
+    required this.testCaseId,
+    required this.baselineJobId,
+    required this.optimizedJobId,
+  });
+
+  final String testCaseId;
+  final String baselineJobId;
+  final String optimizedJobId;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'testCaseId': testCaseId,
+    'baselineJobId': baselineJobId,
+    'optimizedJobId': optimizedJobId,
+  };
+}
+
+class ABCompareConfigV1 {
+  const ABCompareConfigV1({
+    required this.minTokenReductionPct,
+    required this.maxQualityDrop,
+    required this.minQualityScore,
+    required this.significanceThreshold,
+  });
+
+  final double minTokenReductionPct;
+  final double maxQualityDrop;
+  final double minQualityScore;
+  final double significanceThreshold;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'minTokenReductionPct': minTokenReductionPct,
+    'maxQualityDrop': maxQualityDrop,
+    'minQualityScore': minQualityScore,
+    'significanceThreshold': significanceThreshold,
+  };
+}
+
+class ABComparisonLiteV1 {
+  const ABComparisonLiteV1({
+    required this.testCaseId,
+    required this.qualityRegression,
+    required this.tokenReductionPct,
+    required this.qualityScoreDiff,
+    required this.pValue,
+    required this.passed,
+    required this.failureReasons,
+  });
+
+  factory ABComparisonLiteV1.fromJson(Map<String, dynamic> json) {
+    final reasons = json['failureReasons'];
+    return ABComparisonLiteV1(
+      testCaseId: json['testCaseId']?.toString() ?? '',
+      qualityRegression: json['qualityRegression'] == true,
+      tokenReductionPct: (json['tokenReductionPct'] as num?)?.toDouble() ?? 0,
+      qualityScoreDiff: (json['qualityScoreDiff'] as num?)?.toDouble(),
+      pValue: (json['pValue'] as num?)?.toDouble(),
+      passed: json['passed'] == true,
+      failureReasons: reasons is List
+          ? reasons.map((e) => e.toString()).toList(growable: false)
+          : const <String>[],
+    );
+  }
+
+  final String testCaseId;
+  final bool qualityRegression;
+  final double tokenReductionPct;
+  final double? qualityScoreDiff;
+  final double? pValue;
+  final bool passed;
+  final List<String> failureReasons;
+}
+
+class ABCompareResponseV1 {
+  const ABCompareResponseV1({
+    required this.totalCases,
+    required this.passedCases,
+    required this.failedCases,
+    required this.avgTokenReductionPct,
+    required this.avgQualityDiff,
+    required this.qualityRegressions,
+    required this.passed,
+    required this.comparisons,
+    this.runId,
+  });
+
+  factory ABCompareResponseV1.fromJson(Map<String, dynamic> json) {
+    final raw = json['comparisons'];
+    return ABCompareResponseV1(
+      runId: json['runId']?.toString(),
+      totalCases: (json['totalCases'] as num?)?.toInt() ?? 0,
+      passedCases: (json['passedCases'] as num?)?.toInt() ?? 0,
+      failedCases: (json['failedCases'] as num?)?.toInt() ?? 0,
+      avgTokenReductionPct:
+          (json['avgTokenReductionPct'] as num?)?.toDouble() ?? 0,
+      avgQualityDiff: (json['avgQualityDiff'] as num?)?.toDouble() ?? 0,
+      qualityRegressions: (json['qualityRegressions'] as num?)?.toInt() ?? 0,
+      passed: json['passed'] == true,
+      comparisons: raw is List
+          ? raw
+                .whereType<Map>()
+                .map(
+                  (item) => ABComparisonLiteV1.fromJson(
+                    Map<String, dynamic>.from(item.cast<String, dynamic>()),
+                  ),
+                )
+                .toList(growable: false)
+          : const <ABComparisonLiteV1>[],
+    );
+  }
+
+  final int totalCases;
+  final int passedCases;
+  final int failedCases;
+  final double avgTokenReductionPct;
+  final double avgQualityDiff;
+  final int qualityRegressions;
+  final bool passed;
+  final List<ABComparisonLiteV1> comparisons;
+  final String? runId;
+}
+
+class ABCompareRunRowV1 {
+  const ABCompareRunRowV1({
+    required this.id,
+    required this.name,
+    required this.createdAt,
+    required this.config,
+    required this.summary,
+  });
+
+  factory ABCompareRunRowV1.fromJson(Map<String, dynamic> json) {
+    return ABCompareRunRowV1(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString(),
+      createdAt: json['createdAt']?.toString() ?? '',
+      config: json['config'] is Map
+          ? Map<String, dynamic>.from(
+              (json['config'] as Map).cast<String, dynamic>(),
+            )
+          : const <String, dynamic>{},
+      summary: json['summary'] is Map
+          ? Map<String, dynamic>.from((json['summary'] as Map).cast<String, dynamic>())
+          : const <String, dynamic>{},
+    );
+  }
+
+  final String id;
+  final String? name;
+  final String createdAt;
+  final Map<String, dynamic> config;
+  final Map<String, dynamic> summary;
+}
+
+class ABCompareRunCaseV1 {
+  const ABCompareRunCaseV1({
+    required this.id,
+    required this.testCaseId,
+    required this.baselineJobId,
+    required this.optimizedJobId,
+    required this.comparison,
+    required this.createdAt,
+  });
+
+  factory ABCompareRunCaseV1.fromJson(Map<String, dynamic> json) {
+    return ABCompareRunCaseV1(
+      id: json['id']?.toString() ?? '',
+      testCaseId: json['testCaseId']?.toString() ?? '',
+      baselineJobId: json['baselineJobId']?.toString() ?? '',
+      optimizedJobId: json['optimizedJobId']?.toString() ?? '',
+      comparison: json['comparison'] is Map
+          ? Map<String, dynamic>.from((json['comparison'] as Map).cast<String, dynamic>())
+          : const <String, dynamic>{},
+      createdAt: json['createdAt']?.toString() ?? '',
+    );
+  }
+
+  final String id;
+  final String testCaseId;
+  final String baselineJobId;
+  final String optimizedJobId;
+  final Map<String, dynamic> comparison;
+  final String createdAt;
+}
+
+class ABCompareRunDetailV1 {
+  const ABCompareRunDetailV1({required this.run, required this.cases});
+
+  factory ABCompareRunDetailV1.fromJson(Map<String, dynamic> json) {
+    return ABCompareRunDetailV1(
+      run: ABCompareRunRowV1.fromJson(
+        Map<String, dynamic>.from((json['run'] as Map).cast<String, dynamic>()),
+      ),
+      cases: (json['cases'] as List<dynamic>? ?? const [])
+          .whereType<Map>()
+          .map((e) => ABCompareRunCaseV1.fromJson(Map<String, dynamic>.from(e.cast<String, dynamic>())))
+          .toList(growable: false),
+    );
+  }
+
+  final ABCompareRunRowV1 run;
+  final List<ABCompareRunCaseV1> cases;
+}

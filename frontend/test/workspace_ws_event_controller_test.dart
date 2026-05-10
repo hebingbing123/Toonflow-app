@@ -15,6 +15,7 @@ void main() {
       onErrorChanged: (_) {},
       onWsMessage: (_) {},
       onWsLifecycleSettled: () {},
+      onWsConnectionChanged: (_) {},
     );
     addTearDown(inputController.dispose);
     addTearDown(skillsHarnessController.dispose);
@@ -59,6 +60,7 @@ void main() {
         onErrorChanged: (_) {},
         onWsMessage: (_) {},
         onWsLifecycleSettled: () {},
+        onWsConnectionChanged: (_) {},
       );
       addTearDown(inputController.dispose);
       addTearDown(skillsHarnessController.dispose);
@@ -100,6 +102,7 @@ void main() {
       onErrorChanged: (_) {},
       onWsMessage: (_) {},
       onWsLifecycleSettled: () {},
+      onWsConnectionChanged: (_) {},
     );
     addTearDown(inputController.dispose);
     addTearDown(skillsHarnessController.dispose);
@@ -142,6 +145,7 @@ void main() {
       onErrorChanged: (_) {},
       onWsMessage: (_) {},
       onWsLifecycleSettled: () {},
+      onWsConnectionChanged: (_) {},
     );
     addTearDown(inputController.dispose);
     addTearDown(skillsHarnessController.dispose);

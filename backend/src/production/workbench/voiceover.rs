@@ -77,6 +77,7 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
         SELECT voice_profile, subtitle_style, bgm_strategy
         FROM app_project
         WHERE owner_user_id = $1 AND numeric_id = $2
+          AND archived_at IS NULL
         "#,
     )
     .bind(uid)

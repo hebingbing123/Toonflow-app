@@ -1470,6 +1470,57 @@ components:
       - items
       - total
       type: object
+    ListNotificationsEnvelope:
+      properties:
+        hasMore:
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/NotificationRecord'
+          type: array
+        nextBeforeId:
+          format: int64
+          type:
+          - integer
+          - 'null'
+        unreadCount:
+          format: int64
+          type: integer
+      required:
+      - items
+      - unreadCount
+      - hasMore
+      type: object
+    ListProjectAuditEnvelope:
+      properties:
+        hasMore:
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/ProjectAuditResponse'
+          type: array
+      required:
+      - items
+      - hasMore
+      type: object
+    ListProjectAuditQuery:
+      additionalProperties: false
+      properties:
+        action:
+          type:
+          - string
+          - 'null'
+        limit:
+          format: int64
+          type:
+          - integer
+          - 'null'
+        offset:
+          format: int64
+          type:
+          - integer
+          - 'null'
+      type: object
     ListPublishAuditQuery:
       properties:
         delivery_mode:
@@ -1520,6 +1571,38 @@ components:
           format: int64
           type: integer
       type: object
+    ListWorkspaceAuditEnvelope:
+      properties:
+        has_more:
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/WorkspaceAuditResponse'
+          type: array
+      required:
+      - items
+      - has_more
+      type: object
+    ListWorkspaceAuditQuery:
+      properties:
+        action:
+          description: Filter by exact action name (for example `workspace_member_upserted`).
+          type:
+          - string
+          - 'null'
+        limit:
+          description: Max rows (**1–200**, default **50**).
+          format: int64
+          type:
+          - integer
+          - 'null'
+        offset:
+          description: Pagination offset (default **0**).
+          format: int64
+          type:
+          - integer
+          - 'null'
+      type: object
     ListWorkspaceInvitesEnvelope:
       properties:
         has_more:
@@ -1549,6 +1632,47 @@ components:
       required:
       - dimension
       - score
+      type: object
+    MarkAllNotificationsReadResponse:
+      additionalProperties: false
+      properties:
+        unreadCount:
+          format: int64
+          type: integer
+        updatedCount:
+          format: int64
+          type: integer
+      required:
+      - updatedCount
+      - unreadCount
+      type: object
+    MarkNotificationsReadBody:
+      additionalProperties: false
+      properties:
+        ids:
+          items:
+            format: int64
+            type: integer
+          type: array
+        read:
+          type:
+          - boolean
+          - 'null'
+      required:
+      - ids
+      type: object
+    MarkNotificationsReadEnvelope:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/NotificationRecord'
+          type: array
+        unreadCount:
+          format: int64
+          type: integer
+      required:
+      - items
+      - unreadCount
       type: object
     MeResponse:
       properties:
@@ -1757,6 +1881,75 @@ components:
           - 'null'
       required:
       - modelName
+      type: object
+    NotificationRecord:
+      properties:
+        changedAt:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        createdAt:
+          format: date-time
+          type: string
+        filePath:
+          type:
+          - string
+          - 'null'
+        id:
+          format: int64
+          type: integer
+        jobId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        linkPath:
+          type:
+          - string
+          - 'null'
+        message:
+          type: string
+        notificationType:
+          type: string
+        payload: {}
+        projectId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        projectNumericId:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        readAt:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        title:
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        userId:
+          format: uuid
+          type: string
+        workspaceId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+      required:
+      - id
+      - userId
+      - notificationType
+      - title
+      - message
+      - payload
+      - createdAt
+      - updatedAt
       type: object
     NovelCrawlAuditSampleRow:
       properties:
@@ -2415,6 +2608,103 @@ components:
       required:
       - ok
       type: object
+    PlatformConfigEnvelope:
+      additionalProperties: false
+      properties:
+        reset:
+          type:
+          - boolean
+          - 'null'
+        scope:
+          type:
+          - string
+          - 'null'
+        toggles:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/PlatformConfigToggleSet'
+      type: object
+    PlatformConfigResponse:
+      additionalProperties: false
+      properties:
+        currentWorkspace:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/PlatformConfigWorkspaceContext'
+        effective:
+          $ref: '#/components/schemas/PlatformConfigToggleSet'
+        hasPlanOverride:
+          type: boolean
+        hasUserOverride:
+          type: boolean
+        hasWorkspaceOverride:
+          type: boolean
+        planOverride:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/PlatformConfigToggleSet'
+        planTier:
+          type: string
+        schemaVersion:
+          format: int32
+          type: integer
+        scope:
+          type: string
+        userOverride:
+          $ref: '#/components/schemas/PlatformConfigToggleSet'
+        workspaceOverride:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/PlatformConfigToggleSet'
+      required:
+      - scope
+      - schemaVersion
+      - effective
+      - planTier
+      - hasPlanOverride
+      - userOverride
+      - hasUserOverride
+      - hasWorkspaceOverride
+      type: object
+    PlatformConfigToggleSet:
+      additionalProperties: false
+      properties:
+        benchmarkPaneEnabled:
+          type: boolean
+        helpHubEnabled:
+          type: boolean
+        jobsPaneEnabled:
+          type: boolean
+        platformStatusEnabled:
+          type: boolean
+        qualityDashboardEnabled:
+          type: boolean
+        qualityRefreshControlsEnabled:
+          type: boolean
+        workspaceActivityEnabled:
+          type: boolean
+      type: object
+    PlatformConfigWorkspaceContext:
+      additionalProperties: false
+      properties:
+        canManageOverride:
+          type: boolean
+        id:
+          format: uuid
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        workspaceType:
+          type: string
+      required:
+      - id
+      - name
+      - workspaceType
+      - role
+      - canManageOverride
+      type: object
     ProjectAssetsOverviewResponse:
       properties:
         by_asset_type:
@@ -2439,6 +2729,45 @@ components:
       - total_count
       - candidate_counts
       - by_asset_type
+      type: object
+    ProjectAuditResponse:
+      properties:
+        action:
+          type: string
+        actorUserId:
+          format: uuid
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        details: {}
+        id:
+          format: int64
+          type: integer
+        projectId:
+          format: uuid
+          type: string
+        projectNumericId:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        targetUserId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        workspaceId:
+          format: uuid
+          type: string
+      required:
+      - id
+      - projectId
+      - workspaceId
+      - actorUserId
+      - action
+      - details
+      - createdAt
       type: object
     ProjectBrief:
       additionalProperties: false
@@ -2714,6 +3043,14 @@ components:
         numeric_id:
           format: int32
           type: integer
+        project_access_mode:
+          description: Effective access mode for the caller in the current workspace context.
+          example: restricted
+          type: string
+        project_access_role:
+          description: Effective access role resolved for the caller on this project.
+          example: editor
+          type: string
         project_type:
           type:
           - string
@@ -2771,6 +3108,8 @@ components:
       required:
       - id
       - numeric_id
+      - project_access_mode
+      - project_access_role
       title: ProjectRow
       type: object
     ProjectShortVideoAssemblyResponse:
@@ -3424,6 +3763,45 @@ components:
       required:
       - storyboardId
       - degraded
+      type: object
+    QualityDashboardRefreshResponse:
+      properties:
+        mode:
+          type: string
+        performed:
+          type: boolean
+        refreshedAt:
+          format: date-time
+          type: string
+        rowCount:
+          format: int64
+          type: integer
+        sourceMaxReviewCreatedAt:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        sourceMaxUsageCreatedAt:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        sourceReviewCount:
+          format: int64
+          type: integer
+        sourceUsageCount:
+          format: int64
+          type: integer
+        staleBeforeRefresh:
+          type: boolean
+      required:
+      - refreshedAt
+      - rowCount
+      - mode
+      - performed
+      - staleBeforeRefresh
+      - sourceReviewCount
+      - sourceUsageCount
       type: object
     QualityDegradationSummary:
       description: Quality degradation summary for a project or script.
@@ -4573,6 +4951,15 @@ components:
       - platform_copy_fragment
       - source
       type: object
+    TransferWorkspaceOwnerBody:
+      additionalProperties: false
+      properties:
+        target_user_id:
+          format: uuid
+          type: string
+      required:
+      - target_user_id
+      type: object
     UpdateBenchmarkCaseBody:
       additionalProperties: false
       description: 更新基线样本请求体
@@ -4788,6 +5175,36 @@ components:
       required:
       - service
       - version
+      type: object
+    WorkspaceAuditResponse:
+      properties:
+        action:
+          type: string
+        actor_user_id:
+          format: uuid
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        details: {}
+        id:
+          format: int64
+          type: integer
+        target_user_id:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        workspace_id:
+          format: uuid
+          type: string
+      required:
+      - id
+      - workspace_id
+      - actor_user_id
+      - action
+      - details
+      - created_at
       type: object
     WorkspaceInviteResponse:
       properties:
@@ -11702,6 +12119,69 @@ paths:
       summary: Download asset image bytes or redirect (by project UUID)
       tags:
       - assets
+  /api/v1/projects/{project_id}/audit:
+    get:
+      operationId: listProjectAuditV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - in: query
+        name: action
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: limit
+        required: false
+        schema:
+          format: int64
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          format: int64
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProjectAuditEnvelope'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
   /api/v1/projects/{project_id}/home:
     get:
       operationId: getProjectHomeByIdV1
@@ -14809,6 +15289,83 @@ paths:
       summary: GET /api/v1/quality/bad-case-stats
       tags:
       - quality
+  /api/v1/quality/dashboard:
+    get:
+      operationId: getQualityDashboardV1
+      parameters:
+      - in: query
+        name: projectId
+        required: false
+        schema:
+          format: int32
+          type: integer
+      - in: query
+        name: scriptId
+        required: false
+        schema:
+          format: int32
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      summary: GET /api/v1/quality/dashboard - 主面板聚合读模型
+      tags:
+      - quality
+    post:
+      operationId: refreshQualityDashboardV1
+      parameters:
+      - in: query
+        name: onlyIfStale
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityDashboardRefreshResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      summary: POST /api/v1/quality/dashboard - 刷新主面板物化读模型
+      tags:
+      - quality
   /api/v1/quality/reviews:
     get:
       operationId: listQualityReviewsV1
@@ -15969,6 +16526,193 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - settings
+  /api/v1/settings/notifications:
+    get:
+      operationId: getNotificationsV1
+      parameters:
+      - in: query
+        name: notificationType
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: unreadOnly
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: query
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: limit
+        required: false
+        schema:
+          format: int64
+          type: integer
+      - in: query
+        name: beforeId
+        required: false
+        schema:
+          format: int64
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListNotificationsEnvelope'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - settings
+  /api/v1/settings/notifications/mark-all-read:
+    post:
+      operationId: markAllNotificationsReadV1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkAllNotificationsReadResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - settings
+  /api/v1/settings/notifications/mark-read:
+    post:
+      operationId: markNotificationsReadV1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkNotificationsReadBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkNotificationsReadEnvelope'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - settings
+  /api/v1/settings/platform-config:
+    get:
+      operationId: getPlatformConfigV1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformConfigResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - settings
+    post:
+      operationId: postPlatformConfigV1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformConfigEnvelope'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformConfigResponse'
+          description: OK
         '401':
           content:
             application/json:
@@ -17251,6 +17995,69 @@ paths:
       - bearerAuth: []
       tags:
       - workspaces
+  /api/v1/workspaces/{workspace_id}/audit:
+    get:
+      operationId: listWorkspaceAuditV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Filter by exact action name (for example `workspace_member_upserted`).
+        example: workspace_invite_created
+        in: query
+        name: action
+        required: false
+        schema:
+          type: string
+      - description: Max rows (**1–200**, default **50**).
+        example: 50
+        in: query
+        name: limit
+        required: false
+        schema:
+          format: int64
+          type: integer
+      - description: Pagination offset (default **0**).
+        example: 0
+        in: query
+        name: offset
+        required: false
+        schema:
+          format: int64
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListWorkspaceAuditEnvelope'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
   /api/v1/workspaces/{workspace_id}/invites:
     get:
       operationId: listWorkspaceInvitesV1
@@ -17822,6 +18629,70 @@ paths:
       - bearerAuth: []
       tags:
       - workspaces
+  /api/v1/workspaces/{workspace_id}/owner-transfer:
+    post:
+      operationId: transferWorkspaceOwnerV1
+      parameters:
+      - description: Workspace UUID
+        in: path
+        name: workspace_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferWorkspaceOwnerBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - workspaces
   /api/v1/workspaces/{workspace_id}/stats:
     get:
       operationId: getWorkspaceStatsV1
@@ -17868,7 +18739,7 @@ paths:
       - workspaces
   /api/v1/ws:
     get:
-      description: "# WebSocket events (`/api/v1/ws`)\n\nSingle WebSocket entry (same version prefix as REST). Clients derive the URL from HTTP `baseUrl`, e.g. `ws://127.0.0.1:8666/api/v1/ws` or `wss://…/api/v1/ws` behind TLS.\n\n## Wire envelope (target v1)\n\nAll frames are **UTF-8 JSON** with:\n\n| Field | Type | Required | Notes |\n|--------|------|----------|--------|\n| `type` | string | yes | `domain.action` (lowercase), e.g. `agent.chat.send` |\n| `schema_version` | integer | yes | Start at `1`; bump when payload is incompatible |\n| `payload` | object | yes | Event-specific body |\n| `request_id` | string (uuid) | no | Correlate with logs / tracing |\n\nUnknown `type` or unsupported `schema_version` → close with policy-defined code or return `error.occurred` (see below).\n\n## Authentication\n\n- **v1 (no BFF)**: Same JWT as REST — Supabase access token.\n- Browsers cannot set arbitrary headers on `WebSocket`; use **query** `access_token=<jwt>` or **first message** `session.auth` (see below) — pick one per client and document in Flutter config.\n\n### `session.auth` (client → server)\n\n| Field | Type | Required |\n|-------|------|----------|\n| `type` | const `session.auth` | yes |\n| `schema_version` | `1` | yes |\n| `payload.access_token` | string | yes |\n\nServer responds with `session.ready` or `error.occurred` before other traffic.\n\n### `session.ready` (server → client)\n\n| Field | Notes |\n|-------|--------|\n| `payload.sub` | Authenticated user id (UUID string, matches JWT `sub`) |\n\n### `harness.tool.invoke` (client → server)\n\nRequires an authenticated session (`?access_token=` or successful `session.auth`). Does **not** require `agent.*.attach`.\n\n| Field | Type | Required |\n|-------|------|----------|\n| `type` | const `harness.tool.invoke` | yes |\n| `schema_version` | `1` | yes |\n| `payload.name` | string | yes (tool id from `GET /api/v1/harness/tools`) |\n| `payload.arguments` | object | no (defaults to `{}`) |\n| `payload.arguments.path` | string | required for **`skills.read`** — relative path under `data/skills` (same as REST `GET /api/v1/skills/content?path=`) |\n\n#### Production `add_deriveAsset`\n\n- **`arguments.assetsId`**: parent asset **`app_asset.numeric_id`**. That parent row must be linked to the active script (**`app_script_asset`**) for **`arguments.scriptId`** or the script from **`agent.production.attach`** / **`agent.context.update`**.\n- **`arguments.id`** (optional): when updating an existing derived asset, that row must already be linked to the same script (**`UPDATE … FROM app_script_asset`** on the server).\n\n### `harness.tool.result` (server → client)\n\nEmitted when invocation succeeds.\n\n| Field | Notes |\n|-------|--------|\n| `payload.name` | Tool that ran |\n| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }`; script tools: `get_planData` (includes optional numeric `planId` when an `app_script_agent_plan` row exists, aligned with REST `get-plan-data`), `get_script_content` (supports `scriptId` plus optional `relativeOffset` for previous/next episode windows), `get_novel_text`, `get_novel_events` (both default to compact reads when args are omitted: `get_novel_text` returns one chapter window with trimmed fields; `get_novel_events` returns up to eight trimmed event rows), `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent` (sub-agent tools return `{ tool, agent_role, result, review? }`; supervision tools may include parsed `reviewSummary` attrs under `review`); production tools: `get_flowData` (compact by default when filters are omitted: `script`/`scriptPlan` return trimmed text windows, `storyboardTable` returns the first 8 key rows, `assets`/`storyboard` return trimmed field subsets plus bounded row counts), `add_deriveAsset` (parent `arguments.assetsId` must be linked to the active script in `app_script_asset`; see **Production `add_deriveAsset`** below), `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`, `run_sub_agent_production_supervision`; `wasm.probe`: `{ ok, value }`; `wasm.user.probe` (requires `arguments.wasm_id` UUID): `{ ok, value }`) |\n\n### `harness.agent.run` (client → server)\n\nMulti-round **OpenAI tool calling** loop: the model may invoke Harness catalog tools; the server runs them (same rules as `harness.tool.invoke`) and feeds results back until the model returns a final assistant message.\n\nRequires **`OPENAI_API_KEY` / `LLM_API_KEY`** (same as `agent.chat.send`). Requires an authenticated session and **an attached channel** (`agent.script.attach` or `agent.production.attach`) before use.\n\n| Field | Type | Required |\n|-------|------|----------|\n| `type` | const `harness.agent.run` | yes |\n| `schema_version` | `1` | yes |\n| `payload.content` | string | yes (user goal / instruction) |\n| `payload.max_tool_rounds` | integer | no (default **8**, clamped **1–32**; each “round” is one chat completion that may issue tool calls) |\n| `payload.stream` | boolean | no — **WP‑E**：请求「流式输出 + 工具交错」时为 **`true`**；服务端当前在未设置 **`HARNESS_AGENT_STREAMING_TOOLS=1`** 时返回 **`error.occurred`**（`not_implemented`）。启用 env 后仍使用同一套非流式 completion + 工具循环（流式 token 事件后续里程碑补齐）。 |\n\nShares **`agent.run.cancel`** with streaming chat: cancel aborts an in-flight `harness.agent.run`.\n\n### `harness.agent.started` (server → client)\n\n| Field | Notes |\n|-------|-------|\n| `payload.max_tool_rounds` | Configured cap |\n\n### `harness.agent.tool_call` (server → client)\n\nEmitted before each tool execution during the loop.\n\n| Field | Notes |\n|-------|-------|\n| `payload.call_id` | OpenAI `tool_call` id |\n| `payload.name` | Tool name |\n| `payload.arguments` | Parsed JSON arguments (or a fallback object if JSON parse fails) |\n\n### `harness.agent.finished` (server → client)\n\nAfter the model returns a final text response (no tool calls in that completion).\n\n| Field | Notes |\n|-------|-------|\n| `payload.tool_rounds_executed` | Completions that executed at least one tool call |\n| `payload.finish_reason` | e.g. `stop` |\n\n### `harness.agent.cancelled` (server → client)\n\nEmitted when the run stops due to **`agent.run.cancel`** (cancel token).\n\nThe final assistant text uses the same **`chat.message.*` / `chat.content.*`** sequence as a non-streaming single block (one `chat.content.updated` with full text).\n\n### `generation.job.updated` (server → client)\n\nPushed when a row in `app_generation_job` owned by the caller transitions (for example `queued` → `running` → `succeeded` / `failed`, `queued` → `cancelled`, or `failed` → `queued` via retry). **`payload`** is the full job object (snake_case: `id`, `owner_user_id`, `kind`, `status`, `payload`, `result`, `error_message`, `idempotency_key`, `created_at`, `updated_at`).\n\nThe server registers the connection for push after auth (`?access_token=` or `session.auth`).\n\nCancelling a **`running`** job via REST sets `cancelled` immediately; the in-process worker will not apply `succeeded` / `failed` if the row is no longer `running`.\n\n### `session.ack` (server → client)\n\nGeneric success for attach / context update / cancel; carries `request_id` when the client sent one. When the server resolved **`app_project.workspace_id`** from Postgres, **`payload.workspaceUuid`** echoes that UUID so clients can confirm the active Harness workspace boundary.\n\n### `agent.chat.send` → LLM stream (server → client)\n\nWhen `OPENAI_API_KEY` or `LLM_API_KEY` is configured, the server streams an OpenAI-compatible **`/v1/chat/completions`** response and emits (in order):\n\n1. **`chat.message.created`** — assistant shell (`status`: `streaming`, `name`: `统筹` or `视频策划` by channel).\n2. **`chat.content.added`** — first `text` block (`messageId`, `content.id`).\n3. **`chat.content.updated`** — repeated; `payload.append` carries each token/chunk (client concatenates for full text).\n4. **`chat.message.updated`** — `status`: `complete` or `stop` (cancel / disconnect).\n\nIf the API key is missing, respond with **`error.occurred`** (`code`: `llm_not_configured`). Upstream failures use `code`: `llm_error`.\n\n## Channels vs previous Socket.IO namespaces\n\nPrevious Node stack used Socket.IO namespaces:\n\n| Previous namespace | Purpose |\n|------------------|---------|\n| `/api/socket/scriptAgent` | 剧本 / 统筹 Agent |\n| `/api/socket/productionAgent` | 视频策划 Agent |\n\n**Target mapping**: `payload.channel` on the first post-auth message, or dedicated connect types:\n\n| `type` | Meaning |\n|--------|---------|\n| `agent.script.attach` | Former `scriptAgent` namespace |\n| `agent.production.attach` | Former `productionAgent` namespace |\n\n`payload` should carry `isolation_key` plus **project scope** and (for production / `agent.context.update`) **script scope**:\n\n| Wire field | Meaning |\n|------------|---------|\n| **`projectUuid`** (preferred) | `app_project.id` (UUID string) |\n| **`workspaceUuid`** (optional) | `app_workspace.id` / **`app_project.workspace_id`**; when sent, must match the resolved project's workspace (400 / WS `bad_request` if not); omit when using legacy numeric-only attach without DB |\n| **`project_id`** (legacy) | `app_project.numeric_id` (positive integer) |\n| **`scriptUuid`** (preferred) | `app_script.id` |\n| **`script_id`** (legacy) | `app_script.numeric_id` |\n\nSend **`projectUuid`** and/or **`project_id`** (same pairing rules as REST agent-memory: if both are sent they must refer to the same row). Optional **`workspaceUuid`** must match **`app_project.workspace_id`** when Postgres resolves the project (attach fails with `bad_request` on mismatch or when **`workspaceUuid`** is sent but the project was not resolved from the database). When Postgres is configured, legacy **`project_id` only** is verified against **workspace membership** (same as REST); **`projectUuid`** resolution requires a database pool (attach fails with `bad_request` if the pool is absent). **`scriptUuid`** similarly requires DB + a resolved project UUID key server-side.\n\n## Client → server (previous names → target `type`)\n\n| Previous Socket.IO event | Target `type` | Notes |\n|------------------------|---------------|--------|\n| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }`; script tools: `get_planData`, `get_script_content` (`arguments.scriptId` plus optional `arguments.relativeOffset`), `get_novel_text`, `get_novel_events` (compact by default: chapter window / event subset unless the caller widens `fields`, `limit`, or line range), `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent`; production tools: `get_flowData` (`arguments.key` + optional `scriptId`; compact by default unless the caller widens `fields`, `limit`, `rowCount`, or text windows), `add_deriveAsset` (parent `assetsId` must be `app_script_asset`-linked for active `scriptId`; see **Production `add_deriveAsset`** below), `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`, `run_sub_agent_production_supervision`; `wasm.probe` runs embedded WASM (wasmi); `wasm.user.probe` runs owner-scoped active uploaded WASM row (`arguments.wasm_id`) under fuel limit |\n| (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |\n| `chat` | `agent.chat.send` | `payload.content` (string) |\n| `stop` | `agent.run.cancel` | Abort current generation |\n| `updateContext` | `agent.context.update` | Same payload shape as `agent.production.attach` (`isolation_key`, **`projectUuid`** / **`project_id`**, **`scriptUuid`** / **`script_id`**); previous implementation used ack callback — use `request_id` + optional `session.ack` server message |\n\n## Server → client (previous names → target `type`)\n\nPrevious implementation emits arbitrary Socket.IO event names. Map to `domain.action`:\n\n| Previous event | Target `type` | Payload notes |\n|--------------|---------------|---------------|\n| `message` | `chat.message.created` | New message shell: `id`, `role`, `name`, `status`, `datetime`, `content` array |\n| `message:update` | `chat.message.updated` | `id`, `status`, optional `ext` (e.g. `error`) |\n| `content:add` | `chat.content.added` | `messageId`, `content` (discriminated by `content.type`) |\n| `content:update` | `chat.content.updated` | Streaming: e.g. `append` per chunk (see § `agent.chat.send` above) |\n\nContent block shapes follow `src/socket/chatMessagesData.d.ts` (`text`, `markdown`, `image`, `thinking`, `search`, `suggestion`, `toolcall`, `activity`, `reasoning`, etc.) until OpenAPI/JSON Schema is generated for them.\n\n## Errors over WebSocket\n\n| `type` | `payload` |\n|--------|-----------|\n| `error.occurred` | `code` (string), `message` (string), optional `request_id` inside **`payload`** (and the same id may appear on the **envelope** root when the client sent one), optional `details` |\n\nHarness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no runtime path yet), **`invalid_payload`** (bad/missing args, path rules, oversize file), **`invalid_state`** (runtime prerequisites missing, e.g. call `harness.agent.run` before attach), **`not_found`** (skill path missing or inactive/missing user wasm row), **`database_error`** (runtime needs DB but pool/query fails), **`skill_unavailable`** (skills dir missing on server), **`isolation_failed`** (child process tool error), **`wasm_failed`** (WASM interpreter error for `wasm.probe` / `wasm.user.probe`, including fuel-limit traps), **`wasm_timeout`** (`wasm.user.probe` exceeded `HARNESS_USER_WASM_INVOKE_TIMEOUT_MS`), **`unsupported_schema`**.  \nFor `wasm.user.probe`, server-side structured audit remains emitted to logs (`harness.user_wasm.audit`) and is also durably persisted best-effort (`event=invoke`) when Postgres is configured. Invoke-path failures also emit structured warning signals (`harness.user_wasm.signal`) using `signal_name=invoke_wasm_failed|invoke_wasm_timeout` with normalized `error_code` (`invalid_payload`, `not_found`, `database_error`, `object_store_misconfigured`, `wasm_failed`, `wasm_timeout`) for log-pipeline filtering.  \nWhen object-store read fallback is triggered, `signal_name=object_store_get_fail` now carries correlatable context (`request_id`, `workspace_id`, `wasm_id`) when available on the invoke boundary, so operators can join storage-fallback and invoke-fail timelines by request.\n\nAlign `code` / `message` semantics with `the exported OpenAPI document` `ErrorBody` where possible.\n\n## Reverse proxy\n\nConfigure **one** `location` (or equivalent) for `/api/v1/` so HTTP and `Upgrade: websocket` both reach the Rust service.\n\n## Reference implementation (previous)\n\n- Namespaces: `src/socket/index.ts`\n- Handlers: `src/socket/routes/scriptAgent.ts`, `src/socket/routes/productionAgent.ts`\n- Outbound payloads: `src/socket/resTool.ts`\n"
+      description: "# WebSocket events (`/api/v1/ws`)\n\nSingle WebSocket entry (same version prefix as REST). Clients derive the URL from HTTP `baseUrl`, e.g. `ws://127.0.0.1:8666/api/v1/ws` or `wss://…/api/v1/ws` behind TLS.\n\n## Wire envelope (target v1)\n\nAll frames are **UTF-8 JSON** with:\n\n| Field | Type | Required | Notes |\n|--------|------|----------|--------|\n| `type` | string | yes | `domain.action` (lowercase), e.g. `agent.chat.send` |\n| `schema_version` | integer | yes | Start at `1`; bump when payload is incompatible |\n| `payload` | object | yes | Event-specific body |\n| `request_id` | string (uuid) | no | Correlate with logs / tracing |\n\nUnknown `type` or unsupported `schema_version` → close with policy-defined code or return `error.occurred` (see below).\n\n## Authentication\n\n- **v1 (no BFF)**: Same JWT as REST — Supabase access token.\n- Browsers cannot set arbitrary headers on `WebSocket`; use **query** `access_token=<jwt>` or **first message** `session.auth` (see below) — pick one per client and document in Flutter config.\n\n### `session.auth` (client → server)\n\n| Field | Type | Required |\n|-------|------|----------|\n| `type` | const `session.auth` | yes |\n| `schema_version` | `1` | yes |\n| `payload.access_token` | string | yes |\n\nServer responds with `session.ready` or `error.occurred` before other traffic.\n\n### `session.ready` (server → client)\n\n| Field | Notes |\n|-------|--------|\n| `payload.sub` | Authenticated user id (UUID string, matches JWT `sub`) |\n\n### `harness.tool.invoke` (client → server)\n\nRequires an authenticated session (`?access_token=` or successful `session.auth`). Does **not** require `agent.*.attach`.\n\n| Field | Type | Required |\n|-------|------|----------|\n| `type` | const `harness.tool.invoke` | yes |\n| `schema_version` | `1` | yes |\n| `payload.name` | string | yes (tool id from `GET /api/v1/harness/tools`) |\n| `payload.arguments` | object | no (defaults to `{}`) |\n| `payload.arguments.path` | string | required for **`skills.read`** — relative path under `data/skills` (same as REST `GET /api/v1/skills/content?path=`) |\n\n#### Production `add_deriveAsset`\n\n- **`arguments.assetsId`**: parent asset **`app_asset.numeric_id`**. That parent row must be linked to the active script (**`app_script_asset`**) for **`arguments.scriptId`** or the script from **`agent.production.attach`** / **`agent.context.update`**.\n- **`arguments.id`** (optional): when updating an existing derived asset, that row must already be linked to the same script (**`UPDATE … FROM app_script_asset`** on the server).\n\n### `harness.tool.result` (server → client)\n\nEmitted when invocation succeeds.\n\n| Field | Notes |\n|-------|--------|\n| `payload.name` | Tool that ran |\n| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }`; script tools: `get_planData` (includes optional numeric `planId` when an `app_script_agent_plan` row exists, aligned with REST `get-plan-data`), `get_script_content` (supports `scriptId` plus optional `relativeOffset` for previous/next episode windows), `get_novel_text`, `get_novel_events` (both default to compact reads when args are omitted: `get_novel_text` returns one chapter window with trimmed fields; `get_novel_events` returns up to eight trimmed event rows), `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent` (sub-agent tools return `{ tool, agent_role, result, review? }`; supervision tools may include parsed `reviewSummary` attrs under `review`); production tools: `get_flowData` (compact by default when filters are omitted: `script`/`scriptPlan` return trimmed text windows, `storyboardTable` returns the first 8 key rows, `assets`/`storyboard` return trimmed field subsets plus bounded row counts), `add_deriveAsset` (parent `arguments.assetsId` must be linked to the active script in `app_script_asset`; see **Production `add_deriveAsset`** below), `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`, `run_sub_agent_production_supervision`; `wasm.probe`: `{ ok, value }`; `wasm.user.probe` (requires `arguments.wasm_id` UUID): `{ ok, value }`) |\n\n### `harness.agent.run` (client → server)\n\nMulti-round **OpenAI tool calling** loop: the model may invoke Harness catalog tools; the server runs them (same rules as `harness.tool.invoke`) and feeds results back until the model returns a final assistant message.\n\nRequires **`OPENAI_API_KEY` / `LLM_API_KEY`** (same as `agent.chat.send`). Requires an authenticated session and **an attached channel** (`agent.script.attach` or `agent.production.attach`) before use.\n\n| Field | Type | Required |\n|-------|------|----------|\n| `type` | const `harness.agent.run` | yes |\n| `schema_version` | `1` | yes |\n| `payload.content` | string | yes (user goal / instruction) |\n| `payload.max_tool_rounds` | integer | no (default **8**, clamped **1–32**; each “round” is one chat completion that may issue tool calls) |\n| `payload.stream` | boolean | no — **WP‑E**：请求「流式输出 + 工具交错」时为 **`true`**；服务端当前在未设置 **`HARNESS_AGENT_STREAMING_TOOLS=1`** 时返回 **`error.occurred`**（`not_implemented`）。启用 env 后仍使用同一套非流式 completion + 工具循环（流式 token 事件后续里程碑补齐）。 |\n\nShares **`agent.run.cancel`** with streaming chat: cancel aborts an in-flight `harness.agent.run`.\n\n### `harness.agent.started` (server → client)\n\n| Field | Notes |\n|-------|-------|\n| `payload.max_tool_rounds` | Configured cap |\n\n### `harness.agent.tool_call` (server → client)\n\nEmitted before each tool execution during the loop.\n\n| Field | Notes |\n|-------|-------|\n| `payload.call_id` | OpenAI `tool_call` id |\n| `payload.name` | Tool name |\n| `payload.arguments` | Parsed JSON arguments (or a fallback object if JSON parse fails) |\n\n### `harness.agent.finished` (server → client)\n\nAfter the model returns a final text response (no tool calls in that completion).\n\n| Field | Notes |\n|-------|-------|\n| `payload.tool_rounds_executed` | Completions that executed at least one tool call |\n| `payload.finish_reason` | e.g. `stop` |\n\n### `harness.agent.cancelled` (server → client)\n\nEmitted when the run stops due to **`agent.run.cancel`** (cancel token).\n\nThe final assistant text uses the same **`chat.message.*` / `chat.content.*`** sequence as a non-streaming single block (one `chat.content.updated` with full text).\n\n### `generation.job.updated` (server → client)\n\nPushed when a row in `app_generation_job` owned by the caller transitions (for example `queued` → `running` → `succeeded` / `failed`, `queued` → `cancelled`, or `failed` → `queued` via retry). **`payload`** is the full job object (snake_case: `id`, `owner_user_id`, `kind`, `status`, `payload`, `result`, `error_message`, `idempotency_key`, `created_at`, `updated_at`).\n\nThe server registers the connection for push after auth (`?access_token=` or `session.auth`).\n\nCancelling a **`running`** job via REST sets `cancelled` immediately; the in-process worker will not apply `succeeded` / `failed` if the row is no longer `running`.\n\n### `settings.notification.created` / `settings.notification.updated` (server → client)\n\nPushed when the authenticated user receives a new inbox row or when an existing inbox row changes read state. **`payload`** is the full notification object (camelCase: `id`, `userId`, `workspaceId`, `projectId`, `projectNumericId`, `jobId`, `notificationType`, `title`, `message`, `linkPath`, `payload`, `filePath`, `changedAt`, `readAt`, `createdAt`, `updatedAt`).\n\nCurrent producers include:\n\n1. skill file / pack change notices\n2. job terminal-state summaries (`succeeded` / `failed` / `cancelled`)\n3. workspace invite lifecycle summaries (`created` / `resent` / `revoked` / `accepted`)\n\n### `session.ack` (server → client)\n\nGeneric success for attach / context update / cancel; carries `request_id` when the client sent one. When the server resolved **`app_project.workspace_id`** from Postgres, **`payload.workspaceUuid`** echoes that UUID so clients can confirm the active Harness workspace boundary.\n\n### `agent.chat.send` → LLM stream (server → client)\n\nWhen `OPENAI_API_KEY` or `LLM_API_KEY` is configured, the server streams an OpenAI-compatible **`/v1/chat/completions`** response and emits (in order):\n\n1. **`chat.message.created`** — assistant shell (`status`: `streaming`, `name`: `统筹` or `视频策划` by channel).\n2. **`chat.content.added`** — first `text` block (`messageId`, `content.id`).\n3. **`chat.content.updated`** — repeated; `payload.append` carries each token/chunk (client concatenates for full text).\n4. **`chat.message.updated`** — `status`: `complete` or `stop` (cancel / disconnect).\n\nIf the API key is missing, respond with **`error.occurred`** (`code`: `llm_not_configured`). Upstream failures use `code`: `llm_error`.\n\n## Channels vs previous Socket.IO namespaces\n\nPrevious Node stack used Socket.IO namespaces:\n\n| Previous namespace | Purpose |\n|------------------|---------|\n| `/api/socket/scriptAgent` | 剧本 / 统筹 Agent |\n| `/api/socket/productionAgent` | 视频策划 Agent |\n\n**Target mapping**: `payload.channel` on the first post-auth message, or dedicated connect types:\n\n| `type` | Meaning |\n|--------|---------|\n| `agent.script.attach` | Former `scriptAgent` namespace |\n| `agent.production.attach` | Former `productionAgent` namespace |\n\n`payload` should carry `isolation_key` plus **project scope** and (for production / `agent.context.update`) **script scope**:\n\n| Wire field | Meaning |\n|------------|---------|\n| **`projectUuid`** (preferred) | `app_project.id` (UUID string) |\n| **`workspaceUuid`** (optional) | `app_workspace.id` / **`app_project.workspace_id`**; when sent, must match the resolved project's workspace (400 / WS `bad_request` if not); omit when using legacy numeric-only attach without DB |\n| **`project_id`** (legacy) | `app_project.numeric_id` (positive integer) |\n| **`scriptUuid`** (preferred) | `app_script.id` |\n| **`script_id`** (legacy) | `app_script.numeric_id` |\n\nSend **`projectUuid`** and/or **`project_id`** (same pairing rules as REST agent-memory: if both are sent they must refer to the same row). Optional **`workspaceUuid`** must match **`app_project.workspace_id`** when Postgres resolves the project (attach fails with `bad_request` on mismatch or when **`workspaceUuid`** is sent but the project was not resolved from the database). When Postgres is configured, legacy **`project_id` only** is verified against **workspace membership** (same as REST); **`projectUuid`** resolution requires a database pool (attach fails with `bad_request` if the pool is absent). **`scriptUuid`** similarly requires DB + a resolved project UUID key server-side.\n\n## Client → server (previous names → target `type`)\n\n| Previous Socket.IO event | Target `type` | Notes |\n|------------------------|---------------|--------|\n| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }`; script tools: `get_planData`, `get_script_content` (`arguments.scriptId` plus optional `arguments.relativeOffset`), `get_novel_text`, `get_novel_events` (compact by default: chapter window / event subset unless the caller widens `fields`, `limit`, or line range), `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent`; production tools: `get_flowData` (`arguments.key` + optional `scriptId`; compact by default unless the caller widens `fields`, `limit`, `rowCount`, or text windows), `add_deriveAsset` (parent `assetsId` must be `app_script_asset`-linked for active `scriptId`; see **Production `add_deriveAsset`** below), `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`, `run_sub_agent_production_supervision`; `wasm.probe` runs embedded WASM (wasmi); `wasm.user.probe` runs owner-scoped active uploaded WASM row (`arguments.wasm_id`) under fuel limit |\n| (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |\n| `chat` | `agent.chat.send` | `payload.content` (string) |\n| `stop` | `agent.run.cancel` | Abort current generation |\n| `updateContext` | `agent.context.update` | Same payload shape as `agent.production.attach` (`isolation_key`, **`projectUuid`** / **`project_id`**, **`scriptUuid`** / **`script_id`**); previous implementation used ack callback — use `request_id` + optional `session.ack` server message |\n\n## Server → client (previous names → target `type`)\n\nPrevious implementation emits arbitrary Socket.IO event names. Map to `domain.action`:\n\n| Previous event | Target `type` | Payload notes |\n|--------------|---------------|---------------|\n| `message` | `chat.message.created` | New message shell: `id`, `role`, `name`, `status`, `datetime`, `content` array |\n| `message:update` | `chat.message.updated` | `id`, `status`, optional `ext` (e.g. `error`) |\n| `content:add` | `chat.content.added` | `messageId`, `content` (discriminated by `content.type`) |\n| `content:update` | `chat.content.updated` | Streaming: e.g. `append` per chunk (see § `agent.chat.send` above) |\n\nContent block shapes follow `src/socket/chatMessagesData.d.ts` (`text`, `markdown`, `image`, `thinking`, `search`, `suggestion`, `toolcall`, `activity`, `reasoning`, etc.) until OpenAPI/JSON Schema is generated for them.\n\n## Errors over WebSocket\n\n| `type` | `payload` |\n|--------|-----------|\n| `error.occurred` | `code` (string), `message` (string), optional `request_id` inside **`payload`** (and the same id may appear on the **envelope** root when the client sent one), optional `details` |\n\nHarness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no runtime path yet), **`invalid_payload`** (bad/missing args, path rules, oversize file), **`invalid_state`** (runtime prerequisites missing, e.g. call `harness.agent.run` before attach), **`not_found`** (skill path missing or inactive/missing user wasm row), **`database_error`** (runtime needs DB but pool/query fails), **`skill_unavailable`** (skills dir missing on server), **`isolation_failed`** (child process tool error), **`wasm_failed`** (WASM interpreter error for `wasm.probe` / `wasm.user.probe`, including fuel-limit traps), **`wasm_timeout`** (`wasm.user.probe` exceeded `HARNESS_USER_WASM_INVOKE_TIMEOUT_MS`), **`unsupported_schema`**.  \nFor `wasm.user.probe`, server-side structured audit remains emitted to logs (`harness.user_wasm.audit`) and is also durably persisted best-effort (`event=invoke`) when Postgres is configured. Invoke-path failures also emit structured warning signals (`harness.user_wasm.signal`) using `signal_name=invoke_wasm_failed|invoke_wasm_timeout` with normalized `error_code` (`invalid_payload`, `not_found`, `database_error`, `object_store_misconfigured`, `wasm_failed`, `wasm_timeout`) for log-pipeline filtering.  \nWhen object-store read fallback is triggered, `signal_name=object_store_get_fail` now carries correlatable context (`request_id`, `workspace_id`, `wasm_id`) when available on the invoke boundary, so operators can join storage-fallback and invoke-fail timelines by request.\n\nAlign `code` / `message` semantics with `the exported OpenAPI document` `ErrorBody` where possible.\n\n## Reverse proxy\n\nConfigure **one** `location` (or equivalent) for `/api/v1/` so HTTP and `Upgrade: websocket` both reach the Rust service.\n\n## Reference implementation (previous)\n\n- Namespaces: `src/socket/index.ts`\n- Handlers: `src/socket/routes/scriptAgent.ts`, `src/socket/routes/productionAgent.ts`\n- Outbound payloads: `src/socket/resTool.ts`\n"
       operationId: websocketUpgrade
       parameters:
       - description: Supabase JWT when the client cannot set `Authorization` on the WebSocket handshake (typical browsers).

@@ -10,6 +10,7 @@ class PlatformConfigToggleSetV1 {
     required this.helpHubEnabled,
     required this.qualityDashboardEnabled,
     required this.qualityRefreshControlsEnabled,
+    required this.platformStatusEnabled,
     required this.workspaceActivityEnabled,
     required this.benchmarkPaneEnabled,
     required this.jobsPaneEnabled,
@@ -18,6 +19,7 @@ class PlatformConfigToggleSetV1 {
   final bool helpHubEnabled;
   final bool qualityDashboardEnabled;
   final bool qualityRefreshControlsEnabled;
+  final bool platformStatusEnabled;
   final bool workspaceActivityEnabled;
   final bool benchmarkPaneEnabled;
   final bool jobsPaneEnabled;
@@ -26,6 +28,7 @@ class PlatformConfigToggleSetV1 {
     helpHubEnabled: true,
     qualityDashboardEnabled: true,
     qualityRefreshControlsEnabled: true,
+    platformStatusEnabled: true,
     workspaceActivityEnabled: true,
     benchmarkPaneEnabled: true,
     jobsPaneEnabled: true,
@@ -37,6 +40,7 @@ class PlatformConfigToggleSetV1 {
       qualityDashboardEnabled: json['qualityDashboardEnabled'] as bool? ?? true,
       qualityRefreshControlsEnabled:
           json['qualityRefreshControlsEnabled'] as bool? ?? true,
+      platformStatusEnabled: json['platformStatusEnabled'] as bool? ?? true,
       workspaceActivityEnabled:
           json['workspaceActivityEnabled'] as bool? ?? true,
       benchmarkPaneEnabled: json['benchmarkPaneEnabled'] as bool? ?? true,
@@ -48,6 +52,7 @@ class PlatformConfigToggleSetV1 {
     'helpHubEnabled': helpHubEnabled,
     'qualityDashboardEnabled': qualityDashboardEnabled,
     'qualityRefreshControlsEnabled': qualityRefreshControlsEnabled,
+    'platformStatusEnabled': platformStatusEnabled,
     'workspaceActivityEnabled': workspaceActivityEnabled,
     'benchmarkPaneEnabled': benchmarkPaneEnabled,
     'jobsPaneEnabled': jobsPaneEnabled,
@@ -57,6 +62,7 @@ class PlatformConfigToggleSetV1 {
     bool? helpHubEnabled,
     bool? qualityDashboardEnabled,
     bool? qualityRefreshControlsEnabled,
+    bool? platformStatusEnabled,
     bool? workspaceActivityEnabled,
     bool? benchmarkPaneEnabled,
     bool? jobsPaneEnabled,
@@ -67,6 +73,7 @@ class PlatformConfigToggleSetV1 {
           qualityDashboardEnabled ?? this.qualityDashboardEnabled,
       qualityRefreshControlsEnabled:
           qualityRefreshControlsEnabled ?? this.qualityRefreshControlsEnabled,
+      platformStatusEnabled: platformStatusEnabled ?? this.platformStatusEnabled,
       workspaceActivityEnabled:
           workspaceActivityEnabled ?? this.workspaceActivityEnabled,
       benchmarkPaneEnabled: benchmarkPaneEnabled ?? this.benchmarkPaneEnabled,
@@ -82,6 +89,7 @@ class PlatformConfigToggleSetV1 {
             other.qualityDashboardEnabled == qualityDashboardEnabled &&
             other.qualityRefreshControlsEnabled ==
                 qualityRefreshControlsEnabled &&
+            other.platformStatusEnabled == platformStatusEnabled &&
             other.workspaceActivityEnabled == workspaceActivityEnabled &&
             other.benchmarkPaneEnabled == benchmarkPaneEnabled &&
             other.jobsPaneEnabled == jobsPaneEnabled);
@@ -92,6 +100,7 @@ class PlatformConfigToggleSetV1 {
     helpHubEnabled,
     qualityDashboardEnabled,
     qualityRefreshControlsEnabled,
+    platformStatusEnabled,
     workspaceActivityEnabled,
     benchmarkPaneEnabled,
     jobsPaneEnabled,

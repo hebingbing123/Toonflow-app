@@ -1,5 +1,6 @@
 export 'compat.dart';
 export 'audit.dart';
+export 'export.dart';
 export 'members.dart';
 export 'manuals.dart';
 export 'manuals_director.dart';
@@ -7,4 +8,5 @@ export 'manuals_visual.dart';
 export 'overview.dart';
 export 'publish.dart';
 export 'rest.dart';
+export 'tts.dart';
 export 'visual_manual.dart';

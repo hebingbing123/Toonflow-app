@@ -18,12 +18,12 @@ pub(crate) use handlers::{
     __path_get_admin_project_detail, __path_get_admin_search, __path_get_admin_user_detail,
     __path_get_admin_workspace_detail, __path_post_admin_project_governance,
     __path_post_admin_user_governance, __path_post_admin_user_workspace_context,
-    __path_post_admin_workspace_governance,
+    __path_post_admin_workspace_governance, __path_post_admin_workspace_member_remediation,
 };
 pub(crate) use handlers::{
     get_admin_project_detail, get_admin_search, get_admin_user_detail, get_admin_workspace_detail,
     post_admin_project_governance, post_admin_user_governance, post_admin_user_workspace_context,
-    post_admin_workspace_governance,
+    post_admin_workspace_governance, post_admin_workspace_member_remediation,
 };
 
 pub fn router() -> Router<AppState> {
@@ -48,6 +48,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/internal/admin/workspaces/{workspace_id}/governance",
             post(post_admin_workspace_governance),
+        )
+        .route(
+            "/api/v1/internal/admin/workspaces/{workspace_id}/members/remediation",
+            post(post_admin_workspace_member_remediation),
         )
         .route(
             "/api/v1/internal/admin/projects/{project_id}",

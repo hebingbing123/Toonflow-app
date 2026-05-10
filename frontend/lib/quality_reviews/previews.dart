@@ -89,6 +89,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     super.key,
     required this.outlineColor,
     required this.dashboardSummary,
+    required this.refreshControlsEnabled,
     required this.refreshSummary,
     required this.freshnessSummary,
     required this.qualityStatsRows,
@@ -100,6 +101,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
 
   final Color outlineColor;
   final String? dashboardSummary;
+  final bool refreshControlsEnabled;
   final String? refreshSummary;
   final String? freshnessSummary;
   final List<QualityDashboardTargetStat>? qualityStatsRows;
@@ -121,7 +123,9 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
         (badCaseStats?.isNotEmpty ?? false);
     if (!hasAnything) {
       return Text(
-        '质量看板尚未加载。可直接刷新聚合统计、坏例热点、阶段分布与 token 效率。',
+        refreshControlsEnabled
+            ? '质量看板尚未加载。可直接刷新聚合统计、坏例热点、阶段分布与 token 效率。'
+            : '质量看板尚未加载。当前平台配置已关闭刷新入口，可读取当前看板查看已有聚合统计与坏例热点。',
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: outlineColor),

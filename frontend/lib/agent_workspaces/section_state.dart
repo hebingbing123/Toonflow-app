@@ -264,7 +264,17 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 16),
-        Text(title, style: Theme.of(context).textTheme.titleSmall),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+            ),
+            const RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: '本机客户端偏好',
+            ),
+          ],
+        ),
         const SizedBox(height: 4),
         Text(description, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 12),

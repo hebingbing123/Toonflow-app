@@ -14,6 +14,7 @@ typedef SkillsHarnessAccessTokenProvider = String? Function();
 typedef SkillsHarnessErrorSink = void Function(String? error);
 typedef SkillsHarnessWsMessageHandler = void Function(String raw);
 typedef SkillsHarnessWsLifecycleHandler = void Function();
+typedef SkillsHarnessWsConnectionHandler = void Function(bool connected);
 
 class SkillsHarnessController extends ChangeNotifier {
   SkillsHarnessController({
@@ -21,15 +22,18 @@ class SkillsHarnessController extends ChangeNotifier {
     required SkillsHarnessErrorSink onErrorChanged,
     required SkillsHarnessWsMessageHandler onWsMessage,
     required SkillsHarnessWsLifecycleHandler onWsLifecycleSettled,
+    required SkillsHarnessWsConnectionHandler onWsConnectionChanged,
   }) : _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
        _onWsMessage = onWsMessage,
-       _onWsLifecycleSettled = onWsLifecycleSettled;
+       _onWsLifecycleSettled = onWsLifecycleSettled,
+       _onWsConnectionChanged = onWsConnectionChanged;
 
   final SkillsHarnessAccessTokenProvider _accessTokenProvider;
   final SkillsHarnessErrorSink _onErrorChanged;
   final SkillsHarnessWsMessageHandler _onWsMessage;
   final SkillsHarnessWsLifecycleHandler _onWsLifecycleSettled;
+  final SkillsHarnessWsConnectionHandler _onWsConnectionChanged;
 
   final TextEditingController skillPathController = TextEditingController(
     text: 'script_execution_script.md',
@@ -40,6 +44,8 @@ class SkillsHarnessController extends ChangeNotifier {
 
   WebSocketChannel? _ws;
   StreamSubscription<dynamic>? _wsSub;
+  Timer? _wsReconnectTimer;
+  bool _maintainSessionWs = false;
 
   bool loadingHarnessTools = false;
   bool loadingUserWasmValidate = false;
@@ -72,6 +78,44 @@ class SkillsHarnessController extends ChangeNotifier {
   String? skillMutationLine;
 
   String? get _accessToken => _accessTokenProvider();
+
+  bool get wsConnected => _ws != null;
+
+  Future<void> startAutoSessionWs() async {
+    _maintainSessionWs = true;
+    final token = _accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    await ensureHarnessChannel(token);
+  }
+
+  void stopAutoSessionWs() {
+    _maintainSessionWs = false;
+    _wsReconnectTimer?.cancel();
+    _wsReconnectTimer = null;
+  }
+
+  void scheduleSessionWsReconnect() {
+    if (!_maintainSessionWs || _wsReconnectTimer != null || wsConnected) {
+      return;
+    }
+    final token = _accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    _wsReconnectTimer = Timer(const Duration(seconds: 2), () async {
+      _wsReconnectTimer = null;
+      if (!_maintainSessionWs || wsConnected) {
+        return;
+      }
+      final latestToken = _accessToken;
+      if (latestToken == null || latestToken.isEmpty) {
+        return;
+      }
+      await ensureHarnessChannel(latestToken);
+    });
+  }
 
   bool get wsProbesBusy =>
       loadingWs ||
@@ -134,6 +178,10 @@ class SkillsHarnessController extends ChangeNotifier {
 
   void _setError(String? error) {
     _onErrorChanged(error);
+  }
+
+  void publishWsConnection(bool connected) {
+    _onWsConnectionChanged(connected);
   }
 
   void _publish() {
@@ -336,10 +384,13 @@ class SkillsHarnessController extends ChangeNotifier {
   }
 
   Future<void> closeChannel() async {
+    _wsReconnectTimer?.cancel();
+    _wsReconnectTimer = null;
     await _wsSub?.cancel();
     await _ws?.sink.close();
     _ws = null;
     _wsSub = null;
+    publishWsConnection(false);
   }
 
   @override

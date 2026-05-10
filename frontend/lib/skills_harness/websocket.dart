@@ -1,6 +1,13 @@
 part of 'controller.dart';
 
 extension SkillsHarnessWebSocketController on SkillsHarnessController {
+  Future<WebSocketChannel?> ensureHarnessChannel(String token) async {
+    if (wsConnected) {
+      return _ws;
+    }
+    return openHarnessChannel(token);
+  }
+
   Future<WebSocketChannel?> openHarnessChannel(String token) async {
     await _wsSub?.cancel();
     await _ws?.sink.close();
@@ -8,22 +15,36 @@ extension SkillsHarnessWebSocketController on SkillsHarnessController {
       final uri = rustWebSocketUri(kApiBaseUrl, accessToken: token);
       final channel = WebSocketChannel.connect(uri);
       _ws = channel;
+      publishWsConnection(true);
       _wsSub = channel.stream.listen(
         (message) => appendWsLog(message.toString()),
         onError: (Object e) {
+          if (identical(_ws, channel)) {
+            _ws = null;
+            _wsSub = null;
+          }
+          publishWsConnection(false);
           _setError('ws: $e');
           resetWsBusyFlags();
+          scheduleSessionWsReconnect();
           _onWsLifecycleSettled();
           _publish();
         },
         onDone: () {
+          if (identical(_ws, channel)) {
+            _ws = null;
+            _wsSub = null;
+          }
+          publishWsConnection(false);
           resetWsBusyFlags();
+          scheduleSessionWsReconnect();
           _onWsLifecycleSettled();
           _publish();
         },
       );
       return channel;
     } catch (e) {
+      publishWsConnection(false);
       _setError(e.toString());
       resetWsBusyFlags();
       _publish();

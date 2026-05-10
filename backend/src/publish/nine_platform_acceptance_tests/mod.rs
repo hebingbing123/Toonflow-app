@@ -83,6 +83,7 @@ pub(super) mod tests {
     mod error_handling;
     mod evidence;
     mod metrics;
+    mod p12_production_acceptance;
     mod registry;
     mod validation;
 }

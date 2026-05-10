@@ -13,7 +13,7 @@ use super::types::{
     AdminProjectDetailResponse, AdminProjectGovernanceUpdateBody, AdminSearchQuery,
     AdminSearchResponse, AdminUserDetailResponse, AdminUserGovernanceUpdateBody,
     AdminUserWorkspaceContextUpdateBody, AdminWorkspaceDetailResponse,
-    AdminWorkspaceGovernanceUpdateBody,
+    AdminWorkspaceGovernanceUpdateBody, AdminWorkspaceMemberRemediationBody,
 };
 
 fn internal_ops_token_expected() -> Option<String> {
@@ -199,6 +199,38 @@ pub(crate) async fn post_admin_workspace_governance(
 ) -> Result<Json<AdminWorkspaceDetailResponse>, ApiError> {
     require_internal_ops_token(&headers)?;
     let response = storage::update_admin_workspace_governance(&state, workspace_id, body).await?;
+    Ok(Json(response))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/internal/admin/workspaces/{workspace_id}/members/remediation",
+    operation_id = "postInternalAdminWorkspaceMemberRemediationV1",
+    tag = "settings",
+    params(("workspace_id" = Uuid, Path, description = "Workspace UUID")),
+    request_body(
+        content = AdminWorkspaceMemberRemediationBody,
+        content_type = "application/json"
+    ),
+    responses(
+        (status = 200, description = "OK", body = AdminWorkspaceDetailResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn post_admin_workspace_member_remediation(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(workspace_id): Path<Uuid>,
+    Json(body): Json<AdminWorkspaceMemberRemediationBody>,
+) -> Result<Json<AdminWorkspaceDetailResponse>, ApiError> {
+    require_internal_ops_token(&headers)?;
+    let response =
+        storage::update_admin_workspace_member_remediation(&state, workspace_id, body).await?;
     Ok(Json(response))
 }
 

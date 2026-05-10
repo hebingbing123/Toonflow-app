@@ -15,6 +15,7 @@ class AdminConsoleController extends ChangeNotifier {
   bool loadingDetail = false;
   bool savingGovernance = false;
   bool savingWorkspaceContext = false;
+  bool savingWorkspaceMembership = false;
   String? selectedKind;
   String? selectedId;
   AdminSearchResponseV1? searchResult;
@@ -309,6 +310,74 @@ class AdminConsoleController extends ChangeNotifier {
     }
   }
 
+  Future<void> updateWorkspaceMemberRemediation({
+    required String workspaceId,
+    required AdminWorkspaceMemberRemediationActionV1 action,
+    required String userId,
+    AdminWorkspaceMemberRoleV1? role,
+  }) async {
+    if (!enabled || savingWorkspaceMembership) {
+      return;
+    }
+    final trimmedUserId = userId.trim();
+    if (trimmedUserId.isEmpty) {
+      _setError('成员 userId 不能为空');
+      notifyListeners();
+      return;
+    }
+    if (action == AdminWorkspaceMemberRemediationActionV1.upsert &&
+        role == null) {
+      _setError('新增或更新成员时必须指定角色');
+      notifyListeners();
+      return;
+    }
+    savingWorkspaceMembership = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      workspaceDetail = await updateAdminWorkspaceMemberRemediationV1(
+        _internalOpsToken,
+        workspaceId: workspaceId,
+        action: action,
+        userId: trimmedUserId,
+        role: role,
+      );
+      final current = searchResult;
+      if (current != null) {
+        searchResult = AdminSearchResponseV1(
+          query: current.query,
+          users: current.users,
+          workspaces: current.workspaces
+              .map(
+                (item) => item.workspaceId == workspaceId
+                    ? AdminWorkspaceSearchHitV1(
+                        workspaceId: item.workspaceId,
+                        name: item.name,
+                        workspaceType: item.workspaceType,
+                        archivedAt: item.archivedAt,
+                        ownerUserId: item.ownerUserId,
+                        ownerEmail: item.ownerEmail,
+                        memberCount: workspaceDetail!.memberCount,
+                        projectCount: item.projectCount,
+                        activeJobCount: item.activeJobCount,
+                      )
+                    : item,
+              )
+              .toList(growable: false),
+          projects: current.projects,
+          jobs: current.jobs,
+        );
+      }
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } catch (error) {
+      _setError('$error');
+    } finally {
+      savingWorkspaceMembership = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> updateProjectGovernance({
     required String projectId,
     required AdminProjectLifecycleActionV1 projectLifecycle,
@@ -382,6 +451,7 @@ class AdminConsoleController extends ChangeNotifier {
     projectDetail = null;
     savingGovernance = false;
     savingWorkspaceContext = false;
+    savingWorkspaceMembership = false;
     notifyListeners();
   }
 }

@@ -20,7 +20,7 @@ echo "==> backend/ (fmt, clippy, test)"
   cd backend
   cargo fmt -- --check
   cargo clippy -- -D warnings
-  cargo test
+  cargo test -- --test-threads=1
 )
 
 echo "==> frontend/ (pub get, analyze, test)"

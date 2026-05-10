@@ -7,6 +7,7 @@ import 'runtime_output_controller.dart';
 
 typedef WorkspaceWsBusyProvider = bool Function();
 typedef WorkspaceWsFlagReset = void Function();
+typedef WorkspaceWsRawEventHandler = void Function(Map<String, dynamic> event);
 
 class WorkspaceWsEventController {
   WorkspaceWsEventController({
@@ -17,13 +18,15 @@ class WorkspaceWsEventController {
     required WorkspaceOperationController operationController,
     required WorkspaceOutputController outputController,
     required WorkspaceInputController inputController,
+    WorkspaceWsRawEventHandler? onRawEvent,
   }) : _skillsHarnessBusyProvider = skillsHarnessBusyProvider,
        _resetSkillsHarnessBusyFlags = resetSkillsHarnessBusyFlags,
        _clearSkillsHarnessToolProbeFlags = clearSkillsHarnessToolProbeFlags,
        _clearSkillsHarnessAgentProbeFlags = clearSkillsHarnessAgentProbeFlags,
        _operationController = operationController,
        _outputController = outputController,
-       _inputController = inputController;
+       _inputController = inputController,
+       _onRawEvent = onRawEvent;
 
   final WorkspaceWsBusyProvider _skillsHarnessBusyProvider;
   final WorkspaceWsFlagReset _resetSkillsHarnessBusyFlags;
@@ -32,6 +35,7 @@ class WorkspaceWsEventController {
   final WorkspaceOperationController _operationController;
   final WorkspaceOutputController _outputController;
   final WorkspaceInputController _inputController;
+  final WorkspaceWsRawEventHandler? _onRawEvent;
 
   bool get wsProbesBusy =>
       _skillsHarnessBusyProvider() || _operationController.hasPendingWork;
@@ -62,6 +66,7 @@ class WorkspaceWsEventController {
   }
 
   void _ingestWorkspaceWsEvent(Map<String, dynamic> event) {
+    _onRawEvent?.call(event);
     final resolution = resolveWorkspaceWsEvent(event);
     if (resolution.clearAllOperations) {
       _resetSkillsHarnessBusyFlags();

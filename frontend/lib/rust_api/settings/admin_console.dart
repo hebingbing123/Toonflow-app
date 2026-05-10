@@ -87,6 +87,10 @@ enum AdminWorkspaceLifecycleActionV1 { preserve, archive, restore }
 
 enum AdminWorkspaceOpsNoteActionV1 { preserve, set, clear }
 
+enum AdminWorkspaceMemberRemediationActionV1 { upsert, remove }
+
+enum AdminWorkspaceMemberRoleV1 { admin, member }
+
 enum AdminProjectLifecycleActionV1 { preserve, archive, restore }
 
 enum AdminUserWorkspaceContextActionV1 { resetToPersonal, setToWorkspace }
@@ -791,6 +795,45 @@ Future<AdminWorkspaceDetailResponseV1> updateAdminWorkspaceGovernanceV1(
   };
   if (opsNote != null) {
     body['opsNote'] = opsNote;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          ..._internalHeaders(internalOpsToken),
+          'content-type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  return AdminWorkspaceDetailResponseV1.fromJson(
+    jsonDecode(res.body) as Map<String, dynamic>,
+  );
+}
+
+Future<AdminWorkspaceDetailResponseV1> updateAdminWorkspaceMemberRemediationV1(
+  String internalOpsToken, {
+  required String workspaceId,
+  required AdminWorkspaceMemberRemediationActionV1 action,
+  required String userId,
+  AdminWorkspaceMemberRoleV1? role,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/internal/admin/workspaces/$workspaceId/members/remediation',
+  );
+  final body = <String, dynamic>{
+    'action': switch (action) {
+      AdminWorkspaceMemberRemediationActionV1.upsert => 'upsert',
+      AdminWorkspaceMemberRemediationActionV1.remove => 'remove',
+    },
+    'userId': userId,
+  };
+  if (role != null) {
+    body['role'] = switch (role) {
+      AdminWorkspaceMemberRoleV1.admin => 'admin',
+      AdminWorkspaceMemberRoleV1.member => 'member',
+    };
   }
   final res = await http
       .post(

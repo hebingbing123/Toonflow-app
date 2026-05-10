@@ -117,7 +117,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       final confirmed = await showBatchDisableConfirmation(
         dialogContext,
         shotCount: selectedStoryboardIds.length,
-        showDontShowAgain: false, // TODO: Enable after proper SharedPreferences setup
+        showDontShowAgain: true,
       );
 
       if (confirmed != true) {
@@ -442,21 +442,28 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     // Show voiceover settings dialog to configure TTS parameters
     final settings = await _openVoiceoverSettingsDialog(
       context: context,
-      initialSettings: null, // Use default settings
+      initialSettings: _ttsRetrySettings,
     );
 
     if (settings == null) {
       // User cancelled
       return;
     }
+    _ttsRetrySettings = settings;
 
-    // Group shots by script ID for batch API calls
-    final shotsByScript = <int, List<int>>{};
-    for (final shot in eligibleShots) {
-      shotsByScript
-          .putIfAbsent(shot.scriptNumericId, () => <int>[])
-          .add(shot.storyboardNumericId);
-    }
+    final requestShots = eligibleShots
+        .map(
+          (shot) => TtsGenerateRequestV1(
+            projectId: project.id,
+            shotId: shot.storyboardId,
+            text: shot.subtitleText,
+            provider: settings.provider,
+            voiceId: settings.voiceId,
+            emotion: settings.emotion,
+            speed: settings.speed,
+          ),
+        )
+        .toList(growable: false);
 
     // Show progress dialog
     var totalProcessed = 0;
@@ -542,69 +549,48 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       },
     );
 
-    // Execute batch generation for each script
-    for (final entry in shotsByScript.entries) {
-      final scriptId = entry.key;
-      final storyboardIds = entry.value;
+    try {
+      final response = await postTtsBatchGenerateV1(
+        token,
+        TtsBatchGenerateRequestV1(
+          projectId: project.id,
+          shots: requestShots,
+        ),
+      );
 
-      try {
-        final response = await postWorkbenchGenerateVoiceoverV1(
-          token,
-          projectId: project.numericId,
-          scriptId: scriptId,
-          storyboardIds: storyboardIds,
-          voice: settings.voiceId,
-          speed: settings.speed,
-        );
-
-        // Update progress
-        totalProcessed += storyboardIds.length;
-        totalSuccessful += response.total;
-
-        // Show feedback for this batch
-        if (response.total > 0) {
-          showFeedback(
-            '已为 ${response.total} 个镜头入队配音生成任务',
-            isSuccess: true,
-          );
-        }
-      } on RustApiException catch (e) {
-        // Mark all shots in this batch as failed
-        totalProcessed += storyboardIds.length;
-        totalFailed += storyboardIds.length;
-
-        for (final storyboardId in storyboardIds) {
-          failedItems.add(
-            BatchOperationFailedItem(
-              shotId: storyboardId,
-              errorMessage: '${e.statusCode ?? "未知错误"}: ${e.message}',
-            ),
-          );
-        }
-
-        showFeedback(
-          '剧本 #$scriptId 的配音生成失败：${e.statusCode ?? "-"}',
-          isSuccess: false,
-        );
-      } catch (e) {
-        // Mark all shots in this batch as failed
-        totalProcessed += storyboardIds.length;
-        totalFailed += storyboardIds.length;
-
-        for (final storyboardId in storyboardIds) {
-          failedItems.add(
-            BatchOperationFailedItem(
-              shotId: storyboardId,
-              errorMessage: e.toString(),
-            ),
-          );
-        }
-
-        showFeedback(
-          '剧本 #$scriptId 的配音生成失败：$e',
-          isSuccess: false,
+      totalProcessed = eligibleShots.length;
+      totalSuccessful = response.succeeded;
+      totalFailed = response.failed;
+    } on RustApiException catch (e) {
+      totalProcessed = eligibleShots.length;
+      totalFailed = eligibleShots.length;
+      for (final shot in eligibleShots) {
+        failedItems.add(
+          BatchOperationFailedItem(
+            shotId: shot.storyboardNumericId,
+            errorMessage: '${e.statusCode ?? "未知错误"}: ${e.message}',
+          ),
         );
       }
+      showFeedback(
+        '批量配音生成失败：${e.statusCode ?? "-"}',
+        isSuccess: false,
+      );
+    } catch (e) {
+      totalProcessed = eligibleShots.length;
+      totalFailed = eligibleShots.length;
+      for (final shot in eligibleShots) {
+        failedItems.add(
+          BatchOperationFailedItem(
+            shotId: shot.storyboardNumericId,
+            errorMessage: e.toString(),
+          ),
+        );
+      }
+      showFeedback(
+        '批量配音生成失败：$e',
+        isSuccess: false,
+      );
     }
 
     // Final feedback
@@ -646,13 +632,14 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     // Show voiceover settings dialog to configure TTS parameters
     final settings = await _openVoiceoverSettingsDialog(
       context: context,
-      initialSettings: null, // Use default settings
+      initialSettings: _ttsRetrySettings,
     );
 
     if (settings == null) {
       // User cancelled
       return;
     }
+    _ttsRetrySettings = settings;
 
     // Show progress indicator
     if (!context.mounted) return;
@@ -674,13 +661,17 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     );
 
     try {
-      final response = await postWorkbenchGenerateVoiceoverV1(
+      final response = await postTtsGenerateV1(
         token,
-        projectId: project.numericId,
-        scriptId: item.scriptNumericId,
-        storyboardIds: [item.storyboardNumericId],
-        voice: settings.voiceId,
-        speed: settings.speed,
+        TtsGenerateRequestV1(
+          projectId: project.id,
+          shotId: item.storyboardId,
+          text: item.subtitleText,
+          provider: settings.provider,
+          voiceId: settings.voiceId,
+          emotion: settings.emotion,
+          speed: settings.speed,
+        ),
       );
 
       // Close progress dialog
@@ -688,7 +679,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
         Navigator.of(context).pop();
       }
 
-      if (response.total > 0) {
+      if (response.taskId.isNotEmpty) {
         showFeedback(
           '分镜 #${item.storyboardNumericId} 配音生成任务已入队',
           isSuccess: true,

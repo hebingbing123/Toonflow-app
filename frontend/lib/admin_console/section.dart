@@ -19,6 +19,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   final _dailyQuotaController = TextEditingController();
   final _workspaceOpsNoteController = TextEditingController();
   final _projectOpsNoteController = TextEditingController();
+  final _workspaceMemberUserIdController = TextEditingController();
   String? _governanceDraftFingerprint;
   String? _workspaceGovernanceDraftFingerprint;
   String? _projectGovernanceDraftFingerprint;
@@ -28,6 +29,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       AdminWorkspaceLifecycleActionV1.preserve;
   AdminWorkspaceOpsNoteActionV1 _workspaceOpsNoteAction =
       AdminWorkspaceOpsNoteActionV1.preserve;
+  AdminWorkspaceMemberRoleV1 _workspaceMemberRole =
+      AdminWorkspaceMemberRoleV1.member;
   AdminProjectLifecycleActionV1 _projectLifecycle =
       AdminProjectLifecycleActionV1.preserve;
   AdminWorkspaceOpsNoteActionV1 _projectOpsNoteAction =
@@ -57,6 +60,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     _dailyQuotaController.dispose();
     _workspaceOpsNoteController.dispose();
     _projectOpsNoteController.dispose();
+    _workspaceMemberUserIdController.dispose();
     super.dispose();
   }
 
@@ -799,6 +803,144 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     );
   }
 
+  Widget _buildWorkspaceMemberRemediationPanel(
+    BuildContext context,
+    AdminWorkspaceDetailResponseV1 detail,
+  ) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('成员修复', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          '支持 internal ops 直接补成员、改角色、移除成员；移除时会顺带回退 current workspace 并清理该 workspace 下的项目 ACL 残留。',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            SizedBox(
+              width: 260,
+              child: TextField(
+                controller: _workspaceMemberUserIdController,
+                decoration: const InputDecoration(
+                  labelText: '成员 userId',
+                  hintText: '输入要补成员或修角色的用户 UUID',
+                ),
+              ),
+            ),
+            ChoiceChip(
+              label: const Text('member'),
+              selected:
+                  _workspaceMemberRole == AdminWorkspaceMemberRoleV1.member,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceMemberRole = AdminWorkspaceMemberRoleV1.member;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('admin'),
+              selected:
+                  _workspaceMemberRole == AdminWorkspaceMemberRoleV1.admin,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceMemberRole = AdminWorkspaceMemberRoleV1.admin;
+                });
+              },
+            ),
+            FilledButton.tonalIcon(
+              onPressed: widget.controller.savingWorkspaceMembership
+                  ? null
+                  : () => widget.controller.updateWorkspaceMemberRemediation(
+                      workspaceId: detail.workspaceId,
+                      action: AdminWorkspaceMemberRemediationActionV1.upsert,
+                      userId: _workspaceMemberUserIdController.text,
+                      role: _workspaceMemberRole,
+                    ),
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              label: Text(
+                widget.controller.savingWorkspaceMembership
+                    ? '处理中…'
+                    : '补成员 / 改角色',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...detail.members.map((member) {
+          final isOwner = member.role == 'owner';
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  '${member.email ?? member.userId} · ${member.role}',
+                  style: theme.textTheme.bodySmall,
+                ),
+                if (!isOwner) ...[
+                  OutlinedButton(
+                    onPressed: widget.controller.savingWorkspaceMembership
+                        ? null
+                        : () => widget.controller
+                              .updateWorkspaceMemberRemediation(
+                                workspaceId: detail.workspaceId,
+                                action: AdminWorkspaceMemberRemediationActionV1
+                                    .upsert,
+                                userId: member.userId,
+                                role: AdminWorkspaceMemberRoleV1.member,
+                              ),
+                    child: const Text('设为 member'),
+                  ),
+                  OutlinedButton(
+                    onPressed: widget.controller.savingWorkspaceMembership
+                        ? null
+                        : () => widget.controller
+                              .updateWorkspaceMemberRemediation(
+                                workspaceId: detail.workspaceId,
+                                action: AdminWorkspaceMemberRemediationActionV1
+                                    .upsert,
+                                userId: member.userId,
+                                role: AdminWorkspaceMemberRoleV1.admin,
+                              ),
+                    child: const Text('设为 admin'),
+                  ),
+                  OutlinedButton(
+                    onPressed: widget.controller.savingWorkspaceMembership
+                        ? null
+                        : () => widget.controller
+                              .updateWorkspaceMemberRemediation(
+                                workspaceId: detail.workspaceId,
+                                action: AdminWorkspaceMemberRemediationActionV1
+                                    .remove,
+                                userId: member.userId,
+                              ),
+                    child: const Text('移除'),
+                  ),
+                ] else
+                  Text(
+                    'owner 请走 owner transfer',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
   Widget _buildWorkspaceDetail(
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
@@ -825,6 +967,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               : detail.opsNote!,
         }),
         _buildWorkspaceGovernancePanel(context, detail),
+        _buildWorkspaceMemberRemediationPanel(context, detail),
         _subList(
           context,
           title: '成员',
@@ -1138,6 +1281,16 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   String _workspaceAuditSummary(AdminWorkspaceGovernanceAuditSummaryV1 item) {
+    final action = item.nextState['action'];
+    if (action == 'upsert' || action == 'remove') {
+      final targetUserId =
+          item.nextState['targetUserId'] ?? item.previousState['targetUserId'];
+      final targetRole =
+          item.nextState['targetRole'] ?? item.previousState['targetRole'];
+      final prunedProjectAclCount = item.nextState['prunedProjectAclCount'];
+      final currentWorkspaceReset = item.nextState['currentWorkspaceReset'];
+      return 'action=$action · user=${targetUserId ?? '-'} · role=${targetRole ?? '-'} · prunedAcl=${prunedProjectAclCount ?? 0} · reset=${currentWorkspaceReset ?? false}';
+    }
     final nextArchived = item.nextState['archivedAt'];
     final nextNote = item.nextState['opsNote'];
     return 'archivedAt=$nextArchived · opsNote=${nextNote ?? 'null'}';

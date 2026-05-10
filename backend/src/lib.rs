@@ -22,6 +22,7 @@ pub mod prompting;
 pub mod publish;
 pub mod scope;
 pub mod scripting;
+pub mod search;
 pub mod settings;
 pub mod short_video;
 pub mod state;

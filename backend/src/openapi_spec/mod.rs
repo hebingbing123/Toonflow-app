@@ -75,6 +75,7 @@ pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     doc.merge(crate::metering::MeteringOpenApi::openapi());
     doc.merge(crate::narrative::novels::NovelsHttpOpenApi::openapi());
     doc.merge(crate::workspaces::WorkspacesOpenApi::openapi());
+    doc.merge(crate::search::SearchOpenApi::openapi());
     doc.merge(generated::merged_generated_openapi());
     doc
 }

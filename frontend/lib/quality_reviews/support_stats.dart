@@ -1,32 +1,7 @@
-part of 'support.dart';
-
-int _qualityTokenEfficiencyActionPriority(String action) {
-  switch (action) {
-    case 'keep_delivery_memory':
-      return 4;
-    case 'reuse_negative_memory':
-      return 3;
-    case 'trim_generic_style_memory':
-      return 2;
-    case 'promote_selected_memory':
-      return 1;
-    default:
-      return 0;
-  }
-}
-
-String _qualityTokenEfficiencyFocusLabel(String focus) {
-  switch (focus) {
-    case 'selected_video_memory':
-      return '镜头级精选记忆';
-    case 'rejected_video_negative_memory':
-      return '坏例记忆';
-    case 'project_video_style_memory':
-      return '项目级风格记忆';
-    default:
-      return '当前记忆';
-  }
-}
+import '../../rust_api.dart';
+import 'support_models.dart';
+import 'support_filters.dart';
+import 'support_actions.dart';
 
 String summarizeQualityTokenEfficiencyRows(
   Iterable<QualityTokenEfficiencyRow> rows, {
@@ -212,7 +187,7 @@ String summarizeQualityScopeInsightRows(
             '回写slim ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}条',
           );
         }
-        final focusSummary = _summarizeFeedbackFocusTags(row.feedbackFocusTags);
+        final focusSummary = summarizeFeedbackFocusTags(row.feedbackFocusTags);
         if (focusSummary != null) {
           parts.add('关注=$focusSummary');
         }

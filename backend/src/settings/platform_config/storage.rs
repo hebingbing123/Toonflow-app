@@ -293,7 +293,32 @@ fn parse_workspace_platform_config(
     else {
         return Ok(None);
     };
-    serde_json::from_value(raw)
+
+    // Enterprise workspace override must be explicit and complete; do not silently
+    // default missing fields for governance-critical toggles.
+    let Some(obj) = raw.as_object() else {
+        return Err(ApiError::BadRequest(
+            "workspace platform_config is invalid: expected JSON object".to_string(),
+        ));
+    };
+    const REQUIRED_KEYS: [&str; 7] = [
+        "helpHubEnabled",
+        "qualityDashboardEnabled",
+        "qualityRefreshControlsEnabled",
+        "platformStatusEnabled",
+        "workspaceActivityEnabled",
+        "benchmarkPaneEnabled",
+        "jobsPaneEnabled",
+    ];
+    for key in REQUIRED_KEYS {
+        if !obj.contains_key(key) {
+            return Err(ApiError::BadRequest(format!(
+                "workspace platform_config is invalid: missing required key '{key}'"
+            )));
+        }
+    }
+
+    serde_json::from_value(Value::Object(obj.clone()))
         .map(Some)
         .map_err(|e| ApiError::BadRequest(format!("workspace platform_config is invalid: {e}")))
 }
@@ -342,6 +367,7 @@ mod tests {
             help_hub_enabled: enabled,
             quality_dashboard_enabled: enabled,
             quality_refresh_controls_enabled: enabled,
+            platform_status_enabled: enabled,
             workspace_activity_enabled: enabled,
             benchmark_pane_enabled: enabled,
             jobs_pane_enabled: enabled,
@@ -369,6 +395,7 @@ mod tests {
                 "helpHubEnabled": false,
                 "qualityDashboardEnabled": false,
                 "qualityRefreshControlsEnabled": false,
+                "platformStatusEnabled": false,
                 "workspaceActivityEnabled": false,
                 "benchmarkPaneEnabled": false,
                 "jobsPaneEnabled": false
@@ -377,6 +404,7 @@ mod tests {
                 "helpHubEnabled": true,
                 "qualityDashboardEnabled": true,
                 "qualityRefreshControlsEnabled": true,
+                "platformStatusEnabled": true,
                 "workspaceActivityEnabled": true,
                 "benchmarkPaneEnabled": true,
                 "jobsPaneEnabled": true
@@ -385,6 +413,7 @@ mod tests {
                 "helpHubEnabled": false,
                 "qualityDashboardEnabled": true,
                 "qualityRefreshControlsEnabled": true,
+                "platformStatusEnabled": true,
                 "workspaceActivityEnabled": true,
                 "benchmarkPaneEnabled": true,
                 "jobsPaneEnabled": true
@@ -393,6 +422,7 @@ mod tests {
                 "helpHubEnabled": true,
                 "qualityDashboardEnabled": false,
                 "qualityRefreshControlsEnabled": false,
+                "platformStatusEnabled": false,
                 "workspaceActivityEnabled": false,
                 "benchmarkPaneEnabled": false,
                 "jobsPaneEnabled": false

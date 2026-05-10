@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'publish_copy_editor.dart';
 import 'publish_schedule_calendar.dart';
@@ -605,7 +606,20 @@ class ShortVideoSpaceView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text('短视频 Space', style: theme.textTheme.titleLarge),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                '短视频 Space',
+                style: theme.textTheme.titleLarge,
+              ),
+            ),
+            const RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: '本机客户端偏好（含发布/成片等「不再提示」）',
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Text(
           '参考 MoneyPrinterTurbo 的长处，先把“主题到成片”的链路聚成一个入口，再逐步把脚本、素材、旁白、字幕和质检串成标准流程。',

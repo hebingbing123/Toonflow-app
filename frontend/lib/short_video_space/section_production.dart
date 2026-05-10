@@ -296,6 +296,7 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
         _publishAuditRows = publishAuditsSnap;
         _syncPublishAutomationModesFromMatrix();
       });
+      await _loadDraftsAndVersions();
     } on RustApiException catch (_) {
       if (!mounted) {
         return;
@@ -325,6 +326,9 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
         _publishAutomationModesByPlatform = <String, String>{};
         _publishBusy = false;
         _publishCopyEditorRevision = 0;
+        _assemblyDrafts = const <AssemblyDraft>[];
+        _assemblyVersions = const <AssemblyVersion>[];
+        _currentAssemblyVersionId = 'default';
       });
     } catch (_) {
       if (!mounted) {
@@ -355,10 +359,10 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
         _publishAutomationModesByPlatform = <String, String>{};
         _publishBusy = false;
         _publishCopyEditorRevision = 0;
+        _assemblyDrafts = const <AssemblyDraft>[];
+        _assemblyVersions = const <AssemblyVersion>[];
+        _currentAssemblyVersionId = 'default';
       });
-      
-      // Load drafts and versions after assembly is loaded
-      await _loadDraftsAndVersions();
     } finally {
       if (mounted) {
         setState(() {

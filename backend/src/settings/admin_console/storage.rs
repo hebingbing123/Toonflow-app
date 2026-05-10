@@ -15,8 +15,9 @@ use super::types::{
     AdminUserSearchHit, AdminUserWorkspaceContextActionDto, AdminUserWorkspaceContextUpdateBody,
     AdminWorkspaceDetailResponse, AdminWorkspaceGovernanceAuditSummary,
     AdminWorkspaceGovernanceUpdateBody, AdminWorkspaceLifecycleActionDto,
-    AdminWorkspaceMemberSummary, AdminWorkspaceOpsNoteActionDto, AdminWorkspaceRef,
-    AdminWorkspaceSearchHit,
+    AdminWorkspaceMemberRemediationActionDto, AdminWorkspaceMemberRemediationBody,
+    AdminWorkspaceMemberRoleDto, AdminWorkspaceMemberSummary, AdminWorkspaceOpsNoteActionDto,
+    AdminWorkspaceRef, AdminWorkspaceSearchHit,
 };
 
 #[derive(Debug, FromRow)]
@@ -237,6 +238,68 @@ fn apply_internal_ops_note_to_metadata(
     metadata
 }
 
+fn workspace_member_role_str(role: &AdminWorkspaceMemberRoleDto) -> &'static str {
+    match role {
+        AdminWorkspaceMemberRoleDto::Admin => "admin",
+        AdminWorkspaceMemberRoleDto::Member => "member",
+    }
+}
+
+async fn reset_user_current_workspace_if_matches(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    workspace_id: Uuid,
+) -> Result<bool, ApiError> {
+    let personal = ensure_personal_workspace(pool, user_id).await?;
+    let updated: u64 = sqlx::query(
+        r#"
+        UPDATE public.app_user_profile
+        SET
+          current_workspace_id = $2,
+          updated_at = NOW()
+        WHERE user_id = $1
+          AND current_workspace_id = $3
+        "#,
+    )
+    .bind(user_id)
+    .bind(personal.workspace_id)
+    .bind(workspace_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .rows_affected();
+    Ok(updated > 0)
+}
+
+async fn append_internal_workspace_governance_audit(
+    pool: &sqlx::PgPool,
+    workspace_id: Uuid,
+    event_type: &str,
+    previous_state: serde_json::Value,
+    next_state: serde_json::Value,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_workspace_governance_audit (
+          workspace_id,
+          event_type,
+          actor_label,
+          previous_state,
+          next_state
+        )
+        VALUES ($1, $2, 'internal_ops', $3, $4)
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(event_type)
+    .bind(previous_state)
+    .bind(next_state)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
 fn operational_status_str(status: &AdminOperationalStatusDto) -> &'static str {
     match status {
         AdminOperationalStatusDto::Active => "active",
@@ -304,6 +367,7 @@ pub async fn search_admin_console(
             SELECT COUNT(*)::bigint
             FROM public.app_project pr
             WHERE pr.owner_user_id = u.id
+              AND pr.archived_at IS NULL
           ) AS project_count,
           (
             SELECT COUNT(*)::bigint
@@ -356,6 +420,7 @@ pub async fn search_admin_console(
             SELECT COUNT(*)::bigint
             FROM public.app_project p
             WHERE p.workspace_id = w.id
+              AND p.archived_at IS NULL
           ) AS project_count,
           (
             SELECT COUNT(*)::bigint
@@ -365,6 +430,7 @@ pub async fn search_admin_console(
                 SELECT 1
                 FROM public.app_project p
                 WHERE p.workspace_id = w.id
+                  AND p.archived_at IS NULL
                   AND (
                     (j.payload->>'project_uuid') = p.id::text
                     OR (
@@ -531,6 +597,7 @@ pub async fn get_admin_user_detail(
             SELECT COUNT(*)::bigint
             FROM public.app_project pr
             WHERE pr.owner_user_id = u.id
+              AND pr.archived_at IS NULL
           ) AS project_count,
           (
             SELECT COUNT(*)::bigint
@@ -711,6 +778,7 @@ pub async fn get_admin_workspace_detail(
             SELECT COUNT(*)::bigint
             FROM public.app_project p
             WHERE p.workspace_id = w.id
+              AND p.archived_at IS NULL
           ) AS project_count,
           (
             SELECT COUNT(*)::bigint
@@ -720,6 +788,7 @@ pub async fn get_admin_workspace_detail(
                 SELECT 1
                 FROM public.app_project p
                 WHERE p.workspace_id = w.id
+                  AND p.archived_at IS NULL
                   AND (
                     (j.payload->>'project_uuid') = p.id::text
                     OR (
@@ -1007,6 +1076,194 @@ pub async fn update_admin_workspace_governance(
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    get_admin_workspace_detail(state, workspace_id).await
+}
+
+pub async fn update_admin_workspace_member_remediation(
+    state: &AppState,
+    workspace_id: Uuid,
+    body: AdminWorkspaceMemberRemediationBody,
+) -> Result<AdminWorkspaceDetailResponse, ApiError> {
+    let pool = state.require_pool()?;
+
+    let workspace: Option<(String, Option<Uuid>)> = sqlx::query_as(
+        r#"
+        SELECT workspace_type, owner_user_id
+        FROM public.app_workspace
+        WHERE id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let Some((workspace_type, owner_user_id)) = workspace else {
+        return Err(ApiError::NotFound);
+    };
+
+    match body.action {
+        AdminWorkspaceMemberRemediationActionDto::Upsert => {
+            let role = body.role.as_ref().ok_or_else(|| {
+                ApiError::BadRequest("role is required when action=upsert".into())
+            })?;
+            let current_role: Option<String> = sqlx::query_scalar(
+                r#"
+                SELECT role
+                FROM public.app_workspace_member
+                WHERE workspace_id = $1
+                  AND user_id = $2
+                "#,
+            )
+            .bind(workspace_id)
+            .bind(body.user_id)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            if current_role.as_deref() == Some("owner")
+                || owner_user_id.is_some_and(|owner_id| owner_id == body.user_id)
+            {
+                return Err(ApiError::Conflict(
+                    "workspace owner role must use owner-transfer flow".into(),
+                ));
+            }
+
+            let user_exists: bool =
+                sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM auth.users WHERE id = $1)")
+                    .bind(body.user_id)
+                    .fetch_one(pool)
+                    .await
+                    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            if !user_exists {
+                return Err(ApiError::NotFound);
+            }
+
+            let next_role = workspace_member_role_str(role);
+            sqlx::query(
+                r#"
+                INSERT INTO public.app_workspace_member (workspace_id, user_id, role)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (workspace_id, user_id)
+                DO UPDATE SET role = EXCLUDED.role, updated_at = NOW()
+                "#,
+            )
+            .bind(workspace_id)
+            .bind(body.user_id)
+            .bind(next_role)
+            .execute(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+            append_internal_workspace_governance_audit(
+                pool,
+                workspace_id,
+                "member_upserted_internal",
+                json!({
+                    "action": "upsert",
+                    "targetUserId": body.user_id,
+                    "targetRole": current_role,
+                    "workspaceType": workspace_type,
+                }),
+                json!({
+                    "action": "upsert",
+                    "targetUserId": body.user_id,
+                    "targetRole": next_role,
+                    "workspaceType": workspace_type,
+                }),
+            )
+            .await?;
+        }
+        AdminWorkspaceMemberRemediationActionDto::Remove => {
+            let current_role: Option<String> = sqlx::query_scalar(
+                r#"
+                SELECT role
+                FROM public.app_workspace_member
+                WHERE workspace_id = $1
+                  AND user_id = $2
+                "#,
+            )
+            .bind(workspace_id)
+            .bind(body.user_id)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            let Some(current_role) = current_role else {
+                return Err(ApiError::NotFound);
+            };
+            if current_role == "owner"
+                || owner_user_id.is_some_and(|owner_id| owner_id == body.user_id)
+            {
+                return Err(ApiError::Conflict(
+                    "workspace owner must use owner-transfer flow before removal".into(),
+                ));
+            }
+
+            let mut tx = pool
+                .begin()
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+            sqlx::query(
+                r#"
+                DELETE FROM public.app_workspace_member
+                WHERE workspace_id = $1
+                  AND user_id = $2
+                "#,
+            )
+            .bind(workspace_id)
+            .bind(body.user_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+            let pruned_project_acl_count = sqlx::query(
+                r#"
+                DELETE FROM public.app_project_member pm
+                WHERE pm.user_id = $1
+                  AND EXISTS (
+                    SELECT 1
+                    FROM public.app_project p
+                    WHERE p.id = pm.project_id
+                      AND p.workspace_id = $2
+                  )
+                "#,
+            )
+            .bind(body.user_id)
+            .bind(workspace_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+            .rows_affected();
+
+            tx.commit()
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+            let current_workspace_reset =
+                reset_user_current_workspace_if_matches(pool, body.user_id, workspace_id).await?;
+
+            append_internal_workspace_governance_audit(
+                pool,
+                workspace_id,
+                "member_removed_internal",
+                json!({
+                    "action": "remove",
+                    "targetUserId": body.user_id,
+                    "targetRole": current_role,
+                    "workspaceType": workspace_type,
+                }),
+                json!({
+                    "action": "remove",
+                    "targetUserId": body.user_id,
+                    "targetRole": current_role,
+                    "workspaceType": workspace_type,
+                    "currentWorkspaceReset": current_workspace_reset,
+                    "prunedProjectAclCount": pruned_project_acl_count as i64,
+                }),
+            )
+            .await?;
+        }
+    }
 
     get_admin_workspace_detail(state, workspace_id).await
 }

@@ -17,6 +17,7 @@ use utoipa::OpenApi;
     crate::settings::admin_console::post_admin_user_workspace_context,
     crate::settings::admin_console::get_admin_workspace_detail,
     crate::settings::admin_console::post_admin_workspace_governance,
+    crate::settings::admin_console::post_admin_workspace_member_remediation,
     crate::settings::admin_console::get_admin_project_detail,
     crate::settings::admin_console::post_admin_project_governance,
     crate::settings::account::post_account_export,

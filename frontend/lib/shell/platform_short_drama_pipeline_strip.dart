@@ -9,10 +9,12 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
     super.key,
     required this.onSelectPane,
     required this.jobsPaneEnabled,
+    required this.qualityPaneEnabled,
   });
 
   final void Function(ProductWorkspacePane pane) onSelectPane;
   final bool jobsPaneEnabled;
+  final bool qualityPaneEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +62,9 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
             children: steps
                 .map((s) {
                   final enabled =
-                      s.$1 != ProductWorkspacePane.jobs || jobsPaneEnabled;
+                      (s.$1 != ProductWorkspacePane.jobs || jobsPaneEnabled) &&
+                      (s.$1 != ProductWorkspacePane.quality ||
+                          qualityPaneEnabled);
                   return ActionChip(
                     avatar: Icon(s.$3, size: 18),
                     label: Text(s.$2),

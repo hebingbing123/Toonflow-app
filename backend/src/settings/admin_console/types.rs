@@ -294,6 +294,35 @@ pub struct AdminWorkspaceGovernanceUpdateBody {
     pub ops_note: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AdminWorkspaceMemberRemediationActionDto {
+    Upsert,
+    Remove,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AdminWorkspaceMemberRoleDto {
+    Admin,
+    Member,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdminWorkspaceMemberRemediationBody {
+    pub action: AdminWorkspaceMemberRemediationActionDto,
+    pub user_id: Uuid,
+    #[serde(default)]
+    pub role: Option<AdminWorkspaceMemberRoleDto>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdminWorkspaceOwnerTransferBody {
+    pub target_user_id: Uuid,
+}
+
 pub type AdminProjectLifecycleActionDto = AdminWorkspaceLifecycleActionDto;
 pub type AdminProjectOpsNoteActionDto = AdminWorkspaceOpsNoteActionDto;
 
@@ -306,4 +335,10 @@ pub struct AdminProjectGovernanceUpdateBody {
     pub ops_note_action: AdminProjectOpsNoteActionDto,
     #[serde(default)]
     pub ops_note: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdminProjectOwnerTransferBody {
+    pub target_user_id: Uuid,
 }

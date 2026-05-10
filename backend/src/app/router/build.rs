@@ -23,7 +23,7 @@ use crate::workspaces;
 
 use axum::{
     http::{header, HeaderName, Method},
-    middleware::from_fn,
+    middleware::{from_fn, from_fn_with_state},
     routing::{get, patch},
     Router,
 };
@@ -47,6 +47,7 @@ pub fn build_router(state: AppState) -> Router {
             header::AUTHORIZATION,
             header::CONTENT_TYPE,
             header::ACCEPT,
+            HeaderName::from_static("x-api-key"),
             HeaderName::from_static("x-request-id"),
             HeaderName::from_static("x-toonflow-internal-token"),
         ])
@@ -96,6 +97,8 @@ pub fn build_router(state: AppState) -> Router {
         .merge(prompting::benchmark::memory_profiles_routes())
         .merge(prompting::benchmark::promotion_gate_routes())
         .merge(settings::about::router())
+        .merge(settings::admin_console::router())
+        .merge(settings::api_keys::router())
         .merge(settings::account::router())
         .merge(settings::agent_deploy::router())
         .merge(settings::danger::router())
@@ -114,6 +117,14 @@ pub fn build_router(state: AppState) -> Router {
         .route("/api/v1/ws", get(ws_upgrade))
         // Layer 1: Global IP-based rate limiting (~50 req/s per IP)
         .layer(governor_layer_from_env())
+        .layer(from_fn_with_state(
+            state.clone(),
+            crate::auth::middleware::api_key_auth_middleware,
+        ))
+        .layer(from_fn_with_state(
+            state.clone(),
+            crate::auth::middleware::user_governance_middleware,
+        ))
         // Layer 2: Per-user rate limiting applied after global
         .layer(user_governor_layer());
 

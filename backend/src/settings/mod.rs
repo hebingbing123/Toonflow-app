@@ -7,6 +7,7 @@
 //! 子模块：
 //! - `about` — 关于（检查更新、下载应用）
 //! - `account` — 账户导出 / 删号
+//! - `api_keys` — 用户级 API Key
 //! - `vendors` — 提供商配置
 //! - `dev` — 开发设置
 //! - `danger` — 危险操作
@@ -20,8 +21,10 @@
 
 pub mod about;
 pub mod account;
+pub mod admin_console;
 pub mod agent_deploy;
 pub mod agent_memory;
+pub mod api_keys;
 pub mod danger;
 pub mod dev;
 pub mod help_hub;

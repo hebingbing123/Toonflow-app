@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/short_video_space/components/version_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('AssemblyVersion', () {
@@ -66,7 +67,10 @@ void main() {
     late List<String> restoreDraftCalls;
     late List<String> deleteDraftCalls;
 
-    setUp(() {
+    setUp(() async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      await (await SharedPreferences.getInstance()).clear();
       testVersions = [
         AssemblyVersion(
           id: 'v1',

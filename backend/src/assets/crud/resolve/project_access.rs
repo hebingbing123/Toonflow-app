@@ -15,6 +15,7 @@ pub(crate) async fn ensure_owned_project_pk(
           SELECT 1
           FROM app_project p
           WHERE p.id = $1
+            AND p.archived_at IS NULL
             AND EXISTS (
               SELECT 1
               FROM app_workspace_member wm
@@ -47,6 +48,7 @@ pub(crate) async fn ensure_owned_project_numeric_id(
         SELECT p.numeric_id
         FROM app_project p
         WHERE p.id = $1
+          AND p.archived_at IS NULL
           AND EXISTS (
             SELECT 1
             FROM app_workspace_member wm
@@ -101,6 +103,7 @@ pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
                   SELECT 1
                   FROM app_project p
                   WHERE p.numeric_id = $1
+                    AND p.archived_at IS NULL
                     AND EXISTS (
                       SELECT 1
                       FROM app_workspace_member wm
@@ -146,6 +149,7 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                 SELECT p.id, p.numeric_id, p.workspace_id
                 FROM app_project p
                 WHERE p.id = $1
+                  AND p.archived_at IS NULL
                   AND EXISTS (
                     SELECT 1
                     FROM app_workspace_member wm
@@ -173,6 +177,7 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                 SELECT p.id, p.numeric_id, p.workspace_id
                 FROM app_project p
                 WHERE p.id = $1
+                  AND p.archived_at IS NULL
                   AND EXISTS (
                     SELECT 1
                     FROM app_workspace_member wm
@@ -199,6 +204,7 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
                 SELECT p.id, p.numeric_id, p.workspace_id
                 FROM app_project p
                 WHERE p.numeric_id = $1
+                  AND p.archived_at IS NULL
                   AND EXISTS (
                     SELECT 1
                     FROM app_workspace_member wm

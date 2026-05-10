@@ -210,9 +210,9 @@ enum _RiskyPrefsOverflowValue {
   resetDestructiveConfirms,
 }
 
-/// AppBar / toolbar entry: one menu item that runs [runResetRiskyOperationConfirmPrefsFlow].
+/// AppBar / toolbar entry: **查看已静默** + **恢复确认**（本机 SharedPreferences）。
 ///
-/// Use wherever shell needs a compact cross-cut without duplicating strings.
+/// Use wherever the product shell needs a compact cross-cut without duplicating strings.
 class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
   const RiskyOperationConfirmPrefsOverflowMenu({
     super.key,

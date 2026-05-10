@@ -13,6 +13,7 @@ void main() {
           body: PlatformShortDramaPipelineStrip(
             onSelectPane: (pane) => last = pane,
             jobsPaneEnabled: true,
+            qualityPaneEnabled: true,
           ),
         ),
       ),

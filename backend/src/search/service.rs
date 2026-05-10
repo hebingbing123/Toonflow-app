@@ -250,6 +250,7 @@ impl SearchService {
                 WHERE 
                     search_vector @@ plainto_tsquery('simple', $1)
                     AND workspace_id = $2
+                    AND archived_at IS NULL
                     {}
                 "#,
                 time_filter_proj
@@ -293,6 +294,7 @@ impl SearchService {
                 WHERE 
                     s.search_vector @@ plainto_tsquery('simple', $1)
                     AND p.workspace_id = $2
+                    AND p.archived_at IS NULL
                     {}
                 "#,
                 time_filter_script
@@ -337,6 +339,7 @@ impl SearchService {
                 WHERE 
                     a.search_vector @@ plainto_tsquery('simple', $1)
                     AND p.workspace_id = $2
+                    AND p.archived_at IS NULL
                     {}
                 "#,
                 time_filter_asset
@@ -380,6 +383,7 @@ impl SearchService {
                 WHERE 
                     n.search_vector @@ plainto_tsquery('simple', $1)
                     AND p.workspace_id = $2
+                    AND p.archived_at IS NULL
                     {}
                 "#,
                 time_filter_novel
@@ -422,6 +426,7 @@ impl SearchService {
                 WHERE 
                     e.search_vector @@ plainto_tsquery('simple', $1)
                     AND p.workspace_id = $2
+                    AND p.archived_at IS NULL
                     {}
                 "#,
                 time_filter_event

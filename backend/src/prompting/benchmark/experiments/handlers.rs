@@ -6,9 +6,14 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
 
+use crate::publish::ab_testing::{
+    aggregate_comparisons, compare_variants, fetch_quality_metrics, fetch_token_metrics,
+    ABTestConfig, ABTestResult, ABVariant,
+};
 use crate::{auth::require_user_uuid, error::ApiError, state::AppState};
 
 use super::{
@@ -22,6 +27,90 @@ use super::{
     },
     validation::{validate_experiment_dependencies, validate_sample_tier, validate_stage_scope},
 };
+
+#[derive(Debug, Clone, Deserialize, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABCompareCaseBody {
+    pub test_case_id: String,
+    pub baseline_job_id: Uuid,
+    pub optimized_job_id: Uuid,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABCompareRequestBody {
+    pub cases: Vec<ABCompareCaseBody>,
+    #[serde(default)]
+    pub config: Option<ABCompareConfigBody>,
+    #[serde(default)]
+    pub persist: Option<bool>,
+    #[serde(default)]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABCompareConfigBody {
+    pub min_token_reduction_pct: f64,
+    pub max_quality_drop: f64,
+    pub min_quality_score: f64,
+    pub significance_threshold: f64,
+}
+
+#[derive(Debug, Clone, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABComparisonLite {
+    pub test_case_id: String,
+    pub quality_regression: bool,
+    pub token_reduction_pct: f64,
+    pub quality_score_diff: Option<f64>,
+    pub p_value: Option<f64>,
+    pub passed: bool,
+    pub failure_reasons: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABCompareResponseBody {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub run_id: Option<Uuid>,
+    pub total_cases: usize,
+    pub passed_cases: usize,
+    pub failed_cases: usize,
+    pub avg_token_reduction_pct: f64,
+    pub avg_quality_diff: f64,
+    pub quality_regressions: usize,
+    pub passed: bool,
+    pub comparisons: Vec<ABComparisonLite>,
+}
+
+#[derive(Debug, Clone, Serialize, sqlx::FromRow, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABCompareRunRow {
+    pub id: Uuid,
+    pub name: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub config: serde_json::Value,
+    pub summary: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABCompareRunDetail {
+    pub run: ABCompareRunRow,
+    pub cases: Vec<ABCompareCasePersisted>,
+}
+
+#[derive(Debug, Clone, Serialize, sqlx::FromRow, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ABCompareCasePersisted {
+    pub id: Uuid,
+    pub test_case_id: String,
+    pub baseline_job_id: Uuid,
+    pub optimized_job_id: Uuid,
+    pub comparison: serde_json::Value,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
 
 /// 创建实验运行
 #[utoipa::path(
@@ -565,4 +654,263 @@ pub async fn estimate_cost(
     estimate.update_total_savings();
 
     Ok(Json(estimate))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/benchmark/ab/compare",
+    request_body = ABCompareRequestBody,
+    responses(
+        (status = 200, description = "A/B 对比结果", body = ABCompareResponseBody),
+        (status = 400, description = "Invalid request"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Server error"),
+    ),
+    tag = "benchmark",
+    security(("bearerAuth" = []))
+)]
+pub async fn compare_ab_jobs(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<ABCompareRequestBody>,
+) -> Result<Json<ABCompareResponseBody>, ApiError> {
+    let user_id = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+
+    if body.cases.is_empty() {
+        return Err(ApiError::BadRequest("cases cannot be empty".into()));
+    }
+    let cases = body.cases.clone();
+
+    let config = body
+        .config
+        .map_or_else(ABTestConfig::default, |c| ABTestConfig {
+            min_token_reduction_pct: c.min_token_reduction_pct,
+            max_quality_drop: c.max_quality_drop,
+            min_quality_score: c.min_quality_score,
+            significance_threshold: c.significance_threshold,
+        });
+
+    let mut comparisons = Vec::with_capacity(cases.len());
+    for case in &cases {
+        let baseline_quality = fetch_quality_metrics(pool, case.baseline_job_id).await?;
+        let baseline_tokens = fetch_token_metrics(pool, case.baseline_job_id).await?;
+        let optimized_quality = fetch_quality_metrics(pool, case.optimized_job_id).await?;
+        let optimized_tokens = fetch_token_metrics(pool, case.optimized_job_id).await?;
+
+        let baseline = ABTestResult {
+            test_case_id: case.test_case_id.clone(),
+            variant: ABVariant::Baseline,
+            quality: baseline_quality,
+            tokens: baseline_tokens,
+            timestamp: chrono::Utc::now(),
+            metadata: json!({
+                "jobId": case.baseline_job_id,
+            }),
+        };
+        let optimized = ABTestResult {
+            test_case_id: case.test_case_id.clone(),
+            variant: ABVariant::Optimized,
+            quality: optimized_quality,
+            tokens: optimized_tokens,
+            timestamp: chrono::Utc::now(),
+            metadata: json!({
+                "jobId": case.optimized_job_id,
+            }),
+        };
+        comparisons.push(compare_variants(&baseline, &optimized, &config));
+    }
+
+    let summary = aggregate_comparisons(comparisons);
+    let persist = body.persist.unwrap_or(false);
+    let run_id = if persist {
+        let run_id: Uuid = sqlx::query_scalar(
+            r#"
+            INSERT INTO app_benchmark_ab_compare_run (id, owner_user_id, name, config, summary)
+            VALUES ($1, $2, $3, $4::jsonb, $5::jsonb)
+            RETURNING id
+            "#,
+        )
+        .bind(Uuid::new_v4())
+        .bind(user_id)
+        .bind(
+            body.name
+                .as_ref()
+                .map(|s| s.trim())
+                .filter(|s| !s.is_empty()),
+        )
+        .bind(json!(&config))
+        .bind(json!({
+            "totalCases": summary.total_cases,
+            "passedCases": summary.passed_cases,
+            "failedCases": summary.failed_cases,
+            "avgTokenReductionPct": summary.avg_token_reduction_pct,
+            "avgQualityDiff": summary.avg_quality_diff,
+            "qualityRegressions": summary.quality_regressions,
+            "passed": summary.passed,
+        }))
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        for c in &summary.comparisons {
+            let comparison_json = json!({
+                "testCaseId": c.test_case_id,
+                "qualityRegression": c.quality_regression,
+                "tokenReductionPct": c.token_reduction_pct,
+                "qualityScoreDiff": c.quality_score_diff,
+                "pValue": c.p_value,
+                "passed": c.passed,
+                "failureReasons": c.failure_reasons,
+            });
+            let baseline_job_id = c
+                .baseline
+                .metadata
+                .get("jobId")
+                .and_then(|v| v.as_str())
+                .and_then(|s| Uuid::parse_str(s).ok())
+                .unwrap_or(Uuid::nil());
+            let optimized_job_id = c
+                .optimized
+                .metadata
+                .get("jobId")
+                .and_then(|v| v.as_str())
+                .and_then(|s| Uuid::parse_str(s).ok())
+                .unwrap_or(Uuid::nil());
+            let _case_id: Uuid = sqlx::query_scalar(
+                r#"
+                INSERT INTO app_benchmark_ab_compare_case
+                    (id, run_id, test_case_id, baseline_job_id, optimized_job_id, comparison)
+                VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+                RETURNING id
+                "#,
+            )
+            .bind(Uuid::new_v4())
+            .bind(run_id)
+            .bind(&c.test_case_id)
+            .bind(baseline_job_id)
+            .bind(optimized_job_id)
+            .bind(comparison_json)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        }
+
+        // Also store per-variant A/B results for audit trail (L.3 table)
+        for idx in 0..cases.len() {
+            if let Some(comp) = summary.comparisons.get(idx) {
+                let _ =
+                    crate::publish::ab_testing::store_ab_test_result(pool, &comp.baseline).await;
+                let _ =
+                    crate::publish::ab_testing::store_ab_test_result(pool, &comp.optimized).await;
+            }
+        }
+
+        Some(run_id)
+    } else {
+        None
+    };
+
+    Ok(Json(ABCompareResponseBody {
+        run_id,
+        total_cases: summary.total_cases,
+        passed_cases: summary.passed_cases,
+        failed_cases: summary.failed_cases,
+        avg_token_reduction_pct: summary.avg_token_reduction_pct,
+        avg_quality_diff: summary.avg_quality_diff,
+        quality_regressions: summary.quality_regressions,
+        passed: summary.passed,
+        comparisons: summary
+            .comparisons
+            .into_iter()
+            .map(|c| ABComparisonLite {
+                test_case_id: c.test_case_id,
+                quality_regression: c.quality_regression,
+                token_reduction_pct: c.token_reduction_pct,
+                quality_score_diff: c.quality_score_diff,
+                p_value: c.p_value,
+                passed: c.passed,
+                failure_reasons: c.failure_reasons,
+            })
+            .collect(),
+    }))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/benchmark/ab/runs",
+    responses(
+        (status = 200, description = "A/B 对比运行列表", body = Vec<ABCompareRunRow>),
+        (status = 401, description = "Unauthorized"),
+    ),
+    tag = "benchmark",
+    security(("bearerAuth" = []))
+)]
+pub async fn list_ab_compare_runs(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<ABCompareRunRow>>, ApiError> {
+    let user_id = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let rows: Vec<ABCompareRunRow> = sqlx::query_as(
+        r#"
+        SELECT id, name, created_at, config, summary
+        FROM app_benchmark_ab_compare_run
+        WHERE owner_user_id = $1
+        ORDER BY created_at DESC
+        LIMIT 50
+        "#,
+    )
+    .bind(user_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(rows))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/benchmark/ab/runs/{id}",
+    params(("id" = Uuid, Path, description = "A/B compare run id")),
+    responses(
+        (status = 200, description = "A/B 对比运行详情", body = ABCompareRunDetail),
+        (status = 401, description = "Unauthorized"),
+        (status = 404, description = "Not found"),
+    ),
+    tag = "benchmark",
+    security(("bearerAuth" = []))
+)]
+pub async fn get_ab_compare_run(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ABCompareRunDetail>, ApiError> {
+    let user_id = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let run: Option<ABCompareRunRow> = sqlx::query_as(
+        r#"
+        SELECT id, name, created_at, config, summary
+        FROM app_benchmark_ab_compare_run
+        WHERE id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(id)
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let run = run.ok_or(ApiError::NotFound)?;
+    let cases: Vec<ABCompareCasePersisted> = sqlx::query_as(
+        r#"
+        SELECT id, test_case_id, baseline_job_id, optimized_job_id, comparison, created_at
+        FROM app_benchmark_ab_compare_case
+        WHERE run_id = $1
+        ORDER BY created_at ASC
+        "#,
+    )
+    .bind(id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(ABCompareRunDetail { run, cases }))
 }

@@ -1,6 +1,9 @@
+mod api_keys_contract;
 mod me;
 mod project_audit_contract;
+mod project_export_contract;
 mod project_members_contract;
+mod project_tts_contract;
 mod projects_create;
 mod script_storyboard_routes;
 mod workspaces_list;

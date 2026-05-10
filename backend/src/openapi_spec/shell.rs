@@ -3,7 +3,7 @@
 //! Reusable HTTP schemas are registered via domain `OpenApi` merges (see [`super::combined_openapi`]).
 
 use utoipa::openapi::{
-    security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
+    security::{ApiKey, ApiKeyValue, HttpAuthScheme, HttpBuilder, SecurityScheme},
     ComponentsBuilder, InfoBuilder, OpenApi, Paths, ServerBuilder, Tag,
 };
 
@@ -13,7 +13,7 @@ pub(super) fn openapi_shell() -> OpenApi {
             .title("Toonflow API")
             .version("1.0.0")
             .description(Some(
-                "HTTP under `/api/v1` (use tags below). Typical calls: `Authorization: Bearer <Supabase access_token>`.",
+                "HTTP under `/api/v1` (use tags below). Typical calls use `Authorization: Bearer <Supabase access_token>`. Settings can also mint user API keys, and authenticated product routes accept `X-API-Key: tfk_...` for server-to-server automation.",
             ))
             .build(),
         Paths::new(),
@@ -96,6 +96,10 @@ pub(super) fn openapi_shell() -> OpenApi {
             "publish",
             "Short-video publish profiles, drafts, platform targets, and publish jobs (`app_publish_*`; Postgres + RLS)",
         ),
+        tag(
+            "search",
+            "全局搜索：跨项目、剧本、资产的全文搜索（PostgreSQL tsvector + GIN 索引）",
+        ),
     ]);
 
     let bearer = HttpBuilder::new()
@@ -110,6 +114,10 @@ pub(super) fn openapi_shell() -> OpenApi {
     api.components = Some(
         ComponentsBuilder::new()
             .security_scheme("bearerAuth", SecurityScheme::Http(bearer))
+            .security_scheme(
+                "apiKeyAuth",
+                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("X-API-Key"))),
+            )
             .build(),
     );
 

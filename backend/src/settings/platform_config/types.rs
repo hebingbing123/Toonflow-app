@@ -1,15 +1,27 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+const fn default_enabled() -> bool {
+    true
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 #[schema(rename_all = "camelCase")]
 pub struct PlatformConfigToggleSet {
+    #[serde(default = "default_enabled")]
     pub help_hub_enabled: bool,
+    #[serde(default = "default_enabled")]
     pub quality_dashboard_enabled: bool,
+    #[serde(default = "default_enabled")]
     pub quality_refresh_controls_enabled: bool,
+    #[serde(default = "default_enabled")]
+    pub platform_status_enabled: bool,
+    #[serde(default = "default_enabled")]
     pub workspace_activity_enabled: bool,
+    #[serde(default = "default_enabled")]
     pub benchmark_pane_enabled: bool,
+    #[serde(default = "default_enabled")]
     pub jobs_pane_enabled: bool,
 }
 
@@ -19,6 +31,7 @@ impl PlatformConfigToggleSet {
             help_hub_enabled: true,
             quality_dashboard_enabled: true,
             quality_refresh_controls_enabled: true,
+            platform_status_enabled: true,
             workspace_activity_enabled: true,
             benchmark_pane_enabled: true,
             jobs_pane_enabled: true,

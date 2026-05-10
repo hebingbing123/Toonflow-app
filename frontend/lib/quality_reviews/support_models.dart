@@ -1,8 +1,17 @@
-part of 'support.dart';
+import 'dart:collection';
 
-// ── 诊断数据提取辅助（私有）────────────────────────────────────────────────
+import '../../rust_api.dart';
 
-Map<String, dynamic>? _qualityDiagnosticsMap(QualityReview row) {
+// ── 通用辅助函数 ────────────────────────────────────────────────
+
+int qualityScorePercent(int? score, {int fallback = 10}) {
+  final normalized = (score ?? fallback).clamp(0, 10);
+  return normalized * 10;
+}
+
+// ── 诊断数据提取辅助 ────────────────────────────────────────────────
+
+Map<String, dynamic>? qualityDiagnosticsMap(QualityReview row) {
   final params = row.modelParams;
   if (params == null) return null;
   final diagnostics = params['diagnostics'];
@@ -10,35 +19,35 @@ Map<String, dynamic>? _qualityDiagnosticsMap(QualityReview row) {
   return Map<String, dynamic>.from(diagnostics);
 }
 
-Map<String, dynamic>? _feedbackMemoryMap(QualityReview row) {
-  final diagnostics = _qualityDiagnosticsMap(row);
+Map<String, dynamic>? feedbackMemoryMap(QualityReview row) {
+  final diagnostics = qualityDiagnosticsMap(row);
   if (diagnostics == null) return null;
   final feedback = diagnostics['feedbackMemory'];
   if (feedback is! Map) return null;
   return Map<String, dynamic>.from(feedback);
 }
 
-int _diagnosticInt(Map<String, dynamic> map, String key) {
+int diagnosticInt(Map<String, dynamic> map, String key) {
   final value = map[key];
   if (value is num) return value.toInt();
   return 0;
 }
 
-String? _diagnosticString(Map<String, dynamic> map, String key) {
+String? diagnosticString(Map<String, dynamic> map, String key) {
   final value = map[key];
   if (value is String && value.isNotEmpty) return value;
   return null;
 }
 
-bool _diagnosticBool(Map<String, dynamic> map, String key) => map[key] == true;
+bool diagnosticBool(Map<String, dynamic> map, String key) => map[key] == true;
 
-List<String> _diagnosticStringList(Map<String, dynamic> map, String key) {
+List<String> diagnosticStringList(Map<String, dynamic> map, String key) {
   final value = map[key];
   if (value is! List) return const <String>[];
   return value.whereType<String>().where((item) => item.isNotEmpty).toList();
 }
 
-Map<String, int> _diagnosticStringIntMap(Map<String, dynamic> map, String key) {
+Map<String, int> diagnosticStringIntMap(Map<String, dynamic> map, String key) {
   final value = map[key];
   if (value is! Map) return const <String, int>{};
   final result = <String, int>{};
@@ -52,7 +61,7 @@ Map<String, int> _diagnosticStringIntMap(Map<String, dynamic> map, String key) {
   return result;
 }
 
-String _describeAutoNegativeSource(String source) {
+String describeAutoNegativeSource(String source) {
   switch (source) {
     case 'review+rejected_memory':
       return '负向约束=评审+坏例记忆';
@@ -69,7 +78,7 @@ String _describeAutoNegativeSource(String source) {
   }
 }
 
-String _joinTopBucketCounts(Map<String, int> counts, {int maxItems = 3}) {
+String joinTopBucketCounts(Map<String, int> counts, {int maxItems = 3}) {
   if (counts.isEmpty) return '';
   return (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
       .take(maxItems)
@@ -77,7 +86,7 @@ String _joinTopBucketCounts(Map<String, int> counts, {int maxItems = 3}) {
       .join(' / ');
 }
 
-String _joinBucketListWithCounts(
+String joinBucketListWithCounts(
   List<String> buckets,
   Map<String, int> counts,
 ) {
@@ -90,7 +99,7 @@ String _joinBucketListWithCounts(
       .join('/');
 }
 
-String _describeFeedbackFocusTag(String tag) {
+String describeFeedbackFocusTag(String tag) {
   switch (tag) {
     case 'delivery_realism':
       return '台词真实';
@@ -105,15 +114,15 @@ String _describeFeedbackFocusTag(String tag) {
   }
 }
 
-String? _summarizeFeedbackFocusTags(Iterable<String> tags) {
+String? summarizeFeedbackFocusTags(Iterable<String> tags) {
   final values = LinkedHashSet<String>.from(
     tags.map((tag) => tag.trim()).where((tag) => tag.isNotEmpty),
   ).toList(growable: false);
   if (values.isEmpty) return null;
-  return values.map(_describeFeedbackFocusTag).join('/');
+  return values.map(describeFeedbackFocusTag).join('/');
 }
 
-String _formatQualityScopeLabel(QualityReview row) {
+String formatQualityScopeLabel(QualityReview row) {
   if (row.projectId != null && row.scriptId != null) {
     return 'P${row.projectId}/S${row.scriptId}';
   }
@@ -126,7 +135,7 @@ String _formatQualityScopeLabel(QualityReview row) {
   return row.targetType;
 }
 
-String? _describeMemoryScopeRows({
+String? describeMemoryScopeRows({
   required int projectScopeRows,
   required int scriptScopeRows,
   required int roleScopeRows,
@@ -138,4 +147,32 @@ String? _describeMemoryScopeRows({
   ];
   if (parts.isEmpty) return null;
   return parts.join('/');
+}
+
+int qualityTokenEfficiencyActionPriority(String action) {
+  switch (action) {
+    case 'keep_delivery_memory':
+      return 4;
+    case 'reuse_negative_memory':
+      return 3;
+    case 'trim_generic_style_memory':
+      return 2;
+    case 'promote_selected_memory':
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+String qualityTokenEfficiencyFocusLabel(String focus) {
+  switch (focus) {
+    case 'selected_video_memory':
+      return '镜头级精选记忆';
+    case 'rejected_video_negative_memory':
+      return '坏例记忆';
+    case 'project_video_style_memory':
+      return '项目级风格记忆';
+    default:
+      return '当前记忆';
+  }
 }

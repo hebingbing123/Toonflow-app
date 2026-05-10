@@ -13,10 +13,15 @@
 //! 每个端点每个用户约 5 req/s，突发 10。
 //! 用于高频端点如 jobs、harness。
 //!
+//! ## 搜索端点速率限制
+//! 每个用户 60 req/min（1 req/s），突发 5。
+//! 用于搜索端点以防止滥用。
+//!
 //! 排除健康检查/版本/探测路由和 `POST /api/v1/webhooks/billing`。
 
 mod layer;
 
 pub(crate) use layer::{
-    governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
+    governor_layer_from_env, search_governor_layer, strict_endpoint_governor_layer,
+    user_governor_layer,
 };

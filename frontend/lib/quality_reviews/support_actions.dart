@@ -1,7 +1,8 @@
-part of 'support.dart';
+import '../../rust_api.dart';
+import 'support_models.dart';
 
 List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
-  final diagnostics = _qualityDiagnosticsMap(row);
+  final diagnostics = qualityDiagnosticsMap(row);
   final suggestions = <String>[];
   final tags = <String>{};
 
@@ -11,63 +12,63 @@ List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
 
   final badCaseCategory = (row.badCaseCategory ?? '').toLowerCase();
   final comments = (row.comments ?? '').toLowerCase();
-  final overallScore = _qualityScorePercent(row.overallScore);
-  final dialogueNaturalness = _qualityScorePercent(
+  final overallScore = qualityScorePercent(row.overallScore);
+  final dialogueNaturalness = qualityScorePercent(
     row.dialogueNaturalness,
     fallback: row.overallScore ?? 10,
   );
-  final visualQuality = _qualityScorePercent(
+  final visualQuality = qualityScorePercent(
     row.visualQuality,
     fallback: row.overallScore ?? 10,
   );
 
   if (diagnostics != null) {
-    final usesReferenceFrame = _diagnosticBool(
+    final usesReferenceFrame = diagnosticBool(
       diagnostics,
       'usesReferenceFrame',
     );
-    final continuityCount = _diagnosticInt(diagnostics, 'continuityNoteCount');
-    final promptChars = _diagnosticInt(diagnostics, 'promptChars');
-    final memoryStyleChars = _diagnosticInt(diagnostics, 'memoryStyleChars');
-    final negativePromptChars = _diagnosticInt(
+    final continuityCount = diagnosticInt(diagnostics, 'continuityNoteCount');
+    final promptChars = diagnosticInt(diagnostics, 'promptChars');
+    final memoryStyleChars = diagnosticInt(diagnostics, 'memoryStyleChars');
+    final negativePromptChars = diagnosticInt(
       diagnostics,
       'negativePromptChars',
     );
-    final directorSaved = _diagnosticInt(
+    final directorSaved = diagnosticInt(
       diagnostics,
       'directorAnchorSavedChars',
     );
-    final projectScopeRows = _diagnosticInt(
+    final projectScopeRows = diagnosticInt(
       diagnostics,
       'memoryProjectScopeRowCount',
     );
-    final scriptScopeRows = _diagnosticInt(
+    final scriptScopeRows = diagnosticInt(
       diagnostics,
       'memoryScriptScopeRowCount',
     );
-    final roleScopeRows = _diagnosticInt(
+    final roleScopeRows = diagnosticInt(
       diagnostics,
       'memoryRoleScopeRowCount',
     );
-    final hitCounts = _diagnosticStringIntMap(
+    final hitCounts = diagnosticStringIntMap(
       diagnostics,
       'memoryHitBucketCounts',
     );
-    final suppressedCounts = _diagnosticStringIntMap(
+    final suppressedCounts = diagnosticStringIntMap(
       diagnostics,
       'memorySuppressedBucketCounts',
     );
-    final autoNegativeSource = _diagnosticString(
+    final autoNegativeSource = diagnosticString(
       diagnostics,
       'autoNegativeSource',
     );
 
     final hitBuckets = {
-      ..._diagnosticStringList(diagnostics, 'memoryHitBuckets'),
+      ...diagnosticStringList(diagnostics, 'memoryHitBuckets'),
       ...hitCounts.keys,
     };
     final suppressedBuckets = {
-      ..._diagnosticStringList(diagnostics, 'memorySuppressedBuckets'),
+      ...diagnosticStringList(diagnostics, 'memorySuppressedBuckets'),
       ...suppressedCounts.keys,
     };
 
@@ -98,7 +99,7 @@ List<String> buildQualityReviewRepairSuggestions(QualityReview row) {
     if (autoNegativeSource != null && negativePromptChars > 0) {
       addTagged('negative_reuse', '沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。');
     }
-    if (_diagnosticBool(diagnostics, 'directorManualYieldedToMemory') ||
+    if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory') ||
         directorSaved > 0) {
       addTagged('director_trim', '导演描述已经让位给记忆，优先回收重复导演句，不动关键表演锚点。');
     }
@@ -178,9 +179,9 @@ String? summarizeQualityTokenEfficiencyActionPlan(
 
   final ranked = items.toList()
     ..sort((a, b) {
-      final priority = _qualityTokenEfficiencyActionPriority(
+      final priority = qualityTokenEfficiencyActionPriority(
         b.memoryAction,
-      ).compareTo(_qualityTokenEfficiencyActionPriority(a.memoryAction));
+      ).compareTo(qualityTokenEfficiencyActionPriority(a.memoryAction));
       if (priority != 0) return priority;
       return b.sampleCount.compareTo(a.sampleCount);
     });
@@ -188,7 +189,7 @@ String? summarizeQualityTokenEfficiencyActionPlan(
   final visible = ranked
       .take(maxItems)
       .map((row) {
-        final focus = _qualityTokenEfficiencyFocusLabel(row.memoryFocus);
+        final focus = qualityTokenEfficiencyFocusLabel(row.memoryFocus);
         switch (row.memoryAction) {
           case 'keep_delivery_memory':
             return '${row.targetType} 保留$focus的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。';
@@ -224,7 +225,7 @@ String? buildQualityScopedExecutionChecklist({
   }();
 
   for (final row in tokenRows.where((row) => row.memoryAction != 'observe')) {
-    final focus = _qualityTokenEfficiencyFocusLabel(row.memoryFocus);
+    final focus = qualityTokenEfficiencyFocusLabel(row.memoryFocus);
     switch (row.memoryAction) {
       case 'keep_delivery_memory':
         steps.add('保留$focus里的表演、语气、口型和情绪记忆，只压泛风格套话。');

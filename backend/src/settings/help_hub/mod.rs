@@ -1,10 +1,18 @@
-use axum::{extract::State, http::HeaderMap, routing::get, Json, Router};
+use axum::{
+    extract::State,
+    http::HeaderMap,
+    routing::{get, post},
+    Json, Router,
+};
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
+use crate::workspaces::ensure_personal_workspace;
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -18,6 +26,32 @@ pub struct HelpHubLinkItem {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HelpHubLinksResponse {
     pub items: Vec<HelpHubLinkItem>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct HelpHubConfigResponse {
+    pub workspace_id: Uuid,
+    pub can_manage_workspace: bool,
+    pub env_items: Vec<HelpHubLinkItem>,
+    pub workspace_items: Vec<HelpHubLinkItem>,
+    pub user_items: Vec<HelpHubLinkItem>,
+    pub effective_items: Vec<HelpHubLinkItem>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct UpsertHelpHubLinksBody {
+    pub items: Vec<HelpHubLinkItem>,
+}
+
+#[derive(Debug, Clone, FromRow)]
+struct HelpHubLinkRow {
+    link_id: String,
+    title: String,
+    url: String,
+    #[allow(dead_code)]
+    sort_order: i32,
 }
 
 fn parse_env_items() -> Vec<HelpHubLinkItem> {
@@ -42,6 +76,94 @@ fn parse_env_items() -> Vec<HelpHubLinkItem> {
     }]
 }
 
+async fn resolve_current_workspace(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+) -> Result<(Uuid, bool), ApiError> {
+    let personal = ensure_personal_workspace(pool, uid).await?;
+    let current_workspace_id: Option<Uuid> = sqlx::query_scalar(
+        "SELECT current_workspace_id FROM public.app_user_profile WHERE user_id = $1",
+    )
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .flatten();
+
+    let resolved = if let Some(ws_id) = current_workspace_id {
+        let row: Option<(Uuid, String, String)> = sqlx::query_as(
+            r#"
+            SELECT w.id, w.workspace_type::text, m.role
+            FROM public.app_workspace w
+            INNER JOIN public.app_workspace_member m ON m.workspace_id = w.id
+            WHERE w.id = $1
+              AND m.user_id = $2
+              AND w.archived_at IS NULL
+            LIMIT 1
+            "#,
+        )
+        .bind(ws_id)
+        .bind(uid)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        row.map(|(id, workspace_type, role)| {
+            let can_manage =
+                workspace_type == "enterprise" && matches!(role.as_str(), "owner" | "admin");
+            (id, can_manage)
+        })
+    } else {
+        None
+    };
+    Ok(resolved.unwrap_or((personal.workspace_id, true)))
+}
+
+async fn load_scope_links(
+    pool: &sqlx::PgPool,
+    scope: &str,
+    workspace_id: Option<Uuid>,
+    user_id: Option<Uuid>,
+) -> Result<Vec<HelpHubLinkItem>, ApiError> {
+    let rows: Vec<HelpHubLinkRow> = sqlx::query_as(
+        r#"
+        SELECT link_id, title, url, sort_order
+        FROM app_help_hub_link
+        WHERE scope = $1
+          AND ($2::uuid IS NULL OR workspace_id = $2)
+          AND ($3::uuid IS NULL OR user_id = $3)
+        ORDER BY sort_order ASC, created_at ASC
+        "#,
+    )
+    .bind(scope)
+    .bind(workspace_id)
+    .bind(user_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(rows
+        .into_iter()
+        .map(|r| HelpHubLinkItem {
+            id: r.link_id,
+            title: r.title,
+            url: r.url,
+        })
+        .collect())
+}
+
+fn build_effective(
+    env_items: &[HelpHubLinkItem],
+    workspace_items: &[HelpHubLinkItem],
+    user_items: &[HelpHubLinkItem],
+) -> Vec<HelpHubLinkItem> {
+    // priority: user overrides > workspace overrides > env defaults
+    use std::collections::BTreeMap;
+    let mut map: BTreeMap<String, HelpHubLinkItem> = BTreeMap::new();
+    for item in env_items.iter().chain(workspace_items).chain(user_items) {
+        map.insert(item.id.clone(), item.clone());
+    }
+    map.into_values().collect()
+}
+
 #[utoipa::path(
     get,
     path = "/api/v1/settings/help/hub",
@@ -58,14 +180,175 @@ pub(crate) async fn get_help_hub_links(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<HelpHubLinksResponse>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let (workspace_id, _can_manage_workspace) = resolve_current_workspace(pool, uid).await?;
+    let env_items = parse_env_items();
+    let workspace_items = load_scope_links(pool, "workspace", Some(workspace_id), None).await?;
+    let user_items = load_scope_links(pool, "user", None, Some(uid)).await?;
     Ok(Json(HelpHubLinksResponse {
-        items: parse_env_items(),
+        items: build_effective(&env_items, &workspace_items, &user_items),
     }))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/settings/help/hub/config",
+    operation_id = "getSettingsHelpHubConfigV1",
+    tag = "settings",
+    responses(
+        (status = 200, description = "OK", body = HelpHubConfigResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_help_hub_config(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<HelpHubConfigResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let (workspace_id, can_manage_workspace) = resolve_current_workspace(pool, uid).await?;
+    let env_items = parse_env_items();
+    let workspace_items = load_scope_links(pool, "workspace", Some(workspace_id), None).await?;
+    let user_items = load_scope_links(pool, "user", None, Some(uid)).await?;
+    let effective_items = build_effective(&env_items, &workspace_items, &user_items);
+    Ok(Json(HelpHubConfigResponse {
+        workspace_id,
+        can_manage_workspace,
+        env_items,
+        workspace_items,
+        user_items,
+        effective_items,
+    }))
+}
+
+async fn replace_links(
+    pool: &sqlx::PgPool,
+    scope: &str,
+    workspace_id: Option<Uuid>,
+    user_id: Option<Uuid>,
+    items: &[HelpHubLinkItem],
+) -> Result<(), ApiError> {
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    sqlx::query(
+        r#"
+        DELETE FROM app_help_hub_link
+        WHERE scope = $1
+          AND ($2::uuid IS NULL OR workspace_id = $2)
+          AND ($3::uuid IS NULL OR user_id = $3)
+        "#,
+    )
+    .bind(scope)
+    .bind(workspace_id)
+    .bind(user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    for (idx, item) in items.iter().enumerate() {
+        let link_id = item.id.trim();
+        let title = item.title.trim();
+        let url = item.url.trim();
+        if link_id.is_empty() || title.is_empty() || url.is_empty() {
+            continue;
+        }
+        sqlx::query(
+            r#"
+            INSERT INTO app_help_hub_link
+              (id, scope, workspace_id, user_id, link_id, title, url, sort_order, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+            "#,
+        )
+        .bind(Uuid::new_v4())
+        .bind(scope)
+        .bind(workspace_id)
+        .bind(user_id)
+        .bind(link_id)
+        .bind(title)
+        .bind(url)
+        .bind(idx as i32)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    }
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/help/hub/user-links",
+    operation_id = "postSettingsHelpHubUserLinksV1",
+    tag = "settings",
+    request_body = UpsertHelpHubLinksBody,
+    responses(
+        (status = 200, description = "OK", body = HelpHubConfigResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_user_help_hub_links(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<UpsertHelpHubLinksBody>,
+) -> Result<Json<HelpHubConfigResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    replace_links(pool, "user", None, Some(uid), &body.items).await?;
+    get_help_hub_config(State(state), headers).await
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/help/hub/workspace-links",
+    operation_id = "postSettingsHelpHubWorkspaceLinksV1",
+    tag = "settings",
+    request_body = UpsertHelpHubLinksBody,
+    responses(
+        (status = 200, description = "OK", body = HelpHubConfigResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_workspace_help_hub_links(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<UpsertHelpHubLinksBody>,
+) -> Result<Json<HelpHubConfigResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let (workspace_id, can_manage) = resolve_current_workspace(pool, uid).await?;
+    if !can_manage {
+        return Err(ApiError::Forbidden(
+            "requires enterprise workspace owner/admin".into(),
+        ));
+    }
+    replace_links(pool, "workspace", Some(workspace_id), None, &body.items).await?;
+    get_help_hub_config(State(state), headers).await
+}
+
 pub fn router() -> Router<AppState> {
-    Router::new().route("/api/v1/settings/help/hub", get(get_help_hub_links))
+    Router::new()
+        .route("/api/v1/settings/help/hub", get(get_help_hub_links))
+        .route("/api/v1/settings/help/hub/config", get(get_help_hub_config))
+        .route(
+            "/api/v1/settings/help/hub/user-links",
+            post(post_user_help_hub_links),
+        )
+        .route(
+            "/api/v1/settings/help/hub/workspace-links",
+            post(post_workspace_help_hub_links),
+        )
 }
 
 #[cfg(test)]

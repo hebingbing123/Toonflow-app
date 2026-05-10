@@ -96,6 +96,7 @@ mod tests {
                 numeric_id INTEGER NOT NULL UNIQUE,
                 name TEXT NOT NULL,
                 intro TEXT,
+                archived_at TIMESTAMPTZ,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 search_vector tsvector GENERATED ALWAYS AS (
@@ -108,6 +109,13 @@ mod tests {
         .execute(pool)
         .await
         .expect("Failed to create app_project");
+
+        sqlx::query(
+            r#"ALTER TABLE public.app_project ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ"#,
+        )
+        .execute(pool)
+        .await
+        .expect("Failed to ensure app_project.archived_at");
 
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_app_project_search ON public.app_project USING GIN(search_vector)")
             .execute(pool)

@@ -7,6 +7,8 @@ use tower_governor::governor::{GovernorConfig, GovernorConfigBuilder};
 use tower_governor::key_extractor::{KeyExtractor, PeerIpKeyExtractor, SmartIpKeyExtractor};
 use tower_governor::GovernorLayer;
 
+use crate::auth::api_keys::public_id_from_request;
+
 use super::env::env_truthy;
 use super::jwt_decode::extract_user_id_from_jwt;
 
@@ -28,6 +30,9 @@ impl KeyExtractor for UserIdKeyExtractor {
     type Key = String;
 
     fn extract<T>(&self, req: &Request<T>) -> Result<Self::Key, GovernorError> {
+        if let Some(public_id) = public_id_from_request(req) {
+            return Ok(format!("api_key:{}", public_id));
+        }
         // Try to extract user_id from Authorization header (JWT)
         if let Some(auth_header) = req.headers().get("authorization") {
             if let Ok(auth_str) = auth_header.to_str() {

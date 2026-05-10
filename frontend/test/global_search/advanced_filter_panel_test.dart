@@ -61,7 +61,9 @@ void main() {
       expect(find.text('项目'), findsOneWidget);
       expect(find.text('剧本'), findsOneWidget);
       expect(find.text('资产'), findsOneWidget);
-      expect(find.byType(CheckboxListTile), findsNWidgets(3));
+      expect(find.text('小说章节'), findsOneWidget);
+      expect(find.text('小说大纲事件'), findsOneWidget);
+      expect(find.byType(CheckboxListTile), findsNWidgets(5));
     });
 
     testWidgets('toggles result type when checkbox is tapped', (tester) async {
@@ -150,6 +152,10 @@ void main() {
           ),
         ),
       );
+
+      // End date control sits below extra result-type rows; scroll into view.
+      await tester.ensureVisible(find.text('选择结束日期'));
+      await tester.pumpAndSettle();
 
       // Tap the end date button
       await tester.tap(find.text('选择结束日期'));
@@ -475,6 +481,8 @@ void main() {
       expect(find.byIcon(Icons.folder), findsOneWidget);
       expect(find.byIcon(Icons.description), findsOneWidget);
       expect(find.byIcon(Icons.image), findsOneWidget);
+      expect(find.byIcon(Icons.menu_book), findsOneWidget);
+      expect(find.byIcon(Icons.event_note), findsOneWidget);
     });
 
     testWidgets('displays calendar icons for date buttons', (tester) async {

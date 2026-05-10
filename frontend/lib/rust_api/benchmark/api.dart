@@ -372,3 +372,69 @@ Future<BenchmarkTrendsResponseV1> fetchBenchmarkTrends(
   }
   return BenchmarkTrendsResponseV1.fromJson(Map<String, dynamic>.from(decoded));
 }
+
+Future<ABCompareResponseV1> compareBenchmarkABJobs(
+  String accessToken, {
+  bool persist = false,
+  String? name,
+  required List<ABCompareCaseV1> cases,
+  ABCompareConfigV1? config,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/benchmark/ab/compare');
+  final body = <String, dynamic>{
+    'cases': cases.map((e) => e.toJson()).toList(growable: false),
+    if (config != null) 'config': config.toJson(),
+    if (persist) 'persist': true,
+    if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 60));
+  ensureHttpSuccess(res);
+  final decoded = jsonDecode(res.body);
+  if (decoded is! Map) {
+    throw RustApiException('Unexpected response: ${res.body}');
+  }
+  return ABCompareResponseV1.fromJson(Map<String, dynamic>.from(decoded));
+}
+
+Future<List<ABCompareRunRowV1>> fetchBenchmarkABCompareRuns(
+  String accessToken,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/benchmark/ab/runs');
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 30));
+  ensureHttpSuccess(res);
+  final decoded = jsonDecode(res.body);
+  if (decoded is! List) {
+    throw RustApiException('Unexpected response: ${res.body}');
+  }
+  return decoded
+      .whereType<Map>()
+      .map((item) => ABCompareRunRowV1.fromJson(Map<String, dynamic>.from(item)))
+      .toList(growable: false);
+}
+
+Future<ABCompareRunDetailV1> fetchBenchmarkABCompareRunDetail(
+  String accessToken,
+  String runId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/benchmark/ab/runs/$runId');
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 30));
+  ensureHttpSuccess(res);
+  final decoded = jsonDecode(res.body);
+  if (decoded is! Map) {
+    throw RustApiException('Unexpected response: ${res.body}');
+  }
+  return ABCompareRunDetailV1.fromJson(Map<String, dynamic>.from(decoded));
+}

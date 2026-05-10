@@ -65,6 +65,7 @@ pub(crate) async fn ensure_project_owned(
         SELECT EXISTS(
           SELECT 1 FROM app_project
           WHERE numeric_id = $1 AND owner_user_id = $2
+            AND archived_at IS NULL
         )
         "#,
     )

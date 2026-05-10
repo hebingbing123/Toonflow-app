@@ -8,7 +8,7 @@ use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
 
-use crate::auth::require_claims;
+use crate::auth::{bearer_token, require_claims, require_user_uuid};
 use crate::error::ApiError;
 use crate::state::{AppState, MemoryConfig};
 
@@ -60,8 +60,12 @@ pub(crate) async fn me(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<MeResponse>, ApiError> {
-    let claims = require_claims(&state, &headers)?;
-    let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
+    let sub = require_user_uuid(&state, &headers)?;
+    let claims = if bearer_token(&headers).is_some_and(|token| token.contains('.')) {
+        Some(require_claims(&state, &headers)?)
+    } else {
+        None
+    };
     let request_id = request_id_from_headers(&headers);
 
     let (
@@ -250,7 +254,7 @@ pub(crate) async fn me(
 
     Ok(Json(MeResponse {
         sub,
-        email: claims.email,
+        email: claims.and_then(|c| c.email),
         plan_tier,
         billing_currency,
         billing_provider,
@@ -283,8 +287,7 @@ pub(crate) async fn patch_current_workspace(
     headers: HeaderMap,
     Json(body): Json<PatchCurrentWorkspaceBody>,
 ) -> Result<Json<WorkspaceSummary>, ApiError> {
-    let claims = require_claims(&state, &headers)?;
-    let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
+    let sub = require_user_uuid(&state, &headers)?;
     let request_id = request_id_from_headers(&headers);
     let pool = state.require_pool()?;
     let workspace_id = body.workspace_id;
