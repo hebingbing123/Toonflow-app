@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../local_prefs/risky_operation_confirm_prefs.dart';
+
 class HarnessSection extends StatelessWidget {
   const HarnessSection({
     super.key,
@@ -114,7 +116,20 @@ class HarnessSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text('Harness / skills', style: Theme.of(context).textTheme.titleSmall),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                'Harness / skills',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            const RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: '本机客户端偏好（调试壳，与各主面板标题旁 ⋯ 相同）',
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
