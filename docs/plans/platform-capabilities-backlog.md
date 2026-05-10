@@ -22,7 +22,7 @@
 
 | ID | 能力 | Backend | Flutter / 产品面 | 备注 |
 |----|------|---------|-------------------|------|
-| P-B1 | **用户级或 workspace 级 API Key**（只读/读写 scope） | 签发、哈希存储、轮换、审计 | 设置页管理 keys、展示一次明文 | 与限流、审计联动 |
+| P-B1 | **用户级或 workspace 级 API Key**（只读/读写 scope） | 签发、哈希存储、轮换、审计 | 设置页管理 keys、展示一次明文 | **tracked**：本轮先落 **用户级** API key（`tfk_*`），新增 `app_api_key` / `app_api_key_audit`、`GET /api/v1/settings/api-keys`、`GET /api/v1/settings/api-keys/audit`、`POST /api/v1/settings/api-keys`、`POST /{id}/rotate|revoke|activate`、`DELETE /{id}`；secret 仅创建/轮换时回显一次，服务端以 HMAC 哈希保存，并把 `last_used_*` / `use_count` 与生命周期审计落库；认证链已支持 `X-API-Key` 用于用户域 REST 自动化，`read_only` key 仅允许 `GET/HEAD/OPTIONS`，速率限制按 `public_id` 分桶；轮换现保持 `public_id` 稳定、支持 `expiresAtAction = preserve|clear|set`，列表直接返回 `isExpired` / `isUsable`；Flutter 主导航已补「API 密钥」pane，覆盖创建、一次性明文复制、过期策略、轮换、撤销/恢复、删除与审计查看 |
 | P-B2 | **出站 Webhook**（项目状态、任务完成 → 客户 URL） | 注册 URL、签名校验、重试、死信 | 配置 UI + 测试投递按钮 | **tracked**：Flutter [`帮助 / 出站 Webhook`](../../frontend/lib/shell/build_sections_product.dart) 已补平台级治理面，覆盖 settings CRUD、可选自定义 secret、可配置 test `eventType`、列表搜索、最近创建凭据回显、删除确认、最近测试结果与本地操作活动流；并复用 `GET /api/v1/webhooks/billing/events` 补齐 billing webhook 审计筛选 / 摘要 / 导出 / drilldown |
 | P-B3 | **公开只读 Status / Health 页**（非鉴权或弱鉴权） | 聚合 `/health`、队列深度、依赖项 | 静态页或 Flutter Web 路由 | **tracked**：已新增 Flutter `/status` 页，公开聚合 `/health` / `/api/v1/health` / `/api/v1/ready` / `/api/v1/version`，并在带 `INTERNAL_OPS_TOKEN` 时附加队列统计；见 [`roadmap-flutter-shell.md`](./roadmap-flutter-shell.md) WP-E |
 
@@ -32,7 +32,7 @@
 
 | ID | 能力 | Backend | Flutter / 产品面 | 备注 |
 |----|------|---------|-------------------|------|
-| P-C1 | **管理台扩展**（超越 billing events 列表） | 用户/空间只读、封禁、配额调整 API | 内部路由或独立 build | RBAC 须极严 |
+| P-C1 | **管理台扩展**（超越 billing events 列表） | 用户/空间只读、封禁、配额调整 API | 内部路由或独立 build | **tracked**：当前已从只读底座扩到 **用户治理可写** 与 **workspace 治理可写（企业归档/解档、内部备注、审计）**。统一复用 `TOONFLOW_INTERNAL_OPS_TOKEN` / `X-Toonflow-Internal-Token` 门禁，已落 `GET /api/v1/internal/admin/search`、`GET /api/v1/internal/admin/users/{user_id}`、`GET /api/v1/internal/admin/workspaces/{workspace_id}`、`GET /api/v1/internal/admin/projects/{project_id}`、`POST /api/v1/internal/admin/users/{user_id}/governance`、`POST /api/v1/internal/admin/users/{user_id}/workspace-context`、`POST /api/v1/internal/admin/workspaces/{workspace_id}/governance`；用户侧把 `operational_status` / `operational_status_reason` / `ops_note` / `daily_job_quota` 持久化到 `app_user_profile`，`app_user_governance_audit` 记录变更；workspace 侧把 `archived_at` 与 `metadata.internalOps`（含 `opsNote`）持久化到 `app_workspace`，`app_workspace_governance_audit` 记录变更；个人 workspace 禁止归档。认证中间件在 JWT / `X-API-Key` 两条链路上一致拦截 suspended 用户（`403`）；管理台可把用户 `current_workspace_id` 切回 personal 或切到仍具成员关系的 workspace。Flutter internal「管理台」pane 支持跨实体搜索、详情、用户封禁/恢复、日配额 override、用户内部备注、workspace 上下文修复、**workspace 归档/解档与内部备注**、双方治理审计查看。**project 级治理写操作**仍留待下一段 |
 | P-C2 | **内容与合规队列**（举报、人工审核） | 表 + 工作流 API | 审核台 UI | 母文档 § 合规提及 |
 | P-C3 | **审计日志用户可见切片**（「谁改了我的项目」） | 读模型 API | 项目设置 / 活动时间线 | **tracked**：已新增 `app_project_audit` 与 `GET /api/v1/projects/{project_id}/audit`，当前覆盖项目创建 / 基础信息修改 / 删除，以及项目 ACL `viewer` / `editor` 增删改；Flutter 项目编辑器已补 [`ProjectAuditPanel`](../../frontend/lib/project_editor/project_audit_panel.dart) 活动时间线，支持动作过滤、搜索、分页追加与刷新 |
 

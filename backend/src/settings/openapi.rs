@@ -4,6 +4,20 @@ use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(paths(
+    crate::settings::api_keys::get_api_keys,
+    crate::settings::api_keys::get_api_key_audit,
+    crate::settings::api_keys::post_create_api_key,
+    crate::settings::api_keys::post_rotate_api_key,
+    crate::settings::api_keys::post_revoke_api_key,
+    crate::settings::api_keys::post_activate_api_key,
+    crate::settings::api_keys::delete_api_key,
+    crate::settings::admin_console::get_admin_search,
+    crate::settings::admin_console::get_admin_user_detail,
+    crate::settings::admin_console::post_admin_user_governance,
+    crate::settings::admin_console::post_admin_user_workspace_context,
+    crate::settings::admin_console::get_admin_workspace_detail,
+    crate::settings::admin_console::post_admin_workspace_governance,
+    crate::settings::admin_console::get_admin_project_detail,
     crate::settings::account::post_account_export,
     crate::settings::account::get_account_exports,
     crate::settings::account::get_account_export_file,
