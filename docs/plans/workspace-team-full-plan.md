@@ -126,6 +126,8 @@
 
 ## 九、Phase W8 — 计费、用量、任务配额（与空间绑定策略）
 
+**Kiro 工程规格**（W8.2–W8.4 完整需求 / 架构 / 任务，与 global-search spec 同结构）：[`.kiro/specs/workspace-scope-billing/`](../../.kiro/specs/workspace-scope-billing/)。
+
 - [x] **W8.1** 结论落地文档：`plan_tier` / `daily_job_quota` / `jobs_today` **按 user 还是按 workspace**（或 hybrid）— 当前定稿为 **user-scope**，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
 - [ ] **W8.2** 若未来改为 workspace-scope：`app_user_profile` vs `app_workspace` 字段迁移 + webhook 与 **`/me`** 响应形状变更策略（版本化）— **规格草案**（未实施）：[`workspace-billing-future-workspace-scope.md`](./workspace-billing-future-workspace-scope.md) §2
 - [ ] **W8.3** 若未来改为 workspace-scope：Billing 运营视图是否按 workspace 过滤 — 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-D 对齐 — **规格草案**：同上 §3

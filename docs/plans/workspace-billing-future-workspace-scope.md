@@ -3,6 +3,8 @@
 **状态**：**未实施**。仅在产品/财务推翻 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md) 的 user-scope 结论后启用本文件。  
 主计划：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W8。
 
+**Kiro 工程规格**（需求 / 架构 / 任务清单，与 global-search spec 同结构）：[`.kiro/specs/workspace-scope-billing/`](../../.kiro/specs/workspace-scope-billing/) — `requirements.md`、`design.md`、`tasks.md`。
+
 ## 1) 前置条件（全部满足后再开工）
 
 - 书面签字：**计费归属**从 user 改为 workspace（或 hybrid）及生效日期。

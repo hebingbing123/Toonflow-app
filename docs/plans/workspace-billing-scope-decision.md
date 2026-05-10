@@ -5,6 +5,8 @@
 路线图：[`roadmap-workspace.md`](./roadmap-workspace.md)。  
 相关路线：[`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-B / WP-D。
 
+若未来切换为 **workspace-scope** 计费，工程侧完整规格（需求 / 架构 / 任务）见 Kiro：[`.kiro/specs/workspace-scope-billing/`](../../.kiro/specs/workspace-scope-billing/)（`requirements.md`、`design.md`、`tasks.md`）。本文档 **W8.1** 结论在切换前仍以 **user-scope** 为准。
+
 ## 1) 结论
 
 在现有实现和产品基线上，以下字段继续按 **user** 口径解释：
