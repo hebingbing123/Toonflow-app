@@ -241,6 +241,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                             ResultType.project => Icons.folder_outlined,
                             ResultType.script => Icons.article_outlined,
                             ResultType.asset => Icons.widgets_outlined,
+                            ResultType.novel => Icons.menu_book_outlined,
+                            ResultType.novelEvent => Icons.event_note_outlined,
                           },
                           size: 20,
                         ),
@@ -255,6 +257,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                             ResultType.project => '项目',
                             ResultType.script => '剧本',
                             ResultType.asset => '资产',
+                            ResultType.novel => '小说章节',
+                            ResultType.novelEvent => '小说事件',
                           },
                           style: TextStyle(
                             fontSize: 12,

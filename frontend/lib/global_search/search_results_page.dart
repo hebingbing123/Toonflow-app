@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,7 +17,7 @@ import 'advanced_filter_panel.dart';
 /// - Display search keyword and total result count at the top
 /// - Loading state with skeleton screen or loading animation
 /// - Call RustApiSearch.search() to fetch results
-/// - Group results by type (projects, scripts, assets)
+/// - Group results by type (projects, scripts, assets, novels, novel events)
 /// - Pagination controls (previous/next page)
 /// - Handle no results scenario: "未找到匹配结果,请尝试其他关键词"
 /// - Handle error scenario: display error message and retry button
@@ -34,9 +36,13 @@ class SearchResultsPage extends StatefulWidget {
   /// Access token for API calls
   final String? accessToken;
 
-  /// Callback when navigating to detail page
-  /// Parameters: (resultType, id)
-  final void Function(ResultType type, String id)? onNavigateToDetail;
+  /// Callback when navigating to detail page.
+  /// [metadata] 来自服务端（如 `project_numeric_id`、`project_id` UUID）。
+  final void Function(
+    ResultType type,
+    String id, {
+    Map<String, dynamic>? metadata,
+  })? onNavigateToDetail;
 
   @override
   State<SearchResultsPage> createState() => _SearchResultsPageState();
@@ -203,6 +209,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         return '剧本';
       case ResultType.asset:
         return '资产';
+      case ResultType.novel:
+        return '小说章节';
+      case ResultType.novelEvent:
+        return '小说事件';
     }
   }
 
@@ -215,28 +225,45 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         return Icons.description_outlined;
       case ResultType.asset:
         return Icons.image_outlined;
+      case ResultType.novel:
+        return Icons.menu_book_outlined;
+      case ResultType.novelEvent:
+        return Icons.event_note_outlined;
     }
   }
 
   /// Navigate to detail page
-  void _navigateToDetail(ResultType type, String id) {
+  void _navigateToDetail(SearchResult result) {
     if (widget.onNavigateToDetail != null) {
-      widget.onNavigateToDetail!(type, id);
+      widget.onNavigateToDetail!(
+        result.resultType,
+        result.id,
+        metadata: result.metadata,
+      );
     } else {
-      // Default navigation logic
-      String route;
-      switch (type) {
+      // Default navigation logic（主导航未注入回调时的兜底）
+      switch (result.resultType) {
         case ResultType.project:
-          route = '/projects/$id';
+          unawaited(Navigator.pushNamed(context, '/projects/${result.id}'));
           break;
         case ResultType.script:
-          route = '/scripts/$id';
+          unawaited(Navigator.pushNamed(context, '/scripts/${result.id}'));
           break;
         case ResultType.asset:
-          route = '/assets/$id';
+          unawaited(Navigator.pushNamed(context, '/assets/${result.id}'));
+          break;
+        case ResultType.novel:
+        case ResultType.novelEvent:
+          if (!context.mounted) {
+            return;
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('请从首页主导航打开「项目列表」，在目标项目内使用小说工作台查看章节与事件。'),
+            ),
+          );
           break;
       }
-      Navigator.pushNamed(context, route);
     }
   }
 
@@ -293,7 +320,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     if (event.logicalKey == LogicalKeyboardKey.enter) {
       if (_selectedResultIndex >= 0 && _selectedResultIndex < totalResults) {
         final selectedResult = _response!.results[_selectedResultIndex];
-        _navigateToDetail(selectedResult.resultType, selectedResult.id);
+        _navigateToDetail(selectedResult);
         return KeyEventResult.handled;
       }
     }
@@ -572,19 +599,27 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   Widget _buildResultsList() {
     final grouped = _groupResultsByType();
     int currentIndex = 0;
-    
+    const typeOrder = <ResultType>[
+      ResultType.project,
+      ResultType.script,
+      ResultType.asset,
+      ResultType.novel,
+      ResultType.novelEvent,
+    ];
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Display results grouped by type
-        for (final entry in grouped.entries) ...[
-          _buildTypeHeader(entry.key, entry.value.length),
-          const SizedBox(height: 8),
-          ...entry.value.map((result) {
-            final index = currentIndex++;
-            return _buildResultCard(result, index);
-          }),
-          const SizedBox(height: 24),
+        for (final t in typeOrder) ...[
+          if (grouped[t] != null && grouped[t]!.isNotEmpty) ...[
+            _buildTypeHeader(t, grouped[t]!.length),
+            const SizedBox(height: 8),
+            ...grouped[t]!.map((result) {
+              final index = currentIndex++;
+              return _buildResultCard(result, index);
+            }),
+            const SizedBox(height: 24),
+          ],
         ],
       ],
     );
@@ -616,7 +651,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     
     return SearchResultCard(
       result: result,
-      onTap: () => _navigateToDetail(result.resultType, result.id),
+      onTap: () => _navigateToDetail(result),
       isSelected: isSelected,
     );
   }

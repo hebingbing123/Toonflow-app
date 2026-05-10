@@ -175,7 +175,7 @@ void main() {
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
-              onNavigateToDetail: (type, id) {},
+              onNavigateToDetail: (type, id, {metadata}) {},
             ),
           ),
         );

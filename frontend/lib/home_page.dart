@@ -47,6 +47,7 @@ import 'agent_workspaces/ws_event_controller.dart';
 import 'agent_workspaces/writeback_controller.dart';
 import 'auth/controller.dart';
 import 'account/controller.dart';
+import 'api_keys/controller.dart';
 import 'jobs/controller.dart';
 import 'notifications/controller.dart';
 import 'notifications/section.dart';
@@ -186,6 +187,11 @@ class _HomePageState extends State<HomePage> {
   );
 
   late final AccountController _accountController = AccountController(
+    accessTokenProvider: () => _session?.accessToken,
+    onErrorChanged: _setSharedError,
+  );
+
+  late final ApiKeysController _apiKeysController = ApiKeysController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
   );
@@ -386,11 +392,114 @@ class _HomePageState extends State<HomePage> {
     unawaited(
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
-          builder: (context) =>
-              SearchResultsPage(query: query, accessToken: token),
+          builder: (context) => SearchResultsPage(
+            query: query,
+            accessToken: token,
+            onNavigateToDetail: (type, id, {metadata}) {
+              Navigator.of(context).pop();
+              _handleSearchResultNavigation(type, id, metadata: metadata);
+            },
+          ),
         ),
       ),
     );
+  }
+
+  int? _intFromSearchMeta(dynamic v) {
+    if (v == null) {
+      return null;
+    }
+    if (v is int) {
+      return v;
+    }
+    if (v is num) {
+      return v.toInt();
+    }
+    return int.tryParse(v.toString());
+  }
+
+  /// 全局搜索命中后：回到产品壳并尽量恢复项目 / 剧本上下文（平台级深链）。
+  void _handleSearchResultNavigation(
+    ResultType type,
+    String id, {
+    Map<String, dynamic>? metadata,
+  }) {
+    if (!mounted) {
+      return;
+    }
+    _shellNavigationController.selectHomeSectionMode(HomeSectionMode.product);
+
+    final projectNumeric = _intFromSearchMeta(metadata?['project_numeric_id']);
+    final projectUuid = metadata?['project_id']?.toString();
+    final workspaceId = metadata?['workspace_id']?.toString();
+    final scriptNumeric = _intFromSearchMeta(metadata?['script_numeric_id']);
+
+    void goProjectsScoped() {
+      if (projectNumeric != null && projectNumeric > 0) {
+        setState(() {
+          _productScopedProjectNumericId = projectNumeric;
+        });
+        _workspaceInputController.applyProjectScope(
+          projectNumeric,
+          projectUuid: projectUuid,
+          workspaceId: workspaceId,
+        );
+      }
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.projects,
+      );
+    }
+
+    switch (type) {
+      case ResultType.project:
+        if (projectNumeric != null && projectNumeric > 0) {
+          setState(() {
+            _productScopedProjectNumericId = projectNumeric;
+          });
+          _workspaceInputController.applyProjectScope(
+            projectNumeric,
+            projectUuid: id,
+            workspaceId: workspaceId,
+          );
+        }
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.projects,
+        );
+        break;
+      case ResultType.script:
+        if (projectNumeric != null && projectNumeric > 0) {
+          setState(() {
+            _productScopedProjectNumericId = projectNumeric;
+          });
+          _workspaceInputController.applyProjectScope(
+            projectNumeric,
+            scriptNumericId: scriptNumeric,
+            projectUuid: projectUuid,
+            scriptUuid: id,
+            workspaceId: workspaceId,
+          );
+        }
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.projects,
+        );
+        break;
+      case ResultType.asset:
+        goProjectsScoped();
+        break;
+      case ResultType.novel:
+      case ResultType.novelEvent:
+        goProjectsScoped();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              type == ResultType.novelEvent
+                  ? '已定位到项目。请在项目详情中打开「小说与事件」查看大纲事件（事件 #${_intFromSearchMeta(metadata?['event_numeric_id']) ?? '?'}）。'
+                  : '已定位到项目。请在项目详情中打开「小说与事件」查看章节（章索引 ${metadata?['chapter_index'] ?? '?'}）。',
+            ),
+          ),
+        );
+        break;
+    }
   }
 
   void _openNotificationLink(NotificationRecordV1 notification) {
@@ -695,6 +804,7 @@ class _HomePageState extends State<HomePage> {
     _projectsController.reset();
     _jobsController.reset();
     _accountController.reset();
+    _apiKeysController.reset();
     _notificationsController.reset();
     _taskCenterController.reset();
     _qualityReviewsController.reset();
@@ -746,6 +856,7 @@ class _HomePageState extends State<HomePage> {
     _modelsCatalogController.dispose();
     _overviewController.dispose();
     _accountController.dispose();
+    _apiKeysController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
     _notificationsController.dispose();
