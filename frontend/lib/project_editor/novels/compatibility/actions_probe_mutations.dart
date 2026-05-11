@@ -114,11 +114,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  await deleteNovelByNumericIdScanningProjects(
-                    token,
-                    0,
-                    projectUuid: p.id,
-                  );
+                  await deleteNovelByProjectUuid(token, p.id, 0);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
@@ -155,10 +151,10 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 setDialogState(() => novelsBusy[0] = true);
                 final n = novelsRef[0]!.items.first;
                 try {
-                  final msg = await updateNovelScanningProjects(
+                  final msg = await updateNovelByProjectUuid(
                     token,
-                    id: n.numericId,
                     projectUuid: p.id,
+                    id: n.numericId,
                     index: n.chapterIndex,
                     reel: n.reel ?? '',
                     chapter: n.chapter,

@@ -238,6 +238,23 @@ Future<String> deleteNovelByNumericIdScanningProjects(
   );
 }
 
+/// UUID-first delete helper for callers that already hold **`app_project.id`**.
+Future<String> deleteNovelByProjectUuid(
+  String accessToken,
+  String projectUuid,
+  int novelNumericId,
+) async {
+  final explicitProjectUuid = projectUuid.trim();
+  if (explicitProjectUuid.isEmpty) {
+    throw ArgumentError('projectUuid is required');
+  }
+  return _deleteNovelByNumericIdScanningProjects(
+    accessToken,
+    novelNumericId,
+    projectUuid: explicitProjectUuid,
+  );
+}
+
 Future<String> _patchNovelByNumericIdScanningProjects(
   String accessToken, {
   required int id,
@@ -302,6 +319,33 @@ Future<String> updateNovelScanningProjects(
     accessToken,
     id: id,
     projectUuid: projectUuid,
+    index: index,
+    reel: reel,
+    chapter: chapter,
+    chapterData: chapterData,
+    event: event,
+  );
+}
+
+/// UUID-first update helper for callers that already hold **`app_project.id`**.
+Future<String> updateNovelByProjectUuid(
+  String accessToken, {
+  required String projectUuid,
+  required int id,
+  required Object index,
+  required String reel,
+  required String chapter,
+  required String chapterData,
+  required String event,
+}) async {
+  final explicitProjectUuid = projectUuid.trim();
+  if (explicitProjectUuid.isEmpty) {
+    throw ArgumentError('projectUuid is required');
+  }
+  return _patchNovelByNumericIdScanningProjects(
+    accessToken,
+    id: id,
+    projectUuid: explicitProjectUuid,
     index: index,
     reel: reel,
     chapter: chapter,
