@@ -1265,6 +1265,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please sign in first'**
   String get platformConfigPleaseSignIn;
+
+  /// No description provided for @productNavSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product navigation'**
+  String get productNavSectionTitle;
+
+  /// No description provided for @productNavShortVideoSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-video Space'**
+  String get productNavShortVideoSpace;
+
+  /// No description provided for @productNavProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get productNavProjects;
+
+  /// No description provided for @productNavAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get productNavAccount;
+
+  /// No description provided for @productNavApiKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'API keys'**
+  String get productNavApiKeys;
+
+  /// No description provided for @productNavNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get productNavNotifications;
+
+  /// No description provided for @productNavContentCompliance.
+  ///
+  /// In en, this message translates to:
+  /// **'Compliance'**
+  String get productNavContentCompliance;
+
+  /// No description provided for @productNavPlatformStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform status'**
+  String get productNavPlatformStatus;
+
+  /// No description provided for @productNavTeamWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Team workspaces'**
+  String get productNavTeamWorkspaces;
+
+  /// No description provided for @productNavScriptWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Script workspace'**
+  String get productNavScriptWorkspace;
+
+  /// No description provided for @productNavProductionWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Production workspace'**
+  String get productNavProductionWorkspace;
+
+  /// No description provided for @productNavWorkspaceActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace activity'**
+  String get productNavWorkspaceActivity;
+
+  /// No description provided for @productNavBenchmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Benchmark'**
+  String get productNavBenchmark;
+
+  /// No description provided for @productNavTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Task center'**
+  String get productNavTasks;
+
+  /// No description provided for @productNavJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
+  String get productNavJobs;
+
+  /// No description provided for @productNavQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get productNavQuality;
+
+  /// No description provided for @productNavPlatformConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform configuration'**
+  String get productNavPlatformConfig;
+
+  /// No description provided for @productNavHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get productNavHelp;
+
+  /// No description provided for @productAgentScriptWorkspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script workspace'**
+  String get productAgentScriptWorkspaceTitle;
+
+  /// No description provided for @productAgentScriptWorkspaceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script Agent flow: context probes, sub-agent orchestration, and body/plan writeback.'**
+  String get productAgentScriptWorkspaceSubtitle;
+
+  /// No description provided for @productAgentProductionWorkspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Production workspace'**
+  String get productAgentProductionWorkspaceTitle;
+
+  /// No description provided for @productAgentProductionWorkspaceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Production Agent flow: flow data reads, asset/storyboard tools, and safe writeback.'**
+  String get productAgentProductionWorkspaceSubtitle;
+
+  /// No description provided for @productAgentActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get productAgentActivityTitle;
+
+  /// No description provided for @productAgentActivitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent WebSocket events, tool receipts, and writeback status in one execution log panel.'**
+  String get productAgentActivitySubtitle;
+
+  /// No description provided for @productPaneDisabledHelpHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Hub is disabled by platform configuration. Re-enable it under Platform configuration.'**
+  String get productPaneDisabledHelpHub;
+
+  /// No description provided for @productPaneDisabledQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'The quality dashboard is disabled by platform configuration. Re-enable it under Platform configuration.'**
+  String get productPaneDisabledQuality;
+
+  /// No description provided for @productPaneDisabledPlatformStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform status is disabled by platform configuration. Re-enable it under Platform configuration.'**
+  String get productPaneDisabledPlatformStatus;
+
+  /// No description provided for @productPaneDisabledWorkspaceActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace activity is disabled by platform configuration. Re-enable it under Platform configuration.'**
+  String get productPaneDisabledWorkspaceActivity;
+
+  /// No description provided for @productPaneDisabledBenchmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Benchmark baseline is disabled by platform configuration. Re-enable it under Platform configuration.'**
+  String get productPaneDisabledBenchmark;
+
+  /// No description provided for @productPaneDisabledJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'The Jobs panel is disabled by platform configuration. Re-enable it under Platform configuration.'**
+  String get productPaneDisabledJobs;
+
+  /// No description provided for @productComplianceSnackAccountPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to Account panel. For user administration, prefer your internal admin console.'**
+  String get productComplianceSnackAccountPanel;
+
+  /// No description provided for @productComplianceSnackNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in; cannot open the target context.'**
+  String get productComplianceSnackNotSignedIn;
+
+  /// No description provided for @productComplianceTeamContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to team workspace context: {detail}'**
+  String productComplianceTeamContext(String detail);
+
+  /// No description provided for @productComplianceNoProjectContext.
+  ///
+  /// In en, this message translates to:
+  /// **'This report has no project context to open.'**
+  String get productComplianceNoProjectContext;
+
+  /// No description provided for @productComplianceOpenTargetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open target: {detail}'**
+  String productComplianceOpenTargetFailed(String detail);
 }
 
 class _AppLocalizationsDelegate

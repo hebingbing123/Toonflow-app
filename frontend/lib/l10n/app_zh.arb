@@ -339,5 +339,54 @@
   "platformConfigSnackWorkspaceSaved": "已保存当前 workspace 平台配置",
   "platformConfigSnackWorkspaceReset": "已重置 workspace 覆盖层",
   "platformConfigSnackCopyJsonDone": "已复制平台配置 JSON",
-  "platformConfigPleaseSignIn": "请先登录"
+  "platformConfigPleaseSignIn": "请先登录",
+  "productNavSectionTitle": "产品导航",
+  "productNavShortVideoSpace": "短视频 Space",
+  "productNavProjects": "项目",
+  "productNavAccount": "账户",
+  "productNavApiKeys": "API 密钥",
+  "productNavNotifications": "通知中心",
+  "productNavContentCompliance": "内容合规",
+  "productNavPlatformStatus": "平台状态",
+  "productNavTeamWorkspaces": "团队工作区",
+  "productNavScriptWorkspace": "脚本工作区",
+  "productNavProductionWorkspace": "制作工作区",
+  "productNavWorkspaceActivity": "工作区动态",
+  "productNavBenchmark": "评测基线",
+  "productNavTasks": "任务中心",
+  "productNavJobs": "任务作业",
+  "productNavQuality": "质量评审",
+  "productNavPlatformConfig": "平台配置",
+  "productNavHelp": "帮助",
+  "productAgentScriptWorkspaceTitle": "剧本工作区",
+  "productAgentScriptWorkspaceSubtitle": "专注剧本 Agent 工作流：上下文探测、子 Agent 编排与正文/计划回写。",
+  "productAgentProductionWorkspaceTitle": "制作工作区",
+  "productAgentProductionWorkspaceSubtitle": "专注 production Agent 工作流：flow 数据读取、资产/分镜工具执行与安全回写。",
+  "productAgentActivityTitle": "执行动态",
+  "productAgentActivitySubtitle": "集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。",
+  "productPaneDisabledHelpHub": "当前平台配置已关闭帮助 Hub，可在「平台配置」中重新开启。",
+  "productPaneDisabledQuality": "当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。",
+  "productPaneDisabledPlatformStatus": "当前平台配置已关闭平台状态入口，可在「平台配置」中重新开启。",
+  "productPaneDisabledWorkspaceActivity": "当前平台配置已关闭执行动态面板，可在「平台配置」中重新开启。",
+  "productPaneDisabledBenchmark": "当前平台配置已关闭评测基线入口，可在「平台配置」中重新开启。",
+  "productPaneDisabledJobs": "当前平台配置已关闭 jobs 面板，可在「平台配置」中重新开启。",
+  "productComplianceSnackAccountPanel": "已切到账户面板；用户治理仍建议在内部管理台处理。",
+  "productComplianceSnackNotSignedIn": "当前未登录，无法打开目标上下文。",
+  "productComplianceTeamContext": "该举报已切到团队工作区上下文；{detail}",
+  "@productComplianceTeamContext": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "productComplianceNoProjectContext": "该举报没有可打开的项目上下文。",
+  "productComplianceOpenTargetFailed": "打开目标失败：{detail}",
+  "@productComplianceOpenTargetFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }

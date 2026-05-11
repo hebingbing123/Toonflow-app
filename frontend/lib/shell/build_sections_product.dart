@@ -9,6 +9,7 @@ extension _HomePageBuildProductSections on _HomePageState {
     if (!mounted) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     switch (item.targetType) {
       case 'user':
@@ -16,7 +17,7 @@ extension _HomePageBuildProductSections on _HomePageState {
           ProductWorkspacePane.account,
         );
         messenger.showSnackBar(
-          const SnackBar(content: Text('已切到账户面板；用户治理仍建议在内部管理台处理。')),
+          SnackBar(content: Text(l10n.productComplianceSnackAccountPanel)),
         );
         return;
       default:
@@ -27,7 +28,9 @@ extension _HomePageBuildProductSections on _HomePageState {
     final projectId =
         item.projectId ?? (item.targetType == 'project' ? item.targetId : null);
     if (token == null || token.isEmpty) {
-      messenger.showSnackBar(const SnackBar(content: Text('当前未登录，无法打开目标上下文。')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.productComplianceSnackNotSignedIn)),
+      );
       return;
     }
     if (projectId == null || projectId.isEmpty) {
@@ -35,16 +38,15 @@ extension _HomePageBuildProductSections on _HomePageState {
         _shellNavigationController.selectProductWorkspacePane(
           ProductWorkspacePane.teamWorkspaces,
         );
+        final wsDetail = 'workspace ${item.workspaceName ?? item.workspaceId!}';
         messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '该举报已切到团队工作区上下文；workspace ${item.workspaceName ?? item.workspaceId!}',
-            ),
-          ),
+          SnackBar(content: Text(l10n.productComplianceTeamContext(wsDetail))),
         );
         return;
       }
-      messenger.showSnackBar(const SnackBar(content: Text('该举报没有可打开的项目上下文。')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.productComplianceNoProjectContext)),
+      );
       return;
     }
 
@@ -68,10 +70,16 @@ extension _HomePageBuildProductSections on _HomePageState {
       await _openProjectDetail(row);
     } on RustApiException catch (error) {
       messenger.showSnackBar(
-        SnackBar(content: Text('打开目标失败：${error.message}')),
+        SnackBar(
+          content: Text(l10n.productComplianceOpenTargetFailed(error.message)),
+        ),
       );
     } catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text('打开目标失败：$error')));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.productComplianceOpenTargetFailed('$error')),
+        ),
+      );
     }
   }
 
@@ -190,259 +198,263 @@ extension _HomePageBuildProductSections on _HomePageState {
     );
   }
 
-  List<Widget> _buildProductSections(BuildContext context) => [
-    _buildProductPaneSelector(context),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.helpHub)
-      _buildFeatureGatedPane(
-        enabled: _platformConfig.helpHubEnabled,
-        title: '帮助',
-        reason: '当前平台配置已关闭帮助 Hub，可在「平台配置」中重新开启。',
-        child: _HelpHubSection(accessToken: _session?.accessToken),
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.shortVideoSpace)
-      ShortVideoSpaceSection(
-        accessToken: _session?.accessToken,
-        onOpenProjects: () {
-          _shellNavigationController.selectProductWorkspacePane(
-            ProductWorkspacePane.projects,
-          );
-        },
-        onSyncProjectContext: (projectNumericId) {
-          setState(() {
-            _productScopedProjectNumericId = projectNumericId;
-          });
-          if (projectNumericId == null) {
-            _workspaceInputController.projectIdController.clear();
-            _workspaceInputController.projectUuidController.clear();
-            _workspaceInputController.workspaceUuidController.clear();
+  List<Widget> _buildProductSections(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return <Widget>[
+      _buildProductPaneSelector(context),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.helpHub)
+        _buildFeatureGatedPane(
+          enabled: _platformConfig.helpHubEnabled,
+          title: l10n.productNavHelp,
+          reason: l10n.productPaneDisabledHelpHub,
+          child: _HelpHubSection(accessToken: _session?.accessToken),
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.shortVideoSpace)
+        ShortVideoSpaceSection(
+          accessToken: _session?.accessToken,
+          onOpenProjects: () {
+            _shellNavigationController.selectProductWorkspacePane(
+              ProductWorkspacePane.projects,
+            );
+          },
+          onSyncProjectContext: (projectNumericId) {
+            setState(() {
+              _productScopedProjectNumericId = projectNumericId;
+            });
+            if (projectNumericId == null) {
+              _workspaceInputController.projectIdController.clear();
+              _workspaceInputController.projectUuidController.clear();
+              _workspaceInputController.workspaceUuidController.clear();
+              _workspaceInputController.clearScriptScope();
+              return;
+            }
+            _workspaceInputController.applyProjectScope(projectNumericId);
             _workspaceInputController.clearScriptScope();
-            return;
-          }
-          _workspaceInputController.applyProjectScope(projectNumericId);
-          _workspaceInputController.clearScriptScope();
-        },
-        onOpenScriptWorkspace: () {
-          _shellNavigationController.selectProductWorkspacePane(
-            ProductWorkspacePane.scriptWorkspace,
-          );
-        },
-        onOpenProductionWorkspace: () {
-          _shellNavigationController.selectProductWorkspacePane(
-            ProductWorkspacePane.productionWorkspace,
-          );
-        },
-        onOpenTasks: () {
-          _shellNavigationController.selectProductWorkspacePane(
-            ProductWorkspacePane.tasks,
-          );
-        },
-        onOpenQuality: () {
-          _selectProductPaneWithGate(
-            ProductWorkspacePane.quality,
-            disabledReason: '当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。',
-          );
-        },
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.projects)
-      ProjectsSection(
-        accessToken: _session?.accessToken,
-        controller: _projectsController,
-        currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
-        currentWorkspaceType: _sessionMe?.currentWorkspace?.workspaceType,
-        onOpenProjectDetail: _openProjectDetail,
-        onOpenTeamWorkspaces: () {
-          _shellNavigationController.selectProductWorkspacePane(
-            ProductWorkspacePane.teamWorkspaces,
-          );
-        },
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.account)
-      AccountSection(
-        controller: _accountController,
-        onAccountDeleted: _handleAccountDeleted,
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.apiKeys)
-      ApiKeysSection(controller: _apiKeysController),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.notifications)
-      NotificationsSection(
-        controller: _notificationsController,
-        onOpenNotification: _openNotificationLink,
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.contentCompliance)
-      ContentComplianceSection(
-        controller: _contentComplianceController,
-        onOpenTarget: _openComplianceProductTarget,
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.platformStatus)
-      _buildFeatureGatedPane(
-        enabled: _platformConfig.platformStatusEnabled,
-        title: '平台状态',
-        reason: '当前平台配置已关闭平台状态入口，可在「平台配置」中重新开启。',
-        child: PlatformStatusSection(
-          onOverallHealthChanged: (healthy, degradedEndpoints) {
-            _notificationsController.addPlatformStatusTransitionNotification(
-              healthy: healthy,
-              degradedEndpoints: degradedEndpoints,
+          },
+          onOpenScriptWorkspace: () {
+            _shellNavigationController.selectProductWorkspacePane(
+              ProductWorkspacePane.scriptWorkspace,
+            );
+          },
+          onOpenProductionWorkspace: () {
+            _shellNavigationController.selectProductWorkspacePane(
+              ProductWorkspacePane.productionWorkspace,
+            );
+          },
+          onOpenTasks: () {
+            _shellNavigationController.selectProductWorkspacePane(
+              ProductWorkspacePane.tasks,
+            );
+          },
+          onOpenQuality: () {
+            _selectProductPaneWithGate(
+              ProductWorkspacePane.quality,
+              disabledReason: l10n.productPaneDisabledQuality,
             );
           },
         ),
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.teamWorkspaces)
-      TeamWorkspacesSection(
-        accessToken: _session?.accessToken,
-        onWorkspaceContextChanged: _handleWorkspaceContextChanged,
-        currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.scriptWorkspace)
-      _buildAgentWorkspacePane(
-        initialPane: AgentWorkspacePane.script,
-        sectionTitle: '剧本工作区',
-        sectionDescription: '专注剧本 Agent 工作流：上下文探测、子 Agent 编排与正文/计划回写。',
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.productionWorkspace)
-      _buildAgentWorkspacePane(
-        initialPane: AgentWorkspacePane.production,
-        sectionTitle: '制作工作区',
-        sectionDescription: '专注 production Agent 工作流：flow 数据读取、资产/分镜工具执行与安全回写。',
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.workspaceActivity)
-      _buildFeatureGatedPane(
-        enabled: _platformConfig.workspaceActivityEnabled,
-        title: '工作区动态',
-        reason: '当前平台配置已关闭执行动态面板，可在「平台配置」中重新开启。',
-        child: _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.activity,
-          sectionTitle: '执行动态',
-          sectionDescription: '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。',
-        ),
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.benchmark)
-      _buildFeatureGatedPane(
-        enabled: _platformConfig.benchmarkPaneEnabled,
-        title: '评测基线',
-        reason: '当前平台配置已关闭评测基线入口，可在「平台配置」中重新开启。',
-        child: BenchmarkSection(accessToken: _session?.accessToken),
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.tasks)
-      TaskCenterSection(
-        accessToken: _session?.accessToken,
-        initialProjectNumericId: _productScopedProjectNumericId,
-        onNavigateExportJobDeepLink: (TaskCenterExportJobDeepLink link) {
-          setState(() {
-            _productScopedProjectNumericId = link.projectNumericId;
-          });
-          _workspaceInputController.applyProjectScope(
-            link.projectNumericId,
-            scriptNumericId: link.scriptNumericId,
-          );
-          _shellNavigationController.selectProductWorkspacePane(
-            link.openProductionWorkspace
-                ? ProductWorkspacePane.productionWorkspace
-                : ProductWorkspacePane.scriptWorkspace,
-          );
-        },
-        onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
-          setState(() {
-            _productScopedProjectNumericId = link.projectNumericId;
-          });
-          _workspaceInputController.applyProjectScope(
-            link.projectNumericId,
-            scriptNumericId: link.scriptNumericId,
-          );
-          switch (link.target) {
-            case TaskCenterDomainDeepLinkTarget.publish:
-            case TaskCenterDomainDeepLinkTarget.project:
-              _shellNavigationController.selectProductWorkspacePane(
-                ProductWorkspacePane.shortVideoSpace,
-              );
-              break;
-            case TaskCenterDomainDeepLinkTarget.script:
-              _shellNavigationController.selectProductWorkspacePane(
-                ProductWorkspacePane.scriptWorkspace,
-              );
-              break;
-            case TaskCenterDomainDeepLinkTarget.storyboard:
-              _shellNavigationController.selectProductWorkspacePane(
-                ProductWorkspacePane.productionWorkspace,
-              );
-              break;
-          }
-        },
-        loadingTaskProjects: _taskCenterController.loadingTaskProjects,
-        loadingTaskCategories: _taskCenterController.loadingTaskCategories,
-        loadingTaskApi: _taskCenterController.loadingTaskApi,
-        loadingTaskDetailsByNumericId:
-            _taskCenterController.loadingTaskDetailsByNumericId,
-        loadingTaskDetailsUuid: _taskCenterController.loadingTaskDetailsUuid,
-        taskDetailJobIdController:
-            _taskCenterController.taskDetailJobIdController,
-        taskProjects: _taskCenterController.taskProjects,
-        taskCategoriesLine: _taskCenterController.taskCategoriesLine,
-        taskApiSummaryLine: _taskCenterController.taskApiSummaryLine,
-        taskDetailNumericIdLine: _taskCenterController.taskDetailNumericIdLine,
-        taskDetailUuidLine: _taskCenterController.taskDetailUuidLine,
-        taskApiJobs: _taskCenterController.taskApiJobs,
-        onTaskDetailJobIdChanged: (_) =>
-            _taskCenterController.notifyJobIdChanged(),
-        onLoadTaskProjects: _taskCenterController.loadTaskProjects,
-        onLoadTaskCategories: _taskCenterController.loadTaskCategories,
-        onLoadTaskApi: _taskCenterController.loadTaskApi,
-        onProbeTaskDetailByNumericId:
-            _taskCenterController.probeTaskDetailByNumericId,
-        onProbeTaskDetailUuid: _taskCenterController.probeTaskDetailUuid,
-        onSelectTaskJob: _taskCenterController.selectTaskJob,
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.jobs)
-      _buildFeatureGatedPane(
-        enabled: _platformConfig.jobsPaneEnabled,
-        title: '任务作业',
-        reason: '当前平台配置已关闭 jobs 面板，可在「平台配置」中重新开启。',
-        child: JobsSection(controller: _jobsController),
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.quality)
-      _buildFeatureGatedPane(
-        enabled: _platformConfig.qualityDashboardEnabled,
-        title: '质量评审',
-        reason: '当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。',
-        child: QualityReviewsSection(
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.projects)
+        ProjectsSection(
           accessToken: _session?.accessToken,
-          controller: _qualityReviewsController,
-          initialProjectNumericId: _productScopedProjectNumericId,
-          platformConfig: _platformConfig,
+          controller: _projectsController,
+          currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
+          currentWorkspaceType: _sessionMe?.currentWorkspace?.workspaceType,
+          onOpenProjectDetail: _openProjectDetail,
+          onOpenTeamWorkspaces: () {
+            _shellNavigationController.selectProductWorkspacePane(
+              ProductWorkspacePane.teamWorkspaces,
+            );
+          },
         ),
-      ),
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.platformConfig)
-      _PlatformConfigSection(
-        accessToken: _session?.accessToken,
-        currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
-        initialConfig: _platformConfig,
-        onConfigSaved: (config) {
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            _applyPlatformConfig(config);
-          });
-        },
-      ),
-  ];
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.account)
+        AccountSection(
+          controller: _accountController,
+          onAccountDeleted: _handleAccountDeleted,
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.apiKeys)
+        ApiKeysSection(controller: _apiKeysController),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.notifications)
+        NotificationsSection(
+          controller: _notificationsController,
+          onOpenNotification: _openNotificationLink,
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.contentCompliance)
+        ContentComplianceSection(
+          controller: _contentComplianceController,
+          onOpenTarget: _openComplianceProductTarget,
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.platformStatus)
+        _buildFeatureGatedPane(
+          enabled: _platformConfig.platformStatusEnabled,
+          title: l10n.productNavPlatformStatus,
+          reason: l10n.productPaneDisabledPlatformStatus,
+          child: PlatformStatusSection(
+            onOverallHealthChanged: (healthy, degradedEndpoints) {
+              _notificationsController.addPlatformStatusTransitionNotification(
+                healthy: healthy,
+                degradedEndpoints: degradedEndpoints,
+              );
+            },
+          ),
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.teamWorkspaces)
+        TeamWorkspacesSection(
+          accessToken: _session?.accessToken,
+          onWorkspaceContextChanged: _handleWorkspaceContextChanged,
+          currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.scriptWorkspace)
+        _buildAgentWorkspacePane(
+          initialPane: AgentWorkspacePane.script,
+          sectionTitle: l10n.productAgentScriptWorkspaceTitle,
+          sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.productionWorkspace)
+        _buildAgentWorkspacePane(
+          initialPane: AgentWorkspacePane.production,
+          sectionTitle: l10n.productAgentProductionWorkspaceTitle,
+          sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.workspaceActivity)
+        _buildFeatureGatedPane(
+          enabled: _platformConfig.workspaceActivityEnabled,
+          title: l10n.productNavWorkspaceActivity,
+          reason: l10n.productPaneDisabledWorkspaceActivity,
+          child: _buildAgentWorkspacePane(
+            initialPane: AgentWorkspacePane.activity,
+            sectionTitle: l10n.productAgentActivityTitle,
+            sectionDescription: l10n.productAgentActivitySubtitle,
+          ),
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.benchmark)
+        _buildFeatureGatedPane(
+          enabled: _platformConfig.benchmarkPaneEnabled,
+          title: l10n.productNavBenchmark,
+          reason: l10n.productPaneDisabledBenchmark,
+          child: BenchmarkSection(accessToken: _session?.accessToken),
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.tasks)
+        TaskCenterSection(
+          accessToken: _session?.accessToken,
+          initialProjectNumericId: _productScopedProjectNumericId,
+          onNavigateExportJobDeepLink: (TaskCenterExportJobDeepLink link) {
+            setState(() {
+              _productScopedProjectNumericId = link.projectNumericId;
+            });
+            _workspaceInputController.applyProjectScope(
+              link.projectNumericId,
+              scriptNumericId: link.scriptNumericId,
+            );
+            _shellNavigationController.selectProductWorkspacePane(
+              link.openProductionWorkspace
+                  ? ProductWorkspacePane.productionWorkspace
+                  : ProductWorkspacePane.scriptWorkspace,
+            );
+          },
+          onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
+            setState(() {
+              _productScopedProjectNumericId = link.projectNumericId;
+            });
+            _workspaceInputController.applyProjectScope(
+              link.projectNumericId,
+              scriptNumericId: link.scriptNumericId,
+            );
+            switch (link.target) {
+              case TaskCenterDomainDeepLinkTarget.publish:
+              case TaskCenterDomainDeepLinkTarget.project:
+                _shellNavigationController.selectProductWorkspacePane(
+                  ProductWorkspacePane.shortVideoSpace,
+                );
+                break;
+              case TaskCenterDomainDeepLinkTarget.script:
+                _shellNavigationController.selectProductWorkspacePane(
+                  ProductWorkspacePane.scriptWorkspace,
+                );
+                break;
+              case TaskCenterDomainDeepLinkTarget.storyboard:
+                _shellNavigationController.selectProductWorkspacePane(
+                  ProductWorkspacePane.productionWorkspace,
+                );
+                break;
+            }
+          },
+          loadingTaskProjects: _taskCenterController.loadingTaskProjects,
+          loadingTaskCategories: _taskCenterController.loadingTaskCategories,
+          loadingTaskApi: _taskCenterController.loadingTaskApi,
+          loadingTaskDetailsByNumericId:
+              _taskCenterController.loadingTaskDetailsByNumericId,
+          loadingTaskDetailsUuid: _taskCenterController.loadingTaskDetailsUuid,
+          taskDetailJobIdController:
+              _taskCenterController.taskDetailJobIdController,
+          taskProjects: _taskCenterController.taskProjects,
+          taskCategoriesLine: _taskCenterController.taskCategoriesLine,
+          taskApiSummaryLine: _taskCenterController.taskApiSummaryLine,
+          taskDetailNumericIdLine:
+              _taskCenterController.taskDetailNumericIdLine,
+          taskDetailUuidLine: _taskCenterController.taskDetailUuidLine,
+          taskApiJobs: _taskCenterController.taskApiJobs,
+          onTaskDetailJobIdChanged: (_) =>
+              _taskCenterController.notifyJobIdChanged(),
+          onLoadTaskProjects: _taskCenterController.loadTaskProjects,
+          onLoadTaskCategories: _taskCenterController.loadTaskCategories,
+          onLoadTaskApi: _taskCenterController.loadTaskApi,
+          onProbeTaskDetailByNumericId:
+              _taskCenterController.probeTaskDetailByNumericId,
+          onProbeTaskDetailUuid: _taskCenterController.probeTaskDetailUuid,
+          onSelectTaskJob: _taskCenterController.selectTaskJob,
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.jobs)
+        _buildFeatureGatedPane(
+          enabled: _platformConfig.jobsPaneEnabled,
+          title: l10n.productNavJobs,
+          reason: l10n.productPaneDisabledJobs,
+          child: JobsSection(controller: _jobsController),
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.quality)
+        _buildFeatureGatedPane(
+          enabled: _platformConfig.qualityDashboardEnabled,
+          title: l10n.productNavQuality,
+          reason: l10n.productPaneDisabledQuality,
+          child: QualityReviewsSection(
+            accessToken: _session?.accessToken,
+            controller: _qualityReviewsController,
+            initialProjectNumericId: _productScopedProjectNumericId,
+            platformConfig: _platformConfig,
+          ),
+        ),
+      if (_shellNavigationController.productWorkspacePane ==
+          ProductWorkspacePane.platformConfig)
+        _PlatformConfigSection(
+          accessToken: _session?.accessToken,
+          currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
+          initialConfig: _platformConfig,
+          onConfigSaved: (config) {
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              _applyPlatformConfig(config);
+            });
+          },
+        ),
+    ];
+  }
 }
 
 class _ProductPaneSelector extends StatefulWidget {
@@ -484,31 +496,71 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final paneEntries = <(ProductWorkspacePane, String, int?)>[
-      (ProductWorkspacePane.shortVideoSpace, '短视频 Space', null),
-      (ProductWorkspacePane.projects, '项目', null),
-      (ProductWorkspacePane.account, '账户', null),
-      (ProductWorkspacePane.apiKeys, 'API 密钥', null),
-      (ProductWorkspacePane.notifications, '通知中心', widget.unreadNotifications),
-      (ProductWorkspacePane.contentCompliance, '内容合规', null),
-      (ProductWorkspacePane.platformStatus, '平台状态', null),
-      (ProductWorkspacePane.teamWorkspaces, '团队工作区', null),
-      (ProductWorkspacePane.scriptWorkspace, '脚本工作区', null),
-      (ProductWorkspacePane.productionWorkspace, '制作工作区', null),
-      (ProductWorkspacePane.workspaceActivity, '工作区动态', null),
-      (ProductWorkspacePane.benchmark, '评测基线', null),
-      (ProductWorkspacePane.tasks, '任务中心', null),
-      (ProductWorkspacePane.jobs, '任务作业', null),
-      (ProductWorkspacePane.quality, '质量评审', null),
-      (ProductWorkspacePane.platformConfig, '平台配置', null),
-      (ProductWorkspacePane.helpHub, '帮助', null),
+      (
+        ProductWorkspacePane.shortVideoSpace,
+        l10n.productNavShortVideoSpace,
+        null,
+      ),
+      (ProductWorkspacePane.projects, l10n.productNavProjects, null),
+      (ProductWorkspacePane.account, l10n.productNavAccount, null),
+      (ProductWorkspacePane.apiKeys, l10n.productNavApiKeys, null),
+      (
+        ProductWorkspacePane.notifications,
+        l10n.productNavNotifications,
+        widget.unreadNotifications,
+      ),
+      (
+        ProductWorkspacePane.contentCompliance,
+        l10n.productNavContentCompliance,
+        null,
+      ),
+      (
+        ProductWorkspacePane.platformStatus,
+        l10n.productNavPlatformStatus,
+        null,
+      ),
+      (
+        ProductWorkspacePane.teamWorkspaces,
+        l10n.productNavTeamWorkspaces,
+        null,
+      ),
+      (
+        ProductWorkspacePane.scriptWorkspace,
+        l10n.productNavScriptWorkspace,
+        null,
+      ),
+      (
+        ProductWorkspacePane.productionWorkspace,
+        l10n.productNavProductionWorkspace,
+        null,
+      ),
+      (
+        ProductWorkspacePane.workspaceActivity,
+        l10n.productNavWorkspaceActivity,
+        null,
+      ),
+      (ProductWorkspacePane.benchmark, l10n.productNavBenchmark, null),
+      (ProductWorkspacePane.tasks, l10n.productNavTasks, null),
+      (ProductWorkspacePane.jobs, l10n.productNavJobs, null),
+      (ProductWorkspacePane.quality, l10n.productNavQuality, null),
+      (
+        ProductWorkspacePane.platformConfig,
+        l10n.productNavPlatformConfig,
+        null,
+      ),
+      (ProductWorkspacePane.helpHub, l10n.productNavHelp, null),
     ];
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('产品导航', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.productNavSectionTitle,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,

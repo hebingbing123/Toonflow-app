@@ -579,7 +579,7 @@ class _HomePageState extends State<HomePage> {
       }
       _selectProductPaneWithGate(
         ProductWorkspacePane.jobs,
-        disabledReason: '当前平台配置已关闭 jobs 面板，可在「平台配置」中重新开启。',
+        disabledReason: AppLocalizations.of(context)!.productPaneDisabledJobs,
       );
       return;
     }
@@ -637,35 +637,45 @@ class _HomePageState extends State<HomePage> {
     if (path == '/product/platform-status') {
       _selectProductPaneWithGate(
         ProductWorkspacePane.platformStatus,
-        disabledReason: '当前平台配置已关闭平台状态入口，可在「平台配置」中重新开启。',
+        disabledReason: AppLocalizations.of(
+          context,
+        )!.productPaneDisabledPlatformStatus,
       );
       return;
     }
     if (path == '/product/quality') {
       _selectProductPaneWithGate(
         ProductWorkspacePane.quality,
-        disabledReason: '当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。',
+        disabledReason: AppLocalizations.of(
+          context,
+        )!.productPaneDisabledQuality,
       );
       return;
     }
     if (path == '/product/help') {
       _selectProductPaneWithGate(
         ProductWorkspacePane.helpHub,
-        disabledReason: '当前平台配置已关闭帮助 Hub，可在「平台配置」中重新开启。',
+        disabledReason: AppLocalizations.of(
+          context,
+        )!.productPaneDisabledHelpHub,
       );
       return;
     }
     if (path == '/product/benchmark') {
       _selectProductPaneWithGate(
         ProductWorkspacePane.benchmark,
-        disabledReason: '当前平台配置已关闭评测基线入口，可在「平台配置」中重新开启。',
+        disabledReason: AppLocalizations.of(
+          context,
+        )!.productPaneDisabledBenchmark,
       );
       return;
     }
     if (path == '/product/workspace-activity') {
       _selectProductPaneWithGate(
         ProductWorkspacePane.workspaceActivity,
-        disabledReason: '当前平台配置已关闭执行动态面板，可在「平台配置」中重新开启。',
+        disabledReason: AppLocalizations.of(
+          context,
+        )!.productPaneDisabledWorkspaceActivity,
       );
       return;
     }

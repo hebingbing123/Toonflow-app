@@ -652,4 +652,118 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get platformConfigPleaseSignIn => '请先登录';
+
+  @override
+  String get productNavSectionTitle => '产品导航';
+
+  @override
+  String get productNavShortVideoSpace => '短视频 Space';
+
+  @override
+  String get productNavProjects => '项目';
+
+  @override
+  String get productNavAccount => '账户';
+
+  @override
+  String get productNavApiKeys => 'API 密钥';
+
+  @override
+  String get productNavNotifications => '通知中心';
+
+  @override
+  String get productNavContentCompliance => '内容合规';
+
+  @override
+  String get productNavPlatformStatus => '平台状态';
+
+  @override
+  String get productNavTeamWorkspaces => '团队工作区';
+
+  @override
+  String get productNavScriptWorkspace => '脚本工作区';
+
+  @override
+  String get productNavProductionWorkspace => '制作工作区';
+
+  @override
+  String get productNavWorkspaceActivity => '工作区动态';
+
+  @override
+  String get productNavBenchmark => '评测基线';
+
+  @override
+  String get productNavTasks => '任务中心';
+
+  @override
+  String get productNavJobs => '任务作业';
+
+  @override
+  String get productNavQuality => '质量评审';
+
+  @override
+  String get productNavPlatformConfig => '平台配置';
+
+  @override
+  String get productNavHelp => '帮助';
+
+  @override
+  String get productAgentScriptWorkspaceTitle => '剧本工作区';
+
+  @override
+  String get productAgentScriptWorkspaceSubtitle =>
+      '专注剧本 Agent 工作流：上下文探测、子 Agent 编排与正文/计划回写。';
+
+  @override
+  String get productAgentProductionWorkspaceTitle => '制作工作区';
+
+  @override
+  String get productAgentProductionWorkspaceSubtitle =>
+      '专注 production Agent 工作流：flow 数据读取、资产/分镜工具执行与安全回写。';
+
+  @override
+  String get productAgentActivityTitle => '执行动态';
+
+  @override
+  String get productAgentActivitySubtitle =>
+      '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。';
+
+  @override
+  String get productPaneDisabledHelpHub => '当前平台配置已关闭帮助 Hub，可在「平台配置」中重新开启。';
+
+  @override
+  String get productPaneDisabledQuality => '当前平台配置已关闭质量主面板，可在「平台配置」中重新开启。';
+
+  @override
+  String get productPaneDisabledPlatformStatus =>
+      '当前平台配置已关闭平台状态入口，可在「平台配置」中重新开启。';
+
+  @override
+  String get productPaneDisabledWorkspaceActivity =>
+      '当前平台配置已关闭执行动态面板，可在「平台配置」中重新开启。';
+
+  @override
+  String get productPaneDisabledBenchmark => '当前平台配置已关闭评测基线入口，可在「平台配置」中重新开启。';
+
+  @override
+  String get productPaneDisabledJobs => '当前平台配置已关闭 jobs 面板，可在「平台配置」中重新开启。';
+
+  @override
+  String get productComplianceSnackAccountPanel => '已切到账户面板；用户治理仍建议在内部管理台处理。';
+
+  @override
+  String get productComplianceSnackNotSignedIn => '当前未登录，无法打开目标上下文。';
+
+  @override
+  String productComplianceTeamContext(String detail) {
+    return '该举报已切到团队工作区上下文；$detail';
+  }
+
+  @override
+  String get productComplianceNoProjectContext => '该举报没有可打开的项目上下文。';
+
+  @override
+  String productComplianceOpenTargetFailed(String detail) {
+    return '打开目标失败：$detail';
+  }
 }

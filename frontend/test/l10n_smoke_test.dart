@@ -59,6 +59,24 @@ void main() {
     expect(find.text('通知中心'), findsOneWidget);
   });
 
+  testWidgets('AppLocalizations zh product nav section title', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Scaffold(body: Text(l10n.productNavSectionTitle));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('产品导航'), findsOneWidget);
+  });
+
   testWidgets('AppLocalizations zh platform config section title', (
     tester,
   ) async {

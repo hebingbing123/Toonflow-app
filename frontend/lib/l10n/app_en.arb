@@ -339,5 +339,54 @@
   "platformConfigSnackWorkspaceSaved": "Workspace platform configuration saved.",
   "platformConfigSnackWorkspaceReset": "Workspace override cleared.",
   "platformConfigSnackCopyJsonDone": "Platform configuration JSON copied.",
-  "platformConfigPleaseSignIn": "Please sign in first"
+  "platformConfigPleaseSignIn": "Please sign in first",
+  "productNavSectionTitle": "Product navigation",
+  "productNavShortVideoSpace": "Short-video Space",
+  "productNavProjects": "Projects",
+  "productNavAccount": "Account",
+  "productNavApiKeys": "API keys",
+  "productNavNotifications": "Notifications",
+  "productNavContentCompliance": "Compliance",
+  "productNavPlatformStatus": "Platform status",
+  "productNavTeamWorkspaces": "Team workspaces",
+  "productNavScriptWorkspace": "Script workspace",
+  "productNavProductionWorkspace": "Production workspace",
+  "productNavWorkspaceActivity": "Workspace activity",
+  "productNavBenchmark": "Benchmark",
+  "productNavTasks": "Task center",
+  "productNavJobs": "Jobs",
+  "productNavQuality": "Quality",
+  "productNavPlatformConfig": "Platform configuration",
+  "productNavHelp": "Help",
+  "productAgentScriptWorkspaceTitle": "Script workspace",
+  "productAgentScriptWorkspaceSubtitle": "Script Agent flow: context probes, sub-agent orchestration, and body/plan writeback.",
+  "productAgentProductionWorkspaceTitle": "Production workspace",
+  "productAgentProductionWorkspaceSubtitle": "Production Agent flow: flow data reads, asset/storyboard tools, and safe writeback.",
+  "productAgentActivityTitle": "Activity",
+  "productAgentActivitySubtitle": "Recent WebSocket events, tool receipts, and writeback status in one execution log panel.",
+  "productPaneDisabledHelpHub": "Help Hub is disabled by platform configuration. Re-enable it under Platform configuration.",
+  "productPaneDisabledQuality": "The quality dashboard is disabled by platform configuration. Re-enable it under Platform configuration.",
+  "productPaneDisabledPlatformStatus": "Platform status is disabled by platform configuration. Re-enable it under Platform configuration.",
+  "productPaneDisabledWorkspaceActivity": "Workspace activity is disabled by platform configuration. Re-enable it under Platform configuration.",
+  "productPaneDisabledBenchmark": "Benchmark baseline is disabled by platform configuration. Re-enable it under Platform configuration.",
+  "productPaneDisabledJobs": "The Jobs panel is disabled by platform configuration. Re-enable it under Platform configuration.",
+  "productComplianceSnackAccountPanel": "Switched to Account panel. For user administration, prefer your internal admin console.",
+  "productComplianceSnackNotSignedIn": "Not signed in; cannot open the target context.",
+  "productComplianceTeamContext": "Switched to team workspace context: {detail}",
+  "@productComplianceTeamContext": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "productComplianceNoProjectContext": "This report has no project context to open.",
+  "productComplianceOpenTargetFailed": "Failed to open target: {detail}",
+  "@productComplianceOpenTargetFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }

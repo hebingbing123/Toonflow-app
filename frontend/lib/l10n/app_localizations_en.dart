@@ -697,4 +697,125 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get platformConfigPleaseSignIn => 'Please sign in first';
+
+  @override
+  String get productNavSectionTitle => 'Product navigation';
+
+  @override
+  String get productNavShortVideoSpace => 'Short-video Space';
+
+  @override
+  String get productNavProjects => 'Projects';
+
+  @override
+  String get productNavAccount => 'Account';
+
+  @override
+  String get productNavApiKeys => 'API keys';
+
+  @override
+  String get productNavNotifications => 'Notifications';
+
+  @override
+  String get productNavContentCompliance => 'Compliance';
+
+  @override
+  String get productNavPlatformStatus => 'Platform status';
+
+  @override
+  String get productNavTeamWorkspaces => 'Team workspaces';
+
+  @override
+  String get productNavScriptWorkspace => 'Script workspace';
+
+  @override
+  String get productNavProductionWorkspace => 'Production workspace';
+
+  @override
+  String get productNavWorkspaceActivity => 'Workspace activity';
+
+  @override
+  String get productNavBenchmark => 'Benchmark';
+
+  @override
+  String get productNavTasks => 'Task center';
+
+  @override
+  String get productNavJobs => 'Jobs';
+
+  @override
+  String get productNavQuality => 'Quality';
+
+  @override
+  String get productNavPlatformConfig => 'Platform configuration';
+
+  @override
+  String get productNavHelp => 'Help';
+
+  @override
+  String get productAgentScriptWorkspaceTitle => 'Script workspace';
+
+  @override
+  String get productAgentScriptWorkspaceSubtitle =>
+      'Script Agent flow: context probes, sub-agent orchestration, and body/plan writeback.';
+
+  @override
+  String get productAgentProductionWorkspaceTitle => 'Production workspace';
+
+  @override
+  String get productAgentProductionWorkspaceSubtitle =>
+      'Production Agent flow: flow data reads, asset/storyboard tools, and safe writeback.';
+
+  @override
+  String get productAgentActivityTitle => 'Activity';
+
+  @override
+  String get productAgentActivitySubtitle =>
+      'Recent WebSocket events, tool receipts, and writeback status in one execution log panel.';
+
+  @override
+  String get productPaneDisabledHelpHub =>
+      'Help Hub is disabled by platform configuration. Re-enable it under Platform configuration.';
+
+  @override
+  String get productPaneDisabledQuality =>
+      'The quality dashboard is disabled by platform configuration. Re-enable it under Platform configuration.';
+
+  @override
+  String get productPaneDisabledPlatformStatus =>
+      'Platform status is disabled by platform configuration. Re-enable it under Platform configuration.';
+
+  @override
+  String get productPaneDisabledWorkspaceActivity =>
+      'Workspace activity is disabled by platform configuration. Re-enable it under Platform configuration.';
+
+  @override
+  String get productPaneDisabledBenchmark =>
+      'Benchmark baseline is disabled by platform configuration. Re-enable it under Platform configuration.';
+
+  @override
+  String get productPaneDisabledJobs =>
+      'The Jobs panel is disabled by platform configuration. Re-enable it under Platform configuration.';
+
+  @override
+  String get productComplianceSnackAccountPanel =>
+      'Switched to Account panel. For user administration, prefer your internal admin console.';
+
+  @override
+  String get productComplianceSnackNotSignedIn =>
+      'Not signed in; cannot open the target context.';
+
+  @override
+  String productComplianceTeamContext(String detail) {
+    return 'Switched to team workspace context: $detail';
+  }
+
+  @override
+  String get productComplianceNoProjectContext =>
+      'This report has no project context to open.';
+
+  @override
+  String productComplianceOpenTargetFailed(String detail) {
+    return 'Failed to open target: $detail';
+  }
 }
