@@ -875,6 +875,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **' · Sync'**
   String get notificationsExportDeliverySync;
+
+  /// No description provided for @riskyPrefsMenuDefaultTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Local client preferences'**
+  String get riskyPrefsMenuDefaultTooltip;
+
+  /// No description provided for @riskyPrefsMenuViewSilencesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View silenced high-risk confirmations'**
+  String get riskyPrefsMenuViewSilencesTitle;
+
+  /// No description provided for @riskyPrefsMenuViewSilencesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only list; does not change settings'**
+  String get riskyPrefsMenuViewSilencesSubtitle;
+
+  /// No description provided for @riskyPrefsMenuResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore high-risk confirmation prompts'**
+  String get riskyPrefsMenuResetTitle;
+
+  /// No description provided for @riskyPrefsMenuResetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This device only; unrelated to server settings'**
+  String get riskyPrefsMenuResetSubtitle;
+
+  /// No description provided for @riskyPrefsSummaryDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Silenced high-risk confirmations'**
+  String get riskyPrefsSummaryDialogTitle;
+
+  /// No description provided for @riskyPrefsSummaryEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No \"don\'t ask again\" choices are saved on this device.'**
+  String get riskyPrefsSummaryEmptyBody;
+
+  /// No description provided for @riskyPrefsSummaryNonEmptyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'These actions will skip confirmation dialogs on this device (you can clear them anytime with \"Restore high-risk confirmation prompts\"):'**
+  String get riskyPrefsSummaryNonEmptyIntro;
+
+  /// No description provided for @riskyPrefsSummaryClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get riskyPrefsSummaryClose;
+
+  /// No description provided for @riskyPrefsResetDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore confirmation dialogs'**
+  String get riskyPrefsResetDialogTitle;
+
+  /// No description provided for @riskyPrefsResetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This clears local \"don\'t ask again\" choices. Deletes, archive/publish, cancel export, and similar actions will show confirmations again (this app on this device only).'**
+  String get riskyPrefsResetBody;
+
+  /// No description provided for @riskyPrefsResetNoSavedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved \"don\'t ask again\" entries. You can still clear any leftover keys.'**
+  String get riskyPrefsResetNoSavedLabel;
+
+  /// No description provided for @riskyPrefsResetHasItemsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently silenced:'**
+  String get riskyPrefsResetHasItemsLabel;
+
+  /// No description provided for @riskyPrefsResetCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get riskyPrefsResetCancel;
+
+  /// No description provided for @riskyPrefsResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear and restore'**
+  String get riskyPrefsResetConfirm;
+
+  /// No description provided for @riskyPrefsResetSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared local \"don\'t ask again\" preferences for high-risk actions; confirmations will show again.'**
+  String get riskyPrefsResetSuccessSnack;
+
+  /// No description provided for @riskyPrefsLabelDeleteVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete finished version'**
+  String get riskyPrefsLabelDeleteVersion;
+
+  /// No description provided for @riskyPrefsLabelBatchDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable shots'**
+  String get riskyPrefsLabelBatchDisable;
+
+  /// No description provided for @riskyPrefsLabelRestoreDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore draft overwrite'**
+  String get riskyPrefsLabelRestoreDraft;
+
+  /// No description provided for @riskyPrefsLabelCancelExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel finished export'**
+  String get riskyPrefsLabelCancelExport;
+
+  /// No description provided for @riskyPrefsLabelBatchArchivePublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch archive/publish drafts'**
+  String get riskyPrefsLabelBatchArchivePublish;
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/app_localizations.dart';
+
 /// SharedPreferences keys for client-side "don't show again" on destructive flows.
 class RiskyOperationConfirmPreferenceKeys {
   static const String deleteVersion = 'confirmDeleteVersion';
@@ -23,31 +25,33 @@ Future<void> resetAllRiskyOperationConfirmPreferences() async {
 }
 
 /// Labels for prefs that are currently true (for ops / recovery UI).
-Future<List<String>> listActiveRiskyOperationConfirmDontShowLabels() async {
+Future<List<String>> listActiveRiskyOperationConfirmDontShowLabels(
+  AppLocalizations l10n,
+) async {
   try {
     final prefs = await SharedPreferences.getInstance();
     final labels = <String>[];
     if (prefs.getBool(RiskyOperationConfirmPreferenceKeys.deleteVersion) ??
         false) {
-      labels.add('删除成片版本');
+      labels.add(l10n.riskyPrefsLabelDeleteVersion);
     }
     if (prefs.getBool(RiskyOperationConfirmPreferenceKeys.batchDisable) ??
         false) {
-      labels.add('批量禁用镜头');
+      labels.add(l10n.riskyPrefsLabelBatchDisable);
     }
     if (prefs.getBool(RiskyOperationConfirmPreferenceKeys.restoreDraft) ??
         false) {
-      labels.add('恢复草稿覆盖');
+      labels.add(l10n.riskyPrefsLabelRestoreDraft);
     }
     if (prefs.getBool(RiskyOperationConfirmPreferenceKeys.cancelExport) ??
         false) {
-      labels.add('取消成片导出');
+      labels.add(l10n.riskyPrefsLabelCancelExport);
     }
     if (prefs.getBool(
           RiskyOperationConfirmPreferenceKeys.batchArchivePublish,
         ) ??
         false) {
-      labels.add('批量归档发布草稿');
+      labels.add(l10n.riskyPrefsLabelBatchArchivePublish);
     }
     return labels;
   } catch (_) {
@@ -59,15 +63,20 @@ Future<List<String>> listActiveRiskyOperationConfirmDontShowLabels() async {
 Future<void> showActiveRiskyOperationConfirmPrefsSummary(
   BuildContext context,
 ) async {
-  final active = await listActiveRiskyOperationConfirmDontShowLabels();
+  final l10n = AppLocalizations.of(context);
+  if (l10n == null) {
+    return;
+  }
+  final active = await listActiveRiskyOperationConfirmDontShowLabels(l10n);
   if (!context.mounted) {
     return;
   }
   await showDialog<void>(
     context: context,
     builder: (ctx) {
+      final dl10n = AppLocalizations.of(ctx)!;
       return AlertDialog(
-        title: const Text('已静默的高风险确认'),
+        title: Text(dl10n.riskyPrefsSummaryDialogTitle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -75,8 +84,8 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
             children: [
               Text(
                 active.isEmpty
-                    ? '当前没有勾选「不再提示」的记录。'
-                    : '以下操作在本机将不再弹出确认框（可随时在「恢复高风险操作确认提示」中清除）：',
+                    ? dl10n.riskyPrefsSummaryEmptyBody
+                    : dl10n.riskyPrefsSummaryNonEmptyIntro,
                 style: Theme.of(ctx).textTheme.bodyMedium,
               ),
               if (active.isNotEmpty) ...[
@@ -105,7 +114,7 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('关闭'),
+            child: Text(dl10n.riskyPrefsSummaryClose),
           ),
         ],
       );
@@ -119,7 +128,11 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
 Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
   BuildContext context,
 ) async {
-  final active = await listActiveRiskyOperationConfirmDontShowLabels();
+  final l10n = AppLocalizations.of(context);
+  if (l10n == null) {
+    return null;
+  }
+  final active = await listActiveRiskyOperationConfirmDontShowLabels(l10n);
 
   if (!context.mounted) {
     return null;
@@ -128,22 +141,20 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
   return showDialog<bool>(
     context: context,
     builder: (ctx) {
+      final dl10n = AppLocalizations.of(ctx)!;
       return AlertDialog(
-        title: const Text('恢复快风险确认框'),
+        title: Text(dl10n.riskyPrefsResetDialogTitle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '将清除本机「不再提示」记录。此后删除版本、归档、取消导出等操作'
-                '会重新弹出确认（仅影响当前设备上的本应用）。',
-              ),
+              Text(dl10n.riskyPrefsResetBody),
               const SizedBox(height: 12),
               Text(
                 active.isEmpty
-                    ? '当前无已保存的「不再提示」条目。仍可清除可能的残留键。'
-                    : '当前已静默确认的项目：',
+                    ? dl10n.riskyPrefsResetNoSavedLabel
+                    : dl10n.riskyPrefsResetHasItemsLabel,
                 style: Theme.of(ctx).textTheme.labelMedium,
               ),
               if (active.isNotEmpty) ...[
@@ -172,11 +183,11 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('取消'),
+            child: Text(dl10n.riskyPrefsResetCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('清除并恢复'),
+            child: Text(dl10n.riskyPrefsResetConfirm),
           ),
         ],
       );
@@ -196,19 +207,16 @@ Future<void> runResetRiskyOperationConfirmPrefsFlow(
   if (!context.mounted) {
     return;
   }
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text(
-        '已清除本机高风险操作的「不再提示」偏好；后续将重新弹出确认。',
-      ),
-    ),
-  );
+  final l10n = AppLocalizations.of(context);
+  if (l10n == null) {
+    return;
+  }
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(l10n.riskyPrefsResetSuccessSnack)));
 }
 
-enum _RiskyPrefsOverflowValue {
-  viewActiveSilences,
-  resetDestructiveConfirms,
-}
+enum _RiskyPrefsOverflowValue { viewActiveSilences, resetDestructiveConfirms }
 
 /// AppBar / toolbar entry: **查看已静默** + **恢复确认**（本机 SharedPreferences）。
 ///
@@ -217,16 +225,19 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
   const RiskyOperationConfirmPrefsOverflowMenu({
     super.key,
     this.icon = Icons.more_vert,
-    this.tooltip = '本机客户端偏好',
+    this.tooltip,
   });
 
   final IconData icon;
-  final String tooltip;
+
+  /// When null, uses [AppLocalizations.riskyPrefsMenuDefaultTooltip].
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<_RiskyPrefsOverflowValue>(
-      tooltip: tooltip,
+      tooltip: tooltip ?? l10n.riskyPrefsMenuDefaultTooltip,
       icon: Icon(icon),
       onSelected: (value) {
         if (value == _RiskyPrefsOverflowValue.viewActiveSilences) {
@@ -235,38 +246,44 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
           unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
         }
       },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: _RiskyPrefsOverflowValue.viewActiveSilences,
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-            leading: Icon(
-              Icons.visibility_outlined,
-              size: 22,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: const Text('查看已静默的高风险确认'),
-            subtitle: Text(
-              '只读列表，不影响设置',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-        ),
-        PopupMenuItem(
-          value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-            leading: const Icon(Icons.notifications_active_outlined, size: 22),
-            title: const Text('恢复高风险操作确认提示'),
-            subtitle: Text(
-              '仅本机，与服务器配置无关',
-              style: Theme.of(context).textTheme.bodySmall,
+      itemBuilder: (menuContext) {
+        final ml10n = AppLocalizations.of(menuContext)!;
+        return [
+          PopupMenuItem(
+            value: _RiskyPrefsOverflowValue.viewActiveSilences,
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              leading: Icon(
+                Icons.visibility_outlined,
+                size: 22,
+                color: Theme.of(menuContext).colorScheme.primary,
+              ),
+              title: Text(ml10n.riskyPrefsMenuViewSilencesTitle),
+              subtitle: Text(
+                ml10n.riskyPrefsMenuViewSilencesSubtitle,
+                style: Theme.of(menuContext).textTheme.bodySmall,
+              ),
             ),
           ),
-        ),
-      ],
+          PopupMenuItem(
+            value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              leading: const Icon(
+                Icons.notifications_active_outlined,
+                size: 22,
+              ),
+              title: Text(ml10n.riskyPrefsMenuResetTitle),
+              subtitle: Text(
+                ml10n.riskyPrefsMenuResetSubtitle,
+                style: Theme.of(menuContext).textTheme.bodySmall,
+              ),
+            ),
+          ),
+        ];
+      },
     );
   }
 }

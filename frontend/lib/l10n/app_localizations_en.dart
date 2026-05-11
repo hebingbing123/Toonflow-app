@@ -468,4 +468,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsExportDeliverySync => ' · Sync';
+
+  @override
+  String get riskyPrefsMenuDefaultTooltip => 'Local client preferences';
+
+  @override
+  String get riskyPrefsMenuViewSilencesTitle =>
+      'View silenced high-risk confirmations';
+
+  @override
+  String get riskyPrefsMenuViewSilencesSubtitle =>
+      'Read-only list; does not change settings';
+
+  @override
+  String get riskyPrefsMenuResetTitle =>
+      'Restore high-risk confirmation prompts';
+
+  @override
+  String get riskyPrefsMenuResetSubtitle =>
+      'This device only; unrelated to server settings';
+
+  @override
+  String get riskyPrefsSummaryDialogTitle => 'Silenced high-risk confirmations';
+
+  @override
+  String get riskyPrefsSummaryEmptyBody =>
+      'No \"don\'t ask again\" choices are saved on this device.';
+
+  @override
+  String get riskyPrefsSummaryNonEmptyIntro =>
+      'These actions will skip confirmation dialogs on this device (you can clear them anytime with \"Restore high-risk confirmation prompts\"):';
+
+  @override
+  String get riskyPrefsSummaryClose => 'Close';
+
+  @override
+  String get riskyPrefsResetDialogTitle => 'Restore confirmation dialogs';
+
+  @override
+  String get riskyPrefsResetBody =>
+      'This clears local \"don\'t ask again\" choices. Deletes, archive/publish, cancel export, and similar actions will show confirmations again (this app on this device only).';
+
+  @override
+  String get riskyPrefsResetNoSavedLabel =>
+      'No saved \"don\'t ask again\" entries. You can still clear any leftover keys.';
+
+  @override
+  String get riskyPrefsResetHasItemsLabel => 'Currently silenced:';
+
+  @override
+  String get riskyPrefsResetCancel => 'Cancel';
+
+  @override
+  String get riskyPrefsResetConfirm => 'Clear and restore';
+
+  @override
+  String get riskyPrefsResetSuccessSnack =>
+      'Cleared local \"don\'t ask again\" preferences for high-risk actions; confirmations will show again.';
+
+  @override
+  String get riskyPrefsLabelDeleteVersion => 'Delete finished version';
+
+  @override
+  String get riskyPrefsLabelBatchDisable => 'Batch disable shots';
+
+  @override
+  String get riskyPrefsLabelRestoreDraft => 'Restore draft overwrite';
+
+  @override
+  String get riskyPrefsLabelCancelExport => 'Cancel finished export';
+
+  @override
+  String get riskyPrefsLabelBatchArchivePublish =>
+      'Batch archive/publish drafts';
 }

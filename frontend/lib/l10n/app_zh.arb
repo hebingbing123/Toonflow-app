@@ -274,5 +274,26 @@
       }
     }
   },
-  "notificationsExportDeliverySync": " · 同步"
+  "notificationsExportDeliverySync": " · 同步",
+  "riskyPrefsMenuDefaultTooltip": "本机客户端偏好",
+  "riskyPrefsMenuViewSilencesTitle": "查看已静默的高风险确认",
+  "riskyPrefsMenuViewSilencesSubtitle": "只读列表，不影响设置",
+  "riskyPrefsMenuResetTitle": "恢复高风险操作确认提示",
+  "riskyPrefsMenuResetSubtitle": "仅本机，与服务器配置无关",
+  "riskyPrefsSummaryDialogTitle": "已静默的高风险确认",
+  "riskyPrefsSummaryEmptyBody": "当前没有勾选「不再提示」的记录。",
+  "riskyPrefsSummaryNonEmptyIntro": "以下操作在本机将不再弹出确认框（可随时在「恢复高风险操作确认提示」中清除）：",
+  "riskyPrefsSummaryClose": "关闭",
+  "riskyPrefsResetDialogTitle": "恢复快风险确认框",
+  "riskyPrefsResetBody": "将清除本机「不再提示」记录。此后删除版本、归档、取消导出等操作会重新弹出确认（仅影响当前设备上的本应用）。",
+  "riskyPrefsResetNoSavedLabel": "当前无已保存的「不再提示」条目。仍可清除可能的残留键。",
+  "riskyPrefsResetHasItemsLabel": "当前已静默确认的项目：",
+  "riskyPrefsResetCancel": "取消",
+  "riskyPrefsResetConfirm": "清除并恢复",
+  "riskyPrefsResetSuccessSnack": "已清除本机高风险操作的「不再提示」偏好；后续将重新弹出确认。",
+  "riskyPrefsLabelDeleteVersion": "删除成片版本",
+  "riskyPrefsLabelBatchDisable": "批量禁用镜头",
+  "riskyPrefsLabelRestoreDraft": "恢复草稿覆盖",
+  "riskyPrefsLabelCancelExport": "取消成片导出",
+  "riskyPrefsLabelBatchArchivePublish": "批量归档发布草稿"
 }

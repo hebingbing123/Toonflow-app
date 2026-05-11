@@ -274,5 +274,26 @@
       }
     }
   },
-  "notificationsExportDeliverySync": " · Sync"
+  "notificationsExportDeliverySync": " · Sync",
+  "riskyPrefsMenuDefaultTooltip": "Local client preferences",
+  "riskyPrefsMenuViewSilencesTitle": "View silenced high-risk confirmations",
+  "riskyPrefsMenuViewSilencesSubtitle": "Read-only list; does not change settings",
+  "riskyPrefsMenuResetTitle": "Restore high-risk confirmation prompts",
+  "riskyPrefsMenuResetSubtitle": "This device only; unrelated to server settings",
+  "riskyPrefsSummaryDialogTitle": "Silenced high-risk confirmations",
+  "riskyPrefsSummaryEmptyBody": "No \"don't ask again\" choices are saved on this device.",
+  "riskyPrefsSummaryNonEmptyIntro": "These actions will skip confirmation dialogs on this device (you can clear them anytime with \"Restore high-risk confirmation prompts\"):",
+  "riskyPrefsSummaryClose": "Close",
+  "riskyPrefsResetDialogTitle": "Restore confirmation dialogs",
+  "riskyPrefsResetBody": "This clears local \"don't ask again\" choices. Deletes, archive/publish, cancel export, and similar actions will show confirmations again (this app on this device only).",
+  "riskyPrefsResetNoSavedLabel": "No saved \"don't ask again\" entries. You can still clear any leftover keys.",
+  "riskyPrefsResetHasItemsLabel": "Currently silenced:",
+  "riskyPrefsResetCancel": "Cancel",
+  "riskyPrefsResetConfirm": "Clear and restore",
+  "riskyPrefsResetSuccessSnack": "Cleared local \"don't ask again\" preferences for high-risk actions; confirmations will show again.",
+  "riskyPrefsLabelDeleteVersion": "Delete finished version",
+  "riskyPrefsLabelBatchDisable": "Batch disable shots",
+  "riskyPrefsLabelRestoreDraft": "Restore draft overwrite",
+  "riskyPrefsLabelCancelExport": "Cancel finished export",
+  "riskyPrefsLabelBatchArchivePublish": "Batch archive/publish drafts"
 }

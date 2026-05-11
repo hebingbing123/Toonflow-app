@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 
 /// Confirmation dialog utilities for short video editing operations
@@ -41,7 +42,7 @@ Future<bool?> showDeleteVersionConfirmation(
       final prefs = await SharedPreferences.getInstance();
       final dontShow =
           prefs.getBool(RiskyOperationConfirmPreferenceKeys.deleteVersion) ??
-              false;
+          false;
       if (dontShow) {
         return true; // Auto-confirm if user chose "don't show again"
       }
@@ -84,7 +85,8 @@ Future<bool?> showBatchDisableConfirmation(
   if (showDontShowAgain) {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final dontShow = prefs.getBool(ConfirmationPreferenceKeys.batchDisable) ?? false;
+      final dontShow =
+          prefs.getBool(ConfirmationPreferenceKeys.batchDisable) ?? false;
       if (dontShow) {
         return true; // Auto-confirm if user chose "don't show again"
       }
@@ -127,7 +129,8 @@ Future<bool?> showRestoreDraftConfirmation(
   if (showDontShowAgain) {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final dontShow = prefs.getBool(ConfirmationPreferenceKeys.restoreDraft) ?? false;
+      final dontShow =
+          prefs.getBool(ConfirmationPreferenceKeys.restoreDraft) ?? false;
       if (dontShow) {
         return true; // Auto-confirm if user chose "don't show again"
       }
@@ -169,7 +172,8 @@ Future<bool?> showCancelExportConfirmation(
   if (showDontShowAgain) {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final dontShow = prefs.getBool(ConfirmationPreferenceKeys.cancelExport) ?? false;
+      final dontShow =
+          prefs.getBool(ConfirmationPreferenceKeys.cancelExport) ?? false;
       if (dontShow) {
         return true; // Auto-confirm if user chose "don't show again"
       }
@@ -182,9 +186,8 @@ Future<bool?> showCancelExportConfirmation(
 
   final result = await showDialog<ConfirmationResult>(
     context: context,
-    builder: (ctx) => _CancelExportConfirmationDialog(
-      showDontShowAgain: showDontShowAgain,
-    ),
+    builder: (ctx) =>
+        _CancelExportConfirmationDialog(showDontShowAgain: showDontShowAgain),
   );
 
   if (result != null && result.dontShowAgain) {
@@ -212,7 +215,7 @@ Future<bool?> showBatchArchivePublishConfirmation(
       final prefs = await SharedPreferences.getInstance();
       final dontShow =
           prefs.getBool(ConfirmationPreferenceKeys.batchArchivePublish) ??
-              false;
+          false;
       if (dontShow) {
         return true;
       }
@@ -248,17 +251,16 @@ Future<void> resetAllConfirmationPreferences() =>
     resetAllRiskyOperationConfirmPreferences();
 
 /// Human-readable snapshot of stored "don't show again" toggles (for ops UI).
-Future<List<String>> listActiveConfirmationDontShowAgainLabels() =>
-    listActiveRiskyOperationConfirmDontShowLabels();
+Future<List<String>> listActiveConfirmationDontShowAgainLabels(
+  AppLocalizations l10n,
+) => listActiveRiskyOperationConfirmDontShowLabels(l10n);
 
 /// Read-only dialog listing current silenced confirms (delegates to platform prefs).
 Future<void> showActiveConfirmationDontShowAgainSummary(BuildContext context) =>
     showActiveRiskyOperationConfirmPrefsSummary(context);
 
 /// Confirm clearing all local "don't show again" confirmations (platform recovery).
-Future<bool?> showResetConfirmationDontShowAgainDialog(
-  BuildContext context,
-) =>
+Future<bool?> showResetConfirmationDontShowAgainDialog(BuildContext context) =>
     showResetRiskyOperationConfirmPrefsDialog(context);
 
 // Private dialog widgets
@@ -311,9 +313,9 @@ class _DeleteVersionConfirmationDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(
-            ConfirmationResult(confirmed: false, dontShowAgain: false),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
           child: const Text('取消'),
         ),
         FilledButton(
@@ -378,9 +380,9 @@ class _BatchDisableConfirmationDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(
-            ConfirmationResult(confirmed: false, dontShowAgain: false),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
           child: const Text('取消'),
         ),
         FilledButton(
@@ -442,9 +444,9 @@ class _RestoreDraftConfirmationDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(
-            ConfirmationResult(confirmed: false, dontShowAgain: false),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
           child: const Text('取消'),
         ),
         FilledButton(
@@ -461,9 +463,7 @@ class _RestoreDraftConfirmationDialogState
 class _CancelExportConfirmationDialog extends StatefulWidget {
   final bool showDontShowAgain;
 
-  const _CancelExportConfirmationDialog({
-    required this.showDontShowAgain,
-  });
+  const _CancelExportConfirmationDialog({required this.showDontShowAgain});
 
   @override
   State<_CancelExportConfirmationDialog> createState() =>
@@ -501,9 +501,9 @@ class _CancelExportConfirmationDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(
-            ConfirmationResult(confirmed: false, dontShowAgain: false),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
           child: const Text('继续导出'),
         ),
         FilledButton(
@@ -543,9 +543,7 @@ class _BatchArchivePublishConfirmationDialogState
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '确定要归档 ${widget.draftCount} 张发布草稿吗？归档后将从待发布队列中移除（视后端策略可能可恢复）。',
-          ),
+          Text('确定要归档 ${widget.draftCount} 张发布草稿吗？归档后将从待发布队列中移除（视后端策略可能可恢复）。'),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
             CheckboxListTile(
@@ -564,9 +562,9 @@ class _BatchArchivePublishConfirmationDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(
-            ConfirmationResult(confirmed: false, dontShowAgain: false),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
           child: const Text('取消'),
         ),
         FilledButton(

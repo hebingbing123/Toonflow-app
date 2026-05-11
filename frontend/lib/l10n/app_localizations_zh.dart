@@ -442,4 +442,69 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationsExportDeliverySync => ' · 同步';
+
+  @override
+  String get riskyPrefsMenuDefaultTooltip => '本机客户端偏好';
+
+  @override
+  String get riskyPrefsMenuViewSilencesTitle => '查看已静默的高风险确认';
+
+  @override
+  String get riskyPrefsMenuViewSilencesSubtitle => '只读列表，不影响设置';
+
+  @override
+  String get riskyPrefsMenuResetTitle => '恢复高风险操作确认提示';
+
+  @override
+  String get riskyPrefsMenuResetSubtitle => '仅本机，与服务器配置无关';
+
+  @override
+  String get riskyPrefsSummaryDialogTitle => '已静默的高风险确认';
+
+  @override
+  String get riskyPrefsSummaryEmptyBody => '当前没有勾选「不再提示」的记录。';
+
+  @override
+  String get riskyPrefsSummaryNonEmptyIntro =>
+      '以下操作在本机将不再弹出确认框（可随时在「恢复高风险操作确认提示」中清除）：';
+
+  @override
+  String get riskyPrefsSummaryClose => '关闭';
+
+  @override
+  String get riskyPrefsResetDialogTitle => '恢复快风险确认框';
+
+  @override
+  String get riskyPrefsResetBody =>
+      '将清除本机「不再提示」记录。此后删除版本、归档、取消导出等操作会重新弹出确认（仅影响当前设备上的本应用）。';
+
+  @override
+  String get riskyPrefsResetNoSavedLabel => '当前无已保存的「不再提示」条目。仍可清除可能的残留键。';
+
+  @override
+  String get riskyPrefsResetHasItemsLabel => '当前已静默确认的项目：';
+
+  @override
+  String get riskyPrefsResetCancel => '取消';
+
+  @override
+  String get riskyPrefsResetConfirm => '清除并恢复';
+
+  @override
+  String get riskyPrefsResetSuccessSnack => '已清除本机高风险操作的「不再提示」偏好；后续将重新弹出确认。';
+
+  @override
+  String get riskyPrefsLabelDeleteVersion => '删除成片版本';
+
+  @override
+  String get riskyPrefsLabelBatchDisable => '批量禁用镜头';
+
+  @override
+  String get riskyPrefsLabelRestoreDraft => '恢复草稿覆盖';
+
+  @override
+  String get riskyPrefsLabelCancelExport => '取消成片导出';
+
+  @override
+  String get riskyPrefsLabelBatchArchivePublish => '批量归档发布草稿';
 }
