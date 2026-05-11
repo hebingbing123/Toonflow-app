@@ -23,6 +23,24 @@ void main() {
     expect(find.text('界面语言'), findsOneWidget);
   });
 
+  testWidgets('AppLocalizations zh workspace mode title', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Scaffold(body: Text(l10n.workspaceModeTitle));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('工作区模式'), findsOneWidget);
+  });
+
   testWidgets('AppLocalizations en shows English section title', (
     tester,
   ) async {

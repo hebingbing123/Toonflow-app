@@ -22,4 +22,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localeChinese => '简体中文';
+
+  @override
+  String get workspaceModeTitle => '工作区模式';
+
+  @override
+  String get workspaceModeProduct => '产品工作区';
+
+  @override
+  String get workspaceModeDebug => '运维与调试';
+
+  @override
+  String get workspaceModeDescriptionProduct => '当前聚焦用户工作流：项目、Agent 工作区、任务与质量。';
+
+  @override
+  String get workspaceModeDescriptionDebug =>
+      '当前聚焦运维探针：Harness 工具目录、WS 探测与系统诊断。';
+
+  @override
+  String errorLine(String detail) {
+    return '错误：$detail';
+  }
 }

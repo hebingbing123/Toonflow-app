@@ -4,5 +4,18 @@
   "localeSectionTitle": "界面语言",
   "localeSystem": "跟随系统",
   "localeEnglish": "English",
-  "localeChinese": "简体中文"
+  "localeChinese": "简体中文",
+  "workspaceModeTitle": "工作区模式",
+  "workspaceModeProduct": "产品工作区",
+  "workspaceModeDebug": "运维与调试",
+  "workspaceModeDescriptionProduct": "当前聚焦用户工作流：项目、Agent 工作区、任务与质量。",
+  "workspaceModeDescriptionDebug": "当前聚焦运维探针：Harness 工具目录、WS 探测与系统诊断。",
+  "errorLine": "错误：{detail}",
+  "@errorLine": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }

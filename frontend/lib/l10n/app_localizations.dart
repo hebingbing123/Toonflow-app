@@ -127,6 +127,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Simplified Chinese'**
   String get localeChinese;
+
+  /// No description provided for @workspaceModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace mode'**
+  String get workspaceModeTitle;
+
+  /// No description provided for @workspaceModeProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Product workspace'**
+  String get workspaceModeProduct;
+
+  /// No description provided for @workspaceModeDebug.
+  ///
+  /// In en, this message translates to:
+  /// **'Ops and debug'**
+  String get workspaceModeDebug;
+
+  /// No description provided for @workspaceModeDescriptionProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused on user workflows: projects, agent workspaces, tasks, and quality.'**
+  String get workspaceModeDescriptionProduct;
+
+  /// No description provided for @workspaceModeDescriptionDebug.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused on ops probes: Harness tooling, WebSocket diagnostics, and system checks.'**
+  String get workspaceModeDescriptionDebug;
+
+  /// No description provided for @errorLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {detail}'**
+  String errorLine(String detail);
 }
 
 class _AppLocalizationsDelegate

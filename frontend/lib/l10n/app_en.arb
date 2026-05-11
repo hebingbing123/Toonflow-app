@@ -4,5 +4,18 @@
   "localeSectionTitle": "Display language",
   "localeSystem": "System default",
   "localeEnglish": "English",
-  "localeChinese": "Simplified Chinese"
+  "localeChinese": "Simplified Chinese",
+  "workspaceModeTitle": "Workspace mode",
+  "workspaceModeProduct": "Product workspace",
+  "workspaceModeDebug": "Ops and debug",
+  "workspaceModeDescriptionProduct": "Focused on user workflows: projects, agent workspaces, tasks, and quality.",
+  "workspaceModeDescriptionDebug": "Focused on ops probes: Harness tooling, WebSocket diagnostics, and system checks.",
+  "errorLine": "Error: {detail}",
+  "@errorLine": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -22,4 +22,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localeChinese => 'Simplified Chinese';
+
+  @override
+  String get workspaceModeTitle => 'Workspace mode';
+
+  @override
+  String get workspaceModeProduct => 'Product workspace';
+
+  @override
+  String get workspaceModeDebug => 'Ops and debug';
+
+  @override
+  String get workspaceModeDescriptionProduct =>
+      'Focused on user workflows: projects, agent workspaces, tasks, and quality.';
+
+  @override
+  String get workspaceModeDescriptionDebug =>
+      'Focused on ops probes: Harness tooling, WebSocket diagnostics, and system checks.';
+
+  @override
+  String errorLine(String detail) {
+    return 'Error: $detail';
+  }
 }

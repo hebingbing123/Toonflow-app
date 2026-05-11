@@ -148,6 +148,10 @@ extension _HomePageBuildSections on _HomePageState {
   );
 
   Widget _buildWorkspaceModeSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
     final selected = <HomeSectionMode>{
       _shellNavigationController.homeSectionMode,
     };
@@ -157,17 +161,20 @@ extension _HomePageBuildSections on _HomePageState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('Workspace mode', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.workspaceModeTitle,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           SegmentedButton<HomeSectionMode>(
-            segments: const <ButtonSegment<HomeSectionMode>>[
+            segments: <ButtonSegment<HomeSectionMode>>[
               ButtonSegment<HomeSectionMode>(
                 value: HomeSectionMode.product,
-                label: Text('Product workspace'),
+                label: Text(l10n.workspaceModeProduct),
               ),
               ButtonSegment<HomeSectionMode>(
                 value: HomeSectionMode.debug,
-                label: Text('Ops and debug'),
+                label: Text(l10n.workspaceModeDebug),
               ),
             ],
             selected: selected,
@@ -179,8 +186,8 @@ extension _HomePageBuildSections on _HomePageState {
           const SizedBox(height: 8),
           Text(
             isProduct
-                ? '当前聚焦用户工作流：项目、Agent 工作区、任务与质量。'
-                : '当前聚焦运维探针：Harness 工具目录、WS 探测与系统诊断。',
+                ? l10n.workspaceModeDescriptionProduct
+                : l10n.workspaceModeDescriptionDebug,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -221,12 +228,11 @@ extension _HomePageBuildSections on _HomePageState {
 
   List<Widget> _buildErrorSection(BuildContext context) {
     if (_error == null) return const [];
+    final err = _error!;
+    final line = AppLocalizations.of(context)?.errorLine(err) ?? '错误: $err';
     return [
       const SizedBox(height: 16),
-      Text(
-        '错误: $_error',
-        style: TextStyle(color: Theme.of(context).colorScheme.error),
-      ),
+      Text(line, style: TextStyle(color: Theme.of(context).colorScheme.error)),
     ];
   }
 }
