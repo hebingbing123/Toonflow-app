@@ -1,39 +1,49 @@
+import '../l10n/app_localizations.dart';
 import '../rust_api/settings/billing_webhook_events.dart';
+
+/// Placeholder stored in error strings when the user must sign in; resolve in UI with [AppLocalizations.platformConfigPleaseSignIn].
+const String kProductShellSignInErrorPlaceholder = '__product_shell_sign_in__';
 
 int countWebhookActivity(Iterable<String> actions, String action) {
   return actions.where((entry) => entry == action).length;
 }
 
-String buildWebhookInventorySummary({
+String buildWebhookInventorySummary(
+  AppLocalizations l10n, {
   required int total,
   required int filtered,
   required int sessionTestOkCount,
   required int sessionTestFailedCount,
   String? latestWebhookId,
 }) {
-  return [
-    'total=$total',
-    'filtered=$filtered',
-    'session test ok=$sessionTestOkCount',
-    'session test failed=$sessionTestFailedCount',
-    if (latestWebhookId != null) 'latest=$latestWebhookId',
-  ].join(' · ');
+  final latestPart = latestWebhookId == null
+      ? ''
+      : l10n.opsWhInventoryLatestPart(latestWebhookId);
+  return l10n.opsWhInventoryLine(
+    total,
+    filtered,
+    sessionTestOkCount,
+    sessionTestFailedCount,
+    latestPart,
+  );
 }
 
-String? describeOutboundWebhookEmptyState({
+String? describeOutboundWebhookEmptyState(
+  AppLocalizations l10n, {
   required int total,
   required int filtered,
 }) {
   if (total == 0) {
-    return '当前还没有配置任何出站 Webhook。可直接在上方创建，并在此处测试投递与删除。';
+    return l10n.opsWhEmptyNone;
   }
   if (filtered == 0) {
-    return '当前筛选没有命中任何 Webhook，请调整 URL / id / createdAt 搜索关键字。';
+    return l10n.opsWhEmptyFiltered;
   }
   return null;
 }
 
-String? describeBillingWebhookEmptyState({
+String? describeBillingWebhookEmptyState(
+  AppLocalizations l10n, {
   required bool hasPage,
   required int loaded,
   required bool isLoading,
@@ -42,7 +52,7 @@ String? describeBillingWebhookEmptyState({
   if (!hasPage || loaded > 0 || isLoading || error != null) {
     return null;
   }
-  return '当前查询没有命中任何 billing webhook 审计事件，可调整 provider、event id、时间窗或 informational 条件后重试。';
+  return l10n.billingEmptyQuery;
 }
 
 Map<String, int> countBillingEventsByProvider(
@@ -70,6 +80,7 @@ Map<String, int> countBillingEventsByType(
 }
 
 String buildBillingEventsSnapshotSummary(
+  AppLocalizations l10n,
   Iterable<BillingWebhookEventItemV1> items,
 ) {
   final list = items.toList(growable: false);
@@ -80,10 +91,14 @@ String buildBillingEventsSnapshotSummary(
   final informational = list.where((e) => e.isInformationalEvent).length;
   final stateful = list.length - informational;
   return [
-    'loaded=${list.length}',
-    'informational=$informational',
-    'stateful=$stateful',
-    'providers=${providerCounts.map((e) => '${e.key}:${e.value}').join(', ')}',
-    'event_types=${typeCounts.take(8).map((e) => '${e.key}:${e.value}').join(', ')}',
+    l10n.billingSnapLoaded(list.length),
+    l10n.billingSnapInformational(informational),
+    l10n.billingSnapStateful(stateful),
+    l10n.billingSnapProviders(
+      providerCounts.map((e) => '${e.key}:${e.value}').join(', '),
+    ),
+    l10n.billingSnapEventTypes(
+      typeCounts.take(8).map((e) => '${e.key}:${e.value}').join(', '),
+    ),
   ].join('\n');
 }

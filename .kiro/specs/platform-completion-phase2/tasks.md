@@ -205,7 +205,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] I2.1 使用 `l10n` 框架 — `l10n.yaml`、`lib/l10n/*.arb`、`AppLocalizations` 生成物已入库；`flutter_localizations` + `MaterialApp` delegates
   - [ ] I2.2 覆盖项目列表界面的中英文文案
   - [ ] I2.3 覆盖工作台界面的中英文文案
-  - [~] I2.4 覆盖设置界面的中英文文案（除语言卡片外）— **部分**：**`_PlatformConfigSection`** 已 **`platformConfig*`**；**产品壳** **`productNav*` / `productPaneDisabled*` / `productAgent*` / `productCompliance*`** 已覆盖导航 ChoiceChip、功能门控标题与说明、合规跳转 SnackBar、深链 `_selectProductPaneWithGate`；**Help Hub / Webhook / Billing 审计** 等大块仍硬编码
+  - [~] I2.4 覆盖设置界面的中英文文案（除语言卡片外）— **部分**：**`_PlatformConfigSection`** 已 **`platformConfig*`**（含 Plan/Workspace/User 覆盖标题）；**产品壳** **`productNav*` / `productPaneDisabled*` / `productAgent*` / `productCompliance*`**；**`_HelpHubSection`** 已 **`helpHub*` / `opsWh*` / `billing*`**（帮助文档、出站 Webhook、Billing 审计、管理对话框与 SnackBar）；其余设置相关子界面仍可能含硬编码
   - [~] I2.5 覆盖团队工作区界面的中英文文案 — **部分**：首页 **工作区模式**（`build_sections.dart`）与 **`WorkspaceContextView`**（加载、无工作区/项目、计费标题与配额文案）已接 `AppLocalizations`；成员/邀请等子界面仍待迁移
   - [x] I2.6 覆盖通知中心界面的中英文文案 — `NotificationsSection` 全量 ARB；**`RiskyOperationConfirmPrefsOverflowMenu`** 与 **`listActiveRiskyOperationConfirmDontShowLabels` / 摘要与重置对话框 / SnackBar** 已在 `risky_operation_confirm_prefs.dart` 接 l10n（`listActiveConfirmationDontShowAgainLabels` 现需传入 `AppLocalizations`）
   - [x] I2.7 语言切换 — 首页 Overview 下 **界面语言** 卡片（系统 / English / 简体中文），`AppLocaleNotifier` + `SharedPreferences`

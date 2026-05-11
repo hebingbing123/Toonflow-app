@@ -388,5 +388,368 @@
         "type": "String"
       }
     }
+  },
+  "platformConfigPlanOverrideTitle": "Plan 覆盖",
+  "platformConfigWorkspaceOverrideTitle": "Workspace 覆盖",
+  "platformConfigUserOverrideTitle": "用户覆盖",
+  "helpHubDocsTitle": "帮助 / 文档",
+  "helpHubLocalRiskLine": "本机：需要重新显示删除版本、归档、取消导出等高风险二次确认时，请点标题栏 ⋯ 菜单（与服务器配置无关）。",
+  "helpHubRefresh": "刷新",
+  "helpHubManageEntries": "管理入口",
+  "helpHubLoading": "加载中…",
+  "helpHubSearchLabel": "搜索帮助文档（title / id / url）",
+  "helpHubNoEffectiveLinks": "当前没有可用的帮助入口，请检查 settings/help/hub 配置。",
+  "helpHubSearchEmpty": "当前搜索没有命中文档入口，请调整关键词后重试。",
+  "helpHubCopyLinkTooltip": "复制链接",
+  "helpHubCopied": "已复制",
+  "helpHubCopyTitleUrlTooltip": "复制标题+链接",
+  "helpHubCopiedHandoff": "已复制文档 handoff",
+  "helpHubManageDialogTitle": "管理帮助入口（个人 / 工作区）",
+  "helpHubManagePrecedence": "生效顺序：个人覆盖 > 工作区覆盖 > 环境默认。",
+  "helpHubManageWorkspaceLocked": "（当前工作区不可配置工作区级入口；仅个人覆盖可用。）",
+  "helpHubTabPersonal": "个人覆盖",
+  "helpHubTabWorkspace": "工作区覆盖",
+  "helpHubFieldId": "id（用于去重/覆盖）",
+  "helpHubFieldTitle": "标题",
+  "helpHubFieldUrl": "URL",
+  "helpHubHintId": "runbook-quality",
+  "helpHubHintUrl": "https://docs.example.com/runbook",
+  "helpHubAdd": "添加",
+  "helpHubValidationRequired": "id、title、url 不能为空。",
+  "helpHubNoCustomInScope": "当前范围没有自定义入口。",
+  "helpHubDialogClose": "关闭",
+  "helpHubSave": "保存",
+  "helpHubSaving": "保存中…",
+  "helpHubCategoryRunbook": "Runbook",
+  "helpHubCategoryBillingWebhook": "Billing / Webhook",
+  "helpHubCategoryWorkspace": "Workspace",
+  "helpHubCategoryQuality": "质量",
+  "helpHubCategoryStatus": "状态",
+  "helpHubCategoryGeneral": "通用",
+  "helpHubSummary": "共 {total} · 筛选后 {filtered}{extra}",
+  "@helpHubSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "filtered": {
+        "type": "int"
+      },
+      "extra": {
+        "type": "String"
+      }
+    }
+  },
+  "helpHubSummaryCategoryCount": "{name}:{count}",
+  "@helpHubSummaryCategoryCount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opsWhSectionTitle": "出站 Webhook",
+  "opsWhErrorUrlRequired": "URL 不能为空",
+  "opsWhErrorWorkspaceId": "workspaceId 须为合法 UUID，或留空",
+  "opsWhErrorWorkspaceIdPatch": "workspaceId 须为合法 UUID，或清空后保存以改为全局",
+  "opsWhSnackCreated": "已创建；secret 已复制到剪贴板",
+  "opsWhSnackEventsUpdated": "已更新订阅事件",
+  "opsWhSnackDeliverOk": "投递成功（HTTP {status}）",
+  "@opsWhSnackDeliverOk": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhSnackDeliverFail": "投递失败：{detail}",
+  "@opsWhSnackDeliverFail": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhSnackScopeGlobal": "已改为全局（无 workspace 过滤）",
+  "opsWhSnackScopeWorkspaceUpdated": "已更新 workspaceId",
+  "opsWhDeleteTitle": "删除 Webhook",
+  "opsWhDeleteBody": "即将删除 webhook：{id}\n此操作会移除该目标地址。",
+  "@opsWhDeleteBody": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhDeleteConfirm": "删除",
+  "opsWhDeleteConfirmButton": "确认删除",
+  "opsWhLastTestOk": "最近测试：成功（HTTP {status}）",
+  "@opsWhLastTestOk": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhLastTestFail": "最近测试：失败（HTTP {status}）{error}",
+  "@opsWhLastTestFail": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhInventoryLine": "共 {total} · 筛选 {filtered} · 本会话测试成功 {ok} · 失败 {fail}{latestPart}",
+  "@opsWhInventoryLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "filtered": {
+        "type": "int"
+      },
+      "ok": {
+        "type": "int"
+      },
+      "fail": {
+        "type": "int"
+      },
+      "latestPart": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhInventoryLatestPart": " · 最近：{id}",
+  "@opsWhInventoryLatestPart": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhEmptyNone": "当前还没有配置任何出站 Webhook。可直接在上方创建，并在此处测试投递与删除。",
+  "opsWhEmptyFiltered": "当前筛选没有命中任何 Webhook，请调整 URL / id / createdAt 搜索关键字。",
+  "opsWhUrlLabel": "Webhook URL",
+  "opsWhUrlHint": "https://example.com/webhook",
+  "opsWhSecretLabel": "Secret（可空，留空则服务端生成）",
+  "opsWhWorkspaceIdLabel": "workspaceId（可空）",
+  "opsWhWorkspaceIdHint": "仅投递属于该工作区的事件；须为 UUID",
+  "opsWhSubscribeHint": "订阅事件（全选=默认全部；可取消不需要的类型）",
+  "opsWhTestEventTypeLabel": "测试 eventType",
+  "opsWhTestEventTypeHint": "test.ping",
+  "opsWhLatestCreatedTitle": "最近创建的 Webhook 凭据",
+  "opsWhCopyId": "复制 ID",
+  "opsWhCopyUrl": "复制 URL",
+  "opsWhCopySecret": "复制 Secret",
+  "opsWhCreate": "创建",
+  "opsWhCreating": "请求中…",
+  "opsWhRefreshList": "刷新列表",
+  "opsWhSearchLabel": "搜索 Webhook（URL / id / createdAt）",
+  "opsWhRecentActivity": "最近操作",
+  "opsWhCopyActivityTooltip": "复制记录",
+  "opsWhActivityRecordSuffix": " Webhook 操作记录",
+  "opsWhChipLatestCreated": "最近创建",
+  "opsWhChipDisabled": "已停用",
+  "opsWhSubscribeHeading": "订阅事件",
+  "opsWhScopeHeading": "作用域 workspaceId（留空保存 = 全局）",
+  "opsWhScopeFieldHint": "UUID，留空表示不按工作区过滤",
+  "opsWhSaveScope": "保存作用域",
+  "opsWhSavingScope": "保存中…",
+  "opsWhClearInput": "清空输入",
+  "opsWhRecentDeliveries": "最近投递",
+  "opsWhTooltipCopyUrl": "复制 URL",
+  "opsWhUrlCopiedSnack": "已复制 Webhook URL",
+  "opsWhTestDeliver": "测试投递",
+  "opsWhBusy": "处理中…",
+  "opsWhDeliveryLog": "投递记录",
+  "opsWhLoading": "加载中…",
+  "opsWhDelete": "删除",
+  "billingAuditTitle": "Billing Webhook 审计",
+  "billingAuditProviderLabel": "Provider",
+  "billingAuditAll": "全部",
+  "billingAuditSortLabel": "排序",
+  "billingAuditSortNewest": "最新优先",
+  "billingAuditSortOldest": "最早优先",
+  "billingAuditOnlyInformational": "仅 informational",
+  "billingAuditOnlyStateful": "仅 stateful",
+  "billingAuditEventTypeHint": "例如 invoice.paid / subscription.expired",
+  "billingAuditProviderEventIdHint": "例如 stripe:evt_123",
+  "billingAuditRawEventIdHint": "例如 evt_123",
+  "billingAuditProviderPrefixHint": "例如 stripe:evt_",
+  "billingAuditRawPrefixHint": "例如 evt_",
+  "billingAuditEventCreatedFromHint": "2026-04-01T00:00:00Z",
+  "billingAuditEventCreatedToHint": "2026-04-30T23:59:59Z",
+  "billingAuditQuery": "查询审计",
+  "billingAuditQuerying": "读取中…",
+  "billingAuditResetRefresh": "重置并刷新",
+  "billingAuditCopyCsv": "复制 CSV",
+  "billingAuditCsvCopiedSnack": "已复制当前 billing 审计 CSV",
+  "billingAuditCopyQuerySummary": "复制查询摘要",
+  "billingAuditCopyQueryUrl": "复制查询 URL",
+  "billingAuditQueryUrlCopiedSnack": "已复制当前查询 URL",
+  "billingAuditCopyFullCsv": "复制全量 CSV",
+  "billingAuditExporting": "导出中…",
+  "billingAuditLoading": "加载 billing 审计中…",
+  "billingAuditPageStats": "total={total} · loaded={loaded} · has_more={hasMore}",
+  "@billingAuditPageStats": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "loaded": {
+        "type": "int"
+      },
+      "hasMore": {
+        "type": "String"
+      }
+    }
+  },
+  "billingEmptyQuery": "当前查询没有命中任何 billing webhook 审计事件，可调整 provider、event id、时间窗或 informational 条件后重试。",
+  "billingAuditQuerySummaryCopied": "已复制当前查询摘要",
+  "billingAuditSnapshotCopied": "已复制当前审计摘要",
+  "billingCopiedWithLabel": "已复制{label}",
+  "@billingCopiedWithLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditFullCsvCopied": "已复制全量 billing 审计 CSV（{count} 条）",
+  "@billingAuditFullCsvCopied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapLoaded": "已加载：{count}",
+  "@billingSnapLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapInformational": "informational：{count}",
+  "@billingSnapInformational": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapStateful": "stateful：{count}",
+  "@billingSnapStateful": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapProviders": "providers：{list}",
+  "@billingSnapProviders": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "billingSnapEventTypes": "event types：{list}",
+  "@billingSnapEventTypes": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditCurrentLoadTitle": "当前加载摘要",
+  "billingAuditCopySnapshot": "复制审计摘要",
+  "billingAuditCopyProviderEventId": "复制 provider_event_id",
+  "billingAuditCopyRawEventId": "复制 raw_event_id",
+  "billingAuditFilterByProvider": "按 {provider} 过滤",
+  "@billingAuditFilterByProvider": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditFilterByEventType": "按 {eventType} 过滤",
+  "@billingAuditFilterByEventType": {
+    "placeholders": {
+      "eventType": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditOnlyThisEvent": "仅看这一事件",
+  "billingAuditLoadMore": "加载更多审计",
+  "billingMetaProvider": "provider={value}",
+  "@billingMetaProvider": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaType": "type={value}",
+  "@billingMetaType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaCreated": "created={value}",
+  "@billingMetaCreated": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaEventCreated": "event_created={value}",
+  "@billingMetaEventCreated": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaInformational": "informational",
+  "billingMetaStateful": "stateful",
+  "billingRowRawEventId": "raw_event_id={value}",
+  "@billingRowRawEventId": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingRowId": "id={value}",
+  "@billingRowId": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingChipCount": "{label} {count}",
+  "@billingChipCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

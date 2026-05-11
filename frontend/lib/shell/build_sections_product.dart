@@ -1259,7 +1259,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         ],
         if (_response != null) ...[
           const SizedBox(height: 12),
-          Text('Plan Override', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.platformConfigPlanOverrideTitle,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 4),
           Text(
             l10n.platformConfigPlanLayerIntro,
@@ -1289,7 +1292,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         if (workspace != null && workspaceDraft != null) ...[
           const SizedBox(height: 12),
           Text(
-            'Workspace Override',
+            l10n.platformConfigWorkspaceOverrideTitle,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 4),
@@ -1318,7 +1321,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         if (workspace != null && workspaceDraft == null) ...[
           const SizedBox(height: 12),
           Text(
-            'Workspace Override',
+            l10n.platformConfigWorkspaceOverrideTitle,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 4),
@@ -1331,7 +1334,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         ],
         if (userDraft != null) ...[
           const SizedBox(height: 12),
-          Text('User Override', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.platformConfigUserOverrideTitle,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 4),
           Text(
             l10n.platformConfigUserOverrideIntro,
@@ -1441,7 +1447,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       setState(() {
-        _error = '请先登录';
+        _error = kProductShellSignInErrorPlaceholder;
         _resp = null;
         _helpHubConfig = null;
       });
@@ -1572,6 +1578,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     await showDialog<void>(
       context: context,
       builder: (ctx) {
+        final dl10n = AppLocalizations.of(ctx)!;
         return StatefulBuilder(
           builder: (ctx, setInner) {
             final canManageWorkspace =
@@ -1585,7 +1592,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               final url = _helpHubNewUrlController.text.trim();
               if (id.isEmpty || title.isEmpty || url.isEmpty) {
                 setInner(() {
-                  errorText = 'id / title / url 不能为空';
+                  errorText = dl10n.helpHubValidationRequired;
                 });
                 return;
               }
@@ -1601,7 +1608,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             }
 
             return AlertDialog(
-              title: const Text('管理帮助入口（个人 / 工作区）'),
+              title: Text(dl10n.helpHubManageDialogTitle),
               content: SizedBox(
                 width: 720,
                 child: SingleChildScrollView(
@@ -1609,8 +1616,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '生效顺序：个人覆盖 > 工作区覆盖 > 环境默认。'
-                        '${canManageWorkspace ? '' : '（当前工作区不可配置，只有个人覆盖可用）'}',
+                        dl10n.helpHubManagePrecedence +
+                            (canManageWorkspace
+                                ? ''
+                                : dl10n.helpHubManageWorkspaceLocked),
                         style: Theme.of(ctx).textTheme.bodySmall,
                       ),
                       const SizedBox(height: 12),
@@ -1620,7 +1629,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           runSpacing: 8,
                           children: [
                             FilterChip(
-                              label: const Text('个人覆盖'),
+                              label: Text(dl10n.helpHubTabPersonal),
                               selected: !activeIsWorkspace,
                               onSelected: (v) => setInner(() {
                                 useWorkspaceTab = !v;
@@ -1628,7 +1637,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               }),
                             ),
                             FilterChip(
-                              label: const Text('工作区覆盖'),
+                              label: Text(dl10n.helpHubTabWorkspace),
                               selected: activeIsWorkspace,
                               onSelected: (v) => setInner(() {
                                 useWorkspaceTab = v;
@@ -1640,24 +1649,26 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _helpHubNewIdController,
-                        decoration: const InputDecoration(
-                          labelText: 'id（用于去重/覆盖）',
-                          hintText: 'runbook-quality',
+                        decoration: InputDecoration(
+                          labelText: dl10n.helpHubFieldId,
+                          hintText: dl10n.helpHubHintId,
                         ),
                         enabled: !_savingHelpHubLinks,
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _helpHubNewTitleController,
-                        decoration: const InputDecoration(labelText: '标题'),
+                        decoration: InputDecoration(
+                          labelText: dl10n.helpHubFieldTitle,
+                        ),
                         enabled: !_savingHelpHubLinks,
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _helpHubNewUrlController,
-                        decoration: const InputDecoration(
-                          labelText: 'URL',
-                          hintText: 'https://docs.example.com/runbook',
+                        decoration: InputDecoration(
+                          labelText: dl10n.helpHubFieldUrl,
+                          hintText: dl10n.helpHubHintUrl,
                         ),
                         enabled: !_savingHelpHubLinks,
                       ),
@@ -1668,7 +1679,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         children: [
                           FilledButton.tonal(
                             onPressed: _savingHelpHubLinks ? null : addNew,
-                            child: const Text('添加'),
+                            child: Text(dl10n.helpHubAdd),
                           ),
                           if (errorText.isNotEmpty)
                             Text(
@@ -1680,7 +1691,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       const SizedBox(height: 12),
                       if (activeItems.isEmpty)
                         Text(
-                          '当前范围没有自定义入口。',
+                          dl10n.helpHubNoCustomInScope,
                           style: Theme.of(ctx).textTheme.bodySmall,
                         ),
                       ...activeItems.asMap().entries.map((entry) {
@@ -1709,7 +1720,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 ),
                                 const SizedBox(width: 8),
                                 IconButton(
-                                  tooltip: '上移',
+                                  tooltip: dl10n.notificationsComplianceTooltipMoveUp,
                                   onPressed: (_savingHelpHubLinks || idx == 0)
                                       ? null
                                       : () => setInner(() {
@@ -1721,7 +1732,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   icon: const Icon(Icons.arrow_upward),
                                 ),
                                 IconButton(
-                                  tooltip: '下移',
+                                  tooltip:
+                                      dl10n.notificationsComplianceTooltipMoveDown,
                                   onPressed:
                                       (_savingHelpHubLinks ||
                                           idx >= activeItems.length - 1)
@@ -1735,7 +1747,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   icon: const Icon(Icons.arrow_downward),
                                 ),
                                 IconButton(
-                                  tooltip: '删除',
+                                  tooltip: dl10n.notificationsActionDelete,
                                   onPressed: _savingHelpHubLinks
                                       ? null
                                       : () => setInner(() {
@@ -1757,7 +1769,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                   onPressed: _savingHelpHubLinks
                       ? null
                       : () => Navigator.pop(ctx),
-                  child: const Text('关闭'),
+                  child: Text(dl10n.helpHubDialogClose),
                 ),
                 FilledButton(
                   onPressed: _savingHelpHubLinks
@@ -1773,7 +1785,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           }
                           Navigator.pop(ctx);
                         },
-                  child: Text(_savingHelpHubLinks ? '保存中…' : '保存'),
+                  child: Text(
+                    _savingHelpHubLinks
+                        ? dl10n.helpHubSaving
+                        : dl10n.helpHubSave,
+                  ),
                 ),
               ],
             );
@@ -1810,7 +1826,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       setState(() {
-        _webhooksError = '请先登录';
+        _webhooksError = kProductShellSignInErrorPlaceholder;
         _webhooks = null;
       });
       _disposeAllWebhookWorkspaceDraftControllers();
@@ -1861,41 +1877,55 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         .toList(growable: false);
   }
 
-  String _helpHubCategoryFor(HelpHubLinkItemV1 item) {
+  String _helpHubCategorySlug(HelpHubLinkItemV1 item) {
     final key = '${item.id} ${item.title} ${item.url}'.toLowerCase();
     if (key.contains('runbook') || key.contains('guide')) {
-      return 'Runbook';
+      return 'runbook';
     }
     if (key.contains('webhook') || key.contains('billing')) {
-      return 'Billing/Webhook';
+      return 'billing';
     }
     if (key.contains('workspace') || key.contains('team')) {
-      return 'Workspace';
+      return 'workspace';
     }
     if (key.contains('quality') || key.contains('review')) {
-      return 'Quality';
+      return 'quality';
     }
     if (key.contains('status') || key.contains('health')) {
-      return 'Status';
+      return 'status';
     }
-    return 'General';
+    return 'general';
   }
 
-  String _helpHubInventorySummary() {
+  String _helpHubInventorySummary(AppLocalizations l10n) {
     final items = _resp?.items ?? const <HelpHubLinkItemV1>[];
     final filtered = _filteredHelpHubLinks();
     final counts = <String, int>{};
     for (final item in filtered) {
-      counts.update(
-        _helpHubCategoryFor(item),
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
+      final slug = _helpHubCategorySlug(item);
+      counts.update(slug, (value) => value + 1, ifAbsent: () => 1);
     }
-    final categories = counts.entries
-        .map((e) => '${e.key}:${e.value}')
-        .join(', ');
-    return 'total=${items.length} · filtered=${filtered.length}${categories.isEmpty ? '' : ' · $categories'}';
+    final extra = counts.isEmpty
+        ? ''
+        : ' · ${counts.entries.map((e) => l10n.helpHubSummaryCategoryCount(_helpHubCategoryLabelForSlug(e.key, l10n), e.value)).join(', ')}';
+    return l10n.helpHubSummary(items.length, filtered.length, extra);
+  }
+
+  String _helpHubCategoryLabelForSlug(String slug, AppLocalizations l10n) {
+    switch (slug) {
+      case 'runbook':
+        return l10n.helpHubCategoryRunbook;
+      case 'billing':
+        return l10n.helpHubCategoryBillingWebhook;
+      case 'workspace':
+        return l10n.helpHubCategoryWorkspace;
+      case 'quality':
+        return l10n.helpHubCategoryQuality;
+      case 'status':
+        return l10n.helpHubCategoryStatus;
+      default:
+        return l10n.helpHubCategoryGeneral;
+    }
   }
 
   BillingWebhookEventsQueryV1 _buildBillingEventsQuery({int offset = 0}) {
@@ -1928,7 +1958,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       setState(() {
-        _billingEventsError = '请先登录';
+        _billingEventsError = kProductShellSignInErrorPlaceholder;
         _billingEventsPage = null;
         _billingEvents.clear();
       });
@@ -1990,10 +2020,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (token == null || token.isEmpty) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final url = _webhookUrlController.text.trim();
     if (url.isEmpty) {
       setState(() {
-        _webhooksError = 'URL 不能为空';
+        _webhooksError = l10n.opsWhErrorUrlRequired;
       });
       return;
     }
@@ -2002,7 +2033,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (wsRaw.isNotEmpty) {
       if (!outboundWebhookWorkspaceIdLooksValid(wsRaw)) {
         setState(() {
-          _webhooksError = 'workspaceId 须为合法 UUID，或留空';
+          _webhooksError = l10n.opsWhErrorWorkspaceId;
         });
         return;
       }
@@ -2047,9 +2078,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('已创建；secret 已复制到剪贴板')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.opsWhSnackCreated)),
+      );
       await _loadWebhooks();
     } catch (e) {
       if (!mounted) {
@@ -2086,7 +2117,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           return;
         }
         setState(() {
-          _webhooksError = 'workspaceId 须为合法 UUID，或清空后保存以改为全局';
+          _webhooksError = AppLocalizations.of(context)!.opsWhErrorWorkspaceIdPatch;
         });
         return;
       }
@@ -2106,10 +2137,13 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
+      final patchL10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            draft.isEmpty ? '已改为全局（无 workspace 过滤）' : '已更新 workspaceId',
+            draft.isEmpty
+                ? patchL10n.opsWhSnackScopeGlobal
+                : patchL10n.opsWhSnackScopeWorkspaceUpdated,
           ),
         ),
       );
@@ -2167,9 +2201,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('已更新订阅事件')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.opsWhSnackEventsUpdated),
+        ),
+      );
       await _loadWebhooks();
     } catch (e) {
       if (!mounted) {
@@ -2195,18 +2231,19 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
+        final dl10n = AppLocalizations.of(dialogContext)!;
         return AlertDialog(
-          title: const Text('删除 Webhook'),
-          content: SelectableText('即将删除 webhook：$id\n此操作会移除该目标地址。'),
+          title: Text(dl10n.opsWhDeleteTitle),
+          content: SelectableText(dl10n.opsWhDeleteBody(id)),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl10n.notificationsActionCancel),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('确认删除'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(dl10n.opsWhDeleteConfirmButton),
             ),
           ],
         );
@@ -2316,8 +2353,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     );
   }
 
-  String _webhookInventorySummary() {
+  String _webhookInventorySummary(AppLocalizations l10n) {
     return buildWebhookInventorySummary(
+      l10n,
       total: _webhooks?.items.length ?? 0,
       filtered: _filteredWebhooks().length,
       sessionTestOkCount: _countWebhookActivity('test_success'),
@@ -2378,12 +2416,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               : 'http=${res.httpStatus ?? "-"} error=${res.error ?? "unknown"}',
         );
       });
+      final testL10n = AppLocalizations.of(context)!;
+      final httpLabel = res.httpStatus?.toString() ?? '-';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             res.delivered
-                ? '投递成功（${res.httpStatus ?? '-'}）'
-                : '投递失败：${res.error ?? 'unknown'}',
+                ? testL10n.opsWhSnackDeliverOk(httpLabel)
+                : testL10n.opsWhSnackDeliverFail(res.error ?? 'unknown'),
           ),
         ),
       );
@@ -2404,25 +2444,38 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
   }
 
-  String _formatWebhookTestResult(OutboundWebhookTestResponseV1 result) {
+  String _formatWebhookTestResult(
+    AppLocalizations l10n,
+    OutboundWebhookTestResponseV1 result,
+  ) {
+    final httpLabel = result.httpStatus?.toString() ?? '-';
     if (result.delivered) {
-      return '最近测试: success (${result.httpStatus ?? "-"})';
+      return l10n.opsWhLastTestOk(httpLabel);
     }
-    return '最近测试: failed (${result.httpStatus ?? "-"}) ${result.error ?? "unknown"}';
+    return l10n.opsWhLastTestFail(httpLabel, result.error ?? 'unknown');
   }
 
-  String _formatBillingEventMeta(BillingWebhookEventItemV1 item) {
+  String _formatBillingEventMeta(
+    AppLocalizations l10n,
+    BillingWebhookEventItemV1 item,
+  ) {
     final parts = <String>[
-      'provider=${item.provider ?? '-'}',
-      'type=${item.eventType ?? '-'}',
-      'created=${item.createdAt.toLocal().toIso8601String()}',
+      l10n.billingMetaProvider(item.provider ?? '-'),
+      l10n.billingMetaType(item.eventType ?? '-'),
+      l10n.billingMetaCreated(item.createdAt.toLocal().toIso8601String()),
     ];
     if (item.eventCreatedAt != null) {
       parts.add(
-        'event_created=${item.eventCreatedAt!.toLocal().toIso8601String()}',
+        l10n.billingMetaEventCreated(
+          item.eventCreatedAt!.toLocal().toIso8601String(),
+        ),
       );
     }
-    parts.add(item.isInformationalEvent ? 'informational' : 'stateful');
+    parts.add(
+      item.isInformationalEvent
+          ? l10n.billingMetaInformational
+          : l10n.billingMetaStateful,
+    );
     return parts.join(' · ');
   }
 
@@ -2434,8 +2487,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     return countBillingEventsByType(_billingEvents);
   }
 
-  String _billingEventsSnapshotSummary() {
-    return buildBillingEventsSnapshotSummary(_billingEvents);
+  String _billingEventsSnapshotSummary(AppLocalizations l10n) {
+    return buildBillingEventsSnapshotSummary(l10n, _billingEvents);
   }
 
   String _billingEventsQuerySummary() {
@@ -2503,31 +2556,34 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('已复制当前查询摘要')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.billingAuditQuerySummaryCopied)),
+    );
   }
 
   Future<void> _copyBillingEventsSnapshotSummary() async {
+    final l10n = AppLocalizations.of(context)!;
     await Clipboard.setData(
-      ClipboardData(text: _billingEventsSnapshotSummary()),
+      ClipboardData(text: _billingEventsSnapshotSummary(l10n)),
     );
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('已复制当前审计摘要')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.billingAuditSnapshotCopied)),
+    );
   }
 
-  Future<void> _copyBillingAuditText(String text, String label) async {
+  Future<void> _copyBillingAuditText(String text, String labelForSnack) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('已复制$label')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.billingCopiedWithLabel(labelForSnack))),
+    );
   }
 
   Future<void> _applyBillingRowFilters({
@@ -2557,7 +2613,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       setState(() {
-        _billingEventsError = '请先登录';
+        _billingEventsError = kProductShellSignInErrorPlaceholder;
       });
       return;
     }
@@ -2627,8 +2683,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已复制全量 billing 审计 CSV（${all.length} 条）')),
+        SnackBar(content: Text(l10n.billingAuditFullCsvCopied(all.length))),
       );
     } catch (e) {
       if (!mounted) {
@@ -2649,6 +2706,20 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final outboundWebhookEmptyMsg = _webhooks == null
+        ? null
+        : describeOutboundWebhookEmptyState(
+            l10n,
+            total: _webhooks!.items.length,
+            filtered: _filteredWebhooks().length,
+          );
+    final billingWebhookEmptyMsg = describeBillingWebhookEmptyState(
+      l10n,
+      hasPage: _billingEventsPage != null,
+      loaded: _billingEvents.length,
+      isLoading: _loadingBillingEvents,
+      error: _billingEventsError,
+    );
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -2659,7 +2730,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             children: [
               Expanded(
                 child: Text(
-                  '帮助 / 文档',
+                  l10n.helpHubDocsTitle,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -2670,7 +2741,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           ),
           const SizedBox(height: 8),
           Text(
-            '本机：需要重新显示删除版本、归档、取消导出等高风险二次确认时，请点标题栏 ⋯ 菜单（与服务器配置无关）。',
+            l10n.helpHubLocalRiskLine,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
@@ -2680,40 +2751,45 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             children: [
               OutlinedButton(
                 onPressed: _loading ? null : _load,
-                child: const Text('刷新'),
+                child: Text(l10n.helpHubRefresh),
               ),
               OutlinedButton(
                 onPressed: (_loading || _helpHubConfig == null)
                     ? null
                     : _openHelpHubManageDialog,
-                child: const Text('管理入口'),
+                child: Text(l10n.helpHubManageEntries),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          if (_loading) const Text('加载中...'),
+          if (_loading) Text(l10n.helpHubLoading),
           if (_error != null)
-            Text(_error!, style: const TextStyle(color: Colors.red)),
+            Text(
+              _error == kProductShellSignInErrorPlaceholder
+                  ? l10n.platformConfigPleaseSignIn
+                  : _error!,
+              style: const TextStyle(color: Colors.red),
+            ),
           const SizedBox(height: 8),
           TextField(
             controller: _helpHubSearchController,
-            decoration: const InputDecoration(
-              labelText: '搜索帮助文档（title / id / url）',
+            decoration: InputDecoration(
+              labelText: l10n.helpHubSearchLabel,
             ),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 8),
-          if (_resp != null) Text(_helpHubInventorySummary()),
+          if (_resp != null) Text(_helpHubInventorySummary(l10n)),
           if (_resp != null && _resp!.items.isEmpty)
             Text(
-              '当前没有可用的帮助入口，请检查 settings/help/hub 配置。',
+              l10n.helpHubNoEffectiveLinks,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (_resp != null &&
               _resp!.items.isNotEmpty &&
               _filteredHelpHubLinks().isEmpty)
             Text(
-              '当前搜索没有命中文档入口，请调整关键词后重试。',
+              l10n.helpHubSearchEmpty,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (_resp != null)
@@ -2733,7 +2809,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             ),
                             const SizedBox(height: 4),
                             Chip(
-                              label: Text(_helpHubCategoryFor(item)),
+                              label: Text(
+                                _helpHubCategoryLabelForSlug(
+                                  _helpHubCategorySlug(item),
+                                  l10n,
+                                ),
+                              ),
                               visualDensity: VisualDensity.compact,
                             ),
                             const SizedBox(height: 4),
@@ -2743,7 +2824,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        tooltip: '复制链接',
+                        tooltip: l10n.helpHubCopyLinkTooltip,
                         onPressed: () async {
                           await Clipboard.setData(
                             ClipboardData(text: item.url),
@@ -2751,14 +2832,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           if (!context.mounted) {
                             return;
                           }
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(const SnackBar(content: Text('已复制')));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.helpHubCopied)),
+                          );
                         },
                         icon: const Icon(Icons.copy),
                       ),
                       IconButton(
-                        tooltip: '复制标题+链接',
+                        tooltip: l10n.helpHubCopyTitleUrlTooltip,
                         onPressed: () async {
                           await Clipboard.setData(
                             ClipboardData(text: '${item.title}\n${item.url}'),
@@ -2767,7 +2848,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             return;
                           }
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('已复制文档 handoff')),
+                            SnackBar(content: Text(l10n.helpHubCopiedHandoff)),
                           );
                         },
                         icon: const Icon(Icons.copy_all_outlined),
@@ -2778,33 +2859,38 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               ),
             ),
           const SizedBox(height: 16),
-          Text('出站 Webhook', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.opsWhSectionTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: _webhookUrlController,
-            decoration: const InputDecoration(
-              labelText: 'Webhook URL',
-              hintText: 'https://example.com/webhook',
+            decoration: InputDecoration(
+              labelText: l10n.opsWhUrlLabel,
+              hintText: l10n.opsWhUrlHint,
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _webhookSecretController,
-            decoration: const InputDecoration(labelText: 'Secret（可空，留空则服务端生成）'),
+            decoration: InputDecoration(
+              labelText: l10n.opsWhSecretLabel,
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _webhookWorkspaceIdController,
-            decoration: const InputDecoration(
-              labelText: 'workspaceId（可空）',
-              hintText: '仅投递属于该工作区的事件；须为 UUID',
+            decoration: InputDecoration(
+              labelText: l10n.opsWhWorkspaceIdLabel,
+              hintText: l10n.opsWhWorkspaceIdHint,
             ),
           ),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              '订阅事件（全选=默认全部；可取消不需要的类型）',
+              l10n.opsWhSubscribeHint,
               style: Theme.of(context).textTheme.labelMedium,
             ),
           ),
@@ -2823,9 +2909,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           const SizedBox(height: 8),
           TextField(
             controller: _webhookTestEventTypeController,
-            decoration: const InputDecoration(
-              labelText: '测试 eventType',
-              hintText: 'test.ping',
+            decoration: InputDecoration(
+              labelText: l10n.opsWhTestEventTypeLabel,
+              hintText: l10n.opsWhTestEventTypeHint,
             ),
           ),
           if (_latestCreatedWebhook != null) ...[
@@ -2841,12 +2927,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       children: [
                         Expanded(
                           child: Text(
-                            '最近创建的 Webhook 凭据',
+                            l10n.opsWhLatestCreatedTitle,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                         ),
                         IconButton(
-                          tooltip: '关闭',
+                          tooltip: l10n.helpHubDialogClose,
                           onPressed: () {
                             setState(() {
                               _latestCreatedWebhook = null;
@@ -2868,19 +2954,19 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           onPressed: () => Clipboard.setData(
                             ClipboardData(text: _latestCreatedWebhook!.id),
                           ),
-                          child: const Text('复制 ID'),
+                          child: Text(l10n.opsWhCopyId),
                         ),
                         OutlinedButton(
                           onPressed: () => Clipboard.setData(
                             ClipboardData(text: _latestCreatedWebhook!.url),
                           ),
-                          child: const Text('复制 URL'),
+                          child: Text(l10n.opsWhCopyUrl),
                         ),
                         OutlinedButton(
                           onPressed: () => Clipboard.setData(
                             ClipboardData(text: _latestCreatedWebhook!.secret),
                           ),
-                          child: const Text('复制 Secret'),
+                          child: Text(l10n.opsWhCopySecret),
                         ),
                       ],
                     ),
@@ -2896,30 +2982,40 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             children: [
               FilledButton.tonal(
                 onPressed: _loadingWebhooks ? null : _createWebhook,
-                child: Text(_loadingWebhooks ? '请求中…' : '创建'),
+                child: Text(
+                  _loadingWebhooks ? l10n.opsWhCreating : l10n.opsWhCreate,
+                ),
               ),
               OutlinedButton(
                 onPressed: _loadingWebhooks ? null : _loadWebhooks,
-                child: const Text('刷新列表'),
+                child: Text(l10n.opsWhRefreshList),
               ),
             ],
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _webhookSearchController,
-            decoration: const InputDecoration(
-              labelText: '搜索 Webhook（URL / id / createdAt）',
+            decoration: InputDecoration(
+              labelText: l10n.opsWhSearchLabel,
             ),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 8),
-          if (_loadingWebhooks) const Text('加载中...'),
+          if (_loadingWebhooks) Text(l10n.opsWhLoading),
           if (_webhooksError != null)
-            Text(_webhooksError!, style: const TextStyle(color: Colors.red)),
-          if (_webhooks != null) Text(_webhookInventorySummary()),
+            Text(
+              _webhooksError == kProductShellSignInErrorPlaceholder
+                  ? l10n.platformConfigPleaseSignIn
+                  : _webhooksError!,
+              style: const TextStyle(color: Colors.red),
+            ),
+          if (_webhooks != null) Text(_webhookInventorySummary(l10n)),
           if (_webhookActivity.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text('最近操作', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.opsWhRecentActivity,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             ..._webhookActivity
                 .take(6)
@@ -2933,27 +3029,19 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     trailing: IconButton(
-                      tooltip: '复制记录',
+                      tooltip: l10n.opsWhCopyActivityTooltip,
                       onPressed: () => _copyBillingAuditText(
                         '${entry.action}\n${entry.webhookId}\n${entry.summary}',
-                        ' webhook 操作记录',
+                        l10n.opsWhActivityRecordSuffix.trim(),
                       ),
                       icon: const Icon(Icons.copy_outlined),
                     ),
                   ),
                 ),
           ],
-          if (_webhooks != null &&
-              describeOutboundWebhookEmptyState(
-                    total: _webhooks!.items.length,
-                    filtered: _filteredWebhooks().length,
-                  ) !=
-                  null)
+          if (outboundWebhookEmptyMsg != null)
             Text(
-              describeOutboundWebhookEmptyState(
-                total: _webhooks!.items.length,
-                filtered: _filteredWebhooks().length,
-              )!,
+              outboundWebhookEmptyMsg,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (_webhooks != null)
@@ -2979,7 +3067,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
                                 child: Chip(
-                                  label: const Text('最近创建'),
+                                  label: Text(l10n.opsWhChipLatestCreated),
                                   visualDensity: VisualDensity.compact,
                                 ),
                               ),
@@ -2990,7 +3078,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Chip(
-                                  label: const Text('已停用'),
+                                  label: Text(l10n.opsWhChipDisabled),
                                   visualDensity: VisualDensity.compact,
                                 ),
                               ),
@@ -3000,7 +3088,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '订阅事件',
+                                    l10n.opsWhSubscribeHeading,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.labelMedium,
@@ -3041,7 +3129,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '作用域 workspaceId（留空保存 = 全局）',
+                                    l10n.opsWhScopeHeading,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.labelMedium,
@@ -3051,8 +3139,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                     controller:
                                         _webhookWorkspaceDraftControllers[wh
                                             .id],
-                                    decoration: const InputDecoration(
-                                      hintText: 'UUID，留空表示不按工作区过滤',
+                                    decoration: InputDecoration(
+                                      hintText: l10n.opsWhScopeFieldHint,
                                       isDense: true,
                                     ),
                                     enabled:
@@ -3074,8 +3162,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                               ),
                                         child: Text(
                                           _webhookBusyId == wh.id
-                                              ? '保存中…'
-                                              : '保存作用域',
+                                              ? l10n.opsWhSavingScope
+                                              : l10n.opsWhSaveScope,
                                         ),
                                       ),
                                       TextButton(
@@ -3088,7 +3176,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                                         .id]
                                                     ?.clear();
                                               },
-                                        child: const Text('清空输入'),
+                                        child: Text(l10n.opsWhClearInput),
                                       ),
                                     ],
                                   ),
@@ -3098,7 +3186,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             if (_webhookDeliveries[wh.id] != null) ...[
                               const SizedBox(height: 8),
                               Text(
-                                '最近投递',
+                                l10n.opsWhRecentDeliveries,
                                 style: Theme.of(context).textTheme.labelLarge,
                               ),
                               ..._webhookDeliveries[wh.id]!.items
@@ -3124,6 +3212,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
                                   _formatWebhookTestResult(
+                                    l10n,
                                     _webhookLastTestResultById[wh.id]!,
                                   ),
                                   style: Theme.of(context).textTheme.bodySmall,
@@ -3134,14 +3223,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        tooltip: '复制 URL',
+                        tooltip: l10n.opsWhTooltipCopyUrl,
                         onPressed: () async {
                           await Clipboard.setData(ClipboardData(text: wh.url));
                           if (!context.mounted) {
                             return;
                           }
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('已复制 Webhook URL')),
+                            SnackBar(content: Text(l10n.opsWhUrlCopiedSnack)),
                           );
                         },
                         icon: const Icon(Icons.copy_outlined),
@@ -3150,7 +3239,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         onPressed: _loadingWebhooks || _webhookBusyId != null
                             ? null
                             : () => _testWebhook(wh.id),
-                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '测试投递'),
+                        child: Text(
+                          _webhookBusyId == wh.id
+                              ? l10n.opsWhBusy
+                              : l10n.opsWhTestDeliver,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton(
@@ -3161,7 +3254,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             ? null
                             : () => _loadWebhookDeliveries(wh.id),
                         child: Text(
-                          _loadingDeliveriesId == wh.id ? '加载中…' : '投递记录',
+                          _loadingDeliveriesId == wh.id
+                              ? l10n.opsWhLoading
+                              : l10n.opsWhDeliveryLog,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -3169,7 +3264,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         onPressed: _loadingWebhooks || _webhookBusyId != null
                             ? null
                             : () => _deleteWebhook(wh.id),
-                        child: Text(_webhookBusyId == wh.id ? '处理中…' : '删除'),
+                        child: Text(
+                          _webhookBusyId == wh.id
+                              ? l10n.opsWhBusy
+                              : l10n.opsWhDelete,
+                        ),
                       ),
                     ],
                   ),
@@ -3178,7 +3277,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             ),
           const SizedBox(height: 16),
           Text(
-            'Billing Webhook 审计',
+            l10n.billingAuditTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -3190,12 +3289,26 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 width: 180,
                 child: DropdownButtonFormField<String>(
                   initialValue: _billingProvider,
-                  decoration: const InputDecoration(labelText: 'Provider'),
-                  items: const [
-                    DropdownMenuItem(value: '', child: Text('全部')),
-                    DropdownMenuItem(value: 'stripe', child: Text('stripe')),
-                    DropdownMenuItem(value: 'alipay', child: Text('alipay')),
-                    DropdownMenuItem(value: 'paddle', child: Text('paddle')),
+                  decoration: InputDecoration(
+                    labelText: l10n.billingAuditProviderLabel,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(l10n.billingAuditAll),
+                    ),
+                    const DropdownMenuItem(
+                      value: 'stripe',
+                      child: Text('stripe'),
+                    ),
+                    const DropdownMenuItem(
+                      value: 'alipay',
+                      child: Text('alipay'),
+                    ),
+                    const DropdownMenuItem(
+                      value: 'paddle',
+                      child: Text('paddle'),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -3208,10 +3321,18 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 width: 180,
                 child: DropdownButtonFormField<String>(
                   initialValue: _billingSort,
-                  decoration: const InputDecoration(labelText: '排序'),
-                  items: const [
-                    DropdownMenuItem(value: 'id_desc', child: Text('最新优先')),
-                    DropdownMenuItem(value: 'id_asc', child: Text('最早优先')),
+                  decoration: InputDecoration(
+                    labelText: l10n.billingAuditSortLabel,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'id_desc',
+                      child: Text(l10n.billingAuditSortNewest),
+                    ),
+                    DropdownMenuItem(
+                      value: 'id_asc',
+                      child: Text(l10n.billingAuditSortOldest),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -3221,7 +3342,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 ),
               ),
               FilterChip(
-                label: const Text('仅 informational'),
+                label: Text(l10n.billingAuditOnlyInformational),
                 selected: _billingInformationalOnly == true,
                 onSelected: (selected) {
                   setState(() {
@@ -3230,7 +3351,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 },
               ),
               FilterChip(
-                label: const Text('仅 stateful'),
+                label: Text(l10n.billingAuditOnlyStateful),
                 selected: _billingInformationalOnly == false,
                 onSelected: (selected) {
                   setState(() {
@@ -3243,41 +3364,41 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           const SizedBox(height: 8),
           TextField(
             controller: _billingEventTypeController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'event_type',
-              hintText: '例如 invoice.paid / subscription.expired',
+              hintText: l10n.billingAuditEventTypeHint,
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _billingProviderEventIdController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'provider_event_id',
-              hintText: '例如 stripe:evt_123',
+              hintText: l10n.billingAuditProviderEventIdHint,
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _billingRawEventIdController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'raw_event_id',
-              hintText: '例如 evt_123',
+              hintText: l10n.billingAuditRawEventIdHint,
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _billingProviderEventIdPrefixController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'provider_event_id_prefix',
-              hintText: '例如 stripe:evt_',
+              hintText: l10n.billingAuditProviderPrefixHint,
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _billingRawEventIdPrefixController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'raw_event_id_prefix',
-              hintText: '例如 evt_',
+              hintText: l10n.billingAuditRawPrefixHint,
             ),
           ),
           const SizedBox(height: 8),
@@ -3289,9 +3410,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 width: 280,
                 child: TextField(
                   controller: _billingEventCreatedFromController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'event_created_from',
-                    hintText: '2026-04-01T00:00:00Z',
+                    hintText: l10n.billingAuditEventCreatedFromHint,
                   ),
                 ),
               ),
@@ -3299,9 +3420,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 width: 280,
                 child: TextField(
                   controller: _billingEventCreatedToController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'event_created_to',
-                    hintText: '2026-04-30T23:59:59Z',
+                    hintText: l10n.billingAuditEventCreatedToHint,
                   ),
                 ),
               ),
@@ -3309,9 +3430,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 width: 280,
                 child: TextField(
                   controller: _billingCreatedFromController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'created_from',
-                    hintText: '2026-04-01T00:00:00Z',
+                    hintText: l10n.billingAuditEventCreatedFromHint,
                   ),
                 ),
               ),
@@ -3319,9 +3440,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 width: 280,
                 child: TextField(
                   controller: _billingCreatedToController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'created_to',
-                    hintText: '2026-04-30T23:59:59Z',
+                    hintText: l10n.billingAuditEventCreatedToHint,
                   ),
                 ),
               ),
@@ -3334,7 +3455,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             children: [
               FilledButton.tonal(
                 onPressed: _loadingBillingEvents ? null : _loadBillingEvents,
-                child: Text(_loadingBillingEvents ? '读取中…' : '查询审计'),
+                child: Text(
+                  _loadingBillingEvents
+                      ? l10n.billingAuditQuerying
+                      : l10n.billingAuditQuery,
+                ),
               ),
               OutlinedButton(
                 onPressed: _loadingBillingEvents || _loadingMoreBillingEvents
@@ -3356,7 +3481,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         });
                         _loadBillingEvents();
                       },
-                child: const Text('重置并刷新'),
+                child: Text(l10n.billingAuditResetRefresh),
               ),
               OutlinedButton(
                 onPressed: _billingEvents.isEmpty
@@ -3369,14 +3494,16 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           return;
                         }
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('已复制当前 billing 审计 CSV')),
+                          SnackBar(
+                            content: Text(l10n.billingAuditCsvCopiedSnack),
+                          ),
                         );
                       },
-                child: const Text('复制 CSV'),
+                child: Text(l10n.billingAuditCopyCsv),
               ),
               OutlinedButton(
                 onPressed: _copyBillingEventsQuerySummary,
-                child: const Text('复制查询摘要'),
+                child: Text(l10n.billingAuditCopyQuerySummary),
               ),
               OutlinedButton(
                 onPressed: () async {
@@ -3386,50 +3513,54 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                   if (!context.mounted) {
                     return;
                   }
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('已复制当前查询 URL')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.billingAuditQueryUrlCopiedSnack),
+                    ),
+                  );
                 },
-                child: const Text('复制查询 URL'),
+                child: Text(l10n.billingAuditCopyQueryUrl),
               ),
               OutlinedButton(
                 onPressed: _exportingAllBillingEvents
                     ? null
                     : _copyAllBillingEventsCsv,
-                child: Text(_exportingAllBillingEvents ? '导出中…' : '复制全量 CSV'),
+                child: Text(
+                  _exportingAllBillingEvents
+                      ? l10n.billingAuditExporting
+                      : l10n.billingAuditCopyFullCsv,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          if (_loadingBillingEvents) const Text('加载 billing 审计中...'),
+          if (_loadingBillingEvents) Text(l10n.billingAuditLoading),
           if (_billingEventsError != null)
             Text(
-              _billingEventsError!,
+              _billingEventsError == kProductShellSignInErrorPlaceholder
+                  ? l10n.platformConfigPleaseSignIn
+                  : _billingEventsError!,
               style: const TextStyle(color: Colors.red),
             ),
           if (_billingEventsPage != null)
             Text(
-              'total=${_billingEventsPage!.total} · loaded=${_billingEvents.length} · has_more=${_billingEventsPage!.hasMore}',
+              l10n.billingAuditPageStats(
+                _billingEventsPage!.total,
+                _billingEvents.length,
+                '${_billingEventsPage!.hasMore}',
+              ),
             ),
-          if (describeBillingWebhookEmptyState(
-                hasPage: _billingEventsPage != null,
-                loaded: _billingEvents.length,
-                isLoading: _loadingBillingEvents,
-                error: _billingEventsError,
-              ) !=
-              null)
+          if (billingWebhookEmptyMsg != null)
             Text(
-              describeBillingWebhookEmptyState(
-                hasPage: _billingEventsPage != null,
-                loaded: _billingEvents.length,
-                isLoading: _loadingBillingEvents,
-                error: _billingEventsError,
-              )!,
+              billingWebhookEmptyMsg,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (_billingEvents.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text('当前加载摘要', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.billingAuditCurrentLoadTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -3439,19 +3570,25 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       ..sort((a, b) => b.value.compareTo(a.value)))
                     .map(
                       (entry) => Chip(
-                        label: Text('${entry.key} ${entry.value}'),
+                        label: Text(
+                          l10n.billingChipCount(entry.key, entry.value),
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
                 Chip(
                   label: Text(
-                    'informational ${_billingEvents.where((e) => e.isInformationalEvent).length}',
+                    l10n.billingSnapInformational(
+                      _billingEvents.where((e) => e.isInformationalEvent).length,
+                    ),
                   ),
                   visualDensity: VisualDensity.compact,
                 ),
                 Chip(
                   label: Text(
-                    'stateful ${_billingEvents.where((e) => !e.isInformationalEvent).length}',
+                    l10n.billingSnapStateful(
+                      _billingEvents.where((e) => !e.isInformationalEvent).length,
+                    ),
                   ),
                   visualDensity: VisualDensity.compact,
                 ),
@@ -3467,13 +3604,15 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     .take(8)
                     .map(
                       (entry) => Chip(
-                        label: Text('${entry.key} ${entry.value}'),
+                        label: Text(
+                          l10n.billingChipCount(entry.key, entry.value),
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
                 OutlinedButton(
                   onPressed: _copyBillingEventsSnapshotSummary,
-                  child: const Text('复制审计摘要'),
+                  child: Text(l10n.billingAuditCopySnapshot),
                 ),
               ],
             ),
@@ -3490,10 +3629,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 4),
-                    SelectableText(_formatBillingEventMeta(item)),
+                    SelectableText(_formatBillingEventMeta(l10n, item)),
                     if (item.rawEventId != null && item.rawEventId!.isNotEmpty)
-                      SelectableText('raw_event_id=${item.rawEventId}'),
-                    SelectableText('id=${item.id}'),
+                      SelectableText(
+                        l10n.billingRowRawEventId(item.rawEventId!),
+                      ),
+                    SelectableText(l10n.billingRowId('${item.id}')),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -3502,18 +3643,18 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         OutlinedButton(
                           onPressed: () => _copyBillingAuditText(
                             item.providerEventId,
-                            ' provider_event_id',
+                            'provider_event_id',
                           ),
-                          child: const Text('复制 provider_event_id'),
+                          child: Text(l10n.billingAuditCopyProviderEventId),
                         ),
                         if (item.rawEventId != null &&
                             item.rawEventId!.isNotEmpty)
                           OutlinedButton(
                             onPressed: () => _copyBillingAuditText(
                               item.rawEventId!,
-                              ' raw_event_id',
+                              'raw_event_id',
                             ),
-                            child: const Text('复制 raw_event_id'),
+                            child: Text(l10n.billingAuditCopyRawEventId),
                           ),
                         if (item.provider != null &&
                             item.provider!.trim().isNotEmpty)
@@ -3521,7 +3662,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             onPressed: () => _applyBillingRowFilters(
                               provider: item.provider,
                             ),
-                            child: Text('按 ${item.provider} 过滤'),
+                            child: Text(
+                              l10n.billingAuditFilterByProvider(
+                                item.provider!.trim(),
+                              ),
+                            ),
                           ),
                         if (item.eventType != null &&
                             item.eventType!.trim().isNotEmpty)
@@ -3529,14 +3674,18 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             onPressed: () => _applyBillingRowFilters(
                               eventType: item.eventType,
                             ),
-                            child: Text('按 ${item.eventType} 过滤'),
+                            child: Text(
+                              l10n.billingAuditFilterByEventType(
+                                item.eventType!.trim(),
+                              ),
+                            ),
                           ),
                         FilledButton.tonal(
                           onPressed: () => _applyBillingRowFilters(
                             providerEventId: item.providerEventId,
                             rawEventId: item.rawEventId,
                           ),
-                          child: const Text('仅看这一事件'),
+                          child: Text(l10n.billingAuditOnlyThisEvent),
                         ),
                       ],
                     ),
@@ -3550,7 +3699,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               onPressed: _loadingBillingEvents || _loadingMoreBillingEvents
                   ? null
                   : () => _loadBillingEvents(append: true),
-              child: Text(_loadingMoreBillingEvents ? '加载中…' : '加载更多审计'),
+              child: Text(
+                _loadingMoreBillingEvents
+                    ? l10n.opsWhLoading
+                    : l10n.billingAuditLoadMore,
+              ),
             ),
         ],
       ),

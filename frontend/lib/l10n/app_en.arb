@@ -388,5 +388,368 @@
         "type": "String"
       }
     }
+  },
+  "platformConfigPlanOverrideTitle": "Plan override",
+  "platformConfigWorkspaceOverrideTitle": "Workspace override",
+  "platformConfigUserOverrideTitle": "User override",
+  "helpHubDocsTitle": "Help / docs",
+  "helpHubLocalRiskLine": "On this device: to restore high-risk confirmations (delete, archive, cancel export), use the ⋯ menu in the header (unrelated to server settings).",
+  "helpHubRefresh": "Refresh",
+  "helpHubManageEntries": "Manage links",
+  "helpHubLoading": "Loading…",
+  "helpHubSearchLabel": "Search help links (title / id / url)",
+  "helpHubNoEffectiveLinks": "No help links are available. Check settings/help/hub configuration.",
+  "helpHubSearchEmpty": "No links match your search. Try different keywords.",
+  "helpHubCopyLinkTooltip": "Copy link",
+  "helpHubCopied": "Copied.",
+  "helpHubCopyTitleUrlTooltip": "Copy title + URL",
+  "helpHubCopiedHandoff": "Copied document handoff.",
+  "helpHubManageDialogTitle": "Manage help links (personal / workspace)",
+  "helpHubManagePrecedence": "Effective order: personal override > workspace override > environment defaults.",
+  "helpHubManageWorkspaceLocked": " (This workspace cannot configure workspace-level links; personal override only.)",
+  "helpHubTabPersonal": "Personal override",
+  "helpHubTabWorkspace": "Workspace override",
+  "helpHubFieldId": "id (dedupe / override key)",
+  "helpHubFieldTitle": "Title",
+  "helpHubFieldUrl": "URL",
+  "helpHubHintId": "runbook-quality",
+  "helpHubHintUrl": "https://docs.example.com/runbook",
+  "helpHubAdd": "Add",
+  "helpHubValidationRequired": "id, title, and url are required.",
+  "helpHubNoCustomInScope": "No custom links in this scope.",
+  "helpHubDialogClose": "Close",
+  "helpHubSave": "Save",
+  "helpHubSaving": "Saving…",
+  "helpHubCategoryRunbook": "Runbook",
+  "helpHubCategoryBillingWebhook": "Billing / Webhook",
+  "helpHubCategoryWorkspace": "Workspace",
+  "helpHubCategoryQuality": "Quality",
+  "helpHubCategoryStatus": "Status",
+  "helpHubCategoryGeneral": "General",
+  "helpHubSummary": "Total {total} · Filtered {filtered}{extra}",
+  "@helpHubSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "filtered": {
+        "type": "int"
+      },
+      "extra": {
+        "type": "String"
+      }
+    }
+  },
+  "helpHubSummaryCategoryCount": "{name}:{count}",
+  "@helpHubSummaryCategoryCount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opsWhSectionTitle": "Outbound webhooks",
+  "opsWhErrorUrlRequired": "URL is required.",
+  "opsWhErrorWorkspaceId": "workspaceId must be a valid UUID or empty.",
+  "opsWhErrorWorkspaceIdPatch": "workspaceId must be a valid UUID, or clear the field to use global scope.",
+  "opsWhSnackCreated": "Created; secret copied to clipboard.",
+  "opsWhSnackEventsUpdated": "Subscription events updated.",
+  "opsWhSnackDeliverOk": "Delivered (HTTP {status})",
+  "@opsWhSnackDeliverOk": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhSnackDeliverFail": "Delivery failed: {detail}",
+  "@opsWhSnackDeliverFail": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhSnackScopeGlobal": "Scope set to global (no workspace filter).",
+  "opsWhSnackScopeWorkspaceUpdated": "workspaceId updated.",
+  "opsWhDeleteTitle": "Delete webhook",
+  "opsWhDeleteBody": "You are about to delete webhook: {id}\nThis removes the destination URL.",
+  "@opsWhDeleteBody": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhDeleteConfirm": "Delete",
+  "opsWhDeleteConfirmButton": "Confirm delete",
+  "opsWhLastTestOk": "Last test: success (HTTP {status})",
+  "@opsWhLastTestOk": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhLastTestFail": "Last test: failed (HTTP {status}) {error}",
+  "@opsWhLastTestFail": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhInventoryLine": "Total {total} · Filtered {filtered} · Session tests OK {ok} · Failed {fail}{latestPart}",
+  "@opsWhInventoryLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "filtered": {
+        "type": "int"
+      },
+      "ok": {
+        "type": "int"
+      },
+      "fail": {
+        "type": "int"
+      },
+      "latestPart": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhInventoryLatestPart": " · Latest: {id}",
+  "@opsWhInventoryLatestPart": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhEmptyNone": "No outbound webhooks yet. Create one above to test delivery and manage lifecycle.",
+  "opsWhEmptyFiltered": "No webhooks match your search. Adjust URL / id / createdAt keywords.",
+  "opsWhUrlLabel": "Webhook URL",
+  "opsWhUrlHint": "https://example.com/webhook",
+  "opsWhSecretLabel": "Secret (optional; server generates if empty)",
+  "opsWhWorkspaceIdLabel": "workspaceId (optional)",
+  "opsWhWorkspaceIdHint": "Only deliver events for this workspace; must be a UUID",
+  "opsWhSubscribeHint": "Subscribed events (select all = default; deselect types you do not need)",
+  "opsWhTestEventTypeLabel": "Test eventType",
+  "opsWhTestEventTypeHint": "test.ping",
+  "opsWhLatestCreatedTitle": "Latest created webhook credentials",
+  "opsWhCopyId": "Copy ID",
+  "opsWhCopyUrl": "Copy URL",
+  "opsWhCopySecret": "Copy secret",
+  "opsWhCreate": "Create",
+  "opsWhCreating": "Requesting…",
+  "opsWhRefreshList": "Refresh list",
+  "opsWhSearchLabel": "Search webhooks (URL / id / createdAt)",
+  "opsWhRecentActivity": "Recent activity",
+  "opsWhCopyActivityTooltip": "Copy record",
+  "opsWhActivityRecordSuffix": " webhook activity",
+  "opsWhChipLatestCreated": "Latest created",
+  "opsWhChipDisabled": "Disabled",
+  "opsWhSubscribeHeading": "Subscribed events",
+  "opsWhScopeHeading": "Scope workspaceId (empty save = global)",
+  "opsWhScopeFieldHint": "UUID; empty means no workspace filter",
+  "opsWhSaveScope": "Save scope",
+  "opsWhSavingScope": "Saving…",
+  "opsWhClearInput": "Clear input",
+  "opsWhRecentDeliveries": "Recent deliveries",
+  "opsWhTooltipCopyUrl": "Copy URL",
+  "opsWhUrlCopiedSnack": "Webhook URL copied.",
+  "opsWhTestDeliver": "Test delivery",
+  "opsWhBusy": "Working…",
+  "opsWhDeliveryLog": "Delivery log",
+  "opsWhLoading": "Loading…",
+  "opsWhDelete": "Delete",
+  "billingAuditTitle": "Billing webhook audit",
+  "billingAuditProviderLabel": "Provider",
+  "billingAuditAll": "All",
+  "billingAuditSortLabel": "Sort",
+  "billingAuditSortNewest": "Newest first",
+  "billingAuditSortOldest": "Oldest first",
+  "billingAuditOnlyInformational": "Informational only",
+  "billingAuditOnlyStateful": "Stateful only",
+  "billingAuditEventTypeHint": "e.g. invoice.paid / subscription.expired",
+  "billingAuditProviderEventIdHint": "e.g. stripe:evt_123",
+  "billingAuditRawEventIdHint": "e.g. evt_123",
+  "billingAuditProviderPrefixHint": "e.g. stripe:evt_",
+  "billingAuditRawPrefixHint": "e.g. evt_",
+  "billingAuditEventCreatedFromHint": "2026-04-01T00:00:00Z",
+  "billingAuditEventCreatedToHint": "2026-04-30T23:59:59Z",
+  "billingAuditQuery": "Query",
+  "billingAuditQuerying": "Reading…",
+  "billingAuditResetRefresh": "Reset and refresh",
+  "billingAuditCopyCsv": "Copy CSV",
+  "billingAuditCsvCopiedSnack": "Current billing audit CSV copied.",
+  "billingAuditCopyQuerySummary": "Copy query summary",
+  "billingAuditCopyQueryUrl": "Copy query URL",
+  "billingAuditQueryUrlCopiedSnack": "Current query URL copied.",
+  "billingAuditCopyFullCsv": "Copy full CSV",
+  "billingAuditExporting": "Exporting…",
+  "billingAuditLoading": "Loading billing audit…",
+  "billingAuditPageStats": "total={total} · loaded={loaded} · has_more={hasMore}",
+  "@billingAuditPageStats": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "loaded": {
+        "type": "int"
+      },
+      "hasMore": {
+        "type": "String"
+      }
+    }
+  },
+  "billingEmptyQuery": "No billing webhook events match this query. Adjust provider, event id, time window, or informational filters.",
+  "billingAuditQuerySummaryCopied": "Query summary copied.",
+  "billingAuditSnapshotCopied": "Audit snapshot copied.",
+  "billingCopiedWithLabel": "Copied {label}.",
+  "@billingCopiedWithLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditFullCsvCopied": "Full billing audit CSV copied ({count} rows).",
+  "@billingAuditFullCsvCopied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapLoaded": "Loaded: {count}",
+  "@billingSnapLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapInformational": "Informational: {count}",
+  "@billingSnapInformational": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapStateful": "Stateful: {count}",
+  "@billingSnapStateful": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingSnapProviders": "Providers: {list}",
+  "@billingSnapProviders": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "billingSnapEventTypes": "Event types: {list}",
+  "@billingSnapEventTypes": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditCurrentLoadTitle": "Current load summary",
+  "billingAuditCopySnapshot": "Copy audit snapshot",
+  "billingAuditCopyProviderEventId": "Copy provider_event_id",
+  "billingAuditCopyRawEventId": "Copy raw_event_id",
+  "billingAuditFilterByProvider": "Filter by {provider}",
+  "@billingAuditFilterByProvider": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditFilterByEventType": "Filter by {eventType}",
+  "@billingAuditFilterByEventType": {
+    "placeholders": {
+      "eventType": {
+        "type": "String"
+      }
+    }
+  },
+  "billingAuditOnlyThisEvent": "Only this event",
+  "billingAuditLoadMore": "Load more",
+  "billingMetaProvider": "provider={value}",
+  "@billingMetaProvider": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaType": "type={value}",
+  "@billingMetaType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaCreated": "created={value}",
+  "@billingMetaCreated": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaEventCreated": "event_created={value}",
+  "@billingMetaEventCreated": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMetaInformational": "informational",
+  "billingMetaStateful": "stateful",
+  "billingRowRawEventId": "raw_event_id={value}",
+  "@billingRowRawEventId": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingRowId": "id={value}",
+  "@billingRowId": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billingChipCount": "{label} {count}",
+  "@billingChipCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

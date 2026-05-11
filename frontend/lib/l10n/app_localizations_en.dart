@@ -818,4 +818,521 @@ class AppLocalizationsEn extends AppLocalizations {
   String productComplianceOpenTargetFailed(String detail) {
     return 'Failed to open target: $detail';
   }
+
+  @override
+  String get platformConfigPlanOverrideTitle => 'Plan override';
+
+  @override
+  String get platformConfigWorkspaceOverrideTitle => 'Workspace override';
+
+  @override
+  String get platformConfigUserOverrideTitle => 'User override';
+
+  @override
+  String get helpHubDocsTitle => 'Help / docs';
+
+  @override
+  String get helpHubLocalRiskLine =>
+      'On this device: to restore high-risk confirmations (delete, archive, cancel export), use the ⋯ menu in the header (unrelated to server settings).';
+
+  @override
+  String get helpHubRefresh => 'Refresh';
+
+  @override
+  String get helpHubManageEntries => 'Manage links';
+
+  @override
+  String get helpHubLoading => 'Loading…';
+
+  @override
+  String get helpHubSearchLabel => 'Search help links (title / id / url)';
+
+  @override
+  String get helpHubNoEffectiveLinks =>
+      'No help links are available. Check settings/help/hub configuration.';
+
+  @override
+  String get helpHubSearchEmpty =>
+      'No links match your search. Try different keywords.';
+
+  @override
+  String get helpHubCopyLinkTooltip => 'Copy link';
+
+  @override
+  String get helpHubCopied => 'Copied.';
+
+  @override
+  String get helpHubCopyTitleUrlTooltip => 'Copy title + URL';
+
+  @override
+  String get helpHubCopiedHandoff => 'Copied document handoff.';
+
+  @override
+  String get helpHubManageDialogTitle =>
+      'Manage help links (personal / workspace)';
+
+  @override
+  String get helpHubManagePrecedence =>
+      'Effective order: personal override > workspace override > environment defaults.';
+
+  @override
+  String get helpHubManageWorkspaceLocked =>
+      ' (This workspace cannot configure workspace-level links; personal override only.)';
+
+  @override
+  String get helpHubTabPersonal => 'Personal override';
+
+  @override
+  String get helpHubTabWorkspace => 'Workspace override';
+
+  @override
+  String get helpHubFieldId => 'id (dedupe / override key)';
+
+  @override
+  String get helpHubFieldTitle => 'Title';
+
+  @override
+  String get helpHubFieldUrl => 'URL';
+
+  @override
+  String get helpHubHintId => 'runbook-quality';
+
+  @override
+  String get helpHubHintUrl => 'https://docs.example.com/runbook';
+
+  @override
+  String get helpHubAdd => 'Add';
+
+  @override
+  String get helpHubValidationRequired => 'id, title, and url are required.';
+
+  @override
+  String get helpHubNoCustomInScope => 'No custom links in this scope.';
+
+  @override
+  String get helpHubDialogClose => 'Close';
+
+  @override
+  String get helpHubSave => 'Save';
+
+  @override
+  String get helpHubSaving => 'Saving…';
+
+  @override
+  String get helpHubCategoryRunbook => 'Runbook';
+
+  @override
+  String get helpHubCategoryBillingWebhook => 'Billing / Webhook';
+
+  @override
+  String get helpHubCategoryWorkspace => 'Workspace';
+
+  @override
+  String get helpHubCategoryQuality => 'Quality';
+
+  @override
+  String get helpHubCategoryStatus => 'Status';
+
+  @override
+  String get helpHubCategoryGeneral => 'General';
+
+  @override
+  String helpHubSummary(int total, int filtered, String extra) {
+    return 'Total $total · Filtered $filtered$extra';
+  }
+
+  @override
+  String helpHubSummaryCategoryCount(String name, int count) {
+    return '$name:$count';
+  }
+
+  @override
+  String get opsWhSectionTitle => 'Outbound webhooks';
+
+  @override
+  String get opsWhErrorUrlRequired => 'URL is required.';
+
+  @override
+  String get opsWhErrorWorkspaceId =>
+      'workspaceId must be a valid UUID or empty.';
+
+  @override
+  String get opsWhErrorWorkspaceIdPatch =>
+      'workspaceId must be a valid UUID, or clear the field to use global scope.';
+
+  @override
+  String get opsWhSnackCreated => 'Created; secret copied to clipboard.';
+
+  @override
+  String get opsWhSnackEventsUpdated => 'Subscription events updated.';
+
+  @override
+  String opsWhSnackDeliverOk(String status) {
+    return 'Delivered (HTTP $status)';
+  }
+
+  @override
+  String opsWhSnackDeliverFail(String detail) {
+    return 'Delivery failed: $detail';
+  }
+
+  @override
+  String get opsWhSnackScopeGlobal =>
+      'Scope set to global (no workspace filter).';
+
+  @override
+  String get opsWhSnackScopeWorkspaceUpdated => 'workspaceId updated.';
+
+  @override
+  String get opsWhDeleteTitle => 'Delete webhook';
+
+  @override
+  String opsWhDeleteBody(String id) {
+    return 'You are about to delete webhook: $id\nThis removes the destination URL.';
+  }
+
+  @override
+  String get opsWhDeleteConfirm => 'Delete';
+
+  @override
+  String get opsWhDeleteConfirmButton => 'Confirm delete';
+
+  @override
+  String opsWhLastTestOk(String status) {
+    return 'Last test: success (HTTP $status)';
+  }
+
+  @override
+  String opsWhLastTestFail(String status, String error) {
+    return 'Last test: failed (HTTP $status) $error';
+  }
+
+  @override
+  String opsWhInventoryLine(
+    int total,
+    int filtered,
+    int ok,
+    int fail,
+    String latestPart,
+  ) {
+    return 'Total $total · Filtered $filtered · Session tests OK $ok · Failed $fail$latestPart';
+  }
+
+  @override
+  String opsWhInventoryLatestPart(String id) {
+    return ' · Latest: $id';
+  }
+
+  @override
+  String get opsWhEmptyNone =>
+      'No outbound webhooks yet. Create one above to test delivery and manage lifecycle.';
+
+  @override
+  String get opsWhEmptyFiltered =>
+      'No webhooks match your search. Adjust URL / id / createdAt keywords.';
+
+  @override
+  String get opsWhUrlLabel => 'Webhook URL';
+
+  @override
+  String get opsWhUrlHint => 'https://example.com/webhook';
+
+  @override
+  String get opsWhSecretLabel => 'Secret (optional; server generates if empty)';
+
+  @override
+  String get opsWhWorkspaceIdLabel => 'workspaceId (optional)';
+
+  @override
+  String get opsWhWorkspaceIdHint =>
+      'Only deliver events for this workspace; must be a UUID';
+
+  @override
+  String get opsWhSubscribeHint =>
+      'Subscribed events (select all = default; deselect types you do not need)';
+
+  @override
+  String get opsWhTestEventTypeLabel => 'Test eventType';
+
+  @override
+  String get opsWhTestEventTypeHint => 'test.ping';
+
+  @override
+  String get opsWhLatestCreatedTitle => 'Latest created webhook credentials';
+
+  @override
+  String get opsWhCopyId => 'Copy ID';
+
+  @override
+  String get opsWhCopyUrl => 'Copy URL';
+
+  @override
+  String get opsWhCopySecret => 'Copy secret';
+
+  @override
+  String get opsWhCreate => 'Create';
+
+  @override
+  String get opsWhCreating => 'Requesting…';
+
+  @override
+  String get opsWhRefreshList => 'Refresh list';
+
+  @override
+  String get opsWhSearchLabel => 'Search webhooks (URL / id / createdAt)';
+
+  @override
+  String get opsWhRecentActivity => 'Recent activity';
+
+  @override
+  String get opsWhCopyActivityTooltip => 'Copy record';
+
+  @override
+  String get opsWhActivityRecordSuffix => ' webhook activity';
+
+  @override
+  String get opsWhChipLatestCreated => 'Latest created';
+
+  @override
+  String get opsWhChipDisabled => 'Disabled';
+
+  @override
+  String get opsWhSubscribeHeading => 'Subscribed events';
+
+  @override
+  String get opsWhScopeHeading => 'Scope workspaceId (empty save = global)';
+
+  @override
+  String get opsWhScopeFieldHint => 'UUID; empty means no workspace filter';
+
+  @override
+  String get opsWhSaveScope => 'Save scope';
+
+  @override
+  String get opsWhSavingScope => 'Saving…';
+
+  @override
+  String get opsWhClearInput => 'Clear input';
+
+  @override
+  String get opsWhRecentDeliveries => 'Recent deliveries';
+
+  @override
+  String get opsWhTooltipCopyUrl => 'Copy URL';
+
+  @override
+  String get opsWhUrlCopiedSnack => 'Webhook URL copied.';
+
+  @override
+  String get opsWhTestDeliver => 'Test delivery';
+
+  @override
+  String get opsWhBusy => 'Working…';
+
+  @override
+  String get opsWhDeliveryLog => 'Delivery log';
+
+  @override
+  String get opsWhLoading => 'Loading…';
+
+  @override
+  String get opsWhDelete => 'Delete';
+
+  @override
+  String get billingAuditTitle => 'Billing webhook audit';
+
+  @override
+  String get billingAuditProviderLabel => 'Provider';
+
+  @override
+  String get billingAuditAll => 'All';
+
+  @override
+  String get billingAuditSortLabel => 'Sort';
+
+  @override
+  String get billingAuditSortNewest => 'Newest first';
+
+  @override
+  String get billingAuditSortOldest => 'Oldest first';
+
+  @override
+  String get billingAuditOnlyInformational => 'Informational only';
+
+  @override
+  String get billingAuditOnlyStateful => 'Stateful only';
+
+  @override
+  String get billingAuditEventTypeHint =>
+      'e.g. invoice.paid / subscription.expired';
+
+  @override
+  String get billingAuditProviderEventIdHint => 'e.g. stripe:evt_123';
+
+  @override
+  String get billingAuditRawEventIdHint => 'e.g. evt_123';
+
+  @override
+  String get billingAuditProviderPrefixHint => 'e.g. stripe:evt_';
+
+  @override
+  String get billingAuditRawPrefixHint => 'e.g. evt_';
+
+  @override
+  String get billingAuditEventCreatedFromHint => '2026-04-01T00:00:00Z';
+
+  @override
+  String get billingAuditEventCreatedToHint => '2026-04-30T23:59:59Z';
+
+  @override
+  String get billingAuditQuery => 'Query';
+
+  @override
+  String get billingAuditQuerying => 'Reading…';
+
+  @override
+  String get billingAuditResetRefresh => 'Reset and refresh';
+
+  @override
+  String get billingAuditCopyCsv => 'Copy CSV';
+
+  @override
+  String get billingAuditCsvCopiedSnack => 'Current billing audit CSV copied.';
+
+  @override
+  String get billingAuditCopyQuerySummary => 'Copy query summary';
+
+  @override
+  String get billingAuditCopyQueryUrl => 'Copy query URL';
+
+  @override
+  String get billingAuditQueryUrlCopiedSnack => 'Current query URL copied.';
+
+  @override
+  String get billingAuditCopyFullCsv => 'Copy full CSV';
+
+  @override
+  String get billingAuditExporting => 'Exporting…';
+
+  @override
+  String get billingAuditLoading => 'Loading billing audit…';
+
+  @override
+  String billingAuditPageStats(int total, int loaded, String hasMore) {
+    return 'total=$total · loaded=$loaded · has_more=$hasMore';
+  }
+
+  @override
+  String get billingEmptyQuery =>
+      'No billing webhook events match this query. Adjust provider, event id, time window, or informational filters.';
+
+  @override
+  String get billingAuditQuerySummaryCopied => 'Query summary copied.';
+
+  @override
+  String get billingAuditSnapshotCopied => 'Audit snapshot copied.';
+
+  @override
+  String billingCopiedWithLabel(String label) {
+    return 'Copied $label.';
+  }
+
+  @override
+  String billingAuditFullCsvCopied(int count) {
+    return 'Full billing audit CSV copied ($count rows).';
+  }
+
+  @override
+  String billingSnapLoaded(int count) {
+    return 'Loaded: $count';
+  }
+
+  @override
+  String billingSnapInformational(int count) {
+    return 'Informational: $count';
+  }
+
+  @override
+  String billingSnapStateful(int count) {
+    return 'Stateful: $count';
+  }
+
+  @override
+  String billingSnapProviders(String list) {
+    return 'Providers: $list';
+  }
+
+  @override
+  String billingSnapEventTypes(String list) {
+    return 'Event types: $list';
+  }
+
+  @override
+  String get billingAuditCurrentLoadTitle => 'Current load summary';
+
+  @override
+  String get billingAuditCopySnapshot => 'Copy audit snapshot';
+
+  @override
+  String get billingAuditCopyProviderEventId => 'Copy provider_event_id';
+
+  @override
+  String get billingAuditCopyRawEventId => 'Copy raw_event_id';
+
+  @override
+  String billingAuditFilterByProvider(String provider) {
+    return 'Filter by $provider';
+  }
+
+  @override
+  String billingAuditFilterByEventType(String eventType) {
+    return 'Filter by $eventType';
+  }
+
+  @override
+  String get billingAuditOnlyThisEvent => 'Only this event';
+
+  @override
+  String get billingAuditLoadMore => 'Load more';
+
+  @override
+  String billingMetaProvider(String value) {
+    return 'provider=$value';
+  }
+
+  @override
+  String billingMetaType(String value) {
+    return 'type=$value';
+  }
+
+  @override
+  String billingMetaCreated(String value) {
+    return 'created=$value';
+  }
+
+  @override
+  String billingMetaEventCreated(String value) {
+    return 'event_created=$value';
+  }
+
+  @override
+  String get billingMetaInformational => 'informational';
+
+  @override
+  String get billingMetaStateful => 'stateful';
+
+  @override
+  String billingRowRawEventId(String value) {
+    return 'raw_event_id=$value';
+  }
+
+  @override
+  String billingRowId(String value) {
+    return 'id=$value';
+  }
+
+  @override
+  String billingChipCount(String label, int count) {
+    return '$label $count';
+  }
 }

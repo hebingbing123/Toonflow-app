@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_en.dart';
 import 'package:openflow_app/rust_api/settings/billing_webhook_events.dart';
 import 'package:openflow_app/shell/help_hub_support.dart';
 
@@ -25,6 +26,8 @@ BillingWebhookEventItemV1 billingEvent({
 }
 
 void main() {
+  final l10n = AppLocalizationsEn();
+
   test('countWebhookActivity counts only matching actions', () {
     expect(
       countWebhookActivity(
@@ -39,52 +42,59 @@ void main() {
   test('buildWebhookInventorySummary includes latest id when present', () {
     expect(
       buildWebhookInventorySummary(
+        l10n,
         total: 4,
         filtered: 2,
         sessionTestOkCount: 1,
         sessionTestFailedCount: 3,
         latestWebhookId: 'wh_123',
       ),
-      'total=4 · filtered=2 · session test ok=1 · session test failed=3 · latest=wh_123',
+      'Total 4 · Filtered 2 · Session tests OK 1 · Failed 3 · Latest: wh_123',
     );
   });
 
   test('buildWebhookInventorySummary omits latest id when absent', () {
     expect(
       buildWebhookInventorySummary(
+        l10n,
         total: 0,
         filtered: 0,
         sessionTestOkCount: 0,
         sessionTestFailedCount: 0,
       ),
-      'total=0 · filtered=0 · session test ok=0 · session test failed=0',
+      'Total 0 · Filtered 0 · Session tests OK 0 · Failed 0',
     );
   });
 
   test('describeOutboundWebhookEmptyState distinguishes zero and filtered out', () {
     expect(
-      describeOutboundWebhookEmptyState(total: 0, filtered: 0),
-      '当前还没有配置任何出站 Webhook。可直接在上方创建，并在此处测试投递与删除。',
+      describeOutboundWebhookEmptyState(l10n, total: 0, filtered: 0),
+      l10n.opsWhEmptyNone,
     );
     expect(
-      describeOutboundWebhookEmptyState(total: 2, filtered: 0),
-      '当前筛选没有命中任何 Webhook，请调整 URL / id / createdAt 搜索关键字。',
+      describeOutboundWebhookEmptyState(l10n, total: 2, filtered: 0),
+      l10n.opsWhEmptyFiltered,
     );
-    expect(describeOutboundWebhookEmptyState(total: 2, filtered: 1), isNull);
+    expect(
+      describeOutboundWebhookEmptyState(l10n, total: 2, filtered: 1),
+      isNull,
+    );
   });
 
   test('describeBillingWebhookEmptyState only shows for loaded-empty successful page', () {
     expect(
       describeBillingWebhookEmptyState(
+        l10n,
         hasPage: true,
         loaded: 0,
         isLoading: false,
         error: null,
       ),
-      '当前查询没有命中任何 billing webhook 审计事件，可调整 provider、event id、时间窗或 informational 条件后重试。',
+      l10n.billingEmptyQuery,
     );
     expect(
       describeBillingWebhookEmptyState(
+        l10n,
         hasPage: false,
         loaded: 0,
         isLoading: false,
@@ -94,6 +104,7 @@ void main() {
     );
     expect(
       describeBillingWebhookEmptyState(
+        l10n,
         hasPage: true,
         loaded: 1,
         isLoading: false,
@@ -103,6 +114,7 @@ void main() {
     );
     expect(
       describeBillingWebhookEmptyState(
+        l10n,
         hasPage: true,
         loaded: 0,
         isLoading: true,
@@ -112,6 +124,7 @@ void main() {
     );
     expect(
       describeBillingWebhookEmptyState(
+        l10n,
         hasPage: true,
         loaded: 0,
         isLoading: false,
@@ -175,11 +188,14 @@ void main() {
       ),
     ];
 
-    final summary = buildBillingEventsSnapshotSummary(items);
-    expect(summary, contains('loaded=3'));
-    expect(summary, contains('informational=1'));
-    expect(summary, contains('stateful=2'));
-    expect(summary, contains('providers=stripe:2, alipay:1'));
-    expect(summary, contains('event_types=invoice.paid:2, trade.success:1'));
+    final summary = buildBillingEventsSnapshotSummary(l10n, items);
+    expect(summary, contains('Loaded: 3'));
+    expect(summary, contains('Informational: 1'));
+    expect(summary, contains('Stateful: 2'));
+    expect(summary, contains('Providers: stripe:2, alipay:1'));
+    expect(
+      summary,
+      contains('Event types: invoice.paid:2, trade.success:1'),
+    );
   });
 }

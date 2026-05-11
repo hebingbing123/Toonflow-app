@@ -1475,6 +1475,900 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to open target: {detail}'**
   String productComplianceOpenTargetFailed(String detail);
+
+  /// No description provided for @platformConfigPlanOverrideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan override'**
+  String get platformConfigPlanOverrideTitle;
+
+  /// No description provided for @platformConfigWorkspaceOverrideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace override'**
+  String get platformConfigWorkspaceOverrideTitle;
+
+  /// No description provided for @platformConfigUserOverrideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User override'**
+  String get platformConfigUserOverrideTitle;
+
+  /// No description provided for @helpHubDocsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help / docs'**
+  String get helpHubDocsTitle;
+
+  /// No description provided for @helpHubLocalRiskLine.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device: to restore high-risk confirmations (delete, archive, cancel export), use the ⋯ menu in the header (unrelated to server settings).'**
+  String get helpHubLocalRiskLine;
+
+  /// No description provided for @helpHubRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get helpHubRefresh;
+
+  /// No description provided for @helpHubManageEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage links'**
+  String get helpHubManageEntries;
+
+  /// No description provided for @helpHubLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get helpHubLoading;
+
+  /// No description provided for @helpHubSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search help links (title / id / url)'**
+  String get helpHubSearchLabel;
+
+  /// No description provided for @helpHubNoEffectiveLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'No help links are available. Check settings/help/hub configuration.'**
+  String get helpHubNoEffectiveLinks;
+
+  /// No description provided for @helpHubSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No links match your search. Try different keywords.'**
+  String get helpHubSearchEmpty;
+
+  /// No description provided for @helpHubCopyLinkTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get helpHubCopyLinkTooltip;
+
+  /// No description provided for @helpHubCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied.'**
+  String get helpHubCopied;
+
+  /// No description provided for @helpHubCopyTitleUrlTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy title + URL'**
+  String get helpHubCopyTitleUrlTooltip;
+
+  /// No description provided for @helpHubCopiedHandoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied document handoff.'**
+  String get helpHubCopiedHandoff;
+
+  /// No description provided for @helpHubManageDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage help links (personal / workspace)'**
+  String get helpHubManageDialogTitle;
+
+  /// No description provided for @helpHubManagePrecedence.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective order: personal override > workspace override > environment defaults.'**
+  String get helpHubManagePrecedence;
+
+  /// No description provided for @helpHubManageWorkspaceLocked.
+  ///
+  /// In en, this message translates to:
+  /// **' (This workspace cannot configure workspace-level links; personal override only.)'**
+  String get helpHubManageWorkspaceLocked;
+
+  /// No description provided for @helpHubTabPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal override'**
+  String get helpHubTabPersonal;
+
+  /// No description provided for @helpHubTabWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace override'**
+  String get helpHubTabWorkspace;
+
+  /// No description provided for @helpHubFieldId.
+  ///
+  /// In en, this message translates to:
+  /// **'id (dedupe / override key)'**
+  String get helpHubFieldId;
+
+  /// No description provided for @helpHubFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get helpHubFieldTitle;
+
+  /// No description provided for @helpHubFieldUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get helpHubFieldUrl;
+
+  /// No description provided for @helpHubHintId.
+  ///
+  /// In en, this message translates to:
+  /// **'runbook-quality'**
+  String get helpHubHintId;
+
+  /// No description provided for @helpHubHintUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'https://docs.example.com/runbook'**
+  String get helpHubHintUrl;
+
+  /// No description provided for @helpHubAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get helpHubAdd;
+
+  /// No description provided for @helpHubValidationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'id, title, and url are required.'**
+  String get helpHubValidationRequired;
+
+  /// No description provided for @helpHubNoCustomInScope.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom links in this scope.'**
+  String get helpHubNoCustomInScope;
+
+  /// No description provided for @helpHubDialogClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get helpHubDialogClose;
+
+  /// No description provided for @helpHubSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get helpHubSave;
+
+  /// No description provided for @helpHubSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get helpHubSaving;
+
+  /// No description provided for @helpHubCategoryRunbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Runbook'**
+  String get helpHubCategoryRunbook;
+
+  /// No description provided for @helpHubCategoryBillingWebhook.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing / Webhook'**
+  String get helpHubCategoryBillingWebhook;
+
+  /// No description provided for @helpHubCategoryWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get helpHubCategoryWorkspace;
+
+  /// No description provided for @helpHubCategoryQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get helpHubCategoryQuality;
+
+  /// No description provided for @helpHubCategoryStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get helpHubCategoryStatus;
+
+  /// No description provided for @helpHubCategoryGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get helpHubCategoryGeneral;
+
+  /// No description provided for @helpHubSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {total} · Filtered {filtered}{extra}'**
+  String helpHubSummary(int total, int filtered, String extra);
+
+  /// No description provided for @helpHubSummaryCategoryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}:{count}'**
+  String helpHubSummaryCategoryCount(String name, int count);
+
+  /// No description provided for @opsWhSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Outbound webhooks'**
+  String get opsWhSectionTitle;
+
+  /// No description provided for @opsWhErrorUrlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'URL is required.'**
+  String get opsWhErrorUrlRequired;
+
+  /// No description provided for @opsWhErrorWorkspaceId.
+  ///
+  /// In en, this message translates to:
+  /// **'workspaceId must be a valid UUID or empty.'**
+  String get opsWhErrorWorkspaceId;
+
+  /// No description provided for @opsWhErrorWorkspaceIdPatch.
+  ///
+  /// In en, this message translates to:
+  /// **'workspaceId must be a valid UUID, or clear the field to use global scope.'**
+  String get opsWhErrorWorkspaceIdPatch;
+
+  /// No description provided for @opsWhSnackCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created; secret copied to clipboard.'**
+  String get opsWhSnackCreated;
+
+  /// No description provided for @opsWhSnackEventsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription events updated.'**
+  String get opsWhSnackEventsUpdated;
+
+  /// No description provided for @opsWhSnackDeliverOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered (HTTP {status})'**
+  String opsWhSnackDeliverOk(String status);
+
+  /// No description provided for @opsWhSnackDeliverFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery failed: {detail}'**
+  String opsWhSnackDeliverFail(String detail);
+
+  /// No description provided for @opsWhSnackScopeGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope set to global (no workspace filter).'**
+  String get opsWhSnackScopeGlobal;
+
+  /// No description provided for @opsWhSnackScopeWorkspaceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'workspaceId updated.'**
+  String get opsWhSnackScopeWorkspaceUpdated;
+
+  /// No description provided for @opsWhDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete webhook'**
+  String get opsWhDeleteTitle;
+
+  /// No description provided for @opsWhDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to delete webhook: {id}\nThis removes the destination URL.'**
+  String opsWhDeleteBody(String id);
+
+  /// No description provided for @opsWhDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get opsWhDeleteConfirm;
+
+  /// No description provided for @opsWhDeleteConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delete'**
+  String get opsWhDeleteConfirmButton;
+
+  /// No description provided for @opsWhLastTestOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Last test: success (HTTP {status})'**
+  String opsWhLastTestOk(String status);
+
+  /// No description provided for @opsWhLastTestFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Last test: failed (HTTP {status}) {error}'**
+  String opsWhLastTestFail(String status, String error);
+
+  /// No description provided for @opsWhInventoryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {total} · Filtered {filtered} · Session tests OK {ok} · Failed {fail}{latestPart}'**
+  String opsWhInventoryLine(
+    int total,
+    int filtered,
+    int ok,
+    int fail,
+    String latestPart,
+  );
+
+  /// No description provided for @opsWhInventoryLatestPart.
+  ///
+  /// In en, this message translates to:
+  /// **' · Latest: {id}'**
+  String opsWhInventoryLatestPart(String id);
+
+  /// No description provided for @opsWhEmptyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No outbound webhooks yet. Create one above to test delivery and manage lifecycle.'**
+  String get opsWhEmptyNone;
+
+  /// No description provided for @opsWhEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No webhooks match your search. Adjust URL / id / createdAt keywords.'**
+  String get opsWhEmptyFiltered;
+
+  /// No description provided for @opsWhUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Webhook URL'**
+  String get opsWhUrlLabel;
+
+  /// No description provided for @opsWhUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com/webhook'**
+  String get opsWhUrlHint;
+
+  /// No description provided for @opsWhSecretLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret (optional; server generates if empty)'**
+  String get opsWhSecretLabel;
+
+  /// No description provided for @opsWhWorkspaceIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'workspaceId (optional)'**
+  String get opsWhWorkspaceIdLabel;
+
+  /// No description provided for @opsWhWorkspaceIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only deliver events for this workspace; must be a UUID'**
+  String get opsWhWorkspaceIdHint;
+
+  /// No description provided for @opsWhSubscribeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed events (select all = default; deselect types you do not need)'**
+  String get opsWhSubscribeHint;
+
+  /// No description provided for @opsWhTestEventTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Test eventType'**
+  String get opsWhTestEventTypeLabel;
+
+  /// No description provided for @opsWhTestEventTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'test.ping'**
+  String get opsWhTestEventTypeHint;
+
+  /// No description provided for @opsWhLatestCreatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest created webhook credentials'**
+  String get opsWhLatestCreatedTitle;
+
+  /// No description provided for @opsWhCopyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy ID'**
+  String get opsWhCopyId;
+
+  /// No description provided for @opsWhCopyUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get opsWhCopyUrl;
+
+  /// No description provided for @opsWhCopySecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy secret'**
+  String get opsWhCopySecret;
+
+  /// No description provided for @opsWhCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get opsWhCreate;
+
+  /// No description provided for @opsWhCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting…'**
+  String get opsWhCreating;
+
+  /// No description provided for @opsWhRefreshList.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh list'**
+  String get opsWhRefreshList;
+
+  /// No description provided for @opsWhSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search webhooks (URL / id / createdAt)'**
+  String get opsWhSearchLabel;
+
+  /// No description provided for @opsWhRecentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get opsWhRecentActivity;
+
+  /// No description provided for @opsWhCopyActivityTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy record'**
+  String get opsWhCopyActivityTooltip;
+
+  /// No description provided for @opsWhActivityRecordSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' webhook activity'**
+  String get opsWhActivityRecordSuffix;
+
+  /// No description provided for @opsWhChipLatestCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest created'**
+  String get opsWhChipLatestCreated;
+
+  /// No description provided for @opsWhChipDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get opsWhChipDisabled;
+
+  /// No description provided for @opsWhSubscribeHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed events'**
+  String get opsWhSubscribeHeading;
+
+  /// No description provided for @opsWhScopeHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope workspaceId (empty save = global)'**
+  String get opsWhScopeHeading;
+
+  /// No description provided for @opsWhScopeFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'UUID; empty means no workspace filter'**
+  String get opsWhScopeFieldHint;
+
+  /// No description provided for @opsWhSaveScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Save scope'**
+  String get opsWhSaveScope;
+
+  /// No description provided for @opsWhSavingScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get opsWhSavingScope;
+
+  /// No description provided for @opsWhClearInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear input'**
+  String get opsWhClearInput;
+
+  /// No description provided for @opsWhRecentDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent deliveries'**
+  String get opsWhRecentDeliveries;
+
+  /// No description provided for @opsWhTooltipCopyUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get opsWhTooltipCopyUrl;
+
+  /// No description provided for @opsWhUrlCopiedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Webhook URL copied.'**
+  String get opsWhUrlCopiedSnack;
+
+  /// No description provided for @opsWhTestDeliver.
+  ///
+  /// In en, this message translates to:
+  /// **'Test delivery'**
+  String get opsWhTestDeliver;
+
+  /// No description provided for @opsWhBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get opsWhBusy;
+
+  /// No description provided for @opsWhDeliveryLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery log'**
+  String get opsWhDeliveryLog;
+
+  /// No description provided for @opsWhLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get opsWhLoading;
+
+  /// No description provided for @opsWhDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get opsWhDelete;
+
+  /// No description provided for @billingAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing webhook audit'**
+  String get billingAuditTitle;
+
+  /// No description provided for @billingAuditProviderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get billingAuditProviderLabel;
+
+  /// No description provided for @billingAuditAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get billingAuditAll;
+
+  /// No description provided for @billingAuditSortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get billingAuditSortLabel;
+
+  /// No description provided for @billingAuditSortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get billingAuditSortNewest;
+
+  /// No description provided for @billingAuditSortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get billingAuditSortOldest;
+
+  /// No description provided for @billingAuditOnlyInformational.
+  ///
+  /// In en, this message translates to:
+  /// **'Informational only'**
+  String get billingAuditOnlyInformational;
+
+  /// No description provided for @billingAuditOnlyStateful.
+  ///
+  /// In en, this message translates to:
+  /// **'Stateful only'**
+  String get billingAuditOnlyStateful;
+
+  /// No description provided for @billingAuditEventTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. invoice.paid / subscription.expired'**
+  String get billingAuditEventTypeHint;
+
+  /// No description provided for @billingAuditProviderEventIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. stripe:evt_123'**
+  String get billingAuditProviderEventIdHint;
+
+  /// No description provided for @billingAuditRawEventIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. evt_123'**
+  String get billingAuditRawEventIdHint;
+
+  /// No description provided for @billingAuditProviderPrefixHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. stripe:evt_'**
+  String get billingAuditProviderPrefixHint;
+
+  /// No description provided for @billingAuditRawPrefixHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. evt_'**
+  String get billingAuditRawPrefixHint;
+
+  /// No description provided for @billingAuditEventCreatedFromHint.
+  ///
+  /// In en, this message translates to:
+  /// **'2026-04-01T00:00:00Z'**
+  String get billingAuditEventCreatedFromHint;
+
+  /// No description provided for @billingAuditEventCreatedToHint.
+  ///
+  /// In en, this message translates to:
+  /// **'2026-04-30T23:59:59Z'**
+  String get billingAuditEventCreatedToHint;
+
+  /// No description provided for @billingAuditQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Query'**
+  String get billingAuditQuery;
+
+  /// No description provided for @billingAuditQuerying.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading…'**
+  String get billingAuditQuerying;
+
+  /// No description provided for @billingAuditResetRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset and refresh'**
+  String get billingAuditResetRefresh;
+
+  /// No description provided for @billingAuditCopyCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy CSV'**
+  String get billingAuditCopyCsv;
+
+  /// No description provided for @billingAuditCsvCopiedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Current billing audit CSV copied.'**
+  String get billingAuditCsvCopiedSnack;
+
+  /// No description provided for @billingAuditCopyQuerySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy query summary'**
+  String get billingAuditCopyQuerySummary;
+
+  /// No description provided for @billingAuditCopyQueryUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy query URL'**
+  String get billingAuditCopyQueryUrl;
+
+  /// No description provided for @billingAuditQueryUrlCopiedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Current query URL copied.'**
+  String get billingAuditQueryUrlCopiedSnack;
+
+  /// No description provided for @billingAuditCopyFullCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy full CSV'**
+  String get billingAuditCopyFullCsv;
+
+  /// No description provided for @billingAuditExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting…'**
+  String get billingAuditExporting;
+
+  /// No description provided for @billingAuditLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading billing audit…'**
+  String get billingAuditLoading;
+
+  /// No description provided for @billingAuditPageStats.
+  ///
+  /// In en, this message translates to:
+  /// **'total={total} · loaded={loaded} · has_more={hasMore}'**
+  String billingAuditPageStats(int total, int loaded, String hasMore);
+
+  /// No description provided for @billingEmptyQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'No billing webhook events match this query. Adjust provider, event id, time window, or informational filters.'**
+  String get billingEmptyQuery;
+
+  /// No description provided for @billingAuditQuerySummaryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Query summary copied.'**
+  String get billingAuditQuerySummaryCopied;
+
+  /// No description provided for @billingAuditSnapshotCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit snapshot copied.'**
+  String get billingAuditSnapshotCopied;
+
+  /// No description provided for @billingCopiedWithLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied {label}.'**
+  String billingCopiedWithLabel(String label);
+
+  /// No description provided for @billingAuditFullCsvCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Full billing audit CSV copied ({count} rows).'**
+  String billingAuditFullCsvCopied(int count);
+
+  /// No description provided for @billingSnapLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded: {count}'**
+  String billingSnapLoaded(int count);
+
+  /// No description provided for @billingSnapInformational.
+  ///
+  /// In en, this message translates to:
+  /// **'Informational: {count}'**
+  String billingSnapInformational(int count);
+
+  /// No description provided for @billingSnapStateful.
+  ///
+  /// In en, this message translates to:
+  /// **'Stateful: {count}'**
+  String billingSnapStateful(int count);
+
+  /// No description provided for @billingSnapProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers: {list}'**
+  String billingSnapProviders(String list);
+
+  /// No description provided for @billingSnapEventTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Event types: {list}'**
+  String billingSnapEventTypes(String list);
+
+  /// No description provided for @billingAuditCurrentLoadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current load summary'**
+  String get billingAuditCurrentLoadTitle;
+
+  /// No description provided for @billingAuditCopySnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy audit snapshot'**
+  String get billingAuditCopySnapshot;
+
+  /// No description provided for @billingAuditCopyProviderEventId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy provider_event_id'**
+  String get billingAuditCopyProviderEventId;
+
+  /// No description provided for @billingAuditCopyRawEventId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy raw_event_id'**
+  String get billingAuditCopyRawEventId;
+
+  /// No description provided for @billingAuditFilterByProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by {provider}'**
+  String billingAuditFilterByProvider(String provider);
+
+  /// No description provided for @billingAuditFilterByEventType.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by {eventType}'**
+  String billingAuditFilterByEventType(String eventType);
+
+  /// No description provided for @billingAuditOnlyThisEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this event'**
+  String get billingAuditOnlyThisEvent;
+
+  /// No description provided for @billingAuditLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get billingAuditLoadMore;
+
+  /// No description provided for @billingMetaProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'provider={value}'**
+  String billingMetaProvider(String value);
+
+  /// No description provided for @billingMetaType.
+  ///
+  /// In en, this message translates to:
+  /// **'type={value}'**
+  String billingMetaType(String value);
+
+  /// No description provided for @billingMetaCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'created={value}'**
+  String billingMetaCreated(String value);
+
+  /// No description provided for @billingMetaEventCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'event_created={value}'**
+  String billingMetaEventCreated(String value);
+
+  /// No description provided for @billingMetaInformational.
+  ///
+  /// In en, this message translates to:
+  /// **'informational'**
+  String get billingMetaInformational;
+
+  /// No description provided for @billingMetaStateful.
+  ///
+  /// In en, this message translates to:
+  /// **'stateful'**
+  String get billingMetaStateful;
+
+  /// No description provided for @billingRowRawEventId.
+  ///
+  /// In en, this message translates to:
+  /// **'raw_event_id={value}'**
+  String billingRowRawEventId(String value);
+
+  /// No description provided for @billingRowId.
+  ///
+  /// In en, this message translates to:
+  /// **'id={value}'**
+  String billingRowId(String value);
+
+  /// No description provided for @billingChipCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {count}'**
+  String billingChipCount(String label, int count);
 }
 
 class _AppLocalizationsDelegate

@@ -766,4 +766,510 @@ class AppLocalizationsZh extends AppLocalizations {
   String productComplianceOpenTargetFailed(String detail) {
     return '打开目标失败：$detail';
   }
+
+  @override
+  String get platformConfigPlanOverrideTitle => 'Plan 覆盖';
+
+  @override
+  String get platformConfigWorkspaceOverrideTitle => 'Workspace 覆盖';
+
+  @override
+  String get platformConfigUserOverrideTitle => '用户覆盖';
+
+  @override
+  String get helpHubDocsTitle => '帮助 / 文档';
+
+  @override
+  String get helpHubLocalRiskLine =>
+      '本机：需要重新显示删除版本、归档、取消导出等高风险二次确认时，请点标题栏 ⋯ 菜单（与服务器配置无关）。';
+
+  @override
+  String get helpHubRefresh => '刷新';
+
+  @override
+  String get helpHubManageEntries => '管理入口';
+
+  @override
+  String get helpHubLoading => '加载中…';
+
+  @override
+  String get helpHubSearchLabel => '搜索帮助文档（title / id / url）';
+
+  @override
+  String get helpHubNoEffectiveLinks => '当前没有可用的帮助入口，请检查 settings/help/hub 配置。';
+
+  @override
+  String get helpHubSearchEmpty => '当前搜索没有命中文档入口，请调整关键词后重试。';
+
+  @override
+  String get helpHubCopyLinkTooltip => '复制链接';
+
+  @override
+  String get helpHubCopied => '已复制';
+
+  @override
+  String get helpHubCopyTitleUrlTooltip => '复制标题+链接';
+
+  @override
+  String get helpHubCopiedHandoff => '已复制文档 handoff';
+
+  @override
+  String get helpHubManageDialogTitle => '管理帮助入口（个人 / 工作区）';
+
+  @override
+  String get helpHubManagePrecedence => '生效顺序：个人覆盖 > 工作区覆盖 > 环境默认。';
+
+  @override
+  String get helpHubManageWorkspaceLocked => '（当前工作区不可配置工作区级入口；仅个人覆盖可用。）';
+
+  @override
+  String get helpHubTabPersonal => '个人覆盖';
+
+  @override
+  String get helpHubTabWorkspace => '工作区覆盖';
+
+  @override
+  String get helpHubFieldId => 'id（用于去重/覆盖）';
+
+  @override
+  String get helpHubFieldTitle => '标题';
+
+  @override
+  String get helpHubFieldUrl => 'URL';
+
+  @override
+  String get helpHubHintId => 'runbook-quality';
+
+  @override
+  String get helpHubHintUrl => 'https://docs.example.com/runbook';
+
+  @override
+  String get helpHubAdd => '添加';
+
+  @override
+  String get helpHubValidationRequired => 'id、title、url 不能为空。';
+
+  @override
+  String get helpHubNoCustomInScope => '当前范围没有自定义入口。';
+
+  @override
+  String get helpHubDialogClose => '关闭';
+
+  @override
+  String get helpHubSave => '保存';
+
+  @override
+  String get helpHubSaving => '保存中…';
+
+  @override
+  String get helpHubCategoryRunbook => 'Runbook';
+
+  @override
+  String get helpHubCategoryBillingWebhook => 'Billing / Webhook';
+
+  @override
+  String get helpHubCategoryWorkspace => 'Workspace';
+
+  @override
+  String get helpHubCategoryQuality => '质量';
+
+  @override
+  String get helpHubCategoryStatus => '状态';
+
+  @override
+  String get helpHubCategoryGeneral => '通用';
+
+  @override
+  String helpHubSummary(int total, int filtered, String extra) {
+    return '共 $total · 筛选后 $filtered$extra';
+  }
+
+  @override
+  String helpHubSummaryCategoryCount(String name, int count) {
+    return '$name:$count';
+  }
+
+  @override
+  String get opsWhSectionTitle => '出站 Webhook';
+
+  @override
+  String get opsWhErrorUrlRequired => 'URL 不能为空';
+
+  @override
+  String get opsWhErrorWorkspaceId => 'workspaceId 须为合法 UUID，或留空';
+
+  @override
+  String get opsWhErrorWorkspaceIdPatch => 'workspaceId 须为合法 UUID，或清空后保存以改为全局';
+
+  @override
+  String get opsWhSnackCreated => '已创建；secret 已复制到剪贴板';
+
+  @override
+  String get opsWhSnackEventsUpdated => '已更新订阅事件';
+
+  @override
+  String opsWhSnackDeliverOk(String status) {
+    return '投递成功（HTTP $status）';
+  }
+
+  @override
+  String opsWhSnackDeliverFail(String detail) {
+    return '投递失败：$detail';
+  }
+
+  @override
+  String get opsWhSnackScopeGlobal => '已改为全局（无 workspace 过滤）';
+
+  @override
+  String get opsWhSnackScopeWorkspaceUpdated => '已更新 workspaceId';
+
+  @override
+  String get opsWhDeleteTitle => '删除 Webhook';
+
+  @override
+  String opsWhDeleteBody(String id) {
+    return '即将删除 webhook：$id\n此操作会移除该目标地址。';
+  }
+
+  @override
+  String get opsWhDeleteConfirm => '删除';
+
+  @override
+  String get opsWhDeleteConfirmButton => '确认删除';
+
+  @override
+  String opsWhLastTestOk(String status) {
+    return '最近测试：成功（HTTP $status）';
+  }
+
+  @override
+  String opsWhLastTestFail(String status, String error) {
+    return '最近测试：失败（HTTP $status）$error';
+  }
+
+  @override
+  String opsWhInventoryLine(
+    int total,
+    int filtered,
+    int ok,
+    int fail,
+    String latestPart,
+  ) {
+    return '共 $total · 筛选 $filtered · 本会话测试成功 $ok · 失败 $fail$latestPart';
+  }
+
+  @override
+  String opsWhInventoryLatestPart(String id) {
+    return ' · 最近：$id';
+  }
+
+  @override
+  String get opsWhEmptyNone => '当前还没有配置任何出站 Webhook。可直接在上方创建，并在此处测试投递与删除。';
+
+  @override
+  String get opsWhEmptyFiltered =>
+      '当前筛选没有命中任何 Webhook，请调整 URL / id / createdAt 搜索关键字。';
+
+  @override
+  String get opsWhUrlLabel => 'Webhook URL';
+
+  @override
+  String get opsWhUrlHint => 'https://example.com/webhook';
+
+  @override
+  String get opsWhSecretLabel => 'Secret（可空，留空则服务端生成）';
+
+  @override
+  String get opsWhWorkspaceIdLabel => 'workspaceId（可空）';
+
+  @override
+  String get opsWhWorkspaceIdHint => '仅投递属于该工作区的事件；须为 UUID';
+
+  @override
+  String get opsWhSubscribeHint => '订阅事件（全选=默认全部；可取消不需要的类型）';
+
+  @override
+  String get opsWhTestEventTypeLabel => '测试 eventType';
+
+  @override
+  String get opsWhTestEventTypeHint => 'test.ping';
+
+  @override
+  String get opsWhLatestCreatedTitle => '最近创建的 Webhook 凭据';
+
+  @override
+  String get opsWhCopyId => '复制 ID';
+
+  @override
+  String get opsWhCopyUrl => '复制 URL';
+
+  @override
+  String get opsWhCopySecret => '复制 Secret';
+
+  @override
+  String get opsWhCreate => '创建';
+
+  @override
+  String get opsWhCreating => '请求中…';
+
+  @override
+  String get opsWhRefreshList => '刷新列表';
+
+  @override
+  String get opsWhSearchLabel => '搜索 Webhook（URL / id / createdAt）';
+
+  @override
+  String get opsWhRecentActivity => '最近操作';
+
+  @override
+  String get opsWhCopyActivityTooltip => '复制记录';
+
+  @override
+  String get opsWhActivityRecordSuffix => ' Webhook 操作记录';
+
+  @override
+  String get opsWhChipLatestCreated => '最近创建';
+
+  @override
+  String get opsWhChipDisabled => '已停用';
+
+  @override
+  String get opsWhSubscribeHeading => '订阅事件';
+
+  @override
+  String get opsWhScopeHeading => '作用域 workspaceId（留空保存 = 全局）';
+
+  @override
+  String get opsWhScopeFieldHint => 'UUID，留空表示不按工作区过滤';
+
+  @override
+  String get opsWhSaveScope => '保存作用域';
+
+  @override
+  String get opsWhSavingScope => '保存中…';
+
+  @override
+  String get opsWhClearInput => '清空输入';
+
+  @override
+  String get opsWhRecentDeliveries => '最近投递';
+
+  @override
+  String get opsWhTooltipCopyUrl => '复制 URL';
+
+  @override
+  String get opsWhUrlCopiedSnack => '已复制 Webhook URL';
+
+  @override
+  String get opsWhTestDeliver => '测试投递';
+
+  @override
+  String get opsWhBusy => '处理中…';
+
+  @override
+  String get opsWhDeliveryLog => '投递记录';
+
+  @override
+  String get opsWhLoading => '加载中…';
+
+  @override
+  String get opsWhDelete => '删除';
+
+  @override
+  String get billingAuditTitle => 'Billing Webhook 审计';
+
+  @override
+  String get billingAuditProviderLabel => 'Provider';
+
+  @override
+  String get billingAuditAll => '全部';
+
+  @override
+  String get billingAuditSortLabel => '排序';
+
+  @override
+  String get billingAuditSortNewest => '最新优先';
+
+  @override
+  String get billingAuditSortOldest => '最早优先';
+
+  @override
+  String get billingAuditOnlyInformational => '仅 informational';
+
+  @override
+  String get billingAuditOnlyStateful => '仅 stateful';
+
+  @override
+  String get billingAuditEventTypeHint =>
+      '例如 invoice.paid / subscription.expired';
+
+  @override
+  String get billingAuditProviderEventIdHint => '例如 stripe:evt_123';
+
+  @override
+  String get billingAuditRawEventIdHint => '例如 evt_123';
+
+  @override
+  String get billingAuditProviderPrefixHint => '例如 stripe:evt_';
+
+  @override
+  String get billingAuditRawPrefixHint => '例如 evt_';
+
+  @override
+  String get billingAuditEventCreatedFromHint => '2026-04-01T00:00:00Z';
+
+  @override
+  String get billingAuditEventCreatedToHint => '2026-04-30T23:59:59Z';
+
+  @override
+  String get billingAuditQuery => '查询审计';
+
+  @override
+  String get billingAuditQuerying => '读取中…';
+
+  @override
+  String get billingAuditResetRefresh => '重置并刷新';
+
+  @override
+  String get billingAuditCopyCsv => '复制 CSV';
+
+  @override
+  String get billingAuditCsvCopiedSnack => '已复制当前 billing 审计 CSV';
+
+  @override
+  String get billingAuditCopyQuerySummary => '复制查询摘要';
+
+  @override
+  String get billingAuditCopyQueryUrl => '复制查询 URL';
+
+  @override
+  String get billingAuditQueryUrlCopiedSnack => '已复制当前查询 URL';
+
+  @override
+  String get billingAuditCopyFullCsv => '复制全量 CSV';
+
+  @override
+  String get billingAuditExporting => '导出中…';
+
+  @override
+  String get billingAuditLoading => '加载 billing 审计中…';
+
+  @override
+  String billingAuditPageStats(int total, int loaded, String hasMore) {
+    return 'total=$total · loaded=$loaded · has_more=$hasMore';
+  }
+
+  @override
+  String get billingEmptyQuery =>
+      '当前查询没有命中任何 billing webhook 审计事件，可调整 provider、event id、时间窗或 informational 条件后重试。';
+
+  @override
+  String get billingAuditQuerySummaryCopied => '已复制当前查询摘要';
+
+  @override
+  String get billingAuditSnapshotCopied => '已复制当前审计摘要';
+
+  @override
+  String billingCopiedWithLabel(String label) {
+    return '已复制$label';
+  }
+
+  @override
+  String billingAuditFullCsvCopied(int count) {
+    return '已复制全量 billing 审计 CSV（$count 条）';
+  }
+
+  @override
+  String billingSnapLoaded(int count) {
+    return '已加载：$count';
+  }
+
+  @override
+  String billingSnapInformational(int count) {
+    return 'informational：$count';
+  }
+
+  @override
+  String billingSnapStateful(int count) {
+    return 'stateful：$count';
+  }
+
+  @override
+  String billingSnapProviders(String list) {
+    return 'providers：$list';
+  }
+
+  @override
+  String billingSnapEventTypes(String list) {
+    return 'event types：$list';
+  }
+
+  @override
+  String get billingAuditCurrentLoadTitle => '当前加载摘要';
+
+  @override
+  String get billingAuditCopySnapshot => '复制审计摘要';
+
+  @override
+  String get billingAuditCopyProviderEventId => '复制 provider_event_id';
+
+  @override
+  String get billingAuditCopyRawEventId => '复制 raw_event_id';
+
+  @override
+  String billingAuditFilterByProvider(String provider) {
+    return '按 $provider 过滤';
+  }
+
+  @override
+  String billingAuditFilterByEventType(String eventType) {
+    return '按 $eventType 过滤';
+  }
+
+  @override
+  String get billingAuditOnlyThisEvent => '仅看这一事件';
+
+  @override
+  String get billingAuditLoadMore => '加载更多审计';
+
+  @override
+  String billingMetaProvider(String value) {
+    return 'provider=$value';
+  }
+
+  @override
+  String billingMetaType(String value) {
+    return 'type=$value';
+  }
+
+  @override
+  String billingMetaCreated(String value) {
+    return 'created=$value';
+  }
+
+  @override
+  String billingMetaEventCreated(String value) {
+    return 'event_created=$value';
+  }
+
+  @override
+  String get billingMetaInformational => 'informational';
+
+  @override
+  String get billingMetaStateful => 'stateful';
+
+  @override
+  String billingRowRawEventId(String value) {
+    return 'raw_event_id=$value';
+  }
+
+  @override
+  String billingRowId(String value) {
+    return 'id=$value';
+  }
+
+  @override
+  String billingChipCount(String label, int count) {
+    return '$label $count';
+  }
 }
