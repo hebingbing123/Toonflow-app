@@ -19,7 +19,6 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                 try {
                   final pg = await fetchNovelWorkbenchPaged(
                     token,
-                    p.numericId,
                     projectUuid: p.id,
                     page: 1,
                     limit: 10,
@@ -57,7 +56,6 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                 try {
                   final rows = await fetchNovelWorkbenchFullRows(
                     token,
-                    p.numericId,
                     projectUuid: p.id,
                   );
                   if (!ctx.mounted) return;
@@ -88,7 +86,6 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                 try {
                   final idx = await fetchNovelWorkbenchIndex(
                     token,
-                    p.numericId,
                     projectUuid: p.id,
                   );
                   if (!ctx.mounted) return;

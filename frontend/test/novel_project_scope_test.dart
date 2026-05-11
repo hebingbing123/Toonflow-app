@@ -18,4 +18,13 @@ void main() {
       throwsA(isA<ArgumentError>()),
     );
   });
+
+  test('novels compat callers may rely on uuid without numeric id', () async {
+    final resolved = await resolveNovelProjectUuid(
+      'token',
+      projectUuid: '550e8400-e29b-41d4-a716-446655440123',
+    );
+
+    expect(resolved, '550e8400-e29b-41d4-a716-446655440123');
+  });
 }

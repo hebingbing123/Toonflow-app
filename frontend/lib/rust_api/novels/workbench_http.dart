@@ -11,11 +11,10 @@ import 'rest_api.dart';
 
 /// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (workbench **`getNovelData`**).
 Future<List<NovelRow>> fetchNovelWorkbenchFullRows(
-  String accessToken,
-  int projectNumericId, {
+  String accessToken, {
+  int? projectNumericId,
   String? projectUuid,
-}
-) async {
+}) async {
   final projectId = await resolveNovelProjectUuid(
     accessToken,
     projectUuid: projectUuid,
@@ -27,11 +26,10 @@ Future<List<NovelRow>> fetchNovelWorkbenchFullRows(
 
 /// Compat: index list via **`GET …/novels`** (**`getNovelIndex`** shape).
 Future<List<NovelWorkbenchIndexItem>> fetchNovelWorkbenchIndex(
-  String accessToken,
-  int projectNumericId, {
+  String accessToken, {
+  int? projectNumericId,
   String? projectUuid,
-}
-) async {
+}) async {
   final projectId = await resolveNovelProjectUuid(
     accessToken,
     projectUuid: projectUuid,
@@ -93,7 +91,7 @@ Future<List<NovelWorkbenchEventStateItem>> fetchNovelWorkbenchEventStates(
 /// Compat: async event extraction — **`POST …/novel-events/generate-events`** (project UUID in path).
 Future<String> postNovelEventsGenerateEvents(
   String accessToken, {
-  required int projectNumericId,
+  int? projectNumericId,
   String? projectUuid,
   required List<int> novelIds,
   int concurrentCount = 5,
@@ -129,8 +127,8 @@ Future<String> postNovelEventsGenerateEvents(
 
 /// Compat: paginated list (**`getNovel`**: **`{ data, total }`**).
 Future<NovelWorkbenchPagedResponse> fetchNovelWorkbenchPaged(
-  String accessToken,
-  int projectNumericId, {
+  String accessToken, {
+  int? projectNumericId,
   String? projectUuid,
   required int page,
   required int limit,
@@ -168,11 +166,10 @@ Future<NovelWorkbenchPagedResponse> fetchNovelWorkbenchPaged(
 /// Compat: batch add — sequential **`POST …/novels`** (empty **`data`** → success message, no HTTP).
 Future<String> appendNovelsUnderProject(
   String accessToken,
-  int projectNumericId,
   List<NovelWorkbenchAppendItem> data, {
+  int? projectNumericId,
   String? projectUuid,
-}
-) async {
+}) async {
   if (data.isEmpty) {
     return '新增原文成功';
   }

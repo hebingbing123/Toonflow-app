@@ -68,7 +68,6 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
               }
               final message = await postNovelEventsGenerateEvents(
                 token,
-                projectNumericId: p.numericId,
                 projectUuid: p.id,
                 novelIds: ids,
               );

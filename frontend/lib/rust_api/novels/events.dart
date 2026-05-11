@@ -165,8 +165,8 @@ Future<String> postProjectNovelEventsBatchDeleteByProjectId(
 
 /// Compat: maps **`GET …/projects/{uuid}/novel-events`** to workbench **`{ list, total }`**.
 Future<NovelEventsPageResponse> fetchNovelEventsPaged(
-  String accessToken,
-  int projectNumericId, {
+  String accessToken, {
+  int? projectNumericId,
   String? projectUuid,
   required int page,
   required int limit,
@@ -201,11 +201,10 @@ Future<NovelEventsPageResponse> fetchNovelEventsPaged(
 /// Compat: **`POST …/projects/{uuid}/novel-events/batch-delete`** by event numeric ids.
 Future<String> batchDeleteNovelEvents(
   String accessToken,
-  int projectNumericId,
   List<int> numericIds, {
+  int? projectNumericId,
   String? projectUuid,
-}
-) async {
+}) async {
   final resolvedProjectUuid = await resolveNovelProjectUuid(
     accessToken,
     projectUuid: projectUuid,

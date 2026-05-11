@@ -567,7 +567,6 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     }
     final message = await postNovelEventsGenerateEvents(
       token,
-      projectNumericId: project.numericId,
       projectUuid: project.id,
       novelIds: ids,
     );
@@ -582,7 +581,6 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final rows = await fetchNovelWorkbenchFullRows(
       token,
-      project.numericId,
       projectUuid: project.id,
     );
     final sample = rows.isEmpty
@@ -601,7 +599,6 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final rows = await fetchNovelWorkbenchIndex(
       token,
-      project.numericId,
       projectUuid: project.id,
     );
     final sample = rows.isEmpty

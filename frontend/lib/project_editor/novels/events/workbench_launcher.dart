@@ -142,7 +142,6 @@ Future<void> openNovelEventsWorkbenchDialog({
                         );
                         final workbenchPage = await fetchNovelEventsPaged(
                           token,
-                          project.numericId,
                           projectUuid: project.id,
                           page: 1,
                           limit: 10,

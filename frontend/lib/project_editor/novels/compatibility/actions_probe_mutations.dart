@@ -20,7 +20,6 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
                   final msg = await postNovelEventsGenerateEvents(
                     token,
-                    projectNumericId: p.numericId,
                     projectUuid: p.id,
                     novelIds: ids.take(3).toList(),
                   );
@@ -52,7 +51,6 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 try {
                   final msg = await appendNovelsUnderProject(
                     token,
-                    p.numericId,
                     const [],
                     projectUuid: p.id,
                   );
