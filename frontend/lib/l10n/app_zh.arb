@@ -1936,5 +1936,121 @@
         "type": "int"
       }
     }
+  },
+  "qualityReviewsErrNotLoggedIn": "当前未登录，无法读取质量评审",
+  "qualityReviewsSummaryNotLoaded": "尚未加载评审列表",
+  "qualityReviewsSectionIntro": "查看评审列表、坏例与阶段通过率；低分坏例会回写负向记忆，高分通过会晋升正向记忆。",
+  "qualityReviewsOpsDashboardTitle": "质量运营看板",
+  "qualityReviewsCopiedDashboardSummary": "已复制质量看板摘要",
+  "qualityReviewsCopyDashboardSummary": "复制看板摘要",
+  "qualityReviewsFieldReviewId": "评审 ID（点下方列表可自动填入）",
+  "qualityReviewsViewReviewDetails": "查看评审详情",
+  "qualityReviewsSummaryReviewDetails": "评审详情：{value}",
+  "@qualityReviewsSummaryReviewDetails": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryStats": "质量统计：{value}",
+  "@qualityReviewsSummaryStats": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryStagePassRate": "阶段通过率：{value}",
+  "@qualityReviewsSummaryStagePassRate": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryStageGrade": "阶段等级分布：{value}",
+  "@qualityReviewsSummaryStageGrade": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryScopeInsights": "Scope榜单：{value}",
+  "@qualityReviewsSummaryScopeInsights": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryTokenEfficiency": "Token效率：{value}",
+  "@qualityReviewsSummaryTokenEfficiency": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryBadCaseHotspots": "坏例热点：{value}",
+  "@qualityReviewsSummaryBadCaseHotspots": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsOpenWorkbench": "打开质量工作台",
+  "qualityReviewsLoadCurrentDashboard": "读取当前看板",
+  "qualityReviewsRefreshReadModel": "刷新底层读模型",
+  "qualityReviewsLoadReviewList": "加载评审列表",
+  "qualityReviewsViewBadCases": "查看坏例",
+  "qualityReviewsViewStats": "查看质量统计",
+  "qualityReviewsViewStagePassRate": "查看阶段通过率",
+  "qualityReviewsDashboardNotLoadedRefreshEnabled": "质量看板尚未加载。可直接刷新聚合统计、坏例热点、阶段分布与 token 效率。",
+  "qualityReviewsDashboardNotLoadedRefreshDisabled": "质量看板尚未加载。当前平台配置已关闭刷新入口，可读取当前看板查看已有聚合统计与坏例热点。",
+  "qualityReviewsTargetType": "目标类型",
+  "qualityReviewsTargetTypeChip": "{target} {pass}% · {count}条",
+  "@qualityReviewsTargetTypeChip": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "pass": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsStageGrade": "阶段等级",
+  "qualityReviewsBadCaseHotspots": "坏例热点",
+  "qualityReviewsBadCaseChip": "{category} {count}",
+  "@qualityReviewsBadCaseChip": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsUncategorized": "未分类",
+  "qualityReviewsScopeLeaderboard": "Scope 榜单",
+  "qualityReviewsTokenEfficiency": "Token 效率",
+  "qualityReviewsCompatibilityCheck": "兼容性检查",
+  "qualityReviewsCompatibilityCheckIntro": "保留只读回归入口，确认评审列表与详情查询仍可正常工作",
+  "qualityReviewsReadProbeLabel": "Quality review read probe",
+  "qualityReviewsRunReadOnlyRegressionCheck": "运行只读回归检查",
+  "qualityReviewsCount": "{count} 条评审",
+  "@qualityReviewsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

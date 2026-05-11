@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/quality_reviews/controller.dart';
 import 'package:openflow_app/quality_reviews/section.dart';
 import 'package:openflow_app/rust_api.dart';
 
 const _testPlatformConfig = PlatformConfigToggleSetV1.defaults;
+
+Widget _buildTestApp(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
+    home: Scaffold(body: child),
+  );
+}
 
 QualityReviewsController buildController({
   List<QualityReview>? qualityReviews,
@@ -44,14 +54,12 @@ void main() {
       qualityStagePassRateLine: '2026-04-10 output:100%',
     );
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: QualityReviewsSection(
-            accessToken: 'token',
-            controller: controller,
-            initialProjectNumericId: 9,
-            platformConfig: _testPlatformConfig,
-          ),
+      _buildTestApp(
+        QualityReviewsSection(
+          accessToken: 'token',
+          controller: controller,
+          initialProjectNumericId: 9,
+          platformConfig: _testPlatformConfig,
         ),
       ),
     );
@@ -84,14 +92,12 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: QualityReviewsSection(
-            accessToken: 'token',
-            controller: controller,
-            initialProjectNumericId: 9,
-            platformConfig: _testPlatformConfig,
-          ),
+      _buildTestApp(
+        QualityReviewsSection(
+          accessToken: 'token',
+          controller: controller,
+          initialProjectNumericId: 9,
+          platformConfig: _testPlatformConfig,
         ),
       ),
     );

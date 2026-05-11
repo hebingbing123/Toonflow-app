@@ -5024,6 +5024,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} results'**
   String globalSearchResultRows(int count);
+
+  /// No description provided for @qualityReviewsErrNotLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in. Unable to load quality reviews.'**
+  String get qualityReviewsErrNotLoggedIn;
+
+  /// No description provided for @qualityReviewsSummaryNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Review list not loaded yet.'**
+  String get qualityReviewsSummaryNotLoaded;
+
+  /// No description provided for @qualityReviewsSectionIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'View review list, bad cases, and stage pass rates. Low-score bad cases write back negative memory, while high-score passes promote positive memory.'**
+  String get qualityReviewsSectionIntro;
+
+  /// No description provided for @qualityReviewsOpsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality operations dashboard'**
+  String get qualityReviewsOpsDashboardTitle;
+
+  /// No description provided for @qualityReviewsCopiedDashboardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied dashboard summary.'**
+  String get qualityReviewsCopiedDashboardSummary;
+
+  /// No description provided for @qualityReviewsCopyDashboardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy dashboard summary'**
+  String get qualityReviewsCopyDashboardSummary;
+
+  /// No description provided for @qualityReviewsFieldReviewId.
+  ///
+  /// In en, this message translates to:
+  /// **'Review ID (tap from list below to autofill)'**
+  String get qualityReviewsFieldReviewId;
+
+  /// No description provided for @qualityReviewsViewReviewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View review details'**
+  String get qualityReviewsViewReviewDetails;
+
+  /// No description provided for @qualityReviewsSummaryReviewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Review details: {value}'**
+  String qualityReviewsSummaryReviewDetails(String value);
+
+  /// No description provided for @qualityReviewsSummaryStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality stats: {value}'**
+  String qualityReviewsSummaryStats(String value);
+
+  /// No description provided for @qualityReviewsSummaryStagePassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage pass rate: {value}'**
+  String qualityReviewsSummaryStagePassRate(String value);
+
+  /// No description provided for @qualityReviewsSummaryStageGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage grade distribution: {value}'**
+  String qualityReviewsSummaryStageGrade(String value);
+
+  /// No description provided for @qualityReviewsSummaryScopeInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope leaderboard: {value}'**
+  String qualityReviewsSummaryScopeInsights(String value);
+
+  /// No description provided for @qualityReviewsSummaryTokenEfficiency.
+  ///
+  /// In en, this message translates to:
+  /// **'Token efficiency: {value}'**
+  String qualityReviewsSummaryTokenEfficiency(String value);
+
+  /// No description provided for @qualityReviewsSummaryBadCaseHotspots.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad-case hotspots: {value}'**
+  String qualityReviewsSummaryBadCaseHotspots(String value);
+
+  /// No description provided for @qualityReviewsOpenWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open quality workbench'**
+  String get qualityReviewsOpenWorkbench;
+
+  /// No description provided for @qualityReviewsLoadCurrentDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Load current dashboard'**
+  String get qualityReviewsLoadCurrentDashboard;
+
+  /// No description provided for @qualityReviewsRefreshReadModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh underlying read model'**
+  String get qualityReviewsRefreshReadModel;
+
+  /// No description provided for @qualityReviewsLoadReviewList.
+  ///
+  /// In en, this message translates to:
+  /// **'Load review list'**
+  String get qualityReviewsLoadReviewList;
+
+  /// No description provided for @qualityReviewsViewBadCases.
+  ///
+  /// In en, this message translates to:
+  /// **'View bad cases'**
+  String get qualityReviewsViewBadCases;
+
+  /// No description provided for @qualityReviewsViewStats.
+  ///
+  /// In en, this message translates to:
+  /// **'View quality stats'**
+  String get qualityReviewsViewStats;
+
+  /// No description provided for @qualityReviewsViewStagePassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'View stage pass rates'**
+  String get qualityReviewsViewStagePassRate;
+
+  /// No description provided for @qualityReviewsDashboardNotLoadedRefreshEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality dashboard not loaded. You can refresh aggregated stats, bad-case hotspots, stage distributions, and token efficiency directly.'**
+  String get qualityReviewsDashboardNotLoadedRefreshEnabled;
+
+  /// No description provided for @qualityReviewsDashboardNotLoadedRefreshDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality dashboard not loaded. Refresh controls are disabled by platform config; load current dashboard to view existing aggregates and bad-case hotspots.'**
+  String get qualityReviewsDashboardNotLoadedRefreshDisabled;
+
+  /// No description provided for @qualityReviewsTargetType.
+  ///
+  /// In en, this message translates to:
+  /// **'Target type'**
+  String get qualityReviewsTargetType;
+
+  /// No description provided for @qualityReviewsTargetTypeChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{target} {pass}% · {count} items'**
+  String qualityReviewsTargetTypeChip(String target, String pass, int count);
+
+  /// No description provided for @qualityReviewsStageGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage grade'**
+  String get qualityReviewsStageGrade;
+
+  /// No description provided for @qualityReviewsBadCaseHotspots.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad-case hotspots'**
+  String get qualityReviewsBadCaseHotspots;
+
+  /// No description provided for @qualityReviewsBadCaseChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} {count}'**
+  String qualityReviewsBadCaseChip(String category, int count);
+
+  /// No description provided for @qualityReviewsUncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get qualityReviewsUncategorized;
+
+  /// No description provided for @qualityReviewsScopeLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope leaderboard'**
+  String get qualityReviewsScopeLeaderboard;
+
+  /// No description provided for @qualityReviewsTokenEfficiency.
+  ///
+  /// In en, this message translates to:
+  /// **'Token efficiency'**
+  String get qualityReviewsTokenEfficiency;
+
+  /// No description provided for @qualityReviewsCompatibilityCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility check'**
+  String get qualityReviewsCompatibilityCheck;
+
+  /// No description provided for @qualityReviewsCompatibilityCheckIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a read-only regression entry to ensure review list and detail queries still work.'**
+  String get qualityReviewsCompatibilityCheckIntro;
+
+  /// No description provided for @qualityReviewsReadProbeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality review read probe'**
+  String get qualityReviewsReadProbeLabel;
+
+  /// No description provided for @qualityReviewsRunReadOnlyRegressionCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Run read-only regression check'**
+  String get qualityReviewsRunReadOnlyRegressionCheck;
+
+  /// No description provided for @qualityReviewsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} reviews'**
+  String qualityReviewsCount(int count);
 }
 
 class _AppLocalizationsDelegate

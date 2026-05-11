@@ -2962,4 +2962,143 @@ class AppLocalizationsEn extends AppLocalizations {
   String globalSearchResultRows(int count) {
     return '$count results';
   }
+
+  @override
+  String get qualityReviewsErrNotLoggedIn =>
+      'Not signed in. Unable to load quality reviews.';
+
+  @override
+  String get qualityReviewsSummaryNotLoaded => 'Review list not loaded yet.';
+
+  @override
+  String get qualityReviewsSectionIntro =>
+      'View review list, bad cases, and stage pass rates. Low-score bad cases write back negative memory, while high-score passes promote positive memory.';
+
+  @override
+  String get qualityReviewsOpsDashboardTitle => 'Quality operations dashboard';
+
+  @override
+  String get qualityReviewsCopiedDashboardSummary =>
+      'Copied dashboard summary.';
+
+  @override
+  String get qualityReviewsCopyDashboardSummary => 'Copy dashboard summary';
+
+  @override
+  String get qualityReviewsFieldReviewId =>
+      'Review ID (tap from list below to autofill)';
+
+  @override
+  String get qualityReviewsViewReviewDetails => 'View review details';
+
+  @override
+  String qualityReviewsSummaryReviewDetails(String value) {
+    return 'Review details: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryStats(String value) {
+    return 'Quality stats: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryStagePassRate(String value) {
+    return 'Stage pass rate: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryStageGrade(String value) {
+    return 'Stage grade distribution: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryScopeInsights(String value) {
+    return 'Scope leaderboard: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryTokenEfficiency(String value) {
+    return 'Token efficiency: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryBadCaseHotspots(String value) {
+    return 'Bad-case hotspots: $value';
+  }
+
+  @override
+  String get qualityReviewsOpenWorkbench => 'Open quality workbench';
+
+  @override
+  String get qualityReviewsLoadCurrentDashboard => 'Load current dashboard';
+
+  @override
+  String get qualityReviewsRefreshReadModel => 'Refresh underlying read model';
+
+  @override
+  String get qualityReviewsLoadReviewList => 'Load review list';
+
+  @override
+  String get qualityReviewsViewBadCases => 'View bad cases';
+
+  @override
+  String get qualityReviewsViewStats => 'View quality stats';
+
+  @override
+  String get qualityReviewsViewStagePassRate => 'View stage pass rates';
+
+  @override
+  String get qualityReviewsDashboardNotLoadedRefreshEnabled =>
+      'Quality dashboard not loaded. You can refresh aggregated stats, bad-case hotspots, stage distributions, and token efficiency directly.';
+
+  @override
+  String get qualityReviewsDashboardNotLoadedRefreshDisabled =>
+      'Quality dashboard not loaded. Refresh controls are disabled by platform config; load current dashboard to view existing aggregates and bad-case hotspots.';
+
+  @override
+  String get qualityReviewsTargetType => 'Target type';
+
+  @override
+  String qualityReviewsTargetTypeChip(String target, String pass, int count) {
+    return '$target $pass% · $count items';
+  }
+
+  @override
+  String get qualityReviewsStageGrade => 'Stage grade';
+
+  @override
+  String get qualityReviewsBadCaseHotspots => 'Bad-case hotspots';
+
+  @override
+  String qualityReviewsBadCaseChip(String category, int count) {
+    return '$category $count';
+  }
+
+  @override
+  String get qualityReviewsUncategorized => 'Uncategorized';
+
+  @override
+  String get qualityReviewsScopeLeaderboard => 'Scope leaderboard';
+
+  @override
+  String get qualityReviewsTokenEfficiency => 'Token efficiency';
+
+  @override
+  String get qualityReviewsCompatibilityCheck => 'Compatibility check';
+
+  @override
+  String get qualityReviewsCompatibilityCheckIntro =>
+      'Keep a read-only regression entry to ensure review list and detail queries still work.';
+
+  @override
+  String get qualityReviewsReadProbeLabel => 'Quality review read probe';
+
+  @override
+  String get qualityReviewsRunReadOnlyRegressionCheck =>
+      'Run read-only regression check';
+
+  @override
+  String qualityReviewsCount(int count) {
+    return '$count reviews';
+  }
 }

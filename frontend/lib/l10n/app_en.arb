@@ -1936,5 +1936,121 @@
         "type": "int"
       }
     }
+  },
+  "qualityReviewsErrNotLoggedIn": "Not signed in. Unable to load quality reviews.",
+  "qualityReviewsSummaryNotLoaded": "Review list not loaded yet.",
+  "qualityReviewsSectionIntro": "View review list, bad cases, and stage pass rates. Low-score bad cases write back negative memory, while high-score passes promote positive memory.",
+  "qualityReviewsOpsDashboardTitle": "Quality operations dashboard",
+  "qualityReviewsCopiedDashboardSummary": "Copied dashboard summary.",
+  "qualityReviewsCopyDashboardSummary": "Copy dashboard summary",
+  "qualityReviewsFieldReviewId": "Review ID (tap from list below to autofill)",
+  "qualityReviewsViewReviewDetails": "View review details",
+  "qualityReviewsSummaryReviewDetails": "Review details: {value}",
+  "@qualityReviewsSummaryReviewDetails": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryStats": "Quality stats: {value}",
+  "@qualityReviewsSummaryStats": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryStagePassRate": "Stage pass rate: {value}",
+  "@qualityReviewsSummaryStagePassRate": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryStageGrade": "Stage grade distribution: {value}",
+  "@qualityReviewsSummaryStageGrade": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryScopeInsights": "Scope leaderboard: {value}",
+  "@qualityReviewsSummaryScopeInsights": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryTokenEfficiency": "Token efficiency: {value}",
+  "@qualityReviewsSummaryTokenEfficiency": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryBadCaseHotspots": "Bad-case hotspots: {value}",
+  "@qualityReviewsSummaryBadCaseHotspots": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsOpenWorkbench": "Open quality workbench",
+  "qualityReviewsLoadCurrentDashboard": "Load current dashboard",
+  "qualityReviewsRefreshReadModel": "Refresh underlying read model",
+  "qualityReviewsLoadReviewList": "Load review list",
+  "qualityReviewsViewBadCases": "View bad cases",
+  "qualityReviewsViewStats": "View quality stats",
+  "qualityReviewsViewStagePassRate": "View stage pass rates",
+  "qualityReviewsDashboardNotLoadedRefreshEnabled": "Quality dashboard not loaded. You can refresh aggregated stats, bad-case hotspots, stage distributions, and token efficiency directly.",
+  "qualityReviewsDashboardNotLoadedRefreshDisabled": "Quality dashboard not loaded. Refresh controls are disabled by platform config; load current dashboard to view existing aggregates and bad-case hotspots.",
+  "qualityReviewsTargetType": "Target type",
+  "qualityReviewsTargetTypeChip": "{target} {pass}% · {count} items",
+  "@qualityReviewsTargetTypeChip": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "pass": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsStageGrade": "Stage grade",
+  "qualityReviewsBadCaseHotspots": "Bad-case hotspots",
+  "qualityReviewsBadCaseChip": "{category} {count}",
+  "@qualityReviewsBadCaseChip": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsUncategorized": "Uncategorized",
+  "qualityReviewsScopeLeaderboard": "Scope leaderboard",
+  "qualityReviewsTokenEfficiency": "Token efficiency",
+  "qualityReviewsCompatibilityCheck": "Compatibility check",
+  "qualityReviewsCompatibilityCheckIntro": "Keep a read-only regression entry to ensure review list and detail queries still work.",
+  "qualityReviewsReadProbeLabel": "Quality review read probe",
+  "qualityReviewsRunReadOnlyRegressionCheck": "Run read-only regression check",
+  "qualityReviewsCount": "{count} reviews",
+  "@qualityReviewsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

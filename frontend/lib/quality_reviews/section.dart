@@ -8,6 +8,7 @@ import 'workbench_view.dart';
 import '../../rust_api.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 
 part 'section_workbench.dart';
 part 'section_workbench_controllers.dart';
@@ -27,11 +28,12 @@ class QualityReviewsSection extends StatelessWidget {
   final PlatformConfigToggleSetV1 platformConfig;
 
   Future<void> _openQualityWorkbench(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = accessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('当前未登录，无法读取质量评审')));
+      ).showSnackBar(SnackBar(content: Text(l10n.qualityReviewsErrNotLoggedIn)));
       return;
     }
     await showDialog<void>(
@@ -49,9 +51,10 @@ class QualityReviewsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final reviewSummary = controller.qualityReviews == null
-        ? '尚未加载评审列表'
+        ? l10n.qualityReviewsSummaryNotLoaded
         : summarizeQualityReviews(controller.qualityReviews!);
     return AnimatedBuilder(
       animation: controller,
@@ -65,18 +68,18 @@ class QualityReviewsSection extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '质量评审',
+                    l10n.productNavQuality,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
-                const RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: '本机客户端偏好',
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: l10n.taskCenterLocalClientPrefs,
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              '查看评审列表、坏例与阶段通过率；低分坏例会回写负向记忆，高分通过会晋升正向记忆。',
+              l10n.qualityReviewsSectionIntro,
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: outline),
@@ -113,7 +116,10 @@ class QualityReviewsSection extends StatelessWidget {
             ),
             if (platformConfig.qualityDashboardEnabled) ...[
               const SizedBox(height: 8),
-              Text('质量运营看板', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.qualityReviewsOpsDashboardTitle,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 6),
               if (controller.qualityDashboardLine != null)
                 Align(
@@ -128,9 +134,11 @@ class QualityReviewsSection extends StatelessWidget {
                       }
                       ScaffoldMessenger.of(
                         context,
-                      ).showSnackBar(const SnackBar(content: Text('已复制质量看板摘要')));
+                      ).showSnackBar(
+                        SnackBar(content: Text(l10n.qualityReviewsCopiedDashboardSummary)),
+                      );
                     },
-                    child: const Text('复制看板摘要'),
+                    child: Text(l10n.qualityReviewsCopyDashboardSummary),
                   ),
                 ),
               QualityReviewsOpsDashboardPreview(
@@ -159,7 +167,9 @@ class QualityReviewsSection extends StatelessWidget {
             TextField(
               controller: controller.qualityReviewIdController,
               onChanged: controller.onQualityReviewIdChanged,
-              decoration: const InputDecoration(labelText: '评审 ID（点下方列表可自动填入）'),
+              decoration: InputDecoration(
+                labelText: l10n.qualityReviewsFieldReviewId,
+              ),
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
@@ -168,35 +178,53 @@ class QualityReviewsSection extends StatelessWidget {
                       controller.qualityReviewIdController.text.trim().isEmpty)
                   ? null
                   : controller.fetchSelectedQualityReview,
-              child: Text(controller.loadingQualityReviewById ? '…' : '查看评审详情'),
+              child: Text(
+                controller.loadingQualityReviewById
+                    ? l10n.projectsBusyProcessing
+                    : l10n.qualityReviewsViewReviewDetails,
+              ),
             ),
             if (controller.qualityReviewByIdLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText('评审详情：${controller.qualityReviewByIdLine}'),
+              SelectableText(
+                l10n.qualityReviewsSummaryReviewDetails(controller.qualityReviewByIdLine!),
+              ),
             ],
             if (controller.qualityStatsLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText('质量统计：${controller.qualityStatsLine}'),
+              SelectableText(
+                l10n.qualityReviewsSummaryStats(controller.qualityStatsLine!),
+              ),
             ],
             if (controller.qualityStagePassRateLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText('阶段通过率：${controller.qualityStagePassRateLine}'),
+              SelectableText(
+                l10n.qualityReviewsSummaryStagePassRate(controller.qualityStagePassRateLine!),
+              ),
             ],
             if (controller.qualityStageGradeLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText('阶段等级分布：${controller.qualityStageGradeLine}'),
+              SelectableText(
+                l10n.qualityReviewsSummaryStageGrade(controller.qualityStageGradeLine!),
+              ),
             ],
             if (controller.qualityScopeInsightsLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText('Scope榜单：${controller.qualityScopeInsightsLine}'),
+              SelectableText(
+                l10n.qualityReviewsSummaryScopeInsights(controller.qualityScopeInsightsLine!),
+              ),
             ],
             if (controller.qualityTokenEfficiencyLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText('Token效率：${controller.qualityTokenEfficiencyLine}'),
+              SelectableText(
+                l10n.qualityReviewsSummaryTokenEfficiency(controller.qualityTokenEfficiencyLine!),
+              ),
             ],
             if (controller.qualityBadCaseStatsLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText('坏例热点：${controller.qualityBadCaseStatsLine}'),
+              SelectableText(
+                l10n.qualityReviewsSummaryBadCaseHotspots(controller.qualityBadCaseStatsLine!),
+              ),
             ],
             if (controller.qualityReviews != null) ...[
               QualityReviewsListPreview(

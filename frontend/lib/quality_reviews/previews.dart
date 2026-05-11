@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
+import '../l10n/app_localizations.dart';
 
 /// Groups the section-level review actions above the detailed workbench flow.
 class QualityReviewsActionsBar extends StatelessWidget {
@@ -41,43 +42,68 @@ class QualityReviewsActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         FilledButton.tonal(
           onPressed: onOpenWorkbench,
-          child: const Text('打开质量工作台'),
+          child: Text(l10n.qualityReviewsOpenWorkbench),
         ),
         if (showDashboardControls)
           FilledButton(
             onPressed: loadingQualityDashboard ? null : onLoadQualityDashboard,
-            child: Text(loadingQualityDashboard ? '…' : '读取当前看板'),
+            child: Text(
+              loadingQualityDashboard
+                  ? l10n.projectsBusyProcessing
+                  : l10n.qualityReviewsLoadCurrentDashboard,
+            ),
           ),
         if (showDashboardControls && showRefreshControls)
           FilledButton.tonal(
             onPressed: refreshingQualityDashboardReadModel
                 ? null
                 : onRefreshQualityDashboardReadModel,
-            child: Text(refreshingQualityDashboardReadModel ? '…' : '刷新底层读模型'),
+            child: Text(
+              refreshingQualityDashboardReadModel
+                  ? l10n.projectsBusyProcessing
+                  : l10n.qualityReviewsRefreshReadModel,
+            ),
           ),
         FilledButton.tonal(
           onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
-          child: Text(loadingQualityReviews ? '…' : '加载评审列表'),
+          child: Text(
+            loadingQualityReviews
+                ? l10n.projectsBusyProcessing
+                : l10n.qualityReviewsLoadReviewList,
+          ),
         ),
         FilledButton.tonal(
           onPressed: loadingQualityBadCases ? null : onLoadQualityBadCases,
-          child: Text(loadingQualityBadCases ? '…' : '查看坏例'),
+          child: Text(
+            loadingQualityBadCases
+                ? l10n.projectsBusyProcessing
+                : l10n.qualityReviewsViewBadCases,
+          ),
         ),
         FilledButton.tonal(
           onPressed: loadingQualityStats ? null : onLoadQualityStats,
-          child: Text(loadingQualityStats ? '…' : '查看质量统计'),
+          child: Text(
+            loadingQualityStats
+                ? l10n.projectsBusyProcessing
+                : l10n.qualityReviewsViewStats,
+          ),
         ),
         FilledButton.tonal(
           onPressed: loadingQualityStagePassRate
               ? null
               : onLoadQualityStagePassRate,
-          child: Text(loadingQualityStagePassRate ? '…' : '查看阶段通过率'),
+          child: Text(
+            loadingQualityStagePassRate
+                ? l10n.projectsBusyProcessing
+                : l10n.qualityReviewsViewStagePassRate,
+          ),
         ),
       ],
     );
@@ -112,6 +138,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasAnything =
         dashboardSummary != null ||
         refreshSummary != null ||
@@ -124,8 +151,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     if (!hasAnything) {
       return Text(
         refreshControlsEnabled
-            ? '质量看板尚未加载。可直接刷新聚合统计、坏例热点、阶段分布与 token 效率。'
-            : '质量看板尚未加载。当前平台配置已关闭刷新入口，可读取当前看板查看已有聚合统计与坏例热点。',
+            ? l10n.qualityReviewsDashboardNotLoadedRefreshEnabled
+            : l10n.qualityReviewsDashboardNotLoadedRefreshDisabled,
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: outlineColor),
@@ -160,7 +187,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (qualityStatsRows?.isNotEmpty == true) ...[
-          Text('目标类型', style: Theme.of(context).textTheme.labelLarge),
+          Text(l10n.qualityReviewsTargetType, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -170,7 +197,11 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                 .map(
                   (row) => Chip(
                     label: Text(
-                      '${row.targetType} ${row.passRatePercent.toStringAsFixed(1)}% · ${row.totalReviews}条',
+                      l10n.qualityReviewsTargetTypeChip(
+                        row.targetType,
+                        row.passRatePercent.toStringAsFixed(1),
+                        row.totalReviews,
+                      ),
                     ),
                     visualDensity: VisualDensity.compact,
                   ),
@@ -180,7 +211,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (stageGradeRows?.isNotEmpty == true) ...[
-          Text('阶段等级', style: Theme.of(context).textTheme.labelLarge),
+          Text(l10n.qualityReviewsStageGrade, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -200,7 +231,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (badCaseStats?.isNotEmpty == true) ...[
-          Text('坏例热点', style: Theme.of(context).textTheme.labelLarge),
+          Text(l10n.qualityReviewsBadCaseHotspots, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -209,7 +240,12 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                 .take(4)
                 .map(
                   (row) => Chip(
-                    label: Text('${row.badCaseCategory ?? "未分类"} ${row.count}'),
+                    label: Text(
+                      l10n.qualityReviewsBadCaseChip(
+                        row.badCaseCategory ?? l10n.qualityReviewsUncategorized,
+                        row.count,
+                      ),
+                    ),
                     visualDensity: VisualDensity.compact,
                   ),
                 )
@@ -218,7 +254,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (scopeInsightRows?.isNotEmpty == true) ...[
-          Text('Scope 榜单', style: Theme.of(context).textTheme.labelLarge),
+          Text(l10n.qualityReviewsScopeLeaderboard, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
           ...scopeInsightRows!
               .take(3)
@@ -234,7 +270,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (tokenEfficiencyRows?.isNotEmpty == true) ...[
-          Text('Token 效率', style: Theme.of(context).textTheme.labelLarge),
+          Text(l10n.qualityReviewsTokenEfficiency, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
           ...tokenEfficiencyRows!
               .take(3)
@@ -290,12 +326,13 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      title: const Text('兼容性检查'),
+      title: Text(l10n.qualityReviewsCompatibilityCheck),
       subtitle: Text(
-        '保留只读回归入口，确认评审列表与详情查询仍可正常工作',
+        l10n.qualityReviewsCompatibilityCheckIntro,
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: outlineColor),
@@ -304,7 +341,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Quality review read probe',
+            l10n.qualityReviewsReadProbeLabel,
             style: Theme.of(
               context,
             ).textTheme.labelSmall?.copyWith(color: outlineColor),
@@ -319,7 +356,11 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
               onPressed: creatingQualityReview
                   ? null
                   : onCreateQualityReviewProbe,
-              child: Text(creatingQualityReview ? '…' : '运行只读回归检查'),
+              child: Text(
+                creatingQualityReview
+                    ? l10n.projectsBusyProcessing
+                    : l10n.qualityReviewsRunReadOnlyRegressionCheck,
+              ),
             ),
           ],
         ),
@@ -341,12 +382,13 @@ class QualityReviewsListPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         Text(
-          '${reviews.length} 条评审',
+          l10n.qualityReviewsCount(reviews.length),
           style: Theme.of(context).textTheme.labelLarge,
         ),
         ...reviews

@@ -2849,4 +2849,139 @@ class AppLocalizationsZh extends AppLocalizations {
   String globalSearchResultRows(int count) {
     return '$count 条结果';
   }
+
+  @override
+  String get qualityReviewsErrNotLoggedIn => '当前未登录，无法读取质量评审';
+
+  @override
+  String get qualityReviewsSummaryNotLoaded => '尚未加载评审列表';
+
+  @override
+  String get qualityReviewsSectionIntro =>
+      '查看评审列表、坏例与阶段通过率；低分坏例会回写负向记忆，高分通过会晋升正向记忆。';
+
+  @override
+  String get qualityReviewsOpsDashboardTitle => '质量运营看板';
+
+  @override
+  String get qualityReviewsCopiedDashboardSummary => '已复制质量看板摘要';
+
+  @override
+  String get qualityReviewsCopyDashboardSummary => '复制看板摘要';
+
+  @override
+  String get qualityReviewsFieldReviewId => '评审 ID（点下方列表可自动填入）';
+
+  @override
+  String get qualityReviewsViewReviewDetails => '查看评审详情';
+
+  @override
+  String qualityReviewsSummaryReviewDetails(String value) {
+    return '评审详情：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryStats(String value) {
+    return '质量统计：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryStagePassRate(String value) {
+    return '阶段通过率：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryStageGrade(String value) {
+    return '阶段等级分布：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryScopeInsights(String value) {
+    return 'Scope榜单：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryTokenEfficiency(String value) {
+    return 'Token效率：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryBadCaseHotspots(String value) {
+    return '坏例热点：$value';
+  }
+
+  @override
+  String get qualityReviewsOpenWorkbench => '打开质量工作台';
+
+  @override
+  String get qualityReviewsLoadCurrentDashboard => '读取当前看板';
+
+  @override
+  String get qualityReviewsRefreshReadModel => '刷新底层读模型';
+
+  @override
+  String get qualityReviewsLoadReviewList => '加载评审列表';
+
+  @override
+  String get qualityReviewsViewBadCases => '查看坏例';
+
+  @override
+  String get qualityReviewsViewStats => '查看质量统计';
+
+  @override
+  String get qualityReviewsViewStagePassRate => '查看阶段通过率';
+
+  @override
+  String get qualityReviewsDashboardNotLoadedRefreshEnabled =>
+      '质量看板尚未加载。可直接刷新聚合统计、坏例热点、阶段分布与 token 效率。';
+
+  @override
+  String get qualityReviewsDashboardNotLoadedRefreshDisabled =>
+      '质量看板尚未加载。当前平台配置已关闭刷新入口，可读取当前看板查看已有聚合统计与坏例热点。';
+
+  @override
+  String get qualityReviewsTargetType => '目标类型';
+
+  @override
+  String qualityReviewsTargetTypeChip(String target, String pass, int count) {
+    return '$target $pass% · $count条';
+  }
+
+  @override
+  String get qualityReviewsStageGrade => '阶段等级';
+
+  @override
+  String get qualityReviewsBadCaseHotspots => '坏例热点';
+
+  @override
+  String qualityReviewsBadCaseChip(String category, int count) {
+    return '$category $count';
+  }
+
+  @override
+  String get qualityReviewsUncategorized => '未分类';
+
+  @override
+  String get qualityReviewsScopeLeaderboard => 'Scope 榜单';
+
+  @override
+  String get qualityReviewsTokenEfficiency => 'Token 效率';
+
+  @override
+  String get qualityReviewsCompatibilityCheck => '兼容性检查';
+
+  @override
+  String get qualityReviewsCompatibilityCheckIntro =>
+      '保留只读回归入口，确认评审列表与详情查询仍可正常工作';
+
+  @override
+  String get qualityReviewsReadProbeLabel => 'Quality review read probe';
+
+  @override
+  String get qualityReviewsRunReadOnlyRegressionCheck => '运行只读回归检查';
+
+  @override
+  String qualityReviewsCount(int count) {
+    return '$count 条评审';
+  }
 }
