@@ -504,8 +504,11 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _productScopedProjectNumericId = projectNumeric;
         });
-        _workspaceInputController.applyProjectScope(
-          projectNumeric,
+      }
+      if ((projectNumeric != null && projectNumeric > 0) ||
+          (projectUuid != null && projectUuid.isNotEmpty)) {
+        _workspaceInputController.applyProjectScopeRef(
+          projectNumericId: projectNumeric,
           projectUuid: projectUuid,
           workspaceId: workspaceId,
         );
@@ -521,8 +524,10 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _productScopedProjectNumericId = projectNumeric;
           });
-          _workspaceInputController.applyProjectScope(
-            projectNumeric,
+        }
+        if (id.trim().isNotEmpty || (projectNumeric != null && projectNumeric > 0)) {
+          _workspaceInputController.applyProjectScopeRef(
+            projectNumericId: projectNumeric,
             projectUuid: id,
             workspaceId: workspaceId,
           );
@@ -536,8 +541,11 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _productScopedProjectNumericId = projectNumeric;
           });
-          _workspaceInputController.applyProjectScope(
-            projectNumeric,
+        }
+        if ((projectNumeric != null && projectNumeric > 0) ||
+            (projectUuid != null && projectUuid.isNotEmpty)) {
+          _workspaceInputController.applyProjectScopeRef(
+            projectNumericId: projectNumeric,
             scriptNumericId: scriptNumeric,
             projectUuid: projectUuid,
             scriptUuid: id,
