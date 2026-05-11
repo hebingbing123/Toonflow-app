@@ -151,12 +151,12 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] WH1.9 OpenAPI / `SettingsOpenApi` 已注册 `patch` + `deliveries`；导出 `export-openapi` 通过
   - _Requirements: 4.1, 4.5, 4.10, 4.13_
 
-- [~] **WH2. 出站 Webhook — 投递引擎**（**四类平台事件**已接线；**wiremock HTTP 契约测**已补；**带 PG 的 deliver→delivery 行**全链路仍可选加强）
+- [x] **WH2. 出站 Webhook — 投递引擎**（需求 **4.4**「死信」以 **`app_outbound_webhook_delivery` 失败行**落地；**可选加强**：独立 DLQ 消费/自动重放未做）
   - [x] WH2.1 测试与手动路径：`reqwest` POST 至用户 URL（见 `post_outbound_webhook_test`）
   - [x] WH2.2 HMAC：`sign_toonflow`（`timestamp + '.' + body`）
   - [x] WH2.3 请求头：`X-Toonflow-Signature`、`X-Toonflow-Event-Type`（及 Timestamp）
   - [x] WH2.4 指数退避重试（最多 **3** 次 HTTP 尝试：1s / 2s 间隔），测试与业务投递共用 `deliver_outbound_event`
-  - [~] WH2.5 死信 — **`status=failed` 投递行**即终态（无自动重放消费者）；运营可依赖「投递历史 + 手动再测 URL」
+  - [x] WH2.5 死信 — **`status=failed`** 投递审计行即终态（无后台重放 worker）；与需求 **4.4** 对齐为「记录失败」而非独立队列产品
   - [x] WH2.6 事件触发器：**`job.completed` / `job.failed`**（`jobs/worker` → `fire_job_terminal_outbound_webhooks`）；**`project.created`**（`projects/.../create.rs` 事务提交后 `fire_project_created_outbound_webhooks`）；**`workspace.member.added`**（`workspaces/http.rs`：`add_workspace_member` 在 **此前非成员** 时投递；**`accept_workspace_invite`** 同条件，**`actorUserId`** 为邀请人 `invited_by`；收件人为 **workspace owner + actor**，去重）
   - [x] WH2.7 单元测试 — **`deliver.rs`** workspace / event_types 纯函数 + **`http_shape_tests`**（`sign_toonflow` + reqwest 与 wiremock 对齐头/路径）
   - [x] WH2.8 端到端集成测试 — **`outbound_webhooks/http_shape_tests.rs`**：`wiremock` 校验 `POST` 携带 **`X-Toonflow-Signature` / `Timestamp` / `Event-Type`** 与 body；**不依赖 PG**（投递写库路径仍以 `deliver.rs` 单测 + 产品验证为主）

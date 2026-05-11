@@ -272,7 +272,7 @@ async fn probe_url_reachable(http: &reqwest::Client, url: &str) -> Result<(), Ap
     path = "/api/v1/settings/webhooks/outbound",
     operation_id = "postSettingsOutboundWebhookCreateV1",
     tag = "settings",
-    request_body(content = serde_json::Value, content_type = "application/json"),
+    request_body(content = OutboundWebhookCreateBody, content_type = "application/json"),
     responses(
         (status = 200, description = "Created", body = OutboundWebhookCreatedResponse),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
@@ -402,7 +402,7 @@ pub(crate) async fn get_outbound_webhook_list(
     operation_id = "patchSettingsOutboundWebhookV1",
     tag = "settings",
     params(("id" = Uuid, Path, description = "Webhook id")),
-    request_body(content = serde_json::Value, content_type = "application/json"),
+    request_body(content = OutboundWebhookPatchBody, content_type = "application/json"),
     responses(
         (status = 200, description = "Updated", body = OutboundWebhookListItem),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
@@ -552,7 +552,7 @@ pub(crate) async fn delete_outbound_webhook(
     operation_id = "postSettingsOutboundWebhookTestV1",
     tag = "settings",
     params(("id" = Uuid, Path, description = "Webhook id")),
-    request_body(content = serde_json::Value, content_type = "application/json"),
+    request_body(content = OutboundWebhookTestBody, content_type = "application/json"),
     responses(
         (status = 200, description = "Test attempted", body = OutboundWebhookTestResponse),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
