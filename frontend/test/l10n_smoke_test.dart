@@ -77,6 +77,29 @@ void main() {
     expect(find.text('已静默的高风险确认'), findsOneWidget);
   });
 
+  testWidgets('AppLocalizations en risky prefs long tooltip', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Scaffold(
+              body: Text(l10n.riskyPrefsTooltipSameAsMainPanelHeaders),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Local client preferences'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('AppLocalizations en notifications center title', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

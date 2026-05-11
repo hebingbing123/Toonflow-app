@@ -276,6 +276,7 @@
   },
   "notificationsExportDeliverySync": " · 同步",
   "riskyPrefsMenuDefaultTooltip": "本机客户端偏好",
+  "riskyPrefsTooltipSameAsMainPanelHeaders": "本机客户端偏好（与各主面板标题旁 ⋯ 相同）",
   "riskyPrefsMenuViewSilencesTitle": "查看已静默的高风险确认",
   "riskyPrefsMenuViewSilencesSubtitle": "只读列表，不影响设置",
   "riskyPrefsMenuResetTitle": "恢复高风险操作确认提示",

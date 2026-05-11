@@ -205,7 +205,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] I2.1 使用 `l10n` 框架 — `l10n.yaml`、`lib/l10n/*.arb`、`AppLocalizations` 生成物已入库；`flutter_localizations` + `MaterialApp` delegates
   - [ ] I2.2 覆盖项目列表界面的中英文文案
   - [ ] I2.3 覆盖工作台界面的中英文文案
-  - [ ] I2.4 覆盖设置界面的中英文文案（除语言卡片外）
+  - [~] I2.4 覆盖设置界面的中英文文案（除语言卡片外）— **部分**：产品壳 **`build_sections_product`** 中平台配置 / 帮助文档区块的 **`RiskyOperationConfirmPrefsOverflowMenu`** 长 tooltip 已 ARB；**Agent 工作区**标题旁 ⋯ 使用默认 **`riskyPrefsMenuDefaultTooltip`**；其余设置正文仍大量硬编码
   - [~] I2.5 覆盖团队工作区界面的中英文文案 — **部分**：首页 **工作区模式**（`build_sections.dart`）与 **`WorkspaceContextView`**（加载、无工作区/项目、计费标题与配额文案）已接 `AppLocalizations`；成员/邀请等子界面仍待迁移
   - [x] I2.6 覆盖通知中心界面的中英文文案 — `NotificationsSection` 全量 ARB；**`RiskyOperationConfirmPrefsOverflowMenu`** 与 **`listActiveRiskyOperationConfirmDontShowLabels` / 摘要与重置对话框 / SnackBar** 已在 `risky_operation_confirm_prefs.dart` 接 l10n（`listActiveConfirmationDontShowAgainLabels` 现需传入 `AppLocalizations`）
   - [x] I2.7 语言切换 — 首页 Overview 下 **界面语言** 卡片（系统 / English / 简体中文），`AppLocaleNotifier` + `SharedPreferences`

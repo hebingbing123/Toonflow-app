@@ -276,6 +276,7 @@
   },
   "notificationsExportDeliverySync": " · Sync",
   "riskyPrefsMenuDefaultTooltip": "Local client preferences",
+  "riskyPrefsTooltipSameAsMainPanelHeaders": "Local client preferences (same ⋯ menu as beside each main panel title)",
   "riskyPrefsMenuViewSilencesTitle": "View silenced high-risk confirmations",
   "riskyPrefsMenuViewSilencesSubtitle": "Read-only list; does not change settings",
   "riskyPrefsMenuResetTitle": "Restore high-risk confirmation prompts",

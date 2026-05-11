@@ -270,9 +270,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
             Expanded(
               child: Text(title, style: Theme.of(context).textTheme.titleSmall),
             ),
-            const RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: '本机客户端偏好',
-            ),
+            const RiskyOperationConfirmPrefsOverflowMenu(),
           ],
         ),
         const SizedBox(height: 4),

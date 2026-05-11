@@ -1043,6 +1043,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final userDraft = _userDraft;
     final workspaceDraft = _workspaceDraft;
     final workspace = _response?.currentWorkspace;
@@ -1072,8 +1073,8 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
-            const RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: '本机客户端偏好（与各主面板标题旁 ⋯ 相同）',
+            RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
             ),
           ],
         ),
@@ -2535,6 +2536,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -2549,8 +2551,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              const RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: '本机客户端偏好（与各主面板标题旁 ⋯ 相同）',
+              RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
               ),
             ],
           ),

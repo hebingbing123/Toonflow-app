@@ -882,6 +882,12 @@ abstract class AppLocalizations {
   /// **'Local client preferences'**
   String get riskyPrefsMenuDefaultTooltip;
 
+  /// No description provided for @riskyPrefsTooltipSameAsMainPanelHeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Local client preferences (same ⋯ menu as beside each main panel title)'**
+  String get riskyPrefsTooltipSameAsMainPanelHeaders;
+
   /// No description provided for @riskyPrefsMenuViewSilencesTitle.
   ///
   /// In en, this message translates to:

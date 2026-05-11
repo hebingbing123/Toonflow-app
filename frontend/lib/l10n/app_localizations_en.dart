@@ -473,6 +473,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get riskyPrefsMenuDefaultTooltip => 'Local client preferences';
 
   @override
+  String get riskyPrefsTooltipSameAsMainPanelHeaders =>
+      'Local client preferences (same ⋯ menu as beside each main panel title)';
+
+  @override
   String get riskyPrefsMenuViewSilencesTitle =>
       'View silenced high-risk confirmations';
 

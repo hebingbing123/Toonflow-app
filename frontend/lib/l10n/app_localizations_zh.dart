@@ -447,6 +447,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get riskyPrefsMenuDefaultTooltip => '本机客户端偏好';
 
   @override
+  String get riskyPrefsTooltipSameAsMainPanelHeaders =>
+      '本机客户端偏好（与各主面板标题旁 ⋯ 相同）';
+
+  @override
   String get riskyPrefsMenuViewSilencesTitle => '查看已静默的高风险确认';
 
   @override
