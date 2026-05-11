@@ -39,7 +39,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
 
     final generate = await postAssetsGenerateGenerateV1(
       token,
-      projectId: 1,
+      projectId: scope.projectId,
       assetNumericId: 1,
       model: '1:gpt-4o-mini',
       resolution: '1024x1024',

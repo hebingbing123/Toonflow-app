@@ -123,10 +123,17 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
     required String token,
     required Map<String, int> statuses,
   }) async {
+    final scope = await resolveProductionProbeScope(
+      token: token,
+      projectIdText: _workspaceInputController.projectIdController.text,
+      projectUuidText: _workspaceInputController.projectUuidController.text,
+      scriptIdText: _workspaceInputController.scriptIdController.text,
+      fetchProjects: fetchProjects,
+    );
     final polish = await postAssetsGeneratePolishPromptV1(
       token,
       assetsId: 1,
-      projectId: 1,
+      projectId: scope.projectId,
       type: 'role',
       name: 'n',
       describe: 'd',
@@ -140,7 +147,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
 
     final batchGenerate = await postAssetsGenerateBatchGenerateV1(
       token,
-      projectId: 1,
+      projectId: scope.projectId,
       model: '1:x',
       resolution: '1024x1024',
       items: const [
@@ -156,7 +163,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
 
     final batchPolish = await postAssetsGenerateBatchPolishV1(
       token,
-      projectId: 1,
+      projectId: scope.projectId,
       items: const [
         {'assetsId': 1, 'type': 'role', 'name': 'n', 'describe': 'd'},
       ],
@@ -180,4 +187,3 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
     statuses['cancel-generate'] = cancelGenerate;
   }
 }
-
