@@ -68,4 +68,105 @@ void main() {
     expect(scope.projectId, 1);
     expect(scope.scriptId, 1);
   });
+
+  test('production probe resource scope prefers explicit project uuid', () async {
+    final resources = await resolveProductionProbeResourceScope(
+      token: 'token',
+      scope: const ProductionProbeScope(projectId: 23, scriptId: 8),
+      projectUuidText: '550e8400-e29b-41d4-a716-446655440777',
+      fetchProjects: (token) async => throw StateError('unused'),
+      fetchAssets: (
+        token,
+        projectUuid, {
+        int? scriptNumericId,
+      }) async {
+        expect(projectUuid, '550e8400-e29b-41d4-a716-446655440777');
+        expect(scriptNumericId, 8);
+        return const ListAssetsResponse(
+          items: [
+            AssetRow(
+              id: 'asset-1',
+              numericId: 41,
+              name: 'A',
+              assetType: 'role',
+            ),
+          ],
+          total: 1,
+        );
+      },
+      fetchStoryboards: (token, projectUuid, scriptNumericId) async {
+        expect(projectUuid, '550e8400-e29b-41d4-a716-446655440777');
+        expect(scriptNumericId, 8);
+        return const [
+          StoryboardRow(id: 'sb-1', scriptId: 'script-1', numericId: 51),
+        ];
+      },
+    );
+
+    expect(resources.projectUuid, '550e8400-e29b-41d4-a716-446655440777');
+    expect(resources.assetId, 41);
+    expect(resources.storyboardId, 51);
+  });
+
+  test(
+    'production probe resource scope resolves uuid from numeric project id',
+    () async {
+      var fetchProjectsCalls = 0;
+      final resources = await resolveProductionProbeResourceScope(
+        token: 'token',
+        scope: const ProductionProbeScope(projectId: 77, scriptId: 5),
+        projectUuidText: '',
+        fetchProjects: (token) async {
+          fetchProjectsCalls += 1;
+          return const [
+            ProjectRow(
+              id: '550e8400-e29b-41d4-a716-446655440123',
+              numericId: 77,
+              projectAccessMode: 'inherited',
+              projectAccessRole: 'member',
+            ),
+          ];
+        },
+        fetchAssets: (
+          token,
+          projectUuid, {
+          int? scriptNumericId,
+        }) async {
+          expect(projectUuid, '550e8400-e29b-41d4-a716-446655440123');
+          expect(scriptNumericId, 5);
+          return const ListAssetsResponse(items: [], total: 0);
+        },
+        fetchStoryboards: (token, projectUuid, scriptNumericId) async {
+          expect(projectUuid, '550e8400-e29b-41d4-a716-446655440123');
+          expect(scriptNumericId, 5);
+          return const [];
+        },
+      );
+
+      expect(fetchProjectsCalls, 1);
+      expect(resources.projectUuid, '550e8400-e29b-41d4-a716-446655440123');
+      expect(resources.assetId, 1);
+      expect(resources.storyboardId, 1);
+    },
+  );
+
+  test('production probe resource scope falls back when lookups fail', () async {
+    final resources = await resolveProductionProbeResourceScope(
+      token: 'token',
+      scope: const ProductionProbeScope(projectId: 77, scriptId: 5),
+      projectUuidText: '',
+      fetchProjects: (token) async => throw StateError('boom'),
+      fetchAssets: (
+        token,
+        projectUuid, {
+        int? scriptNumericId,
+      }) async => throw StateError('boom'),
+      fetchStoryboards: (token, projectUuid, scriptNumericId) async =>
+          throw StateError('boom'),
+    );
+
+    expect(resources.projectUuid, isNull);
+    expect(resources.assetId, 1);
+    expect(resources.storyboardId, 1);
+  });
 }

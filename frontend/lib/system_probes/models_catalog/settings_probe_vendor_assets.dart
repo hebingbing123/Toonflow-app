@@ -130,9 +130,17 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       scriptIdText: _workspaceInputController.scriptIdController.text,
       fetchProjects: fetchProjects,
     );
+    final resources = await resolveProductionProbeResourceScope(
+      token: token,
+      scope: scope,
+      projectUuidText: _workspaceInputController.projectUuidController.text,
+      fetchProjects: fetchProjects,
+      fetchAssets: fetchProjectAssetsByProjectId,
+      fetchStoryboards: fetchStoryboardsForProjectScript,
+    );
     final polish = await postAssetsGeneratePolishPromptV1(
       token,
-      assetsId: 1,
+      assetsId: resources.assetId,
       projectId: scope.projectId,
       type: 'role',
       name: 'n',
@@ -150,8 +158,8 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       projectId: scope.projectId,
       model: '1:x',
       resolution: '1024x1024',
-      items: const [
-        {'id': 1, 'type': 'role', 'name': 'n', 'prompt': 'p'},
+      items: [
+        {'id': resources.assetId, 'type': 'role', 'name': 'n', 'prompt': 'p'},
       ],
     );
     _expectProbeStatus(
@@ -164,8 +172,13 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
     final batchPolish = await postAssetsGenerateBatchPolishV1(
       token,
       projectId: scope.projectId,
-      items: const [
-        {'assetsId': 1, 'type': 'role', 'name': 'n', 'describe': 'd'},
+      items: [
+        {
+          'assetsId': resources.assetId,
+          'type': 'role',
+          'name': 'n',
+          'describe': 'd',
+        },
       ],
     );
     _expectProbeStatus(

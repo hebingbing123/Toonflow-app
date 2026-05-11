@@ -13,6 +13,14 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
       scriptIdText: _workspaceInputController.scriptIdController.text,
       fetchProjects: fetchProjects,
     );
+    final resources = await resolveProductionProbeResourceScope(
+      token: token,
+      scope: scope,
+      projectUuidText: _workspaceInputController.projectUuidController.text,
+      fetchProjects: fetchProjects,
+      fetchAssets: fetchProjectAssetsByProjectId,
+      fetchStoryboards: fetchStoryboardsForProjectScript,
+    );
     final modelTest = await postSettingsVendorModelTestV1(
       token,
       modelName: 'gpt-4o-mini',
@@ -40,7 +48,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     final generate = await postAssetsGenerateGenerateV1(
       token,
       projectId: scope.projectId,
-      assetNumericId: 1,
+      assetNumericId: resources.assetId,
       model: '1:gpt-4o-mini',
       resolution: '1024x1024',
       type: 'role',
@@ -129,7 +137,10 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     );
     statuses['script-agent/set'] = scriptAgentSetPlan;
 
-    final scriptAgentUpdate = await postScriptAgentUpdateDataV1(token, id: 1);
+    final scriptAgentUpdate = await postScriptAgentUpdateDataV1(
+      token,
+      id: scope.scriptId,
+    );
     _expectProbeStatus(
       label: 'POST script-agent/update-data',
       status: scriptAgentUpdate,

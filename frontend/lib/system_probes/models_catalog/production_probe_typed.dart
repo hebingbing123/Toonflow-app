@@ -7,6 +7,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
     Map<String, int> statuses, {
     required int projectId,
     required int scriptId,
+    required int assetId,
+    required int storyboardId,
   }) async {
     statuses['prod/assets.batch'] = await _runTypedProductionProbe(
       label: 'POST production/assets/batch-generate-assets-image',
@@ -14,7 +16,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        assetIds: const [1],
+        assetIds: [assetId],
       ),
     );
     statuses['prod/assets.delete'] = await _runTypedProductionProbe(
@@ -23,7 +25,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        assetIds: const [1],
+        assetIds: [assetId],
       ),
     );
     statuses['prod/assets.data'] = await _runTypedProductionProbe(
@@ -40,7 +42,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        assetIds: const [1],
+        assetIds: [assetId],
       ),
     );
     statuses['prod/assets.url'] = await _runTypedProductionProbe(
@@ -49,7 +51,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        assetId: 1,
+        assetId: assetId,
         imageUrl: 'https://example.com/probe.png',
       ),
     );
@@ -87,8 +89,11 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        items: const [
-          BatchGenerateImageItem(storyboardId: 1, prompt: 'probe storyboard'),
+        items: [
+          BatchGenerateImageItem(
+            storyboardId: storyboardId,
+            prompt: 'probe storyboard',
+          ),
         ],
       ),
     );
@@ -98,7 +103,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
       ),
     );
     statuses['prod/storyboard.edit'] = await _runTypedProductionProbe(
@@ -107,7 +112,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
         prompt: 'probe storyboard',
       ),
     );
@@ -117,7 +122,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
       ),
     );
     statuses['prod/storyboard.preview'] = await _runTypedProductionProbe(
@@ -126,7 +131,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
       ),
     );
     statuses['prod/storyboard.remove'] = await _runTypedProductionProbe(
@@ -135,7 +140,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
       ),
     );
     statuses['prod/storyboard.url'] = await _runTypedProductionProbe(
@@ -144,7 +149,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
         imageUrl: 'https://example.com/probe.png',
       ),
     );
@@ -218,7 +223,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
       ),
     );
     statuses['prod/workbench.prompt'] = await _runTypedProductionProbe(
@@ -251,7 +256,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         token,
         projectId: projectId,
         scriptId: scriptId,
-        storyboardId: 1,
+        storyboardId: storyboardId,
         videoUrl: 'https://example.com/probe.mp4',
       ),
     );
@@ -261,7 +266,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
         'op': 'selectVideo',
         'projectId': projectId,
         'scriptId': scriptId,
-        'storyboardId': 1,
+        'storyboardId': storyboardId,
         'videoUrl': 'https://example.com/probe.mp4',
       }),
     );

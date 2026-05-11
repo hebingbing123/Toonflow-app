@@ -11,12 +11,20 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       scriptIdText: _workspaceInputController.scriptIdController.text,
       fetchProjects: fetchProjects,
     );
+    final resources = await resolveProductionProbeResourceScope(
+      token: token,
+      scope: scope,
+      projectUuidText: _workspaceInputController.projectUuidController.text,
+      fetchProjects: fetchProjects,
+      fetchAssets: fetchProjectAssetsByProjectId,
+      fetchStoryboards: fetchStoryboardsForProjectScript,
+    );
 
     final getData = await postProductionGetProductionDataV1(
       token,
       projectId: scope.projectId,
       scriptId: scope.scriptId,
-      storyboardIds: const [1],
+      storyboardIds: [resources.storyboardId],
     );
     _expectProbeStatus(
       label: 'POST production/get-production-data',
@@ -53,8 +61,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       token,
       projectId: scope.projectId,
       scriptId: scope.scriptId,
-      uploadData: const [
-        {'id': 1, 'sources': 'assets'},
+      uploadData: [
+        {'id': resources.assetId, 'sources': 'assets'},
       ],
       prompt: 'p',
       model: '1:x',
@@ -92,7 +100,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       token,
       projectId: scope.projectId,
       scriptId: scope.scriptId,
-      ids: const [1],
+      ids: [resources.storyboardId],
     );
     _expectProbeStatus(
       label: 'POST production/storyboard/polling-image',
@@ -105,8 +113,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       token,
       projectId: scope.projectId,
       scriptId: scope.scriptId,
-      shotId: const [
-        {'id': '1'},
+      shotId: [
+        {'id': '${resources.storyboardId}'},
       ],
     );
     _expectProbeStatus(
@@ -121,6 +129,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       statuses,
       projectId: scope.projectId,
       scriptId: scope.scriptId,
+      assetId: resources.assetId,
+      storyboardId: resources.storyboardId,
     );
 
     return (statuses: statuses, implementedCount: 29);
