@@ -2634,4 +2634,146 @@ class AppLocalizationsEn extends AppLocalizations {
   String projectsArtWorkbenchStatusExtractFailed(String error) {
     return 'Extraction failed: $error';
   }
+
+  @override
+  String get globalSearchErrSignInFirst => 'Please sign in first.';
+
+  @override
+  String globalSearchErrSearchFailed(String error) {
+    return 'Search failed: $error';
+  }
+
+  @override
+  String get globalSearchCopiedDeepLink => 'Copied current search deep link.';
+
+  @override
+  String get globalSearchAllTypes => 'All';
+
+  @override
+  String get globalSearchTimeStart => 'start';
+
+  @override
+  String get globalSearchTimeNow => 'now';
+
+  @override
+  String get globalSearchAllTime => 'All time';
+
+  @override
+  String get globalSearchNeverUsed => 'never used';
+
+  @override
+  String get globalSearchSaveViewTitle => 'Save search view';
+
+  @override
+  String get globalSearchViewNameField => 'View name';
+
+  @override
+  String get globalSearchViewNameHint => 'e.g. scripts in last 30 days';
+
+  @override
+  String get globalSearchCancel => 'Cancel';
+
+  @override
+  String get globalSearchSave => 'Save';
+
+  @override
+  String get globalSearchViewNameRequired => 'View name is required.';
+
+  @override
+  String get globalSearchViewSaved => 'Search view saved.';
+
+  @override
+  String get globalSearchNoSavedViews => 'No saved search views yet.';
+
+  @override
+  String get globalSearchPinned => 'Pinned';
+
+  @override
+  String get globalSearchUnpin => 'Unpin';
+
+  @override
+  String get globalSearchPinToSearchBar => 'Pin to search bar';
+
+  @override
+  String get globalSearchUnpinnedView => 'Unpinned search view.';
+
+  @override
+  String get globalSearchPinnedToSearchBar => 'Pinned to search bar.';
+
+  @override
+  String get globalSearchDelete => 'Delete';
+
+  @override
+  String get globalSearchViewDeleted => 'Search view deleted.';
+
+  @override
+  String get globalSearchTypeProject => 'Project';
+
+  @override
+  String get globalSearchTypeScript => 'Script';
+
+  @override
+  String get globalSearchTypeAsset => 'Asset';
+
+  @override
+  String get globalSearchTypeNovel => 'Novel chapters';
+
+  @override
+  String get globalSearchTypeNovelEvent => 'Novel events';
+
+  @override
+  String globalSearchTitle(String query) {
+    return 'Search: $query';
+  }
+
+  @override
+  String get globalSearchTooltipSaveCurrentView => 'Save current view';
+
+  @override
+  String get globalSearchTooltipSavedViews => 'Saved views';
+
+  @override
+  String get globalSearchTooltipCopyDeepLink => 'Copy search deep link';
+
+  @override
+  String get globalSearchTooltipFilter => 'Filter';
+
+  @override
+  String globalSearchFoundResults(int count) {
+    return 'Found $count results';
+  }
+
+  @override
+  String get globalSearchClearFilters => 'Clear filters';
+
+  @override
+  String globalSearchTimeChip(String from, String to) {
+    return 'Time $from ~ $to';
+  }
+
+  @override
+  String get globalSearchErrorTitle => 'Search error';
+
+  @override
+  String get globalSearchUnknownError => 'Unknown error';
+
+  @override
+  String get globalSearchRetry => 'Retry';
+
+  @override
+  String get globalSearchNoResultsTitle => 'No matching results';
+
+  @override
+  String get globalSearchNoResultsHint => 'Try different keywords';
+
+  @override
+  String get globalSearchPrevPage => 'Previous page';
+
+  @override
+  String globalSearchCurrentPage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String get globalSearchNextPage => 'Next page';
 }

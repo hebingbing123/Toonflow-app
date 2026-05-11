@@ -1711,5 +1711,87 @@
         "type": "String"
       }
     }
-  }
+  },
+  "globalSearchErrSignInFirst": "请先登录",
+  "globalSearchErrSearchFailed": "搜索失败：{error}",
+  "@globalSearchErrSearchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchCopiedDeepLink": "已复制当前搜索深链",
+  "globalSearchAllTypes": "全部",
+  "globalSearchTimeStart": "起始",
+  "globalSearchTimeNow": "至今",
+  "globalSearchAllTime": "全部时间",
+  "globalSearchNeverUsed": "未使用",
+  "globalSearchSaveViewTitle": "保存搜索视图",
+  "globalSearchViewNameField": "视图名称",
+  "globalSearchViewNameHint": "例如：近 30 天剧本搜索",
+  "globalSearchCancel": "取消",
+  "globalSearchSave": "保存",
+  "globalSearchViewNameRequired": "视图名称不能为空",
+  "globalSearchViewSaved": "已保存搜索视图",
+  "globalSearchNoSavedViews": "当前没有已保存的搜索视图。",
+  "globalSearchPinned": "已固定",
+  "globalSearchUnpin": "取消固定",
+  "globalSearchPinToSearchBar": "固定到搜索栏",
+  "globalSearchUnpinnedView": "已取消固定搜索视图",
+  "globalSearchPinnedToSearchBar": "已固定到搜索栏",
+  "globalSearchDelete": "删除",
+  "globalSearchViewDeleted": "已删除搜索视图",
+  "globalSearchTypeProject": "项目",
+  "globalSearchTypeScript": "剧本",
+  "globalSearchTypeAsset": "资产",
+  "globalSearchTypeNovel": "小说章节",
+  "globalSearchTypeNovelEvent": "小说事件",
+  "globalSearchTitle": "搜索：{query}",
+  "@globalSearchTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchTooltipSaveCurrentView": "保存当前视图",
+  "globalSearchTooltipSavedViews": "已保存视图",
+  "globalSearchTooltipCopyDeepLink": "复制搜索深链",
+  "globalSearchTooltipFilter": "过滤",
+  "globalSearchFoundResults": "找到 {count} 个结果",
+  "@globalSearchFoundResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchClearFilters": "清除过滤",
+  "globalSearchTimeChip": "时间 {from} ~ {to}",
+  "@globalSearchTimeChip": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchErrorTitle": "搜索出错",
+  "globalSearchUnknownError": "未知错误",
+  "globalSearchRetry": "重试",
+  "globalSearchNoResultsTitle": "未找到匹配结果",
+  "globalSearchNoResultsHint": "请尝试其他关键词",
+  "globalSearchPrevPage": "上一页",
+  "globalSearchCurrentPage": "第 {page} 页",
+  "@globalSearchCurrentPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchNextPage": "下一页"
 }

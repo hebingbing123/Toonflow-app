@@ -1711,5 +1711,87 @@
         "type": "String"
       }
     }
-  }
+  },
+  "globalSearchErrSignInFirst": "Please sign in first.",
+  "globalSearchErrSearchFailed": "Search failed: {error}",
+  "@globalSearchErrSearchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchCopiedDeepLink": "Copied current search deep link.",
+  "globalSearchAllTypes": "All",
+  "globalSearchTimeStart": "start",
+  "globalSearchTimeNow": "now",
+  "globalSearchAllTime": "All time",
+  "globalSearchNeverUsed": "never used",
+  "globalSearchSaveViewTitle": "Save search view",
+  "globalSearchViewNameField": "View name",
+  "globalSearchViewNameHint": "e.g. scripts in last 30 days",
+  "globalSearchCancel": "Cancel",
+  "globalSearchSave": "Save",
+  "globalSearchViewNameRequired": "View name is required.",
+  "globalSearchViewSaved": "Search view saved.",
+  "globalSearchNoSavedViews": "No saved search views yet.",
+  "globalSearchPinned": "Pinned",
+  "globalSearchUnpin": "Unpin",
+  "globalSearchPinToSearchBar": "Pin to search bar",
+  "globalSearchUnpinnedView": "Unpinned search view.",
+  "globalSearchPinnedToSearchBar": "Pinned to search bar.",
+  "globalSearchDelete": "Delete",
+  "globalSearchViewDeleted": "Search view deleted.",
+  "globalSearchTypeProject": "Project",
+  "globalSearchTypeScript": "Script",
+  "globalSearchTypeAsset": "Asset",
+  "globalSearchTypeNovel": "Novel chapters",
+  "globalSearchTypeNovelEvent": "Novel events",
+  "globalSearchTitle": "Search: {query}",
+  "@globalSearchTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchTooltipSaveCurrentView": "Save current view",
+  "globalSearchTooltipSavedViews": "Saved views",
+  "globalSearchTooltipCopyDeepLink": "Copy search deep link",
+  "globalSearchTooltipFilter": "Filter",
+  "globalSearchFoundResults": "Found {count} results",
+  "@globalSearchFoundResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchClearFilters": "Clear filters",
+  "globalSearchTimeChip": "Time {from} ~ {to}",
+  "@globalSearchTimeChip": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchErrorTitle": "Search error",
+  "globalSearchUnknownError": "Unknown error",
+  "globalSearchRetry": "Retry",
+  "globalSearchNoResultsTitle": "No matching results",
+  "globalSearchNoResultsHint": "Try different keywords",
+  "globalSearchPrevPage": "Previous page",
+  "globalSearchCurrentPage": "Page {page}",
+  "@globalSearchCurrentPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchNextPage": "Next page"
 }

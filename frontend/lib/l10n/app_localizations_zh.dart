@@ -2525,4 +2525,146 @@ class AppLocalizationsZh extends AppLocalizations {
   String projectsArtWorkbenchStatusExtractFailed(String error) {
     return '抽取失败：$error';
   }
+
+  @override
+  String get globalSearchErrSignInFirst => '请先登录';
+
+  @override
+  String globalSearchErrSearchFailed(String error) {
+    return '搜索失败：$error';
+  }
+
+  @override
+  String get globalSearchCopiedDeepLink => '已复制当前搜索深链';
+
+  @override
+  String get globalSearchAllTypes => '全部';
+
+  @override
+  String get globalSearchTimeStart => '起始';
+
+  @override
+  String get globalSearchTimeNow => '至今';
+
+  @override
+  String get globalSearchAllTime => '全部时间';
+
+  @override
+  String get globalSearchNeverUsed => '未使用';
+
+  @override
+  String get globalSearchSaveViewTitle => '保存搜索视图';
+
+  @override
+  String get globalSearchViewNameField => '视图名称';
+
+  @override
+  String get globalSearchViewNameHint => '例如：近 30 天剧本搜索';
+
+  @override
+  String get globalSearchCancel => '取消';
+
+  @override
+  String get globalSearchSave => '保存';
+
+  @override
+  String get globalSearchViewNameRequired => '视图名称不能为空';
+
+  @override
+  String get globalSearchViewSaved => '已保存搜索视图';
+
+  @override
+  String get globalSearchNoSavedViews => '当前没有已保存的搜索视图。';
+
+  @override
+  String get globalSearchPinned => '已固定';
+
+  @override
+  String get globalSearchUnpin => '取消固定';
+
+  @override
+  String get globalSearchPinToSearchBar => '固定到搜索栏';
+
+  @override
+  String get globalSearchUnpinnedView => '已取消固定搜索视图';
+
+  @override
+  String get globalSearchPinnedToSearchBar => '已固定到搜索栏';
+
+  @override
+  String get globalSearchDelete => '删除';
+
+  @override
+  String get globalSearchViewDeleted => '已删除搜索视图';
+
+  @override
+  String get globalSearchTypeProject => '项目';
+
+  @override
+  String get globalSearchTypeScript => '剧本';
+
+  @override
+  String get globalSearchTypeAsset => '资产';
+
+  @override
+  String get globalSearchTypeNovel => '小说章节';
+
+  @override
+  String get globalSearchTypeNovelEvent => '小说事件';
+
+  @override
+  String globalSearchTitle(String query) {
+    return '搜索：$query';
+  }
+
+  @override
+  String get globalSearchTooltipSaveCurrentView => '保存当前视图';
+
+  @override
+  String get globalSearchTooltipSavedViews => '已保存视图';
+
+  @override
+  String get globalSearchTooltipCopyDeepLink => '复制搜索深链';
+
+  @override
+  String get globalSearchTooltipFilter => '过滤';
+
+  @override
+  String globalSearchFoundResults(int count) {
+    return '找到 $count 个结果';
+  }
+
+  @override
+  String get globalSearchClearFilters => '清除过滤';
+
+  @override
+  String globalSearchTimeChip(String from, String to) {
+    return '时间 $from ~ $to';
+  }
+
+  @override
+  String get globalSearchErrorTitle => '搜索出错';
+
+  @override
+  String get globalSearchUnknownError => '未知错误';
+
+  @override
+  String get globalSearchRetry => '重试';
+
+  @override
+  String get globalSearchNoResultsTitle => '未找到匹配结果';
+
+  @override
+  String get globalSearchNoResultsHint => '请尝试其他关键词';
+
+  @override
+  String get globalSearchPrevPage => '上一页';
+
+  @override
+  String globalSearchCurrentPage(int page) {
+    return '第 $page 页';
+  }
+
+  @override
+  String get globalSearchNextPage => '下一页';
 }

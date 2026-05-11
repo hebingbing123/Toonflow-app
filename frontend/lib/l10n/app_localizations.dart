@@ -4448,6 +4448,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extraction failed: {error}'**
   String projectsArtWorkbenchStatusExtractFailed(String error);
+
+  /// No description provided for @globalSearchErrSignInFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in first.'**
+  String get globalSearchErrSignInFirst;
+
+  /// No description provided for @globalSearchErrSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed: {error}'**
+  String globalSearchErrSearchFailed(String error);
+
+  /// No description provided for @globalSearchCopiedDeepLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied current search deep link.'**
+  String get globalSearchCopiedDeepLink;
+
+  /// No description provided for @globalSearchAllTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get globalSearchAllTypes;
+
+  /// No description provided for @globalSearchTimeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'start'**
+  String get globalSearchTimeStart;
+
+  /// No description provided for @globalSearchTimeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get globalSearchTimeNow;
+
+  /// No description provided for @globalSearchAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get globalSearchAllTime;
+
+  /// No description provided for @globalSearchNeverUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'never used'**
+  String get globalSearchNeverUsed;
+
+  /// No description provided for @globalSearchSaveViewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save search view'**
+  String get globalSearchSaveViewTitle;
+
+  /// No description provided for @globalSearchViewNameField.
+  ///
+  /// In en, this message translates to:
+  /// **'View name'**
+  String get globalSearchViewNameField;
+
+  /// No description provided for @globalSearchViewNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. scripts in last 30 days'**
+  String get globalSearchViewNameHint;
+
+  /// No description provided for @globalSearchCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get globalSearchCancel;
+
+  /// No description provided for @globalSearchSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get globalSearchSave;
+
+  /// No description provided for @globalSearchViewNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'View name is required.'**
+  String get globalSearchViewNameRequired;
+
+  /// No description provided for @globalSearchViewSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Search view saved.'**
+  String get globalSearchViewSaved;
+
+  /// No description provided for @globalSearchNoSavedViews.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved search views yet.'**
+  String get globalSearchNoSavedViews;
+
+  /// No description provided for @globalSearchPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get globalSearchPinned;
+
+  /// No description provided for @globalSearchUnpin.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get globalSearchUnpin;
+
+  /// No description provided for @globalSearchPinToSearchBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to search bar'**
+  String get globalSearchPinToSearchBar;
+
+  /// No description provided for @globalSearchUnpinnedView.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpinned search view.'**
+  String get globalSearchUnpinnedView;
+
+  /// No description provided for @globalSearchPinnedToSearchBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned to search bar.'**
+  String get globalSearchPinnedToSearchBar;
+
+  /// No description provided for @globalSearchDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get globalSearchDelete;
+
+  /// No description provided for @globalSearchViewDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Search view deleted.'**
+  String get globalSearchViewDeleted;
+
+  /// No description provided for @globalSearchTypeProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get globalSearchTypeProject;
+
+  /// No description provided for @globalSearchTypeScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get globalSearchTypeScript;
+
+  /// No description provided for @globalSearchTypeAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset'**
+  String get globalSearchTypeAsset;
+
+  /// No description provided for @globalSearchTypeNovel.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel chapters'**
+  String get globalSearchTypeNovel;
+
+  /// No description provided for @globalSearchTypeNovelEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel events'**
+  String get globalSearchTypeNovelEvent;
+
+  /// No description provided for @globalSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search: {query}'**
+  String globalSearchTitle(String query);
+
+  /// No description provided for @globalSearchTooltipSaveCurrentView.
+  ///
+  /// In en, this message translates to:
+  /// **'Save current view'**
+  String get globalSearchTooltipSaveCurrentView;
+
+  /// No description provided for @globalSearchTooltipSavedViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved views'**
+  String get globalSearchTooltipSavedViews;
+
+  /// No description provided for @globalSearchTooltipCopyDeepLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy search deep link'**
+  String get globalSearchTooltipCopyDeepLink;
+
+  /// No description provided for @globalSearchTooltipFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get globalSearchTooltipFilter;
+
+  /// No description provided for @globalSearchFoundResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {count} results'**
+  String globalSearchFoundResults(int count);
+
+  /// No description provided for @globalSearchClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get globalSearchClearFilters;
+
+  /// No description provided for @globalSearchTimeChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Time {from} ~ {to}'**
+  String globalSearchTimeChip(String from, String to);
+
+  /// No description provided for @globalSearchErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search error'**
+  String get globalSearchErrorTitle;
+
+  /// No description provided for @globalSearchUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get globalSearchUnknownError;
+
+  /// No description provided for @globalSearchRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get globalSearchRetry;
+
+  /// No description provided for @globalSearchNoResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching results'**
+  String get globalSearchNoResultsTitle;
+
+  /// No description provided for @globalSearchNoResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try different keywords'**
+  String get globalSearchNoResultsHint;
+
+  /// No description provided for @globalSearchPrevPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get globalSearchPrevPage;
+
+  /// No description provided for @globalSearchCurrentPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String globalSearchCurrentPage(int page);
+
+  /// No description provided for @globalSearchNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get globalSearchNextPage;
 }
 
 class _AppLocalizationsDelegate
