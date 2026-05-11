@@ -2,13 +2,13 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::jobs::worker::common::{job_ok, JobRunError};
 use crate::narrative::novels::handlers::crawl_preview::{
     crawl_preview_adaptive, evaluate_novel_import_quality, insert_imported_novels_for_project,
     normalize_extracted_text_for_import, parse_whole_book_chapters_from_normalized,
     CrawlAuditSummary,
 };
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 use super::super::dto::JobRow;
@@ -56,10 +56,10 @@ pub(crate) async fn run_novel_crawl_import_batch(
         return Err(JobRunError::Failed("payload.urls too many (max 50)".into()));
     }
 
-    // Enforce ownership under the job owner; same as HTTP handlers.
-    ensure_owned_project_pk(pool, row.owner_user_id, project_id)
+    // Enforce workspace write scope for the job owner (same semantics as HTTP mutation handlers).
+    require_project_write_scope(state, row.owner_user_id, project_id)
         .await
-        .map_err(|e| JobRunError::Failed(format!("project ownership check failed: {e:?}")))?;
+        .map_err(|e| JobRunError::Failed(format!("project write scope check failed: {e:?}")))?;
 
     let mut succeeded = 0i32;
     let mut failed = 0i32;
@@ -170,6 +170,7 @@ pub(crate) async fn run_novel_crawl_import_batch(
             crate::jobs::JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
             next_payload,
             None,
+            &state.billing_config,
         )
         .await
         {

@@ -5,9 +5,11 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::{
+    require_project_workspace_member_scope, require_project_write_scope,
+};
 use crate::state::AppState;
 
 use super::super::dto::{
@@ -53,7 +55,7 @@ pub(crate) async fn list_novel_events_for_project(
 ) -> Result<JsonResponse<ListNovelEventsResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_workspace_member_scope(&state, uid, project_id).await?;
     list_novel_events_core(pool, project_id, query).await
 }
 
@@ -154,6 +156,6 @@ pub(crate) async fn create_novel_event_for_project(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
     create_novel_event_core(pool, project_id, body).await
 }

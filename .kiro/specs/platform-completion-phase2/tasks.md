@@ -169,7 +169,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] WH3.4 投递历史：卡片内展示最近 6 条 `deliveries`
   - [x] WH3.5 失败详情：`deliveries` 列表展示 `error` 文本
   - [ ] WH3.6 Flutter widget 测试 — **未加**
-  - [~] WH3.7 以 CI / `yarn refactor:check` 为准（当前分支另有 `ensure_owned_project_pk` deprecation 与 clippy `-D warnings` 冲突，见合并前修复）
+  - [x] WH3.7 合并窗口以 CI / `yarn refactor:check` 为准（小说事件与 novel crawl worker 已移除 `ensure_owned_project_pk`，改用 `require_project_*_scope`）
   - _Requirements: 4.10, 4.11, 4.12_
 
 - [x] **C1. 内容合规分阶段通知 — Backend**

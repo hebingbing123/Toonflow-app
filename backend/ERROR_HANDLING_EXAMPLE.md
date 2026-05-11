@@ -43,7 +43,7 @@ pub(crate) async fn post_project_workbench_add_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    crate::projects::routes::common::require_project_write_scope(&state, uid, project_id).await?;
 
     // 手动处理数据库错误
     let mut tx = pool
@@ -104,7 +104,7 @@ pub(crate) async fn post_project_workbench_add_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    crate::projects::routes::common::require_project_write_scope(&state, uid, project_id).await?;
 
     // 使用 db_error 辅助函数 - 自动记录详细的错误日志
     let mut tx = pool

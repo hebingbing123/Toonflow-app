@@ -5,9 +5,9 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 use super::super::super::dto::{
@@ -57,7 +57,7 @@ pub(crate) async fn post_generate_novel_events_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_uuid).await?;
+    require_project_write_scope(&state, uid, project_uuid).await?;
 
     let novels: Vec<NovelEventExtractionRow> = sqlx::query_as(
         r#"

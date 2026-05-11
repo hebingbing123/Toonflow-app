@@ -2,39 +2,29 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::projects::routes::common::{
+    require_project_workspace_member_scope, require_project_write_scope, ProjectAccessScope,
+};
+use crate::state::AppState;
 
-/// **404** if the UUID project is missing or not accessible by **`uid`** in workspace membership scope.
-pub(crate) async fn ensure_owned_project_pk(
-    pool: &PgPool,
+/// Validates workspace member read access to a project using unified permission helpers.
+/// Returns `ProjectAccessScope` for further permission checks if needed.
+pub(crate) async fn require_asset_project_read_scope(
+    state: &AppState,
     uid: Uuid,
     project_id: Uuid,
-) -> Result<(), ApiError> {
-    let ok: bool = sqlx::query_scalar(
-        r#"
-        SELECT EXISTS(
-          SELECT 1
-          FROM app_project p
-          WHERE p.id = $1
-            AND p.archived_at IS NULL
-            AND EXISTS (
-              SELECT 1
-              FROM app_workspace_member wm
-              WHERE wm.workspace_id = p.workspace_id
-                AND wm.user_id = $2
-            )
-        )
-        "#,
-    )
-    .bind(project_id)
-    .bind(uid)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    if ok {
-        Ok(())
-    } else {
-        Err(ApiError::NotFound)
-    }
+) -> Result<ProjectAccessScope, ApiError> {
+    require_project_workspace_member_scope(state, uid, project_id).await
+}
+
+/// Validates workspace member write access to a project using unified permission helpers.
+/// Returns `ProjectAccessScope` for further permission checks if needed.
+pub(crate) async fn require_asset_project_write_scope(
+    state: &AppState,
+    uid: Uuid,
+    project_id: Uuid,
+) -> Result<ProjectAccessScope, ApiError> {
+    require_project_write_scope(state, uid, project_id).await
 }
 
 /// **404** if the project is missing or inaccessible; returns **`app_project.numeric_id`** for Electron-era payloads.

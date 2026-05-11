@@ -7,9 +7,9 @@ use serde_json::Value;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 use super::super::super::dto::{BatchDeleteEventsBody, BatchDeleteEventsResponse};
@@ -58,7 +58,7 @@ pub(crate) async fn delete_novel_event_for_project(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
     delete_novel_event_core(pool, project_id, event_numeric_id).await
 }
 
@@ -120,6 +120,6 @@ pub(crate) async fn batch_delete_novel_events_for_project(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
     batch_delete_novel_events_core(pool, project_id, body).await
 }
