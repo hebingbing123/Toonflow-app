@@ -156,6 +156,24 @@ void main() {
     expect(find.text('Notifications'), findsOneWidget);
   });
 
+  testWidgets('AppLocalizations zh projects list title', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            return Scaffold(body: Text(l10n.projectsListTitle));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('项目列表'), findsOneWidget);
+  });
+
   testWidgets('AppLocalizations en shows English section title', (
     tester,
   ) async {

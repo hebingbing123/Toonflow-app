@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
@@ -19,8 +20,9 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
   return showDialog<Map<String, dynamic>>(
     context: context,
     builder: (dialogContext) {
+      final l10n = AppLocalizations.of(dialogContext)!;
       return AlertDialog(
-        title: const Text('新建项目'),
+        title: Text(l10n.projectsDialogCreateTitle),
         content: SizedBox(
           width: 560,
           child: SingleChildScrollView(
@@ -30,86 +32,98 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
               children: <Widget>[
                 TextField(
                   controller: nameController,
-                  decoration: const InputDecoration(labelText: '项目名'),
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldName,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: introController,
                   maxLines: 2,
-                  decoration: const InputDecoration(labelText: '项目简介'),
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldIntro,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '项目立项',
+                  l10n.projectsDialogSectionBrief,
                   style: Theme.of(dialogContext).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: premiseController,
-                  decoration: const InputDecoration(labelText: 'Premise'),
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldPremise,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: audienceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Target audience',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldTargetAudience,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: toneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Emotional tone',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldEmotionalTone,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: hookController,
-                  decoration: const InputDecoration(labelText: 'Core hook'),
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldCoreHook,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: visualController,
-                  decoration: const InputDecoration(
-                    labelText: 'Visual direction',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldVisualDirection,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '品牌圣经',
+                  l10n.projectsDialogSectionBrand,
                   style: Theme.of(dialogContext).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: brandNameController,
-                  decoration: const InputDecoration(labelText: 'Brand name'),
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldBrandName,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: brandPromiseController,
-                  decoration: const InputDecoration(labelText: 'Brand promise'),
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldBrandPromise,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: motifsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Visual motifs (每行一个)',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldVisualMotifsMultiline,
                   ),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: forbiddenController,
-                  decoration: const InputDecoration(
-                    labelText: 'Forbidden elements (每行一个)',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldForbiddenElementsMultiline,
                   ),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: continuityController,
-                  decoration: const InputDecoration(
-                    labelText: 'Continuity rules (每行一个)',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsDialogFieldContinuityRulesMultiline,
                   ),
                   maxLines: 2,
                 ),
@@ -120,7 +134,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('取消'),
+            child: Text(l10n.notificationsActionCancel),
           ),
           FilledButton(
             onPressed: () {
@@ -161,7 +175,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
               }
               Navigator.of(dialogContext).pop(result);
             },
-            child: const Text('创建'),
+            child: Text(l10n.projectsDialogCreateButton),
           ),
         ],
       );

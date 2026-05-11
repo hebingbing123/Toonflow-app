@@ -1272,4 +1272,190 @@ class AppLocalizationsZh extends AppLocalizations {
   String billingChipCount(String label, int count) {
     return '$label $count';
   }
+
+  @override
+  String get projectsListTitle => '项目列表';
+
+  @override
+  String get projectsListSubtitle => '查看项目、摘要、美术风格与创作手册，并进入项目详情继续编辑。';
+
+  @override
+  String get projectsSnackProjectCreated => '已创建项目';
+
+  @override
+  String get projectsSnackSignInArtStyles => '当前未登录，无法读取美术风格';
+
+  @override
+  String get projectsSnackSignInCreativeManuals => '当前未登录，无法读取创作手册';
+
+  @override
+  String get projectsSnackSignInAgentMemory => '当前未登录，无法读取 Agent 记忆';
+
+  @override
+  String get projectsEnterpriseEmptyTitle => '当前团队空间还没有项目';
+
+  @override
+  String get projectsEnterpriseEmptyUnnamedFallback => '这个 enterprise 空间';
+
+  @override
+  String projectsEnterpriseEmptyBody(String displayName) {
+    return '$displayName 还没有任何项目。可以先创建一个空项目作为团队母项目，再到团队工作区继续邀请成员和分配协作范围。';
+  }
+
+  @override
+  String get projectsCreateFirstEmpty => '先创建空项目';
+
+  @override
+  String get projectsOpenTeamWorkspaces => '打开团队工作区';
+
+  @override
+  String get projectsLoadProjectList => '加载项目列表';
+
+  @override
+  String get projectsViewSummary => '查看项目摘要';
+
+  @override
+  String get projectsLoadArtStyles => '加载美术风格';
+
+  @override
+  String get projectsOpenArtStylesWorkbench => '打开画风工作台';
+
+  @override
+  String get projectsOpenCreativeManualsWorkbench => '打开创作手册工作台';
+
+  @override
+  String get projectsOpenAgentMemoryWorkbench => '打开记忆工作台';
+
+  @override
+  String get projectsCreateEmptyProject => '新建空项目';
+
+  @override
+  String get projectsLoading => '加载中…';
+
+  @override
+  String get projectsCreating => '创建中…';
+
+  @override
+  String get projectsRequesting => '请求中…';
+
+  @override
+  String get projectsCompatibilityTitle => '兼容性检查';
+
+  @override
+  String get projectsCompatibilitySubtitle =>
+      '保留首项目 Agent memory probe 作为回归入口，默认折叠';
+
+  @override
+  String get projectsCompatibilityProbeMemory => '查询首个项目记忆';
+
+  @override
+  String get projectsSummaryLinePrefix => '项目摘要：';
+
+  @override
+  String get projectsArtStylesLinePrefix => '美术风格：';
+
+  @override
+  String projectsArtStyleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 条画风',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get projectsArtStylesManage => '管理';
+
+  @override
+  String projectsProjectCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String projectsUnnamedProject(int numericId) {
+    return '项目 #$numericId';
+  }
+
+  @override
+  String get projectsAgentMemoryPrefix => '项目记忆：';
+
+  @override
+  String get projectsAccessModeRestricted => '显式 ACL';
+
+  @override
+  String get projectsAccessModeInherited => '继承 workspace';
+
+  @override
+  String get projectsRoleWorkspaceOwner => 'workspace owner';
+
+  @override
+  String get projectsRoleWorkspaceAdmin => 'workspace admin';
+
+  @override
+  String get projectsRoleProjectOwner => '项目 owner';
+
+  @override
+  String get projectsRoleEditor => 'editor';
+
+  @override
+  String get projectsRoleViewer => 'viewer';
+
+  @override
+  String get projectsRoleMember => 'member';
+
+  @override
+  String get projectsDialogCreateTitle => '新建项目';
+
+  @override
+  String get projectsDialogFieldName => '项目名';
+
+  @override
+  String get projectsDialogFieldIntro => '项目简介';
+
+  @override
+  String get projectsDialogSectionBrief => '项目立项';
+
+  @override
+  String get projectsDialogFieldPremise => 'Premise';
+
+  @override
+  String get projectsDialogFieldTargetAudience => 'Target audience';
+
+  @override
+  String get projectsDialogFieldEmotionalTone => 'Emotional tone';
+
+  @override
+  String get projectsDialogFieldCoreHook => 'Core hook';
+
+  @override
+  String get projectsDialogFieldVisualDirection => 'Visual direction';
+
+  @override
+  String get projectsDialogSectionBrand => '品牌圣经';
+
+  @override
+  String get projectsDialogFieldBrandName => 'Brand name';
+
+  @override
+  String get projectsDialogFieldBrandPromise => 'Brand promise';
+
+  @override
+  String get projectsDialogFieldVisualMotifsMultiline => 'Visual motifs (每行一个)';
+
+  @override
+  String get projectsDialogFieldForbiddenElementsMultiline =>
+      'Forbidden elements (每行一个)';
+
+  @override
+  String get projectsDialogFieldContinuityRulesMultiline =>
+      'Continuity rules (每行一个)';
+
+  @override
+  String get projectsDialogCreateButton => '创建';
 }

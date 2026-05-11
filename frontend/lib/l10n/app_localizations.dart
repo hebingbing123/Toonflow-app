@@ -2369,6 +2369,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{label} {count}'**
   String billingChipCount(String label, int count);
+
+  /// No description provided for @projectsListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get projectsListTitle;
+
+  /// No description provided for @projectsListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Load projects, summaries, art styles, and creative manuals, then open a project to keep editing.'**
+  String get projectsListSubtitle;
+
+  /// No description provided for @projectsSnackProjectCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Project created'**
+  String get projectsSnackProjectCreated;
+
+  /// No description provided for @projectsSnackSignInArtStyles.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to load art styles.'**
+  String get projectsSnackSignInArtStyles;
+
+  /// No description provided for @projectsSnackSignInCreativeManuals.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to load creative manuals.'**
+  String get projectsSnackSignInCreativeManuals;
+
+  /// No description provided for @projectsSnackSignInAgentMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to load Agent memory.'**
+  String get projectsSnackSignInAgentMemory;
+
+  /// No description provided for @projectsEnterpriseEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects in this team workspace yet'**
+  String get projectsEnterpriseEmptyTitle;
+
+  /// No description provided for @projectsEnterpriseEmptyUnnamedFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'This enterprise workspace'**
+  String get projectsEnterpriseEmptyUnnamedFallback;
+
+  /// No description provided for @projectsEnterpriseEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{displayName} has no projects yet. Create an empty project as a team starting point, then open Team workspaces to invite members and assign collaboration scope.'**
+  String projectsEnterpriseEmptyBody(String displayName);
+
+  /// No description provided for @projectsCreateFirstEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an empty project'**
+  String get projectsCreateFirstEmpty;
+
+  /// No description provided for @projectsOpenTeamWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Open team workspaces'**
+  String get projectsOpenTeamWorkspaces;
+
+  /// No description provided for @projectsLoadProjectList.
+  ///
+  /// In en, this message translates to:
+  /// **'Load projects'**
+  String get projectsLoadProjectList;
+
+  /// No description provided for @projectsViewSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'View project summary'**
+  String get projectsViewSummary;
+
+  /// No description provided for @projectsLoadArtStyles.
+  ///
+  /// In en, this message translates to:
+  /// **'Load art styles'**
+  String get projectsLoadArtStyles;
+
+  /// No description provided for @projectsOpenArtStylesWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open art styles workbench'**
+  String get projectsOpenArtStylesWorkbench;
+
+  /// No description provided for @projectsOpenCreativeManualsWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open creative manuals workbench'**
+  String get projectsOpenCreativeManualsWorkbench;
+
+  /// No description provided for @projectsOpenAgentMemoryWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Agent memory workbench'**
+  String get projectsOpenAgentMemoryWorkbench;
+
+  /// No description provided for @projectsCreateEmptyProject.
+  ///
+  /// In en, this message translates to:
+  /// **'New empty project'**
+  String get projectsCreateEmptyProject;
+
+  /// No description provided for @projectsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get projectsLoading;
+
+  /// No description provided for @projectsCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating…'**
+  String get projectsCreating;
+
+  /// No description provided for @projectsRequesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting…'**
+  String get projectsRequesting;
+
+  /// No description provided for @projectsCompatibilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility check'**
+  String get projectsCompatibilityTitle;
+
+  /// No description provided for @projectsCompatibilitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps the first-project Agent memory probe as a regression entry point (collapsed by default).'**
+  String get projectsCompatibilitySubtitle;
+
+  /// No description provided for @projectsCompatibilityProbeMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Probe first project memory'**
+  String get projectsCompatibilityProbeMemory;
+
+  /// No description provided for @projectsSummaryLinePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Project summary: '**
+  String get projectsSummaryLinePrefix;
+
+  /// No description provided for @projectsArtStylesLinePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Art styles: '**
+  String get projectsArtStylesLinePrefix;
+
+  /// No description provided for @projectsArtStyleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 art style} other{{count} art styles}}'**
+  String projectsArtStyleCount(int count);
+
+  /// No description provided for @projectsArtStylesManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get projectsArtStylesManage;
+
+  /// No description provided for @projectsProjectCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 project} other{{count} projects}}'**
+  String projectsProjectCount(int count);
+
+  /// No description provided for @projectsUnnamedProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Project #{numericId}'**
+  String projectsUnnamedProject(int numericId);
+
+  /// No description provided for @projectsAgentMemoryPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Project memory: '**
+  String get projectsAgentMemoryPrefix;
+
+  /// No description provided for @projectsAccessModeRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit ACL'**
+  String get projectsAccessModeRestricted;
+
+  /// No description provided for @projectsAccessModeInherited.
+  ///
+  /// In en, this message translates to:
+  /// **'Inherited workspace'**
+  String get projectsAccessModeInherited;
+
+  /// No description provided for @projectsRoleWorkspaceOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'workspace owner'**
+  String get projectsRoleWorkspaceOwner;
+
+  /// No description provided for @projectsRoleWorkspaceAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'workspace admin'**
+  String get projectsRoleWorkspaceAdmin;
+
+  /// No description provided for @projectsRoleProjectOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'project owner'**
+  String get projectsRoleProjectOwner;
+
+  /// No description provided for @projectsRoleEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'editor'**
+  String get projectsRoleEditor;
+
+  /// No description provided for @projectsRoleViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'viewer'**
+  String get projectsRoleViewer;
+
+  /// No description provided for @projectsRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'member'**
+  String get projectsRoleMember;
+
+  /// No description provided for @projectsDialogCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New project'**
+  String get projectsDialogCreateTitle;
+
+  /// No description provided for @projectsDialogFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get projectsDialogFieldName;
+
+  /// No description provided for @projectsDialogFieldIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduction'**
+  String get projectsDialogFieldIntro;
+
+  /// No description provided for @projectsDialogSectionBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Project brief'**
+  String get projectsDialogSectionBrief;
+
+  /// No description provided for @projectsDialogFieldPremise.
+  ///
+  /// In en, this message translates to:
+  /// **'Premise'**
+  String get projectsDialogFieldPremise;
+
+  /// No description provided for @projectsDialogFieldTargetAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Target audience'**
+  String get projectsDialogFieldTargetAudience;
+
+  /// No description provided for @projectsDialogFieldEmotionalTone.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional tone'**
+  String get projectsDialogFieldEmotionalTone;
+
+  /// No description provided for @projectsDialogFieldCoreHook.
+  ///
+  /// In en, this message translates to:
+  /// **'Core hook'**
+  String get projectsDialogFieldCoreHook;
+
+  /// No description provided for @projectsDialogFieldVisualDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual direction'**
+  String get projectsDialogFieldVisualDirection;
+
+  /// No description provided for @projectsDialogSectionBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand bible'**
+  String get projectsDialogSectionBrand;
+
+  /// No description provided for @projectsDialogFieldBrandName.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand name'**
+  String get projectsDialogFieldBrandName;
+
+  /// No description provided for @projectsDialogFieldBrandPromise.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand promise'**
+  String get projectsDialogFieldBrandPromise;
+
+  /// No description provided for @projectsDialogFieldVisualMotifsMultiline.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual motifs (one per line)'**
+  String get projectsDialogFieldVisualMotifsMultiline;
+
+  /// No description provided for @projectsDialogFieldForbiddenElementsMultiline.
+  ///
+  /// In en, this message translates to:
+  /// **'Forbidden elements (one per line)'**
+  String get projectsDialogFieldForbiddenElementsMultiline;
+
+  /// No description provided for @projectsDialogFieldContinuityRulesMultiline.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuity rules (one per line)'**
+  String get projectsDialogFieldContinuityRulesMultiline;
+
+  /// No description provided for @projectsDialogCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get projectsDialogCreateButton;
 }
 
 class _AppLocalizationsDelegate

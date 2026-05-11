@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api/workspaces/workspaces.dart';
 import 'package:openflow_app/team_workspaces/invite_deep_link.dart';
 import 'package:openflow_app/team_workspaces/section.dart';
@@ -403,13 +404,18 @@ void main() {
   test(
     'buildEnterpriseProjectsEmptyStateBody falls back when name missing',
     () {
+      final zh = AppLocalizationsZh();
       expect(
-        buildEnterpriseProjectsEmptyStateBody('Team Alpha'),
+        buildEnterpriseProjectsEmptyStateBody(zh, 'Team Alpha'),
         contains('Team Alpha 还没有任何项目'),
       );
       expect(
-        buildEnterpriseProjectsEmptyStateBody('   '),
-        contains('这个 enterprise 空间 还没有任何项目'),
+        buildEnterpriseProjectsEmptyStateBody(zh, '   '),
+        contains(zh.projectsEnterpriseEmptyUnnamedFallback),
+      );
+      expect(
+        buildEnterpriseProjectsEmptyStateBody(zh, '   '),
+        contains('还没有任何项目'),
       );
     },
   );

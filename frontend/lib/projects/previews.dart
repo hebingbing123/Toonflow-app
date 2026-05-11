@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
-String _projectAccessModeLabel(String mode) {
+String _projectAccessModeLabel(AppLocalizations l10n, String mode) {
   switch (mode) {
     case 'restricted':
-      return '显式 ACL';
+      return l10n.projectsAccessModeRestricted;
     case 'inherited':
     default:
-      return '继承 workspace';
+      return l10n.projectsAccessModeInherited;
   }
 }
 
-String _projectAccessRoleLabel(String role) {
+String _projectAccessRoleLabel(AppLocalizations l10n, String role) {
   switch (role) {
     case 'workspace_owner':
-      return 'workspace owner';
+      return l10n.projectsRoleWorkspaceOwner;
     case 'workspace_admin':
-      return 'workspace admin';
+      return l10n.projectsRoleWorkspaceAdmin;
     case 'project_owner':
-      return '项目 owner';
+      return l10n.projectsRoleProjectOwner;
     case 'editor':
-      return 'editor';
+      return l10n.projectsRoleEditor;
     case 'viewer':
-      return 'viewer';
+      return l10n.projectsRoleViewer;
     case 'member':
     default:
-      return 'member';
+      return l10n.projectsRoleMember;
   }
 }
 
@@ -61,42 +62,55 @@ class ProjectsActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         FilledButton.tonal(
           onPressed: (loadingProjects || creatingProject) ? null : onLoadProjects,
-          child: Text(loadingProjects ? '加载中…' : '加载项目列表'),
+          child: Text(
+            loadingProjects ? l10n.projectsLoading : l10n.projectsLoadProjectList,
+          ),
         ),
         FilledButton.tonal(
           onPressed:
               (loadingProjectsSummary || creatingProject)
               ? null
               : onLoadProjectsSummary,
-          child: Text(loadingProjectsSummary ? '加载中…' : '查看项目摘要'),
+          child: Text(
+            loadingProjectsSummary
+                ? l10n.projectsLoading
+                : l10n.projectsViewSummary,
+          ),
         ),
         FilledButton.tonal(
           onPressed: (loadingArtStyles || creatingProject) ? null : onLoadArtStyles,
-          child: Text(loadingArtStyles ? '加载中…' : '加载美术风格'),
+          child: Text(
+            loadingArtStyles ? l10n.projectsLoading : l10n.projectsLoadArtStyles,
+          ),
         ),
         FilledButton.tonal(
           onPressed: creatingProject ? null : onOpenArtStylesWorkbench,
-          child: const Text('打开画风工作台'),
+          child: Text(l10n.projectsOpenArtStylesWorkbench),
         ),
         FilledButton.tonal(
           onPressed: creatingProject ? null : onOpenCreativeManualsWorkbench,
-          child: const Text('打开创作手册工作台'),
+          child: Text(l10n.projectsOpenCreativeManualsWorkbench),
         ),
         FilledButton.tonal(
           onPressed: creatingProject ? null : onOpenAgentMemoryWorkbench,
-          child: const Text('打开记忆工作台'),
+          child: Text(l10n.projectsOpenAgentMemoryWorkbench),
         ),
         FilledButton.tonal(
           onPressed: (loadingProjects || creatingProject)
               ? null
               : onCreateEmptyProject,
-          child: Text(creatingProject ? '创建中…' : '新建空项目'),
+          child: Text(
+            creatingProject
+                ? l10n.projectsCreating
+                : l10n.projectsCreateEmptyProject,
+          ),
         ),
       ],
     );
@@ -118,12 +132,13 @@ class ProjectsCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      title: const Text('兼容性检查'),
+      title: Text(l10n.projectsCompatibilityTitle),
       subtitle: Text(
-        '保留首项目 Agent memory probe 作为回归入口，默认折叠',
+        l10n.projectsCompatibilitySubtitle,
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: outlineColor),
@@ -133,7 +148,11 @@ class ProjectsCompatibilityPanel extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: FilledButton.tonal(
             onPressed: loadingAgentMemory ? null : onProbeAgentMemory,
-            child: Text(loadingAgentMemory ? '请求中…' : '查询首个项目记忆'),
+            child: Text(
+              loadingAgentMemory
+                  ? l10n.projectsRequesting
+                  : l10n.projectsCompatibilityProbeMemory,
+            ),
           ),
         ),
       ],
@@ -154,16 +173,19 @@ class ProjectsSummaryPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (projectsSummaryLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('项目摘要：$projectsSummaryLine'),
+          SelectableText(
+            '${l10n.projectsSummaryLinePrefix}$projectsSummaryLine',
+          ),
         ],
         if (artStylesLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('美术风格：$artStylesLine'),
+          SelectableText('${l10n.projectsArtStylesLinePrefix}$artStylesLine'),
         ],
       ],
     );
@@ -231,12 +253,13 @@ class ProjectsArtStylesPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
         Text(
-          '${artStyles.length} 条画风',
+          l10n.projectsArtStyleCount(artStyles.length),
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: 4),
@@ -249,7 +272,10 @@ class ProjectsArtStylesPreview extends StatelessWidget {
               '#${style.numericId}'
               '${(style.label ?? '').isEmpty ? '' : ' · ${style.label}'}',
             ),
-            trailing: TextButton(onPressed: onManage, child: const Text('管理')),
+            trailing: TextButton(
+              onPressed: onManage,
+              child: Text(l10n.projectsArtStylesManage),
+            ),
           ),
         ),
       ],
@@ -272,12 +298,13 @@ class ProjectsListPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
         Text(
-          '${projects.length} 个项目',
+          l10n.projectsProjectCount(projects.length),
           style: Theme.of(context).textTheme.labelLarge,
         ),
         ...projects.map(
@@ -289,12 +316,15 @@ class ProjectsListPreview extends StatelessWidget {
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(project.name ?? '项目 #${project.numericId}'),
+                Text(
+                  project.name ??
+                      l10n.projectsUnnamedProject(project.numericId),
+                ),
                 _ProjectAccessBadge(project: project),
               ],
             ),
             subtitle: Text(
-              '#${project.numericId} · ${project.id} · ${_projectAccessRoleLabel(project.projectAccessRole)}',
+              '#${project.numericId} · ${project.id} · ${_projectAccessRoleLabel(l10n, project.projectAccessRole)}',
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => onOpenProjectDetail(project),
@@ -302,7 +332,9 @@ class ProjectsListPreview extends StatelessWidget {
         ),
         if (agentMemoryBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('项目记忆：$agentMemoryBody'),
+          SelectableText(
+            '${l10n.projectsAgentMemoryPrefix}$agentMemoryBody',
+          ),
         ],
       ],
     );
@@ -316,6 +348,7 @@ class _ProjectAccessBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final restricted = project.projectAccessMode == 'restricted';
     return Container(
@@ -327,7 +360,7 @@ class _ProjectAccessBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        '${_projectAccessModeLabel(project.projectAccessMode)} · ${_projectAccessRoleLabel(project.projectAccessRole)}',
+        '${_projectAccessModeLabel(l10n, project.projectAccessMode)} · ${_projectAccessRoleLabel(l10n, project.projectAccessRole)}',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: restricted
               ? colorScheme.onTertiaryContainer

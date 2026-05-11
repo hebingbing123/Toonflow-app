@@ -1335,4 +1335,200 @@ class AppLocalizationsEn extends AppLocalizations {
   String billingChipCount(String label, int count) {
     return '$label $count';
   }
+
+  @override
+  String get projectsListTitle => 'Projects';
+
+  @override
+  String get projectsListSubtitle =>
+      'Load projects, summaries, art styles, and creative manuals, then open a project to keep editing.';
+
+  @override
+  String get projectsSnackProjectCreated => 'Project created';
+
+  @override
+  String get projectsSnackSignInArtStyles =>
+      'Please sign in to load art styles.';
+
+  @override
+  String get projectsSnackSignInCreativeManuals =>
+      'Please sign in to load creative manuals.';
+
+  @override
+  String get projectsSnackSignInAgentMemory =>
+      'Please sign in to load Agent memory.';
+
+  @override
+  String get projectsEnterpriseEmptyTitle =>
+      'No projects in this team workspace yet';
+
+  @override
+  String get projectsEnterpriseEmptyUnnamedFallback =>
+      'This enterprise workspace';
+
+  @override
+  String projectsEnterpriseEmptyBody(String displayName) {
+    return '$displayName has no projects yet. Create an empty project as a team starting point, then open Team workspaces to invite members and assign collaboration scope.';
+  }
+
+  @override
+  String get projectsCreateFirstEmpty => 'Create an empty project';
+
+  @override
+  String get projectsOpenTeamWorkspaces => 'Open team workspaces';
+
+  @override
+  String get projectsLoadProjectList => 'Load projects';
+
+  @override
+  String get projectsViewSummary => 'View project summary';
+
+  @override
+  String get projectsLoadArtStyles => 'Load art styles';
+
+  @override
+  String get projectsOpenArtStylesWorkbench => 'Open art styles workbench';
+
+  @override
+  String get projectsOpenCreativeManualsWorkbench =>
+      'Open creative manuals workbench';
+
+  @override
+  String get projectsOpenAgentMemoryWorkbench => 'Open Agent memory workbench';
+
+  @override
+  String get projectsCreateEmptyProject => 'New empty project';
+
+  @override
+  String get projectsLoading => 'Loading…';
+
+  @override
+  String get projectsCreating => 'Creating…';
+
+  @override
+  String get projectsRequesting => 'Requesting…';
+
+  @override
+  String get projectsCompatibilityTitle => 'Compatibility check';
+
+  @override
+  String get projectsCompatibilitySubtitle =>
+      'Keeps the first-project Agent memory probe as a regression entry point (collapsed by default).';
+
+  @override
+  String get projectsCompatibilityProbeMemory => 'Probe first project memory';
+
+  @override
+  String get projectsSummaryLinePrefix => 'Project summary: ';
+
+  @override
+  String get projectsArtStylesLinePrefix => 'Art styles: ';
+
+  @override
+  String projectsArtStyleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count art styles',
+      one: '1 art style',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get projectsArtStylesManage => 'Manage';
+
+  @override
+  String projectsProjectCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count projects',
+      one: '1 project',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String projectsUnnamedProject(int numericId) {
+    return 'Project #$numericId';
+  }
+
+  @override
+  String get projectsAgentMemoryPrefix => 'Project memory: ';
+
+  @override
+  String get projectsAccessModeRestricted => 'Explicit ACL';
+
+  @override
+  String get projectsAccessModeInherited => 'Inherited workspace';
+
+  @override
+  String get projectsRoleWorkspaceOwner => 'workspace owner';
+
+  @override
+  String get projectsRoleWorkspaceAdmin => 'workspace admin';
+
+  @override
+  String get projectsRoleProjectOwner => 'project owner';
+
+  @override
+  String get projectsRoleEditor => 'editor';
+
+  @override
+  String get projectsRoleViewer => 'viewer';
+
+  @override
+  String get projectsRoleMember => 'member';
+
+  @override
+  String get projectsDialogCreateTitle => 'New project';
+
+  @override
+  String get projectsDialogFieldName => 'Name';
+
+  @override
+  String get projectsDialogFieldIntro => 'Introduction';
+
+  @override
+  String get projectsDialogSectionBrief => 'Project brief';
+
+  @override
+  String get projectsDialogFieldPremise => 'Premise';
+
+  @override
+  String get projectsDialogFieldTargetAudience => 'Target audience';
+
+  @override
+  String get projectsDialogFieldEmotionalTone => 'Emotional tone';
+
+  @override
+  String get projectsDialogFieldCoreHook => 'Core hook';
+
+  @override
+  String get projectsDialogFieldVisualDirection => 'Visual direction';
+
+  @override
+  String get projectsDialogSectionBrand => 'Brand bible';
+
+  @override
+  String get projectsDialogFieldBrandName => 'Brand name';
+
+  @override
+  String get projectsDialogFieldBrandPromise => 'Brand promise';
+
+  @override
+  String get projectsDialogFieldVisualMotifsMultiline =>
+      'Visual motifs (one per line)';
+
+  @override
+  String get projectsDialogFieldForbiddenElementsMultiline =>
+      'Forbidden elements (one per line)';
+
+  @override
+  String get projectsDialogFieldContinuityRulesMultiline =>
+      'Continuity rules (one per line)';
+
+  @override
+  String get projectsDialogCreateButton => 'Create';
 }

@@ -751,5 +751,88 @@
         "type": "int"
       }
     }
-  }
+  },
+  "projectsListTitle": "Projects",
+  "projectsListSubtitle": "Load projects, summaries, art styles, and creative manuals, then open a project to keep editing.",
+  "projectsSnackProjectCreated": "Project created",
+  "projectsSnackSignInArtStyles": "Please sign in to load art styles.",
+  "projectsSnackSignInCreativeManuals": "Please sign in to load creative manuals.",
+  "projectsSnackSignInAgentMemory": "Please sign in to load Agent memory.",
+  "projectsEnterpriseEmptyTitle": "No projects in this team workspace yet",
+  "projectsEnterpriseEmptyUnnamedFallback": "This enterprise workspace",
+  "projectsEnterpriseEmptyBody": "{displayName} has no projects yet. Create an empty project as a team starting point, then open Team workspaces to invite members and assign collaboration scope.",
+  "@projectsEnterpriseEmptyBody": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsCreateFirstEmpty": "Create an empty project",
+  "projectsOpenTeamWorkspaces": "Open team workspaces",
+  "projectsLoadProjectList": "Load projects",
+  "projectsViewSummary": "View project summary",
+  "projectsLoadArtStyles": "Load art styles",
+  "projectsOpenArtStylesWorkbench": "Open art styles workbench",
+  "projectsOpenCreativeManualsWorkbench": "Open creative manuals workbench",
+  "projectsOpenAgentMemoryWorkbench": "Open Agent memory workbench",
+  "projectsCreateEmptyProject": "New empty project",
+  "projectsLoading": "Loading…",
+  "projectsCreating": "Creating…",
+  "projectsRequesting": "Requesting…",
+  "projectsCompatibilityTitle": "Compatibility check",
+  "projectsCompatibilitySubtitle": "Keeps the first-project Agent memory probe as a regression entry point (collapsed by default).",
+  "projectsCompatibilityProbeMemory": "Probe first project memory",
+  "projectsSummaryLinePrefix": "Project summary: ",
+  "projectsArtStylesLinePrefix": "Art styles: ",
+  "projectsArtStyleCount": "{count, plural, one{1 art style} other{{count} art styles}}",
+  "@projectsArtStyleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtStylesManage": "Manage",
+  "projectsProjectCount": "{count, plural, one{1 project} other{{count} projects}}",
+  "@projectsProjectCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsUnnamedProject": "Project #{numericId}",
+  "@projectsUnnamedProject": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsAgentMemoryPrefix": "Project memory: ",
+  "projectsAccessModeRestricted": "Explicit ACL",
+  "projectsAccessModeInherited": "Inherited workspace",
+  "projectsRoleWorkspaceOwner": "workspace owner",
+  "projectsRoleWorkspaceAdmin": "workspace admin",
+  "projectsRoleProjectOwner": "project owner",
+  "projectsRoleEditor": "editor",
+  "projectsRoleViewer": "viewer",
+  "projectsRoleMember": "member",
+  "projectsDialogCreateTitle": "New project",
+  "projectsDialogFieldName": "Name",
+  "projectsDialogFieldIntro": "Introduction",
+  "projectsDialogSectionBrief": "Project brief",
+  "projectsDialogFieldPremise": "Premise",
+  "projectsDialogFieldTargetAudience": "Target audience",
+  "projectsDialogFieldEmotionalTone": "Emotional tone",
+  "projectsDialogFieldCoreHook": "Core hook",
+  "projectsDialogFieldVisualDirection": "Visual direction",
+  "projectsDialogSectionBrand": "Brand bible",
+  "projectsDialogFieldBrandName": "Brand name",
+  "projectsDialogFieldBrandPromise": "Brand promise",
+  "projectsDialogFieldVisualMotifsMultiline": "Visual motifs (one per line)",
+  "projectsDialogFieldForbiddenElementsMultiline": "Forbidden elements (one per line)",
+  "projectsDialogFieldContinuityRulesMultiline": "Continuity rules (one per line)",
+  "projectsDialogCreateButton": "Create"
 }

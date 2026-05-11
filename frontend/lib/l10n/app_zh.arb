@@ -751,5 +751,88 @@
         "type": "int"
       }
     }
-  }
+  },
+  "projectsListTitle": "项目列表",
+  "projectsListSubtitle": "查看项目、摘要、美术风格与创作手册，并进入项目详情继续编辑。",
+  "projectsSnackProjectCreated": "已创建项目",
+  "projectsSnackSignInArtStyles": "当前未登录，无法读取美术风格",
+  "projectsSnackSignInCreativeManuals": "当前未登录，无法读取创作手册",
+  "projectsSnackSignInAgentMemory": "当前未登录，无法读取 Agent 记忆",
+  "projectsEnterpriseEmptyTitle": "当前团队空间还没有项目",
+  "projectsEnterpriseEmptyUnnamedFallback": "这个 enterprise 空间",
+  "projectsEnterpriseEmptyBody": "{displayName} 还没有任何项目。可以先创建一个空项目作为团队母项目，再到团队工作区继续邀请成员和分配协作范围。",
+  "@projectsEnterpriseEmptyBody": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsCreateFirstEmpty": "先创建空项目",
+  "projectsOpenTeamWorkspaces": "打开团队工作区",
+  "projectsLoadProjectList": "加载项目列表",
+  "projectsViewSummary": "查看项目摘要",
+  "projectsLoadArtStyles": "加载美术风格",
+  "projectsOpenArtStylesWorkbench": "打开画风工作台",
+  "projectsOpenCreativeManualsWorkbench": "打开创作手册工作台",
+  "projectsOpenAgentMemoryWorkbench": "打开记忆工作台",
+  "projectsCreateEmptyProject": "新建空项目",
+  "projectsLoading": "加载中…",
+  "projectsCreating": "创建中…",
+  "projectsRequesting": "请求中…",
+  "projectsCompatibilityTitle": "兼容性检查",
+  "projectsCompatibilitySubtitle": "保留首项目 Agent memory probe 作为回归入口，默认折叠",
+  "projectsCompatibilityProbeMemory": "查询首个项目记忆",
+  "projectsSummaryLinePrefix": "项目摘要：",
+  "projectsArtStylesLinePrefix": "美术风格：",
+  "projectsArtStyleCount": "{count, plural, other{{count} 条画风}}",
+  "@projectsArtStyleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtStylesManage": "管理",
+  "projectsProjectCount": "{count, plural, other{{count} 个项目}}",
+  "@projectsProjectCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsUnnamedProject": "项目 #{numericId}",
+  "@projectsUnnamedProject": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsAgentMemoryPrefix": "项目记忆：",
+  "projectsAccessModeRestricted": "显式 ACL",
+  "projectsAccessModeInherited": "继承 workspace",
+  "projectsRoleWorkspaceOwner": "workspace owner",
+  "projectsRoleWorkspaceAdmin": "workspace admin",
+  "projectsRoleProjectOwner": "项目 owner",
+  "projectsRoleEditor": "editor",
+  "projectsRoleViewer": "viewer",
+  "projectsRoleMember": "member",
+  "projectsDialogCreateTitle": "新建项目",
+  "projectsDialogFieldName": "项目名",
+  "projectsDialogFieldIntro": "项目简介",
+  "projectsDialogSectionBrief": "项目立项",
+  "projectsDialogFieldPremise": "Premise",
+  "projectsDialogFieldTargetAudience": "Target audience",
+  "projectsDialogFieldEmotionalTone": "Emotional tone",
+  "projectsDialogFieldCoreHook": "Core hook",
+  "projectsDialogFieldVisualDirection": "Visual direction",
+  "projectsDialogSectionBrand": "品牌圣经",
+  "projectsDialogFieldBrandName": "Brand name",
+  "projectsDialogFieldBrandPromise": "Brand promise",
+  "projectsDialogFieldVisualMotifsMultiline": "Visual motifs (每行一个)",
+  "projectsDialogFieldForbiddenElementsMultiline": "Forbidden elements (每行一个)",
+  "projectsDialogFieldContinuityRulesMultiline": "Continuity rules (每行一个)",
+  "projectsDialogCreateButton": "创建"
 }

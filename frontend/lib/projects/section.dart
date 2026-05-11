@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'create_project_dialog.dart';
 import 'controller.dart';
 import 'previews.dart';
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../team_workspaces/strings.dart';
 import 'workbenches/agent_memory.dart';
@@ -42,9 +43,10 @@ class ProjectsSection extends StatelessWidget {
   Future<void> _openArtStylesWorkbench(BuildContext context) async {
     final token = accessToken;
     if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('当前未登录，无法读取美术风格')));
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.projectsSnackSignInArtStyles)),
+      );
       return;
     }
     await showDialog<void>(
@@ -60,9 +62,10 @@ class ProjectsSection extends StatelessWidget {
   Future<void> _openCreativeManualsWorkbench(BuildContext context) async {
     final token = accessToken;
     if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('当前未登录，无法读取创作手册')));
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.projectsSnackSignInCreativeManuals)),
+      );
       return;
     }
     await showDialog<void>(
@@ -75,9 +78,10 @@ class ProjectsSection extends StatelessWidget {
   Future<void> _openAgentMemoryWorkbench(BuildContext context) async {
     final token = accessToken;
     if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('当前未登录，无法读取 Agent 记忆')));
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.projectsSnackSignInAgentMemory)),
+      );
       return;
     }
     await showDialog<void>(
@@ -94,13 +98,15 @@ class ProjectsSection extends StatelessWidget {
     if (!context.mounted || fields == null) return;
     final created = await controller.createProjectWithFields(fields);
     if (!context.mounted || !created) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('已创建项目')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.projectsSnackProjectCreated)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     return AnimatedBuilder(
       animation: controller,
@@ -113,18 +119,16 @@ class ProjectsSection extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '项目列表',
+                  l10n.projectsListTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              const RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: '本机客户端偏好',
-              ),
+              const RiskyOperationConfirmPrefsOverflowMenu(),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            '查看项目、摘要、美术风格与创作手册，并进入项目详情继续编辑。',
+            l10n.projectsListSubtitle,
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: outline),
@@ -166,12 +170,15 @@ class ProjectsSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '当前团队空间还没有项目',
+                    l10n.projectsEnterpriseEmptyTitle,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    buildEnterpriseProjectsEmptyStateBody(currentWorkspaceName),
+                    buildEnterpriseProjectsEmptyStateBody(
+                      l10n,
+                      currentWorkspaceName,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 10),
@@ -184,12 +191,14 @@ class ProjectsSection extends StatelessWidget {
                             ? null
                             : () => _createEmptyProject(context),
                         child: Text(
-                          controller.creatingProject ? '创建中…' : '先创建空项目',
+                          controller.creatingProject
+                              ? l10n.projectsCreating
+                              : l10n.projectsCreateFirstEmpty,
                         ),
                       ),
                       OutlinedButton(
                         onPressed: onOpenTeamWorkspaces,
-                        child: const Text('打开团队工作区'),
+                        child: Text(l10n.projectsOpenTeamWorkspaces),
                       ),
                     ],
                   ),

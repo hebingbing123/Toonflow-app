@@ -203,7 +203,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 
 - [~] **I2. i18n 产品文案中英收口 — Frontend**（**进行中**：已启用 `gen-l10n` + 首页语言卡片；**绝大部分界面仍为硬编码**，需按模块迁移到 ARB）
   - [x] I2.1 使用 `l10n` 框架 — `l10n.yaml`、`lib/l10n/*.arb`、`AppLocalizations` 生成物已入库；`flutter_localizations` + `MaterialApp` delegates
-  - [ ] I2.2 覆盖项目列表界面的中英文文案
+  - [~] I2.2 覆盖项目列表界面的中英文文案 — **部分**：**`ProjectsSection` / `previews.dart` / `create_project_dialog`** 已 **`projects*`**；画风/手册/Agent 记忆等 **工作台子视图**仍大量硬编码
   - [ ] I2.3 覆盖工作台界面的中英文文案
   - [~] I2.4 覆盖设置界面的中英文文案（除语言卡片外）— **部分**：**`_PlatformConfigSection`** 已 **`platformConfig*`**（含 Plan/Workspace/User 覆盖标题）；**产品壳** **`productNav*` / `productPaneDisabled*` / `productAgent*` / `productCompliance*`**；**`_HelpHubSection`** 已 **`helpHub*` / `opsWh*` / `billing*`**（帮助文档、出站 Webhook、Billing 审计、管理对话框与 SnackBar）；其余设置相关子界面仍可能含硬编码
   - [~] I2.5 覆盖团队工作区界面的中英文文案 — **部分**：首页 **工作区模式**（`build_sections.dart`）与 **`WorkspaceContextView`**（加载、无工作区/项目、计费标题与配额文案）已接 `AppLocalizations`；成员/邀请等子界面仍待迁移
