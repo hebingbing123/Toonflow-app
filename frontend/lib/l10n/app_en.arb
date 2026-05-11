@@ -3008,5 +3008,110 @@
   "teamWorkspaceAuditInviteCreated": "Invite created",
   "teamWorkspaceAuditInviteResent": "Invite resent",
   "teamWorkspaceAuditInviteRevoked": "Invite revoked",
-  "teamWorkspaceAuditInviteAccepted": "Invite accepted"
+  "teamWorkspaceAuditInviteAccepted": "Invite accepted",
+  "teamWorkspaceTransferOwnerTitle": "Transfer owner",
+  "teamWorkspaceTransferOwnerBody": "Transfer owner of {workspace} from {fromUser} to {toUser}.\n\nAfter confirmation, current owner is downgraded to admin and target member is promoted to owner.",
+  "@teamWorkspaceTransferOwnerBody": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      },
+      "fromUser": {
+        "type": "String"
+      },
+      "toUser": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceConfirmTransferOwner": "Confirm transfer",
+  "teamWorkspaceMembersDialogTitle": "Members · {workspace}",
+  "@teamWorkspaceMembersDialogTitle": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceUserUuidLabel": "User UUID",
+  "teamWorkspaceRoleLabel": "Role",
+  "teamWorkspaceEnterUserUuid": "Please enter user UUID",
+  "teamWorkspaceAddingMember": "Adding…",
+  "teamWorkspaceAddMemberAction": "Add member",
+  "teamWorkspaceRefreshAction": "Refresh",
+  "teamWorkspaceInviteEmailLabel": "Invite email",
+  "teamWorkspaceEnterInviteEmail": "Please enter invite email",
+  "teamWorkspaceGeneratingInvite": "Generating invite…",
+  "teamWorkspaceGenerateInviteLinkAction": "Generate invite link",
+  "teamWorkspaceOpsStatsTitle": "Internal ops stats",
+  "teamWorkspaceReading": "Reading…",
+  "teamWorkspaceRefreshStats": "Refresh stats",
+  "teamWorkspaceStatsMembers": "Members {count}",
+  "@teamWorkspaceStatsMembers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspaceStatsProjects": "Projects {count}",
+  "@teamWorkspaceStatsProjects": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspaceStatsActiveJobs": "Active jobs {count}",
+  "@teamWorkspaceStatsActiveJobs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspacePlatformInvitesTitle": "Platform invites (server)",
+  "teamWorkspaceIncludeRevokedInvites": "Include revoked invites",
+  "teamWorkspaceShowExpiredInvites": "Show expired invites",
+  "teamWorkspaceSearchInvitesHint": "Search invites (email / role / status)",
+  "teamWorkspaceNoInviteRecords": "No invite records yet. Generate one or load more from server.",
+  "teamWorkspaceInviteTokenLine": "invite token: {token}",
+  "@teamWorkspaceInviteTokenLine": {
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceRefreshInviteLinkTooltip": "Refresh link (extend expiry and rotate token)",
+  "teamWorkspaceRevokeInviteTooltip": "Revoke invite",
+  "teamWorkspaceCopyInviteInfoTooltip": "Copy invite info",
+  "teamWorkspaceCopiedInvite": "Copied invite: {email}",
+  "@teamWorkspaceCopiedInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceLoadMoreInvites": "Load more invites",
+  "teamWorkspaceActivityRecordsTitle": "Activity records",
+  "teamWorkspaceSearchActivityHint": "Search activity (action / actor / target / role / email)",
+  "teamWorkspaceNoActivityRecords": "No activity records.",
+  "teamWorkspaceLoadMoreActivity": "Load more activity",
+  "teamWorkspaceCurrentOwnerLine": "Current owner: {userId}",
+  "@teamWorkspaceCurrentOwnerLine": {
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceSearchMembersHint": "Search members (UUID / role)",
+  "teamWorkspaceNoMembers": "No members (unexpected).",
+  "teamWorkspaceTransferOwnerTooltip": "Transfer owner",
+  "teamWorkspaceRemoveMemberTooltip": "Remove member",
+  "teamWorkspaceLeftWorkspace": "Left this workspace",
+  "teamWorkspaceLeaving": "Leaving…",
+  "teamWorkspaceLeaveWorkspaceAction": "Leave workspace"
 }

@@ -6914,6 +6914,268 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invite accepted'**
   String get teamWorkspaceAuditInviteAccepted;
+
+  /// No description provided for @teamWorkspaceTransferOwnerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer owner'**
+  String get teamWorkspaceTransferOwnerTitle;
+
+  /// No description provided for @teamWorkspaceTransferOwnerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer owner of {workspace} from {fromUser} to {toUser}.\n\nAfter confirmation, current owner is downgraded to admin and target member is promoted to owner.'**
+  String teamWorkspaceTransferOwnerBody(
+    String workspace,
+    String fromUser,
+    String toUser,
+  );
+
+  /// No description provided for @teamWorkspaceConfirmTransferOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm transfer'**
+  String get teamWorkspaceConfirmTransferOwner;
+
+  /// No description provided for @teamWorkspaceMembersDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Members · {workspace}'**
+  String teamWorkspaceMembersDialogTitle(String workspace);
+
+  /// No description provided for @teamWorkspaceUserUuidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User UUID'**
+  String get teamWorkspaceUserUuidLabel;
+
+  /// No description provided for @teamWorkspaceRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get teamWorkspaceRoleLabel;
+
+  /// No description provided for @teamWorkspaceEnterUserUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter user UUID'**
+  String get teamWorkspaceEnterUserUuid;
+
+  /// No description provided for @teamWorkspaceAddingMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding…'**
+  String get teamWorkspaceAddingMember;
+
+  /// No description provided for @teamWorkspaceAddMemberAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member'**
+  String get teamWorkspaceAddMemberAction;
+
+  /// No description provided for @teamWorkspaceRefreshAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get teamWorkspaceRefreshAction;
+
+  /// No description provided for @teamWorkspaceInviteEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite email'**
+  String get teamWorkspaceInviteEmailLabel;
+
+  /// No description provided for @teamWorkspaceEnterInviteEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter invite email'**
+  String get teamWorkspaceEnterInviteEmail;
+
+  /// No description provided for @teamWorkspaceGeneratingInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating invite…'**
+  String get teamWorkspaceGeneratingInvite;
+
+  /// No description provided for @teamWorkspaceGenerateInviteLinkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate invite link'**
+  String get teamWorkspaceGenerateInviteLinkAction;
+
+  /// No description provided for @teamWorkspaceOpsStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal ops stats'**
+  String get teamWorkspaceOpsStatsTitle;
+
+  /// No description provided for @teamWorkspaceReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading…'**
+  String get teamWorkspaceReading;
+
+  /// No description provided for @teamWorkspaceRefreshStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh stats'**
+  String get teamWorkspaceRefreshStats;
+
+  /// No description provided for @teamWorkspaceStatsMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members {count}'**
+  String teamWorkspaceStatsMembers(int count);
+
+  /// No description provided for @teamWorkspaceStatsProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects {count}'**
+  String teamWorkspaceStatsProjects(int count);
+
+  /// No description provided for @teamWorkspaceStatsActiveJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Active jobs {count}'**
+  String teamWorkspaceStatsActiveJobs(int count);
+
+  /// No description provided for @teamWorkspacePlatformInvitesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform invites (server)'**
+  String get teamWorkspacePlatformInvitesTitle;
+
+  /// No description provided for @teamWorkspaceIncludeRevokedInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Include revoked invites'**
+  String get teamWorkspaceIncludeRevokedInvites;
+
+  /// No description provided for @teamWorkspaceShowExpiredInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Show expired invites'**
+  String get teamWorkspaceShowExpiredInvites;
+
+  /// No description provided for @teamWorkspaceSearchInvitesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search invites (email / role / status)'**
+  String get teamWorkspaceSearchInvitesHint;
+
+  /// No description provided for @teamWorkspaceNoInviteRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No invite records yet. Generate one or load more from server.'**
+  String get teamWorkspaceNoInviteRecords;
+
+  /// No description provided for @teamWorkspaceInviteTokenLine.
+  ///
+  /// In en, this message translates to:
+  /// **'invite token: {token}'**
+  String teamWorkspaceInviteTokenLine(String token);
+
+  /// No description provided for @teamWorkspaceRefreshInviteLinkTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh link (extend expiry and rotate token)'**
+  String get teamWorkspaceRefreshInviteLinkTooltip;
+
+  /// No description provided for @teamWorkspaceRevokeInviteTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke invite'**
+  String get teamWorkspaceRevokeInviteTooltip;
+
+  /// No description provided for @teamWorkspaceCopyInviteInfoTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invite info'**
+  String get teamWorkspaceCopyInviteInfoTooltip;
+
+  /// No description provided for @teamWorkspaceCopiedInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied invite: {email}'**
+  String teamWorkspaceCopiedInvite(String email);
+
+  /// No description provided for @teamWorkspaceLoadMoreInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more invites'**
+  String get teamWorkspaceLoadMoreInvites;
+
+  /// No description provided for @teamWorkspaceActivityRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity records'**
+  String get teamWorkspaceActivityRecordsTitle;
+
+  /// No description provided for @teamWorkspaceSearchActivityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search activity (action / actor / target / role / email)'**
+  String get teamWorkspaceSearchActivityHint;
+
+  /// No description provided for @teamWorkspaceNoActivityRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity records.'**
+  String get teamWorkspaceNoActivityRecords;
+
+  /// No description provided for @teamWorkspaceLoadMoreActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more activity'**
+  String get teamWorkspaceLoadMoreActivity;
+
+  /// No description provided for @teamWorkspaceCurrentOwnerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Current owner: {userId}'**
+  String teamWorkspaceCurrentOwnerLine(String userId);
+
+  /// No description provided for @teamWorkspaceSearchMembersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search members (UUID / role)'**
+  String get teamWorkspaceSearchMembersHint;
+
+  /// No description provided for @teamWorkspaceNoMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No members (unexpected).'**
+  String get teamWorkspaceNoMembers;
+
+  /// No description provided for @teamWorkspaceTransferOwnerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer owner'**
+  String get teamWorkspaceTransferOwnerTooltip;
+
+  /// No description provided for @teamWorkspaceRemoveMemberTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member'**
+  String get teamWorkspaceRemoveMemberTooltip;
+
+  /// No description provided for @teamWorkspaceLeftWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Left this workspace'**
+  String get teamWorkspaceLeftWorkspace;
+
+  /// No description provided for @teamWorkspaceLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving…'**
+  String get teamWorkspaceLeaving;
+
+  /// No description provided for @teamWorkspaceLeaveWorkspaceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave workspace'**
+  String get teamWorkspaceLeaveWorkspaceAction;
 }
 
 class _AppLocalizationsDelegate

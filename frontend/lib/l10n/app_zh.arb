@@ -3008,5 +3008,110 @@
   "teamWorkspaceAuditInviteCreated": "邀请已创建",
   "teamWorkspaceAuditInviteResent": "邀请已重发",
   "teamWorkspaceAuditInviteRevoked": "邀请已撤销",
-  "teamWorkspaceAuditInviteAccepted": "邀请已接受"
+  "teamWorkspaceAuditInviteAccepted": "邀请已接受",
+  "teamWorkspaceTransferOwnerTitle": "转让 owner",
+  "teamWorkspaceTransferOwnerBody": "将把 {workspace} 的主 owner 从 {fromUser}\n转给 {toUser}。\n\n提交后当前主 owner 会自动降为 admin，目标成员会升为 owner。",
+  "@teamWorkspaceTransferOwnerBody": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      },
+      "fromUser": {
+        "type": "String"
+      },
+      "toUser": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceConfirmTransferOwner": "确认转让",
+  "teamWorkspaceMembersDialogTitle": "成员管理 · {workspace}",
+  "@teamWorkspaceMembersDialogTitle": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceUserUuidLabel": "用户 UUID",
+  "teamWorkspaceRoleLabel": "角色",
+  "teamWorkspaceEnterUserUuid": "请输入用户 UUID",
+  "teamWorkspaceAddingMember": "添加中…",
+  "teamWorkspaceAddMemberAction": "添加成员",
+  "teamWorkspaceRefreshAction": "刷新",
+  "teamWorkspaceInviteEmailLabel": "邀请邮箱",
+  "teamWorkspaceEnterInviteEmail": "请输入邀请邮箱",
+  "teamWorkspaceGeneratingInvite": "生成邀请中…",
+  "teamWorkspaceGenerateInviteLinkAction": "生成邀请链接",
+  "teamWorkspaceOpsStatsTitle": "内部运维统计",
+  "teamWorkspaceReading": "读取中…",
+  "teamWorkspaceRefreshStats": "刷新统计",
+  "teamWorkspaceStatsMembers": "成员 {count}",
+  "@teamWorkspaceStatsMembers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspaceStatsProjects": "项目 {count}",
+  "@teamWorkspaceStatsProjects": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspaceStatsActiveJobs": "活跃任务 {count}",
+  "@teamWorkspaceStatsActiveJobs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspacePlatformInvitesTitle": "平台邀请（服务端）",
+  "teamWorkspaceIncludeRevokedInvites": "包含已撤销邀请",
+  "teamWorkspaceShowExpiredInvites": "显示已过期邀请",
+  "teamWorkspaceSearchInvitesHint": "搜索邀请（邮箱 / 角色 / 状态）",
+  "teamWorkspaceNoInviteRecords": "暂无邀请记录。生成或从服务端加载更多。",
+  "teamWorkspaceInviteTokenLine": "invite token: {token}",
+  "@teamWorkspaceInviteTokenLine": {
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceRefreshInviteLinkTooltip": "刷新链接（延期并更换 token）",
+  "teamWorkspaceRevokeInviteTooltip": "撤销邀请",
+  "teamWorkspaceCopyInviteInfoTooltip": "复制邀请信息",
+  "teamWorkspaceCopiedInvite": "已复制邀请：{email}",
+  "@teamWorkspaceCopiedInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceLoadMoreInvites": "加载更多邀请",
+  "teamWorkspaceActivityRecordsTitle": "活动记录",
+  "teamWorkspaceSearchActivityHint": "搜索活动（动作 / actor / target / role / email）",
+  "teamWorkspaceNoActivityRecords": "暂无活动记录。",
+  "teamWorkspaceLoadMoreActivity": "加载更多活动",
+  "teamWorkspaceCurrentOwnerLine": "当前主 owner: {userId}",
+  "@teamWorkspaceCurrentOwnerLine": {
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceSearchMembersHint": "搜索成员（UUID / 角色）",
+  "teamWorkspaceNoMembers": "暂无成员（异常）。",
+  "teamWorkspaceTransferOwnerTooltip": "转让 owner",
+  "teamWorkspaceRemoveMemberTooltip": "移除成员",
+  "teamWorkspaceLeftWorkspace": "已退出该空间",
+  "teamWorkspaceLeaving": "退出中…",
+  "teamWorkspaceLeaveWorkspaceAction": "退出该空间"
 }

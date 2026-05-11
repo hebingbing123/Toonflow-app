@@ -491,20 +491,22 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: const Text('转让 owner'),
+                title: Text(l10n.teamWorkspaceTransferOwnerTitle),
                 content: SelectableText(
-                  '将把 ${row.workspace.name} 的主 owner 从 $currentOwnerUserId\n'
-                  '转给 ${member.userId}。\n\n'
-                  '提交后当前主 owner 会自动降为 admin，目标成员会升为 owner。',
+                  l10n.teamWorkspaceTransferOwnerBody(
+                    row.workspace.name,
+                    currentOwnerUserId,
+                    member.userId,
+                  ),
                 ),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text('取消'),
+                    child: Text(l10n.helpHubDialogClose),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: const Text('确认转让'),
+                    child: Text(l10n.teamWorkspaceConfirmTransferOwner),
                   ),
                 ],
               );
@@ -679,7 +681,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               });
             }
             return AlertDialog(
-              title: Text('成员管理 · ${row.workspace.name}'),
+              title: Text(l10n.teamWorkspaceMembersDialogTitle(row.workspace.name)),
               content: SizedBox(
                 width: 480,
                 child: SingleChildScrollView(
@@ -689,16 +691,16 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                     children: <Widget>[
                       TextField(
                         controller: userIdController,
-                        decoration: const InputDecoration(
-                          labelText: '用户 UUID',
+                        decoration: InputDecoration(
+                          labelText: l10n.teamWorkspaceUserUuidLabel,
                           border: OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         initialValue: role,
-                        decoration: const InputDecoration(
-                          labelText: '角色',
+                        decoration: InputDecoration(
+                          labelText: l10n.teamWorkspaceRoleLabel,
                           border: OutlineInputBorder(),
                         ),
                         items: const <DropdownMenuItem<String>>[
@@ -724,7 +726,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 : () async {
                                     final userId = userIdController.text.trim();
                                     if (userId.isEmpty) {
-                                      setModalState(() => error = '请输入用户 UUID');
+                                      setModalState(
+                                        () => error = l10n.teamWorkspaceEnterUserUuid,
+                                      );
                                       return;
                                     }
                                     setModalState(() {
@@ -750,22 +754,26 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       setModalState(() => adding = false);
                                     }
                                   },
-                            child: Text(adding ? '添加中…' : '添加成员'),
+                            child: Text(
+                              adding
+                                  ? l10n.teamWorkspaceAddingMember
+                                  : l10n.teamWorkspaceAddMemberAction,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           TextButton(
                             onPressed: loading
                                 ? null
                                 : () => loadMembers(setModalState),
-                            child: const Text('刷新'),
+                            child: Text(l10n.teamWorkspaceRefreshAction),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: inviteEmailController,
-                        decoration: const InputDecoration(
-                          labelText: '邀请邮箱',
+                        decoration: InputDecoration(
+                          labelText: l10n.teamWorkspaceInviteEmailLabel,
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -776,7 +784,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             : () async {
                                 final email = inviteEmailController.text.trim();
                                 if (email.isEmpty) {
-                                  setModalState(() => error = '请输入邀请邮箱');
+                                  setModalState(
+                                    () => error = l10n.teamWorkspaceEnterInviteEmail,
+                                  );
                                   return;
                                 }
                                 setModalState(() {
@@ -805,7 +815,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   setModalState(() => inviting = false);
                                 }
                               },
-                        child: Text(inviting ? '生成邀请中…' : '生成邀请链接'),
+                        child: Text(
+                          inviting
+                              ? l10n.teamWorkspaceGeneratingInvite
+                              : l10n.teamWorkspaceGenerateInviteLinkAction,
+                        ),
                       ),
                       if (showWorkspaceOpsStats &&
                           (currentWorkspaceRole == 'owner' ||
@@ -814,7 +828,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         Row(
                           children: <Widget>[
                             Text(
-                              '内部运维统计',
+                              l10n.teamWorkspaceOpsStatsTitle,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                             const SizedBox(width: 8),
@@ -823,7 +837,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   ? null
                                   : () => loadWorkspaceStats(setModalState),
                               child: Text(
-                                loadingWorkspaceStats ? '读取中…' : '刷新统计',
+                                loadingWorkspaceStats
+                                    ? l10n.teamWorkspaceReading
+                                    : l10n.teamWorkspaceRefreshStats,
                               ),
                             ),
                           ],
@@ -835,19 +851,25 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             children: <Widget>[
                               Chip(
                                 label: Text(
-                                  '成员 ${workspaceStats!.workspaceMemberCount}',
+                                  l10n.teamWorkspaceStatsMembers(
+                                    workspaceStats!.workspaceMemberCount,
+                                  ),
                                 ),
                                 visualDensity: VisualDensity.compact,
                               ),
                               Chip(
                                 label: Text(
-                                  '项目 ${workspaceStats!.workspaceProjectCount}',
+                                  l10n.teamWorkspaceStatsProjects(
+                                    workspaceStats!.workspaceProjectCount,
+                                  ),
                                 ),
                                 visualDensity: VisualDensity.compact,
                               ),
                               Chip(
                                 label: Text(
-                                  '活跃任务 ${workspaceStats!.workspaceActiveJobCount}',
+                                  l10n.teamWorkspaceStatsActiveJobs(
+                                    workspaceStats!.workspaceActiveJobCount,
+                                  ),
                                 ),
                                 visualDensity: VisualDensity.compact,
                               ),
@@ -865,14 +887,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           currentWorkspaceRole == 'admin') ...<Widget>[
                         const SizedBox(height: 8),
                         Text(
-                          '平台邀请（服务端）',
+                          l10n.teamWorkspacePlatformInvitesTitle,
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         const SizedBox(height: 8),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
-                          title: const Text('包含已撤销邀请'),
+                          title: Text(l10n.teamWorkspaceIncludeRevokedInvites),
                           value: includeRevokedInvites,
                           onChanged: loading
                               ? null
@@ -886,15 +908,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
-                          title: const Text('显示已过期邀请'),
+                          title: Text(l10n.teamWorkspaceShowExpiredInvites),
                           value: includeExpiredInvites,
                           onChanged: (v) =>
                               setModalState(() => includeExpiredInvites = v),
                         ),
                         TextField(
                           controller: inviteSearchController,
-                          decoration: const InputDecoration(
-                            labelText: '搜索邀请（邮箱 / 角色 / 状态）',
+                          decoration: InputDecoration(
+                            labelText: l10n.teamWorkspaceSearchInvitesHint,
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (_) => setModalState(() {}),
@@ -902,7 +924,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         const SizedBox(height: 4),
                         if (pendingInvites.isEmpty && !loading)
                           Text(
-                            '暂无邀请记录。生成或从服务端加载更多。',
+                            l10n.teamWorkspaceNoInviteRecords,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ...sortWorkspaceInvitesByExpiry(
@@ -915,7 +937,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           ),
                         ).map((invite) {
                           final label = inviteStatusLabel(invite, l10n: l10n);
-                          final chipColor = label == '已过期' || label == '已撤销'
+                          final chipColor =
+                              invite.status == 'revoked' ||
+                                  isWorkspaceInviteExpired(invite)
                               ? Theme.of(context).colorScheme.errorContainer
                               : Theme.of(
                                   context,
@@ -946,7 +970,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       ],
                                     ),
                                     SelectableText(
-                                      '${formatWorkspaceInviteMeta(invite, l10n: l10n)}\ninvite token: ${invite.token}',
+                                      '${formatWorkspaceInviteMeta(invite, l10n: l10n)}\n${l10n.teamWorkspaceInviteTokenLine(invite.token)}',
                                       style: Theme.of(
                                         context,
                                       ).textTheme.bodySmall,
@@ -956,7 +980,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               ),
                               if (invite.status == 'pending') ...<Widget>[
                                 IconButton(
-                                  tooltip: '刷新链接（延期并更换 token）',
+                                  tooltip: l10n.teamWorkspaceRefreshInviteLinkTooltip,
                                   icon: const Icon(Icons.refresh, size: 18),
                                   onPressed: inviteActionBusyId != null
                                       ? null
@@ -995,7 +1019,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                         },
                                 ),
                                 IconButton(
-                                  tooltip: '撤销邀请',
+                                  tooltip: l10n.teamWorkspaceRevokeInviteTooltip,
                                   icon: const Icon(
                                     Icons.cancel_outlined,
                                     size: 18,
@@ -1044,7 +1068,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 ),
                               ],
                               IconButton(
-                                tooltip: '复制邀请信息',
+                                tooltip: l10n.teamWorkspaceCopyInviteInfoTooltip,
                                 icon: const Icon(
                                   Icons.copy_all_outlined,
                                   size: 18,
@@ -1063,7 +1087,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   }
                                   messenger.showSnackBar(
                                     SnackBar(
-                                      content: Text('已复制邀请：${invite.email}'),
+                                      content: Text(
+                                        l10n.teamWorkspaceCopiedInvite(invite.email),
+                                      ),
                                     ),
                                   );
                                 },
@@ -1079,21 +1105,22 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   ? null
                                   : () => loadMoreInvites(setModalState),
                               child: Text(
-                                loadingMoreInvites ? '加载中…' : '加载更多邀请',
+                                loadingMoreInvites
+                                    ? l10n.teamWorkspaceLoading
+                                    : l10n.teamWorkspaceLoadMoreInvites,
                               ),
                             ),
                           ),
                         const SizedBox(height: 12),
                         Text(
-                          '活动记录',
+                          l10n.teamWorkspaceActivityRecordsTitle,
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: auditSearchController,
-                          decoration: const InputDecoration(
-                            labelText:
-                                '搜索活动（动作 / actor / target / role / email）',
+                          decoration: InputDecoration(
+                            labelText: l10n.teamWorkspaceSearchActivityHint,
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (_) => setModalState(() {}),
@@ -1101,7 +1128,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         const SizedBox(height: 6),
                         if (auditRows.isEmpty && !loading)
                           Text(
-                            '暂无活动记录。',
+                            l10n.teamWorkspaceNoActivityRecords,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ...auditRows
@@ -1153,7 +1180,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       setModalState,
                                       append: true,
                                     ),
-                              child: Text(loadingMoreAudit ? '加载中…' : '加载更多活动'),
+                              child: Text(
+                                loadingMoreAudit
+                                    ? l10n.teamWorkspaceLoading
+                                    : l10n.teamWorkspaceLoadMoreActivity,
+                              ),
                             ),
                           ),
                       ],
@@ -1168,20 +1199,21 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       ],
                       const SizedBox(height: 12),
                       SelectableText(
-                        '当前主 owner: $currentOwnerUserId',
+                        l10n.teamWorkspaceCurrentOwnerLine(currentOwnerUserId),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: memberSearchController,
-                        decoration: const InputDecoration(
-                          labelText: '搜索成员（UUID / 角色）',
+                        decoration: InputDecoration(
+                          labelText: l10n.teamWorkspaceSearchMembersHint,
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (_) => setModalState(() {}),
                       ),
                       const SizedBox(height: 8),
-                      if (members.isEmpty && !loading) const Text('暂无成员（异常）。'),
+                      if (members.isEmpty && !loading)
+                        Text(l10n.teamWorkspaceNoMembers),
                       if (loading) const LinearProgressIndicator(),
                       if (members.isNotEmpty)
                         ...filterWorkspaceMembers(
@@ -1262,7 +1294,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   ),
                                 if (canTransferOwner)
                                   IconButton(
-                                    tooltip: '转让 owner',
+                                    tooltip: l10n.teamWorkspaceTransferOwnerTooltip,
                                     onPressed: mutatingMemberUserId != null
                                         ? null
                                         : () async {
@@ -1306,7 +1338,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                     icon: const Icon(Icons.swap_horiz_outlined),
                                   ),
                                 IconButton(
-                                  tooltip: '移除成员',
+                                  tooltip: l10n.teamWorkspaceRemoveMemberTooltip,
                                   onPressed: mutatingMemberUserId != null
                                       ? null
                                       : () async {
@@ -1362,7 +1394,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             }
                             navigator.pop();
                             messenger.showSnackBar(
-                              const SnackBar(content: Text('已退出该空间')),
+                              SnackBar(
+                                content: Text(l10n.teamWorkspaceLeftWorkspace),
+                              ),
                             );
                             if (widget.onWorkspaceContextChanged != null) {
                               await widget.onWorkspaceContextChanged!();
@@ -1375,11 +1409,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             });
                           }
                         },
-                  child: Text(leaving ? '退出中…' : '退出该空间'),
+                  child: Text(
+                    leaving
+                        ? l10n.teamWorkspaceLeaving
+                        : l10n.teamWorkspaceLeaveWorkspaceAction,
+                  ),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('关闭'),
+                  child: Text(l10n.helpHubDialogClose),
                 ),
               ],
             );

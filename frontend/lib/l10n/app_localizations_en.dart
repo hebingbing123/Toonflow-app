@@ -4171,4 +4171,157 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teamWorkspaceAuditInviteAccepted => 'Invite accepted';
+
+  @override
+  String get teamWorkspaceTransferOwnerTitle => 'Transfer owner';
+
+  @override
+  String teamWorkspaceTransferOwnerBody(
+    String workspace,
+    String fromUser,
+    String toUser,
+  ) {
+    return 'Transfer owner of $workspace from $fromUser to $toUser.\n\nAfter confirmation, current owner is downgraded to admin and target member is promoted to owner.';
+  }
+
+  @override
+  String get teamWorkspaceConfirmTransferOwner => 'Confirm transfer';
+
+  @override
+  String teamWorkspaceMembersDialogTitle(String workspace) {
+    return 'Members · $workspace';
+  }
+
+  @override
+  String get teamWorkspaceUserUuidLabel => 'User UUID';
+
+  @override
+  String get teamWorkspaceRoleLabel => 'Role';
+
+  @override
+  String get teamWorkspaceEnterUserUuid => 'Please enter user UUID';
+
+  @override
+  String get teamWorkspaceAddingMember => 'Adding…';
+
+  @override
+  String get teamWorkspaceAddMemberAction => 'Add member';
+
+  @override
+  String get teamWorkspaceRefreshAction => 'Refresh';
+
+  @override
+  String get teamWorkspaceInviteEmailLabel => 'Invite email';
+
+  @override
+  String get teamWorkspaceEnterInviteEmail => 'Please enter invite email';
+
+  @override
+  String get teamWorkspaceGeneratingInvite => 'Generating invite…';
+
+  @override
+  String get teamWorkspaceGenerateInviteLinkAction => 'Generate invite link';
+
+  @override
+  String get teamWorkspaceOpsStatsTitle => 'Internal ops stats';
+
+  @override
+  String get teamWorkspaceReading => 'Reading…';
+
+  @override
+  String get teamWorkspaceRefreshStats => 'Refresh stats';
+
+  @override
+  String teamWorkspaceStatsMembers(int count) {
+    return 'Members $count';
+  }
+
+  @override
+  String teamWorkspaceStatsProjects(int count) {
+    return 'Projects $count';
+  }
+
+  @override
+  String teamWorkspaceStatsActiveJobs(int count) {
+    return 'Active jobs $count';
+  }
+
+  @override
+  String get teamWorkspacePlatformInvitesTitle => 'Platform invites (server)';
+
+  @override
+  String get teamWorkspaceIncludeRevokedInvites => 'Include revoked invites';
+
+  @override
+  String get teamWorkspaceShowExpiredInvites => 'Show expired invites';
+
+  @override
+  String get teamWorkspaceSearchInvitesHint =>
+      'Search invites (email / role / status)';
+
+  @override
+  String get teamWorkspaceNoInviteRecords =>
+      'No invite records yet. Generate one or load more from server.';
+
+  @override
+  String teamWorkspaceInviteTokenLine(String token) {
+    return 'invite token: $token';
+  }
+
+  @override
+  String get teamWorkspaceRefreshInviteLinkTooltip =>
+      'Refresh link (extend expiry and rotate token)';
+
+  @override
+  String get teamWorkspaceRevokeInviteTooltip => 'Revoke invite';
+
+  @override
+  String get teamWorkspaceCopyInviteInfoTooltip => 'Copy invite info';
+
+  @override
+  String teamWorkspaceCopiedInvite(String email) {
+    return 'Copied invite: $email';
+  }
+
+  @override
+  String get teamWorkspaceLoadMoreInvites => 'Load more invites';
+
+  @override
+  String get teamWorkspaceActivityRecordsTitle => 'Activity records';
+
+  @override
+  String get teamWorkspaceSearchActivityHint =>
+      'Search activity (action / actor / target / role / email)';
+
+  @override
+  String get teamWorkspaceNoActivityRecords => 'No activity records.';
+
+  @override
+  String get teamWorkspaceLoadMoreActivity => 'Load more activity';
+
+  @override
+  String teamWorkspaceCurrentOwnerLine(String userId) {
+    return 'Current owner: $userId';
+  }
+
+  @override
+  String get teamWorkspaceSearchMembersHint => 'Search members (UUID / role)';
+
+  @override
+  String get teamWorkspaceNoMembers => 'No members (unexpected).';
+
+  @override
+  String get teamWorkspaceTransferOwnerTooltip => 'Transfer owner';
+
+  @override
+  String get teamWorkspaceRemoveMemberTooltip => 'Remove member';
+
+  @override
+  String get teamWorkspaceLeftWorkspace => 'Left this workspace';
+
+  @override
+  String get teamWorkspaceLeaving => 'Leaving…';
+
+  @override
+  String get teamWorkspaceLeaveWorkspaceAction => 'Leave workspace';
 }

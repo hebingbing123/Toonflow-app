@@ -4010,4 +4010,154 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get teamWorkspaceAuditInviteAccepted => '邀请已接受';
+
+  @override
+  String get teamWorkspaceTransferOwnerTitle => '转让 owner';
+
+  @override
+  String teamWorkspaceTransferOwnerBody(
+    String workspace,
+    String fromUser,
+    String toUser,
+  ) {
+    return '将把 $workspace 的主 owner 从 $fromUser\n转给 $toUser。\n\n提交后当前主 owner 会自动降为 admin，目标成员会升为 owner。';
+  }
+
+  @override
+  String get teamWorkspaceConfirmTransferOwner => '确认转让';
+
+  @override
+  String teamWorkspaceMembersDialogTitle(String workspace) {
+    return '成员管理 · $workspace';
+  }
+
+  @override
+  String get teamWorkspaceUserUuidLabel => '用户 UUID';
+
+  @override
+  String get teamWorkspaceRoleLabel => '角色';
+
+  @override
+  String get teamWorkspaceEnterUserUuid => '请输入用户 UUID';
+
+  @override
+  String get teamWorkspaceAddingMember => '添加中…';
+
+  @override
+  String get teamWorkspaceAddMemberAction => '添加成员';
+
+  @override
+  String get teamWorkspaceRefreshAction => '刷新';
+
+  @override
+  String get teamWorkspaceInviteEmailLabel => '邀请邮箱';
+
+  @override
+  String get teamWorkspaceEnterInviteEmail => '请输入邀请邮箱';
+
+  @override
+  String get teamWorkspaceGeneratingInvite => '生成邀请中…';
+
+  @override
+  String get teamWorkspaceGenerateInviteLinkAction => '生成邀请链接';
+
+  @override
+  String get teamWorkspaceOpsStatsTitle => '内部运维统计';
+
+  @override
+  String get teamWorkspaceReading => '读取中…';
+
+  @override
+  String get teamWorkspaceRefreshStats => '刷新统计';
+
+  @override
+  String teamWorkspaceStatsMembers(int count) {
+    return '成员 $count';
+  }
+
+  @override
+  String teamWorkspaceStatsProjects(int count) {
+    return '项目 $count';
+  }
+
+  @override
+  String teamWorkspaceStatsActiveJobs(int count) {
+    return '活跃任务 $count';
+  }
+
+  @override
+  String get teamWorkspacePlatformInvitesTitle => '平台邀请（服务端）';
+
+  @override
+  String get teamWorkspaceIncludeRevokedInvites => '包含已撤销邀请';
+
+  @override
+  String get teamWorkspaceShowExpiredInvites => '显示已过期邀请';
+
+  @override
+  String get teamWorkspaceSearchInvitesHint => '搜索邀请（邮箱 / 角色 / 状态）';
+
+  @override
+  String get teamWorkspaceNoInviteRecords => '暂无邀请记录。生成或从服务端加载更多。';
+
+  @override
+  String teamWorkspaceInviteTokenLine(String token) {
+    return 'invite token: $token';
+  }
+
+  @override
+  String get teamWorkspaceRefreshInviteLinkTooltip => '刷新链接（延期并更换 token）';
+
+  @override
+  String get teamWorkspaceRevokeInviteTooltip => '撤销邀请';
+
+  @override
+  String get teamWorkspaceCopyInviteInfoTooltip => '复制邀请信息';
+
+  @override
+  String teamWorkspaceCopiedInvite(String email) {
+    return '已复制邀请：$email';
+  }
+
+  @override
+  String get teamWorkspaceLoadMoreInvites => '加载更多邀请';
+
+  @override
+  String get teamWorkspaceActivityRecordsTitle => '活动记录';
+
+  @override
+  String get teamWorkspaceSearchActivityHint =>
+      '搜索活动（动作 / actor / target / role / email）';
+
+  @override
+  String get teamWorkspaceNoActivityRecords => '暂无活动记录。';
+
+  @override
+  String get teamWorkspaceLoadMoreActivity => '加载更多活动';
+
+  @override
+  String teamWorkspaceCurrentOwnerLine(String userId) {
+    return '当前主 owner: $userId';
+  }
+
+  @override
+  String get teamWorkspaceSearchMembersHint => '搜索成员（UUID / 角色）';
+
+  @override
+  String get teamWorkspaceNoMembers => '暂无成员（异常）。';
+
+  @override
+  String get teamWorkspaceTransferOwnerTooltip => '转让 owner';
+
+  @override
+  String get teamWorkspaceRemoveMemberTooltip => '移除成员';
+
+  @override
+  String get teamWorkspaceLeftWorkspace => '已退出该空间';
+
+  @override
+  String get teamWorkspaceLeaving => '退出中…';
+
+  @override
+  String get teamWorkspaceLeaveWorkspaceAction => '退出该空间';
 }
