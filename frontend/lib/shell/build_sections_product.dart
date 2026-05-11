@@ -1287,6 +1287,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   final _webhookTestEventTypeController = TextEditingController(
     text: 'test.ping',
   );
+  final _webhookWorkspaceIdController = TextEditingController();
+  /// Create form: selected platform event slugs (empty on server = all types).
+  final Set<String> _createWebhookEventTypes =
+      <String>{...kOutboundWebhookPlatformEventTypes};
   final _helpHubSearchController = TextEditingController();
   final _helpHubNewIdController = TextEditingController();
   final _helpHubNewTitleController = TextEditingController();
@@ -1374,6 +1378,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     _webhookSecretController.dispose();
     _webhookSearchController.dispose();
     _webhookTestEventTypeController.dispose();
+    _webhookWorkspaceIdController.dispose();
     _helpHubSearchController.dispose();
     _helpHubNewIdController.dispose();
     _helpHubNewTitleController.dispose();
@@ -1836,6 +1841,36 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
   }
 
+  static final RegExp _uuidV4ish = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  );
+
+  Set<String> _eventTypesFromWebhookItem(OutboundWebhookListItemV1 wh) {
+    if (wh.eventTypes.isEmpty) {
+      return Set<String>.from(kOutboundWebhookPlatformEventTypes);
+    }
+    return Set<String>.from(wh.eventTypes);
+  }
+
+  /// Empty list ⇒ backend treats as「订阅全部平台事件」。
+  List<String> _eventTypesForApiPayload(Set<String> selected) {
+    final all = kOutboundWebhookPlatformEventTypes.toSet();
+    final inter = selected.intersection(all);
+    if (inter.length == all.length) {
+      return <String>[];
+    }
+    final out = inter.toList()..sort();
+    return out;
+  }
+
+  List<String>? _eventTypesForCreateBody() {
+    final payload = _eventTypesForApiPayload(_createWebhookEventTypes);
+    if (payload.isEmpty) {
+      return null;
+    }
+    return payload;
+  }
+
   Future<void> _createWebhook() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
@@ -1847,6 +1882,17 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _webhooksError = 'URL 不能为空';
       });
       return;
+    }
+    final wsRaw = _webhookWorkspaceIdController.text.trim();
+    String? workspaceId;
+    if (wsRaw.isNotEmpty) {
+      if (!_uuidV4ish.hasMatch(wsRaw)) {
+        setState(() {
+          _webhooksError = 'workspaceId 须为合法 UUID，或留空';
+        });
+        return;
+      }
+      workspaceId = wsRaw;
     }
     setState(() {
       _loadingWebhooks = true;
@@ -1860,6 +1906,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           secret: _webhookSecretController.text.trim().isEmpty
               ? null
               : _webhookSecretController.text.trim(),
+          workspaceId: workspaceId,
+          eventTypes: _eventTypesForCreateBody(),
         ),
       );
       if (!mounted) {
@@ -1869,6 +1917,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _latestCreatedWebhook = created;
         _webhookUrlController.clear();
         _webhookSecretController.clear();
+        _webhookWorkspaceIdController.clear();
+        _createWebhookEventTypes
+          ..clear()
+          ..addAll(kOutboundWebhookPlatformEventTypes);
         _appendWebhookActivity(
           action: 'created',
           webhookId: created.id,
@@ -1894,6 +1946,51 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (mounted) {
         setState(() {
           _loadingWebhooks = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _patchWebhookEventSubscription(
+    OutboundWebhookListItemV1 wh,
+    Set<String> nextSelection,
+  ) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    setState(() {
+      _loadingWebhooks = true;
+      _webhooksError = null;
+      _webhookBusyId = wh.id;
+    });
+    try {
+      await patchSettingsOutboundWebhookV1(
+        token,
+        wh.id,
+        OutboundWebhookPatchBodyV1(
+          eventTypes: _eventTypesForApiPayload(nextSelection),
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已更新订阅事件')),
+      );
+      await _loadWebhooks();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooksError = describeRustApiError(e);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingWebhooks = false;
+          _webhookBusyId = null;
         });
       }
     }
@@ -2503,6 +2600,50 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           ),
           const SizedBox(height: 8),
           TextField(
+            controller: _webhookWorkspaceIdController,
+            decoration: const InputDecoration(
+              labelText: 'workspaceId（可空）',
+              hintText: '仅投递属于该工作区的事件；须为 UUID',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '订阅事件（全选=默认全部；可取消不需要的类型）',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final slug in kOutboundWebhookPlatformEventTypes)
+                FilterChip(
+                  label: Text(outboundWebhookPlatformEventLabel(slug)),
+                  selected: _createWebhookEventTypes.contains(slug),
+                  onSelected: _loadingWebhooks
+                      ? null
+                      : (v) {
+                          setState(() {
+                            if (v) {
+                              _createWebhookEventTypes.add(slug);
+                            } else {
+                              _createWebhookEventTypes.remove(slug);
+                            }
+                            if (_createWebhookEventTypes.isEmpty) {
+                              _createWebhookEventTypes.addAll(
+                                kOutboundWebhookPlatformEventTypes,
+                              );
+                            }
+                          });
+                        },
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextField(
             controller: _webhookTestEventTypeController,
             decoration: const InputDecoration(
               labelText: '测试 eventType',
@@ -2675,14 +2816,68 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                               ),
-                            if (wh.eventTypes.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  '订阅事件: ${wh.eventTypes.join(', ')}',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '订阅事件',
+                                    style: Theme.of(context).textTheme.labelMedium,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 6,
+                                    children: [
+                                      for (final slug in kOutboundWebhookPlatformEventTypes)
+                                        FilterChip(
+                                          label: Text(
+                                            outboundWebhookPlatformEventLabel(slug),
+                                          ),
+                                          selected: _eventTypesFromWebhookItem(
+                                            wh,
+                                          ).contains(slug),
+                                          onSelected:
+                                              (_loadingWebhooks ||
+                                                  _webhookBusyId != null)
+                                              ? null
+                                              : (v) {
+                                                  final cur = _eventTypesFromWebhookItem(
+                                                    wh,
+                                                  );
+                                                  final next = Set<String>.from(cur);
+                                                  if (v) {
+                                                    next.add(slug);
+                                                  } else {
+                                                    next.remove(slug);
+                                                  }
+                                                  if (next.isEmpty) {
+                                                    next.addAll(
+                                                      kOutboundWebhookPlatformEventTypes,
+                                                    );
+                                                  }
+                                                  unawaited(
+                                                    _patchWebhookEventSubscription(
+                                                      wh,
+                                                      next,
+                                                    ),
+                                                  );
+                                                },
+                                        ),
+                                    ],
+                                  ),
+                                  if (wh.eventTypes.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        'API: ${wh.eventTypes.join(', ')}',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ),
+                                ],
                               ),
+                            ),
                             if (wh.workspaceId != null && wh.workspaceId!.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
