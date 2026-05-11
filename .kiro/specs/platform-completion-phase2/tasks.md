@@ -180,7 +180,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] C1.4 在通知记录中包含升级阶段、数量与摘要 payload（含深链模板）
   - [x] C1.5 差量同步：活跃告警更新时复位 `read_at` 提示未读；阶段消退时写入 `content_compliance_alert_cleared` 并配节流/模板偏好（见 `sync_content_compliance_alert_notifications`）
   - [x] C1.6 更新 OpenAPI 注册合规通知相关路径（含 sync、cleared-templates 族等）
-  - [~] C1.7 添加**独立单元测试**：告警生成纯函数级覆盖（当前以 storage 集成路径 + 契约 smoke 为主）
+  - [x] C1.7 添加**独立单元测试**：`backend/src/settings/notifications/content_compliance_sync_pure.rs` — `normalize_*`、`build_content_compliance_alert_payload`、`content_compliance_alert_unchanged`；`notifications/storage.rs` 复用同模块
   - [~] C1.8 添加**专用集成测试**：WS 推送全双工自动化（当前以产品竖切 + `contract_smoke` 覆盖为主）
   - _Requirements: 5.1–5.10_
 
