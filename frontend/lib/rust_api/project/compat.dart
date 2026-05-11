@@ -17,6 +17,18 @@ Future<List<ProjectRow>> postGeneralGetSingleProject(
   return rows.where((r) => r.numericId == numericId).toList();
 }
 
+String? projectUuidFromCompatBody(Map<String, dynamic> body) {
+  final raw = body['projectUuid'];
+  if (raw is! String) {
+    return null;
+  }
+  final value = raw.trim();
+  if (value.isEmpty) {
+    return null;
+  }
+  return value;
+}
+
 /// Compat **`updateProject`**: maps camelCase fields to **`PATCH /api/v1/projects/{uuid}`**.
 ///
 /// [body] must include **`id`** (numeric project id) and at least one of **`intro`**,
@@ -35,7 +47,9 @@ Future<String> postGeneralUpdateProject(
   if (numericId == null || numericId <= 0) {
     throw RustApiException('invalid id', statusCode: 400);
   }
-  final projectId = await projectIdForNumericId(accessToken, numericId);
+  final projectId =
+      projectUuidFromCompatBody(body) ??
+      await projectIdForNumericId(accessToken, numericId);
 
   final patch = <String, dynamic>{};
   if (body.containsKey('intro')) {

@@ -68,11 +68,13 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                     token,
                     <String, dynamic>{
                       'id': p.numericId,
+                      'projectUuid': p.id,
                       'intro': probeIntro,
                     },
                   );
                   final restoreBody = <String, dynamic>{
                     'id': p.numericId,
+                    'projectUuid': p.id,
                     if (origIntro.isEmpty) 'intro': null else 'intro': origIntro,
                   };
                   final msg2 = await postGeneralUpdateProject(
