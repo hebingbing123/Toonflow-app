@@ -881,54 +881,106 @@
   "projectsCreativeManualSummaryLine": "{name} · 路径 {path} · 图片 {imageCount} 张 · 槽位 {slotCount} 个",
   "@projectsCreativeManualSummaryLine": {
     "placeholders": {
-      "name": {"type": "String"},
-      "path": {"type": "String"},
-      "imageCount": {"type": "int"},
-      "slotCount": {"type": "int"}
+      "name": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      },
+      "imageCount": {
+        "type": "int"
+      },
+      "slotCount": {
+        "type": "int"
+      }
     }
   },
   "projectsCreativeManualStatusRefreshing": "刷新创作手册中…",
   "projectsCreativeManualStatusReloadOk": "导演手册 {directorCount} 条 · 视觉手册 {visualCount} 条 · visual GET/POST={getCount}/{postCount}",
   "@projectsCreativeManualStatusReloadOk": {
     "placeholders": {
-      "directorCount": {"type": "int"},
-      "visualCount": {"type": "int"},
-      "getCount": {"type": "int"},
-      "postCount": {"type": "int"}
+      "directorCount": {
+        "type": "int"
+      },
+      "visualCount": {
+        "type": "int"
+      },
+      "getCount": {
+        "type": "int"
+      },
+      "postCount": {
+        "type": "int"
+      }
     }
   },
   "projectsCreativeManualStatusReloadFail": "刷新失败：{detail}",
   "@projectsCreativeManualStatusReloadFail": {
-    "placeholders": {"detail": {"type": "String"}}
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusCreateNeedFields": "新建失败：名称与路径不能为空。",
   "projectsCreativeManualStatusCreating": "新建手册中…",
   "projectsCreativeManualStatusCreated": "已新建 {kind}：{path}",
   "@projectsCreativeManualStatusCreated": {
-    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusSaveNeedSelect": "保存失败：请先选择一条手册。",
   "projectsCreativeManualStatusSaveNeedFields": "保存失败：名称与路径不能为空。",
   "projectsCreativeManualStatusSaving": "保存手册中…",
   "projectsCreativeManualStatusSaved": "已保存 {kind}：{path}",
   "@projectsCreativeManualStatusSaved": {
-    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusDeleteNeedSelect": "删除失败：请先选择一条手册。",
   "projectsCreativeManualStatusDeleting": "删除手册中…",
   "projectsCreativeManualStatusDeleted": "已删除 {kind}：{path}",
   "@projectsCreativeManualStatusDeleted": {
-    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusOpFail": "{verb}失败：{detail}",
   "@projectsCreativeManualStatusOpFail": {
-    "placeholders": {"verb": {"type": "String"}, "detail": {"type": "String"}}
+    "placeholders": {
+      "verb": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualKindDirector": "导演手册",
   "projectsCreativeManualKindVisual": "视觉手册",
   "projectsCreativeManualInvalidSlotLine": "槽位格式无效（应为 label|value|data）：{line}",
   "@projectsCreativeManualInvalidSlotLine": {
-    "placeholders": {"line": {"type": "String"}}
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualVerbCreate": "新建",
   "projectsCreativeManualVerbSave": "保存",
@@ -942,9 +994,15 @@
   "agentMemoryProjectsPreviewLine": "{count} 个项目 · {preview}{ellipsis}",
   "@agentMemoryProjectsPreviewLine": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryUnnamedProject": "未命名项目",
@@ -982,21 +1040,49 @@
   "agentMemoryTierGroupHeader": "{label} · {count} 条 · 最近注入 {last}",
   "@agentMemoryTierGroupHeader": {
     "placeholders": {
-      "label": {"type": "String"},
-      "count": {"type": "int"},
-      "last": {"type": "String"}
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "last": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryMemoryRowCount": "{count, plural, other{{count} 条记忆}}",
   "@agentMemoryMemoryRowCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "agentMemoryCharsAbbr": "{n} chars",
-  "@agentMemoryCharsAbbr": {"placeholders": {"n": {"type": "int"}}},
+  "@agentMemoryCharsAbbr": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "agentMemorySubjectLabel": "subject {value}",
-  "@agentMemorySubjectLabel": {"placeholders": {"value": {"type": "String"}}},
+  "@agentMemorySubjectLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemorySignalsLabel": "signals {value}",
-  "@agentMemorySignalsLabel": {"placeholders": {"value": {"type": "String"}}},
+  "@agentMemorySignalsLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryTierAll": "全部层级",
   "agentMemoryTierStyleBible": "风格圣经",
   "agentMemoryTierStageSummary": "阶段摘要",
@@ -1014,85 +1100,204 @@
   "agentMemoryInsightCore": "角色分布：{roles}{typesPart} · 约 {totalChars} chars · 最长 {longestChars} chars{dupPart}",
   "@agentMemoryInsightCore": {
     "placeholders": {
-      "roles": {"type": "String"},
-      "typesPart": {"type": "String"},
-      "totalChars": {"type": "int"},
-      "longestChars": {"type": "int"},
-      "dupPart": {"type": "String"}
+      "roles": {
+        "type": "String"
+      },
+      "typesPart": {
+        "type": "String"
+      },
+      "totalChars": {
+        "type": "int"
+      },
+      "longestChars": {
+        "type": "int"
+      },
+      "dupPart": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryInsightTypesPart": " · 类型 {detail}",
-  "@agentMemoryInsightTypesPart": {"placeholders": {"detail": {"type": "String"}}},
+  "@agentMemoryInsightTypesPart": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryInsightDupPart": " · 重复 {count} 条",
-  "@agentMemoryInsightDupPart": {"placeholders": {"count": {"type": "int"}}},
+  "@agentMemoryInsightDupPart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "agentMemoryVideoInsight": "视频记忆：delivery {dRows}/{dChars} chars · visual {vRows}/{vChars} chars · negative {nRows}/{nChars} chars",
   "@agentMemoryVideoInsight": {
     "placeholders": {
-      "dRows": {"type": "int"},
-      "dChars": {"type": "int"},
-      "vRows": {"type": "int"},
-      "vChars": {"type": "int"},
-      "nRows": {"type": "int"},
-      "nChars": {"type": "int"}
+      "dRows": {
+        "type": "int"
+      },
+      "dChars": {
+        "type": "int"
+      },
+      "vRows": {
+        "type": "int"
+      },
+      "vChars": {
+        "type": "int"
+      },
+      "nRows": {
+        "type": "int"
+      },
+      "nChars": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryEfficiencyInsight": "处理建议：保留 {kRows}/{kChars} chars · 压缩 {tRows}/{tChars} chars · 合并坏例 {mRows}/{mChars} chars",
   "@agentMemoryEfficiencyInsight": {
     "placeholders": {
-      "kRows": {"type": "int"},
-      "kChars": {"type": "int"},
-      "tRows": {"type": "int"},
-      "tChars": {"type": "int"},
-      "mRows": {"type": "int"},
-      "mChars": {"type": "int"}
+      "kRows": {
+        "type": "int"
+      },
+      "kChars": {
+        "type": "int"
+      },
+      "tRows": {
+        "type": "int"
+      },
+      "tChars": {
+        "type": "int"
+      },
+      "mRows": {
+        "type": "int"
+      },
+      "mChars": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryBucketPriorityLine": "记忆桶优先级：{detail}",
-  "@agentMemoryBucketPriorityLine": {"placeholders": {"detail": {"type": "String"}}},
+  "@agentMemoryBucketPriorityLine": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryBucketPriorityItem": "{action} {name} · {rows}条/{chars} chars",
   "@agentMemoryBucketPriorityItem": {
     "placeholders": {
-      "action": {"type": "String"},
-      "name": {"type": "String"},
-      "rows": {"type": "int"},
-      "chars": {"type": "int"}
+      "action": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryCostNever": "暂无",
   "agentMemoryCostOverviewLine": "scope={scope} · 成本概览：风格圣经 {sb} 条 · 阶段摘要 {ss} 条 · 增量记忆 {dm} 条 · 普通消息 {msg} 条 · 近 30 次平均注入 {avgInj} 字 · 近 30 次平均命中层级 {avgHit} 个 · 最近注入 {last}",
   "@agentMemoryCostOverviewLine": {
     "placeholders": {
-      "scope": {"type": "String"},
-      "sb": {"type": "int"},
-      "ss": {"type": "int"},
-      "dm": {"type": "int"},
-      "msg": {"type": "int"},
-      "avgInj": {"type": "int"},
-      "avgHit": {"type": "int"},
-      "last": {"type": "String"}
+      "scope": {
+        "type": "String"
+      },
+      "sb": {
+        "type": "int"
+      },
+      "ss": {
+        "type": "int"
+      },
+      "dm": {
+        "type": "int"
+      },
+      "msg": {
+        "type": "int"
+      },
+      "avgInj": {
+        "type": "int"
+      },
+      "avgHit": {
+        "type": "int"
+      },
+      "last": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryChecklistTitle": "记忆执行清单：",
   "agentMemoryChecklistScope": "范围：只处理 {scope} 的记忆，不跨用户、项目或短剧复用。",
-  "@agentMemoryChecklistScope": {"placeholders": {"scope": {"type": "String"}}},
+  "@agentMemoryChecklistScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistScopeFallback": "当前查询 scope",
   "agentMemoryChecklistCompress": "压缩 {name} 的镜头/光影/氛围套话，优先保留表演、语气、情绪和人物一致性片段。",
-  "@agentMemoryChecklistCompress": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistCompress": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistMerge": "合并 {name} 的重复 risk/avoid 约束，保留最能防止穿帮、口型僵硬和身份漂移的坏例。",
-  "@agentMemoryChecklistMerge": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistMerge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistKeep": "保留 {name} 里最具体的表演/情绪锚点，避免删掉能让人物不读稿、不木的 delivery 记忆。",
-  "@agentMemoryChecklistKeep": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistKeep": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistObserve": "观察 {name} 的新增条目，避免继续堆重复记忆。",
-  "@agentMemoryChecklistObserve": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistObserve": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistReminder": "当前提醒：{text}",
-  "@agentMemoryChecklistReminder": {"placeholders": {"text": {"type": "String"}}},
+  "@agentMemoryChecklistReminder": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryRecDup": "检测到重复表述，先去重旧记忆，避免同一约束反复注入。",
   "agentMemoryRecVisualOnly": "当前视频记忆几乎只有镜头/光影，先补一条表演、语气或情绪锚点，再决定删哪条视觉记忆。",
   "agentMemoryRecVisualBudget": "视觉偏重记忆吃掉了更多预算，先清理只保留镜头/光影的旧条目，把 chars 留给表演、语气和情绪。",
   "agentMemoryRecNegativeMerge": "坏例约束累计较多，先合并重复 risk/avoid 片段，避免 negative memory 自己膨胀。",
   "agentMemoryRecBucketHot": "{name} 已累计 {count} 条，先压缩这个记忆桶，避免它单独吃掉预算。",
   "@agentMemoryRecBucketHot": {
-    "placeholders": {"name": {"type": "String"}, "count": {"type": "int"}}
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "agentMemoryRecLong": "当前记忆偏长，优先压缩长记忆，再决定是否继续追加。",
   "agentMemoryRecManyRows": "条数偏多，先读取 summary 或清理旧 message，给当前镜头约束留预算。",
@@ -1105,17 +1310,35 @@
   "agentMemorySignalDialogue": "台词",
   "agentMemorySignalPerformance": "表演",
   "agentMemorySignalNegative": "坏例{n}",
-  "@agentMemorySignalNegative": {"placeholders": {"n": {"type": "String"}}},
+  "@agentMemorySignalNegative": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryStatusProjectsRefreshed": "已刷新 {count} 个项目。",
-  "@agentMemoryStatusProjectsRefreshed": {"placeholders": {"count": {"type": "int"}}},
+  "@agentMemoryStatusProjectsRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "agentMemoryErrFillProjectAndAgent": "请填写合法的项目 ID（numeric 或列表中可选 UUID）和 agent type。",
   "agentMemoryErrFillAgentType": "请填写 agent type。",
   "agentMemoryQuerySummaryLine": "已读取 {count} 条 {memoryType} 记忆 · 层级 {tier}。",
   "@agentMemoryQuerySummaryLine": {
     "placeholders": {
-      "count": {"type": "int"},
-      "memoryType": {"type": "String"},
-      "tier": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "memoryType": {
+        "type": "String"
+      },
+      "tier": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryErrCostOverviewFields": "加载成本概览前请填写合法的项目 ID 和 agent type。",
@@ -1123,26 +1346,54 @@
   "agentMemoryErrAppendProjectFields": "追加记忆前请填写项目 ID、agent type、role 和内容。",
   "agentMemoryErrAppendAgentRoleContent": "追加记忆前请填写 agent type、role 和内容。",
   "agentMemoryStatusAppended": "已追加记忆 {id}。",
-  "@agentMemoryStatusAppended": {"placeholders": {"id": {"type": "String"}}},
+  "@agentMemoryStatusAppended": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryErrClearProjectFields": "清理记忆前请填写项目 ID 和 agent type。",
   "agentMemoryStatusCleared": "已执行记忆清理：{clearType}。",
-  "@agentMemoryStatusCleared": {"placeholders": {"clearType": {"type": "String"}}},
+  "@agentMemoryStatusCleared": {
+    "placeholders": {
+      "clearType": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryErrOptimizeProjectFields": "自动优化前请填写项目 ID、agent type 和 episodes id。",
   "agentMemoryErrOptimizeAgentEpisodes": "自动优化前请填写 agent type 和 episodes id。",
   "agentMemoryStatusOptimized": "已自动优化视频记忆（{mode}）：删除 {removedRows} 条 / {removedChars} chars，其中重复 {dupRows} 条、纯视觉 {visRows} 条。",
   "@agentMemoryStatusOptimized": {
     "placeholders": {
-      "mode": {"type": "String"},
-      "removedRows": {"type": "int"},
-      "removedChars": {"type": "int"},
-      "dupRows": {"type": "int"},
-      "visRows": {"type": "int"}
+      "mode": {
+        "type": "String"
+      },
+      "removedRows": {
+        "type": "int"
+      },
+      "removedChars": {
+        "type": "int"
+      },
+      "dupRows": {
+        "type": "int"
+      },
+      "visRows": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryErrScopeNotObject": "scopeSignature 必须是 JSON 对象",
   "agentMemoryErrScopeNeedsDimension": "scopeSignature 至少需要一个非空范围维度",
   "agentMemoryErrScopeTierRequires": "{action} 需要填写非空的 scopeSignature JSON。",
-  "@agentMemoryErrScopeTierRequires": {"placeholders": {"action": {"type": "String"}}},
+  "@agentMemoryErrScopeTierRequires": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryActionLabelQueryScoped": "查询 scoped 记忆",
   "agentMemoryActionLabelAppendScoped": "追加 scoped 记忆",
   "taskCenterErrNotLoggedIn": "当前未登录，无法读取任务中心",
@@ -1161,13 +1412,37 @@
   "taskCenterFieldTaskUuidTapToFill": "任务 UUID（点下方列表可自动填入）",
   "taskCenterViewByUuid": "按 UUID 查看详情",
   "taskCenterJobsCount": "{count} 条任务",
-  "@taskCenterJobsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterJobsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterCategoriesLine": "分类摘要：{line}",
-  "@taskCenterCategoriesLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterCategoriesLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterNumericIdDetailsLine": "任务详情（numeric ID）：{line}",
-  "@taskCenterNumericIdDetailsLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterNumericIdDetailsLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterUuidDetailsLine": "UUID 详情：{line}",
-  "@taskCenterUuidDetailsLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterUuidDetailsLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterPhasePrep": "素材准备",
   "taskCenterPhaseImage": "出图",
   "taskCenterPhaseVideo": "出视频",
@@ -1175,7 +1450,13 @@
   "taskCenterPhaseQuality": "质检",
   "taskCenterWorkbenchTitle": "任务工作台",
   "taskCenterWorkbenchIntro": "在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 numeric task id 或 UUID 查看详情。{realtime}",
-  "@taskCenterWorkbenchIntro": {"placeholders": {"realtime": {"type": "String"}}},
+  "@taskCenterWorkbenchIntro": {
+    "placeholders": {
+      "realtime": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterWorkbenchRealtimeConnected": " 当前已接入实时任务更新。",
   "taskCenterWorkbenchFilterAndList": "筛选与列表",
   "taskCenterReloadTaskProjects": "刷新任务项目",
@@ -1188,7 +1469,13 @@
   "taskCenterFieldTaskStatusOptional": "任务状态（可空）",
   "taskCenterFieldProductionPhaseOptional": "短视频阶段（可空：prep/image/video/export/quality）",
   "taskCenterFailureReason": "失败原因={text}",
-  "@taskCenterFailureReason": {"placeholders": {"text": {"type": "String"}}},
+  "@taskCenterFailureReason": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterRetry": "重试",
   "taskCenterCancel": "取消",
   "taskCenterTaskDetailsSection": "任务详情",
@@ -1197,9 +1484,21 @@
   "taskCenterFieldTaskUuid": "任务 UUID",
   "taskCenterLoadUuidDetails": "读取 UUID 详情",
   "taskCenterStatusLine": "状态：{line}",
-  "@taskCenterStatusLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterStatusLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterStructuredFailure": "结构化失败 · {label}",
-  "@taskCenterStructuredFailure": {"placeholders": {"label": {"type": "String"}}},
+  "@taskCenterStructuredFailure": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterOpenProductionWorkspace": "打开制作工作区",
   "taskCenterOpenScriptWorkspace": "打开剧本工作区",
   "taskCenterRegenerate": "重新生成",
@@ -1210,11 +1509,29 @@
   "taskCenterOpenScriptScript": "打开剧本工作区（脚本）",
   "taskCenterOpenSpaceProject": "打开短视频 Space（项目）",
   "taskCenterStatusLoadedTaskProjects": "已读取 {count} 个任务项目。",
-  "@taskCenterStatusLoadedTaskProjects": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterStatusLoadedTaskProjects": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterStatusLoadedTaskCategories": "已读取 {count} 个任务分类。",
-  "@taskCenterStatusLoadedTaskCategories": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterStatusLoadedTaskCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterStatusRefreshedTasks": "已刷新 {count} 条任务。",
-  "@taskCenterStatusRefreshedTasks": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterStatusRefreshedTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterErrInvalidNumericTaskId": "请填写合法的任务 numeric ID。",
   "taskCenterErrFillTaskUuid": "请填写任务 UUID。",
   "taskCenterOriginRetrySubmitted": "已提交重试",
@@ -1224,37 +1541,63 @@
   "taskCenterStatusMergedUpdate": "{origin}：#{taskId} {kind} -> {status}",
   "@taskCenterStatusMergedUpdate": {
     "placeholders": {
-      "origin": {"type": "String"},
-      "taskId": {"type": "int"},
-      "kind": {"type": "String"},
-      "status": {"type": "String"}
+      "origin": {
+        "type": "String"
+      },
+      "taskId": {
+        "type": "int"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "taskCenterProjectsEmpty": "当前没有任务项目",
   "taskCenterProjectsSummary": "{count} 个项目 · {preview}{ellipsis}",
   "@taskCenterProjectsSummary": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "taskCenterCategoriesEmpty": "当前没有任务分类",
   "taskCenterCategoriesSummary": "{count} 个分类 · {preview}{ellipsis}",
   "@taskCenterCategoriesSummary": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "taskCenterJobsEmpty": "当前没有任务记录",
   "taskCenterJobsSummary": "{count} 条任务 · {preview}{ellipsis}",
   "@taskCenterJobsSummary": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "taskCenterFailurePayloadMissingSourceUrl": "缺少 source_url",
@@ -1269,5 +1612,104 @@
   "taskCenterFailureVideoFormatMismatchNoTranscode": "格式不一致（未转码）",
   "taskCenterFailureVideoContentLengthExceedsLimit": "源视频过大（长度头）",
   "taskCenterFailureVideoBodyExceedsLimit": "源视频过大（正文）",
-  "taskCenterFailureUnknownCode": "未知原因码"
+  "taskCenterFailureUnknownCode": "未知原因码",
+  "projectsArtWorkbenchStatusRefreshing": "刷新画风列表中…",
+  "projectsArtWorkbenchStatusRefreshed": "已刷新 {count} 条画风。",
+  "@projectsArtWorkbenchStatusRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusRefreshFailed": "刷新失败：{error}",
+  "@projectsArtWorkbenchStatusRefreshFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusReadingCover": "读取封面中…",
+  "projectsArtWorkbenchStatusReadCover": "已读取画风 #{id} 封面。",
+  "@projectsArtWorkbenchStatusReadCover": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusReadCoverFailed": "读取封面失败：{error}",
+  "@projectsArtWorkbenchStatusReadCoverFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusCreateNeedName": "新建失败：名称不能为空。",
+  "projectsArtWorkbenchStatusCreating": "新建画风中…",
+  "projectsArtWorkbenchStatusCreated": "已新建画风 #{id}。",
+  "@projectsArtWorkbenchStatusCreated": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusCreateFailed": "新建失败：{error}",
+  "@projectsArtWorkbenchStatusCreateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusSaveNeedSelect": "保存失败：请先选择画风。",
+  "projectsArtWorkbenchStatusSaving": "保存画风中…",
+  "projectsArtWorkbenchStatusSaved": "已更新画风 #{id}。",
+  "@projectsArtWorkbenchStatusSaved": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusSaveFailed": "保存失败：{error}",
+  "@projectsArtWorkbenchStatusSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusDeleteNeedSelect": "删除失败：请先选择画风。",
+  "projectsArtWorkbenchStatusDeleting": "删除画风中…",
+  "projectsArtWorkbenchStatusDeleted": "已删除画风 #{id}。",
+  "@projectsArtWorkbenchStatusDeleted": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusDeleteFailed": "删除失败：{error}",
+  "@projectsArtWorkbenchStatusDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusExtractNeedInput": "抽取失败：请至少输入一个图片 URL 或 data URI。",
+  "projectsArtWorkbenchStatusExtracting": "抽取画风 prompt 中…",
+  "projectsArtWorkbenchStatusExtracted": "已生成画风 prompt，可直接保存到当前画风。",
+  "projectsArtWorkbenchStatusExtractFailed": "抽取失败：{error}",
+  "@projectsArtWorkbenchStatusExtractFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

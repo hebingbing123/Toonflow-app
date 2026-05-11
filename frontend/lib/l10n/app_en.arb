@@ -881,54 +881,106 @@
   "projectsCreativeManualSummaryLine": "{name} · Path {path} · Images {imageCount} · Slots {slotCount}",
   "@projectsCreativeManualSummaryLine": {
     "placeholders": {
-      "name": {"type": "String"},
-      "path": {"type": "String"},
-      "imageCount": {"type": "int"},
-      "slotCount": {"type": "int"}
+      "name": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      },
+      "imageCount": {
+        "type": "int"
+      },
+      "slotCount": {
+        "type": "int"
+      }
     }
   },
   "projectsCreativeManualStatusRefreshing": "Refreshing creative manuals…",
   "projectsCreativeManualStatusReloadOk": "Director {directorCount} · Visual {visualCount} · visual GET/POST={getCount}/{postCount}",
   "@projectsCreativeManualStatusReloadOk": {
     "placeholders": {
-      "directorCount": {"type": "int"},
-      "visualCount": {"type": "int"},
-      "getCount": {"type": "int"},
-      "postCount": {"type": "int"}
+      "directorCount": {
+        "type": "int"
+      },
+      "visualCount": {
+        "type": "int"
+      },
+      "getCount": {
+        "type": "int"
+      },
+      "postCount": {
+        "type": "int"
+      }
     }
   },
   "projectsCreativeManualStatusReloadFail": "Reload failed: {detail}",
   "@projectsCreativeManualStatusReloadFail": {
-    "placeholders": {"detail": {"type": "String"}}
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusCreateNeedFields": "Create failed: name and path are required.",
   "projectsCreativeManualStatusCreating": "Creating manual…",
   "projectsCreativeManualStatusCreated": "Created {kind}: {path}",
   "@projectsCreativeManualStatusCreated": {
-    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusSaveNeedSelect": "Save failed: select a manual first.",
   "projectsCreativeManualStatusSaveNeedFields": "Save failed: name and path are required.",
   "projectsCreativeManualStatusSaving": "Saving manual…",
   "projectsCreativeManualStatusSaved": "Saved {kind}: {path}",
   "@projectsCreativeManualStatusSaved": {
-    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusDeleteNeedSelect": "Delete failed: select a manual first.",
   "projectsCreativeManualStatusDeleting": "Deleting manual…",
   "projectsCreativeManualStatusDeleted": "Deleted {kind}: {path}",
   "@projectsCreativeManualStatusDeleted": {
-    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualStatusOpFail": "{verb} failed: {detail}",
   "@projectsCreativeManualStatusOpFail": {
-    "placeholders": {"verb": {"type": "String"}, "detail": {"type": "String"}}
+    "placeholders": {
+      "verb": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
   },
   "projectsCreativeManualKindDirector": "Director manual",
   "projectsCreativeManualKindVisual": "Visual manual",
   "projectsCreativeManualInvalidSlotLine": "Invalid slot line (expected label|value|data): {line}",
   "@projectsCreativeManualInvalidSlotLine": {
-    "placeholders": {"line": {"type": "String"}}
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
   },
   "agentMemoryWorkbenchTitle": "Agent memory workbench",
   "agentMemoryWorkbenchIntro": "Query, append, and clear project-scoped script/production Agent memory—without relying on the first-project probe only.",
@@ -939,9 +991,15 @@
   "agentMemoryProjectsPreviewLine": "{count} projects · {preview}{ellipsis}",
   "@agentMemoryProjectsPreviewLine": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryUnnamedProject": "Unnamed project",
@@ -979,21 +1037,49 @@
   "agentMemoryTierGroupHeader": "{label} · {count} rows · Last injected {last}",
   "@agentMemoryTierGroupHeader": {
     "placeholders": {
-      "label": {"type": "String"},
-      "count": {"type": "int"},
-      "last": {"type": "String"}
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "last": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryMemoryRowCount": "{count, plural, one{1 memory row} other{{count} memory rows}}",
   "@agentMemoryMemoryRowCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "agentMemoryCharsAbbr": "{n} chars",
-  "@agentMemoryCharsAbbr": {"placeholders": {"n": {"type": "int"}}},
+  "@agentMemoryCharsAbbr": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "agentMemorySubjectLabel": "subject {value}",
-  "@agentMemorySubjectLabel": {"placeholders": {"value": {"type": "String"}}},
+  "@agentMemorySubjectLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemorySignalsLabel": "signals {value}",
-  "@agentMemorySignalsLabel": {"placeholders": {"value": {"type": "String"}}},
+  "@agentMemorySignalsLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryTierAll": "All tiers",
   "agentMemoryTierStyleBible": "Style bible",
   "agentMemoryTierStageSummary": "Stage summary",
@@ -1011,85 +1097,204 @@
   "agentMemoryInsightCore": "Roles: {roles}{typesPart} · ~{totalChars} chars · longest {longestChars} chars{dupPart}",
   "@agentMemoryInsightCore": {
     "placeholders": {
-      "roles": {"type": "String"},
-      "typesPart": {"type": "String"},
-      "totalChars": {"type": "int"},
-      "longestChars": {"type": "int"},
-      "dupPart": {"type": "String"}
+      "roles": {
+        "type": "String"
+      },
+      "typesPart": {
+        "type": "String"
+      },
+      "totalChars": {
+        "type": "int"
+      },
+      "longestChars": {
+        "type": "int"
+      },
+      "dupPart": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryInsightTypesPart": " · Types: {detail}",
-  "@agentMemoryInsightTypesPart": {"placeholders": {"detail": {"type": "String"}}},
+  "@agentMemoryInsightTypesPart": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryInsightDupPart": " · Duplicates: {count}",
-  "@agentMemoryInsightDupPart": {"placeholders": {"count": {"type": "int"}}},
+  "@agentMemoryInsightDupPart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "agentMemoryVideoInsight": "Video memory: delivery {dRows}/{dChars} chars · visual {vRows}/{vChars} chars · negative {nRows}/{nChars} chars",
   "@agentMemoryVideoInsight": {
     "placeholders": {
-      "dRows": {"type": "int"},
-      "dChars": {"type": "int"},
-      "vRows": {"type": "int"},
-      "vChars": {"type": "int"},
-      "nRows": {"type": "int"},
-      "nChars": {"type": "int"}
+      "dRows": {
+        "type": "int"
+      },
+      "dChars": {
+        "type": "int"
+      },
+      "vRows": {
+        "type": "int"
+      },
+      "vChars": {
+        "type": "int"
+      },
+      "nRows": {
+        "type": "int"
+      },
+      "nChars": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryEfficiencyInsight": "Plan: keep {kRows}/{kChars} chars · trim {tRows}/{tChars} chars · merge negatives {mRows}/{mChars} chars",
   "@agentMemoryEfficiencyInsight": {
     "placeholders": {
-      "kRows": {"type": "int"},
-      "kChars": {"type": "int"},
-      "tRows": {"type": "int"},
-      "tChars": {"type": "int"},
-      "mRows": {"type": "int"},
-      "mChars": {"type": "int"}
+      "kRows": {
+        "type": "int"
+      },
+      "kChars": {
+        "type": "int"
+      },
+      "tRows": {
+        "type": "int"
+      },
+      "tChars": {
+        "type": "int"
+      },
+      "mRows": {
+        "type": "int"
+      },
+      "mChars": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryBucketPriorityLine": "Bucket priority: {detail}",
-  "@agentMemoryBucketPriorityLine": {"placeholders": {"detail": {"type": "String"}}},
+  "@agentMemoryBucketPriorityLine": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryBucketPriorityItem": "{action} {name} · {rows} rows / {chars} chars",
   "@agentMemoryBucketPriorityItem": {
     "placeholders": {
-      "action": {"type": "String"},
-      "name": {"type": "String"},
-      "rows": {"type": "int"},
-      "chars": {"type": "int"}
+      "action": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryCostNever": "never",
   "agentMemoryCostOverviewLine": "scope={scope} · Cost: style bible {sb} · stage summary {ss} · delta {dm} · messages {msg} · avg injected (30) {avgInj} chars · avg hit tiers (30) {avgHit} · last injected {last}",
   "@agentMemoryCostOverviewLine": {
     "placeholders": {
-      "scope": {"type": "String"},
-      "sb": {"type": "int"},
-      "ss": {"type": "int"},
-      "dm": {"type": "int"},
-      "msg": {"type": "int"},
-      "avgInj": {"type": "int"},
-      "avgHit": {"type": "int"},
-      "last": {"type": "String"}
+      "scope": {
+        "type": "String"
+      },
+      "sb": {
+        "type": "int"
+      },
+      "ss": {
+        "type": "int"
+      },
+      "dm": {
+        "type": "int"
+      },
+      "msg": {
+        "type": "int"
+      },
+      "avgInj": {
+        "type": "int"
+      },
+      "avgHit": {
+        "type": "int"
+      },
+      "last": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryChecklistTitle": "Execution checklist:",
   "agentMemoryChecklistScope": "Scope: only memories for {scope}; do not reuse across users, projects, or shorts.",
-  "@agentMemoryChecklistScope": {"placeholders": {"scope": {"type": "String"}}},
+  "@agentMemoryChecklistScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistScopeFallback": "current query scope",
   "agentMemoryChecklistCompress": "Compress filler shots/lighting in {name}; keep delivery, tone, emotion, and character consistency.",
-  "@agentMemoryChecklistCompress": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistCompress": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistMerge": "Merge duplicate risk/avoid constraints in {name}; keep the strongest guardrails against continuity breaks.",
-  "@agentMemoryChecklistMerge": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistMerge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistKeep": "Keep the strongest delivery/emotion anchors in {name}; avoid deleting cues that keep performances natural.",
-  "@agentMemoryChecklistKeep": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistKeep": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistObserve": "Watch new entries in {name}; avoid stacking duplicates.",
-  "@agentMemoryChecklistObserve": {"placeholders": {"name": {"type": "String"}}},
+  "@agentMemoryChecklistObserve": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryChecklistReminder": "Reminder: {text}",
-  "@agentMemoryChecklistReminder": {"placeholders": {"text": {"type": "String"}}},
+  "@agentMemoryChecklistReminder": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryRecDup": "Duplicates detected—dedupe older memories so constraints are not injected repeatedly.",
   "agentMemoryRecVisualOnly": "Video memory is mostly framing/lighting—add a delivery, tone, or emotion anchor before deleting visual rows.",
   "agentMemoryRecVisualBudget": "Visual-heavy rows consume budget—trim old framing/lighting entries and reserve chars for delivery and emotion.",
   "agentMemoryRecNegativeMerge": "Many negative constraints—merge duplicate risk/avoid snippets before negative memory balloons.",
   "agentMemoryRecBucketHot": "{name} already has {count} rows—compress that bucket first so it does not dominate budget.",
   "@agentMemoryRecBucketHot": {
-    "placeholders": {"name": {"type": "String"}, "count": {"type": "int"}}
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "agentMemoryRecLong": "Memory is long—compress the longest rows before appending more.",
   "agentMemoryRecManyRows": "Many rows—read summaries or clear old messages to budget for current shots.",
@@ -1102,17 +1307,35 @@
   "agentMemorySignalDialogue": "dialogue",
   "agentMemorySignalPerformance": "performance",
   "agentMemorySignalNegative": "negative{n}",
-  "@agentMemorySignalNegative": {"placeholders": {"n": {"type": "String"}}},
+  "@agentMemorySignalNegative": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryStatusProjectsRefreshed": "Reloaded {count} projects.",
-  "@agentMemoryStatusProjectsRefreshed": {"placeholders": {"count": {"type": "int"}}},
+  "@agentMemoryStatusProjectsRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "agentMemoryErrFillProjectAndAgent": "Enter a valid project ID (numeric or UUID from the list) and agent type.",
   "agentMemoryErrFillAgentType": "Enter agent type.",
   "agentMemoryQuerySummaryLine": "Loaded {count} {memoryType} memories · tier {tier}.",
   "@agentMemoryQuerySummaryLine": {
     "placeholders": {
-      "count": {"type": "int"},
-      "memoryType": {"type": "String"},
-      "tier": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "memoryType": {
+        "type": "String"
+      },
+      "tier": {
+        "type": "String"
+      }
     }
   },
   "agentMemoryErrCostOverviewFields": "Enter a valid project ID and agent type before loading cost overview.",
@@ -1120,26 +1343,54 @@
   "agentMemoryErrAppendProjectFields": "Enter project ID, agent type, role, and content before appending.",
   "agentMemoryErrAppendAgentRoleContent": "Enter agent type, role, and content before appending.",
   "agentMemoryStatusAppended": "Appended memory {id}.",
-  "@agentMemoryStatusAppended": {"placeholders": {"id": {"type": "String"}}},
+  "@agentMemoryStatusAppended": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryErrClearProjectFields": "Enter project ID and agent type before clearing.",
   "agentMemoryStatusCleared": "Cleared memory: {clearType}.",
-  "@agentMemoryStatusCleared": {"placeholders": {"clearType": {"type": "String"}}},
+  "@agentMemoryStatusCleared": {
+    "placeholders": {
+      "clearType": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryErrOptimizeProjectFields": "Enter project ID, agent type, and episodes id before optimizing.",
   "agentMemoryErrOptimizeAgentEpisodes": "Enter agent type and episodes id before optimizing.",
   "agentMemoryStatusOptimized": "Optimized video memory ({mode}): removed {removedRows} rows / {removedChars} chars (duplicates {dupRows}, visual-only {visRows}).",
   "@agentMemoryStatusOptimized": {
     "placeholders": {
-      "mode": {"type": "String"},
-      "removedRows": {"type": "int"},
-      "removedChars": {"type": "int"},
-      "dupRows": {"type": "int"},
-      "visRows": {"type": "int"}
+      "mode": {
+        "type": "String"
+      },
+      "removedRows": {
+        "type": "int"
+      },
+      "removedChars": {
+        "type": "int"
+      },
+      "dupRows": {
+        "type": "int"
+      },
+      "visRows": {
+        "type": "int"
+      }
     }
   },
   "agentMemoryErrScopeNotObject": "scopeSignature must be a JSON object.",
   "agentMemoryErrScopeNeedsDimension": "scopeSignature needs at least one non-empty scope dimension.",
   "agentMemoryErrScopeTierRequires": "{action} requires non-empty scopeSignature JSON for this tier.",
-  "@agentMemoryErrScopeTierRequires": {"placeholders": {"action": {"type": "String"}}},
+  "@agentMemoryErrScopeTierRequires": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryActionLabelQueryScoped": "Query scoped memory",
   "agentMemoryActionLabelAppendScoped": "Append scoped memory",
   "taskCenterErrNotLoggedIn": "Not signed in. Cannot open task center.",
@@ -1158,13 +1409,37 @@
   "taskCenterFieldTaskUuidTapToFill": "Task UUID (tap a row below to fill)",
   "taskCenterViewByUuid": "View details by UUID",
   "taskCenterJobsCount": "{count} tasks",
-  "@taskCenterJobsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterJobsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterCategoriesLine": "Category summary: {line}",
-  "@taskCenterCategoriesLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterCategoriesLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterNumericIdDetailsLine": "Task details (numeric ID): {line}",
-  "@taskCenterNumericIdDetailsLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterNumericIdDetailsLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterUuidDetailsLine": "UUID details: {line}",
-  "@taskCenterUuidDetailsLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterUuidDetailsLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterPhasePrep": "Prep",
   "taskCenterPhaseImage": "Image",
   "taskCenterPhaseVideo": "Video",
@@ -1172,7 +1447,13 @@
   "taskCenterPhaseQuality": "Quality",
   "taskCenterWorkbenchTitle": "Task workbench",
   "taskCenterWorkbenchIntro": "Use one dialog to load task projects/categories, filter lists by project/category, and inspect details by numeric task id or UUID.{realtime}",
-  "@taskCenterWorkbenchIntro": {"placeholders": {"realtime": {"type": "String"}}},
+  "@taskCenterWorkbenchIntro": {
+    "placeholders": {
+      "realtime": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterWorkbenchRealtimeConnected": " Live task updates are connected.",
   "taskCenterWorkbenchFilterAndList": "Filters and list",
   "taskCenterReloadTaskProjects": "Reload task projects",
@@ -1185,7 +1466,13 @@
   "taskCenterFieldTaskStatusOptional": "Task status (optional)",
   "taskCenterFieldProductionPhaseOptional": "Short-video phase (optional: prep/image/video/export/quality)",
   "taskCenterFailureReason": "Failure reason={text}",
-  "@taskCenterFailureReason": {"placeholders": {"text": {"type": "String"}}},
+  "@taskCenterFailureReason": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterRetry": "Retry",
   "taskCenterCancel": "Cancel",
   "taskCenterTaskDetailsSection": "Task details",
@@ -1194,9 +1481,21 @@
   "taskCenterFieldTaskUuid": "Task UUID",
   "taskCenterLoadUuidDetails": "Load UUID details",
   "taskCenterStatusLine": "Status: {line}",
-  "@taskCenterStatusLine": {"placeholders": {"line": {"type": "String"}}},
+  "@taskCenterStatusLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterStructuredFailure": "Structured failure · {label}",
-  "@taskCenterStructuredFailure": {"placeholders": {"label": {"type": "String"}}},
+  "@taskCenterStructuredFailure": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterOpenProductionWorkspace": "Open production workspace",
   "taskCenterOpenScriptWorkspace": "Open script workspace",
   "taskCenterRegenerate": "Regenerate",
@@ -1207,11 +1506,29 @@
   "taskCenterOpenScriptScript": "Open script workspace (script)",
   "taskCenterOpenSpaceProject": "Open short-video Space (project)",
   "taskCenterStatusLoadedTaskProjects": "Loaded {count} task projects.",
-  "@taskCenterStatusLoadedTaskProjects": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterStatusLoadedTaskProjects": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterStatusLoadedTaskCategories": "Loaded {count} task categories.",
-  "@taskCenterStatusLoadedTaskCategories": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterStatusLoadedTaskCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterStatusRefreshedTasks": "Refreshed {count} tasks.",
-  "@taskCenterStatusRefreshedTasks": {"placeholders": {"count": {"type": "int"}}},
+  "@taskCenterStatusRefreshedTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "taskCenterErrInvalidNumericTaskId": "Enter a valid numeric task ID.",
   "taskCenterErrFillTaskUuid": "Enter task UUID.",
   "taskCenterOriginRetrySubmitted": "Retry submitted",
@@ -1221,37 +1538,63 @@
   "taskCenterStatusMergedUpdate": "{origin}: #{taskId} {kind} -> {status}",
   "@taskCenterStatusMergedUpdate": {
     "placeholders": {
-      "origin": {"type": "String"},
-      "taskId": {"type": "int"},
-      "kind": {"type": "String"},
-      "status": {"type": "String"}
+      "origin": {
+        "type": "String"
+      },
+      "taskId": {
+        "type": "int"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "taskCenterProjectsEmpty": "No task projects currently.",
   "taskCenterProjectsSummary": "{count} projects · {preview}{ellipsis}",
   "@taskCenterProjectsSummary": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "taskCenterCategoriesEmpty": "No task categories currently.",
   "taskCenterCategoriesSummary": "{count} categories · {preview}{ellipsis}",
   "@taskCenterCategoriesSummary": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "taskCenterJobsEmpty": "No task records currently.",
   "taskCenterJobsSummary": "{count} tasks · {preview}{ellipsis}",
   "@taskCenterJobsSummary": {
     "placeholders": {
-      "count": {"type": "int"},
-      "preview": {"type": "String"},
-      "ellipsis": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
     }
   },
   "taskCenterFailurePayloadMissingSourceUrl": "Missing source_url",
@@ -1269,5 +1612,104 @@
   "taskCenterFailureUnknownCode": "Unknown failure code",
   "projectsCreativeManualVerbCreate": "Create",
   "projectsCreativeManualVerbSave": "Save",
-  "projectsCreativeManualVerbDelete": "Delete"
+  "projectsCreativeManualVerbDelete": "Delete",
+  "projectsArtWorkbenchStatusRefreshing": "Refreshing art styles…",
+  "projectsArtWorkbenchStatusRefreshed": "Refreshed {count} art styles.",
+  "@projectsArtWorkbenchStatusRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusRefreshFailed": "Refresh failed: {error}",
+  "@projectsArtWorkbenchStatusRefreshFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusReadingCover": "Reading cover…",
+  "projectsArtWorkbenchStatusReadCover": "Read cover for style #{id}.",
+  "@projectsArtWorkbenchStatusReadCover": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusReadCoverFailed": "Read cover failed: {error}",
+  "@projectsArtWorkbenchStatusReadCoverFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusCreateNeedName": "Create failed: name is required.",
+  "projectsArtWorkbenchStatusCreating": "Creating art style…",
+  "projectsArtWorkbenchStatusCreated": "Created style #{id}.",
+  "@projectsArtWorkbenchStatusCreated": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusCreateFailed": "Create failed: {error}",
+  "@projectsArtWorkbenchStatusCreateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusSaveNeedSelect": "Save failed: select a style first.",
+  "projectsArtWorkbenchStatusSaving": "Saving art style…",
+  "projectsArtWorkbenchStatusSaved": "Updated style #{id}.",
+  "@projectsArtWorkbenchStatusSaved": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusSaveFailed": "Save failed: {error}",
+  "@projectsArtWorkbenchStatusSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusDeleteNeedSelect": "Delete failed: select a style first.",
+  "projectsArtWorkbenchStatusDeleting": "Deleting art style…",
+  "projectsArtWorkbenchStatusDeleted": "Deleted style #{id}.",
+  "@projectsArtWorkbenchStatusDeleted": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusDeleteFailed": "Delete failed: {error}",
+  "@projectsArtWorkbenchStatusDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtWorkbenchStatusExtractNeedInput": "Extraction failed: provide at least one image URL or data URI.",
+  "projectsArtWorkbenchStatusExtracting": "Extracting art-style prompt…",
+  "projectsArtWorkbenchStatusExtracted": "Prompt generated. You can save it to the current style.",
+  "projectsArtWorkbenchStatusExtractFailed": "Extraction failed: {error}",
+  "@projectsArtWorkbenchStatusExtractFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

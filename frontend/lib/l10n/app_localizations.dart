@@ -4316,6 +4316,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get projectsCreativeManualVerbDelete;
+
+  /// No description provided for @projectsArtWorkbenchStatusRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing art styles…'**
+  String get projectsArtWorkbenchStatusRefreshing;
+
+  /// No description provided for @projectsArtWorkbenchStatusRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed {count} art styles.'**
+  String projectsArtWorkbenchStatusRefreshed(int count);
+
+  /// No description provided for @projectsArtWorkbenchStatusRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh failed: {error}'**
+  String projectsArtWorkbenchStatusRefreshFailed(String error);
+
+  /// No description provided for @projectsArtWorkbenchStatusReadingCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading cover…'**
+  String get projectsArtWorkbenchStatusReadingCover;
+
+  /// No description provided for @projectsArtWorkbenchStatusReadCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Read cover for style #{id}.'**
+  String projectsArtWorkbenchStatusReadCover(int id);
+
+  /// No description provided for @projectsArtWorkbenchStatusReadCoverFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Read cover failed: {error}'**
+  String projectsArtWorkbenchStatusReadCoverFailed(String error);
+
+  /// No description provided for @projectsArtWorkbenchStatusCreateNeedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Create failed: name is required.'**
+  String get projectsArtWorkbenchStatusCreateNeedName;
+
+  /// No description provided for @projectsArtWorkbenchStatusCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating art style…'**
+  String get projectsArtWorkbenchStatusCreating;
+
+  /// No description provided for @projectsArtWorkbenchStatusCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created style #{id}.'**
+  String projectsArtWorkbenchStatusCreated(int id);
+
+  /// No description provided for @projectsArtWorkbenchStatusCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Create failed: {error}'**
+  String projectsArtWorkbenchStatusCreateFailed(String error);
+
+  /// No description provided for @projectsArtWorkbenchStatusSaveNeedSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: select a style first.'**
+  String get projectsArtWorkbenchStatusSaveNeedSelect;
+
+  /// No description provided for @projectsArtWorkbenchStatusSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving art style…'**
+  String get projectsArtWorkbenchStatusSaving;
+
+  /// No description provided for @projectsArtWorkbenchStatusSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated style #{id}.'**
+  String projectsArtWorkbenchStatusSaved(int id);
+
+  /// No description provided for @projectsArtWorkbenchStatusSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String projectsArtWorkbenchStatusSaveFailed(String error);
+
+  /// No description provided for @projectsArtWorkbenchStatusDeleteNeedSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: select a style first.'**
+  String get projectsArtWorkbenchStatusDeleteNeedSelect;
+
+  /// No description provided for @projectsArtWorkbenchStatusDeleting.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting art style…'**
+  String get projectsArtWorkbenchStatusDeleting;
+
+  /// No description provided for @projectsArtWorkbenchStatusDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted style #{id}.'**
+  String projectsArtWorkbenchStatusDeleted(int id);
+
+  /// No description provided for @projectsArtWorkbenchStatusDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String projectsArtWorkbenchStatusDeleteFailed(String error);
+
+  /// No description provided for @projectsArtWorkbenchStatusExtractNeedInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Extraction failed: provide at least one image URL or data URI.'**
+  String get projectsArtWorkbenchStatusExtractNeedInput;
+
+  /// No description provided for @projectsArtWorkbenchStatusExtracting.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting art-style prompt…'**
+  String get projectsArtWorkbenchStatusExtracting;
+
+  /// No description provided for @projectsArtWorkbenchStatusExtracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt generated. You can save it to the current style.'**
+  String get projectsArtWorkbenchStatusExtracted;
+
+  /// No description provided for @projectsArtWorkbenchStatusExtractFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Extraction failed: {error}'**
+  String projectsArtWorkbenchStatusExtractFailed(String error);
 }
 
 class _AppLocalizationsDelegate

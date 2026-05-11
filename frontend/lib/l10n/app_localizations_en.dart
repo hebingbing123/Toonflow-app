@@ -2540,4 +2540,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectsCreativeManualVerbDelete => 'Delete';
+
+  @override
+  String get projectsArtWorkbenchStatusRefreshing => 'Refreshing art styles…';
+
+  @override
+  String projectsArtWorkbenchStatusRefreshed(int count) {
+    return 'Refreshed $count art styles.';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusRefreshFailed(String error) {
+    return 'Refresh failed: $error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusReadingCover => 'Reading cover…';
+
+  @override
+  String projectsArtWorkbenchStatusReadCover(int id) {
+    return 'Read cover for style #$id.';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusReadCoverFailed(String error) {
+    return 'Read cover failed: $error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusCreateNeedName =>
+      'Create failed: name is required.';
+
+  @override
+  String get projectsArtWorkbenchStatusCreating => 'Creating art style…';
+
+  @override
+  String projectsArtWorkbenchStatusCreated(int id) {
+    return 'Created style #$id.';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusCreateFailed(String error) {
+    return 'Create failed: $error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusSaveNeedSelect =>
+      'Save failed: select a style first.';
+
+  @override
+  String get projectsArtWorkbenchStatusSaving => 'Saving art style…';
+
+  @override
+  String projectsArtWorkbenchStatusSaved(int id) {
+    return 'Updated style #$id.';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusSaveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusDeleteNeedSelect =>
+      'Delete failed: select a style first.';
+
+  @override
+  String get projectsArtWorkbenchStatusDeleting => 'Deleting art style…';
+
+  @override
+  String projectsArtWorkbenchStatusDeleted(int id) {
+    return 'Deleted style #$id.';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusDeleteFailed(String error) {
+    return 'Delete failed: $error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusExtractNeedInput =>
+      'Extraction failed: provide at least one image URL or data URI.';
+
+  @override
+  String get projectsArtWorkbenchStatusExtracting =>
+      'Extracting art-style prompt…';
+
+  @override
+  String get projectsArtWorkbenchStatusExtracted =>
+      'Prompt generated. You can save it to the current style.';
+
+  @override
+  String projectsArtWorkbenchStatusExtractFailed(String error) {
+    return 'Extraction failed: $error';
+  }
 }

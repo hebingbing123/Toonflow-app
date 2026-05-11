@@ -58,9 +58,10 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _reloadRows({int? preferredNumericId}) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _busy = true;
-      _statusLine = '刷新画风列表中…';
+      _statusLine = l10n.projectsArtWorkbenchStatusRefreshing;
     });
     try {
       final response = await fetchArtStyles(widget.accessToken);
@@ -69,7 +70,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       setState(() {
         _rows = response.items;
         _busy = false;
-        _statusLine = '已刷新 ${response.total} 条画风。';
+        _statusLine = l10n.projectsArtWorkbenchStatusRefreshed(response.total);
       });
       ArtStyleRow? target;
       if (preferredNumericId == null) {
@@ -100,23 +101,24 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '刷新失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusRefreshFailed('$e');
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '刷新失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusRefreshFailed('$e');
       });
     }
   }
 
   Future<void> _loadCover() async {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _selected;
     if (selected == null) return;
     setState(() {
       _loadingCover = true;
-      _statusLine = '读取封面中…';
+      _statusLine = l10n.projectsArtWorkbenchStatusReadingCover;
     });
     try {
       final bytes = await fetchArtStyleCoverByNumericId(
@@ -127,34 +129,35 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       setState(() {
         _coverBytes = bytes;
         _loadingCover = false;
-        _statusLine = '已读取画风 #${selected.numericId} 封面。';
+        _statusLine = l10n.projectsArtWorkbenchStatusReadCover(selected.numericId);
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _coverBytes = null;
         _loadingCover = false;
-        _statusLine = '读取封面失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusReadCoverFailed('$e');
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _coverBytes = null;
         _loadingCover = false;
-        _statusLine = '读取封面失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusReadCoverFailed('$e');
       });
     }
   }
 
   Future<void> _createStyle() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _ctrls.nameCtrl.text.trim();
     if (name.isEmpty) {
-      setState(() => _statusLine = '新建失败：名称不能为空。');
+      setState(() => _statusLine = l10n.projectsArtWorkbenchStatusCreateNeedName);
       return;
     }
     setState(() {
       _busy = true;
-      _statusLine = '新建画风中…';
+      _statusLine = l10n.projectsArtWorkbenchStatusCreating;
     });
     try {
       final created = await createArtStyle(
@@ -172,26 +175,31 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       );
       await _reloadRows(preferredNumericId: created.numericId);
       if (!mounted) return;
-      setState(() => _statusLine = '已新建画风 #${created.numericId}。');
+      setState(
+        () => _statusLine = l10n.projectsArtWorkbenchStatusCreated(
+          created.numericId,
+        ),
+      );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '新建失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusCreateFailed('$e');
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '新建失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusCreateFailed('$e');
       });
     }
   }
 
   Future<void> _saveSelected() async {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _selected;
     if (selected == null) {
-      setState(() => _statusLine = '保存失败：请先选择画风。');
+      setState(() => _statusLine = l10n.projectsArtWorkbenchStatusSaveNeedSelect);
       return;
     }
     final body = buildArtStylePatchBody(
@@ -202,7 +210,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
     );
     setState(() {
       _busy = true;
-      _statusLine = '保存画风中…';
+      _statusLine = l10n.projectsArtWorkbenchStatusSaving;
     });
     try {
       final updated = await patchArtStyleByNumericId(
@@ -212,61 +220,73 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       );
       await _reloadRows(preferredNumericId: updated.numericId);
       if (!mounted) return;
-      setState(() => _statusLine = '已更新画风 #${updated.numericId}。');
+      setState(
+        () => _statusLine = l10n.projectsArtWorkbenchStatusSaved(
+          updated.numericId,
+        ),
+      );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '保存失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusSaveFailed('$e');
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '保存失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusSaveFailed('$e');
       });
     }
   }
 
   Future<void> _deleteSelected() async {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _selected;
     if (selected == null) {
-      setState(() => _statusLine = '删除失败：请先选择画风。');
+      setState(() => _statusLine = l10n.projectsArtWorkbenchStatusDeleteNeedSelect);
       return;
     }
     setState(() {
       _busy = true;
-      _statusLine = '删除画风中…';
+      _statusLine = l10n.projectsArtWorkbenchStatusDeleting;
     });
     try {
       await deleteArtStyleByNumericId(widget.accessToken, selected.numericId);
       await _reloadRows();
       if (!mounted) return;
-      setState(() => _statusLine = '已删除画风 #${selected.numericId}。');
+      setState(
+        () => _statusLine = l10n.projectsArtWorkbenchStatusDeleted(
+          selected.numericId,
+        ),
+      );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '删除失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusDeleteFailed('$e');
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '删除失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusDeleteFailed('$e');
       });
     }
   }
 
   Future<void> _extractPrompt() async {
+    final l10n = AppLocalizations.of(context)!;
     final images = parseArtStyleExtractImages(_ctrls.extractImagesCtrl.text);
     if (images.isEmpty) {
-      setState(() => _statusLine = '抽取失败：请至少输入一个图片 URL 或 data URI。');
+      setState(
+        () => _statusLine = l10n.projectsArtWorkbenchStatusExtractNeedInput,
+      );
       return;
     }
     setState(() {
       _busy = true;
-      _statusLine = '抽取画风 prompt 中…';
+      _statusLine = l10n.projectsArtWorkbenchStatusExtracting;
     });
     try {
       final response = await extractArtStylePrompt(widget.accessToken, images);
@@ -274,19 +294,19 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       setState(() {
         _ctrls.promptCtrl.text = response.text;
         _busy = false;
-        _statusLine = '已生成画风 prompt，可直接保存到当前画风。';
+        _statusLine = l10n.projectsArtWorkbenchStatusExtracted;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '抽取失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusExtractFailed('$e');
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '抽取失败：$e';
+        _statusLine = l10n.projectsArtWorkbenchStatusExtractFailed('$e');
       });
     }
   }

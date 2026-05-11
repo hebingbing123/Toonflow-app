@@ -2436,4 +2436,93 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectsCreativeManualVerbDelete => '删除';
+
+  @override
+  String get projectsArtWorkbenchStatusRefreshing => '刷新画风列表中…';
+
+  @override
+  String projectsArtWorkbenchStatusRefreshed(int count) {
+    return '已刷新 $count 条画风。';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusRefreshFailed(String error) {
+    return '刷新失败：$error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusReadingCover => '读取封面中…';
+
+  @override
+  String projectsArtWorkbenchStatusReadCover(int id) {
+    return '已读取画风 #$id 封面。';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusReadCoverFailed(String error) {
+    return '读取封面失败：$error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusCreateNeedName => '新建失败：名称不能为空。';
+
+  @override
+  String get projectsArtWorkbenchStatusCreating => '新建画风中…';
+
+  @override
+  String projectsArtWorkbenchStatusCreated(int id) {
+    return '已新建画风 #$id。';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusCreateFailed(String error) {
+    return '新建失败：$error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusSaveNeedSelect => '保存失败：请先选择画风。';
+
+  @override
+  String get projectsArtWorkbenchStatusSaving => '保存画风中…';
+
+  @override
+  String projectsArtWorkbenchStatusSaved(int id) {
+    return '已更新画风 #$id。';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusSaveFailed(String error) {
+    return '保存失败：$error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusDeleteNeedSelect => '删除失败：请先选择画风。';
+
+  @override
+  String get projectsArtWorkbenchStatusDeleting => '删除画风中…';
+
+  @override
+  String projectsArtWorkbenchStatusDeleted(int id) {
+    return '已删除画风 #$id。';
+  }
+
+  @override
+  String projectsArtWorkbenchStatusDeleteFailed(String error) {
+    return '删除失败：$error';
+  }
+
+  @override
+  String get projectsArtWorkbenchStatusExtractNeedInput =>
+      '抽取失败：请至少输入一个图片 URL 或 data URI。';
+
+  @override
+  String get projectsArtWorkbenchStatusExtracting => '抽取画风 prompt 中…';
+
+  @override
+  String get projectsArtWorkbenchStatusExtracted => '已生成画风 prompt，可直接保存到当前画风。';
+
+  @override
+  String projectsArtWorkbenchStatusExtractFailed(String error) {
+    return '抽取失败：$error';
+  }
 }
