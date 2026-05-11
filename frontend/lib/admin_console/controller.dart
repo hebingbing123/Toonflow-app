@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 typedef AdminConsoleErrorSink = void Function(String? error);
+typedef AdminConsoleL10nProvider = AppLocalizations? Function();
 
 class AdminConsoleController extends ChangeNotifier {
-  AdminConsoleController({required AdminConsoleErrorSink onErrorChanged})
-    : _onErrorChanged = onErrorChanged;
+  AdminConsoleController({
+    required AdminConsoleErrorSink onErrorChanged,
+    AdminConsoleL10nProvider? l10nProvider,
+  }) : _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider;
 
   final AdminConsoleErrorSink _onErrorChanged;
+  final AdminConsoleL10nProvider? _l10nProvider;
 
   bool searching = false;
   bool loadingDetail = false;
@@ -17,6 +23,7 @@ class AdminConsoleController extends ChangeNotifier {
   bool savingWorkspaceContext = false;
   bool savingWorkspaceMembership = false;
   bool savingOwnershipRemediation = false;
+  bool savingBatchGovernance = false;
   String? selectedKind;
   String? selectedId;
   AdminSearchResponseV1? searchResult;
@@ -25,6 +32,7 @@ class AdminConsoleController extends ChangeNotifier {
   AdminProjectDetailResponseV1? projectDetail;
 
   String get _internalOpsToken => kInternalOpsToken;
+  AppLocalizations? get _l10n => _l10nProvider?.call();
 
   bool get enabled => _internalOpsToken.trim().isNotEmpty;
 
@@ -36,7 +44,7 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final needle = query.trim();
     if (needle.length < 2) {
-      _setError('请输入至少 2 个字符');
+      _setError(_l10n?.adminConsoleErrSearchAtLeast2Chars ?? '请输入至少 2 个字符');
       return;
     }
     searching = true;
@@ -127,13 +135,18 @@ class AdminConsoleController extends ChangeNotifier {
     final normalizedNote = opsNote?.trim();
     if (operationalStatus == AdminOperationalStatusV1.suspended &&
         (normalizedReason == null || normalizedReason.isEmpty)) {
-      _setError('暂停用户时必须填写暂停原因');
+      _setError(
+        _l10n?.adminConsoleErrSuspendReasonRequired ?? '暂停用户时必须填写暂停原因',
+      );
       notifyListeners();
       return;
     }
     if (dailyJobQuotaAction == AdminQuotaOverrideActionV1.set &&
         (dailyJobQuota == null || dailyJobQuota <= 0)) {
-      _setError('设置日配额时必须填写大于 0 的整数');
+      _setError(
+        _l10n?.adminConsoleErrDailyQuotaPositiveRequired ??
+            '设置日配额时必须填写大于 0 的整数',
+      );
       notifyListeners();
       return;
     }
@@ -258,7 +271,9 @@ class AdminConsoleController extends ChangeNotifier {
     final trimmed = opsNote?.trim();
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
-      _setError('设置内部备注时必须填写内容');
+      _setError(
+        _l10n?.adminConsoleErrInternalNoteRequired ?? '设置内部备注时必须填写内容',
+      );
       notifyListeners();
       return;
     }
@@ -322,13 +337,15 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final trimmedUserId = userId.trim();
     if (trimmedUserId.isEmpty) {
-      _setError('成员 userId 不能为空');
+      _setError(_l10n?.adminConsoleErrMemberUserIdRequired ?? '成员 userId 不能为空');
       notifyListeners();
       return;
     }
     if (action == AdminWorkspaceMemberRemediationActionV1.upsert &&
         role == null) {
-      _setError('新增或更新成员时必须指定角色');
+      _setError(
+        _l10n?.adminConsoleErrMemberRoleRequired ?? '新增或更新成员时必须指定角色',
+      );
       notifyListeners();
       return;
     }
@@ -391,7 +408,9 @@ class AdminConsoleController extends ChangeNotifier {
     final trimmed = opsNote?.trim();
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
-      _setError('设置内部备注时必须填写内容');
+      _setError(
+        _l10n?.adminConsoleErrInternalNoteRequired ?? '设置内部备注时必须填写内容',
+      );
       notifyListeners();
       return;
     }
@@ -453,7 +472,10 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final trimmedTarget = targetUserId.trim();
     if (trimmedTarget.isEmpty) {
-      _setError('目标 owner userId 不能为空');
+      _setError(
+        _l10n?.adminConsoleErrTargetOwnerUserIdRequired ??
+            '目标 owner userId 不能为空',
+      );
       notifyListeners();
       return;
     }
@@ -511,7 +533,10 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final trimmedTarget = targetUserId.trim();
     if (trimmedTarget.isEmpty) {
-      _setError('目标 owner userId 不能为空');
+      _setError(
+        _l10n?.adminConsoleErrTargetOwnerUserIdRequired ??
+            '目标 owner userId 不能为空',
+      );
       notifyListeners();
       return;
     }
@@ -560,6 +585,106 @@ class AdminConsoleController extends ChangeNotifier {
     }
   }
 
+  Future<AdminProjectBatchGovernanceResponseV1?> updateProjectBatchGovernance({
+    required List<String> projectIds,
+    required AdminProjectLifecycleActionV1 projectLifecycle,
+    required AdminWorkspaceOpsNoteActionV1 opsNoteAction,
+    String? opsNote,
+  }) async {
+    if (!enabled || savingBatchGovernance) {
+      return null;
+    }
+    if (projectIds.isEmpty) {
+      _setError(
+        _l10n?.adminConsoleErrAtLeastOneProjectRequired ?? '至少选择一个 project',
+      );
+      notifyListeners();
+      return null;
+    }
+    final trimmed = opsNote?.trim();
+    if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
+        (trimmed == null || trimmed.isEmpty)) {
+      _setError(
+        _l10n?.adminConsoleErrBatchNoteRequired ?? '批量写备注时必须填写内容',
+      );
+      notifyListeners();
+      return null;
+    }
+    savingBatchGovernance = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      final response = await updateAdminProjectBatchGovernanceV1(
+        _internalOpsToken,
+        projectIds: projectIds,
+        projectLifecycle: projectLifecycle,
+        opsNoteAction: opsNoteAction,
+        opsNote: opsNoteAction == AdminWorkspaceOpsNoteActionV1.set
+            ? trimmed
+            : null,
+      );
+      if (workspaceDetail != null &&
+          response.projects.isNotEmpty &&
+          response.projects.first.workspace?.workspaceId ==
+              workspaceDetail!.workspaceId) {
+        workspaceDetail = await fetchAdminWorkspaceDetailV1(
+          _internalOpsToken,
+          workspaceId: workspaceDetail!.workspaceId,
+        );
+      }
+      final currentProjectId = projectDetail?.projectId;
+      if (currentProjectId != null) {
+        final updated = response.projects.where(
+          (item) => item.projectId == currentProjectId,
+        );
+        if (updated.isNotEmpty) {
+          projectDetail = updated.first;
+        }
+      }
+      final current = searchResult;
+      if (current != null) {
+        final updates = {
+          for (final item in response.projects) item.projectId: item,
+        };
+        searchResult = AdminSearchResponseV1(
+          query: current.query,
+          users: current.users,
+          workspaces: current.workspaces,
+          projects: current.projects
+              .map((item) {
+                final updated = updates[item.projectId];
+                if (updated == null) {
+                  return item;
+                }
+                return AdminProjectSearchHitV1(
+                  projectId: item.projectId,
+                  numericId: item.numericId,
+                  name: item.name,
+                  workspaceId: item.workspaceId,
+                  workspaceName: item.workspaceName,
+                  ownerUserId: updated.ownerUserId,
+                  ownerEmail: updated.ownerEmail,
+                  archivedAt: updated.archivedAt,
+                  updatedAt: updated.updatedAt,
+                );
+              })
+              .toList(growable: false),
+          jobs: current.jobs,
+        );
+      }
+      return response;
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+      return null;
+    } catch (error) {
+      _setError('$error');
+      return null;
+    } finally {
+      savingBatchGovernance = false;
+      notifyListeners();
+    }
+  }
+
   void clearDetail() {
     selectedKind = null;
     selectedId = null;
@@ -570,6 +695,7 @@ class AdminConsoleController extends ChangeNotifier {
     savingWorkspaceContext = false;
     savingWorkspaceMembership = false;
     savingOwnershipRemediation = false;
+    savingBatchGovernance = false;
     notifyListeners();
   }
 }

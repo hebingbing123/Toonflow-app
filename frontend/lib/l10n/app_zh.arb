@@ -3588,5 +3588,15 @@
     }
   },
   "adminConsoleSectionExplicitAclMembers": "显式 ACL 成员",
-  "adminConsoleSectionWorkspaceCandidates": "Workspace 候选成员"
+  "adminConsoleSectionWorkspaceCandidates": "Workspace 候选成员",
+  "adminConsoleNoData": "暂无数据",
+  "adminConsoleErrSearchAtLeast2Chars": "请输入至少 2 个字符",
+  "adminConsoleErrSuspendReasonRequired": "暂停用户时必须填写暂停原因",
+  "adminConsoleErrDailyQuotaPositiveRequired": "设置日配额时必须填写大于 0 的整数",
+  "adminConsoleErrInternalNoteRequired": "设置内部备注时必须填写内容",
+  "adminConsoleErrMemberUserIdRequired": "成员 userId 不能为空",
+  "adminConsoleErrMemberRoleRequired": "新增或更新成员时必须指定角色",
+  "adminConsoleErrTargetOwnerUserIdRequired": "目标 owner userId 不能为空",
+  "adminConsoleErrAtLeastOneProjectRequired": "至少选择一个 project",
+  "adminConsoleErrBatchNoteRequired": "批量写备注时必须填写内容"
 }

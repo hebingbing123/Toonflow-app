@@ -4779,4 +4779,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get adminConsoleSectionWorkspaceCandidates => 'Workspace 候选成员';
+
+  @override
+  String get adminConsoleNoData => '暂无数据';
+
+  @override
+  String get adminConsoleErrSearchAtLeast2Chars => '请输入至少 2 个字符';
+
+  @override
+  String get adminConsoleErrSuspendReasonRequired => '暂停用户时必须填写暂停原因';
+
+  @override
+  String get adminConsoleErrDailyQuotaPositiveRequired => '设置日配额时必须填写大于 0 的整数';
+
+  @override
+  String get adminConsoleErrInternalNoteRequired => '设置内部备注时必须填写内容';
+
+  @override
+  String get adminConsoleErrMemberUserIdRequired => '成员 userId 不能为空';
+
+  @override
+  String get adminConsoleErrMemberRoleRequired => '新增或更新成员时必须指定角色';
+
+  @override
+  String get adminConsoleErrTargetOwnerUserIdRequired => '目标 owner userId 不能为空';
+
+  @override
+  String get adminConsoleErrAtLeastOneProjectRequired => '至少选择一个 project';
+
+  @override
+  String get adminConsoleErrBatchNoteRequired => '批量写备注时必须填写内容';
 }

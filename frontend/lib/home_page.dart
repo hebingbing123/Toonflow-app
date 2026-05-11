@@ -231,7 +231,10 @@ class _HomePageState extends State<HomePage> {
   );
 
   late final AdminConsoleController _adminConsoleController =
-      AdminConsoleController(onErrorChanged: _setSharedError);
+      AdminConsoleController(
+        onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
+      );
   late final ContentComplianceController _contentComplianceController =
       ContentComplianceController(
         accessTokenProvider: () => _session?.accessToken,

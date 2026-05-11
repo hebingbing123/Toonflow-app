@@ -4966,4 +4966,43 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminConsoleSectionWorkspaceCandidates =>
       'Workspace candidate members';
+
+  @override
+  String get adminConsoleNoData => 'No data yet';
+
+  @override
+  String get adminConsoleErrSearchAtLeast2Chars =>
+      'Please enter at least 2 characters';
+
+  @override
+  String get adminConsoleErrSuspendReasonRequired =>
+      'Suspension reason is required when suspending a user';
+
+  @override
+  String get adminConsoleErrDailyQuotaPositiveRequired =>
+      'A positive integer is required when setting daily quota';
+
+  @override
+  String get adminConsoleErrInternalNoteRequired =>
+      'Internal note content is required when setting note';
+
+  @override
+  String get adminConsoleErrMemberUserIdRequired =>
+      'Member userId cannot be empty';
+
+  @override
+  String get adminConsoleErrMemberRoleRequired =>
+      'Role is required when adding or updating a member';
+
+  @override
+  String get adminConsoleErrTargetOwnerUserIdRequired =>
+      'Target owner userId cannot be empty';
+
+  @override
+  String get adminConsoleErrAtLeastOneProjectRequired =>
+      'Select at least one project';
+
+  @override
+  String get adminConsoleErrBatchNoteRequired =>
+      'Batch note content is required when writing notes';
 }

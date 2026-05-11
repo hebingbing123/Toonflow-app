@@ -3588,5 +3588,15 @@
     }
   },
   "adminConsoleSectionExplicitAclMembers": "Explicit ACL members",
-  "adminConsoleSectionWorkspaceCandidates": "Workspace candidate members"
+  "adminConsoleSectionWorkspaceCandidates": "Workspace candidate members",
+  "adminConsoleNoData": "No data yet",
+  "adminConsoleErrSearchAtLeast2Chars": "Please enter at least 2 characters",
+  "adminConsoleErrSuspendReasonRequired": "Suspension reason is required when suspending a user",
+  "adminConsoleErrDailyQuotaPositiveRequired": "A positive integer is required when setting daily quota",
+  "adminConsoleErrInternalNoteRequired": "Internal note content is required when setting note",
+  "adminConsoleErrMemberUserIdRequired": "Member userId cannot be empty",
+  "adminConsoleErrMemberRoleRequired": "Role is required when adding or updating a member",
+  "adminConsoleErrTargetOwnerUserIdRequired": "Target owner userId cannot be empty",
+  "adminConsoleErrAtLeastOneProjectRequired": "Select at least one project",
+  "adminConsoleErrBatchNoteRequired": "Batch note content is required when writing notes"
 }

@@ -8217,6 +8217,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Workspace candidate members'**
   String get adminConsoleSectionWorkspaceCandidates;
+
+  /// No description provided for @adminConsoleNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get adminConsoleNoData;
+
+  /// No description provided for @adminConsoleErrSearchAtLeast2Chars.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter at least 2 characters'**
+  String get adminConsoleErrSearchAtLeast2Chars;
+
+  /// No description provided for @adminConsoleErrSuspendReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspension reason is required when suspending a user'**
+  String get adminConsoleErrSuspendReasonRequired;
+
+  /// No description provided for @adminConsoleErrDailyQuotaPositiveRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A positive integer is required when setting daily quota'**
+  String get adminConsoleErrDailyQuotaPositiveRequired;
+
+  /// No description provided for @adminConsoleErrInternalNoteRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal note content is required when setting note'**
+  String get adminConsoleErrInternalNoteRequired;
+
+  /// No description provided for @adminConsoleErrMemberUserIdRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Member userId cannot be empty'**
+  String get adminConsoleErrMemberUserIdRequired;
+
+  /// No description provided for @adminConsoleErrMemberRoleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Role is required when adding or updating a member'**
+  String get adminConsoleErrMemberRoleRequired;
+
+  /// No description provided for @adminConsoleErrTargetOwnerUserIdRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Target owner userId cannot be empty'**
+  String get adminConsoleErrTargetOwnerUserIdRequired;
+
+  /// No description provided for @adminConsoleErrAtLeastOneProjectRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one project'**
+  String get adminConsoleErrAtLeastOneProjectRequired;
+
+  /// No description provided for @adminConsoleErrBatchNoteRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch note content is required when writing notes'**
+  String get adminConsoleErrBatchNoteRequired;
 }
 
 class _AppLocalizationsDelegate

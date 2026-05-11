@@ -1728,6 +1728,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     required String title,
     required List<String> items,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1736,7 +1737,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         const SizedBox(height: 6),
         if (items.isEmpty)
           Text(
-            '暂无数据',
+            l10n.adminConsoleNoData,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
