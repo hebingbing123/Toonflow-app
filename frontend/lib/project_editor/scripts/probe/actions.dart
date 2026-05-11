@@ -249,7 +249,6 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   final acc = await startScriptAssetExtract(
                     token,
                     projectUuid: p.id,
-                    projectNumericId: p.numericId,
                     scriptNumericIds: ids,
                   );
                   if (!ctx.mounted) return;

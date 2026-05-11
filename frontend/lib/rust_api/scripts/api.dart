@@ -212,14 +212,12 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
 /// `POST /api/v1/scripts/extract-assets` — background LLM extraction (**503** if LLM/DB unset). See `startScriptAssetExtractV1`.
 ///
 /// Prefer **`projectUuid`** (`app_project.id`); **`projectNumericId`** is legacy **`numeric_id`**.
-Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
-  String accessToken, {
+Map<String, dynamic> buildScriptAssetExtractBody({
   int? projectNumericId,
   String? projectUuid,
   required List<int> scriptNumericIds,
   int? groupSize,
-}) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-assets');
+}) {
   final body = <String, dynamic>{'script_numeric_ids': scriptNumericIds};
   final u = projectUuid?.trim();
   if (u != null && u.isNotEmpty) {
@@ -232,6 +230,23 @@ Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
   if (groupSize != null) {
     body['group_size'] = groupSize;
   }
+  return body;
+}
+
+Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
+  String accessToken, {
+  int? projectNumericId,
+  String? projectUuid,
+  required List<int> scriptNumericIds,
+  int? groupSize,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-assets');
+  final body = buildScriptAssetExtractBody(
+    projectNumericId: projectNumericId,
+    projectUuid: projectUuid,
+    scriptNumericIds: scriptNumericIds,
+    groupSize: groupSize,
+  );
   final res = await http
       .post(
         uri,

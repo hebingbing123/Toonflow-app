@@ -123,7 +123,6 @@ Widget buildProjectScriptsSection({
       final accepted = await startScriptAssetExtract(
         token,
         projectUuid: project.id,
-        projectNumericId: project.numericId,
         scriptNumericIds: allScriptIds,
       );
       final rows = await pollScriptExtractState(token, allScriptIds);
