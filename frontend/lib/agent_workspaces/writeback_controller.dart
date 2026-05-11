@@ -111,6 +111,9 @@ class WorkspaceWritebackController {
   Future<void> writeBackScriptWorkspaceResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
+    final projectUuid = _trimmedNonEmpty(
+      _inputController.projectUuidController.text,
+    );
     final projectNumericId = _parsePositiveInt(
       _inputController.projectIdController.text,
     );
@@ -124,21 +127,25 @@ class WorkspaceWritebackController {
     final source = useToolCandidate
         ? (_outputController.scriptWritebackSource ?? 'tool:get_script_content')
         : 'assistant stream';
-    if (projectNumericId == null || scriptId == null || content.isEmpty) {
+    if ((projectUuid == null && projectNumericId == null) ||
+        scriptId == null ||
+        content.isEmpty) {
       _onErrorChanged('project_id/script_id 与可回写结果必须有效');
       return;
     }
 
     _beginWriteback(WorkspaceOperation.scriptResultWriteback);
     try {
-      final projects = await _fetchProjects(token, projectNumericId);
-      if (projects.isEmpty) {
+      final resolvedProjectUuid =
+          projectUuid ??
+          await _resolveProjectUuidFromNumericId(token, projectNumericId!);
+      if (resolvedProjectUuid == null || resolvedProjectUuid.isEmpty) {
         _onErrorChanged('未找到项目');
         return;
       }
       final updated = await _updateScript(
         token,
-        projects.first.id,
+        resolvedProjectUuid,
         scriptId,
         <String, dynamic>{'content': content},
       );
@@ -353,6 +360,17 @@ class WorkspaceWritebackController {
         false,
       );
     }
+  }
+
+  Future<String?> _resolveProjectUuidFromNumericId(
+    String token,
+    int projectNumericId,
+  ) async {
+    final projects = await _fetchProjects(token, projectNumericId);
+    if (projects.isEmpty) {
+      return null;
+    }
+    return projects.first.id;
   }
 
   void _beginWriteback(WorkspaceOperation operation) {

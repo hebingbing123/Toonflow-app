@@ -18,6 +18,14 @@ int? _parsePositiveInt(String raw) {
   return value;
 }
 
+String? _trimmedNonEmpty(String raw) {
+  final value = raw.trim();
+  if (value.isEmpty) {
+    return null;
+  }
+  return value;
+}
+
 List<Map<String, dynamic>> _normalizeScriptPlanRows(Object? scriptRaw) {
   final rows = <Map<String, dynamic>>[];
   if (scriptRaw is! List) {
@@ -46,8 +54,8 @@ _ScriptPlanWritebackPayload? _extractScriptPlanWritebackPayload(
   if (payload is! Map<String, dynamic>) return null;
   return _ScriptPlanWritebackPayload(
     storySkeleton: (payload['storySkeleton'] as String?)?.trim() ?? '',
-    adaptationStrategy: (payload['adaptationStrategy'] as String?)?.trim() ?? '',
+    adaptationStrategy:
+        (payload['adaptationStrategy'] as String?)?.trim() ?? '',
     rawScript: payload['script'],
   );
 }
-

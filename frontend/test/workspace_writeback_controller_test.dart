@@ -55,6 +55,57 @@ void main() {
   });
 
   test(
+    'workspace writeback controller prefers project uuid without fetching projects',
+    () async {
+      final inputController = WorkspaceInputController();
+      final operationController = WorkspaceOperationController();
+      final outputController = WorkspaceOutputController();
+      addTearDown(inputController.dispose);
+
+      String? lastError = 'seed';
+      var fetchProjectsCalls = 0;
+      String? updatedProjectId;
+      final controller = WorkspaceWritebackController(
+        inputController: inputController,
+        outputController: outputController,
+        operationController: operationController,
+        accessTokenProvider: () => 'token',
+        onErrorChanged: (error) => lastError = error,
+        fetchProjects: (token, projectNumericId) async {
+          fetchProjectsCalls += 1;
+          return const <ProjectRow>[];
+        },
+        updateScript: (token, projectId, scriptNumericId, body) async {
+          updatedProjectId = projectId;
+          return const ScriptRow(
+            id: 'script-uuid',
+            projectId: '550e8400-e29b-41d4-a716-446655440000',
+            numericId: 12,
+            content: 'uuid first body',
+          );
+        },
+      );
+
+      inputController.projectIdController.clear();
+      inputController.projectUuidController.text =
+          '550e8400-e29b-41d4-a716-446655440000';
+      inputController.scriptIdController.text = '12';
+      outputController.recordToolResult(
+        'run_sub_agent_script',
+        <String, dynamic>{'result': 'uuid first body'},
+      );
+
+      await controller.writeBackScriptWorkspaceResult();
+
+      expect(lastError, isNull);
+      expect(fetchProjectsCalls, 0);
+      expect(updatedProjectId, '550e8400-e29b-41d4-a716-446655440000');
+      expect(outputController.writebackLine, contains('script 12 已更新'));
+      expect(operationController.loadingScriptResultWriteback, isFalse);
+    },
+  );
+
+  test(
     'workspace writeback controller blocks unsafe core flow overwrite',
     () async {
       final inputController = WorkspaceInputController();
