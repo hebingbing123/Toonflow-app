@@ -5,6 +5,19 @@ import '../../rust_api.dart';
 typedef ProjectsAccessTokenProvider = String? Function();
 typedef ProjectsErrorSink = void Function(String? error);
 
+({String? projectUuid, int? projectId}) agentMemoryProjectRefFromRow(
+  ProjectRow row,
+) {
+  final projectUuid = row.id.trim();
+  if (projectUuid.isNotEmpty) {
+    return (projectUuid: projectUuid, projectId: null);
+  }
+  return (
+    projectUuid: null,
+    projectId: row.numericId > 0 ? row.numericId : null,
+  );
+}
+
 class ProjectsController extends ChangeNotifier {
   ProjectsController({
     required ProjectsAccessTokenProvider accessTokenProvider,
@@ -85,18 +98,19 @@ class ProjectsController extends ChangeNotifier {
     _setError(null);
     notifyListeners();
     try {
+      final projectRef = agentMemoryProjectRefFromRow(first);
       final rows = await queryAgentMemory(
         token,
-        projectUuid: first.id,
-        projectId: first.numericId,
+        projectUuid: projectRef.projectUuid,
+        projectId: projectRef.projectId,
         agentType: 'scriptAgent',
       );
       var appendBit = '';
       try {
         final id = await appendAgentMemory(
           token,
-          projectUuid: first.id,
-          projectId: first.numericId,
+          projectUuid: projectRef.projectUuid,
+          projectId: projectRef.projectId,
           agentType: 'scriptAgent',
           content: '[flutter probe] ${DateTime.now().toIso8601String()}',
         );
