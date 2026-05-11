@@ -17,5 +17,70 @@
         "type": "String"
       }
     }
-  }
+  },
+  "workspaceContextLoading": "Loading workspace…",
+  "workspaceContextNoWorkspace": "No workspace",
+  "workspaceContextNoProject": "No project selected",
+  "workspaceBillingTitle": "Workspace billing",
+  "workspaceBillingUnlimited": "Unlimited",
+  "workspaceBillingUnknownTier": "unknown",
+  "workspaceBillingPlan": "Plan: {tier}",
+  "@workspaceBillingPlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceBillingDailyQuota": "Daily quota: {quota}",
+  "@workspaceBillingDailyQuota": {
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceBillingPercentUsed": "{percent}% used",
+  "@workspaceBillingPercentUsed": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsCenterTitle": "Notifications",
+  "notificationsCenterSubtitle": "Aggregates job completion, workspace invites, skill changes, and read state.",
+  "notificationsMarkAllRead": "Mark all read",
+  "notificationsRiskyPrefsTooltip": "Local client preferences (for example \"don't ask again\" on short-video risky actions).",
+  "notificationsFilterUnread": "Unread {count}",
+  "@notificationsFilterUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsTypeFilterLabel": "Type",
+  "notificationsTypeAll": "All",
+  "notificationsTypeJob": "Jobs",
+  "notificationsTypeWorkspace": "Team",
+  "notificationsTypeSkill": "Skills",
+  "notificationsTypeCompliance": "Compliance",
+  "notificationsSearchLabel": "Search title / body / file / job",
+  "notificationsRefresh": "Refresh",
+  "notificationsLoadMore": "Load more",
+  "notificationsEmptyFiltered": "No notifications match the current filters.",
+  "notificationsUnreadBadge": "Unread",
+  "notificationsMarkRead": "Mark read",
+  "notificationsOpen": "Open",
+  "notificationsRecordJobSucceeded": "Job completed",
+  "notificationsRecordJobFailed": "Job failed",
+  "notificationsRecordJobCancelled": "Job cancelled",
+  "notificationsRecordWorkspaceInviteCreated": "Invite created",
+  "notificationsRecordWorkspaceInviteResent": "Invite resent",
+  "notificationsRecordWorkspaceInviteRevoked": "Invite revoked",
+  "notificationsRecordWorkspaceInviteAccepted": "Invite accepted",
+  "notificationsRecordSkillChange": "Skill change",
+  "notificationsRecordContentComplianceAlert": "Content compliance alert",
+  "notificationsRecordContentComplianceCleared": "Content compliance cleared"
 }

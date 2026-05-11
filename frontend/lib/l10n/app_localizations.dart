@@ -163,6 +163,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error: {detail}'**
   String errorLine(String detail);
+
+  /// No description provided for @workspaceContextLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading workspace…'**
+  String get workspaceContextLoading;
+
+  /// No description provided for @workspaceContextNoWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'No workspace'**
+  String get workspaceContextNoWorkspace;
+
+  /// No description provided for @workspaceContextNoProject.
+  ///
+  /// In en, this message translates to:
+  /// **'No project selected'**
+  String get workspaceContextNoProject;
+
+  /// No description provided for @workspaceBillingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace billing'**
+  String get workspaceBillingTitle;
+
+  /// No description provided for @workspaceBillingUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get workspaceBillingUnlimited;
+
+  /// No description provided for @workspaceBillingUnknownTier.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown'**
+  String get workspaceBillingUnknownTier;
+
+  /// No description provided for @workspaceBillingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan: {tier}'**
+  String workspaceBillingPlan(String tier);
+
+  /// No description provided for @workspaceBillingDailyQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily quota: {quota}'**
+  String workspaceBillingDailyQuota(String quota);
+
+  /// No description provided for @workspaceBillingPercentUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% used'**
+  String workspaceBillingPercentUsed(String percent);
+
+  /// No description provided for @notificationsCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsCenterTitle;
+
+  /// No description provided for @notificationsCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregates job completion, workspace invites, skill changes, and read state.'**
+  String get notificationsCenterSubtitle;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsRiskyPrefsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Local client preferences (for example \"don\'t ask again\" on short-video risky actions).'**
+  String get notificationsRiskyPrefsTooltip;
+
+  /// No description provided for @notificationsFilterUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread {count}'**
+  String notificationsFilterUnread(int count);
+
+  /// No description provided for @notificationsTypeFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get notificationsTypeFilterLabel;
+
+  /// No description provided for @notificationsTypeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get notificationsTypeAll;
+
+  /// No description provided for @notificationsTypeJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
+  String get notificationsTypeJob;
+
+  /// No description provided for @notificationsTypeWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get notificationsTypeWorkspace;
+
+  /// No description provided for @notificationsTypeSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get notificationsTypeSkill;
+
+  /// No description provided for @notificationsTypeCompliance.
+  ///
+  /// In en, this message translates to:
+  /// **'Compliance'**
+  String get notificationsTypeCompliance;
+
+  /// No description provided for @notificationsSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search title / body / file / job'**
+  String get notificationsSearchLabel;
+
+  /// No description provided for @notificationsRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get notificationsRefresh;
+
+  /// No description provided for @notificationsLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get notificationsLoadMore;
+
+  /// No description provided for @notificationsEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications match the current filters.'**
+  String get notificationsEmptyFiltered;
+
+  /// No description provided for @notificationsUnreadBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get notificationsUnreadBadge;
+
+  /// No description provided for @notificationsMarkRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark read'**
+  String get notificationsMarkRead;
+
+  /// No description provided for @notificationsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get notificationsOpen;
+
+  /// No description provided for @notificationsRecordJobSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Job completed'**
+  String get notificationsRecordJobSucceeded;
+
+  /// No description provided for @notificationsRecordJobFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Job failed'**
+  String get notificationsRecordJobFailed;
+
+  /// No description provided for @notificationsRecordJobCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Job cancelled'**
+  String get notificationsRecordJobCancelled;
+
+  /// No description provided for @notificationsRecordWorkspaceInviteCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite created'**
+  String get notificationsRecordWorkspaceInviteCreated;
+
+  /// No description provided for @notificationsRecordWorkspaceInviteResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite resent'**
+  String get notificationsRecordWorkspaceInviteResent;
+
+  /// No description provided for @notificationsRecordWorkspaceInviteRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite revoked'**
+  String get notificationsRecordWorkspaceInviteRevoked;
+
+  /// No description provided for @notificationsRecordWorkspaceInviteAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite accepted'**
+  String get notificationsRecordWorkspaceInviteAccepted;
+
+  /// No description provided for @notificationsRecordSkillChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill change'**
+  String get notificationsRecordSkillChange;
+
+  /// No description provided for @notificationsRecordContentComplianceAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance alert'**
+  String get notificationsRecordContentComplianceAlert;
+
+  /// No description provided for @notificationsRecordContentComplianceCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance cleared'**
+  String get notificationsRecordContentComplianceCleared;
 }
 
 class _AppLocalizationsDelegate
