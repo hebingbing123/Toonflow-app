@@ -204,7 +204,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 - [~] **I2. i18n 产品文案中英收口 — Frontend**（**进行中**：已启用 `gen-l10n` + 首页语言卡片；**绝大部分界面仍为硬编码**，需按模块迁移到 ARB）
   - [x] I2.1 使用 `l10n` 框架 — `l10n.yaml`、`lib/l10n/*.arb`、`AppLocalizations` 生成物已入库；`flutter_localizations` + `MaterialApp` delegates
   - [~] I2.2 覆盖项目列表界面的中英文文案 — **部分**：**`ProjectsSection` / `previews.dart` / `create_project_dialog`** 已 **`projects*`**；**画风工作台**（`art_styles_view`）、**创作手册工作台**（`creative_manuals*.dart`）、**Agent 记忆工作台**（`agent_memory*.dart` / `memory_widgets.dart`）已分别走 **`projectsArtWorkbench*` / `projectsCreativeManual*` / `agentMemory*`** ARB；其它项目内入口若仍有硬编码再扫尾
-  - [ ] I2.3 覆盖工作台界面的中英文文案
+  - [~] I2.3 覆盖工作台界面的中英文文案 — **部分**：`task_center/section.dart`、`previews.dart`、`workbench_view.dart`、`section_workbench.dart`、`support.dart` 已迁移至 `taskCenter*` ARB（含工作台主流程、兼容性入口、实时状态行、失败动作与阶段标签）；其余非 task_center 工作台子域继续扫尾
   - [~] I2.4 覆盖设置界面的中英文文案（除语言卡片外）— **部分**：**`_PlatformConfigSection`** 已 **`platformConfig*`**（含 Plan/Workspace/User 覆盖标题）；**产品壳** **`productNav*` / `productPaneDisabled*` / `productAgent*` / `productCompliance*`**；**`_HelpHubSection`** 已 **`helpHub*` / `opsWh*` / `billing*`**（帮助文档、出站 Webhook、Billing 审计、管理对话框与 SnackBar）；其余设置相关子界面仍可能含硬编码
   - [~] I2.5 覆盖团队工作区界面的中英文文案 — **部分**：首页 **工作区模式**（`build_sections.dart`）与 **`WorkspaceContextView`**（加载、无工作区/项目、计费标题与配额文案）已接 `AppLocalizations`；成员/邀请等子界面仍待迁移
   - [x] I2.6 覆盖通知中心界面的中英文文案 — `NotificationsSection` 全量 ARB；**`RiskyOperationConfirmPrefsOverflowMenu`** 与 **`listActiveRiskyOperationConfirmDontShowLabels` / 摘要与重置对话框 / SnackBar** 已在 `risky_operation_confirm_prefs.dart` 接 l10n（`listActiveConfirmationDontShowAgainLabels` 现需传入 `AppLocalizations`）

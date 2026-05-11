@@ -1458,4 +1458,982 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectsDialogCreateButton => '创建';
+
+  @override
+  String get projectsBusyProcessing => '处理中…';
+
+  @override
+  String get projectsArtWorkbenchTitle => '画风工作台';
+
+  @override
+  String get projectsArtWorkbenchIntro =>
+      '在同一入口内完成画风列表刷新、封面查看、CRUD 与 prompt 抽取，不再只停留在列表加载与回归探针。';
+
+  @override
+  String get projectsArtWorkbenchReloadList => '刷新列表';
+
+  @override
+  String get projectsArtWorkbenchViewCover => '查看封面';
+
+  @override
+  String get projectsArtWorkbenchReadingCover => '读取中…';
+
+  @override
+  String get projectsArtWorkbenchNew => '新建画风';
+
+  @override
+  String get projectsArtWorkbenchSave => '保存当前画风';
+
+  @override
+  String get projectsArtWorkbenchDelete => '删除当前画风';
+
+  @override
+  String get projectsArtWorkbenchCurrentStyle => '当前画风';
+
+  @override
+  String get projectsArtWorkbenchEmptyHint => '当前还没有画风，填写下面表单后可直接新建。';
+
+  @override
+  String get projectsArtWorkbenchFieldName => '名称';
+
+  @override
+  String get projectsArtWorkbenchFieldTags => '标签';
+
+  @override
+  String get projectsArtWorkbenchFieldCoverUrl => '封面 URL / data URI';
+
+  @override
+  String get projectsArtWorkbenchFieldCoverUrlHelper =>
+      '可填写可访问 URL，或 data:image/...;base64,...';
+
+  @override
+  String get projectsArtWorkbenchFieldPrompt => 'Prompt';
+
+  @override
+  String get projectsArtWorkbenchExtractTitle => 'Prompt 抽取';
+
+  @override
+  String get projectsArtWorkbenchExtractImagesLabel => '图片输入';
+
+  @override
+  String get projectsArtWorkbenchExtractImagesHelper =>
+      '按换行或逗号分隔多个图片 URL / data URI。';
+
+  @override
+  String get projectsArtWorkbenchExtractButton => '抽取 Prompt 到编辑区';
+
+  @override
+  String get projectsArtWorkbenchCoverPreview => '当前封面预览';
+
+  @override
+  String get projectsCreativeManualTitle => '创作手册工作台';
+
+  @override
+  String get projectsCreativeManualIntro =>
+      '把导演手册与视觉手册从首页探针收口到同一工作台，可直接刷新、查看、创建、更新和删除。';
+
+  @override
+  String get projectsCreativeManualSegmentDirector => '导演手册';
+
+  @override
+  String get projectsCreativeManualSegmentVisual => '视觉手册';
+
+  @override
+  String get projectsCreativeManualReloadAll => '刷新全部手册';
+
+  @override
+  String get projectsCreativeManualPathDirectorFolder => 'directorManual 文件夹';
+
+  @override
+  String get projectsCreativeManualPathVisual => 'stylePath';
+
+  @override
+  String get projectsCreativeManualSelectionDirector => '当前导演手册';
+
+  @override
+  String get projectsCreativeManualSelectionVisual => '当前视觉手册';
+
+  @override
+  String get projectsCreativeManualCreateDirector => '新建导演手册';
+
+  @override
+  String get projectsCreativeManualCreateVisual => '新建视觉手册';
+
+  @override
+  String get projectsCreativeManualSaveDirector => '保存当前导演手册';
+
+  @override
+  String get projectsCreativeManualSaveVisual => '保存当前视觉手册';
+
+  @override
+  String get projectsCreativeManualDeleteDirector => '删除当前导演手册';
+
+  @override
+  String get projectsCreativeManualDeleteVisual => '删除当前视觉手册';
+
+  @override
+  String get projectsCreativeManualEmptyKind => '当前类型还没有手册，可直接填写下方表单新建。';
+
+  @override
+  String get projectsCreativeManualFieldName => '名称';
+
+  @override
+  String get projectsCreativeManualFieldImagesList => '图片列表';
+
+  @override
+  String get projectsCreativeManualFieldImagesHelper =>
+      '按换行或逗号分隔多个图片 URL / 路径。';
+
+  @override
+  String get projectsCreativeManualFieldSlots => '数据槽位';
+
+  @override
+  String get projectsCreativeManualFieldSlotsHelper =>
+      '每行一个槽位，格式为 label|value|data';
+
+  @override
+  String get projectsCreativeManualSummaryTitle => '当前摘要';
+
+  @override
+  String projectsCreativeManualSummaryLine(
+    String name,
+    String path,
+    int imageCount,
+    int slotCount,
+  ) {
+    return '$name · 路径 $path · 图片 $imageCount 张 · 槽位 $slotCount 个';
+  }
+
+  @override
+  String get projectsCreativeManualStatusRefreshing => '刷新创作手册中…';
+
+  @override
+  String projectsCreativeManualStatusReloadOk(
+    int directorCount,
+    int visualCount,
+    int getCount,
+    int postCount,
+  ) {
+    return '导演手册 $directorCount 条 · 视觉手册 $visualCount 条 · visual GET/POST=$getCount/$postCount';
+  }
+
+  @override
+  String projectsCreativeManualStatusReloadFail(String detail) {
+    return '刷新失败：$detail';
+  }
+
+  @override
+  String get projectsCreativeManualStatusCreateNeedFields => '新建失败：名称与路径不能为空。';
+
+  @override
+  String get projectsCreativeManualStatusCreating => '新建手册中…';
+
+  @override
+  String projectsCreativeManualStatusCreated(String kind, String path) {
+    return '已新建 $kind：$path';
+  }
+
+  @override
+  String get projectsCreativeManualStatusSaveNeedSelect => '保存失败：请先选择一条手册。';
+
+  @override
+  String get projectsCreativeManualStatusSaveNeedFields => '保存失败：名称与路径不能为空。';
+
+  @override
+  String get projectsCreativeManualStatusSaving => '保存手册中…';
+
+  @override
+  String projectsCreativeManualStatusSaved(String kind, String path) {
+    return '已保存 $kind：$path';
+  }
+
+  @override
+  String get projectsCreativeManualStatusDeleteNeedSelect => '删除失败：请先选择一条手册。';
+
+  @override
+  String get projectsCreativeManualStatusDeleting => '删除手册中…';
+
+  @override
+  String projectsCreativeManualStatusDeleted(String kind, String path) {
+    return '已删除 $kind：$path';
+  }
+
+  @override
+  String projectsCreativeManualStatusOpFail(String verb, String detail) {
+    return '$verb失败：$detail';
+  }
+
+  @override
+  String get projectsCreativeManualKindDirector => '导演手册';
+
+  @override
+  String get projectsCreativeManualKindVisual => '视觉手册';
+
+  @override
+  String projectsCreativeManualInvalidSlotLine(String line) {
+    return '槽位格式无效（应为 label|value|data）：$line';
+  }
+
+  @override
+  String get agentMemoryWorkbenchTitle => 'Agent 记忆工作台';
+
+  @override
+  String get agentMemoryWorkbenchIntro =>
+      '针对项目级 script/production Agent 记忆执行查询、追加和清理，不再只依赖首页首项目 probe。';
+
+  @override
+  String get agentMemoryReloadProjects => '刷新项目列表';
+
+  @override
+  String get agentMemoryQueryMemory => '查询记忆';
+
+  @override
+  String get agentMemoryLoadCostOverview => '加载成本概览';
+
+  @override
+  String get agentMemoryOptimizeVideo => '自动优化视频记忆';
+
+  @override
+  String agentMemoryProjectsPreviewLine(
+    int count,
+    String preview,
+    String ellipsis,
+  ) {
+    return '$count 个项目 · $preview$ellipsis';
+  }
+
+  @override
+  String get agentMemoryUnnamedProject => '未命名项目';
+
+  @override
+  String get agentMemoryFieldProjectNumericId => '项目 numeric ID';
+
+  @override
+  String get agentMemoryFieldAgentType => 'agent type';
+
+  @override
+  String get agentMemoryFieldEpisodesIdOptional => 'episodes id（可空）';
+
+  @override
+  String get agentMemoryFieldScopeSignatureOptional =>
+      'scopeSignature JSON（可空）';
+
+  @override
+  String get agentMemoryFieldScopeSignatureHelper =>
+      'JSON 对象；常见键：episodeId、storyboardIds、focusSections';
+
+  @override
+  String get agentMemoryFieldQueryType => 'query type';
+
+  @override
+  String get agentMemoryFieldQueryTypeHelper => 'summary / message / all';
+
+  @override
+  String get agentMemoryFieldMemoryTier => 'memory tier';
+
+  @override
+  String get agentMemoryFieldMemoryTierHelper =>
+      'all / style_bible / stage_summary / delta_memory / message';
+
+  @override
+  String get agentMemoryFieldAutomationMode => 'automation mode';
+
+  @override
+  String get agentMemoryFieldAutomationModeHelper => 'standard / lean / off';
+
+  @override
+  String get agentMemoryIsolateHint =>
+      '自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。';
+
+  @override
+  String get agentMemoryOptimizeScopeHint =>
+      '自动优化只处理 productionAgent + episodes id 范围内的 selected video memory，不共享到别的用户、项目或短剧。';
+
+  @override
+  String get agentMemoryOptimizeEnableHint =>
+      '要启用自动优化，请把 agent type 设为 productionAgent，并填写 episodes id。';
+
+  @override
+  String get agentMemoryRecommendationPrefix => '建议：';
+
+  @override
+  String get agentMemoryCopyChecklistTooltip => '复制记忆执行清单';
+
+  @override
+  String get agentMemoryChecklistCopiedSnack => '已复制记忆执行清单';
+
+  @override
+  String get agentMemoryAppendSection => '追加记忆';
+
+  @override
+  String get agentMemoryFieldAppendType => 'append type';
+
+  @override
+  String get agentMemoryFieldAppendTypeHelper => 'message / summary';
+
+  @override
+  String get agentMemoryFieldAppendMemoryTier => 'append memory tier';
+
+  @override
+  String get agentMemoryFieldAppendMemoryTierHelper =>
+      'style_bible / stage_summary / delta_memory / message';
+
+  @override
+  String get agentMemoryFieldRole => 'role';
+
+  @override
+  String get agentMemoryFieldNameOptional => 'name（可空）';
+
+  @override
+  String get agentMemoryAppendButton => '按当前 scope 追加记忆';
+
+  @override
+  String get agentMemoryFieldMemoryContent => '记忆内容';
+
+  @override
+  String get agentMemoryClearSection => '清理记忆';
+
+  @override
+  String get agentMemoryFieldClearType => 'clear type';
+
+  @override
+  String get agentMemoryFieldClearTypeHelper => 'summary / message / all';
+
+  @override
+  String get agentMemoryClearRun => '执行清理';
+
+  @override
+  String get agentMemoryDuplicateChip => '重复';
+
+  @override
+  String agentMemoryTierGroupHeader(String label, int count, String last) {
+    return '$label · $count 条 · 最近注入 $last';
+  }
+
+  @override
+  String agentMemoryMemoryRowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 条记忆',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agentMemoryCharsAbbr(int n) {
+    return '$n chars';
+  }
+
+  @override
+  String agentMemorySubjectLabel(String value) {
+    return 'subject $value';
+  }
+
+  @override
+  String agentMemorySignalsLabel(String value) {
+    return 'signals $value';
+  }
+
+  @override
+  String get agentMemoryTierAll => '全部层级';
+
+  @override
+  String get agentMemoryTierStyleBible => '风格圣经';
+
+  @override
+  String get agentMemoryTierStageSummary => '阶段摘要';
+
+  @override
+  String get agentMemoryTierDeltaMemory => '增量记忆';
+
+  @override
+  String get agentMemoryTierMessage => '普通消息';
+
+  @override
+  String get agentMemoryClassNegative => '坏例约束';
+
+  @override
+  String get agentMemoryClassDeliveryVisual => '表演+视觉';
+
+  @override
+  String get agentMemoryClassDeliveryFirst => '表演优先';
+
+  @override
+  String get agentMemoryClassVisualHeavy => '视觉偏重';
+
+  @override
+  String get agentMemoryClassVideoMemory => '视频记忆';
+
+  @override
+  String get agentMemoryActionMergeNegative => '合并坏例';
+
+  @override
+  String get agentMemoryActionObserve => '待观察';
+
+  @override
+  String get agentMemoryActionCompress => '待压缩';
+
+  @override
+  String get agentMemoryActionKeep => '优先保留';
+
+  @override
+  String agentMemoryInsightCore(
+    String roles,
+    String typesPart,
+    int totalChars,
+    int longestChars,
+    String dupPart,
+  ) {
+    return '角色分布：$roles$typesPart · 约 $totalChars chars · 最长 $longestChars chars$dupPart';
+  }
+
+  @override
+  String agentMemoryInsightTypesPart(String detail) {
+    return ' · 类型 $detail';
+  }
+
+  @override
+  String agentMemoryInsightDupPart(int count) {
+    return ' · 重复 $count 条';
+  }
+
+  @override
+  String agentMemoryVideoInsight(
+    int dRows,
+    int dChars,
+    int vRows,
+    int vChars,
+    int nRows,
+    int nChars,
+  ) {
+    return '视频记忆：delivery $dRows/$dChars chars · visual $vRows/$vChars chars · negative $nRows/$nChars chars';
+  }
+
+  @override
+  String agentMemoryEfficiencyInsight(
+    int kRows,
+    int kChars,
+    int tRows,
+    int tChars,
+    int mRows,
+    int mChars,
+  ) {
+    return '处理建议：保留 $kRows/$kChars chars · 压缩 $tRows/$tChars chars · 合并坏例 $mRows/$mChars chars';
+  }
+
+  @override
+  String agentMemoryBucketPriorityLine(String detail) {
+    return '记忆桶优先级：$detail';
+  }
+
+  @override
+  String agentMemoryBucketPriorityItem(
+    String action,
+    String name,
+    int rows,
+    int chars,
+  ) {
+    return '$action $name · $rows条/$chars chars';
+  }
+
+  @override
+  String get agentMemoryCostNever => '暂无';
+
+  @override
+  String agentMemoryCostOverviewLine(
+    String scope,
+    int sb,
+    int ss,
+    int dm,
+    int msg,
+    int avgInj,
+    int avgHit,
+    String last,
+  ) {
+    return 'scope=$scope · 成本概览：风格圣经 $sb 条 · 阶段摘要 $ss 条 · 增量记忆 $dm 条 · 普通消息 $msg 条 · 近 30 次平均注入 $avgInj 字 · 近 30 次平均命中层级 $avgHit 个 · 最近注入 $last';
+  }
+
+  @override
+  String get agentMemoryChecklistTitle => '记忆执行清单：';
+
+  @override
+  String agentMemoryChecklistScope(String scope) {
+    return '范围：只处理 $scope 的记忆，不跨用户、项目或短剧复用。';
+  }
+
+  @override
+  String get agentMemoryChecklistScopeFallback => '当前查询 scope';
+
+  @override
+  String agentMemoryChecklistCompress(String name) {
+    return '压缩 $name 的镜头/光影/氛围套话，优先保留表演、语气、情绪和人物一致性片段。';
+  }
+
+  @override
+  String agentMemoryChecklistMerge(String name) {
+    return '合并 $name 的重复 risk/avoid 约束，保留最能防止穿帮、口型僵硬和身份漂移的坏例。';
+  }
+
+  @override
+  String agentMemoryChecklistKeep(String name) {
+    return '保留 $name 里最具体的表演/情绪锚点，避免删掉能让人物不读稿、不木的 delivery 记忆。';
+  }
+
+  @override
+  String agentMemoryChecklistObserve(String name) {
+    return '观察 $name 的新增条目，避免继续堆重复记忆。';
+  }
+
+  @override
+  String agentMemoryChecklistReminder(String text) {
+    return '当前提醒：$text';
+  }
+
+  @override
+  String get agentMemoryRecDup => '检测到重复表述，先去重旧记忆，避免同一约束反复注入。';
+
+  @override
+  String get agentMemoryRecVisualOnly =>
+      '当前视频记忆几乎只有镜头/光影，先补一条表演、语气或情绪锚点，再决定删哪条视觉记忆。';
+
+  @override
+  String get agentMemoryRecVisualBudget =>
+      '视觉偏重记忆吃掉了更多预算，先清理只保留镜头/光影的旧条目，把 chars 留给表演、语气和情绪。';
+
+  @override
+  String get agentMemoryRecNegativeMerge =>
+      '坏例约束累计较多，先合并重复 risk/avoid 片段，避免 negative memory 自己膨胀。';
+
+  @override
+  String agentMemoryRecBucketHot(String name, int count) {
+    return '$name 已累计 $count 条，先压缩这个记忆桶，避免它单独吃掉预算。';
+  }
+
+  @override
+  String get agentMemoryRecLong => '当前记忆偏长，优先压缩长记忆，再决定是否继续追加。';
+
+  @override
+  String get agentMemoryRecManyRows =>
+      '条数偏多，先读取 summary 或清理旧 message，给当前镜头约束留预算。';
+
+  @override
+  String get agentMemoryRecAssistantHeavy => 'assistant 记忆偏多，先清旧总结，只保留最新执行约束。';
+
+  @override
+  String get agentMemorySignalSubject => '人物';
+
+  @override
+  String get agentMemorySignalEmotion => '情绪';
+
+  @override
+  String get agentMemorySignalCamera => '镜头';
+
+  @override
+  String get agentMemorySignalVisual => '视觉';
+
+  @override
+  String get agentMemorySignalIdentity => '身份';
+
+  @override
+  String get agentMemorySignalDialogue => '台词';
+
+  @override
+  String get agentMemorySignalPerformance => '表演';
+
+  @override
+  String agentMemorySignalNegative(String n) {
+    return '坏例$n';
+  }
+
+  @override
+  String agentMemoryStatusProjectsRefreshed(int count) {
+    return '已刷新 $count 个项目。';
+  }
+
+  @override
+  String get agentMemoryErrFillProjectAndAgent =>
+      '请填写合法的项目 ID（numeric 或列表中可选 UUID）和 agent type。';
+
+  @override
+  String get agentMemoryErrFillAgentType => '请填写 agent type。';
+
+  @override
+  String agentMemoryQuerySummaryLine(
+    int count,
+    String memoryType,
+    String tier,
+  ) {
+    return '已读取 $count 条 $memoryType 记忆 · 层级 $tier。';
+  }
+
+  @override
+  String get agentMemoryErrCostOverviewFields =>
+      '加载成本概览前请填写合法的项目 ID 和 agent type。';
+
+  @override
+  String get agentMemoryStatusCostOverviewLoaded => '已加载记忆成本概览。';
+
+  @override
+  String get agentMemoryErrAppendProjectFields =>
+      '追加记忆前请填写项目 ID、agent type、role 和内容。';
+
+  @override
+  String get agentMemoryErrAppendAgentRoleContent =>
+      '追加记忆前请填写 agent type、role 和内容。';
+
+  @override
+  String agentMemoryStatusAppended(String id) {
+    return '已追加记忆 $id。';
+  }
+
+  @override
+  String get agentMemoryErrClearProjectFields => '清理记忆前请填写项目 ID 和 agent type。';
+
+  @override
+  String agentMemoryStatusCleared(String clearType) {
+    return '已执行记忆清理：$clearType。';
+  }
+
+  @override
+  String get agentMemoryErrOptimizeProjectFields =>
+      '自动优化前请填写项目 ID、agent type 和 episodes id。';
+
+  @override
+  String get agentMemoryErrOptimizeAgentEpisodes =>
+      '自动优化前请填写 agent type 和 episodes id。';
+
+  @override
+  String agentMemoryStatusOptimized(
+    String mode,
+    int removedRows,
+    int removedChars,
+    int dupRows,
+    int visRows,
+  ) {
+    return '已自动优化视频记忆（$mode）：删除 $removedRows 条 / $removedChars chars，其中重复 $dupRows 条、纯视觉 $visRows 条。';
+  }
+
+  @override
+  String get agentMemoryErrScopeNotObject => 'scopeSignature 必须是 JSON 对象';
+
+  @override
+  String get agentMemoryErrScopeNeedsDimension => 'scopeSignature 至少需要一个非空范围维度';
+
+  @override
+  String agentMemoryErrScopeTierRequires(String action) {
+    return '$action 需要填写非空的 scopeSignature JSON。';
+  }
+
+  @override
+  String get agentMemoryActionLabelQueryScoped => '查询 scoped 记忆';
+
+  @override
+  String get agentMemoryActionLabelAppendScoped => '追加 scoped 记忆';
+
+  @override
+  String get taskCenterErrNotLoggedIn => '当前未登录，无法读取任务中心';
+
+  @override
+  String get taskCenterProjectsNotLoaded => '尚未加载任务项目';
+
+  @override
+  String get taskCenterTaskListNotLoaded => '尚未加载任务列表';
+
+  @override
+  String get taskCenterLocalClientPrefs => '本机客户端偏好';
+
+  @override
+  String get taskCenterSectionIntro =>
+      '用正式工作台完成任务项目、分类、筛选列表和详情查看，主区不再依赖首条/UUID probe 按钮。';
+
+  @override
+  String get taskCenterOpenWorkbench => '打开任务工作台';
+
+  @override
+  String get taskCenterRefreshSummary => '刷新任务摘要';
+
+  @override
+  String get taskCenterCompatibilityCheck => '兼容性检查';
+
+  @override
+  String get taskCenterCompatibilityHint => '保留旧式加载/详情 probe 作为回归入口，默认折叠';
+
+  @override
+  String get taskCenterLoadTaskProjects => '加载任务项目';
+
+  @override
+  String get taskCenterLoadTaskCategories => '加载任务分类';
+
+  @override
+  String get taskCenterLoadTaskList => '加载任务列表';
+
+  @override
+  String get taskCenterViewFirstTaskDetails => '查看首条任务详情';
+
+  @override
+  String get taskCenterFieldTaskUuidTapToFill => '任务 UUID（点下方列表可自动填入）';
+
+  @override
+  String get taskCenterViewByUuid => '按 UUID 查看详情';
+
+  @override
+  String taskCenterJobsCount(int count) {
+    return '$count 条任务';
+  }
+
+  @override
+  String taskCenterCategoriesLine(String line) {
+    return '分类摘要：$line';
+  }
+
+  @override
+  String taskCenterNumericIdDetailsLine(String line) {
+    return '任务详情（numeric ID）：$line';
+  }
+
+  @override
+  String taskCenterUuidDetailsLine(String line) {
+    return 'UUID 详情：$line';
+  }
+
+  @override
+  String get taskCenterPhasePrep => '素材准备';
+
+  @override
+  String get taskCenterPhaseImage => '出图';
+
+  @override
+  String get taskCenterPhaseVideo => '出视频';
+
+  @override
+  String get taskCenterPhaseExport => '导出成片';
+
+  @override
+  String get taskCenterPhaseQuality => '质检';
+
+  @override
+  String get taskCenterWorkbenchTitle => '任务工作台';
+
+  @override
+  String taskCenterWorkbenchIntro(String realtime) {
+    return '在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 numeric task id 或 UUID 查看详情。$realtime';
+  }
+
+  @override
+  String get taskCenterWorkbenchRealtimeConnected => ' 当前已接入实时任务更新。';
+
+  @override
+  String get taskCenterWorkbenchFilterAndList => '筛选与列表';
+
+  @override
+  String get taskCenterReloadTaskProjects => '刷新任务项目';
+
+  @override
+  String get taskCenterReloadTaskCategories => '刷新任务分类';
+
+  @override
+  String get taskCenterLoadTasksByFilters => '按筛选加载任务';
+
+  @override
+  String get taskCenterFieldPage => '页码';
+
+  @override
+  String get taskCenterFieldPageSize => '每页数量';
+
+  @override
+  String get taskCenterFieldProjectNumericIdOptional => '项目 numeric ID（可空）';
+
+  @override
+  String get taskCenterFieldTaskClassOptional => '任务分类（可空）';
+
+  @override
+  String get taskCenterFieldTaskStatusOptional => '任务状态（可空）';
+
+  @override
+  String get taskCenterFieldProductionPhaseOptional =>
+      '短视频阶段（可空：prep/image/video/export/quality）';
+
+  @override
+  String taskCenterFailureReason(String text) {
+    return '失败原因=$text';
+  }
+
+  @override
+  String get taskCenterRetry => '重试';
+
+  @override
+  String get taskCenterCancel => '取消';
+
+  @override
+  String get taskCenterTaskDetailsSection => '任务详情';
+
+  @override
+  String get taskCenterFieldNumericTaskId => 'numeric task id';
+
+  @override
+  String get taskCenterLoadNumericIdDetails => '读取任务详情（numeric ID）';
+
+  @override
+  String get taskCenterFieldTaskUuid => '任务 UUID';
+
+  @override
+  String get taskCenterLoadUuidDetails => '读取 UUID 详情';
+
+  @override
+  String taskCenterStatusLine(String line) {
+    return '状态：$line';
+  }
+
+  @override
+  String taskCenterStructuredFailure(String label) {
+    return '结构化失败 · $label';
+  }
+
+  @override
+  String get taskCenterOpenProductionWorkspace => '打开制作工作区';
+
+  @override
+  String get taskCenterOpenScriptWorkspace => '打开剧本工作区';
+
+  @override
+  String get taskCenterRegenerate => '重新生成';
+
+  @override
+  String get taskCenterPartialRework => '局部返工';
+
+  @override
+  String get taskCenterWritebackCompensation => '回写补偿';
+
+  @override
+  String get taskCenterOpenSpacePublish => '打开短视频 Space（发布）';
+
+  @override
+  String get taskCenterOpenProductionStoryboard => '打开制作工作区（分镜）';
+
+  @override
+  String get taskCenterOpenScriptScript => '打开剧本工作区（脚本）';
+
+  @override
+  String get taskCenterOpenSpaceProject => '打开短视频 Space（项目）';
+
+  @override
+  String taskCenterStatusLoadedTaskProjects(int count) {
+    return '已读取 $count 个任务项目。';
+  }
+
+  @override
+  String taskCenterStatusLoadedTaskCategories(int count) {
+    return '已读取 $count 个任务分类。';
+  }
+
+  @override
+  String taskCenterStatusRefreshedTasks(int count) {
+    return '已刷新 $count 条任务。';
+  }
+
+  @override
+  String get taskCenterErrInvalidNumericTaskId => '请填写合法的任务 numeric ID。';
+
+  @override
+  String get taskCenterErrFillTaskUuid => '请填写任务 UUID。';
+
+  @override
+  String get taskCenterOriginRetrySubmitted => '已提交重试';
+
+  @override
+  String get taskCenterOriginTaskCancelled => '已取消任务';
+
+  @override
+  String get taskCenterStatusEnteredWritebackCompensation =>
+      '已进入回写补偿：先读取任务 UUID 详情并校验写回状态。';
+
+  @override
+  String get taskCenterOriginRealtimeUpdate => '收到实时更新';
+
+  @override
+  String taskCenterStatusMergedUpdate(
+    String origin,
+    int taskId,
+    String kind,
+    String status,
+  ) {
+    return '$origin：#$taskId $kind -> $status';
+  }
+
+  @override
+  String get taskCenterProjectsEmpty => '当前没有任务项目';
+
+  @override
+  String taskCenterProjectsSummary(int count, String preview, String ellipsis) {
+    return '$count 个项目 · $preview$ellipsis';
+  }
+
+  @override
+  String get taskCenterCategoriesEmpty => '当前没有任务分类';
+
+  @override
+  String taskCenterCategoriesSummary(
+    int count,
+    String preview,
+    String ellipsis,
+  ) {
+    return '$count 个分类 · $preview$ellipsis';
+  }
+
+  @override
+  String get taskCenterJobsEmpty => '当前没有任务记录';
+
+  @override
+  String taskCenterJobsSummary(int count, String preview, String ellipsis) {
+    return '$count 条任务 · $preview$ellipsis';
+  }
+
+  @override
+  String get taskCenterFailurePayloadMissingSourceUrl => '缺少 source_url';
+
+  @override
+  String get taskCenterFailurePayloadSourceUrlEmpty => '成片 URL 为空';
+
+  @override
+  String get taskCenterFailurePayloadFormatInvalid => '导出格式无效';
+
+  @override
+  String get taskCenterFailureLocalExportDirUnset => '服务端未配置导出目录';
+
+  @override
+  String get taskCenterFailureExportProviderFailed => '导出提供方失败';
+
+  @override
+  String get taskCenterFailureExportDirectoryCreateFailed => '创建导出目录失败';
+
+  @override
+  String get taskCenterFailureExportFilePersistFailed => '写入导出文件失败';
+
+  @override
+  String get taskCenterFailureVideoDownloadHttp => '源视频 HTTP 失败';
+
+  @override
+  String get taskCenterFailureVideoDownloadStream => '源视频下载中断';
+
+  @override
+  String get taskCenterFailureVideoFormatMismatchNoTranscode => '格式不一致（未转码）';
+
+  @override
+  String get taskCenterFailureVideoContentLengthExceedsLimit => '源视频过大（长度头）';
+
+  @override
+  String get taskCenterFailureVideoBodyExceedsLimit => '源视频过大（正文）';
+
+  @override
+  String get taskCenterFailureUnknownCode => '未知原因码';
+
+  @override
+  String get projectsCreativeManualVerbCreate => '新建';
+
+  @override
+  String get projectsCreativeManualVerbSave => '保存';
+
+  @override
+  String get projectsCreativeManualVerbDelete => '删除';
 }

@@ -2699,6 +2699,1623 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create'**
   String get projectsDialogCreateButton;
+
+  /// No description provided for @projectsBusyProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing…'**
+  String get projectsBusyProcessing;
+
+  /// No description provided for @projectsArtWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Art styles workbench'**
+  String get projectsArtWorkbenchTitle;
+
+  /// No description provided for @projectsArtWorkbenchIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the list, inspect covers, edit prompts, and extract prompts from images—beyond list-only probes.'**
+  String get projectsArtWorkbenchIntro;
+
+  /// No description provided for @projectsArtWorkbenchReloadList.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh list'**
+  String get projectsArtWorkbenchReloadList;
+
+  /// No description provided for @projectsArtWorkbenchViewCover.
+  ///
+  /// In en, this message translates to:
+  /// **'View cover'**
+  String get projectsArtWorkbenchViewCover;
+
+  /// No description provided for @projectsArtWorkbenchReadingCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading cover…'**
+  String get projectsArtWorkbenchReadingCover;
+
+  /// No description provided for @projectsArtWorkbenchNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New style'**
+  String get projectsArtWorkbenchNew;
+
+  /// No description provided for @projectsArtWorkbenchSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save current style'**
+  String get projectsArtWorkbenchSave;
+
+  /// No description provided for @projectsArtWorkbenchDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete current style'**
+  String get projectsArtWorkbenchDelete;
+
+  /// No description provided for @projectsArtWorkbenchCurrentStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current style'**
+  String get projectsArtWorkbenchCurrentStyle;
+
+  /// No description provided for @projectsArtWorkbenchEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No styles yet—fill the form below to create one.'**
+  String get projectsArtWorkbenchEmptyHint;
+
+  /// No description provided for @projectsArtWorkbenchFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get projectsArtWorkbenchFieldName;
+
+  /// No description provided for @projectsArtWorkbenchFieldTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get projectsArtWorkbenchFieldTags;
+
+  /// No description provided for @projectsArtWorkbenchFieldCoverUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover URL / data URI'**
+  String get projectsArtWorkbenchFieldCoverUrl;
+
+  /// No description provided for @projectsArtWorkbenchFieldCoverUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a reachable URL or data:image/...;base64,...'**
+  String get projectsArtWorkbenchFieldCoverUrlHelper;
+
+  /// No description provided for @projectsArtWorkbenchFieldPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get projectsArtWorkbenchFieldPrompt;
+
+  /// No description provided for @projectsArtWorkbenchExtractTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt extraction'**
+  String get projectsArtWorkbenchExtractTitle;
+
+  /// No description provided for @projectsArtWorkbenchExtractImagesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Image inputs'**
+  String get projectsArtWorkbenchExtractImagesLabel;
+
+  /// No description provided for @projectsArtWorkbenchExtractImagesHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate multiple URLs / data URIs with commas or newlines.'**
+  String get projectsArtWorkbenchExtractImagesHelper;
+
+  /// No description provided for @projectsArtWorkbenchExtractButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract prompt into editor'**
+  String get projectsArtWorkbenchExtractButton;
+
+  /// No description provided for @projectsArtWorkbenchCoverPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover preview'**
+  String get projectsArtWorkbenchCoverPreview;
+
+  /// No description provided for @projectsCreativeManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Creative manuals workbench'**
+  String get projectsCreativeManualTitle;
+
+  /// No description provided for @projectsCreativeManualIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage director and visual manuals in one place: refresh, create, update, and delete.'**
+  String get projectsCreativeManualIntro;
+
+  /// No description provided for @projectsCreativeManualSegmentDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Director manual'**
+  String get projectsCreativeManualSegmentDirector;
+
+  /// No description provided for @projectsCreativeManualSegmentVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual manual'**
+  String get projectsCreativeManualSegmentVisual;
+
+  /// No description provided for @projectsCreativeManualReloadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload all manuals'**
+  String get projectsCreativeManualReloadAll;
+
+  /// No description provided for @projectsCreativeManualPathDirectorFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'directorManual folder'**
+  String get projectsCreativeManualPathDirectorFolder;
+
+  /// No description provided for @projectsCreativeManualPathVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'stylePath'**
+  String get projectsCreativeManualPathVisual;
+
+  /// No description provided for @projectsCreativeManualSelectionDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Current director manual'**
+  String get projectsCreativeManualSelectionDirector;
+
+  /// No description provided for @projectsCreativeManualSelectionVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Current visual manual'**
+  String get projectsCreativeManualSelectionVisual;
+
+  /// No description provided for @projectsCreativeManualCreateDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'New director manual'**
+  String get projectsCreativeManualCreateDirector;
+
+  /// No description provided for @projectsCreativeManualCreateVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'New visual manual'**
+  String get projectsCreativeManualCreateVisual;
+
+  /// No description provided for @projectsCreativeManualSaveDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Save director manual'**
+  String get projectsCreativeManualSaveDirector;
+
+  /// No description provided for @projectsCreativeManualSaveVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Save visual manual'**
+  String get projectsCreativeManualSaveVisual;
+
+  /// No description provided for @projectsCreativeManualDeleteDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete director manual'**
+  String get projectsCreativeManualDeleteDirector;
+
+  /// No description provided for @projectsCreativeManualDeleteVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete visual manual'**
+  String get projectsCreativeManualDeleteVisual;
+
+  /// No description provided for @projectsCreativeManualEmptyKind.
+  ///
+  /// In en, this message translates to:
+  /// **'No manuals of this type yet—create one with the form below.'**
+  String get projectsCreativeManualEmptyKind;
+
+  /// No description provided for @projectsCreativeManualFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get projectsCreativeManualFieldName;
+
+  /// No description provided for @projectsCreativeManualFieldImagesList.
+  ///
+  /// In en, this message translates to:
+  /// **'Images list'**
+  String get projectsCreativeManualFieldImagesList;
+
+  /// No description provided for @projectsCreativeManualFieldImagesHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate URLs / paths with commas or newlines.'**
+  String get projectsCreativeManualFieldImagesHelper;
+
+  /// No description provided for @projectsCreativeManualFieldSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Data slots'**
+  String get projectsCreativeManualFieldSlots;
+
+  /// No description provided for @projectsCreativeManualFieldSlotsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'One slot per line: label|value|data'**
+  String get projectsCreativeManualFieldSlotsHelper;
+
+  /// No description provided for @projectsCreativeManualSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get projectsCreativeManualSummaryTitle;
+
+  /// No description provided for @projectsCreativeManualSummaryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · Path {path} · Images {imageCount} · Slots {slotCount}'**
+  String projectsCreativeManualSummaryLine(
+    String name,
+    String path,
+    int imageCount,
+    int slotCount,
+  );
+
+  /// No description provided for @projectsCreativeManualStatusRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing creative manuals…'**
+  String get projectsCreativeManualStatusRefreshing;
+
+  /// No description provided for @projectsCreativeManualStatusReloadOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Director {directorCount} · Visual {visualCount} · visual GET/POST={getCount}/{postCount}'**
+  String projectsCreativeManualStatusReloadOk(
+    int directorCount,
+    int visualCount,
+    int getCount,
+    int postCount,
+  );
+
+  /// No description provided for @projectsCreativeManualStatusReloadFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload failed: {detail}'**
+  String projectsCreativeManualStatusReloadFail(String detail);
+
+  /// No description provided for @projectsCreativeManualStatusCreateNeedFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Create failed: name and path are required.'**
+  String get projectsCreativeManualStatusCreateNeedFields;
+
+  /// No description provided for @projectsCreativeManualStatusCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating manual…'**
+  String get projectsCreativeManualStatusCreating;
+
+  /// No description provided for @projectsCreativeManualStatusCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {kind}: {path}'**
+  String projectsCreativeManualStatusCreated(String kind, String path);
+
+  /// No description provided for @projectsCreativeManualStatusSaveNeedSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: select a manual first.'**
+  String get projectsCreativeManualStatusSaveNeedSelect;
+
+  /// No description provided for @projectsCreativeManualStatusSaveNeedFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: name and path are required.'**
+  String get projectsCreativeManualStatusSaveNeedFields;
+
+  /// No description provided for @projectsCreativeManualStatusSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving manual…'**
+  String get projectsCreativeManualStatusSaving;
+
+  /// No description provided for @projectsCreativeManualStatusSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {kind}: {path}'**
+  String projectsCreativeManualStatusSaved(String kind, String path);
+
+  /// No description provided for @projectsCreativeManualStatusDeleteNeedSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: select a manual first.'**
+  String get projectsCreativeManualStatusDeleteNeedSelect;
+
+  /// No description provided for @projectsCreativeManualStatusDeleting.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting manual…'**
+  String get projectsCreativeManualStatusDeleting;
+
+  /// No description provided for @projectsCreativeManualStatusDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {kind}: {path}'**
+  String projectsCreativeManualStatusDeleted(String kind, String path);
+
+  /// No description provided for @projectsCreativeManualStatusOpFail.
+  ///
+  /// In en, this message translates to:
+  /// **'{verb} failed: {detail}'**
+  String projectsCreativeManualStatusOpFail(String verb, String detail);
+
+  /// No description provided for @projectsCreativeManualKindDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Director manual'**
+  String get projectsCreativeManualKindDirector;
+
+  /// No description provided for @projectsCreativeManualKindVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual manual'**
+  String get projectsCreativeManualKindVisual;
+
+  /// No description provided for @projectsCreativeManualInvalidSlotLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid slot line (expected label|value|data): {line}'**
+  String projectsCreativeManualInvalidSlotLine(String line);
+
+  /// No description provided for @agentMemoryWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent memory workbench'**
+  String get agentMemoryWorkbenchTitle;
+
+  /// No description provided for @agentMemoryWorkbenchIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Query, append, and clear project-scoped script/production Agent memory—without relying on the first-project probe only.'**
+  String get agentMemoryWorkbenchIntro;
+
+  /// No description provided for @agentMemoryReloadProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload projects'**
+  String get agentMemoryReloadProjects;
+
+  /// No description provided for @agentMemoryQueryMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Query memory'**
+  String get agentMemoryQueryMemory;
+
+  /// No description provided for @agentMemoryLoadCostOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Load cost overview'**
+  String get agentMemoryLoadCostOverview;
+
+  /// No description provided for @agentMemoryOptimizeVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimize video memory'**
+  String get agentMemoryOptimizeVideo;
+
+  /// No description provided for @agentMemoryProjectsPreviewLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} projects · {preview}{ellipsis}'**
+  String agentMemoryProjectsPreviewLine(
+    int count,
+    String preview,
+    String ellipsis,
+  );
+
+  /// No description provided for @agentMemoryUnnamedProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed project'**
+  String get agentMemoryUnnamedProject;
+
+  /// No description provided for @agentMemoryFieldProjectNumericId.
+  ///
+  /// In en, this message translates to:
+  /// **'Project numeric ID'**
+  String get agentMemoryFieldProjectNumericId;
+
+  /// No description provided for @agentMemoryFieldAgentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent type'**
+  String get agentMemoryFieldAgentType;
+
+  /// No description provided for @agentMemoryFieldEpisodesIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Episodes id (optional)'**
+  String get agentMemoryFieldEpisodesIdOptional;
+
+  /// No description provided for @agentMemoryFieldScopeSignatureOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'scopeSignature JSON (optional)'**
+  String get agentMemoryFieldScopeSignatureOptional;
+
+  /// No description provided for @agentMemoryFieldScopeSignatureHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON object; typical keys: episodeId, storyboardIds, focusSections'**
+  String get agentMemoryFieldScopeSignatureHelper;
+
+  /// No description provided for @agentMemoryFieldQueryType.
+  ///
+  /// In en, this message translates to:
+  /// **'Query type'**
+  String get agentMemoryFieldQueryType;
+
+  /// No description provided for @agentMemoryFieldQueryTypeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'summary / message / all'**
+  String get agentMemoryFieldQueryTypeHelper;
+
+  /// No description provided for @agentMemoryFieldMemoryTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory tier'**
+  String get agentMemoryFieldMemoryTier;
+
+  /// No description provided for @agentMemoryFieldMemoryTierHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'all / style_bible / stage_summary / delta_memory / message'**
+  String get agentMemoryFieldMemoryTierHelper;
+
+  /// No description provided for @agentMemoryFieldAutomationMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Automation mode'**
+  String get agentMemoryFieldAutomationMode;
+
+  /// No description provided for @agentMemoryFieldAutomationModeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'standard / lean / off'**
+  String get agentMemoryFieldAutomationModeHelper;
+
+  /// No description provided for @agentMemoryIsolateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic memory is isolated by project numeric ID + agent type + episodes id.'**
+  String get agentMemoryIsolateHint;
+
+  /// No description provided for @agentMemoryOptimizeScopeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimization only affects productionAgent + episodes id scoped selected video memory; it is not shared across users, projects, or shorts.'**
+  String get agentMemoryOptimizeScopeHint;
+
+  /// No description provided for @agentMemoryOptimizeEnableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'To enable optimization, set agent type to productionAgent and fill episodes id.'**
+  String get agentMemoryOptimizeEnableHint;
+
+  /// No description provided for @agentMemoryRecommendationPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion: '**
+  String get agentMemoryRecommendationPrefix;
+
+  /// No description provided for @agentMemoryCopyChecklistTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy execution checklist'**
+  String get agentMemoryCopyChecklistTooltip;
+
+  /// No description provided for @agentMemoryChecklistCopiedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution checklist copied.'**
+  String get agentMemoryChecklistCopiedSnack;
+
+  /// No description provided for @agentMemoryAppendSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Append memory'**
+  String get agentMemoryAppendSection;
+
+  /// No description provided for @agentMemoryFieldAppendType.
+  ///
+  /// In en, this message translates to:
+  /// **'Append type'**
+  String get agentMemoryFieldAppendType;
+
+  /// No description provided for @agentMemoryFieldAppendTypeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'message / summary'**
+  String get agentMemoryFieldAppendTypeHelper;
+
+  /// No description provided for @agentMemoryFieldAppendMemoryTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Append memory tier'**
+  String get agentMemoryFieldAppendMemoryTier;
+
+  /// No description provided for @agentMemoryFieldAppendMemoryTierHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'style_bible / stage_summary / delta_memory / message'**
+  String get agentMemoryFieldAppendMemoryTierHelper;
+
+  /// No description provided for @agentMemoryFieldRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get agentMemoryFieldRole;
+
+  /// No description provided for @agentMemoryFieldNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get agentMemoryFieldNameOptional;
+
+  /// No description provided for @agentMemoryAppendButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Append with current scope'**
+  String get agentMemoryAppendButton;
+
+  /// No description provided for @agentMemoryFieldMemoryContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory content'**
+  String get agentMemoryFieldMemoryContent;
+
+  /// No description provided for @agentMemoryClearSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear memory'**
+  String get agentMemoryClearSection;
+
+  /// No description provided for @agentMemoryFieldClearType.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear type'**
+  String get agentMemoryFieldClearType;
+
+  /// No description provided for @agentMemoryFieldClearTypeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'summary / message / all'**
+  String get agentMemoryFieldClearTypeHelper;
+
+  /// No description provided for @agentMemoryClearRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run clear'**
+  String get agentMemoryClearRun;
+
+  /// No description provided for @agentMemoryDuplicateChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get agentMemoryDuplicateChip;
+
+  /// No description provided for @agentMemoryTierGroupHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {count} rows · Last injected {last}'**
+  String agentMemoryTierGroupHeader(String label, int count, String last);
+
+  /// No description provided for @agentMemoryMemoryRowCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 memory row} other{{count} memory rows}}'**
+  String agentMemoryMemoryRowCount(int count);
+
+  /// No description provided for @agentMemoryCharsAbbr.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} chars'**
+  String agentMemoryCharsAbbr(int n);
+
+  /// No description provided for @agentMemorySubjectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'subject {value}'**
+  String agentMemorySubjectLabel(String value);
+
+  /// No description provided for @agentMemorySignalsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'signals {value}'**
+  String agentMemorySignalsLabel(String value);
+
+  /// No description provided for @agentMemoryTierAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All tiers'**
+  String get agentMemoryTierAll;
+
+  /// No description provided for @agentMemoryTierStyleBible.
+  ///
+  /// In en, this message translates to:
+  /// **'Style bible'**
+  String get agentMemoryTierStyleBible;
+
+  /// No description provided for @agentMemoryTierStageSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage summary'**
+  String get agentMemoryTierStageSummary;
+
+  /// No description provided for @agentMemoryTierDeltaMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delta memory'**
+  String get agentMemoryTierDeltaMemory;
+
+  /// No description provided for @agentMemoryTierMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get agentMemoryTierMessage;
+
+  /// No description provided for @agentMemoryClassNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative constraints'**
+  String get agentMemoryClassNegative;
+
+  /// No description provided for @agentMemoryClassDeliveryVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery + visual'**
+  String get agentMemoryClassDeliveryVisual;
+
+  /// No description provided for @agentMemoryClassDeliveryFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery-first'**
+  String get agentMemoryClassDeliveryFirst;
+
+  /// No description provided for @agentMemoryClassVisualHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual-heavy'**
+  String get agentMemoryClassVisualHeavy;
+
+  /// No description provided for @agentMemoryClassVideoMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Video memory'**
+  String get agentMemoryClassVideoMemory;
+
+  /// No description provided for @agentMemoryActionMergeNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge negatives'**
+  String get agentMemoryActionMergeNegative;
+
+  /// No description provided for @agentMemoryActionObserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Observe'**
+  String get agentMemoryActionObserve;
+
+  /// No description provided for @agentMemoryActionCompress.
+  ///
+  /// In en, this message translates to:
+  /// **'Compress'**
+  String get agentMemoryActionCompress;
+
+  /// No description provided for @agentMemoryActionKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get agentMemoryActionKeep;
+
+  /// No description provided for @agentMemoryInsightCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles: {roles}{typesPart} · ~{totalChars} chars · longest {longestChars} chars{dupPart}'**
+  String agentMemoryInsightCore(
+    String roles,
+    String typesPart,
+    int totalChars,
+    int longestChars,
+    String dupPart,
+  );
+
+  /// No description provided for @agentMemoryInsightTypesPart.
+  ///
+  /// In en, this message translates to:
+  /// **' · Types: {detail}'**
+  String agentMemoryInsightTypesPart(String detail);
+
+  /// No description provided for @agentMemoryInsightDupPart.
+  ///
+  /// In en, this message translates to:
+  /// **' · Duplicates: {count}'**
+  String agentMemoryInsightDupPart(int count);
+
+  /// No description provided for @agentMemoryVideoInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'Video memory: delivery {dRows}/{dChars} chars · visual {vRows}/{vChars} chars · negative {nRows}/{nChars} chars'**
+  String agentMemoryVideoInsight(
+    int dRows,
+    int dChars,
+    int vRows,
+    int vChars,
+    int nRows,
+    int nChars,
+  );
+
+  /// No description provided for @agentMemoryEfficiencyInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan: keep {kRows}/{kChars} chars · trim {tRows}/{tChars} chars · merge negatives {mRows}/{mChars} chars'**
+  String agentMemoryEfficiencyInsight(
+    int kRows,
+    int kChars,
+    int tRows,
+    int tChars,
+    int mRows,
+    int mChars,
+  );
+
+  /// No description provided for @agentMemoryBucketPriorityLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Bucket priority: {detail}'**
+  String agentMemoryBucketPriorityLine(String detail);
+
+  /// No description provided for @agentMemoryBucketPriorityItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} {name} · {rows} rows / {chars} chars'**
+  String agentMemoryBucketPriorityItem(
+    String action,
+    String name,
+    int rows,
+    int chars,
+  );
+
+  /// No description provided for @agentMemoryCostNever.
+  ///
+  /// In en, this message translates to:
+  /// **'never'**
+  String get agentMemoryCostNever;
+
+  /// No description provided for @agentMemoryCostOverviewLine.
+  ///
+  /// In en, this message translates to:
+  /// **'scope={scope} · Cost: style bible {sb} · stage summary {ss} · delta {dm} · messages {msg} · avg injected (30) {avgInj} chars · avg hit tiers (30) {avgHit} · last injected {last}'**
+  String agentMemoryCostOverviewLine(
+    String scope,
+    int sb,
+    int ss,
+    int dm,
+    int msg,
+    int avgInj,
+    int avgHit,
+    String last,
+  );
+
+  /// No description provided for @agentMemoryChecklistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution checklist:'**
+  String get agentMemoryChecklistTitle;
+
+  /// No description provided for @agentMemoryChecklistScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope: only memories for {scope}; do not reuse across users, projects, or shorts.'**
+  String agentMemoryChecklistScope(String scope);
+
+  /// No description provided for @agentMemoryChecklistScopeFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'current query scope'**
+  String get agentMemoryChecklistScopeFallback;
+
+  /// No description provided for @agentMemoryChecklistCompress.
+  ///
+  /// In en, this message translates to:
+  /// **'Compress filler shots/lighting in {name}; keep delivery, tone, emotion, and character consistency.'**
+  String agentMemoryChecklistCompress(String name);
+
+  /// No description provided for @agentMemoryChecklistMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge duplicate risk/avoid constraints in {name}; keep the strongest guardrails against continuity breaks.'**
+  String agentMemoryChecklistMerge(String name);
+
+  /// No description provided for @agentMemoryChecklistKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the strongest delivery/emotion anchors in {name}; avoid deleting cues that keep performances natural.'**
+  String agentMemoryChecklistKeep(String name);
+
+  /// No description provided for @agentMemoryChecklistObserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch new entries in {name}; avoid stacking duplicates.'**
+  String agentMemoryChecklistObserve(String name);
+
+  /// No description provided for @agentMemoryChecklistReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder: {text}'**
+  String agentMemoryChecklistReminder(String text);
+
+  /// No description provided for @agentMemoryRecDup.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicates detected—dedupe older memories so constraints are not injected repeatedly.'**
+  String get agentMemoryRecDup;
+
+  /// No description provided for @agentMemoryRecVisualOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Video memory is mostly framing/lighting—add a delivery, tone, or emotion anchor before deleting visual rows.'**
+  String get agentMemoryRecVisualOnly;
+
+  /// No description provided for @agentMemoryRecVisualBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual-heavy rows consume budget—trim old framing/lighting entries and reserve chars for delivery and emotion.'**
+  String get agentMemoryRecVisualBudget;
+
+  /// No description provided for @agentMemoryRecNegativeMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Many negative constraints—merge duplicate risk/avoid snippets before negative memory balloons.'**
+  String get agentMemoryRecNegativeMerge;
+
+  /// No description provided for @agentMemoryRecBucketHot.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already has {count} rows—compress that bucket first so it does not dominate budget.'**
+  String agentMemoryRecBucketHot(String name, int count);
+
+  /// No description provided for @agentMemoryRecLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory is long—compress the longest rows before appending more.'**
+  String get agentMemoryRecLong;
+
+  /// No description provided for @agentMemoryRecManyRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Many rows—read summaries or clear old messages to budget for current shots.'**
+  String get agentMemoryRecManyRows;
+
+  /// No description provided for @agentMemoryRecAssistantHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Many assistant summaries—clear older ones and keep the latest execution constraints.'**
+  String get agentMemoryRecAssistantHeavy;
+
+  /// No description provided for @agentMemorySignalSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'subject'**
+  String get agentMemorySignalSubject;
+
+  /// No description provided for @agentMemorySignalEmotion.
+  ///
+  /// In en, this message translates to:
+  /// **'emotion'**
+  String get agentMemorySignalEmotion;
+
+  /// No description provided for @agentMemorySignalCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'camera'**
+  String get agentMemorySignalCamera;
+
+  /// No description provided for @agentMemorySignalVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'visual'**
+  String get agentMemorySignalVisual;
+
+  /// No description provided for @agentMemorySignalIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'identity'**
+  String get agentMemorySignalIdentity;
+
+  /// No description provided for @agentMemorySignalDialogue.
+  ///
+  /// In en, this message translates to:
+  /// **'dialogue'**
+  String get agentMemorySignalDialogue;
+
+  /// No description provided for @agentMemorySignalPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'performance'**
+  String get agentMemorySignalPerformance;
+
+  /// No description provided for @agentMemorySignalNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'negative{n}'**
+  String agentMemorySignalNegative(String n);
+
+  /// No description provided for @agentMemoryStatusProjectsRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reloaded {count} projects.'**
+  String agentMemoryStatusProjectsRefreshed(int count);
+
+  /// No description provided for @agentMemoryErrFillProjectAndAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid project ID (numeric or UUID from the list) and agent type.'**
+  String get agentMemoryErrFillProjectAndAgent;
+
+  /// No description provided for @agentMemoryErrFillAgentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter agent type.'**
+  String get agentMemoryErrFillAgentType;
+
+  /// No description provided for @agentMemoryQuerySummaryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} {memoryType} memories · tier {tier}.'**
+  String agentMemoryQuerySummaryLine(int count, String memoryType, String tier);
+
+  /// No description provided for @agentMemoryErrCostOverviewFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid project ID and agent type before loading cost overview.'**
+  String get agentMemoryErrCostOverviewFields;
+
+  /// No description provided for @agentMemoryStatusCostOverviewLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded memory cost overview.'**
+  String get agentMemoryStatusCostOverviewLoaded;
+
+  /// No description provided for @agentMemoryErrAppendProjectFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter project ID, agent type, role, and content before appending.'**
+  String get agentMemoryErrAppendProjectFields;
+
+  /// No description provided for @agentMemoryErrAppendAgentRoleContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter agent type, role, and content before appending.'**
+  String get agentMemoryErrAppendAgentRoleContent;
+
+  /// No description provided for @agentMemoryStatusAppended.
+  ///
+  /// In en, this message translates to:
+  /// **'Appended memory {id}.'**
+  String agentMemoryStatusAppended(String id);
+
+  /// No description provided for @agentMemoryErrClearProjectFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter project ID and agent type before clearing.'**
+  String get agentMemoryErrClearProjectFields;
+
+  /// No description provided for @agentMemoryStatusCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared memory: {clearType}.'**
+  String agentMemoryStatusCleared(String clearType);
+
+  /// No description provided for @agentMemoryErrOptimizeProjectFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter project ID, agent type, and episodes id before optimizing.'**
+  String get agentMemoryErrOptimizeProjectFields;
+
+  /// No description provided for @agentMemoryErrOptimizeAgentEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter agent type and episodes id before optimizing.'**
+  String get agentMemoryErrOptimizeAgentEpisodes;
+
+  /// No description provided for @agentMemoryStatusOptimized.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimized video memory ({mode}): removed {removedRows} rows / {removedChars} chars (duplicates {dupRows}, visual-only {visRows}).'**
+  String agentMemoryStatusOptimized(
+    String mode,
+    int removedRows,
+    int removedChars,
+    int dupRows,
+    int visRows,
+  );
+
+  /// No description provided for @agentMemoryErrScopeNotObject.
+  ///
+  /// In en, this message translates to:
+  /// **'scopeSignature must be a JSON object.'**
+  String get agentMemoryErrScopeNotObject;
+
+  /// No description provided for @agentMemoryErrScopeNeedsDimension.
+  ///
+  /// In en, this message translates to:
+  /// **'scopeSignature needs at least one non-empty scope dimension.'**
+  String get agentMemoryErrScopeNeedsDimension;
+
+  /// No description provided for @agentMemoryErrScopeTierRequires.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} requires non-empty scopeSignature JSON for this tier.'**
+  String agentMemoryErrScopeTierRequires(String action);
+
+  /// No description provided for @agentMemoryActionLabelQueryScoped.
+  ///
+  /// In en, this message translates to:
+  /// **'Query scoped memory'**
+  String get agentMemoryActionLabelQueryScoped;
+
+  /// No description provided for @agentMemoryActionLabelAppendScoped.
+  ///
+  /// In en, this message translates to:
+  /// **'Append scoped memory'**
+  String get agentMemoryActionLabelAppendScoped;
+
+  /// No description provided for @taskCenterErrNotLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in. Cannot open task center.'**
+  String get taskCenterErrNotLoggedIn;
+
+  /// No description provided for @taskCenterProjectsNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Task projects are not loaded yet.'**
+  String get taskCenterProjectsNotLoaded;
+
+  /// No description provided for @taskCenterTaskListNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Task list is not loaded yet.'**
+  String get taskCenterTaskListNotLoaded;
+
+  /// No description provided for @taskCenterLocalClientPrefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Local client preferences'**
+  String get taskCenterLocalClientPrefs;
+
+  /// No description provided for @taskCenterSectionIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the formal workbench for task projects/categories, filtered task listing, and details. The main section no longer depends on first-row or UUID probe buttons.'**
+  String get taskCenterSectionIntro;
+
+  /// No description provided for @taskCenterOpenWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open task workbench'**
+  String get taskCenterOpenWorkbench;
+
+  /// No description provided for @taskCenterRefreshSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh task summary'**
+  String get taskCenterRefreshSummary;
+
+  /// No description provided for @taskCenterCompatibilityCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility checks'**
+  String get taskCenterCompatibilityCheck;
+
+  /// No description provided for @taskCenterCompatibilityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep legacy loading/detail probes as regression entry points; collapsed by default.'**
+  String get taskCenterCompatibilityHint;
+
+  /// No description provided for @taskCenterLoadTaskProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Load task projects'**
+  String get taskCenterLoadTaskProjects;
+
+  /// No description provided for @taskCenterLoadTaskCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Load task categories'**
+  String get taskCenterLoadTaskCategories;
+
+  /// No description provided for @taskCenterLoadTaskList.
+  ///
+  /// In en, this message translates to:
+  /// **'Load task list'**
+  String get taskCenterLoadTaskList;
+
+  /// No description provided for @taskCenterViewFirstTaskDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View first task details'**
+  String get taskCenterViewFirstTaskDetails;
+
+  /// No description provided for @taskCenterFieldTaskUuidTapToFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Task UUID (tap a row below to fill)'**
+  String get taskCenterFieldTaskUuidTapToFill;
+
+  /// No description provided for @taskCenterViewByUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'View details by UUID'**
+  String get taskCenterViewByUuid;
+
+  /// No description provided for @taskCenterJobsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tasks'**
+  String taskCenterJobsCount(int count);
+
+  /// No description provided for @taskCenterCategoriesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Category summary: {line}'**
+  String taskCenterCategoriesLine(String line);
+
+  /// No description provided for @taskCenterNumericIdDetailsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Task details (numeric ID): {line}'**
+  String taskCenterNumericIdDetailsLine(String line);
+
+  /// No description provided for @taskCenterUuidDetailsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'UUID details: {line}'**
+  String taskCenterUuidDetailsLine(String line);
+
+  /// No description provided for @taskCenterPhasePrep.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep'**
+  String get taskCenterPhasePrep;
+
+  /// No description provided for @taskCenterPhaseImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get taskCenterPhaseImage;
+
+  /// No description provided for @taskCenterPhaseVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get taskCenterPhaseVideo;
+
+  /// No description provided for @taskCenterPhaseExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get taskCenterPhaseExport;
+
+  /// No description provided for @taskCenterPhaseQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get taskCenterPhaseQuality;
+
+  /// No description provided for @taskCenterWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task workbench'**
+  String get taskCenterWorkbenchTitle;
+
+  /// No description provided for @taskCenterWorkbenchIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Use one dialog to load task projects/categories, filter lists by project/category, and inspect details by numeric task id or UUID.{realtime}'**
+  String taskCenterWorkbenchIntro(String realtime);
+
+  /// No description provided for @taskCenterWorkbenchRealtimeConnected.
+  ///
+  /// In en, this message translates to:
+  /// **' Live task updates are connected.'**
+  String get taskCenterWorkbenchRealtimeConnected;
+
+  /// No description provided for @taskCenterWorkbenchFilterAndList.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters and list'**
+  String get taskCenterWorkbenchFilterAndList;
+
+  /// No description provided for @taskCenterReloadTaskProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload task projects'**
+  String get taskCenterReloadTaskProjects;
+
+  /// No description provided for @taskCenterReloadTaskCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload task categories'**
+  String get taskCenterReloadTaskCategories;
+
+  /// No description provided for @taskCenterLoadTasksByFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Load tasks by filters'**
+  String get taskCenterLoadTasksByFilters;
+
+  /// No description provided for @taskCenterFieldPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get taskCenterFieldPage;
+
+  /// No description provided for @taskCenterFieldPageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Page size'**
+  String get taskCenterFieldPageSize;
+
+  /// No description provided for @taskCenterFieldProjectNumericIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Project numeric ID (optional)'**
+  String get taskCenterFieldProjectNumericIdOptional;
+
+  /// No description provided for @taskCenterFieldTaskClassOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Task class (optional)'**
+  String get taskCenterFieldTaskClassOptional;
+
+  /// No description provided for @taskCenterFieldTaskStatusOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Task status (optional)'**
+  String get taskCenterFieldTaskStatusOptional;
+
+  /// No description provided for @taskCenterFieldProductionPhaseOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-video phase (optional: prep/image/video/export/quality)'**
+  String get taskCenterFieldProductionPhaseOptional;
+
+  /// No description provided for @taskCenterFailureReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Failure reason={text}'**
+  String taskCenterFailureReason(String text);
+
+  /// No description provided for @taskCenterRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get taskCenterRetry;
+
+  /// No description provided for @taskCenterCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get taskCenterCancel;
+
+  /// No description provided for @taskCenterTaskDetailsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Task details'**
+  String get taskCenterTaskDetailsSection;
+
+  /// No description provided for @taskCenterFieldNumericTaskId.
+  ///
+  /// In en, this message translates to:
+  /// **'Numeric task id'**
+  String get taskCenterFieldNumericTaskId;
+
+  /// No description provided for @taskCenterLoadNumericIdDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Load task details (numeric ID)'**
+  String get taskCenterLoadNumericIdDetails;
+
+  /// No description provided for @taskCenterFieldTaskUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Task UUID'**
+  String get taskCenterFieldTaskUuid;
+
+  /// No description provided for @taskCenterLoadUuidDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Load UUID details'**
+  String get taskCenterLoadUuidDetails;
+
+  /// No description provided for @taskCenterStatusLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {line}'**
+  String taskCenterStatusLine(String line);
+
+  /// No description provided for @taskCenterStructuredFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Structured failure · {label}'**
+  String taskCenterStructuredFailure(String label);
+
+  /// No description provided for @taskCenterOpenProductionWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open production workspace'**
+  String get taskCenterOpenProductionWorkspace;
+
+  /// No description provided for @taskCenterOpenScriptWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open script workspace'**
+  String get taskCenterOpenScriptWorkspace;
+
+  /// No description provided for @taskCenterRegenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate'**
+  String get taskCenterRegenerate;
+
+  /// No description provided for @taskCenterPartialRework.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework'**
+  String get taskCenterPartialRework;
+
+  /// No description provided for @taskCenterWritebackCompensation.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback compensation'**
+  String get taskCenterWritebackCompensation;
+
+  /// No description provided for @taskCenterOpenSpacePublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Open short-video Space (publish)'**
+  String get taskCenterOpenSpacePublish;
+
+  /// No description provided for @taskCenterOpenProductionStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open production workspace (storyboard)'**
+  String get taskCenterOpenProductionStoryboard;
+
+  /// No description provided for @taskCenterOpenScriptScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Open script workspace (script)'**
+  String get taskCenterOpenScriptScript;
+
+  /// No description provided for @taskCenterOpenSpaceProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Open short-video Space (project)'**
+  String get taskCenterOpenSpaceProject;
+
+  /// No description provided for @taskCenterStatusLoadedTaskProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} task projects.'**
+  String taskCenterStatusLoadedTaskProjects(int count);
+
+  /// No description provided for @taskCenterStatusLoadedTaskCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} task categories.'**
+  String taskCenterStatusLoadedTaskCategories(int count);
+
+  /// No description provided for @taskCenterStatusRefreshedTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed {count} tasks.'**
+  String taskCenterStatusRefreshedTasks(int count);
+
+  /// No description provided for @taskCenterErrInvalidNumericTaskId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid numeric task ID.'**
+  String get taskCenterErrInvalidNumericTaskId;
+
+  /// No description provided for @taskCenterErrFillTaskUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter task UUID.'**
+  String get taskCenterErrFillTaskUuid;
+
+  /// No description provided for @taskCenterOriginRetrySubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry submitted'**
+  String get taskCenterOriginRetrySubmitted;
+
+  /// No description provided for @taskCenterOriginTaskCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Task cancelled'**
+  String get taskCenterOriginTaskCancelled;
+
+  /// No description provided for @taskCenterStatusEnteredWritebackCompensation.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered writeback compensation: load UUID details first and verify writeback status.'**
+  String get taskCenterStatusEnteredWritebackCompensation;
+
+  /// No description provided for @taskCenterOriginRealtimeUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Realtime update received'**
+  String get taskCenterOriginRealtimeUpdate;
+
+  /// No description provided for @taskCenterStatusMergedUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'{origin}: #{taskId} {kind} -> {status}'**
+  String taskCenterStatusMergedUpdate(
+    String origin,
+    int taskId,
+    String kind,
+    String status,
+  );
+
+  /// No description provided for @taskCenterProjectsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No task projects currently.'**
+  String get taskCenterProjectsEmpty;
+
+  /// No description provided for @taskCenterProjectsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} projects · {preview}{ellipsis}'**
+  String taskCenterProjectsSummary(int count, String preview, String ellipsis);
+
+  /// No description provided for @taskCenterCategoriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No task categories currently.'**
+  String get taskCenterCategoriesEmpty;
+
+  /// No description provided for @taskCenterCategoriesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} categories · {preview}{ellipsis}'**
+  String taskCenterCategoriesSummary(
+    int count,
+    String preview,
+    String ellipsis,
+  );
+
+  /// No description provided for @taskCenterJobsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No task records currently.'**
+  String get taskCenterJobsEmpty;
+
+  /// No description provided for @taskCenterJobsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tasks · {preview}{ellipsis}'**
+  String taskCenterJobsSummary(int count, String preview, String ellipsis);
+
+  /// No description provided for @taskCenterFailurePayloadMissingSourceUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing source_url'**
+  String get taskCenterFailurePayloadMissingSourceUrl;
+
+  /// No description provided for @taskCenterFailurePayloadSourceUrlEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Output URL is empty'**
+  String get taskCenterFailurePayloadSourceUrlEmpty;
+
+  /// No description provided for @taskCenterFailurePayloadFormatInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid export format'**
+  String get taskCenterFailurePayloadFormatInvalid;
+
+  /// No description provided for @taskCenterFailureLocalExportDirUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Export directory is not configured on server'**
+  String get taskCenterFailureLocalExportDirUnset;
+
+  /// No description provided for @taskCenterFailureExportProviderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export provider failed'**
+  String get taskCenterFailureExportProviderFailed;
+
+  /// No description provided for @taskCenterFailureExportDirectoryCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create export directory'**
+  String get taskCenterFailureExportDirectoryCreateFailed;
+
+  /// No description provided for @taskCenterFailureExportFilePersistFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to persist export file'**
+  String get taskCenterFailureExportFilePersistFailed;
+
+  /// No description provided for @taskCenterFailureVideoDownloadHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Source video HTTP failed'**
+  String get taskCenterFailureVideoDownloadHttp;
+
+  /// No description provided for @taskCenterFailureVideoDownloadStream.
+  ///
+  /// In en, this message translates to:
+  /// **'Source video stream interrupted'**
+  String get taskCenterFailureVideoDownloadStream;
+
+  /// No description provided for @taskCenterFailureVideoFormatMismatchNoTranscode.
+  ///
+  /// In en, this message translates to:
+  /// **'Format mismatch (no transcoding)'**
+  String get taskCenterFailureVideoFormatMismatchNoTranscode;
+
+  /// No description provided for @taskCenterFailureVideoContentLengthExceedsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Source video too large (content-length)'**
+  String get taskCenterFailureVideoContentLengthExceedsLimit;
+
+  /// No description provided for @taskCenterFailureVideoBodyExceedsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Source video too large (body)'**
+  String get taskCenterFailureVideoBodyExceedsLimit;
+
+  /// No description provided for @taskCenterFailureUnknownCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown failure code'**
+  String get taskCenterFailureUnknownCode;
+
+  /// No description provided for @projectsCreativeManualVerbCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get projectsCreativeManualVerbCreate;
+
+  /// No description provided for @projectsCreativeManualVerbSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get projectsCreativeManualVerbSave;
+
+  /// No description provided for @projectsCreativeManualVerbDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get projectsCreativeManualVerbDelete;
 }
 
 class _AppLocalizationsDelegate

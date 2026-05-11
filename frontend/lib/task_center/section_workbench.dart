@@ -80,6 +80,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadProjects() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingProjects = true;
       _statusLine = null;
@@ -92,7 +93,7 @@ class _TaskCenterWorkbenchDialogState
         if (_ctrls.projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
           _ctrls.projectIdCtrl.text = rows.first.numericId.toString();
         }
-        _statusLine = '已读取 ${rows.length} 个任务项目。';
+        _statusLine = l10n.taskCenterStatusLoadedTaskProjects(rows.length);
         _loadingProjects = false;
       });
     } on RustApiException catch (e) {
@@ -111,6 +112,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadCategories() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingCategories = true;
       _statusLine = null;
@@ -120,8 +122,8 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _categories = rows;
-        _categoriesSummary = summarizeTaskCategories(rows);
-        _statusLine = '已读取 ${rows.length} 个任务分类。';
+        _categoriesSummary = summarizeTaskCategories(l10n, rows);
+        _statusLine = l10n.taskCenterStatusLoadedTaskCategories(rows.length);
         _loadingCategories = false;
       });
     } on RustApiException catch (e) {
@@ -140,6 +142,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadTasks() async {
+    final l10n = AppLocalizations.of(context)!;
     final page = int.tryParse(_ctrls.pageCtrl.text.trim()) ?? 1;
     final limit = int.tryParse(_ctrls.limitCtrl.text.trim()) ?? 10;
     final projectId = int.tryParse(_ctrls.projectIdCtrl.text.trim());
@@ -173,7 +176,7 @@ class _TaskCenterWorkbenchDialogState
           _ctrls.numericTaskIdCtrl.text = jobs.first.numericTaskId.toString();
           _ctrls.uuidCtrl.text = jobs.first.id;
         }
-        _statusLine = '已刷新 ${jobs.length} 条任务。';
+        _statusLine = l10n.taskCenterStatusRefreshedTasks(jobs.length);
         _loadingTasks = false;
       });
     } on RustApiException catch (e) {
@@ -192,9 +195,10 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadNumericIdTaskDetail() async {
+    final l10n = AppLocalizations.of(context)!;
     final taskId = int.tryParse(_ctrls.numericTaskIdCtrl.text.trim());
     if (taskId == null) {
-      setState(() => _statusLine = '请填写合法的任务 numeric ID。');
+      setState(() => _statusLine = l10n.taskCenterErrInvalidNumericTaskId);
       return;
     }
     setState(() {
@@ -225,9 +229,10 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadUuidDetails() async {
+    final l10n = AppLocalizations.of(context)!;
     final taskId = _ctrls.uuidCtrl.text.trim();
     if (taskId.isEmpty) {
-      setState(() => _statusLine = '请填写任务 UUID。');
+      setState(() => _statusLine = l10n.taskCenterErrFillTaskUuid);
       return;
     }
     setState(() {
@@ -258,6 +263,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _retryFailedJob(JobRow job) async {
+    final l10n = AppLocalizations.of(context)!;
     if (job.status != 'failed') {
       return;
     }
@@ -269,7 +275,7 @@ class _TaskCenterWorkbenchDialogState
       final updated = await retryJob(widget.accessToken, job.id);
       if (!mounted) return;
       setState(() {
-        _mergeJobUpdate(updated, origin: '已提交重试');
+        _mergeJobUpdate(updated, origin: l10n.taskCenterOriginRetrySubmitted);
         _retryingJobId = null;
       });
     } on RustApiException catch (e) {
@@ -288,6 +294,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _cancelQueuedJob(JobRow job) async {
+    final l10n = AppLocalizations.of(context)!;
     if (job.status != 'queued' && job.status != 'running') {
       return;
     }
@@ -299,7 +306,7 @@ class _TaskCenterWorkbenchDialogState
       final updated = await cancelJob(widget.accessToken, job.id);
       if (!mounted) return;
       setState(() {
-        _mergeJobUpdate(updated, origin: '已取消任务');
+        _mergeJobUpdate(updated, origin: l10n.taskCenterOriginTaskCancelled);
         _cancellingJobId = null;
       });
     } on RustApiException catch (e) {
@@ -318,10 +325,11 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _runWritebackCompensation(JobRow job) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _ctrls.uuidCtrl.text = job.id;
       _ctrls.numericTaskIdCtrl.text = job.numericTaskId.toString();
-      _statusLine = '已进入回写补偿：先读取任务 UUID 详情并校验写回状态。';
+      _statusLine = l10n.taskCenterStatusEnteredWritebackCompensation;
     });
     await _loadUuidDetails();
   }
@@ -374,6 +382,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   void _handleWsMessage(String raw) {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic> ||
@@ -386,7 +395,7 @@ class _TaskCenterWorkbenchDialogState
       }
       final row = JobRow.fromJson(payload);
       setState(() {
-        _mergeJobUpdate(row, origin: '收到实时更新');
+        _mergeJobUpdate(row, origin: l10n.taskCenterOriginRealtimeUpdate);
       });
     } catch (_) {
       // Ignore unrelated frames.
@@ -394,6 +403,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   void _mergeJobUpdate(JobRow row, {required String origin}) {
+    final l10n = AppLocalizations.of(context)!;
     final nextJobs = List<JobRow>.from(_jobs);
     final index = nextJobs.indexWhere((item) => item.id == row.id);
     final matchesFilters = _matchesCurrentFilters(row);
@@ -412,7 +422,12 @@ class _TaskCenterWorkbenchDialogState
     if (_ctrls.uuidCtrl.text.trim() == row.id) {
       _uuidDetails = formatTaskJobDetails(row);
     }
-    _statusLine = '$origin：#${row.numericTaskId} ${row.kind} -> ${row.status}';
+    _statusLine = l10n.taskCenterStatusMergedUpdate(
+      origin,
+      row.numericTaskId,
+      row.kind,
+      row.status,
+    );
   }
 
   bool _matchesCurrentFilters(JobRow row) {
@@ -451,7 +466,8 @@ class _TaskCenterWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final projectSummary = summarizeTaskProjects(_projects);
+    final l10n = AppLocalizations.of(context)!;
+    final projectSummary = summarizeTaskProjects(l10n, _projects);
     final phaseFilter = _ctrls.productionPhaseCtrl.text.trim();
     final filteredJobs = phaseFilter.isEmpty
         ? _jobs
@@ -459,8 +475,8 @@ class _TaskCenterWorkbenchDialogState
             .where((job) => taskCenterShortVideoStageKey(job) == phaseFilter)
             .toList(growable: false);
     final jobSummary = _jobs.isEmpty
-        ? (_taskSummary ?? '当前没有任务记录')
-        : summarizeTaskJobs(_jobs);
+        ? (_taskSummary ?? l10n.taskCenterJobsEmpty)
+        : summarizeTaskJobs(l10n, _jobs);
     return TaskCenterWorkbenchDialogView(
       model: TaskCenterWorkbenchDialogViewModel(
         projectSummary: projectSummary,

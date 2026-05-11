@@ -2222,6 +2222,317 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentMemoryActionLabelAppendScoped => 'Append scoped memory';
 
   @override
+  String get taskCenterErrNotLoggedIn =>
+      'Not signed in. Cannot open task center.';
+
+  @override
+  String get taskCenterProjectsNotLoaded => 'Task projects are not loaded yet.';
+
+  @override
+  String get taskCenterTaskListNotLoaded => 'Task list is not loaded yet.';
+
+  @override
+  String get taskCenterLocalClientPrefs => 'Local client preferences';
+
+  @override
+  String get taskCenterSectionIntro =>
+      'Use the formal workbench for task projects/categories, filtered task listing, and details. The main section no longer depends on first-row or UUID probe buttons.';
+
+  @override
+  String get taskCenterOpenWorkbench => 'Open task workbench';
+
+  @override
+  String get taskCenterRefreshSummary => 'Refresh task summary';
+
+  @override
+  String get taskCenterCompatibilityCheck => 'Compatibility checks';
+
+  @override
+  String get taskCenterCompatibilityHint =>
+      'Keep legacy loading/detail probes as regression entry points; collapsed by default.';
+
+  @override
+  String get taskCenterLoadTaskProjects => 'Load task projects';
+
+  @override
+  String get taskCenterLoadTaskCategories => 'Load task categories';
+
+  @override
+  String get taskCenterLoadTaskList => 'Load task list';
+
+  @override
+  String get taskCenterViewFirstTaskDetails => 'View first task details';
+
+  @override
+  String get taskCenterFieldTaskUuidTapToFill =>
+      'Task UUID (tap a row below to fill)';
+
+  @override
+  String get taskCenterViewByUuid => 'View details by UUID';
+
+  @override
+  String taskCenterJobsCount(int count) {
+    return '$count tasks';
+  }
+
+  @override
+  String taskCenterCategoriesLine(String line) {
+    return 'Category summary: $line';
+  }
+
+  @override
+  String taskCenterNumericIdDetailsLine(String line) {
+    return 'Task details (numeric ID): $line';
+  }
+
+  @override
+  String taskCenterUuidDetailsLine(String line) {
+    return 'UUID details: $line';
+  }
+
+  @override
+  String get taskCenterPhasePrep => 'Prep';
+
+  @override
+  String get taskCenterPhaseImage => 'Image';
+
+  @override
+  String get taskCenterPhaseVideo => 'Video';
+
+  @override
+  String get taskCenterPhaseExport => 'Export';
+
+  @override
+  String get taskCenterPhaseQuality => 'Quality';
+
+  @override
+  String get taskCenterWorkbenchTitle => 'Task workbench';
+
+  @override
+  String taskCenterWorkbenchIntro(String realtime) {
+    return 'Use one dialog to load task projects/categories, filter lists by project/category, and inspect details by numeric task id or UUID.$realtime';
+  }
+
+  @override
+  String get taskCenterWorkbenchRealtimeConnected =>
+      ' Live task updates are connected.';
+
+  @override
+  String get taskCenterWorkbenchFilterAndList => 'Filters and list';
+
+  @override
+  String get taskCenterReloadTaskProjects => 'Reload task projects';
+
+  @override
+  String get taskCenterReloadTaskCategories => 'Reload task categories';
+
+  @override
+  String get taskCenterLoadTasksByFilters => 'Load tasks by filters';
+
+  @override
+  String get taskCenterFieldPage => 'Page';
+
+  @override
+  String get taskCenterFieldPageSize => 'Page size';
+
+  @override
+  String get taskCenterFieldProjectNumericIdOptional =>
+      'Project numeric ID (optional)';
+
+  @override
+  String get taskCenterFieldTaskClassOptional => 'Task class (optional)';
+
+  @override
+  String get taskCenterFieldTaskStatusOptional => 'Task status (optional)';
+
+  @override
+  String get taskCenterFieldProductionPhaseOptional =>
+      'Short-video phase (optional: prep/image/video/export/quality)';
+
+  @override
+  String taskCenterFailureReason(String text) {
+    return 'Failure reason=$text';
+  }
+
+  @override
+  String get taskCenterRetry => 'Retry';
+
+  @override
+  String get taskCenterCancel => 'Cancel';
+
+  @override
+  String get taskCenterTaskDetailsSection => 'Task details';
+
+  @override
+  String get taskCenterFieldNumericTaskId => 'Numeric task id';
+
+  @override
+  String get taskCenterLoadNumericIdDetails => 'Load task details (numeric ID)';
+
+  @override
+  String get taskCenterFieldTaskUuid => 'Task UUID';
+
+  @override
+  String get taskCenterLoadUuidDetails => 'Load UUID details';
+
+  @override
+  String taskCenterStatusLine(String line) {
+    return 'Status: $line';
+  }
+
+  @override
+  String taskCenterStructuredFailure(String label) {
+    return 'Structured failure · $label';
+  }
+
+  @override
+  String get taskCenterOpenProductionWorkspace => 'Open production workspace';
+
+  @override
+  String get taskCenterOpenScriptWorkspace => 'Open script workspace';
+
+  @override
+  String get taskCenterRegenerate => 'Regenerate';
+
+  @override
+  String get taskCenterPartialRework => 'Partial rework';
+
+  @override
+  String get taskCenterWritebackCompensation => 'Writeback compensation';
+
+  @override
+  String get taskCenterOpenSpacePublish => 'Open short-video Space (publish)';
+
+  @override
+  String get taskCenterOpenProductionStoryboard =>
+      'Open production workspace (storyboard)';
+
+  @override
+  String get taskCenterOpenScriptScript => 'Open script workspace (script)';
+
+  @override
+  String get taskCenterOpenSpaceProject => 'Open short-video Space (project)';
+
+  @override
+  String taskCenterStatusLoadedTaskProjects(int count) {
+    return 'Loaded $count task projects.';
+  }
+
+  @override
+  String taskCenterStatusLoadedTaskCategories(int count) {
+    return 'Loaded $count task categories.';
+  }
+
+  @override
+  String taskCenterStatusRefreshedTasks(int count) {
+    return 'Refreshed $count tasks.';
+  }
+
+  @override
+  String get taskCenterErrInvalidNumericTaskId =>
+      'Enter a valid numeric task ID.';
+
+  @override
+  String get taskCenterErrFillTaskUuid => 'Enter task UUID.';
+
+  @override
+  String get taskCenterOriginRetrySubmitted => 'Retry submitted';
+
+  @override
+  String get taskCenterOriginTaskCancelled => 'Task cancelled';
+
+  @override
+  String get taskCenterStatusEnteredWritebackCompensation =>
+      'Entered writeback compensation: load UUID details first and verify writeback status.';
+
+  @override
+  String get taskCenterOriginRealtimeUpdate => 'Realtime update received';
+
+  @override
+  String taskCenterStatusMergedUpdate(
+    String origin,
+    int taskId,
+    String kind,
+    String status,
+  ) {
+    return '$origin: #$taskId $kind -> $status';
+  }
+
+  @override
+  String get taskCenterProjectsEmpty => 'No task projects currently.';
+
+  @override
+  String taskCenterProjectsSummary(int count, String preview, String ellipsis) {
+    return '$count projects · $preview$ellipsis';
+  }
+
+  @override
+  String get taskCenterCategoriesEmpty => 'No task categories currently.';
+
+  @override
+  String taskCenterCategoriesSummary(
+    int count,
+    String preview,
+    String ellipsis,
+  ) {
+    return '$count categories · $preview$ellipsis';
+  }
+
+  @override
+  String get taskCenterJobsEmpty => 'No task records currently.';
+
+  @override
+  String taskCenterJobsSummary(int count, String preview, String ellipsis) {
+    return '$count tasks · $preview$ellipsis';
+  }
+
+  @override
+  String get taskCenterFailurePayloadMissingSourceUrl => 'Missing source_url';
+
+  @override
+  String get taskCenterFailurePayloadSourceUrlEmpty => 'Output URL is empty';
+
+  @override
+  String get taskCenterFailurePayloadFormatInvalid => 'Invalid export format';
+
+  @override
+  String get taskCenterFailureLocalExportDirUnset =>
+      'Export directory is not configured on server';
+
+  @override
+  String get taskCenterFailureExportProviderFailed => 'Export provider failed';
+
+  @override
+  String get taskCenterFailureExportDirectoryCreateFailed =>
+      'Failed to create export directory';
+
+  @override
+  String get taskCenterFailureExportFilePersistFailed =>
+      'Failed to persist export file';
+
+  @override
+  String get taskCenterFailureVideoDownloadHttp => 'Source video HTTP failed';
+
+  @override
+  String get taskCenterFailureVideoDownloadStream =>
+      'Source video stream interrupted';
+
+  @override
+  String get taskCenterFailureVideoFormatMismatchNoTranscode =>
+      'Format mismatch (no transcoding)';
+
+  @override
+  String get taskCenterFailureVideoContentLengthExceedsLimit =>
+      'Source video too large (content-length)';
+
+  @override
+  String get taskCenterFailureVideoBodyExceedsLimit =>
+      'Source video too large (body)';
+
+  @override
+  String get taskCenterFailureUnknownCode => 'Unknown failure code';
+
+  @override
   String get projectsCreativeManualVerbCreate => 'Create';
 
   @override

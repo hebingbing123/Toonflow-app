@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'workbench_view.dart';
 import 'previews.dart';
@@ -68,11 +69,12 @@ class TaskCenterSection extends StatelessWidget {
   final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
 
   Future<void> _openTaskWorkbench(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = accessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('当前未登录，无法读取任务中心')));
+      ).showSnackBar(SnackBar(content: Text(l10n.taskCenterErrNotLoggedIn)));
       return;
     }
     await showDialog<void>(
@@ -94,13 +96,14 @@ class TaskCenterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final projectSummary = taskProjects == null
-        ? '尚未加载任务项目'
-        : summarizeTaskProjects(taskProjects!);
+        ? l10n.taskCenterProjectsNotLoaded
+        : summarizeTaskProjects(l10n, taskProjects!);
     final taskSummary = taskApiJobs == null
-        ? (taskApiSummaryLine ?? '尚未加载任务列表')
-        : summarizeTaskJobs(taskApiJobs!);
+        ? (taskApiSummaryLine ?? l10n.taskCenterTaskListNotLoaded)
+        : summarizeTaskJobs(l10n, taskApiJobs!);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -110,18 +113,18 @@ class TaskCenterSection extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '任务中心',
+                l10n.productNavTasks,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
-            const RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: '本机客户端偏好',
+            RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.taskCenterLocalClientPrefs,
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
-          '用正式工作台完成任务项目、分类、筛选列表和详情查看，主区不再依赖首条/UUID probe 按钮。',
+          l10n.taskCenterSectionIntro,
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(color: outline),

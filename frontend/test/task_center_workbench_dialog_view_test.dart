@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/task_center/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -37,14 +38,14 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
   bool liveUpdatesConnected = true,
   String? retryingJobId,
   String? cancellingJobId,
-  String? categoriesSummary = '分类 2 个 · storyboard, render',
+  String? categoriesSummary = '2 个分类 · storyboard, render',
   String? numericIdTaskDetailText,
   String? uuidDetails,
   String? statusLine = '已刷新 1 条任务。',
 }) {
   return TaskCenterWorkbenchDialogViewModel(
-    projectSummary: '项目 1 个 · #7 春季短剧',
-    jobSummary: '任务 1 条 · #11 storyboard:failed',
+    projectSummary: '1 个项目 · #7 春季短剧',
+    jobSummary: '1 条任务 · #11 storyboard:failed',
     pageCtrl: pageCtrl,
     limitCtrl: limitCtrl,
     stateCtrl: stateCtrl,
@@ -135,6 +136,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: TaskCenterWorkbenchDialogView(
             model: buildDialogModel(
@@ -156,8 +160,8 @@ void main() {
     expect(find.text('刷新任务项目'), findsOneWidget);
     expect(find.text('按筛选加载任务'), findsOneWidget);
     expect(find.textContaining('当前已接入实时任务更新'), findsOneWidget);
-    expect(find.text('项目 1 个 · #7 春季短剧'), findsOneWidget);
-    expect(find.text('分类 2 个 · storyboard, render'), findsOneWidget);
+    expect(find.text('1 个项目 · #7 春季短剧'), findsOneWidget);
+    expect(find.text('2 个分类 · storyboard, render'), findsOneWidget);
     expect(find.text('1 条任务'), findsOneWidget);
     expect(find.text('任务详情'), findsOneWidget);
     expect(find.textContaining('#11 · job-11'), findsOneWidget);
@@ -169,6 +173,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: TaskCenterWorkbenchDialogView(
             model: buildDialogModel(
@@ -204,6 +211,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: TaskCenterWorkbenchDialogView(
             model: buildDialogModel(

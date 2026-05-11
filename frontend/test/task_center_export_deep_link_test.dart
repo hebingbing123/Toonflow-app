@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/task_center/support.dart';
 
@@ -41,7 +42,7 @@ void main() {
     expect(link.storyboardNumericId, 77);
     expect(link.workspaceId, '550e8400-e29b-41d4-a716-446655440222');
     expect(
-      videoExportFailureCodeLabelZh('video_download_http'),
+      videoExportFailureCodeLabel(AppLocalizationsZh(), 'video_download_http'),
       '源视频 HTTP 失败',
     );
   });

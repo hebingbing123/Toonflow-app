@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 import 'support.dart';
@@ -10,12 +11,14 @@ class _PhaseFilterItem {
   final String label;
 }
 
-const List<_PhaseFilterItem> _shortVideoProductionPhaseFilterItems = [
-  _PhaseFilterItem(key: 'prep', label: '素材准备'),
-  _PhaseFilterItem(key: 'image', label: '出图'),
-  _PhaseFilterItem(key: 'video', label: '出视频'),
-  _PhaseFilterItem(key: 'export', label: '导出成片'),
-  _PhaseFilterItem(key: 'quality', label: '质检'),
+List<_PhaseFilterItem> _shortVideoProductionPhaseFilterItems(
+  AppLocalizations l10n,
+) => <_PhaseFilterItem>[
+  _PhaseFilterItem(key: 'prep', label: l10n.taskCenterPhasePrep),
+  _PhaseFilterItem(key: 'image', label: l10n.taskCenterPhaseImage),
+  _PhaseFilterItem(key: 'video', label: l10n.taskCenterPhaseVideo),
+  _PhaseFilterItem(key: 'export', label: l10n.taskCenterPhaseExport),
+  _PhaseFilterItem(key: 'quality', label: l10n.taskCenterPhaseQuality),
 ];
 
 class TaskCenterWorkbenchDialogViewModel {
@@ -118,13 +121,14 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
     return AlertDialog(
-      title: const Text('任务工作台'),
+      title: Text(l10n.taskCenterWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -133,14 +137,20 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 numeric task id 或 UUID 查看详情。'
-                '${model.liveUpdatesConnected ? ' 当前已接入实时任务更新。' : ''}',
+                l10n.taskCenterWorkbenchIntro(
+                  model.liveUpdatesConnected
+                      ? l10n.taskCenterWorkbenchRealtimeConnected
+                      : '',
+                ),
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 12),
-              Text('筛选与列表', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.taskCenterWorkbenchFilterAndList,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -150,19 +160,31 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.loadingProjects
                         ? null
                         : callbacks.onLoadProjects,
-                    child: Text(model.loadingProjects ? '…' : '刷新任务项目'),
+                    child: Text(
+                      model.loadingProjects
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterReloadTaskProjects,
+                    ),
                   ),
                   FilledButton.tonal(
                     onPressed: model.loadingCategories
                         ? null
                         : callbacks.onLoadCategories,
-                    child: Text(model.loadingCategories ? '…' : '刷新任务分类'),
+                    child: Text(
+                      model.loadingCategories
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterReloadTaskCategories,
+                    ),
                   ),
                   FilledButton.tonal(
                     onPressed: model.loadingTasks
                         ? null
                         : callbacks.onLoadTasks,
-                    child: Text(model.loadingTasks ? '…' : '按筛选加载任务'),
+                    child: Text(
+                      model.loadingTasks
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterLoadTasksByFilters,
+                    ),
                   ),
                 ],
               ),
@@ -195,14 +217,18 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.pageCtrl,
-                      decoration: const InputDecoration(labelText: '页码'),
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldPage,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       controller: model.limitCtrl,
-                      decoration: const InputDecoration(labelText: '每页数量'),
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldPageSize,
+                      ),
                     ),
                   ),
                 ],
@@ -213,8 +239,8 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.projectIdCtrl,
-                      decoration: const InputDecoration(
-                        labelText: '项目 numeric ID（可空）',
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldProjectNumericIdOptional,
                       ),
                     ),
                   ),
@@ -222,7 +248,9 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.taskClassCtrl,
-                      decoration: const InputDecoration(labelText: '任务分类（可空）'),
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldTaskClassOptional,
+                      ),
                     ),
                   ),
                 ],
@@ -230,13 +258,15 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               TextField(
                 controller: model.stateCtrl,
-                decoration: const InputDecoration(labelText: '任务状态（可空）'),
+                decoration: InputDecoration(
+                  labelText: l10n.taskCenterFieldTaskStatusOptional,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.productionPhaseCtrl,
-                decoration: const InputDecoration(
-                  labelText: '短视频阶段（可空：prep/image/video/export/quality）',
+                decoration: InputDecoration(
+                  labelText: l10n.taskCenterFieldProductionPhaseOptional,
                 ),
               ),
               const SizedBox(height: 8),
@@ -244,7 +274,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  for (final item in _shortVideoProductionPhaseFilterItems)
+                  for (final item in _shortVideoProductionPhaseFilterItems(l10n))
                     FilterChip(
                       label: Text(item.label),
                       selected:
@@ -277,7 +307,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
               if (model.jobs.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '${model.jobs.length} 条任务',
+                  l10n.taskCenterJobsCount(model.jobs.length),
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 ...model.jobs
@@ -288,7 +318,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         contentPadding: EdgeInsets.zero,
                         title: Text(
                           '${job.kind} · ${job.status}'
-                          '${taskCenterShortVideoStageLabel(job).isEmpty ? '' : ' · ${taskCenterShortVideoStageLabel(job)}'}',
+                          '${taskCenterShortVideoStageLabel(l10n, job).isEmpty ? '' : ' · ${taskCenterShortVideoStageLabel(l10n, job)}'}',
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +328,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                                 '#${job.numericTaskId} · ${job.id}',
                                 if (job.errorMessage != null &&
                                     job.errorMessage!.isNotEmpty)
-                                  '失败原因=${job.errorMessage}',
+                                  l10n.taskCenterFailureReason(job.errorMessage!),
                               ].join('\n'),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
@@ -337,8 +367,8 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                                                 callbacks.onRetryFailedJob(job),
                                       child: Text(
                                         model.retryingJobId == job.id
-                                            ? '…'
-                                            : '重试',
+                                            ? l10n.projectsBusyProcessing
+                                            : l10n.taskCenterRetry,
                                       ),
                                     ),
                                   if (job.status == 'queued' ||
@@ -351,8 +381,8 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                                             ),
                                       child: Text(
                                         model.cancellingJobId == job.id
-                                            ? '…'
-                                            : '取消',
+                                            ? l10n.projectsBusyProcessing
+                                            : l10n.taskCenterCancel,
                                       ),
                                     ),
                                 ],
@@ -363,15 +393,18 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     ),
               ],
               const SizedBox(height: 12),
-              Text('任务详情', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.taskCenterTaskDetailsSection,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: model.numericTaskIdCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'numeric task id',
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldNumericTaskId,
                       ),
                     ),
                   ),
@@ -382,8 +415,8 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         : callbacks.onLoadNumericIdTaskDetail,
                     child: Text(
                       model.loadingNumericIdTaskDetail
-                          ? '…'
-                          : '读取任务详情（numeric ID）',
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterLoadNumericIdDetails,
                     ),
                   ),
                 ],
@@ -394,7 +427,9 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.uuidCtrl,
-                      decoration: const InputDecoration(labelText: '任务 UUID'),
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldTaskUuid,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -402,30 +437,41 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.loadingUuidDetails
                         ? null
                         : callbacks.onLoadUuidDetails,
-                    child: Text(model.loadingUuidDetails ? '…' : '读取 UUID 详情'),
+                    child: Text(
+                      model.loadingUuidDetails
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterLoadUuidDetails,
+                    ),
                   ),
                 ],
               ),
               if (model.numericIdTaskDetailText != null) ...[
                 const SizedBox(height: 8),
                 SelectableText(
-                  '任务详情（numeric ID）：${model.numericIdTaskDetailText}',
+                  l10n.taskCenterNumericIdDetailsLine(
+                    model.numericIdTaskDetailText!,
+                  ),
                 ),
               ],
               if (model.uuidDetails != null) ...[
                 const SizedBox(height: 8),
-                SelectableText('UUID 详情：${model.uuidDetails}'),
+                SelectableText(
+                  l10n.taskCenterUuidDetailsLine(model.uuidDetails!),
+                ),
               ],
               if (model.statusLine != null) ...[
                 const SizedBox(height: 8),
-                SelectableText('状态：${model.statusLine}'),
+                SelectableText(l10n.taskCenterStatusLine(model.statusLine!)),
               ],
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+        TextButton(
+          onPressed: callbacks.onClose,
+          child: Text(l10n.helpHubDialogClose),
+        ),
       ],
     );
   }
@@ -446,12 +492,13 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final small = Theme.of(context).textTheme.bodySmall;
     final code = job.errorDetails == null
         ? null
         : job.errorDetails!['code'] as String?;
-    final label = videoExportFailureCodeLabelZh(code ?? '');
+    final label = videoExportFailureCodeLabel(l10n, code ?? '');
     final link = tryParseVideoExportJobDeepLink(job);
     final deepLinkHandler = onNavigateExportJobDeepLink;
     final domainLink = tryParseTaskCenterDomainDeepLink(job);
@@ -462,14 +509,14 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '结构化失败 · $label',
+            l10n.taskCenterStructuredFailure(label),
             style: small?.copyWith(color: outline),
           ),
           if (domainLink != null && domainLinkHandler != null) ...[
             const SizedBox(height: 2),
             TextButton(
               onPressed: () => domainLinkHandler(domainLink),
-              child: Text(_domainDeepLinkLabel(domainLink)),
+              child: Text(_domainDeepLinkLabel(l10n, domainLink)),
             ),
           ],
           if (link != null && deepLinkHandler != null) ...[
@@ -489,7 +536,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
                       openProductionWorkspace: true,
                     ),
                   ),
-                  child: const Text('打开制作工作区'),
+                  child: Text(l10n.taskCenterOpenProductionWorkspace),
                 ),
                 TextButton(
                   onPressed: () => deepLinkHandler(
@@ -502,7 +549,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
                       openProductionWorkspace: false,
                     ),
                   ),
-                  child: const Text('打开剧本工作区'),
+                  child: Text(l10n.taskCenterOpenScriptWorkspace),
                 ),
               ],
             ),
@@ -528,6 +575,7 @@ class _TaskFailedReworkActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final domainLink = tryParseTaskCenterDomainDeepLink(job);
     final canPartial = domainLink != null &&
         onNavigateDomainDeepLink != null &&
@@ -542,17 +590,17 @@ class _TaskFailedReworkActions extends StatelessWidget {
         children: [
           TextButton(
             onPressed: () => onRetry(job),
-            child: const Text('重新生成'),
+            child: Text(l10n.taskCenterRegenerate),
           ),
           if (canPartial)
             TextButton(
               onPressed: () => onNavigateDomainDeepLink!(domainLink),
-              child: const Text('局部返工'),
+              child: Text(l10n.taskCenterPartialRework),
             ),
           if (canCompensate)
             TextButton(
               onPressed: () => onCompensateWritebackJob!(job),
-              child: const Text('回写补偿'),
+              child: Text(l10n.taskCenterWritebackCompensation),
             ),
         ],
       ),
@@ -560,15 +608,18 @@ class _TaskFailedReworkActions extends StatelessWidget {
   }
 }
 
-String _domainDeepLinkLabel(TaskCenterDomainDeepLink link) {
+String _domainDeepLinkLabel(
+  AppLocalizations l10n,
+  TaskCenterDomainDeepLink link,
+) {
   switch (link.target) {
     case TaskCenterDomainDeepLinkTarget.publish:
-      return '打开短视频 Space（发布）';
+      return l10n.taskCenterOpenSpacePublish;
     case TaskCenterDomainDeepLinkTarget.storyboard:
-      return '打开制作工作区（分镜）';
+      return l10n.taskCenterOpenProductionStoryboard;
     case TaskCenterDomainDeepLinkTarget.script:
-      return '打开剧本工作区（脚本）';
+      return l10n.taskCenterOpenScriptScript;
     case TaskCenterDomainDeepLinkTarget.project:
-      return '打开短视频 Space（项目）';
+      return l10n.taskCenterOpenSpaceProject;
   }
 }

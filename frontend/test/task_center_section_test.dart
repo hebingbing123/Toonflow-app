@@ -60,9 +60,9 @@ void main() {
     );
 
     expect(find.text('打开任务工作台'), findsOneWidget);
-    expect(find.text('项目 1 个 · #9 古风短剧'), findsOneWidget);
+    expect(find.text('1 个项目 · #9 古风短剧'), findsOneWidget);
     expect(
-      find.text('任务 1 条 · #101 asset.generate.image:queued'),
+      find.text('1 条任务 · #101 asset.generate.image:queued'),
       findsOneWidget,
     );
   });

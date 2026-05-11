@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 /// Keeps the top-level task center actions together before drill-down content.
@@ -17,17 +18,22 @@ class TaskCenterActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         FilledButton.tonal(
           onPressed: onOpenWorkbench,
-          child: const Text('打开任务工作台'),
+          child: Text(l10n.taskCenterOpenWorkbench),
         ),
         FilledButton.tonal(
           onPressed: loadingTaskApi ? null : onLoadTaskApi,
-          child: Text(loadingTaskApi ? '…' : '刷新任务摘要'),
+          child: Text(
+            loadingTaskApi
+                ? l10n.projectsBusyProcessing
+                : l10n.taskCenterRefreshSummary,
+          ),
         ),
       ],
     );
@@ -69,12 +75,13 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      title: const Text('兼容性检查'),
+      title: Text(l10n.taskCenterCompatibilityCheck),
       subtitle: Text(
-        '保留旧式加载/详情 probe 作为回归入口，默认折叠',
+        l10n.taskCenterCompatibilityHint,
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: outlineColor),
@@ -86,19 +93,35 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: loadingTaskProjects ? null : onLoadTaskProjects,
-              child: Text(loadingTaskProjects ? '…' : '加载任务项目'),
+              child: Text(
+                loadingTaskProjects
+                    ? l10n.projectsBusyProcessing
+                    : l10n.taskCenterLoadTaskProjects,
+              ),
             ),
             FilledButton.tonal(
               onPressed: loadingTaskCategories ? null : onLoadTaskCategories,
-              child: Text(loadingTaskCategories ? '…' : '加载任务分类'),
+              child: Text(
+                loadingTaskCategories
+                    ? l10n.projectsBusyProcessing
+                    : l10n.taskCenterLoadTaskCategories,
+              ),
             ),
             FilledButton.tonal(
               onPressed: loadingTaskApi ? null : onLoadTaskApi,
-              child: Text(loadingTaskApi ? '…' : '加载任务列表'),
+              child: Text(
+                loadingTaskApi
+                    ? l10n.projectsBusyProcessing
+                    : l10n.taskCenterLoadTaskList,
+              ),
             ),
             FilledButton.tonal(
               onPressed: loadingTaskDetailsByNumericId ? null : onProbeTaskDetailByNumericId,
-              child: Text(loadingTaskDetailsByNumericId ? '…' : '查看首条任务详情'),
+              child: Text(
+                loadingTaskDetailsByNumericId
+                    ? l10n.projectsBusyProcessing
+                    : l10n.taskCenterViewFirstTaskDetails,
+              ),
             ),
           ],
         ),
@@ -106,8 +129,8 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
         TextField(
           controller: taskDetailJobIdController,
           onChanged: onTaskDetailJobIdChanged,
-          decoration: const InputDecoration(
-            labelText: '任务 UUID（点下方列表可自动填入）',
+          decoration: InputDecoration(
+            labelText: l10n.taskCenterFieldTaskUuidTapToFill,
           ),
         ),
         const SizedBox(height: 8),
@@ -117,7 +140,11 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
                   taskDetailJobIdController.text.trim().isEmpty
               ? null
               : onProbeTaskDetailUuid,
-          child: Text(loadingTaskDetailsUuid ? '…' : '按 UUID 查看详情'),
+          child: Text(
+            loadingTaskDetailsUuid
+                ? l10n.projectsBusyProcessing
+                : l10n.taskCenterViewByUuid,
+          ),
         ),
       ],
     );
@@ -137,11 +164,15 @@ class TaskCenterJobsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Text('${jobs.length} 条任务', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.taskCenterJobsCount(jobs.length),
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         ...jobs.take(8).map(
           (job) => ListTile(
             dense: true,
@@ -174,6 +205,7 @@ class TaskCenterSummaryPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final bodySmall = Theme.of(
       context,
     ).textTheme.bodySmall?.copyWith(color: outlineColor);
@@ -185,7 +217,7 @@ class TaskCenterSummaryPreview extends StatelessWidget {
         Text(taskSummary, style: bodySmall),
         if (taskCategoriesLine != null) ...[
           const SizedBox(height: 4),
-          Text('分类摘要：$taskCategoriesLine', style: bodySmall),
+          Text(l10n.taskCenterCategoriesLine(taskCategoriesLine!), style: bodySmall),
         ],
       ],
     );
@@ -205,16 +237,19 @@ class TaskCenterDetailsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (taskDetailNumericIdLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('任务详情（numeric ID）：$taskDetailNumericIdLine'),
+          SelectableText(
+            l10n.taskCenterNumericIdDetailsLine(taskDetailNumericIdLine!),
+          ),
         ],
         if (taskDetailUuidLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('UUID 详情：$taskDetailUuidLine'),
+          SelectableText(l10n.taskCenterUuidDetailsLine(taskDetailUuidLine!)),
         ],
       ],
     );
