@@ -14,22 +14,6 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   List<_CreativeManualRow> get _activeRows =>
       _kind == _CreativeManualKind.director ? _directorRows : _visualRows;
 
-  String get _pathLabel => _kind == _CreativeManualKind.director
-      ? 'directorManual 文件夹'
-      : 'stylePath';
-
-  String get _selectionLabel =>
-      _kind == _CreativeManualKind.director ? '当前导演手册' : '当前视觉手册';
-
-  String get _createLabel =>
-      _kind == _CreativeManualKind.director ? '新建导演手册' : '新建视觉手册';
-
-  String get _saveLabel =>
-      _kind == _CreativeManualKind.director ? '保存当前导演手册' : '保存当前视觉手册';
-
-  String get _deleteLabel =>
-      _kind == _CreativeManualKind.director ? '删除当前导演手册' : '删除当前视觉手册';
-
   @override
   void initState() {
     super.initState();
@@ -74,9 +58,10 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   Future<void> _reloadAll({String? preferredPath}) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _busy = true;
-      _statusLine = '刷新创作手册中…';
+      _statusLine = l10n.projectsCreativeManualStatusRefreshing;
     });
     try {
       final director = await postProjectQueryDirectorManual(widget.accessToken);
@@ -106,9 +91,12 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _directorRows = directorRows;
         _visualRows = visualRows;
         _busy = false;
-        _statusLine =
-            '导演手册 ${directorRows.length} 条 · 视觉手册 ${visualRows.length} 条 · '
-            'visual GET/POST=${visualGet.styles.length}/${visualPost.styles.length}';
+        _statusLine = l10n.projectsCreativeManualStatusReloadOk(
+          directorRows.length,
+          visualRows.length,
+          visualGet.styles.length,
+          visualPost.styles.length,
+        );
         if (target == null) {
           _selected = null;
           _clearForm();
@@ -120,29 +108,30 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '刷新失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusReloadFail(e.toString());
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '刷新失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusReloadFail('$e');
       });
     }
   }
 
   Future<void> _createCurrentKind() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _ctrls.nameCtrl.text.trim();
     final path = _ctrls.pathCtrl.text.trim();
     if (name.isEmpty || path.isEmpty) {
-      setState(() => _statusLine = '新建失败：名称与路径不能为空。');
+      setState(() => _statusLine = l10n.projectsCreativeManualStatusCreateNeedFields);
       return;
     }
     final slots = parseCreativeManualSlots(_ctrls.slotsCtrl.text);
     final images = parseCreativeManualImages(_ctrls.imagesCtrl.text);
     setState(() {
       _busy = true;
-      _statusLine = '新建手册中…';
+      _statusLine = l10n.projectsCreativeManualStatusCreating;
     });
     try {
       if (_kind == _CreativeManualKind.director) {
@@ -164,44 +153,56 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       }
       await _reloadAll(preferredPath: path);
       if (!mounted) return;
-      setState(() => _statusLine = '已新建 ${creativeManualKindLabel(_kind)}：$path');
+      setState(
+        () => _statusLine = l10n.projectsCreativeManualStatusCreated(
+          creativeManualKindLabel(l10n, _kind),
+          path,
+        ),
+      );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '新建失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusOpFail(
+          l10n.projectsCreativeManualVerbCreate,
+          e.toString(),
+        );
       });
     } on FormatException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '新建失败：${e.message}';
+        _statusLine = l10n.projectsCreativeManualInvalidSlotLine(e.message);
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '新建失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusOpFail(
+          l10n.projectsCreativeManualVerbCreate,
+          '$e',
+        );
       });
     }
   }
 
   Future<void> _saveCurrentKind() async {
+    final l10n = AppLocalizations.of(context)!;
     final path = _ctrls.pathCtrl.text.trim();
     final name = _ctrls.nameCtrl.text.trim();
     if (_selected == null) {
-      setState(() => _statusLine = '保存失败：请先选择一条手册。');
+      setState(() => _statusLine = l10n.projectsCreativeManualStatusSaveNeedSelect);
       return;
     }
     if (name.isEmpty || path.isEmpty) {
-      setState(() => _statusLine = '保存失败：名称与路径不能为空。');
+      setState(() => _statusLine = l10n.projectsCreativeManualStatusSaveNeedFields);
       return;
     }
     final slots = parseCreativeManualSlots(_ctrls.slotsCtrl.text);
     final images = parseCreativeManualImages(_ctrls.imagesCtrl.text);
     setState(() {
       _busy = true;
-      _statusLine = '保存手册中…';
+      _statusLine = l10n.projectsCreativeManualStatusSaving;
     });
     try {
       if (_kind == _CreativeManualKind.director) {
@@ -223,37 +224,49 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       }
       await _reloadAll(preferredPath: path);
       if (!mounted) return;
-      setState(() => _statusLine = '已保存 ${creativeManualKindLabel(_kind)}：$path');
+      setState(
+        () => _statusLine = l10n.projectsCreativeManualStatusSaved(
+          creativeManualKindLabel(l10n, _kind),
+          path,
+        ),
+      );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '保存失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusOpFail(
+          l10n.projectsCreativeManualVerbSave,
+          e.toString(),
+        );
       });
     } on FormatException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '保存失败：${e.message}';
+        _statusLine = l10n.projectsCreativeManualInvalidSlotLine(e.message);
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '保存失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusOpFail(
+          l10n.projectsCreativeManualVerbSave,
+          '$e',
+        );
       });
     }
   }
 
   Future<void> _deleteCurrentKind() async {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _selected;
     if (selected == null) {
-      setState(() => _statusLine = '删除失败：请先选择一条手册。');
+      setState(() => _statusLine = l10n.projectsCreativeManualStatusDeleteNeedSelect);
       return;
     }
     setState(() {
       _busy = true;
-      _statusLine = '删除手册中…';
+      _statusLine = l10n.projectsCreativeManualStatusDeleting;
     });
     try {
       if (_kind == _CreativeManualKind.director) {
@@ -267,26 +280,35 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       await _reloadAll();
       if (!mounted) return;
       setState(
-        () => _statusLine =
-            '已删除 ${creativeManualKindLabel(_kind)}：${selected.path}',
+        () => _statusLine = l10n.projectsCreativeManualStatusDeleted(
+          creativeManualKindLabel(l10n, _kind),
+          selected.path,
+        ),
       );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '删除失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusOpFail(
+          l10n.projectsCreativeManualVerbDelete,
+          e.toString(),
+        );
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = '删除失败：$e';
+        _statusLine = l10n.projectsCreativeManualStatusOpFail(
+          l10n.projectsCreativeManualVerbDelete,
+          '$e',
+        );
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return CreativeManualsWorkbenchView(
       kind: _kind,
       busy: _busy,
@@ -297,11 +319,21 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       pathCtrl: _ctrls.pathCtrl,
       imagesCtrl: _ctrls.imagesCtrl,
       slotsCtrl: _ctrls.slotsCtrl,
-      pathLabel: _pathLabel,
-      selectionLabel: _selectionLabel,
-      createLabel: _createLabel,
-      saveLabel: _saveLabel,
-      deleteLabel: _deleteLabel,
+      pathLabel: _kind == _CreativeManualKind.director
+          ? l10n.projectsCreativeManualPathDirectorFolder
+          : l10n.projectsCreativeManualPathVisual,
+      selectionLabel: _kind == _CreativeManualKind.director
+          ? l10n.projectsCreativeManualSelectionDirector
+          : l10n.projectsCreativeManualSelectionVisual,
+      createLabel: _kind == _CreativeManualKind.director
+          ? l10n.projectsCreativeManualCreateDirector
+          : l10n.projectsCreativeManualCreateVisual,
+      saveLabel: _kind == _CreativeManualKind.director
+          ? l10n.projectsCreativeManualSaveDirector
+          : l10n.projectsCreativeManualSaveVisual,
+      deleteLabel: _kind == _CreativeManualKind.director
+          ? l10n.projectsCreativeManualDeleteDirector
+          : l10n.projectsCreativeManualDeleteVisual,
       onKindChanged: (next) => _setKind(next),
       onReloadAll: _reloadAll,
       onCreate: _createCurrentKind,

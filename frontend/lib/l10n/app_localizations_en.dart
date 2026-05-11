@@ -1531,4 +1531,702 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectsDialogCreateButton => 'Create';
+
+  @override
+  String get projectsBusyProcessing => 'Processing…';
+
+  @override
+  String get projectsArtWorkbenchTitle => 'Art styles workbench';
+
+  @override
+  String get projectsArtWorkbenchIntro =>
+      'Refresh the list, inspect covers, edit prompts, and extract prompts from images—beyond list-only probes.';
+
+  @override
+  String get projectsArtWorkbenchReloadList => 'Refresh list';
+
+  @override
+  String get projectsArtWorkbenchViewCover => 'View cover';
+
+  @override
+  String get projectsArtWorkbenchReadingCover => 'Reading cover…';
+
+  @override
+  String get projectsArtWorkbenchNew => 'New style';
+
+  @override
+  String get projectsArtWorkbenchSave => 'Save current style';
+
+  @override
+  String get projectsArtWorkbenchDelete => 'Delete current style';
+
+  @override
+  String get projectsArtWorkbenchCurrentStyle => 'Current style';
+
+  @override
+  String get projectsArtWorkbenchEmptyHint =>
+      'No styles yet—fill the form below to create one.';
+
+  @override
+  String get projectsArtWorkbenchFieldName => 'Name';
+
+  @override
+  String get projectsArtWorkbenchFieldTags => 'Tags';
+
+  @override
+  String get projectsArtWorkbenchFieldCoverUrl => 'Cover URL / data URI';
+
+  @override
+  String get projectsArtWorkbenchFieldCoverUrlHelper =>
+      'Use a reachable URL or data:image/...;base64,...';
+
+  @override
+  String get projectsArtWorkbenchFieldPrompt => 'Prompt';
+
+  @override
+  String get projectsArtWorkbenchExtractTitle => 'Prompt extraction';
+
+  @override
+  String get projectsArtWorkbenchExtractImagesLabel => 'Image inputs';
+
+  @override
+  String get projectsArtWorkbenchExtractImagesHelper =>
+      'Separate multiple URLs / data URIs with commas or newlines.';
+
+  @override
+  String get projectsArtWorkbenchExtractButton => 'Extract prompt into editor';
+
+  @override
+  String get projectsArtWorkbenchCoverPreview => 'Cover preview';
+
+  @override
+  String get projectsCreativeManualTitle => 'Creative manuals workbench';
+
+  @override
+  String get projectsCreativeManualIntro =>
+      'Manage director and visual manuals in one place: refresh, create, update, and delete.';
+
+  @override
+  String get projectsCreativeManualSegmentDirector => 'Director manual';
+
+  @override
+  String get projectsCreativeManualSegmentVisual => 'Visual manual';
+
+  @override
+  String get projectsCreativeManualReloadAll => 'Reload all manuals';
+
+  @override
+  String get projectsCreativeManualPathDirectorFolder =>
+      'directorManual folder';
+
+  @override
+  String get projectsCreativeManualPathVisual => 'stylePath';
+
+  @override
+  String get projectsCreativeManualSelectionDirector =>
+      'Current director manual';
+
+  @override
+  String get projectsCreativeManualSelectionVisual => 'Current visual manual';
+
+  @override
+  String get projectsCreativeManualCreateDirector => 'New director manual';
+
+  @override
+  String get projectsCreativeManualCreateVisual => 'New visual manual';
+
+  @override
+  String get projectsCreativeManualSaveDirector => 'Save director manual';
+
+  @override
+  String get projectsCreativeManualSaveVisual => 'Save visual manual';
+
+  @override
+  String get projectsCreativeManualDeleteDirector => 'Delete director manual';
+
+  @override
+  String get projectsCreativeManualDeleteVisual => 'Delete visual manual';
+
+  @override
+  String get projectsCreativeManualEmptyKind =>
+      'No manuals of this type yet—create one with the form below.';
+
+  @override
+  String get projectsCreativeManualFieldName => 'Name';
+
+  @override
+  String get projectsCreativeManualFieldImagesList => 'Images list';
+
+  @override
+  String get projectsCreativeManualFieldImagesHelper =>
+      'Separate URLs / paths with commas or newlines.';
+
+  @override
+  String get projectsCreativeManualFieldSlots => 'Data slots';
+
+  @override
+  String get projectsCreativeManualFieldSlotsHelper =>
+      'One slot per line: label|value|data';
+
+  @override
+  String get projectsCreativeManualSummaryTitle => 'Summary';
+
+  @override
+  String projectsCreativeManualSummaryLine(
+    String name,
+    String path,
+    int imageCount,
+    int slotCount,
+  ) {
+    return '$name · Path $path · Images $imageCount · Slots $slotCount';
+  }
+
+  @override
+  String get projectsCreativeManualStatusRefreshing =>
+      'Refreshing creative manuals…';
+
+  @override
+  String projectsCreativeManualStatusReloadOk(
+    int directorCount,
+    int visualCount,
+    int getCount,
+    int postCount,
+  ) {
+    return 'Director $directorCount · Visual $visualCount · visual GET/POST=$getCount/$postCount';
+  }
+
+  @override
+  String projectsCreativeManualStatusReloadFail(String detail) {
+    return 'Reload failed: $detail';
+  }
+
+  @override
+  String get projectsCreativeManualStatusCreateNeedFields =>
+      'Create failed: name and path are required.';
+
+  @override
+  String get projectsCreativeManualStatusCreating => 'Creating manual…';
+
+  @override
+  String projectsCreativeManualStatusCreated(String kind, String path) {
+    return 'Created $kind: $path';
+  }
+
+  @override
+  String get projectsCreativeManualStatusSaveNeedSelect =>
+      'Save failed: select a manual first.';
+
+  @override
+  String get projectsCreativeManualStatusSaveNeedFields =>
+      'Save failed: name and path are required.';
+
+  @override
+  String get projectsCreativeManualStatusSaving => 'Saving manual…';
+
+  @override
+  String projectsCreativeManualStatusSaved(String kind, String path) {
+    return 'Saved $kind: $path';
+  }
+
+  @override
+  String get projectsCreativeManualStatusDeleteNeedSelect =>
+      'Delete failed: select a manual first.';
+
+  @override
+  String get projectsCreativeManualStatusDeleting => 'Deleting manual…';
+
+  @override
+  String projectsCreativeManualStatusDeleted(String kind, String path) {
+    return 'Deleted $kind: $path';
+  }
+
+  @override
+  String projectsCreativeManualStatusOpFail(String verb, String detail) {
+    return '$verb failed: $detail';
+  }
+
+  @override
+  String get projectsCreativeManualKindDirector => 'Director manual';
+
+  @override
+  String get projectsCreativeManualKindVisual => 'Visual manual';
+
+  @override
+  String projectsCreativeManualInvalidSlotLine(String line) {
+    return 'Invalid slot line (expected label|value|data): $line';
+  }
+
+  @override
+  String get agentMemoryWorkbenchTitle => 'Agent memory workbench';
+
+  @override
+  String get agentMemoryWorkbenchIntro =>
+      'Query, append, and clear project-scoped script/production Agent memory—without relying on the first-project probe only.';
+
+  @override
+  String get agentMemoryReloadProjects => 'Reload projects';
+
+  @override
+  String get agentMemoryQueryMemory => 'Query memory';
+
+  @override
+  String get agentMemoryLoadCostOverview => 'Load cost overview';
+
+  @override
+  String get agentMemoryOptimizeVideo => 'Optimize video memory';
+
+  @override
+  String agentMemoryProjectsPreviewLine(
+    int count,
+    String preview,
+    String ellipsis,
+  ) {
+    return '$count projects · $preview$ellipsis';
+  }
+
+  @override
+  String get agentMemoryUnnamedProject => 'Unnamed project';
+
+  @override
+  String get agentMemoryFieldProjectNumericId => 'Project numeric ID';
+
+  @override
+  String get agentMemoryFieldAgentType => 'Agent type';
+
+  @override
+  String get agentMemoryFieldEpisodesIdOptional => 'Episodes id (optional)';
+
+  @override
+  String get agentMemoryFieldScopeSignatureOptional =>
+      'scopeSignature JSON (optional)';
+
+  @override
+  String get agentMemoryFieldScopeSignatureHelper =>
+      'JSON object; typical keys: episodeId, storyboardIds, focusSections';
+
+  @override
+  String get agentMemoryFieldQueryType => 'Query type';
+
+  @override
+  String get agentMemoryFieldQueryTypeHelper => 'summary / message / all';
+
+  @override
+  String get agentMemoryFieldMemoryTier => 'Memory tier';
+
+  @override
+  String get agentMemoryFieldMemoryTierHelper =>
+      'all / style_bible / stage_summary / delta_memory / message';
+
+  @override
+  String get agentMemoryFieldAutomationMode => 'Automation mode';
+
+  @override
+  String get agentMemoryFieldAutomationModeHelper => 'standard / lean / off';
+
+  @override
+  String get agentMemoryIsolateHint =>
+      'Automatic memory is isolated by project numeric ID + agent type + episodes id.';
+
+  @override
+  String get agentMemoryOptimizeScopeHint =>
+      'Optimization only affects productionAgent + episodes id scoped selected video memory; it is not shared across users, projects, or shorts.';
+
+  @override
+  String get agentMemoryOptimizeEnableHint =>
+      'To enable optimization, set agent type to productionAgent and fill episodes id.';
+
+  @override
+  String get agentMemoryRecommendationPrefix => 'Suggestion: ';
+
+  @override
+  String get agentMemoryCopyChecklistTooltip => 'Copy execution checklist';
+
+  @override
+  String get agentMemoryChecklistCopiedSnack => 'Execution checklist copied.';
+
+  @override
+  String get agentMemoryAppendSection => 'Append memory';
+
+  @override
+  String get agentMemoryFieldAppendType => 'Append type';
+
+  @override
+  String get agentMemoryFieldAppendTypeHelper => 'message / summary';
+
+  @override
+  String get agentMemoryFieldAppendMemoryTier => 'Append memory tier';
+
+  @override
+  String get agentMemoryFieldAppendMemoryTierHelper =>
+      'style_bible / stage_summary / delta_memory / message';
+
+  @override
+  String get agentMemoryFieldRole => 'Role';
+
+  @override
+  String get agentMemoryFieldNameOptional => 'Name (optional)';
+
+  @override
+  String get agentMemoryAppendButton => 'Append with current scope';
+
+  @override
+  String get agentMemoryFieldMemoryContent => 'Memory content';
+
+  @override
+  String get agentMemoryClearSection => 'Clear memory';
+
+  @override
+  String get agentMemoryFieldClearType => 'Clear type';
+
+  @override
+  String get agentMemoryFieldClearTypeHelper => 'summary / message / all';
+
+  @override
+  String get agentMemoryClearRun => 'Run clear';
+
+  @override
+  String get agentMemoryDuplicateChip => 'Duplicate';
+
+  @override
+  String agentMemoryTierGroupHeader(String label, int count, String last) {
+    return '$label · $count rows · Last injected $last';
+  }
+
+  @override
+  String agentMemoryMemoryRowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count memory rows',
+      one: '1 memory row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agentMemoryCharsAbbr(int n) {
+    return '$n chars';
+  }
+
+  @override
+  String agentMemorySubjectLabel(String value) {
+    return 'subject $value';
+  }
+
+  @override
+  String agentMemorySignalsLabel(String value) {
+    return 'signals $value';
+  }
+
+  @override
+  String get agentMemoryTierAll => 'All tiers';
+
+  @override
+  String get agentMemoryTierStyleBible => 'Style bible';
+
+  @override
+  String get agentMemoryTierStageSummary => 'Stage summary';
+
+  @override
+  String get agentMemoryTierDeltaMemory => 'Delta memory';
+
+  @override
+  String get agentMemoryTierMessage => 'Messages';
+
+  @override
+  String get agentMemoryClassNegative => 'Negative constraints';
+
+  @override
+  String get agentMemoryClassDeliveryVisual => 'Delivery + visual';
+
+  @override
+  String get agentMemoryClassDeliveryFirst => 'Delivery-first';
+
+  @override
+  String get agentMemoryClassVisualHeavy => 'Visual-heavy';
+
+  @override
+  String get agentMemoryClassVideoMemory => 'Video memory';
+
+  @override
+  String get agentMemoryActionMergeNegative => 'Merge negatives';
+
+  @override
+  String get agentMemoryActionObserve => 'Observe';
+
+  @override
+  String get agentMemoryActionCompress => 'Compress';
+
+  @override
+  String get agentMemoryActionKeep => 'Keep';
+
+  @override
+  String agentMemoryInsightCore(
+    String roles,
+    String typesPart,
+    int totalChars,
+    int longestChars,
+    String dupPart,
+  ) {
+    return 'Roles: $roles$typesPart · ~$totalChars chars · longest $longestChars chars$dupPart';
+  }
+
+  @override
+  String agentMemoryInsightTypesPart(String detail) {
+    return ' · Types: $detail';
+  }
+
+  @override
+  String agentMemoryInsightDupPart(int count) {
+    return ' · Duplicates: $count';
+  }
+
+  @override
+  String agentMemoryVideoInsight(
+    int dRows,
+    int dChars,
+    int vRows,
+    int vChars,
+    int nRows,
+    int nChars,
+  ) {
+    return 'Video memory: delivery $dRows/$dChars chars · visual $vRows/$vChars chars · negative $nRows/$nChars chars';
+  }
+
+  @override
+  String agentMemoryEfficiencyInsight(
+    int kRows,
+    int kChars,
+    int tRows,
+    int tChars,
+    int mRows,
+    int mChars,
+  ) {
+    return 'Plan: keep $kRows/$kChars chars · trim $tRows/$tChars chars · merge negatives $mRows/$mChars chars';
+  }
+
+  @override
+  String agentMemoryBucketPriorityLine(String detail) {
+    return 'Bucket priority: $detail';
+  }
+
+  @override
+  String agentMemoryBucketPriorityItem(
+    String action,
+    String name,
+    int rows,
+    int chars,
+  ) {
+    return '$action $name · $rows rows / $chars chars';
+  }
+
+  @override
+  String get agentMemoryCostNever => 'never';
+
+  @override
+  String agentMemoryCostOverviewLine(
+    String scope,
+    int sb,
+    int ss,
+    int dm,
+    int msg,
+    int avgInj,
+    int avgHit,
+    String last,
+  ) {
+    return 'scope=$scope · Cost: style bible $sb · stage summary $ss · delta $dm · messages $msg · avg injected (30) $avgInj chars · avg hit tiers (30) $avgHit · last injected $last';
+  }
+
+  @override
+  String get agentMemoryChecklistTitle => 'Execution checklist:';
+
+  @override
+  String agentMemoryChecklistScope(String scope) {
+    return 'Scope: only memories for $scope; do not reuse across users, projects, or shorts.';
+  }
+
+  @override
+  String get agentMemoryChecklistScopeFallback => 'current query scope';
+
+  @override
+  String agentMemoryChecklistCompress(String name) {
+    return 'Compress filler shots/lighting in $name; keep delivery, tone, emotion, and character consistency.';
+  }
+
+  @override
+  String agentMemoryChecklistMerge(String name) {
+    return 'Merge duplicate risk/avoid constraints in $name; keep the strongest guardrails against continuity breaks.';
+  }
+
+  @override
+  String agentMemoryChecklistKeep(String name) {
+    return 'Keep the strongest delivery/emotion anchors in $name; avoid deleting cues that keep performances natural.';
+  }
+
+  @override
+  String agentMemoryChecklistObserve(String name) {
+    return 'Watch new entries in $name; avoid stacking duplicates.';
+  }
+
+  @override
+  String agentMemoryChecklistReminder(String text) {
+    return 'Reminder: $text';
+  }
+
+  @override
+  String get agentMemoryRecDup =>
+      'Duplicates detected—dedupe older memories so constraints are not injected repeatedly.';
+
+  @override
+  String get agentMemoryRecVisualOnly =>
+      'Video memory is mostly framing/lighting—add a delivery, tone, or emotion anchor before deleting visual rows.';
+
+  @override
+  String get agentMemoryRecVisualBudget =>
+      'Visual-heavy rows consume budget—trim old framing/lighting entries and reserve chars for delivery and emotion.';
+
+  @override
+  String get agentMemoryRecNegativeMerge =>
+      'Many negative constraints—merge duplicate risk/avoid snippets before negative memory balloons.';
+
+  @override
+  String agentMemoryRecBucketHot(String name, int count) {
+    return '$name already has $count rows—compress that bucket first so it does not dominate budget.';
+  }
+
+  @override
+  String get agentMemoryRecLong =>
+      'Memory is long—compress the longest rows before appending more.';
+
+  @override
+  String get agentMemoryRecManyRows =>
+      'Many rows—read summaries or clear old messages to budget for current shots.';
+
+  @override
+  String get agentMemoryRecAssistantHeavy =>
+      'Many assistant summaries—clear older ones and keep the latest execution constraints.';
+
+  @override
+  String get agentMemorySignalSubject => 'subject';
+
+  @override
+  String get agentMemorySignalEmotion => 'emotion';
+
+  @override
+  String get agentMemorySignalCamera => 'camera';
+
+  @override
+  String get agentMemorySignalVisual => 'visual';
+
+  @override
+  String get agentMemorySignalIdentity => 'identity';
+
+  @override
+  String get agentMemorySignalDialogue => 'dialogue';
+
+  @override
+  String get agentMemorySignalPerformance => 'performance';
+
+  @override
+  String agentMemorySignalNegative(String n) {
+    return 'negative$n';
+  }
+
+  @override
+  String agentMemoryStatusProjectsRefreshed(int count) {
+    return 'Reloaded $count projects.';
+  }
+
+  @override
+  String get agentMemoryErrFillProjectAndAgent =>
+      'Enter a valid project ID (numeric or UUID from the list) and agent type.';
+
+  @override
+  String get agentMemoryErrFillAgentType => 'Enter agent type.';
+
+  @override
+  String agentMemoryQuerySummaryLine(
+    int count,
+    String memoryType,
+    String tier,
+  ) {
+    return 'Loaded $count $memoryType memories · tier $tier.';
+  }
+
+  @override
+  String get agentMemoryErrCostOverviewFields =>
+      'Enter a valid project ID and agent type before loading cost overview.';
+
+  @override
+  String get agentMemoryStatusCostOverviewLoaded =>
+      'Loaded memory cost overview.';
+
+  @override
+  String get agentMemoryErrAppendProjectFields =>
+      'Enter project ID, agent type, role, and content before appending.';
+
+  @override
+  String get agentMemoryErrAppendAgentRoleContent =>
+      'Enter agent type, role, and content before appending.';
+
+  @override
+  String agentMemoryStatusAppended(String id) {
+    return 'Appended memory $id.';
+  }
+
+  @override
+  String get agentMemoryErrClearProjectFields =>
+      'Enter project ID and agent type before clearing.';
+
+  @override
+  String agentMemoryStatusCleared(String clearType) {
+    return 'Cleared memory: $clearType.';
+  }
+
+  @override
+  String get agentMemoryErrOptimizeProjectFields =>
+      'Enter project ID, agent type, and episodes id before optimizing.';
+
+  @override
+  String get agentMemoryErrOptimizeAgentEpisodes =>
+      'Enter agent type and episodes id before optimizing.';
+
+  @override
+  String agentMemoryStatusOptimized(
+    String mode,
+    int removedRows,
+    int removedChars,
+    int dupRows,
+    int visRows,
+  ) {
+    return 'Optimized video memory ($mode): removed $removedRows rows / $removedChars chars (duplicates $dupRows, visual-only $visRows).';
+  }
+
+  @override
+  String get agentMemoryErrScopeNotObject =>
+      'scopeSignature must be a JSON object.';
+
+  @override
+  String get agentMemoryErrScopeNeedsDimension =>
+      'scopeSignature needs at least one non-empty scope dimension.';
+
+  @override
+  String agentMemoryErrScopeTierRequires(String action) {
+    return '$action requires non-empty scopeSignature JSON for this tier.';
+  }
+
+  @override
+  String get agentMemoryActionLabelQueryScoped => 'Query scoped memory';
+
+  @override
+  String get agentMemoryActionLabelAppendScoped => 'Append scoped memory';
+
+  @override
+  String get projectsCreativeManualVerbCreate => 'Create';
+
+  @override
+  String get projectsCreativeManualVerbSave => 'Save';
+
+  @override
+  String get projectsCreativeManualVerbDelete => 'Delete';
 }

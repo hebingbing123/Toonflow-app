@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/projects/workbenches/agent_memory_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -67,6 +68,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
             .toList(growable: false)) ??
         <AgentMemoryHistoryItem>[
           const AgentMemoryHistoryItem(
+            scope: 'user',
             id: 'memory-1',
             name: 'selected_video_memory',
             role: 'user',
@@ -84,6 +86,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
             ],
           ),
           const AgentMemoryHistoryItem(
+            scope: 'user',
             id: 'memory-2',
             name: 'quality_feedback_memory',
             role: 'assistant',
@@ -230,6 +233,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -254,7 +260,7 @@ void main() {
     );
 
     expect(find.text('Agent 记忆工作台'), findsOneWidget);
-    expect(find.textContaining('项目 2 个'), findsOneWidget);
+    expect(find.textContaining('2 个项目 ·'), findsOneWidget);
     expect(find.text('已读取 2 条记忆。'), findsOneWidget);
     expect(find.text('summary / message / all'), findsNWidgets(2));
     expect(
@@ -287,12 +293,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.byTooltip('复制记忆执行清单'), findsOneWidget);
-    expect(
-      find.textContaining(
-        '记忆执行清单：范围：只处理 P11 / scriptAgent / E3 的记忆，不跨用户、项目或短剧复用。',
-      ),
-      findsOneWidget,
-    );
+    expect(find.textContaining('记忆执行清单：'), findsOneWidget);
+    expect(find.textContaining('P11 / scriptAgent / E3'), findsOneWidget);
     expect(
       find.textContaining('保留 selected_video_memory 里最具体的表演/情绪锚点'),
       findsOneWidget,
@@ -317,6 +319,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -367,6 +372,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -405,6 +413,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -490,6 +501,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -556,7 +570,7 @@ void main() {
     );
     expect(
       find.textContaining(
-        '记忆桶优先级：合并坏例 rejected_video_negative_memory 3条/338 chars',
+        '记忆桶优先级：合并坏例 rejected_video_negative_memory · 3条/338 chars',
       ),
       findsOneWidget,
     );
@@ -573,6 +587,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -634,6 +651,9 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: Scaffold(
             body: ProjectsAgentMemoryWorkbenchDialogView(
               model: buildModel(
@@ -680,6 +700,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -731,6 +754,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(
@@ -753,7 +779,7 @@ void main() {
       ),
     );
 
-    expect(disabledButtonWithText('…'), findsNWidgets(5));
+    expect(disabledButtonWithText('处理中…'), findsNWidgets(5));
   });
 
   testWidgets(
@@ -761,6 +787,9 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: Scaffold(
             body: ProjectsAgentMemoryWorkbenchDialogView(
               model: buildModel(
@@ -799,6 +828,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: ProjectsAgentMemoryWorkbenchDialogView(
             model: buildModel(

@@ -834,5 +834,315 @@
   "projectsDialogFieldVisualMotifsMultiline": "Visual motifs (one per line)",
   "projectsDialogFieldForbiddenElementsMultiline": "Forbidden elements (one per line)",
   "projectsDialogFieldContinuityRulesMultiline": "Continuity rules (one per line)",
-  "projectsDialogCreateButton": "Create"
+  "projectsDialogCreateButton": "Create",
+  "projectsBusyProcessing": "Processing…",
+  "projectsArtWorkbenchTitle": "Art styles workbench",
+  "projectsArtWorkbenchIntro": "Refresh the list, inspect covers, edit prompts, and extract prompts from images—beyond list-only probes.",
+  "projectsArtWorkbenchReloadList": "Refresh list",
+  "projectsArtWorkbenchViewCover": "View cover",
+  "projectsArtWorkbenchReadingCover": "Reading cover…",
+  "projectsArtWorkbenchNew": "New style",
+  "projectsArtWorkbenchSave": "Save current style",
+  "projectsArtWorkbenchDelete": "Delete current style",
+  "projectsArtWorkbenchCurrentStyle": "Current style",
+  "projectsArtWorkbenchEmptyHint": "No styles yet—fill the form below to create one.",
+  "projectsArtWorkbenchFieldName": "Name",
+  "projectsArtWorkbenchFieldTags": "Tags",
+  "projectsArtWorkbenchFieldCoverUrl": "Cover URL / data URI",
+  "projectsArtWorkbenchFieldCoverUrlHelper": "Use a reachable URL or data:image/...;base64,...",
+  "projectsArtWorkbenchFieldPrompt": "Prompt",
+  "projectsArtWorkbenchExtractTitle": "Prompt extraction",
+  "projectsArtWorkbenchExtractImagesLabel": "Image inputs",
+  "projectsArtWorkbenchExtractImagesHelper": "Separate multiple URLs / data URIs with commas or newlines.",
+  "projectsArtWorkbenchExtractButton": "Extract prompt into editor",
+  "projectsArtWorkbenchCoverPreview": "Cover preview",
+  "projectsCreativeManualTitle": "Creative manuals workbench",
+  "projectsCreativeManualIntro": "Manage director and visual manuals in one place: refresh, create, update, and delete.",
+  "projectsCreativeManualSegmentDirector": "Director manual",
+  "projectsCreativeManualSegmentVisual": "Visual manual",
+  "projectsCreativeManualReloadAll": "Reload all manuals",
+  "projectsCreativeManualPathDirectorFolder": "directorManual folder",
+  "projectsCreativeManualPathVisual": "stylePath",
+  "projectsCreativeManualSelectionDirector": "Current director manual",
+  "projectsCreativeManualSelectionVisual": "Current visual manual",
+  "projectsCreativeManualCreateDirector": "New director manual",
+  "projectsCreativeManualCreateVisual": "New visual manual",
+  "projectsCreativeManualSaveDirector": "Save director manual",
+  "projectsCreativeManualSaveVisual": "Save visual manual",
+  "projectsCreativeManualDeleteDirector": "Delete director manual",
+  "projectsCreativeManualDeleteVisual": "Delete visual manual",
+  "projectsCreativeManualEmptyKind": "No manuals of this type yet—create one with the form below.",
+  "projectsCreativeManualFieldName": "Name",
+  "projectsCreativeManualFieldImagesList": "Images list",
+  "projectsCreativeManualFieldImagesHelper": "Separate URLs / paths with commas or newlines.",
+  "projectsCreativeManualFieldSlots": "Data slots",
+  "projectsCreativeManualFieldSlotsHelper": "One slot per line: label|value|data",
+  "projectsCreativeManualSummaryTitle": "Summary",
+  "projectsCreativeManualSummaryLine": "{name} · Path {path} · Images {imageCount} · Slots {slotCount}",
+  "@projectsCreativeManualSummaryLine": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "path": {"type": "String"},
+      "imageCount": {"type": "int"},
+      "slotCount": {"type": "int"}
+    }
+  },
+  "projectsCreativeManualStatusRefreshing": "Refreshing creative manuals…",
+  "projectsCreativeManualStatusReloadOk": "Director {directorCount} · Visual {visualCount} · visual GET/POST={getCount}/{postCount}",
+  "@projectsCreativeManualStatusReloadOk": {
+    "placeholders": {
+      "directorCount": {"type": "int"},
+      "visualCount": {"type": "int"},
+      "getCount": {"type": "int"},
+      "postCount": {"type": "int"}
+    }
+  },
+  "projectsCreativeManualStatusReloadFail": "Reload failed: {detail}",
+  "@projectsCreativeManualStatusReloadFail": {
+    "placeholders": {"detail": {"type": "String"}}
+  },
+  "projectsCreativeManualStatusCreateNeedFields": "Create failed: name and path are required.",
+  "projectsCreativeManualStatusCreating": "Creating manual…",
+  "projectsCreativeManualStatusCreated": "Created {kind}: {path}",
+  "@projectsCreativeManualStatusCreated": {
+    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+  },
+  "projectsCreativeManualStatusSaveNeedSelect": "Save failed: select a manual first.",
+  "projectsCreativeManualStatusSaveNeedFields": "Save failed: name and path are required.",
+  "projectsCreativeManualStatusSaving": "Saving manual…",
+  "projectsCreativeManualStatusSaved": "Saved {kind}: {path}",
+  "@projectsCreativeManualStatusSaved": {
+    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+  },
+  "projectsCreativeManualStatusDeleteNeedSelect": "Delete failed: select a manual first.",
+  "projectsCreativeManualStatusDeleting": "Deleting manual…",
+  "projectsCreativeManualStatusDeleted": "Deleted {kind}: {path}",
+  "@projectsCreativeManualStatusDeleted": {
+    "placeholders": {"kind": {"type": "String"}, "path": {"type": "String"}}
+  },
+  "projectsCreativeManualStatusOpFail": "{verb} failed: {detail}",
+  "@projectsCreativeManualStatusOpFail": {
+    "placeholders": {"verb": {"type": "String"}, "detail": {"type": "String"}}
+  },
+  "projectsCreativeManualKindDirector": "Director manual",
+  "projectsCreativeManualKindVisual": "Visual manual",
+  "projectsCreativeManualInvalidSlotLine": "Invalid slot line (expected label|value|data): {line}",
+  "@projectsCreativeManualInvalidSlotLine": {
+    "placeholders": {"line": {"type": "String"}}
+  },
+  "agentMemoryWorkbenchTitle": "Agent memory workbench",
+  "agentMemoryWorkbenchIntro": "Query, append, and clear project-scoped script/production Agent memory—without relying on the first-project probe only.",
+  "agentMemoryReloadProjects": "Reload projects",
+  "agentMemoryQueryMemory": "Query memory",
+  "agentMemoryLoadCostOverview": "Load cost overview",
+  "agentMemoryOptimizeVideo": "Optimize video memory",
+  "agentMemoryProjectsPreviewLine": "{count} projects · {preview}{ellipsis}",
+  "@agentMemoryProjectsPreviewLine": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "preview": {"type": "String"},
+      "ellipsis": {"type": "String"}
+    }
+  },
+  "agentMemoryUnnamedProject": "Unnamed project",
+  "agentMemoryFieldProjectNumericId": "Project numeric ID",
+  "agentMemoryFieldAgentType": "Agent type",
+  "agentMemoryFieldEpisodesIdOptional": "Episodes id (optional)",
+  "agentMemoryFieldScopeSignatureOptional": "scopeSignature JSON (optional)",
+  "agentMemoryFieldScopeSignatureHelper": "JSON object; typical keys: episodeId, storyboardIds, focusSections",
+  "agentMemoryFieldQueryType": "Query type",
+  "agentMemoryFieldQueryTypeHelper": "summary / message / all",
+  "agentMemoryFieldMemoryTier": "Memory tier",
+  "agentMemoryFieldMemoryTierHelper": "all / style_bible / stage_summary / delta_memory / message",
+  "agentMemoryFieldAutomationMode": "Automation mode",
+  "agentMemoryFieldAutomationModeHelper": "standard / lean / off",
+  "agentMemoryIsolateHint": "Automatic memory is isolated by project numeric ID + agent type + episodes id.",
+  "agentMemoryOptimizeScopeHint": "Optimization only affects productionAgent + episodes id scoped selected video memory; it is not shared across users, projects, or shorts.",
+  "agentMemoryOptimizeEnableHint": "To enable optimization, set agent type to productionAgent and fill episodes id.",
+  "agentMemoryRecommendationPrefix": "Suggestion: ",
+  "agentMemoryCopyChecklistTooltip": "Copy execution checklist",
+  "agentMemoryChecklistCopiedSnack": "Execution checklist copied.",
+  "agentMemoryAppendSection": "Append memory",
+  "agentMemoryFieldAppendType": "Append type",
+  "agentMemoryFieldAppendTypeHelper": "message / summary",
+  "agentMemoryFieldAppendMemoryTier": "Append memory tier",
+  "agentMemoryFieldAppendMemoryTierHelper": "style_bible / stage_summary / delta_memory / message",
+  "agentMemoryFieldRole": "Role",
+  "agentMemoryFieldNameOptional": "Name (optional)",
+  "agentMemoryAppendButton": "Append with current scope",
+  "agentMemoryFieldMemoryContent": "Memory content",
+  "agentMemoryClearSection": "Clear memory",
+  "agentMemoryFieldClearType": "Clear type",
+  "agentMemoryFieldClearTypeHelper": "summary / message / all",
+  "agentMemoryClearRun": "Run clear",
+  "agentMemoryDuplicateChip": "Duplicate",
+  "agentMemoryTierGroupHeader": "{label} · {count} rows · Last injected {last}",
+  "@agentMemoryTierGroupHeader": {
+    "placeholders": {
+      "label": {"type": "String"},
+      "count": {"type": "int"},
+      "last": {"type": "String"}
+    }
+  },
+  "agentMemoryMemoryRowCount": "{count, plural, one{1 memory row} other{{count} memory rows}}",
+  "@agentMemoryMemoryRowCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "agentMemoryCharsAbbr": "{n} chars",
+  "@agentMemoryCharsAbbr": {"placeholders": {"n": {"type": "int"}}},
+  "agentMemorySubjectLabel": "subject {value}",
+  "@agentMemorySubjectLabel": {"placeholders": {"value": {"type": "String"}}},
+  "agentMemorySignalsLabel": "signals {value}",
+  "@agentMemorySignalsLabel": {"placeholders": {"value": {"type": "String"}}},
+  "agentMemoryTierAll": "All tiers",
+  "agentMemoryTierStyleBible": "Style bible",
+  "agentMemoryTierStageSummary": "Stage summary",
+  "agentMemoryTierDeltaMemory": "Delta memory",
+  "agentMemoryTierMessage": "Messages",
+  "agentMemoryClassNegative": "Negative constraints",
+  "agentMemoryClassDeliveryVisual": "Delivery + visual",
+  "agentMemoryClassDeliveryFirst": "Delivery-first",
+  "agentMemoryClassVisualHeavy": "Visual-heavy",
+  "agentMemoryClassVideoMemory": "Video memory",
+  "agentMemoryActionMergeNegative": "Merge negatives",
+  "agentMemoryActionObserve": "Observe",
+  "agentMemoryActionCompress": "Compress",
+  "agentMemoryActionKeep": "Keep",
+  "agentMemoryInsightCore": "Roles: {roles}{typesPart} · ~{totalChars} chars · longest {longestChars} chars{dupPart}",
+  "@agentMemoryInsightCore": {
+    "placeholders": {
+      "roles": {"type": "String"},
+      "typesPart": {"type": "String"},
+      "totalChars": {"type": "int"},
+      "longestChars": {"type": "int"},
+      "dupPart": {"type": "String"}
+    }
+  },
+  "agentMemoryInsightTypesPart": " · Types: {detail}",
+  "@agentMemoryInsightTypesPart": {"placeholders": {"detail": {"type": "String"}}},
+  "agentMemoryInsightDupPart": " · Duplicates: {count}",
+  "@agentMemoryInsightDupPart": {"placeholders": {"count": {"type": "int"}}},
+  "agentMemoryVideoInsight": "Video memory: delivery {dRows}/{dChars} chars · visual {vRows}/{vChars} chars · negative {nRows}/{nChars} chars",
+  "@agentMemoryVideoInsight": {
+    "placeholders": {
+      "dRows": {"type": "int"},
+      "dChars": {"type": "int"},
+      "vRows": {"type": "int"},
+      "vChars": {"type": "int"},
+      "nRows": {"type": "int"},
+      "nChars": {"type": "int"}
+    }
+  },
+  "agentMemoryEfficiencyInsight": "Plan: keep {kRows}/{kChars} chars · trim {tRows}/{tChars} chars · merge negatives {mRows}/{mChars} chars",
+  "@agentMemoryEfficiencyInsight": {
+    "placeholders": {
+      "kRows": {"type": "int"},
+      "kChars": {"type": "int"},
+      "tRows": {"type": "int"},
+      "tChars": {"type": "int"},
+      "mRows": {"type": "int"},
+      "mChars": {"type": "int"}
+    }
+  },
+  "agentMemoryBucketPriorityLine": "Bucket priority: {detail}",
+  "@agentMemoryBucketPriorityLine": {"placeholders": {"detail": {"type": "String"}}},
+  "agentMemoryBucketPriorityItem": "{action} {name} · {rows} rows / {chars} chars",
+  "@agentMemoryBucketPriorityItem": {
+    "placeholders": {
+      "action": {"type": "String"},
+      "name": {"type": "String"},
+      "rows": {"type": "int"},
+      "chars": {"type": "int"}
+    }
+  },
+  "agentMemoryCostNever": "never",
+  "agentMemoryCostOverviewLine": "scope={scope} · Cost: style bible {sb} · stage summary {ss} · delta {dm} · messages {msg} · avg injected (30) {avgInj} chars · avg hit tiers (30) {avgHit} · last injected {last}",
+  "@agentMemoryCostOverviewLine": {
+    "placeholders": {
+      "scope": {"type": "String"},
+      "sb": {"type": "int"},
+      "ss": {"type": "int"},
+      "dm": {"type": "int"},
+      "msg": {"type": "int"},
+      "avgInj": {"type": "int"},
+      "avgHit": {"type": "int"},
+      "last": {"type": "String"}
+    }
+  },
+  "agentMemoryChecklistTitle": "Execution checklist:",
+  "agentMemoryChecklistScope": "Scope: only memories for {scope}; do not reuse across users, projects, or shorts.",
+  "@agentMemoryChecklistScope": {"placeholders": {"scope": {"type": "String"}}},
+  "agentMemoryChecklistScopeFallback": "current query scope",
+  "agentMemoryChecklistCompress": "Compress filler shots/lighting in {name}; keep delivery, tone, emotion, and character consistency.",
+  "@agentMemoryChecklistCompress": {"placeholders": {"name": {"type": "String"}}},
+  "agentMemoryChecklistMerge": "Merge duplicate risk/avoid constraints in {name}; keep the strongest guardrails against continuity breaks.",
+  "@agentMemoryChecklistMerge": {"placeholders": {"name": {"type": "String"}}},
+  "agentMemoryChecklistKeep": "Keep the strongest delivery/emotion anchors in {name}; avoid deleting cues that keep performances natural.",
+  "@agentMemoryChecklistKeep": {"placeholders": {"name": {"type": "String"}}},
+  "agentMemoryChecklistObserve": "Watch new entries in {name}; avoid stacking duplicates.",
+  "@agentMemoryChecklistObserve": {"placeholders": {"name": {"type": "String"}}},
+  "agentMemoryChecklistReminder": "Reminder: {text}",
+  "@agentMemoryChecklistReminder": {"placeholders": {"text": {"type": "String"}}},
+  "agentMemoryRecDup": "Duplicates detected—dedupe older memories so constraints are not injected repeatedly.",
+  "agentMemoryRecVisualOnly": "Video memory is mostly framing/lighting—add a delivery, tone, or emotion anchor before deleting visual rows.",
+  "agentMemoryRecVisualBudget": "Visual-heavy rows consume budget—trim old framing/lighting entries and reserve chars for delivery and emotion.",
+  "agentMemoryRecNegativeMerge": "Many negative constraints—merge duplicate risk/avoid snippets before negative memory balloons.",
+  "agentMemoryRecBucketHot": "{name} already has {count} rows—compress that bucket first so it does not dominate budget.",
+  "@agentMemoryRecBucketHot": {
+    "placeholders": {"name": {"type": "String"}, "count": {"type": "int"}}
+  },
+  "agentMemoryRecLong": "Memory is long—compress the longest rows before appending more.",
+  "agentMemoryRecManyRows": "Many rows—read summaries or clear old messages to budget for current shots.",
+  "agentMemoryRecAssistantHeavy": "Many assistant summaries—clear older ones and keep the latest execution constraints.",
+  "agentMemorySignalSubject": "subject",
+  "agentMemorySignalEmotion": "emotion",
+  "agentMemorySignalCamera": "camera",
+  "agentMemorySignalVisual": "visual",
+  "agentMemorySignalIdentity": "identity",
+  "agentMemorySignalDialogue": "dialogue",
+  "agentMemorySignalPerformance": "performance",
+  "agentMemorySignalNegative": "negative{n}",
+  "@agentMemorySignalNegative": {"placeholders": {"n": {"type": "String"}}},
+  "agentMemoryStatusProjectsRefreshed": "Reloaded {count} projects.",
+  "@agentMemoryStatusProjectsRefreshed": {"placeholders": {"count": {"type": "int"}}},
+  "agentMemoryErrFillProjectAndAgent": "Enter a valid project ID (numeric or UUID from the list) and agent type.",
+  "agentMemoryErrFillAgentType": "Enter agent type.",
+  "agentMemoryQuerySummaryLine": "Loaded {count} {memoryType} memories · tier {tier}.",
+  "@agentMemoryQuerySummaryLine": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "memoryType": {"type": "String"},
+      "tier": {"type": "String"}
+    }
+  },
+  "agentMemoryErrCostOverviewFields": "Enter a valid project ID and agent type before loading cost overview.",
+  "agentMemoryStatusCostOverviewLoaded": "Loaded memory cost overview.",
+  "agentMemoryErrAppendProjectFields": "Enter project ID, agent type, role, and content before appending.",
+  "agentMemoryErrAppendAgentRoleContent": "Enter agent type, role, and content before appending.",
+  "agentMemoryStatusAppended": "Appended memory {id}.",
+  "@agentMemoryStatusAppended": {"placeholders": {"id": {"type": "String"}}},
+  "agentMemoryErrClearProjectFields": "Enter project ID and agent type before clearing.",
+  "agentMemoryStatusCleared": "Cleared memory: {clearType}.",
+  "@agentMemoryStatusCleared": {"placeholders": {"clearType": {"type": "String"}}},
+  "agentMemoryErrOptimizeProjectFields": "Enter project ID, agent type, and episodes id before optimizing.",
+  "agentMemoryErrOptimizeAgentEpisodes": "Enter agent type and episodes id before optimizing.",
+  "agentMemoryStatusOptimized": "Optimized video memory ({mode}): removed {removedRows} rows / {removedChars} chars (duplicates {dupRows}, visual-only {visRows}).",
+  "@agentMemoryStatusOptimized": {
+    "placeholders": {
+      "mode": {"type": "String"},
+      "removedRows": {"type": "int"},
+      "removedChars": {"type": "int"},
+      "dupRows": {"type": "int"},
+      "visRows": {"type": "int"}
+    }
+  },
+  "agentMemoryErrScopeNotObject": "scopeSignature must be a JSON object.",
+  "agentMemoryErrScopeNeedsDimension": "scopeSignature needs at least one non-empty scope dimension.",
+  "agentMemoryErrScopeTierRequires": "{action} requires non-empty scopeSignature JSON for this tier.",
+  "@agentMemoryErrScopeTierRequires": {"placeholders": {"action": {"type": "String"}}},
+  "agentMemoryActionLabelQueryScoped": "Query scoped memory",
+  "agentMemoryActionLabelAppendScoped": "Append scoped memory",
+  "projectsCreativeManualVerbCreate": "Create",
+  "projectsCreativeManualVerbSave": "Save",
+  "projectsCreativeManualVerbDelete": "Delete"
 }

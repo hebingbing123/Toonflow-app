@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 part 'agent_memory_view/memory_widgets.dart';
+
+/// Localized tier label for summaries outside this view (e.g. state widget).
+String agentMemoryTierDisplayLabel(AppLocalizations l10n, String tier) =>
+    _memoryTierLabel(l10n, tier);
 
 class ProjectsAgentMemoryWorkbenchDialogViewModel {
   const ProjectsAgentMemoryWorkbenchDialogViewModel({
@@ -128,6 +133,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
@@ -135,18 +141,19 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
         : 760.0;
     final optimizeEnabled =
         model.canOptimizeVideoMemory && !model.optimizingMemory;
-    final memoryInsights = _buildAgentMemoryInsights(model.memoryRows);
+    final memoryInsights = _buildAgentMemoryInsights(model.memoryRows, l10n);
     final memoryPreviewById = <String, _AgentMemoryPreview>{
       for (final preview in memoryInsights.previews) preview.memoryId: preview,
     };
-    final memoryTierGroups = _buildMemoryTierGroups(model.memoryRows);
-    final costOverviewLine = _buildCostOverviewLine(model.costOverview);
+    final memoryTierGroups = _buildMemoryTierGroups(model.memoryRows, l10n);
+    final costOverviewLine = _buildCostOverviewLine(l10n, model.costOverview);
     final executionChecklist = _buildScopedExecutionChecklist(
       model,
       memoryInsights,
+      l10n,
     );
     return AlertDialog(
-      title: const Text('Agent 记忆工作台'),
+      title: Text(l10n.agentMemoryWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -155,7 +162,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '针对项目级 script/production Agent 记忆执行查询、追加和清理，不再只依赖首页首项目 probe。',
+                l10n.agentMemoryWorkbenchIntro,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
@@ -169,32 +176,58 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.loadingProjects
                         ? null
                         : callbacks.onReloadProjects,
-                    child: Text(model.loadingProjects ? '…' : '刷新项目列表'),
+                    child: Text(
+                      model.loadingProjects
+                          ? l10n.projectsBusyProcessing
+                          : l10n.agentMemoryReloadProjects,
+                    ),
                   ),
                   FilledButton.tonal(
                     onPressed: model.loadingMemory
                         ? null
                         : callbacks.onQueryMemory,
-                    child: Text(model.loadingMemory ? '…' : '查询记忆'),
+                    child: Text(
+                      model.loadingMemory
+                          ? l10n.projectsBusyProcessing
+                          : l10n.agentMemoryQueryMemory,
+                    ),
                   ),
                   FilledButton.tonal(
                     onPressed: model.loadingCostOverview
                         ? null
                         : callbacks.onLoadCostOverview,
-                    child: Text(model.loadingCostOverview ? '…' : '加载成本概览'),
+                    child: Text(
+                      model.loadingCostOverview
+                          ? l10n.projectsBusyProcessing
+                          : l10n.agentMemoryLoadCostOverview,
+                    ),
                   ),
                   FilledButton.tonal(
                     onPressed: optimizeEnabled
                         ? callbacks.onOptimizeVideoMemory
                         : null,
-                    child: Text(model.optimizingMemory ? '…' : '自动优化视频记忆'),
+                    child: Text(
+                      model.optimizingMemory
+                          ? l10n.projectsBusyProcessing
+                          : l10n.agentMemoryOptimizeVideo,
+                    ),
                   ),
                 ],
               ),
               if (model.projects.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '项目 ${model.projects.length} 个 · ${model.projects.take(4).map((p) => '#${p.numericId} ${p.name ?? "未命名项目"}').join(', ')}${model.projects.length > 4 ? '…' : ''}',
+                  l10n.agentMemoryProjectsPreviewLine(
+                    model.projects.length,
+                    model.projects
+                        .take(4)
+                        .map(
+                          (p) =>
+                              '#${p.numericId} ${p.name ?? l10n.agentMemoryUnnamedProject}',
+                        )
+                        .join(', '),
+                    model.projects.length > 4 ? '…' : '',
+                  ),
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -206,8 +239,8 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.projectIdCtrl,
-                      decoration: const InputDecoration(
-                        labelText: '项目 numeric ID',
+                      decoration: InputDecoration(
+                        labelText: l10n.agentMemoryFieldProjectNumericId,
                       ),
                     ),
                   ),
@@ -215,8 +248,8 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.agentTypeCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'agent type',
+                      decoration: InputDecoration(
+                        labelText: l10n.agentMemoryFieldAgentType,
                       ),
                     ),
                   ),
@@ -225,25 +258,26 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               TextField(
                 controller: model.episodesIdCtrl,
-                decoration: const InputDecoration(labelText: 'episodes id（可空）'),
+                decoration: InputDecoration(
+                  labelText: l10n.agentMemoryFieldEpisodesIdOptional,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.scopeSignatureCtrl,
                 minLines: 2,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'scopeSignature JSON（可空）',
-                  helperText:
-                      '例如 {"episodeId":3,"storyboardIds":[12],"focusSections":["ep3-sc2"]}',
+                decoration: InputDecoration(
+                  labelText: l10n.agentMemoryFieldScopeSignatureOptional,
+                  helperText: l10n.agentMemoryFieldScopeSignatureHelper,
                 ),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: model.queryType,
-                decoration: const InputDecoration(
-                  labelText: 'query type',
-                  helperText: 'summary / message / all',
+                decoration: InputDecoration(
+                  labelText: l10n.agentMemoryFieldQueryType,
+                  helperText: l10n.agentMemoryFieldQueryTypeHelper,
                 ),
                 items: model.queryTypeOptions
                     .map(
@@ -262,16 +296,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: model.memoryTier,
-                decoration: const InputDecoration(
-                  labelText: 'memory tier',
-                  helperText:
-                      'all / style_bible / stage_summary / delta_memory / message',
+                decoration: InputDecoration(
+                  labelText: l10n.agentMemoryFieldMemoryTier,
+                  helperText: l10n.agentMemoryFieldMemoryTierHelper,
                 ),
                 items: model.memoryTierOptions
                     .map(
                       (value) => DropdownMenuItem<String>(
                         value: value,
-                        child: Text(_memoryTierLabel(value)),
+                        child: Text(_memoryTierLabel(l10n, value)),
                       ),
                     )
                     .toList(),
@@ -284,9 +317,9 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: model.automationMode,
-                decoration: const InputDecoration(
-                  labelText: 'automation mode',
-                  helperText: 'standard / lean / off',
+                decoration: InputDecoration(
+                  labelText: l10n.agentMemoryFieldAutomationMode,
+                  helperText: l10n.agentMemoryFieldAutomationModeHelper,
                 ),
                 items: model.automationModeOptions
                     .map(
@@ -304,14 +337,14 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。',
+                l10n.agentMemoryIsolateHint,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 4),
               Text(
-                '自动优化只处理 productionAgent + episodes id 范围内的 selected video memory，不共享到别的用户、项目或短剧。',
+                l10n.agentMemoryOptimizeScopeHint,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
@@ -319,7 +352,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               if (!model.canOptimizeVideoMemory) ...[
                 const SizedBox(height: 4),
                 Text(
-                  '要启用自动优化，请把 agent type 设为 productionAgent，并填写 episodes id。',
+                  l10n.agentMemoryOptimizeEnableHint,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -382,7 +415,8 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               if (memoryInsights.recommendation != null) ...[
                 const SizedBox(height: 4),
                 Text(
-                  '建议：${memoryInsights.recommendation}',
+                  '${l10n.agentMemoryRecommendationPrefix}'
+                  '${memoryInsights.recommendation}',
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -402,14 +436,14 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: '复制记忆执行清单',
+                      tooltip: l10n.agentMemoryCopyChecklistTooltip,
                       onPressed: () async {
                         await Clipboard.setData(
                           ClipboardData(text: executionChecklist),
                         );
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('已复制记忆执行清单')),
+                          SnackBar(content: Text(l10n.agentMemoryChecklistCopiedSnack)),
                         );
                       },
                       icon: const Icon(Icons.copy_all_rounded),
@@ -420,7 +454,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               if (model.memoryRows.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '${model.memoryRows.length} 条记忆',
+                  l10n.agentMemoryMemoryRowCount(model.memoryRows.length),
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 ...memoryTierGroups.map((group) {
@@ -429,7 +463,11 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     children: [
                       const SizedBox(height: 8),
                       Text(
-                        '${group.label} · ${group.rows.length} 条 · 最近注入 ${group.lastInjectedLabel}',
+                        l10n.agentMemoryTierGroupHeader(
+                          group.label,
+                          group.rows.length,
+                          group.lastInjectedLabel,
+                        ),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       ...group.rows.take(6).map((item) {
@@ -439,19 +477,27 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                         final titleSegments = <String>[
                           if (preview.memoryName.isNotEmpty) preview.memoryName,
                           preview.role,
-                          '${preview.charCount} chars',
+                          l10n.agentMemoryCharsAbbr(preview.charCount),
                           if (preview.classificationLabel.isNotEmpty)
-                            preview.classificationLabel,
+                            _displayMemoryClass(
+                              l10n,
+                              preview.classificationLabel,
+                            ),
                           if (preview.actionLabel.isNotEmpty)
-                            preview.actionLabel,
+                            _displayMemoryAction(l10n, preview.actionLabel),
                         ];
                         final subtitleSegments = <String>[
                           if (preview.memoryId.isNotEmpty) preview.memoryId,
                           if (preview.scopeLabel.isNotEmpty) preview.scopeLabel,
                           if (preview.subjectLabel.isNotEmpty)
-                            'subject ${preview.subjectLabel}',
+                            l10n.agentMemorySubjectLabel(preview.subjectLabel),
                           if (preview.signalLabel.isNotEmpty)
-                            'signals ${preview.signalLabel}',
+                            l10n.agentMemorySignalsLabel(
+                              _formatSignalLabelDisplay(
+                                l10n,
+                                preview.signalLabel,
+                              ),
+                            ),
                           preview.shortContent,
                         ];
                         return ListTile(
@@ -460,8 +506,8 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                           title: Text(titleSegments.join(' · ')),
                           subtitle: Text(subtitleSegments.join(' · ')),
                           trailing: preview.isDuplicated
-                              ? const Chip(
-                                  label: Text('重复'),
+                              ? Chip(
+                                  label: Text(l10n.agentMemoryDuplicateChip),
                                   visualDensity: VisualDensity.compact,
                                 )
                               : null,
@@ -472,16 +518,19 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 }),
               ],
               const SizedBox(height: 12),
-              Text('追加记忆', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.agentMemoryAppendSection,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: model.appendType,
-                      decoration: const InputDecoration(
-                        labelText: 'append type',
-                        helperText: 'message / summary',
+                      decoration: InputDecoration(
+                        labelText: l10n.agentMemoryFieldAppendType,
+                        helperText: l10n.agentMemoryFieldAppendTypeHelper,
                       ),
                       items: model.appendTypeOptions
                           .map(
@@ -502,17 +551,17 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: model.appendMemoryTier,
-                      decoration: const InputDecoration(
-                        labelText: 'append memory tier',
+                      decoration: InputDecoration(
+                        labelText: l10n.agentMemoryFieldAppendMemoryTier,
                         helperText:
-                            'style_bible / stage_summary / delta_memory / message',
+                            l10n.agentMemoryFieldAppendMemoryTierHelper,
                       ),
                       items: model.memoryTierOptions
                           .where((value) => value != 'all')
                           .map(
                             (value) => DropdownMenuItem<String>(
                               value: value,
-                              child: Text(_memoryTierLabel(value)),
+                              child: Text(_memoryTierLabel(l10n, value)),
                             ),
                           )
                           .toList(),
@@ -531,14 +580,18 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.appendRoleCtrl,
-                      decoration: const InputDecoration(labelText: 'role'),
+                      decoration: InputDecoration(
+                        labelText: l10n.agentMemoryFieldRole,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       controller: model.appendNameCtrl,
-                      decoration: const InputDecoration(labelText: 'name（可空）'),
+                      decoration: InputDecoration(
+                        labelText: l10n.agentMemoryFieldNameOptional,
+                      ),
                     ),
                   ),
                 ],
@@ -552,7 +605,9 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                           ? null
                           : callbacks.onAppendMemory,
                       child: Text(
-                        model.appendingMemory ? '…' : '按当前 scope 追加记忆',
+                        model.appendingMemory
+                            ? l10n.projectsBusyProcessing
+                            : l10n.agentMemoryAppendButton,
                       ),
                     ),
                   ),
@@ -563,19 +618,24 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 controller: model.appendContentCtrl,
                 minLines: 3,
                 maxLines: 5,
-                decoration: const InputDecoration(labelText: '记忆内容'),
+                decoration: InputDecoration(
+                  labelText: l10n.agentMemoryFieldMemoryContent,
+                ),
               ),
               const SizedBox(height: 12),
-              Text('清理记忆', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.agentMemoryClearSection,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: model.clearType,
-                      decoration: const InputDecoration(
-                        labelText: 'clear type',
-                        helperText: 'summary / message / all',
+                      decoration: InputDecoration(
+                        labelText: l10n.agentMemoryFieldClearType,
+                        helperText: l10n.agentMemoryFieldClearTypeHelper,
                       ),
                       items: model.clearTypeOptions
                           .map(
@@ -598,7 +658,11 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       onPressed: model.clearingMemory
                           ? null
                           : callbacks.onClearMemory,
-                      child: Text(model.clearingMemory ? '…' : '执行清理'),
+                      child: Text(
+                        model.clearingMemory
+                            ? l10n.projectsBusyProcessing
+                            : l10n.agentMemoryClearRun,
+                      ),
                     ),
                   ),
                 ],
@@ -617,7 +681,10 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+        TextButton(
+          onPressed: callbacks.onClose,
+          child: Text(l10n.helpHubDialogClose),
+        ),
       ],
     );
   }

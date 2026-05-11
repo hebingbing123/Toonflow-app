@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'agent_memory_view.dart';
 
@@ -159,11 +160,11 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     if (raw.isEmpty) return null;
     final decoded = jsonDecode(raw);
     if (decoded is! Map) {
-      throw const FormatException('scopeSignature 必须是 JSON 对象');
+      throw const FormatException('scope_not_object');
     }
     final scopeSignature = Map<String, dynamic>.from(decoded);
     if (!_scopeSignatureHasMeaningfulDimension(scopeSignature)) {
-      throw const FormatException('scopeSignature 至少需要一个非空范围维度');
+      throw const FormatException('scope_needs_dimension');
     }
     return scopeSignature;
   }
@@ -186,14 +187,36 @@ class _ProjectsAgentMemoryWorkbenchDialogState
 
   Map<String, dynamic>? _validatedScopeSignatureForTier(
     String tier, {
-    required String actionLabel,
+    required bool forAppend,
   }) {
     final scopeSignature = _parseScopeSignature();
     if (_memoryTierRequiresScope(tier) &&
         (scopeSignature == null || scopeSignature.isEmpty)) {
-      throw FormatException('$actionLabel 需要填写非空的 scopeSignature JSON。');
+      throw FormatException(
+        forAppend ? 'scope_tier_requires_append' : 'scope_tier_requires_query',
+      );
     }
     return scopeSignature;
+  }
+
+  String _agentMemoryMessageFromError(Object e, AppLocalizations l10n) {
+    if (e is FormatException) {
+      switch (e.message) {
+        case 'scope_not_object':
+          return l10n.agentMemoryErrScopeNotObject;
+        case 'scope_needs_dimension':
+          return l10n.agentMemoryErrScopeNeedsDimension;
+        case 'scope_tier_requires_query':
+          return l10n.agentMemoryErrScopeTierRequires(
+            l10n.agentMemoryActionLabelQueryScoped,
+          );
+        case 'scope_tier_requires_append':
+          return l10n.agentMemoryErrScopeTierRequires(
+            l10n.agentMemoryActionLabelAppendScoped,
+          );
+      }
+    }
+    return e.toString();
   }
 
   String _normalizedSelection(
@@ -206,6 +229,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _reloadProjects() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingProjects = true;
       _statusLine = null;
@@ -218,7 +242,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         if (_projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
           _projectIdCtrl.text = rows.first.numericId.toString();
         }
-        _statusLine = '已刷新 ${rows.length} 个项目。';
+        _statusLine = l10n.agentMemoryStatusProjectsRefreshed(rows.length);
         _loadingProjects = false;
       });
     } on RustApiException catch (e) {
@@ -230,24 +254,25 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = _agentMemoryMessageFromError(e, l10n);
         _loadingProjects = false;
       });
     }
   }
 
   Future<void> _queryMemory() async {
+    final l10n = AppLocalizations.of(context)!;
     final agentType = _agentTypeCtrl.text.trim();
     final memoryType = _queryType;
     final memoryTier = _memoryTier;
     final ref = _agentMemoryProjectRef();
     if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
         ref.projectId == null) {
-      setState(() => _statusLine = '请填写合法的项目 ID（numeric 或列表中可选 UUID）和 agent type。');
+      setState(() => _statusLine = l10n.agentMemoryErrFillProjectAndAgent);
       return;
     }
     if (agentType.isEmpty) {
-      setState(() => _statusLine = '请填写 agent type。');
+      setState(() => _statusLine = l10n.agentMemoryErrFillAgentType);
       return;
     }
     setState(() {
@@ -265,14 +290,16 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         memoryTier: memoryTier == 'all' ? null : memoryTier,
         scopeSignature: memoryTier == 'all'
             ? _parseScopeSignature()
-            : _validatedScopeSignatureForTier(memoryTier, actionLabel: '查询 scoped 记忆'),
+            : _validatedScopeSignatureForTier(memoryTier, forAppend: false),
       );
       if (!mounted) return;
       setState(() {
         _memoryRows = rows;
-        final tierSummary = memoryTier == 'all' ? '全部层级' : memoryTier;
-        _memorySummary =
-            '已读取 ${rows.length} 条 $memoryType 记忆 · 层级 $tierSummary。';
+        _memorySummary = l10n.agentMemoryQuerySummaryLine(
+          rows.length,
+          memoryType,
+          agentMemoryTierDisplayLabel(l10n, memoryTier),
+        );
         _loadingMemory = false;
       });
     } on RustApiException catch (e) {
@@ -284,22 +311,23 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = _agentMemoryMessageFromError(e, l10n);
         _loadingMemory = false;
       });
     }
   }
 
   Future<void> _loadCostOverview() async {
+    final l10n = AppLocalizations.of(context)!;
     final agentType = _agentTypeCtrl.text.trim();
     final ref = _agentMemoryProjectRef();
     if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
         ref.projectId == null) {
-      setState(() => _statusLine = '加载成本概览前请填写合法的项目 ID 和 agent type。');
+      setState(() => _statusLine = l10n.agentMemoryErrCostOverviewFields);
       return;
     }
     if (agentType.isEmpty) {
-      setState(() => _statusLine = '请填写 agent type。');
+      setState(() => _statusLine = l10n.agentMemoryErrFillAgentType);
       return;
     }
     setState(() {
@@ -316,7 +344,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _costOverview = overview;
-        _statusLine = '已加载记忆成本概览。';
+        _statusLine = l10n.agentMemoryStatusCostOverviewLoaded;
         _loadingCostOverview = false;
       });
     } on RustApiException catch (e) {
@@ -328,13 +356,14 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = _agentMemoryMessageFromError(e, l10n);
         _loadingCostOverview = false;
       });
     }
   }
 
   Future<void> _appendMemory() async {
+    final l10n = AppLocalizations.of(context)!;
     final agentType = _agentTypeCtrl.text.trim();
     final content = _appendContentCtrl.text.trim();
     final role = _appendRoleCtrl.text.trim();
@@ -343,16 +372,16 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     final appendName = _appendNameCtrl.text.trim();
     final scopeSignature = _validatedScopeSignatureForTier(
       appendTier,
-      actionLabel: '追加 scoped 记忆',
+      forAppend: true,
     );
     final ref = _agentMemoryProjectRef();
     if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
         ref.projectId == null) {
-      setState(() => _statusLine = '追加记忆前请填写项目 ID、agent type、role 和内容。');
+      setState(() => _statusLine = l10n.agentMemoryErrAppendProjectFields);
       return;
     }
     if (agentType.isEmpty || content.isEmpty || role.isEmpty) {
-      setState(() => _statusLine = '追加记忆前请填写 agent type、role 和内容。');
+      setState(() => _statusLine = l10n.agentMemoryErrAppendAgentRoleContent);
       return;
     }
     setState(() {
@@ -377,7 +406,9 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _appendContentCtrl.clear();
-        _statusLine = '已追加记忆 ${id.length > 8 ? '${id.substring(0, 8)}…' : id}。';
+        final idDisplay =
+            id.length > 8 ? '${id.substring(0, 8)}…' : id;
+        _statusLine = l10n.agentMemoryStatusAppended(idDisplay);
         _appendingMemory = false;
       });
     } on RustApiException catch (e) {
@@ -389,23 +420,24 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = _agentMemoryMessageFromError(e, l10n);
         _appendingMemory = false;
       });
     }
   }
 
   Future<void> _clearMemory() async {
+    final l10n = AppLocalizations.of(context)!;
     final agentType = _agentTypeCtrl.text.trim();
     final clearType = _clearType;
     final ref = _agentMemoryProjectRef();
     if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
         ref.projectId == null) {
-      setState(() => _statusLine = '清理记忆前请填写项目 ID 和 agent type。');
+      setState(() => _statusLine = l10n.agentMemoryErrClearProjectFields);
       return;
     }
     if (agentType.isEmpty) {
-      setState(() => _statusLine = '请填写 agent type。');
+      setState(() => _statusLine = l10n.agentMemoryErrFillAgentType);
       return;
     }
     setState(() {
@@ -424,7 +456,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       await _queryMemory();
       if (!mounted) return;
       setState(() {
-        _statusLine = '已执行记忆清理：$clearType。';
+        _statusLine = l10n.agentMemoryStatusCleared(clearType);
         _clearingMemory = false;
       });
     } on RustApiException catch (e) {
@@ -436,23 +468,24 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = _agentMemoryMessageFromError(e, l10n);
         _clearingMemory = false;
       });
     }
   }
 
   Future<void> _optimizeVideoMemory() async {
+    final l10n = AppLocalizations.of(context)!;
     final agentType = _agentTypeCtrl.text.trim();
     final episodesId = _episodesId;
     final ref = _agentMemoryProjectRef();
     if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
         ref.projectId == null) {
-      setState(() => _statusLine = '自动优化前请填写项目 ID、agent type 和 episodes id。');
+      setState(() => _statusLine = l10n.agentMemoryErrOptimizeProjectFields);
       return;
     }
     if (agentType.isEmpty || episodesId == null) {
-      setState(() => _statusLine = '自动优化前请填写 agent type 和 episodes id。');
+      setState(() => _statusLine = l10n.agentMemoryErrOptimizeAgentEpisodes);
       return;
     }
     setState(() {
@@ -471,8 +504,19 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       await _queryMemory();
       if (!mounted) return;
       setState(() {
-        _statusLine =
-            '已自动优化视频记忆（${result['automationMode'] ?? _automationMode}）：删除 ${result['removedRows'] ?? 0} 条 / ${(result['removedChars'] ?? 0)} chars，其中重复 ${(result['removedDuplicateRows'] ?? 0)} 条、纯视觉 ${(result['removedVisualRows'] ?? 0)} 条。';
+        final mode = (result['automationMode'] ?? _automationMode).toString();
+        final removedRows = (result['removedRows'] as num?)?.toInt() ?? 0;
+        final removedChars = (result['removedChars'] as num?)?.toInt() ?? 0;
+        final dupRows =
+            (result['removedDuplicateRows'] as num?)?.toInt() ?? 0;
+        final visRows = (result['removedVisualRows'] as num?)?.toInt() ?? 0;
+        _statusLine = l10n.agentMemoryStatusOptimized(
+          mode,
+          removedRows,
+          removedChars,
+          dupRows,
+          visRows,
+        );
         _optimizingMemory = false;
       });
     } on RustApiException catch (e) {
@@ -484,7 +528,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = _agentMemoryMessageFromError(e, l10n);
         _optimizingMemory = false;
       });
     }
