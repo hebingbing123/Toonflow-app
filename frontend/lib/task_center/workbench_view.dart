@@ -482,8 +482,10 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
                   onPressed: () => deepLinkHandler(
                     TaskCenterExportJobDeepLink(
                       projectNumericId: link.projectNumericId,
+                      projectUuid: link.projectUuid,
                       scriptNumericId: link.scriptNumericId,
                       storyboardNumericId: link.storyboardNumericId,
+                      workspaceId: link.workspaceId,
                       openProductionWorkspace: true,
                     ),
                   ),
@@ -493,8 +495,10 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
                   onPressed: () => deepLinkHandler(
                     TaskCenterExportJobDeepLink(
                       projectNumericId: link.projectNumericId,
+                      projectUuid: link.projectUuid,
                       scriptNumericId: link.scriptNumericId,
                       storyboardNumericId: link.storyboardNumericId,
+                      workspaceId: link.workspaceId,
                       openProductionWorkspace: false,
                     ),
                   ),

@@ -13,15 +13,19 @@ void main() {
       status: 'failed',
       payload: <String, dynamic>{
         'project_numeric_id': 9,
+        'project_uuid': '550e8400-e29b-41d4-a716-446655440111',
         'script_numeric_id': 3,
         'storyboard_numeric_id': 77,
+        'workspace_id': '550e8400-e29b-41d4-a716-446655440222',
       },
       errorDetails: <String, dynamic>{
         'code': 'video_download_http',
         'deep_links': <String, dynamic>{
           'project_numeric_id': 9,
+          'project_uuid': '550e8400-e29b-41d4-a716-446655440111',
           'script_numeric_id': 3,
           'storyboard_numeric_id': 77,
+          'workspace_id': '550e8400-e29b-41d4-a716-446655440222',
         },
       },
       errorMessage: 'video download HTTP 403',
@@ -32,11 +36,48 @@ void main() {
     final link = tryParseVideoExportJobDeepLink(job);
     expect(link, isNotNull);
     expect(link!.projectNumericId, 9);
+    expect(link.projectUuid, '550e8400-e29b-41d4-a716-446655440111');
     expect(link.scriptNumericId, 3);
     expect(link.storyboardNumericId, 77);
+    expect(link.workspaceId, '550e8400-e29b-41d4-a716-446655440222');
     expect(
       videoExportFailureCodeLabelZh('video_download_http'),
       '源视频 HTTP 失败',
     );
+  });
+
+  test('parses domain deep link with uuid-first metadata while keeping numeric fallback',
+      () {
+    final job = JobRow(
+      numericTaskId: 88,
+      id: '550e8400-e29b-41d4-a716-446655440333',
+      ownerUserId: 'user',
+      kind: 'storyboard.render',
+      status: 'failed',
+      payload: const <String, dynamic>{
+        'project_numeric_id': 12,
+        'project_uuid': '550e8400-e29b-41d4-a716-446655440444',
+        'script_numeric_id': 5,
+        'workspace_id': '550e8400-e29b-41d4-a716-446655440555',
+      },
+      errorDetails: const <String, dynamic>{
+        'deep_links': <String, dynamic>{
+          'project_numeric_id': 12,
+          'project_id': '550e8400-e29b-41d4-a716-446655440444',
+          'script_numeric_id': 5,
+          'workspace_id': '550e8400-e29b-41d4-a716-446655440555',
+        },
+      },
+      createdAt: '2026-05-05T00:00:00Z',
+      updatedAt: '2026-05-05T00:00:01Z',
+    );
+
+    final link = tryParseTaskCenterDomainDeepLink(job);
+    expect(link, isNotNull);
+    expect(link!.target, TaskCenterDomainDeepLinkTarget.storyboard);
+    expect(link.projectNumericId, 12);
+    expect(link.projectUuid, '550e8400-e29b-41d4-a716-446655440444');
+    expect(link.scriptNumericId, 5);
+    expect(link.workspaceId, '550e8400-e29b-41d4-a716-446655440555');
   });
 }

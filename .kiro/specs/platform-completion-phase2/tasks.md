@@ -108,7 +108,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 
 - [~] **H3. HTTP API D 批次收敛**（**进行中**：已完成首轮依赖盘点与阻塞面落档；确认 **production/task-center/agent workspaces** 仍广泛依赖整型兼容字段，且 **`import_staging` / `promote_import_snapshots()`** 与 `pg_contract_tests` 仍绑定 `numeric_id` / 历史导入语义；删除 PG 标识列仍需独立发布窗口 + DBA 评估）
   - [x] H3.1 按 `docs/plans/http-api-cleanup.md` / `tasks-http-api-cleanup.md` **D** 清单识别待清理列与依赖（含 `import_staging` / promote）
-  - [~] H3.2 确认 Flutter `rust_api` 与主路径 UI 不再依赖待删列 — **首轮结论**：`frontend/lib/rust_api/production/**`、`task_center/**`、`agent_workspaces/**` 及多处 compat/probe 仍直接消费 `projectId` / `*_numeric_id`
+  - [~] H3.2 确认 Flutter `rust_api` 与主路径 UI 不再依赖待删列 — **持续推进**：`task_center` deep-link / shell 跳转已开始透传 `project_uuid` + `workspace_id`，不再只靠 `project_numeric_id` 恢复上下文；但 `frontend/lib/rust_api/production/**`、`agent_workspaces/**` 与多处 compat/probe 仍直接消费 `projectId` / `*_numeric_id`
   - [ ] H3.3 从 `backend/src/` 移除仅服务 legacy 列的 handler 或查询分支（随 D 清单逐项执行）
   - [ ] H3.4 更新 OpenAPI 与导出契约，移除 D 批次涉及的对外字段
   - [ ] H3.5 评估并执行必要数据迁移 / backfill

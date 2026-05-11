@@ -358,6 +358,8 @@ extension _HomePageBuildProductSections on _HomePageState {
             _workspaceInputController.applyProjectScope(
               link.projectNumericId,
               scriptNumericId: link.scriptNumericId,
+              projectUuid: link.projectUuid,
+              workspaceId: link.workspaceId,
             );
             _shellNavigationController.selectProductWorkspacePane(
               link.openProductionWorkspace
@@ -372,6 +374,8 @@ extension _HomePageBuildProductSections on _HomePageState {
             _workspaceInputController.applyProjectScope(
               link.projectNumericId,
               scriptNumericId: link.scriptNumericId,
+              projectUuid: link.projectUuid,
+              workspaceId: link.workspaceId,
             );
             switch (link.target) {
               case TaskCenterDomainDeepLinkTarget.publish:

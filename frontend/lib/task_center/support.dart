@@ -1,45 +1,52 @@
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 String summarizeTaskProjects(
+  AppLocalizations l10n,
   Iterable<TaskCenterProjectItem> rows, {
   int maxItems = 4,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有任务项目';
+    return l10n.taskCenterProjectsEmpty;
   }
   final visible = items
       .take(maxItems)
       .map((row) => '#${row.numericId} ${row.name}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
-  return '项目 ${items.length} 个 · $visible$suffix';
+  return l10n.taskCenterProjectsSummary(items.length, visible, suffix);
 }
 
 String summarizeTaskCategories(
+  AppLocalizations l10n,
   Iterable<TaskCenterTaskClassRow> rows, {
   int maxItems = 4,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有任务分类';
+    return l10n.taskCenterCategoriesEmpty;
   }
   final visible = items.take(maxItems).map((row) => row.taskClass).join(', ');
   final suffix = items.length > maxItems ? '…' : '';
-  return '分类 ${items.length} 个 · $visible$suffix';
+  return l10n.taskCenterCategoriesSummary(items.length, visible, suffix);
 }
 
-String summarizeTaskJobs(Iterable<JobRow> rows, {int maxItems = 4}) {
+String summarizeTaskJobs(
+  AppLocalizations l10n,
+  Iterable<JobRow> rows, {
+  int maxItems = 4,
+}) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有任务记录';
+    return l10n.taskCenterJobsEmpty;
   }
   final visible = items
       .take(maxItems)
       .map((row) => '#${row.numericTaskId} ${row.kind}:${row.status}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
-  return '任务 ${items.length} 条 · $visible$suffix';
+  return l10n.taskCenterJobsSummary(items.length, visible, suffix);
 }
 
 String formatTaskJobDetails(JobRow row) {
@@ -68,14 +75,18 @@ String formatTaskJobDetails(JobRow row) {
 class TaskCenterExportJobDeepLink {
   const TaskCenterExportJobDeepLink({
     required this.projectNumericId,
+    this.projectUuid,
     this.scriptNumericId,
     this.storyboardNumericId,
+    this.workspaceId,
     required this.openProductionWorkspace,
   });
 
   final int projectNumericId;
+  final String? projectUuid;
   final int? scriptNumericId;
   final int? storyboardNumericId;
+  final String? workspaceId;
 
   /// **`true`** → 制作工作区；**`false`** → 剧本工作区。
   final bool openProductionWorkspace;
@@ -87,15 +98,19 @@ class TaskCenterDomainDeepLink {
   const TaskCenterDomainDeepLink({
     required this.target,
     required this.projectNumericId,
+    this.projectUuid,
     this.scriptNumericId,
     this.storyboardNumericId,
+    this.workspaceId,
     this.publishDraftId,
   });
 
   final TaskCenterDomainDeepLinkTarget target;
   final int projectNumericId;
+  final String? projectUuid;
   final int? scriptNumericId;
   final int? storyboardNumericId;
+  final String? workspaceId;
   final String? publishDraftId;
 }
 
@@ -111,6 +126,18 @@ int? taskCenterDeepLinkInt(Map<String, dynamic>? map, String key) {
     return int.tryParse(value);
   }
   return null;
+}
+
+String? taskCenterDeepLinkString(Map<String, dynamic>? map, String key) {
+  if (map == null) {
+    return null;
+  }
+  final value = map[key];
+  if (value == null) {
+    return null;
+  }
+  final text = value.toString().trim();
+  return text.isEmpty ? null : text;
 }
 
 TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
@@ -129,14 +156,24 @@ TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
   if (project == null) {
     return null;
   }
+  final projectUuid =
+      taskCenterDeepLinkString(links, 'project_uuid') ??
+      taskCenterDeepLinkString(payload, 'project_uuid') ??
+      taskCenterDeepLinkString(links, 'project_id') ??
+      taskCenterDeepLinkString(payload, 'project_id');
   final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'script_numeric_id');
   final storyboard = taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'storyboard_numeric_id');
+  final workspaceId =
+      taskCenterDeepLinkString(links, 'workspace_id') ??
+      taskCenterDeepLinkString(payload, 'workspace_id');
   return TaskCenterExportJobDeepLink(
     projectNumericId: project,
+    projectUuid: projectUuid,
     scriptNumericId: script,
     storyboardNumericId: storyboard,
+    workspaceId: workspaceId,
     openProductionWorkspace: true,
   );
 }
@@ -151,11 +188,19 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
   if (project == null) {
     return null;
   }
+  final projectUuid =
+      taskCenterDeepLinkString(links, 'project_uuid') ??
+      taskCenterDeepLinkString(payload, 'project_uuid') ??
+      taskCenterDeepLinkString(links, 'project_id') ??
+      taskCenterDeepLinkString(payload, 'project_id');
 
   final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'script_numeric_id');
   final storyboard = taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'storyboard_numeric_id');
+  final workspaceId =
+      taskCenterDeepLinkString(links, 'workspace_id') ??
+      taskCenterDeepLinkString(payload, 'workspace_id');
   final publishDraftId = (links['publish_draft_id'] ?? payload['publish_draft_id'])?.toString();
 
   final kind = job.kind.trim().toLowerCase();
@@ -173,8 +218,10 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
   return TaskCenterDomainDeepLink(
     target: target,
     projectNumericId: project,
+    projectUuid: projectUuid,
     scriptNumericId: script,
     storyboardNumericId: storyboard,
+    workspaceId: workspaceId,
     publishDraftId: publishDraftId,
   );
 }
@@ -201,18 +248,18 @@ String taskCenterShortVideoStageKey(JobRow job) {
   return 'prep';
 }
 
-String taskCenterShortVideoStageLabel(JobRow job) {
+String taskCenterShortVideoStageLabel(AppLocalizations l10n, JobRow job) {
   switch (taskCenterShortVideoStageKey(job)) {
     case 'quality':
-      return '质检';
+      return l10n.taskCenterPhaseQuality;
     case 'export':
-      return '导出成片';
+      return l10n.taskCenterPhaseExport;
     case 'video':
-      return '出视频';
+      return l10n.taskCenterPhaseVideo;
     case 'image':
-      return '出图';
+      return l10n.taskCenterPhaseImage;
     case 'prep':
-      return '素材准备';
+      return l10n.taskCenterPhasePrep;
     default:
       return '';
   }
@@ -235,33 +282,33 @@ bool taskCenterSupportsWritebackCompensation(JobRow job) {
   return code.contains('writeback') || code.contains('persist');
 }
 
-String videoExportFailureCodeLabelZh(String code) {
+String videoExportFailureCodeLabel(AppLocalizations l10n, String code) {
   switch (code) {
     case 'payload_missing_source_url':
-      return '缺少 source_url';
+      return l10n.taskCenterFailurePayloadMissingSourceUrl;
     case 'payload_source_url_empty':
-      return '成片 URL 为空';
+      return l10n.taskCenterFailurePayloadSourceUrlEmpty;
     case 'payload_format_invalid':
-      return '导出格式无效';
+      return l10n.taskCenterFailurePayloadFormatInvalid;
     case 'local_export_dir_unset':
-      return '服务端未配置导出目录';
+      return l10n.taskCenterFailureLocalExportDirUnset;
     case 'export_provider_failed':
-      return '导出提供方失败';
+      return l10n.taskCenterFailureExportProviderFailed;
     case 'export_directory_create_failed':
-      return '创建导出目录失败';
+      return l10n.taskCenterFailureExportDirectoryCreateFailed;
     case 'export_file_persist_failed':
-      return '写入导出文件失败';
+      return l10n.taskCenterFailureExportFilePersistFailed;
     case 'video_download_http':
-      return '源视频 HTTP 失败';
+      return l10n.taskCenterFailureVideoDownloadHttp;
     case 'video_download_stream':
-      return '源视频下载中断';
+      return l10n.taskCenterFailureVideoDownloadStream;
     case 'video_format_mismatch_no_transcode':
-      return '格式不一致（未转码）';
+      return l10n.taskCenterFailureVideoFormatMismatchNoTranscode;
     case 'video_content_length_exceeds_limit':
-      return '源视频过大（长度头）';
+      return l10n.taskCenterFailureVideoContentLengthExceedsLimit;
     case 'video_body_exceeds_limit':
-      return '源视频过大（正文）';
+      return l10n.taskCenterFailureVideoBodyExceedsLimit;
     default:
-      return code.isEmpty ? '未知原因码' : code;
+      return code.isEmpty ? l10n.taskCenterFailureUnknownCode : code;
   }
 }
