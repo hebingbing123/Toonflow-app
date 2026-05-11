@@ -366,6 +366,7 @@ void main() {
   });
 
   test('buildWorkspaceRowSemanticsLabel describes current archived state', () {
+    final zh = AppLocalizationsZh();
     final now = DateTime.utc(2026, 1, 1);
     final row = WorkspaceListItem(
       workspace: WorkspaceResponse(
@@ -382,18 +383,20 @@ void main() {
     );
 
     expect(
-      buildWorkspaceRowSemanticsLabel(row, isCurrent: true),
+      buildWorkspaceRowSemanticsLabel(zh, row, isCurrent: true),
       'Team Alpha，enterprise 空间，你的角色是 admin，已归档，当前工作区',
     );
     expect(
-      buildWorkspaceRowSemanticsLabel(row, isCurrent: false),
+      buildWorkspaceRowSemanticsLabel(zh, row, isCurrent: false),
       'Team Alpha，enterprise 空间，你的角色是 admin，已归档',
     );
   });
 
   test('buildWorkspaceActionTooltip includes workspace name', () {
+    final zh = AppLocalizationsZh();
     expect(
       buildWorkspaceActionTooltip(
+        l10n: zh,
         actionLabel: '管理邀请',
         workspaceName: 'Team Alpha',
       ),

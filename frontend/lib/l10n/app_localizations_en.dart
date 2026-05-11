@@ -3964,4 +3964,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String qualityReviewsStageGradeRow(String stage, int a, int b, int c, int d) {
     return '$stage · A $a / B $b / C $c / D $d';
   }
+
+  @override
+  String get teamWorkspaceInviteTokenAutofillHint =>
+      'Invite token was auto-filled from the link. You can accept directly.';
+
+  @override
+  String get teamWorkspaceOnlyPersonalTitle =>
+      'Only Personal workspace is active';
+
+  @override
+  String get teamWorkspaceOnlyPersonalBody =>
+      'To start team collaboration, create an enterprise workspace first, then invite members from member management. Projects, jobs, and Agent context can then share the same team scope.';
+
+  @override
+  String get teamWorkspaceArchivedFlag => ', archived';
+
+  @override
+  String get teamWorkspaceCurrentFlag => ', current workspace';
+
+  @override
+  String teamWorkspaceRowSemantics(
+    String name,
+    String type,
+    String role,
+    String archived,
+    String current,
+  ) {
+    return '$name, $type workspace, your role is $role$archived$current';
+  }
+
+  @override
+  String teamWorkspaceActionTooltip(String action, String workspace) {
+    return '$action $workspace';
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
@@ -1917,6 +1918,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final theme = Theme.of(context);
     if (token == null || token.isEmpty) {
@@ -1968,7 +1970,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         )) ...<Widget>[
           const SizedBox(height: 6),
           Text(
-            kInviteTokenAutofillHint,
+            inviteTokenAutofillHint(l10n),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.primary,
             ),
@@ -2047,12 +2049,12 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  kOnlyPersonalWorkspaceTitle,
+                  onlyPersonalWorkspaceTitle(l10n),
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  kOnlyPersonalWorkspaceBody,
+                  onlyPersonalWorkspaceBody(l10n),
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -2079,6 +2081,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               return Semantics(
                 selected: isCurrent,
                 label: buildWorkspaceRowSemanticsLabel(
+                  l10n,
                   row,
                   isCurrent: isCurrent,
                 ),
@@ -2107,6 +2110,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       if (canManage)
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
+                            l10n: l10n,
                             actionLabel: '管理成员',
                             workspaceName: w.name,
                           ),
@@ -2120,6 +2124,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       if (canManage)
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
+                            l10n: l10n,
                             actionLabel: '管理邀请',
                             workspaceName: w.name,
                           ),
@@ -2132,6 +2137,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         ),
                       Tooltip(
                         message: buildWorkspaceActionTooltip(
+                          l10n: l10n,
                           actionLabel: '切换到工作区',
                           workspaceName: w.name,
                         ),
@@ -2154,6 +2160,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       if (canManage && w.archivedAt == null)
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
+                            l10n: l10n,
                             actionLabel: '归档工作区',
                             workspaceName: w.name,
                           ),
@@ -2175,6 +2182,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       if (canManage && w.archivedAt != null)
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
+                            l10n: l10n,
                             actionLabel: '恢复工作区',
                             workspaceName: w.name,
                           ),

@@ -3810,4 +3810,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String qualityReviewsStageGradeRow(String stage, int a, int b, int c, int d) {
     return '$stage · A $a / B $b / C $c / D $d';
   }
+
+  @override
+  String get teamWorkspaceInviteTokenAutofillHint =>
+      '已从链接自动填入邀请 token，可直接点击“接受邀请”。';
+
+  @override
+  String get teamWorkspaceOnlyPersonalTitle => '当前只有 Personal 工作区';
+
+  @override
+  String get teamWorkspaceOnlyPersonalBody =>
+      '若要开始团队协作，可先创建一个 enterprise 空间，再去成员管理里发邀请。创建后就能把项目、任务和 Agent 上下文切到同一个团队范围。';
+
+  @override
+  String get teamWorkspaceArchivedFlag => '，已归档';
+
+  @override
+  String get teamWorkspaceCurrentFlag => '，当前工作区';
+
+  @override
+  String teamWorkspaceRowSemantics(
+    String name,
+    String type,
+    String role,
+    String archived,
+    String current,
+  ) {
+    return '$name，$type 空间，你的角色是 $role$archived$current';
+  }
+
+  @override
+  String teamWorkspaceActionTooltip(String action, String workspace) {
+    return '$action $workspace';
+  }
 }

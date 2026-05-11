@@ -6560,6 +6560,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{stage} · A {a} / B {b} / C {c} / D {d}'**
   String qualityReviewsStageGradeRow(String stage, int a, int b, int c, int d);
+
+  /// No description provided for @teamWorkspaceInviteTokenAutofillHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite token was auto-filled from the link. You can accept directly.'**
+  String get teamWorkspaceInviteTokenAutofillHint;
+
+  /// No description provided for @teamWorkspaceOnlyPersonalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Only Personal workspace is active'**
+  String get teamWorkspaceOnlyPersonalTitle;
+
+  /// No description provided for @teamWorkspaceOnlyPersonalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To start team collaboration, create an enterprise workspace first, then invite members from member management. Projects, jobs, and Agent context can then share the same team scope.'**
+  String get teamWorkspaceOnlyPersonalBody;
+
+  /// No description provided for @teamWorkspaceArchivedFlag.
+  ///
+  /// In en, this message translates to:
+  /// **', archived'**
+  String get teamWorkspaceArchivedFlag;
+
+  /// No description provided for @teamWorkspaceCurrentFlag.
+  ///
+  /// In en, this message translates to:
+  /// **', current workspace'**
+  String get teamWorkspaceCurrentFlag;
+
+  /// No description provided for @teamWorkspaceRowSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {type} workspace, your role is {role}{archived}{current}'**
+  String teamWorkspaceRowSemantics(
+    String name,
+    String type,
+    String role,
+    String archived,
+    String current,
+  );
+
+  /// No description provided for @teamWorkspaceActionTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} {workspace}'**
+  String teamWorkspaceActionTooltip(String action, String workspace);
 }
 
 class _AppLocalizationsDelegate

@@ -2876,5 +2876,41 @@
         "type": "int"
       }
     }
+  },
+  "teamWorkspaceInviteTokenAutofillHint": "Invite token was auto-filled from the link. You can accept directly.",
+  "teamWorkspaceOnlyPersonalTitle": "Only Personal workspace is active",
+  "teamWorkspaceOnlyPersonalBody": "To start team collaboration, create an enterprise workspace first, then invite members from member management. Projects, jobs, and Agent context can then share the same team scope.",
+  "teamWorkspaceArchivedFlag": ", archived",
+  "teamWorkspaceCurrentFlag": ", current workspace",
+  "teamWorkspaceRowSemantics": "{name}, {type} workspace, your role is {role}{archived}{current}",
+  "@teamWorkspaceRowSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "archived": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceActionTooltip": "{action} {workspace}",
+  "@teamWorkspaceActionTooltip": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "workspace": {
+        "type": "String"
+      }
+    }
   }
 }

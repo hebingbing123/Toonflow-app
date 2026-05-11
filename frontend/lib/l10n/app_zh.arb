@@ -2876,5 +2876,41 @@
         "type": "int"
       }
     }
+  },
+  "teamWorkspaceInviteTokenAutofillHint": "已从链接自动填入邀请 token，可直接点击“接受邀请”。",
+  "teamWorkspaceOnlyPersonalTitle": "当前只有 Personal 工作区",
+  "teamWorkspaceOnlyPersonalBody": "若要开始团队协作，可先创建一个 enterprise 空间，再去成员管理里发邀请。创建后就能把项目、任务和 Agent 上下文切到同一个团队范围。",
+  "teamWorkspaceArchivedFlag": "，已归档",
+  "teamWorkspaceCurrentFlag": "，当前工作区",
+  "teamWorkspaceRowSemantics": "{name}，{type} 空间，你的角色是 {role}{archived}{current}",
+  "@teamWorkspaceRowSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "archived": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceActionTooltip": "{action} {workspace}",
+  "@teamWorkspaceActionTooltip": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "workspace": {
+        "type": "String"
+      }
+    }
   }
 }
