@@ -3966,4 +3966,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get teamWorkspaceRestoreAction => '恢复';
+
+  @override
+  String teamWorkspaceInviteMetaLine(String status, String expiry) {
+    return '状态: $status · 过期: $expiry';
+  }
+
+  @override
+  String get teamWorkspaceInviteStatusRevoked => '已撤销';
+
+  @override
+  String get teamWorkspaceInviteStatusExpired => '已过期';
+
+  @override
+  String get teamWorkspaceInviteStatusValid => '有效';
+
+  @override
+  String get teamWorkspaceInviteStatusAccepted => '已接受';
+
+  @override
+  String get teamWorkspaceAuditMemberUpserted => '成员已添加或更新';
+
+  @override
+  String get teamWorkspaceAuditMemberRoleChanged => '成员角色已变更';
+
+  @override
+  String get teamWorkspaceAuditMemberRemoved => '成员已移除';
+
+  @override
+  String get teamWorkspaceAuditMemberLeft => '成员主动离开';
+
+  @override
+  String get teamWorkspaceAuditOwnerTransferred => 'owner 已转让';
+
+  @override
+  String get teamWorkspaceAuditInviteCreated => '邀请已创建';
+
+  @override
+  String get teamWorkspaceAuditInviteResent => '邀请已重发';
+
+  @override
+  String get teamWorkspaceAuditInviteRevoked => '邀请已撤销';
+
+  @override
+  String get teamWorkspaceAuditInviteAccepted => '邀请已接受';
 }

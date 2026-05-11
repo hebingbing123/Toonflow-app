@@ -2984,5 +2984,29 @@
   "teamWorkspaceSwitchHereAction": "Switch here",
   "teamWorkspaceArchiveActionLabel": "Archive workspace",
   "teamWorkspaceRestoreActionLabel": "Restore workspace",
-  "teamWorkspaceRestoreAction": "Restore"
+  "teamWorkspaceRestoreAction": "Restore",
+  "teamWorkspaceInviteMetaLine": "Status: {status} · expires: {expiry}",
+  "@teamWorkspaceInviteMetaLine": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "expiry": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceInviteStatusRevoked": "Revoked",
+  "teamWorkspaceInviteStatusExpired": "Expired",
+  "teamWorkspaceInviteStatusValid": "Valid",
+  "teamWorkspaceInviteStatusAccepted": "Accepted",
+  "teamWorkspaceAuditMemberUpserted": "Member added or updated",
+  "teamWorkspaceAuditMemberRoleChanged": "Member role changed",
+  "teamWorkspaceAuditMemberRemoved": "Member removed",
+  "teamWorkspaceAuditMemberLeft": "Member left workspace",
+  "teamWorkspaceAuditOwnerTransferred": "Owner transferred",
+  "teamWorkspaceAuditInviteCreated": "Invite created",
+  "teamWorkspaceAuditInviteResent": "Invite resent",
+  "teamWorkspaceAuditInviteRevoked": "Invite revoked",
+  "teamWorkspaceAuditInviteAccepted": "Invite accepted"
 }

@@ -4127,4 +4127,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teamWorkspaceRestoreAction => 'Restore';
+
+  @override
+  String teamWorkspaceInviteMetaLine(String status, String expiry) {
+    return 'Status: $status · expires: $expiry';
+  }
+
+  @override
+  String get teamWorkspaceInviteStatusRevoked => 'Revoked';
+
+  @override
+  String get teamWorkspaceInviteStatusExpired => 'Expired';
+
+  @override
+  String get teamWorkspaceInviteStatusValid => 'Valid';
+
+  @override
+  String get teamWorkspaceInviteStatusAccepted => 'Accepted';
+
+  @override
+  String get teamWorkspaceAuditMemberUpserted => 'Member added or updated';
+
+  @override
+  String get teamWorkspaceAuditMemberRoleChanged => 'Member role changed';
+
+  @override
+  String get teamWorkspaceAuditMemberRemoved => 'Member removed';
+
+  @override
+  String get teamWorkspaceAuditMemberLeft => 'Member left workspace';
+
+  @override
+  String get teamWorkspaceAuditOwnerTransferred => 'Owner transferred';
+
+  @override
+  String get teamWorkspaceAuditInviteCreated => 'Invite created';
+
+  @override
+  String get teamWorkspaceAuditInviteResent => 'Invite resent';
+
+  @override
+  String get teamWorkspaceAuditInviteRevoked => 'Invite revoked';
+
+  @override
+  String get teamWorkspaceAuditInviteAccepted => 'Invite accepted';
 }

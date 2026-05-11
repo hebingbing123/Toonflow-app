@@ -56,28 +56,35 @@ List<WorkspaceInviteResponse> filterInvitesByExpiryVisibility(
       .toList(growable: false);
 }
 
-String formatWorkspaceInviteMeta(WorkspaceInviteResponse invite) {
+String formatWorkspaceInviteMeta(
+  WorkspaceInviteResponse invite, {
+  AppLocalizations? l10n,
+}) {
   final expiry = invite.expiresAt.toLocal().toIso8601String();
-  final stateText = inviteStatusLabel(invite);
-  return '状态: $stateText · 过期: $expiry';
+  final stateText = inviteStatusLabel(invite, l10n: l10n);
+  return l10n?.teamWorkspaceInviteMetaLine(stateText, expiry) ??
+      '状态: $stateText · 过期: $expiry';
 }
 
 bool isWorkspaceInviteExpired(WorkspaceInviteResponse invite) {
   return invite.expiresAt.isBefore(DateTime.now().toUtc());
 }
 
-String inviteStatusLabel(WorkspaceInviteResponse invite) {
+String inviteStatusLabel(
+  WorkspaceInviteResponse invite, {
+  AppLocalizations? l10n,
+}) {
   if (invite.status == 'revoked') {
-    return '已撤销';
+    return l10n?.teamWorkspaceInviteStatusRevoked ?? '已撤销';
   }
   if (isWorkspaceInviteExpired(invite)) {
-    return '已过期';
+    return l10n?.teamWorkspaceInviteStatusExpired ?? '已过期';
   }
   if (invite.status == 'pending') {
-    return '有效';
+    return l10n?.teamWorkspaceInviteStatusValid ?? '有效';
   }
   if (invite.status == 'accepted') {
-    return '已接受';
+    return l10n?.teamWorkspaceInviteStatusAccepted ?? '已接受';
   }
   return invite.status;
 }
@@ -91,26 +98,29 @@ String buildInviteCopyText(WorkspaceInviteResponse invite) {
       'token=${invite.token}';
 }
 
-String workspaceAuditActionLabel(String action) {
+String workspaceAuditActionLabel(
+  String action, {
+  AppLocalizations? l10n,
+}) {
   switch (action) {
     case 'workspace_member_upserted':
-      return '成员已添加或更新';
+      return l10n?.teamWorkspaceAuditMemberUpserted ?? '成员已添加或更新';
     case 'workspace_member_role_changed':
-      return '成员角色已变更';
+      return l10n?.teamWorkspaceAuditMemberRoleChanged ?? '成员角色已变更';
     case 'workspace_member_removed':
-      return '成员已移除';
+      return l10n?.teamWorkspaceAuditMemberRemoved ?? '成员已移除';
     case 'workspace_member_left':
-      return '成员主动离开';
+      return l10n?.teamWorkspaceAuditMemberLeft ?? '成员主动离开';
     case 'workspace_owner_transferred':
-      return 'owner 已转让';
+      return l10n?.teamWorkspaceAuditOwnerTransferred ?? 'owner 已转让';
     case 'workspace_invite_created':
-      return '邀请已创建';
+      return l10n?.teamWorkspaceAuditInviteCreated ?? '邀请已创建';
     case 'workspace_invite_resent':
-      return '邀请已重发';
+      return l10n?.teamWorkspaceAuditInviteResent ?? '邀请已重发';
     case 'workspace_invite_revoked':
-      return '邀请已撤销';
+      return l10n?.teamWorkspaceAuditInviteRevoked ?? '邀请已撤销';
     case 'workspace_invite_accepted':
-      return '邀请已接受';
+      return l10n?.teamWorkspaceAuditInviteAccepted ?? '邀请已接受';
     default:
       return action;
   }
@@ -439,6 +449,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _openMembersDialog(WorkspaceListItem row) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -903,7 +914,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             includeExpired: includeExpiredInvites,
                           ),
                         ).map((invite) {
-                          final label = inviteStatusLabel(invite);
+                          final label = inviteStatusLabel(invite, l10n: l10n);
                           final chipColor = label == '已过期' || label == '已撤销'
                               ? Theme.of(context).colorScheme.errorContainer
                               : Theme.of(
@@ -935,7 +946,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       ],
                                     ),
                                     SelectableText(
-                                      '${formatWorkspaceInviteMeta(invite)}\ninvite token: ${invite.token}',
+                                      '${formatWorkspaceInviteMeta(invite, l10n: l10n)}\ninvite token: ${invite.token}',
                                       style: Theme.of(
                                         context,
                                       ).textTheme.bodySmall,
@@ -1103,7 +1114,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               }
                               final haystack = <String>[
                                 audit.action,
-                                workspaceAuditActionLabel(audit.action),
+                                workspaceAuditActionLabel(
+                                  audit.action,
+                                  l10n: l10n,
+                                ),
                                 audit.actorUserId,
                                 audit.targetUserId ?? '',
                                 '${audit.details['role'] ?? ''}',
@@ -1118,7 +1132,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 dense: true,
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(
-                                  workspaceAuditActionLabel(audit.action),
+                                  workspaceAuditActionLabel(
+                                    audit.action,
+                                    l10n: l10n,
+                                  ),
                                 ),
                                 subtitle: SelectableText(
                                   '${audit.createdAt.toLocal().toIso8601String()}\n${buildWorkspaceAuditSummary(audit)}',
@@ -1377,6 +1394,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _openInvitesDialog(WorkspaceListItem row) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -1696,7 +1714,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           final selected = selectedInviteIds.contains(
                             invite.id,
                           );
-                          final label = inviteStatusLabel(invite);
+                          final label = inviteStatusLabel(invite, l10n: l10n);
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
@@ -1717,7 +1735,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 },
                                 title: Text('${invite.email} · ${invite.role}'),
                                 subtitle: SelectableText(
-                                  '$label\n${formatWorkspaceInviteMeta(invite)}\ninvite token: ${invite.token}',
+                                  '$label\n${formatWorkspaceInviteMeta(invite, l10n: l10n)}\ninvite token: ${invite.token}',
                                 ),
                               ),
                               if (invite.status == 'pending')

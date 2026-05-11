@@ -6830,6 +6830,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore'**
   String get teamWorkspaceRestoreAction;
+
+  /// No description provided for @teamWorkspaceInviteMetaLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status} · expires: {expiry}'**
+  String teamWorkspaceInviteMetaLine(String status, String expiry);
+
+  /// No description provided for @teamWorkspaceInviteStatusRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get teamWorkspaceInviteStatusRevoked;
+
+  /// No description provided for @teamWorkspaceInviteStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get teamWorkspaceInviteStatusExpired;
+
+  /// No description provided for @teamWorkspaceInviteStatusValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid'**
+  String get teamWorkspaceInviteStatusValid;
+
+  /// No description provided for @teamWorkspaceInviteStatusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get teamWorkspaceInviteStatusAccepted;
+
+  /// No description provided for @teamWorkspaceAuditMemberUpserted.
+  ///
+  /// In en, this message translates to:
+  /// **'Member added or updated'**
+  String get teamWorkspaceAuditMemberUpserted;
+
+  /// No description provided for @teamWorkspaceAuditMemberRoleChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Member role changed'**
+  String get teamWorkspaceAuditMemberRoleChanged;
+
+  /// No description provided for @teamWorkspaceAuditMemberRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed'**
+  String get teamWorkspaceAuditMemberRemoved;
+
+  /// No description provided for @teamWorkspaceAuditMemberLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Member left workspace'**
+  String get teamWorkspaceAuditMemberLeft;
+
+  /// No description provided for @teamWorkspaceAuditOwnerTransferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner transferred'**
+  String get teamWorkspaceAuditOwnerTransferred;
+
+  /// No description provided for @teamWorkspaceAuditInviteCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite created'**
+  String get teamWorkspaceAuditInviteCreated;
+
+  /// No description provided for @teamWorkspaceAuditInviteResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite resent'**
+  String get teamWorkspaceAuditInviteResent;
+
+  /// No description provided for @teamWorkspaceAuditInviteRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite revoked'**
+  String get teamWorkspaceAuditInviteRevoked;
+
+  /// No description provided for @teamWorkspaceAuditInviteAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite accepted'**
+  String get teamWorkspaceAuditInviteAccepted;
 }
 
 class _AppLocalizationsDelegate

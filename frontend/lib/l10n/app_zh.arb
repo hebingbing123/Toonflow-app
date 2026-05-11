@@ -2984,5 +2984,29 @@
   "teamWorkspaceSwitchHereAction": "切换到此",
   "teamWorkspaceArchiveActionLabel": "归档工作区",
   "teamWorkspaceRestoreActionLabel": "恢复工作区",
-  "teamWorkspaceRestoreAction": "恢复"
+  "teamWorkspaceRestoreAction": "恢复",
+  "teamWorkspaceInviteMetaLine": "状态: {status} · 过期: {expiry}",
+  "@teamWorkspaceInviteMetaLine": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "expiry": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceInviteStatusRevoked": "已撤销",
+  "teamWorkspaceInviteStatusExpired": "已过期",
+  "teamWorkspaceInviteStatusValid": "有效",
+  "teamWorkspaceInviteStatusAccepted": "已接受",
+  "teamWorkspaceAuditMemberUpserted": "成员已添加或更新",
+  "teamWorkspaceAuditMemberRoleChanged": "成员角色已变更",
+  "teamWorkspaceAuditMemberRemoved": "成员已移除",
+  "teamWorkspaceAuditMemberLeft": "成员主动离开",
+  "teamWorkspaceAuditOwnerTransferred": "owner 已转让",
+  "teamWorkspaceAuditInviteCreated": "邀请已创建",
+  "teamWorkspaceAuditInviteResent": "邀请已重发",
+  "teamWorkspaceAuditInviteRevoked": "邀请已撤销",
+  "teamWorkspaceAuditInviteAccepted": "邀请已接受"
 }
