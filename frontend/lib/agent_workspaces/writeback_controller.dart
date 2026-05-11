@@ -9,6 +9,8 @@ typedef WorkspaceWritebackAccessTokenProvider = String? Function();
 typedef WorkspaceWritebackErrorSink = void Function(String? error);
 typedef WorkspaceWritebackFetchProjects =
     Future<List<ProjectRow>> Function(String token, int projectNumericId);
+typedef WorkspaceWritebackFetchAllProjects =
+    Future<List<ProjectRow>> Function(String token);
 typedef WorkspaceWritebackUpdateScript =
     Future<ScriptRow> Function(
       String token,
@@ -54,6 +56,7 @@ class WorkspaceWritebackController {
     required WorkspaceWritebackAccessTokenProvider accessTokenProvider,
     required WorkspaceWritebackErrorSink onErrorChanged,
     WorkspaceWritebackFetchProjects fetchProjects = postGeneralGetSingleProject,
+    WorkspaceWritebackFetchAllProjects fetchAllProjects = fetchProjects,
     WorkspaceWritebackUpdateScript updateScript =
         updateScriptByProjectAndNumericId,
     WorkspaceWritebackSetPlanData setPlanData = postScriptAgentSetPlanDataV1,
@@ -68,6 +71,7 @@ class WorkspaceWritebackController {
        _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
        _fetchProjects = fetchProjects,
+       _fetchAllProjects = fetchAllProjects,
        _updateScript = updateScript,
        _setPlanData = setPlanData,
        _updatePlanData = updatePlanData,
@@ -80,6 +84,7 @@ class WorkspaceWritebackController {
   final WorkspaceWritebackAccessTokenProvider _accessTokenProvider;
   final WorkspaceWritebackErrorSink _onErrorChanged;
   final WorkspaceWritebackFetchProjects _fetchProjects;
+  final WorkspaceWritebackFetchAllProjects _fetchAllProjects;
   final WorkspaceWritebackUpdateScript _updateScript;
   final WorkspaceWritebackSetPlanData _setPlanData;
   final WorkspaceWritebackUpdatePlanData _updatePlanData;
@@ -166,11 +171,15 @@ class WorkspaceWritebackController {
   Future<void> writeBackScriptPlanWorkspaceResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
+    final projectUuid = _trimmedNonEmpty(
+      _inputController.projectUuidController.text,
+    );
+    final projectNumericId = _parsePositiveInt(
       _inputController.projectIdController.text,
     );
     final candidate = _outputController.scriptPlanWritebackCandidate;
-    if (projectId == null || candidate == null) {
+    if ((projectNumericId == null && projectUuid == null) ||
+        candidate == null) {
       _onErrorChanged('project_id 与 planData 回写源必须有效');
       return;
     }
@@ -187,6 +196,15 @@ class WorkspaceWritebackController {
 
     _beginWriteback(WorkspaceOperation.scriptPlanResultWriteback);
     try {
+      final projectId = await _resolveProjectNumericId(
+        token,
+        projectNumericId: projectNumericId,
+        projectUuid: projectUuid,
+      );
+      if (projectId == null) {
+        _onErrorChanged('未找到项目');
+        return;
+      }
       final status = await _setPlanData(
         token,
         projectId: projectId,
@@ -261,7 +279,10 @@ class WorkspaceWritebackController {
   Future<void> writeBackProductionFlowResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final projectId = _parsePositiveInt(
+    final projectUuid = _trimmedNonEmpty(
+      _inputController.projectUuidController.text,
+    );
+    final projectNumericId = _parsePositiveInt(
       _inputController.projectIdController.text,
     );
     final scriptId = _parsePositiveInt(
@@ -270,7 +291,7 @@ class WorkspaceWritebackController {
     final flowKey = _inputController.productionFlowKeyController.text.trim();
     final toolName = _outputController.lastToolName;
     final result = _outputController.lastToolResultData;
-    if (projectId == null ||
+    if ((projectNumericId == null && projectUuid == null) ||
         scriptId == null ||
         flowKey.isEmpty ||
         result == null) {
@@ -279,6 +300,16 @@ class WorkspaceWritebackController {
     }
     if (toolName == null) {
       _onErrorChanged('缺少工具来源，无法安全回写');
+      return;
+    }
+
+    final projectId = await _resolveProjectNumericId(
+      token,
+      projectNumericId: projectNumericId,
+      projectUuid: projectUuid,
+    );
+    if (projectId == null) {
+      _onErrorChanged('未找到项目');
       return;
     }
 
@@ -371,6 +402,26 @@ class WorkspaceWritebackController {
       return null;
     }
     return projects.first.id;
+  }
+
+  Future<int?> _resolveProjectNumericId(
+    String token, {
+    int? projectNumericId,
+    String? projectUuid,
+  }) async {
+    if (projectNumericId != null && projectNumericId > 0) {
+      return projectNumericId;
+    }
+    if (projectUuid == null || projectUuid.isEmpty) {
+      return null;
+    }
+    final projects = await _fetchAllProjects(token);
+    for (final project in projects) {
+      if (project.id == projectUuid) {
+        return project.numericId;
+      }
+    }
+    return null;
   }
 
   void _beginWriteback(WorkspaceOperation operation) {
