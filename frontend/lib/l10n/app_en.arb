@@ -3113,5 +3113,53 @@
   "teamWorkspaceRemoveMemberTooltip": "Remove member",
   "teamWorkspaceLeftWorkspace": "Left this workspace",
   "teamWorkspaceLeaving": "Leaving…",
-  "teamWorkspaceLeaveWorkspaceAction": "Leave workspace"
+  "teamWorkspaceLeaveWorkspaceAction": "Leave workspace",
+  "teamWorkspaceRoleOptionMember": "member",
+  "teamWorkspaceRoleOptionAdmin": "admin",
+  "teamWorkspaceStatusOptionPending": "pending",
+  "teamWorkspaceStatusOptionAccepted": "accepted",
+  "teamWorkspaceStatusOptionRevoked": "revoked",
+  "teamWorkspaceStatusOptionAll": "all",
+  "teamWorkspaceInvitesDialogTitle": "Invites · {workspace}",
+  "@teamWorkspaceInvitesDialogTitle": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceGenerating": "Generating…",
+  "teamWorkspaceGenerateInviteAction": "Generate invite",
+  "teamWorkspaceRefreshInvitesAction": "Refresh invites",
+  "teamWorkspaceCopiedInviteCount": "Copied {count} invites",
+  "@teamWorkspaceCopiedInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspaceBulkCopyAction": "Bulk copy",
+  "teamWorkspaceClearSelectionAction": "Clear selection",
+  "teamWorkspaceStatusLabel": "Status",
+  "teamWorkspacePageSizeLabel": "Page size",
+  "teamWorkspaceNoInvitesForCurrentFilters": "No invites for current filters.",
+  "teamWorkspacePagingLine": "Page {page} / {pages} · total {total}",
+  "@teamWorkspacePagingLine": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspacePrevPageAction": "Previous",
+  "teamWorkspaceNextPageAction": "Next",
+  "teamWorkspaceResendInviteLinkAction": "Resend link",
+  "teamWorkspaceRevokeAction": "Revoke"
 }

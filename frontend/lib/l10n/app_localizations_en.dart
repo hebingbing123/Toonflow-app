@@ -4324,4 +4324,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teamWorkspaceLeaveWorkspaceAction => 'Leave workspace';
+
+  @override
+  String get teamWorkspaceRoleOptionMember => 'member';
+
+  @override
+  String get teamWorkspaceRoleOptionAdmin => 'admin';
+
+  @override
+  String get teamWorkspaceStatusOptionPending => 'pending';
+
+  @override
+  String get teamWorkspaceStatusOptionAccepted => 'accepted';
+
+  @override
+  String get teamWorkspaceStatusOptionRevoked => 'revoked';
+
+  @override
+  String get teamWorkspaceStatusOptionAll => 'all';
+
+  @override
+  String teamWorkspaceInvitesDialogTitle(String workspace) {
+    return 'Invites · $workspace';
+  }
+
+  @override
+  String get teamWorkspaceGenerating => 'Generating…';
+
+  @override
+  String get teamWorkspaceGenerateInviteAction => 'Generate invite';
+
+  @override
+  String get teamWorkspaceRefreshInvitesAction => 'Refresh invites';
+
+  @override
+  String teamWorkspaceCopiedInviteCount(int count) {
+    return 'Copied $count invites';
+  }
+
+  @override
+  String get teamWorkspaceBulkCopyAction => 'Bulk copy';
+
+  @override
+  String get teamWorkspaceClearSelectionAction => 'Clear selection';
+
+  @override
+  String get teamWorkspaceStatusLabel => 'Status';
+
+  @override
+  String get teamWorkspacePageSizeLabel => 'Page size';
+
+  @override
+  String get teamWorkspaceNoInvitesForCurrentFilters =>
+      'No invites for current filters.';
+
+  @override
+  String teamWorkspacePagingLine(int page, int pages, int total) {
+    return 'Page $page / $pages · total $total';
+  }
+
+  @override
+  String get teamWorkspacePrevPageAction => 'Previous';
+
+  @override
+  String get teamWorkspaceNextPageAction => 'Next';
+
+  @override
+  String get teamWorkspaceResendInviteLinkAction => 'Resend link';
+
+  @override
+  String get teamWorkspaceRevokeAction => 'Revoke';
 }

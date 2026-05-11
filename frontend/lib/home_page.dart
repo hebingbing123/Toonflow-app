@@ -72,6 +72,7 @@ import 'system_probes/account/controller.dart';
 import 'system_probes/content/controller.dart';
 import 'system_probes/models_catalog/controller.dart';
 import 'system_probes/models_catalog/production_probe_scope.dart';
+import 'system_probes/models_catalog/settings_probe_scope.dart';
 import 'task_center/controller.dart';
 import 'task_center/support.dart';
 import 'team_workspaces/invite_deep_link.dart';

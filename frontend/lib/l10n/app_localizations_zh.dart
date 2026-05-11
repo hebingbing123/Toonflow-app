@@ -4160,4 +4160,73 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get teamWorkspaceLeaveWorkspaceAction => '退出该空间';
+
+  @override
+  String get teamWorkspaceRoleOptionMember => 'member';
+
+  @override
+  String get teamWorkspaceRoleOptionAdmin => 'admin';
+
+  @override
+  String get teamWorkspaceStatusOptionPending => 'pending';
+
+  @override
+  String get teamWorkspaceStatusOptionAccepted => 'accepted';
+
+  @override
+  String get teamWorkspaceStatusOptionRevoked => 'revoked';
+
+  @override
+  String get teamWorkspaceStatusOptionAll => 'all';
+
+  @override
+  String teamWorkspaceInvitesDialogTitle(String workspace) {
+    return '邀请管理 · $workspace';
+  }
+
+  @override
+  String get teamWorkspaceGenerating => '生成中…';
+
+  @override
+  String get teamWorkspaceGenerateInviteAction => '生成邀请';
+
+  @override
+  String get teamWorkspaceRefreshInvitesAction => '刷新邀请';
+
+  @override
+  String teamWorkspaceCopiedInviteCount(int count) {
+    return '已复制 $count 条邀请';
+  }
+
+  @override
+  String get teamWorkspaceBulkCopyAction => '批量复制';
+
+  @override
+  String get teamWorkspaceClearSelectionAction => '清空选择';
+
+  @override
+  String get teamWorkspaceStatusLabel => '状态';
+
+  @override
+  String get teamWorkspacePageSizeLabel => '每页条数';
+
+  @override
+  String get teamWorkspaceNoInvitesForCurrentFilters => '当前筛选条件下暂无邀请。';
+
+  @override
+  String teamWorkspacePagingLine(int page, int pages, int total) {
+    return '第 $page / $pages 页 · 共 $total 条';
+  }
+
+  @override
+  String get teamWorkspacePrevPageAction => '上一页';
+
+  @override
+  String get teamWorkspaceNextPageAction => '下一页';
+
+  @override
+  String get teamWorkspaceResendInviteLinkAction => '重发链接';
+
+  @override
+  String get teamWorkspaceRevokeAction => '撤销';
 }

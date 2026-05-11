@@ -7176,6 +7176,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave workspace'**
   String get teamWorkspaceLeaveWorkspaceAction;
+
+  /// No description provided for @teamWorkspaceRoleOptionMember.
+  ///
+  /// In en, this message translates to:
+  /// **'member'**
+  String get teamWorkspaceRoleOptionMember;
+
+  /// No description provided for @teamWorkspaceRoleOptionAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'admin'**
+  String get teamWorkspaceRoleOptionAdmin;
+
+  /// No description provided for @teamWorkspaceStatusOptionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'pending'**
+  String get teamWorkspaceStatusOptionPending;
+
+  /// No description provided for @teamWorkspaceStatusOptionAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'accepted'**
+  String get teamWorkspaceStatusOptionAccepted;
+
+  /// No description provided for @teamWorkspaceStatusOptionRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'revoked'**
+  String get teamWorkspaceStatusOptionRevoked;
+
+  /// No description provided for @teamWorkspaceStatusOptionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'all'**
+  String get teamWorkspaceStatusOptionAll;
+
+  /// No description provided for @teamWorkspaceInvitesDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invites · {workspace}'**
+  String teamWorkspaceInvitesDialogTitle(String workspace);
+
+  /// No description provided for @teamWorkspaceGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating…'**
+  String get teamWorkspaceGenerating;
+
+  /// No description provided for @teamWorkspaceGenerateInviteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate invite'**
+  String get teamWorkspaceGenerateInviteAction;
+
+  /// No description provided for @teamWorkspaceRefreshInvitesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh invites'**
+  String get teamWorkspaceRefreshInvitesAction;
+
+  /// No description provided for @teamWorkspaceCopiedInviteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied {count} invites'**
+  String teamWorkspaceCopiedInviteCount(int count);
+
+  /// No description provided for @teamWorkspaceBulkCopyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk copy'**
+  String get teamWorkspaceBulkCopyAction;
+
+  /// No description provided for @teamWorkspaceClearSelectionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get teamWorkspaceClearSelectionAction;
+
+  /// No description provided for @teamWorkspaceStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get teamWorkspaceStatusLabel;
+
+  /// No description provided for @teamWorkspacePageSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Page size'**
+  String get teamWorkspacePageSizeLabel;
+
+  /// No description provided for @teamWorkspaceNoInvitesForCurrentFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No invites for current filters.'**
+  String get teamWorkspaceNoInvitesForCurrentFilters;
+
+  /// No description provided for @teamWorkspacePagingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} / {pages} · total {total}'**
+  String teamWorkspacePagingLine(int page, int pages, int total);
+
+  /// No description provided for @teamWorkspacePrevPageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get teamWorkspacePrevPageAction;
+
+  /// No description provided for @teamWorkspaceNextPageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get teamWorkspaceNextPageAction;
+
+  /// No description provided for @teamWorkspaceResendInviteLinkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend link'**
+  String get teamWorkspaceResendInviteLinkAction;
+
+  /// No description provided for @teamWorkspaceRevokeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get teamWorkspaceRevokeAction;
 }
 
 class _AppLocalizationsDelegate

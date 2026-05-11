@@ -3113,5 +3113,53 @@
   "teamWorkspaceRemoveMemberTooltip": "移除成员",
   "teamWorkspaceLeftWorkspace": "已退出该空间",
   "teamWorkspaceLeaving": "退出中…",
-  "teamWorkspaceLeaveWorkspaceAction": "退出该空间"
+  "teamWorkspaceLeaveWorkspaceAction": "退出该空间",
+  "teamWorkspaceRoleOptionMember": "member",
+  "teamWorkspaceRoleOptionAdmin": "admin",
+  "teamWorkspaceStatusOptionPending": "pending",
+  "teamWorkspaceStatusOptionAccepted": "accepted",
+  "teamWorkspaceStatusOptionRevoked": "revoked",
+  "teamWorkspaceStatusOptionAll": "all",
+  "teamWorkspaceInvitesDialogTitle": "邀请管理 · {workspace}",
+  "@teamWorkspaceInvitesDialogTitle": {
+    "placeholders": {
+      "workspace": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceGenerating": "生成中…",
+  "teamWorkspaceGenerateInviteAction": "生成邀请",
+  "teamWorkspaceRefreshInvitesAction": "刷新邀请",
+  "teamWorkspaceCopiedInviteCount": "已复制 {count} 条邀请",
+  "@teamWorkspaceCopiedInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspaceBulkCopyAction": "批量复制",
+  "teamWorkspaceClearSelectionAction": "清空选择",
+  "teamWorkspaceStatusLabel": "状态",
+  "teamWorkspacePageSizeLabel": "每页条数",
+  "teamWorkspaceNoInvitesForCurrentFilters": "当前筛选条件下暂无邀请。",
+  "teamWorkspacePagingLine": "第 {page} / {pages} 页 · 共 {total} 条",
+  "@teamWorkspacePagingLine": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWorkspacePrevPageAction": "上一页",
+  "teamWorkspaceNextPageAction": "下一页",
+  "teamWorkspaceResendInviteLinkAction": "重发链接",
+  "teamWorkspaceRevokeAction": "撤销"
 }
