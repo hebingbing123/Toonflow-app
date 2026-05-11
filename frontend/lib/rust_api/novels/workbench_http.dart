@@ -196,10 +196,21 @@ Future<String> appendNovelsUnderProject(
 
 Future<String> _deleteNovelByNumericIdScanningProjects(
   String accessToken,
-  int novelNumericId,
+  int novelNumericId, {
+  String? projectUuid,
+}
 ) async {
   if (novelNumericId <= 0) {
     throw RustApiException('id must be positive', statusCode: 400);
+  }
+  final explicitProjectUuid = projectUuid?.trim();
+  if (explicitProjectUuid != null && explicitProjectUuid.isNotEmpty) {
+    await deleteProjectNovelByProjectIds(
+      accessToken,
+      explicitProjectUuid,
+      novelNumericId,
+    );
+    return '删除原文成功';
   }
   final projects = await project_api.fetchAllProjectsPaged(accessToken);
   for (final p in projects) {
@@ -219,14 +230,21 @@ Future<String> _deleteNovelByNumericIdScanningProjects(
 /// Compat: delete by **`app_novel`** numeric id (scans owned projects).
 Future<String> deleteNovelByNumericIdScanningProjects(
   String accessToken,
-  int novelNumericId,
+  int novelNumericId, {
+  String? projectUuid,
+}
 ) async {
-  return _deleteNovelByNumericIdScanningProjects(accessToken, novelNumericId);
+  return _deleteNovelByNumericIdScanningProjects(
+    accessToken,
+    novelNumericId,
+    projectUuid: projectUuid,
+  );
 }
 
 Future<String> _patchNovelByNumericIdScanningProjects(
   String accessToken, {
   required int id,
+  String? projectUuid,
   required Object index,
   required String reel,
   required String chapter,
@@ -252,6 +270,11 @@ Future<String> _patchNovelByNumericIdScanningProjects(
     'chapter_data': chapterData,
     'event': event,
   };
+  final explicitProjectUuid = projectUuid?.trim();
+  if (explicitProjectUuid != null && explicitProjectUuid.isNotEmpty) {
+    await patchProjectNovelByProjectIds(accessToken, explicitProjectUuid, id, body);
+    return '更新原文成功';
+  }
   for (final p in projects) {
     try {
       await fetchProjectNovelByProjectIds(accessToken, p.id, id);
@@ -271,6 +294,7 @@ Future<String> _patchNovelByNumericIdScanningProjects(
 Future<String> updateNovelScanningProjects(
   String accessToken, {
   required int id,
+  String? projectUuid,
   required Object index,
   required String reel,
   required String chapter,
@@ -280,6 +304,7 @@ Future<String> updateNovelScanningProjects(
   return _patchNovelByNumericIdScanningProjects(
     accessToken,
     id: id,
+    projectUuid: projectUuid,
     index: index,
     reel: reel,
     chapter: chapter,
