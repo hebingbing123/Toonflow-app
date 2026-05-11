@@ -1,7 +1,10 @@
-//! `X-Request-Id` propagation and JSON [`crate::error::ErrorBody`] `request_id` injection.
+//! `X-Request-Id` propagation and JSON [`crate::error::ErrorBody`] `request_id` injection。
+//! 同时将请求套入 [`crate::error::locale::REQUEST_LOCALE`]，供 [`crate::error::ApiError`] 按 `Accept-Language` 本地化 `message`。
 
 use axum::{body::Body, extract::Request, http::header, middleware::Next, response::Response};
 use serde_json::{json, Value};
+
+use crate::error::locale::{preferred_locale_from_headers, REQUEST_LOCALE};
 
 const MAX_ERROR_JSON: usize = 65_536;
 
@@ -9,13 +12,16 @@ const MAX_ERROR_JSON: usize = 65_536;
 /// copies `x-request-id` from the request into JSON error bodies that match `ErrorBody` (`code` + `message`, no `request_id` yet).
 /// Also ensures `status` field is present in error responses.
 pub async fn inject_request_id_into_json_errors(request: Request, next: Next) -> Response {
+    let locale = preferred_locale_from_headers(request.headers());
     let rid = request
         .headers()
         .get("x-request-id")
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
 
-    let response = next.run(request).await;
+    let response = REQUEST_LOCALE
+        .scope(locale, async move { next.run(request).await })
+        .await;
 
     let Some(rid) = rid else {
         return response;
@@ -97,6 +103,7 @@ mod tests {
             local_art_style_cover_dir: None,
             local_video_export_dir: None,
             local_voiceover_audio_dir: None,
+            billing_config: crate::metering::BillingConfig::default(),
         }
     }
 

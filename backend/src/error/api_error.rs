@@ -1,6 +1,9 @@
 //! API 错误类型定义。
 //!
 //! 定义 HTTP API 的错误响应类型，包括错误体结构和常用错误枚举。
+//!
+//! **国际化**：固定话术响应 [`super::locale::REQUEST_LOCALE`]（由 `Accept-Language` 与 HTTP 中间件设置）。
+//! 携带动态文案的变体（如 [`ApiError::BadRequest`]）在英文库尚未逐项迁移前保持与源码相同的字符串。
 
 use axum::{
     http::{header, HeaderValue, StatusCode},
@@ -11,13 +14,17 @@ use serde::Serialize;
 use tracing::{error, warn};
 use utoipa::ToSchema;
 
+use super::locale::{current_locale, ApiLocale};
+
 #[derive(Serialize, ToSchema)]
 pub struct ErrorBody {
     /// HTTP status code (e.g., 400, 404, 409, 500)
     pub status: u16,
     /// Machine-readable error code (e.g., "validation_error", "not_found", "conflict")
     pub code: String,
-    /// Human-readable error message
+    /// Human-readable error message。
+    ///
+    /// 服务端对常用 **`code`** 可按请求头 **`Accept-Language`** 返回中文或英文；业务校验等动态字符串可能仍为英文。
     pub message: String,
     /// Request ID for tracing and debugging (injected by middleware)
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -57,8 +64,19 @@ pub enum ApiError {
     /// HTTP **429** — user has exceeded their plan quota (e.g. daily job limit for Free tier).
     /// Automatically adds `Retry-After` header (seconds) and `retry_after_ms` in body.
     QuotaExceeded(String),
+    /// HTTP **429** — too many in-flight operations (e.g. concurrent export jobs). Not a daily quota:
+    /// **no** `Retry-After` / `retry_after_ms` (client should poll job status or retry later).
+    ConcurrentLimitExceeded(String),
     /// HTTP **403** — authenticated but not allowed (e.g. ops-only endpoint with env gate off).
     Forbidden(String),
+}
+
+#[inline]
+fn tr(loc: ApiLocale, en: &'static str, zh: &'static str) -> String {
+    match loc {
+        ApiLocale::En => en.to_string(),
+        ApiLocale::Zh => zh.to_string(),
+    }
 }
 
 /// Seconds remaining until the next UTC midnight (quota reset point).
@@ -208,89 +226,108 @@ impl IntoResponse for ApiError {
                     "Quota exceeded"
                 );
             }
+            ApiError::ConcurrentLimitExceeded(msg) => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "concurrent_limit_exceeded",
+                    status = 429,
+                    message = %msg,
+                    "Concurrent operation limit exceeded"
+                );
+            }
         }
 
-        let (status, code, message, details) = match &self {
+        let is_quota = matches!(&self, ApiError::QuotaExceeded(_));
+        let loc = current_locale();
+
+        let (status, code, message, details) = match self {
             ApiError::Unauthorized => (
                 StatusCode::UNAUTHORIZED,
                 "unauthorized",
-                "Missing or invalid Authorization header",
+                tr(
+                    loc,
+                    "Missing or invalid Authorization header",
+                    "缺少或无效的 Authorization 请求头",
+                ),
                 None,
             ),
             ApiError::BadToken => (
                 StatusCode::UNAUTHORIZED,
                 "invalid_token",
-                "JWT verification failed",
+                tr(loc, "JWT verification failed", "JWT 验证失败"),
                 None,
             ),
             ApiError::AuthNotConfigured => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "auth_not_configured",
-                "SUPABASE_JWT_SECRET is not set",
+                tr(
+                    loc,
+                    "SUPABASE_JWT_SECRET is not set",
+                    "未设置 SUPABASE_JWT_SECRET（认证不可用）",
+                ),
                 None,
             ),
             ApiError::NotFound => (
                 StatusCode::NOT_FOUND,
                 "not_found",
-                "Resource not found",
+                tr(loc, "Resource not found", "资源不存在"),
                 None,
             ),
-            ApiError::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg.as_str(), None),
-            ApiError::ConflictWithDetails { message, details } => (
-                StatusCode::CONFLICT,
-                "conflict",
-                message.as_str(),
-                Some(details.clone()),
-            ),
-            ApiError::BadRequest(msg) => {
-                (StatusCode::BAD_REQUEST, "bad_request", msg.as_str(), None)
+            ApiError::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg, None),
+            ApiError::ConflictWithDetails { message, details } => {
+                (StatusCode::CONFLICT, "conflict", message, Some(details))
             }
-            ApiError::DatabaseError(msg) => (
-                StatusCode::SERVICE_UNAVAILABLE,
-                "database_error",
-                msg.as_str(),
-                None,
-            ),
+            ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg, None),
+            ApiError::DatabaseError(msg) => {
+                (StatusCode::SERVICE_UNAVAILABLE, "database_error", msg, None)
+            }
             ApiError::WebhookNotConfigured => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "webhook_not_configured",
-                "BILLING_WEBHOOK_SECRET is not set",
+                tr(
+                    loc,
+                    "BILLING_WEBHOOK_SECRET is not set",
+                    "未设置 BILLING_WEBHOOK_SECRET",
+                ),
                 None,
             ),
             ApiError::InvalidWebhookSignature => (
                 StatusCode::UNAUTHORIZED,
                 "invalid_webhook_signature",
-                "HMAC verification failed",
+                tr(loc, "HMAC verification failed", "HMAC 校验失败"),
                 None,
             ),
             ApiError::Internal => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "internal_error",
-                "Internal server error",
+                tr(loc, "Internal server error", "服务器内部错误"),
                 None,
             ),
             ApiError::LlmNotConfigured => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "llm_not_configured",
-                "LLM is not configured (set OPENAI_API_KEY or LLM_API_KEY)",
+                tr(
+                    loc,
+                    "LLM is not configured (set OPENAI_API_KEY or LLM_API_KEY)",
+                    "未配置 LLM（请设置 OPENAI_API_KEY 或 LLM_API_KEY）",
+                ),
                 None,
             ),
-            ApiError::NotImplemented(msg) => (
-                StatusCode::NOT_IMPLEMENTED,
-                "not_implemented",
-                msg.as_str(),
-                None,
-            ),
-            ApiError::QuotaExceeded(msg) => (
+            ApiError::NotImplemented(msg) => {
+                (StatusCode::NOT_IMPLEMENTED, "not_implemented", msg, None)
+            }
+            ApiError::QuotaExceeded(msg) => {
+                (StatusCode::TOO_MANY_REQUESTS, "quota_exceeded", msg, None)
+            }
+            ApiError::ConcurrentLimitExceeded(msg) => (
                 StatusCode::TOO_MANY_REQUESTS,
-                "quota_exceeded",
-                msg.as_str(),
+                "concurrent_limit_exceeded",
+                msg,
                 None,
             ),
-            ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg.as_str(), None),
+            ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg, None),
         };
 
-        let is_quota = matches!(self, ApiError::QuotaExceeded(_));
         let retry_secs = if is_quota {
             Some(secs_until_utc_midnight())
         } else {
@@ -300,7 +337,7 @@ impl IntoResponse for ApiError {
         let body = ErrorBody {
             status: status.as_u16(),
             code: code.to_string(),
-            message: message.to_string(),
+            message,
             request_id: None,
             details,
             retry_after_ms: retry_secs.map(|s| s * 1_000),
@@ -322,6 +359,7 @@ impl IntoResponse for ApiError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::locale::{ApiLocale, REQUEST_LOCALE};
     use axum::body::to_bytes;
     use axum::response::IntoResponse;
     use proptest::prelude::*;
@@ -335,6 +373,26 @@ mod tests {
             .block_on(to_bytes(resp.into_body(), 16 * 1024))
             .expect("body bytes");
         serde_json::from_slice(&bytes).expect("json body")
+    }
+
+    async fn decode_error_body_async(resp: Response) -> serde_json::Value {
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        serde_json::from_slice(&bytes).expect("json body")
+    }
+
+    #[test]
+    fn concurrent_limit_exceeded_has_no_retry_after() {
+        let resp = ApiError::ConcurrentLimitExceeded("too many in flight".into()).into_response();
+        assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert!(resp.headers().get(header::RETRY_AFTER).is_none());
+        let body = decode_error_body(resp);
+        assert_eq!(
+            body.get("code").and_then(serde_json::Value::as_str),
+            Some("concurrent_limit_exceeded")
+        );
+        assert!(body.get("retry_after_ms").is_none());
     }
 
     #[test]
@@ -359,6 +417,18 @@ mod tests {
     fn other_errors_have_no_retry_after_header() {
         let resp = ApiError::NotFound.into_response();
         assert!(resp.headers().get(header::RETRY_AFTER).is_none());
+    }
+
+    #[tokio::test]
+    async fn not_found_message_follows_zh_locale_scope() {
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async { ApiError::NotFound.into_response() })
+            .await;
+        let body = decode_error_body_async(resp).await;
+        assert_eq!(
+            body.get("message").and_then(serde_json::Value::as_str),
+            Some("资源不存在")
+        );
     }
 
     #[test]

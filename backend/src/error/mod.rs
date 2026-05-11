@@ -66,6 +66,7 @@
 
 mod api_error;
 mod helpers;
+pub mod locale;
 
 // `ErrorBody` is part of the stable JSON contract but only referenced from docs / future callers.
 #[allow(unused_imports)]
@@ -74,3 +75,4 @@ pub use helpers::{
     db_error, internal_error, validate_enum, validate_input, validate_non_empty_string,
     validate_range,
 };
+pub use locale::ApiLocale;

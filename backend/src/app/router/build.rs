@@ -47,6 +47,7 @@ pub fn build_router(state: AppState) -> Router {
             header::AUTHORIZATION,
             header::CONTENT_TYPE,
             header::ACCEPT,
+            header::ACCEPT_LANGUAGE,
             HeaderName::from_static("x-api-key"),
             HeaderName::from_static("x-request-id"),
             HeaderName::from_static("x-toonflow-internal-token"),
