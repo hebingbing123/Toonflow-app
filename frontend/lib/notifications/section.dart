@@ -211,16 +211,19 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text('合规 cleared 节流（分钟）', style: theme.textTheme.bodyMedium),
+                Text(
+                  l10n.notificationsComplianceClearedThrottleTitle,
+                  style: theme.textTheme.bodyMedium,
+                ),
                 SizedBox(
                   width: 140,
                   child: TextField(
                     controller: _clearedThrottleController,
                     focusNode: _clearedThrottleFocus,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       isDense: true,
-                      hintText: '1-1440',
+                      hintText: l10n.notificationsComplianceMinutesHint,
                     ),
                   ),
                 ),
@@ -234,14 +237,14 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           height: 14,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('保存策略'),
+                      : Text(l10n.notificationsComplianceSavePolicy),
                 ),
                 OutlinedButton.icon(
                   onPressed: widget.controller.savingPreferences
                       ? null
                       : _createTemplateFromCurrentPolicy,
                   icon: const Icon(Icons.add),
-                  label: const Text('保存为模板'),
+                  label: Text(l10n.notificationsComplianceSaveAsTemplate),
                 ),
                 OutlinedButton.icon(
                   onPressed:
@@ -250,31 +253,33 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       ? null
                       : _createWorkspaceSharedTemplateFromCurrentPolicy,
                   icon: const Icon(Icons.group_work_outlined),
-                  label: const Text('保存到工作区共享'),
+                  label: Text(
+                    l10n.notificationsComplianceSaveToWorkspaceShared,
+                  ),
                 ),
                 OutlinedButton.icon(
                   onPressed: widget.controller.savingPreferences
                       ? null
                       : _exportTemplatesToClipboard,
                   icon: const Icon(Icons.upload_file_outlined),
-                  label: const Text('导出模板 JSON'),
+                  label: Text(l10n.notificationsComplianceExportTemplatesJson),
                 ),
                 OutlinedButton.icon(
                   onPressed: widget.controller.savingPreferences
                       ? null
                       : _openImportTemplatesDialog,
                   icon: const Icon(Icons.download_outlined),
-                  label: const Text('导入模板 JSON'),
+                  label: Text(l10n.notificationsComplianceImportTemplatesJson),
                 ),
                 Text(
-                  '同一 stage 在窗口内只发一次 cleared，降低抖动噪音。',
+                  l10n.notificationsComplianceClearedHelpShort,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 FilterChip(
                   selected: _customTemplatesOnly,
-                  label: const Text('仅自定义模板'),
+                  label: Text(l10n.notificationsComplianceCustomTemplatesOnly),
                   onSelected: (selected) {
                     setState(() {
                       _customTemplatesOnly = selected;
@@ -293,13 +298,18 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ActionChip(
-                              label: Text('模板：${template.label}'),
+                              label: Text(
+                                l10n.notificationsComplianceTemplateChip(
+                                  template.label,
+                                ),
+                              ),
                               onPressed: widget.controller.savingPreferences
                                   ? null
                                   : () => _applyThrottleTemplate(template.id),
                             ),
                             IconButton(
-                              tooltip: '上移',
+                              tooltip:
+                                  l10n.notificationsComplianceTooltipMoveUp,
                               onPressed: widget.controller.savingPreferences
                                   ? null
                                   : () =>
@@ -307,7 +317,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                               icon: const Icon(Icons.arrow_upward, size: 18),
                             ),
                             IconButton(
-                              tooltip: '下移',
+                              tooltip:
+                                  l10n.notificationsComplianceTooltipMoveDown,
                               onPressed: widget.controller.savingPreferences
                                   ? null
                                   : () => _reorderTemplate(
@@ -317,7 +328,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                               icon: const Icon(Icons.arrow_downward, size: 18),
                             ),
                             IconButton(
-                              tooltip: '编辑模板',
+                              tooltip: l10n
+                                  .notificationsComplianceTooltipEditTemplate,
                               onPressed:
                                   widget.controller.savingPreferences ||
                                       !template.canEdit
@@ -326,7 +338,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                               icon: const Icon(Icons.edit_outlined, size: 18),
                             ),
                             IconButton(
-                              tooltip: '删除模板',
+                              tooltip: l10n
+                                  .notificationsComplianceTooltipDeleteTemplate,
                               onPressed:
                                   widget.controller.savingPreferences ||
                                       !template.canDelete
@@ -343,7 +356,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     .workspaceSharedComplianceTemplates
                     .isNotEmpty)
                   Text(
-                    '工作区共享模板',
+                    l10n.notificationsComplianceWorkspaceSharedHeader,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -355,13 +368,18 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ActionChip(
-                          label: Text('共享：${template.label}'),
+                          label: Text(
+                            l10n.notificationsComplianceSharedChip(
+                              template.label,
+                            ),
+                          ),
                           onPressed: widget.controller.savingPreferences
                               ? null
                               : () => _applyThrottleTemplate(template.id),
                         ),
                         IconButton(
-                          tooltip: '编辑共享模板',
+                          tooltip: l10n
+                              .notificationsComplianceTooltipEditSharedTemplate,
                           onPressed:
                               widget.controller.savingPreferences ||
                                   !widget
@@ -372,7 +390,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           icon: const Icon(Icons.edit_outlined, size: 18),
                         ),
                         IconButton(
-                          tooltip: '删除共享模板',
+                          tooltip: l10n
+                              .notificationsComplianceTooltipDeleteSharedTemplate,
                           onPressed:
                               widget.controller.savingPreferences ||
                                   !widget
@@ -395,14 +414,16 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         isDense: true,
-                        labelText: '$stage 覆盖值',
-                        hintText: '留空=跟随全局',
+                        labelText: l10n
+                            .notificationsComplianceStageOverrideLabel(stage),
+                        hintText: l10n.notificationsComplianceStageOverrideHint,
                       ),
                     ),
                   ),
                 ),
                 Text(
                   _buildPreferencesAuditText(
+                    l10n,
                     widget.controller.preferencesAudit,
                   ),
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -417,7 +438,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        '共享模板审计',
+                        l10n.notificationsComplianceSharedAuditTitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -426,9 +447,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         width: 180,
                         child: TextField(
                           controller: _workspaceAuditTemplateFilterController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
-                            labelText: '模板 ID 过滤',
+                            labelText:
+                                l10n.notificationsComplianceFilterTemplateId,
                           ),
                         ),
                       ),
@@ -436,19 +458,22 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         width: 180,
                         child: DropdownButtonFormField<String>(
                           initialValue: _workspaceAuditActionFilter,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
-                            labelText: '动作过滤',
+                            labelText: l10n.notificationsComplianceFilterAction,
                           ),
-                          items: const [
-                            DropdownMenuItem(value: '', child: Text('全部')),
+                          items: [
+                            DropdownMenuItem(
+                              value: '',
+                              child: Text(l10n.notificationsTypeAll),
+                            ),
                             DropdownMenuItem(
                               value: 'upsert',
-                              child: Text('upsert'),
+                              child: Text(l10n.notificationsAuditActionUpsert),
                             ),
                             DropdownMenuItem(
                               value: 'delete',
-                              child: Text('delete'),
+                              child: Text(l10n.notificationsAuditActionDelete),
                             ),
                           ],
                           onChanged: (value) {
@@ -462,9 +487,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         width: 220,
                         child: TextField(
                           controller: _workspaceAuditStartAtController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
-                            labelText: '开始时间(ISO8601)',
+                            labelText:
+                                l10n.notificationsComplianceFilterStartIso,
                           ),
                         ),
                       ),
@@ -472,9 +498,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         width: 220,
                         child: TextField(
                           controller: _workspaceAuditEndAtController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
-                            labelText: '结束时间(ISO8601)',
+                            labelText: l10n.notificationsComplianceFilterEndIso,
                           ),
                         ),
                       ),
@@ -482,39 +508,54 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         onPressed: widget.controller.loadingWorkspaceSharedAudit
                             ? null
                             : _reloadWorkspaceAuditWithFilters,
-                        child: const Text('应用筛选'),
+                        child: Text(l10n.notificationsComplianceApplyFilters),
                       ),
                       OutlinedButton.icon(
                         onPressed: widget.controller.loadingWorkspaceSharedAudit
                             ? null
                             : _exportWorkspaceAuditJsonToClipboard,
                         icon: const Icon(Icons.data_object),
-                        label: const Text('下载审计 JSON'),
+                        label: Text(
+                          l10n.notificationsComplianceDownloadAuditJson,
+                        ),
                       ),
                       OutlinedButton.icon(
                         onPressed: widget.controller.loadingWorkspaceSharedAudit
                             ? null
                             : _exportWorkspaceAuditCsvToClipboard,
                         icon: const Icon(Icons.table_chart_outlined),
-                        label: const Text('下载审计 CSV'),
+                        label: Text(
+                          l10n.notificationsComplianceDownloadAuditCsv,
+                        ),
                       ),
                       OutlinedButton.icon(
-                        onPressed: widget.controller.loadingWorkspaceSharedAudit ||
-                                widget.controller.enqueueingWorkspaceSharedAuditAsyncExport
+                        onPressed:
+                            widget.controller.loadingWorkspaceSharedAudit ||
+                                widget
+                                    .controller
+                                    .enqueueingWorkspaceSharedAuditAsyncExport
                             ? null
-                            : () => _enqueueWorkspaceSharedAuditExportAsync('json'),
+                            : () => _enqueueWorkspaceSharedAuditExportAsync(
+                                'json',
+                              ),
                         icon: const Icon(Icons.hourglass_empty_outlined),
-                        label: const Text('异步 JSON'),
+                        label: Text(l10n.notificationsComplianceAsyncJson),
                       ),
                       OutlinedButton.icon(
-                        onPressed: widget.controller.loadingWorkspaceSharedAudit ||
-                                widget.controller.enqueueingWorkspaceSharedAuditAsyncExport
+                        onPressed:
+                            widget.controller.loadingWorkspaceSharedAudit ||
+                                widget
+                                    .controller
+                                    .enqueueingWorkspaceSharedAuditAsyncExport
                             ? null
-                            : () => _enqueueWorkspaceSharedAuditExportAsync('csv'),
+                            : () => _enqueueWorkspaceSharedAuditExportAsync(
+                                'csv',
+                              ),
                         icon: const Icon(Icons.hourglass_empty_outlined),
-                        label: const Text('异步 CSV'),
+                        label: Text(l10n.notificationsComplianceAsyncCsv),
                       ),
-                      if ((widget.controller.workspaceSharedAsyncExportInfo ?? '')
+                      if ((widget.controller.workspaceSharedAsyncExportInfo ??
+                              '')
                           .trim()
                           .isNotEmpty)
                         SizedBox(
@@ -528,20 +569,24 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                 color: theme.colorScheme.primary,
                               ),
                               title: Text(
-                                widget.controller.workspaceSharedAsyncExportInfo!,
+                                widget
+                                    .controller
+                                    .workspaceSharedAsyncExportInfo!,
                                 style: theme.textTheme.bodySmall,
                               ),
                               trailing: IconButton(
-                                tooltip: '关闭',
+                                tooltip:
+                                    l10n.notificationsComplianceCloseTooltip,
                                 icon: const Icon(Icons.close),
-                                onPressed: widget.controller
+                                onPressed: widget
+                                    .controller
                                     .clearWorkspaceSharedAsyncExportInfo,
                               ),
                             ),
                           ),
                         ),
                       Text(
-                        '导出历史',
+                        l10n.notificationsComplianceExportHistoryTitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -552,17 +597,24 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           // Controlled by _exportHistoryFormat via setState.
                           // ignore: deprecated_member_use
                           value: _exportHistoryFormat,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
-                            labelText: '导出格式筛选',
+                            labelText:
+                                l10n.notificationsComplianceExportFormatFilter,
                           ),
-                          items: const [
-                            DropdownMenuItem(value: '', child: Text('全部')),
+                          items: [
+                            DropdownMenuItem(
+                              value: '',
+                              child: Text(l10n.notificationsTypeAll),
+                            ),
                             DropdownMenuItem(
                               value: 'json',
-                              child: Text('JSON'),
+                              child: const Text('JSON'),
                             ),
-                            DropdownMenuItem(value: 'csv', child: Text('CSV')),
+                            DropdownMenuItem(
+                              value: 'csv',
+                              child: const Text('CSV'),
+                            ),
                           ],
                           onChanged: (value) {
                             setState(() {
@@ -575,9 +627,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         width: 200,
                         child: TextField(
                           controller: _exportHistoryExportedStartController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
-                            labelText: '导出时间起(ISO)',
+                            labelText:
+                                l10n.notificationsComplianceExportedStartIso,
                           ),
                         ),
                       ),
@@ -585,9 +638,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         width: 200,
                         child: TextField(
                           controller: _exportHistoryExportedEndController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
-                            labelText: '导出时间止(ISO)',
+                            labelText:
+                                l10n.notificationsComplianceExportedEndIso,
                           ),
                         ),
                       ),
@@ -603,18 +657,21 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('筛选导出历史'),
+                            : Text(l10n.notificationsComplianceFilterExports),
                       ),
                       ...widget.controller.workspaceSharedAuditExports.map(
                         (item) => SizedBox(
                           width: 800,
                           child: Tooltip(
-                            message: _formatWorkspaceAuditExportItem(item),
+                            message: _formatWorkspaceAuditExportItem(
+                              l10n,
+                              item,
+                            ),
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Text(
-                                    _formatWorkspaceAuditExportItem(item),
+                                    _formatWorkspaceAuditExportItem(l10n, item),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: theme.textTheme.bodySmall?.copyWith(
@@ -623,7 +680,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                   ),
                                 ),
                                 IconButton(
-                                  tooltip: '复用该次筛选到上方',
+                                  tooltip: l10n
+                                      .notificationsComplianceReuseExportFiltersTooltip,
                                   onPressed:
                                       widget
                                           .controller
@@ -636,7 +694,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                   ),
                                 ),
                                 IconButton(
-                                  tooltip: _exportRecordDownloadTooltip(item),
+                                  tooltip: _exportRecordDownloadTooltip(
+                                    l10n,
+                                    item,
+                                  ),
                                   onPressed:
                                       widget.controller.loadingExportHistory
                                       ? null
@@ -665,13 +726,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                   ),
                                 )
                               : const Icon(Icons.expand_more, size: 18),
-                          label: const Text('更多导出记录'),
+                          label: Text(
+                            l10n.notificationsComplianceMoreExportRecords,
+                          ),
                         ),
                       ...widget.controller.workspaceSharedComplianceAudit
                           .take(6)
                           .map(
                             (item) => Text(
-                              _formatWorkspaceAuditItem(item),
+                              _formatWorkspaceAuditItem(l10n, item),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -694,7 +757,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                   ),
                                 )
                               : const Icon(Icons.expand_more, size: 18),
-                          label: const Text('加载更多审计'),
+                          label: Text(
+                            l10n.notificationsComplianceLoadMoreAudit,
+                          ),
                         ),
                     ],
                   ),
@@ -982,12 +1047,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   }
 
   void _saveClearedThrottlePolicy() {
+    final l10n = AppLocalizations.of(context)!;
     final globalRaw = _clearedThrottleController.text.trim();
     final globalMinutes = int.tryParse(globalRaw);
     if (globalMinutes == null || globalMinutes < 1 || globalMinutes > 1440) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请输入 1-1440 的整数分钟值')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.notificationsComplianceThrottleInvalidGlobal),
+        ),
+      );
       return;
     }
     final stageMinutes = <String, int>{};
@@ -998,9 +1066,13 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       }
       final value = int.tryParse(raw);
       if (value == null || value < 1 || value > 1440) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$stage 请输入 1-1440 的整数分钟值，或留空')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.notificationsComplianceThrottleStageInvalid(stage),
+            ),
+          ),
+        );
         return;
       }
       stageMinutes[stage] = value;
@@ -1021,36 +1093,45 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final descriptionController = TextEditingController();
     final shouldSave = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('保存 cleared 模板'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: idController,
-              decoration: const InputDecoration(labelText: '模板 ID（英文）'),
+      builder: (dialogContext) {
+        final dl10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(dl10n.notificationsDialogSaveClearedTemplateTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: idController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateIdAscii,
+                ),
+              ),
+              TextField(
+                controller: labelController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateName,
+                ),
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateDescription,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl10n.notificationsActionCancel),
             ),
-            TextField(
-              controller: labelController,
-              decoration: const InputDecoration(labelText: '模板名称'),
-            ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: '模板说明'),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(dl10n.notificationsActionSave),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
+        );
+      },
     );
     if (shouldSave != true) {
       return;
@@ -1062,9 +1143,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final label = labelController.text.trim();
     final description = descriptionController.text.trim();
     if (id.isEmpty || label.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('模板 ID 和名称不能为空')));
+      if (!mounted) {
+        return;
+      }
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.notificationsSnackTemplateIdAndNameRequired),
+        ),
+      );
       return;
     }
     final stageMinutes = <String, int>{};
@@ -1098,36 +1185,47 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final descriptionController = TextEditingController();
     final shouldSave = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('保存工作区共享模板'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: idController,
-              decoration: const InputDecoration(labelText: '模板 ID（英文）'),
+      builder: (dialogContext) {
+        final dl10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(
+            dl10n.notificationsDialogSaveWorkspaceSharedTemplateTitle,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: idController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateIdAscii,
+                ),
+              ),
+              TextField(
+                controller: labelController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateName,
+                ),
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateDescription,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl10n.notificationsActionCancel),
             ),
-            TextField(
-              controller: labelController,
-              decoration: const InputDecoration(labelText: '模板名称'),
-            ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: '模板说明'),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(dl10n.notificationsActionSave),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
+        );
+      },
     );
     if (shouldSave != true || !mounted) {
       return;
@@ -1136,9 +1234,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final label = labelController.text.trim();
     final description = descriptionController.text.trim();
     if (id.isEmpty || label.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('模板 ID 和名称不能为空')));
+      if (!mounted) {
+        return;
+      }
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.notificationsSnackTemplateIdAndNameRequired),
+        ),
+      );
       return;
     }
     final stageMinutes = <String, int>{};
@@ -1175,32 +1279,39 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     );
     final shouldSave = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('编辑模板：${template.id}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: labelController,
-              decoration: const InputDecoration(labelText: '模板名称'),
+      builder: (dialogContext) {
+        final dl10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(dl10n.notificationsDialogEditTemplateTitle(template.id)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: labelController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateName,
+                ),
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateDescription,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl10n.notificationsActionCancel),
             ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: '模板说明'),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(dl10n.notificationsActionSave),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
+        );
+      },
     );
     if (shouldSave != true) {
       return;
@@ -1225,20 +1336,25 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   ) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('删除模板：${template.label}'),
-        content: const Text('删除后不可恢复，是否继续？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+      builder: (dialogContext) {
+        final dl10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(
+            dl10n.notificationsDialogDeleteTemplateTitle(template.label),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
+          content: Text(dl10n.notificationsDialogDeleteTemplateBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl10n.notificationsActionCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(dl10n.notificationsActionDelete),
+            ),
+          ],
+        );
+      },
     );
     if (shouldDelete != true) {
       return;
@@ -1251,20 +1367,25 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   ) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('删除共享模板：${template.label}'),
-        content: const Text('删除后会影响当前工作区所有成员，是否继续？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+      builder: (dialogContext) {
+        final dl10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(
+            dl10n.notificationsDialogDeleteSharedTemplateTitle(template.label),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
+          content: Text(dl10n.notificationsDialogDeleteSharedTemplateBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl10n.notificationsActionCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(dl10n.notificationsActionDelete),
+            ),
+          ],
+        );
+      },
     );
     if (shouldDelete != true) {
       return;
@@ -1283,32 +1404,41 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     );
     final shouldSave = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('编辑共享模板：${template.id}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: labelController,
-              decoration: const InputDecoration(labelText: '模板名称'),
+      builder: (dialogContext) {
+        final dl10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(
+            dl10n.notificationsDialogEditSharedTemplateTitle(template.id),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: labelController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateName,
+                ),
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: dl10n.notificationsFieldTemplateDescription,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl10n.notificationsActionCancel),
             ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: '模板说明'),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(dl10n.notificationsActionSave),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
+        );
+      },
     );
     if (shouldSave != true) {
       return;
@@ -1369,9 +1499,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('已复用该次导出的筛选并刷新审计列表')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.notificationsSnackExportFiltersReused)),
+    );
   }
 
   Future<void> _redownloadFromExportRecord(
@@ -1382,9 +1513,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || path == null) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('已按历史条件下载：$path')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.notificationsSnackDownloadedByHistory(path))),
+    );
   }
 
   Future<void> _enqueueWorkspaceSharedAuditExportAsync(String format) async {
@@ -1396,11 +1528,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (job == null) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          '后台导出已排队（任务 #${job.numericTaskId}）。导出历史会在任务完成后自动刷新。',
-        ),
+        content: Text(l10n.notificationsSnackExportQueued(job.numericTaskId)),
       ),
     );
     widget.controller.scheduleWorkspaceSharedAuditExportHistoryPoll(job.id);
@@ -1412,9 +1543,12 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || savedPath == null) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('共享审计 JSON 已下载：$savedPath')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.notificationsSnackSharedAuditJsonSaved(savedPath)),
+      ),
+    );
   }
 
   Future<void> _exportWorkspaceAuditCsvToClipboard() async {
@@ -1423,9 +1557,12 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || savedPath == null) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('共享审计 CSV 已下载：$savedPath')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.notificationsSnackSharedAuditCsvSaved(savedPath)),
+      ),
+    );
   }
 
   Future<void> _reorderTemplate(String id, {required bool up}) async {
@@ -1454,9 +1591,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('模板 JSON 已复制到剪贴板')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.notificationsSnackTemplatesJsonCopied)),
+    );
   }
 
   Future<void> _openImportTemplatesDialog() async {
@@ -1464,59 +1602,65 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     String mode = 'replace';
     final shouldImport = await showDialog<bool>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('导入模板 JSON'),
-          content: SizedBox(
-            width: 560,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButtonFormField<String>(
-                  initialValue: mode,
-                  decoration: const InputDecoration(
-                    labelText: '导入模式',
-                    isDense: true,
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'replace',
-                      child: Text('replace（覆盖）'),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (stateContext, setDialogState) {
+          final dl10n = AppLocalizations.of(stateContext)!;
+          return AlertDialog(
+            title: Text(dl10n.notificationsDialogImportTemplatesJsonTitle),
+            content: SizedBox(
+              width: 560,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: mode,
+                    decoration: InputDecoration(
+                      labelText: dl10n.notificationsFieldImportMode,
+                      isDense: true,
                     ),
-                    DropdownMenuItem(value: 'merge', child: Text('merge（合并）')),
-                  ],
-                  onChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    setDialogState(() {
-                      mode = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: jsonController,
-                  maxLines: 14,
-                  decoration: const InputDecoration(
-                    labelText: '粘贴模板 JSON',
-                    alignLabelWithHint: true,
+                    items: [
+                      DropdownMenuItem(
+                        value: 'replace',
+                        child: Text(dl10n.notificationsImportModeReplace),
+                      ),
+                      DropdownMenuItem(
+                        value: 'merge',
+                        child: Text(dl10n.notificationsImportModeMerge),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) {
+                        return;
+                      }
+                      setDialogState(() {
+                        mode = value;
+                      });
+                    },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: jsonController,
+                    maxLines: 14,
+                    decoration: InputDecoration(
+                      labelText: dl10n.notificationsFieldPasteTemplatesJson,
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('导入'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(stateContext).pop(false),
+                child: Text(dl10n.notificationsActionCancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(stateContext).pop(true),
+                child: Text(dl10n.notificationsActionImport),
+              ),
+            ],
+          );
+        },
       ),
     );
     if (shouldImport != true || !mounted) {
@@ -1529,27 +1673,47 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || count == null) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('导入完成：$count 条模板')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.notificationsSnackImportDone(count))),
+    );
   }
 
-  String _buildPreferencesAuditText(NotificationPreferencesAuditMetaV1 audit) {
+  String _buildPreferencesAuditText(
+    AppLocalizations l10n,
+    NotificationPreferencesAuditMetaV1 audit,
+  ) {
     final updatedAt = audit.updatedAt;
-    final timePart = updatedAt == null ? '未知时间' : _formatDateTime(updatedAt);
-    return '策略最近更新：$timePart · ${audit.updatedBy} · ${audit.source}';
+    final timePart = updatedAt == null
+        ? l10n.notificationsUnknownTime
+        : _formatDateTime(updatedAt);
+    return l10n.notificationsPrefsAuditUpdatedLine(
+      timePart,
+      audit.updatedBy,
+      audit.source,
+    );
+  }
+
+  String _auditActionDisplay(AppLocalizations l10n, String action) {
+    switch (action.trim().toLowerCase()) {
+      case 'upsert':
+        return l10n.notificationsAuditActionUpsert;
+      case 'delete':
+        return l10n.notificationsAuditActionDelete;
+      default:
+        return action;
+    }
   }
 
   String _formatWorkspaceAuditItem(
+    AppLocalizations l10n,
     ContentComplianceClearedTemplateAuditItemV1 item,
   ) {
-    final at = item.at == null ? '未知时间' : _formatDateTime(item.at!);
+    final at = item.at == null
+        ? l10n.notificationsUnknownTime
+        : _formatDateTime(item.at!);
     final note = (item.note ?? '').trim();
-    final actionLabel = switch (item.action.trim().toLowerCase()) {
-      'upsert' => '新增/更新',
-      'delete' => '删除',
-      _ => item.action,
-    };
+    final actionLabel = _auditActionDisplay(l10n, item.action);
     if (note.isEmpty) {
       return '$at $actionLabel ${item.templateId}';
     }
@@ -1557,41 +1721,51 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   }
 
   String _exportRecordDownloadTooltip(
+    AppLocalizations l10n,
     WorkspaceSharedComplianceAuditExportRecordV1 item,
   ) {
     final d = (item.exportDelivery ?? '').trim().toLowerCase();
     if (d == 'async' && (item.jobId ?? '').trim().isNotEmpty) {
-      return '下载该次后台导出落盘的文件';
+      return l10n.notificationsExportDownloadAsyncArtifact;
     }
-    return '按相同条件再次下载（同步生成）';
+    return l10n.notificationsExportRedownloadSync;
   }
 
   String _formatWorkspaceAuditExportItem(
+    AppLocalizations l10n,
     WorkspaceSharedComplianceAuditExportRecordV1 item,
   ) {
     final when = item.exportedAt == null
-        ? '未知时间'
+        ? l10n.notificationsUnknownTime
         : _formatDateTime(item.exportedAt!);
     final format = item.format.toUpperCase();
-    final action = (item.action ?? '').trim().isEmpty ? '全部动作' : item.action!;
-    final template = (item.templateId ?? '').trim().isEmpty
-        ? '全部模板'
-        : item.templateId!;
-    return '导出记录：$when · $format · $template · $action · ${item.fileName}'
-        '${_exportDeliveryLabel(item)}';
+    final actionRaw = (item.action ?? '').trim();
+    final action = actionRaw.isEmpty
+        ? l10n.notificationsAuditAllActions
+        : _auditActionDisplay(l10n, actionRaw);
+    final templateRaw = (item.templateId ?? '').trim();
+    final template = templateRaw.isEmpty
+        ? l10n.notificationsAuditAllTemplates
+        : templateRaw;
+    return '${l10n.notificationsExportRecordLeadIn} $when · $format · '
+        '$template · $action · ${item.fileName}'
+        '${_exportDeliveryLabel(l10n, item)}';
   }
 
-  String _exportDeliveryLabel(WorkspaceSharedComplianceAuditExportRecordV1 item) {
+  String _exportDeliveryLabel(
+    AppLocalizations l10n,
+    WorkspaceSharedComplianceAuditExportRecordV1 item,
+  ) {
     final d = (item.exportDelivery ?? '').trim().toLowerCase();
     if (d == 'async') {
       final j = (item.jobId ?? '').trim();
       if (j.isNotEmpty) {
-        return ' · 异步(job:$j)';
+        return l10n.notificationsExportDeliveryAsyncWithJob(j);
       }
-      return ' · 异步';
+      return l10n.notificationsExportDeliveryAsync;
     }
     if (d == 'sync') {
-      return ' · 同步';
+      return l10n.notificationsExportDeliverySync;
     }
     return '';
   }

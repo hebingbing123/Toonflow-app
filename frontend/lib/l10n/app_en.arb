@@ -82,5 +82,197 @@
   "notificationsRecordWorkspaceInviteAccepted": "Invite accepted",
   "notificationsRecordSkillChange": "Skill change",
   "notificationsRecordContentComplianceAlert": "Content compliance alert",
-  "notificationsRecordContentComplianceCleared": "Content compliance cleared"
+  "notificationsRecordContentComplianceCleared": "Content compliance cleared",
+  "notificationsComplianceClearedThrottleTitle": "Compliance cleared throttle (minutes)",
+  "notificationsComplianceMinutesHint": "1–1440",
+  "notificationsComplianceSavePolicy": "Save policy",
+  "notificationsComplianceSaveAsTemplate": "Save as template",
+  "notificationsComplianceSaveToWorkspaceShared": "Save to workspace shared",
+  "notificationsComplianceExportTemplatesJson": "Export templates JSON",
+  "notificationsComplianceImportTemplatesJson": "Import templates JSON",
+  "notificationsComplianceClearedHelpShort": "At most one cleared per stage within the window to reduce noise.",
+  "notificationsComplianceCustomTemplatesOnly": "Custom templates only",
+  "notificationsComplianceTemplateChip": "Template: {name}",
+  "@notificationsComplianceTemplateChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsComplianceSharedChip": "Shared: {name}",
+  "@notificationsComplianceSharedChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsComplianceTooltipMoveUp": "Move up",
+  "notificationsComplianceTooltipMoveDown": "Move down",
+  "notificationsComplianceTooltipEditTemplate": "Edit template",
+  "notificationsComplianceTooltipDeleteTemplate": "Delete template",
+  "notificationsComplianceWorkspaceSharedHeader": "Workspace shared templates",
+  "notificationsComplianceTooltipEditSharedTemplate": "Edit shared template",
+  "notificationsComplianceTooltipDeleteSharedTemplate": "Delete shared template",
+  "notificationsComplianceStageOverrideLabel": "{stage} override",
+  "@notificationsComplianceStageOverrideLabel": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsComplianceStageOverrideHint": "Empty = follow global",
+  "notificationsComplianceSharedAuditTitle": "Shared template audit",
+  "notificationsComplianceFilterTemplateId": "Template ID filter",
+  "notificationsComplianceFilterAction": "Action filter",
+  "notificationsComplianceFilterStartIso": "Start time (ISO 8601)",
+  "notificationsComplianceFilterEndIso": "End time (ISO 8601)",
+  "notificationsComplianceApplyFilters": "Apply filters",
+  "notificationsComplianceDownloadAuditJson": "Download audit JSON",
+  "notificationsComplianceDownloadAuditCsv": "Download audit CSV",
+  "notificationsComplianceAsyncJson": "Async JSON",
+  "notificationsComplianceAsyncCsv": "Async CSV",
+  "notificationsComplianceCloseTooltip": "Dismiss",
+  "notificationsComplianceExportHistoryTitle": "Export history",
+  "notificationsComplianceExportFormatFilter": "Export format filter",
+  "notificationsComplianceExportedStartIso": "Exported from (ISO)",
+  "notificationsComplianceExportedEndIso": "Exported to (ISO)",
+  "notificationsComplianceFilterExports": "Filter export history",
+  "notificationsComplianceReuseExportFiltersTooltip": "Reuse this export’s filters above",
+  "notificationsComplianceMoreExportRecords": "More export records",
+  "notificationsComplianceLoadMoreAudit": "Load more audit",
+  "notificationsComplianceThrottleInvalidGlobal": "Enter an integer from 1 to 1440 minutes.",
+  "notificationsComplianceThrottleStageInvalid": "{stage}: enter 1–1440 minutes, or leave blank.",
+  "@notificationsComplianceThrottleStageInvalid": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogSaveClearedTemplateTitle": "Save cleared template",
+  "notificationsDialogSaveWorkspaceSharedTemplateTitle": "Save workspace shared template",
+  "notificationsDialogEditTemplateTitle": "Edit template: {id}",
+  "@notificationsDialogEditTemplateTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogDeleteTemplateTitle": "Delete template: {label}",
+  "@notificationsDialogDeleteTemplateTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogDeleteTemplateBody": "This cannot be undone. Continue?",
+  "notificationsDialogDeleteSharedTemplateTitle": "Delete shared template: {label}",
+  "@notificationsDialogDeleteSharedTemplateTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogDeleteSharedTemplateBody": "This affects all members in the workspace. Continue?",
+  "notificationsDialogEditSharedTemplateTitle": "Edit shared template: {id}",
+  "@notificationsDialogEditSharedTemplateTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsFieldTemplateIdAscii": "Template ID (ASCII)",
+  "notificationsFieldTemplateName": "Template name",
+  "notificationsFieldTemplateDescription": "Description",
+  "notificationsFieldImportMode": "Import mode",
+  "notificationsFieldPasteTemplatesJson": "Paste templates JSON",
+  "notificationsImportModeReplace": "replace (overwrite)",
+  "notificationsImportModeMerge": "merge",
+  "notificationsActionCancel": "Cancel",
+  "notificationsActionSave": "Save",
+  "notificationsActionDelete": "Delete",
+  "notificationsActionImport": "Import",
+  "notificationsSnackTemplateIdAndNameRequired": "Template ID and name cannot be empty.",
+  "notificationsSnackExportFiltersReused": "Reused that export’s filters and refreshed the audit list.",
+  "notificationsSnackDownloadedByHistory": "Downloaded with history filters: {path}",
+  "@notificationsSnackDownloadedByHistory": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSnackExportQueued": "Background export queued (task #{taskId}). History refreshes when it completes.",
+  "@notificationsSnackExportQueued": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsSnackSharedAuditJsonSaved": "Shared audit JSON saved: {path}",
+  "@notificationsSnackSharedAuditJsonSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSnackSharedAuditCsvSaved": "Shared audit CSV saved: {path}",
+  "@notificationsSnackSharedAuditCsvSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSnackTemplatesJsonCopied": "Templates JSON copied to clipboard.",
+  "notificationsDialogImportTemplatesJsonTitle": "Import templates JSON",
+  "notificationsSnackImportDone": "Import finished: {count} templates.",
+  "@notificationsSnackImportDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsUnknownTime": "Unknown time",
+  "notificationsPrefsAuditUpdatedLine": "Policy last updated: {time} · {by} · {source}",
+  "@notificationsPrefsAuditUpdatedLine": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "by": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAuditActionUpsert": "Upsert",
+  "notificationsAuditActionDelete": "Delete",
+  "notificationsAuditAllActions": "All actions",
+  "notificationsAuditAllTemplates": "All templates",
+  "notificationsExportRecordLeadIn": "Export record:",
+  "notificationsExportDownloadAsyncArtifact": "Download the async export artifact",
+  "notificationsExportRedownloadSync": "Download again with the same filters (sync)",
+  "notificationsExportDeliveryAsync": " · Async",
+  "notificationsExportDeliveryAsyncWithJob": " · Async (job: {jobId})",
+  "@notificationsExportDeliveryAsyncWithJob": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsExportDeliverySync": " · Sync"
 }

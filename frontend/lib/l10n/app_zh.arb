@@ -82,5 +82,197 @@
   "notificationsRecordWorkspaceInviteAccepted": "邀请已接受",
   "notificationsRecordSkillChange": "技能变更",
   "notificationsRecordContentComplianceAlert": "内容合规告警",
-  "notificationsRecordContentComplianceCleared": "内容合规告警清除"
+  "notificationsRecordContentComplianceCleared": "内容合规告警清除",
+  "notificationsComplianceClearedThrottleTitle": "合规 cleared 节流（分钟）",
+  "notificationsComplianceMinutesHint": "1–1440",
+  "notificationsComplianceSavePolicy": "保存策略",
+  "notificationsComplianceSaveAsTemplate": "保存为模板",
+  "notificationsComplianceSaveToWorkspaceShared": "保存到工作区共享",
+  "notificationsComplianceExportTemplatesJson": "导出模板 JSON",
+  "notificationsComplianceImportTemplatesJson": "导入模板 JSON",
+  "notificationsComplianceClearedHelpShort": "同一 stage 在窗口内只发一次 cleared，降低抖动噪音。",
+  "notificationsComplianceCustomTemplatesOnly": "仅自定义模板",
+  "notificationsComplianceTemplateChip": "模板：{name}",
+  "@notificationsComplianceTemplateChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsComplianceSharedChip": "共享：{name}",
+  "@notificationsComplianceSharedChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsComplianceTooltipMoveUp": "上移",
+  "notificationsComplianceTooltipMoveDown": "下移",
+  "notificationsComplianceTooltipEditTemplate": "编辑模板",
+  "notificationsComplianceTooltipDeleteTemplate": "删除模板",
+  "notificationsComplianceWorkspaceSharedHeader": "工作区共享模板",
+  "notificationsComplianceTooltipEditSharedTemplate": "编辑共享模板",
+  "notificationsComplianceTooltipDeleteSharedTemplate": "删除共享模板",
+  "notificationsComplianceStageOverrideLabel": "{stage} 覆盖值",
+  "@notificationsComplianceStageOverrideLabel": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsComplianceStageOverrideHint": "留空=跟随全局",
+  "notificationsComplianceSharedAuditTitle": "共享模板审计",
+  "notificationsComplianceFilterTemplateId": "模板 ID 过滤",
+  "notificationsComplianceFilterAction": "动作过滤",
+  "notificationsComplianceFilterStartIso": "开始时间(ISO8601)",
+  "notificationsComplianceFilterEndIso": "结束时间(ISO8601)",
+  "notificationsComplianceApplyFilters": "应用筛选",
+  "notificationsComplianceDownloadAuditJson": "下载审计 JSON",
+  "notificationsComplianceDownloadAuditCsv": "下载审计 CSV",
+  "notificationsComplianceAsyncJson": "异步 JSON",
+  "notificationsComplianceAsyncCsv": "异步 CSV",
+  "notificationsComplianceCloseTooltip": "关闭",
+  "notificationsComplianceExportHistoryTitle": "导出历史",
+  "notificationsComplianceExportFormatFilter": "导出格式筛选",
+  "notificationsComplianceExportedStartIso": "导出时间起(ISO)",
+  "notificationsComplianceExportedEndIso": "导出时间止(ISO)",
+  "notificationsComplianceFilterExports": "筛选导出历史",
+  "notificationsComplianceReuseExportFiltersTooltip": "复用该次筛选到上方",
+  "notificationsComplianceMoreExportRecords": "更多导出记录",
+  "notificationsComplianceLoadMoreAudit": "加载更多审计",
+  "notificationsComplianceThrottleInvalidGlobal": "请输入 1–1440 的整数分钟值。",
+  "notificationsComplianceThrottleStageInvalid": "{stage}：请输入 1–1440 的整数分钟值，或留空。",
+  "@notificationsComplianceThrottleStageInvalid": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogSaveClearedTemplateTitle": "保存 cleared 模板",
+  "notificationsDialogSaveWorkspaceSharedTemplateTitle": "保存工作区共享模板",
+  "notificationsDialogEditTemplateTitle": "编辑模板：{id}",
+  "@notificationsDialogEditTemplateTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogDeleteTemplateTitle": "删除模板：{label}",
+  "@notificationsDialogDeleteTemplateTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogDeleteTemplateBody": "删除后不可恢复，是否继续？",
+  "notificationsDialogDeleteSharedTemplateTitle": "删除共享模板：{label}",
+  "@notificationsDialogDeleteSharedTemplateTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDialogDeleteSharedTemplateBody": "删除后会影响当前工作区所有成员，是否继续？",
+  "notificationsDialogEditSharedTemplateTitle": "编辑共享模板：{id}",
+  "@notificationsDialogEditSharedTemplateTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsFieldTemplateIdAscii": "模板 ID（英文）",
+  "notificationsFieldTemplateName": "模板名称",
+  "notificationsFieldTemplateDescription": "模板说明",
+  "notificationsFieldImportMode": "导入模式",
+  "notificationsFieldPasteTemplatesJson": "粘贴模板 JSON",
+  "notificationsImportModeReplace": "replace（覆盖）",
+  "notificationsImportModeMerge": "merge（合并）",
+  "notificationsActionCancel": "取消",
+  "notificationsActionSave": "保存",
+  "notificationsActionDelete": "删除",
+  "notificationsActionImport": "导入",
+  "notificationsSnackTemplateIdAndNameRequired": "模板 ID 和名称不能为空。",
+  "notificationsSnackExportFiltersReused": "已复用该次导出的筛选并刷新审计列表。",
+  "notificationsSnackDownloadedByHistory": "已按历史条件下载：{path}",
+  "@notificationsSnackDownloadedByHistory": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSnackExportQueued": "后台导出已排队（任务 #{taskId}）。导出历史会在任务完成后自动刷新。",
+  "@notificationsSnackExportQueued": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsSnackSharedAuditJsonSaved": "共享审计 JSON 已下载：{path}",
+  "@notificationsSnackSharedAuditJsonSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSnackSharedAuditCsvSaved": "共享审计 CSV 已下载：{path}",
+  "@notificationsSnackSharedAuditCsvSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSnackTemplatesJsonCopied": "模板 JSON 已复制到剪贴板。",
+  "notificationsDialogImportTemplatesJsonTitle": "导入模板 JSON",
+  "notificationsSnackImportDone": "导入完成：{count} 条模板。",
+  "@notificationsSnackImportDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsUnknownTime": "未知时间",
+  "notificationsPrefsAuditUpdatedLine": "策略最近更新：{time} · {by} · {source}",
+  "@notificationsPrefsAuditUpdatedLine": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "by": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAuditActionUpsert": "新增/更新",
+  "notificationsAuditActionDelete": "删除",
+  "notificationsAuditAllActions": "全部动作",
+  "notificationsAuditAllTemplates": "全部模板",
+  "notificationsExportRecordLeadIn": "导出记录：",
+  "notificationsExportDownloadAsyncArtifact": "下载该次后台导出落盘的文件",
+  "notificationsExportRedownloadSync": "按相同条件再次下载（同步生成）",
+  "notificationsExportDeliveryAsync": " · 异步",
+  "notificationsExportDeliveryAsyncWithJob": " · 异步(job:{jobId})",
+  "@notificationsExportDeliveryAsyncWithJob": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsExportDeliverySync": " · 同步"
 }

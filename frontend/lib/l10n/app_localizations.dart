@@ -385,6 +385,496 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Content compliance cleared'**
   String get notificationsRecordContentComplianceCleared;
+
+  /// No description provided for @notificationsComplianceClearedThrottleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compliance cleared throttle (minutes)'**
+  String get notificationsComplianceClearedThrottleTitle;
+
+  /// No description provided for @notificationsComplianceMinutesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1–1440'**
+  String get notificationsComplianceMinutesHint;
+
+  /// No description provided for @notificationsComplianceSavePolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Save policy'**
+  String get notificationsComplianceSavePolicy;
+
+  /// No description provided for @notificationsComplianceSaveAsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as template'**
+  String get notificationsComplianceSaveAsTemplate;
+
+  /// No description provided for @notificationsComplianceSaveToWorkspaceShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to workspace shared'**
+  String get notificationsComplianceSaveToWorkspaceShared;
+
+  /// No description provided for @notificationsComplianceExportTemplatesJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Export templates JSON'**
+  String get notificationsComplianceExportTemplatesJson;
+
+  /// No description provided for @notificationsComplianceImportTemplatesJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Import templates JSON'**
+  String get notificationsComplianceImportTemplatesJson;
+
+  /// No description provided for @notificationsComplianceClearedHelpShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At most one cleared per stage within the window to reduce noise.'**
+  String get notificationsComplianceClearedHelpShort;
+
+  /// No description provided for @notificationsComplianceCustomTemplatesOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom templates only'**
+  String get notificationsComplianceCustomTemplatesOnly;
+
+  /// No description provided for @notificationsComplianceTemplateChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: {name}'**
+  String notificationsComplianceTemplateChip(String name);
+
+  /// No description provided for @notificationsComplianceSharedChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared: {name}'**
+  String notificationsComplianceSharedChip(String name);
+
+  /// No description provided for @notificationsComplianceTooltipMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get notificationsComplianceTooltipMoveUp;
+
+  /// No description provided for @notificationsComplianceTooltipMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get notificationsComplianceTooltipMoveDown;
+
+  /// No description provided for @notificationsComplianceTooltipEditTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit template'**
+  String get notificationsComplianceTooltipEditTemplate;
+
+  /// No description provided for @notificationsComplianceTooltipDeleteTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete template'**
+  String get notificationsComplianceTooltipDeleteTemplate;
+
+  /// No description provided for @notificationsComplianceWorkspaceSharedHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace shared templates'**
+  String get notificationsComplianceWorkspaceSharedHeader;
+
+  /// No description provided for @notificationsComplianceTooltipEditSharedTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit shared template'**
+  String get notificationsComplianceTooltipEditSharedTemplate;
+
+  /// No description provided for @notificationsComplianceTooltipDeleteSharedTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete shared template'**
+  String get notificationsComplianceTooltipDeleteSharedTemplate;
+
+  /// No description provided for @notificationsComplianceStageOverrideLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{stage} override'**
+  String notificationsComplianceStageOverrideLabel(String stage);
+
+  /// No description provided for @notificationsComplianceStageOverrideHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty = follow global'**
+  String get notificationsComplianceStageOverrideHint;
+
+  /// No description provided for @notificationsComplianceSharedAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared template audit'**
+  String get notificationsComplianceSharedAuditTitle;
+
+  /// No description provided for @notificationsComplianceFilterTemplateId.
+  ///
+  /// In en, this message translates to:
+  /// **'Template ID filter'**
+  String get notificationsComplianceFilterTemplateId;
+
+  /// No description provided for @notificationsComplianceFilterAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Action filter'**
+  String get notificationsComplianceFilterAction;
+
+  /// No description provided for @notificationsComplianceFilterStartIso.
+  ///
+  /// In en, this message translates to:
+  /// **'Start time (ISO 8601)'**
+  String get notificationsComplianceFilterStartIso;
+
+  /// No description provided for @notificationsComplianceFilterEndIso.
+  ///
+  /// In en, this message translates to:
+  /// **'End time (ISO 8601)'**
+  String get notificationsComplianceFilterEndIso;
+
+  /// No description provided for @notificationsComplianceApplyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply filters'**
+  String get notificationsComplianceApplyFilters;
+
+  /// No description provided for @notificationsComplianceDownloadAuditJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Download audit JSON'**
+  String get notificationsComplianceDownloadAuditJson;
+
+  /// No description provided for @notificationsComplianceDownloadAuditCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Download audit CSV'**
+  String get notificationsComplianceDownloadAuditCsv;
+
+  /// No description provided for @notificationsComplianceAsyncJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Async JSON'**
+  String get notificationsComplianceAsyncJson;
+
+  /// No description provided for @notificationsComplianceAsyncCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Async CSV'**
+  String get notificationsComplianceAsyncCsv;
+
+  /// No description provided for @notificationsComplianceCloseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get notificationsComplianceCloseTooltip;
+
+  /// No description provided for @notificationsComplianceExportHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export history'**
+  String get notificationsComplianceExportHistoryTitle;
+
+  /// No description provided for @notificationsComplianceExportFormatFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Export format filter'**
+  String get notificationsComplianceExportFormatFilter;
+
+  /// No description provided for @notificationsComplianceExportedStartIso.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported from (ISO)'**
+  String get notificationsComplianceExportedStartIso;
+
+  /// No description provided for @notificationsComplianceExportedEndIso.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported to (ISO)'**
+  String get notificationsComplianceExportedEndIso;
+
+  /// No description provided for @notificationsComplianceFilterExports.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter export history'**
+  String get notificationsComplianceFilterExports;
+
+  /// No description provided for @notificationsComplianceReuseExportFiltersTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse this export’s filters above'**
+  String get notificationsComplianceReuseExportFiltersTooltip;
+
+  /// No description provided for @notificationsComplianceMoreExportRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'More export records'**
+  String get notificationsComplianceMoreExportRecords;
+
+  /// No description provided for @notificationsComplianceLoadMoreAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more audit'**
+  String get notificationsComplianceLoadMoreAudit;
+
+  /// No description provided for @notificationsComplianceThrottleInvalidGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an integer from 1 to 1440 minutes.'**
+  String get notificationsComplianceThrottleInvalidGlobal;
+
+  /// No description provided for @notificationsComplianceThrottleStageInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'{stage}: enter 1–1440 minutes, or leave blank.'**
+  String notificationsComplianceThrottleStageInvalid(String stage);
+
+  /// No description provided for @notificationsDialogSaveClearedTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save cleared template'**
+  String get notificationsDialogSaveClearedTemplateTitle;
+
+  /// No description provided for @notificationsDialogSaveWorkspaceSharedTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save workspace shared template'**
+  String get notificationsDialogSaveWorkspaceSharedTemplateTitle;
+
+  /// No description provided for @notificationsDialogEditTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit template: {id}'**
+  String notificationsDialogEditTemplateTitle(String id);
+
+  /// No description provided for @notificationsDialogDeleteTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete template: {label}'**
+  String notificationsDialogDeleteTemplateTitle(String label);
+
+  /// No description provided for @notificationsDialogDeleteTemplateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone. Continue?'**
+  String get notificationsDialogDeleteTemplateBody;
+
+  /// No description provided for @notificationsDialogDeleteSharedTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete shared template: {label}'**
+  String notificationsDialogDeleteSharedTemplateTitle(String label);
+
+  /// No description provided for @notificationsDialogDeleteSharedTemplateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This affects all members in the workspace. Continue?'**
+  String get notificationsDialogDeleteSharedTemplateBody;
+
+  /// No description provided for @notificationsDialogEditSharedTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit shared template: {id}'**
+  String notificationsDialogEditSharedTemplateTitle(String id);
+
+  /// No description provided for @notificationsFieldTemplateIdAscii.
+  ///
+  /// In en, this message translates to:
+  /// **'Template ID (ASCII)'**
+  String get notificationsFieldTemplateIdAscii;
+
+  /// No description provided for @notificationsFieldTemplateName.
+  ///
+  /// In en, this message translates to:
+  /// **'Template name'**
+  String get notificationsFieldTemplateName;
+
+  /// No description provided for @notificationsFieldTemplateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get notificationsFieldTemplateDescription;
+
+  /// No description provided for @notificationsFieldImportMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Import mode'**
+  String get notificationsFieldImportMode;
+
+  /// No description provided for @notificationsFieldPasteTemplatesJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste templates JSON'**
+  String get notificationsFieldPasteTemplatesJson;
+
+  /// No description provided for @notificationsImportModeReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'replace (overwrite)'**
+  String get notificationsImportModeReplace;
+
+  /// No description provided for @notificationsImportModeMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'merge'**
+  String get notificationsImportModeMerge;
+
+  /// No description provided for @notificationsActionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get notificationsActionCancel;
+
+  /// No description provided for @notificationsActionSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get notificationsActionSave;
+
+  /// No description provided for @notificationsActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get notificationsActionDelete;
+
+  /// No description provided for @notificationsActionImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get notificationsActionImport;
+
+  /// No description provided for @notificationsSnackTemplateIdAndNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Template ID and name cannot be empty.'**
+  String get notificationsSnackTemplateIdAndNameRequired;
+
+  /// No description provided for @notificationsSnackExportFiltersReused.
+  ///
+  /// In en, this message translates to:
+  /// **'Reused that export’s filters and refreshed the audit list.'**
+  String get notificationsSnackExportFiltersReused;
+
+  /// No description provided for @notificationsSnackDownloadedByHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded with history filters: {path}'**
+  String notificationsSnackDownloadedByHistory(String path);
+
+  /// No description provided for @notificationsSnackExportQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Background export queued (task #{taskId}). History refreshes when it completes.'**
+  String notificationsSnackExportQueued(int taskId);
+
+  /// No description provided for @notificationsSnackSharedAuditJsonSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared audit JSON saved: {path}'**
+  String notificationsSnackSharedAuditJsonSaved(String path);
+
+  /// No description provided for @notificationsSnackSharedAuditCsvSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared audit CSV saved: {path}'**
+  String notificationsSnackSharedAuditCsvSaved(String path);
+
+  /// No description provided for @notificationsSnackTemplatesJsonCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Templates JSON copied to clipboard.'**
+  String get notificationsSnackTemplatesJsonCopied;
+
+  /// No description provided for @notificationsDialogImportTemplatesJsonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import templates JSON'**
+  String get notificationsDialogImportTemplatesJsonTitle;
+
+  /// No description provided for @notificationsSnackImportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Import finished: {count} templates.'**
+  String notificationsSnackImportDone(int count);
+
+  /// No description provided for @notificationsUnknownTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown time'**
+  String get notificationsUnknownTime;
+
+  /// No description provided for @notificationsPrefsAuditUpdatedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy last updated: {time} · {by} · {source}'**
+  String notificationsPrefsAuditUpdatedLine(
+    String time,
+    String by,
+    String source,
+  );
+
+  /// No description provided for @notificationsAuditActionUpsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Upsert'**
+  String get notificationsAuditActionUpsert;
+
+  /// No description provided for @notificationsAuditActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get notificationsAuditActionDelete;
+
+  /// No description provided for @notificationsAuditAllActions.
+  ///
+  /// In en, this message translates to:
+  /// **'All actions'**
+  String get notificationsAuditAllActions;
+
+  /// No description provided for @notificationsAuditAllTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'All templates'**
+  String get notificationsAuditAllTemplates;
+
+  /// No description provided for @notificationsExportRecordLeadIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Export record:'**
+  String get notificationsExportRecordLeadIn;
+
+  /// No description provided for @notificationsExportDownloadAsyncArtifact.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the async export artifact'**
+  String get notificationsExportDownloadAsyncArtifact;
+
+  /// No description provided for @notificationsExportRedownloadSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Download again with the same filters (sync)'**
+  String get notificationsExportRedownloadSync;
+
+  /// No description provided for @notificationsExportDeliveryAsync.
+  ///
+  /// In en, this message translates to:
+  /// **' · Async'**
+  String get notificationsExportDeliveryAsync;
+
+  /// No description provided for @notificationsExportDeliveryAsyncWithJob.
+  ///
+  /// In en, this message translates to:
+  /// **' · Async (job: {jobId})'**
+  String notificationsExportDeliveryAsyncWithJob(String jobId);
+
+  /// No description provided for @notificationsExportDeliverySync.
+  ///
+  /// In en, this message translates to:
+  /// **' · Sync'**
+  String get notificationsExportDeliverySync;
 }
 
 class _AppLocalizationsDelegate

@@ -162,4 +162,284 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationsRecordContentComplianceCleared => '内容合规告警清除';
+
+  @override
+  String get notificationsComplianceClearedThrottleTitle => '合规 cleared 节流（分钟）';
+
+  @override
+  String get notificationsComplianceMinutesHint => '1–1440';
+
+  @override
+  String get notificationsComplianceSavePolicy => '保存策略';
+
+  @override
+  String get notificationsComplianceSaveAsTemplate => '保存为模板';
+
+  @override
+  String get notificationsComplianceSaveToWorkspaceShared => '保存到工作区共享';
+
+  @override
+  String get notificationsComplianceExportTemplatesJson => '导出模板 JSON';
+
+  @override
+  String get notificationsComplianceImportTemplatesJson => '导入模板 JSON';
+
+  @override
+  String get notificationsComplianceClearedHelpShort =>
+      '同一 stage 在窗口内只发一次 cleared，降低抖动噪音。';
+
+  @override
+  String get notificationsComplianceCustomTemplatesOnly => '仅自定义模板';
+
+  @override
+  String notificationsComplianceTemplateChip(String name) {
+    return '模板：$name';
+  }
+
+  @override
+  String notificationsComplianceSharedChip(String name) {
+    return '共享：$name';
+  }
+
+  @override
+  String get notificationsComplianceTooltipMoveUp => '上移';
+
+  @override
+  String get notificationsComplianceTooltipMoveDown => '下移';
+
+  @override
+  String get notificationsComplianceTooltipEditTemplate => '编辑模板';
+
+  @override
+  String get notificationsComplianceTooltipDeleteTemplate => '删除模板';
+
+  @override
+  String get notificationsComplianceWorkspaceSharedHeader => '工作区共享模板';
+
+  @override
+  String get notificationsComplianceTooltipEditSharedTemplate => '编辑共享模板';
+
+  @override
+  String get notificationsComplianceTooltipDeleteSharedTemplate => '删除共享模板';
+
+  @override
+  String notificationsComplianceStageOverrideLabel(String stage) {
+    return '$stage 覆盖值';
+  }
+
+  @override
+  String get notificationsComplianceStageOverrideHint => '留空=跟随全局';
+
+  @override
+  String get notificationsComplianceSharedAuditTitle => '共享模板审计';
+
+  @override
+  String get notificationsComplianceFilterTemplateId => '模板 ID 过滤';
+
+  @override
+  String get notificationsComplianceFilterAction => '动作过滤';
+
+  @override
+  String get notificationsComplianceFilterStartIso => '开始时间(ISO8601)';
+
+  @override
+  String get notificationsComplianceFilterEndIso => '结束时间(ISO8601)';
+
+  @override
+  String get notificationsComplianceApplyFilters => '应用筛选';
+
+  @override
+  String get notificationsComplianceDownloadAuditJson => '下载审计 JSON';
+
+  @override
+  String get notificationsComplianceDownloadAuditCsv => '下载审计 CSV';
+
+  @override
+  String get notificationsComplianceAsyncJson => '异步 JSON';
+
+  @override
+  String get notificationsComplianceAsyncCsv => '异步 CSV';
+
+  @override
+  String get notificationsComplianceCloseTooltip => '关闭';
+
+  @override
+  String get notificationsComplianceExportHistoryTitle => '导出历史';
+
+  @override
+  String get notificationsComplianceExportFormatFilter => '导出格式筛选';
+
+  @override
+  String get notificationsComplianceExportedStartIso => '导出时间起(ISO)';
+
+  @override
+  String get notificationsComplianceExportedEndIso => '导出时间止(ISO)';
+
+  @override
+  String get notificationsComplianceFilterExports => '筛选导出历史';
+
+  @override
+  String get notificationsComplianceReuseExportFiltersTooltip => '复用该次筛选到上方';
+
+  @override
+  String get notificationsComplianceMoreExportRecords => '更多导出记录';
+
+  @override
+  String get notificationsComplianceLoadMoreAudit => '加载更多审计';
+
+  @override
+  String get notificationsComplianceThrottleInvalidGlobal =>
+      '请输入 1–1440 的整数分钟值。';
+
+  @override
+  String notificationsComplianceThrottleStageInvalid(String stage) {
+    return '$stage：请输入 1–1440 的整数分钟值，或留空。';
+  }
+
+  @override
+  String get notificationsDialogSaveClearedTemplateTitle => '保存 cleared 模板';
+
+  @override
+  String get notificationsDialogSaveWorkspaceSharedTemplateTitle => '保存工作区共享模板';
+
+  @override
+  String notificationsDialogEditTemplateTitle(String id) {
+    return '编辑模板：$id';
+  }
+
+  @override
+  String notificationsDialogDeleteTemplateTitle(String label) {
+    return '删除模板：$label';
+  }
+
+  @override
+  String get notificationsDialogDeleteTemplateBody => '删除后不可恢复，是否继续？';
+
+  @override
+  String notificationsDialogDeleteSharedTemplateTitle(String label) {
+    return '删除共享模板：$label';
+  }
+
+  @override
+  String get notificationsDialogDeleteSharedTemplateBody =>
+      '删除后会影响当前工作区所有成员，是否继续？';
+
+  @override
+  String notificationsDialogEditSharedTemplateTitle(String id) {
+    return '编辑共享模板：$id';
+  }
+
+  @override
+  String get notificationsFieldTemplateIdAscii => '模板 ID（英文）';
+
+  @override
+  String get notificationsFieldTemplateName => '模板名称';
+
+  @override
+  String get notificationsFieldTemplateDescription => '模板说明';
+
+  @override
+  String get notificationsFieldImportMode => '导入模式';
+
+  @override
+  String get notificationsFieldPasteTemplatesJson => '粘贴模板 JSON';
+
+  @override
+  String get notificationsImportModeReplace => 'replace（覆盖）';
+
+  @override
+  String get notificationsImportModeMerge => 'merge（合并）';
+
+  @override
+  String get notificationsActionCancel => '取消';
+
+  @override
+  String get notificationsActionSave => '保存';
+
+  @override
+  String get notificationsActionDelete => '删除';
+
+  @override
+  String get notificationsActionImport => '导入';
+
+  @override
+  String get notificationsSnackTemplateIdAndNameRequired => '模板 ID 和名称不能为空。';
+
+  @override
+  String get notificationsSnackExportFiltersReused => '已复用该次导出的筛选并刷新审计列表。';
+
+  @override
+  String notificationsSnackDownloadedByHistory(String path) {
+    return '已按历史条件下载：$path';
+  }
+
+  @override
+  String notificationsSnackExportQueued(int taskId) {
+    return '后台导出已排队（任务 #$taskId）。导出历史会在任务完成后自动刷新。';
+  }
+
+  @override
+  String notificationsSnackSharedAuditJsonSaved(String path) {
+    return '共享审计 JSON 已下载：$path';
+  }
+
+  @override
+  String notificationsSnackSharedAuditCsvSaved(String path) {
+    return '共享审计 CSV 已下载：$path';
+  }
+
+  @override
+  String get notificationsSnackTemplatesJsonCopied => '模板 JSON 已复制到剪贴板。';
+
+  @override
+  String get notificationsDialogImportTemplatesJsonTitle => '导入模板 JSON';
+
+  @override
+  String notificationsSnackImportDone(int count) {
+    return '导入完成：$count 条模板。';
+  }
+
+  @override
+  String get notificationsUnknownTime => '未知时间';
+
+  @override
+  String notificationsPrefsAuditUpdatedLine(
+    String time,
+    String by,
+    String source,
+  ) {
+    return '策略最近更新：$time · $by · $source';
+  }
+
+  @override
+  String get notificationsAuditActionUpsert => '新增/更新';
+
+  @override
+  String get notificationsAuditActionDelete => '删除';
+
+  @override
+  String get notificationsAuditAllActions => '全部动作';
+
+  @override
+  String get notificationsAuditAllTemplates => '全部模板';
+
+  @override
+  String get notificationsExportRecordLeadIn => '导出记录：';
+
+  @override
+  String get notificationsExportDownloadAsyncArtifact => '下载该次后台导出落盘的文件';
+
+  @override
+  String get notificationsExportRedownloadSync => '按相同条件再次下载（同步生成）';
+
+  @override
+  String get notificationsExportDeliveryAsync => ' · 异步';
+
+  @override
+  String notificationsExportDeliveryAsyncWithJob(String jobId) {
+    return ' · 异步(job:$jobId)';
+  }
+
+  @override
+  String get notificationsExportDeliverySync => ' · 同步';
 }
