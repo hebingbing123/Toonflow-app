@@ -57,6 +57,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   final msg = await postProjectEditProject(
                     token,
                     id: pr.numericId,
+                    projectUuid: pr.id,
                     name: pr.name ?? '',
                     intro: pr.intro ?? '',
                     type: pr.mode ?? '',
@@ -227,7 +228,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                     );
                     return;
                   }
-                  await postProjectDeleteProject(token, match.numericId);
+                  await postProjectDeleteProject(
+                    token,
+                    match.numericId,
+                    projectUuid: match.id,
+                  );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
