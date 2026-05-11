@@ -746,7 +746,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                      '${_qualityStageLabel(row.stage, l10n)} · A ${row.gradeACount} / B ${row.gradeBCount} / C ${row.gradeCCount} / D ${row.gradeDCount}',
+                      l10n.qualityReviewsStageGradeRow(
+                        _qualityStageLabel(row.stage, l10n),
+                        row.gradeACount,
+                        row.gradeBCount,
+                        row.gradeCCount,
+                        row.gradeDCount,
+                      ),
                     ),
                     subtitle: Text(
                       l10n.qualityReviewsTotalAndPassRate(
@@ -822,7 +828,12 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                      '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
+                      l10n.qualityReviewsReviewRowTitle(
+                        review.targetType,
+                        review.source,
+                        (review.overallScore ?? l10n.qualityReviewsNotAvailable)
+                            .toString(),
+                      ),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

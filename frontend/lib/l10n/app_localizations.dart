@@ -6538,6 +6538,28 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'memory'**
   String get qualityReviewsMemoryTag;
+
+  /// No description provided for @qualityReviewsNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'n/a'**
+  String get qualityReviewsNotAvailable;
+
+  /// No description provided for @qualityReviewsReviewRowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType} · {source} · score={score}'**
+  String qualityReviewsReviewRowTitle(
+    String targetType,
+    String source,
+    String score,
+  );
+
+  /// No description provided for @qualityReviewsStageGradeRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{stage} · A {a} / B {b} / C {c} / D {d}'**
+  String qualityReviewsStageGradeRow(String stage, int a, int b, int c, int d);
 }
 
 class _AppLocalizationsDelegate

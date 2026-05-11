@@ -3947,4 +3947,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qualityReviewsMemoryTag => 'memory';
+
+  @override
+  String get qualityReviewsNotAvailable => 'n/a';
+
+  @override
+  String qualityReviewsReviewRowTitle(
+    String targetType,
+    String source,
+    String score,
+  ) {
+    return '$targetType · $source · score=$score';
+  }
+
+  @override
+  String qualityReviewsStageGradeRow(String stage, int a, int b, int c, int d) {
+    return '$stage · A $a / B $b / C $c / D $d';
+  }
 }

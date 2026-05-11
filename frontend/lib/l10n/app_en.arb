@@ -2841,5 +2841,40 @@
   "qualityReviewsFieldBadCaseCategory": "badCaseCategory",
   "qualityReviewsDeliveryTag": "delivery",
   "qualityReviewsAutoTag": "auto",
-  "qualityReviewsMemoryTag": "memory"
+  "qualityReviewsMemoryTag": "memory",
+  "qualityReviewsNotAvailable": "n/a",
+  "qualityReviewsReviewRowTitle": "{targetType} · {source} · score={score}",
+  "@qualityReviewsReviewRowTitle": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStageGradeRow": "{stage} · A {a} / B {b} / C {c} / D {d}",
+  "@qualityReviewsStageGradeRow": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      },
+      "a": {
+        "type": "int"
+      },
+      "b": {
+        "type": "int"
+      },
+      "c": {
+        "type": "int"
+      },
+      "d": {
+        "type": "int"
+      }
+    }
+  }
 }
