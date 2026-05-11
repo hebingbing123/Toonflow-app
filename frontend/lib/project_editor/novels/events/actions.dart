@@ -31,6 +31,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   final pg = await fetchNovelEventsPaged(
                     token,
                     p.numericId,
+                    projectUuid: p.id,
                     page: 1,
                     limit: 10,
                   );
@@ -74,6 +75,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   final pg = await fetchNovelEventsPaged(
                     token,
                     p.numericId,
+                    projectUuid: p.id,
                     page: 1,
                     limit: 10,
                   );

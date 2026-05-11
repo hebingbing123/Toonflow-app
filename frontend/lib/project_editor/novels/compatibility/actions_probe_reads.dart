@@ -20,6 +20,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   final pg = await fetchNovelWorkbenchPaged(
                     token,
                     p.numericId,
+                    projectUuid: p.id,
                     page: 1,
                     limit: 10,
                   );
@@ -57,6 +58,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   final rows = await fetchNovelWorkbenchFullRows(
                     token,
                     p.numericId,
+                    projectUuid: p.id,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -87,6 +89,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   final idx = await fetchNovelWorkbenchIndex(
                     token,
                     p.numericId,
+                    projectUuid: p.id,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -145,4 +148,3 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
     ];
   }
 }
-

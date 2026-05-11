@@ -568,6 +568,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     final message = await postNovelEventsGenerateEvents(
       token,
       projectNumericId: project.numericId,
+      projectUuid: project.id,
       novelIds: ids,
     );
     await refreshWorkbench(setLocalState);
@@ -579,7 +580,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required ProjectRow project,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    final rows = await fetchNovelWorkbenchFullRows(token, project.numericId);
+    final rows = await fetchNovelWorkbenchFullRows(
+      token,
+      project.numericId,
+      projectUuid: project.id,
+    );
     final sample = rows.isEmpty
         ? '空列表'
         : rows
@@ -594,7 +599,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required ProjectRow project,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    final rows = await fetchNovelWorkbenchIndex(token, project.numericId);
+    final rows = await fetchNovelWorkbenchIndex(
+      token,
+      project.numericId,
+      projectUuid: project.id,
+    );
     final sample = rows.isEmpty
         ? '空列表'
         : rows

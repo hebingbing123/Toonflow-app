@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 
 import '../../config.dart';
 import '../core.dart';
-import '../project/index.dart' as project_api;
 import 'events_models.dart';
+import 'project_scope.dart';
 
 /// `GET /api/v1/projects/{project_id}/novel-events` — paginated events list with chapter associations.
 Future<ListNovelEventsResponse> fetchProjectNovelEventsByProjectId(
@@ -167,17 +167,19 @@ Future<String> postProjectNovelEventsBatchDeleteByProjectId(
 Future<NovelEventsPageResponse> fetchNovelEventsPaged(
   String accessToken,
   int projectNumericId, {
+  String? projectUuid,
   required int page,
   required int limit,
   String? search,
 }) async {
-  final projectUuid = await project_api.projectIdForNumericId(
+  final resolvedProjectUuid = await resolveNovelProjectUuid(
     accessToken,
-    projectNumericId,
+    projectUuid: projectUuid,
+    projectNumericId: projectNumericId,
   );
   final rows = await fetchProjectNovelEventsByProjectId(
     accessToken,
-    projectUuid,
+    resolvedProjectUuid,
     search: search,
     page: page,
     limit: limit,
@@ -200,15 +202,18 @@ Future<NovelEventsPageResponse> fetchNovelEventsPaged(
 Future<String> batchDeleteNovelEvents(
   String accessToken,
   int projectNumericId,
-  List<int> numericIds,
+  List<int> numericIds, {
+  String? projectUuid,
+}
 ) async {
-  final projectUuid = await project_api.projectIdForNumericId(
+  final resolvedProjectUuid = await resolveNovelProjectUuid(
     accessToken,
-    projectNumericId,
+    projectUuid: projectUuid,
+    projectNumericId: projectNumericId,
   );
   return postProjectNovelEventsBatchDeleteByProjectId(
     accessToken,
-    projectUuid,
+    resolvedProjectUuid,
     numericIds,
   );
 }

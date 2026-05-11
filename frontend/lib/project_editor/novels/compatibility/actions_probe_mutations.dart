@@ -21,6 +21,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   final msg = await postNovelEventsGenerateEvents(
                     token,
                     projectNumericId: p.numericId,
+                    projectUuid: p.id,
                     novelIds: ids.take(3).toList(),
                   );
                   if (!ctx.mounted) return;
@@ -53,6 +54,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                     token,
                     p.numericId,
                     const [],
+                    projectUuid: p.id,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -185,4 +187,3 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
     ];
   }
 }
-
