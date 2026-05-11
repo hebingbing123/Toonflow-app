@@ -2333,5 +2333,187 @@
   "qualityReviewsSummaryBadCasePrefix": "坏例",
   "qualityReviewsDiagnosticLabel": "诊断",
   "qualityReviewsWritebackLabel": "回写",
-  "qualityReviewsSuggestionsLabel": "建议"
+  "qualityReviewsSuggestionsLabel": "建议",
+  "qualityReviewsNegativeConstraintReviewAndBadCase": "负向约束=评审+坏例记忆",
+  "qualityReviewsNegativeConstraintRecentReviews": "负向约束=近期评审",
+  "qualityReviewsNegativeConstraintBadCaseMemory": "负向约束=坏例记忆",
+  "qualityReviewsNegativeConstraintPendingBadCase": "负向约束=待观察坏例",
+  "qualityReviewsNegativeConstraintPendingRejected": "负向约束=待观察拒绝项",
+  "qualityReviewsNegativeConstraintGeneric": "负向约束={source}",
+  "@qualityReviewsNegativeConstraintGeneric": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsBucketCount": "{bucket}{count}次",
+  "@qualityReviewsBucketCount": {
+    "placeholders": {
+      "bucket": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsFeedbackTagDeliveryRealism": "台词真实",
+  "qualityReviewsFeedbackTagEmotionArc": "情绪层次",
+  "qualityReviewsFeedbackTagIdentityContinuity": "人物一致",
+  "qualityReviewsFeedbackTagLightingRealism": "光影真实",
+  "qualityReviewsScopeProject": "项目{count}",
+  "@qualityReviewsScopeProject": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsScopeScript": "剧本{count}",
+  "@qualityReviewsScopeScript": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsScopeRole": "角色{count}",
+  "@qualityReviewsScopeRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsFocusSelectedVideoMemory": "镜头级精选记忆",
+  "qualityReviewsFocusRejectedVideoNegativeMemory": "坏例记忆",
+  "qualityReviewsFocusProjectVideoStyleMemory": "项目级风格记忆",
+  "qualityReviewsFocusCurrentMemory": "当前记忆",
+  "qualityReviewsSuggestionReferenceFrame": "先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。",
+  "qualityReviewsSuggestionContinuity": "把连续性约束压成 1-2 条硬规则，只留机位、服化道和角色位置。",
+  "qualityReviewsSuggestionDelivery": "保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。",
+  "qualityReviewsSuggestionTrimGeneric": "继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。",
+  "qualityReviewsSuggestionNegativeReuse": "沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。",
+  "qualityReviewsSuggestionDirectorTrim": "导演描述已经让位给记忆，优先回收重复导演句，不动关键表演锚点。",
+  "qualityReviewsSuggestionProjectScopeTrim": "当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。",
+  "qualityReviewsSuggestionRoleScopeKeep": "已经命中角色级记忆，优先加强角色表演动作，不要回退成泛项目描述。",
+  "qualityReviewsSuggestionEmotion": "下一轮把情绪弧线写成可观察动作，避免只剩解释性台词。",
+  "qualityReviewsSuggestionVisual": "优先补人物外观和镜头真实感约束，再决定是否继续加风格描述。",
+  "qualityReviewsSuggestionGeneral": "先锁定人物情绪、连续性和坏例约束，再做下一轮生成。",
+  "qualityReviewsRepairPlanCount": "{suggestion} {count}次",
+  "@qualityReviewsRepairPlanCount": {
+    "placeholders": {
+      "suggestion": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsCurrentFilterScope": "当前筛选范围",
+  "qualityReviewsActionPlanKeepDelivery": "{targetType} 保留{focus}的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。",
+  "@qualityReviewsActionPlanKeepDelivery": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsActionPlanReuseNegative": "{targetType} 先复用{focus}做坏例隔离约束，锁住穿帮/假感后再决定是否补 prompt。",
+  "@qualityReviewsActionPlanReuseNegative": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsActionPlanTrimGeneric": "{targetType} 优先压{focus}里的动作/光影/氛围套话，把 token 留给人物表演、口型和连续性。",
+  "@qualityReviewsActionPlanTrimGeneric": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsActionPlanPromoteSelected": "{targetType} 从高分样本晋升一条{focus}，复用人物情绪和镜头执行，减少重复描述。",
+  "@qualityReviewsActionPlanPromoteSelected": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsScopedMemorySuggestion": "{scope} 独立记忆建议：{value}",
+  "@qualityReviewsScopedMemorySuggestion": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistKeepDelivery": "保留{focus}里的表演、语气、口型和情绪记忆，只压泛风格套话。",
+  "@qualityReviewsChecklistKeepDelivery": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistReuseNegative": "先复用{focus}里的坏例约束，锁住穿帮、假感和冷场，再决定是否补 prompt。",
+  "@qualityReviewsChecklistReuseNegative": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistTrimGeneric": "清掉{focus}里的动作、光影、氛围套话，把 token 留给人物表演和连续性。",
+  "@qualityReviewsChecklistTrimGeneric": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistPromoteSelected": "把高分样本晋升为{focus}，复用人物情绪和镜头执行，减少重复导演描述。",
+  "@qualityReviewsChecklistPromoteSelected": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistTitle": "{scope} 执行清单：",
+  "@qualityReviewsChecklistTitle": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistScope": "范围：记忆只在 {scope} 生效，不跨用户、项目或短剧复用。",
+  "@qualityReviewsChecklistScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  }
 }

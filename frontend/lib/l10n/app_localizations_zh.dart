@@ -3353,4 +3353,178 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityReviewsSuggestionsLabel => '建议';
+
+  @override
+  String get qualityReviewsNegativeConstraintReviewAndBadCase => '负向约束=评审+坏例记忆';
+
+  @override
+  String get qualityReviewsNegativeConstraintRecentReviews => '负向约束=近期评审';
+
+  @override
+  String get qualityReviewsNegativeConstraintBadCaseMemory => '负向约束=坏例记忆';
+
+  @override
+  String get qualityReviewsNegativeConstraintPendingBadCase => '负向约束=待观察坏例';
+
+  @override
+  String get qualityReviewsNegativeConstraintPendingRejected => '负向约束=待观察拒绝项';
+
+  @override
+  String qualityReviewsNegativeConstraintGeneric(String source) {
+    return '负向约束=$source';
+  }
+
+  @override
+  String qualityReviewsBucketCount(String bucket, int count) {
+    return '$bucket$count次';
+  }
+
+  @override
+  String get qualityReviewsFeedbackTagDeliveryRealism => '台词真实';
+
+  @override
+  String get qualityReviewsFeedbackTagEmotionArc => '情绪层次';
+
+  @override
+  String get qualityReviewsFeedbackTagIdentityContinuity => '人物一致';
+
+  @override
+  String get qualityReviewsFeedbackTagLightingRealism => '光影真实';
+
+  @override
+  String qualityReviewsScopeProject(int count) {
+    return '项目$count';
+  }
+
+  @override
+  String qualityReviewsScopeScript(int count) {
+    return '剧本$count';
+  }
+
+  @override
+  String qualityReviewsScopeRole(int count) {
+    return '角色$count';
+  }
+
+  @override
+  String get qualityReviewsFocusSelectedVideoMemory => '镜头级精选记忆';
+
+  @override
+  String get qualityReviewsFocusRejectedVideoNegativeMemory => '坏例记忆';
+
+  @override
+  String get qualityReviewsFocusProjectVideoStyleMemory => '项目级风格记忆';
+
+  @override
+  String get qualityReviewsFocusCurrentMemory => '当前记忆';
+
+  @override
+  String get qualityReviewsSuggestionReferenceFrame =>
+      '先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。';
+
+  @override
+  String get qualityReviewsSuggestionContinuity =>
+      '把连续性约束压成 1-2 条硬规则，只留机位、服化道和角色位置。';
+
+  @override
+  String get qualityReviewsSuggestionDelivery =>
+      '保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。';
+
+  @override
+  String get qualityReviewsSuggestionTrimGeneric =>
+      '继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。';
+
+  @override
+  String get qualityReviewsSuggestionNegativeReuse =>
+      '沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。';
+
+  @override
+  String get qualityReviewsSuggestionDirectorTrim =>
+      '导演描述已经让位给记忆，优先回收重复导演句，不动关键表演锚点。';
+
+  @override
+  String get qualityReviewsSuggestionProjectScopeTrim =>
+      '当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。';
+
+  @override
+  String get qualityReviewsSuggestionRoleScopeKeep =>
+      '已经命中角色级记忆，优先加强角色表演动作，不要回退成泛项目描述。';
+
+  @override
+  String get qualityReviewsSuggestionEmotion => '下一轮把情绪弧线写成可观察动作，避免只剩解释性台词。';
+
+  @override
+  String get qualityReviewsSuggestionVisual => '优先补人物外观和镜头真实感约束，再决定是否继续加风格描述。';
+
+  @override
+  String get qualityReviewsSuggestionGeneral => '先锁定人物情绪、连续性和坏例约束，再做下一轮生成。';
+
+  @override
+  String qualityReviewsRepairPlanCount(String suggestion, int count) {
+    return '$suggestion $count次';
+  }
+
+  @override
+  String get qualityReviewsCurrentFilterScope => '当前筛选范围';
+
+  @override
+  String qualityReviewsActionPlanKeepDelivery(String targetType, String focus) {
+    return '$targetType 保留$focus的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。';
+  }
+
+  @override
+  String qualityReviewsActionPlanReuseNegative(
+    String targetType,
+    String focus,
+  ) {
+    return '$targetType 先复用$focus做坏例隔离约束，锁住穿帮/假感后再决定是否补 prompt。';
+  }
+
+  @override
+  String qualityReviewsActionPlanTrimGeneric(String targetType, String focus) {
+    return '$targetType 优先压$focus里的动作/光影/氛围套话，把 token 留给人物表演、口型和连续性。';
+  }
+
+  @override
+  String qualityReviewsActionPlanPromoteSelected(
+    String targetType,
+    String focus,
+  ) {
+    return '$targetType 从高分样本晋升一条$focus，复用人物情绪和镜头执行，减少重复描述。';
+  }
+
+  @override
+  String qualityReviewsScopedMemorySuggestion(String scope, String value) {
+    return '$scope 独立记忆建议：$value';
+  }
+
+  @override
+  String qualityReviewsChecklistKeepDelivery(String focus) {
+    return '保留$focus里的表演、语气、口型和情绪记忆，只压泛风格套话。';
+  }
+
+  @override
+  String qualityReviewsChecklistReuseNegative(String focus) {
+    return '先复用$focus里的坏例约束，锁住穿帮、假感和冷场，再决定是否补 prompt。';
+  }
+
+  @override
+  String qualityReviewsChecklistTrimGeneric(String focus) {
+    return '清掉$focus里的动作、光影、氛围套话，把 token 留给人物表演和连续性。';
+  }
+
+  @override
+  String qualityReviewsChecklistPromoteSelected(String focus) {
+    return '把高分样本晋升为$focus，复用人物情绪和镜头执行，减少重复导演描述。';
+  }
+
+  @override
+  String qualityReviewsChecklistTitle(String scope) {
+    return '$scope 执行清单：';
+  }
+
+  @override
+  String qualityReviewsChecklistScope(String scope) {
+    return '范围：记忆只在 $scope 生效，不跨用户、项目或短剧复用。';
+  }
 }

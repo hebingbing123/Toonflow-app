@@ -3492,4 +3492,189 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qualityReviewsSuggestionsLabel => 'suggestions';
+
+  @override
+  String get qualityReviewsNegativeConstraintReviewAndBadCase =>
+      'negative constraint=reviews+bad-case memory';
+
+  @override
+  String get qualityReviewsNegativeConstraintRecentReviews =>
+      'negative constraint=recent reviews';
+
+  @override
+  String get qualityReviewsNegativeConstraintBadCaseMemory =>
+      'negative constraint=bad-case memory';
+
+  @override
+  String get qualityReviewsNegativeConstraintPendingBadCase =>
+      'negative constraint=pending bad cases';
+
+  @override
+  String get qualityReviewsNegativeConstraintPendingRejected =>
+      'negative constraint=pending rejected items';
+
+  @override
+  String qualityReviewsNegativeConstraintGeneric(String source) {
+    return 'negative constraint=$source';
+  }
+
+  @override
+  String qualityReviewsBucketCount(String bucket, int count) {
+    return '$bucket$count times';
+  }
+
+  @override
+  String get qualityReviewsFeedbackTagDeliveryRealism => 'dialogue realism';
+
+  @override
+  String get qualityReviewsFeedbackTagEmotionArc => 'emotion arc';
+
+  @override
+  String get qualityReviewsFeedbackTagIdentityContinuity =>
+      'identity continuity';
+
+  @override
+  String get qualityReviewsFeedbackTagLightingRealism => 'lighting realism';
+
+  @override
+  String qualityReviewsScopeProject(int count) {
+    return 'project $count';
+  }
+
+  @override
+  String qualityReviewsScopeScript(int count) {
+    return 'script $count';
+  }
+
+  @override
+  String qualityReviewsScopeRole(int count) {
+    return 'role $count';
+  }
+
+  @override
+  String get qualityReviewsFocusSelectedVideoMemory => 'selected shot memory';
+
+  @override
+  String get qualityReviewsFocusRejectedVideoNegativeMemory =>
+      'bad-case memory';
+
+  @override
+  String get qualityReviewsFocusProjectVideoStyleMemory =>
+      'project style memory';
+
+  @override
+  String get qualityReviewsFocusCurrentMemory => 'current memory';
+
+  @override
+  String get qualityReviewsSuggestionReferenceFrame =>
+      'Add reference frame and previous-shot continuity first; lock face, costume/props, and blocking continuity.';
+
+  @override
+  String get qualityReviewsSuggestionContinuity =>
+      'Compress continuity constraints to 1-2 hard rules: camera setup, costume/props, and character positions only.';
+
+  @override
+  String get qualityReviewsSuggestionDelivery =>
+      'Keep delivery/tone memory, add performable emotional actions, and do not trim delivery memory first.';
+
+  @override
+  String get qualityReviewsSuggestionTrimGeneric =>
+      'Continue trimming generic action/lighting lines and reserve budget for expressions, lip sync, and identity continuity.';
+
+  @override
+  String get qualityReviewsSuggestionNegativeReuse =>
+      'Reuse existing bad-case negative constraints; dedupe manually added phrases first to avoid repeated token burn.';
+
+  @override
+  String get qualityReviewsSuggestionDirectorTrim =>
+      'Director descriptions already yielded to memory; reclaim repeated director lines first and keep key performance anchors.';
+
+  @override
+  String get qualityReviewsSuggestionProjectScopeTrim =>
+      'Current hits are mostly project-scoped memory; trim generic style lines first and keep character performance details.';
+
+  @override
+  String get qualityReviewsSuggestionRoleScopeKeep =>
+      'Role-scoped memory already hit; strengthen role performance actions first and avoid regressing to generic project copy.';
+
+  @override
+  String get qualityReviewsSuggestionEmotion =>
+      'In next round, turn emotional arc into observable actions; avoid explanatory dialogue only.';
+
+  @override
+  String get qualityReviewsSuggestionVisual =>
+      'Prioritize character appearance and shot realism constraints, then decide whether to add more style descriptions.';
+
+  @override
+  String get qualityReviewsSuggestionGeneral =>
+      'Lock emotion, continuity, and bad-case constraints first, then run the next generation round.';
+
+  @override
+  String qualityReviewsRepairPlanCount(String suggestion, int count) {
+    return '$suggestion $count times';
+  }
+
+  @override
+  String get qualityReviewsCurrentFilterScope => 'current filter scope';
+
+  @override
+  String qualityReviewsActionPlanKeepDelivery(String targetType, String focus) {
+    return '$targetType: keep delivery/emotion memory from $focus; continue trimming generic style lines before delivery fragments.';
+  }
+
+  @override
+  String qualityReviewsActionPlanReuseNegative(
+    String targetType,
+    String focus,
+  ) {
+    return '$targetType: reuse $focus for bad-case isolation constraints; lock glitches/fakeness before deciding prompt additions.';
+  }
+
+  @override
+  String qualityReviewsActionPlanTrimGeneric(String targetType, String focus) {
+    return '$targetType: prioritize trimming action/lighting/mood filler in $focus; reserve tokens for performance, lip sync, and continuity.';
+  }
+
+  @override
+  String qualityReviewsActionPlanPromoteSelected(
+    String targetType,
+    String focus,
+  ) {
+    return '$targetType: promote one high-score sample to $focus; reuse emotion and shot execution while reducing repetitive descriptions.';
+  }
+
+  @override
+  String qualityReviewsScopedMemorySuggestion(String scope, String value) {
+    return '$scope scoped-memory suggestion: $value';
+  }
+
+  @override
+  String qualityReviewsChecklistKeepDelivery(String focus) {
+    return 'Keep performance/tone/lip-sync/emotion memory in $focus, only trim generic style filler.';
+  }
+
+  @override
+  String qualityReviewsChecklistReuseNegative(String focus) {
+    return 'Reuse bad-case constraints in $focus first; lock glitches/fakeness/coldness before deciding prompt additions.';
+  }
+
+  @override
+  String qualityReviewsChecklistTrimGeneric(String focus) {
+    return 'Remove action/lighting/mood filler in $focus; keep tokens for performance and continuity.';
+  }
+
+  @override
+  String qualityReviewsChecklistPromoteSelected(String focus) {
+    return 'Promote high-score samples to $focus; reuse emotion and shot execution while reducing repetitive director copy.';
+  }
+
+  @override
+  String qualityReviewsChecklistTitle(String scope) {
+    return '$scope checklist:';
+  }
+
+  @override
+  String qualityReviewsChecklistScope(String scope) {
+    return 'Scope: memory takes effect only in $scope; no reuse across users, projects, or shows.';
+  }
 }

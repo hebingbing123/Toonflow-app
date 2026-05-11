@@ -2333,5 +2333,187 @@
   "qualityReviewsSummaryBadCasePrefix": "Bad case",
   "qualityReviewsDiagnosticLabel": "diagnostic",
   "qualityReviewsWritebackLabel": "writeback",
-  "qualityReviewsSuggestionsLabel": "suggestions"
+  "qualityReviewsSuggestionsLabel": "suggestions",
+  "qualityReviewsNegativeConstraintReviewAndBadCase": "negative constraint=reviews+bad-case memory",
+  "qualityReviewsNegativeConstraintRecentReviews": "negative constraint=recent reviews",
+  "qualityReviewsNegativeConstraintBadCaseMemory": "negative constraint=bad-case memory",
+  "qualityReviewsNegativeConstraintPendingBadCase": "negative constraint=pending bad cases",
+  "qualityReviewsNegativeConstraintPendingRejected": "negative constraint=pending rejected items",
+  "qualityReviewsNegativeConstraintGeneric": "negative constraint={source}",
+  "@qualityReviewsNegativeConstraintGeneric": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsBucketCount": "{bucket}{count} times",
+  "@qualityReviewsBucketCount": {
+    "placeholders": {
+      "bucket": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsFeedbackTagDeliveryRealism": "dialogue realism",
+  "qualityReviewsFeedbackTagEmotionArc": "emotion arc",
+  "qualityReviewsFeedbackTagIdentityContinuity": "identity continuity",
+  "qualityReviewsFeedbackTagLightingRealism": "lighting realism",
+  "qualityReviewsScopeProject": "project {count}",
+  "@qualityReviewsScopeProject": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsScopeScript": "script {count}",
+  "@qualityReviewsScopeScript": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsScopeRole": "role {count}",
+  "@qualityReviewsScopeRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsFocusSelectedVideoMemory": "selected shot memory",
+  "qualityReviewsFocusRejectedVideoNegativeMemory": "bad-case memory",
+  "qualityReviewsFocusProjectVideoStyleMemory": "project style memory",
+  "qualityReviewsFocusCurrentMemory": "current memory",
+  "qualityReviewsSuggestionReferenceFrame": "Add reference frame and previous-shot continuity first; lock face, costume/props, and blocking continuity.",
+  "qualityReviewsSuggestionContinuity": "Compress continuity constraints to 1-2 hard rules: camera setup, costume/props, and character positions only.",
+  "qualityReviewsSuggestionDelivery": "Keep delivery/tone memory, add performable emotional actions, and do not trim delivery memory first.",
+  "qualityReviewsSuggestionTrimGeneric": "Continue trimming generic action/lighting lines and reserve budget for expressions, lip sync, and identity continuity.",
+  "qualityReviewsSuggestionNegativeReuse": "Reuse existing bad-case negative constraints; dedupe manually added phrases first to avoid repeated token burn.",
+  "qualityReviewsSuggestionDirectorTrim": "Director descriptions already yielded to memory; reclaim repeated director lines first and keep key performance anchors.",
+  "qualityReviewsSuggestionProjectScopeTrim": "Current hits are mostly project-scoped memory; trim generic style lines first and keep character performance details.",
+  "qualityReviewsSuggestionRoleScopeKeep": "Role-scoped memory already hit; strengthen role performance actions first and avoid regressing to generic project copy.",
+  "qualityReviewsSuggestionEmotion": "In next round, turn emotional arc into observable actions; avoid explanatory dialogue only.",
+  "qualityReviewsSuggestionVisual": "Prioritize character appearance and shot realism constraints, then decide whether to add more style descriptions.",
+  "qualityReviewsSuggestionGeneral": "Lock emotion, continuity, and bad-case constraints first, then run the next generation round.",
+  "qualityReviewsRepairPlanCount": "{suggestion} {count} times",
+  "@qualityReviewsRepairPlanCount": {
+    "placeholders": {
+      "suggestion": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsCurrentFilterScope": "current filter scope",
+  "qualityReviewsActionPlanKeepDelivery": "{targetType}: keep delivery/emotion memory from {focus}; continue trimming generic style lines before delivery fragments.",
+  "@qualityReviewsActionPlanKeepDelivery": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsActionPlanReuseNegative": "{targetType}: reuse {focus} for bad-case isolation constraints; lock glitches/fakeness before deciding prompt additions.",
+  "@qualityReviewsActionPlanReuseNegative": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsActionPlanTrimGeneric": "{targetType}: prioritize trimming action/lighting/mood filler in {focus}; reserve tokens for performance, lip sync, and continuity.",
+  "@qualityReviewsActionPlanTrimGeneric": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsActionPlanPromoteSelected": "{targetType}: promote one high-score sample to {focus}; reuse emotion and shot execution while reducing repetitive descriptions.",
+  "@qualityReviewsActionPlanPromoteSelected": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsScopedMemorySuggestion": "{scope} scoped-memory suggestion: {value}",
+  "@qualityReviewsScopedMemorySuggestion": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistKeepDelivery": "Keep performance/tone/lip-sync/emotion memory in {focus}, only trim generic style filler.",
+  "@qualityReviewsChecklistKeepDelivery": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistReuseNegative": "Reuse bad-case constraints in {focus} first; lock glitches/fakeness/coldness before deciding prompt additions.",
+  "@qualityReviewsChecklistReuseNegative": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistTrimGeneric": "Remove action/lighting/mood filler in {focus}; keep tokens for performance and continuity.",
+  "@qualityReviewsChecklistTrimGeneric": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistPromoteSelected": "Promote high-score samples to {focus}; reuse emotion and shot execution while reducing repetitive director copy.",
+  "@qualityReviewsChecklistPromoteSelected": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistTitle": "{scope} checklist:",
+  "@qualityReviewsChecklistTitle": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsChecklistScope": "Scope: memory takes effect only in {scope}; no reuse across users, projects, or shows.",
+  "@qualityReviewsChecklistScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  }
 }

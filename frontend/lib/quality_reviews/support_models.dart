@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 // ── 通用辅助函数 ────────────────────────────────────────────────
@@ -61,65 +62,90 @@ Map<String, int> diagnosticStringIntMap(Map<String, dynamic> map, String key) {
   return result;
 }
 
-String describeAutoNegativeSource(String source) {
+String describeAutoNegativeSource(
+  String source, {
+  AppLocalizations? l10n,
+}) {
   switch (source) {
     case 'review+rejected_memory':
-      return '负向约束=评审+坏例记忆';
+      return l10n?.qualityReviewsNegativeConstraintReviewAndBadCase ??
+          '负向约束=评审+坏例记忆';
     case 'review':
-      return '负向约束=近期评审';
+      return l10n?.qualityReviewsNegativeConstraintRecentReviews ?? '负向约束=近期评审';
     case 'rejected_memory':
-      return '负向约束=坏例记忆';
+      return l10n?.qualityReviewsNegativeConstraintBadCaseMemory ?? '负向约束=坏例记忆';
     case 'pending_observation_note':
-      return '负向约束=待观察坏例';
+      return l10n?.qualityReviewsNegativeConstraintPendingBadCase ?? '负向约束=待观察坏例';
     case 'pending_rejected_observation':
-      return '负向约束=待观察拒绝项';
+      return l10n?.qualityReviewsNegativeConstraintPendingRejected ??
+          '负向约束=待观察拒绝项';
     default:
-      return '负向约束=$source';
+      return l10n?.qualityReviewsNegativeConstraintGeneric(source) ??
+          '负向约束=$source';
   }
 }
 
-String joinTopBucketCounts(Map<String, int> counts, {int maxItems = 3}) {
+String joinTopBucketCounts(
+  Map<String, int> counts, {
+  int maxItems = 3,
+  AppLocalizations? l10n,
+}) {
   if (counts.isEmpty) return '';
   return (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
       .take(maxItems)
-      .map((entry) => '${entry.key}${entry.value}次')
+      .map(
+        (entry) =>
+            l10n?.qualityReviewsBucketCount(entry.key, entry.value) ??
+            '${entry.key}${entry.value}次',
+      )
       .join(' / ');
 }
 
 String joinBucketListWithCounts(
   List<String> buckets,
   Map<String, int> counts,
+  {AppLocalizations? l10n}
 ) {
   if (buckets.isEmpty) return '';
   return buckets
       .map((bucket) {
         final count = counts[bucket];
-        return count == null || count <= 1 ? bucket : '$bucket$count次';
+        return count == null || count <= 1
+            ? bucket
+            : (l10n?.qualityReviewsBucketCount(bucket, count) ?? '$bucket$count次');
       })
       .join('/');
 }
 
-String describeFeedbackFocusTag(String tag) {
+String describeFeedbackFocusTag(
+  String tag, {
+  AppLocalizations? l10n,
+}) {
   switch (tag) {
     case 'delivery_realism':
-      return '台词真实';
+      return l10n?.qualityReviewsFeedbackTagDeliveryRealism ?? '台词真实';
     case 'emotion_arc':
-      return '情绪层次';
+      return l10n?.qualityReviewsFeedbackTagEmotionArc ?? '情绪层次';
     case 'identity_continuity':
-      return '人物一致';
+      return l10n?.qualityReviewsFeedbackTagIdentityContinuity ?? '人物一致';
     case 'lighting_realism':
-      return '光影真实';
+      return l10n?.qualityReviewsFeedbackTagLightingRealism ?? '光影真实';
     default:
       return tag;
   }
 }
 
-String? summarizeFeedbackFocusTags(Iterable<String> tags) {
+String? summarizeFeedbackFocusTags(
+  Iterable<String> tags, {
+  AppLocalizations? l10n,
+}) {
   final values = LinkedHashSet<String>.from(
     tags.map((tag) => tag.trim()).where((tag) => tag.isNotEmpty),
   ).toList(growable: false);
   if (values.isEmpty) return null;
-  return values.map(describeFeedbackFocusTag).join('/');
+  return values
+      .map((tag) => describeFeedbackFocusTag(tag, l10n: l10n))
+      .join('/');
 }
 
 String formatQualityScopeLabel(QualityReview row) {
@@ -139,11 +165,15 @@ String? describeMemoryScopeRows({
   required int projectScopeRows,
   required int scriptScopeRows,
   required int roleScopeRows,
+  AppLocalizations? l10n,
 }) {
   final parts = <String>[
-    if (projectScopeRows > 0) '项目$projectScopeRows',
-    if (scriptScopeRows > 0) '剧本$scriptScopeRows',
-    if (roleScopeRows > 0) '角色$roleScopeRows',
+    if (projectScopeRows > 0)
+      l10n?.qualityReviewsScopeProject(projectScopeRows) ?? '项目$projectScopeRows',
+    if (scriptScopeRows > 0)
+      l10n?.qualityReviewsScopeScript(scriptScopeRows) ?? '剧本$scriptScopeRows',
+    if (roleScopeRows > 0)
+      l10n?.qualityReviewsScopeRole(roleScopeRows) ?? '角色$roleScopeRows',
   ];
   if (parts.isEmpty) return null;
   return parts.join('/');
@@ -164,15 +194,18 @@ int qualityTokenEfficiencyActionPriority(String action) {
   }
 }
 
-String qualityTokenEfficiencyFocusLabel(String focus) {
+String qualityTokenEfficiencyFocusLabel(
+  String focus, {
+  AppLocalizations? l10n,
+}) {
   switch (focus) {
     case 'selected_video_memory':
-      return '镜头级精选记忆';
+      return l10n?.qualityReviewsFocusSelectedVideoMemory ?? '镜头级精选记忆';
     case 'rejected_video_negative_memory':
-      return '坏例记忆';
+      return l10n?.qualityReviewsFocusRejectedVideoNegativeMemory ?? '坏例记忆';
     case 'project_video_style_memory':
-      return '项目级风格记忆';
+      return l10n?.qualityReviewsFocusProjectVideoStyleMemory ?? '项目级风格记忆';
     default:
-      return '当前记忆';
+      return l10n?.qualityReviewsFocusCurrentMemory ?? '当前记忆';
   }
 }

@@ -5886,6 +5886,261 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'suggestions'**
   String get qualityReviewsSuggestionsLabel;
+
+  /// No description provided for @qualityReviewsNegativeConstraintReviewAndBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'negative constraint=reviews+bad-case memory'**
+  String get qualityReviewsNegativeConstraintReviewAndBadCase;
+
+  /// No description provided for @qualityReviewsNegativeConstraintRecentReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'negative constraint=recent reviews'**
+  String get qualityReviewsNegativeConstraintRecentReviews;
+
+  /// No description provided for @qualityReviewsNegativeConstraintBadCaseMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'negative constraint=bad-case memory'**
+  String get qualityReviewsNegativeConstraintBadCaseMemory;
+
+  /// No description provided for @qualityReviewsNegativeConstraintPendingBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'negative constraint=pending bad cases'**
+  String get qualityReviewsNegativeConstraintPendingBadCase;
+
+  /// No description provided for @qualityReviewsNegativeConstraintPendingRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'negative constraint=pending rejected items'**
+  String get qualityReviewsNegativeConstraintPendingRejected;
+
+  /// No description provided for @qualityReviewsNegativeConstraintGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'negative constraint={source}'**
+  String qualityReviewsNegativeConstraintGeneric(String source);
+
+  /// No description provided for @qualityReviewsBucketCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{bucket}{count} times'**
+  String qualityReviewsBucketCount(String bucket, int count);
+
+  /// No description provided for @qualityReviewsFeedbackTagDeliveryRealism.
+  ///
+  /// In en, this message translates to:
+  /// **'dialogue realism'**
+  String get qualityReviewsFeedbackTagDeliveryRealism;
+
+  /// No description provided for @qualityReviewsFeedbackTagEmotionArc.
+  ///
+  /// In en, this message translates to:
+  /// **'emotion arc'**
+  String get qualityReviewsFeedbackTagEmotionArc;
+
+  /// No description provided for @qualityReviewsFeedbackTagIdentityContinuity.
+  ///
+  /// In en, this message translates to:
+  /// **'identity continuity'**
+  String get qualityReviewsFeedbackTagIdentityContinuity;
+
+  /// No description provided for @qualityReviewsFeedbackTagLightingRealism.
+  ///
+  /// In en, this message translates to:
+  /// **'lighting realism'**
+  String get qualityReviewsFeedbackTagLightingRealism;
+
+  /// No description provided for @qualityReviewsScopeProject.
+  ///
+  /// In en, this message translates to:
+  /// **'project {count}'**
+  String qualityReviewsScopeProject(int count);
+
+  /// No description provided for @qualityReviewsScopeScript.
+  ///
+  /// In en, this message translates to:
+  /// **'script {count}'**
+  String qualityReviewsScopeScript(int count);
+
+  /// No description provided for @qualityReviewsScopeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'role {count}'**
+  String qualityReviewsScopeRole(int count);
+
+  /// No description provided for @qualityReviewsFocusSelectedVideoMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'selected shot memory'**
+  String get qualityReviewsFocusSelectedVideoMemory;
+
+  /// No description provided for @qualityReviewsFocusRejectedVideoNegativeMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'bad-case memory'**
+  String get qualityReviewsFocusRejectedVideoNegativeMemory;
+
+  /// No description provided for @qualityReviewsFocusProjectVideoStyleMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'project style memory'**
+  String get qualityReviewsFocusProjectVideoStyleMemory;
+
+  /// No description provided for @qualityReviewsFocusCurrentMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'current memory'**
+  String get qualityReviewsFocusCurrentMemory;
+
+  /// No description provided for @qualityReviewsSuggestionReferenceFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reference frame and previous-shot continuity first; lock face, costume/props, and blocking continuity.'**
+  String get qualityReviewsSuggestionReferenceFrame;
+
+  /// No description provided for @qualityReviewsSuggestionContinuity.
+  ///
+  /// In en, this message translates to:
+  /// **'Compress continuity constraints to 1-2 hard rules: camera setup, costume/props, and character positions only.'**
+  String get qualityReviewsSuggestionContinuity;
+
+  /// No description provided for @qualityReviewsSuggestionDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep delivery/tone memory, add performable emotional actions, and do not trim delivery memory first.'**
+  String get qualityReviewsSuggestionDelivery;
+
+  /// No description provided for @qualityReviewsSuggestionTrimGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue trimming generic action/lighting lines and reserve budget for expressions, lip sync, and identity continuity.'**
+  String get qualityReviewsSuggestionTrimGeneric;
+
+  /// No description provided for @qualityReviewsSuggestionNegativeReuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse existing bad-case negative constraints; dedupe manually added phrases first to avoid repeated token burn.'**
+  String get qualityReviewsSuggestionNegativeReuse;
+
+  /// No description provided for @qualityReviewsSuggestionDirectorTrim.
+  ///
+  /// In en, this message translates to:
+  /// **'Director descriptions already yielded to memory; reclaim repeated director lines first and keep key performance anchors.'**
+  String get qualityReviewsSuggestionDirectorTrim;
+
+  /// No description provided for @qualityReviewsSuggestionProjectScopeTrim.
+  ///
+  /// In en, this message translates to:
+  /// **'Current hits are mostly project-scoped memory; trim generic style lines first and keep character performance details.'**
+  String get qualityReviewsSuggestionProjectScopeTrim;
+
+  /// No description provided for @qualityReviewsSuggestionRoleScopeKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Role-scoped memory already hit; strengthen role performance actions first and avoid regressing to generic project copy.'**
+  String get qualityReviewsSuggestionRoleScopeKeep;
+
+  /// No description provided for @qualityReviewsSuggestionEmotion.
+  ///
+  /// In en, this message translates to:
+  /// **'In next round, turn emotional arc into observable actions; avoid explanatory dialogue only.'**
+  String get qualityReviewsSuggestionEmotion;
+
+  /// No description provided for @qualityReviewsSuggestionVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize character appearance and shot realism constraints, then decide whether to add more style descriptions.'**
+  String get qualityReviewsSuggestionVisual;
+
+  /// No description provided for @qualityReviewsSuggestionGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock emotion, continuity, and bad-case constraints first, then run the next generation round.'**
+  String get qualityReviewsSuggestionGeneral;
+
+  /// No description provided for @qualityReviewsRepairPlanCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{suggestion} {count} times'**
+  String qualityReviewsRepairPlanCount(String suggestion, int count);
+
+  /// No description provided for @qualityReviewsCurrentFilterScope.
+  ///
+  /// In en, this message translates to:
+  /// **'current filter scope'**
+  String get qualityReviewsCurrentFilterScope;
+
+  /// No description provided for @qualityReviewsActionPlanKeepDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: keep delivery/emotion memory from {focus}; continue trimming generic style lines before delivery fragments.'**
+  String qualityReviewsActionPlanKeepDelivery(String targetType, String focus);
+
+  /// No description provided for @qualityReviewsActionPlanReuseNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: reuse {focus} for bad-case isolation constraints; lock glitches/fakeness before deciding prompt additions.'**
+  String qualityReviewsActionPlanReuseNegative(String targetType, String focus);
+
+  /// No description provided for @qualityReviewsActionPlanTrimGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: prioritize trimming action/lighting/mood filler in {focus}; reserve tokens for performance, lip sync, and continuity.'**
+  String qualityReviewsActionPlanTrimGeneric(String targetType, String focus);
+
+  /// No description provided for @qualityReviewsActionPlanPromoteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: promote one high-score sample to {focus}; reuse emotion and shot execution while reducing repetitive descriptions.'**
+  String qualityReviewsActionPlanPromoteSelected(
+    String targetType,
+    String focus,
+  );
+
+  /// No description provided for @qualityReviewsScopedMemorySuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} scoped-memory suggestion: {value}'**
+  String qualityReviewsScopedMemorySuggestion(String scope, String value);
+
+  /// No description provided for @qualityReviewsChecklistKeepDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep performance/tone/lip-sync/emotion memory in {focus}, only trim generic style filler.'**
+  String qualityReviewsChecklistKeepDelivery(String focus);
+
+  /// No description provided for @qualityReviewsChecklistReuseNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse bad-case constraints in {focus} first; lock glitches/fakeness/coldness before deciding prompt additions.'**
+  String qualityReviewsChecklistReuseNegative(String focus);
+
+  /// No description provided for @qualityReviewsChecklistTrimGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove action/lighting/mood filler in {focus}; keep tokens for performance and continuity.'**
+  String qualityReviewsChecklistTrimGeneric(String focus);
+
+  /// No description provided for @qualityReviewsChecklistPromoteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Promote high-score samples to {focus}; reuse emotion and shot execution while reducing repetitive director copy.'**
+  String qualityReviewsChecklistPromoteSelected(String focus);
+
+  /// No description provided for @qualityReviewsChecklistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} checklist:'**
+  String qualityReviewsChecklistTitle(String scope);
+
+  /// No description provided for @qualityReviewsChecklistScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope: memory takes effect only in {scope}; no reuse across users, projects, or shows.'**
+  String qualityReviewsChecklistScope(String scope);
 }
 
 class _AppLocalizationsDelegate

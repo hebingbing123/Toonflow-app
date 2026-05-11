@@ -439,7 +439,10 @@ String formatQualityReviewDetails(
   if (writebackSummary != null) {
     parts.add('${l10n?.qualityReviewsWritebackLabel ?? "回写"}=$writebackSummary');
   }
-  final repairSuggestions = buildQualityReviewRepairSuggestions(row);
+  final repairSuggestions = buildQualityReviewRepairSuggestions(
+    row,
+    l10n: l10n,
+  );
   if (repairSuggestions.isNotEmpty) {
     parts.add(
       '${l10n?.qualityReviewsSuggestionsLabel ?? "建议"}=${repairSuggestions.join(" / ")}',

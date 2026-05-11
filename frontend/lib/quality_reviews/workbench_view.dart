@@ -173,6 +173,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
     );
     final repairPlanSummary = summarizeQualityRepairPlanFromReviews(
       model.reviews,
+      l10n: l10n,
     );
     final activeFilters = [
       if (model.filterBadCasesOnly) l10n.qualityReviewsFilterBadCase,
@@ -785,6 +786,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       summarizeQualityReviewMemoryWriteback(review);
                   final repairSuggestions = buildQualityReviewRepairSuggestions(
                     review,
+                    l10n: l10n,
                   );
                   return ListTile(
                     dense: true,
