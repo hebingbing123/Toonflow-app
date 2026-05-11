@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 
@@ -22,9 +23,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   final _workspaceMemberUserIdController = TextEditingController();
   final _workspaceOwnerUserIdController = TextEditingController();
   final _projectOwnerUserIdController = TextEditingController();
+  final _workspaceBatchOpsNoteController = TextEditingController();
   String? _governanceDraftFingerprint;
   String? _workspaceGovernanceDraftFingerprint;
   String? _projectGovernanceDraftFingerprint;
+  final Set<String> _selectedWorkspaceProjectIds = <String>{};
   AdminOperationalStatusV1 _operationalStatus = AdminOperationalStatusV1.active;
   AdminQuotaOverrideActionV1 _quotaAction = AdminQuotaOverrideActionV1.preserve;
   AdminWorkspaceLifecycleActionV1 _workspaceLifecycle =
@@ -36,6 +39,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   AdminProjectLifecycleActionV1 _projectLifecycle =
       AdminProjectLifecycleActionV1.preserve;
   AdminWorkspaceOpsNoteActionV1 _projectOpsNoteAction =
+      AdminWorkspaceOpsNoteActionV1.preserve;
+  AdminProjectLifecycleActionV1 _workspaceBatchLifecycle =
+      AdminProjectLifecycleActionV1.preserve;
+  AdminWorkspaceOpsNoteActionV1 _workspaceBatchOpsNoteAction =
       AdminWorkspaceOpsNoteActionV1.preserve;
 
   @override
@@ -65,6 +72,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     _workspaceMemberUserIdController.dispose();
     _workspaceOwnerUserIdController.dispose();
     _projectOwnerUserIdController.dispose();
+    _workspaceBatchOpsNoteController.dispose();
     super.dispose();
   }
 
@@ -119,6 +127,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         _workspaceOpsNoteController.text = workspaceDetail.opsNote ?? '';
         _workspaceLifecycle = AdminWorkspaceLifecycleActionV1.preserve;
         _workspaceOpsNoteAction = AdminWorkspaceOpsNoteActionV1.preserve;
+        _workspaceBatchOpsNoteController.clear();
+        _workspaceBatchLifecycle = AdminProjectLifecycleActionV1.preserve;
+        _workspaceBatchOpsNoteAction = AdminWorkspaceOpsNoteActionV1.preserve;
+        _selectedWorkspaceProjectIds.clear();
       }
       _projectGovernanceDraftFingerprint = null;
       return;
@@ -152,6 +164,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final result = widget.controller.searchResult;
     return Padding(
@@ -159,10 +172,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('管理台', style: theme.textTheme.titleMedium),
+          Text(l10n.adminConsoleTitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(
-            '内部治理面。统一检索用户、workspace、project、job；支持用户治理、workspace 上下文修复、成员修复，以及 workspace / project ownership / 归档 / 内部备注治理。',
+            l10n.adminConsoleIntro,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -185,10 +198,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   child: TextField(
                     controller: _searchController,
                     onSubmitted: widget.controller.search,
-                    decoration: const InputDecoration(
-                      labelText: '搜索 email / workspace / project / job',
-                      hintText:
-                          '支持 UUID 前缀、project numeric_id、status / kind 关键词',
+                    decoration: InputDecoration(
+                      labelText: l10n.adminConsoleSearchLabel,
+                      hintText: l10n.adminConsoleSearchHint,
                       prefixIcon: Icon(Icons.search),
                     ),
                   ),
@@ -204,13 +216,13 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.travel_explore_outlined),
-                  label: const Text('搜索'),
+                  label: Text(l10n.adminConsoleSearchAction),
                 ),
                 if (widget.controller.selectedKind != null)
                   TextButton.icon(
                     onPressed: widget.controller.clearDetail,
                     icon: const Icon(Icons.layers_clear_outlined),
-                    label: const Text('清空详情'),
+                    label: Text(l10n.adminConsoleClearDetailAction),
                   ),
               ],
             ),
@@ -219,8 +231,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           if (result != null) ...[
             _buildSearchGroup(
               context,
-              title: '用户',
-              emptyText: '没有匹配用户',
+              title: l10n.adminConsoleGroupUsers,
+              emptyText: l10n.adminConsoleEmptyUsers,
               children: result.users
                   .map((item) => _userHitTile(context, item))
                   .toList(growable: false),
@@ -228,8 +240,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             const SizedBox(height: 12),
             _buildSearchGroup(
               context,
-              title: 'Workspace',
-              emptyText: '没有匹配 workspace',
+              title: l10n.adminConsoleGroupWorkspaces,
+              emptyText: l10n.adminConsoleEmptyWorkspaces,
               children: result.workspaces
                   .map((item) => _workspaceHitTile(context, item))
                   .toList(growable: false),
@@ -237,8 +249,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             const SizedBox(height: 12),
             _buildSearchGroup(
               context,
-              title: 'Project',
-              emptyText: '没有匹配 project',
+              title: l10n.adminConsoleGroupProjects,
+              emptyText: l10n.adminConsoleEmptyProjects,
               children: result.projects
                   .map((item) => _projectHitTile(context, item))
                   .toList(growable: false),
@@ -246,8 +258,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             const SizedBox(height: 12),
             _buildSearchGroup(
               context,
-              title: 'Job',
-              emptyText: '没有匹配 job',
+              title: l10n.adminConsoleGroupJobs,
+              emptyText: l10n.adminConsoleEmptyJobs,
               children: result.jobs
                   .map((item) => _jobTile(context, item))
                   .toList(growable: false),
@@ -301,13 +313,20 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   Widget _userHitTile(BuildContext context, AdminUserSearchHitV1 item) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
       contentPadding: EdgeInsets.zero,
       title: Text(item.email ?? item.userId),
       subtitle: Text(
-        'plan ${item.planTier ?? 'free'} · ${item.operationalStatus} · ws ${item.workspaceCount} · project ${item.projectCount} · active job ${item.activeJobCount}',
+        l10n.adminConsoleUserHitSummary(
+          item.planTier ?? 'free',
+          item.operationalStatus,
+          item.workspaceCount,
+          item.projectCount,
+          item.activeJobCount,
+        ),
         style: theme.textTheme.bodySmall,
       ),
       trailing: const Icon(Icons.chevron_right),
@@ -319,13 +338,20 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceSearchHitV1 item,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
       contentPadding: EdgeInsets.zero,
       title: Text(item.name),
       subtitle: Text(
-        '${item.workspaceType} · member ${item.memberCount} · project ${item.projectCount} · active job ${item.activeJobCount}${item.archivedAt == null ? '' : ' · archived'}',
+        l10n.adminConsoleWorkspaceHitSummary(
+          item.workspaceType,
+          item.memberCount,
+          item.projectCount,
+          item.activeJobCount,
+          item.archivedAt == null ? '' : l10n.adminConsoleArchivedSuffix,
+        ),
         style: theme.textTheme.bodySmall,
       ),
       trailing: const Icon(Icons.chevron_right),
@@ -334,6 +360,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   Widget _projectHitTile(BuildContext context, AdminProjectSearchHitV1 item) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
@@ -344,8 +371,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             : '#${item.numericId}',
       ),
       subtitle: Text(
-        '#${item.numericId} · ${item.workspaceName ?? 'no workspace'} · ${item.ownerEmail ?? item.ownerUserId}'
-        '${item.archivedAt == null ? '' : ' · archived'}',
+        l10n.adminConsoleProjectHitSummary(
+          item.numericId,
+          item.workspaceName ?? l10n.adminConsoleNoWorkspace,
+          item.ownerEmail ?? item.ownerUserId,
+          item.archivedAt == null ? '' : l10n.adminConsoleArchivedSuffix,
+        ),
         style: theme.textTheme.bodySmall,
       ),
       trailing: const Icon(Icons.chevron_right),
@@ -354,13 +385,18 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   Widget _jobTile(BuildContext context, AdminJobSummaryV1 item) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
       contentPadding: EdgeInsets.zero,
-      title: Text('${item.kind} · ${item.status}'),
+      title: Text(l10n.adminConsoleJobHitTitle(item.kind, item.status)),
       subtitle: Text(
-        '${item.ownerEmail ?? item.ownerUserId} · project ${item.projectNumericId ?? '-'} · ${_fmt(item.createdAt)}',
+        l10n.adminConsoleJobHitSummary(
+          item.ownerEmail ?? item.ownerUserId,
+          item.projectNumericId?.toString() ?? '-',
+          _fmt(item.createdAt),
+        ),
         style: theme.textTheme.bodySmall,
       ),
     );
@@ -370,16 +406,17 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminUserDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return _detailCard(
       context,
       title: detail.email ?? detail.userId,
       chips: [
-        'plan ${detail.planTier}',
-        'workspace ${detail.workspaceCount}',
-        'project ${detail.projectCount}',
-        'active job ${detail.activeJobCount}',
-        'api key ${detail.apiKeyCount}',
-        'unread notif ${detail.unreadNotificationCount}',
+        l10n.adminConsoleChipPlan(detail.planTier),
+        l10n.adminConsoleChipWorkspace(detail.workspaceCount),
+        l10n.adminConsoleChipProject(detail.projectCount),
+        l10n.adminConsoleChipActiveJob(detail.activeJobCount),
+        l10n.adminConsoleChipApiKey(detail.apiKeyCount),
+        l10n.adminConsoleChipUnreadNotif(detail.unreadNotificationCount),
       ],
       sections: [
         _kvWrap({
@@ -394,18 +431,18 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         _buildGovernancePanel(context, detail),
         _subList(
           context,
-          title: '成员归属',
+          title: l10n.adminConsoleSectionMemberships,
           items: detail.memberships
               .map(
                 (item) =>
                     '${item.workspaceName} · ${item.workspaceType} · ${item.role}'
-                    '${item.archivedAt == null ? '' : ' · archived'}',
+                    '${item.archivedAt == null ? '' : l10n.adminConsoleArchivedSuffix}',
               )
               .toList(growable: false),
         ),
         _subList(
           context,
-          title: '最近作业',
+          title: l10n.adminConsoleSectionRecentJobs,
           items: detail.recentJobs
               .map(
                 (job) =>
@@ -415,7 +452,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         _subList(
           context,
-          title: '治理审计',
+          title: l10n.adminConsoleSectionGovernanceAudit,
           items: detail.governanceAudit
               .map(
                 (item) =>
@@ -1030,6 +1067,238 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     );
   }
 
+  Widget _buildWorkspaceAclPanel(
+    BuildContext context,
+    AdminWorkspaceDetailResponseV1 detail,
+  ) {
+    final theme = Theme.of(context);
+    final breakdown = detail.workspaceRoleBreakdown;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('ACL 摘要', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            Chip(label: Text('owner ${breakdown['owner'] ?? 0}')),
+            Chip(label: Text('admin ${breakdown['admin'] ?? 0}')),
+            Chip(label: Text('member ${breakdown['member'] ?? 0}')),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (detail.projectAclSummaries.isEmpty)
+          Text(
+            '当前 workspace 暂无 project ACL 摘要',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          )
+        else
+          ...detail.projectAclSummaries.map(
+            (project) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Checkbox(
+                    value: _selectedWorkspaceProjectIds.contains(
+                      project.projectId,
+                    ),
+                    onChanged: widget.controller.savingBatchGovernance
+                        ? null
+                        : (checked) {
+                            setState(() {
+                              if (checked == true) {
+                                _selectedWorkspaceProjectIds.add(
+                                  project.projectId,
+                                );
+                              } else {
+                                _selectedWorkspaceProjectIds.remove(
+                                  project.projectId,
+                                );
+                              }
+                            });
+                          },
+                  ),
+                  Text(
+                    '#${project.numericId} ${project.name ?? ''}',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  Chip(label: Text(project.aclMode)),
+                  Chip(label: Text('explicit ${project.explicitAclCount}')),
+                  Chip(label: Text('editor ${project.editorCount}')),
+                  Chip(label: Text('viewer ${project.viewerCount}')),
+                  if (project.archivedAt != null)
+                    const Chip(label: Text('archived')),
+                  TextButton(
+                    onPressed: () =>
+                        widget.controller.loadProject(project.projectId),
+                    child: const Text('查看'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildWorkspaceProjectBatchGovernancePanel(
+    BuildContext context,
+    AdminWorkspaceDetailResponseV1 detail,
+  ) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('批量 Project 治理', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          '对当前 workspace 下选中的 project 批量执行 archive / restore / 内部备注写入，用于集中处理同类 ACL 与治理问题。',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              label: const Text('不动归档'),
+              selected:
+                  _workspaceBatchLifecycle ==
+                  AdminProjectLifecycleActionV1.preserve,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceBatchLifecycle =
+                      AdminProjectLifecycleActionV1.preserve;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('批量归档'),
+              selected:
+                  _workspaceBatchLifecycle ==
+                  AdminProjectLifecycleActionV1.archive,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceBatchLifecycle =
+                      AdminProjectLifecycleActionV1.archive;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('批量解档'),
+              selected:
+                  _workspaceBatchLifecycle ==
+                  AdminProjectLifecycleActionV1.restore,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceBatchLifecycle =
+                      AdminProjectLifecycleActionV1.restore;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              label: const Text('备注不变'),
+              selected:
+                  _workspaceBatchOpsNoteAction ==
+                  AdminWorkspaceOpsNoteActionV1.preserve,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceBatchOpsNoteAction =
+                      AdminWorkspaceOpsNoteActionV1.preserve;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('清除备注'),
+              selected:
+                  _workspaceBatchOpsNoteAction ==
+                  AdminWorkspaceOpsNoteActionV1.clear,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceBatchOpsNoteAction =
+                      AdminWorkspaceOpsNoteActionV1.clear;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: const Text('写入备注'),
+              selected:
+                  _workspaceBatchOpsNoteAction ==
+                  AdminWorkspaceOpsNoteActionV1.set,
+              onSelected: (_) {
+                setState(() {
+                  _workspaceBatchOpsNoteAction =
+                      AdminWorkspaceOpsNoteActionV1.set;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _workspaceBatchOpsNoteController,
+          enabled: _workspaceBatchOpsNoteRequiresValue,
+          maxLines: 2,
+          decoration: InputDecoration(
+            labelText: '批量内部备注',
+            hintText: _workspaceBatchOpsNoteRequiresValue
+                ? '仅在选择「写入备注」时提交'
+                : '选择「写入备注」后可编辑',
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.tonalIcon(
+          onPressed: widget.controller.savingBatchGovernance
+              ? null
+              : () async {
+                  final response = await widget.controller
+                      .updateProjectBatchGovernance(
+                        projectIds: _selectedWorkspaceProjectIds.toList(
+                          growable: false,
+                        ),
+                        projectLifecycle: _workspaceBatchLifecycle,
+                        opsNoteAction: _workspaceBatchOpsNoteAction,
+                        opsNote: _workspaceBatchOpsNoteController.text,
+                      );
+                  if (!mounted || response == null) {
+                    return;
+                  }
+                  setState(() {
+                    _selectedWorkspaceProjectIds.clear();
+                  });
+                },
+          icon: widget.controller.savingBatchGovernance
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.playlist_add_check_circle_outlined),
+          label: Text(
+            widget.controller.savingBatchGovernance
+                ? '处理中…'
+                : '批量应用到 ${_selectedWorkspaceProjectIds.length} 个 project',
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildWorkspaceDetail(
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
@@ -1058,6 +1327,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         _buildWorkspaceGovernancePanel(context, detail),
         _buildWorkspaceOwnerTransferPanel(context, detail),
         _buildWorkspaceMemberRemediationPanel(context, detail),
+        _buildWorkspaceAclPanel(context, detail),
+        _buildWorkspaceProjectBatchGovernancePanel(context, detail),
         _subList(
           context,
           title: '成员',
@@ -1104,6 +1375,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
 
   bool get _projectOpsNoteRequiresValue =>
       _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set;
+
+  bool get _workspaceBatchOpsNoteRequiresValue =>
+      _workspaceBatchOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set;
 
   Widget _buildProjectOwnerTransferPanel(
     BuildContext context,
@@ -1300,6 +1574,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         'asset ${detail.assetCount}',
         'job ${detail.jobCount}',
         'active job ${detail.activeJobCount}',
+        detail.projectAclMode,
+        'explicit acl ${detail.explicitAclCount}',
         if (detail.archivedAt != null) 'archived',
       ],
       sections: [
@@ -1313,11 +1589,34 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           'opsNote': detail.opsNote == null || detail.opsNote!.trim().isEmpty
               ? '-'
               : detail.opsNote!,
+          'aclMode': detail.projectAclMode,
+          'editorCount': '${detail.editorCount}',
+          'viewerCount': '${detail.viewerCount}',
           'createdAt': detail.createdAt == null ? '-' : _fmt(detail.createdAt!),
           'updatedAt': detail.updatedAt == null ? '-' : _fmt(detail.updatedAt!),
         }),
         _buildProjectOwnerTransferPanel(context, detail),
         _buildProjectGovernancePanel(context, detail),
+        _subList(
+          context,
+          title: '显式 ACL 成员',
+          items: detail.aclMembers
+              .map(
+                (item) =>
+                    '${item.email ?? item.userId} · workspace ${item.workspaceRole} · project ${item.projectRole} · ${_fmt(item.updatedAt)}',
+              )
+              .toList(growable: false),
+        ),
+        _subList(
+          context,
+          title: 'Workspace 候选成员',
+          items: detail.workspaceMemberCandidates
+              .map(
+                (item) =>
+                    '${item.email ?? item.userId} · ${item.workspaceRole} · explicit ${item.explicitProjectRole ?? '-'}',
+              )
+              .toList(growable: false),
+        ),
         _subList(
           context,
           title: '最近作业',

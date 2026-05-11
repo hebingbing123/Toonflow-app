@@ -4343,4 +4343,139 @@ class AppLocalizationsZh extends AppLocalizations {
   String platformStatusServerErrors(int count) {
     return '5xx $count';
   }
+
+  @override
+  String get adminConsoleTitle => '管理台';
+
+  @override
+  String get adminConsoleIntro =>
+      '内部治理面。统一检索用户、workspace、project、job；支持用户治理、workspace 上下文修复、成员修复，以及 workspace / project ownership / 归档 / 内部备注治理。';
+
+  @override
+  String get adminConsoleSearchLabel => '搜索 email / workspace / project / job';
+
+  @override
+  String get adminConsoleSearchHint =>
+      '支持 UUID 前缀、project numeric_id、status / kind 关键词';
+
+  @override
+  String get adminConsoleSearchAction => '搜索';
+
+  @override
+  String get adminConsoleClearDetailAction => '清空详情';
+
+  @override
+  String get adminConsoleGroupUsers => '用户';
+
+  @override
+  String get adminConsoleEmptyUsers => '没有匹配用户';
+
+  @override
+  String get adminConsoleGroupWorkspaces => 'Workspace';
+
+  @override
+  String get adminConsoleEmptyWorkspaces => '没有匹配 workspace';
+
+  @override
+  String get adminConsoleGroupProjects => 'Project';
+
+  @override
+  String get adminConsoleEmptyProjects => '没有匹配 project';
+
+  @override
+  String get adminConsoleGroupJobs => 'Job';
+
+  @override
+  String get adminConsoleEmptyJobs => '没有匹配 job';
+
+  @override
+  String adminConsoleUserHitSummary(
+    String plan,
+    String status,
+    int workspaces,
+    int projects,
+    int activeJobs,
+  ) {
+    return 'plan $plan · $status · ws $workspaces · project $projects · active job $activeJobs';
+  }
+
+  @override
+  String adminConsoleWorkspaceHitSummary(
+    String workspaceType,
+    int members,
+    int projects,
+    int activeJobs,
+    String archivedSuffix,
+  ) {
+    return '$workspaceType · member $members · project $projects · active job $activeJobs$archivedSuffix';
+  }
+
+  @override
+  String get adminConsoleArchivedSuffix => ' · archived';
+
+  @override
+  String get adminConsoleNoWorkspace => 'no workspace';
+
+  @override
+  String adminConsoleProjectHitSummary(
+    int numericId,
+    String workspaceName,
+    String owner,
+    String archivedSuffix,
+  ) {
+    return '#$numericId · $workspaceName · $owner$archivedSuffix';
+  }
+
+  @override
+  String adminConsoleJobHitTitle(String kind, String status) {
+    return '$kind · $status';
+  }
+
+  @override
+  String adminConsoleJobHitSummary(
+    String owner,
+    String projectNumericId,
+    String createdAt,
+  ) {
+    return '$owner · project $projectNumericId · $createdAt';
+  }
+
+  @override
+  String adminConsoleChipPlan(String value) {
+    return 'plan $value';
+  }
+
+  @override
+  String adminConsoleChipWorkspace(int value) {
+    return 'workspace $value';
+  }
+
+  @override
+  String adminConsoleChipProject(int value) {
+    return 'project $value';
+  }
+
+  @override
+  String adminConsoleChipActiveJob(int value) {
+    return 'active job $value';
+  }
+
+  @override
+  String adminConsoleChipApiKey(int value) {
+    return 'api key $value';
+  }
+
+  @override
+  String adminConsoleChipUnreadNotif(int value) {
+    return 'unread notif $value';
+  }
+
+  @override
+  String get adminConsoleSectionMemberships => '成员归属';
+
+  @override
+  String get adminConsoleSectionRecentJobs => '最近作业';
+
+  @override
+  String get adminConsoleSectionGovernanceAudit => '治理审计';
 }

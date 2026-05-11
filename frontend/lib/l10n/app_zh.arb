@@ -3270,5 +3270,154 @@
         "type": "int"
       }
     }
-  }
+  },
+  "adminConsoleTitle": "管理台",
+  "adminConsoleIntro": "内部治理面。统一检索用户、workspace、project、job；支持用户治理、workspace 上下文修复、成员修复，以及 workspace / project ownership / 归档 / 内部备注治理。",
+  "adminConsoleSearchLabel": "搜索 email / workspace / project / job",
+  "adminConsoleSearchHint": "支持 UUID 前缀、project numeric_id、status / kind 关键词",
+  "adminConsoleSearchAction": "搜索",
+  "adminConsoleClearDetailAction": "清空详情",
+  "adminConsoleGroupUsers": "用户",
+  "adminConsoleEmptyUsers": "没有匹配用户",
+  "adminConsoleGroupWorkspaces": "Workspace",
+  "adminConsoleEmptyWorkspaces": "没有匹配 workspace",
+  "adminConsoleGroupProjects": "Project",
+  "adminConsoleEmptyProjects": "没有匹配 project",
+  "adminConsoleGroupJobs": "Job",
+  "adminConsoleEmptyJobs": "没有匹配 job",
+  "adminConsoleUserHitSummary": "plan {plan} · {status} · ws {workspaces} · project {projects} · active job {activeJobs}",
+  "@adminConsoleUserHitSummary": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "workspaces": {
+        "type": "int"
+      },
+      "projects": {
+        "type": "int"
+      },
+      "activeJobs": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleWorkspaceHitSummary": "{workspaceType} · member {members} · project {projects} · active job {activeJobs}{archivedSuffix}",
+  "@adminConsoleWorkspaceHitSummary": {
+    "placeholders": {
+      "workspaceType": {
+        "type": "String"
+      },
+      "members": {
+        "type": "int"
+      },
+      "projects": {
+        "type": "int"
+      },
+      "activeJobs": {
+        "type": "int"
+      },
+      "archivedSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleArchivedSuffix": " · archived",
+  "adminConsoleNoWorkspace": "no workspace",
+  "adminConsoleProjectHitSummary": "#{numericId} · {workspaceName} · {owner}{archivedSuffix}",
+  "@adminConsoleProjectHitSummary": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "workspaceName": {
+        "type": "String"
+      },
+      "owner": {
+        "type": "String"
+      },
+      "archivedSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleJobHitTitle": "{kind} · {status}",
+  "@adminConsoleJobHitTitle": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleJobHitSummary": "{owner} · project {projectNumericId} · {createdAt}",
+  "@adminConsoleJobHitSummary": {
+    "placeholders": {
+      "owner": {
+        "type": "String"
+      },
+      "projectNumericId": {
+        "type": "String"
+      },
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleChipPlan": "plan {value}",
+  "@adminConsoleChipPlan": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleChipWorkspace": "workspace {value}",
+  "@adminConsoleChipWorkspace": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipProject": "project {value}",
+  "@adminConsoleChipProject": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipActiveJob": "active job {value}",
+  "@adminConsoleChipActiveJob": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipApiKey": "api key {value}",
+  "@adminConsoleChipApiKey": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipUnreadNotif": "unread notif {value}",
+  "@adminConsoleChipUnreadNotif": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleSectionMemberships": "成员归属",
+  "adminConsoleSectionRecentJobs": "最近作业",
+  "adminConsoleSectionGovernanceAudit": "治理审计"
 }

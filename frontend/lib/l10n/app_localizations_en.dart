@@ -4512,4 +4512,140 @@ class AppLocalizationsEn extends AppLocalizations {
   String platformStatusServerErrors(int count) {
     return '5xx $count';
   }
+
+  @override
+  String get adminConsoleTitle => 'Admin console';
+
+  @override
+  String get adminConsoleIntro =>
+      'Internal governance surface. Unified search over users, workspace, project, and job; supports user governance, workspace context repair, member remediation, and workspace/project ownership, archive, and internal-note governance.';
+
+  @override
+  String get adminConsoleSearchLabel =>
+      'Search email / workspace / project / job';
+
+  @override
+  String get adminConsoleSearchHint =>
+      'Supports UUID prefix, project numeric_id, and status/kind keywords';
+
+  @override
+  String get adminConsoleSearchAction => 'Search';
+
+  @override
+  String get adminConsoleClearDetailAction => 'Clear detail';
+
+  @override
+  String get adminConsoleGroupUsers => 'Users';
+
+  @override
+  String get adminConsoleEmptyUsers => 'No matching users';
+
+  @override
+  String get adminConsoleGroupWorkspaces => 'Workspace';
+
+  @override
+  String get adminConsoleEmptyWorkspaces => 'No matching workspace';
+
+  @override
+  String get adminConsoleGroupProjects => 'Project';
+
+  @override
+  String get adminConsoleEmptyProjects => 'No matching project';
+
+  @override
+  String get adminConsoleGroupJobs => 'Job';
+
+  @override
+  String get adminConsoleEmptyJobs => 'No matching job';
+
+  @override
+  String adminConsoleUserHitSummary(
+    String plan,
+    String status,
+    int workspaces,
+    int projects,
+    int activeJobs,
+  ) {
+    return 'plan $plan · $status · ws $workspaces · project $projects · active job $activeJobs';
+  }
+
+  @override
+  String adminConsoleWorkspaceHitSummary(
+    String workspaceType,
+    int members,
+    int projects,
+    int activeJobs,
+    String archivedSuffix,
+  ) {
+    return '$workspaceType · member $members · project $projects · active job $activeJobs$archivedSuffix';
+  }
+
+  @override
+  String get adminConsoleArchivedSuffix => ' · archived';
+
+  @override
+  String get adminConsoleNoWorkspace => 'no workspace';
+
+  @override
+  String adminConsoleProjectHitSummary(
+    int numericId,
+    String workspaceName,
+    String owner,
+    String archivedSuffix,
+  ) {
+    return '#$numericId · $workspaceName · $owner$archivedSuffix';
+  }
+
+  @override
+  String adminConsoleJobHitTitle(String kind, String status) {
+    return '$kind · $status';
+  }
+
+  @override
+  String adminConsoleJobHitSummary(
+    String owner,
+    String projectNumericId,
+    String createdAt,
+  ) {
+    return '$owner · project $projectNumericId · $createdAt';
+  }
+
+  @override
+  String adminConsoleChipPlan(String value) {
+    return 'plan $value';
+  }
+
+  @override
+  String adminConsoleChipWorkspace(int value) {
+    return 'workspace $value';
+  }
+
+  @override
+  String adminConsoleChipProject(int value) {
+    return 'project $value';
+  }
+
+  @override
+  String adminConsoleChipActiveJob(int value) {
+    return 'active job $value';
+  }
+
+  @override
+  String adminConsoleChipApiKey(int value) {
+    return 'api key $value';
+  }
+
+  @override
+  String adminConsoleChipUnreadNotif(int value) {
+    return 'unread notif $value';
+  }
+
+  @override
+  String get adminConsoleSectionMemberships => 'Memberships';
+
+  @override
+  String get adminConsoleSectionRecentJobs => 'Recent jobs';
+
+  @override
+  String get adminConsoleSectionGovernanceAudit => 'Governance audit';
 }

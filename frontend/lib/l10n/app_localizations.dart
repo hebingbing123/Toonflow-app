@@ -7482,6 +7482,207 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'5xx {count}'**
   String platformStatusServerErrors(int count);
+
+  /// No description provided for @adminConsoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console'**
+  String get adminConsoleTitle;
+
+  /// No description provided for @adminConsoleIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal governance surface. Unified search over users, workspace, project, and job; supports user governance, workspace context repair, member remediation, and workspace/project ownership, archive, and internal-note governance.'**
+  String get adminConsoleIntro;
+
+  /// No description provided for @adminConsoleSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search email / workspace / project / job'**
+  String get adminConsoleSearchLabel;
+
+  /// No description provided for @adminConsoleSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports UUID prefix, project numeric_id, and status/kind keywords'**
+  String get adminConsoleSearchHint;
+
+  /// No description provided for @adminConsoleSearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get adminConsoleSearchAction;
+
+  /// No description provided for @adminConsoleClearDetailAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear detail'**
+  String get adminConsoleClearDetailAction;
+
+  /// No description provided for @adminConsoleGroupUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get adminConsoleGroupUsers;
+
+  /// No description provided for @adminConsoleEmptyUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching users'**
+  String get adminConsoleEmptyUsers;
+
+  /// No description provided for @adminConsoleGroupWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get adminConsoleGroupWorkspaces;
+
+  /// No description provided for @adminConsoleEmptyWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching workspace'**
+  String get adminConsoleEmptyWorkspaces;
+
+  /// No description provided for @adminConsoleGroupProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get adminConsoleGroupProjects;
+
+  /// No description provided for @adminConsoleEmptyProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching project'**
+  String get adminConsoleEmptyProjects;
+
+  /// No description provided for @adminConsoleGroupJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get adminConsoleGroupJobs;
+
+  /// No description provided for @adminConsoleEmptyJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching job'**
+  String get adminConsoleEmptyJobs;
+
+  /// No description provided for @adminConsoleUserHitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'plan {plan} · {status} · ws {workspaces} · project {projects} · active job {activeJobs}'**
+  String adminConsoleUserHitSummary(
+    String plan,
+    String status,
+    int workspaces,
+    int projects,
+    int activeJobs,
+  );
+
+  /// No description provided for @adminConsoleWorkspaceHitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{workspaceType} · member {members} · project {projects} · active job {activeJobs}{archivedSuffix}'**
+  String adminConsoleWorkspaceHitSummary(
+    String workspaceType,
+    int members,
+    int projects,
+    int activeJobs,
+    String archivedSuffix,
+  );
+
+  /// No description provided for @adminConsoleArchivedSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · archived'**
+  String get adminConsoleArchivedSuffix;
+
+  /// No description provided for @adminConsoleNoWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'no workspace'**
+  String get adminConsoleNoWorkspace;
+
+  /// No description provided for @adminConsoleProjectHitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'#{numericId} · {workspaceName} · {owner}{archivedSuffix}'**
+  String adminConsoleProjectHitSummary(
+    int numericId,
+    String workspaceName,
+    String owner,
+    String archivedSuffix,
+  );
+
+  /// No description provided for @adminConsoleJobHitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} · {status}'**
+  String adminConsoleJobHitTitle(String kind, String status);
+
+  /// No description provided for @adminConsoleJobHitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{owner} · project {projectNumericId} · {createdAt}'**
+  String adminConsoleJobHitSummary(
+    String owner,
+    String projectNumericId,
+    String createdAt,
+  );
+
+  /// No description provided for @adminConsoleChipPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'plan {value}'**
+  String adminConsoleChipPlan(String value);
+
+  /// No description provided for @adminConsoleChipWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'workspace {value}'**
+  String adminConsoleChipWorkspace(int value);
+
+  /// No description provided for @adminConsoleChipProject.
+  ///
+  /// In en, this message translates to:
+  /// **'project {value}'**
+  String adminConsoleChipProject(int value);
+
+  /// No description provided for @adminConsoleChipActiveJob.
+  ///
+  /// In en, this message translates to:
+  /// **'active job {value}'**
+  String adminConsoleChipActiveJob(int value);
+
+  /// No description provided for @adminConsoleChipApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'api key {value}'**
+  String adminConsoleChipApiKey(int value);
+
+  /// No description provided for @adminConsoleChipUnreadNotif.
+  ///
+  /// In en, this message translates to:
+  /// **'unread notif {value}'**
+  String adminConsoleChipUnreadNotif(int value);
+
+  /// No description provided for @adminConsoleSectionMemberships.
+  ///
+  /// In en, this message translates to:
+  /// **'Memberships'**
+  String get adminConsoleSectionMemberships;
+
+  /// No description provided for @adminConsoleSectionRecentJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent jobs'**
+  String get adminConsoleSectionRecentJobs;
+
+  /// No description provided for @adminConsoleSectionGovernanceAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Governance audit'**
+  String get adminConsoleSectionGovernanceAudit;
 }
 
 class _AppLocalizationsDelegate

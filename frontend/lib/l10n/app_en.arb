@@ -3270,5 +3270,154 @@
         "type": "int"
       }
     }
-  }
+  },
+  "adminConsoleTitle": "Admin console",
+  "adminConsoleIntro": "Internal governance surface. Unified search over users, workspace, project, and job; supports user governance, workspace context repair, member remediation, and workspace/project ownership, archive, and internal-note governance.",
+  "adminConsoleSearchLabel": "Search email / workspace / project / job",
+  "adminConsoleSearchHint": "Supports UUID prefix, project numeric_id, and status/kind keywords",
+  "adminConsoleSearchAction": "Search",
+  "adminConsoleClearDetailAction": "Clear detail",
+  "adminConsoleGroupUsers": "Users",
+  "adminConsoleEmptyUsers": "No matching users",
+  "adminConsoleGroupWorkspaces": "Workspace",
+  "adminConsoleEmptyWorkspaces": "No matching workspace",
+  "adminConsoleGroupProjects": "Project",
+  "adminConsoleEmptyProjects": "No matching project",
+  "adminConsoleGroupJobs": "Job",
+  "adminConsoleEmptyJobs": "No matching job",
+  "adminConsoleUserHitSummary": "plan {plan} · {status} · ws {workspaces} · project {projects} · active job {activeJobs}",
+  "@adminConsoleUserHitSummary": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "workspaces": {
+        "type": "int"
+      },
+      "projects": {
+        "type": "int"
+      },
+      "activeJobs": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleWorkspaceHitSummary": "{workspaceType} · member {members} · project {projects} · active job {activeJobs}{archivedSuffix}",
+  "@adminConsoleWorkspaceHitSummary": {
+    "placeholders": {
+      "workspaceType": {
+        "type": "String"
+      },
+      "members": {
+        "type": "int"
+      },
+      "projects": {
+        "type": "int"
+      },
+      "activeJobs": {
+        "type": "int"
+      },
+      "archivedSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleArchivedSuffix": " · archived",
+  "adminConsoleNoWorkspace": "no workspace",
+  "adminConsoleProjectHitSummary": "#{numericId} · {workspaceName} · {owner}{archivedSuffix}",
+  "@adminConsoleProjectHitSummary": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "workspaceName": {
+        "type": "String"
+      },
+      "owner": {
+        "type": "String"
+      },
+      "archivedSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleJobHitTitle": "{kind} · {status}",
+  "@adminConsoleJobHitTitle": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleJobHitSummary": "{owner} · project {projectNumericId} · {createdAt}",
+  "@adminConsoleJobHitSummary": {
+    "placeholders": {
+      "owner": {
+        "type": "String"
+      },
+      "projectNumericId": {
+        "type": "String"
+      },
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleChipPlan": "plan {value}",
+  "@adminConsoleChipPlan": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleChipWorkspace": "workspace {value}",
+  "@adminConsoleChipWorkspace": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipProject": "project {value}",
+  "@adminConsoleChipProject": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipActiveJob": "active job {value}",
+  "@adminConsoleChipActiveJob": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipApiKey": "api key {value}",
+  "@adminConsoleChipApiKey": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleChipUnreadNotif": "unread notif {value}",
+  "@adminConsoleChipUnreadNotif": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleSectionMemberships": "Memberships",
+  "adminConsoleSectionRecentJobs": "Recent jobs",
+  "adminConsoleSectionGovernanceAudit": "Governance audit"
 }
