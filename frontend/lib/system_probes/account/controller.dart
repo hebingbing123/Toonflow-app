@@ -4,16 +4,75 @@ import '../../rust_api.dart';
 
 typedef AccountProbesAccessTokenProvider = String? Function();
 typedef AccountProbesErrorSink = void Function(String? error);
+typedef AccountProbesScopeTextProvider = String Function();
+typedef AccountProbesFetchProjects =
+    Future<List<ProjectRow>> Function(String token);
+
+class AccountProbeClearScope {
+  const AccountProbeClearScope({
+    required this.projectId,
+    this.projectUuid,
+    this.scriptId,
+  });
+
+  final int projectId;
+  final String? projectUuid;
+  final int? scriptId;
+}
+
+Future<AccountProbeClearScope> resolveAccountProbeClearScope({
+  required String token,
+  required String projectIdText,
+  required String projectUuidText,
+  required String scriptIdText,
+  required AccountProbesFetchProjects fetchProjects,
+  int fallbackProjectId = 1,
+}) async {
+  final explicitProjectUuid = _trimmedNonEmpty(projectUuidText);
+  var projectId = _parsePositiveInt(projectIdText);
+  if (explicitProjectUuid == null && projectId == null) {
+    try {
+      final projects = await fetchProjects(token);
+      if (projects.isNotEmpty) {
+        projectId = projects.first.numericId;
+        return AccountProbeClearScope(
+          projectId: projectId,
+          projectUuid: projects.first.id,
+          scriptId: _parsePositiveInt(scriptIdText),
+        );
+      }
+    } on RustApiException catch (_) {
+      // Keep the legacy fallback when project probing is unavailable.
+    }
+  }
+  return AccountProbeClearScope(
+    projectId: projectId ?? fallbackProjectId,
+    projectUuid: explicitProjectUuid,
+    scriptId: _parsePositiveInt(scriptIdText),
+  );
+}
 
 class AccountProbesController extends ChangeNotifier {
   AccountProbesController({
     required AccountProbesAccessTokenProvider accessTokenProvider,
     required AccountProbesErrorSink onErrorChanged,
+    AccountProbesScopeTextProvider? projectIdTextProvider,
+    AccountProbesScopeTextProvider? projectUuidTextProvider,
+    AccountProbesScopeTextProvider? scriptIdTextProvider,
+    AccountProbesFetchProjects fetchProjects = fetchProjects,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _projectIdTextProvider = projectIdTextProvider ?? _emptyScopeText,
+       _projectUuidTextProvider = projectUuidTextProvider ?? _emptyScopeText,
+       _scriptIdTextProvider = scriptIdTextProvider ?? _emptyScopeText,
+       _fetchProjects = fetchProjects;
 
   final AccountProbesAccessTokenProvider _accessTokenProvider;
   final AccountProbesErrorSink _onErrorChanged;
+  final AccountProbesScopeTextProvider _projectIdTextProvider;
+  final AccountProbesScopeTextProvider _projectUuidTextProvider;
+  final AccountProbesScopeTextProvider _scriptIdTextProvider;
+  final AccountProbesFetchProjects _fetchProjects;
 
   bool loadingMe = false;
   bool loadingDevSwitchProbe = false;
@@ -162,33 +221,30 @@ class AccountProbesController extends ChangeNotifier {
           'GET ragLimit=${original.ragLimit} · '
           'POST -> "$message" · '
           'GET ragLimit=${interim.ragLimit} · restored';
-      var numericIdForClear = 1;
-      String? uuidForClear;
-      try {
-        final projects = await fetchProjects(token);
-        if (projects.isNotEmpty) {
-          numericIdForClear = projects.first.numericId;
-          uuidForClear = projects.first.id;
-        }
-      } on RustApiException catch (_) {
-        // Keep default project id 1 when project probing is unavailable.
-      }
+      final clearScope = await resolveAccountProbeClearScope(
+        token: token,
+        projectIdText: _projectIdTextProvider(),
+        projectUuidText: _projectUuidTextProvider(),
+        scriptIdText: _scriptIdTextProvider(),
+        fetchProjects: _fetchProjects,
+      );
       final clearStatus = await postSettingsClearAgentMemoriesV1(
         token,
-        projectUuid: uuidForClear,
-        projectId: uuidForClear != null ? null : numericIdForClear,
+        projectUuid: clearScope.projectUuid,
+        projectId: clearScope.projectUuid != null ? null : clearScope.projectId,
         agentType: 'scriptAgent',
+        episodesId: clearScope.scriptId,
       );
       if (!const [200, 404, 503].contains(clearStatus)) {
         throw StateError(
           'POST clear-agent-memories expected 503/200/404, got '
-          '$clearStatus (numeric id #$numericIdForClear)',
+          '$clearStatus (numeric id #${clearScope.projectId})',
         );
       }
       final clearNote = switch (clearStatus) {
         503 => '503 no DB',
         200 => '200 ok',
-        404 => '404 no project numeric#$numericIdForClear',
+        404 => '404 no project numeric#${clearScope.projectId}',
         _ => '$clearStatus',
       };
       memoryConfigProbeBody = '$line · clear-agent-memories -> $clearNote';
@@ -232,4 +288,22 @@ class AccountProbesController extends ChangeNotifier {
       notifyListeners();
     }
   }
+}
+
+String _emptyScopeText() => '';
+
+int? _parsePositiveInt(String raw) {
+  final value = int.tryParse(raw.trim());
+  if (value == null || value <= 0) {
+    return null;
+  }
+  return value;
+}
+
+String? _trimmedNonEmpty(String raw) {
+  final value = raw.trim();
+  if (value.isEmpty) {
+    return null;
+  }
+  return value;
 }
