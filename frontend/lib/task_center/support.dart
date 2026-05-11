@@ -82,7 +82,7 @@ class TaskCenterExportJobDeepLink {
     required this.openProductionWorkspace,
   });
 
-  final int projectNumericId;
+  final int? projectNumericId;
   final String? projectUuid;
   final int? scriptNumericId;
   final int? storyboardNumericId;
@@ -106,7 +106,7 @@ class TaskCenterDomainDeepLink {
   });
 
   final TaskCenterDomainDeepLinkTarget target;
-  final int projectNumericId;
+  final int? projectNumericId;
   final String? projectUuid;
   final int? scriptNumericId;
   final int? storyboardNumericId;
@@ -153,14 +153,14 @@ TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
       : <String, dynamic>{};
   final project = taskCenterDeepLinkInt(links, 'project_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'project_numeric_id');
-  if (project == null) {
-    return null;
-  }
   final projectUuid =
       taskCenterDeepLinkString(links, 'project_uuid') ??
       taskCenterDeepLinkString(payload, 'project_uuid') ??
       taskCenterDeepLinkString(links, 'project_id') ??
       taskCenterDeepLinkString(payload, 'project_id');
+  if (project == null && projectUuid == null) {
+    return null;
+  }
   final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'script_numeric_id');
   final storyboard = taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
@@ -185,14 +185,14 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
 
   final project = taskCenterDeepLinkInt(links, 'project_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'project_numeric_id');
-  if (project == null) {
-    return null;
-  }
   final projectUuid =
       taskCenterDeepLinkString(links, 'project_uuid') ??
       taskCenterDeepLinkString(payload, 'project_uuid') ??
       taskCenterDeepLinkString(links, 'project_id') ??
       taskCenterDeepLinkString(payload, 'project_id');
+  if (project == null && projectUuid == null) {
+    return null;
+  }
 
   final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
       taskCenterDeepLinkInt(payload, 'script_numeric_id');

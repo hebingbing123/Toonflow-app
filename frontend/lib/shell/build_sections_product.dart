@@ -356,11 +356,13 @@ extension _HomePageBuildProductSections on _HomePageState {
           accessToken: _session?.accessToken,
           initialProjectNumericId: _productScopedProjectNumericId,
           onNavigateExportJobDeepLink: (TaskCenterExportJobDeepLink link) {
-            setState(() {
-              _productScopedProjectNumericId = link.projectNumericId;
-            });
-            _workspaceInputController.applyProjectScope(
-              link.projectNumericId,
+            if (link.projectNumericId != null) {
+              setState(() {
+                _productScopedProjectNumericId = link.projectNumericId;
+              });
+            }
+            _workspaceInputController.applyProjectScopeRef(
+              projectNumericId: link.projectNumericId,
               scriptNumericId: link.scriptNumericId,
               projectUuid: link.projectUuid,
               workspaceId: link.workspaceId,
@@ -372,11 +374,13 @@ extension _HomePageBuildProductSections on _HomePageState {
             );
           },
           onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
-            setState(() {
-              _productScopedProjectNumericId = link.projectNumericId;
-            });
-            _workspaceInputController.applyProjectScope(
-              link.projectNumericId,
+            if (link.projectNumericId != null) {
+              setState(() {
+                _productScopedProjectNumericId = link.projectNumericId;
+              });
+            }
+            _workspaceInputController.applyProjectScopeRef(
+              projectNumericId: link.projectNumericId,
               scriptNumericId: link.scriptNumericId,
               projectUuid: link.projectUuid,
               workspaceId: link.workspaceId,

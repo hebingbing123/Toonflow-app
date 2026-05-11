@@ -81,4 +81,38 @@ void main() {
     expect(link.scriptNumericId, 5);
     expect(link.workspaceId, '550e8400-e29b-41d4-a716-446655440555');
   });
+
+  test('parses task-center deep links when only project uuid is available', () {
+    final job = JobRow(
+      numericTaskId: 77,
+      id: '550e8400-e29b-41d4-a716-446655440777',
+      ownerUserId: 'user',
+      kind: 'video.export',
+      status: 'failed',
+      payload: const <String, dynamic>{
+        'project_uuid': '550e8400-e29b-41d4-a716-446655440111',
+        'script_numeric_id': 3,
+        'workspace_id': '550e8400-e29b-41d4-a716-446655440222',
+      },
+      errorDetails: const <String, dynamic>{
+        'deep_links': <String, dynamic>{
+          'project_uuid': '550e8400-e29b-41d4-a716-446655440111',
+          'script_numeric_id': 3,
+          'workspace_id': '550e8400-e29b-41d4-a716-446655440222',
+        },
+      },
+      createdAt: '2026-05-05T00:00:00Z',
+      updatedAt: '2026-05-05T00:00:01Z',
+    );
+
+    final exportLink = tryParseVideoExportJobDeepLink(job);
+    final domainLink = tryParseTaskCenterDomainDeepLink(job);
+    expect(exportLink, isNotNull);
+    expect(exportLink!.projectNumericId, isNull);
+    expect(exportLink.projectUuid, '550e8400-e29b-41d4-a716-446655440111');
+    expect(domainLink, isNotNull);
+    expect(domainLink!.projectNumericId, isNull);
+    expect(domainLink.projectUuid, '550e8400-e29b-41d4-a716-446655440111');
+    expect(domainLink.target, TaskCenterDomainDeepLinkTarget.script);
+  });
 }

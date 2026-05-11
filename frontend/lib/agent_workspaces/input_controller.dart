@@ -74,6 +74,47 @@ class WorkspaceInputController {
     }
   }
 
+  void applyProjectScopeRef({
+    int? projectNumericId,
+    int? scriptNumericId,
+    String? projectUuid,
+    String? scriptUuid,
+    String? workspaceId,
+  }) {
+    if (projectNumericId != null && projectNumericId > 0) {
+      projectIdController.text = projectNumericId.toString();
+    } else {
+      projectIdController.clear();
+    }
+    final u = projectUuid?.trim();
+    if (u != null && u.isNotEmpty) {
+      projectUuidController.text = u;
+    } else {
+      projectUuidController.clear();
+    }
+    final w = workspaceId?.trim();
+    if (w != null && w.isNotEmpty) {
+      workspaceUuidController.text = w;
+    } else {
+      workspaceUuidController.clear();
+    }
+    if (scriptNumericId != null && scriptNumericId > 0) {
+      scriptIdController.text = scriptNumericId.toString();
+    } else {
+      scriptIdController.clear();
+    }
+    if (scriptUuid != null) {
+      final su = scriptUuid.trim();
+      if (su.isEmpty) {
+        scriptUuidController.clear();
+      } else {
+        scriptUuidController.text = su;
+      }
+    } else {
+      scriptUuidController.clear();
+    }
+  }
+
   void clearScriptScope() {
     scriptIdController.clear();
     scriptUuidController.clear();
