@@ -214,7 +214,7 @@ class _QualityReviewsWorkbenchDialogState
       final rows = await fetchQualityStats(widget.accessToken);
       if (!mounted) return;
       setState(() {
-        _statsSummary = summarizeQualityStatsRows(rows);
+        _statsSummary = summarizeQualityStatsRows(rows, l10n: l10n);
         _statusLine = l10n.qualityReviewsStatusRefreshedStats;
       });
     } on RustApiException catch (e) {
@@ -268,7 +268,7 @@ class _QualityReviewsWorkbenchDialogState
       );
       if (!mounted) return;
       setState(() {
-        _stagePassRateSummary = summarizeStagePassRateRows(rows);
+        _stagePassRateSummary = summarizeStagePassRateRows(rows, l10n: l10n);
         _stageGradeRows = gradeRows;
         _statusLine = l10n.qualityReviewsStatusRefreshedStageAndGrade;
       });
@@ -329,7 +329,10 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _tokenEfficiencyRows = rows;
-        _tokenEfficiencySummary = summarizeQualityTokenEfficiencyRows(rows);
+        _tokenEfficiencySummary = summarizeQualityTokenEfficiencyRows(
+          rows,
+          l10n: l10n,
+        );
         _tokenEfficiencyActionPlan = summarizeQualityTokenEfficiencyActionPlan(
           rows,
           projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
@@ -369,6 +372,7 @@ class _QualityReviewsWorkbenchDialogState
       setState(() {
         _tokenEfficiencySamplesSummary = summarizeQualityTokenEfficiencySamples(
           rows,
+          l10n: l10n,
         );
         _statusLine = l10n.qualityReviewsStatusRefreshedTokenSavingSamples;
       });
@@ -397,7 +401,7 @@ class _QualityReviewsWorkbenchDialogState
       final review = await fetchQualityReviewById(widget.accessToken, reviewId);
       if (!mounted) return;
       setState(() {
-        _reviewDetails = formatQualityReviewDetails(review);
+        _reviewDetails = formatQualityReviewDetails(review, l10n: l10n);
         _statusLine = l10n.qualityReviewsStatusLoadedReviewDetails;
       });
     } on RustApiException catch (e) {
@@ -470,7 +474,7 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _ctrls.reviewIdCtrl.text = created.id;
-        _reviewDetails = formatQualityReviewDetails(created);
+        _reviewDetails = formatQualityReviewDetails(created, l10n: l10n);
         final writesScopedMemory =
             (projectId != null && scriptId != null) &&
             (_createBadCase ||
@@ -496,6 +500,7 @@ class _QualityReviewsWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return QualityReviewsWorkbenchDialogView(
       model: QualityReviewsWorkbenchDialogViewModel(
         reviews: _reviews,
@@ -601,7 +606,7 @@ class _QualityReviewsWorkbenchDialogState
         onSelectReview: (review) {
           setState(() {
             _ctrls.reviewIdCtrl.text = review.id;
-            _reviewDetails = formatQualityReviewDetails(review);
+            _reviewDetails = formatQualityReviewDetails(review, l10n: l10n);
           });
         },
         onClose: () => Navigator.of(context).pop(),

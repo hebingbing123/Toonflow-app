@@ -3258,4 +3258,99 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityReviewsEmptyForCurrentFilters => '当前筛选条件下无评审记录';
+
+  @override
+  String get qualityReviewsNoTokenEfficiencyStats => '当前没有 token 效率统计';
+
+  @override
+  String get qualityReviewsActionKeepDeliveryMemory => '动作=保留表演记忆';
+
+  @override
+  String get qualityReviewsActionReuseNegativeMemory => '动作=复用坏例约束';
+
+  @override
+  String get qualityReviewsActionTrimGenericStyle => '动作=压项目泛风格';
+
+  @override
+  String get qualityReviewsActionPromoteSelectedMemory => '动作=晋升优质镜头';
+
+  @override
+  String get qualityReviewsFocusLabel => '焦点';
+
+  @override
+  String get qualityReviewsNoTokenEfficiencySamples => '当前没有 token 效率样本';
+
+  @override
+  String get qualityReviewsDeliveryPriority => 'delivery优先';
+
+  @override
+  String get qualityReviewsRegular => '常规';
+
+  @override
+  String get qualityReviewsNoReviews => '当前没有质量评审';
+
+  @override
+  String qualityReviewsSummaryLine(int total, int autoCount, String details) {
+    return '评审 $total 条 · auto $autoCount 条 · $details';
+  }
+
+  @override
+  String get qualityReviewsNoQualityStats => '当前没有质量统计';
+
+  @override
+  String get qualityReviewsNoScopeLeaderboard => '当前没有 scope 榜单';
+
+  @override
+  String get qualityReviewsItemUnit => '条';
+
+  @override
+  String get qualityReviewsEmotionRisk => '情绪';
+
+  @override
+  String get qualityReviewsRealismRisk => '真实感';
+
+  @override
+  String get qualityReviewsPromotionsLabel => '晋升';
+
+  @override
+  String get qualityReviewsBadCaseWriteback => '坏例回写';
+
+  @override
+  String get qualityReviewsSummaryWriteback => '摘要回写';
+
+  @override
+  String get qualityReviewsWritebackSlim => '回写slim';
+
+  @override
+  String get qualityReviewsFocusWatch => '关注';
+
+  @override
+  String get qualityReviewsNoStagePassRate => '当前没有阶段通过率';
+
+  @override
+  String get qualityReviewsNoStageGradeDistribution => '当前没有阶段等级分布';
+
+  @override
+  String get qualityReviewsNoBadCaseHotspots => '当前没有坏例热点';
+
+  @override
+  String get qualityReviewsSummaryStatsPrefix => '统计';
+
+  @override
+  String get qualityReviewsSummaryStagePrefix => '阶段';
+
+  @override
+  String get qualityReviewsSummaryGradePrefix => '等级';
+
+  @override
+  String get qualityReviewsSummaryBadCasePrefix => '坏例';
+
+  @override
+  String get qualityReviewsDiagnosticLabel => '诊断';
+
+  @override
+  String get qualityReviewsWritebackLabel => '回写';
+
+  @override
+  String get qualityReviewsSuggestionsLabel => '建议';
 }

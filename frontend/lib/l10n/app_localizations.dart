@@ -5700,6 +5700,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No reviews under current filters'**
   String get qualityReviewsEmptyForCurrentFilters;
+
+  /// No description provided for @qualityReviewsNoTokenEfficiencyStats.
+  ///
+  /// In en, this message translates to:
+  /// **'No token efficiency stats yet'**
+  String get qualityReviewsNoTokenEfficiencyStats;
+
+  /// No description provided for @qualityReviewsActionKeepDeliveryMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'action=keep delivery memory'**
+  String get qualityReviewsActionKeepDeliveryMemory;
+
+  /// No description provided for @qualityReviewsActionReuseNegativeMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'action=reuse negative constraints'**
+  String get qualityReviewsActionReuseNegativeMemory;
+
+  /// No description provided for @qualityReviewsActionTrimGenericStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'action=trim generic style memory'**
+  String get qualityReviewsActionTrimGenericStyle;
+
+  /// No description provided for @qualityReviewsActionPromoteSelectedMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'action=promote selected memory'**
+  String get qualityReviewsActionPromoteSelectedMemory;
+
+  /// No description provided for @qualityReviewsFocusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'focus'**
+  String get qualityReviewsFocusLabel;
+
+  /// No description provided for @qualityReviewsNoTokenEfficiencySamples.
+  ///
+  /// In en, this message translates to:
+  /// **'No token efficiency samples yet'**
+  String get qualityReviewsNoTokenEfficiencySamples;
+
+  /// No description provided for @qualityReviewsDeliveryPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'delivery-priority'**
+  String get qualityReviewsDeliveryPriority;
+
+  /// No description provided for @qualityReviewsRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'regular'**
+  String get qualityReviewsRegular;
+
+  /// No description provided for @qualityReviewsNoReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No quality reviews yet'**
+  String get qualityReviewsNoReviews;
+
+  /// No description provided for @qualityReviewsSummaryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews {total} · auto {autoCount} · {details}'**
+  String qualityReviewsSummaryLine(int total, int autoCount, String details);
+
+  /// No description provided for @qualityReviewsNoQualityStats.
+  ///
+  /// In en, this message translates to:
+  /// **'No quality stats yet'**
+  String get qualityReviewsNoQualityStats;
+
+  /// No description provided for @qualityReviewsNoScopeLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'No scope leaderboard yet'**
+  String get qualityReviewsNoScopeLeaderboard;
+
+  /// No description provided for @qualityReviewsItemUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get qualityReviewsItemUnit;
+
+  /// No description provided for @qualityReviewsEmotionRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'emotion'**
+  String get qualityReviewsEmotionRisk;
+
+  /// No description provided for @qualityReviewsRealismRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'realism'**
+  String get qualityReviewsRealismRisk;
+
+  /// No description provided for @qualityReviewsPromotionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'promotions'**
+  String get qualityReviewsPromotionsLabel;
+
+  /// No description provided for @qualityReviewsBadCaseWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'bad-case writeback'**
+  String get qualityReviewsBadCaseWriteback;
+
+  /// No description provided for @qualityReviewsSummaryWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'summary writeback'**
+  String get qualityReviewsSummaryWriteback;
+
+  /// No description provided for @qualityReviewsWritebackSlim.
+  ///
+  /// In en, this message translates to:
+  /// **'writeback slim'**
+  String get qualityReviewsWritebackSlim;
+
+  /// No description provided for @qualityReviewsFocusWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'watch'**
+  String get qualityReviewsFocusWatch;
+
+  /// No description provided for @qualityReviewsNoStagePassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No stage pass rates yet'**
+  String get qualityReviewsNoStagePassRate;
+
+  /// No description provided for @qualityReviewsNoStageGradeDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'No stage grade distribution yet'**
+  String get qualityReviewsNoStageGradeDistribution;
+
+  /// No description provided for @qualityReviewsNoBadCaseHotspots.
+  ///
+  /// In en, this message translates to:
+  /// **'No bad-case hotspots yet'**
+  String get qualityReviewsNoBadCaseHotspots;
+
+  /// No description provided for @qualityReviewsSummaryStatsPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get qualityReviewsSummaryStatsPrefix;
+
+  /// No description provided for @qualityReviewsSummaryStagePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage'**
+  String get qualityReviewsSummaryStagePrefix;
+
+  /// No description provided for @qualityReviewsSummaryGradePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get qualityReviewsSummaryGradePrefix;
+
+  /// No description provided for @qualityReviewsSummaryBadCasePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad case'**
+  String get qualityReviewsSummaryBadCasePrefix;
+
+  /// No description provided for @qualityReviewsDiagnosticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'diagnostic'**
+  String get qualityReviewsDiagnosticLabel;
+
+  /// No description provided for @qualityReviewsWritebackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'writeback'**
+  String get qualityReviewsWritebackLabel;
+
+  /// No description provided for @qualityReviewsSuggestionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'suggestions'**
+  String get qualityReviewsSuggestionsLabel;
 }
 
 class _AppLocalizationsDelegate

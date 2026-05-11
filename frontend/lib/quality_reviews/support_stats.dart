@@ -1,4 +1,5 @@
 import '../../rust_api.dart';
+import '../l10n/app_localizations.dart';
 import 'support_models.dart';
 import 'support_filters.dart';
 import 'support_actions.dart';
@@ -6,10 +7,11 @@ import 'support_actions.dart';
 String summarizeQualityTokenEfficiencyRows(
   Iterable<QualityTokenEfficiencyRow> rows, {
   int maxItems = 3,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有 token 效率统计';
+    return l10n?.qualityReviewsNoTokenEfficiencyStats ?? '当前没有 token 效率统计';
   }
   final visible = items
       .take(maxItems)
@@ -26,7 +28,10 @@ String summarizeQualityTokenEfficiencyRows(
         final parts = <String>[
           '${row.targetType}: prompt=$prompt, base=$base, memory=$memory ($share%, delivery=$delivery/$deliveryShare%, hit=$hitRate%)',
         ];
-        final memoryAction = _qualityTokenEfficiencyMemoryActionSummary(row);
+        final memoryAction = _qualityTokenEfficiencyMemoryActionSummary(
+          row,
+          l10n: l10n,
+        );
         if (memoryAction != null) {
           parts.add(memoryAction);
         }
@@ -39,20 +44,21 @@ String summarizeQualityTokenEfficiencyRows(
 
 String? _qualityTokenEfficiencyMemoryActionSummary(
   QualityTokenEfficiencyRow row,
+  {AppLocalizations? l10n}
 ) {
   String? label;
   switch (row.memoryAction) {
     case 'keep_delivery_memory':
-      label = '动作=保留表演记忆';
+      label = l10n?.qualityReviewsActionKeepDeliveryMemory ?? '动作=保留表演记忆';
       break;
     case 'reuse_negative_memory':
-      label = '动作=复用坏例约束';
+      label = l10n?.qualityReviewsActionReuseNegativeMemory ?? '动作=复用坏例约束';
       break;
     case 'trim_generic_style_memory':
-      label = '动作=压项目泛风格';
+      label = l10n?.qualityReviewsActionTrimGenericStyle ?? '动作=压项目泛风格';
       break;
     case 'promote_selected_memory':
-      label = '动作=晋升优质镜头';
+      label = l10n?.qualityReviewsActionPromoteSelectedMemory ?? '动作=晋升优质镜头';
       break;
     default:
       label = null;
@@ -62,7 +68,7 @@ String? _qualityTokenEfficiencyMemoryActionSummary(
   final focus = row.memoryFocus.trim();
   final parts = <String>[label];
   if (focus.isNotEmpty && focus != 'observe') {
-    parts.add('焦点=$focus');
+    parts.add('${l10n?.qualityReviewsFocusLabel ?? "焦点"}=$focus');
   }
   if (reason.isNotEmpty) {
     parts.add(reason);
@@ -73,10 +79,11 @@ String? _qualityTokenEfficiencyMemoryActionSummary(
 String summarizeQualityTokenEfficiencySamples(
   Iterable<QualityTokenEfficiencySampleRow> rows, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有 token 效率样本';
+    return l10n?.qualityReviewsNoTokenEfficiencySamples ?? '当前没有 token 效率样本';
   }
   final visible = items
       .take(maxItems)
@@ -85,8 +92,8 @@ String summarizeQualityTokenEfficiencySamples(
             ? row.createdAt.substring(5, 16).replaceFirst('T', ' ')
             : row.createdAt;
         final deliveryFlag = row.memoryDeliveryPriorityApplied
-            ? 'delivery优先'
-            : '常规';
+            ? (l10n?.qualityReviewsDeliveryPriority ?? 'delivery优先')
+            : (l10n?.qualityReviewsRegular ?? '常规');
         return '$date ${row.targetType}: prompt=${row.promptChars}, base=${row.nonMemoryPromptChars}, memory=${row.memoryStyleChars} (${row.memorySharePercent.toStringAsFixed(1)}%, $deliveryFlag)';
       })
       .join(' | ');
@@ -97,10 +104,11 @@ String summarizeQualityTokenEfficiencySamples(
 String summarizeQualityReviews(
   Iterable<QualityReview> rows, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有质量评审';
+    return l10n?.qualityReviewsNoReviews ?? '当前没有质量评审';
   }
   final autoCount = items.where((row) => row.source == 'auto').length;
   final visible = items
@@ -111,16 +119,18 @@ String summarizeQualityReviews(
       })
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
-  return '评审 ${items.length} 条 · auto $autoCount 条 · $visible$suffix';
+  return l10n?.qualityReviewsSummaryLine(items.length, autoCount, '$visible$suffix') ??
+      '评审 ${items.length} 条 · auto $autoCount 条 · $visible$suffix';
 }
 
 String summarizeQualityStatsRows(
   Iterable<QualityStatsRow> rows, {
   int maxItems = 3,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有质量统计';
+    return l10n?.qualityReviewsNoQualityStats ?? '当前没有质量统计';
   }
   final visible = items
       .take(maxItems)
@@ -141,26 +151,27 @@ String summarizeQualityStatsRows(
 String summarizeQualityScopeInsightRows(
   Iterable<QualityScopeInsightRow> rows, {
   int maxItems = 3,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有 scope 榜单';
+    return l10n?.qualityReviewsNoScopeLeaderboard ?? '当前没有 scope 榜单';
   }
   final visible = items
       .take(maxItems)
       .map((row) {
         final parts = <String>[
-          '${row.scopeLabel} ${row.totalReviews}条',
+          '${row.scopeLabel} ${row.totalReviews}${l10n?.qualityReviewsItemUnit ?? "条"}',
           'pass=${row.passRatePercent.toStringAsFixed(1)}%',
         ];
         if (row.badCaseCount > 0) {
-          parts.add('坏例${row.badCaseCount}');
+          parts.add('${l10n?.qualityReviewsFilterBadCase ?? "坏例"}${row.badCaseCount}');
         }
         if (row.dialogueRiskCount > 0) {
-          parts.add('情绪${row.dialogueRiskCount}');
+          parts.add('${l10n?.qualityReviewsEmotionRisk ?? "情绪"}${row.dialogueRiskCount}');
         }
         if (row.visualRiskCount > 0) {
-          parts.add('真实感${row.visualRiskCount}');
+          parts.add('${l10n?.qualityReviewsRealismRisk ?? "真实感"}${row.visualRiskCount}');
         }
         if (row.autoReviews > 0) {
           parts.add(
@@ -168,30 +179,33 @@ String summarizeQualityScopeInsightRows(
           );
           if (row.memoryRemovedChars > 0 || row.memoryRemovedRows > 0) {
             parts.add(
-              'slim ${row.memoryRemovedChars}c/${row.memoryRemovedRows}条',
+              'slim ${row.memoryRemovedChars}c/${row.memoryRemovedRows}${l10n?.qualityReviewsItemUnit ?? "条"}',
             );
           }
         }
         if (row.feedbackSelectedMemoryPromotions > 0) {
-          parts.add('晋升${row.feedbackSelectedMemoryPromotions}');
+          parts.add('${l10n?.qualityReviewsPromotionsLabel ?? "晋升"}${row.feedbackSelectedMemoryPromotions}');
         }
         if (row.feedbackRejectedMemoryWrites > 0) {
-          parts.add('坏例回写${row.feedbackRejectedMemoryWrites}');
+          parts.add('${l10n?.qualityReviewsBadCaseWriteback ?? "坏例回写"}${row.feedbackRejectedMemoryWrites}');
         }
         if (row.feedbackSummaryMemoryWrites > 0) {
-          parts.add('摘要回写${row.feedbackSummaryMemoryWrites}');
+          parts.add('${l10n?.qualityReviewsSummaryWriteback ?? "摘要回写"}${row.feedbackSummaryMemoryWrites}');
         }
         if (row.feedbackMemoryRemovedChars > 0 ||
             row.feedbackMemoryRemovedRows > 0) {
           parts.add(
-            '回写slim ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}条',
+            '${l10n?.qualityReviewsWritebackSlim ?? "回写slim"} ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}${l10n?.qualityReviewsItemUnit ?? "条"}',
           );
         }
         final focusSummary = summarizeFeedbackFocusTags(row.feedbackFocusTags);
         if (focusSummary != null) {
-          parts.add('关注=$focusSummary');
+          parts.add('${l10n?.qualityReviewsFocusWatch ?? "关注"}=$focusSummary');
         }
-        final memoryAction = _qualityScopeInsightMemoryActionSummary(row);
+        final memoryAction = _qualityScopeInsightMemoryActionSummary(
+          row,
+          l10n: l10n,
+        );
         if (memoryAction != null) {
           parts.add(memoryAction);
         }
@@ -202,20 +216,23 @@ String summarizeQualityScopeInsightRows(
   return visible + suffix;
 }
 
-String? _qualityScopeInsightMemoryActionSummary(QualityScopeInsightRow row) {
+String? _qualityScopeInsightMemoryActionSummary(
+  QualityScopeInsightRow row, {
+  AppLocalizations? l10n,
+}) {
   String? label;
   switch (row.memoryAction) {
     case 'keep_delivery_memory':
-      label = '动作=保留表演记忆';
+      label = l10n?.qualityReviewsActionKeepDeliveryMemory ?? '动作=保留表演记忆';
       break;
     case 'reuse_negative_memory':
-      label = '动作=复用坏例约束';
+      label = l10n?.qualityReviewsActionReuseNegativeMemory ?? '动作=复用坏例约束';
       break;
     case 'trim_generic_style_memory':
-      label = '动作=压项目泛风格';
+      label = l10n?.qualityReviewsActionTrimGenericStyle ?? '动作=压项目泛风格';
       break;
     case 'promote_selected_memory':
-      label = '动作=晋升优质镜头';
+      label = l10n?.qualityReviewsActionPromoteSelectedMemory ?? '动作=晋升优质镜头';
       break;
     default:
       label = null;
@@ -225,7 +242,7 @@ String? _qualityScopeInsightMemoryActionSummary(QualityScopeInsightRow row) {
   final focus = row.memoryFocus.trim();
   final parts = <String>[label];
   if (focus.isNotEmpty && focus != 'observe') {
-    parts.add('焦点=$focus');
+    parts.add('${l10n?.qualityReviewsFocusLabel ?? "焦点"}=$focus');
   }
   if (reason.isNotEmpty) {
     parts.add(reason);
@@ -236,10 +253,11 @@ String? _qualityScopeInsightMemoryActionSummary(QualityScopeInsightRow row) {
 String summarizeStagePassRateRows(
   Iterable<StagePassRateRow> rows, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有阶段通过率';
+    return l10n?.qualityReviewsNoStagePassRate ?? '当前没有阶段通过率';
   }
   final visible = items
       .take(maxItems)
@@ -264,10 +282,11 @@ String summarizeStagePassRateRows(
 String summarizeStageGradeDistributionRows(
   Iterable<StageGradeDistributionRow> rows, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有阶段等级分布';
+    return l10n?.qualityReviewsNoStageGradeDistribution ?? '当前没有阶段等级分布';
   }
   final visible = items
       .take(maxItems)
@@ -283,10 +302,11 @@ String summarizeStageGradeDistributionRows(
 String summarizeDashboardStageGradeDistributionRows(
   Iterable<QualityDashboardStageGradeItem> rows, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有阶段等级分布';
+    return l10n?.qualityReviewsNoStageGradeDistribution ?? '当前没有阶段等级分布';
   }
   final visible = items
       .take(maxItems)
@@ -302,16 +322,17 @@ String summarizeDashboardStageGradeDistributionRows(
 String summarizeDashboardScopeInsightRows(
   Iterable<QualityDashboardScopeInsightItem> rows, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有 scope 榜单';
+    return l10n?.qualityReviewsNoScopeLeaderboard ?? '当前没有 scope 榜单';
   }
   final visible = items
       .take(maxItems)
       .map(
         (row) =>
-            '${row.scopeLabel} ${row.totalReviews}条 · pass=${row.passRatePercent.toStringAsFixed(1)}% · 坏例${row.badCaseCount}',
+            '${row.scopeLabel} ${row.totalReviews}${l10n?.qualityReviewsItemUnit ?? "条"} · pass=${row.passRatePercent.toStringAsFixed(1)}% · ${l10n?.qualityReviewsFilterBadCase ?? "坏例"}${row.badCaseCount}',
       )
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -321,10 +342,11 @@ String summarizeDashboardScopeInsightRows(
 String summarizeDashboardTokenEfficiencyRows(
   Iterable<QualityDashboardTokenEfficiencyItem> rows, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有 token 效率统计';
+    return l10n?.qualityReviewsNoTokenEfficiencyStats ?? '当前没有 token 效率统计';
   }
   final visible = items
       .take(maxItems)
@@ -340,16 +362,17 @@ String summarizeDashboardTokenEfficiencyRows(
 String summarizeBadCaseStatItems(
   Iterable<BadCaseStatItem> items, {
   int maxItems = 4,
+  AppLocalizations? l10n,
 }) {
   final rows = items.toList(growable: false);
   if (rows.isEmpty) {
-    return '当前没有坏例热点';
+    return l10n?.qualityReviewsNoBadCaseHotspots ?? '当前没有坏例热点';
   }
   final visible = rows
       .take(maxItems)
       .map(
         (row) =>
-            '${row.badCaseCategory ?? "未分类"} ${row.count}条 · pass=${row.passRatePercent.toStringAsFixed(1)}% · avg=${row.avgScore.toStringAsFixed(1)}',
+            '${row.badCaseCategory ?? (l10n?.qualityReviewsUncategorized ?? "未分类")} ${row.count}${l10n?.qualityReviewsItemUnit ?? "条"} · pass=${row.passRatePercent.toStringAsFixed(1)}% · avg=${row.avgScore.toStringAsFixed(1)}',
       )
       .join(' | ');
   final suffix = rows.length > maxItems ? ' | …' : '';
@@ -363,19 +386,21 @@ String? buildQualityDashboardSummary({
   String? scopeInsightsSummary,
   String? tokenEfficiencySummary,
   String? badCaseStatsSummary,
+  AppLocalizations? l10n,
 }) {
   final parts = <String>[
-    if (statsSummary != null && statsSummary.isNotEmpty) '统计: $statsSummary',
+    if (statsSummary != null && statsSummary.isNotEmpty)
+      '${l10n?.qualityReviewsSummaryStatsPrefix ?? "统计"}: $statsSummary',
     if (stagePassRateSummary != null && stagePassRateSummary.isNotEmpty)
-      '阶段: $stagePassRateSummary',
+      '${l10n?.qualityReviewsSummaryStagePrefix ?? "阶段"}: $stagePassRateSummary',
     if (stageGradeSummary != null && stageGradeSummary.isNotEmpty)
-      '等级: $stageGradeSummary',
+      '${l10n?.qualityReviewsSummaryGradePrefix ?? "等级"}: $stageGradeSummary',
     if (scopeInsightsSummary != null && scopeInsightsSummary.isNotEmpty)
       'Scope: $scopeInsightsSummary',
     if (tokenEfficiencySummary != null && tokenEfficiencySummary.isNotEmpty)
       'Token: $tokenEfficiencySummary',
     if (badCaseStatsSummary != null && badCaseStatsSummary.isNotEmpty)
-      '坏例: $badCaseStatsSummary',
+      '${l10n?.qualityReviewsSummaryBadCasePrefix ?? "坏例"}: $badCaseStatsSummary',
   ];
   if (parts.isEmpty) {
     return null;
@@ -401,19 +426,24 @@ String formatQualityReviewCoreDetails(QualityReview row) {
   ].join(' · ');
 }
 
-String formatQualityReviewDetails(QualityReview row) {
+String formatQualityReviewDetails(
+  QualityReview row, {
+  AppLocalizations? l10n,
+}) {
   final parts = [formatQualityReviewCoreDetails(row)];
   final diagnosticSummary = summarizeQualityReviewPromptDiagnostics(row);
   if (diagnosticSummary != null) {
-    parts.add('诊断=$diagnosticSummary');
+    parts.add('${l10n?.qualityReviewsDiagnosticLabel ?? "诊断"}=$diagnosticSummary');
   }
   final writebackSummary = summarizeQualityReviewMemoryWriteback(row);
   if (writebackSummary != null) {
-    parts.add('回写=$writebackSummary');
+    parts.add('${l10n?.qualityReviewsWritebackLabel ?? "回写"}=$writebackSummary');
   }
   final repairSuggestions = buildQualityReviewRepairSuggestions(row);
   if (repairSuggestions.isNotEmpty) {
-    parts.add('建议=${repairSuggestions.join(" / ")}');
+    parts.add(
+      '${l10n?.qualityReviewsSuggestionsLabel ?? "建议"}=${repairSuggestions.join(" / ")}',
+    );
   }
   return parts.join(' · ');
 }

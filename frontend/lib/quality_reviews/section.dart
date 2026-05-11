@@ -55,7 +55,7 @@ class QualityReviewsSection extends StatelessWidget {
     final outline = Theme.of(context).colorScheme.outline;
     final reviewSummary = controller.qualityReviews == null
         ? l10n.qualityReviewsSummaryNotLoaded
-        : summarizeQualityReviews(controller.qualityReviews!);
+        : summarizeQualityReviews(controller.qualityReviews!, l10n: l10n);
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) => SingleChildScrollView(

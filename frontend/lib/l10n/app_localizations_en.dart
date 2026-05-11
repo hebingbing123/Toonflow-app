@@ -3390,4 +3390,106 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get qualityReviewsEmptyForCurrentFilters =>
       'No reviews under current filters';
+
+  @override
+  String get qualityReviewsNoTokenEfficiencyStats =>
+      'No token efficiency stats yet';
+
+  @override
+  String get qualityReviewsActionKeepDeliveryMemory =>
+      'action=keep delivery memory';
+
+  @override
+  String get qualityReviewsActionReuseNegativeMemory =>
+      'action=reuse negative constraints';
+
+  @override
+  String get qualityReviewsActionTrimGenericStyle =>
+      'action=trim generic style memory';
+
+  @override
+  String get qualityReviewsActionPromoteSelectedMemory =>
+      'action=promote selected memory';
+
+  @override
+  String get qualityReviewsFocusLabel => 'focus';
+
+  @override
+  String get qualityReviewsNoTokenEfficiencySamples =>
+      'No token efficiency samples yet';
+
+  @override
+  String get qualityReviewsDeliveryPriority => 'delivery-priority';
+
+  @override
+  String get qualityReviewsRegular => 'regular';
+
+  @override
+  String get qualityReviewsNoReviews => 'No quality reviews yet';
+
+  @override
+  String qualityReviewsSummaryLine(int total, int autoCount, String details) {
+    return 'Reviews $total · auto $autoCount · $details';
+  }
+
+  @override
+  String get qualityReviewsNoQualityStats => 'No quality stats yet';
+
+  @override
+  String get qualityReviewsNoScopeLeaderboard => 'No scope leaderboard yet';
+
+  @override
+  String get qualityReviewsItemUnit => 'items';
+
+  @override
+  String get qualityReviewsEmotionRisk => 'emotion';
+
+  @override
+  String get qualityReviewsRealismRisk => 'realism';
+
+  @override
+  String get qualityReviewsPromotionsLabel => 'promotions';
+
+  @override
+  String get qualityReviewsBadCaseWriteback => 'bad-case writeback';
+
+  @override
+  String get qualityReviewsSummaryWriteback => 'summary writeback';
+
+  @override
+  String get qualityReviewsWritebackSlim => 'writeback slim';
+
+  @override
+  String get qualityReviewsFocusWatch => 'watch';
+
+  @override
+  String get qualityReviewsNoStagePassRate => 'No stage pass rates yet';
+
+  @override
+  String get qualityReviewsNoStageGradeDistribution =>
+      'No stage grade distribution yet';
+
+  @override
+  String get qualityReviewsNoBadCaseHotspots => 'No bad-case hotspots yet';
+
+  @override
+  String get qualityReviewsSummaryStatsPrefix => 'Stats';
+
+  @override
+  String get qualityReviewsSummaryStagePrefix => 'Stage';
+
+  @override
+  String get qualityReviewsSummaryGradePrefix => 'Grade';
+
+  @override
+  String get qualityReviewsSummaryBadCasePrefix => 'Bad case';
+
+  @override
+  String get qualityReviewsDiagnosticLabel => 'diagnostic';
+
+  @override
+  String get qualityReviewsWritebackLabel => 'writeback';
+
+  @override
+  String get qualityReviewsSuggestionsLabel => 'suggestions';
 }

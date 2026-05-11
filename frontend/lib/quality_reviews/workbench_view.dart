@@ -204,7 +204,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               Text(
                 model.reviews.isEmpty
                     ? l10n.qualityReviewsWorkbenchIntro
-                    : summarizeQualityReviews(model.reviews),
+                    : summarizeQualityReviews(model.reviews, l10n: l10n),
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),

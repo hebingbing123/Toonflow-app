@@ -2289,5 +2289,49 @@
       }
     }
   },
-  "qualityReviewsEmptyForCurrentFilters": "No reviews under current filters"
+  "qualityReviewsEmptyForCurrentFilters": "No reviews under current filters",
+  "qualityReviewsNoTokenEfficiencyStats": "No token efficiency stats yet",
+  "qualityReviewsActionKeepDeliveryMemory": "action=keep delivery memory",
+  "qualityReviewsActionReuseNegativeMemory": "action=reuse negative constraints",
+  "qualityReviewsActionTrimGenericStyle": "action=trim generic style memory",
+  "qualityReviewsActionPromoteSelectedMemory": "action=promote selected memory",
+  "qualityReviewsFocusLabel": "focus",
+  "qualityReviewsNoTokenEfficiencySamples": "No token efficiency samples yet",
+  "qualityReviewsDeliveryPriority": "delivery-priority",
+  "qualityReviewsRegular": "regular",
+  "qualityReviewsNoReviews": "No quality reviews yet",
+  "qualityReviewsSummaryLine": "Reviews {total} · auto {autoCount} · {details}",
+  "@qualityReviewsSummaryLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "autoCount": {
+        "type": "int"
+      },
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsNoQualityStats": "No quality stats yet",
+  "qualityReviewsNoScopeLeaderboard": "No scope leaderboard yet",
+  "qualityReviewsItemUnit": "items",
+  "qualityReviewsEmotionRisk": "emotion",
+  "qualityReviewsRealismRisk": "realism",
+  "qualityReviewsPromotionsLabel": "promotions",
+  "qualityReviewsBadCaseWriteback": "bad-case writeback",
+  "qualityReviewsSummaryWriteback": "summary writeback",
+  "qualityReviewsWritebackSlim": "writeback slim",
+  "qualityReviewsFocusWatch": "watch",
+  "qualityReviewsNoStagePassRate": "No stage pass rates yet",
+  "qualityReviewsNoStageGradeDistribution": "No stage grade distribution yet",
+  "qualityReviewsNoBadCaseHotspots": "No bad-case hotspots yet",
+  "qualityReviewsSummaryStatsPrefix": "Stats",
+  "qualityReviewsSummaryStagePrefix": "Stage",
+  "qualityReviewsSummaryGradePrefix": "Grade",
+  "qualityReviewsSummaryBadCasePrefix": "Bad case",
+  "qualityReviewsDiagnosticLabel": "diagnostic",
+  "qualityReviewsWritebackLabel": "writeback",
+  "qualityReviewsSuggestionsLabel": "suggestions"
 }

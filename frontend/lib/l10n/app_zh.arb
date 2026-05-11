@@ -2289,5 +2289,49 @@
       }
     }
   },
-  "qualityReviewsEmptyForCurrentFilters": "当前筛选条件下无评审记录"
+  "qualityReviewsEmptyForCurrentFilters": "当前筛选条件下无评审记录",
+  "qualityReviewsNoTokenEfficiencyStats": "当前没有 token 效率统计",
+  "qualityReviewsActionKeepDeliveryMemory": "动作=保留表演记忆",
+  "qualityReviewsActionReuseNegativeMemory": "动作=复用坏例约束",
+  "qualityReviewsActionTrimGenericStyle": "动作=压项目泛风格",
+  "qualityReviewsActionPromoteSelectedMemory": "动作=晋升优质镜头",
+  "qualityReviewsFocusLabel": "焦点",
+  "qualityReviewsNoTokenEfficiencySamples": "当前没有 token 效率样本",
+  "qualityReviewsDeliveryPriority": "delivery优先",
+  "qualityReviewsRegular": "常规",
+  "qualityReviewsNoReviews": "当前没有质量评审",
+  "qualityReviewsSummaryLine": "评审 {total} 条 · auto {autoCount} 条 · {details}",
+  "@qualityReviewsSummaryLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "autoCount": {
+        "type": "int"
+      },
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsNoQualityStats": "当前没有质量统计",
+  "qualityReviewsNoScopeLeaderboard": "当前没有 scope 榜单",
+  "qualityReviewsItemUnit": "条",
+  "qualityReviewsEmotionRisk": "情绪",
+  "qualityReviewsRealismRisk": "真实感",
+  "qualityReviewsPromotionsLabel": "晋升",
+  "qualityReviewsBadCaseWriteback": "坏例回写",
+  "qualityReviewsSummaryWriteback": "摘要回写",
+  "qualityReviewsWritebackSlim": "回写slim",
+  "qualityReviewsFocusWatch": "关注",
+  "qualityReviewsNoStagePassRate": "当前没有阶段通过率",
+  "qualityReviewsNoStageGradeDistribution": "当前没有阶段等级分布",
+  "qualityReviewsNoBadCaseHotspots": "当前没有坏例热点",
+  "qualityReviewsSummaryStatsPrefix": "统计",
+  "qualityReviewsSummaryStagePrefix": "阶段",
+  "qualityReviewsSummaryGradePrefix": "等级",
+  "qualityReviewsSummaryBadCasePrefix": "坏例",
+  "qualityReviewsDiagnosticLabel": "诊断",
+  "qualityReviewsWritebackLabel": "回写",
+  "qualityReviewsSuggestionsLabel": "建议"
 }
