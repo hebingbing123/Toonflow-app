@@ -3733,4 +3733,64 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityReviewsFreshnessFresh => 'fresh';
+
+  @override
+  String get qualityReviewsStageStorySkeleton => '故事骨架';
+
+  @override
+  String get qualityReviewsStageAdaptationStrategy => '改编策略';
+
+  @override
+  String get qualityReviewsStageDirectorPlanning => '导演规划';
+
+  @override
+  String get qualityReviewsStageStoryboardTable => '分镜表';
+
+  @override
+  String get qualityReviewsStageStoryboardPanel => '分镜面板';
+
+  @override
+  String get qualityReviewsStageVideoPrompt => '视频提示词';
+
+  @override
+  String get qualityReviewsSourceAuto => 'source=auto';
+
+  @override
+  String get qualityReviewsFieldTargetType => 'targetType';
+
+  @override
+  String get qualityReviewsFieldTargetId => 'targetId';
+
+  @override
+  String get qualityReviewsFieldSource => 'source';
+
+  @override
+  String get qualityReviewsFieldOverallScore => 'overallScore';
+
+  @override
+  String get qualityReviewsFieldStage => 'stage';
+
+  @override
+  String get qualityReviewsFieldGrade => 'grade';
+
+  @override
+  String get qualityReviewsFieldComments => 'comments';
+
+  @override
+  String get qualityReviewsFieldPassed => 'passed';
+
+  @override
+  String get qualityReviewsFieldIsBadCase => 'isBadCase';
+
+  @override
+  String get qualityReviewsFieldBadCaseCategory => 'badCaseCategory';
+
+  @override
+  String get qualityReviewsDeliveryTag => 'delivery';
+
+  @override
+  String get qualityReviewsAutoTag => 'auto';
+
+  @override
+  String get qualityReviewsMemoryTag => 'memory';
 }

@@ -191,7 +191,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
       if (model.stageFilterCtrl.text.trim().isNotEmpty &&
           model.stageFilterCtrl.text.trim() != 'all')
         l10n.qualityReviewsFilterStage(
-          _qualityStageLabel(model.stageFilterCtrl.text.trim()),
+          _qualityStageLabel(model.stageFilterCtrl.text.trim(), l10n),
         ),
       if (model.gradeFilterCtrl.text.trim().isNotEmpty &&
           model.gradeFilterCtrl.text.trim() != 'all')
@@ -233,7 +233,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         label: Text(l10n.qualityReviewsOnlyDeliveryPriorityHit),
                       ),
                     if (model.filterAutoSourceOnly)
-                      const Chip(label: Text('source=auto')),
+                      Chip(label: Text(l10n.qualityReviewsSourceAuto)),
                   ],
                 ),
                 if (model.activeFilterQuerySummary != null) ...[
@@ -347,7 +347,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           .map(
                             (value) => DropdownMenuItem<String>(
                               value: value,
-                              child: Text(_qualityStageLabel(value)),
+                              child: Text(_qualityStageLabel(value, l10n)),
                             ),
                           )
                           .toList(growable: false),
@@ -548,23 +548,31 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               TextField(
                 controller: model.createTargetTypeCtrl,
-                decoration: const InputDecoration(labelText: 'targetType'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFieldTargetType,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.createTargetIdCtrl,
-                decoration: const InputDecoration(labelText: 'targetId'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFieldTargetId,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.createSourceCtrl,
-                decoration: const InputDecoration(labelText: 'source'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFieldSource,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.createScoreCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'overallScore'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFieldOverallScore,
+                ),
               ),
               const SizedBox(height: 8),
               Row(
@@ -572,14 +580,18 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.createStageCtrl,
-                      decoration: const InputDecoration(labelText: 'stage'),
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsFieldStage,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: model.createGradeCtrl,
-                      decoration: const InputDecoration(labelText: 'grade'),
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsFieldGrade,
+                      ),
                     ),
                   ),
                 ],
@@ -589,12 +601,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 controller: model.createCommentsCtrl,
                 minLines: 2,
                 maxLines: 4,
-                decoration: const InputDecoration(labelText: 'comments'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFieldComments,
+                ),
               ),
               const SizedBox(height: 8),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('passed'),
+                title: Text(l10n.qualityReviewsFieldPassed),
                 value: model.createPassed,
                 onChanged: model.creatingReview
                     ? null
@@ -602,7 +616,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('isBadCase'),
+                title: Text(l10n.qualityReviewsFieldIsBadCase),
                 value: model.createBadCase,
                 onChanged: model.creatingReview
                     ? null
@@ -610,7 +624,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ),
               TextField(
                 controller: model.createBadCaseCategoryCtrl,
-                decoration: const InputDecoration(labelText: 'badCaseCategory'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFieldBadCaseCategory,
+                ),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
@@ -730,7 +746,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                      '${_qualityStageLabel(row.stage)} · A ${row.gradeACount} / B ${row.gradeBCount} / C ${row.gradeCCount} / D ${row.gradeDCount}',
+                      '${_qualityStageLabel(row.stage, l10n)} · A ${row.gradeACount} / B ${row.gradeBCount} / C ${row.gradeCCount} / D ${row.gradeDCount}',
                     ),
                     subtitle: Text(
                       l10n.qualityReviewsTotalAndPassRate(
@@ -815,7 +831,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           [
                             if ((review.stage ?? '').trim().isNotEmpty)
                               l10n.qualityReviewsFilterStage(
-                                _qualityStageLabel(review.stage!.trim()),
+                                _qualityStageLabel(review.stage!.trim(), l10n),
                               ),
                             if ((review.grade ?? '').trim().isNotEmpty)
                               l10n.qualityReviewsFilterGrade(review.grade!),
@@ -851,18 +867,18 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (review.memoryDeliveryPriorityApplied == true)
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(right: 8),
                             child: Chip(
-                              label: Text('delivery'),
+                              label: Text(l10n.qualityReviewsDeliveryTag),
                               visualDensity: VisualDensity.compact,
                             ),
                           ),
                         if (review.source == 'auto')
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(right: 8),
                             child: Chip(
-                              label: Text('auto'),
+                              label: Text(l10n.qualityReviewsAutoTag),
                               visualDensity: VisualDensity.compact,
                             ),
                           ),
@@ -879,10 +895,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             ),
                           ),
                         if (writebackSummary != null)
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(right: 8),
                             child: Chip(
-                              label: Text('memory'),
+                              label: Text(l10n.qualityReviewsMemoryTag),
                               visualDensity: VisualDensity.compact,
                             ),
                           ),

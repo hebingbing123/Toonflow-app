@@ -6418,6 +6418,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'fresh'**
   String get qualityReviewsFreshnessFresh;
+
+  /// No description provided for @qualityReviewsStageStorySkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Story skeleton'**
+  String get qualityReviewsStageStorySkeleton;
+
+  /// No description provided for @qualityReviewsStageAdaptationStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptation strategy'**
+  String get qualityReviewsStageAdaptationStrategy;
+
+  /// No description provided for @qualityReviewsStageDirectorPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Director planning'**
+  String get qualityReviewsStageDirectorPlanning;
+
+  /// No description provided for @qualityReviewsStageStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table'**
+  String get qualityReviewsStageStoryboardTable;
+
+  /// No description provided for @qualityReviewsStageStoryboardPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard panel'**
+  String get qualityReviewsStageStoryboardPanel;
+
+  /// No description provided for @qualityReviewsStageVideoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Video prompt'**
+  String get qualityReviewsStageVideoPrompt;
+
+  /// No description provided for @qualityReviewsSourceAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'source=auto'**
+  String get qualityReviewsSourceAuto;
+
+  /// No description provided for @qualityReviewsFieldTargetType.
+  ///
+  /// In en, this message translates to:
+  /// **'targetType'**
+  String get qualityReviewsFieldTargetType;
+
+  /// No description provided for @qualityReviewsFieldTargetId.
+  ///
+  /// In en, this message translates to:
+  /// **'targetId'**
+  String get qualityReviewsFieldTargetId;
+
+  /// No description provided for @qualityReviewsFieldSource.
+  ///
+  /// In en, this message translates to:
+  /// **'source'**
+  String get qualityReviewsFieldSource;
+
+  /// No description provided for @qualityReviewsFieldOverallScore.
+  ///
+  /// In en, this message translates to:
+  /// **'overallScore'**
+  String get qualityReviewsFieldOverallScore;
+
+  /// No description provided for @qualityReviewsFieldStage.
+  ///
+  /// In en, this message translates to:
+  /// **'stage'**
+  String get qualityReviewsFieldStage;
+
+  /// No description provided for @qualityReviewsFieldGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'grade'**
+  String get qualityReviewsFieldGrade;
+
+  /// No description provided for @qualityReviewsFieldComments.
+  ///
+  /// In en, this message translates to:
+  /// **'comments'**
+  String get qualityReviewsFieldComments;
+
+  /// No description provided for @qualityReviewsFieldPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'passed'**
+  String get qualityReviewsFieldPassed;
+
+  /// No description provided for @qualityReviewsFieldIsBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'isBadCase'**
+  String get qualityReviewsFieldIsBadCase;
+
+  /// No description provided for @qualityReviewsFieldBadCaseCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'badCaseCategory'**
+  String get qualityReviewsFieldBadCaseCategory;
+
+  /// No description provided for @qualityReviewsDeliveryTag.
+  ///
+  /// In en, this message translates to:
+  /// **'delivery'**
+  String get qualityReviewsDeliveryTag;
+
+  /// No description provided for @qualityReviewsAutoTag.
+  ///
+  /// In en, this message translates to:
+  /// **'auto'**
+  String get qualityReviewsAutoTag;
+
+  /// No description provided for @qualityReviewsMemoryTag.
+  ///
+  /// In en, this message translates to:
+  /// **'memory'**
+  String get qualityReviewsMemoryTag;
 }
 
 class _AppLocalizationsDelegate

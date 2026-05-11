@@ -12,22 +12,22 @@ const List<String> _qualityStageOptions = <String>[
 
 const List<String> _qualityGradeOptions = <String>['all', 'A', 'B', 'C', 'D'];
 
-String _qualityStageLabel(String stage) {
+String _qualityStageLabel(String stage, AppLocalizations l10n) {
   switch (stage) {
     case 'all':
-      return '全部';
+      return l10n.qualityReviewsAll;
     case 'story_skeleton':
-      return '故事骨架';
+      return l10n.qualityReviewsStageStorySkeleton;
     case 'adaptation_strategy':
-      return '改编策略';
+      return l10n.qualityReviewsStageAdaptationStrategy;
     case 'director_planning':
-      return '导演规划';
+      return l10n.qualityReviewsStageDirectorPlanning;
     case 'storyboard_table':
-      return '分镜表';
+      return l10n.qualityReviewsStageStoryboardTable;
     case 'storyboard_panel':
-      return '分镜面板';
+      return l10n.qualityReviewsStageStoryboardPanel;
     case 'video_prompt':
-      return '视频提示词';
+      return l10n.qualityReviewsStageVideoPrompt;
     default:
       return stage;
   }
