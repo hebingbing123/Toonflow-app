@@ -17,6 +17,8 @@ use zip::write::FileOptions;
 use crate::error::ApiError;
 use crate::jobs::worker::{job_ok, JobCompletion, JobRunError};
 use crate::jobs::JobRow;
+use crate::settings::export_s3;
+use crate::settings::notifications::workspace_audit_export_artifact_storage;
 use crate::state::AppState;
 
 use super::types::{AccountDeleteResponse, AccountExportJobRecord, AccountExportsResponse};
@@ -24,6 +26,25 @@ use super::types::{AccountDeleteResponse, AccountExportJobRecord, AccountExports
 pub(crate) const JOB_KIND_SETTINGS_ACCOUNT_EXPORT: &str = "settings.account.export";
 const ACCOUNT_EXPORT_ENV: &str = "TOONFLOW_LOCAL_ACCOUNT_EXPORT_DIR";
 const ACCOUNT_EXPORT_LIMIT: i64 = 20;
+
+fn account_export_s3_bucket() -> Option<String> {
+    std::env::var("TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+}
+
+fn account_export_s3_prefix() -> String {
+    std::env::var("TOONFLOW_ACCOUNT_EXPORT_S3_PREFIX")
+        .ok()
+        .map(|s| s.trim().trim_matches('/').to_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "account-exports".to_string())
+}
+
+pub(crate) fn use_s3_for_account_export_artifacts() -> bool {
+    account_export_s3_bucket().is_some()
+}
 
 #[derive(Debug, FromRow)]
 struct AccountExportJobRow {
@@ -199,9 +220,10 @@ pub(crate) async fn get_account_export_file_response(
         return Err(ApiError::NotFound);
     }
     let result = row.result.ok_or(ApiError::NotFound)?.0;
-    if result.get("storage").and_then(|value| value.as_str()) != Some("local") {
-        return Err(ApiError::NotFound);
-    }
+    let storage = result
+        .get("storage")
+        .and_then(|value| value.as_str())
+        .unwrap_or("local");
     let file_name = result
         .get("file_name")
         .and_then(|value| value.as_str())
@@ -212,9 +234,27 @@ pub(crate) async fn get_account_export_file_response(
         .and_then(|value| value.as_str())
         .filter(|value| !value.trim().is_empty())
         .unwrap_or("application/zip");
-    let bytes = tokio::fs::read(account_export_file_path(user_id, file_name))
-        .await
-        .map_err(|_| ApiError::NotFound)?;
+    let bytes = match storage {
+        "local" => tokio::fs::read(account_export_file_path(user_id, file_name))
+            .await
+            .map_err(|_| ApiError::NotFound)?,
+        "s3" => {
+            let bucket = result
+                .get("s3_bucket")
+                .and_then(|value| value.as_str())
+                .filter(|value| !value.trim().is_empty())
+                .ok_or(ApiError::NotFound)?;
+            let key = result
+                .get("s3_key")
+                .and_then(|value| value.as_str())
+                .filter(|value| !value.trim().is_empty())
+                .ok_or(ApiError::NotFound)?;
+            export_s3::get_object(bucket, key)
+                .await
+                .map_err(|_| ApiError::NotFound)?
+        }
+        _ => return Err(ApiError::NotFound),
+    };
     let mut disposition = HeaderValue::from_str(&format!("attachment; filename=\"{file_name}\""))
         .map_err(|_| ApiError::Internal)?;
     disposition.set_sensitive(true);
@@ -264,21 +304,50 @@ pub(crate) async fn build_account_export_artifact(
         now.format("%Y%m%dT%H%M%SZ")
     );
     let bytes = build_account_export_zip(owner_user_id, job_id, now, &datasets)?;
-    let user_dir = account_export_user_dir(owner_user_id);
-    tokio::fs::create_dir_all(&user_dir)
-        .await
-        .map_err(|e| JobRunError::Failed(e.to_string()))?;
-    tokio::fs::write(user_dir.join(&file_name), &bytes)
-        .await
-        .map_err(|e| JobRunError::Failed(e.to_string()))?;
-    Ok(job_ok(json!({
-        "storage": "local",
-        "file_name": file_name,
-        "content_type": "application/zip",
-        "byte_size": i64::try_from(bytes.len()).unwrap_or(i64::MAX),
-        "generated_at": now,
-        "download_path": format!("/api/v1/settings/account/exports/{job_id}/file"),
-    })))
+    let byte_size = i64::try_from(bytes.len()).unwrap_or(i64::MAX);
+
+    let result_json = if use_s3_for_account_export_artifacts() {
+        let bucket = account_export_s3_bucket().ok_or_else(|| {
+            JobRunError::Failed("TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET not set".into())
+        })?;
+        let key = format!(
+            "{}/{}/{}",
+            account_export_s3_prefix(),
+            owner_user_id,
+            file_name
+        );
+        export_s3::put_object(&bucket, &key, "application/zip", &bytes)
+            .await
+            .map_err(JobRunError::Failed)?;
+        json!({
+            "storage": "s3",
+            "s3_bucket": bucket,
+            "s3_key": key,
+            "file_name": file_name,
+            "content_type": "application/zip",
+            "byte_size": byte_size,
+            "generated_at": now,
+            "download_path": format!("/api/v1/settings/account/exports/{job_id}/file"),
+        })
+    } else {
+        let user_dir = account_export_user_dir(owner_user_id);
+        tokio::fs::create_dir_all(&user_dir)
+            .await
+            .map_err(|e| JobRunError::Failed(e.to_string()))?;
+        tokio::fs::write(user_dir.join(&file_name), &bytes)
+            .await
+            .map_err(|e| JobRunError::Failed(e.to_string()))?;
+        json!({
+            "storage": "local",
+            "file_name": file_name,
+            "content_type": "application/zip",
+            "byte_size": byte_size,
+            "generated_at": now,
+            "download_path": format!("/api/v1/settings/account/exports/{job_id}/file"),
+        })
+    };
+
+    Ok(job_ok(result_json))
 }
 
 pub(crate) async fn delete_account_and_cleanup(
@@ -359,6 +428,17 @@ async fn cleanup_local_user_artifacts(state: &AppState, user_id: Uuid) -> Vec<St
         candidates.push(dir.join(user_id.to_string()));
     }
     candidates.push(account_export_user_dir(user_id));
+
+    if use_s3_for_account_export_artifacts() {
+        if let Some(bucket) = account_export_s3_bucket() {
+            let prefix = format!("{}/{}/", account_export_s3_prefix(), user_id);
+            let _ = export_s3::delete_objects_with_prefix(&bucket, &prefix).await;
+        }
+    }
+    workspace_audit_export_artifact_storage::delete_workspace_shared_audit_export_s3_prefix_for_user(
+        user_id,
+    )
+    .await;
 
     let mut removed = Vec::new();
     for path in candidates {
@@ -499,7 +579,16 @@ async fn collect_account_export_datasets(
         ),
         (
             "outbound_webhooks",
-            r#"SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.created_at DESC), '[]'::jsonb) FROM (SELECT id, owner_user_id, url, created_at FROM public.app_outbound_webhook WHERE owner_user_id = $1) t"#,
+            r#"SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.created_at DESC), '[]'::jsonb) FROM (SELECT id, owner_user_id, url, workspace_id, event_types, enabled, created_at, updated_at FROM public.app_outbound_webhook WHERE owner_user_id = $1) t"#,
+        ),
+        (
+            "outbound_webhook_deliveries",
+            r#"SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.created_at DESC), '[]'::jsonb) FROM (
+                SELECT d.*
+                FROM public.app_outbound_webhook_delivery d
+                INNER JOIN public.app_outbound_webhook w ON w.id = d.webhook_id
+                WHERE w.owner_user_id = $1
+            ) t"#,
         ),
         (
             "help_hub_links_user_scope",

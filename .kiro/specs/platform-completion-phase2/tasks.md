@@ -12,7 +12,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 
 - **保存视图**：REST 为 **`GET`/`PUT /api/v1/search/saved-views`**，表 **`app_user_search_saved_view`**；非需求稿中的 `/search/views` 与 `app_saved_search_view`。
 - **帮助 Hub**：REST 为 **`GET /api/v1/settings/help/hub`**、**`/config`** 及用户/工作区链接 **`POST .../user-links`**、**`.../workspace-links`**；环境变量为 **`TOONFLOW_HELP_HUB_ITEMS_JSON`** / **`TOONFLOW_HELP_HUB_URL`**（非 `help-links` / `TOONFLOW_HELP_LINKS_JSON`）。
-- **出站 Webhook（WH）**：需求中的**用户可配置出站**投递尚未实现；仓库现有为 **Stripe 入站** **`POST /api/v1/webhooks/billing`** 与审计 **`GET .../billing/events`** 等（与 WH 任务组不同）。
+- **出站 Webhook（WH）**：用户出站落位 **`app_outbound_webhook`** + **`app_outbound_webhook_delivery`**，REST 主路径 **`/api/v1/settings/webhooks/outbound`**，并带 **`/api/v1/webhooks`** 别名（与计费 **入站** `POST /api/v1/webhooks/billing` 区分）。事件自动触发（job 完成等）仍为后续竖切。
 
 ## Tasks
 
@@ -139,37 +139,37 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] S2.5 合并窗口以 `yarn refactor:check` / CI 为准
   - _Requirements: 3.10, 3.11_
 
-- [ ] **WH1. 出站 Webhook — Backend 核心**（**未完成 / debt**：与计费 **入站** `POST /api/v1/webhooks/billing` 不同；需求 Req.4 仍待独立里程碑）
-  - [ ] WH1.1 创建数据库迁移：`app_webhook_config` 表（id, user_id, workspace_id, url, secret, event_types, enabled, created_at）
-  - [ ] WH1.2 创建数据库迁移：`app_webhook_delivery` 表（id, webhook_id, event_type, payload, status, response_code, retry_count, created_at, delivered_at）
-  - [ ] WH1.3 实现 `POST /api/v1/webhooks` 端点创建 Webhook 配置（含 URL 可达性验证）
-  - [ ] WH1.4 实现 `GET /api/v1/webhooks` 端点列出 Webhook 配置
-  - [ ] WH1.5 实现 `PATCH /api/v1/webhooks/{id}` 端点更新 Webhook 配置
-  - [ ] WH1.6 实现 `DELETE /api/v1/webhooks/{id}` 端点删除 Webhook 配置
-  - [ ] WH1.7 实现 `POST /api/v1/webhooks/{id}/test` 端点发送测试事件
-  - [ ] WH1.8 实现 `GET /api/v1/webhooks/{id}/deliveries` 端点查看投递历史
-  - [ ] WH1.9 更新 OpenAPI 文档添加用户出站 Webhook 端点
+- [x] **WH1. 出站 Webhook — Backend 核心**（表名 **`app_outbound_webhook`** / **`app_outbound_webhook_delivery`**，与需求草案 `app_webhook_*` 等价；**主路径** `settings/webhooks/outbound`，**别名** `/api/v1/webhooks/*`）
+  - [x] WH1.1 基表迁移 `20260508193300_app_outbound_webhook.sql` + 扩展 `20260511143000_app_outbound_webhook_phase2.sql`（`workspace_id`、`event_types`、`enabled`、`updated_at`）
+  - [x] WH1.2 投递表 **`app_outbound_webhook_delivery`**（含 `status` / `http_status` / `retry_count` / `delivered_at`；语义覆盖需求中的 response 记录）
+  - [x] WH1.3 `POST …/webhooks/outbound` 与 **`POST /api/v1/webhooks`** 创建配置；创建前 **HEAD/GET URL 可达性探测**（5s 超时）
+  - [x] WH1.4 `GET …` 列表（含 `eventTypes`、`enabled`、时间戳）
+  - [x] WH1.5 `PATCH …/{id}` 与别名路径更新
+  - [x] WH1.6 `DELETE …/{id}` 与别名路径
+  - [x] WH1.7 `POST …/{id}/test` — JSON 体 + **`X-Toonflow-Signature`**（`sha256=` HMAC）+ **`X-Toonflow-Timestamp`** + **`X-Toonflow-Event-Type`**
+  - [x] WH1.8 `GET …/{id}/deliveries` 分页列表
+  - [x] WH1.9 OpenAPI / `SettingsOpenApi` 已注册 `patch` + `deliveries`；导出 `export-openapi` 通过
   - _Requirements: 4.1, 4.5, 4.10, 4.13_
 
-- [ ] **WH2. 出站 Webhook — 投递引擎**（**未完成 / debt**）
-  - [ ] WH2.1 实现 Webhook 投递服务（HTTP POST 到目标 URL）
-  - [ ] WH2.2 实现 HMAC 签名生成（使用用户配置的 secret）
-  - [ ] WH2.3 添加请求头：`X-Toonflow-Signature`、`X-Toonflow-Event-Type`
-  - [ ] WH2.4 实现指数退避重试策略（最多 3 次）
-  - [ ] WH2.5 实现死信队列（投递失败超过重试次数）
-  - [ ] WH2.6 实现事件触发器：`job.completed`、`job.failed`、`project.created`、`workspace.member.added`
-  - [ ] WH2.7 添加单元测试：签名生成、重试逻辑、死信队列
-  - [ ] WH2.8 添加集成测试：端到端 Webhook 投递
+- [~] **WH2. 出站 Webhook — 投递引擎**（**测试投递**已写库；**业务事件自动投递 / 重试 / 死信**仍待办）
+  - [x] WH2.1 测试与手动路径：`reqwest` POST 至用户 URL（见 `post_outbound_webhook_test`）
+  - [x] WH2.2 HMAC：`sign_toonflow`（`timestamp + '.' + body`）
+  - [x] WH2.3 请求头：`X-Toonflow-Signature`、`X-Toonflow-Event-Type`（及 Timestamp）
+  - [ ] WH2.4 指数退避重试（最多 3 次）— **未做**（当前单次尝试）
+  - [ ] WH2.5 死信队列 — **未做**（可用 `status=failed` 行表达，尚无自动 DLQ 消费）
+  - [ ] WH2.6 事件触发器：`job.completed` 等 — **未接线**
+  - [ ] WH2.7 单元测试（签名/重试）— **待补**
+  - [ ] WH2.8 端到端集成测试 — **待补**
   - _Requirements: 4.2–4.9_
 
-- [ ] **WH3. 出站 Webhook — Frontend**（**部分相关**：产品壳层已有 **计费 webhook 审计/探针** UI，见 `toonflow-platform-progress.md`；**非**本组用户出站 CRUD）
-  - [ ] WH3.1 扩展 `rust_api` 添加**用户出站** Webhook 类型与方法
-  - [ ] WH3.2 实现**用户出站** Webhook 配置界面（URL、secret、事件类型选择）
-  - [ ] WH3.3 实现**用户出站** Webhook 测试按钮（发送测试事件）
-  - [ ] WH3.4 实现**用户出站**投递历史展示（成功/失败状态、响应码、重试次数）
-  - [ ] WH3.5 实现**用户出站**失败详情展示
-  - [ ] WH3.6 添加 Flutter 测试：**用户出站** Webhook 配置 UI 交互
-  - [ ] WH3.7 用户出站竖切合并时跑 `yarn refactor:check`
+- [~] **WH3. 出站 Webhook — Frontend**（帮助页 Webhook 区：列表/创建/测试；**投递记录**按钮拉 `deliveries`；事件多选 UI 仍简）
+  - [x] WH3.1 `rust_api/settings/outbound_webhooks.dart` 已扩展（create/patch/list/test/**deliveries**）
+  - [~] WH3.2 配置界面：URL/secret/测试事件类型已有；**按勾选订阅 `job.completed` 等** 的完整表单仍待产品化（API 已支持 `eventTypes` / `workspaceId`）
+  - [x] WH3.3 测试按钮（已有）
+  - [x] WH3.4 投递历史：卡片内展示最近 6 条 `deliveries`
+  - [x] WH3.5 失败详情：`deliveries` 列表展示 `error` 文本
+  - [ ] WH3.6 Flutter widget 测试 — **未加**
+  - [~] WH3.7 以 CI / `yarn refactor:check` 为准（当前分支另有 `ensure_owned_project_pk` deprecation 与 clippy `-D warnings` 冲突，见合并前修复）
   - _Requirements: 4.10, 4.11, 4.12_
 
 - [x] **C1. 内容合规分阶段通知 — Backend**

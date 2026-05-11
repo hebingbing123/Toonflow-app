@@ -1294,6 +1294,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   String? _webhookBusyId;
   final Map<String, OutboundWebhookTestResponseV1> _webhookLastTestResultById =
       <String, OutboundWebhookTestResponseV1>{};
+  final Map<String, OutboundWebhookDeliveryListResponseV1> _webhookDeliveries =
+      <String, OutboundWebhookDeliveryListResponseV1>{};
+  String? _loadingDeliveriesId;
   final List<_WebhookActivityEntry> _webhookActivity =
       <_WebhookActivityEntry>[];
   bool _loadingBillingEvents = false;
@@ -1935,6 +1938,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhookLastTestResultById.remove(id);
+        _webhookDeliveries.remove(id);
         if (_latestCreatedWebhook?.id == id) {
           _latestCreatedWebhook = null;
         }
@@ -1970,10 +1974,49 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
     return items
         .where((wh) {
-          final haystack = '${wh.id} ${wh.url} ${wh.createdAt}'.toLowerCase();
+          final haystack =
+              '${wh.id} ${wh.url} ${wh.createdAt} ${wh.updatedAt ?? ''} ${wh.eventTypes.join(',')} ${wh.workspaceId ?? ''}'
+                  .toLowerCase();
           return haystack.contains(needle);
         })
         .toList(growable: false);
+  }
+
+  Future<void> _loadWebhookDeliveries(String id) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    setState(() {
+      _webhooksError = null;
+      _loadingDeliveriesId = id;
+    });
+    try {
+      final r = await getSettingsOutboundWebhookDeliveriesV1(
+        token,
+        id,
+        limit: 30,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhookDeliveries[id] = r;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooksError = describeRustApiError(e);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingDeliveriesId = null;
+        });
+      }
+    }
   }
 
   int _countWebhookActivity(String action) {
@@ -2623,6 +2666,55 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               ),
                             Text('id: ${wh.id}'),
                             Text('createdAt: ${wh.createdAt}'),
+                            Text('updatedAt: ${wh.updatedAt ?? wh.createdAt}'),
+                            if (!wh.enabled)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Chip(
+                                  label: const Text('已停用'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ),
+                            if (wh.eventTypes.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  '订阅事件: ${wh.eventTypes.join(', ')}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                            if (wh.workspaceId != null && wh.workspaceId!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  'workspaceId: ${wh.workspaceId}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                            if (_webhookDeliveries[wh.id] != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                '最近投递',
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              ..._webhookDeliveries[wh.id]!.items
+                                  .take(6)
+                                  .map(
+                                    (d) => ListTile(
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(
+                                        '${d.eventType} · ${d.status} · HTTP ${d.httpStatus ?? '-'}',
+                                      ),
+                                      subtitle: SelectableText(
+                                        '${d.createdAt}\n${d.error ?? ''}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                      ),
+                                    ),
+                                  ),
+                            ],
                             if (_webhookLastTestResultById[wh.id] != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
@@ -2655,6 +2747,18 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                             ? null
                             : () => _testWebhook(wh.id),
                         child: Text(_webhookBusyId == wh.id ? '处理中…' : '测试投递'),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed:
+                            _loadingWebhooks ||
+                                _webhookBusyId != null ||
+                                _loadingDeliveriesId != null
+                            ? null
+                            : () => _loadWebhookDeliveries(wh.id),
+                        child: Text(
+                          _loadingDeliveriesId == wh.id ? '加载中…' : '投递记录',
+                        ),
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton(
