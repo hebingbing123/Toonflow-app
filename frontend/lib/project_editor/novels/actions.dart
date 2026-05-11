@@ -423,7 +423,6 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       intakeNote: intakeNote,
       runAtMs: runAtMs,
       repeatIntervalMs: repeatIntervalMs,
-      projectNumericId: project.numericId,
     );
     applyInfoLine(
       '已创建托管抓取计划：task #${created.numericTaskId}（${created.status}；delay ${delayMinutes}m；repeat ${repeatMinutes ?? 0}m）',

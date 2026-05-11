@@ -282,6 +282,27 @@ Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
 }
 
 /// `POST /api/v1/projects/{project_id}/novels/crawl-schedules` — see `postProjectNovelCrawlScheduleCreateByProjectIdV1`.
+Map<String, dynamic> buildNovelCrawlScheduleCreateBody({
+  required List<String> urls,
+  required String intakeStatus,
+  String? intakeNote,
+  int? runAtMs,
+  int? repeatIntervalMs,
+  int? projectNumericId,
+}) {
+  final body = <String, dynamic>{
+    'urls': urls,
+    'intake_status': intakeStatus,
+    'intake_note': intakeNote,
+    'run_at_ms': runAtMs,
+    'repeat_interval_ms': repeatIntervalMs,
+  };
+  if (projectNumericId != null) {
+    body['project_numeric_id'] = projectNumericId;
+  }
+  return body;
+}
+
 Future<NovelCrawlScheduleRow> postProjectNovelCrawlScheduleCreate(
   String accessToken,
   String projectId, {
@@ -295,14 +316,14 @@ Future<NovelCrawlScheduleRow> postProjectNovelCrawlScheduleCreate(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-schedules',
   );
-  final body = <String, dynamic>{
-    'urls': urls,
-    'intake_status': intakeStatus,
-    'intake_note': intakeNote,
-    'run_at_ms': runAtMs,
-    'repeat_interval_ms': repeatIntervalMs,
-    'project_numeric_id': projectNumericId,
-  };
+  final body = buildNovelCrawlScheduleCreateBody(
+    urls: urls,
+    intakeStatus: intakeStatus,
+    intakeNote: intakeNote,
+    runAtMs: runAtMs,
+    repeatIntervalMs: repeatIntervalMs,
+    projectNumericId: projectNumericId,
+  );
   final res = await http
       .post(
         uri,
