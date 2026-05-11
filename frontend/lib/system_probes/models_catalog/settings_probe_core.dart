@@ -6,6 +6,13 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     required String token,
     required Map<String, int> statuses,
   }) async {
+    final scope = await resolveProductionProbeScope(
+      token: token,
+      projectIdText: _workspaceInputController.projectIdController.text,
+      projectUuidText: _workspaceInputController.projectUuidController.text,
+      scriptIdText: _workspaceInputController.scriptIdController.text,
+      fetchProjects: fetchProjects,
+    );
     final modelTest = await postSettingsVendorModelTestV1(
       token,
       modelName: 'gpt-4o-mini',
@@ -21,7 +28,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
 
     final scriptAgentGetPlan = await postScriptAgentGetPlanDataV1(
       token,
-      projectId: 1,
+      projectId: scope.projectId,
     );
     _expectProbeStatus(
       label: 'POST script-agent/get-plan-data',
@@ -104,9 +111,16 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     required String token,
     required Map<String, int> statuses,
   }) async {
+    final scope = await resolveProductionProbeScope(
+      token: token,
+      projectIdText: _workspaceInputController.projectIdController.text,
+      projectUuidText: _workspaceInputController.projectUuidController.text,
+      scriptIdText: _workspaceInputController.scriptIdController.text,
+      fetchProjects: fetchProjects,
+    );
     final scriptAgentSetPlan = await postScriptAgentSetPlanDataV1(
       token,
-      projectId: 1,
+      projectId: scope.projectId,
     );
     _expectProbeStatus(
       label: 'POST script-agent/set-plan-data',
@@ -124,4 +138,3 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     statuses['script-agent/upd'] = scriptAgentUpdate;
   }
 }
-
