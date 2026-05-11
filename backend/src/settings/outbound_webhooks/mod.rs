@@ -24,7 +24,10 @@ use crate::state::AppState;
 
 mod deliver;
 
-pub(crate) use deliver::fire_job_terminal_outbound_webhooks;
+pub(crate) use deliver::{
+    fire_job_terminal_outbound_webhooks, fire_project_created_outbound_webhooks,
+    fire_workspace_member_added_outbound_webhooks,
+};
 
 /// Platform event types users may subscribe to (plus `test.ping` for manual tests only).
 pub const OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES: &[&str] = &[

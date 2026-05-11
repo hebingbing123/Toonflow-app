@@ -226,6 +226,39 @@ pub(crate) async fn create_project(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    let pool_hook = pool.clone();
+    let http_hook = state.http_client.clone();
+    let hook_owner = uid;
+    let hook_workspace = scope_workspace_id;
+    let hook_project = row.clone();
+    tokio::spawn(async move {
+        match serde_json::to_value(&hook_project) {
+            Ok(project_json) => {
+                if let Err(e) =
+                    crate::settings::outbound_webhooks::fire_project_created_outbound_webhooks(
+                        &pool_hook,
+                        &http_hook,
+                        hook_owner,
+                        hook_workspace,
+                        project_json,
+                    )
+                    .await
+                {
+                    tracing::warn!(
+                        error = %e,
+                        user_id = %hook_owner,
+                        "project.created outbound webhooks failed"
+                    );
+                }
+            }
+            Err(e) => tracing::warn!(
+                error = %e,
+                user_id = %hook_owner,
+                "serialize project row for outbound webhooks failed"
+            ),
+        }
+    });
+
     let pool = pool.clone();
     tokio::spawn(async move {
         if let Err(error) = ensure_project_style_bible_template(&pool, uid, row.numeric_id).await {

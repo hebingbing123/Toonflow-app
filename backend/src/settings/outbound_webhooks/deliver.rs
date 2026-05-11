@@ -1,5 +1,6 @@
-//! Outbound HTTP POST with exponential backoff retries + job lifecycle hooks.
+//! Outbound HTTP POST with exponential backoff retries + platform event hooks.
 
+use std::collections::HashSet;
 use std::time::Duration;
 
 use chrono::SecondsFormat;
@@ -17,11 +18,11 @@ const PER_ATTEMPT_TIMEOUT: Duration = Duration::from_secs(15);
 #[inline]
 pub(crate) fn webhook_matches_workspace(
     webhook_workspace_id: Option<Uuid>,
-    job_workspace_id: Option<Uuid>,
+    resource_workspace_id: Option<Uuid>,
 ) -> bool {
     match webhook_workspace_id {
         None => true,
-        Some(ws) => job_workspace_id == Some(ws),
+        Some(ws) => resource_workspace_id == Some(ws),
     }
 }
 
@@ -213,23 +214,20 @@ pub(crate) async fn deliver_outbound_event(
 }
 
 /// After terminal job status (`succeeded` → `job.completed`, `failed` → `job.failed`), notify matching outbound hooks.
-pub(crate) async fn fire_job_terminal_outbound_webhooks(
+/// Deliver a platform event to all enabled outbound hooks owned by `owner_user_id`, scoped by workspace when the hook has `workspace_id` set.
+pub(crate) async fn fire_outbound_webhooks_for_owner(
     pool: &PgPool,
     http: &reqwest::Client,
     owner_user_id: Uuid,
-    job_workspace_id: Option<Uuid>,
-    job_json: Value,
+    resource_workspace_id: Option<Uuid>,
     event_type: &str,
+    data: Value,
 ) -> Result<(), sqlx::Error> {
-    if event_type != "job.completed" && event_type != "job.failed" {
-        return Ok(());
-    }
-
     let payload = json!({
         "id": Uuid::new_v4().to_string(),
         "type": event_type,
         "createdAt": chrono::Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true),
-        "data": { "job": job_json }
+        "data": data,
     });
 
     let rows = sqlx::query_as::<_, (Uuid, String, String, Option<Uuid>, Value)>(
@@ -244,7 +242,7 @@ pub(crate) async fn fire_job_terminal_outbound_webhooks(
     .await?;
 
     for (wh_id, url, secret, wh_ws, et_val) in rows {
-        if !webhook_matches_workspace(wh_ws, job_workspace_id) {
+        if !webhook_matches_workspace(wh_ws, resource_workspace_id) {
             continue;
         }
         let event_types: Vec<String> = serde_json::from_value(et_val).unwrap_or_default();
@@ -270,6 +268,92 @@ pub(crate) async fn fire_job_terminal_outbound_webhooks(
                 "outbound webhook delivery persistence failed"
             );
         }
+    }
+
+    Ok(())
+}
+
+pub(crate) async fn fire_job_terminal_outbound_webhooks(
+    pool: &PgPool,
+    http: &reqwest::Client,
+    owner_user_id: Uuid,
+    job_workspace_id: Option<Uuid>,
+    job_json: Value,
+    event_type: &str,
+) -> Result<(), sqlx::Error> {
+    if event_type != "job.completed" && event_type != "job.failed" {
+        return Ok(());
+    }
+    let data = json!({ "job": job_json });
+    fire_outbound_webhooks_for_owner(
+        pool,
+        http,
+        owner_user_id,
+        job_workspace_id,
+        event_type,
+        data,
+    )
+    .await
+}
+
+pub(crate) async fn fire_project_created_outbound_webhooks(
+    pool: &PgPool,
+    http: &reqwest::Client,
+    owner_user_id: Uuid,
+    workspace_id: Uuid,
+    project_json: Value,
+) -> Result<(), sqlx::Error> {
+    let data = json!({ "project": project_json });
+    fire_outbound_webhooks_for_owner(
+        pool,
+        http,
+        owner_user_id,
+        Some(workspace_id),
+        "project.created",
+        data,
+    )
+    .await
+}
+
+/// Fires for **new** memberships only (caller must not invoke on pure role-change upserts).
+/// Delivers to **workspace owner** and **inviting actor** (deduped when they are the same user).
+pub(crate) async fn fire_workspace_member_added_outbound_webhooks(
+    pool: &PgPool,
+    http: &reqwest::Client,
+    workspace_id: Uuid,
+    actor_user_id: Uuid,
+    member_json: Value,
+) -> Result<(), sqlx::Error> {
+    let Some(ws_owner) = sqlx::query_scalar::<_, Uuid>(
+        "SELECT owner_user_id FROM public.app_workspace WHERE id = $1",
+    )
+    .bind(workspace_id)
+    .fetch_optional(pool)
+    .await?
+    else {
+        return Ok(());
+    };
+
+    let data = json!({
+        "workspaceId": workspace_id,
+        "actorUserId": actor_user_id,
+        "member": member_json,
+    });
+
+    let mut seen = HashSet::<Uuid>::new();
+    for uid in [ws_owner, actor_user_id] {
+        if !seen.insert(uid) {
+            continue;
+        }
+        fire_outbound_webhooks_for_owner(
+            pool,
+            http,
+            uid,
+            Some(workspace_id),
+            "workspace.member.added",
+            data.clone(),
+        )
+        .await?;
     }
 
     Ok(())

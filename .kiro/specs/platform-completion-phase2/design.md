@@ -21,7 +21,7 @@
 
 - **全局搜索保存视图**：`GET`/`PUT /api/v1/search/saved-views`，表 `app_user_search_saved_view`；详见 `tasks.md` 顶部说明与 [`gap-tasks-automation.md`](./gap-tasks-automation.md)。
 - **帮助 Hub**：`/api/v1/settings/help/hub` 族端点，环境变量 `TOONFLOW_HELP_HUB_ITEMS_JSON` / `TOONFLOW_HELP_HUB_URL`；非 `help-links`。
-- **Webhook**：设计中的**用户出站**投递与仓库内 **Stripe 入站** `POST /api/v1/webhooks/billing` 是两条线；出站 WH 仍属待实现债务（见 `tasks.md` WH1–WH3）。
+- **Webhook**：**用户出站**（`app_outbound_webhook` / `settings/webhooks/outbound` 与 `/api/v1/webhooks` 别名）与 **Stripe 计费入站** `POST /api/v1/webhooks/billing` 是两条线；出站已实现配置、签名、投递历史、**指数退避重试**及部分平台事件（`job.completed` / `job.failed` / `project.created` / `workspace.member.added` 等，见 `tasks.md` WH1–WH3）。
 - **Workspace 安全**：应用层授权真源与 RLS 护栏分工见 `docs/plans/workspace-security-boundary.md`；矩阵见 `docs/plans/workspace-rls-consistency-matrix.md`。
 
 ### 技术栈

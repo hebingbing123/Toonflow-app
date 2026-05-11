@@ -528,6 +528,38 @@ async fn reset_current_workspace_if_matches(
     Ok(())
 }
 
+/// Reset all members' **`current_workspace_id`** to their personal workspace if it points to the given **`workspace_id`**.
+/// This is used when a workspace is archived to ensure no user has a dangling reference to an inaccessible workspace.
+async fn reset_all_members_current_workspace_if_matches(
+    pool: &PgPool,
+    workspace_id: Uuid,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        UPDATE public.app_user_profile p
+        SET
+          current_workspace_id = personal_ws.id,
+          updated_at = NOW()
+        FROM (
+          SELECT DISTINCT m.user_id
+          FROM public.app_workspace_member m
+          WHERE m.workspace_id = $1
+        ) AS members
+        INNER JOIN public.app_workspace personal_ws ON (
+          personal_ws.owner_user_id = members.user_id
+          AND personal_ws.workspace_type = 'personal'
+        )
+        WHERE p.user_id = members.user_id
+          AND p.current_workspace_id = $1
+        "#,
+    )
+    .bind(workspace_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
 #[utoipa::path(
     post,
     path = "/api/v1/workspaces",
@@ -837,7 +869,7 @@ pub(crate) async fn patch_workspace(
     let row = row.ok_or(ApiError::NotFound)?;
 
     if body.archive == Some(true) {
-        reset_current_workspace_if_matches(pool, uid, workspace_id).await?;
+        reset_all_members_current_workspace_if_matches(pool, workspace_id).await?;
     }
 
     Ok(Json(WorkspaceResponse {
@@ -947,6 +979,21 @@ pub(crate) async fn add_workspace_member(
         return Err(ApiError::NotFound);
     }
 
+    let was_member: bool = sqlx::query_scalar(
+        r#"
+        SELECT EXISTS(
+            SELECT 1
+            FROM public.app_workspace_member
+            WHERE workspace_id = $1 AND user_id = $2
+        )
+        "#,
+    )
+    .bind(workspace_id)
+    .bind(body.user_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     let row: WorkspaceMemberResponse = sqlx::query_as(
         r#"
         INSERT INTO public.app_workspace_member (workspace_id, user_id, role)
@@ -971,6 +1018,40 @@ pub(crate) async fn add_workspace_member(
         serde_json::json!({ "role": row.role.clone() }),
     )
     .await?;
+
+    if !was_member {
+        let pool2 = pool.clone();
+        let http = state.http_client.clone();
+        let ws = workspace_id;
+        let actor = uid;
+        let member_row = row.clone();
+        tokio::spawn(async move {
+            let member_json = serde_json::to_value(&member_row).unwrap_or_else(|e| {
+                tracing::warn!(
+                    error = %e,
+                    "serialize workspace member for outbound webhooks failed"
+                );
+                serde_json::json!({})
+            });
+            if let Err(e) =
+                crate::settings::outbound_webhooks::fire_workspace_member_added_outbound_webhooks(
+                    &pool2,
+                    &http,
+                    ws,
+                    actor,
+                    member_json,
+                )
+                .await
+            {
+                tracing::warn!(
+                    error = %e,
+                    workspace_id = %ws,
+                    "workspace.member.added outbound webhooks failed"
+                );
+            }
+        });
+    }
+
     Ok(Json(row))
 }
 
@@ -1122,6 +1203,7 @@ pub(crate) async fn remove_workspace_member(
         serde_json::json!({ "role": row.role.clone() }),
     )
     .await?;
+    reset_current_workspace_if_matches(pool, user_id, workspace_id).await?;
     Ok(Json(row))
 }
 
@@ -1888,6 +1970,21 @@ pub(crate) async fn accept_workspace_invite(
         return Err(ApiError::Conflict("invite has expired".into()));
     }
 
+    let was_member: bool = sqlx::query_scalar(
+        r#"
+        SELECT EXISTS(
+            SELECT 1
+            FROM public.app_workspace_member
+            WHERE workspace_id = $1 AND user_id = $2
+        )
+        "#,
+    )
+    .bind(invite.workspace_id)
+    .bind(uid)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     let member: WorkspaceMemberResponse = sqlx::query_as(
         r#"
         INSERT INTO public.app_workspace_member (workspace_id, user_id, role)
@@ -1971,6 +2068,39 @@ pub(crate) async fn accept_workspace_invite(
             }),
         )
         .await?;
+    }
+
+    if !was_member {
+        let pool2 = pool.clone();
+        let http = state.http_client.clone();
+        let ws = invite.workspace_id;
+        let actor = invite.invited_by;
+        let member_row = member.clone();
+        tokio::spawn(async move {
+            let member_json = serde_json::to_value(&member_row).unwrap_or_else(|e| {
+                tracing::warn!(
+                    error = %e,
+                    "serialize workspace member for outbound webhooks failed (invite accept)"
+                );
+                serde_json::json!({})
+            });
+            if let Err(e) =
+                crate::settings::outbound_webhooks::fire_workspace_member_added_outbound_webhooks(
+                    &pool2,
+                    &http,
+                    ws,
+                    actor,
+                    member_json,
+                )
+                .await
+            {
+                tracing::warn!(
+                    error = %e,
+                    workspace_id = %ws,
+                    "workspace.member.added outbound webhooks failed (invite accept)"
+                );
+            }
+        });
     }
 
     Ok(Json(member))

@@ -100,7 +100,7 @@ pub struct ProjectMemberResponse {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
-#[derive(Debug, FromRow, Serialize, ToSchema)]
+#[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
 #[schema(
     title = "ProjectRow",
     description = "Project record with short video configuration fields"
