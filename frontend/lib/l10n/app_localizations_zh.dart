@@ -3843,4 +3843,127 @@ class AppLocalizationsZh extends AppLocalizations {
   String teamWorkspaceActionTooltip(String action, String workspace) {
     return '$action $workspace';
   }
+
+  @override
+  String get teamWorkspaceEnterEnterpriseName => '请输入企业空间名称';
+
+  @override
+  String get teamWorkspaceCreated => '已创建企业空间';
+
+  @override
+  String teamWorkspaceCreateFailed(String error) {
+    return '创建失败：$error';
+  }
+
+  @override
+  String get teamWorkspaceEnterInviteToken => '请输入邀请 token';
+
+  @override
+  String get teamWorkspaceInviteAcceptedAndJoined => '已接受邀请并加入工作区';
+
+  @override
+  String teamWorkspaceAcceptInviteFailed(String error) {
+    return '接受邀请失败：$error';
+  }
+
+  @override
+  String get teamWorkspaceArchiveDialogTitle => '归档企业空间？';
+
+  @override
+  String get teamWorkspaceArchiveDialogBody =>
+      '归档后该空间将从默认列表隐藏；若其为当前工作区，将自动回到 Personal。';
+
+  @override
+  String get teamWorkspaceArchiveAction => '归档';
+
+  @override
+  String get teamWorkspaceArchived => '已归档';
+
+  @override
+  String get teamWorkspaceRestored => '已恢复';
+
+  @override
+  String teamWorkspaceOpFailed(String error) {
+    return '操作失败：$error';
+  }
+
+  @override
+  String teamWorkspaceSwitchedTo(String name) {
+    return '已切换到 $name';
+  }
+
+  @override
+  String teamWorkspaceSwitchFailed(String error) {
+    return '切换失败：$error';
+  }
+
+  @override
+  String get teamWorkspaceLoginRequired => '登录后可管理企业工作区。';
+
+  @override
+  String get teamWorkspaceTitle => '团队工作区';
+
+  @override
+  String get teamWorkspaceIntro =>
+      '列出你可访问的空间（含 Personal），创建 enterprise 空间；owner/admin 可归档或恢复企业空间。';
+
+  @override
+  String get teamWorkspaceCreating => '创建中…';
+
+  @override
+  String get teamWorkspaceCreateAction => '创建';
+
+  @override
+  String get teamWorkspaceJoining => '加入中…';
+
+  @override
+  String get teamWorkspaceAcceptInviteAction => '接受邀请';
+
+  @override
+  String get teamWorkspaceShowArchivedToggle => '显示已归档企业空间';
+
+  @override
+  String get teamWorkspaceLoading => '加载中…';
+
+  @override
+  String get teamWorkspaceRefreshList => '刷新列表';
+
+  @override
+  String get teamWorkspaceNoListDataHint => '尚无列表数据；点「刷新列表」。';
+
+  @override
+  String get teamWorkspaceNoWorkspacesHint => '暂无空间（异常）；通常至少有 Personal。';
+
+  @override
+  String get teamWorkspaceArchivedBadge => '已归档';
+
+  @override
+  String get teamWorkspaceCurrentBadge => '当前';
+
+  @override
+  String get teamWorkspaceManageMembersAction => '管理成员';
+
+  @override
+  String get teamWorkspaceMembersShortAction => '成员';
+
+  @override
+  String get teamWorkspaceManageInvitesAction => '管理邀请';
+
+  @override
+  String get teamWorkspaceInvitesShortAction => '邀请';
+
+  @override
+  String get teamWorkspaceSwitchActionLabel => '切换到工作区';
+
+  @override
+  String get teamWorkspaceSwitchHereAction => '切换到此';
+
+  @override
+  String get teamWorkspaceArchiveActionLabel => '归档工作区';
+
+  @override
+  String get teamWorkspaceRestoreActionLabel => '恢复工作区';
+
+  @override
+  String get teamWorkspaceRestoreAction => '恢复';
 }

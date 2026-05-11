@@ -2912,5 +2912,77 @@
         "type": "String"
       }
     }
-  }
+  },
+  "teamWorkspaceEnterEnterpriseName": "请输入企业空间名称",
+  "teamWorkspaceCreated": "已创建企业空间",
+  "teamWorkspaceCreateFailed": "创建失败：{error}",
+  "@teamWorkspaceCreateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceEnterInviteToken": "请输入邀请 token",
+  "teamWorkspaceInviteAcceptedAndJoined": "已接受邀请并加入工作区",
+  "teamWorkspaceAcceptInviteFailed": "接受邀请失败：{error}",
+  "@teamWorkspaceAcceptInviteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceArchiveDialogTitle": "归档企业空间？",
+  "teamWorkspaceArchiveDialogBody": "归档后该空间将从默认列表隐藏；若其为当前工作区，将自动回到 Personal。",
+  "teamWorkspaceArchiveAction": "归档",
+  "teamWorkspaceArchived": "已归档",
+  "teamWorkspaceRestored": "已恢复",
+  "teamWorkspaceOpFailed": "操作失败：{error}",
+  "@teamWorkspaceOpFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceSwitchedTo": "已切换到 {name}",
+  "@teamWorkspaceSwitchedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceSwitchFailed": "切换失败：{error}",
+  "@teamWorkspaceSwitchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceLoginRequired": "登录后可管理企业工作区。",
+  "teamWorkspaceTitle": "团队工作区",
+  "teamWorkspaceIntro": "列出你可访问的空间（含 Personal），创建 enterprise 空间；owner/admin 可归档或恢复企业空间。",
+  "teamWorkspaceCreating": "创建中…",
+  "teamWorkspaceCreateAction": "创建",
+  "teamWorkspaceJoining": "加入中…",
+  "teamWorkspaceAcceptInviteAction": "接受邀请",
+  "teamWorkspaceShowArchivedToggle": "显示已归档企业空间",
+  "teamWorkspaceLoading": "加载中…",
+  "teamWorkspaceRefreshList": "刷新列表",
+  "teamWorkspaceNoListDataHint": "尚无列表数据；点「刷新列表」。",
+  "teamWorkspaceNoWorkspacesHint": "暂无空间（异常）；通常至少有 Personal。",
+  "teamWorkspaceArchivedBadge": "已归档",
+  "teamWorkspaceCurrentBadge": "当前",
+  "teamWorkspaceManageMembersAction": "管理成员",
+  "teamWorkspaceMembersShortAction": "成员",
+  "teamWorkspaceManageInvitesAction": "管理邀请",
+  "teamWorkspaceInvitesShortAction": "邀请",
+  "teamWorkspaceSwitchActionLabel": "切换到工作区",
+  "teamWorkspaceSwitchHereAction": "切换到此",
+  "teamWorkspaceArchiveActionLabel": "归档工作区",
+  "teamWorkspaceRestoreActionLabel": "恢复工作区",
+  "teamWorkspaceRestoreAction": "恢复"
 }

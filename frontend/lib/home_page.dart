@@ -241,6 +241,12 @@ class _HomePageState extends State<HomePage> {
       AccountProbesController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        projectIdTextProvider: () =>
+            _workspaceInputController.projectIdController.text,
+        projectUuidTextProvider: () =>
+            _workspaceInputController.projectUuidController.text,
+        scriptIdTextProvider: () =>
+            _workspaceInputController.scriptIdController.text,
       );
 
   late final ContentProbesController _contentProbesController =

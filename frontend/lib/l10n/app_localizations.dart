@@ -6608,6 +6608,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{action} {workspace}'**
   String teamWorkspaceActionTooltip(String action, String workspace);
+
+  /// No description provided for @teamWorkspaceEnterEnterpriseName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter enterprise workspace name'**
+  String get teamWorkspaceEnterEnterpriseName;
+
+  /// No description provided for @teamWorkspaceCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise workspace created'**
+  String get teamWorkspaceCreated;
+
+  /// No description provided for @teamWorkspaceCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Create failed: {error}'**
+  String teamWorkspaceCreateFailed(String error);
+
+  /// No description provided for @teamWorkspaceEnterInviteToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter invite token'**
+  String get teamWorkspaceEnterInviteToken;
+
+  /// No description provided for @teamWorkspaceInviteAcceptedAndJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite accepted and joined workspace'**
+  String get teamWorkspaceInviteAcceptedAndJoined;
+
+  /// No description provided for @teamWorkspaceAcceptInviteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept invite failed: {error}'**
+  String teamWorkspaceAcceptInviteFailed(String error);
+
+  /// No description provided for @teamWorkspaceArchiveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive enterprise workspace?'**
+  String get teamWorkspaceArchiveDialogTitle;
+
+  /// No description provided for @teamWorkspaceArchiveDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'After archiving, this workspace is hidden from default list; if it is current workspace, context switches back to Personal.'**
+  String get teamWorkspaceArchiveDialogBody;
+
+  /// No description provided for @teamWorkspaceArchiveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get teamWorkspaceArchiveAction;
+
+  /// No description provided for @teamWorkspaceArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get teamWorkspaceArchived;
+
+  /// No description provided for @teamWorkspaceRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored'**
+  String get teamWorkspaceRestored;
+
+  /// No description provided for @teamWorkspaceOpFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed: {error}'**
+  String teamWorkspaceOpFailed(String error);
+
+  /// No description provided for @teamWorkspaceSwitchedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to {name}'**
+  String teamWorkspaceSwitchedTo(String name);
+
+  /// No description provided for @teamWorkspaceSwitchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch failed: {error}'**
+  String teamWorkspaceSwitchFailed(String error);
+
+  /// No description provided for @teamWorkspaceLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to manage enterprise workspaces.'**
+  String get teamWorkspaceLoginRequired;
+
+  /// No description provided for @teamWorkspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Team workspaces'**
+  String get teamWorkspaceTitle;
+
+  /// No description provided for @teamWorkspaceIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'List your accessible workspaces (including Personal), create enterprise workspaces, and allow owner/admin to archive or restore them.'**
+  String get teamWorkspaceIntro;
+
+  /// No description provided for @teamWorkspaceCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating…'**
+  String get teamWorkspaceCreating;
+
+  /// No description provided for @teamWorkspaceCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get teamWorkspaceCreateAction;
+
+  /// No description provided for @teamWorkspaceJoining.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining…'**
+  String get teamWorkspaceJoining;
+
+  /// No description provided for @teamWorkspaceAcceptInviteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept invite'**
+  String get teamWorkspaceAcceptInviteAction;
+
+  /// No description provided for @teamWorkspaceShowArchivedToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show archived enterprise workspaces'**
+  String get teamWorkspaceShowArchivedToggle;
+
+  /// No description provided for @teamWorkspaceLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get teamWorkspaceLoading;
+
+  /// No description provided for @teamWorkspaceRefreshList.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh list'**
+  String get teamWorkspaceRefreshList;
+
+  /// No description provided for @teamWorkspaceNoListDataHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No list data yet; tap \"Refresh list\".'**
+  String get teamWorkspaceNoListDataHint;
+
+  /// No description provided for @teamWorkspaceNoWorkspacesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No workspace found (unexpected); normally Personal is always available.'**
+  String get teamWorkspaceNoWorkspacesHint;
+
+  /// No description provided for @teamWorkspaceArchivedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'archived'**
+  String get teamWorkspaceArchivedBadge;
+
+  /// No description provided for @teamWorkspaceCurrentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get teamWorkspaceCurrentBadge;
+
+  /// No description provided for @teamWorkspaceManageMembersAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage members'**
+  String get teamWorkspaceManageMembersAction;
+
+  /// No description provided for @teamWorkspaceMembersShortAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get teamWorkspaceMembersShortAction;
+
+  /// No description provided for @teamWorkspaceManageInvitesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage invites'**
+  String get teamWorkspaceManageInvitesAction;
+
+  /// No description provided for @teamWorkspaceInvitesShortAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Invites'**
+  String get teamWorkspaceInvitesShortAction;
+
+  /// No description provided for @teamWorkspaceSwitchActionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to workspace'**
+  String get teamWorkspaceSwitchActionLabel;
+
+  /// No description provided for @teamWorkspaceSwitchHereAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch here'**
+  String get teamWorkspaceSwitchHereAction;
+
+  /// No description provided for @teamWorkspaceArchiveActionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive workspace'**
+  String get teamWorkspaceArchiveActionLabel;
+
+  /// No description provided for @teamWorkspaceRestoreActionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore workspace'**
+  String get teamWorkspaceRestoreActionLabel;
+
+  /// No description provided for @teamWorkspaceRestoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get teamWorkspaceRestoreAction;
 }
 
 class _AppLocalizationsDelegate

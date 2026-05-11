@@ -3998,4 +3998,133 @@ class AppLocalizationsEn extends AppLocalizations {
   String teamWorkspaceActionTooltip(String action, String workspace) {
     return '$action $workspace';
   }
+
+  @override
+  String get teamWorkspaceEnterEnterpriseName =>
+      'Please enter enterprise workspace name';
+
+  @override
+  String get teamWorkspaceCreated => 'Enterprise workspace created';
+
+  @override
+  String teamWorkspaceCreateFailed(String error) {
+    return 'Create failed: $error';
+  }
+
+  @override
+  String get teamWorkspaceEnterInviteToken => 'Please enter invite token';
+
+  @override
+  String get teamWorkspaceInviteAcceptedAndJoined =>
+      'Invite accepted and joined workspace';
+
+  @override
+  String teamWorkspaceAcceptInviteFailed(String error) {
+    return 'Accept invite failed: $error';
+  }
+
+  @override
+  String get teamWorkspaceArchiveDialogTitle => 'Archive enterprise workspace?';
+
+  @override
+  String get teamWorkspaceArchiveDialogBody =>
+      'After archiving, this workspace is hidden from default list; if it is current workspace, context switches back to Personal.';
+
+  @override
+  String get teamWorkspaceArchiveAction => 'Archive';
+
+  @override
+  String get teamWorkspaceArchived => 'Archived';
+
+  @override
+  String get teamWorkspaceRestored => 'Restored';
+
+  @override
+  String teamWorkspaceOpFailed(String error) {
+    return 'Operation failed: $error';
+  }
+
+  @override
+  String teamWorkspaceSwitchedTo(String name) {
+    return 'Switched to $name';
+  }
+
+  @override
+  String teamWorkspaceSwitchFailed(String error) {
+    return 'Switch failed: $error';
+  }
+
+  @override
+  String get teamWorkspaceLoginRequired =>
+      'Sign in to manage enterprise workspaces.';
+
+  @override
+  String get teamWorkspaceTitle => 'Team workspaces';
+
+  @override
+  String get teamWorkspaceIntro =>
+      'List your accessible workspaces (including Personal), create enterprise workspaces, and allow owner/admin to archive or restore them.';
+
+  @override
+  String get teamWorkspaceCreating => 'Creating…';
+
+  @override
+  String get teamWorkspaceCreateAction => 'Create';
+
+  @override
+  String get teamWorkspaceJoining => 'Joining…';
+
+  @override
+  String get teamWorkspaceAcceptInviteAction => 'Accept invite';
+
+  @override
+  String get teamWorkspaceShowArchivedToggle =>
+      'Show archived enterprise workspaces';
+
+  @override
+  String get teamWorkspaceLoading => 'Loading…';
+
+  @override
+  String get teamWorkspaceRefreshList => 'Refresh list';
+
+  @override
+  String get teamWorkspaceNoListDataHint =>
+      'No list data yet; tap \"Refresh list\".';
+
+  @override
+  String get teamWorkspaceNoWorkspacesHint =>
+      'No workspace found (unexpected); normally Personal is always available.';
+
+  @override
+  String get teamWorkspaceArchivedBadge => 'archived';
+
+  @override
+  String get teamWorkspaceCurrentBadge => 'Current';
+
+  @override
+  String get teamWorkspaceManageMembersAction => 'Manage members';
+
+  @override
+  String get teamWorkspaceMembersShortAction => 'Members';
+
+  @override
+  String get teamWorkspaceManageInvitesAction => 'Manage invites';
+
+  @override
+  String get teamWorkspaceInvitesShortAction => 'Invites';
+
+  @override
+  String get teamWorkspaceSwitchActionLabel => 'Switch to workspace';
+
+  @override
+  String get teamWorkspaceSwitchHereAction => 'Switch here';
+
+  @override
+  String get teamWorkspaceArchiveActionLabel => 'Archive workspace';
+
+  @override
+  String get teamWorkspaceRestoreActionLabel => 'Restore workspace';
+
+  @override
+  String get teamWorkspaceRestoreAction => 'Restore';
 }

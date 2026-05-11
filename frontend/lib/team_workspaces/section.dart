@@ -316,6 +316,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _create() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -324,7 +325,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     if (name.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('请输入企业空间名称')));
+      ).showSnackBar(
+        SnackBar(content: Text(l10n.teamWorkspaceEnterEnterpriseName)),
+      );
       return;
     }
     setState(() => _creating = true);
@@ -336,14 +339,18 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('已创建企业空间')));
+      ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceCreated)));
       await _load();
     } on RustApiException catch (e) {
       if (!mounted) {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('创建失败：${describeRustApiError(e)}')),
+        SnackBar(
+          content: Text(
+            l10n.teamWorkspaceCreateFailed(describeRustApiError(e)),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) {
@@ -351,7 +358,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('创建失败：$e')));
+      ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceCreateFailed('$e'))));
     } finally {
       if (mounted) {
         setState(() => _creating = false);
@@ -360,6 +367,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _acceptInvite() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -368,7 +376,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     if (inviteToken.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('请输入邀请 token')));
+      ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceEnterInviteToken)));
       return;
     }
     setState(() => _acceptingInvite = true);
@@ -383,7 +391,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('已接受邀请并加入工作区')));
+      ).showSnackBar(
+        SnackBar(content: Text(l10n.teamWorkspaceInviteAcceptedAndJoined)),
+      );
       if (_inviteTokenFromUri) {
         final cleaned = removeWorkspaceInviteTokenFromUri(Uri.base);
         SystemNavigator.routeInformationUpdated(uri: cleaned);
@@ -398,7 +408,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('接受邀请失败：${describeRustApiError(e)}')),
+        SnackBar(
+          content: Text(
+            l10n.teamWorkspaceAcceptInviteFailed(describeRustApiError(e)),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) {
@@ -406,7 +420,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('接受邀请失败：$e')));
+      ).showSnackBar(
+        SnackBar(content: Text(l10n.teamWorkspaceAcceptInviteFailed('$e'))),
+      );
     } finally {
       if (mounted) {
         setState(() => _acceptingInvite = false);
@@ -1825,19 +1841,20 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _confirmArchive(WorkspaceListItem row) async {
+    final l10n = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
-        title: const Text('归档企业空间？'),
-        content: const Text('归档后该空间将从默认列表隐藏；若其为当前工作区，将自动回到 Personal。'),
+        title: Text(l10n.teamWorkspaceArchiveDialogTitle),
+        content: Text(l10n.teamWorkspaceArchiveDialogBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: Text(l10n.helpHubDialogClose),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('归档'),
+            child: Text(l10n.teamWorkspaceArchiveAction),
           ),
         ],
       ),
@@ -1848,6 +1865,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _setArchive(WorkspaceListItem row, bool archive) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -1861,7 +1879,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(archive ? '已归档' : '已恢复')));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            archive
+                ? l10n.teamWorkspaceArchived
+                : l10n.teamWorkspaceRestored,
+          ),
+        ),
+      );
       if (widget.onWorkspaceContextChanged != null) {
         await widget.onWorkspaceContextChanged!();
       }
@@ -1872,7 +1898,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('操作失败：$e')));
+      ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceOpFailed('$e'))));
     } finally {
       if (mounted) {
         setState(() => _patchingWorkspaceId = null);
@@ -1881,6 +1907,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _switchCurrentWorkspace(WorkspaceListItem row) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -1897,7 +1924,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('已切换到 ${row.workspace.name}')));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(l10n.teamWorkspaceSwitchedTo(row.workspace.name)),
+        ),
+      );
       if (widget.onWorkspaceContextChanged != null) {
         await widget.onWorkspaceContextChanged!();
       }
@@ -1908,7 +1939,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('切换失败：$e')));
+      ).showSnackBar(
+        SnackBar(content: Text(l10n.teamWorkspaceSwitchFailed('$e'))),
+      );
     } finally {
       if (mounted) {
         setState(() => _switchingWorkspaceId = null);
@@ -1922,7 +1955,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     final token = widget.accessToken;
     final theme = Theme.of(context);
     if (token == null || token.isEmpty) {
-      return Text('登录后可管理企业工作区。', style: theme.textTheme.bodyMedium);
+      return Text(
+        l10n.teamWorkspaceLoginRequired,
+        style: theme.textTheme.bodyMedium,
+      );
     }
 
     final items = _items;
@@ -1933,7 +1969,12 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Expanded(child: Text('团队工作区', style: theme.textTheme.titleMedium)),
+            Expanded(
+              child: Text(
+                l10n.teamWorkspaceTitle,
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
             const RiskyOperationConfirmPrefsOverflowMenu(
               tooltip: '本机客户端偏好（查看已静默 / 恢复确认）',
             ),
@@ -1941,7 +1982,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         ),
         const SizedBox(height: 8),
         Text(
-          '列出你可访问的空间（含 Personal），创建 enterprise 空间；owner/admin 可归档或恢复企业空间。',
+          l10n.teamWorkspaceIntro,
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 12),
@@ -1960,7 +2001,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             const SizedBox(width: 12),
             FilledButton(
               onPressed: _creating ? null : _create,
-              child: Text(_creating ? '创建中…' : '创建'),
+              child: Text(
+                _creating
+                    ? l10n.teamWorkspaceCreating
+                    : l10n.teamWorkspaceCreateAction,
+              ),
             ),
           ],
         ),
@@ -1992,14 +2037,18 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             const SizedBox(width: 12),
             FilledButton.tonal(
               onPressed: _acceptingInvite ? null : _acceptInvite,
-              child: Text(_acceptingInvite ? '加入中…' : '接受邀请'),
+              child: Text(
+                _acceptingInvite
+                    ? l10n.teamWorkspaceJoining
+                    : l10n.teamWorkspaceAcceptInviteAction,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('显示已归档企业空间'),
+          title: Text(l10n.teamWorkspaceShowArchivedToggle),
           value: _includeArchived,
           onChanged: _loading
               ? null
@@ -2019,7 +2068,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.refresh),
-            label: Text(_loading ? '加载中…' : '刷新列表'),
+            label: Text(
+              _loading
+                  ? l10n.teamWorkspaceLoading
+                  : l10n.teamWorkspaceRefreshList,
+            ),
           ),
         ),
         if (_error != null) ...<Widget>[
@@ -2031,9 +2084,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         ],
         const SizedBox(height: 8),
         if (items == null && !_loading)
-          Text('尚无列表数据；点「刷新列表」。', style: theme.textTheme.bodySmall),
+          Text(
+            l10n.teamWorkspaceNoListDataHint,
+            style: theme.textTheme.bodySmall,
+          ),
         if (items != null && items.isEmpty)
-          Text('暂无空间（异常）；通常至少有 Personal。', style: theme.textTheme.bodySmall),
+          Text(
+            l10n.teamWorkspaceNoWorkspacesHint,
+            style: theme.textTheme.bodySmall,
+          ),
         if (items != null &&
             items.isNotEmpty &&
             !hasActiveEnterpriseWorkspace(items)) ...<Widget>[
@@ -2093,7 +2152,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                   title: Text(w.name),
                   subtitle: Text(
                     '${w.workspaceType} · ${row.role}'
-                    '${w.archivedAt != null ? ' · 已归档' : ''}',
+                    '${w.archivedAt != null ? ' · ${l10n.teamWorkspaceArchivedBadge}' : ''}',
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -2102,7 +2161,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Chip(
-                            label: const Text('当前'),
+                            label: Text(l10n.teamWorkspaceCurrentBadge),
                             visualDensity: VisualDensity.compact,
                             backgroundColor: theme.colorScheme.primaryContainer,
                           ),
@@ -2111,34 +2170,34 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
                             l10n: l10n,
-                            actionLabel: '管理成员',
+                            actionLabel: l10n.teamWorkspaceManageMembersAction,
                             workspaceName: w.name,
                           ),
                           child: TextButton(
                             onPressed: (_loading || busy)
                                 ? null
                                 : () => _openMembersDialog(row),
-                            child: const Text('成员'),
+                            child: Text(l10n.teamWorkspaceMembersShortAction),
                           ),
                         ),
                       if (canManage)
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
                             l10n: l10n,
-                            actionLabel: '管理邀请',
+                            actionLabel: l10n.teamWorkspaceManageInvitesAction,
                             workspaceName: w.name,
                           ),
                           child: TextButton(
                             onPressed: (_loading || busy)
                                 ? null
                                 : () => _openInvitesDialog(row),
-                            child: const Text('邀请'),
+                            child: Text(l10n.teamWorkspaceInvitesShortAction),
                           ),
                         ),
                       Tooltip(
                         message: buildWorkspaceActionTooltip(
                           l10n: l10n,
-                          actionLabel: '切换到工作区',
+                          actionLabel: l10n.teamWorkspaceSwitchActionLabel,
                           workspaceName: w.name,
                         ),
                         child: TextButton(
@@ -2154,14 +2213,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('切换到此'),
+                              : Text(l10n.teamWorkspaceSwitchHereAction),
                         ),
                       ),
                       if (canManage && w.archivedAt == null)
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
                             l10n: l10n,
-                            actionLabel: '归档工作区',
+                            actionLabel: l10n.teamWorkspaceArchiveActionLabel,
                             workspaceName: w.name,
                           ),
                           child: TextButton(
@@ -2176,14 +2235,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('归档'),
+                                : Text(l10n.teamWorkspaceArchiveAction),
                           ),
                         ),
                       if (canManage && w.archivedAt != null)
                         Tooltip(
                           message: buildWorkspaceActionTooltip(
                             l10n: l10n,
-                            actionLabel: '恢复工作区',
+                            actionLabel: l10n.teamWorkspaceRestoreActionLabel,
                             workspaceName: w.name,
                           ),
                           child: TextButton(
@@ -2198,7 +2257,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('恢复'),
+                                : Text(l10n.teamWorkspaceRestoreAction),
                           ),
                         ),
                     ],

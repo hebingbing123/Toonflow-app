@@ -2912,5 +2912,77 @@
         "type": "String"
       }
     }
-  }
+  },
+  "teamWorkspaceEnterEnterpriseName": "Please enter enterprise workspace name",
+  "teamWorkspaceCreated": "Enterprise workspace created",
+  "teamWorkspaceCreateFailed": "Create failed: {error}",
+  "@teamWorkspaceCreateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceEnterInviteToken": "Please enter invite token",
+  "teamWorkspaceInviteAcceptedAndJoined": "Invite accepted and joined workspace",
+  "teamWorkspaceAcceptInviteFailed": "Accept invite failed: {error}",
+  "@teamWorkspaceAcceptInviteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceArchiveDialogTitle": "Archive enterprise workspace?",
+  "teamWorkspaceArchiveDialogBody": "After archiving, this workspace is hidden from default list; if it is current workspace, context switches back to Personal.",
+  "teamWorkspaceArchiveAction": "Archive",
+  "teamWorkspaceArchived": "Archived",
+  "teamWorkspaceRestored": "Restored",
+  "teamWorkspaceOpFailed": "Operation failed: {error}",
+  "@teamWorkspaceOpFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceSwitchedTo": "Switched to {name}",
+  "@teamWorkspaceSwitchedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceSwitchFailed": "Switch failed: {error}",
+  "@teamWorkspaceSwitchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceLoginRequired": "Sign in to manage enterprise workspaces.",
+  "teamWorkspaceTitle": "Team workspaces",
+  "teamWorkspaceIntro": "List your accessible workspaces (including Personal), create enterprise workspaces, and allow owner/admin to archive or restore them.",
+  "teamWorkspaceCreating": "Creating…",
+  "teamWorkspaceCreateAction": "Create",
+  "teamWorkspaceJoining": "Joining…",
+  "teamWorkspaceAcceptInviteAction": "Accept invite",
+  "teamWorkspaceShowArchivedToggle": "Show archived enterprise workspaces",
+  "teamWorkspaceLoading": "Loading…",
+  "teamWorkspaceRefreshList": "Refresh list",
+  "teamWorkspaceNoListDataHint": "No list data yet; tap \"Refresh list\".",
+  "teamWorkspaceNoWorkspacesHint": "No workspace found (unexpected); normally Personal is always available.",
+  "teamWorkspaceArchivedBadge": "archived",
+  "teamWorkspaceCurrentBadge": "Current",
+  "teamWorkspaceManageMembersAction": "Manage members",
+  "teamWorkspaceMembersShortAction": "Members",
+  "teamWorkspaceManageInvitesAction": "Manage invites",
+  "teamWorkspaceInvitesShortAction": "Invites",
+  "teamWorkspaceSwitchActionLabel": "Switch to workspace",
+  "teamWorkspaceSwitchHereAction": "Switch here",
+  "teamWorkspaceArchiveActionLabel": "Archive workspace",
+  "teamWorkspaceRestoreActionLabel": "Restore workspace",
+  "teamWorkspaceRestoreAction": "Restore"
 }
