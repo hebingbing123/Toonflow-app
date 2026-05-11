@@ -2944,4 +2944,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get globalSearchTemplateScripts30d => 'Scripts in last 30 days';
+
+  @override
+  String get globalSearchClearSearchHistoryTitle => 'Clear search history';
+
+  @override
+  String get globalSearchClearSearchHistoryConfirm =>
+      'Clear all search history? This action cannot be undone.';
+
+  @override
+  String get globalSearchLoadHistoryFailed => 'Failed to load history';
+
+  @override
+  String get globalSearchNoSearchHistory => 'No search history yet';
+
+  @override
+  String globalSearchResultRows(int count) {
+    return '$count results';
+  }
 }

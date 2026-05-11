@@ -2832,4 +2832,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get globalSearchTemplateScripts30d => '剧本近 30 天';
+
+  @override
+  String get globalSearchClearSearchHistoryTitle => '清除搜索历史';
+
+  @override
+  String get globalSearchClearSearchHistoryConfirm => '确定要清除所有搜索历史吗？此操作无法撤销。';
+
+  @override
+  String get globalSearchLoadHistoryFailed => '加载历史失败';
+
+  @override
+  String get globalSearchNoSearchHistory => '暂无搜索历史';
+
+  @override
+  String globalSearchResultRows(int count) {
+    return '$count 条结果';
+  }
 }

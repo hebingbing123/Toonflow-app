@@ -1924,5 +1924,17 @@
         "type": "int"
       }
     }
+  },
+  "globalSearchClearSearchHistoryTitle": "Clear search history",
+  "globalSearchClearSearchHistoryConfirm": "Clear all search history? This action cannot be undone.",
+  "globalSearchLoadHistoryFailed": "Failed to load history",
+  "globalSearchNoSearchHistory": "No search history yet",
+  "globalSearchResultRows": "{count} results",
+  "@globalSearchResultRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

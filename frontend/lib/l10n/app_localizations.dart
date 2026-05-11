@@ -4994,6 +4994,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scripts in last 30 days'**
   String get globalSearchTemplateScripts30d;
+
+  /// No description provided for @globalSearchClearSearchHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search history'**
+  String get globalSearchClearSearchHistoryTitle;
+
+  /// No description provided for @globalSearchClearSearchHistoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all search history? This action cannot be undone.'**
+  String get globalSearchClearSearchHistoryConfirm;
+
+  /// No description provided for @globalSearchLoadHistoryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load history'**
+  String get globalSearchLoadHistoryFailed;
+
+  /// No description provided for @globalSearchNoSearchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No search history yet'**
+  String get globalSearchNoSearchHistory;
+
+  /// No description provided for @globalSearchResultRows.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} results'**
+  String globalSearchResultRows(int count);
 }
 
 class _AppLocalizationsDelegate

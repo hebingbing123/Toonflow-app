@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api/search/api.dart';
 
 /// 搜索历史下拉列表组件
@@ -64,20 +65,21 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
   }
 
   Future<void> _handleClearHistory() async {
+    final l10n = AppLocalizations.of(context)!;
     // 显示确认对话框
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('清除搜索历史'),
-        content: const Text('确定要清除所有搜索历史吗？此操作无法撤销。'),
+        title: Text(l10n.globalSearchClearSearchHistoryTitle),
+        content: Text(l10n.globalSearchClearSearchHistoryConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.globalSearchCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
+            child: Text(l10n.globalSearchConfirm),
           ),
         ],
       ),
@@ -104,7 +106,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       // 显示成功提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('搜索历史已清除')),
+          SnackBar(content: Text(l10n.globalSearchHistoryCleared)),
         );
       }
     } catch (e) {
@@ -118,7 +120,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       // 显示错误提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('清除失败：$e')),
+          SnackBar(content: Text(l10n.globalSearchClearHistoryFailed(e.toString()))),
         );
       }
     }
@@ -126,6 +128,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_loading) {
       return const Card(
         child: Padding(
@@ -151,13 +154,13 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '加载历史失败',
+                  l10n.globalSearchLoadHistoryFailed,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               TextButton(
                 onPressed: _loadHistory,
-                child: const Text('重试'),
+                child: Text(l10n.globalSearchRetry),
               ),
             ],
           ),
@@ -170,7 +173,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
-            '暂无搜索历史',
+            l10n.globalSearchNoSearchHistory,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey,
                 ),
@@ -201,7 +204,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 subtitle: Text(
-                  '${entry.resultCount} 条结果',
+                  l10n.globalSearchResultRows(entry.resultCount),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 trailing: Text(
@@ -221,7 +224,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
             child: TextButton.icon(
               onPressed: _handleClearHistory,
               icon: const Icon(Icons.delete_outline, size: 18),
-              label: const Text('清除历史'),
+              label: Text(l10n.globalSearchClearHistory),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
               ),
@@ -234,19 +237,20 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
 
   /// 格式化时间显示
   String _formatTime(String isoString) {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final dateTime = DateTime.parse(isoString);
       final now = DateTime.now();
       final difference = now.difference(dateTime);
 
       if (difference.inMinutes < 1) {
-        return '刚刚';
+        return l10n.globalSearchTimeJustNow;
       } else if (difference.inHours < 1) {
-        return '${difference.inMinutes} 分钟前';
+        return l10n.globalSearchTimeMinutesAgo(difference.inMinutes);
       } else if (difference.inDays < 1) {
-        return '${difference.inHours} 小时前';
+        return l10n.globalSearchTimeHoursAgo(difference.inHours);
       } else if (difference.inDays < 7) {
-        return '${difference.inDays} 天前';
+        return l10n.globalSearchTimeDaysAgo(difference.inDays);
       } else {
         // 显示具体日期
         return '${dateTime.month}/${dateTime.day}';

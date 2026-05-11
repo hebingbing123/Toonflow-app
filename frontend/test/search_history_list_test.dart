@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/global_search/search_history_list.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+
+Widget _buildTestApp(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
+    home: Scaffold(body: child),
+  );
+}
 
 void main() {
   group('SearchHistoryList', () {
     testWidgets('displays loading indicator initially', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchHistoryList(
-              accessToken: 'test-token',
-              onHistorySelected: (_) {},
-              onClearHistory: () {},
-            ),
+        _buildTestApp(
+          SearchHistoryList(
+            accessToken: 'test-token',
+            onHistorySelected: (_) {},
+            onClearHistory: () {},
           ),
         ),
       );
@@ -24,13 +32,11 @@ void main() {
     testWidgets('formats time correctly for recent searches', (tester) async {
       // This test verifies the time formatting logic
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchHistoryList(
-              accessToken: 'test-token',
-              onHistorySelected: (_) {},
-              onClearHistory: () {},
-            ),
+        _buildTestApp(
+          SearchHistoryList(
+            accessToken: 'test-token',
+            onHistorySelected: (_) {},
+            onClearHistory: () {},
           ),
         ),
       );
@@ -41,15 +47,13 @@ void main() {
 
     testWidgets('calls onHistorySelected when item is tapped', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchHistoryList(
-              accessToken: 'test-token',
-              onHistorySelected: (query) {
-                // Callback will be invoked when history item is tapped
-              },
-              onClearHistory: () {},
-            ),
+        _buildTestApp(
+          SearchHistoryList(
+            accessToken: 'test-token',
+            onHistorySelected: (query) {
+              // Callback will be invoked when history item is tapped
+            },
+            onClearHistory: () {},
           ),
         ),
       );
@@ -64,13 +68,11 @@ void main() {
     testWidgets('shows confirmation dialog when clearing history',
         (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchHistoryList(
-              accessToken: 'test-token',
-              onHistorySelected: (_) {},
-              onClearHistory: () {},
-            ),
+        _buildTestApp(
+          SearchHistoryList(
+            accessToken: 'test-token',
+            onHistorySelected: (_) {},
+            onClearHistory: () {},
           ),
         ),
       );
@@ -87,14 +89,12 @@ void main() {
 
     testWidgets('respects maxItems parameter', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchHistoryList(
-              accessToken: 'test-token',
-              onHistorySelected: (_) {},
-              onClearHistory: () {},
-              maxItems: 3,
-            ),
+        _buildTestApp(
+          SearchHistoryList(
+            accessToken: 'test-token',
+            onHistorySelected: (_) {},
+            onClearHistory: () {},
+            maxItems: 3,
           ),
         ),
       );
@@ -108,13 +108,11 @@ void main() {
 
     testWidgets('displays empty state when no history', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchHistoryList(
-              accessToken: 'test-token',
-              onHistorySelected: (_) {},
-              onClearHistory: () {},
-            ),
+        _buildTestApp(
+          SearchHistoryList(
+            accessToken: 'test-token',
+            onHistorySelected: (_) {},
+            onClearHistory: () {},
           ),
         ),
       );
@@ -128,13 +126,11 @@ void main() {
 
     testWidgets('displays error state with retry button', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchHistoryList(
-              accessToken: 'test-token',
-              onHistorySelected: (_) {},
-              onClearHistory: () {},
-            ),
+        _buildTestApp(
+          SearchHistoryList(
+            accessToken: 'test-token',
+            onHistorySelected: (_) {},
+            onClearHistory: () {},
           ),
         ),
       );
