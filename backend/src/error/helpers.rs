@@ -1,7 +1,11 @@
 //! 错误处理辅助函数。
 //!
 //! 提供常用的错误转换和日志记录模式，确保错误处理的一致性。
+//!
+//! 通用校验（[`validate_non_empty_string`] / [`validate_range`] / [`validate_enum`]）的文案随
+//! [`super::locale::REQUEST_LOCALE`]（`Accept-Language`）切换中英文；[`validate_input`] 仍使用调用方传入的字符串。
 
+use crate::error::locale::{current_locale, ApiLocale};
 use crate::error::ApiError;
 use tracing::error;
 
@@ -74,10 +78,11 @@ pub fn validate_input(condition: bool, message: &str) -> Result<(), ApiError> {
 /// ```
 pub fn validate_non_empty_string(value: &str, field_name: &str) -> Result<(), ApiError> {
     if value.trim().is_empty() {
-        Err(ApiError::BadRequest(format!(
-            "{} must not be empty",
-            field_name
-        )))
+        let msg = match current_locale() {
+            ApiLocale::En => format!("{field_name} must not be empty"),
+            ApiLocale::Zh => format!("{field_name} 不能为空"),
+        };
+        Err(ApiError::BadRequest(msg))
     } else {
         Ok(())
     }
@@ -98,10 +103,11 @@ pub fn validate_range<T: PartialOrd + std::fmt::Display>(
     field_name: &str,
 ) -> Result<(), ApiError> {
     if value < min || value > max {
-        Err(ApiError::BadRequest(format!(
-            "{} must be between {} and {}",
-            field_name, min, max
-        )))
+        let msg = match current_locale() {
+            ApiLocale::En => format!("{field_name} must be between {min} and {max}"),
+            ApiLocale::Zh => format!("{field_name} 必须在 {min} 至 {max} 之间"),
+        };
+        Err(ApiError::BadRequest(msg))
     } else {
         Ok(())
     }
@@ -119,17 +125,19 @@ pub fn validate_enum(value: &str, allowed: &[&str], field_name: &str) -> Result<
     if allowed.contains(&value) {
         Ok(())
     } else {
-        Err(ApiError::BadRequest(format!(
-            "{} must be one of: {}",
-            field_name,
-            allowed.join(", ")
-        )))
+        let list = allowed.join(", ");
+        let msg = match current_locale() {
+            ApiLocale::En => format!("{field_name} must be one of: {list}"),
+            ApiLocale::Zh => format!("{field_name} 必须是以下之一：{list}"),
+        };
+        Err(ApiError::BadRequest(msg))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::locale::{ApiLocale, REQUEST_LOCALE};
 
     #[test]
     fn validate_input_passes_when_condition_true() {
@@ -187,6 +195,45 @@ mod tests {
                 assert!(msg.contains("mp4, mov, webm"));
             }
             _ => panic!("Expected BadRequest error"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_non_empty_string_zh_locale() {
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_non_empty_string("", "name").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequest(m) => assert_eq!(m, "name 不能为空"),
+            _ => panic!("expected BadRequest"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_range_zh_locale() {
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_range(0_i32, 1, 10, "n").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequest(m) => assert_eq!(m, "n 必须在 1 至 10 之间"),
+            _ => panic!("expected BadRequest"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_enum_zh_locale() {
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_enum("x", &["a", "b"], "kind").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequest(m) => assert_eq!(m, "kind 必须是以下之一：a, b"),
+            _ => panic!("expected BadRequest"),
         }
     }
 }

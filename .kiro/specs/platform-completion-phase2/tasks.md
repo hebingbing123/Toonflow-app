@@ -194,7 +194,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - _Requirements: 5.5, 5.7, 5.8_
 
 - [~] **I1. i18n 产品文案中英收口 — Backend**（**进行中**：`ApiError` 固定话术已随 `Accept-Language` 双语文案；`BadRequest` 等**动态**字符串仍多为英文，待各域逐步改为可翻译键或统一文案表）
-  - [~] I1.1 为所有错误码提供中英文 `message` — **部分完成**：`ApiError` 内置枚举（Unauthorized / NotFound / Internal 等）已中英对照；**字符串载荷**变体沿用调用方原文
+  - [~] I1.1 为所有错误码提供中英文 `message` — **部分完成**：`ApiError` 固定枚举已中英对照；**`error/helpers`** 的 `validate_non_empty_string` / `validate_range` / `validate_enum` 随 `Accept-Language` 双语；其余 **`BadRequest`/`Forbidden` 等调用点原文**仍待逐域收口
   - [x] I1.2 实现 `Accept-Language` 头解析和语言选择逻辑（`backend/src/error/locale.rs`，支持 `q=`）
   - [x] I1.3 在错误响应中根据 `Accept-Language` 返回对应语言的消息（`REQUEST_LOCALE` + `http_kit/request_id_mw` 注入）
   - [x] I1.4 添加单元测试：`locale` 解析 + `ApiError` 在 `Zh` task-local 下的 `message`

@@ -30,6 +30,8 @@
 //! - `details` (object, optional): 额外的上下文信息（如字段级验证错误、版本冲突详情）
 //! - `retry_after_ms` (u64, optional): 速率限制重试等待时间（仅 429 响应）
 //!
+//! 通用校验辅助（`helpers` 模块）中部分 `BadRequest` 文案随 `Accept-Language` 切换；其它仍为调用方字符串。
+//!
 //! ## Request ID 追踪
 //!
 //! Request ID 通过以下方式传播：
