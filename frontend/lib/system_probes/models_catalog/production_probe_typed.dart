@@ -4,14 +4,16 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
     on _HomePageState {
   Future<void> _runTypedProductionProbeSuite(
     String token,
-    Map<String, int> statuses,
-  ) async {
+    Map<String, int> statuses, {
+    required int projectId,
+    required int scriptId,
+  }) async {
     statuses['prod/assets.batch'] = await _runTypedProductionProbe(
       label: 'POST production/assets/batch-generate-assets-image',
       run: () => postProductionAssetsBatchGenerateAssetsImageV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         assetIds: const [1],
       ),
     );
@@ -19,22 +21,25 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/assets/delete-assets-derivative',
       run: () => postProductionAssetsDeleteAssetsDerivativeV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         assetIds: const [1],
       ),
     );
     statuses['prod/assets.data'] = await _runTypedProductionProbe(
       label: 'POST production/assets/get-assets-data',
-      run: () =>
-          postProductionAssetsGetAssetsDataV1(token, projectId: 1, scriptId: 1),
+      run: () => postProductionAssetsGetAssetsDataV1(
+        token,
+        projectId: projectId,
+        scriptId: scriptId,
+      ),
     );
     statuses['prod/assets.poll'] = await _runTypedProductionProbe(
       label: 'POST production/assets/polling-image',
       run: () => postProductionAssetsPollingImageV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         assetIds: const [1],
       ),
     );
@@ -42,23 +47,26 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/assets/update-assets-url',
       run: () => postProductionAssetsUpdateAssetsUrlV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         assetId: 1,
         imageUrl: 'https://example.com/probe.png',
       ),
     );
     statuses['prod/storyboard.data'] = await _runTypedProductionProbe(
       label: 'POST production/get-storyboard-data',
-      run: () =>
-          postProductionGetStoryboardDataV1(token, projectId: 1, scriptId: 1),
+      run: () => postProductionGetStoryboardDataV1(
+        token,
+        projectId: projectId,
+        scriptId: scriptId,
+      ),
     );
     statuses['prod/storyboard.add'] = await _runTypedProductionProbe(
       label: 'POST production/storyboard/add',
       run: () => postStoryboardAddV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         prompt: 'probe storyboard',
       ),
     );
@@ -66,8 +74,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/batch-add-info',
       run: () => postStoryboardBatchAddInfoV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboards: const [
           StoryboardBatchAddInfoItem(prompt: 'probe storyboard'),
         ],
@@ -77,8 +85,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/batch-generate-image',
       run: () => postStoryboardBatchGenerateImageV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         items: const [
           BatchGenerateImageItem(storyboardId: 1, prompt: 'probe storyboard'),
         ],
@@ -88,8 +96,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/down-preview-image',
       run: () => postStoryboardDownPreviewImageV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
       ),
     );
@@ -97,8 +105,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/edit-info',
       run: () => postStoryboardEditInfoV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
         prompt: 'probe storyboard',
       ),
@@ -107,8 +115,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/get-data',
       run: () => postStoryboardGetDataV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
       ),
     );
@@ -116,8 +124,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/preview-image',
       run: () => postStoryboardPreviewImageV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
       ),
     );
@@ -125,8 +133,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/remove-frame',
       run: () => postStoryboardRemoveFrameV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
       ),
     );
@@ -134,8 +142,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/storyboard/update-url',
       run: () => postStoryboardUpdateUrlV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
         imageUrl: 'https://example.com/probe.png',
       ),
@@ -171,8 +179,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/edit-image/generate-flow-image',
       run: () => postProductionEditImageGenerateFlowImageV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         flowId: 'img-flow-001',
         prompt: 'probe',
       ),
@@ -181,8 +189,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/edit-image/upload-image',
       run: () => postProductionEditImageUploadImageV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         base64Data: 'data:image/png;base64,AA==',
       ),
     );
@@ -190,8 +198,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/workbench/add-track',
       run: () => postWorkbenchAddTrackV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         trackName: 'probe',
       ),
     );
@@ -199,8 +207,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/workbench/delete-track',
       run: () => postWorkbenchDeleteTrackV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         trackId: 1,
       ),
     );
@@ -208,24 +216,30 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/workbench/delete-video',
       run: () => postWorkbenchDeleteVideoV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
       ),
     );
     statuses['prod/workbench.prompt'] = await _runTypedProductionProbe(
       label: 'POST production/workbench/generate-video-prompt',
-      run: () =>
-          postWorkbenchGenerateVideoPromptV1(token, projectId: 1, scriptId: 1),
+      run: () => postWorkbenchGenerateVideoPromptV1(
+        token,
+        projectId: projectId,
+        scriptId: scriptId,
+      ),
     );
     statuses['prod/workbench.gen-data'] = await _runTypedProductionProbe(
       label: 'POST production/workbench/get-generate-data',
-      run: () =>
-          postWorkbenchGetGenerateDataV1(token, projectId: 1, scriptId: 1),
+      run: () => postWorkbenchGetGenerateDataV1(
+        token,
+        projectId: projectId,
+        scriptId: scriptId,
+      ),
     );
     statuses['prod/workbench.list'] = await _runTypedProductionProbe(
       label: 'POST production/workbench/get-video-list',
-      run: () => postWorkbenchGetVideoListV1(token, projectId: 1),
+      run: () => postWorkbenchGetVideoListV1(token, projectId: projectId),
     );
     statuses['prod/workbench.model-detail'] = await _runTypedProductionProbe(
       label: 'POST production/workbench/get-video-model-detail',
@@ -235,25 +249,21 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       label: 'POST production/workbench/select-video',
       run: () => postWorkbenchSelectVideoV1(
         token,
-        projectId: 1,
-        scriptId: 1,
+        projectId: projectId,
+        scriptId: scriptId,
         storyboardId: 1,
         videoUrl: 'https://example.com/probe.mp4',
       ),
     );
     statuses['prod/workbench.media-op'] = await _runTypedProductionProbe(
       label: 'POST production/workbench/storyboard-media-op',
-      run: () => postWorkbenchStoryboardMediaOpV1(
-        token,
-        <String, dynamic>{
-          'op': 'selectVideo',
-          'projectId': 1,
-          'scriptId': 1,
-          'storyboardId': 1,
-          'videoUrl': 'https://example.com/probe.mp4',
-        },
-      ),
+      run: () => postWorkbenchStoryboardMediaOpV1(token, <String, dynamic>{
+        'op': 'selectVideo',
+        'projectId': projectId,
+        'scriptId': scriptId,
+        'storyboardId': 1,
+        'videoUrl': 'https://example.com/probe.mp4',
+      }),
     );
   }
 }
-
