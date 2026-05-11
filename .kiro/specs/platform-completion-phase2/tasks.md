@@ -201,19 +201,19 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] I1.5 `ErrorBody.message` 已文档化 `Accept-Language` 行为（OpenAPI schema 注释）
   - _Requirements: 6.4, 6.5_
 
-- [ ] **I2. i18n 产品文案中英收口 — Frontend**（**未完成**：尚未全面接入 Flutter `gen-l10n` / `AppLocalizations`；主路径仍以硬编码中文或混合文案为主）
-  - [ ] I2.1 使用 `l10n` 框架管理所有用户可见文案
+- [~] **I2. i18n 产品文案中英收口 — Frontend**（**进行中**：已启用 `gen-l10n` + 首页语言卡片；**绝大部分界面仍为硬编码**，需按模块迁移到 ARB）
+  - [x] I2.1 使用 `l10n` 框架 — `l10n.yaml`、`lib/l10n/*.arb`、`AppLocalizations` 生成物已入库；`flutter_localizations` + `MaterialApp` delegates
   - [ ] I2.2 覆盖项目列表界面的中英文文案
   - [ ] I2.3 覆盖工作台界面的中英文文案
-  - [ ] I2.4 覆盖设置界面的中英文文案
+  - [ ] I2.4 覆盖设置界面的中英文文案（除语言卡片外）
   - [ ] I2.5 覆盖团队工作区界面的中英文文案
   - [ ] I2.6 覆盖通知中心界面的中英文文案
-  - [ ] I2.7 在设置页面提供语言切换选项（中文/English）
-  - [ ] I2.8 实现用户首次登录时根据浏览器语言或系统语言自动选择界面语言
-  - [ ] I2.9 实现用户显式设置语言偏好时持久化到用户配置
-  - [ ] I2.10 实现日期、时间、数字格式按目标语言本地化
-  - [ ] I2.11 添加 Flutter 测试：语言切换和文案显示
-  - [ ] I2.12 竖切合并时跑 `yarn refactor:check`
+  - [x] I2.7 语言切换 — 首页 Overview 下 **界面语言** 卡片（系统 / English / 简体中文），`AppLocaleNotifier` + `SharedPreferences`
+  - [x] I2.8 首次/默认 — 选项 **跟随系统**（`locale: null`）由 Flutter 按设备 `Locale` 在 `en`/`zh` 间解析
+  - [x] I2.9 显式偏好持久化 — 键 `openflow_app_locale`（`system`|`en`|`zh`）
+  - [ ] I2.10 日期、时间、数字格式按目标语言本地化
+  - [x] I2.11 部分测试 — `test/l10n_smoke_test.dart`（en/zh 文案加载）
+  - [ ] I2.12 全量迁移完成后跑 `yarn refactor:check`（竖切已随 PR 跑 incremental / check）
   - _Requirements: 6.1–6.3, 6.6–6.10_
 
 - [x] **HB1. 帮助文档应用内 Hub — Backend**（路径以代码为准，非需求稿 `help-links`）

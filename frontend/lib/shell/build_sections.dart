@@ -7,6 +7,8 @@ extension _HomePageBuildSections on _HomePageState {
     final signedIn = session != null;
     final widgets = <Widget>[
       _buildOverviewSection(),
+      const SizedBox(height: 16),
+      _buildLocaleSection(context),
       if (kInternalOpsToken.isNotEmpty) ...[
         const SizedBox(height: 16),
         const JobQueueStatsCard(),
@@ -26,6 +28,57 @@ extension _HomePageBuildSections on _HomePageState {
 
     widgets.addAll(_buildErrorSection(context));
     return widgets;
+  }
+
+  Widget _buildLocaleSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
+    final notifier = AppLocaleNotifier.instance;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              l10n.localeSectionTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            ListenableBuilder(
+              listenable: notifier,
+              builder: (BuildContext context, _) {
+                return DropdownButton<String>(
+                  isExpanded: true,
+                  value: notifier.code,
+                  items: <DropdownMenuItem<String>>[
+                    DropdownMenuItem<String>(
+                      value: 'system',
+                      child: Text(l10n.localeSystem),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'en',
+                      child: Text(l10n.localeEnglish),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'zh',
+                      child: Text(l10n.localeChinese),
+                    ),
+                  ],
+                  onChanged: (String? v) {
+                    if (v != null) {
+                      notifier.setLocaleCode(v);
+                    }
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildOverviewSection() => OverviewSection(
@@ -149,11 +202,20 @@ extension _HomePageBuildSections on _HomePageState {
               ? 'Project #$_productScopedProjectNumericId'
               : null);
 
+    // Task 6.2: Extract workspace billing info from v2 response
+    final meV2 = _sessionMeV2;
+    final billingScope = meV2?.billingScope;
+    final workspaceBilling = meV2?.currentWorkspaceBilling;
+
     return WorkspaceContextView(
       loading: _loadingSessionMe,
       workspaceName: workspace?.name,
       workspaceType: workspace?.workspaceType,
       projectLabel: projectLabel,
+      billingScope: billingScope,
+      workspacePlanTier: workspaceBilling?.planTier,
+      workspaceDailyJobQuota: workspaceBilling?.dailyJobQuota,
+      workspaceJobsToday: workspaceBilling?.jobsToday,
     );
   }
 

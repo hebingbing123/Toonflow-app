@@ -8,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'l10n/app_localizations.dart';
+import 'locale/app_locale_notifier.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
 import 'global_search/global_search_bar.dart';
 import 'global_search/search_results_page.dart';
@@ -161,7 +163,8 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   int? _productScopedProjectNumericId;
   MeResponse? _sessionMe;
-  MeV2Response? _sessionMeV2; // Task 6.2: Store v2 response for workspace billing
+  MeV2Response?
+  _sessionMeV2; // Task 6.2: Store v2 response for workspace billing
   String? _lastSessionAccessToken;
   bool _loadingSessionMe = false;
   PlatformConfigToggleSetV1 _platformConfig =
@@ -619,7 +622,8 @@ class _HomePageState extends State<HomePage> {
             category: _contentComplianceController.queueCategoryFilter,
             targetType: _contentComplianceController.queueTargetTypeFilter,
             workspaceId: _contentComplianceController.queueWorkspaceIdFilter,
-            workspaceName: _contentComplianceController.queueWorkspaceNameFilter,
+            workspaceName:
+                _contentComplianceController.queueWorkspaceNameFilter,
             claimedByLabel:
                 _contentComplianceController.queueClaimedByLabelFilter,
             slaBucket: _contentComplianceController.queueSlaBucketFilter,
