@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api/search/api.dart';
 
 /// Individual search result card component.
@@ -31,18 +32,18 @@ class SearchResultCard extends StatelessWidget {
   final bool isSelected;
 
   /// Get display name for result type
-  String _getTypeDisplayName(ResultType type) {
+  String _getTypeDisplayName(AppLocalizations l10n, ResultType type) {
     switch (type) {
       case ResultType.project:
-        return '项目';
+        return l10n.globalSearchTypeProject;
       case ResultType.script:
-        return '剧本';
+        return l10n.globalSearchTypeScript;
       case ResultType.asset:
-        return '资产';
+        return l10n.globalSearchTypeAsset;
       case ResultType.novel:
-        return '小说章节';
+        return l10n.globalSearchTypeNovel;
       case ResultType.novelEvent:
-        return '小说事件';
+        return l10n.globalSearchTypeNovelEvent;
     }
   }
 
@@ -63,20 +64,20 @@ class SearchResultCard extends StatelessWidget {
   }
 
   /// Format time display
-  String _formatTime(String isoString) {
+  String _formatTime(AppLocalizations l10n, String isoString) {
     try {
       final dateTime = DateTime.parse(isoString);
       final now = DateTime.now();
       final difference = now.difference(dateTime);
 
       if (difference.inMinutes < 1) {
-        return '刚刚';
+        return l10n.globalSearchTimeJustNow;
       } else if (difference.inHours < 1) {
-        return '${difference.inMinutes} 分钟前';
+        return l10n.globalSearchTimeMinutesAgo(difference.inMinutes);
       } else if (difference.inDays < 1) {
-        return '${difference.inHours} 小时前';
+        return l10n.globalSearchTimeHoursAgo(difference.inHours);
       } else if (difference.inDays < 7) {
-        return '${difference.inDays} 天前';
+        return l10n.globalSearchTimeDaysAgo(difference.inDays);
       } else {
         return '${dateTime.year}/${dateTime.month}/${dateTime.day}';
       }
@@ -139,6 +140,7 @@ class SearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Card(
@@ -194,7 +196,7 @@ class SearchResultCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        _getTypeDisplayName(result.resultType),
+                        _getTypeDisplayName(l10n, result.resultType),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer,
                         ),
@@ -219,7 +221,7 @@ class SearchResultCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _formatTime(result.updatedAt),
+                      _formatTime(l10n, result.updatedAt),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

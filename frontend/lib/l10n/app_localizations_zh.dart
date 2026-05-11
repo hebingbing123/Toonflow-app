@@ -2667,4 +2667,169 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get globalSearchNextPage => '下一页';
+
+  @override
+  String get globalSearchTimeJustNow => '刚刚';
+
+  @override
+  String globalSearchTimeMinutesAgo(int minutes) {
+    return '$minutes 分钟前';
+  }
+
+  @override
+  String globalSearchTimeHoursAgo(int hours) {
+    return '$hours 小时前';
+  }
+
+  @override
+  String globalSearchTimeDaysAgo(int days) {
+    return '$days 天前';
+  }
+
+  @override
+  String get globalSearchChooseStartDate => '选择起始日期';
+
+  @override
+  String get globalSearchChooseEndDate => '选择结束日期';
+
+  @override
+  String get globalSearchConfirm => '确定';
+
+  @override
+  String globalSearchAppliedFilters(int count) {
+    return '已应用 $count 个过滤条件';
+  }
+
+  @override
+  String get globalSearchClearedAllFilters => '已清除所有过滤条件';
+
+  @override
+  String get globalSearchAdvancedFilterTitle => '高级过滤';
+
+  @override
+  String get globalSearchResultTypeSection => '结果类型';
+
+  @override
+  String get globalSearchCreatedTimeSection => '创建时间';
+
+  @override
+  String get globalSearchTypeNovelEventOutline => '小说大纲事件';
+
+  @override
+  String globalSearchStartDateLabel(String date) {
+    return '起始: $date';
+  }
+
+  @override
+  String globalSearchEndDateLabel(String date) {
+    return '结束: $date';
+  }
+
+  @override
+  String get globalSearchClearTimeRange => '清除时间范围';
+
+  @override
+  String get globalSearchApplyFilter => '应用过滤';
+
+  @override
+  String get globalSearchWorkspaceUnlabeled => '未标注 workspace';
+
+  @override
+  String get globalSearchWorkspaceCurrent => '当前 workspace';
+
+  @override
+  String get globalSearchViewActions => '视图操作';
+
+  @override
+  String get globalSearchRename => '重命名';
+
+  @override
+  String get globalSearchDeleteView => '删除视图';
+
+  @override
+  String get globalSearchRenameViewTitle => '重命名搜索视图';
+
+  @override
+  String get globalSearchRenameViewHint => '输入新的视图名称';
+
+  @override
+  String get globalSearchRenamedView => '已重命名搜索视图';
+
+  @override
+  String get globalSearchDeleteViewTitle => '删除搜索视图';
+
+  @override
+  String globalSearchDeleteViewConfirmRemote(String title) {
+    return '确定删除「$title」吗？已登录时将同步从所有已保存该视图数据的客户端移除。';
+  }
+
+  @override
+  String globalSearchDeleteViewConfirmLocal(String title) {
+    return '确定删除「$title」吗？此操作只会移除本机保存的视图。';
+  }
+
+  @override
+  String get globalSearchPinnedViewsTitle => '固定视图';
+
+  @override
+  String get globalSearchRecentViewsTitle => '最近常用视图';
+
+  @override
+  String get globalSearchQuickTemplatesTitle => '快捷模板';
+
+  @override
+  String get globalSearchLiveSuggestionsTitle => '实时建议';
+
+  @override
+  String get globalSearchRecentSearchTitle => '最近搜索';
+
+  @override
+  String get globalSearchClearHistory => '清除历史';
+
+  @override
+  String get globalSearchNoPreviewHint => '暂无匹配预览，按 Enter 查看完整结果';
+
+  @override
+  String get globalSearchMinCharsHint => '输入至少 2 个字符以搜索';
+
+  @override
+  String get globalSearchHistoryCleared => '搜索历史已清除';
+
+  @override
+  String globalSearchClearHistoryFailed(String error) {
+    return '清除历史失败: $error';
+  }
+
+  @override
+  String globalSearchEnterAtLeastChars(int count) {
+    return '请输入至少 $count 个字符';
+  }
+
+  @override
+  String globalSearchMaxCharsHint(int count) {
+    return '搜索关键词过长，请限制在$count字符以内';
+  }
+
+  @override
+  String get globalSearchInputHint => '搜索项目、剧本、资产...';
+
+  @override
+  String get globalSearchActionSearch => '搜索';
+
+  @override
+  String get globalSearchLocalClientPrefsTooltip => '本机客户端偏好（查看已静默 / 恢复确认）';
+
+  @override
+  String globalSearchSavedUsed(int count) {
+    return 'used=$count';
+  }
+
+  @override
+  String get globalSearchTemplateRecent7d => '近 7 天';
+
+  @override
+  String get globalSearchTemplateProjects30d => '项目近 30 天';
+
+  @override
+  String get globalSearchTemplateScripts30d => '剧本近 30 天';
 }

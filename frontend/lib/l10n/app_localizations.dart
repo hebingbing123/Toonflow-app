@@ -4712,6 +4712,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next page'**
   String get globalSearchNextPage;
+
+  /// No description provided for @globalSearchTimeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get globalSearchTimeJustNow;
+
+  /// No description provided for @globalSearchTimeMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m ago'**
+  String globalSearchTimeMinutesAgo(int minutes);
+
+  /// No description provided for @globalSearchTimeHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String globalSearchTimeHoursAgo(int hours);
+
+  /// No description provided for @globalSearchTimeDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String globalSearchTimeDaysAgo(int days);
+
+  /// No description provided for @globalSearchChooseStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose start date'**
+  String get globalSearchChooseStartDate;
+
+  /// No description provided for @globalSearchChooseEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose end date'**
+  String get globalSearchChooseEndDate;
+
+  /// No description provided for @globalSearchConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get globalSearchConfirm;
+
+  /// No description provided for @globalSearchAppliedFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied {count} filters'**
+  String globalSearchAppliedFilters(int count);
+
+  /// No description provided for @globalSearchClearedAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared all filters.'**
+  String get globalSearchClearedAllFilters;
+
+  /// No description provided for @globalSearchAdvancedFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced filters'**
+  String get globalSearchAdvancedFilterTitle;
+
+  /// No description provided for @globalSearchResultTypeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Result type'**
+  String get globalSearchResultTypeSection;
+
+  /// No description provided for @globalSearchCreatedTimeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Created time'**
+  String get globalSearchCreatedTimeSection;
+
+  /// No description provided for @globalSearchTypeNovelEventOutline.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel outline events'**
+  String get globalSearchTypeNovelEventOutline;
+
+  /// No description provided for @globalSearchStartDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start: {date}'**
+  String globalSearchStartDateLabel(String date);
+
+  /// No description provided for @globalSearchEndDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End: {date}'**
+  String globalSearchEndDateLabel(String date);
+
+  /// No description provided for @globalSearchClearTimeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear time range'**
+  String get globalSearchClearTimeRange;
+
+  /// No description provided for @globalSearchApplyFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply filters'**
+  String get globalSearchApplyFilter;
+
+  /// No description provided for @globalSearchWorkspaceUnlabeled.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlabeled workspace'**
+  String get globalSearchWorkspaceUnlabeled;
+
+  /// No description provided for @globalSearchWorkspaceCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current workspace'**
+  String get globalSearchWorkspaceCurrent;
+
+  /// No description provided for @globalSearchViewActions.
+  ///
+  /// In en, this message translates to:
+  /// **'View actions'**
+  String get globalSearchViewActions;
+
+  /// No description provided for @globalSearchRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get globalSearchRename;
+
+  /// No description provided for @globalSearchDeleteView.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete view'**
+  String get globalSearchDeleteView;
+
+  /// No description provided for @globalSearchRenameViewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename search view'**
+  String get globalSearchRenameViewTitle;
+
+  /// No description provided for @globalSearchRenameViewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new view name'**
+  String get globalSearchRenameViewHint;
+
+  /// No description provided for @globalSearchRenamedView.
+  ///
+  /// In en, this message translates to:
+  /// **'Renamed search view.'**
+  String get globalSearchRenamedView;
+
+  /// No description provided for @globalSearchDeleteViewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete search view'**
+  String get globalSearchDeleteViewTitle;
+
+  /// No description provided for @globalSearchDeleteViewConfirmRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{title}\"? Signed-in mode will sync removal to all clients with this saved view data.'**
+  String globalSearchDeleteViewConfirmRemote(String title);
+
+  /// No description provided for @globalSearchDeleteViewConfirmLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{title}\"? This only removes the locally saved view.'**
+  String globalSearchDeleteViewConfirmLocal(String title);
+
+  /// No description provided for @globalSearchPinnedViewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned views'**
+  String get globalSearchPinnedViewsTitle;
+
+  /// No description provided for @globalSearchRecentViewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent views'**
+  String get globalSearchRecentViewsTitle;
+
+  /// No description provided for @globalSearchQuickTemplatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick templates'**
+  String get globalSearchQuickTemplatesTitle;
+
+  /// No description provided for @globalSearchLiveSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live suggestions'**
+  String get globalSearchLiveSuggestionsTitle;
+
+  /// No description provided for @globalSearchRecentSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent searches'**
+  String get globalSearchRecentSearchTitle;
+
+  /// No description provided for @globalSearchClearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get globalSearchClearHistory;
+
+  /// No description provided for @globalSearchNoPreviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No preview matches yet. Press Enter for full results.'**
+  String get globalSearchNoPreviewHint;
+
+  /// No description provided for @globalSearchMinCharsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least 2 characters to search.'**
+  String get globalSearchMinCharsHint;
+
+  /// No description provided for @globalSearchHistoryCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Search history cleared.'**
+  String get globalSearchHistoryCleared;
+
+  /// No description provided for @globalSearchClearHistoryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear history: {error}'**
+  String globalSearchClearHistoryFailed(String error);
+
+  /// No description provided for @globalSearchEnterAtLeastChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least {count} characters.'**
+  String globalSearchEnterAtLeastChars(int count);
+
+  /// No description provided for @globalSearchMaxCharsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search query is too long. Limit to {count} characters.'**
+  String globalSearchMaxCharsHint(int count);
+
+  /// No description provided for @globalSearchInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search projects, scripts, assets...'**
+  String get globalSearchInputHint;
+
+  /// No description provided for @globalSearchActionSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get globalSearchActionSearch;
+
+  /// No description provided for @globalSearchLocalClientPrefsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Local client preferences (view silenced / restore confirmations)'**
+  String get globalSearchLocalClientPrefsTooltip;
+
+  /// No description provided for @globalSearchSavedUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'used={count}'**
+  String globalSearchSavedUsed(int count);
+
+  /// No description provided for @globalSearchTemplateRecent7d.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get globalSearchTemplateRecent7d;
+
+  /// No description provided for @globalSearchTemplateProjects30d.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects in last 30 days'**
+  String get globalSearchTemplateProjects30d;
+
+  /// No description provided for @globalSearchTemplateScripts30d.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts in last 30 days'**
+  String get globalSearchTemplateScripts30d;
 }
 
 class _AppLocalizationsDelegate

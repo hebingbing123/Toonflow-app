@@ -3,19 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:openflow_app/global_search/global_search_bar.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+
+Widget _buildTestApp(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
+    home: Scaffold(body: child),
+  );
+}
 
 void main() {
   group('GlobalSearchBar', () {
     testWidgets('renders search input with placeholder', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('搜索项目、剧本、资产...'), findsOneWidget);
@@ -24,15 +26,7 @@ void main() {
 
     testWidgets('disables search button when input is less than 2 characters',
         (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
 
       // Find the text field and enter 1 character
       final textField = find.byType(TextField);
@@ -50,15 +44,7 @@ void main() {
 
     testWidgets('enables search button when input is 2 or more characters',
         (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
 
       // Find the text field and enter 2 characters
       final textField = find.byType(TextField);
@@ -78,14 +64,12 @@ void main() {
       String? capturedQuery;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-              onNavigateToResults: (query) {
-                capturedQuery = query;
-              },
-            ),
+        _buildTestApp(
+          GlobalSearchBar(
+            accessToken: 'test-token',
+            onNavigateToResults: (query, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {
+              capturedQuery = query;
+            },
           ),
         ),
       );
@@ -107,14 +91,12 @@ void main() {
       String? capturedQuery;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-              onNavigateToResults: (query) {
-                capturedQuery = query;
-              },
-            ),
+        _buildTestApp(
+          GlobalSearchBar(
+            accessToken: 'test-token',
+            onNavigateToResults: (query, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {
+              capturedQuery = query;
+            },
           ),
         ),
       );
@@ -135,15 +117,7 @@ void main() {
 
     testWidgets('shows error message when query is less than 2 characters',
         (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
 
       // Enter 1 character
       final textField = find.byType(TextField);
@@ -159,15 +133,7 @@ void main() {
     });
 
     testWidgets('Ctrl+K shortcut is handled', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
       await tester.pump();
 
       // Just verify the Focus widget exists and can handle key events
@@ -176,15 +142,7 @@ void main() {
     });
 
     testWidgets('Escape key clears focus', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
 
       // Focus the search box
       final textField = find.byType(TextField);
@@ -203,15 +161,7 @@ void main() {
     });
 
     testWidgets('validates maximum query length', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: GlobalSearchBar(
-              accessToken: 'test-token',
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
 
       // Enter a very long query (>200 characters)
       final longQuery = 'a' * 201;

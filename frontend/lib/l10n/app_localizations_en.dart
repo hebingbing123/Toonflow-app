@@ -2776,4 +2776,172 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get globalSearchNextPage => 'Next page';
+
+  @override
+  String get globalSearchTimeJustNow => 'just now';
+
+  @override
+  String globalSearchTimeMinutesAgo(int minutes) {
+    return '${minutes}m ago';
+  }
+
+  @override
+  String globalSearchTimeHoursAgo(int hours) {
+    return '${hours}h ago';
+  }
+
+  @override
+  String globalSearchTimeDaysAgo(int days) {
+    return '${days}d ago';
+  }
+
+  @override
+  String get globalSearchChooseStartDate => 'Choose start date';
+
+  @override
+  String get globalSearchChooseEndDate => 'Choose end date';
+
+  @override
+  String get globalSearchConfirm => 'Confirm';
+
+  @override
+  String globalSearchAppliedFilters(int count) {
+    return 'Applied $count filters';
+  }
+
+  @override
+  String get globalSearchClearedAllFilters => 'Cleared all filters.';
+
+  @override
+  String get globalSearchAdvancedFilterTitle => 'Advanced filters';
+
+  @override
+  String get globalSearchResultTypeSection => 'Result type';
+
+  @override
+  String get globalSearchCreatedTimeSection => 'Created time';
+
+  @override
+  String get globalSearchTypeNovelEventOutline => 'Novel outline events';
+
+  @override
+  String globalSearchStartDateLabel(String date) {
+    return 'Start: $date';
+  }
+
+  @override
+  String globalSearchEndDateLabel(String date) {
+    return 'End: $date';
+  }
+
+  @override
+  String get globalSearchClearTimeRange => 'Clear time range';
+
+  @override
+  String get globalSearchApplyFilter => 'Apply filters';
+
+  @override
+  String get globalSearchWorkspaceUnlabeled => 'Unlabeled workspace';
+
+  @override
+  String get globalSearchWorkspaceCurrent => 'Current workspace';
+
+  @override
+  String get globalSearchViewActions => 'View actions';
+
+  @override
+  String get globalSearchRename => 'Rename';
+
+  @override
+  String get globalSearchDeleteView => 'Delete view';
+
+  @override
+  String get globalSearchRenameViewTitle => 'Rename search view';
+
+  @override
+  String get globalSearchRenameViewHint => 'Enter a new view name';
+
+  @override
+  String get globalSearchRenamedView => 'Renamed search view.';
+
+  @override
+  String get globalSearchDeleteViewTitle => 'Delete search view';
+
+  @override
+  String globalSearchDeleteViewConfirmRemote(String title) {
+    return 'Delete \"$title\"? Signed-in mode will sync removal to all clients with this saved view data.';
+  }
+
+  @override
+  String globalSearchDeleteViewConfirmLocal(String title) {
+    return 'Delete \"$title\"? This only removes the locally saved view.';
+  }
+
+  @override
+  String get globalSearchPinnedViewsTitle => 'Pinned views';
+
+  @override
+  String get globalSearchRecentViewsTitle => 'Recent views';
+
+  @override
+  String get globalSearchQuickTemplatesTitle => 'Quick templates';
+
+  @override
+  String get globalSearchLiveSuggestionsTitle => 'Live suggestions';
+
+  @override
+  String get globalSearchRecentSearchTitle => 'Recent searches';
+
+  @override
+  String get globalSearchClearHistory => 'Clear history';
+
+  @override
+  String get globalSearchNoPreviewHint =>
+      'No preview matches yet. Press Enter for full results.';
+
+  @override
+  String get globalSearchMinCharsHint =>
+      'Enter at least 2 characters to search.';
+
+  @override
+  String get globalSearchHistoryCleared => 'Search history cleared.';
+
+  @override
+  String globalSearchClearHistoryFailed(String error) {
+    return 'Failed to clear history: $error';
+  }
+
+  @override
+  String globalSearchEnterAtLeastChars(int count) {
+    return 'Enter at least $count characters.';
+  }
+
+  @override
+  String globalSearchMaxCharsHint(int count) {
+    return 'Search query is too long. Limit to $count characters.';
+  }
+
+  @override
+  String get globalSearchInputHint => 'Search projects, scripts, assets...';
+
+  @override
+  String get globalSearchActionSearch => 'Search';
+
+  @override
+  String get globalSearchLocalClientPrefsTooltip =>
+      'Local client preferences (view silenced / restore confirmations)';
+
+  @override
+  String globalSearchSavedUsed(int count) {
+    return 'used=$count';
+  }
+
+  @override
+  String get globalSearchTemplateRecent7d => 'Last 7 days';
+
+  @override
+  String get globalSearchTemplateProjects30d => 'Projects in last 30 days';
+
+  @override
+  String get globalSearchTemplateScripts30d => 'Scripts in last 30 days';
 }

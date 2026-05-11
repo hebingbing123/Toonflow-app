@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api/search/api.dart';
 
 /// Advanced filter panel for search results
@@ -68,14 +69,15 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Set time range start date
   Future<void> _selectStartDate() async {
+    final l10n = AppLocalizations.of(context)!;
     final picked = await showDatePicker(
       context: context,
       initialDate: _currentFilters.timeFrom ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      helpText: '选择起始日期',
-      cancelText: '取消',
-      confirmText: '确定',
+      helpText: l10n.globalSearchChooseStartDate,
+      cancelText: l10n.globalSearchCancel,
+      confirmText: l10n.globalSearchConfirm,
     );
 
     if (picked != null) {
@@ -87,14 +89,15 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Set time range end date
   Future<void> _selectEndDate() async {
+    final l10n = AppLocalizations.of(context)!;
     final picked = await showDatePicker(
       context: context,
       initialDate: _currentFilters.timeTo ?? DateTime.now(),
       firstDate: _currentFilters.timeFrom ?? DateTime(2020),
       lastDate: DateTime.now(),
-      helpText: '选择结束日期',
-      cancelText: '取消',
-      confirmText: '确定',
+      helpText: l10n.globalSearchChooseEndDate,
+      cancelText: l10n.globalSearchCancel,
+      confirmText: l10n.globalSearchConfirm,
     );
 
     if (picked != null) {
@@ -117,12 +120,13 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Apply current filters
   void _applyFilters() {
+    final l10n = AppLocalizations.of(context)!;
     widget.onFiltersChanged(_currentFilters);
     
     // Show feedback
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('已应用 ${_currentFilters.activeFilterCount} 个过滤条件'),
+        content: Text(l10n.globalSearchAppliedFilters(_currentFilters.activeFilterCount)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -130,6 +134,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Clear all filters
   void _clearAllFilters() {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _currentFilters = SearchFilters.empty();
     });
@@ -137,8 +142,8 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
     
     // Show feedback
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('已清除所有过滤条件'),
+      SnackBar(
+        content: Text(l10n.globalSearchClearedAllFilters),
         duration: Duration(seconds: 2),
       ),
     );
@@ -221,6 +226,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build header section
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context)!;
     final activeCount = _currentFilters.activeFilterCount;
     
     return Container(
@@ -234,7 +240,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           ),
           const SizedBox(width: 8),
           Text(
-            '高级过滤',
+            l10n.globalSearchAdvancedFilterTitle,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -263,18 +269,19 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build filter content
   Widget _buildFilterContent() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Result type filter
-        _buildSectionTitle('结果类型'),
+        _buildSectionTitle(l10n.globalSearchResultTypeSection),
         const SizedBox(height: 8),
         _buildResultTypeFilters(),
         
         const SizedBox(height: 24),
         
         // Time range filter
-        _buildSectionTitle('创建时间'),
+        _buildSectionTitle(l10n.globalSearchCreatedTimeSection),
         const SizedBox(height: 8),
         _buildTimeRangeFilters(),
       ],
@@ -294,16 +301,17 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build result type filter checkboxes
   Widget _buildResultTypeFilters() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         CheckboxListTile(
           value: _currentFilters.resultTypes.contains(ResultType.project),
           onChanged: (_) => _toggleResultType(ResultType.project),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.folder, size: 18),
               SizedBox(width: 8),
-              Text('项目'),
+              Text(l10n.globalSearchTypeProject),
             ],
           ),
           dense: true,
@@ -313,11 +321,11 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         CheckboxListTile(
           value: _currentFilters.resultTypes.contains(ResultType.script),
           onChanged: (_) => _toggleResultType(ResultType.script),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.description, size: 18),
               SizedBox(width: 8),
-              Text('剧本'),
+              Text(l10n.globalSearchTypeScript),
             ],
           ),
           dense: true,
@@ -327,11 +335,11 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         CheckboxListTile(
           value: _currentFilters.resultTypes.contains(ResultType.asset),
           onChanged: (_) => _toggleResultType(ResultType.asset),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.image, size: 18),
               SizedBox(width: 8),
-              Text('资产'),
+              Text(l10n.globalSearchTypeAsset),
             ],
           ),
           dense: true,
@@ -341,11 +349,11 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         CheckboxListTile(
           value: _currentFilters.resultTypes.contains(ResultType.novel),
           onChanged: (_) => _toggleResultType(ResultType.novel),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.menu_book, size: 18),
               SizedBox(width: 8),
-              Text('小说章节'),
+              Text(l10n.globalSearchTypeNovel),
             ],
           ),
           dense: true,
@@ -355,11 +363,11 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         CheckboxListTile(
           value: _currentFilters.resultTypes.contains(ResultType.novelEvent),
           onChanged: (_) => _toggleResultType(ResultType.novelEvent),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.event_note, size: 18),
               SizedBox(width: 8),
-              Text('小说大纲事件'),
+              Text(l10n.globalSearchTypeNovelEventOutline),
             ],
           ),
           dense: true,
@@ -372,6 +380,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build time range filter controls
   Widget _buildTimeRangeFilters() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -381,8 +390,8 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           icon: const Icon(Icons.calendar_today, size: 18),
           label: Text(
             _currentFilters.timeFrom != null
-                ? '起始: ${_formatDate(_currentFilters.timeFrom!)}'
-                : '选择起始日期',
+                ? l10n.globalSearchStartDateLabel(_formatDate(_currentFilters.timeFrom!))
+                : l10n.globalSearchChooseStartDate,
             style: const TextStyle(fontSize: 14),
           ),
           style: OutlinedButton.styleFrom(
@@ -399,8 +408,8 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           icon: const Icon(Icons.calendar_today, size: 18),
           label: Text(
             _currentFilters.timeTo != null
-                ? '结束: ${_formatDate(_currentFilters.timeTo!)}'
-                : '选择结束日期',
+                ? l10n.globalSearchEndDateLabel(_formatDate(_currentFilters.timeTo!))
+                : l10n.globalSearchChooseEndDate,
             style: const TextStyle(fontSize: 14),
           ),
           style: OutlinedButton.styleFrom(
@@ -415,7 +424,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           TextButton.icon(
             onPressed: _clearTimeRange,
             icon: const Icon(Icons.clear, size: 18),
-            label: const Text('清除时间范围'),
+            label: Text(l10n.globalSearchClearTimeRange),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
@@ -427,6 +436,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build action buttons
   Widget _buildActionButtons() {
+    final l10n = AppLocalizations.of(context)!;
     final hasActiveFilters = _currentFilters.hasActiveFilters;
     
     return Container(
@@ -438,7 +448,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           FilledButton.icon(
             onPressed: _applyFilters,
             icon: const Icon(Icons.check, size: 18),
-            label: const Text('应用过滤'),
+            label: Text(l10n.globalSearchApplyFilter),
           ),
           
           const SizedBox(height: 8),
@@ -447,7 +457,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           OutlinedButton.icon(
             onPressed: hasActiveFilters ? _clearAllFilters : null,
             icon: const Icon(Icons.clear_all, size: 18),
-            label: const Text('清除过滤'),
+            label: Text(l10n.globalSearchClearFilters),
           ),
         ],
       ),

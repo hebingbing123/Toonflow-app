@@ -1793,5 +1793,136 @@
       }
     }
   },
-  "globalSearchNextPage": "Next page"
+  "globalSearchNextPage": "Next page",
+  "globalSearchTimeJustNow": "just now",
+  "globalSearchTimeMinutesAgo": "{minutes}m ago",
+  "@globalSearchTimeMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchTimeHoursAgo": "{hours}h ago",
+  "@globalSearchTimeHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchTimeDaysAgo": "{days}d ago",
+  "@globalSearchTimeDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchChooseStartDate": "Choose start date",
+  "globalSearchChooseEndDate": "Choose end date",
+  "globalSearchConfirm": "Confirm",
+  "globalSearchAppliedFilters": "Applied {count} filters",
+  "@globalSearchAppliedFilters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchClearedAllFilters": "Cleared all filters.",
+  "globalSearchAdvancedFilterTitle": "Advanced filters",
+  "globalSearchResultTypeSection": "Result type",
+  "globalSearchCreatedTimeSection": "Created time",
+  "globalSearchTypeNovelEventOutline": "Novel outline events",
+  "globalSearchStartDateLabel": "Start: {date}",
+  "@globalSearchStartDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchEndDateLabel": "End: {date}",
+  "@globalSearchEndDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchClearTimeRange": "Clear time range",
+  "globalSearchApplyFilter": "Apply filters",
+  "globalSearchWorkspaceUnlabeled": "Unlabeled workspace",
+  "globalSearchWorkspaceCurrent": "Current workspace",
+  "globalSearchViewActions": "View actions",
+  "globalSearchRename": "Rename",
+  "globalSearchDeleteView": "Delete view",
+  "globalSearchRenameViewTitle": "Rename search view",
+  "globalSearchRenameViewHint": "Enter a new view name",
+  "globalSearchRenamedView": "Renamed search view.",
+  "globalSearchDeleteViewTitle": "Delete search view",
+  "globalSearchDeleteViewConfirmRemote": "Delete \"{title}\"? Signed-in mode will sync removal to all clients with this saved view data.",
+  "@globalSearchDeleteViewConfirmRemote": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchDeleteViewConfirmLocal": "Delete \"{title}\"? This only removes the locally saved view.",
+  "@globalSearchDeleteViewConfirmLocal": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchPinnedViewsTitle": "Pinned views",
+  "globalSearchRecentViewsTitle": "Recent views",
+  "globalSearchQuickTemplatesTitle": "Quick templates",
+  "globalSearchLiveSuggestionsTitle": "Live suggestions",
+  "globalSearchRecentSearchTitle": "Recent searches",
+  "globalSearchClearHistory": "Clear history",
+  "globalSearchNoPreviewHint": "No preview matches yet. Press Enter for full results.",
+  "globalSearchMinCharsHint": "Enter at least 2 characters to search.",
+  "globalSearchHistoryCleared": "Search history cleared.",
+  "globalSearchClearHistoryFailed": "Failed to clear history: {error}",
+  "@globalSearchClearHistoryFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchEnterAtLeastChars": "Enter at least {count} characters.",
+  "@globalSearchEnterAtLeastChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchMaxCharsHint": "Search query is too long. Limit to {count} characters.",
+  "@globalSearchMaxCharsHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchInputHint": "Search projects, scripts, assets...",
+  "globalSearchActionSearch": "Search",
+  "globalSearchLocalClientPrefsTooltip": "Local client preferences (view silenced / restore confirmations)",
+  "globalSearchSavedUsed": "used={count}",
+  "globalSearchTemplateRecent7d": "Last 7 days",
+  "globalSearchTemplateProjects30d": "Projects in last 30 days",
+  "globalSearchTemplateScripts30d": "Scripts in last 30 days",
+  "@globalSearchSavedUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
