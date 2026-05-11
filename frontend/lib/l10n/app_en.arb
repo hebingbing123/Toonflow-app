@@ -3457,5 +3457,136 @@
       }
     }
   },
-  "adminConsoleWorkspaceContextRepairing": "Repairing workspace context..."
+  "adminConsoleWorkspaceContextRepairing": "Repairing workspace context...",
+  "adminConsoleWorkspaceGovernanceTitle": "Workspace governance",
+  "adminConsoleWorkspaceGovernancePersonalHint": "Personal workspace cannot be archived; internal notes (metadata.internalOps) can be maintained.",
+  "adminConsoleWorkspaceGovernanceEnterpriseHint": "Enterprise workspace can be archived (soft-frozen) or restored; internal notes are written to metadata.internalOps.",
+  "adminConsoleLifecyclePreserve": "Keep lifecycle unchanged",
+  "adminConsoleLifecycleArchive": "Archive",
+  "adminConsoleLifecycleRestore": "Restore",
+  "adminConsoleNoteActionPreserve": "Keep note unchanged",
+  "adminConsoleNoteActionClear": "Clear note",
+  "adminConsoleNoteActionSet": "Write/Update note",
+  "adminConsoleInternalNoteBodyLabel": "Internal note body",
+  "adminConsoleInternalNoteBodySubmitHint": "Submitted only when \"Write/Update note\" is selected",
+  "adminConsoleInternalNoteBodyEditableHint": "Editable after selecting \"Write/Update note\"",
+  "adminConsoleSaveGovernance": "Save governance",
+  "adminConsoleWorkspaceMemberRemediationTitle": "Member remediation",
+  "adminConsoleWorkspaceMemberRemediationHint": "Internal ops can directly add member, change role, or remove member. Removal also falls back current workspace and clears stale project ACL entries under this workspace.",
+  "adminConsoleMemberUserIdLabel": "Member userId",
+  "adminConsoleMemberUserIdHint": "Enter user UUID to add member or change role",
+  "adminConsoleRoleMember": "member",
+  "adminConsoleRoleAdmin": "admin",
+  "adminConsoleProcessing": "Processing...",
+  "adminConsoleUpsertMemberAction": "Add member / change role",
+  "adminConsoleSetAsMember": "Set as member",
+  "adminConsoleSetAsAdmin": "Set as admin",
+  "adminConsoleRemoveAction": "Remove",
+  "adminConsoleOwnerTransferHint": "Use owner transfer for owner",
+  "adminConsoleWorkspaceOwnerRemediationTitle": "Owner remediation",
+  "adminConsoleWorkspaceOwnerRemediationPersonalHint": "Owner transfer is not allowed for personal workspace.",
+  "adminConsoleWorkspaceOwnerRemediationHint": "Internal ops can directly remediate workspace owner. Target user must already be a workspace member, and previous owner is automatically downgraded to admin.",
+  "adminConsoleTargetOwnerUserIdLabel": "Target owner userId",
+  "adminConsoleTargetOwnerUserIdHint": "Enter target member UUID",
+  "adminConsoleTransferOwnerAction": "Transfer owner",
+  "adminConsoleSetAsOwner": "Set as owner",
+  "adminConsoleAclSummaryTitle": "ACL summary",
+  "adminConsoleRoleCountOwner": "owner {count}",
+  "@adminConsoleRoleCountOwner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleRoleCountAdmin": "admin {count}",
+  "@adminConsoleRoleCountAdmin": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleRoleCountMember": "member {count}",
+  "@adminConsoleRoleCountMember": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleNoProjectAclSummary": "No project ACL summary in current workspace",
+  "adminConsoleExplicitAclCount": "explicit {count}",
+  "@adminConsoleExplicitAclCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleEditorCount": "editor {count}",
+  "@adminConsoleEditorCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleViewerCount": "viewer {count}",
+  "@adminConsoleViewerCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleViewAction": "View",
+  "adminConsoleBatchProjectGovernanceTitle": "Batch project governance",
+  "adminConsoleBatchProjectGovernanceHint": "Batch apply archive / restore / internal note writes to selected projects under current workspace for clustered ACL and governance remediation.",
+  "adminConsoleBatchLifecyclePreserve": "Keep archive state unchanged",
+  "adminConsoleBatchLifecycleArchive": "Batch archive",
+  "adminConsoleBatchLifecycleRestore": "Batch restore",
+  "adminConsoleBatchNotePreserve": "Keep note unchanged",
+  "adminConsoleBatchNoteClear": "Clear note",
+  "adminConsoleBatchNoteSet": "Write note",
+  "adminConsoleBatchNoteBodyLabel": "Batch internal note",
+  "adminConsoleBatchNoteBodySubmitHint": "Submitted only when \"Write note\" is selected",
+  "adminConsoleBatchNoteBodyEditableHint": "Editable after selecting \"Write note\"",
+  "adminConsoleBatchApplyAction": "Batch apply to {count} projects",
+  "@adminConsoleBatchApplyAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleSectionMembers": "Members",
+  "adminConsoleSectionRecentProjects": "Recent projects",
+  "adminConsoleProjectOwnerRemediationTitle": "Project owner remediation",
+  "adminConsoleProjectOwnerRemediationHint": "Internal ops can directly remediate project owner. Target user must already be a member in the project workspace. If ACL is enabled, old owner with member role keeps editor access automatically.",
+  "adminConsoleTargetProjectOwnerUserIdHint": "Enter target workspace member UUID",
+  "adminConsoleRepairProjectOwnerAction": "Repair project owner",
+  "adminConsoleProjectGovernanceTitle": "Project governance",
+  "adminConsoleProjectGovernanceHint": "After archive, the project is hidden from member lists and aggregate statistics, and all project-scope APIs return 403; restore reverses this. Internal note is written to metadata.internalOps.",
+  "adminConsoleProjectTitleWithName": "{name} (#{numericId})",
+  "@adminConsoleProjectTitleWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleProjectTitle": "Project #{numericId}",
+  "@adminConsoleProjectTitle": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleSectionExplicitAclMembers": "Explicit ACL members",
+  "adminConsoleSectionWorkspaceCandidates": "Workspace candidate members"
 }

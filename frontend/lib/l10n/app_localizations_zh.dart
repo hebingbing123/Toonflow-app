@@ -4556,4 +4556,227 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get adminConsoleWorkspaceContextRepairing => '正在修复 workspace 上下文…';
+
+  @override
+  String get adminConsoleWorkspaceGovernanceTitle => 'Workspace 治理';
+
+  @override
+  String get adminConsoleWorkspaceGovernancePersonalHint =>
+      '个人 workspace 不可归档；可维护内部备注（metadata.internalOps）。';
+
+  @override
+  String get adminConsoleWorkspaceGovernanceEnterpriseHint =>
+      '企业 workspace：可归档（软冻结）或解档；内部备注写入 metadata.internalOps。';
+
+  @override
+  String get adminConsoleLifecyclePreserve => '不动归档状态';
+
+  @override
+  String get adminConsoleLifecycleArchive => '归档';
+
+  @override
+  String get adminConsoleLifecycleRestore => '解档';
+
+  @override
+  String get adminConsoleNoteActionPreserve => '不变';
+
+  @override
+  String get adminConsoleNoteActionClear => '清除';
+
+  @override
+  String get adminConsoleNoteActionSet => '写入/更新';
+
+  @override
+  String get adminConsoleInternalNoteBodyLabel => '内部备注正文';
+
+  @override
+  String get adminConsoleInternalNoteBodySubmitHint => '仅在选择「写入/更新」时提交';
+
+  @override
+  String get adminConsoleInternalNoteBodyEditableHint => '选择「写入/更新」后可编辑';
+
+  @override
+  String get adminConsoleSaveGovernance => '保存治理';
+
+  @override
+  String get adminConsoleWorkspaceMemberRemediationTitle => '成员修复';
+
+  @override
+  String get adminConsoleWorkspaceMemberRemediationHint =>
+      '支持 internal ops 直接补成员、改角色、移除成员；移除时会顺带回退 current workspace 并清理该 workspace 下的项目 ACL 残留。';
+
+  @override
+  String get adminConsoleMemberUserIdLabel => '成员 userId';
+
+  @override
+  String get adminConsoleMemberUserIdHint => '输入要补成员或修角色的用户 UUID';
+
+  @override
+  String get adminConsoleRoleMember => 'member';
+
+  @override
+  String get adminConsoleRoleAdmin => 'admin';
+
+  @override
+  String get adminConsoleProcessing => '处理中…';
+
+  @override
+  String get adminConsoleUpsertMemberAction => '补成员 / 改角色';
+
+  @override
+  String get adminConsoleSetAsMember => '设为 member';
+
+  @override
+  String get adminConsoleSetAsAdmin => '设为 admin';
+
+  @override
+  String get adminConsoleRemoveAction => '移除';
+
+  @override
+  String get adminConsoleOwnerTransferHint => 'owner 请走 owner transfer';
+
+  @override
+  String get adminConsoleWorkspaceOwnerRemediationTitle => 'Owner 补救';
+
+  @override
+  String get adminConsoleWorkspaceOwnerRemediationPersonalHint =>
+      'personal workspace 不允许 owner transfer。';
+
+  @override
+  String get adminConsoleWorkspaceOwnerRemediationHint =>
+      'internal ops 可直接修复 workspace owner；目标用户必须已是该 workspace 成员，原 owner 会自动降为 admin。';
+
+  @override
+  String get adminConsoleTargetOwnerUserIdLabel => '目标 owner userId';
+
+  @override
+  String get adminConsoleTargetOwnerUserIdHint => '输入目标成员 UUID';
+
+  @override
+  String get adminConsoleTransferOwnerAction => '转让 owner';
+
+  @override
+  String get adminConsoleSetAsOwner => '设为 owner';
+
+  @override
+  String get adminConsoleAclSummaryTitle => 'ACL 摘要';
+
+  @override
+  String adminConsoleRoleCountOwner(int count) {
+    return 'owner $count';
+  }
+
+  @override
+  String adminConsoleRoleCountAdmin(int count) {
+    return 'admin $count';
+  }
+
+  @override
+  String adminConsoleRoleCountMember(int count) {
+    return 'member $count';
+  }
+
+  @override
+  String get adminConsoleNoProjectAclSummary =>
+      '当前 workspace 暂无 project ACL 摘要';
+
+  @override
+  String adminConsoleExplicitAclCount(int count) {
+    return 'explicit $count';
+  }
+
+  @override
+  String adminConsoleEditorCount(int count) {
+    return 'editor $count';
+  }
+
+  @override
+  String adminConsoleViewerCount(int count) {
+    return 'viewer $count';
+  }
+
+  @override
+  String get adminConsoleViewAction => '查看';
+
+  @override
+  String get adminConsoleBatchProjectGovernanceTitle => '批量 Project 治理';
+
+  @override
+  String get adminConsoleBatchProjectGovernanceHint =>
+      '对当前 workspace 下选中的 project 批量执行 archive / restore / 内部备注写入，用于集中处理同类 ACL 与治理问题。';
+
+  @override
+  String get adminConsoleBatchLifecyclePreserve => '不动归档';
+
+  @override
+  String get adminConsoleBatchLifecycleArchive => '批量归档';
+
+  @override
+  String get adminConsoleBatchLifecycleRestore => '批量解档';
+
+  @override
+  String get adminConsoleBatchNotePreserve => '备注不变';
+
+  @override
+  String get adminConsoleBatchNoteClear => '清除备注';
+
+  @override
+  String get adminConsoleBatchNoteSet => '写入备注';
+
+  @override
+  String get adminConsoleBatchNoteBodyLabel => '批量内部备注';
+
+  @override
+  String get adminConsoleBatchNoteBodySubmitHint => '仅在选择「写入备注」时提交';
+
+  @override
+  String get adminConsoleBatchNoteBodyEditableHint => '选择「写入备注」后可编辑';
+
+  @override
+  String adminConsoleBatchApplyAction(int count) {
+    return '批量应用到 $count 个 project';
+  }
+
+  @override
+  String get adminConsoleSectionMembers => '成员';
+
+  @override
+  String get adminConsoleSectionRecentProjects => '最近项目';
+
+  @override
+  String get adminConsoleProjectOwnerRemediationTitle => 'Project Owner 补救';
+
+  @override
+  String get adminConsoleProjectOwnerRemediationHint =>
+      'internal ops 可直接修复 project owner；目标用户必须已是该 project 所属 workspace 成员。若该项目已启用 ACL，旧 owner 为普通 member 时会自动保留 editor 访问。';
+
+  @override
+  String get adminConsoleTargetProjectOwnerUserIdHint =>
+      '输入目标 workspace 成员 UUID';
+
+  @override
+  String get adminConsoleRepairProjectOwnerAction => '修复 project owner';
+
+  @override
+  String get adminConsoleProjectGovernanceTitle => 'Project 治理';
+
+  @override
+  String get adminConsoleProjectGovernanceHint =>
+      '归档后该项目从成员列表与汇总统计中隐藏，且所有需 project scope 的 API 返回 403；解档恢复。内部备注写入 metadata.internalOps。';
+
+  @override
+  String adminConsoleProjectTitleWithName(String name, int numericId) {
+    return '$name (#$numericId)';
+  }
+
+  @override
+  String adminConsoleProjectTitle(int numericId) {
+    return 'Project #$numericId';
+  }
+
+  @override
+  String get adminConsoleSectionExplicitAclMembers => '显式 ACL 成员';
+
+  @override
+  String get adminConsoleSectionWorkspaceCandidates => 'Workspace 候选成员';
 }

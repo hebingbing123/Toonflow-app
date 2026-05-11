@@ -7827,6 +7827,396 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Repairing workspace context...'**
   String get adminConsoleWorkspaceContextRepairing;
+
+  /// No description provided for @adminConsoleWorkspaceGovernanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace governance'**
+  String get adminConsoleWorkspaceGovernanceTitle;
+
+  /// No description provided for @adminConsoleWorkspaceGovernancePersonalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal workspace cannot be archived; internal notes (metadata.internalOps) can be maintained.'**
+  String get adminConsoleWorkspaceGovernancePersonalHint;
+
+  /// No description provided for @adminConsoleWorkspaceGovernanceEnterpriseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise workspace can be archived (soft-frozen) or restored; internal notes are written to metadata.internalOps.'**
+  String get adminConsoleWorkspaceGovernanceEnterpriseHint;
+
+  /// No description provided for @adminConsoleLifecyclePreserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep lifecycle unchanged'**
+  String get adminConsoleLifecyclePreserve;
+
+  /// No description provided for @adminConsoleLifecycleArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get adminConsoleLifecycleArchive;
+
+  /// No description provided for @adminConsoleLifecycleRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get adminConsoleLifecycleRestore;
+
+  /// No description provided for @adminConsoleNoteActionPreserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep note unchanged'**
+  String get adminConsoleNoteActionPreserve;
+
+  /// No description provided for @adminConsoleNoteActionClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear note'**
+  String get adminConsoleNoteActionClear;
+
+  /// No description provided for @adminConsoleNoteActionSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Write/Update note'**
+  String get adminConsoleNoteActionSet;
+
+  /// No description provided for @adminConsoleInternalNoteBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal note body'**
+  String get adminConsoleInternalNoteBodyLabel;
+
+  /// No description provided for @adminConsoleInternalNoteBodySubmitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted only when \"Write/Update note\" is selected'**
+  String get adminConsoleInternalNoteBodySubmitHint;
+
+  /// No description provided for @adminConsoleInternalNoteBodyEditableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Editable after selecting \"Write/Update note\"'**
+  String get adminConsoleInternalNoteBodyEditableHint;
+
+  /// No description provided for @adminConsoleSaveGovernance.
+  ///
+  /// In en, this message translates to:
+  /// **'Save governance'**
+  String get adminConsoleSaveGovernance;
+
+  /// No description provided for @adminConsoleWorkspaceMemberRemediationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Member remediation'**
+  String get adminConsoleWorkspaceMemberRemediationTitle;
+
+  /// No description provided for @adminConsoleWorkspaceMemberRemediationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal ops can directly add member, change role, or remove member. Removal also falls back current workspace and clears stale project ACL entries under this workspace.'**
+  String get adminConsoleWorkspaceMemberRemediationHint;
+
+  /// No description provided for @adminConsoleMemberUserIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Member userId'**
+  String get adminConsoleMemberUserIdLabel;
+
+  /// No description provided for @adminConsoleMemberUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter user UUID to add member or change role'**
+  String get adminConsoleMemberUserIdHint;
+
+  /// No description provided for @adminConsoleRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'member'**
+  String get adminConsoleRoleMember;
+
+  /// No description provided for @adminConsoleRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'admin'**
+  String get adminConsoleRoleAdmin;
+
+  /// No description provided for @adminConsoleProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get adminConsoleProcessing;
+
+  /// No description provided for @adminConsoleUpsertMemberAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member / change role'**
+  String get adminConsoleUpsertMemberAction;
+
+  /// No description provided for @adminConsoleSetAsMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as member'**
+  String get adminConsoleSetAsMember;
+
+  /// No description provided for @adminConsoleSetAsAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as admin'**
+  String get adminConsoleSetAsAdmin;
+
+  /// No description provided for @adminConsoleRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get adminConsoleRemoveAction;
+
+  /// No description provided for @adminConsoleOwnerTransferHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use owner transfer for owner'**
+  String get adminConsoleOwnerTransferHint;
+
+  /// No description provided for @adminConsoleWorkspaceOwnerRemediationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner remediation'**
+  String get adminConsoleWorkspaceOwnerRemediationTitle;
+
+  /// No description provided for @adminConsoleWorkspaceOwnerRemediationPersonalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner transfer is not allowed for personal workspace.'**
+  String get adminConsoleWorkspaceOwnerRemediationPersonalHint;
+
+  /// No description provided for @adminConsoleWorkspaceOwnerRemediationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal ops can directly remediate workspace owner. Target user must already be a workspace member, and previous owner is automatically downgraded to admin.'**
+  String get adminConsoleWorkspaceOwnerRemediationHint;
+
+  /// No description provided for @adminConsoleTargetOwnerUserIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target owner userId'**
+  String get adminConsoleTargetOwnerUserIdLabel;
+
+  /// No description provided for @adminConsoleTargetOwnerUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter target member UUID'**
+  String get adminConsoleTargetOwnerUserIdHint;
+
+  /// No description provided for @adminConsoleTransferOwnerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer owner'**
+  String get adminConsoleTransferOwnerAction;
+
+  /// No description provided for @adminConsoleSetAsOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as owner'**
+  String get adminConsoleSetAsOwner;
+
+  /// No description provided for @adminConsoleAclSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ACL summary'**
+  String get adminConsoleAclSummaryTitle;
+
+  /// No description provided for @adminConsoleRoleCountOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'owner {count}'**
+  String adminConsoleRoleCountOwner(int count);
+
+  /// No description provided for @adminConsoleRoleCountAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'admin {count}'**
+  String adminConsoleRoleCountAdmin(int count);
+
+  /// No description provided for @adminConsoleRoleCountMember.
+  ///
+  /// In en, this message translates to:
+  /// **'member {count}'**
+  String adminConsoleRoleCountMember(int count);
+
+  /// No description provided for @adminConsoleNoProjectAclSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'No project ACL summary in current workspace'**
+  String get adminConsoleNoProjectAclSummary;
+
+  /// No description provided for @adminConsoleExplicitAclCount.
+  ///
+  /// In en, this message translates to:
+  /// **'explicit {count}'**
+  String adminConsoleExplicitAclCount(int count);
+
+  /// No description provided for @adminConsoleEditorCount.
+  ///
+  /// In en, this message translates to:
+  /// **'editor {count}'**
+  String adminConsoleEditorCount(int count);
+
+  /// No description provided for @adminConsoleViewerCount.
+  ///
+  /// In en, this message translates to:
+  /// **'viewer {count}'**
+  String adminConsoleViewerCount(int count);
+
+  /// No description provided for @adminConsoleViewAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get adminConsoleViewAction;
+
+  /// No description provided for @adminConsoleBatchProjectGovernanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch project governance'**
+  String get adminConsoleBatchProjectGovernanceTitle;
+
+  /// No description provided for @adminConsoleBatchProjectGovernanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch apply archive / restore / internal note writes to selected projects under current workspace for clustered ACL and governance remediation.'**
+  String get adminConsoleBatchProjectGovernanceHint;
+
+  /// No description provided for @adminConsoleBatchLifecyclePreserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep archive state unchanged'**
+  String get adminConsoleBatchLifecyclePreserve;
+
+  /// No description provided for @adminConsoleBatchLifecycleArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch archive'**
+  String get adminConsoleBatchLifecycleArchive;
+
+  /// No description provided for @adminConsoleBatchLifecycleRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch restore'**
+  String get adminConsoleBatchLifecycleRestore;
+
+  /// No description provided for @adminConsoleBatchNotePreserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep note unchanged'**
+  String get adminConsoleBatchNotePreserve;
+
+  /// No description provided for @adminConsoleBatchNoteClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear note'**
+  String get adminConsoleBatchNoteClear;
+
+  /// No description provided for @adminConsoleBatchNoteSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Write note'**
+  String get adminConsoleBatchNoteSet;
+
+  /// No description provided for @adminConsoleBatchNoteBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch internal note'**
+  String get adminConsoleBatchNoteBodyLabel;
+
+  /// No description provided for @adminConsoleBatchNoteBodySubmitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted only when \"Write note\" is selected'**
+  String get adminConsoleBatchNoteBodySubmitHint;
+
+  /// No description provided for @adminConsoleBatchNoteBodyEditableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Editable after selecting \"Write note\"'**
+  String get adminConsoleBatchNoteBodyEditableHint;
+
+  /// No description provided for @adminConsoleBatchApplyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch apply to {count} projects'**
+  String adminConsoleBatchApplyAction(int count);
+
+  /// No description provided for @adminConsoleSectionMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get adminConsoleSectionMembers;
+
+  /// No description provided for @adminConsoleSectionRecentProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent projects'**
+  String get adminConsoleSectionRecentProjects;
+
+  /// No description provided for @adminConsoleProjectOwnerRemediationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project owner remediation'**
+  String get adminConsoleProjectOwnerRemediationTitle;
+
+  /// No description provided for @adminConsoleProjectOwnerRemediationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal ops can directly remediate project owner. Target user must already be a member in the project workspace. If ACL is enabled, old owner with member role keeps editor access automatically.'**
+  String get adminConsoleProjectOwnerRemediationHint;
+
+  /// No description provided for @adminConsoleTargetProjectOwnerUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter target workspace member UUID'**
+  String get adminConsoleTargetProjectOwnerUserIdHint;
+
+  /// No description provided for @adminConsoleRepairProjectOwnerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair project owner'**
+  String get adminConsoleRepairProjectOwnerAction;
+
+  /// No description provided for @adminConsoleProjectGovernanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project governance'**
+  String get adminConsoleProjectGovernanceTitle;
+
+  /// No description provided for @adminConsoleProjectGovernanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After archive, the project is hidden from member lists and aggregate statistics, and all project-scope APIs return 403; restore reverses this. Internal note is written to metadata.internalOps.'**
+  String get adminConsoleProjectGovernanceHint;
+
+  /// No description provided for @adminConsoleProjectTitleWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (#{numericId})'**
+  String adminConsoleProjectTitleWithName(String name, int numericId);
+
+  /// No description provided for @adminConsoleProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project #{numericId}'**
+  String adminConsoleProjectTitle(int numericId);
+
+  /// No description provided for @adminConsoleSectionExplicitAclMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit ACL members'**
+  String get adminConsoleSectionExplicitAclMembers;
+
+  /// No description provided for @adminConsoleSectionWorkspaceCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace candidate members'**
+  String get adminConsoleSectionWorkspaceCandidates;
 }
 
 class _AppLocalizationsDelegate

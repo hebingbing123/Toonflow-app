@@ -3457,5 +3457,136 @@
       }
     }
   },
-  "adminConsoleWorkspaceContextRepairing": "正在修复 workspace 上下文…"
+  "adminConsoleWorkspaceContextRepairing": "正在修复 workspace 上下文…",
+  "adminConsoleWorkspaceGovernanceTitle": "Workspace 治理",
+  "adminConsoleWorkspaceGovernancePersonalHint": "个人 workspace 不可归档；可维护内部备注（metadata.internalOps）。",
+  "adminConsoleWorkspaceGovernanceEnterpriseHint": "企业 workspace：可归档（软冻结）或解档；内部备注写入 metadata.internalOps。",
+  "adminConsoleLifecyclePreserve": "不动归档状态",
+  "adminConsoleLifecycleArchive": "归档",
+  "adminConsoleLifecycleRestore": "解档",
+  "adminConsoleNoteActionPreserve": "不变",
+  "adminConsoleNoteActionClear": "清除",
+  "adminConsoleNoteActionSet": "写入/更新",
+  "adminConsoleInternalNoteBodyLabel": "内部备注正文",
+  "adminConsoleInternalNoteBodySubmitHint": "仅在选择「写入/更新」时提交",
+  "adminConsoleInternalNoteBodyEditableHint": "选择「写入/更新」后可编辑",
+  "adminConsoleSaveGovernance": "保存治理",
+  "adminConsoleWorkspaceMemberRemediationTitle": "成员修复",
+  "adminConsoleWorkspaceMemberRemediationHint": "支持 internal ops 直接补成员、改角色、移除成员；移除时会顺带回退 current workspace 并清理该 workspace 下的项目 ACL 残留。",
+  "adminConsoleMemberUserIdLabel": "成员 userId",
+  "adminConsoleMemberUserIdHint": "输入要补成员或修角色的用户 UUID",
+  "adminConsoleRoleMember": "member",
+  "adminConsoleRoleAdmin": "admin",
+  "adminConsoleProcessing": "处理中…",
+  "adminConsoleUpsertMemberAction": "补成员 / 改角色",
+  "adminConsoleSetAsMember": "设为 member",
+  "adminConsoleSetAsAdmin": "设为 admin",
+  "adminConsoleRemoveAction": "移除",
+  "adminConsoleOwnerTransferHint": "owner 请走 owner transfer",
+  "adminConsoleWorkspaceOwnerRemediationTitle": "Owner 补救",
+  "adminConsoleWorkspaceOwnerRemediationPersonalHint": "personal workspace 不允许 owner transfer。",
+  "adminConsoleWorkspaceOwnerRemediationHint": "internal ops 可直接修复 workspace owner；目标用户必须已是该 workspace 成员，原 owner 会自动降为 admin。",
+  "adminConsoleTargetOwnerUserIdLabel": "目标 owner userId",
+  "adminConsoleTargetOwnerUserIdHint": "输入目标成员 UUID",
+  "adminConsoleTransferOwnerAction": "转让 owner",
+  "adminConsoleSetAsOwner": "设为 owner",
+  "adminConsoleAclSummaryTitle": "ACL 摘要",
+  "adminConsoleRoleCountOwner": "owner {count}",
+  "@adminConsoleRoleCountOwner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleRoleCountAdmin": "admin {count}",
+  "@adminConsoleRoleCountAdmin": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleRoleCountMember": "member {count}",
+  "@adminConsoleRoleCountMember": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleNoProjectAclSummary": "当前 workspace 暂无 project ACL 摘要",
+  "adminConsoleExplicitAclCount": "explicit {count}",
+  "@adminConsoleExplicitAclCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleEditorCount": "editor {count}",
+  "@adminConsoleEditorCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleViewerCount": "viewer {count}",
+  "@adminConsoleViewerCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleViewAction": "查看",
+  "adminConsoleBatchProjectGovernanceTitle": "批量 Project 治理",
+  "adminConsoleBatchProjectGovernanceHint": "对当前 workspace 下选中的 project 批量执行 archive / restore / 内部备注写入，用于集中处理同类 ACL 与治理问题。",
+  "adminConsoleBatchLifecyclePreserve": "不动归档",
+  "adminConsoleBatchLifecycleArchive": "批量归档",
+  "adminConsoleBatchLifecycleRestore": "批量解档",
+  "adminConsoleBatchNotePreserve": "备注不变",
+  "adminConsoleBatchNoteClear": "清除备注",
+  "adminConsoleBatchNoteSet": "写入备注",
+  "adminConsoleBatchNoteBodyLabel": "批量内部备注",
+  "adminConsoleBatchNoteBodySubmitHint": "仅在选择「写入备注」时提交",
+  "adminConsoleBatchNoteBodyEditableHint": "选择「写入备注」后可编辑",
+  "adminConsoleBatchApplyAction": "批量应用到 {count} 个 project",
+  "@adminConsoleBatchApplyAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleSectionMembers": "成员",
+  "adminConsoleSectionRecentProjects": "最近项目",
+  "adminConsoleProjectOwnerRemediationTitle": "Project Owner 补救",
+  "adminConsoleProjectOwnerRemediationHint": "internal ops 可直接修复 project owner；目标用户必须已是该 project 所属 workspace 成员。若该项目已启用 ACL，旧 owner 为普通 member 时会自动保留 editor 访问。",
+  "adminConsoleTargetProjectOwnerUserIdHint": "输入目标 workspace 成员 UUID",
+  "adminConsoleRepairProjectOwnerAction": "修复 project owner",
+  "adminConsoleProjectGovernanceTitle": "Project 治理",
+  "adminConsoleProjectGovernanceHint": "归档后该项目从成员列表与汇总统计中隐藏，且所有需 project scope 的 API 返回 403；解档恢复。内部备注写入 metadata.internalOps。",
+  "adminConsoleProjectTitleWithName": "{name} (#{numericId})",
+  "@adminConsoleProjectTitleWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleProjectTitle": "Project #{numericId}",
+  "@adminConsoleProjectTitle": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleSectionExplicitAclMembers": "显式 ACL 成员",
+  "adminConsoleSectionWorkspaceCandidates": "Workspace 候选成员"
 }

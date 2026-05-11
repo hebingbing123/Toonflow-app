@@ -713,23 +713,24 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isPersonal = detail.workspaceType == 'personal';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Workspace 治理', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleWorkspaceGovernanceTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         if (isPersonal)
           Text(
-            '个人 workspace 不可归档；可维护内部备注（metadata.internalOps）。',
+            l10n.adminConsoleWorkspaceGovernancePersonalHint,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           )
         else
           Text(
-            '企业 workspace：可归档（软冻结）或解档；内部备注写入 metadata.internalOps。',
+            l10n.adminConsoleWorkspaceGovernanceEnterpriseHint,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -741,7 +742,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             runSpacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('不动归档状态'),
+                label: Text(l10n.adminConsoleLifecyclePreserve),
                 selected:
                     _workspaceLifecycle ==
                     AdminWorkspaceLifecycleActionV1.preserve,
@@ -753,7 +754,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 },
               ),
               ChoiceChip(
-                label: const Text('归档'),
+                label: Text(l10n.adminConsoleLifecycleArchive),
                 selected:
                     _workspaceLifecycle ==
                     AdminWorkspaceLifecycleActionV1.archive,
@@ -765,7 +766,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 },
               ),
               ChoiceChip(
-                label: const Text('解档'),
+                label: Text(l10n.adminConsoleLifecycleRestore),
                 selected:
                     _workspaceLifecycle ==
                     AdminWorkspaceLifecycleActionV1.restore,
@@ -780,14 +781,14 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ),
           const SizedBox(height: 8),
         ],
-        Text('内部备注', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleInternalNoteLabel, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('不变'),
+              label: Text(l10n.adminConsoleNoteActionPreserve),
               selected:
                   _workspaceOpsNoteAction ==
                   AdminWorkspaceOpsNoteActionV1.preserve,
@@ -799,7 +800,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('清除'),
+              label: Text(l10n.adminConsoleNoteActionClear),
               selected:
                   _workspaceOpsNoteAction ==
                   AdminWorkspaceOpsNoteActionV1.clear,
@@ -810,7 +811,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('写入/更新'),
+              label: Text(l10n.adminConsoleNoteActionSet),
               selected:
                   _workspaceOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set,
               onSelected: (_) {
@@ -827,10 +828,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           enabled: _workspaceOpsNoteRequiresValue,
           maxLines: 3,
           decoration: InputDecoration(
-            labelText: '内部备注正文',
+            labelText: l10n.adminConsoleInternalNoteBodyLabel,
             hintText: _workspaceOpsNoteRequiresValue
-                ? '仅在选择「写入/更新」时提交'
-                : '选择「写入/更新」后可编辑',
+                ? l10n.adminConsoleInternalNoteBodySubmitHint
+                : l10n.adminConsoleInternalNoteBodyEditableHint,
           ),
         ),
         const SizedBox(height: 12),
@@ -852,7 +853,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.domain_verification_outlined),
-          label: Text(widget.controller.savingGovernance ? '保存中…' : '保存治理'),
+          label: Text(
+            widget.controller.savingGovernance
+                ? l10n.adminConsoleSaving
+                : l10n.adminConsoleSaveGovernance,
+          ),
         ),
       ],
     );
@@ -862,14 +867,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('成员修复', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleWorkspaceMemberRemediationTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
-          '支持 internal ops 直接补成员、改角色、移除成员；移除时会顺带回退 current workspace 并清理该 workspace 下的项目 ACL 残留。',
+          l10n.adminConsoleWorkspaceMemberRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -884,14 +890,14 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               width: 260,
               child: TextField(
                 controller: _workspaceMemberUserIdController,
-                decoration: const InputDecoration(
-                  labelText: '成员 userId',
-                  hintText: '输入要补成员或修角色的用户 UUID',
+                decoration: InputDecoration(
+                  labelText: l10n.adminConsoleMemberUserIdLabel,
+                  hintText: l10n.adminConsoleMemberUserIdHint,
                 ),
               ),
             ),
             ChoiceChip(
-              label: const Text('member'),
+              label: Text(l10n.adminConsoleRoleMember),
               selected:
                   _workspaceMemberRole == AdminWorkspaceMemberRoleV1.member,
               onSelected: (_) {
@@ -901,7 +907,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('admin'),
+              label: Text(l10n.adminConsoleRoleAdmin),
               selected:
                   _workspaceMemberRole == AdminWorkspaceMemberRoleV1.admin,
               onSelected: (_) {
@@ -922,8 +928,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               icon: const Icon(Icons.person_add_alt_1_outlined),
               label: Text(
                 widget.controller.savingWorkspaceMembership
-                    ? '处理中…'
-                    : '补成员 / 改角色',
+                    ? l10n.adminConsoleProcessing
+                    : l10n.adminConsoleUpsertMemberAction,
               ),
             ),
           ],
@@ -954,7 +960,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                                 userId: member.userId,
                                 role: AdminWorkspaceMemberRoleV1.member,
                               ),
-                    child: const Text('设为 member'),
+                    child: Text(l10n.adminConsoleSetAsMember),
                   ),
                   OutlinedButton(
                     onPressed: widget.controller.savingWorkspaceMembership
@@ -967,7 +973,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                                 userId: member.userId,
                                 role: AdminWorkspaceMemberRoleV1.admin,
                               ),
-                    child: const Text('设为 admin'),
+                    child: Text(l10n.adminConsoleSetAsAdmin),
                   ),
                   OutlinedButton(
                     onPressed: widget.controller.savingWorkspaceMembership
@@ -979,11 +985,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                                     .remove,
                                 userId: member.userId,
                               ),
-                    child: const Text('移除'),
+                    child: Text(l10n.adminConsoleRemoveAction),
                   ),
                 ] else
                   Text(
-                    'owner 请走 owner transfer',
+                    l10n.adminConsoleOwnerTransferHint,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -1000,17 +1006,18 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isPersonal = detail.workspaceType == 'personal';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Owner 补救', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleWorkspaceOwnerRemediationTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
           isPersonal
-              ? 'personal workspace 不允许 owner transfer。'
-              : 'internal ops 可直接修复 workspace owner；目标用户必须已是该 workspace 成员，原 owner 会自动降为 admin。',
+              ? l10n.adminConsoleWorkspaceOwnerRemediationPersonalHint
+              : l10n.adminConsoleWorkspaceOwnerRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -1026,9 +1033,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 width: 260,
                 child: TextField(
                   controller: _workspaceOwnerUserIdController,
-                  decoration: const InputDecoration(
-                    labelText: '目标 owner userId',
-                    hintText: '输入目标成员 UUID',
+                  decoration: InputDecoration(
+                    labelText: l10n.adminConsoleTargetOwnerUserIdLabel,
+                    hintText: l10n.adminConsoleTargetOwnerUserIdHint,
                   ),
                 ),
               ),
@@ -1042,8 +1049,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 icon: const Icon(Icons.swap_horiz_outlined),
                 label: Text(
                   widget.controller.savingOwnershipRemediation
-                      ? '处理中…'
-                      : '转让 owner',
+                      ? l10n.adminConsoleProcessing
+                      : l10n.adminConsoleTransferOwnerAction,
                 ),
               ),
             ],
@@ -1070,7 +1077,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                                 workspaceId: detail.workspaceId,
                                 targetUserId: member.userId,
                               ),
-                        child: const Text('设为 owner'),
+                        child: Text(l10n.adminConsoleSetAsOwner),
                       ),
                     ],
                   ),
@@ -1085,26 +1092,27 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final breakdown = detail.workspaceRoleBreakdown;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('ACL 摘要', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleAclSummaryTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            Chip(label: Text('owner ${breakdown['owner'] ?? 0}')),
-            Chip(label: Text('admin ${breakdown['admin'] ?? 0}')),
-            Chip(label: Text('member ${breakdown['member'] ?? 0}')),
+            Chip(label: Text(l10n.adminConsoleRoleCountOwner(breakdown['owner'] ?? 0))),
+            Chip(label: Text(l10n.adminConsoleRoleCountAdmin(breakdown['admin'] ?? 0))),
+            Chip(label: Text(l10n.adminConsoleRoleCountMember(breakdown['member'] ?? 0))),
           ],
         ),
         const SizedBox(height: 8),
         if (detail.projectAclSummaries.isEmpty)
           Text(
-            '当前 workspace 暂无 project ACL 摘要',
+            l10n.adminConsoleNoProjectAclSummary,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -1143,15 +1151,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     style: theme.textTheme.bodySmall,
                   ),
                   Chip(label: Text(project.aclMode)),
-                  Chip(label: Text('explicit ${project.explicitAclCount}')),
-                  Chip(label: Text('editor ${project.editorCount}')),
-                  Chip(label: Text('viewer ${project.viewerCount}')),
+                  Chip(label: Text(l10n.adminConsoleExplicitAclCount(project.explicitAclCount))),
+                  Chip(label: Text(l10n.adminConsoleEditorCount(project.editorCount))),
+                  Chip(label: Text(l10n.adminConsoleViewerCount(project.viewerCount))),
                   if (project.archivedAt != null)
                     const Chip(label: Text('archived')),
                   TextButton(
                     onPressed: () =>
                         widget.controller.loadProject(project.projectId),
-                    child: const Text('查看'),
+                    child: Text(l10n.adminConsoleViewAction),
                   ),
                 ],
               ),
@@ -1165,14 +1173,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('批量 Project 治理', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleBatchProjectGovernanceTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
-          '对当前 workspace 下选中的 project 批量执行 archive / restore / 内部备注写入，用于集中处理同类 ACL 与治理问题。',
+          l10n.adminConsoleBatchProjectGovernanceHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -1183,7 +1192,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('不动归档'),
+              label: Text(l10n.adminConsoleBatchLifecyclePreserve),
               selected:
                   _workspaceBatchLifecycle ==
                   AdminProjectLifecycleActionV1.preserve,
@@ -1195,7 +1204,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('批量归档'),
+              label: Text(l10n.adminConsoleBatchLifecycleArchive),
               selected:
                   _workspaceBatchLifecycle ==
                   AdminProjectLifecycleActionV1.archive,
@@ -1207,7 +1216,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('批量解档'),
+              label: Text(l10n.adminConsoleBatchLifecycleRestore),
               selected:
                   _workspaceBatchLifecycle ==
                   AdminProjectLifecycleActionV1.restore,
@@ -1226,7 +1235,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('备注不变'),
+              label: Text(l10n.adminConsoleBatchNotePreserve),
               selected:
                   _workspaceBatchOpsNoteAction ==
                   AdminWorkspaceOpsNoteActionV1.preserve,
@@ -1238,7 +1247,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('清除备注'),
+              label: Text(l10n.adminConsoleBatchNoteClear),
               selected:
                   _workspaceBatchOpsNoteAction ==
                   AdminWorkspaceOpsNoteActionV1.clear,
@@ -1250,7 +1259,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('写入备注'),
+              label: Text(l10n.adminConsoleBatchNoteSet),
               selected:
                   _workspaceBatchOpsNoteAction ==
                   AdminWorkspaceOpsNoteActionV1.set,
@@ -1269,10 +1278,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           enabled: _workspaceBatchOpsNoteRequiresValue,
           maxLines: 2,
           decoration: InputDecoration(
-            labelText: '批量内部备注',
+            labelText: l10n.adminConsoleBatchNoteBodyLabel,
             hintText: _workspaceBatchOpsNoteRequiresValue
-                ? '仅在选择「写入备注」时提交'
-                : '选择「写入备注」后可编辑',
+                ? l10n.adminConsoleBatchNoteBodySubmitHint
+                : l10n.adminConsoleBatchNoteBodyEditableHint,
           ),
         ),
         const SizedBox(height: 12),
@@ -1305,8 +1314,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               : const Icon(Icons.playlist_add_check_circle_outlined),
           label: Text(
             widget.controller.savingBatchGovernance
-                ? '处理中…'
-                : '批量应用到 ${_selectedWorkspaceProjectIds.length} 个 project',
+                ? l10n.adminConsoleProcessing
+                : l10n.adminConsoleBatchApplyAction(
+                    _selectedWorkspaceProjectIds.length,
+                  ),
           ),
         ),
       ],
@@ -1317,6 +1328,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return _detailCard(
       context,
       title: detail.name,
@@ -1345,7 +1357,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         _buildWorkspaceProjectBatchGovernancePanel(context, detail),
         _subList(
           context,
-          title: '成员',
+          title: l10n.adminConsoleSectionMembers,
           items: detail.members
               .map(
                 (item) =>
@@ -1355,7 +1367,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         _subList(
           context,
-          title: '最近项目',
+          title: l10n.adminConsoleSectionRecentProjects,
           items: detail.recentProjects
               .map(
                 (item) =>
@@ -1365,7 +1377,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         _subList(
           context,
-          title: '最近作业',
+          title: l10n.adminConsoleSectionRecentJobs,
           items: detail.recentJobs
               .map(
                 (job) =>
@@ -1375,7 +1387,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         _subList(
           context,
-          title: '治理审计',
+          title: l10n.adminConsoleSectionGovernanceAudit,
           items: detail.governanceAudit
               .map(
                 (item) =>
@@ -1397,14 +1409,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminProjectDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Project Owner 补救', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleProjectOwnerRemediationTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
-          'internal ops 可直接修复 project owner；目标用户必须已是该 project 所属 workspace 成员。若该项目已启用 ACL，旧 owner 为普通 member 时会自动保留 editor 访问。',
+          l10n.adminConsoleProjectOwnerRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -1419,9 +1432,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               width: 260,
               child: TextField(
                 controller: _projectOwnerUserIdController,
-                decoration: const InputDecoration(
-                  labelText: '目标 owner userId',
-                  hintText: '输入目标 workspace 成员 UUID',
+                decoration: InputDecoration(
+                  labelText: l10n.adminConsoleTargetOwnerUserIdLabel,
+                  hintText: l10n.adminConsoleTargetProjectOwnerUserIdHint,
                 ),
               ),
             ),
@@ -1435,8 +1448,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               icon: const Icon(Icons.swap_horizontal_circle_outlined),
               label: Text(
                 widget.controller.savingOwnershipRemediation
-                    ? '处理中…'
-                    : '修复 project owner',
+                    ? l10n.adminConsoleProcessing
+                    : l10n.adminConsoleRepairProjectOwnerAction,
               ),
             ),
           ],
@@ -1449,14 +1462,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminProjectDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Project 治理', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleProjectGovernanceTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
-          '归档后该项目从成员列表与汇总统计中隐藏，且所有需 project scope 的 API 返回 403；解档恢复。内部备注写入 metadata.internalOps。',
+          l10n.adminConsoleProjectGovernanceHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -1467,7 +1481,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('不动归档状态'),
+              label: Text(l10n.adminConsoleLifecyclePreserve),
               selected:
                   _projectLifecycle == AdminProjectLifecycleActionV1.preserve,
               onSelected: (_) {
@@ -1477,7 +1491,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('归档'),
+              label: Text(l10n.adminConsoleLifecycleArchive),
               selected:
                   _projectLifecycle == AdminProjectLifecycleActionV1.archive,
               onSelected: (_) {
@@ -1487,7 +1501,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('解档'),
+              label: Text(l10n.adminConsoleLifecycleRestore),
               selected:
                   _projectLifecycle == AdminProjectLifecycleActionV1.restore,
               onSelected: (_) {
@@ -1499,14 +1513,14 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ],
         ),
         const SizedBox(height: 8),
-        Text('内部备注', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleInternalNoteLabel, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('不变'),
+              label: Text(l10n.adminConsoleNoteActionPreserve),
               selected:
                   _projectOpsNoteAction ==
                   AdminWorkspaceOpsNoteActionV1.preserve,
@@ -1518,7 +1532,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('清除'),
+              label: Text(l10n.adminConsoleNoteActionClear),
               selected:
                   _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.clear,
               onSelected: (_) {
@@ -1528,7 +1542,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('写入/更新'),
+              label: Text(l10n.adminConsoleNoteActionSet),
               selected:
                   _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set,
               onSelected: (_) {
@@ -1545,10 +1559,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           enabled: _projectOpsNoteRequiresValue,
           maxLines: 3,
           decoration: InputDecoration(
-            labelText: '内部备注正文',
+            labelText: l10n.adminConsoleInternalNoteBodyLabel,
             hintText: _projectOpsNoteRequiresValue
-                ? '仅在选择「写入/更新」时提交'
-                : '选择「写入/更新」后可编辑',
+                ? l10n.adminConsoleInternalNoteBodySubmitHint
+                : l10n.adminConsoleInternalNoteBodyEditableHint,
           ),
         ),
         const SizedBox(height: 12),
@@ -1568,7 +1582,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.folder_special_outlined),
-          label: Text(widget.controller.savingGovernance ? '保存中…' : '保存治理'),
+          label: Text(
+            widget.controller.savingGovernance
+                ? l10n.adminConsoleSaving
+                : l10n.adminConsoleSaveGovernance,
+          ),
         ),
       ],
     );
@@ -1578,11 +1596,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminProjectDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return _detailCard(
       context,
       title: detail.name?.trim().isNotEmpty == true
-          ? '${detail.name} (#${detail.numericId})'
-          : 'Project #${detail.numericId}',
+          ? l10n.adminConsoleProjectTitleWithName(
+              detail.name!,
+              detail.numericId,
+            )
+          : l10n.adminConsoleProjectTitle(detail.numericId),
       chips: [
         'script ${detail.scriptCount}',
         'asset ${detail.assetCount}',
@@ -1613,7 +1635,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         _buildProjectGovernancePanel(context, detail),
         _subList(
           context,
-          title: '显式 ACL 成员',
+          title: l10n.adminConsoleSectionExplicitAclMembers,
           items: detail.aclMembers
               .map(
                 (item) =>
@@ -1623,7 +1645,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         _subList(
           context,
-          title: 'Workspace 候选成员',
+          title: l10n.adminConsoleSectionWorkspaceCandidates,
           items: detail.workspaceMemberCandidates
               .map(
                 (item) =>
@@ -1633,7 +1655,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         _subList(
           context,
-          title: '最近作业',
+          title: l10n.adminConsoleSectionRecentJobs,
           items: detail.recentJobs
               .map(
                 (job) =>
@@ -1643,7 +1665,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         _subList(
           context,
-          title: '治理审计',
+          title: l10n.adminConsoleSectionGovernanceAudit,
           items: detail.governanceAudit
               .map(
                 (item) =>

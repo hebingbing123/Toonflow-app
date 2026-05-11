@@ -4733,4 +4733,237 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminConsoleWorkspaceContextRepairing =>
       'Repairing workspace context...';
+
+  @override
+  String get adminConsoleWorkspaceGovernanceTitle => 'Workspace governance';
+
+  @override
+  String get adminConsoleWorkspaceGovernancePersonalHint =>
+      'Personal workspace cannot be archived; internal notes (metadata.internalOps) can be maintained.';
+
+  @override
+  String get adminConsoleWorkspaceGovernanceEnterpriseHint =>
+      'Enterprise workspace can be archived (soft-frozen) or restored; internal notes are written to metadata.internalOps.';
+
+  @override
+  String get adminConsoleLifecyclePreserve => 'Keep lifecycle unchanged';
+
+  @override
+  String get adminConsoleLifecycleArchive => 'Archive';
+
+  @override
+  String get adminConsoleLifecycleRestore => 'Restore';
+
+  @override
+  String get adminConsoleNoteActionPreserve => 'Keep note unchanged';
+
+  @override
+  String get adminConsoleNoteActionClear => 'Clear note';
+
+  @override
+  String get adminConsoleNoteActionSet => 'Write/Update note';
+
+  @override
+  String get adminConsoleInternalNoteBodyLabel => 'Internal note body';
+
+  @override
+  String get adminConsoleInternalNoteBodySubmitHint =>
+      'Submitted only when \"Write/Update note\" is selected';
+
+  @override
+  String get adminConsoleInternalNoteBodyEditableHint =>
+      'Editable after selecting \"Write/Update note\"';
+
+  @override
+  String get adminConsoleSaveGovernance => 'Save governance';
+
+  @override
+  String get adminConsoleWorkspaceMemberRemediationTitle =>
+      'Member remediation';
+
+  @override
+  String get adminConsoleWorkspaceMemberRemediationHint =>
+      'Internal ops can directly add member, change role, or remove member. Removal also falls back current workspace and clears stale project ACL entries under this workspace.';
+
+  @override
+  String get adminConsoleMemberUserIdLabel => 'Member userId';
+
+  @override
+  String get adminConsoleMemberUserIdHint =>
+      'Enter user UUID to add member or change role';
+
+  @override
+  String get adminConsoleRoleMember => 'member';
+
+  @override
+  String get adminConsoleRoleAdmin => 'admin';
+
+  @override
+  String get adminConsoleProcessing => 'Processing...';
+
+  @override
+  String get adminConsoleUpsertMemberAction => 'Add member / change role';
+
+  @override
+  String get adminConsoleSetAsMember => 'Set as member';
+
+  @override
+  String get adminConsoleSetAsAdmin => 'Set as admin';
+
+  @override
+  String get adminConsoleRemoveAction => 'Remove';
+
+  @override
+  String get adminConsoleOwnerTransferHint => 'Use owner transfer for owner';
+
+  @override
+  String get adminConsoleWorkspaceOwnerRemediationTitle => 'Owner remediation';
+
+  @override
+  String get adminConsoleWorkspaceOwnerRemediationPersonalHint =>
+      'Owner transfer is not allowed for personal workspace.';
+
+  @override
+  String get adminConsoleWorkspaceOwnerRemediationHint =>
+      'Internal ops can directly remediate workspace owner. Target user must already be a workspace member, and previous owner is automatically downgraded to admin.';
+
+  @override
+  String get adminConsoleTargetOwnerUserIdLabel => 'Target owner userId';
+
+  @override
+  String get adminConsoleTargetOwnerUserIdHint => 'Enter target member UUID';
+
+  @override
+  String get adminConsoleTransferOwnerAction => 'Transfer owner';
+
+  @override
+  String get adminConsoleSetAsOwner => 'Set as owner';
+
+  @override
+  String get adminConsoleAclSummaryTitle => 'ACL summary';
+
+  @override
+  String adminConsoleRoleCountOwner(int count) {
+    return 'owner $count';
+  }
+
+  @override
+  String adminConsoleRoleCountAdmin(int count) {
+    return 'admin $count';
+  }
+
+  @override
+  String adminConsoleRoleCountMember(int count) {
+    return 'member $count';
+  }
+
+  @override
+  String get adminConsoleNoProjectAclSummary =>
+      'No project ACL summary in current workspace';
+
+  @override
+  String adminConsoleExplicitAclCount(int count) {
+    return 'explicit $count';
+  }
+
+  @override
+  String adminConsoleEditorCount(int count) {
+    return 'editor $count';
+  }
+
+  @override
+  String adminConsoleViewerCount(int count) {
+    return 'viewer $count';
+  }
+
+  @override
+  String get adminConsoleViewAction => 'View';
+
+  @override
+  String get adminConsoleBatchProjectGovernanceTitle =>
+      'Batch project governance';
+
+  @override
+  String get adminConsoleBatchProjectGovernanceHint =>
+      'Batch apply archive / restore / internal note writes to selected projects under current workspace for clustered ACL and governance remediation.';
+
+  @override
+  String get adminConsoleBatchLifecyclePreserve =>
+      'Keep archive state unchanged';
+
+  @override
+  String get adminConsoleBatchLifecycleArchive => 'Batch archive';
+
+  @override
+  String get adminConsoleBatchLifecycleRestore => 'Batch restore';
+
+  @override
+  String get adminConsoleBatchNotePreserve => 'Keep note unchanged';
+
+  @override
+  String get adminConsoleBatchNoteClear => 'Clear note';
+
+  @override
+  String get adminConsoleBatchNoteSet => 'Write note';
+
+  @override
+  String get adminConsoleBatchNoteBodyLabel => 'Batch internal note';
+
+  @override
+  String get adminConsoleBatchNoteBodySubmitHint =>
+      'Submitted only when \"Write note\" is selected';
+
+  @override
+  String get adminConsoleBatchNoteBodyEditableHint =>
+      'Editable after selecting \"Write note\"';
+
+  @override
+  String adminConsoleBatchApplyAction(int count) {
+    return 'Batch apply to $count projects';
+  }
+
+  @override
+  String get adminConsoleSectionMembers => 'Members';
+
+  @override
+  String get adminConsoleSectionRecentProjects => 'Recent projects';
+
+  @override
+  String get adminConsoleProjectOwnerRemediationTitle =>
+      'Project owner remediation';
+
+  @override
+  String get adminConsoleProjectOwnerRemediationHint =>
+      'Internal ops can directly remediate project owner. Target user must already be a member in the project workspace. If ACL is enabled, old owner with member role keeps editor access automatically.';
+
+  @override
+  String get adminConsoleTargetProjectOwnerUserIdHint =>
+      'Enter target workspace member UUID';
+
+  @override
+  String get adminConsoleRepairProjectOwnerAction => 'Repair project owner';
+
+  @override
+  String get adminConsoleProjectGovernanceTitle => 'Project governance';
+
+  @override
+  String get adminConsoleProjectGovernanceHint =>
+      'After archive, the project is hidden from member lists and aggregate statistics, and all project-scope APIs return 403; restore reverses this. Internal note is written to metadata.internalOps.';
+
+  @override
+  String adminConsoleProjectTitleWithName(String name, int numericId) {
+    return '$name (#$numericId)';
+  }
+
+  @override
+  String adminConsoleProjectTitle(int numericId) {
+    return 'Project #$numericId';
+  }
+
+  @override
+  String get adminConsoleSectionExplicitAclMembers => 'Explicit ACL members';
+
+  @override
+  String get adminConsoleSectionWorkspaceCandidates =>
+      'Workspace candidate members';
 }
