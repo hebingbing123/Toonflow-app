@@ -511,4 +511,145 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get riskyPrefsLabelBatchArchivePublish => '批量归档发布草稿';
+
+  @override
+  String get platformConfigSectionTitle => '平台配置';
+
+  @override
+  String get platformConfigSectionSubtitle =>
+      '管理产品壳层的功能开关与运营面可见性。effective 现按 defaults <- plan override <- current workspace override <- user override 合成。';
+
+  @override
+  String get platformConfigLocalPrefsDescription =>
+      '下列项仅影响当前设备上的本应用本地存储，与服务器侧平台配置无关。需要恢复删除版本、归档、导出等二次确认时，请点上方标题栏 ⋯ 菜单。';
+
+  @override
+  String get platformConfigButtonRefreshing => '加载中…';
+
+  @override
+  String get platformConfigButtonRefresh => '刷新配置';
+
+  @override
+  String get platformConfigButtonSaving => '保存中…';
+
+  @override
+  String get platformConfigButtonSaveUser => '保存用户配置';
+
+  @override
+  String get platformConfigButtonResetUser => '重置用户覆盖';
+
+  @override
+  String get platformConfigButtonSaveWorkspace => '保存 workspace 配置';
+
+  @override
+  String get platformConfigButtonResetWorkspace => '重置 workspace 覆盖';
+
+  @override
+  String get platformConfigButtonCopyJson => '复制 JSON';
+
+  @override
+  String get platformConfigToggleHelpHubTitle => '帮助 Hub';
+
+  @override
+  String get platformConfigToggleHelpHubSubtitle => '控制帮助 / 文档产品入口的可见性';
+
+  @override
+  String get platformConfigToggleQualityMainTitle => '质量主面板';
+
+  @override
+  String get platformConfigToggleQualityMainSubtitle => '控制质量运营看板与主面板摘要区';
+
+  @override
+  String get platformConfigToggleQualityRefreshTitle => '质量刷新控制';
+
+  @override
+  String get platformConfigToggleQualityRefreshSubtitle =>
+      '控制物化读模型 refresh 相关按钮与入口';
+
+  @override
+  String get platformConfigTogglePlatformStatusTitle => '平台状态';
+
+  @override
+  String get platformConfigTogglePlatformStatusSubtitle =>
+      '控制平台状态（Health/Ready/SLI/Metrics）入口';
+
+  @override
+  String get platformConfigToggleWorkspaceActivityTitle => '工作区动态';
+
+  @override
+  String get platformConfigToggleWorkspaceActivitySubtitle =>
+      '控制 Agent Workspace Activity 导航入口';
+
+  @override
+  String get platformConfigToggleBenchmarkTitle => '评测基线';
+
+  @override
+  String get platformConfigToggleBenchmarkSubtitle => '控制 benchmark / 评测相关产品入口';
+
+  @override
+  String get platformConfigToggleJobsTitle => '任务作业';
+
+  @override
+  String get platformConfigToggleJobsSubtitle => '控制 jobs 面板导航入口';
+
+  @override
+  String get platformConfigPlanLayerIntro =>
+      '套餐层是只读覆盖层，来自服务端环境配置；适合先做分层收口，再由 workspace / user 继续细调。';
+
+  @override
+  String get platformConfigPlanStateActive => '当前状态：plan override 已生效';
+
+  @override
+  String get platformConfigPlanStateInactive =>
+      '当前状态：未配置 plan override，直接继承 defaults';
+
+  @override
+  String get platformConfigWorkspaceEnterpriseIntro =>
+      '当前 enterprise workspace 的公共覆盖层，会先于个人配置参与 effective 合成。';
+
+  @override
+  String get platformConfigWorkspaceViewOnlyIntro =>
+      '当前 workspace 仅展示公共覆盖层；只有 enterprise owner/admin 可以修改。';
+
+  @override
+  String get platformConfigWorkspaceStateWritten =>
+      '当前状态：已写入 workspace override';
+
+  @override
+  String get platformConfigWorkspaceStateInherit => '当前状态：继承 defaults，再叠个人覆盖';
+
+  @override
+  String get platformConfigWorkspaceNoDraftEnterprise =>
+      '当前 workspace 没有可编辑的公共覆盖层。请先切到 enterprise owner/admin 身份，或等待公共覆盖配置下发。';
+
+  @override
+  String get platformConfigWorkspaceNoDraftPersonal =>
+      '当前 workspace 为 personal。workspace 级公共覆盖层仅对 enterprise workspace 开放。';
+
+  @override
+  String get platformConfigUserOverrideIntro => '个人覆盖层始终最后生效，适合放自己的运营视图与工具偏好。';
+
+  @override
+  String get platformConfigUserStateWritten => '当前状态：已写入 user override';
+
+  @override
+  String get platformConfigUserStateInherit => '当前状态：直接继承 workspace/defaults';
+
+  @override
+  String get platformConfigSnackUserSaved => '已保存用户平台配置';
+
+  @override
+  String get platformConfigSnackUserReset => '已重置用户覆盖层';
+
+  @override
+  String get platformConfigSnackWorkspaceSaved => '已保存当前 workspace 平台配置';
+
+  @override
+  String get platformConfigSnackWorkspaceReset => '已重置 workspace 覆盖层';
+
+  @override
+  String get platformConfigSnackCopyJsonDone => '已复制平台配置 JSON';
+
+  @override
+  String get platformConfigPleaseSignIn => '请先登录';
 }

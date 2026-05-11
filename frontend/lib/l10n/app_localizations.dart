@@ -1007,6 +1007,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Batch archive/publish drafts'**
   String get riskyPrefsLabelBatchArchivePublish;
+
+  /// No description provided for @platformConfigSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform configuration'**
+  String get platformConfigSectionTitle;
+
+  /// No description provided for @platformConfigSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage product shell feature switches and ops-facing visibility. effective merges as defaults <- plan override <- current workspace override <- user override.'**
+  String get platformConfigSectionSubtitle;
+
+  /// No description provided for @platformConfigLocalPrefsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'These items affect only local storage for this app on this device, not server-side platform settings. To restore confirmations for deletes, archive, export, etc., use the ⋯ menu in the header above.'**
+  String get platformConfigLocalPrefsDescription;
+
+  /// No description provided for @platformConfigButtonRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get platformConfigButtonRefreshing;
+
+  /// No description provided for @platformConfigButtonRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload configuration'**
+  String get platformConfigButtonRefresh;
+
+  /// No description provided for @platformConfigButtonSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get platformConfigButtonSaving;
+
+  /// No description provided for @platformConfigButtonSaveUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Save user overrides'**
+  String get platformConfigButtonSaveUser;
+
+  /// No description provided for @platformConfigButtonResetUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset user overrides'**
+  String get platformConfigButtonResetUser;
+
+  /// No description provided for @platformConfigButtonSaveWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Save workspace configuration'**
+  String get platformConfigButtonSaveWorkspace;
+
+  /// No description provided for @platformConfigButtonResetWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset workspace overrides'**
+  String get platformConfigButtonResetWorkspace;
+
+  /// No description provided for @platformConfigButtonCopyJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy JSON'**
+  String get platformConfigButtonCopyJson;
+
+  /// No description provided for @platformConfigToggleHelpHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Hub'**
+  String get platformConfigToggleHelpHubTitle;
+
+  /// No description provided for @platformConfigToggleHelpHubSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide help / documentation entry points'**
+  String get platformConfigToggleHelpHubSubtitle;
+
+  /// No description provided for @platformConfigToggleQualityMainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality dashboard'**
+  String get platformConfigToggleQualityMainTitle;
+
+  /// No description provided for @platformConfigToggleQualityMainSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality ops board and main summary areas'**
+  String get platformConfigToggleQualityMainSubtitle;
+
+  /// No description provided for @platformConfigToggleQualityRefreshTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality refresh controls'**
+  String get platformConfigToggleQualityRefreshTitle;
+
+  /// No description provided for @platformConfigToggleQualityRefreshSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Materialized read-model refresh buttons and entry points'**
+  String get platformConfigToggleQualityRefreshSubtitle;
+
+  /// No description provided for @platformConfigTogglePlatformStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform status'**
+  String get platformConfigTogglePlatformStatusTitle;
+
+  /// No description provided for @platformConfigTogglePlatformStatusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health / Ready / SLI / Metrics entry points'**
+  String get platformConfigTogglePlatformStatusSubtitle;
+
+  /// No description provided for @platformConfigToggleWorkspaceActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace activity'**
+  String get platformConfigToggleWorkspaceActivityTitle;
+
+  /// No description provided for @platformConfigToggleWorkspaceActivitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace activity navigation entry'**
+  String get platformConfigToggleWorkspaceActivitySubtitle;
+
+  /// No description provided for @platformConfigToggleBenchmarkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Benchmark baseline'**
+  String get platformConfigToggleBenchmarkTitle;
+
+  /// No description provided for @platformConfigToggleBenchmarkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Benchmark / evaluation product entry points'**
+  String get platformConfigToggleBenchmarkSubtitle;
+
+  /// No description provided for @platformConfigToggleJobsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs panel'**
+  String get platformConfigToggleJobsTitle;
+
+  /// No description provided for @platformConfigToggleJobsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs panel navigation entry'**
+  String get platformConfigToggleJobsSubtitle;
+
+  /// No description provided for @platformConfigPlanLayerIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan tier is a read-only overlay from server environment config; use it to layer defaults before workspace / user fine-tuning.'**
+  String get platformConfigPlanLayerIntro;
+
+  /// No description provided for @platformConfigPlanStateActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: plan override is active'**
+  String get platformConfigPlanStateActive;
+
+  /// No description provided for @platformConfigPlanStateInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: no plan override; inherits defaults'**
+  String get platformConfigPlanStateInactive;
+
+  /// No description provided for @platformConfigWorkspaceEnterpriseIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared overlay for the current enterprise workspace; applied before personal settings in effective merge.'**
+  String get platformConfigWorkspaceEnterpriseIntro;
+
+  /// No description provided for @platformConfigWorkspaceViewOnlyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared overlay is shown read-only; only enterprise owner/admin can edit.'**
+  String get platformConfigWorkspaceViewOnlyIntro;
+
+  /// No description provided for @platformConfigWorkspaceStateWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: workspace override is saved'**
+  String get platformConfigWorkspaceStateWritten;
+
+  /// No description provided for @platformConfigWorkspaceStateInherit.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: inherits defaults, then personal overrides'**
+  String get platformConfigWorkspaceStateInherit;
+
+  /// No description provided for @platformConfigWorkspaceNoDraftEnterprise.
+  ///
+  /// In en, this message translates to:
+  /// **'No editable shared overlay for this workspace. Switch to an enterprise owner/admin account, or wait for shared overlay to be provisioned.'**
+  String get platformConfigWorkspaceNoDraftEnterprise;
+
+  /// No description provided for @platformConfigWorkspaceNoDraftPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal workspaces do not support a shared workspace-level overlay; only enterprise workspaces do.'**
+  String get platformConfigWorkspaceNoDraftPersonal;
+
+  /// No description provided for @platformConfigUserOverrideIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal overlay is applied last—use it for your own ops view and tool preferences.'**
+  String get platformConfigUserOverrideIntro;
+
+  /// No description provided for @platformConfigUserStateWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: user override is saved'**
+  String get platformConfigUserStateWritten;
+
+  /// No description provided for @platformConfigUserStateInherit.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: inherits workspace / defaults'**
+  String get platformConfigUserStateInherit;
+
+  /// No description provided for @platformConfigSnackUserSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'User platform configuration saved.'**
+  String get platformConfigSnackUserSaved;
+
+  /// No description provided for @platformConfigSnackUserReset.
+  ///
+  /// In en, this message translates to:
+  /// **'User override cleared.'**
+  String get platformConfigSnackUserReset;
+
+  /// No description provided for @platformConfigSnackWorkspaceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace platform configuration saved.'**
+  String get platformConfigSnackWorkspaceSaved;
+
+  /// No description provided for @platformConfigSnackWorkspaceReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace override cleared.'**
+  String get platformConfigSnackWorkspaceReset;
+
+  /// No description provided for @platformConfigSnackCopyJsonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform configuration JSON copied.'**
+  String get platformConfigSnackCopyJsonDone;
+
+  /// No description provided for @platformConfigPleaseSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in first'**
+  String get platformConfigPleaseSignIn;
 }
 
 class _AppLocalizationsDelegate

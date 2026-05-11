@@ -545,4 +545,156 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get riskyPrefsLabelBatchArchivePublish =>
       'Batch archive/publish drafts';
+
+  @override
+  String get platformConfigSectionTitle => 'Platform configuration';
+
+  @override
+  String get platformConfigSectionSubtitle =>
+      'Manage product shell feature switches and ops-facing visibility. effective merges as defaults <- plan override <- current workspace override <- user override.';
+
+  @override
+  String get platformConfigLocalPrefsDescription =>
+      'These items affect only local storage for this app on this device, not server-side platform settings. To restore confirmations for deletes, archive, export, etc., use the ⋯ menu in the header above.';
+
+  @override
+  String get platformConfigButtonRefreshing => 'Refreshing…';
+
+  @override
+  String get platformConfigButtonRefresh => 'Reload configuration';
+
+  @override
+  String get platformConfigButtonSaving => 'Saving…';
+
+  @override
+  String get platformConfigButtonSaveUser => 'Save user overrides';
+
+  @override
+  String get platformConfigButtonResetUser => 'Reset user overrides';
+
+  @override
+  String get platformConfigButtonSaveWorkspace =>
+      'Save workspace configuration';
+
+  @override
+  String get platformConfigButtonResetWorkspace => 'Reset workspace overrides';
+
+  @override
+  String get platformConfigButtonCopyJson => 'Copy JSON';
+
+  @override
+  String get platformConfigToggleHelpHubTitle => 'Help Hub';
+
+  @override
+  String get platformConfigToggleHelpHubSubtitle =>
+      'Show or hide help / documentation entry points';
+
+  @override
+  String get platformConfigToggleQualityMainTitle => 'Quality dashboard';
+
+  @override
+  String get platformConfigToggleQualityMainSubtitle =>
+      'Quality ops board and main summary areas';
+
+  @override
+  String get platformConfigToggleQualityRefreshTitle =>
+      'Quality refresh controls';
+
+  @override
+  String get platformConfigToggleQualityRefreshSubtitle =>
+      'Materialized read-model refresh buttons and entry points';
+
+  @override
+  String get platformConfigTogglePlatformStatusTitle => 'Platform status';
+
+  @override
+  String get platformConfigTogglePlatformStatusSubtitle =>
+      'Health / Ready / SLI / Metrics entry points';
+
+  @override
+  String get platformConfigToggleWorkspaceActivityTitle => 'Workspace activity';
+
+  @override
+  String get platformConfigToggleWorkspaceActivitySubtitle =>
+      'Agent workspace activity navigation entry';
+
+  @override
+  String get platformConfigToggleBenchmarkTitle => 'Benchmark baseline';
+
+  @override
+  String get platformConfigToggleBenchmarkSubtitle =>
+      'Benchmark / evaluation product entry points';
+
+  @override
+  String get platformConfigToggleJobsTitle => 'Jobs panel';
+
+  @override
+  String get platformConfigToggleJobsSubtitle => 'Jobs panel navigation entry';
+
+  @override
+  String get platformConfigPlanLayerIntro =>
+      'Plan tier is a read-only overlay from server environment config; use it to layer defaults before workspace / user fine-tuning.';
+
+  @override
+  String get platformConfigPlanStateActive => 'Status: plan override is active';
+
+  @override
+  String get platformConfigPlanStateInactive =>
+      'Status: no plan override; inherits defaults';
+
+  @override
+  String get platformConfigWorkspaceEnterpriseIntro =>
+      'Shared overlay for the current enterprise workspace; applied before personal settings in effective merge.';
+
+  @override
+  String get platformConfigWorkspaceViewOnlyIntro =>
+      'Shared overlay is shown read-only; only enterprise owner/admin can edit.';
+
+  @override
+  String get platformConfigWorkspaceStateWritten =>
+      'Status: workspace override is saved';
+
+  @override
+  String get platformConfigWorkspaceStateInherit =>
+      'Status: inherits defaults, then personal overrides';
+
+  @override
+  String get platformConfigWorkspaceNoDraftEnterprise =>
+      'No editable shared overlay for this workspace. Switch to an enterprise owner/admin account, or wait for shared overlay to be provisioned.';
+
+  @override
+  String get platformConfigWorkspaceNoDraftPersonal =>
+      'Personal workspaces do not support a shared workspace-level overlay; only enterprise workspaces do.';
+
+  @override
+  String get platformConfigUserOverrideIntro =>
+      'Personal overlay is applied last—use it for your own ops view and tool preferences.';
+
+  @override
+  String get platformConfigUserStateWritten => 'Status: user override is saved';
+
+  @override
+  String get platformConfigUserStateInherit =>
+      'Status: inherits workspace / defaults';
+
+  @override
+  String get platformConfigSnackUserSaved =>
+      'User platform configuration saved.';
+
+  @override
+  String get platformConfigSnackUserReset => 'User override cleared.';
+
+  @override
+  String get platformConfigSnackWorkspaceSaved =>
+      'Workspace platform configuration saved.';
+
+  @override
+  String get platformConfigSnackWorkspaceReset => 'Workspace override cleared.';
+
+  @override
+  String get platformConfigSnackCopyJsonDone =>
+      'Platform configuration JSON copied.';
+
+  @override
+  String get platformConfigPleaseSignIn => 'Please sign in first';
 }

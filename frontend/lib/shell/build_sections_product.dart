@@ -677,8 +677,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
     final token = widget.accessToken;
     final workspaceId = widget.currentWorkspaceId;
     if (token == null || token.isEmpty) {
+      final l10n = AppLocalizations.of(context);
       setState(() {
-        _error = '请先登录';
+        _error = l10n?.platformConfigPleaseSignIn ?? 'Please sign in first';
         _response = null;
         _userDraft = null;
         _workspaceDraft = null;
@@ -743,7 +744,16 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         _applyResponse(res);
       });
       widget.onConfigSaved(res.effective);
-      messenger.showSnackBar(const SnackBar(content: Text('已保存用户平台配置')));
+      if (!mounted) {
+        return;
+      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.platformConfigSnackUserSaved,
+          ),
+        ),
+      );
     } on RustApiException catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
         return;
@@ -792,7 +802,16 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         _applyResponse(res);
       });
       widget.onConfigSaved(res.effective);
-      messenger.showSnackBar(const SnackBar(content: Text('已重置用户覆盖层')));
+      if (!mounted) {
+        return;
+      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.platformConfigSnackUserReset,
+          ),
+        ),
+      );
     } on RustApiException catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
         return;
@@ -842,8 +861,15 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         _applyResponse(res);
       });
       widget.onConfigSaved(res.effective);
+      if (!mounted) {
+        return;
+      }
       messenger.showSnackBar(
-        const SnackBar(content: Text('已保存当前 workspace 平台配置')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.platformConfigSnackWorkspaceSaved,
+          ),
+        ),
       );
     } on RustApiException catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
@@ -897,8 +923,15 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         _applyResponse(res);
       });
       widget.onConfigSaved(res.effective);
+      if (!mounted) {
+        return;
+      }
       messenger.showSnackBar(
-        const SnackBar(content: Text('已重置 workspace 覆盖层')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.platformConfigSnackWorkspaceReset,
+          ),
+        ),
       );
     } on RustApiException catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
@@ -957,9 +990,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('已复制平台配置 JSON')));
+    final loc = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(loc.platformConfigSnackCopyJsonDone)),
+    );
   }
 
   void _patchUserDraft(PlatformConfigToggleSetV1 next) {
@@ -975,6 +1009,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
   }
 
   Widget _buildToggleEditor({
+    required AppLocalizations l10n,
     required PlatformConfigToggleSetV1 draft,
     required ValueChanged<PlatformConfigToggleSetV1>? onChanged,
   }) {
@@ -985,16 +1020,16 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           onChanged: onChanged == null
               ? null
               : (v) => onChanged(draft.copyWith(helpHubEnabled: v)),
-          title: const Text('帮助 Hub'),
-          subtitle: const Text('控制帮助 / 文档产品入口的可见性'),
+          title: Text(l10n.platformConfigToggleHelpHubTitle),
+          subtitle: Text(l10n.platformConfigToggleHelpHubSubtitle),
         ),
         SwitchListTile(
           value: draft.qualityDashboardEnabled,
           onChanged: onChanged == null
               ? null
               : (v) => onChanged(draft.copyWith(qualityDashboardEnabled: v)),
-          title: const Text('质量主面板'),
-          subtitle: const Text('控制质量运营看板与主面板摘要区'),
+          title: Text(l10n.platformConfigToggleQualityMainTitle),
+          subtitle: Text(l10n.platformConfigToggleQualityMainSubtitle),
         ),
         SwitchListTile(
           value: draft.qualityRefreshControlsEnabled,
@@ -1002,40 +1037,40 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
               ? null
               : (v) =>
                     onChanged(draft.copyWith(qualityRefreshControlsEnabled: v)),
-          title: const Text('质量刷新控制'),
-          subtitle: const Text('控制物化读模型 refresh 相关按钮与入口'),
+          title: Text(l10n.platformConfigToggleQualityRefreshTitle),
+          subtitle: Text(l10n.platformConfigToggleQualityRefreshSubtitle),
         ),
         SwitchListTile(
           value: draft.platformStatusEnabled,
           onChanged: onChanged == null
               ? null
               : (v) => onChanged(draft.copyWith(platformStatusEnabled: v)),
-          title: const Text('平台状态'),
-          subtitle: const Text('控制平台状态（Health/Ready/SLI/Metrics）入口'),
+          title: Text(l10n.platformConfigTogglePlatformStatusTitle),
+          subtitle: Text(l10n.platformConfigTogglePlatformStatusSubtitle),
         ),
         SwitchListTile(
           value: draft.workspaceActivityEnabled,
           onChanged: onChanged == null
               ? null
               : (v) => onChanged(draft.copyWith(workspaceActivityEnabled: v)),
-          title: const Text('工作区动态'),
-          subtitle: const Text('控制 Agent Workspace Activity 导航入口'),
+          title: Text(l10n.platformConfigToggleWorkspaceActivityTitle),
+          subtitle: Text(l10n.platformConfigToggleWorkspaceActivitySubtitle),
         ),
         SwitchListTile(
           value: draft.benchmarkPaneEnabled,
           onChanged: onChanged == null
               ? null
               : (v) => onChanged(draft.copyWith(benchmarkPaneEnabled: v)),
-          title: const Text('评测基线'),
-          subtitle: const Text('控制 benchmark / 评测相关产品入口'),
+          title: Text(l10n.platformConfigToggleBenchmarkTitle),
+          subtitle: Text(l10n.platformConfigToggleBenchmarkSubtitle),
         ),
         SwitchListTile(
           value: draft.jobsPaneEnabled,
           onChanged: onChanged == null
               ? null
               : (v) => onChanged(draft.copyWith(jobsPaneEnabled: v)),
-          title: const Text('任务作业'),
-          subtitle: const Text('控制 jobs 面板导航入口'),
+          title: Text(l10n.platformConfigToggleJobsTitle),
+          subtitle: Text(l10n.platformConfigToggleJobsSubtitle),
         ),
       ],
     );
@@ -1069,7 +1104,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           children: [
             Expanded(
               child: Text(
-                '平台配置',
+                l10n.platformConfigSectionTitle,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
@@ -1080,15 +1115,17 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         ),
         const SizedBox(height: 8),
         Text(
-          '管理产品壳层的功能开关与运营面可见性。effective 现按 defaults <- plan override <- current workspace override <- user override 合成。',
+          l10n.platformConfigSectionSubtitle,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
-        Text('本机客户端偏好', style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          l10n.riskyPrefsMenuDefaultTooltip,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
         const SizedBox(height: 4),
         Text(
-          '下列项仅影响当前设备上的本应用本地存储，与服务器侧平台配置无关。'
-          '需要恢复删除版本、归档、导出等二次确认时，请点上方标题栏 ⋯ 菜单。',
+          l10n.platformConfigLocalPrefsDescription,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
@@ -1098,17 +1135,25 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           children: [
             FilledButton.tonal(
               onPressed: _loading ? null : _load,
-              child: Text(_loading ? '加载中…' : '刷新配置'),
+              child: Text(
+                _loading
+                    ? l10n.platformConfigButtonRefreshing
+                    : l10n.platformConfigButtonRefresh,
+              ),
             ),
             FilledButton(
               onPressed: _savingUser || !userDraftDirty ? null : _saveUser,
-              child: Text(_savingUser ? '保存中…' : '保存用户配置'),
+              child: Text(
+                _savingUser
+                    ? l10n.platformConfigButtonSaving
+                    : l10n.platformConfigButtonSaveUser,
+              ),
             ),
             OutlinedButton(
               onPressed: _savingUser || !(_response?.hasUserOverride ?? false)
                   ? null
                   : _resetUser,
-              child: const Text('重置用户覆盖'),
+              child: Text(l10n.platformConfigButtonResetUser),
             ),
             FilledButton.tonal(
               onPressed:
@@ -1118,7 +1163,11 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                       !workspace.canManageOverride
                   ? null
                   : _saveWorkspace,
-              child: Text(_savingWorkspace ? '保存中…' : '保存 workspace 配置'),
+              child: Text(
+                _savingWorkspace
+                    ? l10n.platformConfigButtonSaving
+                    : l10n.platformConfigButtonSaveWorkspace,
+              ),
             ),
             OutlinedButton(
               onPressed:
@@ -1128,11 +1177,11 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                       !(_response?.hasWorkspaceOverride ?? false)
                   ? null
                   : _resetWorkspace,
-              child: const Text('重置 workspace 覆盖'),
+              child: Text(l10n.platformConfigButtonResetWorkspace),
             ),
             OutlinedButton(
               onPressed: _response == null ? null : _copyConfig,
-              child: const Text('复制 JSON'),
+              child: Text(l10n.platformConfigButtonCopyJson),
             ),
           ],
         ),
@@ -1161,7 +1210,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           Text('Plan Override', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
-            '套餐层是只读覆盖层，来自服务端环境配置；适合先做分层收口，再由 workspace / user 继续细调。',
+            l10n.platformConfigPlanLayerIntro,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 4),
@@ -1172,13 +1221,14 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           const SizedBox(height: 4),
           Text(
             _response!.hasPlanOverride
-                ? '当前状态：plan override 已生效'
-                : '当前状态：未配置 plan override，直接继承 defaults',
+                ? l10n.platformConfigPlanStateActive
+                : l10n.platformConfigPlanStateInactive,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_response!.planOverride != null) ...[
             const SizedBox(height: 12),
             _buildToggleEditor(
+              l10n: l10n,
               draft: _response!.planOverride!,
               onChanged: null,
             ),
@@ -1193,19 +1243,20 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           const SizedBox(height: 4),
           Text(
             workspace.canManageOverride
-                ? '当前 enterprise workspace 的公共覆盖层，会先于个人配置参与 effective 合成。'
-                : '当前 workspace 仅展示公共覆盖层；只有 enterprise owner/admin 可以修改。',
+                ? l10n.platformConfigWorkspaceEnterpriseIntro
+                : l10n.platformConfigWorkspaceViewOnlyIntro,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 4),
           Text(
             (_response?.hasWorkspaceOverride ?? false)
-                ? '当前状态：已写入 workspace override'
-                : '当前状态：继承 defaults，再叠个人覆盖',
+                ? l10n.platformConfigWorkspaceStateWritten
+                : l10n.platformConfigWorkspaceStateInherit,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 12),
           _buildToggleEditor(
+            l10n: l10n,
             draft: workspaceDraft,
             onChanged: workspace.canManageOverride
                 ? _patchWorkspaceDraft
@@ -1221,8 +1272,8 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           const SizedBox(height: 4),
           Text(
             workspace.workspaceType == 'enterprise'
-                ? '当前 workspace 没有可编辑的公共覆盖层。请先切到 enterprise owner/admin 身份，或等待公共覆盖配置下发。'
-                : '当前 workspace 为 personal。workspace 级公共覆盖层仅对 enterprise workspace 开放。',
+                ? l10n.platformConfigWorkspaceNoDraftEnterprise
+                : l10n.platformConfigWorkspaceNoDraftPersonal,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -1231,18 +1282,22 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           Text('User Override', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
-            '个人覆盖层始终最后生效，适合放自己的运营视图与工具偏好。',
+            l10n.platformConfigUserOverrideIntro,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 4),
           Text(
             (_response?.hasUserOverride ?? false)
-                ? '当前状态：已写入 user override'
-                : '当前状态：直接继承 workspace/defaults',
+                ? l10n.platformConfigUserStateWritten
+                : l10n.platformConfigUserStateInherit,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 12),
-          _buildToggleEditor(draft: userDraft, onChanged: _patchUserDraft),
+          _buildToggleEditor(
+            l10n: l10n,
+            draft: userDraft,
+            onChanged: _patchUserDraft,
+          ),
         ],
       ],
     );
@@ -1289,9 +1344,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     text: 'test.ping',
   );
   final _webhookWorkspaceIdController = TextEditingController();
+
   /// Create form: selected platform event slugs (empty on server = all types).
-  final Set<String> _createWebhookEventTypes =
-      <String>{...kOutboundWebhookPlatformEventTypes};
+  final Set<String> _createWebhookEventTypes = <String>{
+    ...kOutboundWebhookPlatformEventTypes,
+  };
   final _helpHubSearchController = TextEditingController();
   final _helpHubNewIdController = TextEditingController();
   final _helpHubNewTitleController = TextEditingController();
@@ -1304,6 +1361,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   String? _loadingDeliveriesId;
   final List<_WebhookActivityEntry> _webhookActivity =
       <_WebhookActivityEntry>[];
+
   /// Per-row draft for PATCH `workspaceId` on existing webhooks.
   final Map<String, TextEditingController> _webhookWorkspaceDraftControllers =
       <String, TextEditingController>{};
@@ -1998,7 +2056,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(draft.isEmpty ? '已改为全局（无 workspace 过滤）' : '已更新 workspaceId'),
+          content: Text(
+            draft.isEmpty ? '已改为全局（无 workspace 过滤）' : '已更新 workspaceId',
+          ),
         ),
       );
       await _loadWebhooks();
@@ -2055,9 +2115,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已更新订阅事件')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已更新订阅事件')));
       await _loadWebhooks();
     } catch (e) {
       if (!mounted) {
@@ -2889,18 +2949,24 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 children: [
                                   Text(
                                     '订阅事件',
-                                    style: Theme.of(context).textTheme.labelMedium,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium,
                                   ),
                                   const SizedBox(height: 4),
                                   OutboundWebhookEventChips(
                                     selected: outboundWebhookEffectiveSelection(
                                       wh.eventTypes,
                                     ),
-                                    enabled: !_loadingWebhooks &&
+                                    enabled:
+                                        !_loadingWebhooks &&
                                         _webhookBusyId == null,
                                     onSelectionChanged: (next) {
                                       unawaited(
-                                        _patchWebhookEventSubscription(wh, next),
+                                        _patchWebhookEventSubscription(
+                                          wh,
+                                          next,
+                                        ),
                                       );
                                     },
                                   ),
@@ -2909,7 +2975,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                       padding: const EdgeInsets.only(top: 4),
                                       child: Text(
                                         'API: ${wh.eventTypes.join(', ')}',
-                                        style: Theme.of(context).textTheme.bodySmall,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
                                       ),
                                     ),
                                 ],
@@ -2922,17 +2990,21 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 children: [
                                   Text(
                                     '作用域 workspaceId（留空保存 = 全局）',
-                                    style: Theme.of(context).textTheme.labelMedium,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium,
                                   ),
                                   const SizedBox(height: 4),
                                   TextField(
                                     controller:
-                                        _webhookWorkspaceDraftControllers[wh.id],
+                                        _webhookWorkspaceDraftControllers[wh
+                                            .id],
                                     decoration: const InputDecoration(
                                       hintText: 'UUID，留空表示不按工作区过滤',
                                       isDense: true,
                                     ),
-                                    enabled: !_loadingWebhooks &&
+                                    enabled:
+                                        !_loadingWebhooks &&
                                         _webhookBusyId == null,
                                   ),
                                   const SizedBox(height: 6),
@@ -2941,12 +3013,13 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                     runSpacing: 8,
                                     children: [
                                       OutlinedButton(
-                                        onPressed: _loadingWebhooks ||
+                                        onPressed:
+                                            _loadingWebhooks ||
                                                 _webhookBusyId != null
                                             ? null
                                             : () => _patchWebhookWorkspaceScope(
-                                                  wh.id,
-                                                ),
+                                                wh.id,
+                                              ),
                                         child: Text(
                                           _webhookBusyId == wh.id
                                               ? '保存中…'
@@ -2954,7 +3027,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                         ),
                                       ),
                                       TextButton(
-                                        onPressed: _loadingWebhooks ||
+                                        onPressed:
+                                            _loadingWebhooks ||
                                                 _webhookBusyId != null
                                             ? null
                                             : () {
