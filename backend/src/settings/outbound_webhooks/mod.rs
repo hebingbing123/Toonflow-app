@@ -206,6 +206,66 @@ fn normalize_event_types(raw: Option<Vec<String>>) -> Result<Vec<String>, ApiErr
     Ok(out)
 }
 
+fn url_host_for_audit(url: &str) -> String {
+    url::Url::parse(url)
+        .ok()
+        .and_then(|u| u.host_str().map(|h| h.to_string()))
+        .unwrap_or_else(|| "unknown".into())
+}
+
+fn patch_audit_changed_keys(body: &OutboundWebhookPatchBody) -> Vec<String> {
+    let mut v = Vec::new();
+    if body.url.is_some() {
+        v.push("url".into());
+    }
+    if body
+        .secret
+        .as_ref()
+        .map(|s| !s.trim().is_empty())
+        .unwrap_or(false)
+    {
+        v.push("secret".into());
+    }
+    if body.clear_workspace_id == Some(true) || body.workspace_id.is_some() {
+        v.push("workspaceId".into());
+    }
+    if body.event_types.is_some() {
+        v.push("eventTypes".into());
+    }
+    if body.enabled.is_some() {
+        v.push("enabled".into());
+    }
+    v
+}
+
+async fn append_outbound_webhook_config_audit<'e, E>(
+    executor: E,
+    owner_user_id: Uuid,
+    webhook_id: Option<Uuid>,
+    action: &'static str,
+    details: Value,
+) -> Result<(), ApiError>
+where
+    E: sqlx::Executor<'e, Database = sqlx::Postgres>,
+{
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_outbound_webhook_config_audit (
+            owner_user_id, webhook_id, action, details
+        )
+        VALUES ($1, $2, $3, $4)
+        "#,
+    )
+    .bind(owner_user_id)
+    .bind(webhook_id)
+    .bind(action)
+    .bind(SqlxJson(details))
+    .execute(executor)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
 async fn require_workspace_member(
     pool: &PgPool,
     user_id: Uuid,
@@ -326,6 +386,20 @@ pub(crate) async fn post_outbound_webhook_create(
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    append_outbound_webhook_config_audit(
+        pool,
+        user_id,
+        Some(id),
+        "webhook_created",
+        json!({
+            "urlHost": url_host_for_audit(&url),
+            "workspaceId": body.workspace_id,
+            "eventTypesCount": event_types.len(),
+            "enabled": enabled,
+        }),
+    )
+    .await?;
 
     Ok(Json(OutboundWebhookCreatedResponse { id, url, secret }))
 }
@@ -493,6 +567,15 @@ pub(crate) async fn patch_outbound_webhook(
         return Err(ApiError::NotFound);
     };
 
+    append_outbound_webhook_config_audit(
+        pool,
+        user_id,
+        Some(id),
+        "webhook_updated",
+        json!({ "changed": patch_audit_changed_keys(&body) }),
+    )
+    .await?;
+
     Ok(Json(OutboundWebhookListItem {
         id,
         url,
@@ -526,22 +609,46 @@ pub(crate) async fn delete_outbound_webhook(
     let user_id = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
 
-    let deleted = sqlx::query_scalar::<_, i64>(
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let found = sqlx::query_scalar::<_, Option<Uuid>>(
         r#"
-        DELETE FROM public.app_outbound_webhook
+        SELECT id FROM public.app_outbound_webhook
         WHERE id = $1 AND owner_user_id = $2
-        RETURNING 1
+        FOR UPDATE
         "#,
     )
     .bind(id)
     .bind(user_id)
-    .fetch_optional(pool)
+    .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    if deleted.is_none() {
+    if found.is_none() {
         return Err(ApiError::NotFound);
     }
+
+    append_outbound_webhook_config_audit(&mut *tx, user_id, Some(id), "webhook_deleted", json!({}))
+        .await?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM public.app_outbound_webhook
+        WHERE id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(id)
+    .bind(user_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(json!({"deleted": true})))
 }
@@ -616,6 +723,19 @@ pub(crate) async fn post_outbound_webhook_test(
     )
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    append_outbound_webhook_config_audit(
+        pool,
+        user_id,
+        Some(id),
+        "webhook_tested",
+        json!({
+            "eventType": event_type,
+            "delivered": attempt.delivered,
+            "httpStatus": attempt.http_status,
+        }),
+    )
+    .await?;
 
     Ok(Json(OutboundWebhookTestResponse {
         delivered: attempt.delivered,

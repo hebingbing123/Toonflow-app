@@ -149,6 +149,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] WH1.7 `POST …/{id}/test` — JSON 体 + **`X-Toonflow-Signature`**（`sha256=` HMAC）+ **`X-Toonflow-Timestamp`** + **`X-Toonflow-Event-Type`**
   - [x] WH1.8 `GET …/{id}/deliveries` 分页列表
   - [x] WH1.9 OpenAPI / `SettingsOpenApi` 已注册 `patch` + `deliveries`；导出 `export-openapi` 通过
+  - [x] WH1.10 **配置审计**：表 **`app_outbound_webhook_config_audit`**（create/patch/delete/test；**`details` 不含 secret**）；账户导出勾选审计时包含 **`outbound_webhook_config_audit`**
   - _Requirements: 4.1, 4.5, 4.10, 4.13_
 
 - [x] **WH2. 出站 Webhook — 投递引擎**（需求 **4.4**「死信」以 **`app_outbound_webhook_delivery` 失败行**落地；**可选加强**：独立 DLQ 消费/自动重放未做）
