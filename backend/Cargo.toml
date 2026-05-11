@@ -10,13 +10,21 @@ name = "toonflow-sqlite-import"
 path = "src/bin/sqlite_import.rs"
 test = false
 
+[[bin]]
+name = "reconcile-billing"
+path = "src/bin/reconcile_billing.rs"
+test = false
+
 [dependencies]
 anyhow = "1"
 aes-gcm = "0.10"
 async-trait = "0.1"
+aws-config = { version = "1.5", default-features = false, features = ["behavior-version-latest", "rt-tokio", "rustls"] }
+aws-sdk-s3 = { version = "1.70", default-features = false, features = ["behavior-version-latest", "rt-tokio", "rustls"] }
 axum = { version = "0.8", features = ["macros", "ws"] }
 base64 = "0.22"
 chrono = { version = "0.4", default-features = false, features = ["clock", "std", "serde"] }
+clap = { version = "4", features = ["derive"] }
 dotenvy = "0.15"
 futures-util = "0.3"
 governor = "0.10"
@@ -62,10 +70,16 @@ futures = "0.3"
 proptest = "1"
 tempfile = "3"
 tower = { version = "0.5", features = ["util"] }
+wiremock = "0.6.5"
 
 [[bin]]
 name = "export-openapi"
 path = "src/bin/export_openapi.rs"
+test = false
+
+[[bin]]
+name = "backfill-job-workspace-id"
+path = "src/bin/backfill_job_workspace_id.rs"
 test = false
 
 [features]

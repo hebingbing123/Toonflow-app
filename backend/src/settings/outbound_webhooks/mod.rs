@@ -758,3 +758,6 @@ pub fn router() -> Router<AppState> {
         .merge(outbound_settings_router())
         .merge(outbound_public_alias_router())
 }
+
+#[cfg(test)]
+mod http_shape_tests;
