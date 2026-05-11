@@ -3,6 +3,7 @@ use axum::{routing::get, Router};
 use crate::state::AppState;
 
 mod content_compliance_sync_pure;
+mod content_compliance_sync_storage;
 mod handlers;
 mod storage;
 mod types;
