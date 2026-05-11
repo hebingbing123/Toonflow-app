@@ -86,6 +86,8 @@ pub struct OutboundWebhookPatchBody {
     pub url: Option<String>,
     /// When set to non-empty, replaces the signing secret.
     pub secret: Option<String>,
+    /// When `true`, clears `workspace_id` (unscoped hooks). Takes precedence over `workspace_id`.
+    pub clear_workspace_id: Option<bool>,
     pub workspace_id: Option<Uuid>,
     pub event_types: Option<Vec<String>>,
     pub enabled: Option<bool>,
@@ -447,7 +449,9 @@ pub(crate) async fn patch_outbound_webhook(
             secret = t.to_string();
         }
     }
-    if let Some(ws) = body.workspace_id {
+    if body.clear_workspace_id == Some(true) {
+        workspace_id = None;
+    } else if let Some(ws) = body.workspace_id {
         require_workspace_member(pool, user_id, ws).await?;
         workspace_id = Some(ws);
     }

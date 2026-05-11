@@ -1303,6 +1303,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   String? _loadingDeliveriesId;
   final List<_WebhookActivityEntry> _webhookActivity =
       <_WebhookActivityEntry>[];
+  /// Per-row draft for PATCH `workspaceId` on existing webhooks.
+  final Map<String, TextEditingController> _webhookWorkspaceDraftControllers =
+      <String, TextEditingController>{};
   bool _loadingBillingEvents = false;
   bool _loadingMoreBillingEvents = false;
   bool _exportingAllBillingEvents = false;
@@ -1392,6 +1395,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     _billingEventCreatedToController.dispose();
     _billingCreatedFromController.dispose();
     _billingCreatedToController.dispose();
+    for (final c in _webhookWorkspaceDraftControllers.values) {
+      c.dispose();
+    }
+    _webhookWorkspaceDraftControllers.clear();
     super.dispose();
   }
 
@@ -1665,6 +1672,29 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     );
   }
 
+  void _syncWebhookWorkspaceDraftControllers() {
+    final items = _webhooks?.items ?? const <OutboundWebhookListItemV1>[];
+    final alive = items.map((e) => e.id).toSet();
+    for (final id in _webhookWorkspaceDraftControllers.keys.toList()) {
+      if (!alive.contains(id)) {
+        _webhookWorkspaceDraftControllers.remove(id)?.dispose();
+      }
+    }
+    for (final wh in items) {
+      _webhookWorkspaceDraftControllers.putIfAbsent(
+        wh.id,
+        () => TextEditingController(text: wh.workspaceId ?? ''),
+      );
+    }
+  }
+
+  void _disposeAllWebhookWorkspaceDraftControllers() {
+    for (final c in _webhookWorkspaceDraftControllers.values) {
+      c.dispose();
+    }
+    _webhookWorkspaceDraftControllers.clear();
+  }
+
   Future<void> _loadWebhooks() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
@@ -1672,6 +1702,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _webhooksError = '请先登录';
         _webhooks = null;
       });
+      _disposeAllWebhookWorkspaceDraftControllers();
       return;
     }
     setState(() {
@@ -1685,6 +1716,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooks = resp;
+        _syncWebhookWorkspaceDraftControllers();
       });
     } catch (e) {
       if (!mounted) {
@@ -1694,6 +1726,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _webhooksError = describeRustApiError(e);
         _webhooks = null;
       });
+      _disposeAllWebhookWorkspaceDraftControllers();
     } finally {
       if (mounted) {
         setState(() {
@@ -1923,6 +1956,80 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
   }
 
+  Future<void> _patchWebhookWorkspaceScope(String webhookId) async {
+    final token = widget.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final ctrl = _webhookWorkspaceDraftControllers[webhookId];
+    final draft = ctrl?.text.trim() ?? '';
+
+    setState(() {
+      _loadingWebhooks = true;
+      _webhooksError = null;
+      _webhookBusyId = webhookId;
+    });
+    try {
+      if (draft.isNotEmpty && !outboundWebhookWorkspaceIdLooksValid(draft)) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _webhooksError = 'workspaceId 须为合法 UUID，或清空后保存以改为全局';
+        });
+        return;
+      }
+      if (draft.isEmpty) {
+        await patchSettingsOutboundWebhookV1(
+          token,
+          webhookId,
+          const OutboundWebhookPatchBodyV1(clearWorkspaceId: true),
+        );
+      } else {
+        await patchSettingsOutboundWebhookV1(
+          token,
+          webhookId,
+          OutboundWebhookPatchBodyV1(workspaceId: draft),
+        );
+      }
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(draft.isEmpty ? '已改为全局（无 workspace 过滤）' : '已更新 workspaceId'),
+        ),
+      );
+      await _loadWebhooks();
+      OutboundWebhookListItemV1? refreshed;
+      final list = _webhooks?.items;
+      if (list != null) {
+        for (final w in list) {
+          if (w.id == webhookId) {
+            refreshed = w;
+            break;
+          }
+        }
+      }
+      _webhookWorkspaceDraftControllers[webhookId]?.text =
+          refreshed?.workspaceId ?? '';
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhooksError = describeRustApiError(e);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingWebhooks = false;
+          _webhookBusyId = null;
+        });
+      }
+    }
+  }
+
   Future<void> _patchWebhookEventSubscription(
     OutboundWebhookListItemV1 wh,
     Set<String> nextSelection,
@@ -2008,6 +2115,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       setState(() {
         _webhookLastTestResultById.remove(id);
         _webhookDeliveries.remove(id);
+        _webhookWorkspaceDraftControllers.remove(id)?.dispose();
         if (_latestCreatedWebhook?.id == id) {
           _latestCreatedWebhook = null;
         }
@@ -2805,14 +2913,60 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 ],
                               ),
                             ),
-                            if (wh.workspaceId != null && wh.workspaceId!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Text(
-                                  'workspaceId: ${wh.workspaceId}',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '作用域 workspaceId（留空保存 = 全局）',
+                                    style: Theme.of(context).textTheme.labelMedium,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  TextField(
+                                    controller:
+                                        _webhookWorkspaceDraftControllers[wh.id],
+                                    decoration: const InputDecoration(
+                                      hintText: 'UUID，留空表示不按工作区过滤',
+                                      isDense: true,
+                                    ),
+                                    enabled: !_loadingWebhooks &&
+                                        _webhookBusyId == null,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      OutlinedButton(
+                                        onPressed: _loadingWebhooks ||
+                                                _webhookBusyId != null
+                                            ? null
+                                            : () => _patchWebhookWorkspaceScope(
+                                                  wh.id,
+                                                ),
+                                        child: Text(
+                                          _webhookBusyId == wh.id
+                                              ? '保存中…'
+                                              : '保存作用域',
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: _loadingWebhooks ||
+                                                _webhookBusyId != null
+                                            ? null
+                                            : () {
+                                                _webhookWorkspaceDraftControllers[wh
+                                                        .id]
+                                                    ?.clear();
+                                              },
+                                        child: const Text('清空输入'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
+                            ),
                             if (_webhookDeliveries[wh.id] != null) ...[
                               const SizedBox(height: 8),
                               Text(

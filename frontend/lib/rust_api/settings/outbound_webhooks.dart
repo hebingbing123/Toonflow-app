@@ -37,6 +37,7 @@ class OutboundWebhookPatchBodyV1 {
   const OutboundWebhookPatchBodyV1({
     this.url,
     this.secret,
+    this.clearWorkspaceId,
     this.workspaceId,
     this.eventTypes,
     this.enabled,
@@ -44,6 +45,8 @@ class OutboundWebhookPatchBodyV1 {
 
   final String? url;
   final String? secret;
+  /// When `true`, backend clears `workspace_id` (ignored when setting [workspaceId] in same request).
+  final bool? clearWorkspaceId;
   final String? workspaceId;
   final List<String>? eventTypes;
   final bool? enabled;
@@ -52,6 +55,7 @@ class OutboundWebhookPatchBodyV1 {
     return <String, dynamic>{
       if (url != null) 'url': url,
       if (secret != null) 'secret': secret,
+      if (clearWorkspaceId != null) 'clearWorkspaceId': clearWorkspaceId,
       if (workspaceId != null) 'workspaceId': workspaceId,
       if (eventTypes != null) 'eventTypes': eventTypes,
       if (enabled != null) 'enabled': enabled,

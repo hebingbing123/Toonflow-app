@@ -164,7 +164,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 
 - [x] **WH3. 出站 Webhook — Frontend**（帮助 Hub 出站区：列表/创建/测试/**事件多选+workspaceId**；**投递记录**；平台逻辑与 chips **widget 测**已加）
   - [x] WH3.1 `rust_api/settings/outbound_webhooks.dart` 已扩展（create/patch/list/test/**deliveries**）
-  - [x] WH3.2 配置界面：帮助 Hub 内「出站 Webhook」区已支持 **`FilterChip` 多选** 四类平台事件（与 `kOutboundWebhookPlatformEventTypes` 对齐）、**可选 `workspaceId`**（UUID 校验）、列表卡片内 **PATCH 即时更新** `eventTypes`（全选时提交空数组以匹配后端「订阅全部」语义）
+  - [x] WH3.2 配置界面：帮助 Hub 内「出站 Webhook」区已支持 **`FilterChip` 多选** 四类平台事件（与 `kOutboundWebhookPlatformEventTypes` 对齐）、**创建时可选 `workspaceId`**（UUID 校验）、列表卡片内 **PATCH 即时更新** `eventTypes`；卡片内 **编辑/清空 `workspaceId`**（`PATCH` **`clearWorkspaceId`** 清全局作用域）
   - [x] WH3.3 测试按钮（已有）
   - [x] WH3.4 投递历史：卡片内展示最近 6 条 `deliveries`
   - [x] WH3.5 失败详情：`deliveries` 列表展示 `error` 文本
