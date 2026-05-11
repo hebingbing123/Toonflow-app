@@ -2790,5 +2790,36 @@
         "type": "String"
       }
     }
-  }
+  },
+  "qualityReviewsEmpty": "(empty)",
+  "qualityReviewsDashboardRefreshPerformed": "Snapshot refreshed: {rows} review facts · reviews={reviews} · usage={usage} · {time}",
+  "@qualityReviewsDashboardRefreshPerformed": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "reviews": {
+        "type": "int"
+      },
+      "usage": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDashboardRefreshSkipped": "Snapshot unchanged · fresh snapshot skipped refresh · {time}",
+  "@qualityReviewsDashboardRefreshSkipped": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsFreshnessUnknownAge": "unknown_age",
+  "qualityReviewsFreshnessNever": "never",
+  "qualityReviewsFreshnessNone": "none",
+  "qualityReviewsFreshnessStale": "STALE",
+  "qualityReviewsFreshnessFresh": "fresh"
 }

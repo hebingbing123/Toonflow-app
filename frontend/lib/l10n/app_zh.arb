@@ -2790,5 +2790,36 @@
         "type": "String"
       }
     }
-  }
+  },
+  "qualityReviewsEmpty": "（空）",
+  "qualityReviewsDashboardRefreshPerformed": "底层快照已刷新 {rows} 条 review fact · reviews={reviews} · usage={usage} · {time}",
+  "@qualityReviewsDashboardRefreshPerformed": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "reviews": {
+        "type": "int"
+      },
+      "usage": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDashboardRefreshSkipped": "底层快照保持现状 · fresh snapshot skipped refresh · {time}",
+  "@qualityReviewsDashboardRefreshSkipped": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsFreshnessUnknownAge": "unknown_age",
+  "qualityReviewsFreshnessNever": "never",
+  "qualityReviewsFreshnessNone": "none",
+  "qualityReviewsFreshnessStale": "STALE",
+  "qualityReviewsFreshnessFresh": "fresh"
 }

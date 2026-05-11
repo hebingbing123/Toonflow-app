@@ -6365,6 +6365,59 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'next step {value}'**
   String qualityReviewsNextStep(String value);
+
+  /// No description provided for @qualityReviewsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty)'**
+  String get qualityReviewsEmpty;
+
+  /// No description provided for @qualityReviewsDashboardRefreshPerformed.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot refreshed: {rows} review facts · reviews={reviews} · usage={usage} · {time}'**
+  String qualityReviewsDashboardRefreshPerformed(
+    int rows,
+    int reviews,
+    int usage,
+    String time,
+  );
+
+  /// No description provided for @qualityReviewsDashboardRefreshSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot unchanged · fresh snapshot skipped refresh · {time}'**
+  String qualityReviewsDashboardRefreshSkipped(String time);
+
+  /// No description provided for @qualityReviewsFreshnessUnknownAge.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown_age'**
+  String get qualityReviewsFreshnessUnknownAge;
+
+  /// No description provided for @qualityReviewsFreshnessNever.
+  ///
+  /// In en, this message translates to:
+  /// **'never'**
+  String get qualityReviewsFreshnessNever;
+
+  /// No description provided for @qualityReviewsFreshnessNone.
+  ///
+  /// In en, this message translates to:
+  /// **'none'**
+  String get qualityReviewsFreshnessNone;
+
+  /// No description provided for @qualityReviewsFreshnessStale.
+  ///
+  /// In en, this message translates to:
+  /// **'STALE'**
+  String get qualityReviewsFreshnessStale;
+
+  /// No description provided for @qualityReviewsFreshnessFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'fresh'**
+  String get qualityReviewsFreshnessFresh;
 }
 
 class _AppLocalizationsDelegate

@@ -3700,4 +3700,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String qualityReviewsNextStep(String value) {
     return '下一步 $value';
   }
+
+  @override
+  String get qualityReviewsEmpty => '（空）';
+
+  @override
+  String qualityReviewsDashboardRefreshPerformed(
+    int rows,
+    int reviews,
+    int usage,
+    String time,
+  ) {
+    return '底层快照已刷新 $rows 条 review fact · reviews=$reviews · usage=$usage · $time';
+  }
+
+  @override
+  String qualityReviewsDashboardRefreshSkipped(String time) {
+    return '底层快照保持现状 · fresh snapshot skipped refresh · $time';
+  }
+
+  @override
+  String get qualityReviewsFreshnessUnknownAge => 'unknown_age';
+
+  @override
+  String get qualityReviewsFreshnessNever => 'never';
+
+  @override
+  String get qualityReviewsFreshnessNone => 'none';
+
+  @override
+  String get qualityReviewsFreshnessStale => 'STALE';
+
+  @override
+  String get qualityReviewsFreshnessFresh => 'fresh';
 }

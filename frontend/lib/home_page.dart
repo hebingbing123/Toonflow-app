@@ -162,6 +162,7 @@ bool shouldAutoOpenTeamWorkspacesForInitialUri(Uri uri) {
 
 class _HomePageState extends State<HomePage> {
   String? _error;
+  AppLocalizations? _appL10n;
   int? _productScopedProjectNumericId;
   MeResponse? _sessionMe;
   MeV2Response?
@@ -221,6 +222,7 @@ class _HomePageState extends State<HomePage> {
       QualityReviewsController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
       );
 
   late final OverviewController _overviewController = OverviewController(
@@ -971,6 +973,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    _appL10n = AppLocalizations.of(context);
     final session = _authController.session;
 
     return Scaffold(
