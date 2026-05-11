@@ -87,10 +87,14 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
       accepted: const [501],
     );
     statuses['clear-db'] = clearDb;
+    final agentDeployId = await resolveSettingsProbeAgentDeployId(
+      token: token,
+      fetchAgentDeployList: postAgentDeployListV1,
+    );
 
     final deployModel = await postSettingsAgentDeployModelV1(
       token,
-      id: 1,
+      id: agentDeployId,
       name: '剧本Agent',
       model: 'x',
       modelName: 'y',
