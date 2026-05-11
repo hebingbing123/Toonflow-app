@@ -15,7 +15,7 @@ class AccountProbeClearScope {
     this.scriptId,
   });
 
-  final int projectId;
+  final int? projectId;
   final String? projectUuid;
   final int? scriptId;
 }
@@ -46,7 +46,7 @@ Future<AccountProbeClearScope> resolveAccountProbeClearScope({
     }
   }
   return AccountProbeClearScope(
-    projectId: projectId ?? fallbackProjectId,
+    projectId: explicitProjectUuid != null ? projectId : (projectId ?? fallbackProjectId),
     projectUuid: explicitProjectUuid,
     scriptId: _parsePositiveInt(scriptIdText),
   );
@@ -231,20 +231,23 @@ class AccountProbesController extends ChangeNotifier {
       final clearStatus = await postSettingsClearAgentMemoriesV1(
         token,
         projectUuid: clearScope.projectUuid,
-        projectId: clearScope.projectUuid != null ? null : clearScope.projectId,
+        projectId: clearScope.projectId,
         agentType: 'scriptAgent',
         episodesId: clearScope.scriptId,
       );
       if (!const [200, 404, 503].contains(clearStatus)) {
         throw StateError(
           'POST clear-agent-memories expected 503/200/404, got '
-          '$clearStatus (numeric id #${clearScope.projectId})',
+          '$clearStatus (projectUuid=${clearScope.projectUuid ?? "-"} '
+          'numeric id #${clearScope.projectId ?? "-"})',
         );
       }
       final clearNote = switch (clearStatus) {
         503 => '503 no DB',
         200 => '200 ok',
-        404 => '404 no project numeric#${clearScope.projectId}',
+        404 => clearScope.projectUuid != null
+            ? '404 no project uuid=${clearScope.projectUuid}'
+            : '404 no project numeric#${clearScope.projectId ?? "-"}',
         _ => '$clearStatus',
       };
       memoryConfigProbeBody = '$line · clear-agent-memories -> $clearNote';

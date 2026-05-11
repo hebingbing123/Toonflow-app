@@ -22,6 +22,25 @@ void main() {
     expect(fetchCalls, 0);
   });
 
+  test('account probe clear scope keeps uuid-only path free of fake numeric id', () async {
+    var fetchCalls = 0;
+    final scope = await resolveAccountProbeClearScope(
+      token: 'token',
+      projectIdText: '',
+      projectUuidText: '550e8400-e29b-41d4-a716-446655440999',
+      scriptIdText: '8',
+      fetchProjects: (token) async {
+        fetchCalls += 1;
+        return const <ProjectRow>[];
+      },
+    );
+
+    expect(scope.projectId, isNull);
+    expect(scope.projectUuid, '550e8400-e29b-41d4-a716-446655440999');
+    expect(scope.scriptId, 8);
+    expect(fetchCalls, 0);
+  });
+
   test('account probe clear scope falls back to first visible project', () async {
     var fetchCalls = 0;
     final scope = await resolveAccountProbeClearScope(
