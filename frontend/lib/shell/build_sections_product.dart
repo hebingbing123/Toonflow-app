@@ -219,18 +219,22 @@ extension _HomePageBuildProductSections on _HomePageState {
               ProductWorkspacePane.projects,
             );
           },
-          onSyncProjectContext: (projectNumericId) {
+          onSyncProjectContext: (projectScope) {
             setState(() {
-              _productScopedProjectNumericId = projectNumericId;
+              _productScopedProjectNumericId = projectScope?.projectNumericId;
             });
-            if (projectNumericId == null) {
+            if (projectScope == null) {
               _workspaceInputController.projectIdController.clear();
               _workspaceInputController.projectUuidController.clear();
               _workspaceInputController.workspaceUuidController.clear();
               _workspaceInputController.clearScriptScope();
               return;
             }
-            _workspaceInputController.applyProjectScope(projectNumericId);
+            _workspaceInputController.applyProjectScope(
+              projectScope.projectNumericId,
+              projectUuid: projectScope.projectUuid,
+              workspaceId: projectScope.workspaceId,
+            );
             _workspaceInputController.clearScriptScope();
           },
           onOpenScriptWorkspace: () {
@@ -1724,7 +1728,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 ),
                                 const SizedBox(width: 8),
                                 IconButton(
-                                  tooltip: dl10n.notificationsComplianceTooltipMoveUp,
+                                  tooltip: dl10n
+                                      .notificationsComplianceTooltipMoveUp,
                                   onPressed: (_savingHelpHubLinks || idx == 0)
                                       ? null
                                       : () => setInner(() {
@@ -1736,8 +1741,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   icon: const Icon(Icons.arrow_upward),
                                 ),
                                 IconButton(
-                                  tooltip:
-                                      dl10n.notificationsComplianceTooltipMoveDown,
+                                  tooltip: dl10n
+                                      .notificationsComplianceTooltipMoveDown,
                                   onPressed:
                                       (_savingHelpHubLinks ||
                                           idx >= activeItems.length - 1)
@@ -2083,7 +2088,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.opsWhSnackCreated)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.opsWhSnackCreated),
+        ),
       );
       await _loadWebhooks();
     } catch (e) {
@@ -2121,7 +2128,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           return;
         }
         setState(() {
-          _webhooksError = AppLocalizations.of(context)!.opsWhErrorWorkspaceIdPatch;
+          _webhooksError = AppLocalizations.of(
+            context,
+          )!.opsWhErrorWorkspaceIdPatch;
         });
         return;
       }
@@ -2574,9 +2583,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.billingAuditSnapshotCopied)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.billingAuditSnapshotCopied)));
   }
 
   Future<void> _copyBillingAuditText(String text, String labelForSnack) async {
@@ -2777,9 +2786,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           const SizedBox(height: 8),
           TextField(
             controller: _helpHubSearchController,
-            decoration: InputDecoration(
-              labelText: l10n.helpHubSearchLabel,
-            ),
+            decoration: InputDecoration(labelText: l10n.helpHubSearchLabel),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 8),
@@ -2878,9 +2885,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           const SizedBox(height: 8),
           TextField(
             controller: _webhookSecretController,
-            decoration: InputDecoration(
-              labelText: l10n.opsWhSecretLabel,
-            ),
+            decoration: InputDecoration(labelText: l10n.opsWhSecretLabel),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -2999,9 +3004,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           const SizedBox(height: 8),
           TextField(
             controller: _webhookSearchController,
-            decoration: InputDecoration(
-              labelText: l10n.opsWhSearchLabel,
-            ),
+            decoration: InputDecoration(labelText: l10n.opsWhSearchLabel),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 8),
@@ -3583,7 +3586,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 Chip(
                   label: Text(
                     l10n.billingSnapInformational(
-                      _billingEvents.where((e) => e.isInformationalEvent).length,
+                      _billingEvents
+                          .where((e) => e.isInformationalEvent)
+                          .length,
                     ),
                   ),
                   visualDensity: VisualDensity.compact,
@@ -3591,7 +3596,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 Chip(
                   label: Text(
                     l10n.billingSnapStateful(
-                      _billingEvents.where((e) => !e.isInformationalEvent).length,
+                      _billingEvents
+                          .where((e) => !e.isInformationalEvent)
+                          .length,
                     ),
                   ),
                   visualDensity: VisualDensity.compact,

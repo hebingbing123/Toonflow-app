@@ -47,7 +47,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
 
   final String? accessToken;
   final VoidCallback onOpenProjects;
-  final ValueChanged<int?> onSyncProjectContext;
+  final ValueChanged<ShortVideoProjectScope?> onSyncProjectContext;
   final VoidCallback onOpenScriptWorkspace;
   final VoidCallback onOpenProductionWorkspace;
   final VoidCallback onOpenTasks;
@@ -98,8 +98,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   List<PublishAttemptAuditRow> _publishAuditRows =
       const <PublishAttemptAuditRow>[];
   String? _selectedPublishDraftId;
-  Map<String, String> _publishAutomationModesByPlatform =
-      <String, String>{};
+  Map<String, String> _publishAutomationModesByPlatform = <String, String>{};
   List<String> _publishBatchResultLines = const <String>[];
   bool _publishBusy = false;
   int _publishCopyEditorRevision = 0;
@@ -111,7 +110,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool _multiSelectMode = false;
   Set<String> _selectedDraftIds = <String>{};
   PublishBatchValidationResponse? _batchValidation;
-  
+
   // P11: Delivery mode state
   String? _deliveryModeFilter;
 
@@ -293,8 +292,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       overviewMetrics.add(
         ShortVideoMetricData(
           label: '分镜就绪',
-          value:
-              '${po.readyStoryboardCount}/${po.totalStoryboardCount}',
+          value: '${po.readyStoryboardCount}/${po.totalStoryboardCount}',
         ),
       );
     }
@@ -321,9 +319,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       clipAssetCount: _clipAssetCount,
     );
     final shotReadinessUi = project == null
-        ? const ShotReadinessUi(
-            headline: '选择短剧项目后，会显示服务端分镜阻塞汇总。',
-          )
+        ? const ShotReadinessUi(headline: '选择短剧项目后，会显示服务端分镜阻塞汇总。')
         : buildShotReadinessUi(
             loadingProjectOverview: _loadingProjectOverview,
             readiness: _shotReadiness,
@@ -341,20 +337,20 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     );
     final Widget? assemblyVersionManagerPanel =
         project != null &&
-                _shortVideoAssembly != null &&
-                _shortVideoAssembly!.scripts.isNotEmpty
-            ? VersionManager(
-                versions: _assemblyVersions,
-                currentVersionId: _currentAssemblyVersionId,
-                drafts: _assemblyDrafts,
-                onCreateVersion: _handleCreateVersion,
-                onSwitchVersion: _handleSwitchVersion,
-                onDeleteVersion: _handleDeleteVersion,
-                onSaveDraft: _handleSaveDraft,
-                onRestoreDraft: _handleRestoreDraft,
-                onDeleteDraft: _handleDeleteDraft,
-              )
-            : null;
+            _shortVideoAssembly != null &&
+            _shortVideoAssembly!.scripts.isNotEmpty
+        ? VersionManager(
+            versions: _assemblyVersions,
+            currentVersionId: _currentAssemblyVersionId,
+            drafts: _assemblyDrafts,
+            onCreateVersion: _handleCreateVersion,
+            onSwitchVersion: _handleSwitchVersion,
+            onDeleteVersion: _handleDeleteVersion,
+            onSaveDraft: _handleSaveDraft,
+            onRestoreDraft: _handleRestoreDraft,
+            onDeleteDraft: _handleDeleteDraft,
+          )
+        : null;
     final exportCheckPanelUi = buildShortVideoExportCheckPanelUi(
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
@@ -383,33 +379,31 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         }
       },
       publishBusy: _publishBusy,
-      onRefreshPublish: project != null &&
-              accessToken != null &&
-              accessToken.isNotEmpty
+      onRefreshPublish:
+          project != null && accessToken != null && accessToken.isNotEmpty
           ? () => unawaited(_refreshPublishSlice(project, accessToken))
           : null,
-      onBootstrapPublishDraft: project != null &&
-              accessToken != null &&
-              accessToken.isNotEmpty
+      onBootstrapPublishDraft:
+          project != null && accessToken != null && accessToken.isNotEmpty
           ? () => unawaited(_bootstrapPublishDraft())
           : null,
-      onEnqueuePublishJob: project != null &&
-              accessToken != null &&
-              accessToken.isNotEmpty
+      onEnqueuePublishJob:
+          project != null && accessToken != null && accessToken.isNotEmpty
           ? () => unawaited(_enqueuePublishJob())
           : null,
-      onConfirmSemiAuto: project != null &&
-              accessToken != null &&
-              accessToken.isNotEmpty
+      onConfirmSemiAuto:
+          project != null && accessToken != null && accessToken.isNotEmpty
           ? () => unawaited(_confirmSemiAutoPublish())
           : null,
-      onSuggestPublishCopy: project != null &&
+      onSuggestPublishCopy:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable
           ? () => unawaited(_suggestPublishCopy())
           : null,
-      onClearPublishSchedule: project != null &&
+      onClearPublishSchedule:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
@@ -417,10 +411,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           ? () => unawaited(_clearPublishSchedule())
           : null,
       publishTargetPlatformIds: _targetPlatforms,
-      onEnqueueAllDrafts:
-          project != null ? () => unawaited(_enqueueAllDraftJobs()) : null,
-      onRetryFailedPublishJobs:
-          project != null ? () => unawaited(_retryFailedPublishJobs()) : null,
+      onEnqueueAllDrafts: project != null
+          ? () => unawaited(_enqueueAllDraftJobs())
+          : null,
+      onRetryFailedPublishJobs: project != null
+          ? () => unawaited(_retryFailedPublishJobs())
+          : null,
       publishBatchResultLines: _publishBatchResultLines,
       publishAutomationModesByPlatform: _publishAutomationModesByPlatform,
       onChangePublishAutomationMode: (platformId, automationMode) {
@@ -432,7 +428,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         });
       },
       publishCopyEditorRevision: _publishCopyEditorRevision,
-      onCommitPublishPlatformCopy: project != null &&
+      onCommitPublishPlatformCopy:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
@@ -447,41 +444,35 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                   tagsComma,
                 )
           : null,
-      onScheduleFirstDraft: project != null &&
+      onScheduleFirstDraft:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
               _publishDrafts.isNotEmpty
-          ? (ctx) => unawaited(
-                _scheduleFirstDraft(ctx, project, accessToken),
-              )
+          ? (ctx) => unawaited(_scheduleFirstDraft(ctx, project, accessToken))
           : null,
-      onScheduleAllDraftsSameTime: project != null &&
+      onScheduleAllDraftsSameTime:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
               _publishDrafts.length > 1
-          ? (ctx) => unawaited(
-                _scheduleAllDraftsSameTime(ctx, project, accessToken),
-              )
+          ? (ctx) =>
+                unawaited(_scheduleAllDraftsSameTime(ctx, project, accessToken))
           : null,
-      onPublishCalendarDayBulkSchedule: project != null &&
+      onPublishCalendarDayBulkSchedule:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
               _publishDrafts.isNotEmpty
           ? (ctx, day) => unawaited(
-                _bulkScheduleDraftsForCalendarDay(
-                  ctx,
-                  project,
-                  accessToken,
-                  day,
-                ),
-              )
+              _bulkScheduleDraftsForCalendarDay(ctx, project, accessToken, day),
+            )
           : null,
-      onOpenPublishTroubleshooting: project != null &&
-              accessToken != null &&
-              accessToken.isNotEmpty
+      onOpenPublishTroubleshooting:
+          project != null && accessToken != null && accessToken.isNotEmpty
           ? () {
               _syncSelectedProjectContext();
               widget.onOpenTasks();
@@ -494,21 +485,24 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onToggleDraftSelection: _toggleDraftSelection,
       onSelectAllDrafts: _selectAllDrafts,
       onClearDraftSelection: _clearDraftSelection,
-      onBatchScheduleDrafts: project != null &&
+      onBatchScheduleDrafts:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
               _publishDrafts.isNotEmpty
           ? (ctx) => unawaited(_batchScheduleDrafts(ctx))
           : null,
-      onBatchPublishDrafts: project != null &&
+      onBatchPublishDrafts:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
               _publishDrafts.isNotEmpty
           ? () => unawaited(_batchPublishDrafts())
           : null,
-      onBatchArchiveDrafts: project != null &&
+      onBatchArchiveDrafts:
+          project != null &&
               accessToken != null &&
               accessToken.isNotEmpty &&
               !_publishUnavailable &&
@@ -529,8 +523,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       assetsOverview: _projectAssetsOverview,
       onBatchGenerateCandidateClips:
           project != null && (_projectStats?.storyboardCount ?? 0) > 0
-              ? _runBatchCandidateClips
-              : null,
+          ? _runBatchCandidateClips
+          : null,
       batchGenerateCandidateClipsBusy: _batchCandidateBusy,
     );
     final candidateComparePanelUi = buildShortVideoCandidateComparePanelUi(
@@ -594,161 +588,164 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       },
       child: ShortVideoSpaceView(
         mode: _mode,
-      modeTitle: modeTitle,
-      modeSummary: modeSummary,
-      modeAdvice: modeAdvice,
-      onModeChanged: (mode) {
-        setState(() {
-          _mode = mode;
-        });
-      },
-      loadingProjects: _loadingProjects,
-      projectOptions: projectOptions,
-      selectedProjectId: _selectedProjectId,
-      onProjectChanged: (value) {
-        setState(() {
-          _selectedProjectId = value;
-        });
-        _applyProjectPreset(_selectedProject);
-        _syncSelectedProjectContext();
-        _loadProjectOverview();
-      },
-      onRefreshProjects: _loadProjects,
-      videoRatio: _videoRatio,
-      onVideoRatioChanged: (value) {
-        setState(() {
-          _videoRatio = value;
-        });
-      },
-      targetMarket: _targetMarket,
-      onTargetMarketChanged: (value) {
-        setState(() {
-          _targetMarket = value;
-        });
-      },
-      targetPlatforms: _targetPlatforms,
-      onPublishPlatformTapped: _onPublishPlatformTapped,
-      durationStrategy: _durationStrategy,
-      onDurationStrategyChanged: (value) {
-        setState(() {
-          _durationStrategy = value;
-        });
-      },
-      voiceProfile: _voiceProfile,
-      onVoiceProfileChanged: (value) {
-        setState(() {
-          _voiceProfile = value;
-        });
-      },
-      subtitleStyle: _subtitleStyle,
-      onSubtitleStyleChanged: (value) {
-        setState(() {
-          _subtitleStyle = value;
-        });
-      },
-      bgmStrategy: _bgmStrategy,
-      onBgmStrategyChanged: (value) {
-        setState(() {
-          _bgmStrategy = value;
-        });
-      },
-      creatingProject: _creatingProject,
-      onCreateProject: _createProjectFromSpace,
-      savingProjectConfig: _savingProjectConfig,
-      onSaveProjectConfig: _saveProjectConfig,
-      onOpenProjects: widget.onOpenProjects,
-      projectConfigLine: _projectConfigLine,
-      operationFeedbackIsSuccess: _operationFeedbackIsSuccess,
-      loadingProjectOverview: _loadingProjectOverview,
-      projectReadinessSummary: shortVideoProjectReadinessSummary(_projectStats),
-      visualLabel: visualLabel,
-      directionLabel: directionLabel,
-      projectMetrics: projectMetrics,
-      spaceOverviewSummary: shortVideoSpaceOverviewSummary(
+        modeTitle: modeTitle,
+        modeSummary: modeSummary,
+        modeAdvice: modeAdvice,
+        onModeChanged: (mode) {
+          setState(() {
+            _mode = mode;
+          });
+        },
+        loadingProjects: _loadingProjects,
+        projectOptions: projectOptions,
+        selectedProjectId: _selectedProjectId,
+        onProjectChanged: (value) {
+          setState(() {
+            _selectedProjectId = value;
+          });
+          _applyProjectPreset(_selectedProject);
+          _syncSelectedProjectContext();
+          _loadProjectOverview();
+        },
+        onRefreshProjects: _loadProjects,
+        videoRatio: _videoRatio,
+        onVideoRatioChanged: (value) {
+          setState(() {
+            _videoRatio = value;
+          });
+        },
+        targetMarket: _targetMarket,
+        onTargetMarketChanged: (value) {
+          setState(() {
+            _targetMarket = value;
+          });
+        },
+        targetPlatforms: _targetPlatforms,
+        onPublishPlatformTapped: _onPublishPlatformTapped,
+        durationStrategy: _durationStrategy,
+        onDurationStrategyChanged: (value) {
+          setState(() {
+            _durationStrategy = value;
+          });
+        },
+        voiceProfile: _voiceProfile,
+        onVoiceProfileChanged: (value) {
+          setState(() {
+            _voiceProfile = value;
+          });
+        },
+        subtitleStyle: _subtitleStyle,
+        onSubtitleStyleChanged: (value) {
+          setState(() {
+            _subtitleStyle = value;
+          });
+        },
+        bgmStrategy: _bgmStrategy,
+        onBgmStrategyChanged: (value) {
+          setState(() {
+            _bgmStrategy = value;
+          });
+        },
+        creatingProject: _creatingProject,
+        onCreateProject: _createProjectFromSpace,
+        savingProjectConfig: _savingProjectConfig,
+        onSaveProjectConfig: _saveProjectConfig,
+        onOpenProjects: widget.onOpenProjects,
+        projectConfigLine: _projectConfigLine,
+        operationFeedbackIsSuccess: _operationFeedbackIsSuccess,
         loadingProjectOverview: _loadingProjectOverview,
-        project: project,
-        projectStats: _projectStats,
-        recentProjectTasks: _recentProjectTasks,
-        qualityScopeInsight: _qualityScopeInsight,
-      ),
-      overviewMetrics: overviewMetrics,
-      qualitySummaryLine: shortVideoQualitySummaryLine(
-        isAnimated: _isAnimated,
-        insight: _qualityScopeInsight,
-      ),
-      badCaseMetrics: badCaseMetrics,
-      recentTaskLines: recentTaskLines,
-      assetsOverviewPanelUi: assetsOverviewPanelUi,
-      assemblyPanelUi: assemblyPanelUi,
-      exportCheckPanelUi: exportCheckPanelUi,
-      onStartExport: project != null &&
-              accessToken != null &&
-              accessToken.isNotEmpty
-          ? () => unawaited(_startExportFlow())
-          : null,
-      onOpenExportHistory: project != null &&
-              accessToken != null &&
-              accessToken.isNotEmpty
-          ? () => unawaited(_openExportHistoryFlow())
-          : null,
-      exportActionBusy: _exportActionBusy,
-      publishPanelUi: publishPanelUi,
-      onOpenProductionForAssemblyExport: project == null
-          ? null
-          : () {
-              _syncSelectedProjectContext();
-              widget.onOpenProductionWorkspace();
-            },
-      onOpenAssemblyClipDeskOps: project == null ||
-              _shortVideoAssembly == null ||
-              (_shortVideoAssembly?.scripts.isEmpty ?? true)
-          ? null
-          : () => unawaited(_openAssemblyClipDeskOps()),
-      onOpenAssemblyDefaultsEditor: project == null || _shortVideoAssembly == null
-          ? null
-          : () => unawaited(_openAssemblyDefaultsEditor()),
-      assemblyVersionManagerPanel: assemblyVersionManagerPanel,
-      candidateCardUi: candidateCardUi,
-      candidateComparePanelUi: candidateComparePanelUi,
-      onOpenProjectsForCandidateAssets:
-          project == null ? null : widget.onOpenProjects,
-      readinessIntro: _isAnimated
-          ? '动漫短剧更看重画风、角色和分镜连续性。'
-          : '真人短剧更看重角色设定、场景参考、clip 镜头素材和口播手册。',
-      readinessCountLabel:
-          '${readinessItems.where((item) => item.ready).length}/${readinessItems.length}',
-      readinessGapSummary: shortVideoReadinessGapSummary(
-        isAnimated: _isAnimated,
+        projectReadinessSummary: shortVideoProjectReadinessSummary(
+          _projectStats,
+        ),
+        visualLabel: visualLabel,
+        directionLabel: directionLabel,
+        projectMetrics: projectMetrics,
+        spaceOverviewSummary: shortVideoSpaceOverviewSummary(
+          loadingProjectOverview: _loadingProjectOverview,
+          project: project,
+          projectStats: _projectStats,
+          recentProjectTasks: _recentProjectTasks,
+          qualityScopeInsight: _qualityScopeInsight,
+        ),
+        overviewMetrics: overviewMetrics,
+        qualitySummaryLine: shortVideoQualitySummaryLine(
+          isAnimated: _isAnimated,
+          insight: _qualityScopeInsight,
+        ),
+        badCaseMetrics: badCaseMetrics,
+        recentTaskLines: recentTaskLines,
+        assetsOverviewPanelUi: assetsOverviewPanelUi,
+        assemblyPanelUi: assemblyPanelUi,
+        exportCheckPanelUi: exportCheckPanelUi,
+        onStartExport:
+            project != null && accessToken != null && accessToken.isNotEmpty
+            ? () => unawaited(_startExportFlow())
+            : null,
+        onOpenExportHistory:
+            project != null && accessToken != null && accessToken.isNotEmpty
+            ? () => unawaited(_openExportHistoryFlow())
+            : null,
+        exportActionBusy: _exportActionBusy,
+        publishPanelUi: publishPanelUi,
+        onOpenProductionForAssemblyExport: project == null
+            ? null
+            : () {
+                _syncSelectedProjectContext();
+                widget.onOpenProductionWorkspace();
+              },
+        onOpenAssemblyClipDeskOps:
+            project == null ||
+                _shortVideoAssembly == null ||
+                (_shortVideoAssembly?.scripts.isEmpty ?? true)
+            ? null
+            : () => unawaited(_openAssemblyClipDeskOps()),
+        onOpenAssemblyDefaultsEditor:
+            project == null || _shortVideoAssembly == null
+            ? null
+            : () => unawaited(_openAssemblyDefaultsEditor()),
+        assemblyVersionManagerPanel: assemblyVersionManagerPanel,
+        candidateCardUi: candidateCardUi,
+        candidateComparePanelUi: candidateComparePanelUi,
+        onOpenProjectsForCandidateAssets: project == null
+            ? null
+            : widget.onOpenProjects,
+        readinessIntro: _isAnimated
+            ? '动漫短剧更看重画风、角色和分镜连续性。'
+            : '真人短剧更看重角色设定、场景参考、clip 镜头素材和口播手册。',
+        readinessCountLabel:
+            '${readinessItems.where((item) => item.ready).length}/${readinessItems.length}',
+        readinessGapSummary: shortVideoReadinessGapSummary(
+          isAnimated: _isAnimated,
+          readinessItems: readinessItems,
+        ),
         readinessItems: readinessItems,
-      ),
-      readinessItems: readinessItems,
-      shotReadinessUi: shotReadinessUi,
-      onOpenProductionForShotReadiness: project == null
-          ? null
-          : () {
-              _syncSelectedProjectContext();
-              widget.onOpenProductionWorkspace();
-            },
-      nextStepTitle: nextStepPlan.title,
-      nextStepDetail: nextStepPlan.detail,
-      onNextStep: _nextStepAction(),
-      nextStepButtonLabel: nextStepPlan.buttonLabel,
-      stageCards: stageCards,
-      migrationSummary: _isAnimated
-          ? '先做单入口，再补链路。第一波只编排现有项目、脚本、制作、任务、质检能力；第二波再补自动旁白、字幕样式和一键成片。'
-          : '真人模式也先走同一入口。第一波先把用户选择显式化，后面再补真人参考素材、口播语气、镜头真实度和成片验收规则。',
-      onOpenScriptWorkspace: () {
-        _syncSelectedProjectContext();
-        widget.onOpenScriptWorkspace();
-      },
-      onOpenProductionWorkspace: () {
-        _syncSelectedProjectContext();
-        widget.onOpenProductionWorkspace();
-      },
-      onOpenTasks: widget.onOpenTasks,
-      onOpenQuality: widget.onOpenQuality,
-      onResetConfirmationDontShowAgain: (ctx) =>
-          unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
+        shotReadinessUi: shotReadinessUi,
+        onOpenProductionForShotReadiness: project == null
+            ? null
+            : () {
+                _syncSelectedProjectContext();
+                widget.onOpenProductionWorkspace();
+              },
+        nextStepTitle: nextStepPlan.title,
+        nextStepDetail: nextStepPlan.detail,
+        onNextStep: _nextStepAction(),
+        nextStepButtonLabel: nextStepPlan.buttonLabel,
+        stageCards: stageCards,
+        migrationSummary: _isAnimated
+            ? '先做单入口，再补链路。第一波只编排现有项目、脚本、制作、任务、质检能力；第二波再补自动旁白、字幕样式和一键成片。'
+            : '真人模式也先走同一入口。第一波先把用户选择显式化，后面再补真人参考素材、口播语气、镜头真实度和成片验收规则。',
+        onOpenScriptWorkspace: () {
+          _syncSelectedProjectContext();
+          widget.onOpenScriptWorkspace();
+        },
+        onOpenProductionWorkspace: () {
+          _syncSelectedProjectContext();
+          widget.onOpenProductionWorkspace();
+        },
+        onOpenTasks: widget.onOpenTasks,
+        onOpenQuality: widget.onOpenQuality,
+        onResetConfirmationDontShowAgain: (ctx) =>
+            unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
       ),
     );
   }

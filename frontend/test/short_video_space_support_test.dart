@@ -6,6 +6,22 @@ import 'package:openflow_app/short_video_space/support.dart';
 import 'package:openflow_app/short_video_space/view.dart';
 
 void main() {
+  test('short video project scope keeps uuid and workspace context', () {
+    final scope = ShortVideoProjectScope.fromProject(
+      const ProjectRow(
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        workspaceId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+        numericId: 7,
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
+      ),
+    );
+
+    expect(scope.projectNumericId, 7);
+    expect(scope.projectUuid, '550e8400-e29b-41d4-a716-446655440000');
+    expect(scope.workspaceId, 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee');
+  });
+
   test('live-action readiness highlights scene clip and manual gaps', () {
     final items = buildShortVideoReadinessItems(
       isAnimated: false,
@@ -142,19 +158,17 @@ void main() {
     expect(shortVideoExportIssueLabelZh('subtitle_empty'), '字幕为空');
     expect(shortVideoExportIssueLabelZh('duration_not_set'), '时长未设定');
     expect(shortVideoExportIssueLabelZh('voiceover_not_ready'), '配音未就绪');
-    expect(shortVideoExportIssueLabelZh('unknown_export_code'), 'unknown_export_code');
+    expect(
+      shortVideoExportIssueLabelZh('unknown_export_code'),
+      'unknown_export_code',
+    );
   });
 
   test('candidate card summarizes counts from assets-overview payload', () {
     final overview = ProjectAssetsOverview.fromJson({
       'schema_version': 1,
       'total_count': 5,
-      'candidate_counts': {
-        'pending': 1,
-        'linked': 1,
-        'ignored': 1,
-        'unset': 2,
-      },
+      'candidate_counts': {'pending': 1, 'linked': 1, 'ignored': 1, 'unset': 2},
       'by_asset_type': <dynamic>[],
     });
     final ui = buildShortVideoCandidateCardUi(
@@ -173,12 +187,7 @@ void main() {
     final overview = ProjectAssetsOverview.fromJson({
       'schema_version': 1,
       'total_count': 2,
-      'candidate_counts': {
-        'pending': 0,
-        'linked': 0,
-        'ignored': 0,
-        'unset': 2,
-      },
+      'candidate_counts': {'pending': 0, 'linked': 0, 'ignored': 0, 'unset': 2},
       'by_asset_type': [
         {
           'asset_type': 'role',
@@ -215,8 +224,7 @@ void main() {
 
   test('shot readiness UI summarizes rollup and blocked shots', () {
     final readiness = ProjectShortVideoReadiness.fromJson(
-      jsonDecode(
-            '''
+      jsonDecode('''
 {
   "schema_version": 1,
   "rollup": {
@@ -260,8 +268,7 @@ void main() {
     }
   ]
 }
-''',
-          )
+''')
           as Map<String, dynamic>,
     );
     final ui = buildShotReadinessUi(
@@ -286,7 +293,10 @@ void main() {
         'ready_count': 1,
         'blocked_count': 1,
         'by_reason': [
-          {'reason': 'missing_live_action_reference_shot', 'storyboard_count': 1},
+          {
+            'reason': 'missing_live_action_reference_shot',
+            'storyboard_count': 1,
+          },
         ],
       },
       'storyboards': [

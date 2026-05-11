@@ -108,7 +108,9 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
 
   void _syncSelectedProjectContext() {
     final project = _selectedProject;
-    widget.onSyncProjectContext(project?.numericId);
+    widget.onSyncProjectContext(
+      project == null ? null : ShortVideoProjectScope.fromProject(project),
+    );
   }
 
   ShortVideoMode _modeFromProject(ProjectRow project) {
@@ -160,7 +162,8 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
             'voiceProfile': _voiceProfile.trim(),
           if (_subtitleStyle.trim().isNotEmpty)
             'subtitleStyle': _subtitleStyle.trim(),
-          if (_bgmStrategy.trim().isNotEmpty) 'bgmStrategy': _bgmStrategy.trim(),
+          if (_bgmStrategy.trim().isNotEmpty)
+            'bgmStrategy': _bgmStrategy.trim(),
         },
       );
       if (!mounted) {
@@ -224,8 +227,9 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
         'voiceProfile': _voiceProfile.trim().isEmpty
             ? null
             : _voiceProfile.trim(),
-        'subtitleStyle':
-            _subtitleStyle.trim().isEmpty ? null : _subtitleStyle.trim(),
+        'subtitleStyle': _subtitleStyle.trim().isEmpty
+            ? null
+            : _subtitleStyle.trim(),
         'bgmStrategy': _bgmStrategy.trim().isEmpty ? null : _bgmStrategy.trim(),
       };
       final updated = await updateProjectByProjectId(token, project.id, body);
