@@ -3172,5 +3172,103 @@
     }
   },
   "teamWorkspaceEnterpriseNameLabel": "Enterprise workspace name",
-  "teamWorkspaceInviteTokenInputLabel": "Invite token (accept and join)"
+  "teamWorkspaceInviteTokenInputLabel": "Invite token (accept and join)",
+  "platformStatusRecoveredHealthy": "Platform status is healthy again",
+  "platformStatusDegradedWarning": "Platform degraded; check SLI and hot endpoints",
+  "platformStatusNotRefreshed": "Not refreshed",
+  "platformStatusTitle": "Platform status",
+  "platformStatusWindowMinutes": "{minutes} minute window",
+  "@platformStatusWindowMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "platformStatusWindowHours": "{hours} hour window",
+  "@platformStatusWindowHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "platformStatusRefreshAction": "Refresh",
+  "platformStatusIntro": "Inspect health, readiness, version, SLI health, and endpoint request overview.",
+  "platformStatusLastRefreshed": "Last refreshed: {time}",
+  "@platformStatusLastRefreshed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusAutoRefresh": "Auto polling",
+  "platformStatusHealthy": "healthy",
+  "platformStatusDegraded": "degraded",
+  "platformStatusVersionLine": "Version: {service} {version}{gitSha}",
+  "@platformStatusVersionLine": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "gitSha": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusSliSnapshot": "SLI snapshot",
+  "platformStatusHotEndpoints": "Hot endpoints",
+  "platformStatusChipHealth": "Health",
+  "platformStatusChipReady": "Ready",
+  "platformStatusChipSli": "SLI",
+  "platformStatusChipEndpoints": "Endpoints",
+  "platformStatusChipDegraded": "Degraded",
+  "platformStatusSliTileSubtitle": "{path} · P95 {p95Ms}ms · success {successRate}%",
+  "@platformStatusSliTileSubtitle": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "p95Ms": {
+        "type": "String"
+      },
+      "successRate": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusRequests": "requests {count}",
+  "@platformStatusRequests": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "platformStatusEndpointTileSubtitle": "total {total} · success {successRate}% · P95 {p95Ms}ms",
+  "@platformStatusEndpointTileSubtitle": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "successRate": {
+        "type": "String"
+      },
+      "p95Ms": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusServerErrors": "5xx {count}",
+  "@platformStatusServerErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

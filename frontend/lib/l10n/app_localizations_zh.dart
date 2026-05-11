@@ -4243,4 +4243,104 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get teamWorkspaceInviteTokenInputLabel => '邀请 token（接受加入）';
+
+  @override
+  String get platformStatusRecoveredHealthy => '平台状态已恢复健康';
+
+  @override
+  String get platformStatusDegradedWarning => '平台状态出现降级，请关注 SLI 与热点端点';
+
+  @override
+  String get platformStatusNotRefreshed => '未刷新';
+
+  @override
+  String get platformStatusTitle => '平台状态';
+
+  @override
+  String platformStatusWindowMinutes(int minutes) {
+    return '$minutes 分钟窗口';
+  }
+
+  @override
+  String platformStatusWindowHours(int hours) {
+    return '$hours 小时窗口';
+  }
+
+  @override
+  String get platformStatusRefreshAction => '刷新';
+
+  @override
+  String get platformStatusIntro => '查看健康检查、就绪状态、版本、SLI 健康度与端点请求概览。';
+
+  @override
+  String platformStatusLastRefreshed(String time) {
+    return '最近刷新：$time';
+  }
+
+  @override
+  String get platformStatusAutoRefresh => '自动轮询';
+
+  @override
+  String get platformStatusHealthy => 'healthy';
+
+  @override
+  String get platformStatusDegraded => 'degraded';
+
+  @override
+  String platformStatusVersionLine(
+    String service,
+    String version,
+    String gitSha,
+  ) {
+    return '版本：$service $version$gitSha';
+  }
+
+  @override
+  String get platformStatusSliSnapshot => 'SLI 快照';
+
+  @override
+  String get platformStatusHotEndpoints => '热点端点';
+
+  @override
+  String get platformStatusChipHealth => 'Health';
+
+  @override
+  String get platformStatusChipReady => 'Ready';
+
+  @override
+  String get platformStatusChipSli => 'SLI';
+
+  @override
+  String get platformStatusChipEndpoints => 'Endpoints';
+
+  @override
+  String get platformStatusChipDegraded => 'Degraded';
+
+  @override
+  String platformStatusSliTileSubtitle(
+    String path,
+    String p95Ms,
+    String successRate,
+  ) {
+    return '$path · P95 ${p95Ms}ms · 成功率 $successRate%';
+  }
+
+  @override
+  String platformStatusRequests(int count) {
+    return '请求 $count';
+  }
+
+  @override
+  String platformStatusEndpointTileSubtitle(
+    int total,
+    String successRate,
+    String p95Ms,
+  ) {
+    return '总请求 $total · 成功率 $successRate% · P95 ${p95Ms}ms';
+  }
+
+  @override
+  String platformStatusServerErrors(int count) {
+    return '5xx $count';
+  }
 }

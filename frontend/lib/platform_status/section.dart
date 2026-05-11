@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 
@@ -56,6 +57,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
   }
 
   Future<void> _refresh() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_loading) {
       return;
     }
@@ -98,7 +100,9 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
           messenger.showSnackBar(
             SnackBar(
               content: Text(
-                nextHealth ? '平台状态已恢复健康' : '平台状态出现降级，请关注 SLI 与热点端点',
+                nextHealth
+                    ? l10n.platformStatusRecoveredHealthy
+                    : l10n.platformStatusDegradedWarning,
               ),
               duration: const Duration(seconds: 4),
             ),
@@ -146,7 +150,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
 
   String _formatUpdatedAt(DateTime? value) {
     if (value == null) {
-      return '未刷新';
+      return '--';
     }
     final local = value.toLocal();
     final hh = local.hour.toString().padLeft(2, '0');
@@ -164,6 +168,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final sliStatus = _sliStatus;
     final metrics = _metrics;
@@ -178,7 +183,10 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
           Row(
             children: <Widget>[
               Expanded(
-                child: Text('平台状态', style: theme.textTheme.titleMedium),
+                child: Text(
+                  l10n.platformStatusTitle,
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
               DropdownButton<int>(
                 value: _windowMinutes,
@@ -193,10 +201,19 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                         });
                         _refresh();
                       },
-                items: const <DropdownMenuItem<int>>[
-                  DropdownMenuItem(value: 15, child: Text('15 分钟窗口')),
-                  DropdownMenuItem(value: 60, child: Text('60 分钟窗口')),
-                  DropdownMenuItem(value: 180, child: Text('3 小时窗口')),
+                items: <DropdownMenuItem<int>>[
+                  DropdownMenuItem(
+                    value: 15,
+                    child: Text(l10n.platformStatusWindowMinutes(15)),
+                  ),
+                  DropdownMenuItem(
+                    value: 60,
+                    child: Text(l10n.platformStatusWindowMinutes(60)),
+                  ),
+                  DropdownMenuItem(
+                    value: 180,
+                    child: Text(l10n.platformStatusWindowHours(3)),
+                  ),
                 ],
               ),
               const SizedBox(width: 8),
@@ -209,17 +226,17 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.refresh),
-                label: const Text('刷新'),
+                label: Text(l10n.platformStatusRefreshAction),
               ),
               const SizedBox(width: 4),
-              const RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: '本机客户端偏好（与上方服务状态无关）',
+              RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.taskCenterLocalClientPrefs,
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            '查看健康检查、就绪状态、版本、SLI 健康度与端点请求概览。',
+            l10n.platformStatusIntro,
             style: theme.textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
@@ -227,7 +244,11 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  '最近刷新：${_formatUpdatedAt(_lastUpdatedAt)}',
+                  l10n.platformStatusLastRefreshed(
+                    _lastUpdatedAt == null
+                        ? l10n.platformStatusNotRefreshed
+                        : _formatUpdatedAt(_lastUpdatedAt),
+                  ),
                   style: theme.textTheme.bodySmall,
                 ),
               ),
@@ -240,7 +261,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                   _startAutoRefreshTimer();
                 },
               ),
-              const Text('自动轮询'),
+              Text(l10n.platformStatusAutoRefresh),
             ],
           ),
           if (_error != null) ...<Widget>[
@@ -256,29 +277,31 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             runSpacing: 8,
             children: <Widget>[
               _StatusChip(
-                title: 'Health',
+                title: l10n.platformStatusChipHealth,
                 value: _health?.status ?? '-',
                 color: _statusColor((_health?.status ?? '') == 'ok'),
               ),
               _StatusChip(
-                title: 'Ready',
+                title: l10n.platformStatusChipReady,
                 value: _ready?.status ?? '-',
                 color: _statusColor((_ready?.status ?? '') == 'ok'),
               ),
               _StatusChip(
-                title: 'SLI',
+                title: l10n.platformStatusChipSli,
                 value: sliStatus == null
                     ? '-'
-                    : (sliStatus.healthy ? 'healthy' : 'degraded'),
+                    : (sliStatus.healthy
+                          ? l10n.platformStatusHealthy
+                          : l10n.platformStatusDegraded),
                 color: _statusColor(sliStatus?.healthy == true),
               ),
               _StatusChip(
-                title: 'Endpoints',
+                title: l10n.platformStatusChipEndpoints,
                 value: '$endpointCount',
                 color: theme.colorScheme.primary,
               ),
               _StatusChip(
-                title: 'Degraded',
+                title: l10n.platformStatusChipDegraded,
                 value: '$degradedEndpoints',
                 color: _statusColor(degradedEndpoints == 0),
               ),
@@ -287,12 +310,16 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
           const SizedBox(height: 12),
           if (_version != null)
             Text(
-              '版本：${_version!.service} ${_version!.version}${_version!.gitSha == null ? '' : ' (${_version!.gitSha})'}',
+              l10n.platformStatusVersionLine(
+                _version!.service,
+                _version!.version,
+                _version!.gitSha == null ? '' : ' (${_version!.gitSha})',
+              ),
               style: theme.textTheme.bodySmall,
             ),
           if (sliStatus != null) ...<Widget>[
             const SizedBox(height: 12),
-            Text('SLI 快照', style: theme.textTheme.titleSmall),
+            Text(l10n.platformStatusSliSnapshot, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             ...sliStatus.slis.take(5).map(
               (sli) => _SliTile(snapshot: sli),
@@ -300,7 +327,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
           ],
           if (metrics != null) ...<Widget>[
             const SizedBox(height: 12),
-            Text('热点端点', style: theme.textTheme.titleSmall),
+            Text(l10n.platformStatusHotEndpoints, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             ...metrics.endpoints.values
                 .toList(growable: false)
@@ -345,6 +372,7 @@ class _SliTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final healthy = snapshot.healthy;
     return ListTile(
       dense: true,
@@ -355,9 +383,13 @@ class _SliTile extends StatelessWidget {
       ),
       title: Text(snapshot.definition.name),
       subtitle: Text(
-        '${snapshot.path} · P95 ${snapshot.currentP95LatencyMs}ms · 成功率 ${(snapshot.currentSuccessRate * 100).toStringAsFixed(2)}%',
+        l10n.platformStatusSliTileSubtitle(
+          snapshot.path,
+          snapshot.currentP95LatencyMs.toString(),
+          (snapshot.currentSuccessRate * 100).toStringAsFixed(2),
+        ),
       ),
-      trailing: Text('请求 ${snapshot.totalRequests}'),
+      trailing: Text(l10n.platformStatusRequests(snapshot.totalRequests)),
     );
   }
 }
@@ -369,14 +401,19 @@ class _EndpointTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 0),
       title: Text(endpoint.path),
       subtitle: Text(
-        '总请求 ${endpoint.totalRequests} · 成功率 ${(endpoint.successRate * 100).toStringAsFixed(2)}% · P95 ${endpoint.p95LatencyMs}ms',
+        l10n.platformStatusEndpointTileSubtitle(
+          endpoint.totalRequests,
+          (endpoint.successRate * 100).toStringAsFixed(2),
+          endpoint.p95LatencyMs.toString(),
+        ),
       ),
-      trailing: Text('5xx ${endpoint.serverErrorCount}'),
+      trailing: Text(l10n.platformStatusServerErrors(endpoint.serverErrorCount)),
     );
   }
 }

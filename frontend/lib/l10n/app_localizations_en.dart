@@ -4409,4 +4409,107 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get teamWorkspaceInviteTokenInputLabel =>
       'Invite token (accept and join)';
+
+  @override
+  String get platformStatusRecoveredHealthy =>
+      'Platform status is healthy again';
+
+  @override
+  String get platformStatusDegradedWarning =>
+      'Platform degraded; check SLI and hot endpoints';
+
+  @override
+  String get platformStatusNotRefreshed => 'Not refreshed';
+
+  @override
+  String get platformStatusTitle => 'Platform status';
+
+  @override
+  String platformStatusWindowMinutes(int minutes) {
+    return '$minutes minute window';
+  }
+
+  @override
+  String platformStatusWindowHours(int hours) {
+    return '$hours hour window';
+  }
+
+  @override
+  String get platformStatusRefreshAction => 'Refresh';
+
+  @override
+  String get platformStatusIntro =>
+      'Inspect health, readiness, version, SLI health, and endpoint request overview.';
+
+  @override
+  String platformStatusLastRefreshed(String time) {
+    return 'Last refreshed: $time';
+  }
+
+  @override
+  String get platformStatusAutoRefresh => 'Auto polling';
+
+  @override
+  String get platformStatusHealthy => 'healthy';
+
+  @override
+  String get platformStatusDegraded => 'degraded';
+
+  @override
+  String platformStatusVersionLine(
+    String service,
+    String version,
+    String gitSha,
+  ) {
+    return 'Version: $service $version$gitSha';
+  }
+
+  @override
+  String get platformStatusSliSnapshot => 'SLI snapshot';
+
+  @override
+  String get platformStatusHotEndpoints => 'Hot endpoints';
+
+  @override
+  String get platformStatusChipHealth => 'Health';
+
+  @override
+  String get platformStatusChipReady => 'Ready';
+
+  @override
+  String get platformStatusChipSli => 'SLI';
+
+  @override
+  String get platformStatusChipEndpoints => 'Endpoints';
+
+  @override
+  String get platformStatusChipDegraded => 'Degraded';
+
+  @override
+  String platformStatusSliTileSubtitle(
+    String path,
+    String p95Ms,
+    String successRate,
+  ) {
+    return '$path · P95 ${p95Ms}ms · success $successRate%';
+  }
+
+  @override
+  String platformStatusRequests(int count) {
+    return 'requests $count';
+  }
+
+  @override
+  String platformStatusEndpointTileSubtitle(
+    int total,
+    String successRate,
+    String p95Ms,
+  ) {
+    return 'total $total · success $successRate% · P95 ${p95Ms}ms';
+  }
+
+  @override
+  String platformStatusServerErrors(int count) {
+    return '5xx $count';
+  }
 }

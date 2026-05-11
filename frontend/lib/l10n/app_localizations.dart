@@ -7326,6 +7326,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invite token (accept and join)'**
   String get teamWorkspaceInviteTokenInputLabel;
+
+  /// No description provided for @platformStatusRecoveredHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform status is healthy again'**
+  String get platformStatusRecoveredHealthy;
+
+  /// No description provided for @platformStatusDegradedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform degraded; check SLI and hot endpoints'**
+  String get platformStatusDegradedWarning;
+
+  /// No description provided for @platformStatusNotRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not refreshed'**
+  String get platformStatusNotRefreshed;
+
+  /// No description provided for @platformStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform status'**
+  String get platformStatusTitle;
+
+  /// No description provided for @platformStatusWindowMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minute window'**
+  String platformStatusWindowMinutes(int minutes);
+
+  /// No description provided for @platformStatusWindowHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hour window'**
+  String platformStatusWindowHours(int hours);
+
+  /// No description provided for @platformStatusRefreshAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get platformStatusRefreshAction;
+
+  /// No description provided for @platformStatusIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect health, readiness, version, SLI health, and endpoint request overview.'**
+  String get platformStatusIntro;
+
+  /// No description provided for @platformStatusLastRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last refreshed: {time}'**
+  String platformStatusLastRefreshed(String time);
+
+  /// No description provided for @platformStatusAutoRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto polling'**
+  String get platformStatusAutoRefresh;
+
+  /// No description provided for @platformStatusHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'healthy'**
+  String get platformStatusHealthy;
+
+  /// No description provided for @platformStatusDegraded.
+  ///
+  /// In en, this message translates to:
+  /// **'degraded'**
+  String get platformStatusDegraded;
+
+  /// No description provided for @platformStatusVersionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Version: {service} {version}{gitSha}'**
+  String platformStatusVersionLine(
+    String service,
+    String version,
+    String gitSha,
+  );
+
+  /// No description provided for @platformStatusSliSnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'SLI snapshot'**
+  String get platformStatusSliSnapshot;
+
+  /// No description provided for @platformStatusHotEndpoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot endpoints'**
+  String get platformStatusHotEndpoints;
+
+  /// No description provided for @platformStatusChipHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get platformStatusChipHealth;
+
+  /// No description provided for @platformStatusChipReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get platformStatusChipReady;
+
+  /// No description provided for @platformStatusChipSli.
+  ///
+  /// In en, this message translates to:
+  /// **'SLI'**
+  String get platformStatusChipSli;
+
+  /// No description provided for @platformStatusChipEndpoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoints'**
+  String get platformStatusChipEndpoints;
+
+  /// No description provided for @platformStatusChipDegraded.
+  ///
+  /// In en, this message translates to:
+  /// **'Degraded'**
+  String get platformStatusChipDegraded;
+
+  /// No description provided for @platformStatusSliTileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{path} · P95 {p95Ms}ms · success {successRate}%'**
+  String platformStatusSliTileSubtitle(
+    String path,
+    String p95Ms,
+    String successRate,
+  );
+
+  /// No description provided for @platformStatusRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'requests {count}'**
+  String platformStatusRequests(int count);
+
+  /// No description provided for @platformStatusEndpointTileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'total {total} · success {successRate}% · P95 {p95Ms}ms'**
+  String platformStatusEndpointTileSubtitle(
+    int total,
+    String successRate,
+    String p95Ms,
+  );
+
+  /// No description provided for @platformStatusServerErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'5xx {count}'**
+  String platformStatusServerErrors(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -3172,5 +3172,103 @@
     }
   },
   "teamWorkspaceEnterpriseNameLabel": "企业空间名称",
-  "teamWorkspaceInviteTokenInputLabel": "邀请 token（接受加入）"
+  "teamWorkspaceInviteTokenInputLabel": "邀请 token（接受加入）",
+  "platformStatusRecoveredHealthy": "平台状态已恢复健康",
+  "platformStatusDegradedWarning": "平台状态出现降级，请关注 SLI 与热点端点",
+  "platformStatusNotRefreshed": "未刷新",
+  "platformStatusTitle": "平台状态",
+  "platformStatusWindowMinutes": "{minutes} 分钟窗口",
+  "@platformStatusWindowMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "platformStatusWindowHours": "{hours} 小时窗口",
+  "@platformStatusWindowHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "platformStatusRefreshAction": "刷新",
+  "platformStatusIntro": "查看健康检查、就绪状态、版本、SLI 健康度与端点请求概览。",
+  "platformStatusLastRefreshed": "最近刷新：{time}",
+  "@platformStatusLastRefreshed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusAutoRefresh": "自动轮询",
+  "platformStatusHealthy": "healthy",
+  "platformStatusDegraded": "degraded",
+  "platformStatusVersionLine": "版本：{service} {version}{gitSha}",
+  "@platformStatusVersionLine": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "gitSha": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusSliSnapshot": "SLI 快照",
+  "platformStatusHotEndpoints": "热点端点",
+  "platformStatusChipHealth": "Health",
+  "platformStatusChipReady": "Ready",
+  "platformStatusChipSli": "SLI",
+  "platformStatusChipEndpoints": "Endpoints",
+  "platformStatusChipDegraded": "Degraded",
+  "platformStatusSliTileSubtitle": "{path} · P95 {p95Ms}ms · 成功率 {successRate}%",
+  "@platformStatusSliTileSubtitle": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "p95Ms": {
+        "type": "String"
+      },
+      "successRate": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusRequests": "请求 {count}",
+  "@platformStatusRequests": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "platformStatusEndpointTileSubtitle": "总请求 {total} · 成功率 {successRate}% · P95 {p95Ms}ms",
+  "@platformStatusEndpointTileSubtitle": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "successRate": {
+        "type": "String"
+      },
+      "p95Ms": {
+        "type": "String"
+      }
+    }
+  },
+  "platformStatusServerErrors": "5xx {count}",
+  "@platformStatusServerErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
