@@ -206,7 +206,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [ ] I2.2 覆盖项目列表界面的中英文文案
   - [ ] I2.3 覆盖工作台界面的中英文文案
   - [ ] I2.4 覆盖设置界面的中英文文案（除语言卡片外）
-  - [~] I2.5 覆盖团队工作区界面的中英文文案 — **部分**：首页 **工作区模式**（`build_sections.dart`）标题 / 分段 / 说明已 ARB；`WorkspaceContextView` 等仍硬编码
+  - [~] I2.5 覆盖团队工作区界面的中英文文案 — **部分**：首页 **工作区模式**（`build_sections.dart`）与 **`WorkspaceContextView`**（加载、无工作区/项目、计费标题与配额文案）已接 `AppLocalizations`；成员/邀请等子界面仍待迁移
   - [ ] I2.6 覆盖通知中心界面的中英文文案
   - [x] I2.7 语言切换 — 首页 Overview 下 **界面语言** 卡片（系统 / English / 简体中文），`AppLocaleNotifier` + `SharedPreferences`
   - [x] I2.8 首次/默认 — 选项 **跟随系统**（`locale: null`）由 Flutter 按设备 `Locale` 在 `en`/`zh` 间解析
