@@ -468,18 +468,19 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminUserDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('治理动作', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleGovernanceActionsTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('正常'),
+              label: Text(l10n.adminConsoleStatusActive),
               selected: _operationalStatus == AdminOperationalStatusV1.active,
               onSelected: (_) {
                 setState(() {
@@ -489,7 +490,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('暂停'),
+              label: Text(l10n.adminConsoleStatusSuspended),
               selected:
                   _operationalStatus == AdminOperationalStatusV1.suspended,
               onSelected: (_) {
@@ -506,28 +507,30 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           enabled: _statusRequiresReason,
           maxLines: 2,
           decoration: InputDecoration(
-            labelText: '暂停原因',
+            labelText: l10n.adminConsoleSuspendReasonLabel,
             hintText: _statusRequiresReason
-                ? '例如：滥用、退款争议、人工风控命中'
-                : '用户为正常状态时不保存暂停原因',
+                ? l10n.adminConsoleSuspendReasonHint
+                : l10n.adminConsoleSuspendReasonDisabledHint,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _opsNoteController,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: '内部备注',
-            hintText: '写给运营 / 支持 / 风控同事看的上下文',
+          decoration: InputDecoration(
+            labelText: l10n.adminConsoleInternalNoteLabel,
+            hintText: l10n.adminConsoleInternalNoteHint,
           ),
         ),
         const SizedBox(height: 12),
-        Text('日配额覆写', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleDailyQuotaOverrideTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
           detail.dailyJobQuotaOverride == null
-              ? '当前未覆写，沿用套餐默认配额。'
-              : '当前覆写值：${detail.dailyJobQuotaOverride}',
+              ? l10n.adminConsoleDailyQuotaNotOverridden
+              : l10n.adminConsoleDailyQuotaCurrentOverride(
+                  detail.dailyJobQuotaOverride!,
+                ),
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -538,7 +541,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('保留当前'),
+              label: Text(l10n.adminConsoleQuotaActionPreserve),
               selected: _quotaAction == AdminQuotaOverrideActionV1.preserve,
               onSelected: (_) {
                 setState(() {
@@ -547,7 +550,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('清除覆写'),
+              label: Text(l10n.adminConsoleQuotaActionClear),
               selected: _quotaAction == AdminQuotaOverrideActionV1.clear,
               onSelected: (_) {
                 setState(() {
@@ -556,7 +559,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             ChoiceChip(
-              label: const Text('设置配额'),
+              label: Text(l10n.adminConsoleQuotaActionSet),
               selected: _quotaAction == AdminQuotaOverrideActionV1.set,
               onSelected: (_) {
                 setState(() {
@@ -576,8 +579,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             decoration: InputDecoration(
               labelText: 'dailyJobQuota',
               hintText: _quotaRequiresValue
-                  ? (detail.dailyJobQuotaOverride?.toString() ?? '例如 500')
-                  : '仅在“设置配额”时生效',
+                  ? (detail.dailyJobQuotaOverride?.toString() ??
+                        l10n.adminConsoleDailyQuotaInputExample)
+                  : l10n.adminConsoleDailyQuotaInputDisabledHint,
             ),
           ),
         ),
@@ -607,7 +611,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.admin_panel_settings_outlined),
-          label: Text(widget.controller.savingGovernance ? '保存中…' : '保存治理设置'),
+          label: Text(
+            widget.controller.savingGovernance
+                ? l10n.adminConsoleSaving
+                : l10n.adminConsoleSaveGovernanceSettings,
+          ),
         ),
       ],
     );
@@ -617,6 +625,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminUserDetailResponseV1 detail,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final currentWorkspaceId = detail.currentWorkspace?.workspaceId;
     final personalMembership = detail.memberships
@@ -633,10 +642,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Workspace 上下文修复', style: theme.textTheme.titleSmall),
+        Text(l10n.adminConsoleWorkspaceContextRepairTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
-          '用于处理 current_workspace 指向失效、成员已变更后仍停在旧 workspace 的场景。',
+          l10n.adminConsoleWorkspaceContextRepairIntro,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -655,7 +664,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     ),
               icon: const Icon(Icons.home_outlined),
               label: Text(
-                personalMembership.isEmpty ? '补建并切回 Personal' : '切回 Personal',
+                personalMembership.isEmpty
+                    ? l10n.adminConsoleWorkspaceContextRebuildAndSwitchPersonal
+                    : l10n.adminConsoleWorkspaceContextSwitchPersonal,
               ),
             ),
             ...switchTargets.map(
@@ -668,7 +679,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                             AdminUserWorkspaceContextActionV1.setToWorkspace,
                         workspaceId: item.workspaceId,
                       ),
-                child: Text('切到 ${item.workspaceName}'),
+                child: Text(l10n.adminConsoleWorkspaceContextSwitchTo(item.workspaceName)),
               ),
             ),
           ],
@@ -684,7 +695,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               const SizedBox(width: 8),
-              Text('正在修复 workspace 上下文…', style: theme.textTheme.bodySmall),
+              Text(
+                l10n.adminConsoleWorkspaceContextRepairing,
+                style: theme.textTheme.bodySmall,
+              ),
             ],
           ),
         ],

@@ -4648,4 +4648,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminConsoleSectionGovernanceAudit => 'Governance audit';
+
+  @override
+  String get adminConsoleGovernanceActionsTitle => 'Governance actions';
+
+  @override
+  String get adminConsoleStatusActive => 'Active';
+
+  @override
+  String get adminConsoleStatusSuspended => 'Suspended';
+
+  @override
+  String get adminConsoleSuspendReasonLabel => 'Suspension reason';
+
+  @override
+  String get adminConsoleSuspendReasonHint =>
+      'For example: abuse, refund dispute, or manual risk-control hit';
+
+  @override
+  String get adminConsoleSuspendReasonDisabledHint =>
+      'Suspension reason is not saved when user is active';
+
+  @override
+  String get adminConsoleInternalNoteLabel => 'Internal note';
+
+  @override
+  String get adminConsoleInternalNoteHint =>
+      'Context for operations / support / risk-control teammates';
+
+  @override
+  String get adminConsoleDailyQuotaOverrideTitle => 'Daily quota override';
+
+  @override
+  String get adminConsoleDailyQuotaNotOverridden =>
+      'No override currently; package default quota is used.';
+
+  @override
+  String adminConsoleDailyQuotaCurrentOverride(int value) {
+    return 'Current override: $value';
+  }
+
+  @override
+  String get adminConsoleQuotaActionPreserve => 'Keep current';
+
+  @override
+  String get adminConsoleQuotaActionClear => 'Clear override';
+
+  @override
+  String get adminConsoleQuotaActionSet => 'Set quota';
+
+  @override
+  String get adminConsoleDailyQuotaInputExample => 'e.g. 500';
+
+  @override
+  String get adminConsoleDailyQuotaInputDisabledHint =>
+      'Only effective when \"Set quota\" is selected';
+
+  @override
+  String get adminConsoleSaving => 'Saving...';
+
+  @override
+  String get adminConsoleSaveGovernanceSettings => 'Save governance settings';
+
+  @override
+  String get adminConsoleWorkspaceContextRepairTitle =>
+      'Workspace context repair';
+
+  @override
+  String get adminConsoleWorkspaceContextRepairIntro =>
+      'Used for scenarios where current_workspace points to an invalid workspace, or membership has changed but user is still stuck on old workspace.';
+
+  @override
+  String get adminConsoleWorkspaceContextRebuildAndSwitchPersonal =>
+      'Rebuild and switch to Personal';
+
+  @override
+  String get adminConsoleWorkspaceContextSwitchPersonal => 'Switch to Personal';
+
+  @override
+  String adminConsoleWorkspaceContextSwitchTo(String workspaceName) {
+    return 'Switch to $workspaceName';
+  }
+
+  @override
+  String get adminConsoleWorkspaceContextRepairing =>
+      'Repairing workspace context...';
 }

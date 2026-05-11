@@ -7683,6 +7683,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Governance audit'**
   String get adminConsoleSectionGovernanceAudit;
+
+  /// No description provided for @adminConsoleGovernanceActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Governance actions'**
+  String get adminConsoleGovernanceActionsTitle;
+
+  /// No description provided for @adminConsoleStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get adminConsoleStatusActive;
+
+  /// No description provided for @adminConsoleStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get adminConsoleStatusSuspended;
+
+  /// No description provided for @adminConsoleSuspendReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspension reason'**
+  String get adminConsoleSuspendReasonLabel;
+
+  /// No description provided for @adminConsoleSuspendReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: abuse, refund dispute, or manual risk-control hit'**
+  String get adminConsoleSuspendReasonHint;
+
+  /// No description provided for @adminConsoleSuspendReasonDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspension reason is not saved when user is active'**
+  String get adminConsoleSuspendReasonDisabledHint;
+
+  /// No description provided for @adminConsoleInternalNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal note'**
+  String get adminConsoleInternalNoteLabel;
+
+  /// No description provided for @adminConsoleInternalNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Context for operations / support / risk-control teammates'**
+  String get adminConsoleInternalNoteHint;
+
+  /// No description provided for @adminConsoleDailyQuotaOverrideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily quota override'**
+  String get adminConsoleDailyQuotaOverrideTitle;
+
+  /// No description provided for @adminConsoleDailyQuotaNotOverridden.
+  ///
+  /// In en, this message translates to:
+  /// **'No override currently; package default quota is used.'**
+  String get adminConsoleDailyQuotaNotOverridden;
+
+  /// No description provided for @adminConsoleDailyQuotaCurrentOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Current override: {value}'**
+  String adminConsoleDailyQuotaCurrentOverride(int value);
+
+  /// No description provided for @adminConsoleQuotaActionPreserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current'**
+  String get adminConsoleQuotaActionPreserve;
+
+  /// No description provided for @adminConsoleQuotaActionClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear override'**
+  String get adminConsoleQuotaActionClear;
+
+  /// No description provided for @adminConsoleQuotaActionSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set quota'**
+  String get adminConsoleQuotaActionSet;
+
+  /// No description provided for @adminConsoleDailyQuotaInputExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 500'**
+  String get adminConsoleDailyQuotaInputExample;
+
+  /// No description provided for @adminConsoleDailyQuotaInputDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only effective when \"Set quota\" is selected'**
+  String get adminConsoleDailyQuotaInputDisabledHint;
+
+  /// No description provided for @adminConsoleSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get adminConsoleSaving;
+
+  /// No description provided for @adminConsoleSaveGovernanceSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Save governance settings'**
+  String get adminConsoleSaveGovernanceSettings;
+
+  /// No description provided for @adminConsoleWorkspaceContextRepairTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace context repair'**
+  String get adminConsoleWorkspaceContextRepairTitle;
+
+  /// No description provided for @adminConsoleWorkspaceContextRepairIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for scenarios where current_workspace points to an invalid workspace, or membership has changed but user is still stuck on old workspace.'**
+  String get adminConsoleWorkspaceContextRepairIntro;
+
+  /// No description provided for @adminConsoleWorkspaceContextRebuildAndSwitchPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild and switch to Personal'**
+  String get adminConsoleWorkspaceContextRebuildAndSwitchPersonal;
+
+  /// No description provided for @adminConsoleWorkspaceContextSwitchPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Personal'**
+  String get adminConsoleWorkspaceContextSwitchPersonal;
+
+  /// No description provided for @adminConsoleWorkspaceContextSwitchTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {workspaceName}'**
+  String adminConsoleWorkspaceContextSwitchTo(String workspaceName);
+
+  /// No description provided for @adminConsoleWorkspaceContextRepairing.
+  ///
+  /// In en, this message translates to:
+  /// **'Repairing workspace context...'**
+  String get adminConsoleWorkspaceContextRepairing;
 }
 
 class _AppLocalizationsDelegate

@@ -4478,4 +4478,82 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get adminConsoleSectionGovernanceAudit => '治理审计';
+
+  @override
+  String get adminConsoleGovernanceActionsTitle => '治理动作';
+
+  @override
+  String get adminConsoleStatusActive => '正常';
+
+  @override
+  String get adminConsoleStatusSuspended => '暂停';
+
+  @override
+  String get adminConsoleSuspendReasonLabel => '暂停原因';
+
+  @override
+  String get adminConsoleSuspendReasonHint => '例如：滥用、退款争议、人工风控命中';
+
+  @override
+  String get adminConsoleSuspendReasonDisabledHint => '用户为正常状态时不保存暂停原因';
+
+  @override
+  String get adminConsoleInternalNoteLabel => '内部备注';
+
+  @override
+  String get adminConsoleInternalNoteHint => '写给运营 / 支持 / 风控同事看的上下文';
+
+  @override
+  String get adminConsoleDailyQuotaOverrideTitle => '日配额覆写';
+
+  @override
+  String get adminConsoleDailyQuotaNotOverridden => '当前未覆写，沿用套餐默认配额。';
+
+  @override
+  String adminConsoleDailyQuotaCurrentOverride(int value) {
+    return '当前覆写值：$value';
+  }
+
+  @override
+  String get adminConsoleQuotaActionPreserve => '保留当前';
+
+  @override
+  String get adminConsoleQuotaActionClear => '清除覆写';
+
+  @override
+  String get adminConsoleQuotaActionSet => '设置配额';
+
+  @override
+  String get adminConsoleDailyQuotaInputExample => '例如 500';
+
+  @override
+  String get adminConsoleDailyQuotaInputDisabledHint => '仅在“设置配额”时生效';
+
+  @override
+  String get adminConsoleSaving => '保存中…';
+
+  @override
+  String get adminConsoleSaveGovernanceSettings => '保存治理设置';
+
+  @override
+  String get adminConsoleWorkspaceContextRepairTitle => 'Workspace 上下文修复';
+
+  @override
+  String get adminConsoleWorkspaceContextRepairIntro =>
+      '用于处理 current_workspace 指向失效、成员已变更后仍停在旧 workspace 的场景。';
+
+  @override
+  String get adminConsoleWorkspaceContextRebuildAndSwitchPersonal =>
+      '补建并切回 Personal';
+
+  @override
+  String get adminConsoleWorkspaceContextSwitchPersonal => '切回 Personal';
+
+  @override
+  String adminConsoleWorkspaceContextSwitchTo(String workspaceName) {
+    return '切到 $workspaceName';
+  }
+
+  @override
+  String get adminConsoleWorkspaceContextRepairing => '正在修复 workspace 上下文…';
 }

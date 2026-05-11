@@ -3419,5 +3419,43 @@
   },
   "adminConsoleSectionMemberships": "成员归属",
   "adminConsoleSectionRecentJobs": "最近作业",
-  "adminConsoleSectionGovernanceAudit": "治理审计"
+  "adminConsoleSectionGovernanceAudit": "治理审计",
+  "adminConsoleGovernanceActionsTitle": "治理动作",
+  "adminConsoleStatusActive": "正常",
+  "adminConsoleStatusSuspended": "暂停",
+  "adminConsoleSuspendReasonLabel": "暂停原因",
+  "adminConsoleSuspendReasonHint": "例如：滥用、退款争议、人工风控命中",
+  "adminConsoleSuspendReasonDisabledHint": "用户为正常状态时不保存暂停原因",
+  "adminConsoleInternalNoteLabel": "内部备注",
+  "adminConsoleInternalNoteHint": "写给运营 / 支持 / 风控同事看的上下文",
+  "adminConsoleDailyQuotaOverrideTitle": "日配额覆写",
+  "adminConsoleDailyQuotaNotOverridden": "当前未覆写，沿用套餐默认配额。",
+  "adminConsoleDailyQuotaCurrentOverride": "当前覆写值：{value}",
+  "@adminConsoleDailyQuotaCurrentOverride": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleQuotaActionPreserve": "保留当前",
+  "adminConsoleQuotaActionClear": "清除覆写",
+  "adminConsoleQuotaActionSet": "设置配额",
+  "adminConsoleDailyQuotaInputExample": "例如 500",
+  "adminConsoleDailyQuotaInputDisabledHint": "仅在“设置配额”时生效",
+  "adminConsoleSaving": "保存中…",
+  "adminConsoleSaveGovernanceSettings": "保存治理设置",
+  "adminConsoleWorkspaceContextRepairTitle": "Workspace 上下文修复",
+  "adminConsoleWorkspaceContextRepairIntro": "用于处理 current_workspace 指向失效、成员已变更后仍停在旧 workspace 的场景。",
+  "adminConsoleWorkspaceContextRebuildAndSwitchPersonal": "补建并切回 Personal",
+  "adminConsoleWorkspaceContextSwitchPersonal": "切回 Personal",
+  "adminConsoleWorkspaceContextSwitchTo": "切到 {workspaceName}",
+  "@adminConsoleWorkspaceContextSwitchTo": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleWorkspaceContextRepairing": "正在修复 workspace 上下文…"
 }

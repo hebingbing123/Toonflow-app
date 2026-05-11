@@ -3419,5 +3419,43 @@
   },
   "adminConsoleSectionMemberships": "Memberships",
   "adminConsoleSectionRecentJobs": "Recent jobs",
-  "adminConsoleSectionGovernanceAudit": "Governance audit"
+  "adminConsoleSectionGovernanceAudit": "Governance audit",
+  "adminConsoleGovernanceActionsTitle": "Governance actions",
+  "adminConsoleStatusActive": "Active",
+  "adminConsoleStatusSuspended": "Suspended",
+  "adminConsoleSuspendReasonLabel": "Suspension reason",
+  "adminConsoleSuspendReasonHint": "For example: abuse, refund dispute, or manual risk-control hit",
+  "adminConsoleSuspendReasonDisabledHint": "Suspension reason is not saved when user is active",
+  "adminConsoleInternalNoteLabel": "Internal note",
+  "adminConsoleInternalNoteHint": "Context for operations / support / risk-control teammates",
+  "adminConsoleDailyQuotaOverrideTitle": "Daily quota override",
+  "adminConsoleDailyQuotaNotOverridden": "No override currently; package default quota is used.",
+  "adminConsoleDailyQuotaCurrentOverride": "Current override: {value}",
+  "@adminConsoleDailyQuotaCurrentOverride": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "adminConsoleQuotaActionPreserve": "Keep current",
+  "adminConsoleQuotaActionClear": "Clear override",
+  "adminConsoleQuotaActionSet": "Set quota",
+  "adminConsoleDailyQuotaInputExample": "e.g. 500",
+  "adminConsoleDailyQuotaInputDisabledHint": "Only effective when \"Set quota\" is selected",
+  "adminConsoleSaving": "Saving...",
+  "adminConsoleSaveGovernanceSettings": "Save governance settings",
+  "adminConsoleWorkspaceContextRepairTitle": "Workspace context repair",
+  "adminConsoleWorkspaceContextRepairIntro": "Used for scenarios where current_workspace points to an invalid workspace, or membership has changed but user is still stuck on old workspace.",
+  "adminConsoleWorkspaceContextRebuildAndSwitchPersonal": "Rebuild and switch to Personal",
+  "adminConsoleWorkspaceContextSwitchPersonal": "Switch to Personal",
+  "adminConsoleWorkspaceContextSwitchTo": "Switch to {workspaceName}",
+  "@adminConsoleWorkspaceContextSwitchTo": {
+    "placeholders": {
+      "workspaceName": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConsoleWorkspaceContextRepairing": "Repairing workspace context..."
 }
