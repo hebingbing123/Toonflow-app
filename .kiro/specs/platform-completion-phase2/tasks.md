@@ -12,7 +12,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 
 - **保存视图**：REST 为 **`GET`/`PUT /api/v1/search/saved-views`**，表 **`app_user_search_saved_view`**；非需求稿中的 `/search/views` 与 `app_saved_search_view`。
 - **帮助 Hub**：REST 为 **`GET /api/v1/settings/help/hub`**、**`/config`** 及用户/工作区链接 **`POST .../user-links`**、**`.../workspace-links`**；环境变量为 **`TOONFLOW_HELP_HUB_ITEMS_JSON`** / **`TOONFLOW_HELP_HUB_URL`**（非 `help-links` / `TOONFLOW_HELP_LINKS_JSON`）。
-- **出站 Webhook（WH）**：用户出站落位 **`app_outbound_webhook`** + **`app_outbound_webhook_delivery`**，REST 主路径 **`/api/v1/settings/webhooks/outbound`**，并带 **`/api/v1/webhooks`** 别名（与计费 **入站** `POST /api/v1/webhooks/billing` 区分）。事件自动触发（job 完成等）仍为后续竖切。
+- **出站 Webhook（WH）**：用户出站落位 **`app_outbound_webhook`** + **`app_outbound_webhook_delivery`**，REST 主路径 **`/api/v1/settings/webhooks/outbound`**，并带 **`/api/v1/webhooks`** 别名（与计费 **入站** `POST /api/v1/webhooks/billing` 区分）。**`job.completed` / `job.failed`** 已在 generation worker 终端状态落库后自动投递（`settings/outbound_webhooks/deliver.rs` + 指数退避重试）；`project.created` / `workspace.member.added` 等仍为后续竖切。
 
 ## Tasks
 
@@ -151,15 +151,15 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] WH1.9 OpenAPI / `SettingsOpenApi` 已注册 `patch` + `deliveries`；导出 `export-openapi` 通过
   - _Requirements: 4.1, 4.5, 4.10, 4.13_
 
-- [~] **WH2. 出站 Webhook — 投递引擎**（**测试投递**已写库；**业务事件自动投递 / 重试 / 死信**仍待办）
+- [~] **WH2. 出站 Webhook — 投递引擎**（**job 终端事件**已接线；**其它平台事件**与 **端到端** 仍部分待办）
   - [x] WH2.1 测试与手动路径：`reqwest` POST 至用户 URL（见 `post_outbound_webhook_test`）
   - [x] WH2.2 HMAC：`sign_toonflow`（`timestamp + '.' + body`）
   - [x] WH2.3 请求头：`X-Toonflow-Signature`、`X-Toonflow-Event-Type`（及 Timestamp）
-  - [ ] WH2.4 指数退避重试（最多 3 次）— **未做**（当前单次尝试）
-  - [ ] WH2.5 死信队列 — **未做**（可用 `status=failed` 行表达，尚无自动 DLQ 消费）
-  - [ ] WH2.6 事件触发器：`job.completed` 等 — **未接线**
-  - [ ] WH2.7 单元测试（签名/重试）— **待补**
-  - [ ] WH2.8 端到端集成测试 — **待补**
+  - [x] WH2.4 指数退避重试（最多 **3** 次 HTTP 尝试：1s / 2s 间隔），测试与业务投递共用 `deliver_outbound_event`
+  - [~] WH2.5 死信 — **`status=failed` 投递行**即终态（无自动重放消费者）；运营可依赖「投递历史 + 手动再测 URL」
+  - [x] WH2.6 事件触发器：**`job.completed`**（`succeeded`）、**`job.failed`** 已由 `jobs/worker` 在 WS 通知后调用 `fire_job_terminal_outbound_webhooks`；`project.created` / `workspace.member.added` 仍 **未接线**
+  - [~] WH2.7 单元测试 — 已补 **workspace / event_types 订阅** 纯函数用例（`deliver.rs` `#[cfg(test)]`）；签名/HTTP 重试路径以集成环境验证为主
+  - [ ] WH2.8 端到端集成测试 — **待补**（可接 `wiremock` 或契约环境对真实 HTTP 断言）
   - _Requirements: 4.2–4.9_
 
 - [~] **WH3. 出站 Webhook — Frontend**（帮助页 Webhook 区：列表/创建/测试；**投递记录**按钮拉 `deliveries`；事件多选 UI 仍简）

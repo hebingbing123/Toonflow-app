@@ -22,6 +22,10 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+mod deliver;
+
+pub(crate) use deliver::fire_job_terminal_outbound_webhooks;
+
 /// Platform event types users may subscribe to (plus `test.ping` for manual tests only).
 pub const OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES: &[&str] = &[
     "job.completed",
@@ -160,7 +164,7 @@ fn generate_secret() -> String {
     base64::engine::general_purpose::STANDARD_NO_PAD.encode(bytes)
 }
 
-fn sign_toonflow(secret: &[u8], timestamp_unix_secs: u64, body: &[u8]) -> String {
+pub(super) fn sign_toonflow(secret: &[u8], timestamp_unix_secs: u64, body: &[u8]) -> String {
     type HmacSha256 = hmac::Hmac<Sha256>;
     let mut mac = HmacSha256::new_from_slice(secret).expect("hmac secret accepted");
     mac.update(timestamp_unix_secs.to_string().as_bytes());
@@ -256,40 +260,6 @@ async fn probe_url_reachable(http: &reqwest::Client, url: &str) -> Result<(), Ap
             "webhook URL not reachable: {e}"
         ))),
     }
-}
-
-#[allow(clippy::too_many_arguments)]
-async fn insert_delivery_row(
-    pool: &PgPool,
-    webhook_id: Uuid,
-    owner_user_id: Uuid,
-    event_type: &str,
-    payload: &Value,
-    status: &str,
-    http_status: Option<i32>,
-    error: Option<&str>,
-    retry_count: i32,
-) -> Result<(), ApiError> {
-    sqlx::query(
-        r#"
-        INSERT INTO public.app_outbound_webhook_delivery (
-            webhook_id, owner_user_id, event_type, payload, status, http_status, error, retry_count, delivered_at
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
-        "#,
-    )
-    .bind(webhook_id)
-    .bind(owner_user_id)
-    .bind(event_type)
-    .bind(payload)
-    .bind(status)
-    .bind(http_status)
-    .bind(error)
-    .bind(retry_count)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(())
 }
 
 #[utoipa::path(
@@ -626,78 +596,25 @@ pub(crate) async fn post_outbound_webhook_test(
         "createdAt": chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
         "data": {"message": "toonflow outbound webhook test"}
     });
-    let bytes =
-        serde_json::to_vec(&payload).map_err(|_| ApiError::BadRequest("bad payload".into()))?;
 
-    let ts = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
+    let attempt = deliver::deliver_outbound_event(
+        &state.http_client,
+        pool,
+        id,
+        user_id,
+        &url,
+        &secret,
+        &event_type,
+        &payload,
+    )
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let signature = sign_toonflow(secret.as_bytes(), ts, &bytes);
-
-    let res = state
-        .http_client
-        .post(&url)
-        .header("Content-Type", "application/json")
-        .header("X-Toonflow-Timestamp", ts.to_string())
-        .header("X-Toonflow-Signature", signature)
-        .header("X-Toonflow-Event-Type", &event_type)
-        .body(bytes.clone())
-        .send()
-        .await;
-
-    let out = match res {
-        Ok(r) => {
-            let ok = r.status().is_success();
-            let http_st = r.status().as_u16() as i32;
-            let err = if ok {
-                None
-            } else {
-                Some(format!("HTTP {}", r.status().as_u16()))
-            };
-            let status = if ok { "success" } else { "failed" };
-            insert_delivery_row(
-                pool,
-                id,
-                user_id,
-                &event_type,
-                &payload,
-                status,
-                Some(http_st),
-                err.as_deref(),
-                0,
-            )
-            .await?;
-            OutboundWebhookTestResponse {
-                delivered: ok,
-                http_status: Some(r.status().as_u16()),
-                error: err,
-            }
-        }
-        Err(e) => {
-            let msg = e.to_string();
-            insert_delivery_row(
-                pool,
-                id,
-                user_id,
-                &event_type,
-                &payload,
-                "failed",
-                None,
-                Some(&msg),
-                0,
-            )
-            .await?;
-            OutboundWebhookTestResponse {
-                delivered: false,
-                http_status: None,
-                error: Some(msg),
-            }
-        }
-    };
-
-    Ok(Json(out))
+    Ok(Json(OutboundWebhookTestResponse {
+        delivered: attempt.delivered,
+        http_status: attempt.http_status,
+        error: attempt.error,
+    }))
 }
 
 #[utoipa::path(

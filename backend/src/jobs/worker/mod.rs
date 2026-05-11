@@ -13,7 +13,7 @@
 
 use std::time::Duration;
 
-use serde_json::json;
+use serde_json::{json, to_value as json_to_value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -21,13 +21,16 @@ use crate::jobs::payload_project::resolved_workspace_id_from_job_payload;
 use crate::jobs::queue::{PgQueue, Queue};
 use crate::metering::usage;
 use crate::settings::account::build_account_export_artifact;
+use crate::settings::notifications::workspace_audit_export::build_workspace_shared_audit_export_artifact;
+use crate::settings::outbound_webhooks::fire_job_terminal_outbound_webhooks;
 use crate::state::AppState;
 
 use super::{
     envelope_generation_job_updated, hydrate_job_row, record_job_notification, JobRow,
     JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
     JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_FLUTTER_PROBE, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
-    JOB_KIND_SETTINGS_ACCOUNT_EXPORT, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT,
+    JOB_KIND_SETTINGS_ACCOUNT_EXPORT, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
+    JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT, JOB_KIND_VIDEO_EXPORT,
     JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
 };
 
@@ -38,6 +41,9 @@ mod novel_crawl;
 mod vendor;
 mod video;
 mod voiceover;
+
+#[cfg(test)]
+mod workspace_validation_tests;
 
 pub(crate) use common::{job_ok, JobCompletion, JobRunError};
 
@@ -99,6 +105,41 @@ fn queue_metrics_interval_secs() -> u64 {
         .ok()
         .and_then(|s| s.trim().parse::<u64>().ok())
         .unwrap_or(60)
+}
+
+async fn fire_outbound_for_terminal_job(
+    pool: &PgPool,
+    http: &reqwest::Client,
+    row: &JobRow,
+    event_type: &'static str,
+) {
+    let job_ws = resolved_workspace_id_from_job_payload(&row.payload);
+    match json_to_value(row) {
+        Ok(job_json) => {
+            if let Err(e) = fire_job_terminal_outbound_webhooks(
+                pool,
+                http,
+                row.owner_user_id,
+                job_ws,
+                job_json,
+                event_type,
+            )
+            .await
+            {
+                tracing::warn!(
+                    error = %e,
+                    job_id = %row.id,
+                    event_type,
+                    "fire_job_terminal_outbound_webhooks failed"
+                );
+            }
+        }
+        Err(e) => tracing::warn!(
+            error = %e,
+            job_id = %row.id,
+            "serialize job row for outbound webhooks failed"
+        ),
+    }
 }
 
 async fn log_queue_metrics(pool: &PgPool, worker_id: &str) {
@@ -241,6 +282,13 @@ async fn process_one_job(
                 }
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
+                fire_outbound_for_terminal_job(
+                    pool,
+                    &state.http_client,
+                    &final_row,
+                    "job.completed",
+                )
+                .await;
             }
             // If None: row was cancelled; cancel_job already sent WS.
         }
@@ -286,6 +334,8 @@ async fn process_one_job(
                 }
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
+                fire_outbound_for_terminal_job(pool, &state.http_client, &final_row, "job.failed")
+                    .await;
             }
         }
         Err(JobRunError::FailedStructured {
@@ -322,11 +372,21 @@ async fn process_one_job(
                 }
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
+                fire_outbound_for_terminal_job(pool, &state.http_client, &final_row, "job.failed")
+                    .await;
             }
         }
     }
 
     Ok(())
+}
+
+/// PostgreSQL contract tests: one worker iteration (**`queued`** → claim → execute → terminal).
+pub async fn contract_worker_process_one_tick(
+    state: &AppState,
+    pool: &PgPool,
+) -> Result<(), sqlx::Error> {
+    process_one_job(state, pool, "pg-contract").await
 }
 
 async fn claim_next_job(pool: &PgPool, worker_id: &str) -> Result<Option<JobRow>, sqlx::Error> {
@@ -411,6 +471,10 @@ async fn execute_kind(
         }
         k if k == JOB_KIND_SETTINGS_ACCOUNT_EXPORT => {
             build_account_export_artifact(pool, row.owner_user_id, id, &row.payload).await
+        }
+        k if k == JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT => {
+            build_workspace_shared_audit_export_artifact(pool, row.owner_user_id, id, &row.payload)
+                .await
         }
         k if k == JOB_KIND_VIDEO_GENERATE => video::run_video_generate(state, pool, id, row).await,
         k if k == JOB_KIND_VIDEO_EXPORT => video::run_video_export(state, pool, id, row).await,
