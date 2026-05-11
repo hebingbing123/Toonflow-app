@@ -6,16 +6,20 @@ import '../../config.dart';
 import '../core.dart';
 import '../project/index.dart' as project_api;
 import 'models.dart';
+import 'project_scope.dart';
 import 'rest_api.dart';
 
 /// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (workbench **`getNovelData`**).
 Future<List<NovelRow>> fetchNovelWorkbenchFullRows(
   String accessToken,
-  int projectNumericId,
+  int projectNumericId, {
+  String? projectUuid,
+}
 ) async {
-  final projectId = await project_api.projectIdForNumericId(
+  final projectId = await resolveNovelProjectUuid(
     accessToken,
-    projectNumericId,
+    projectUuid: projectUuid,
+    projectNumericId: projectNumericId,
   );
   final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
   return res.items;
@@ -24,11 +28,14 @@ Future<List<NovelRow>> fetchNovelWorkbenchFullRows(
 /// Compat: index list via **`GET …/novels`** (**`getNovelIndex`** shape).
 Future<List<NovelWorkbenchIndexItem>> fetchNovelWorkbenchIndex(
   String accessToken,
-  int projectNumericId,
+  int projectNumericId, {
+  String? projectUuid,
+}
 ) async {
-  final projectId = await project_api.projectIdForNumericId(
+  final projectId = await resolveNovelProjectUuid(
     accessToken,
-    projectNumericId,
+    projectUuid: projectUuid,
+    projectNumericId: projectNumericId,
   );
   final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
   return res.items
@@ -87,12 +94,14 @@ Future<List<NovelWorkbenchEventStateItem>> fetchNovelWorkbenchEventStates(
 Future<String> postNovelEventsGenerateEvents(
   String accessToken, {
   required int projectNumericId,
+  String? projectUuid,
   required List<int> novelIds,
   int concurrentCount = 5,
 }) async {
-  final projectId = await project_api.projectIdForNumericId(
+  final projectId = await resolveNovelProjectUuid(
     accessToken,
-    projectNumericId,
+    projectUuid: projectUuid,
+    projectNumericId: projectNumericId,
   );
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/generate-events',
@@ -122,13 +131,15 @@ Future<String> postNovelEventsGenerateEvents(
 Future<NovelWorkbenchPagedResponse> fetchNovelWorkbenchPaged(
   String accessToken,
   int projectNumericId, {
+  String? projectUuid,
   required int page,
   required int limit,
   String? search,
 }) async {
-  final projectId = await project_api.projectIdForNumericId(
+  final projectId = await resolveNovelProjectUuid(
     accessToken,
-    projectNumericId,
+    projectUuid: projectUuid,
+    projectNumericId: projectNumericId,
   );
   final res = await fetchProjectNovelsByProjectId(
     accessToken,
@@ -158,14 +169,17 @@ Future<NovelWorkbenchPagedResponse> fetchNovelWorkbenchPaged(
 Future<String> appendNovelsUnderProject(
   String accessToken,
   int projectNumericId,
-  List<NovelWorkbenchAppendItem> data,
+  List<NovelWorkbenchAppendItem> data, {
+  String? projectUuid,
+}
 ) async {
   if (data.isEmpty) {
     return '新增原文成功';
   }
-  final projectId = await project_api.projectIdForNumericId(
+  final projectId = await resolveNovelProjectUuid(
     accessToken,
-    projectNumericId,
+    projectUuid: projectUuid,
+    projectNumericId: projectNumericId,
   );
   for (final item in data) {
     await createProjectNovelUnderProject(

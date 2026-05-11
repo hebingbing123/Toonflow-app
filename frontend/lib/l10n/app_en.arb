@@ -3161,5 +3161,16 @@
   "teamWorkspacePrevPageAction": "Previous",
   "teamWorkspaceNextPageAction": "Next",
   "teamWorkspaceResendInviteLinkAction": "Resend link",
-  "teamWorkspaceRevokeAction": "Revoke"
+  "teamWorkspaceRevokeAction": "Revoke",
+  "teamWorkspaceRoleOptionOwner": "owner",
+  "teamWorkspaceMemberPrimaryOwnerLine": "{role} · primary owner",
+  "@teamWorkspaceMemberPrimaryOwnerLine": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceEnterpriseNameLabel": "Enterprise workspace name",
+  "teamWorkspaceInviteTokenInputLabel": "Invite token (accept and join)"
 }

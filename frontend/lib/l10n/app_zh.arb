@@ -3161,5 +3161,16 @@
   "teamWorkspacePrevPageAction": "上一页",
   "teamWorkspaceNextPageAction": "下一页",
   "teamWorkspaceResendInviteLinkAction": "重发链接",
-  "teamWorkspaceRevokeAction": "撤销"
+  "teamWorkspaceRevokeAction": "撤销",
+  "teamWorkspaceRoleOptionOwner": "owner",
+  "teamWorkspaceMemberPrimaryOwnerLine": "{role} · primary owner",
+  "@teamWorkspaceMemberPrimaryOwnerLine": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "teamWorkspaceEnterpriseNameLabel": "企业空间名称",
+  "teamWorkspaceInviteTokenInputLabel": "邀请 token（接受加入）"
 }

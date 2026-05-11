@@ -4229,4 +4229,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get teamWorkspaceRevokeAction => '撤销';
+
+  @override
+  String get teamWorkspaceRoleOptionOwner => 'owner';
+
+  @override
+  String teamWorkspaceMemberPrimaryOwnerLine(String role) {
+    return '$role · primary owner';
+  }
+
+  @override
+  String get teamWorkspaceEnterpriseNameLabel => '企业空间名称';
+
+  @override
+  String get teamWorkspaceInviteTokenInputLabel => '邀请 token（接受加入）';
 }

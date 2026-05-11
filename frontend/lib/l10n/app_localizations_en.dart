@@ -4394,4 +4394,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teamWorkspaceRevokeAction => 'Revoke';
+
+  @override
+  String get teamWorkspaceRoleOptionOwner => 'owner';
+
+  @override
+  String teamWorkspaceMemberPrimaryOwnerLine(String role) {
+    return '$role · primary owner';
+  }
+
+  @override
+  String get teamWorkspaceEnterpriseNameLabel => 'Enterprise workspace name';
+
+  @override
+  String get teamWorkspaceInviteTokenInputLabel =>
+      'Invite token (accept and join)';
 }

@@ -7302,6 +7302,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Revoke'**
   String get teamWorkspaceRevokeAction;
+
+  /// No description provided for @teamWorkspaceRoleOptionOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'owner'**
+  String get teamWorkspaceRoleOptionOwner;
+
+  /// No description provided for @teamWorkspaceMemberPrimaryOwnerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{role} · primary owner'**
+  String teamWorkspaceMemberPrimaryOwnerLine(String role);
+
+  /// No description provided for @teamWorkspaceEnterpriseNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise workspace name'**
+  String get teamWorkspaceEnterpriseNameLabel;
+
+  /// No description provided for @teamWorkspaceInviteTokenInputLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite token (accept and join)'**
+  String get teamWorkspaceInviteTokenInputLabel;
 }
 
 class _AppLocalizationsDelegate

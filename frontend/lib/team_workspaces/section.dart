@@ -481,6 +481,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     bool loadingMoreAudit = false;
     String currentOwnerUserId = row.workspace.ownerUserId;
     String currentWorkspaceRole = row.role;
+    String roleOptionLabel(String value) {
+      return switch (value) {
+        'member' => l10n.teamWorkspaceRoleOptionMember,
+        'admin' => l10n.teamWorkspaceRoleOptionAdmin,
+        'owner' => l10n.teamWorkspaceRoleOptionOwner,
+        _ => value,
+      };
+    }
     final showWorkspaceOpsStats = kInternalOpsToken.trim().isNotEmpty;
     WorkspaceStatsResponse? workspaceStats;
     String? workspaceStatsError;
@@ -703,14 +711,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           labelText: l10n.teamWorkspaceRoleLabel,
                           border: OutlineInputBorder(),
                         ),
-                        items: const <DropdownMenuItem<String>>[
+                        items: <DropdownMenuItem<String>>[
                           DropdownMenuItem(
                             value: 'member',
-                            child: Text('member'),
+                            child: Text(roleOptionLabel('member')),
                           ),
                           DropdownMenuItem(
                             value: 'admin',
-                            child: Text('admin'),
+                            child: Text(roleOptionLabel('admin')),
                           ),
                         ],
                         onChanged: adding
@@ -1233,8 +1241,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             title: Text(m.userId),
                             subtitle: Text(
                               isPrimaryOwner
-                                  ? '${m.role} · primary owner'
-                                  : m.role,
+                                  ? l10n.teamWorkspaceMemberPrimaryOwnerLine(
+                                      roleOptionLabel(m.role),
+                                    )
+                                  : roleOptionLabel(m.role),
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1242,14 +1252,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 if (canEditRole)
                                   DropdownButton<String>(
                                     value: m.role,
-                                    items: const <DropdownMenuItem<String>>[
+                                    items: <DropdownMenuItem<String>>[
                                       DropdownMenuItem(
                                         value: 'member',
-                                        child: Text('member'),
+                                        child: Text(roleOptionLabel('member')),
                                       ),
                                       DropdownMenuItem(
                                         value: 'admin',
-                                        child: Text('admin'),
+                                        child: Text(roleOptionLabel('admin')),
                                       ),
                                     ],
                                     onChanged: mutatingMemberUserId != null
@@ -1288,7 +1298,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 else
                                   Chip(
                                     label: Text(
-                                      isPrimaryOwner ? 'owner' : m.role,
+                                      roleOptionLabel(
+                                        isPrimaryOwner ? 'owner' : m.role,
+                                      ),
                                     ),
                                     visualDensity: VisualDensity.compact,
                                   ),
@@ -2066,8 +2078,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 style: theme.textTheme.titleMedium,
               ),
             ),
-            const RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: '本机客户端偏好（查看已静默 / 恢复确认）',
+            RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.taskCenterLocalClientPrefs,
             ),
           ],
         ),
@@ -2083,8 +2095,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             Expanded(
               child: TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: '企业空间名称',
+                decoration: InputDecoration(
+                  labelText: l10n.teamWorkspaceEnterpriseNameLabel,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -2119,8 +2131,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             Expanded(
               child: TextField(
                 controller: _acceptInviteTokenController,
-                decoration: const InputDecoration(
-                  labelText: '邀请 token（接受加入）',
+                decoration: InputDecoration(
+                  labelText: l10n.teamWorkspaceInviteTokenInputLabel,
                   border: OutlineInputBorder(),
                 ),
               ),
