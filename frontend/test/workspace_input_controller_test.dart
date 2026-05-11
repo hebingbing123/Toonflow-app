@@ -37,7 +37,7 @@ void main() {
 
     controller.applyProjectScope(23);
     expect(controller.projectIdController.text, '23');
-    expect(controller.scriptIdController.text, '1');
+    expect(controller.scriptIdController.text, isEmpty);
 
     controller.applyProjectScope(23, scriptNumericId: 7);
     expect(controller.projectIdController.text, '23');
@@ -48,7 +48,7 @@ void main() {
       scriptNumericId: 3,
       projectUuid: '550e8400-e29b-41d4-a716-446655440001',
       scriptUuid: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
-      workspaceId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+      workspaceId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
     );
     expect(controller.projectIdController.text, '99');
     expect(controller.scriptIdController.text, '3');
@@ -62,11 +62,42 @@ void main() {
     );
     expect(
       controller.workspaceUuidController.text,
-      'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+      'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
     );
 
     controller.clearScriptScope();
     expect(controller.scriptIdController.text, isEmpty);
     expect(controller.scriptUuidController.text, isEmpty);
+  });
+
+  test('workspace input controller clears stale script scope on project-only switch', () {
+    final controller = WorkspaceInputController();
+    addTearDown(controller.dispose);
+
+    controller.applyProjectScope(
+      99,
+      scriptNumericId: 3,
+      projectUuid: '550e8400-e29b-41d4-a716-446655440001',
+      scriptUuid: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+      workspaceId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+    );
+
+    controller.applyProjectScope(
+      100,
+      projectUuid: '550e8400-e29b-41d4-a716-446655440002',
+      workspaceId: 'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff',
+    );
+
+    expect(controller.projectIdController.text, '100');
+    expect(
+      controller.projectUuidController.text,
+      '550e8400-e29b-41d4-a716-446655440002',
+    );
+    expect(controller.scriptIdController.text, isEmpty);
+    expect(controller.scriptUuidController.text, isEmpty);
+    expect(
+      controller.workspaceUuidController.text,
+      'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff',
+    );
   });
 }

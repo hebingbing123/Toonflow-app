@@ -59,9 +59,8 @@ class WorkspaceInputController {
     }
     if (scriptNumericId != null && scriptNumericId > 0) {
       scriptIdController.text = scriptNumericId.toString();
-      if (scriptUuid == null) {
-        scriptUuidController.clear();
-      }
+    } else {
+      scriptIdController.clear();
     }
     if (scriptUuid != null) {
       final su = scriptUuid.trim();
@@ -70,6 +69,8 @@ class WorkspaceInputController {
       } else {
         scriptUuidController.text = su;
       }
+    } else {
+      scriptUuidController.clear();
     }
   }
 

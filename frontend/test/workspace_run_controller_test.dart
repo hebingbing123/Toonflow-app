@@ -208,6 +208,53 @@ void main() {
     expect(payload.containsKey('project_id'), isFalse);
   });
 
+  test('workspace run controller drops stale script scope for project-only attach', () async {
+    final inputController = WorkspaceInputController();
+    final operationController = WorkspaceOperationController();
+    final outputController = WorkspaceOutputController();
+    addTearDown(inputController.dispose);
+
+    final sent = <List<Map<String, dynamic>>>[];
+    final controller = WorkspaceRunController(
+      inputController: inputController,
+      operationController: operationController,
+      outputController: outputController,
+      accessTokenProvider: () => 'token',
+      onErrorChanged: (_) {},
+      clearWsLog: () {},
+      resetWorkspaceOutputs: () {},
+      requestSender: (token, messages) async {
+        sent.add(messages);
+        return true;
+      },
+    );
+
+    inputController.applyProjectScope(
+      42,
+      scriptNumericId: 8,
+      projectUuid: '550e8400-e29b-41d4-a716-446655440000',
+      scriptUuid: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+      workspaceId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+    );
+    inputController.applyProjectScope(
+      99,
+      projectUuid: '550e8400-e29b-41d4-a716-446655440001',
+      workspaceId: 'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff',
+    );
+    inputController.scriptPromptController.text = 'project only';
+
+    await controller.runScriptWorkspaceAgent();
+
+    expect(sent, hasLength(1));
+    expect(sent.single[0]['type'], 'agent.script.attach');
+    final payload = sent.single[0]['payload'] as Map<String, dynamic>;
+    expect(payload['projectUuid'], '550e8400-e29b-41d4-a716-446655440001');
+    expect(payload['project_id'], 99);
+    expect(payload['workspaceUuid'], 'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff');
+    expect(payload.containsKey('script_id'), isFalse);
+    expect(payload.containsKey('scriptUuid'), isFalse);
+  });
+
   test('workspace run controller sends workspaceUuid when scope field set', () async {
     final inputController = WorkspaceInputController();
     final operationController = WorkspaceOperationController();
