@@ -125,7 +125,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] S1.3 实现 `PUT /api/v1/search/saved-views` **全量替换** 当前用户的保存视图（上限 100 条；事务内 delete + insert）
   - [~] S1.4 ~~`PATCH/DELETE` 单条端点~~ — **刻意不做**：由客户端改写列表后 `PUT` 全量同步即可；若产品后续要强依赖按资源 URL，再在独立任务中追加（勿与本条重复）
   - [x] S1.5 保存视图含 `workspace_id` 时在写入路径校验 `app_workspace_member`（非成员则 403）
-  - [~] S1.6 审计日志记录（创建/修改/删除时间、操作者）— **未做**；若需要合规审计，单独立项，勿重复造 CRUD API
+  - [x] S1.6 审计日志：**`app_user_search_saved_view_audit`** 在成功 **`PUT /api/v1/search/saved-views`**（全量替换）事务内记录（**`details`** 含 **`itemCount`** + **`clientViewIds`**，不含 query/title）；账户导出含审计时包含 **`user_search_saved_view_audit`**
   - [x] S1.7 更新 OpenAPI（`SearchOpenApi`）注册 `saved-views` 路径与 schema
   - [x] S1.8 契约测试：`pg_contract_tests`/`search_saved_views_roundtrip`（`#[ignore]`）；本地 DB 跑法见 [`gap-tasks-automation.md`](./gap-tasks-automation.md)、`scripts/run_search_saved_views_contract_test.sh`
   - _Requirements: 3.1–3.12_

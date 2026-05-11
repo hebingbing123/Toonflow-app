@@ -628,6 +628,10 @@ async fn collect_account_export_datasets(
             "outbound_webhook_config_audit".into(),
             query_array(pool, r#"SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.created_at DESC), '[]'::jsonb) FROM (SELECT * FROM public.app_outbound_webhook_config_audit WHERE owner_user_id = $1) t"#, user_id).await?,
         );
+        datasets.insert(
+            "user_search_saved_view_audit".into(),
+            query_array(pool, r#"SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.created_at DESC), '[]'::jsonb) FROM (SELECT * FROM public.app_user_search_saved_view_audit WHERE owner_user_id = $1) t"#, user_id).await?,
+        );
     }
     datasets.insert(
         "local_artifact_inventory".into(),
