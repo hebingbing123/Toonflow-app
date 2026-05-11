@@ -288,6 +288,10 @@
 
 1. 确认是否仍需要 **整型**对外暴露；若否，仅 HTTP 收敛即可先不动列。
 2. 若需删 `legacy_id` 列：新迁移、`UPDATE` 回填、双写期、再删列 —— **备份与回滚预案** 必备。
+3. 2026-05-11 kickoff 结论：在真正删列前，至少还要先收掉三类依赖面：
+   - Flutter `production` / `task_center` / `agent_workspaces` 对 `projectId`、`*_numeric_id` 的主路径消费
+   - 后端 `production/flow_data`、`scope`、`jobs/worker`、jobs summaries/notifications 对 `project_numeric_id` 等 payload/查询锚点的依赖
+   - `import_staging` / `promote_import_snapshots()` 与 `pg_contract_tests` 把 `numeric_id` 当幂等与清理基准的测试/导入链路
 
 ### 阶段 E：根目录 `data/` / `scripts/` / `docs/` 卫生（可与 API 并行）
 

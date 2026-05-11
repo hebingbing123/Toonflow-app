@@ -106,16 +106,16 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] H2.8 `toonflow-platform-progress.md` §HTTP 收敛 H5 已反映 C0–C6 进展
   - _Requirements: 2.1–2.5, 12.1–12.10_
 
-- [ ] **H3. HTTP API D 批次收敛**（**仍 open**：删 PG **`legacy_id`** 列等，见 `docs/plans/tasks-http-api-cleanup.md` H5·**D** — 须独立发布窗口 + DBA 评估）
-  - [ ] H3.1 按 `docs/plans/http-api-cleanup.md` / `tasks-http-api-cleanup.md` **D** 清单识别待清理列与依赖（含 `import_staging` / promote）
-  - [ ] H3.2 确认 Flutter `rust_api` 与主路径 UI 不再依赖待删列
+- [~] **H3. HTTP API D 批次收敛**（**进行中**：已完成首轮依赖盘点与阻塞面落档；确认 **production/task-center/agent workspaces** 仍广泛依赖整型兼容字段，且 **`import_staging` / `promote_import_snapshots()`** 与 `pg_contract_tests` 仍绑定 `numeric_id` / 历史导入语义；删除 PG 标识列仍需独立发布窗口 + DBA 评估）
+  - [x] H3.1 按 `docs/plans/http-api-cleanup.md` / `tasks-http-api-cleanup.md` **D** 清单识别待清理列与依赖（含 `import_staging` / promote）
+  - [~] H3.2 确认 Flutter `rust_api` 与主路径 UI 不再依赖待删列 — **首轮结论**：`frontend/lib/rust_api/production/**`、`task_center/**`、`agent_workspaces/**` 及多处 compat/probe 仍直接消费 `projectId` / `*_numeric_id`
   - [ ] H3.3 从 `backend/src/` 移除仅服务 legacy 列的 handler 或查询分支（随 D 清单逐项执行）
   - [ ] H3.4 更新 OpenAPI 与导出契约，移除 D 批次涉及的对外字段
   - [ ] H3.5 评估并执行必要数据迁移 / backfill
-  - [ ] H3.6 在 `http-api-cleanup-h0-inventory.md` / 主进度文中标记 D 批次进展
+  - [x] H3.6 在 `http-api-cleanup-h0-inventory.md` / 主进度文中标记 D 批次进展
   - [ ] H3.7 运行 `yarn refactor:check` 验证变更
   - [ ] H3.8 跑通契约 smoke + 相关 `pg_contract_tests`
-  - [ ] H3.9 更新 `toonflow-platform-progress.md` H5·D 行
+  - [x] H3.9 更新 `toonflow-platform-progress.md` H5·D 行
   - _Requirements: 2.1–2.5, 12.1–12.10_
 
 - [x] **S1. 全局搜索服务端保存视图 — Backend**
