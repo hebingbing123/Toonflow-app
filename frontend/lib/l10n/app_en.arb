@@ -2052,5 +2052,84 @@
         "type": "int"
       }
     }
+  },
+  "qualityReviewsFilterBadCase": "bad case",
+  "qualityReviewsFilterDeliveryPriorityHit": "delivery/tone priority hit",
+  "qualityReviewsFilterStage": "Stage {value}",
+  "@qualityReviewsFilterStage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsFilterGrade": "Grade {value}",
+  "@qualityReviewsFilterGrade": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusLoadedReviews": "Loaded {count} reviews",
+  "@qualityReviewsStatusLoadedReviews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsStatusLoadedReviewsWithLabels": "Loaded {count} reviews with {labels}",
+  "@qualityReviewsStatusLoadedReviewsWithLabels": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "labels": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusRefreshedStats": "Refreshed quality stats",
+  "qualityReviewsStatusRefreshedScopeLeaderboard": "Refreshed scope leaderboard",
+  "qualityReviewsStatusRefreshedStageAndGrade": "Refreshed stage pass rates and grade distribution",
+  "qualityReviewsNoBadCaseData": "No bad-case data",
+  "qualityReviewsBadCaseStatsLine": "{category} {count} items pass={pass}",
+  "@qualityReviewsBadCaseStatsLine": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "pass": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusRefreshedBadCaseDistribution": "Refreshed bad-case distribution",
+  "qualityReviewsStatusRefreshedTokenAggregate": "Refreshed token aggregate",
+  "qualityReviewsStatusRefreshedTokenSavingSamples": "Refreshed token-saving samples",
+  "qualityReviewsErrInputReviewIdFirst": "Please input review ID first",
+  "qualityReviewsStatusLoadedReviewDetails": "Loaded review details",
+  "qualityReviewsErrTargetTypeSourceRequired": "targetType and source are required",
+  "qualityReviewsErrScriptNeedsProject": "scriptId requires projectId",
+  "qualityReviewsErrStoryboardTargetIdPositive": "When creating storyboard review, targetId must be a positive integer shot ID",
+  "qualityReviewsStatusCreated": "Created review {id}",
+  "@qualityReviewsStatusCreated": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusCreatedWithScopedWriteback": "Created review {id}; this row will write back to project/script scoped memory",
+  "@qualityReviewsStatusCreatedWithScopedWriteback": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   }
 }

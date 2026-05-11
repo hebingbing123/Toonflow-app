@@ -2984,4 +2984,88 @@ class AppLocalizationsZh extends AppLocalizations {
   String qualityReviewsCount(int count) {
     return '$count 条评审';
   }
+
+  @override
+  String get qualityReviewsFilterBadCase => '坏例';
+
+  @override
+  String get qualityReviewsFilterDeliveryPriorityHit => '命中表演/语气优先';
+
+  @override
+  String qualityReviewsFilterStage(String value) {
+    return '阶段 $value';
+  }
+
+  @override
+  String qualityReviewsFilterGrade(String value) {
+    return '等级 $value';
+  }
+
+  @override
+  String qualityReviewsStatusLoadedReviews(int count) {
+    return '已加载 $count 条评审';
+  }
+
+  @override
+  String qualityReviewsStatusLoadedReviewsWithLabels(int count, String labels) {
+    return '已加载 $count 条$labels评审';
+  }
+
+  @override
+  String get qualityReviewsStatusRefreshedStats => '已刷新质量统计';
+
+  @override
+  String get qualityReviewsStatusRefreshedScopeLeaderboard => '已刷新 scope 榜单';
+
+  @override
+  String get qualityReviewsStatusRefreshedStageAndGrade => '已刷新阶段通过率与等级分布';
+
+  @override
+  String get qualityReviewsNoBadCaseData => '暂无坏例数据';
+
+  @override
+  String qualityReviewsBadCaseStatsLine(
+    String category,
+    int count,
+    String pass,
+  ) {
+    return '$category $count条 pass=$pass';
+  }
+
+  @override
+  String get qualityReviewsStatusRefreshedBadCaseDistribution => '已刷新坏例分布';
+
+  @override
+  String get qualityReviewsStatusRefreshedTokenAggregate => '已刷新 token 聚合';
+
+  @override
+  String get qualityReviewsStatusRefreshedTokenSavingSamples => '已刷新省 token 样本';
+
+  @override
+  String get qualityReviewsErrInputReviewIdFirst => '请先输入评审 ID';
+
+  @override
+  String get qualityReviewsStatusLoadedReviewDetails => '已读取评审详情';
+
+  @override
+  String get qualityReviewsErrTargetTypeSourceRequired =>
+      'targetType 和 source 不能为空';
+
+  @override
+  String get qualityReviewsErrScriptNeedsProject =>
+      '填写 scriptId 时必须同时填写 projectId';
+
+  @override
+  String get qualityReviewsErrStoryboardTargetIdPositive =>
+      '创建 storyboard 评审时，targetId 必须是正整数镜头 ID';
+
+  @override
+  String qualityReviewsStatusCreated(String id) {
+    return '已创建评审 $id';
+  }
+
+  @override
+  String qualityReviewsStatusCreatedWithScopedWriteback(String id) {
+    return '已创建评审 $id，本条会回写项目/剧本隔离记忆';
+  }
 }

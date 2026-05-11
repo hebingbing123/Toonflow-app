@@ -135,6 +135,7 @@ class _QualityReviewsWorkbenchDialogState
     bool onlyDeliveryPriority = false,
     bool onlyAutoSource = false,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       if (onlyBadCases) {
         _loadingBadCases = true;
@@ -166,14 +167,23 @@ class _QualityReviewsWorkbenchDialogState
         _filterDeliveryPriorityOnly = onlyDeliveryPriority;
         _filterAutoSourceOnly = onlyAutoSource;
         final labels = <String>[];
-        if (onlyBadCases) labels.add('坏例');
-        if (onlyDeliveryPriority) labels.add('命中表演/语气优先');
+        if (onlyBadCases) labels.add(l10n.qualityReviewsFilterBadCase);
+        if (onlyDeliveryPriority) {
+          labels.add(l10n.qualityReviewsFilterDeliveryPriorityHit);
+        }
         if (onlyAutoSource) labels.add('auto');
-        if (_stageFilterValue != null) labels.add('阶段 ${_stageFilterValue!}');
-        if (_gradeFilterValue != null) labels.add('等级 ${_gradeFilterValue!}');
+        if (_stageFilterValue != null) {
+          labels.add(l10n.qualityReviewsFilterStage(_stageFilterValue!));
+        }
+        if (_gradeFilterValue != null) {
+          labels.add(l10n.qualityReviewsFilterGrade(_gradeFilterValue!));
+        }
         _statusLine = labels.isEmpty
-            ? '已加载 ${rows.length} 条评审'
-            : '已加载 ${rows.length} 条${labels.join(" + ")}评审';
+            ? l10n.qualityReviewsStatusLoadedReviews(rows.length)
+            : l10n.qualityReviewsStatusLoadedReviewsWithLabels(
+                rows.length,
+                labels.join(' + '),
+              );
         if (_ctrls.reviewIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
           _ctrls.reviewIdCtrl.text = rows.first.id;
         }
@@ -195,6 +205,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadStats() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingStats = true;
       _statusLine = null;
@@ -204,7 +215,7 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _statsSummary = summarizeQualityStatsRows(rows);
-        _statusLine = '已刷新质量统计';
+        _statusLine = l10n.qualityReviewsStatusRefreshedStats;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -217,6 +228,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadScopeInsights() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingScopeInsights = true;
       _statusLine = null;
@@ -231,7 +243,7 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _scopeInsightsSummary = summarizeQualityScopeInsightRows(rows);
-        _statusLine = '已刷新 scope 榜单';
+        _statusLine = l10n.qualityReviewsStatusRefreshedScopeLeaderboard;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -244,6 +256,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadStagePassRate() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingStagePassRate = true;
       _statusLine = null;
@@ -257,7 +270,7 @@ class _QualityReviewsWorkbenchDialogState
       setState(() {
         _stagePassRateSummary = summarizeStagePassRateRows(rows);
         _stageGradeRows = gradeRows;
-        _statusLine = '已刷新阶段通过率与等级分布';
+        _statusLine = l10n.qualityReviewsStatusRefreshedStageAndGrade;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -270,6 +283,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadBadCaseStats() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingBadCaseStats = true;
       _statusLine = null;
@@ -279,14 +293,18 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _badCaseStatsSummary = items.isEmpty
-            ? '暂无坏例数据'
+            ? l10n.qualityReviewsNoBadCaseData
             : items
                   .map(
                     (e) =>
-                        '${e.badCaseCategory ?? "未分类"} ${e.count}条 pass=${e.passRatePercent.toStringAsFixed(1)}%',
+                        l10n.qualityReviewsBadCaseStatsLine(
+                          e.badCaseCategory ?? l10n.qualityReviewsUncategorized,
+                          e.count,
+                          e.passRatePercent.toStringAsFixed(1),
+                        ),
                   )
                   .join(' | ');
-        _statusLine = '已刷新坏例分布';
+        _statusLine = l10n.qualityReviewsStatusRefreshedBadCaseDistribution;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -297,6 +315,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadTokenEfficiency() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingTokenEfficiency = true;
       _statusLine = null;
@@ -317,7 +336,7 @@ class _QualityReviewsWorkbenchDialogState
           scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
         );
         _refreshExecutionChecklist();
-        _statusLine = '已刷新 token 聚合';
+        _statusLine = l10n.qualityReviewsStatusRefreshedTokenAggregate;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -330,6 +349,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadTokenEfficiencySamples() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingTokenEfficiencySamples = true;
       _statusLine = null;
@@ -350,7 +370,7 @@ class _QualityReviewsWorkbenchDialogState
         _tokenEfficiencySamplesSummary = summarizeQualityTokenEfficiencySamples(
           rows,
         );
-        _statusLine = '已刷新省 token 样本';
+        _statusLine = l10n.qualityReviewsStatusRefreshedTokenSavingSamples;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -363,9 +383,10 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadReviewById() async {
+    final l10n = AppLocalizations.of(context)!;
     final reviewId = _ctrls.reviewIdCtrl.text.trim();
     if (reviewId.isEmpty) {
-      setState(() => _statusLine = '请先输入评审 ID');
+      setState(() => _statusLine = l10n.qualityReviewsErrInputReviewIdFirst);
       return;
     }
     setState(() {
@@ -377,7 +398,7 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _reviewDetails = formatQualityReviewDetails(review);
-        _statusLine = '已读取评审详情';
+        _statusLine = l10n.qualityReviewsStatusLoadedReviewDetails;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -390,6 +411,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _createReview() async {
+    final l10n = AppLocalizations.of(context)!;
     final targetType = _ctrls.createTargetTypeCtrl.text.trim();
     final source = _ctrls.createSourceCtrl.text.trim();
     final projectId = int.tryParse(_ctrls.createProjectIdCtrl.text.trim());
@@ -397,17 +419,19 @@ class _QualityReviewsWorkbenchDialogState
     final score = int.tryParse(_ctrls.createScoreCtrl.text.trim());
     final rawTargetId = _ctrls.createTargetIdCtrl.text.trim();
     if (targetType.isEmpty || source.isEmpty) {
-      setState(() => _statusLine = 'targetType 和 source 不能为空');
+      setState(() => _statusLine = l10n.qualityReviewsErrTargetTypeSourceRequired);
       return;
     }
     if (scriptId != null && projectId == null) {
-      setState(() => _statusLine = '填写 scriptId 时必须同时填写 projectId');
+      setState(() => _statusLine = l10n.qualityReviewsErrScriptNeedsProject);
       return;
     }
     if (targetType == 'storyboard' &&
         (int.tryParse(rawTargetId) == null ||
             (int.tryParse(rawTargetId) ?? 0) <= 0)) {
-      setState(() => _statusLine = '创建 storyboard 评审时，targetId 必须是正整数镜头 ID');
+      setState(
+        () => _statusLine = l10n.qualityReviewsErrStoryboardTargetIdPositive,
+      );
       return;
     }
     setState(() {
@@ -452,8 +476,8 @@ class _QualityReviewsWorkbenchDialogState
             (_createBadCase ||
                 (_createPassed == false && (score == null || score < 7)));
         _statusLine = writesScopedMemory
-            ? '已创建评审 ${created.id}，本条会回写项目/剧本隔离记忆'
-            : '已创建评审 ${created.id}';
+            ? l10n.qualityReviewsStatusCreatedWithScopedWriteback(created.id)
+            : l10n.qualityReviewsStatusCreated(created.id);
       });
       await _loadReviews(
         onlyBadCases: _filterBadCasesOnly,

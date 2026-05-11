@@ -2052,5 +2052,84 @@
         "type": "int"
       }
     }
+  },
+  "qualityReviewsFilterBadCase": "坏例",
+  "qualityReviewsFilterDeliveryPriorityHit": "命中表演/语气优先",
+  "qualityReviewsFilterStage": "阶段 {value}",
+  "@qualityReviewsFilterStage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsFilterGrade": "等级 {value}",
+  "@qualityReviewsFilterGrade": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusLoadedReviews": "已加载 {count} 条评审",
+  "@qualityReviewsStatusLoadedReviews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsStatusLoadedReviewsWithLabels": "已加载 {count} 条{labels}评审",
+  "@qualityReviewsStatusLoadedReviewsWithLabels": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "labels": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusRefreshedStats": "已刷新质量统计",
+  "qualityReviewsStatusRefreshedScopeLeaderboard": "已刷新 scope 榜单",
+  "qualityReviewsStatusRefreshedStageAndGrade": "已刷新阶段通过率与等级分布",
+  "qualityReviewsNoBadCaseData": "暂无坏例数据",
+  "qualityReviewsBadCaseStatsLine": "{category} {count}条 pass={pass}",
+  "@qualityReviewsBadCaseStatsLine": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "pass": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusRefreshedBadCaseDistribution": "已刷新坏例分布",
+  "qualityReviewsStatusRefreshedTokenAggregate": "已刷新 token 聚合",
+  "qualityReviewsStatusRefreshedTokenSavingSamples": "已刷新省 token 样本",
+  "qualityReviewsErrInputReviewIdFirst": "请先输入评审 ID",
+  "qualityReviewsStatusLoadedReviewDetails": "已读取评审详情",
+  "qualityReviewsErrTargetTypeSourceRequired": "targetType 和 source 不能为空",
+  "qualityReviewsErrScriptNeedsProject": "填写 scriptId 时必须同时填写 projectId",
+  "qualityReviewsErrStoryboardTargetIdPositive": "创建 storyboard 评审时，targetId 必须是正整数镜头 ID",
+  "qualityReviewsStatusCreated": "已创建评审 {id}",
+  "@qualityReviewsStatusCreated": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatusCreatedWithScopedWriteback": "已创建评审 {id}，本条会回写项目/剧本隔离记忆",
+  "@qualityReviewsStatusCreatedWithScopedWriteback": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   }
 }

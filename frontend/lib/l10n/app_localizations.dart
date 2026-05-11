@@ -5246,6 +5246,136 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} reviews'**
   String qualityReviewsCount(int count);
+
+  /// No description provided for @qualityReviewsFilterBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'bad case'**
+  String get qualityReviewsFilterBadCase;
+
+  /// No description provided for @qualityReviewsFilterDeliveryPriorityHit.
+  ///
+  /// In en, this message translates to:
+  /// **'delivery/tone priority hit'**
+  String get qualityReviewsFilterDeliveryPriorityHit;
+
+  /// No description provided for @qualityReviewsFilterStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage {value}'**
+  String qualityReviewsFilterStage(String value);
+
+  /// No description provided for @qualityReviewsFilterGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade {value}'**
+  String qualityReviewsFilterGrade(String value);
+
+  /// No description provided for @qualityReviewsStatusLoadedReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} reviews'**
+  String qualityReviewsStatusLoadedReviews(int count);
+
+  /// No description provided for @qualityReviewsStatusLoadedReviewsWithLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} reviews with {labels}'**
+  String qualityReviewsStatusLoadedReviewsWithLabels(int count, String labels);
+
+  /// No description provided for @qualityReviewsStatusRefreshedStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed quality stats'**
+  String get qualityReviewsStatusRefreshedStats;
+
+  /// No description provided for @qualityReviewsStatusRefreshedScopeLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed scope leaderboard'**
+  String get qualityReviewsStatusRefreshedScopeLeaderboard;
+
+  /// No description provided for @qualityReviewsStatusRefreshedStageAndGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed stage pass rates and grade distribution'**
+  String get qualityReviewsStatusRefreshedStageAndGrade;
+
+  /// No description provided for @qualityReviewsNoBadCaseData.
+  ///
+  /// In en, this message translates to:
+  /// **'No bad-case data'**
+  String get qualityReviewsNoBadCaseData;
+
+  /// No description provided for @qualityReviewsBadCaseStatsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} {count} items pass={pass}'**
+  String qualityReviewsBadCaseStatsLine(
+    String category,
+    int count,
+    String pass,
+  );
+
+  /// No description provided for @qualityReviewsStatusRefreshedBadCaseDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed bad-case distribution'**
+  String get qualityReviewsStatusRefreshedBadCaseDistribution;
+
+  /// No description provided for @qualityReviewsStatusRefreshedTokenAggregate.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed token aggregate'**
+  String get qualityReviewsStatusRefreshedTokenAggregate;
+
+  /// No description provided for @qualityReviewsStatusRefreshedTokenSavingSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed token-saving samples'**
+  String get qualityReviewsStatusRefreshedTokenSavingSamples;
+
+  /// No description provided for @qualityReviewsErrInputReviewIdFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please input review ID first'**
+  String get qualityReviewsErrInputReviewIdFirst;
+
+  /// No description provided for @qualityReviewsStatusLoadedReviewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded review details'**
+  String get qualityReviewsStatusLoadedReviewDetails;
+
+  /// No description provided for @qualityReviewsErrTargetTypeSourceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'targetType and source are required'**
+  String get qualityReviewsErrTargetTypeSourceRequired;
+
+  /// No description provided for @qualityReviewsErrScriptNeedsProject.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptId requires projectId'**
+  String get qualityReviewsErrScriptNeedsProject;
+
+  /// No description provided for @qualityReviewsErrStoryboardTargetIdPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'When creating storyboard review, targetId must be a positive integer shot ID'**
+  String get qualityReviewsErrStoryboardTargetIdPositive;
+
+  /// No description provided for @qualityReviewsStatusCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created review {id}'**
+  String qualityReviewsStatusCreated(String id);
+
+  /// No description provided for @qualityReviewsStatusCreatedWithScopedWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Created review {id}; this row will write back to project/script scoped memory'**
+  String qualityReviewsStatusCreatedWithScopedWriteback(String id);
 }
 
 class _AppLocalizationsDelegate

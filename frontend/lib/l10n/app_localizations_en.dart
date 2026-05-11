@@ -3101,4 +3101,95 @@ class AppLocalizationsEn extends AppLocalizations {
   String qualityReviewsCount(int count) {
     return '$count reviews';
   }
+
+  @override
+  String get qualityReviewsFilterBadCase => 'bad case';
+
+  @override
+  String get qualityReviewsFilterDeliveryPriorityHit =>
+      'delivery/tone priority hit';
+
+  @override
+  String qualityReviewsFilterStage(String value) {
+    return 'Stage $value';
+  }
+
+  @override
+  String qualityReviewsFilterGrade(String value) {
+    return 'Grade $value';
+  }
+
+  @override
+  String qualityReviewsStatusLoadedReviews(int count) {
+    return 'Loaded $count reviews';
+  }
+
+  @override
+  String qualityReviewsStatusLoadedReviewsWithLabels(int count, String labels) {
+    return 'Loaded $count reviews with $labels';
+  }
+
+  @override
+  String get qualityReviewsStatusRefreshedStats => 'Refreshed quality stats';
+
+  @override
+  String get qualityReviewsStatusRefreshedScopeLeaderboard =>
+      'Refreshed scope leaderboard';
+
+  @override
+  String get qualityReviewsStatusRefreshedStageAndGrade =>
+      'Refreshed stage pass rates and grade distribution';
+
+  @override
+  String get qualityReviewsNoBadCaseData => 'No bad-case data';
+
+  @override
+  String qualityReviewsBadCaseStatsLine(
+    String category,
+    int count,
+    String pass,
+  ) {
+    return '$category $count items pass=$pass';
+  }
+
+  @override
+  String get qualityReviewsStatusRefreshedBadCaseDistribution =>
+      'Refreshed bad-case distribution';
+
+  @override
+  String get qualityReviewsStatusRefreshedTokenAggregate =>
+      'Refreshed token aggregate';
+
+  @override
+  String get qualityReviewsStatusRefreshedTokenSavingSamples =>
+      'Refreshed token-saving samples';
+
+  @override
+  String get qualityReviewsErrInputReviewIdFirst =>
+      'Please input review ID first';
+
+  @override
+  String get qualityReviewsStatusLoadedReviewDetails => 'Loaded review details';
+
+  @override
+  String get qualityReviewsErrTargetTypeSourceRequired =>
+      'targetType and source are required';
+
+  @override
+  String get qualityReviewsErrScriptNeedsProject =>
+      'scriptId requires projectId';
+
+  @override
+  String get qualityReviewsErrStoryboardTargetIdPositive =>
+      'When creating storyboard review, targetId must be a positive integer shot ID';
+
+  @override
+  String qualityReviewsStatusCreated(String id) {
+    return 'Created review $id';
+  }
+
+  @override
+  String qualityReviewsStatusCreatedWithScopedWriteback(String id) {
+    return 'Created review $id; this row will write back to project/script scoped memory';
+  }
 }
