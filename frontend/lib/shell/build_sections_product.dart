@@ -1841,36 +1841,6 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
   }
 
-  static final RegExp _uuidV4ish = RegExp(
-    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
-  );
-
-  Set<String> _eventTypesFromWebhookItem(OutboundWebhookListItemV1 wh) {
-    if (wh.eventTypes.isEmpty) {
-      return Set<String>.from(kOutboundWebhookPlatformEventTypes);
-    }
-    return Set<String>.from(wh.eventTypes);
-  }
-
-  /// Empty list ⇒ backend treats as「订阅全部平台事件」。
-  List<String> _eventTypesForApiPayload(Set<String> selected) {
-    final all = kOutboundWebhookPlatformEventTypes.toSet();
-    final inter = selected.intersection(all);
-    if (inter.length == all.length) {
-      return <String>[];
-    }
-    final out = inter.toList()..sort();
-    return out;
-  }
-
-  List<String>? _eventTypesForCreateBody() {
-    final payload = _eventTypesForApiPayload(_createWebhookEventTypes);
-    if (payload.isEmpty) {
-      return null;
-    }
-    return payload;
-  }
-
   Future<void> _createWebhook() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
@@ -1886,7 +1856,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     final wsRaw = _webhookWorkspaceIdController.text.trim();
     String? workspaceId;
     if (wsRaw.isNotEmpty) {
-      if (!_uuidV4ish.hasMatch(wsRaw)) {
+      if (!outboundWebhookWorkspaceIdLooksValid(wsRaw)) {
         setState(() {
           _webhooksError = 'workspaceId 须为合法 UUID，或留空';
         });
@@ -1907,7 +1877,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               ? null
               : _webhookSecretController.text.trim(),
           workspaceId: workspaceId,
-          eventTypes: _eventTypesForCreateBody(),
+          eventTypes: outboundWebhookEventTypesPayloadForCreate(
+            _createWebhookEventTypes,
+          ),
         ),
       );
       if (!mounted) {
@@ -1969,7 +1941,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         token,
         wh.id,
         OutboundWebhookPatchBodyV1(
-          eventTypes: _eventTypesForApiPayload(nextSelection),
+          eventTypes: outboundWebhookEventTypesPayloadForPatch(nextSelection),
         ),
       );
       if (!mounted) {
@@ -2615,32 +2587,16 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             ),
           ),
           const SizedBox(height: 4),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final slug in kOutboundWebhookPlatformEventTypes)
-                FilterChip(
-                  label: Text(outboundWebhookPlatformEventLabel(slug)),
-                  selected: _createWebhookEventTypes.contains(slug),
-                  onSelected: _loadingWebhooks
-                      ? null
-                      : (v) {
-                          setState(() {
-                            if (v) {
-                              _createWebhookEventTypes.add(slug);
-                            } else {
-                              _createWebhookEventTypes.remove(slug);
-                            }
-                            if (_createWebhookEventTypes.isEmpty) {
-                              _createWebhookEventTypes.addAll(
-                                kOutboundWebhookPlatformEventTypes,
-                              );
-                            }
-                          });
-                        },
-                ),
-            ],
+          OutboundWebhookEventChips(
+            selected: _createWebhookEventTypes,
+            enabled: !_loadingWebhooks,
+            onSelectionChanged: (next) {
+              setState(() {
+                _createWebhookEventTypes
+                  ..clear()
+                  ..addAll(next);
+              });
+            },
           ),
           const SizedBox(height: 8),
           TextField(
@@ -2826,46 +2782,17 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                     style: Theme.of(context).textTheme.labelMedium,
                                   ),
                                   const SizedBox(height: 4),
-                                  Wrap(
-                                    spacing: 6,
-                                    runSpacing: 6,
-                                    children: [
-                                      for (final slug in kOutboundWebhookPlatformEventTypes)
-                                        FilterChip(
-                                          label: Text(
-                                            outboundWebhookPlatformEventLabel(slug),
-                                          ),
-                                          selected: _eventTypesFromWebhookItem(
-                                            wh,
-                                          ).contains(slug),
-                                          onSelected:
-                                              (_loadingWebhooks ||
-                                                  _webhookBusyId != null)
-                                              ? null
-                                              : (v) {
-                                                  final cur = _eventTypesFromWebhookItem(
-                                                    wh,
-                                                  );
-                                                  final next = Set<String>.from(cur);
-                                                  if (v) {
-                                                    next.add(slug);
-                                                  } else {
-                                                    next.remove(slug);
-                                                  }
-                                                  if (next.isEmpty) {
-                                                    next.addAll(
-                                                      kOutboundWebhookPlatformEventTypes,
-                                                    );
-                                                  }
-                                                  unawaited(
-                                                    _patchWebhookEventSubscription(
-                                                      wh,
-                                                      next,
-                                                    ),
-                                                  );
-                                                },
-                                        ),
-                                    ],
+                                  OutboundWebhookEventChips(
+                                    selected: outboundWebhookEffectiveSelection(
+                                      wh.eventTypes,
+                                    ),
+                                    enabled: !_loadingWebhooks &&
+                                        _webhookBusyId == null,
+                                    onSelectionChanged: (next) {
+                                      unawaited(
+                                        _patchWebhookEventSubscription(wh, next),
+                                      );
+                                    },
                                   ),
                                   if (wh.eventTypes.isNotEmpty)
                                     Padding(

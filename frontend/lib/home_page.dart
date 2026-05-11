@@ -63,6 +63,7 @@ import 'shell/navigation_controller.dart';
 import 'shell/platform_short_drama_pipeline_strip.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_context_view.dart';
+import 'shell/outbound_webhook_event_chips.dart';
 import 'skills_harness/controller.dart';
 import 'overview/controller.dart';
 import 'system_probes/account/controller.dart';
@@ -160,6 +161,7 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   int? _productScopedProjectNumericId;
   MeResponse? _sessionMe;
+  MeV2Response? _sessionMeV2; // Task 6.2: Store v2 response for workspace billing
   String? _lastSessionAccessToken;
   bool _loadingSessionMe = false;
   PlatformConfigToggleSetV1 _platformConfig =
@@ -438,6 +440,7 @@ class _HomePageState extends State<HomePage> {
             query: query,
             accessToken: token,
             currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
+            currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
             initialResultTypes: initialResultTypes,
             initialTimeFrom: initialTimeFrom,
             initialTimeTo: initialTimeTo,
@@ -604,6 +607,29 @@ class _HomePageState extends State<HomePage> {
       );
       return;
     }
+    if (path == '/product/content-compliance') {
+      final escalationStage = uri.queryParameters['escalationStage']?.trim();
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.contentCompliance,
+      );
+      if (escalationStage != null && escalationStage.isNotEmpty) {
+        unawaited(
+          _contentComplianceController.applyQueueFilters(
+            status: _contentComplianceController.queueStatusFilter,
+            category: _contentComplianceController.queueCategoryFilter,
+            targetType: _contentComplianceController.queueTargetTypeFilter,
+            workspaceId: _contentComplianceController.queueWorkspaceIdFilter,
+            workspaceName: _contentComplianceController.queueWorkspaceNameFilter,
+            claimedByLabel:
+                _contentComplianceController.queueClaimedByLabelFilter,
+            slaBucket: _contentComplianceController.queueSlaBucketFilter,
+            escalationStage: escalationStage,
+            claimedOnly: _contentComplianceController.queueClaimedOnly,
+          ),
+        );
+      }
+      return;
+    }
     if (path == '/product/platform-status') {
       _selectProductPaneWithGate(
         ProductWorkspacePane.platformStatus,
@@ -714,6 +740,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         _sessionMe = null;
+        _sessionMeV2 = null; // Task 6.2: Clear v2 response
         _loadingSessionMe = false;
         _platformConfig = PlatformConfigToggleSetV1.defaults;
       });
@@ -729,6 +756,15 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final me = await fetchMeV1(token);
+      // Task 6.2 & 6.3: Fetch v2 response for workspace billing display (feature flag gated)
+      MeV2Response? meV2;
+      if (kEnableWorkspaceBilling) {
+        try {
+          meV2 = await fetchMeV2(token);
+        } catch (_) {
+          // V2 might not be available yet; fall back to v1 only
+        }
+      }
       PlatformConfigToggleSetV1 platformConfig =
           PlatformConfigToggleSetV1.defaults;
       try {
@@ -740,6 +776,7 @@ class _HomePageState extends State<HomePage> {
       }
       setState(() {
         _sessionMe = me;
+        _sessionMeV2 = meV2;
         _applyPlatformConfig(platformConfig);
       });
       unawaited(_notificationsController.prime());
@@ -857,6 +894,7 @@ class _HomePageState extends State<HomePage> {
     _workspaceOperationController.reset();
     _productScopedProjectNumericId = null;
     _sessionMe = null;
+    _sessionMeV2 = null; // Task 6.2: Clear v2 response
     _lastSessionAccessToken = null;
     _loadingSessionMe = false;
     _platformConfig = PlatformConfigToggleSetV1.defaults;
@@ -931,6 +969,7 @@ class _HomePageState extends State<HomePage> {
               child: GlobalSearchBar(
                 accessToken: session.accessToken,
                 currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
+                currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
                 onNavigateToResults: _openGlobalSearchResults,
               ),
             ),

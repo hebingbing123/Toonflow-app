@@ -162,13 +162,13 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [ ] WH2.8 端到端集成测试 — **待补**（可接 `wiremock` 或契约环境对真实 HTTP 断言）
   - _Requirements: 4.2–4.9_
 
-- [~] **WH3. 出站 Webhook — Frontend**（帮助 Hub 出站区：列表/创建/测试/**事件多选+workspaceId**；**投递记录**；WH3.6 widget 测仍缺）
+- [x] **WH3. 出站 Webhook — Frontend**（帮助 Hub 出站区：列表/创建/测试/**事件多选+workspaceId**；**投递记录**；平台逻辑与 chips **widget 测**已加）
   - [x] WH3.1 `rust_api/settings/outbound_webhooks.dart` 已扩展（create/patch/list/test/**deliveries**）
   - [x] WH3.2 配置界面：帮助 Hub 内「出站 Webhook」区已支持 **`FilterChip` 多选** 四类平台事件（与 `kOutboundWebhookPlatformEventTypes` 对齐）、**可选 `workspaceId`**（UUID 校验）、列表卡片内 **PATCH 即时更新** `eventTypes`（全选时提交空数组以匹配后端「订阅全部」语义）
   - [x] WH3.3 测试按钮（已有）
   - [x] WH3.4 投递历史：卡片内展示最近 6 条 `deliveries`
   - [x] WH3.5 失败详情：`deliveries` 列表展示 `error` 文本
-  - [ ] WH3.6 Flutter widget 测试 — **未加**
+  - [x] WH3.6 Flutter 测试 — **`test/outbound_webhook_platform_test.dart`**（payload / UUID 纯函数）+ **`test/outbound_webhook_event_chips_test.dart`**（`OutboundWebhookEventChips` widget）
   - [x] WH3.7 合并窗口以 CI / `yarn refactor:check` 为准（小说事件与 novel crawl worker 已移除 `ensure_owned_project_pk`，改用 `require_project_*_scope`）
   - _Requirements: 4.10, 4.11, 4.12_
 

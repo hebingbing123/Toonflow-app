@@ -5,29 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../config.dart';
 import '../core.dart';
 
-/// Slugs aligned with backend `OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES`.
-const List<String> kOutboundWebhookPlatformEventTypes = <String>[
-  'job.completed',
-  'job.failed',
-  'project.created',
-  'workspace.member.added',
-];
-
-/// UI label for [kOutboundWebhookPlatformEventTypes] entries.
-String outboundWebhookPlatformEventLabel(String slug) {
-  switch (slug) {
-    case 'job.completed':
-      return 'Job 完成';
-    case 'job.failed':
-      return 'Job 失败';
-    case 'project.created':
-      return '项目创建';
-    case 'workspace.member.added':
-      return '工作区成员加入';
-    default:
-      return slug;
-  }
-}
+export 'outbound_webhook_platform.dart';
 
 class OutboundWebhookCreateBodyV1 {
   const OutboundWebhookCreateBodyV1({

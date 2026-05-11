@@ -7,6 +7,7 @@ export 'billing_webhook_events.dart';
 export 'help_hub.dart';
 export 'memory_config_api.dart';
 export 'notifications.dart';
+export 'outbound_webhook_platform.dart';
 export 'outbound_webhooks.dart';
 export 'platform_config.dart';
 export 'vendor_credentials.dart';
