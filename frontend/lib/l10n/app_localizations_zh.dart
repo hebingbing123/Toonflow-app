@@ -3527,4 +3527,177 @@ class AppLocalizationsZh extends AppLocalizations {
   String qualityReviewsChecklistScope(String scope) {
     return '范围：记忆只在 $scope 生效，不跨用户、项目或短剧复用。';
   }
+
+  @override
+  String qualityReviewsAutoSampleSummary(
+    int count,
+    String prompt,
+    String memory,
+    String visual,
+    String delivery,
+    String hitRate,
+  ) {
+    return 'auto样本 $count 条 · 平均 prompt=$prompt chars · memory=$memory (visual=$visual, delivery=$delivery) · delivery优先命中 $hitRate%';
+  }
+
+  @override
+  String qualityReviewsAutoDiagnosticsCount(int count) {
+    return 'auto诊断 $count 条';
+  }
+
+  @override
+  String qualityReviewsAveragePrompt(String prompt) {
+    return '平均 prompt=$prompt chars';
+  }
+
+  @override
+  String qualityReviewsDeliveryPriorityRate(String rate) {
+    return 'delivery优先 $rate%';
+  }
+
+  @override
+  String get qualityReviewsTimesUnit => ' 次';
+
+  @override
+  String qualityReviewsHitMemoryBuckets(String value) {
+    return '命中记忆 $value';
+  }
+
+  @override
+  String qualityReviewsSuppressedBuckets(String value) {
+    return '压缩桶 $value';
+  }
+
+  @override
+  String qualityReviewsDirectorYieldCount(int hit, int total) {
+    return '导演让位 $hit/$total';
+  }
+
+  @override
+  String qualityReviewsContinuityConstraintCount(int hit, int total) {
+    return '连续性约束 $hit/$total';
+  }
+
+  @override
+  String qualityReviewsReferenceFrameCount(int hit, int total) {
+    return '参考帧 $hit/$total';
+  }
+
+  @override
+  String qualityReviewsHitBucketsInline(String value) {
+    return '命中=$value';
+  }
+
+  @override
+  String qualityReviewsSuppressedBucketsInline(String value) {
+    return '压缩=$value';
+  }
+
+  @override
+  String get qualityReviewsDirectorYield => '导演让位';
+
+  @override
+  String qualityReviewsSavedChars(int chars) {
+    return '省下$chars chars';
+  }
+
+  @override
+  String qualityReviewsNegativeSlim(int fragments, int chars) {
+    return '负向精简=$fragments条/$chars chars';
+  }
+
+  @override
+  String qualityReviewsMemoryScopeLevel(String value) {
+    return '记忆层级=$value';
+  }
+
+  @override
+  String qualityReviewsContinuityCount(int count) {
+    return '连续性$count';
+  }
+
+  @override
+  String get qualityReviewsReferenceFrame => '参考帧';
+
+  @override
+  String get qualityReviewsWritebackPromotedSelected => '正向记忆晋升';
+
+  @override
+  String get qualityReviewsWritebackRejectedMemory => '坏例记忆回写';
+
+  @override
+  String get qualityReviewsWritebackSummaryMemory => '评审摘要回写';
+
+  @override
+  String get qualityReviewsWritebackMissingPromptSeed => '正向记忆待补 prompt seed';
+
+  @override
+  String get qualityReviewsWritebackEmptySelectedMemory => '正向记忆未提炼出有效片段';
+
+  @override
+  String qualityReviewsShotId(int id) {
+    return '镜头$id';
+  }
+
+  @override
+  String qualityReviewsWriteMemory(String name) {
+    return '写入=$name';
+  }
+
+  @override
+  String qualityReviewsClearMemory(String name) {
+    return '清理=$name';
+  }
+
+  @override
+  String qualityReviewsSlimSummary(int chars, int rows, int dup, int visual) {
+    return 'slim $chars chars / $rows条（重复 $dup / 纯视觉 $visual）';
+  }
+
+  @override
+  String qualityReviewsFocusWatchTag(String value) {
+    return '关注=$value';
+  }
+
+  @override
+  String qualityReviewsHitSummary(String value) {
+    return '命中 $value';
+  }
+
+  @override
+  String qualityReviewsSuppressedSummary(String value) {
+    return '压缩 $value';
+  }
+
+  @override
+  String qualityReviewsMemoryOptimizationScopeLine(
+    String scope,
+    int reviews,
+    int chars,
+    int rows,
+    int dup,
+    int visual,
+  ) {
+    return '$scope $reviews条 · slim $chars chars / $rows条（重复 $dup / 纯视觉 $visual）';
+  }
+
+  @override
+  String qualityReviewsBadCaseCount(int count) {
+    return '坏例 $count';
+  }
+
+  @override
+  String qualityReviewsDialogueRiskCount(int count) {
+    return '情绪/台词 $count';
+  }
+
+  @override
+  String qualityReviewsVisualRiskCount(int count) {
+    return '真实感 $count';
+  }
+
+  @override
+  String qualityReviewsNextStep(String value) {
+    return '下一步 $value';
+  }
 }

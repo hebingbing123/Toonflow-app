@@ -161,15 +161,23 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
     final outline = Theme.of(context).colorScheme.outline;
     final tokenEfficiencySummary = summarizeTokenEfficiencyFromQualityReviews(
       model.reviews,
+      l10n: l10n,
     );
     final promptDiagnosticsSummary =
-        summarizePromptDiagnosticsFromQualityReviews(model.reviews);
+        summarizePromptDiagnosticsFromQualityReviews(model.reviews, l10n: l10n);
     final memoryScopePressureSummary =
-        summarizeMemoryScopePressureFromQualityReviews(model.reviews);
+        summarizeMemoryScopePressureFromQualityReviews(
+          model.reviews,
+          l10n: l10n,
+        );
     final memoryOptimizationSavingsSummary =
-        summarizeMemoryOptimizationSavingsFromQualityReviews(model.reviews);
+        summarizeMemoryOptimizationSavingsFromQualityReviews(
+          model.reviews,
+          l10n: l10n,
+        );
     final scopeRepairQueueSummary = summarizeScopeRepairQueueFromQualityReviews(
       model.reviews,
+      l10n: l10n,
     );
     final repairPlanSummary = summarizeQualityRepairPlanFromReviews(
       model.reviews,
@@ -781,9 +789,15 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 8),
                 ...model.reviews.take(8).map((review) {
                   final diagnosticSummary =
-                      summarizeQualityReviewPromptDiagnostics(review);
+                      summarizeQualityReviewPromptDiagnostics(
+                        review,
+                        l10n: l10n,
+                      );
                   final writebackSummary =
-                      summarizeQualityReviewMemoryWriteback(review);
+                      summarizeQualityReviewMemoryWriteback(
+                        review,
+                        l10n: l10n,
+                      );
                   final repairSuggestions = buildQualityReviewRepairSuggestions(
                     review,
                     l10n: l10n,

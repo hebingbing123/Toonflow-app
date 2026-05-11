@@ -1,10 +1,12 @@
 import '../../rust_api.dart';
+import '../l10n/app_localizations.dart';
 import 'support_models.dart';
 import 'support_actions.dart';
 
 String? summarizeTokenEfficiencyFromQualityReviews(
   Iterable<QualityReview> rows, {
   int maxSamples = 40,
+  AppLocalizations? l10n,
 }) {
   final samples = rows
       .where((row) => row.source == 'auto')
@@ -52,12 +54,21 @@ String? summarizeTokenEfficiencyFromQualityReviews(
   final avgVisual = (sumVisual / parsed).toStringAsFixed(0);
   final avgDelivery = (sumDelivery / parsed).toStringAsFixed(0);
   final hitRate = (deliveryPriorityHits * 100.0 / parsed).toStringAsFixed(1);
-  return 'auto样本 $parsed 条 · 平均 prompt=$avgPrompt chars · memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery) · delivery优先命中 $hitRate%';
+  return l10n?.qualityReviewsAutoSampleSummary(
+        parsed,
+        avgPrompt,
+        avgMemory,
+        avgVisual,
+        avgDelivery,
+        hitRate,
+      ) ??
+      'auto样本 $parsed 条 · 平均 prompt=$avgPrompt chars · memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery) · delivery优先命中 $hitRate%';
 }
 
 String? summarizePromptDiagnosticsFromQualityReviews(
   Iterable<QualityReview> rows, {
   int maxSamples = 16,
+  AppLocalizations? l10n,
 }) {
   final samples = rows
       .where((row) => row.source == 'auto')
@@ -156,37 +167,63 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   final deliveryHitRate = (deliveryPriorityHits * 100.0 / samples.length)
       .toStringAsFixed(1);
   final parts = <String>[
-    'auto诊断 ${samples.length} 条',
-    '平均 prompt=$avgPrompt chars',
+    l10n?.qualityReviewsAutoDiagnosticsCount(samples.length) ??
+        'auto诊断 ${samples.length} 条',
+    l10n?.qualityReviewsAveragePrompt(avgPrompt) ?? '平均 prompt=$avgPrompt chars',
     'memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery)',
-    'delivery优先 $deliveryHitRate%',
+    l10n?.qualityReviewsDeliveryPriorityRate(deliveryHitRate) ??
+        'delivery优先 $deliveryHitRate%',
   ];
   if (topNegativeSource != null) {
     parts.add(
-      '${describeAutoNegativeSource(topNegativeSource.key)} ${topNegativeSource.value} 次',
+      '${describeAutoNegativeSource(topNegativeSource.key, l10n: l10n)} ${topNegativeSource.value}${l10n?.qualityReviewsTimesUnit ?? " 次"}',
     );
   }
-  final hitBucketSummary = joinTopBucketCounts(memoryHitBuckets);
+  final hitBucketSummary = joinTopBucketCounts(memoryHitBuckets, l10n: l10n);
   if (hitBucketSummary.isNotEmpty) {
-    parts.add('命中记忆 $hitBucketSummary');
+    parts.add(
+      l10n?.qualityReviewsHitMemoryBuckets(hitBucketSummary) ??
+          '命中记忆 $hitBucketSummary',
+    );
   }
-  final suppressedBucketSummary = joinTopBucketCounts(suppressedBuckets);
+  final suppressedBucketSummary = joinTopBucketCounts(
+    suppressedBuckets,
+    l10n: l10n,
+  );
   if (suppressedBucketSummary.isNotEmpty) {
-    parts.add('压缩桶 $suppressedBucketSummary');
+    parts.add(
+      l10n?.qualityReviewsSuppressedBuckets(suppressedBucketSummary) ??
+          '压缩桶 $suppressedBucketSummary',
+    );
   }
   if (directorYieldHits > 0) {
-    parts.add('导演让位 $directorYieldHits/${samples.length}');
+    parts.add(
+      l10n?.qualityReviewsDirectorYieldCount(directorYieldHits, samples.length) ??
+          '导演让位 $directorYieldHits/${samples.length}',
+    );
   }
   if (continuityHits > 0) {
-    parts.add('连续性约束 $continuityHits/${samples.length}');
+    parts.add(
+      l10n?.qualityReviewsContinuityConstraintCount(
+            continuityHits,
+            samples.length,
+          ) ??
+          '连续性约束 $continuityHits/${samples.length}',
+    );
   }
   if (referenceFrameHits > 0) {
-    parts.add('参考帧 $referenceFrameHits/${samples.length}');
+    parts.add(
+      l10n?.qualityReviewsReferenceFrameCount(referenceFrameHits, samples.length) ??
+          '参考帧 $referenceFrameHits/${samples.length}',
+    );
   }
   return parts.join(' · ');
 }
 
-String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
+String? summarizeQualityReviewPromptDiagnostics(
+  QualityReview row, {
+  AppLocalizations? l10n,
+}) {
   final diagnostics = qualityDiagnosticsMap(row);
   if (diagnostics == null) return null;
 
@@ -217,10 +254,10 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
 
   final negativeSource = diagnosticString(diagnostics, 'autoNegativeSource');
   if (negativeSource != null) {
-    parts.add(describeAutoNegativeSource(negativeSource));
+    parts.add(describeAutoNegativeSource(negativeSource, l10n: l10n));
   }
   if (diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
-    parts.add('delivery优先');
+    parts.add(l10n?.qualityReviewsDeliveryPriority ?? 'delivery优先');
   }
   final memoryHitBucketCounts = diagnosticStringIntMap(
     diagnostics,
@@ -232,7 +269,14 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   );
   if (memoryHitBuckets.isNotEmpty) {
     parts.add(
-      '命中=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts)}',
+      l10n?.qualityReviewsHitBucketsInline(
+            joinBucketListWithCounts(
+              memoryHitBuckets,
+              memoryHitBucketCounts,
+              l10n: l10n,
+            ),
+          ) ??
+          '命中=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts, l10n: l10n)}',
     );
   }
   final memorySuppressedBucketCounts = diagnosticStringIntMap(
@@ -245,17 +289,30 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
   );
   if (memorySuppressedBuckets.isNotEmpty) {
     parts.add(
-      '压缩=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts)}',
+      l10n?.qualityReviewsSuppressedBucketsInline(
+            joinBucketListWithCounts(
+              memorySuppressedBuckets,
+              memorySuppressedBucketCounts,
+              l10n: l10n,
+            ),
+          ) ??
+          '压缩=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts, l10n: l10n)}',
     );
   }
   if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
-    parts.add('导演让位');
+    parts.add(l10n?.qualityReviewsDirectorYield ?? '导演让位');
   }
   if (directorSaved > 0) {
-    parts.add('省下$directorSaved chars');
+    parts.add(l10n?.qualityReviewsSavedChars(directorSaved) ?? '省下$directorSaved chars');
   }
   if (negativeSavedChars > 0 || negativeSavedFragments > 0) {
-    parts.add('负向精简=$negativeSavedFragments条/$negativeSavedChars chars');
+    parts.add(
+      l10n?.qualityReviewsNegativeSlim(
+            negativeSavedFragments,
+            negativeSavedChars,
+          ) ??
+          '负向精简=$negativeSavedFragments条/$negativeSavedChars chars',
+    );
   }
   final scopeSummary = describeMemoryScopeRows(
     projectScopeRows: projectScopeRows,
@@ -263,18 +320,27 @@ String? summarizeQualityReviewPromptDiagnostics(QualityReview row) {
     roleScopeRows: roleScopeRows,
   );
   if (scopeSummary != null) {
-    parts.add('记忆层级=$scopeSummary');
+    parts.add(
+      l10n?.qualityReviewsMemoryScopeLevel(scopeSummary) ??
+          '记忆层级=$scopeSummary',
+    );
   }
   if (continuityCount > 0) {
-    parts.add('连续性$continuityCount');
+    parts.add(
+      l10n?.qualityReviewsContinuityCount(continuityCount) ??
+          '连续性$continuityCount',
+    );
   }
   if (diagnosticBool(diagnostics, 'usesReferenceFrame')) {
-    parts.add('参考帧');
+    parts.add(l10n?.qualityReviewsReferenceFrame ?? '参考帧');
   }
   return parts.join(' · ');
 }
 
-String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
+String? summarizeQualityReviewMemoryWriteback(
+  QualityReview row, {
+  AppLocalizations? l10n,
+}) {
   final feedback = feedbackMemoryMap(row);
   if (feedback == null) return null;
 
@@ -291,41 +357,56 @@ String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
   final parts = <String>[];
   switch (action) {
     case 'promoted_selected_memory':
-      parts.add('正向记忆晋升');
+      parts.add(l10n?.qualityReviewsWritebackPromotedSelected ?? '正向记忆晋升');
       break;
     case 'persisted_rejected_memory':
-      parts.add('坏例记忆回写');
+      parts.add(l10n?.qualityReviewsWritebackRejectedMemory ?? '坏例记忆回写');
       break;
     case 'replaced_summary_memory':
-      parts.add('评审摘要回写');
+      parts.add(l10n?.qualityReviewsWritebackSummaryMemory ?? '评审摘要回写');
       break;
     case 'promoted_selected_memory_missing_prompt_seed':
-      parts.add('正向记忆待补 prompt seed');
+      parts.add(
+        l10n?.qualityReviewsWritebackMissingPromptSeed ?? '正向记忆待补 prompt seed',
+      );
       break;
     case 'promoted_selected_memory_empty':
-      parts.add('正向记忆未提炼出有效片段');
+      parts.add(
+        l10n?.qualityReviewsWritebackEmptySelectedMemory ??
+            '正向记忆未提炼出有效片段',
+      );
       break;
     default:
       if (action != null) parts.add(action);
   }
   if (storyboardId > 0) {
-    parts.add('镜头$storyboardId');
+    parts.add(l10n?.qualityReviewsShotId(storyboardId) ?? '镜头$storyboardId');
   }
   if (memoryName != null) {
-    parts.add('写入=$memoryName');
+    parts.add(l10n?.qualityReviewsWriteMemory(memoryName) ?? '写入=$memoryName');
   }
   if (clearedMemoryName != null) {
-    parts.add('清理=$clearedMemoryName');
+    parts.add(
+      l10n?.qualityReviewsClearMemory(clearedMemoryName) ??
+          '清理=$clearedMemoryName',
+    );
   }
   if (removedChars > 0 || removedRows > 0) {
     parts.add(
-      'slim $removedChars chars / $removedRows条'
-      '（重复 $removedDuplicateRows / 纯视觉 $removedVisualRows）',
+      l10n?.qualityReviewsSlimSummary(
+            removedChars,
+            removedRows,
+            removedDuplicateRows,
+            removedVisualRows,
+          ) ??
+          'slim $removedChars chars / $removedRows条（重复 $removedDuplicateRows / 纯视觉 $removedVisualRows）',
     );
   }
-  final focusSummary = summarizeFeedbackFocusTags(focusTags);
+  final focusSummary = summarizeFeedbackFocusTags(focusTags, l10n: l10n);
   if (focusSummary != null) {
-    parts.add('关注=$focusSummary');
+    parts.add(
+      l10n?.qualityReviewsFocusWatchTag(focusSummary) ?? '关注=$focusSummary',
+    );
   }
   return parts.isEmpty ? null : parts.join(' · ');
 }
@@ -333,6 +414,7 @@ String? summarizeQualityReviewMemoryWriteback(QualityReview row) {
 String? summarizeMemoryScopePressureFromQualityReviews(
   Iterable<QualityReview> rows, {
   int maxScopes = 3,
+  AppLocalizations? l10n,
 }) {
   final scopes =
       <
@@ -398,17 +480,29 @@ String? summarizeMemoryScopePressureFromQualityReviews(
   return items
       .take(maxScopes)
       .map((entry) {
-        final hitSummary = joinTopBucketCounts(entry.value.hits, maxItems: 2);
+        final hitSummary = joinTopBucketCounts(
+          entry.value.hits,
+          maxItems: 2,
+          l10n: l10n,
+        );
         final suppressedSummary = joinTopBucketCounts(
           entry.value.suppressed,
           maxItems: 2,
+          l10n: l10n,
         );
-        final parts = <String>['${entry.key} ${entry.value.reviews}条'];
+        final parts = <String>[
+          '${entry.key} ${entry.value.reviews}${l10n?.qualityReviewsItemUnit ?? "条"}',
+        ];
         if (hitSummary.isNotEmpty) {
-          parts.add('命中 $hitSummary');
+          parts.add(
+            l10n?.qualityReviewsHitSummary(hitSummary) ?? '命中 $hitSummary',
+          );
         }
         if (suppressedSummary.isNotEmpty) {
-          parts.add('压缩 $suppressedSummary');
+          parts.add(
+            l10n?.qualityReviewsSuppressedSummary(suppressedSummary) ??
+                '压缩 $suppressedSummary',
+          );
         }
         return parts.join(' · ');
       })
@@ -418,6 +512,7 @@ String? summarizeMemoryScopePressureFromQualityReviews(
 String? summarizeMemoryOptimizationSavingsFromQualityReviews(
   Iterable<QualityReview> rows, {
   int maxScopes = 3,
+  AppLocalizations? l10n,
 }) {
   final scopes =
       <
@@ -480,8 +575,15 @@ String? summarizeMemoryOptimizationSavingsFromQualityReviews(
       .take(maxScopes)
       .map((entry) {
         final value = entry.value;
-        return '${entry.key} ${value.reviews}条 · slim ${value.removedChars} chars / ${value.removedRows}条'
-            '（重复 ${value.removedDuplicateRows} / 纯视觉 ${value.removedVisualRows}）';
+        return l10n?.qualityReviewsMemoryOptimizationScopeLine(
+              entry.key,
+              value.reviews,
+              value.removedChars,
+              value.removedRows,
+              value.removedDuplicateRows,
+              value.removedVisualRows,
+            ) ??
+            '${entry.key} ${value.reviews}条 · slim ${value.removedChars} chars / ${value.removedRows}条（重复 ${value.removedDuplicateRows} / 纯视觉 ${value.removedVisualRows}）';
       })
       .join(' | ');
 }
@@ -490,6 +592,7 @@ String? summarizeScopeRepairQueueFromQualityReviews(
   Iterable<QualityReview> rows, {
   int maxScopes = 3,
   int maxSuggestionsPerScope = 2,
+  AppLocalizations? l10n,
 }) {
   final scopes =
       <
@@ -530,7 +633,7 @@ String? summarizeScopeRepairQueueFromQualityReviews(
     final removedChars = diagnostics == null
         ? 0
         : diagnosticInt(diagnostics, 'memoryOptimizationRemovedChars');
-    final suggestions = buildQualityReviewRepairSuggestions(row);
+    final suggestions = buildQualityReviewRepairSuggestions(row, l10n: l10n);
     final dialogueRisk = hasDialogueRisk(row);
     final visualRisk = hasVisualRisk(row);
     if (!row.isBadCase &&
@@ -610,14 +713,22 @@ String? summarizeScopeRepairQueueFromQualityReviews(
             .map((item) => item.key)
             .join(' / ');
         final parts = <String>[
-          '${entry.key} ${value.reviews}条',
-          if (value.badCases > 0) '坏例 ${value.badCases}',
-          if (value.dialogueRiskHits > 0) '情绪/台词 ${value.dialogueRiskHits}',
-          if (value.visualRiskHits > 0) '真实感 ${value.visualRiskHits}',
+          '${entry.key} ${value.reviews}${l10n?.qualityReviewsItemUnit ?? "条"}',
+          if (value.badCases > 0)
+            l10n?.qualityReviewsBadCaseCount(value.badCases) ??
+                '坏例 ${value.badCases}',
+          if (value.dialogueRiskHits > 0)
+            l10n?.qualityReviewsDialogueRiskCount(value.dialogueRiskHits) ??
+                '情绪/台词 ${value.dialogueRiskHits}',
+          if (value.visualRiskHits > 0)
+            l10n?.qualityReviewsVisualRiskCount(value.visualRiskHits) ??
+                '真实感 ${value.visualRiskHits}',
           if (value.removedChars > 0) 'slim ${value.removedChars} chars',
         ];
         if (nextStep.isNotEmpty) {
-          parts.add('下一步 $nextStep');
+          parts.add(
+            l10n?.qualityReviewsNextStep(nextStep) ?? '下一步 $nextStep',
+          );
         }
         return parts.join(' · ');
       })

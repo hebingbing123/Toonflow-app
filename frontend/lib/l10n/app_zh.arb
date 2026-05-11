@@ -2515,5 +2515,280 @@
         "type": "String"
       }
     }
+  },
+  "qualityReviewsAutoSampleSummary": "auto样本 {count} 条 · 平均 prompt={prompt} chars · memory={memory} (visual={visual}, delivery={delivery}) · delivery优先命中 {hitRate}%",
+  "@qualityReviewsAutoSampleSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "visual": {
+        "type": "String"
+      },
+      "delivery": {
+        "type": "String"
+      },
+      "hitRate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsAutoDiagnosticsCount": "auto诊断 {count} 条",
+  "@qualityReviewsAutoDiagnosticsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsAveragePrompt": "平均 prompt={prompt} chars",
+  "@qualityReviewsAveragePrompt": {
+    "placeholders": {
+      "prompt": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDeliveryPriorityRate": "delivery优先 {rate}%",
+  "@qualityReviewsDeliveryPriorityRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsTimesUnit": " 次",
+  "qualityReviewsHitMemoryBuckets": "命中记忆 {value}",
+  "@qualityReviewsHitMemoryBuckets": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSuppressedBuckets": "压缩桶 {value}",
+  "@qualityReviewsSuppressedBuckets": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDirectorYieldCount": "导演让位 {hit}/{total}",
+  "@qualityReviewsDirectorYieldCount": {
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsContinuityConstraintCount": "连续性约束 {hit}/{total}",
+  "@qualityReviewsContinuityConstraintCount": {
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsReferenceFrameCount": "参考帧 {hit}/{total}",
+  "@qualityReviewsReferenceFrameCount": {
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsHitBucketsInline": "命中={value}",
+  "@qualityReviewsHitBucketsInline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSuppressedBucketsInline": "压缩={value}",
+  "@qualityReviewsSuppressedBucketsInline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDirectorYield": "导演让位",
+  "qualityReviewsSavedChars": "省下{chars} chars",
+  "@qualityReviewsSavedChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsNegativeSlim": "负向精简={fragments}条/{chars} chars",
+  "@qualityReviewsNegativeSlim": {
+    "placeholders": {
+      "fragments": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsMemoryScopeLevel": "记忆层级={value}",
+  "@qualityReviewsMemoryScopeLevel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsContinuityCount": "连续性{count}",
+  "@qualityReviewsContinuityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsReferenceFrame": "参考帧",
+  "qualityReviewsWritebackPromotedSelected": "正向记忆晋升",
+  "qualityReviewsWritebackRejectedMemory": "坏例记忆回写",
+  "qualityReviewsWritebackSummaryMemory": "评审摘要回写",
+  "qualityReviewsWritebackMissingPromptSeed": "正向记忆待补 prompt seed",
+  "qualityReviewsWritebackEmptySelectedMemory": "正向记忆未提炼出有效片段",
+  "qualityReviewsShotId": "镜头{id}",
+  "@qualityReviewsShotId": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsWriteMemory": "写入={name}",
+  "@qualityReviewsWriteMemory": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsClearMemory": "清理={name}",
+  "@qualityReviewsClearMemory": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSlimSummary": "slim {chars} chars / {rows}条（重复 {dup} / 纯视觉 {visual}）",
+  "@qualityReviewsSlimSummary": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "dup": {
+        "type": "int"
+      },
+      "visual": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsFocusWatchTag": "关注={value}",
+  "@qualityReviewsFocusWatchTag": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsHitSummary": "命中 {value}",
+  "@qualityReviewsHitSummary": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSuppressedSummary": "压缩 {value}",
+  "@qualityReviewsSuppressedSummary": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsMemoryOptimizationScopeLine": "{scope} {reviews}条 · slim {chars} chars / {rows}条（重复 {dup} / 纯视觉 {visual}）",
+  "@qualityReviewsMemoryOptimizationScopeLine": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      },
+      "reviews": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "dup": {
+        "type": "int"
+      },
+      "visual": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsBadCaseCount": "坏例 {count}",
+  "@qualityReviewsBadCaseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsDialogueRiskCount": "情绪/台词 {count}",
+  "@qualityReviewsDialogueRiskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsVisualRiskCount": "真实感 {count}",
+  "@qualityReviewsVisualRiskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsNextStep": "下一步 {value}",
+  "@qualityReviewsNextStep": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -6141,6 +6141,230 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scope: memory takes effect only in {scope}; no reuse across users, projects, or shows.'**
   String qualityReviewsChecklistScope(String scope);
+
+  /// No description provided for @qualityReviewsAutoSampleSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'auto samples {count} · avg prompt={prompt} chars · memory={memory} (visual={visual}, delivery={delivery}) · delivery-priority hit {hitRate}%'**
+  String qualityReviewsAutoSampleSummary(
+    int count,
+    String prompt,
+    String memory,
+    String visual,
+    String delivery,
+    String hitRate,
+  );
+
+  /// No description provided for @qualityReviewsAutoDiagnosticsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'auto diagnostics {count}'**
+  String qualityReviewsAutoDiagnosticsCount(int count);
+
+  /// No description provided for @qualityReviewsAveragePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'avg prompt={prompt} chars'**
+  String qualityReviewsAveragePrompt(String prompt);
+
+  /// No description provided for @qualityReviewsDeliveryPriorityRate.
+  ///
+  /// In en, this message translates to:
+  /// **'delivery-priority {rate}%'**
+  String qualityReviewsDeliveryPriorityRate(String rate);
+
+  /// No description provided for @qualityReviewsTimesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **' times'**
+  String get qualityReviewsTimesUnit;
+
+  /// No description provided for @qualityReviewsHitMemoryBuckets.
+  ///
+  /// In en, this message translates to:
+  /// **'hit memory {value}'**
+  String qualityReviewsHitMemoryBuckets(String value);
+
+  /// No description provided for @qualityReviewsSuppressedBuckets.
+  ///
+  /// In en, this message translates to:
+  /// **'suppressed buckets {value}'**
+  String qualityReviewsSuppressedBuckets(String value);
+
+  /// No description provided for @qualityReviewsDirectorYieldCount.
+  ///
+  /// In en, this message translates to:
+  /// **'director yield {hit}/{total}'**
+  String qualityReviewsDirectorYieldCount(int hit, int total);
+
+  /// No description provided for @qualityReviewsContinuityConstraintCount.
+  ///
+  /// In en, this message translates to:
+  /// **'continuity constraints {hit}/{total}'**
+  String qualityReviewsContinuityConstraintCount(int hit, int total);
+
+  /// No description provided for @qualityReviewsReferenceFrameCount.
+  ///
+  /// In en, this message translates to:
+  /// **'reference frame {hit}/{total}'**
+  String qualityReviewsReferenceFrameCount(int hit, int total);
+
+  /// No description provided for @qualityReviewsHitBucketsInline.
+  ///
+  /// In en, this message translates to:
+  /// **'hit={value}'**
+  String qualityReviewsHitBucketsInline(String value);
+
+  /// No description provided for @qualityReviewsSuppressedBucketsInline.
+  ///
+  /// In en, this message translates to:
+  /// **'suppressed={value}'**
+  String qualityReviewsSuppressedBucketsInline(String value);
+
+  /// No description provided for @qualityReviewsDirectorYield.
+  ///
+  /// In en, this message translates to:
+  /// **'director yield'**
+  String get qualityReviewsDirectorYield;
+
+  /// No description provided for @qualityReviewsSavedChars.
+  ///
+  /// In en, this message translates to:
+  /// **'saved {chars} chars'**
+  String qualityReviewsSavedChars(int chars);
+
+  /// No description provided for @qualityReviewsNegativeSlim.
+  ///
+  /// In en, this message translates to:
+  /// **'negative slim={fragments} items/{chars} chars'**
+  String qualityReviewsNegativeSlim(int fragments, int chars);
+
+  /// No description provided for @qualityReviewsMemoryScopeLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'memory scope={value}'**
+  String qualityReviewsMemoryScopeLevel(String value);
+
+  /// No description provided for @qualityReviewsContinuityCount.
+  ///
+  /// In en, this message translates to:
+  /// **'continuity {count}'**
+  String qualityReviewsContinuityCount(int count);
+
+  /// No description provided for @qualityReviewsReferenceFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'reference frame'**
+  String get qualityReviewsReferenceFrame;
+
+  /// No description provided for @qualityReviewsWritebackPromotedSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'promoted selected memory'**
+  String get qualityReviewsWritebackPromotedSelected;
+
+  /// No description provided for @qualityReviewsWritebackRejectedMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'bad-case memory writeback'**
+  String get qualityReviewsWritebackRejectedMemory;
+
+  /// No description provided for @qualityReviewsWritebackSummaryMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'review summary writeback'**
+  String get qualityReviewsWritebackSummaryMemory;
+
+  /// No description provided for @qualityReviewsWritebackMissingPromptSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'selected memory missing prompt seed'**
+  String get qualityReviewsWritebackMissingPromptSeed;
+
+  /// No description provided for @qualityReviewsWritebackEmptySelectedMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'selected memory yielded no effective fragment'**
+  String get qualityReviewsWritebackEmptySelectedMemory;
+
+  /// No description provided for @qualityReviewsShotId.
+  ///
+  /// In en, this message translates to:
+  /// **'shot {id}'**
+  String qualityReviewsShotId(int id);
+
+  /// No description provided for @qualityReviewsWriteMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'write={name}'**
+  String qualityReviewsWriteMemory(String name);
+
+  /// No description provided for @qualityReviewsClearMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'clear={name}'**
+  String qualityReviewsClearMemory(String name);
+
+  /// No description provided for @qualityReviewsSlimSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'slim {chars} chars / {rows} items (dup {dup} / visual-only {visual})'**
+  String qualityReviewsSlimSummary(int chars, int rows, int dup, int visual);
+
+  /// No description provided for @qualityReviewsFocusWatchTag.
+  ///
+  /// In en, this message translates to:
+  /// **'watch={value}'**
+  String qualityReviewsFocusWatchTag(String value);
+
+  /// No description provided for @qualityReviewsHitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'hit {value}'**
+  String qualityReviewsHitSummary(String value);
+
+  /// No description provided for @qualityReviewsSuppressedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'suppressed {value}'**
+  String qualityReviewsSuppressedSummary(String value);
+
+  /// No description provided for @qualityReviewsMemoryOptimizationScopeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} {reviews} items · slim {chars} chars / {rows} items (dup {dup} / visual-only {visual})'**
+  String qualityReviewsMemoryOptimizationScopeLine(
+    String scope,
+    int reviews,
+    int chars,
+    int rows,
+    int dup,
+    int visual,
+  );
+
+  /// No description provided for @qualityReviewsBadCaseCount.
+  ///
+  /// In en, this message translates to:
+  /// **'bad cases {count}'**
+  String qualityReviewsBadCaseCount(int count);
+
+  /// No description provided for @qualityReviewsDialogueRiskCount.
+  ///
+  /// In en, this message translates to:
+  /// **'emotion/dialogue {count}'**
+  String qualityReviewsDialogueRiskCount(int count);
+
+  /// No description provided for @qualityReviewsVisualRiskCount.
+  ///
+  /// In en, this message translates to:
+  /// **'realism {count}'**
+  String qualityReviewsVisualRiskCount(int count);
+
+  /// No description provided for @qualityReviewsNextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'next step {value}'**
+  String qualityReviewsNextStep(String value);
 }
 
 class _AppLocalizationsDelegate

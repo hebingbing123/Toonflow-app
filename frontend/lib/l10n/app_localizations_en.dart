@@ -3677,4 +3677,181 @@ class AppLocalizationsEn extends AppLocalizations {
   String qualityReviewsChecklistScope(String scope) {
     return 'Scope: memory takes effect only in $scope; no reuse across users, projects, or shows.';
   }
+
+  @override
+  String qualityReviewsAutoSampleSummary(
+    int count,
+    String prompt,
+    String memory,
+    String visual,
+    String delivery,
+    String hitRate,
+  ) {
+    return 'auto samples $count · avg prompt=$prompt chars · memory=$memory (visual=$visual, delivery=$delivery) · delivery-priority hit $hitRate%';
+  }
+
+  @override
+  String qualityReviewsAutoDiagnosticsCount(int count) {
+    return 'auto diagnostics $count';
+  }
+
+  @override
+  String qualityReviewsAveragePrompt(String prompt) {
+    return 'avg prompt=$prompt chars';
+  }
+
+  @override
+  String qualityReviewsDeliveryPriorityRate(String rate) {
+    return 'delivery-priority $rate%';
+  }
+
+  @override
+  String get qualityReviewsTimesUnit => ' times';
+
+  @override
+  String qualityReviewsHitMemoryBuckets(String value) {
+    return 'hit memory $value';
+  }
+
+  @override
+  String qualityReviewsSuppressedBuckets(String value) {
+    return 'suppressed buckets $value';
+  }
+
+  @override
+  String qualityReviewsDirectorYieldCount(int hit, int total) {
+    return 'director yield $hit/$total';
+  }
+
+  @override
+  String qualityReviewsContinuityConstraintCount(int hit, int total) {
+    return 'continuity constraints $hit/$total';
+  }
+
+  @override
+  String qualityReviewsReferenceFrameCount(int hit, int total) {
+    return 'reference frame $hit/$total';
+  }
+
+  @override
+  String qualityReviewsHitBucketsInline(String value) {
+    return 'hit=$value';
+  }
+
+  @override
+  String qualityReviewsSuppressedBucketsInline(String value) {
+    return 'suppressed=$value';
+  }
+
+  @override
+  String get qualityReviewsDirectorYield => 'director yield';
+
+  @override
+  String qualityReviewsSavedChars(int chars) {
+    return 'saved $chars chars';
+  }
+
+  @override
+  String qualityReviewsNegativeSlim(int fragments, int chars) {
+    return 'negative slim=$fragments items/$chars chars';
+  }
+
+  @override
+  String qualityReviewsMemoryScopeLevel(String value) {
+    return 'memory scope=$value';
+  }
+
+  @override
+  String qualityReviewsContinuityCount(int count) {
+    return 'continuity $count';
+  }
+
+  @override
+  String get qualityReviewsReferenceFrame => 'reference frame';
+
+  @override
+  String get qualityReviewsWritebackPromotedSelected =>
+      'promoted selected memory';
+
+  @override
+  String get qualityReviewsWritebackRejectedMemory =>
+      'bad-case memory writeback';
+
+  @override
+  String get qualityReviewsWritebackSummaryMemory => 'review summary writeback';
+
+  @override
+  String get qualityReviewsWritebackMissingPromptSeed =>
+      'selected memory missing prompt seed';
+
+  @override
+  String get qualityReviewsWritebackEmptySelectedMemory =>
+      'selected memory yielded no effective fragment';
+
+  @override
+  String qualityReviewsShotId(int id) {
+    return 'shot $id';
+  }
+
+  @override
+  String qualityReviewsWriteMemory(String name) {
+    return 'write=$name';
+  }
+
+  @override
+  String qualityReviewsClearMemory(String name) {
+    return 'clear=$name';
+  }
+
+  @override
+  String qualityReviewsSlimSummary(int chars, int rows, int dup, int visual) {
+    return 'slim $chars chars / $rows items (dup $dup / visual-only $visual)';
+  }
+
+  @override
+  String qualityReviewsFocusWatchTag(String value) {
+    return 'watch=$value';
+  }
+
+  @override
+  String qualityReviewsHitSummary(String value) {
+    return 'hit $value';
+  }
+
+  @override
+  String qualityReviewsSuppressedSummary(String value) {
+    return 'suppressed $value';
+  }
+
+  @override
+  String qualityReviewsMemoryOptimizationScopeLine(
+    String scope,
+    int reviews,
+    int chars,
+    int rows,
+    int dup,
+    int visual,
+  ) {
+    return '$scope $reviews items · slim $chars chars / $rows items (dup $dup / visual-only $visual)';
+  }
+
+  @override
+  String qualityReviewsBadCaseCount(int count) {
+    return 'bad cases $count';
+  }
+
+  @override
+  String qualityReviewsDialogueRiskCount(int count) {
+    return 'emotion/dialogue $count';
+  }
+
+  @override
+  String qualityReviewsVisualRiskCount(int count) {
+    return 'realism $count';
+  }
+
+  @override
+  String qualityReviewsNextStep(String value) {
+    return 'next step $value';
+  }
 }

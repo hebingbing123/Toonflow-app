@@ -2515,5 +2515,280 @@
         "type": "String"
       }
     }
+  },
+  "qualityReviewsAutoSampleSummary": "auto samples {count} · avg prompt={prompt} chars · memory={memory} (visual={visual}, delivery={delivery}) · delivery-priority hit {hitRate}%",
+  "@qualityReviewsAutoSampleSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "visual": {
+        "type": "String"
+      },
+      "delivery": {
+        "type": "String"
+      },
+      "hitRate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsAutoDiagnosticsCount": "auto diagnostics {count}",
+  "@qualityReviewsAutoDiagnosticsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsAveragePrompt": "avg prompt={prompt} chars",
+  "@qualityReviewsAveragePrompt": {
+    "placeholders": {
+      "prompt": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDeliveryPriorityRate": "delivery-priority {rate}%",
+  "@qualityReviewsDeliveryPriorityRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsTimesUnit": " times",
+  "qualityReviewsHitMemoryBuckets": "hit memory {value}",
+  "@qualityReviewsHitMemoryBuckets": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSuppressedBuckets": "suppressed buckets {value}",
+  "@qualityReviewsSuppressedBuckets": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDirectorYieldCount": "director yield {hit}/{total}",
+  "@qualityReviewsDirectorYieldCount": {
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsContinuityConstraintCount": "continuity constraints {hit}/{total}",
+  "@qualityReviewsContinuityConstraintCount": {
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsReferenceFrameCount": "reference frame {hit}/{total}",
+  "@qualityReviewsReferenceFrameCount": {
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsHitBucketsInline": "hit={value}",
+  "@qualityReviewsHitBucketsInline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSuppressedBucketsInline": "suppressed={value}",
+  "@qualityReviewsSuppressedBucketsInline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDirectorYield": "director yield",
+  "qualityReviewsSavedChars": "saved {chars} chars",
+  "@qualityReviewsSavedChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsNegativeSlim": "negative slim={fragments} items/{chars} chars",
+  "@qualityReviewsNegativeSlim": {
+    "placeholders": {
+      "fragments": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsMemoryScopeLevel": "memory scope={value}",
+  "@qualityReviewsMemoryScopeLevel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsContinuityCount": "continuity {count}",
+  "@qualityReviewsContinuityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsReferenceFrame": "reference frame",
+  "qualityReviewsWritebackPromotedSelected": "promoted selected memory",
+  "qualityReviewsWritebackRejectedMemory": "bad-case memory writeback",
+  "qualityReviewsWritebackSummaryMemory": "review summary writeback",
+  "qualityReviewsWritebackMissingPromptSeed": "selected memory missing prompt seed",
+  "qualityReviewsWritebackEmptySelectedMemory": "selected memory yielded no effective fragment",
+  "qualityReviewsShotId": "shot {id}",
+  "@qualityReviewsShotId": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsWriteMemory": "write={name}",
+  "@qualityReviewsWriteMemory": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsClearMemory": "clear={name}",
+  "@qualityReviewsClearMemory": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSlimSummary": "slim {chars} chars / {rows} items (dup {dup} / visual-only {visual})",
+  "@qualityReviewsSlimSummary": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "dup": {
+        "type": "int"
+      },
+      "visual": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsFocusWatchTag": "watch={value}",
+  "@qualityReviewsFocusWatchTag": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsHitSummary": "hit {value}",
+  "@qualityReviewsHitSummary": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSuppressedSummary": "suppressed {value}",
+  "@qualityReviewsSuppressedSummary": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsMemoryOptimizationScopeLine": "{scope} {reviews} items · slim {chars} chars / {rows} items (dup {dup} / visual-only {visual})",
+  "@qualityReviewsMemoryOptimizationScopeLine": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      },
+      "reviews": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "dup": {
+        "type": "int"
+      },
+      "visual": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsBadCaseCount": "bad cases {count}",
+  "@qualityReviewsBadCaseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsDialogueRiskCount": "emotion/dialogue {count}",
+  "@qualityReviewsDialogueRiskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsVisualRiskCount": "realism {count}",
+  "@qualityReviewsVisualRiskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsNextStep": "next step {value}",
+  "@qualityReviewsNextStep": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }
