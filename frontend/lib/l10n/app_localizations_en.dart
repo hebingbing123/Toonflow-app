@@ -3192,4 +3192,202 @@ class AppLocalizationsEn extends AppLocalizations {
   String qualityReviewsStatusCreatedWithScopedWriteback(String id) {
     return 'Created review $id; this row will write back to project/script scoped memory';
   }
+
+  @override
+  String get qualityReviewsWorkbenchTitle => 'Quality workbench';
+
+  @override
+  String get qualityReviewsWorkbenchIntro =>
+      'Use one entry for review filtering, bad-case lookup, stats loading, detail queries, and manual creation.';
+
+  @override
+  String get qualityReviewsOnlyBadCases => 'Only bad cases';
+
+  @override
+  String get qualityReviewsOnlyDeliveryPriorityHit =>
+      'Only delivery/tone priority hits';
+
+  @override
+  String get qualityReviewsOnlyAutoSamples => 'Only auto samples';
+
+  @override
+  String get qualityReviewsFilterAutoSamples => 'auto samples';
+
+  @override
+  String qualityReviewsFilterQueryLine(String value) {
+    return 'Filter query: $value';
+  }
+
+  @override
+  String get qualityReviewsCopyFilterQuery => 'Copy filter query';
+
+  @override
+  String get qualityReviewsCopiedFilterQuery => 'Copied filter query.';
+
+  @override
+  String get qualityReviewsCopyApiUrl => 'Copy full API URL';
+
+  @override
+  String get qualityReviewsCopiedApiUrl => 'Copied API URL.';
+
+  @override
+  String get qualityReviewsFilterAndReadSection => 'Filter and load';
+
+  @override
+  String get qualityReviewsFilterProjectId => 'Filter projectId';
+
+  @override
+  String get qualityReviewsFilterScriptId => 'Filter scriptId';
+
+  @override
+  String get qualityReviewsFilterTargetType => 'Filter targetType';
+
+  @override
+  String get qualityReviewsFilterTargetId => 'Filter targetId';
+
+  @override
+  String get qualityReviewsFilterJobId => 'Filter jobId';
+
+  @override
+  String get qualityReviewsFilterStageLabel => 'Stage filter';
+
+  @override
+  String get qualityReviewsFilterGradeLabel => 'Grade filter';
+
+  @override
+  String get qualityReviewsAll => 'All';
+
+  @override
+  String get qualityReviewsSummarizing => 'Summarizing...';
+
+  @override
+  String get qualityReviewsLoading => 'Loading...';
+
+  @override
+  String get qualityReviewsLoadStats => 'Load quality stats';
+
+  @override
+  String get qualityReviewsLoadScopeLeaderboard => 'Load scope leaderboard';
+
+  @override
+  String get qualityReviewsLoadTokenEfficiency => 'Load token efficiency';
+
+  @override
+  String get qualityReviewsLoadTokenSavingSamples =>
+      'Load token-saving samples';
+
+  @override
+  String get qualityReviewsLoadStagePassRate => 'Load stage pass rate';
+
+  @override
+  String get qualityReviewsLoadBadCaseDistribution =>
+      'Load bad-case distribution';
+
+  @override
+  String get qualityReviewsDetailsQuerySection => 'Details query';
+
+  @override
+  String get qualityReviewsReviewId => 'Review ID';
+
+  @override
+  String get qualityReviewsCreateReviewSection => 'Create review';
+
+  @override
+  String get qualityReviewsCreateProjectIdOptional => 'projectId (optional)';
+
+  @override
+  String get qualityReviewsCreateProjectIdHelper =>
+      'When provided, low-score/bad-case rows can auto-write project-scoped memory.';
+
+  @override
+  String get qualityReviewsCreateScriptIdOptional => 'scriptId (optional)';
+
+  @override
+  String get qualityReviewsCreateScriptIdHelper =>
+      'Fill with projectId together to write into script-scoped memory.';
+
+  @override
+  String get qualityReviewsCreating => 'Creating...';
+
+  @override
+  String get qualityReviewsCreateReview => 'Create review';
+
+  @override
+  String qualityReviewsStatusLine(String value) {
+    return 'Status: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryTokenAggregate(String value) {
+    return 'Token aggregate: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryMemoryAction(String value) {
+    return 'Memory action: $value';
+  }
+
+  @override
+  String get qualityReviewsCopyExecutionChecklist => 'Copy execution checklist';
+
+  @override
+  String get qualityReviewsCopiedExecutionChecklist =>
+      'Copied execution checklist.';
+
+  @override
+  String qualityReviewsSummaryTokenSavingSamples(String value) {
+    return 'Token-saving samples: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryBadCaseDistribution(String value) {
+    return 'Bad-case distribution: $value';
+  }
+
+  @override
+  String get qualityReviewsGradeDistribution => 'Grade distribution';
+
+  @override
+  String qualityReviewsTotalAndPassRate(int total, String rate) {
+    return 'Total $total · A+B pass rate $rate%';
+  }
+
+  @override
+  String qualityReviewsPromptDiagnostics(String value) {
+    return 'Prompt diagnostics: $value';
+  }
+
+  @override
+  String qualityReviewsScopePressure(String value) {
+    return 'Scope pressure: $value';
+  }
+
+  @override
+  String qualityReviewsMemorySlimming(String value) {
+    return 'Memory slimming: $value';
+  }
+
+  @override
+  String qualityReviewsPriorityFix(String value) {
+    return 'Priority fixes: $value';
+  }
+
+  @override
+  String qualityReviewsRepairSuggestions(String value) {
+    return 'Repair suggestions: $value';
+  }
+
+  @override
+  String qualityReviewsFilterCountLine(String filters, int count) {
+    return '$filters $count reviews';
+  }
+
+  @override
+  String qualityReviewsSuggestions(String value) {
+    return 'Suggestions: $value';
+  }
+
+  @override
+  String get qualityReviewsEmptyForCurrentFilters =>
+      'No reviews under current filters';
 }

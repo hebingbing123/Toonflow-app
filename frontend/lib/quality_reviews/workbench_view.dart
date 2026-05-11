@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'support.dart';
 
@@ -156,6 +157,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final tokenEfficiencySummary = summarizeTokenEfficiencyFromQualityReviews(
       model.reviews,
@@ -173,22 +175,25 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
       model.reviews,
     );
     final activeFilters = [
-      if (model.filterBadCasesOnly) '坏例',
-      if (model.filterDeliveryPriorityOnly) '命中表演/语气优先',
-      if (model.filterAutoSourceOnly) 'auto 样本',
+      if (model.filterBadCasesOnly) l10n.qualityReviewsFilterBadCase,
+      if (model.filterDeliveryPriorityOnly)
+        l10n.qualityReviewsFilterDeliveryPriorityHit,
+      if (model.filterAutoSourceOnly) l10n.qualityReviewsFilterAutoSamples,
       if (model.stageFilterCtrl.text.trim().isNotEmpty &&
           model.stageFilterCtrl.text.trim() != 'all')
-        '阶段 ${_qualityStageLabel(model.stageFilterCtrl.text.trim())}',
+        l10n.qualityReviewsFilterStage(
+          _qualityStageLabel(model.stageFilterCtrl.text.trim()),
+        ),
       if (model.gradeFilterCtrl.text.trim().isNotEmpty &&
           model.gradeFilterCtrl.text.trim() != 'all')
-        '等级 ${model.gradeFilterCtrl.text.trim()}',
+        l10n.qualityReviewsFilterGrade(model.gradeFilterCtrl.text.trim()),
     ];
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 840.0)
         : 840.0;
     return AlertDialog(
-      title: const Text('质量工作台'),
+      title: Text(l10n.qualityReviewsWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -198,7 +203,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
             children: [
               Text(
                 model.reviews.isEmpty
-                    ? '用同一入口完成评审筛选、坏例查看、统计读取、详情查询和手动创建。'
+                    ? l10n.qualityReviewsWorkbenchIntro
                     : summarizeQualityReviews(model.reviews),
                 style: Theme.of(
                   context,
@@ -213,9 +218,11 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     if (model.filterBadCasesOnly)
-                      const Chip(label: Text('只看坏例')),
+                      Chip(label: Text(l10n.qualityReviewsOnlyBadCases)),
                     if (model.filterDeliveryPriorityOnly)
-                      const Chip(label: Text('只看命中表演/语气优先')),
+                      Chip(
+                        label: Text(l10n.qualityReviewsOnlyDeliveryPriorityHit),
+                      ),
                     if (model.filterAutoSourceOnly)
                       const Chip(label: Text('source=auto')),
                   ],
@@ -227,31 +234,37 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     children: [
                       Expanded(
                         child: SelectableText(
-                          '筛选查询：${model.activeFilterQuerySummary}',
+                          l10n.qualityReviewsFilterQueryLine(
+                            model.activeFilterQuerySummary!,
+                          ),
                         ),
                       ),
                       IconButton(
-                        tooltip: '复制筛选查询',
+                        tooltip: l10n.qualityReviewsCopyFilterQuery,
                         onPressed: () async {
                           final query = model.activeFilterQuerySummary;
                           if (query == null || query.isEmpty) return;
                           await Clipboard.setData(ClipboardData(text: query));
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('已复制筛选查询')),
+                            SnackBar(
+                              content: Text(l10n.qualityReviewsCopiedFilterQuery),
+                            ),
                           );
                         },
                         icon: const Icon(Icons.copy_rounded),
                       ),
                       IconButton(
-                        tooltip: '复制完整 API URL',
+                        tooltip: l10n.qualityReviewsCopyApiUrl,
                         onPressed: () async {
                           final url = model.activeFilterRequestUrl;
                           if (url == null || url.isEmpty) return;
                           await Clipboard.setData(ClipboardData(text: url));
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('已复制 API URL')),
+                            SnackBar(
+                              content: Text(l10n.qualityReviewsCopiedApiUrl),
+                            ),
                           );
                         },
                         icon: const Icon(Icons.link_rounded),
@@ -261,7 +274,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ],
               ],
               const SizedBox(height: 12),
-              Text('筛选与读取', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.qualityReviewsFilterAndReadSection,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -269,8 +285,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.projectIdFilterCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: '筛选 projectId',
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsFilterProjectId,
                       ),
                     ),
                   ),
@@ -279,8 +295,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.scriptIdFilterCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: '筛选 scriptId',
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsFilterScriptId,
                       ),
                     ),
                   ),
@@ -289,17 +305,23 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               TextField(
                 controller: model.targetTypeFilterCtrl,
-                decoration: const InputDecoration(labelText: '筛选 targetType'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFilterTargetType,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.targetIdFilterCtrl,
-                decoration: const InputDecoration(labelText: '筛选 targetId'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFilterTargetId,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.jobIdFilterCtrl,
-                decoration: const InputDecoration(labelText: '筛选 jobId'),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFilterJobId,
+                ),
               ),
               const SizedBox(height: 8),
               Row(
@@ -309,7 +331,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       initialValue: model.stageFilterCtrl.text.trim().isEmpty
                           ? 'all'
                           : model.stageFilterCtrl.text.trim(),
-                      decoration: const InputDecoration(labelText: '阶段筛选'),
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsFilterStageLabel,
+                      ),
                       items: _qualityStageOptions
                           .map(
                             (value) => DropdownMenuItem<String>(
@@ -331,12 +355,18 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       initialValue: model.gradeFilterCtrl.text.trim().isEmpty
                           ? 'all'
                           : model.gradeFilterCtrl.text.trim(),
-                      decoration: const InputDecoration(labelText: '等级筛选'),
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsFilterGradeLabel,
+                      ),
                       items: _qualityGradeOptions
                           .map(
                             (value) => DropdownMenuItem<String>(
                               value: value,
-                              child: Text(value == 'all' ? '全部' : value),
+                              child: Text(
+                                value == 'all'
+                                    ? l10n.qualityReviewsAll
+                                    : value,
+                              ),
                             ),
                           )
                           .toList(growable: false),
@@ -358,13 +388,21 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.loadingReviews || model.creatingReview
                         ? null
                         : callbacks.onLoadReviews,
-                    child: Text(model.loadingReviews ? '加载中…' : '加载评审列表'),
+                    child: Text(
+                      model.loadingReviews
+                          ? l10n.projectsBusyProcessing
+                          : l10n.qualityReviewsLoadReviewList,
+                    ),
                   ),
                   OutlinedButton(
                     onPressed: model.loadingBadCases || model.creatingReview
                         ? null
                         : callbacks.onLoadBadCases,
-                    child: Text(model.loadingBadCases ? '加载中…' : '只看坏例'),
+                    child: Text(
+                      model.loadingBadCases
+                          ? l10n.projectsBusyProcessing
+                          : l10n.qualityReviewsOnlyBadCases,
+                    ),
                   ),
                   OutlinedButton(
                     onPressed:
@@ -373,7 +411,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             model.creatingReview
                         ? null
                         : callbacks.onLoadDeliveryPriorityReviews,
-                    child: const Text('只看命中表演/语气优先'),
+                    child: Text(l10n.qualityReviewsOnlyDeliveryPriorityHit),
                   ),
                   OutlinedButton(
                     onPressed:
@@ -382,20 +420,26 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             model.creatingReview
                         ? null
                         : callbacks.onLoadAutoSourceReviews,
-                    child: const Text('只看 auto 样本'),
+                    child: Text(l10n.qualityReviewsOnlyAutoSamples),
                   ),
                   OutlinedButton(
                     onPressed: model.loadingStats
                         ? null
                         : callbacks.onLoadStats,
-                    child: Text(model.loadingStats ? '统计中…' : '读取质量统计'),
+                    child: Text(
+                      model.loadingStats
+                          ? l10n.qualityReviewsSummarizing
+                          : l10n.qualityReviewsLoadStats,
+                    ),
                   ),
                   OutlinedButton(
                     onPressed: model.loadingScopeInsights
                         ? null
                         : callbacks.onLoadScopeInsights,
                     child: Text(
-                      model.loadingScopeInsights ? '汇总中…' : '读取Scope榜单',
+                      model.loadingScopeInsights
+                          ? l10n.qualityReviewsSummarizing
+                          : l10n.qualityReviewsLoadScopeLeaderboard,
                     ),
                   ),
                   OutlinedButton(
@@ -403,7 +447,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         ? null
                         : callbacks.onLoadTokenEfficiency,
                     child: Text(
-                      model.loadingTokenEfficiency ? '读取中…' : '读取Token效率',
+                      model.loadingTokenEfficiency
+                          ? l10n.qualityReviewsLoading
+                          : l10n.qualityReviewsLoadTokenEfficiency,
                     ),
                   ),
                   OutlinedButton(
@@ -412,8 +458,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         : callbacks.onLoadTokenEfficiencySamples,
                     child: Text(
                       model.loadingTokenEfficiencySamples
-                          ? '读取中…'
-                          : '读取省Token样本',
+                          ? l10n.qualityReviewsLoading
+                          : l10n.qualityReviewsLoadTokenSavingSamples,
                     ),
                   ),
                   OutlinedButton(
@@ -421,33 +467,49 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         ? null
                         : callbacks.onLoadStagePassRate,
                     child: Text(
-                      model.loadingStagePassRate ? '读取中…' : '读取阶段通过率',
+                      model.loadingStagePassRate
+                          ? l10n.qualityReviewsLoading
+                          : l10n.qualityReviewsLoadStagePassRate,
                     ),
                   ),
                   OutlinedButton(
                     onPressed: model.loadingBadCaseStats
                         ? null
                         : callbacks.onLoadBadCaseStats,
-                    child: Text(model.loadingBadCaseStats ? '读取中…' : '读取坏例分布'),
+                    child: Text(
+                      model.loadingBadCaseStats
+                          ? l10n.qualityReviewsLoading
+                          : l10n.qualityReviewsLoadBadCaseDistribution,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              Text('详情查询', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.qualityReviewsDetailsQuerySection,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.reviewIdCtrl,
-                decoration: const InputDecoration(labelText: '评审 ID'),
+                decoration: InputDecoration(labelText: l10n.qualityReviewsReviewId),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
                 onPressed: model.loadingReviewById || model.creatingReview
                     ? null
                     : callbacks.onLoadReviewById,
-                child: Text(model.loadingReviewById ? '读取中…' : '查看评审详情'),
+                child: Text(
+                  model.loadingReviewById
+                      ? l10n.qualityReviewsLoading
+                      : l10n.qualityReviewsViewReviewDetails,
+                ),
               ),
               const SizedBox(height: 12),
-              Text('创建评审', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.qualityReviewsCreateReviewSection,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -455,9 +517,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.createProjectIdCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'projectId（可空）',
-                        helperText: '填写后低分/坏例可自动写入项目隔离记忆',
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsCreateProjectIdOptional,
+                        helperText: l10n.qualityReviewsCreateProjectIdHelper,
                       ),
                     ),
                   ),
@@ -466,9 +528,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.createScriptIdCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'scriptId（可空）',
-                        helperText: '与 projectId 一起填写，才会落到脚本级记忆',
+                      decoration: InputDecoration(
+                        labelText: l10n.qualityReviewsCreateScriptIdOptional,
+                        helperText: l10n.qualityReviewsCreateScriptIdHelper,
                       ),
                     ),
                   ),
@@ -546,31 +608,51 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 onPressed: model.creatingReview
                     ? null
                     : callbacks.onCreateReview,
-                child: Text(model.creatingReview ? '创建中…' : '创建评审'),
+                child: Text(
+                  model.creatingReview
+                      ? l10n.qualityReviewsCreating
+                      : l10n.qualityReviewsCreateReview,
+                ),
               ),
               if (model.statusLine != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('状态：${model.statusLine}'),
+                SelectableText(l10n.qualityReviewsStatusLine(model.statusLine!)),
               ],
               if (model.reviewDetails != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('评审详情：${model.reviewDetails}'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryReviewDetails(model.reviewDetails!),
+                ),
               ],
               if (model.statsSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('质量统计：${model.statsSummary}'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStats(model.statsSummary!),
+                ),
               ],
               if (model.scopeInsightsSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('Scope榜单：${model.scopeInsightsSummary}'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryScopeInsights(
+                    model.scopeInsightsSummary!,
+                  ),
+                ),
               ],
               if (model.tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('Token聚合：${model.tokenEfficiencySummary}'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryTokenAggregate(
+                    model.tokenEfficiencySummary!,
+                  ),
+                ),
               ],
               if (model.tokenEfficiencyActionPlan != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('记忆动作：${model.tokenEfficiencyActionPlan}'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryMemoryAction(
+                    model.tokenEfficiencyActionPlan!,
+                  ),
+                ),
               ],
               if (model.tokenEfficiencyExecutionChecklist != null) ...[
                 const SizedBox(height: 12),
@@ -583,7 +665,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: '复制执行清单',
+                      tooltip: l10n.qualityReviewsCopyExecutionChecklist,
                       onPressed: () async {
                         final checklist =
                             model.tokenEfficiencyExecutionChecklist;
@@ -591,7 +673,11 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         await Clipboard.setData(ClipboardData(text: checklist));
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('已复制执行清单')),
+                          SnackBar(
+                            content: Text(
+                              l10n.qualityReviewsCopiedExecutionChecklist,
+                            ),
+                          ),
                         );
                       },
                       icon: const Icon(Icons.copy_all_rounded),
@@ -602,20 +688,33 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.tokenEfficiencySamplesSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText(
-                  '省Token样本：${model.tokenEfficiencySamplesSummary}',
+                  l10n.qualityReviewsSummaryTokenSavingSamples(
+                    model.tokenEfficiencySamplesSummary!,
+                  ),
                 ),
               ],
               if (model.stagePassRateSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('阶段通过率：${model.stagePassRateSummary}'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStagePassRate(
+                    model.stagePassRateSummary!,
+                  ),
+                ),
               ],
               if (model.badCaseStatsSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('坏例分布：${model.badCaseStatsSummary}'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryBadCaseDistribution(
+                    model.badCaseStatsSummary!,
+                  ),
+                ),
               ],
               if (model.stageGradeRows.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Text('等级分布', style: Theme.of(context).textTheme.labelLarge),
+                Text(
+                  l10n.qualityReviewsGradeDistribution,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
                 const SizedBox(height: 6),
                 ...model.stageGradeRows.map(
                   (row) => ListTile(
@@ -625,41 +724,57 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       '${_qualityStageLabel(row.stage)} · A ${row.gradeACount} / B ${row.gradeBCount} / C ${row.gradeCCount} / D ${row.gradeDCount}',
                     ),
                     subtitle: Text(
-                      '总计 ${row.totalCount} · A+B 通过率 ${row.passRatePercent.toStringAsFixed(1)}%',
+                      l10n.qualityReviewsTotalAndPassRate(
+                        row.totalCount,
+                        row.passRatePercent.toStringAsFixed(1),
+                      ),
                     ),
                   ),
                 ),
               ],
               if (promptDiagnosticsSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('Prompt诊断：$promptDiagnosticsSummary'),
+                SelectableText(
+                  l10n.qualityReviewsPromptDiagnostics(promptDiagnosticsSummary),
+                ),
               ],
               if (memoryScopePressureSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('Scope压力：$memoryScopePressureSummary'),
+                SelectableText(
+                  l10n.qualityReviewsScopePressure(memoryScopePressureSummary),
+                ),
               ],
               if (memoryOptimizationSavingsSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('记忆瘦身：$memoryOptimizationSavingsSummary'),
+                SelectableText(
+                  l10n.qualityReviewsMemorySlimming(memoryOptimizationSavingsSummary),
+                ),
               ],
               if (scopeRepairQueueSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('优先修复：$scopeRepairQueueSummary'),
+                SelectableText(
+                  l10n.qualityReviewsPriorityFix(scopeRepairQueueSummary),
+                ),
               ],
               if (repairPlanSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('修复建议：$repairPlanSummary'),
+                SelectableText(l10n.qualityReviewsRepairSuggestions(repairPlanSummary)),
               ],
               if (tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('Token效率：$tokenEfficiencySummary'),
+                SelectableText(
+                  l10n.qualityReviewsSummaryTokenEfficiency(tokenEfficiencySummary),
+                ),
               ],
               if (model.reviews.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
                   activeFilters.isEmpty
-                      ? '评审 ${model.reviews.length} 条'
-                      : '${activeFilters.join(' + ')} ${model.reviews.length} 条',
+                      ? l10n.qualityReviewsCount(model.reviews.length)
+                      : l10n.qualityReviewsFilterCountLine(
+                          activeFilters.join(' + '),
+                          model.reviews.length,
+                        ),
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 const SizedBox(height: 8),
@@ -683,9 +798,11 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         Text(
                           [
                             if ((review.stage ?? '').trim().isNotEmpty)
-                              '阶段 ${_qualityStageLabel(review.stage!.trim())}',
+                              l10n.qualityReviewsFilterStage(
+                                _qualityStageLabel(review.stage!.trim()),
+                              ),
                             if ((review.grade ?? '').trim().isNotEmpty)
-                              '等级 ${review.grade}',
+                              l10n.qualityReviewsFilterGrade(review.grade!),
                           ].join(' · '),
                         ),
                         Text(formatQualityReviewCoreDetails(review)),
@@ -705,7 +822,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           ),
                         if (repairSuggestions.isNotEmpty)
                           Text(
-                            '建议：${repairSuggestions.join(' / ')}',
+                            l10n.qualityReviewsSuggestions(
+                              repairSuggestions.join(' / '),
+                            ),
                             style: Theme.of(
                               context,
                             ).textTheme.bodySmall?.copyWith(color: outline),
@@ -760,7 +879,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ] else if (activeFilters.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
-                  '当前筛选条件下无评审记录',
+                  l10n.qualityReviewsEmptyForCurrentFilters,
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(color: outline),
@@ -771,7 +890,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+        TextButton(
+          onPressed: callbacks.onClose,
+          child: Text(l10n.helpHubDialogClose),
+        ),
       ],
     );
   }

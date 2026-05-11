@@ -5376,6 +5376,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Created review {id}; this row will write back to project/script scoped memory'**
   String qualityReviewsStatusCreatedWithScopedWriteback(String id);
+
+  /// No description provided for @qualityReviewsWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality workbench'**
+  String get qualityReviewsWorkbenchTitle;
+
+  /// No description provided for @qualityReviewsWorkbenchIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Use one entry for review filtering, bad-case lookup, stats loading, detail queries, and manual creation.'**
+  String get qualityReviewsWorkbenchIntro;
+
+  /// No description provided for @qualityReviewsOnlyBadCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Only bad cases'**
+  String get qualityReviewsOnlyBadCases;
+
+  /// No description provided for @qualityReviewsOnlyDeliveryPriorityHit.
+  ///
+  /// In en, this message translates to:
+  /// **'Only delivery/tone priority hits'**
+  String get qualityReviewsOnlyDeliveryPriorityHit;
+
+  /// No description provided for @qualityReviewsOnlyAutoSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Only auto samples'**
+  String get qualityReviewsOnlyAutoSamples;
+
+  /// No description provided for @qualityReviewsFilterAutoSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'auto samples'**
+  String get qualityReviewsFilterAutoSamples;
+
+  /// No description provided for @qualityReviewsFilterQueryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter query: {value}'**
+  String qualityReviewsFilterQueryLine(String value);
+
+  /// No description provided for @qualityReviewsCopyFilterQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy filter query'**
+  String get qualityReviewsCopyFilterQuery;
+
+  /// No description provided for @qualityReviewsCopiedFilterQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied filter query.'**
+  String get qualityReviewsCopiedFilterQuery;
+
+  /// No description provided for @qualityReviewsCopyApiUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy full API URL'**
+  String get qualityReviewsCopyApiUrl;
+
+  /// No description provided for @qualityReviewsCopiedApiUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied API URL.'**
+  String get qualityReviewsCopiedApiUrl;
+
+  /// No description provided for @qualityReviewsFilterAndReadSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and load'**
+  String get qualityReviewsFilterAndReadSection;
+
+  /// No description provided for @qualityReviewsFilterProjectId.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter projectId'**
+  String get qualityReviewsFilterProjectId;
+
+  /// No description provided for @qualityReviewsFilterScriptId.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter scriptId'**
+  String get qualityReviewsFilterScriptId;
+
+  /// No description provided for @qualityReviewsFilterTargetType.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter targetType'**
+  String get qualityReviewsFilterTargetType;
+
+  /// No description provided for @qualityReviewsFilterTargetId.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter targetId'**
+  String get qualityReviewsFilterTargetId;
+
+  /// No description provided for @qualityReviewsFilterJobId.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter jobId'**
+  String get qualityReviewsFilterJobId;
+
+  /// No description provided for @qualityReviewsFilterStageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage filter'**
+  String get qualityReviewsFilterStageLabel;
+
+  /// No description provided for @qualityReviewsFilterGradeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade filter'**
+  String get qualityReviewsFilterGradeLabel;
+
+  /// No description provided for @qualityReviewsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get qualityReviewsAll;
+
+  /// No description provided for @qualityReviewsSummarizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarizing...'**
+  String get qualityReviewsSummarizing;
+
+  /// No description provided for @qualityReviewsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get qualityReviewsLoading;
+
+  /// No description provided for @qualityReviewsLoadStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Load quality stats'**
+  String get qualityReviewsLoadStats;
+
+  /// No description provided for @qualityReviewsLoadScopeLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Load scope leaderboard'**
+  String get qualityReviewsLoadScopeLeaderboard;
+
+  /// No description provided for @qualityReviewsLoadTokenEfficiency.
+  ///
+  /// In en, this message translates to:
+  /// **'Load token efficiency'**
+  String get qualityReviewsLoadTokenEfficiency;
+
+  /// No description provided for @qualityReviewsLoadTokenSavingSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Load token-saving samples'**
+  String get qualityReviewsLoadTokenSavingSamples;
+
+  /// No description provided for @qualityReviewsLoadStagePassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Load stage pass rate'**
+  String get qualityReviewsLoadStagePassRate;
+
+  /// No description provided for @qualityReviewsLoadBadCaseDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Load bad-case distribution'**
+  String get qualityReviewsLoadBadCaseDistribution;
+
+  /// No description provided for @qualityReviewsDetailsQuerySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Details query'**
+  String get qualityReviewsDetailsQuerySection;
+
+  /// No description provided for @qualityReviewsReviewId.
+  ///
+  /// In en, this message translates to:
+  /// **'Review ID'**
+  String get qualityReviewsReviewId;
+
+  /// No description provided for @qualityReviewsCreateReviewSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Create review'**
+  String get qualityReviewsCreateReviewSection;
+
+  /// No description provided for @qualityReviewsCreateProjectIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'projectId (optional)'**
+  String get qualityReviewsCreateProjectIdOptional;
+
+  /// No description provided for @qualityReviewsCreateProjectIdHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'When provided, low-score/bad-case rows can auto-write project-scoped memory.'**
+  String get qualityReviewsCreateProjectIdHelper;
+
+  /// No description provided for @qualityReviewsCreateScriptIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptId (optional)'**
+  String get qualityReviewsCreateScriptIdOptional;
+
+  /// No description provided for @qualityReviewsCreateScriptIdHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill with projectId together to write into script-scoped memory.'**
+  String get qualityReviewsCreateScriptIdHelper;
+
+  /// No description provided for @qualityReviewsCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get qualityReviewsCreating;
+
+  /// No description provided for @qualityReviewsCreateReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Create review'**
+  String get qualityReviewsCreateReview;
+
+  /// No description provided for @qualityReviewsStatusLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {value}'**
+  String qualityReviewsStatusLine(String value);
+
+  /// No description provided for @qualityReviewsSummaryTokenAggregate.
+  ///
+  /// In en, this message translates to:
+  /// **'Token aggregate: {value}'**
+  String qualityReviewsSummaryTokenAggregate(String value);
+
+  /// No description provided for @qualityReviewsSummaryMemoryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory action: {value}'**
+  String qualityReviewsSummaryMemoryAction(String value);
+
+  /// No description provided for @qualityReviewsCopyExecutionChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy execution checklist'**
+  String get qualityReviewsCopyExecutionChecklist;
+
+  /// No description provided for @qualityReviewsCopiedExecutionChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied execution checklist.'**
+  String get qualityReviewsCopiedExecutionChecklist;
+
+  /// No description provided for @qualityReviewsSummaryTokenSavingSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Token-saving samples: {value}'**
+  String qualityReviewsSummaryTokenSavingSamples(String value);
+
+  /// No description provided for @qualityReviewsSummaryBadCaseDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad-case distribution: {value}'**
+  String qualityReviewsSummaryBadCaseDistribution(String value);
+
+  /// No description provided for @qualityReviewsGradeDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade distribution'**
+  String get qualityReviewsGradeDistribution;
+
+  /// No description provided for @qualityReviewsTotalAndPassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {total} · A+B pass rate {rate}%'**
+  String qualityReviewsTotalAndPassRate(int total, String rate);
+
+  /// No description provided for @qualityReviewsPromptDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt diagnostics: {value}'**
+  String qualityReviewsPromptDiagnostics(String value);
+
+  /// No description provided for @qualityReviewsScopePressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope pressure: {value}'**
+  String qualityReviewsScopePressure(String value);
+
+  /// No description provided for @qualityReviewsMemorySlimming.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory slimming: {value}'**
+  String qualityReviewsMemorySlimming(String value);
+
+  /// No description provided for @qualityReviewsPriorityFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority fixes: {value}'**
+  String qualityReviewsPriorityFix(String value);
+
+  /// No description provided for @qualityReviewsRepairSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair suggestions: {value}'**
+  String qualityReviewsRepairSuggestions(String value);
+
+  /// No description provided for @qualityReviewsFilterCountLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{filters} {count} reviews'**
+  String qualityReviewsFilterCountLine(String filters, int count);
+
+  /// No description provided for @qualityReviewsSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions: {value}'**
+  String qualityReviewsSuggestions(String value);
+
+  /// No description provided for @qualityReviewsEmptyForCurrentFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews under current filters'**
+  String get qualityReviewsEmptyForCurrentFilters;
 }
 
 class _AppLocalizationsDelegate

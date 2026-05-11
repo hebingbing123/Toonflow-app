@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/quality_reviews/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
+Widget _buildTestApp(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
+    home: Scaffold(body: child),
+  );
+}
+
 
 QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController projectIdFilterCtrl,
@@ -207,10 +217,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: QualityReviewsWorkbenchDialogView(
-            model: buildDialogModel(
+      _buildTestApp(
+        QualityReviewsWorkbenchDialogView(
+          model: buildDialogModel(
               projectIdFilterCtrl: projectIdFilterCtrl,
               scriptIdFilterCtrl: scriptIdFilterCtrl,
               targetTypeFilterCtrl: targetTypeFilterCtrl,
@@ -230,8 +239,7 @@ void main() {
               createCommentsCtrl: createCommentsCtrl,
               createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
             ),
-            callbacks: buildDialogCallbacks(),
-          ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
@@ -256,7 +264,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
-    expect(find.text('评审 1 条'), findsOneWidget);
+    expect(find.text('1 条评审'), findsOneWidget);
     expect(
       find.widgetWithText(ListTile, 'output · manual · score=82'),
       findsOneWidget,
@@ -267,10 +275,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: QualityReviewsWorkbenchDialogView(
-            model: buildDialogModel(
+      _buildTestApp(
+        QualityReviewsWorkbenchDialogView(
+          model: buildDialogModel(
               projectIdFilterCtrl: projectIdFilterCtrl,
               scriptIdFilterCtrl: scriptIdFilterCtrl,
               targetTypeFilterCtrl: targetTypeFilterCtrl,
@@ -299,8 +306,7 @@ void main() {
               loadingReviewById: true,
               creatingReview: true,
             ),
-            callbacks: buildDialogCallbacks(),
-          ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
@@ -333,10 +339,9 @@ void main() {
     QualityReview? selectedReview;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: QualityReviewsWorkbenchDialogView(
-            model: buildDialogModel(
+      _buildTestApp(
+        QualityReviewsWorkbenchDialogView(
+          model: buildDialogModel(
               projectIdFilterCtrl: projectIdFilterCtrl,
               scriptIdFilterCtrl: scriptIdFilterCtrl,
               targetTypeFilterCtrl: targetTypeFilterCtrl,
@@ -357,9 +362,8 @@ void main() {
               createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
               filterBadCasesOnly: true,
             ),
-            callbacks: buildDialogCallbacks(
-              onSelectReview: (review) => selectedReview = review,
-            ),
+          callbacks: buildDialogCallbacks(
+            onSelectReview: (review) => selectedReview = review,
           ),
         ),
       ),
@@ -379,10 +383,9 @@ void main() {
     'quality reviews workbench view shows prompt diagnostics for auto reviews',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QualityReviewsWorkbenchDialogView(
-              model: buildDialogModel(
+        _buildTestApp(
+          QualityReviewsWorkbenchDialogView(
+            model: buildDialogModel(
                 projectIdFilterCtrl: projectIdFilterCtrl,
                 scriptIdFilterCtrl: scriptIdFilterCtrl,
                 targetTypeFilterCtrl: targetTypeFilterCtrl,
@@ -447,8 +450,7 @@ void main() {
                   ),
                 ],
               ),
-              callbacks: buildDialogCallbacks(),
-            ),
+            callbacks: buildDialogCallbacks(),
           ),
         ),
       );

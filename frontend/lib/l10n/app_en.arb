@@ -2131,5 +2131,163 @@
         "type": "String"
       }
     }
-  }
+  },
+  "qualityReviewsWorkbenchTitle": "Quality workbench",
+  "qualityReviewsWorkbenchIntro": "Use one entry for review filtering, bad-case lookup, stats loading, detail queries, and manual creation.",
+  "qualityReviewsOnlyBadCases": "Only bad cases",
+  "qualityReviewsOnlyDeliveryPriorityHit": "Only delivery/tone priority hits",
+  "qualityReviewsOnlyAutoSamples": "Only auto samples",
+  "qualityReviewsFilterAutoSamples": "auto samples",
+  "qualityReviewsFilterQueryLine": "Filter query: {value}",
+  "@qualityReviewsFilterQueryLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsCopyFilterQuery": "Copy filter query",
+  "qualityReviewsCopiedFilterQuery": "Copied filter query.",
+  "qualityReviewsCopyApiUrl": "Copy full API URL",
+  "qualityReviewsCopiedApiUrl": "Copied API URL.",
+  "qualityReviewsFilterAndReadSection": "Filter and load",
+  "qualityReviewsFilterProjectId": "Filter projectId",
+  "qualityReviewsFilterScriptId": "Filter scriptId",
+  "qualityReviewsFilterTargetType": "Filter targetType",
+  "qualityReviewsFilterTargetId": "Filter targetId",
+  "qualityReviewsFilterJobId": "Filter jobId",
+  "qualityReviewsFilterStageLabel": "Stage filter",
+  "qualityReviewsFilterGradeLabel": "Grade filter",
+  "qualityReviewsAll": "All",
+  "qualityReviewsSummarizing": "Summarizing...",
+  "qualityReviewsLoading": "Loading...",
+  "qualityReviewsLoadStats": "Load quality stats",
+  "qualityReviewsLoadScopeLeaderboard": "Load scope leaderboard",
+  "qualityReviewsLoadTokenEfficiency": "Load token efficiency",
+  "qualityReviewsLoadTokenSavingSamples": "Load token-saving samples",
+  "qualityReviewsLoadStagePassRate": "Load stage pass rate",
+  "qualityReviewsLoadBadCaseDistribution": "Load bad-case distribution",
+  "qualityReviewsDetailsQuerySection": "Details query",
+  "qualityReviewsReviewId": "Review ID",
+  "qualityReviewsCreateReviewSection": "Create review",
+  "qualityReviewsCreateProjectIdOptional": "projectId (optional)",
+  "qualityReviewsCreateProjectIdHelper": "When provided, low-score/bad-case rows can auto-write project-scoped memory.",
+  "qualityReviewsCreateScriptIdOptional": "scriptId (optional)",
+  "qualityReviewsCreateScriptIdHelper": "Fill with projectId together to write into script-scoped memory.",
+  "qualityReviewsCreating": "Creating...",
+  "qualityReviewsCreateReview": "Create review",
+  "qualityReviewsStatusLine": "Status: {value}",
+  "@qualityReviewsStatusLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryTokenAggregate": "Token aggregate: {value}",
+  "@qualityReviewsSummaryTokenAggregate": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryMemoryAction": "Memory action: {value}",
+  "@qualityReviewsSummaryMemoryAction": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsCopyExecutionChecklist": "Copy execution checklist",
+  "qualityReviewsCopiedExecutionChecklist": "Copied execution checklist.",
+  "qualityReviewsSummaryTokenSavingSamples": "Token-saving samples: {value}",
+  "@qualityReviewsSummaryTokenSavingSamples": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryBadCaseDistribution": "Bad-case distribution: {value}",
+  "@qualityReviewsSummaryBadCaseDistribution": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsGradeDistribution": "Grade distribution",
+  "qualityReviewsTotalAndPassRate": "Total {total} · A+B pass rate {rate}%",
+  "@qualityReviewsTotalAndPassRate": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPromptDiagnostics": "Prompt diagnostics: {value}",
+  "@qualityReviewsPromptDiagnostics": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsScopePressure": "Scope pressure: {value}",
+  "@qualityReviewsScopePressure": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsMemorySlimming": "Memory slimming: {value}",
+  "@qualityReviewsMemorySlimming": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPriorityFix": "Priority fixes: {value}",
+  "@qualityReviewsPriorityFix": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsRepairSuggestions": "Repair suggestions: {value}",
+  "@qualityReviewsRepairSuggestions": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsFilterCountLine": "{filters} {count} reviews",
+  "@qualityReviewsFilterCountLine": {
+    "placeholders": {
+      "filters": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsSuggestions": "Suggestions: {value}",
+  "@qualityReviewsSuggestions": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsEmptyForCurrentFilters": "No reviews under current filters"
 }

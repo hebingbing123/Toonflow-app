@@ -3068,4 +3068,194 @@ class AppLocalizationsZh extends AppLocalizations {
   String qualityReviewsStatusCreatedWithScopedWriteback(String id) {
     return '已创建评审 $id，本条会回写项目/剧本隔离记忆';
   }
+
+  @override
+  String get qualityReviewsWorkbenchTitle => '质量工作台';
+
+  @override
+  String get qualityReviewsWorkbenchIntro => '用同一入口完成评审筛选、坏例查看、统计读取、详情查询和手动创建。';
+
+  @override
+  String get qualityReviewsOnlyBadCases => '只看坏例';
+
+  @override
+  String get qualityReviewsOnlyDeliveryPriorityHit => '只看命中表演/语气优先';
+
+  @override
+  String get qualityReviewsOnlyAutoSamples => '只看 auto 样本';
+
+  @override
+  String get qualityReviewsFilterAutoSamples => 'auto 样本';
+
+  @override
+  String qualityReviewsFilterQueryLine(String value) {
+    return '筛选查询：$value';
+  }
+
+  @override
+  String get qualityReviewsCopyFilterQuery => '复制筛选查询';
+
+  @override
+  String get qualityReviewsCopiedFilterQuery => '已复制筛选查询';
+
+  @override
+  String get qualityReviewsCopyApiUrl => '复制完整 API URL';
+
+  @override
+  String get qualityReviewsCopiedApiUrl => '已复制 API URL';
+
+  @override
+  String get qualityReviewsFilterAndReadSection => '筛选与读取';
+
+  @override
+  String get qualityReviewsFilterProjectId => '筛选 projectId';
+
+  @override
+  String get qualityReviewsFilterScriptId => '筛选 scriptId';
+
+  @override
+  String get qualityReviewsFilterTargetType => '筛选 targetType';
+
+  @override
+  String get qualityReviewsFilterTargetId => '筛选 targetId';
+
+  @override
+  String get qualityReviewsFilterJobId => '筛选 jobId';
+
+  @override
+  String get qualityReviewsFilterStageLabel => '阶段筛选';
+
+  @override
+  String get qualityReviewsFilterGradeLabel => '等级筛选';
+
+  @override
+  String get qualityReviewsAll => '全部';
+
+  @override
+  String get qualityReviewsSummarizing => '汇总中…';
+
+  @override
+  String get qualityReviewsLoading => '读取中…';
+
+  @override
+  String get qualityReviewsLoadStats => '读取质量统计';
+
+  @override
+  String get qualityReviewsLoadScopeLeaderboard => '读取Scope榜单';
+
+  @override
+  String get qualityReviewsLoadTokenEfficiency => '读取Token效率';
+
+  @override
+  String get qualityReviewsLoadTokenSavingSamples => '读取省Token样本';
+
+  @override
+  String get qualityReviewsLoadStagePassRate => '读取阶段通过率';
+
+  @override
+  String get qualityReviewsLoadBadCaseDistribution => '读取坏例分布';
+
+  @override
+  String get qualityReviewsDetailsQuerySection => '详情查询';
+
+  @override
+  String get qualityReviewsReviewId => '评审 ID';
+
+  @override
+  String get qualityReviewsCreateReviewSection => '创建评审';
+
+  @override
+  String get qualityReviewsCreateProjectIdOptional => 'projectId（可空）';
+
+  @override
+  String get qualityReviewsCreateProjectIdHelper => '填写后低分/坏例可自动写入项目隔离记忆';
+
+  @override
+  String get qualityReviewsCreateScriptIdOptional => 'scriptId（可空）';
+
+  @override
+  String get qualityReviewsCreateScriptIdHelper => '与 projectId 一起填写，才会落到脚本级记忆';
+
+  @override
+  String get qualityReviewsCreating => '创建中…';
+
+  @override
+  String get qualityReviewsCreateReview => '创建评审';
+
+  @override
+  String qualityReviewsStatusLine(String value) {
+    return '状态：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryTokenAggregate(String value) {
+    return 'Token聚合：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryMemoryAction(String value) {
+    return '记忆动作：$value';
+  }
+
+  @override
+  String get qualityReviewsCopyExecutionChecklist => '复制执行清单';
+
+  @override
+  String get qualityReviewsCopiedExecutionChecklist => '已复制执行清单';
+
+  @override
+  String qualityReviewsSummaryTokenSavingSamples(String value) {
+    return '省Token样本：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryBadCaseDistribution(String value) {
+    return '坏例分布：$value';
+  }
+
+  @override
+  String get qualityReviewsGradeDistribution => '等级分布';
+
+  @override
+  String qualityReviewsTotalAndPassRate(int total, String rate) {
+    return '总计 $total · A+B 通过率 $rate%';
+  }
+
+  @override
+  String qualityReviewsPromptDiagnostics(String value) {
+    return 'Prompt诊断：$value';
+  }
+
+  @override
+  String qualityReviewsScopePressure(String value) {
+    return 'Scope压力：$value';
+  }
+
+  @override
+  String qualityReviewsMemorySlimming(String value) {
+    return '记忆瘦身：$value';
+  }
+
+  @override
+  String qualityReviewsPriorityFix(String value) {
+    return '优先修复：$value';
+  }
+
+  @override
+  String qualityReviewsRepairSuggestions(String value) {
+    return '修复建议：$value';
+  }
+
+  @override
+  String qualityReviewsFilterCountLine(String filters, int count) {
+    return '$filters $count 条';
+  }
+
+  @override
+  String qualityReviewsSuggestions(String value) {
+    return '建议：$value';
+  }
+
+  @override
+  String get qualityReviewsEmptyForCurrentFilters => '当前筛选条件下无评审记录';
 }

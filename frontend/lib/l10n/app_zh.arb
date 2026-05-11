@@ -2131,5 +2131,163 @@
         "type": "String"
       }
     }
-  }
+  },
+  "qualityReviewsWorkbenchTitle": "质量工作台",
+  "qualityReviewsWorkbenchIntro": "用同一入口完成评审筛选、坏例查看、统计读取、详情查询和手动创建。",
+  "qualityReviewsOnlyBadCases": "只看坏例",
+  "qualityReviewsOnlyDeliveryPriorityHit": "只看命中表演/语气优先",
+  "qualityReviewsOnlyAutoSamples": "只看 auto 样本",
+  "qualityReviewsFilterAutoSamples": "auto 样本",
+  "qualityReviewsFilterQueryLine": "筛选查询：{value}",
+  "@qualityReviewsFilterQueryLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsCopyFilterQuery": "复制筛选查询",
+  "qualityReviewsCopiedFilterQuery": "已复制筛选查询",
+  "qualityReviewsCopyApiUrl": "复制完整 API URL",
+  "qualityReviewsCopiedApiUrl": "已复制 API URL",
+  "qualityReviewsFilterAndReadSection": "筛选与读取",
+  "qualityReviewsFilterProjectId": "筛选 projectId",
+  "qualityReviewsFilterScriptId": "筛选 scriptId",
+  "qualityReviewsFilterTargetType": "筛选 targetType",
+  "qualityReviewsFilterTargetId": "筛选 targetId",
+  "qualityReviewsFilterJobId": "筛选 jobId",
+  "qualityReviewsFilterStageLabel": "阶段筛选",
+  "qualityReviewsFilterGradeLabel": "等级筛选",
+  "qualityReviewsAll": "全部",
+  "qualityReviewsSummarizing": "汇总中…",
+  "qualityReviewsLoading": "读取中…",
+  "qualityReviewsLoadStats": "读取质量统计",
+  "qualityReviewsLoadScopeLeaderboard": "读取Scope榜单",
+  "qualityReviewsLoadTokenEfficiency": "读取Token效率",
+  "qualityReviewsLoadTokenSavingSamples": "读取省Token样本",
+  "qualityReviewsLoadStagePassRate": "读取阶段通过率",
+  "qualityReviewsLoadBadCaseDistribution": "读取坏例分布",
+  "qualityReviewsDetailsQuerySection": "详情查询",
+  "qualityReviewsReviewId": "评审 ID",
+  "qualityReviewsCreateReviewSection": "创建评审",
+  "qualityReviewsCreateProjectIdOptional": "projectId（可空）",
+  "qualityReviewsCreateProjectIdHelper": "填写后低分/坏例可自动写入项目隔离记忆",
+  "qualityReviewsCreateScriptIdOptional": "scriptId（可空）",
+  "qualityReviewsCreateScriptIdHelper": "与 projectId 一起填写，才会落到脚本级记忆",
+  "qualityReviewsCreating": "创建中…",
+  "qualityReviewsCreateReview": "创建评审",
+  "qualityReviewsStatusLine": "状态：{value}",
+  "@qualityReviewsStatusLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryTokenAggregate": "Token聚合：{value}",
+  "@qualityReviewsSummaryTokenAggregate": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryMemoryAction": "记忆动作：{value}",
+  "@qualityReviewsSummaryMemoryAction": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsCopyExecutionChecklist": "复制执行清单",
+  "qualityReviewsCopiedExecutionChecklist": "已复制执行清单",
+  "qualityReviewsSummaryTokenSavingSamples": "省Token样本：{value}",
+  "@qualityReviewsSummaryTokenSavingSamples": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryBadCaseDistribution": "坏例分布：{value}",
+  "@qualityReviewsSummaryBadCaseDistribution": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsGradeDistribution": "等级分布",
+  "qualityReviewsTotalAndPassRate": "总计 {total} · A+B 通过率 {rate}%",
+  "@qualityReviewsTotalAndPassRate": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPromptDiagnostics": "Prompt诊断：{value}",
+  "@qualityReviewsPromptDiagnostics": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsScopePressure": "Scope压力：{value}",
+  "@qualityReviewsScopePressure": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsMemorySlimming": "记忆瘦身：{value}",
+  "@qualityReviewsMemorySlimming": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPriorityFix": "优先修复：{value}",
+  "@qualityReviewsPriorityFix": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsRepairSuggestions": "修复建议：{value}",
+  "@qualityReviewsRepairSuggestions": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsFilterCountLine": "{filters} {count} 条",
+  "@qualityReviewsFilterCountLine": {
+    "placeholders": {
+      "filters": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qualityReviewsSuggestions": "建议：{value}",
+  "@qualityReviewsSuggestions": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsEmptyForCurrentFilters": "当前筛选条件下无评审记录"
 }
