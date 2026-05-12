@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../config.dart';
 import '../../core.dart';
+import 'project_scope.dart';
 
 class UpdateStoryboardUrlResponseV1 {
   const UpdateStoryboardUrlResponseV1({
@@ -28,12 +29,22 @@ class UpdateStoryboardUrlResponseV1 {
 /// `POST /api/v1/production/storyboard/update-url` — OpenAPI `postStoryboardUpdateUrlV1`.
 Future<UpdateStoryboardUrlResponseV1> postStoryboardUpdateUrlV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
   required String imageUrl,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/update-url');
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+      'imageUrl': imageUrl,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -41,12 +52,7 @@ Future<UpdateStoryboardUrlResponseV1> postStoryboardUpdateUrlV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-          'imageUrl': imageUrl,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -80,12 +86,21 @@ class PreviewImageResponseV1 {
 /// `POST /api/v1/production/storyboard/preview-image` — OpenAPI `postStoryboardPreviewImageV1`.
 Future<PreviewImageResponseV1> postStoryboardPreviewImageV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/preview-image',
+  );
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -94,11 +109,7 @@ Future<PreviewImageResponseV1> postStoryboardPreviewImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -132,12 +143,21 @@ class DownPreviewImageResponseV1 {
 /// `POST /api/v1/production/storyboard/down-preview-image` — OpenAPI `postStoryboardDownPreviewImageV1`.
 Future<DownPreviewImageResponseV1> postStoryboardDownPreviewImageV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/down-preview-image',
+  );
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -146,11 +166,7 @@ Future<DownPreviewImageResponseV1> postStoryboardDownPreviewImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {

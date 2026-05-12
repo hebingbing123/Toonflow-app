@@ -119,6 +119,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     final generated = await postWorkbenchGenerateVideoPromptV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
       autoQualityReview: _autoQualityReviewOnGeneratePrompt,
@@ -202,6 +203,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     final response = await postProductionWorkbenchGenerateVideoV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       uploadData: [
         <String, dynamic>{'id': widget.storyNumericId, 'sources': sourceImage},
@@ -245,6 +247,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     final response = await postWorkbenchGenerateVoiceoverV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardIds: [widget.storyNumericId],
     );

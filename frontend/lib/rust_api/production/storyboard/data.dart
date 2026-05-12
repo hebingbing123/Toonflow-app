@@ -5,21 +5,33 @@ import 'package:http/http.dart' as http;
 import '../../../config.dart';
 import '../../core.dart';
 import 'models.dart';
+import 'project_scope.dart';
 
 /// `POST /api/v1/production/storyboard/add` — OpenAPI `postStoryboardAddV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<StoryboardAddResponse> postStoryboardAddV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required String prompt,
   int? duration,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/add');
   final body = <String, dynamic>{
-    'projectId': projectId,
     'scriptId': scriptId,
     'prompt': prompt,
   };
+  // UUID-first: prefer projectUuid over projectId
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    body['projectUuid'] = u;
+  } else if (projectId != null) {
+    body['projectId'] = projectId;
+  } else {
+    throw ArgumentError('projectUuid or projectId is required');
+  }
   if (duration != null) body['duration'] = duration;
   final res = await http
       .post(
@@ -40,15 +52,31 @@ Future<StoryboardAddResponse> postStoryboardAddV1(
 }
 
 /// `POST /api/v1/production/storyboard/batch-add-info` — OpenAPI `postStoryboardBatchAddInfoV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<StoryboardBatchAddInfoItem> storyboards,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/batch-add-info',
   );
+  final body = <String, dynamic>{
+    'scriptId': scriptId,
+    'storyboards': storyboards.map((e) => e.toJson()).toList(),
+  };
+  // UUID-first: prefer projectUuid over projectId
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    body['projectUuid'] = u;
+  } else if (projectId != null) {
+    body['projectId'] = projectId;
+  } else {
+    throw ArgumentError('projectUuid or projectId is required');
+  }
   final res = await http
       .post(
         uri,
@@ -56,11 +84,7 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboards': storyboards.map((e) => e.toJson()).toList(),
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -72,9 +96,12 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
 }
 
 /// `POST /api/v1/production/storyboard/edit-info` — OpenAPI `postStoryboardEditInfoV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<int> postStoryboardEditInfoV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
   required String prompt,
@@ -82,11 +109,19 @@ Future<int> postStoryboardEditInfoV1(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/edit-info');
   final body = <String, dynamic>{
-    'projectId': projectId,
     'scriptId': scriptId,
     'storyboardId': storyboardId,
     'prompt': prompt,
   };
+  // UUID-first: prefer projectUuid over projectId
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    body['projectUuid'] = u;
+  } else if (projectId != null) {
+    body['projectId'] = projectId;
+  } else {
+    throw ArgumentError('projectUuid or projectId is required');
+  }
   if (duration != null) body['duration'] = duration;
   final res = await http
       .post(
@@ -105,13 +140,29 @@ Future<int> postStoryboardEditInfoV1(
 }
 
 /// `POST /api/v1/production/storyboard/get-data` — OpenAPI `postStoryboardGetDataV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/get-data');
+  final body = <String, dynamic>{
+    'scriptId': scriptId,
+    'storyboardId': storyboardId,
+  };
+  // UUID-first: prefer projectUuid over projectId
+  final u = projectUuid?.trim();
+  if (u != null && u.isNotEmpty) {
+    body['projectUuid'] = u;
+  } else if (projectId != null) {
+    body['projectId'] = projectId;
+  } else {
+    throw ArgumentError('projectUuid or projectId is required');
+  }
   final res = await http
       .post(
         uri,
@@ -119,11 +170,7 @@ Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -137,12 +184,21 @@ Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
 /// `POST /api/v1/production/storyboard/remove-frame` — OpenAPI `postStoryboardRemoveFrameV1`.
 Future<int> postStoryboardRemoveFrameV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/remove-frame',
+  );
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -151,11 +207,7 @@ Future<int> postStoryboardRemoveFrameV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -195,7 +247,8 @@ class UpdateStoryboardLiveActionReferenceResponseV1 {
 Future<UpdateStoryboardLiveActionReferenceResponseV1>
 postStoryboardUpdateLiveActionReferenceV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
   required List<String> referenceShotUrls,
@@ -204,6 +257,16 @@ postStoryboardUpdateLiveActionReferenceV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/update-live-action-reference',
   );
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+      'referenceShotUrls': referenceShotUrls,
+      'performanceNotes': performanceNotes,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -211,13 +274,7 @@ postStoryboardUpdateLiveActionReferenceV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-          'referenceShotUrls': referenceShotUrls,
-          'performanceNotes': performanceNotes,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -263,10 +320,16 @@ Future<int> postStoryboardUpdateDurationV1(
 /// `POST /api/v1/production/get-storyboard-data` — OpenAPI `postProductionGetStoryboardDataV1`.
 Future<ProductionGetProductionDataResponseV1> postProductionGetStoryboardDataV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-storyboard-data');
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -274,7 +337,7 @@ Future<ProductionGetProductionDataResponseV1> postProductionGetStoryboardDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'projectId': projectId, 'scriptId': scriptId}),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {

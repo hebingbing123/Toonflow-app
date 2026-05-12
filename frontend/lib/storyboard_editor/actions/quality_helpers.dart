@@ -13,6 +13,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
     );
@@ -34,6 +35,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final response = await postStoryboardUpdateUrlV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
       imageUrl: imageUrl,
@@ -57,6 +59,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final response = await postStoryboardUpdateLiveActionReferenceV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
       referenceShotUrls: referenceShotUrls,
@@ -82,6 +85,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await postStoryboardRemoveFrameV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
     );
@@ -100,6 +104,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final response = await postWorkbenchAddTrackV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       trackName: name,
     );
@@ -121,6 +126,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await postWorkbenchDeleteTrackV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       trackId: trackId,
     );
@@ -137,6 +143,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final generated = await postWorkbenchGenerateVideoPromptV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
       autoQualityReview: _autoQualityReviewOnGeneratePrompt,
