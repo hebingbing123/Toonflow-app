@@ -118,7 +118,6 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
 
     final generated = await postWorkbenchGenerateVideoPromptV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
@@ -202,7 +201,6 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     final negativePrompt = compactedManualNegative.manualPrompt.trim();
     final response = await postProductionWorkbenchGenerateVideoV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       uploadData: [
@@ -246,7 +244,6 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   Future<void> _generateVoiceover() async {
     final response = await postWorkbenchGenerateVoiceoverV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardIds: [widget.storyNumericId],
@@ -311,7 +308,6 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
           'sourceUrl': sourceUrl,
           'format': 'mp4',
         },
-        projectId: widget.projectNumericId,
         projectUuid: widget.projectId,
       ),
     );

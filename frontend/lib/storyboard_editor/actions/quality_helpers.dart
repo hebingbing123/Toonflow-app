@@ -12,7 +12,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   Future<void> _readCurrentPreview() async {
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
@@ -34,7 +33,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     }
     final response = await postStoryboardUpdateUrlV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
@@ -58,7 +56,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final performanceNotes = _liveActionPerformanceNotesCtrl.text.trim();
     final response = await postStoryboardUpdateLiveActionReferenceV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
@@ -84,7 +81,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   Future<void> _clearCurrentFrame() async {
     await postStoryboardRemoveFrameV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
@@ -103,7 +99,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     if (name.isEmpty) throw const FormatException('轨道名称不能为空');
     final response = await postWorkbenchAddTrackV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       trackName: name,
@@ -125,7 +120,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     }
     await postWorkbenchDeleteTrackV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       trackId: trackId,
@@ -142,7 +136,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final imageUrl = _currentStoryboardSourceImage();
     final generated = await postWorkbenchGenerateVideoPromptV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
@@ -176,7 +169,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
           'storyboardId': widget.storyNumericId,
           'videoUrl': video.videoUrl!.trim(),
         },
-        projectId: widget.projectNumericId,
         projectUuid: widget.projectId,
       ),
     );
@@ -193,7 +185,6 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   Future<void> _deleteCurrentVideo() async {
     final response = await postWorkbenchDeleteVideoV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,

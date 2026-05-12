@@ -200,7 +200,6 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                                   'reason': reasonCtrl.text.trim(),
                                   'modelTier': modelTierCtrl.text,
                                   },
-                                  projectId: widget.projectNumericId,
                                   projectUuid: widget.projectId,
                                 ),
                               );

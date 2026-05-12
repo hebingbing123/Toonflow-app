@@ -52,14 +52,12 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
     try {
       final productionRow = await postStoryboardGetDataV1(
         widget.token,
-        projectId: widget.projectNumericId,
         projectUuid: widget.projectId,
         scriptId: widget.scriptNumericId,
         storyboardId: widget.storyNumericId,
       );
       final productionRows = await postProductionGetStoryboardDataV1(
         widget.token,
-        projectId: widget.projectNumericId,
         projectUuid: widget.projectId,
         scriptId: widget.scriptNumericId,
       );
@@ -147,7 +145,6 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       final model = await postWorkbenchGetVideoModelDetailV1(widget.token);
       final generateData = await postWorkbenchGetGenerateDataV1(
         widget.token,
-        projectId: widget.projectNumericId,
         projectUuid: widget.projectId,
         scriptId: widget.scriptNumericId,
       );
