@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
 class WorkspaceInputController {
-  final TextEditingController projectIdController = TextEditingController(
-    text: '1',
-  );
+  final TextEditingController projectIdController = TextEditingController();
   /// Preferred project key on WebSocket attach (**`app_project.id`**).
   final TextEditingController projectUuidController = TextEditingController();
-  final TextEditingController scriptIdController = TextEditingController(
-    text: '1',
-  );
+  final TextEditingController scriptIdController = TextEditingController();
   /// Preferred script key for production attach (**`app_script.id`**).
   final TextEditingController scriptUuidController = TextEditingController();
   /// **`app_project.workspace_id`** for optional **`workspaceUuid`** on WS attach (team / REST 对齐).

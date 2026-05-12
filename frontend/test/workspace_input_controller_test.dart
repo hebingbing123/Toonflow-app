@@ -2,12 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/agent_workspaces/input_controller.dart';
 
 void main() {
-  test('workspace input controller exposes seeded defaults', () {
+  test('workspace input controller starts without fake project/script scope', () {
     final controller = WorkspaceInputController();
     addTearDown(controller.dispose);
 
-    expect(controller.projectIdController.text, '1');
-    expect(controller.scriptIdController.text, '1');
+    expect(controller.projectIdController.text, isEmpty);
+    expect(controller.scriptIdController.text, isEmpty);
     expect(controller.productionFlowKeyController.text, 'scriptPlan');
     expect(controller.productionDomainToolController.text, 'get_flowData');
     expect(
