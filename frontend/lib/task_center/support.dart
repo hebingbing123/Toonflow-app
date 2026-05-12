@@ -114,6 +114,13 @@ class TaskCenterDomainDeepLink {
   final String? publishDraftId;
 }
 
+class TaskCenterProjectScope {
+  const TaskCenterProjectScope({this.projectNumericId, this.projectUuid});
+
+  final int? projectNumericId;
+  final String? projectUuid;
+}
+
 int? taskCenterDeepLinkInt(Map<String, dynamic>? map, String key) {
   if (map == null) {
     return null;
@@ -140,6 +147,23 @@ String? taskCenterDeepLinkString(Map<String, dynamic>? map, String key) {
   return text.isEmpty ? null : text;
 }
 
+TaskCenterProjectScope taskCenterProjectScopeFromMap(Map<String, dynamic>? map) {
+  final numericId =
+      taskCenterDeepLinkInt(map, 'project_numeric_id') ??
+      taskCenterDeepLinkInt(map, 'projectNumericId') ??
+      taskCenterDeepLinkInt(map, 'project_id') ??
+      taskCenterDeepLinkInt(map, 'projectId');
+  final projectUuid =
+      taskCenterDeepLinkString(map, 'project_uuid') ??
+      taskCenterDeepLinkString(map, 'projectUuid') ??
+      _taskCenterUuidLikeString(taskCenterDeepLinkString(map, 'project_id')) ??
+      _taskCenterUuidLikeString(taskCenterDeepLinkString(map, 'projectId'));
+  return TaskCenterProjectScope(
+    projectNumericId: numericId,
+    projectUuid: projectUuid,
+  );
+}
+
 TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
   if (job.kind != 'video.export') {
     return null;
@@ -151,13 +175,10 @@ TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
   final links = rawLinks is Map<String, dynamic>
       ? rawLinks
       : <String, dynamic>{};
-  final project = taskCenterDeepLinkInt(links, 'project_numeric_id') ??
-      taskCenterDeepLinkInt(payload, 'project_numeric_id');
-  final projectUuid =
-      taskCenterDeepLinkString(links, 'project_uuid') ??
-      taskCenterDeepLinkString(payload, 'project_uuid') ??
-      taskCenterDeepLinkString(links, 'project_id') ??
-      taskCenterDeepLinkString(payload, 'project_id');
+  final linkScope = taskCenterProjectScopeFromMap(links);
+  final payloadScope = taskCenterProjectScopeFromMap(payload);
+  final project = linkScope.projectNumericId ?? payloadScope.projectNumericId;
+  final projectUuid = linkScope.projectUuid ?? payloadScope.projectUuid;
   if (project == null && projectUuid == null) {
     return null;
   }
@@ -182,14 +203,10 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
   final payload = job.payload;
   final rawLinks = job.errorDetails == null ? null : job.errorDetails!['deep_links'];
   final links = rawLinks is Map<String, dynamic> ? rawLinks : <String, dynamic>{};
-
-  final project = taskCenterDeepLinkInt(links, 'project_numeric_id') ??
-      taskCenterDeepLinkInt(payload, 'project_numeric_id');
-  final projectUuid =
-      taskCenterDeepLinkString(links, 'project_uuid') ??
-      taskCenterDeepLinkString(payload, 'project_uuid') ??
-      taskCenterDeepLinkString(links, 'project_id') ??
-      taskCenterDeepLinkString(payload, 'project_id');
+  final linkScope = taskCenterProjectScopeFromMap(links);
+  final payloadScope = taskCenterProjectScopeFromMap(payload);
+  final project = linkScope.projectNumericId ?? payloadScope.projectNumericId;
+  final projectUuid = linkScope.projectUuid ?? payloadScope.projectUuid;
   if (project == null && projectUuid == null) {
     return null;
   }
@@ -280,6 +297,17 @@ bool taskCenterSupportsWritebackCompensation(JobRow job) {
   }
   final code = (details['code'] ?? '').toString();
   return code.contains('writeback') || code.contains('persist');
+}
+
+String? _taskCenterUuidLikeString(String? value) {
+  final text = value?.trim() ?? '';
+  if (text.isEmpty) {
+    return null;
+  }
+  if (int.tryParse(text) != null) {
+    return null;
+  }
+  return text;
 }
 
 String videoExportFailureCodeLabel(AppLocalizations l10n, String code) {

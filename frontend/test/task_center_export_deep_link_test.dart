@@ -4,6 +4,25 @@ import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/task_center/support.dart';
 
 void main() {
+  test('extracts project scope from payload using uuid-first semantics', () {
+    final scope = taskCenterProjectScopeFromMap(const <String, dynamic>{
+      'project_id': '550e8400-e29b-41d4-a716-446655440999',
+      'project_numeric_id': 19,
+    });
+
+    expect(scope.projectNumericId, 19);
+    expect(scope.projectUuid, '550e8400-e29b-41d4-a716-446655440999');
+  });
+
+  test('extracts project scope from legacy numeric project_id payload', () {
+    final scope = taskCenterProjectScopeFromMap(const <String, dynamic>{
+      'project_id': '23',
+    });
+
+    expect(scope.projectNumericId, 23);
+    expect(scope.projectUuid, isNull);
+  });
+
   test('parses video.export deep link from error_details and payload fallback',
       () {
     final job = JobRow(

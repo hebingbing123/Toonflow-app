@@ -462,34 +462,18 @@ class _TaskCenterWorkbenchDialogState
     final taskClass = _ctrls.taskClassCtrl.text.trim();
     final state = _ctrls.stateCtrl.text.trim();
     final projectId = int.tryParse(_ctrls.projectIdCtrl.text.trim());
-    final rowProjectId = _jobProjectId(row);
+    final projectUuid = _trimmedNonEmpty(_ctrls.projectUuidCtrl.text);
+    final rowProjectScope = taskCenterProjectScopeFromMap(row.payload);
     final matchesTaskClass = taskClass.isEmpty || row.kind == taskClass;
     final matchesState = state.isEmpty || row.status == state;
     final matchesProject =
-        projectId == null || rowProjectId == null || rowProjectId == projectId;
+        (projectId == null ||
+            rowProjectScope.projectNumericId == null ||
+            rowProjectScope.projectNumericId == projectId) &&
+        (projectUuid == null ||
+            rowProjectScope.projectUuid == null ||
+            rowProjectScope.projectUuid == projectUuid);
     return matchesTaskClass && matchesState && matchesProject;
-  }
-
-  int? _jobProjectId(JobRow row) {
-    final payload = row.payload;
-    final candidates = <Object?>[
-      payload['project_id'],
-      payload['projectId'],
-      payload['project_numeric_id'],
-      payload['projectNumericId'],
-    ];
-    for (final value in candidates) {
-      if (value is num) {
-        return value.toInt();
-      }
-      if (value is String) {
-        final parsed = int.tryParse(value);
-        if (parsed != null) {
-          return parsed;
-        }
-      }
-    }
-    return null;
   }
 
   @override
@@ -585,4 +569,12 @@ class _TaskCenterWorkbenchDialogState
       ),
     );
   }
+}
+
+String? _trimmedNonEmpty(String? raw) {
+  final value = raw?.trim() ?? '';
+  if (value.isEmpty) {
+    return null;
+  }
+  return value;
 }
