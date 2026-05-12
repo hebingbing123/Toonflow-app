@@ -16,23 +16,39 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return false;
     }
 
+    final l10n = AppLocalizations.of(context);
     try {
       final success = await _operationHistory.undo();
       if (success) {
         // Refresh the assembly data after undo
         await _loadProjectOverview();
+        if (!mounted) {
+          return success;
+        }
 
         // Show feedback
         final operation = _operationHistory.peekRedo();
-        final description = operation?.getDescription() ?? '操作';
-        _showOperationFeedback('已撤销：$description', isSuccess: true);
+        final description =
+            operation?.getDescription() ??
+            (l10n?.shortVideoSpaceUndoRedoOperationDefault ?? 'Operation');
+        _showOperationFeedback(
+          l10n?.shortVideoSpaceUndoSucceeded(description) ??
+              'Undone: $description',
+          isSuccess: true,
+        );
 
         // Update UI state
         setState(() {});
       }
       return success;
     } catch (e) {
-      _showOperationFeedback('撤销失败：$e', isSuccess: false);
+      if (!mounted) {
+        return false;
+      }
+      _showOperationFeedback(
+        l10n?.shortVideoSpaceUndoFailed('$e') ?? 'Undo failed: $e',
+        isSuccess: false,
+      );
       return false;
     }
   }
@@ -46,23 +62,39 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return false;
     }
 
+    final l10n = AppLocalizations.of(context);
     try {
       final success = await _operationHistory.redo();
       if (success) {
         // Refresh the assembly data after redo
         await _loadProjectOverview();
+        if (!mounted) {
+          return success;
+        }
 
         // Show feedback
         final operation = _operationHistory.peekUndo();
-        final description = operation?.getDescription() ?? '操作';
-        _showOperationFeedback('已重做：$description', isSuccess: true);
+        final description =
+            operation?.getDescription() ??
+            (l10n?.shortVideoSpaceUndoRedoOperationDefault ?? 'Operation');
+        _showOperationFeedback(
+          l10n?.shortVideoSpaceRedoSucceeded(description) ??
+              'Redone: $description',
+          isSuccess: true,
+        );
 
         // Update UI state
         setState(() {});
       }
       return success;
     } catch (e) {
-      _showOperationFeedback('重做失败：$e', isSuccess: false);
+      if (!mounted) {
+        return false;
+      }
+      _showOperationFeedback(
+        l10n?.shortVideoSpaceRedoFailed('$e') ?? 'Redo failed: $e',
+        isSuccess: false,
+      );
       return false;
     }
   }

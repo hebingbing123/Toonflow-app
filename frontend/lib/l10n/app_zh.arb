@@ -58,6 +58,40 @@
   "shortVideoSpaceFocusSearch": "聚焦搜索框",
   "shortVideoSpaceUndoOperation": "撤销上一步操作",
   "shortVideoSpaceRedoOperation": "重做上一步操作",
+  "shortVideoSpaceUndoRedoOperationDefault": "操作",
+  "shortVideoSpaceUndoSucceeded": "已撤销：{description}",
+  "@shortVideoSpaceUndoSucceeded": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceUndoFailed": "撤销失败：{error}",
+  "@shortVideoSpaceUndoFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceRedoSucceeded": "已重做：{description}",
+  "@shortVideoSpaceRedoSucceeded": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceRedoFailed": "重做失败：{error}",
+  "@shortVideoSpaceRedoFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpacePreviewVideoLoadFailed": "视频加载失败",
   "shortVideoSpaceFileOperations": "文件操作",
   "shortVideoSpaceSelectionOperations": "选择操作",
   "shortVideoSpaceNavigation": "导航",
@@ -8483,8 +8517,8 @@
   "agentWorkspaceProductionPromptExtraConstraint": "额外约束：{constraint}",
   "agentWorkspaceProductionPromptAssetFocus": "资产焦点：{scope}",
   "agentWorkspaceProductionPromptExecutionOrder": "执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。",
-  "agentWorkspaceProductionStoryboardPriorityMissing": "其余 $hiddenCount 行已折叠",
-  "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
+  "agentWorkspaceProductionStoryboardPriorityMissing": "优先展示缺帧相关镜头",
+  "agentWorkspaceProductionCollapsedRows": "其余 {count} 行已折叠",
   "agentWorkspaceProductionReviewTarget": "目标：{target}",
   "agentWorkspaceProductionReviewGrade": "等级：{grade}",
   "agentWorkspaceProductionReviewIssues": "问题：严重 {severe}，中等 {medium}，轻微 {minor}",
@@ -8522,14 +8556,14 @@
   "agentWorkspaceProductionSummaryTextChars": "文本 {chars} 字",
   "agentWorkspaceProductionSummaryLineCount": "行数 {count}",
   "agentWorkspaceProductionSummaryPlanSections": "计划章节 {count}",
-  "agentWorkspaceProductionSummaryRewriteInherited": "已承接改写约束",
-  "agentWorkspaceProductionSummaryStoryboardRows": "分镜 {count} 条",
+  "agentWorkspaceProductionSummaryRewriteInherited": "改写约束下沉",
+  "agentWorkspaceProductionSummaryStoryboardRows": "分镜表 {count} 行",
   "agentWorkspaceProductionSummaryLinkedAssets": "关联资产 {count}",
   "agentWorkspaceProductionSummaryListCount": "列表 {count} 项",
   "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",
   "agentWorkspaceProductionSummaryMediaUrls": "媒体 URL {count}",
   "agentWorkspaceProductionSummaryNeedImages": "需要图片 {count}",
-  "agentWorkspaceProductionSummaryMissingFrames": "缺少帧 {count} 项",
+  "agentWorkspaceProductionSummaryMissingFrames": "缺帧 {count} 项",
   "agentWorkspaceProductionSummaryTextOnlyCount": "纯文本 {count}",
   "agentWorkspaceProductionSummaryStateTypes": "状态类型 {count}",
   "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys={count} 个",

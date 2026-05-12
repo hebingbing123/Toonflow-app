@@ -38,13 +38,13 @@ String describeAssetImagesWorkbenchRecommendedAction(
 ) {
   switch (action) {
     case AssetImagesWorkbenchRecommendedAction.loadImages:
-      return '读取图片列表';
+      return 'Load image list';
     case AssetImagesWorkbenchRecommendedAction.createImage:
-      return '新增当前图片';
+      return 'Add image';
     case AssetImagesWorkbenchRecommendedAction.previewSelectedImage:
-      return '读取当前预览';
+      return 'Load current preview';
     case AssetImagesWorkbenchRecommendedAction.updateSelectedImage:
-      return '保存当前图片';
+      return 'Save current image';
   }
 }
 
@@ -55,20 +55,20 @@ String buildAssetImagesWorkbenchFollowUp({
   final nextAction = describeAssetImagesWorkbenchRecommendedAction(
     diagnosis.recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+  return '$actionSummary Next step: $nextAction. ${diagnosis.detail}';
 }
 
 String normalizeAssetImagesWorkbenchErrorMessage(String raw) {
   final trimmed = raw.trim();
   if (trimmed.isEmpty) {
-    return '未提供额外错误信息。';
+    return 'No additional error detail.';
   }
   final normalized = trimmed.replaceFirst(
     RegExp(r'^RustApiException\([^)]*\):\s*'),
     '',
   );
   if (normalized.isEmpty) {
-    return '未提供额外错误信息。';
+    return 'No additional error detail.';
   }
   return normalized;
 }
@@ -83,7 +83,7 @@ String buildAssetImagesWorkbenchFailureNotice({
   final nextAction = describeAssetImagesWorkbenchRecommendedAction(
     recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。失败原因：$reason。$fallbackDetail';
+  return '$actionSummary Next step: $nextAction. Reason: $reason. $fallbackDetail';
 }
 
 String? trimAssetImageWorkbenchText(String raw) {
@@ -140,16 +140,18 @@ AssetImagesWorkbenchDiagnosis diagnoseAssetImagesWorkbench({
 }) {
   if (imagesResponse == null) {
     return const AssetImagesWorkbenchDiagnosis(
-      summary: '还没有读取当前资产的图片列表。',
-      detail: '先同步图片列表，确认当前资产是否已有历史图，再决定是直接预览还是新增一张图片。',
+      summary: 'Image list for this asset has not been loaded yet.',
+      detail:
+          'Sync the image list first to see whether history images exist, then preview or add a new image.',
       recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
     );
   }
 
   if (imagesResponse.items.isEmpty) {
     return const AssetImagesWorkbenchDiagnosis(
-      summary: '当前资产还没有图片。',
-      detail: '可以直接新增一张图片，给当前资产补齐首张可编辑的历史图。',
+      summary: 'This asset has no images yet.',
+      detail:
+          'Add an image to create the first editable history row for this asset.',
       recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
     );
   }
@@ -167,17 +169,19 @@ AssetImagesWorkbenchDiagnosis diagnoseAssetImagesWorkbench({
 
   if (!hasPreviewBytes) {
     return AssetImagesWorkbenchDiagnosis(
-      summary: '已读取 ${imagesResponse.items.length} 张图片，但还没加载当前预览。',
-      detail: '建议先读取当前图片预览，确认 file_path 与状态是否匹配，再决定是否继续编辑或删除。',
+      summary:
+          'Loaded ${imagesResponse.items.length} image(s); preview not loaded yet.',
+      detail:
+          'Load the current image preview and verify file_path and state before editing or deleting.',
       recommendedAction:
           AssetImagesWorkbenchRecommendedAction.previewSelectedImage,
     );
   }
 
   return AssetImagesWorkbenchDiagnosis(
-    summary: '当前图片已就绪，可继续编辑。',
+    summary: 'Current image is ready to edit.',
     detail:
-        '当前焦点是 sort=${selectedImage.sortIndex} 的图片，可继续更新 file_path、state 或 sort_index，再根据预览决定是否删除。',
+        'Focused image sort=${selectedImage.sortIndex}; you can update file_path, state, or sort_index, then delete if needed.',
     recommendedAction:
         AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
   );
@@ -219,7 +223,7 @@ String summarizeAssetImageSelection(
   String? selectedImageId,
 }) {
   if (response.items.isEmpty) {
-    return '当前资产暂无图片。';
+    return 'This asset has no images.';
   }
   AssetImageRow? selectedImage;
   if (selectedImageId != null) {
@@ -232,9 +236,9 @@ String summarizeAssetImageSelection(
   }
   selectedImage ??= response.items.first;
   final coverLine = response.coverNumericImageId == null
-      ? '当前没有封面图'
-      : '封面 numeric image #${response.coverNumericImageId}';
+      ? 'No cover image'
+      : 'Cover numeric image #${response.coverNumericImageId}';
   final selectedLine =
-      '当前焦点 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}';
-  return '已加载 ${response.items.length} 张图片；$coverLine；$selectedLine。';
+      'Focus sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "unknown state"}';
+  return 'Loaded ${response.items.length} image(s); $coverLine; $selectedLine.';
 }

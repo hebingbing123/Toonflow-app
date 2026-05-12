@@ -31,7 +31,7 @@ int? chooseInitialAssetNumericId(
 String summarizeProjectAssetRows(Iterable<AssetRow> assets) {
   final rows = assets.toList(growable: false);
   if (rows.isEmpty) {
-    return '当前没有资产';
+    return 'No assets';
   }
   final typeCounts = SplayTreeMap<String, int>();
   for (final asset in rows) {
@@ -39,13 +39,13 @@ String summarizeProjectAssetRows(Iterable<AssetRow> assets) {
     typeCounts[type] = (typeCounts[type] ?? 0) + 1;
   }
   final typeLine = typeCounts.entries
-      .map((entry) => '${entry.key} ${entry.value} 条')
+      .map((entry) => '${entry.key} ${entry.value}')
       .join(' · ');
   final sampleLine = rows
       .take(3)
       .map((asset) => '#${asset.numericId} ${asset.name}')
       .join(', ');
-  return '资产 ${rows.length} 条 · $typeLine · 示例：$sampleLine';
+  return 'Assets ${rows.length} · $typeLine · sample: $sampleLine';
 }
 
 String summarizeScriptScopedAssets(
@@ -53,13 +53,13 @@ String summarizeScriptScopedAssets(
   Iterable<AssetRow> assets,
 ) {
   if (scriptNumericId == null) {
-    return '当前按项目全量资产管理。';
+    return 'Managing all project assets.';
   }
   final rows = assets.toList(growable: false);
   if (rows.isEmpty) {
-    return '当前剧本 #$scriptNumericId 下没有关联资产。';
+    return 'No assets linked under script #$scriptNumericId.';
   }
-  return '当前剧本 #$scriptNumericId 下关联 ${rows.length} 条资产。';
+  return 'Script #$scriptNumericId has ${rows.length} linked asset(s).';
 }
 
 List<String>? parseCornerScapeTypesInput(String raw) {
@@ -111,10 +111,10 @@ String summarizeCornerScapeSelection(
 }) {
   final rows = assets.toList(growable: false);
   final typeLine = activeTypes == null || activeTypes.isEmpty
-      ? '全部类型'
+      ? 'All types'
       : activeTypes.join(', ');
   if (rows.isEmpty) {
-    return '历史图过滤：$typeLine；当前没有命中资产。';
+    return 'History filter: $typeLine; no matching assets.';
   }
   final totalHistories = rows.fold<int>(
     0,
@@ -130,7 +130,7 @@ String summarizeCornerScapeSelection(
     }
   }
   if (selectedAsset == null) {
-    return '历史图过滤：$typeLine；已加载 ${rows.length} 条资产、$totalHistories 张历史图。';
+    return 'History filter: $typeLine; loaded ${rows.length} asset(s), $totalHistories history image(s).';
   }
   CornerScapeHistoryImage? selectedImage;
   if (selectedHistoryImageId != null) {
@@ -142,7 +142,7 @@ String summarizeCornerScapeSelection(
     }
   }
   final focusLine = selectedImage == null
-      ? '当前焦点 #${selectedAsset.numericId} ${selectedAsset.name}，暂无选中历史图'
-      : '当前焦点 #${selectedAsset.numericId} ${selectedAsset.name} · 图 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}';
-  return '历史图过滤：$typeLine；已加载 ${rows.length} 条资产、$totalHistories 张历史图；$focusLine。';
+      ? 'Focus #${selectedAsset.numericId} ${selectedAsset.name}, no history image selected'
+      : 'Focus #${selectedAsset.numericId} ${selectedAsset.name} · image sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "unknown state"}';
+  return 'History filter: $typeLine; loaded ${rows.length} asset(s), $totalHistories history image(s); $focusLine.';
 }

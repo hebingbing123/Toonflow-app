@@ -109,6 +109,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoSpaceRedoOperation => '重做上一步操作';
 
   @override
+  String get shortVideoSpaceUndoRedoOperationDefault => '操作';
+
+  @override
+  String shortVideoSpaceUndoSucceeded(String description) {
+    return '已撤销：$description';
+  }
+
+  @override
+  String shortVideoSpaceUndoFailed(String error) {
+    return '撤销失败：$error';
+  }
+
+  @override
+  String shortVideoSpaceRedoSucceeded(String description) {
+    return '已重做：$description';
+  }
+
+  @override
+  String shortVideoSpaceRedoFailed(String error) {
+    return '重做失败：$error';
+  }
+
+  @override
+  String get shortVideoSpacePreviewVideoLoadFailed => '视频加载失败';
+
+  @override
   String get shortVideoSpaceFileOperations => '文件操作';
 
   @override
@@ -11429,12 +11455,11 @@ class AppLocalizationsZh extends AppLocalizations {
       '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。';
 
   @override
-  String get agentWorkspaceProductionStoryboardPriorityMissing =>
-      '其余 \$hiddenCount 行已折叠';
+  String get agentWorkspaceProductionStoryboardPriorityMissing => '优先展示缺帧相关镜头';
 
   @override
   String agentWorkspaceProductionCollapsedRows(int count) {
-    return '已折叠 $count 行';
+    return '其余 $count 行已折叠';
   }
 
   @override
@@ -11616,11 +11641,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionSummaryRewriteInherited => '已承接改写约束';
+  String get agentWorkspaceProductionSummaryRewriteInherited => '改写约束下沉';
 
   @override
   String agentWorkspaceProductionSummaryStoryboardRows(int count) {
-    return '分镜 $count 条';
+    return '分镜表 $count 行';
   }
 
   @override
@@ -11650,7 +11675,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryMissingFrames(int count) {
-    return '缺少帧 $count 项';
+    return '缺帧 $count 项';
   }
 
   @override

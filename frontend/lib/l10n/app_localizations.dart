@@ -278,6 +278,42 @@ abstract class AppLocalizations {
   /// **'Redo last operation'**
   String get shortVideoSpaceRedoOperation;
 
+  /// No description provided for @shortVideoSpaceUndoRedoOperationDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation'**
+  String get shortVideoSpaceUndoRedoOperationDefault;
+
+  /// No description provided for @shortVideoSpaceUndoSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Undone: {description}'**
+  String shortVideoSpaceUndoSucceeded(String description);
+
+  /// No description provided for @shortVideoSpaceUndoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo failed: {error}'**
+  String shortVideoSpaceUndoFailed(String error);
+
+  /// No description provided for @shortVideoSpaceRedoSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Redone: {description}'**
+  String shortVideoSpaceRedoSucceeded(String description);
+
+  /// No description provided for @shortVideoSpaceRedoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo failed: {error}'**
+  String shortVideoSpaceRedoFailed(String error);
+
+  /// No description provided for @shortVideoSpacePreviewVideoLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load video'**
+  String get shortVideoSpacePreviewVideoLoadFailed;
+
   /// No description provided for @shortVideoSpaceFileOperations.
   ///
   /// In en, this message translates to:
@@ -18495,13 +18531,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionStoryboardPriorityMissing.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production storyboard priority missing'**
+  /// **'Priority: show missing frame shots'**
   String get agentWorkspaceProductionStoryboardPriorityMissing;
 
   /// No description provided for @agentWorkspaceProductionCollapsedRows.
   ///
   /// In en, this message translates to:
-  /// **'已折叠 {count} 行'**
+  /// **'{count} more rows collapsed'**
   String agentWorkspaceProductionCollapsedRows(int count);
 
   /// No description provided for @agentWorkspaceProductionReviewTarget.
@@ -18722,13 +18758,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryTextChars.
   ///
   /// In en, this message translates to:
-  /// **'文本 {chars} 字'**
+  /// **'text {chars} chars'**
   String agentWorkspaceProductionSummaryTextChars(int chars);
 
   /// No description provided for @agentWorkspaceProductionSummaryLineCount.
   ///
   /// In en, this message translates to:
-  /// **'行数 {count}'**
+  /// **'line count {count}'**
   String agentWorkspaceProductionSummaryLineCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryPlanSections.
@@ -18740,19 +18776,19 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryRewriteInherited.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary rewrite inherited'**
+  /// **'Rewrite constraints inherited'**
   String get agentWorkspaceProductionSummaryRewriteInherited;
 
   /// No description provided for @agentWorkspaceProductionSummaryStoryboardRows.
   ///
   /// In en, this message translates to:
-  /// **'分镜 {count} 条'**
+  /// **'storyboard table {count} rows'**
   String agentWorkspaceProductionSummaryStoryboardRows(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryLinkedAssets.
   ///
   /// In en, this message translates to:
-  /// **'关联资产 {count}'**
+  /// **'linked assets {count}'**
   String agentWorkspaceProductionSummaryLinkedAssets(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryListCount.

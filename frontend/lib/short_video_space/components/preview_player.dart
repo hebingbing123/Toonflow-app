@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// 播放列表项，用于连续播放
 class ShotPreviewItem {
   final String videoUrl;
@@ -688,7 +690,11 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
             ),
             const SizedBox(height: 16),
             Text(
-              _errorMessage ?? '视频加载失败',
+              _errorMessage ??
+                  (AppLocalizations.of(
+                        context,
+                      )?.shortVideoSpacePreviewVideoLoadFailed ??
+                      'Failed to load video'),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
               textAlign: TextAlign.center,
             ),

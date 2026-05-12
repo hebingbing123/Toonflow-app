@@ -63,7 +63,7 @@ String formatWorkspaceInviteMeta(
   final expiry = invite.expiresAt.toLocal().toIso8601String();
   final stateText = inviteStatusLabel(invite, l10n: l10n);
   return l10n?.teamWorkspaceInviteMetaLine(stateText, expiry) ??
-      '状态: $stateText · 过期: $expiry';
+      'Status: $stateText · expires: $expiry';
 }
 
 bool isWorkspaceInviteExpired(WorkspaceInviteResponse invite) {
@@ -75,16 +75,16 @@ String inviteStatusLabel(
   AppLocalizations? l10n,
 }) {
   if (invite.status == 'revoked') {
-    return l10n?.teamWorkspaceInviteStatusRevoked ?? '已撤销';
+    return l10n?.teamWorkspaceInviteStatusRevoked ?? 'Revoked';
   }
   if (isWorkspaceInviteExpired(invite)) {
-    return l10n?.teamWorkspaceInviteStatusExpired ?? '已过期';
+    return l10n?.teamWorkspaceInviteStatusExpired ?? 'Expired';
   }
   if (invite.status == 'pending') {
-    return l10n?.teamWorkspaceInviteStatusValid ?? '有效';
+    return l10n?.teamWorkspaceInviteStatusValid ?? 'Valid';
   }
   if (invite.status == 'accepted') {
-    return l10n?.teamWorkspaceInviteStatusAccepted ?? '已接受';
+    return l10n?.teamWorkspaceInviteStatusAccepted ?? 'Accepted';
   }
   return invite.status;
 }
@@ -98,29 +98,27 @@ String buildInviteCopyText(WorkspaceInviteResponse invite) {
       'token=${invite.token}';
 }
 
-String workspaceAuditActionLabel(
-  String action, {
-  AppLocalizations? l10n,
-}) {
+String workspaceAuditActionLabel(String action, {AppLocalizations? l10n}) {
   switch (action) {
     case 'workspace_member_upserted':
-      return l10n?.teamWorkspaceAuditMemberUpserted ?? '成员已添加或更新';
+      return l10n?.teamWorkspaceAuditMemberUpserted ??
+          'Member added or updated';
     case 'workspace_member_role_changed':
-      return l10n?.teamWorkspaceAuditMemberRoleChanged ?? '成员角色已变更';
+      return l10n?.teamWorkspaceAuditMemberRoleChanged ?? 'Member role changed';
     case 'workspace_member_removed':
-      return l10n?.teamWorkspaceAuditMemberRemoved ?? '成员已移除';
+      return l10n?.teamWorkspaceAuditMemberRemoved ?? 'Member removed';
     case 'workspace_member_left':
-      return l10n?.teamWorkspaceAuditMemberLeft ?? '成员主动离开';
+      return l10n?.teamWorkspaceAuditMemberLeft ?? 'Member left workspace';
     case 'workspace_owner_transferred':
-      return l10n?.teamWorkspaceAuditOwnerTransferred ?? 'owner 已转让';
+      return l10n?.teamWorkspaceAuditOwnerTransferred ?? 'Owner transferred';
     case 'workspace_invite_created':
-      return l10n?.teamWorkspaceAuditInviteCreated ?? '邀请已创建';
+      return l10n?.teamWorkspaceAuditInviteCreated ?? 'Invite created';
     case 'workspace_invite_resent':
-      return l10n?.teamWorkspaceAuditInviteResent ?? '邀请已重发';
+      return l10n?.teamWorkspaceAuditInviteResent ?? 'Invite resent';
     case 'workspace_invite_revoked':
-      return l10n?.teamWorkspaceAuditInviteRevoked ?? '邀请已撤销';
+      return l10n?.teamWorkspaceAuditInviteRevoked ?? 'Invite revoked';
     case 'workspace_invite_accepted':
-      return l10n?.teamWorkspaceAuditInviteAccepted ?? '邀请已接受';
+      return l10n?.teamWorkspaceAuditInviteAccepted ?? 'Invite accepted';
     default:
       return action;
   }
@@ -333,9 +331,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     }
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.teamWorkspaceEnterEnterpriseName)),
       );
       return;
@@ -366,9 +362,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceCreateFailed('$e'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.teamWorkspaceCreateFailed('$e'))),
+      );
     } finally {
       if (mounted) {
         setState(() => _creating = false);
@@ -384,9 +380,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     }
     final inviteToken = _acceptInviteTokenController.text.trim();
     if (inviteToken.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceEnterInviteToken)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.teamWorkspaceEnterInviteToken)),
+      );
       return;
     }
     setState(() => _acceptingInvite = true);
@@ -399,9 +395,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.teamWorkspaceInviteAcceptedAndJoined)),
       );
       if (_inviteTokenFromUri) {
@@ -428,9 +422,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.teamWorkspaceAcceptInviteFailed('$e'))),
       );
     } finally {
@@ -489,6 +481,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         _ => value,
       };
     }
+
     final showWorkspaceOpsStats = kInternalOpsToken.trim().isNotEmpty;
     WorkspaceStatsResponse? workspaceStats;
     String? workspaceStatsError;
@@ -689,7 +682,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               });
             }
             return AlertDialog(
-              title: Text(l10n.teamWorkspaceMembersDialogTitle(row.workspace.name)),
+              title: Text(
+                l10n.teamWorkspaceMembersDialogTitle(row.workspace.name),
+              ),
               content: SizedBox(
                 width: 480,
                 child: SingleChildScrollView(
@@ -735,7 +730,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                     final userId = userIdController.text.trim();
                                     if (userId.isEmpty) {
                                       setModalState(
-                                        () => error = l10n.teamWorkspaceEnterUserUuid,
+                                        () => error =
+                                            l10n.teamWorkspaceEnterUserUuid,
                                       );
                                       return;
                                     }
@@ -793,7 +789,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 final email = inviteEmailController.text.trim();
                                 if (email.isEmpty) {
                                   setModalState(
-                                    () => error = l10n.teamWorkspaceEnterInviteEmail,
+                                    () => error =
+                                        l10n.teamWorkspaceEnterInviteEmail,
                                   );
                                   return;
                                 }
@@ -988,7 +985,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               ),
                               if (invite.status == 'pending') ...<Widget>[
                                 IconButton(
-                                  tooltip: l10n.teamWorkspaceRefreshInviteLinkTooltip,
+                                  tooltip: l10n
+                                      .teamWorkspaceRefreshInviteLinkTooltip,
                                   icon: const Icon(Icons.refresh, size: 18),
                                   onPressed: inviteActionBusyId != null
                                       ? null
@@ -1027,7 +1025,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                         },
                                 ),
                                 IconButton(
-                                  tooltip: l10n.teamWorkspaceRevokeInviteTooltip,
+                                  tooltip:
+                                      l10n.teamWorkspaceRevokeInviteTooltip,
                                   icon: const Icon(
                                     Icons.cancel_outlined,
                                     size: 18,
@@ -1076,7 +1075,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                 ),
                               ],
                               IconButton(
-                                tooltip: l10n.teamWorkspaceCopyInviteInfoTooltip,
+                                tooltip:
+                                    l10n.teamWorkspaceCopyInviteInfoTooltip,
                                 icon: const Icon(
                                   Icons.copy_all_outlined,
                                   size: 18,
@@ -1096,7 +1096,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   messenger.showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        l10n.teamWorkspaceCopiedInvite(invite.email),
+                                        l10n.teamWorkspaceCopiedInvite(
+                                          invite.email,
+                                        ),
                                       ),
                                     ),
                                   );
@@ -1306,7 +1308,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   ),
                                 if (canTransferOwner)
                                   IconButton(
-                                    tooltip: l10n.teamWorkspaceTransferOwnerTooltip,
+                                    tooltip:
+                                        l10n.teamWorkspaceTransferOwnerTooltip,
                                     onPressed: mutatingMemberUserId != null
                                         ? null
                                         : () async {
@@ -1350,7 +1353,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                     icon: const Icon(Icons.swap_horiz_outlined),
                                   ),
                                 IconButton(
-                                  tooltip: l10n.teamWorkspaceRemoveMemberTooltip,
+                                  tooltip:
+                                      l10n.teamWorkspaceRemoveMemberTooltip,
                                   onPressed: mutatingMemberUserId != null
                                       ? null
                                       : () async {
@@ -1546,7 +1550,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               pageSize: pageSize,
             );
             return AlertDialog(
-              title: Text(l10n.teamWorkspaceInvitesDialogTitle(row.workspace.name)),
+              title: Text(
+                l10n.teamWorkspaceInvitesDialogTitle(row.workspace.name),
+              ),
               content: SizedBox(
                 width: 560,
                 child: SingleChildScrollView(
@@ -1595,7 +1601,8 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                         .trim();
                                     if (email.isEmpty) {
                                       setModalState(
-                                        () => error = l10n.teamWorkspaceEnterInviteEmail,
+                                        () => error =
+                                            l10n.teamWorkspaceEnterInviteEmail,
                                       );
                                       return;
                                     }
@@ -1980,14 +1987,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            archive
-                ? l10n.teamWorkspaceArchived
-                : l10n.teamWorkspaceRestored,
+            archive ? l10n.teamWorkspaceArchived : l10n.teamWorkspaceRestored,
           ),
         ),
       );
@@ -2025,9 +2028,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.teamWorkspaceSwitchedTo(row.workspace.name)),
         ),
@@ -2040,9 +2041,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.teamWorkspaceSwitchFailed('$e'))),
       );
     } finally {
@@ -2084,10 +2083,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          l10n.teamWorkspaceIntro,
-          style: theme.textTheme.bodySmall,
-        ),
+        Text(l10n.teamWorkspaceIntro, style: theme.textTheme.bodySmall),
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,

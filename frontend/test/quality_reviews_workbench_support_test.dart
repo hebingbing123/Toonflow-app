@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/quality_reviews/support.dart';
 import 'package:openflow_app/rust_api.dart';
+
+final _zh = AppLocalizationsZh();
 
 void main() {
   test('summarizeQualityReviews compacts review list', () {
@@ -25,7 +28,7 @@ void main() {
         overallScore: 72,
         isBadCase: true,
       ),
-    ]);
+    ], l10n: _zh);
 
     expect(
       summary,
@@ -52,7 +55,7 @@ void main() {
         nonDeliveryPriorityBadCaseCount: 1,
         nonDeliveryPriorityPassRatePercent: 75.0,
       ),
-    ]);
+    ], l10n: _zh);
 
     expect(summary, 'output: total=12, pass=75.0% (delivery=75.0%, non=75.0%)');
   });
@@ -88,7 +91,7 @@ void main() {
         memoryReason:
             'Keep scoped acting memory and keep trimming generic style first.',
       ),
-    ]);
+    ], l10n: _zh);
 
     expect(
       summary,
@@ -156,16 +159,17 @@ void main() {
             },
           },
         ),
+        l10n: _zh,
       );
 
       expect(details, contains('诊断=prompt=420'));
-      expect(details, contains('负向约束=评审+坏例记忆'));
-      expect(details, contains('命中=表演2次/语气'));
-      expect(details, contains('压缩=动作2次'));
-      expect(details, contains('导演让位'));
-      expect(details, contains('参考帧'));
-      expect(details, contains('负向精简=2条/34 chars'));
-      expect(details, contains('记忆层级=项目1/剧本2/角色1'));
+      expect(details, contains('negative constraint=reviews+bad-case memory'));
+      expect(details, contains('hit=表演 2 times/语气'));
+      expect(details, contains('suppressed=动作 2 times'));
+      expect(details, contains('director yield'));
+      expect(details, contains('reference frame'));
+      expect(details, contains('negative slim=2 items/34 chars'));
+      expect(details, contains('memory scope=project 1/script 2/role 1'));
       expect(details, contains('建议='));
     },
   );
@@ -203,14 +207,18 @@ void main() {
             },
           },
         ),
+        l10n: _zh,
       );
 
-      expect(details, contains('回写=正向记忆晋升'));
-      expect(details, contains('镜头12'));
-      expect(details, contains('写入=selected_video_memory'));
-      expect(details, contains('清理=rejected_video_negative_memory'));
-      expect(details, contains('slim 88 chars / 2条（重复 1 / 纯视觉 1）'));
-      expect(details, contains('关注=台词真实/光影真实'));
+      expect(details, contains('回写=promoted selected memory'));
+      expect(details, contains('shot 12'));
+      expect(details, contains('write=selected_video_memory'));
+      expect(details, contains('clear=rejected_video_negative_memory'));
+      expect(
+        details,
+        contains('slim 88 chars / 2 items (dup 1 / visual-only 1)'),
+      );
+      expect(details, contains('watch=dialogue realism/lighting realism'));
     },
   );
 
@@ -241,6 +249,7 @@ void main() {
             },
           },
         ),
+        l10n: _zh,
       );
 
       expect(suggestions, contains('当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。'));
@@ -302,7 +311,7 @@ void main() {
           },
         },
       ),
-    ]);
+    ], l10n: _zh);
 
     expect(summary, contains('auto诊断 2 条'));
     expect(summary, contains('平均 prompt=450 chars'));
@@ -366,7 +375,7 @@ void main() {
             },
           },
         ),
-      ]);
+      ], l10n: _zh);
 
       expect(summary, contains('P12/S7 2条'));
       expect(summary, contains('命中 表演3次 / 语气1次'));
@@ -437,6 +446,7 @@ void main() {
             },
           ),
         ],
+        l10n: _zh,
       );
 
       expect(
@@ -489,7 +499,7 @@ void main() {
           isBadCase: false,
           comments: '画面有点假',
         ),
-      ]);
+      ], l10n: _zh);
 
       expect(
         summary,
@@ -531,6 +541,7 @@ void main() {
             },
           },
         ),
+        l10n: _zh,
       );
 
       expect(suggestions, contains('先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。'));
@@ -581,7 +592,7 @@ void main() {
             },
           },
         ),
-      ]);
+      ], l10n: _zh);
 
       expect(summary, contains('继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。 2次'));
       expect(summary, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。 1次'));
@@ -606,7 +617,7 @@ void main() {
         memoryReason:
             'Project-wide style memory is eating budget; trim generic visual/style lines first.',
       ),
-    ]);
+    ], l10n: _zh);
 
     expect(
       summary,
@@ -654,6 +665,7 @@ void main() {
         ],
         projectId: 7,
         scriptId: 11,
+        l10n: _zh,
       );
 
       expect(summary, startsWith('P7/S11 独立记忆建议：'));
@@ -721,6 +733,7 @@ void main() {
             comments: '台词偏生硬，没有情绪起伏',
           ),
         ],
+        l10n: _zh,
       );
 
       expect(checklist, startsWith('P7/S11 执行清单：'));
@@ -746,7 +759,7 @@ void main() {
           deliveryMemorySharePercent: 8.3,
           memoryDeliveryPriorityApplied: true,
         ),
-      ]);
+      ], l10n: _zh);
 
       expect(
         summary,

@@ -17,7 +17,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     BuildContext? dialogContext,
   }) async {
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('请先选择要启用的镜头', isSuccess: false);
+      showFeedback('Select shots to enable first', isSuccess: false);
       return;
     }
 
@@ -41,7 +41,10 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     }
 
     if (operations.isEmpty) {
-      showFeedback('所选镜头都没有可用的视频 URL', isSuccess: false);
+      showFeedback(
+        'None of the selected shots have a usable video URL',
+        isSuccess: false,
+      );
       return;
     }
 
@@ -49,7 +52,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     if (dialogContext != null && dialogContext.mounted) {
       await _showBatchOperationProgress(
         context: dialogContext,
-        title: '批量启用镜头',
+        title: 'Batch enable shots',
         operations: operations,
         executeOperation: (operation) async {
           await postWorkbenchSelectVideoV1(
@@ -62,7 +65,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         },
         onComplete: (successful, failed, failedItems) async {
           showFeedback(
-            '批量启用完成：成功 $successful 个，失败 $failed 个',
+            'Batch enable finished: succeeded $successful, failed $failed',
             isSuccess: failed == 0,
           );
           await refreshData();
@@ -79,15 +82,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         );
 
         showFeedback(
-          '批量启用完成：成功 ${response.success} 个，失败 ${response.failed} 个',
+          'Batch enable finished: succeeded ${response.success}, failed ${response.failed}',
           isSuccess: response.failed == 0,
         );
 
         await refreshData();
       } on RustApiException catch (e) {
-        showFeedback('批量启用失败：${e.statusCode ?? '-'}', isSuccess: false);
+        showFeedback(
+          'Batch enable failed: ${e.statusCode ?? '-'}',
+          isSuccess: false,
+        );
       } catch (e) {
-        showFeedback('批量启用失败：$e', isSuccess: false);
+        showFeedback('Batch enable failed: $e', isSuccess: false);
       }
     }
   }
@@ -103,7 +109,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     BuildContext? dialogContext,
   }) async {
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('请先选择要禁用的镜头', isSuccess: false);
+      showFeedback('Select shots to disable first', isSuccess: false);
       return;
     }
 
@@ -129,7 +135,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     if (dialogContext != null && dialogContext.mounted) {
       await _showBatchOperationProgress(
         context: dialogContext,
-        title: '批量禁用镜头',
+        title: 'Batch disable shots',
         operations: operations,
         executeOperation: (operation) async {
           await postWorkbenchDeleteVideoV1(
@@ -141,7 +147,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         },
         onComplete: (successful, failed, failedItems) async {
           showFeedback(
-            '批量禁用完成：成功 $successful 个，失败 $failed 个',
+            'Batch disable finished: succeeded $successful, failed $failed',
             isSuccess: failed == 0,
           );
           await refreshData();
@@ -158,15 +164,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         );
 
         showFeedback(
-          '批量禁用完成：成功 ${response.success} 个，失败 ${response.failed} 个',
+          'Batch disable finished: succeeded ${response.success}, failed ${response.failed}',
           isSuccess: response.failed == 0,
         );
 
         await refreshData();
       } on RustApiException catch (e) {
-        showFeedback('批量禁用失败：${e.statusCode ?? '-'}', isSuccess: false);
+        showFeedback(
+          'Batch disable failed: ${e.statusCode ?? '-'}',
+          isSuccess: false,
+        );
       } catch (e) {
-        showFeedback('批量禁用失败：$e', isSuccess: false);
+        showFeedback('Batch disable failed: $e', isSuccess: false);
       }
     }
   }
@@ -182,7 +191,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Future<void> Function() refreshData,
   }) async {
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('请先选择要对齐时长的镜头', isSuccess: false);
+      showFeedback('Select shots to align duration first', isSuccess: false);
       return;
     }
 
@@ -191,27 +200,27 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final duration = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('批量时长对齐'),
+        title: const Text('Batch duration align'),
         content: TextField(
           controller: ctrl,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(
-            labelText: '时长（秒）',
-            hintText: '输入 1~300',
+            labelText: 'Duration (seconds)',
+            hintText: 'Enter 1–300',
           ),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('取消'),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () {
               final sec = int.tryParse(ctrl.text.trim());
               Navigator.of(ctx).pop(sec);
             },
-            child: const Text('对齐并写回'),
+            child: const Text('Align and save'),
           ),
         ],
       ),
@@ -231,7 +240,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     if (context.mounted) {
       await _showBatchOperationProgress(
         context: context,
-        title: '批量时长对齐',
+        title: 'Batch duration align',
         operations: operations,
         executeOperation: (operation) async {
           await postStoryboardUpdateDurationV1(
@@ -244,7 +253,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         },
         onComplete: (successful, failed, failedItems) async {
           showFeedback(
-            '批量时长对齐完成：成功 $successful 个，失败 $failed 个',
+            'Batch duration align finished: succeeded $successful, failed $failed',
             isSuccess: failed == 0,
           );
           await refreshData();
@@ -265,7 +274,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Future<void> Function() refreshData,
   }) async {
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('请先选择要替换的镜头', isSuccess: false);
+      showFeedback('Select shots to replace first', isSuccess: false);
       return;
     }
 
@@ -275,7 +284,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('批量替换视频 URL'),
+        title: const Text('Batch replace video URLs'),
         content: SizedBox(
           width: 500,
           child: Column(
@@ -284,21 +293,21 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
               TextField(
                 controller: patternCtrl,
                 decoration: const InputDecoration(
-                  labelText: '查找模式（支持正则表达式）',
-                  hintText: '例如：/v1/',
+                  labelText: 'Find pattern (regex supported)',
+                  hintText: 'e.g. /v1/',
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: replacementCtrl,
                 decoration: const InputDecoration(
-                  labelText: '替换为',
-                  hintText: '例如：/v2/',
+                  labelText: 'Replace with',
+                  hintText: 'e.g. /v2/',
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                '将对所选镜头的视频 URL 执行查找替换操作',
+                'Find-and-replace runs on each selected shot video URL',
                 style: Theme.of(ctx).textTheme.bodySmall,
               ),
             ],
@@ -307,7 +316,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('取消'),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () {
@@ -316,7 +325,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                 'replacement': replacementCtrl.text.trim(),
               });
             },
-            child: const Text('执行替换'),
+            child: const Text('Apply replacement'),
           ),
         ],
       ),
@@ -359,7 +368,10 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     }
 
     if (operations.isEmpty) {
-      showFeedback('没有镜头需要替换（未匹配到模式）', isSuccess: false);
+      showFeedback(
+        'No shots to replace (pattern did not match)',
+        isSuccess: false,
+      );
       return;
     }
 
@@ -372,15 +384,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       );
 
       showFeedback(
-        '批量替换完成：成功 ${response.success} 个，失败 ${response.failed} 个',
+        'Batch replace finished: succeeded ${response.success}, failed ${response.failed}',
         isSuccess: response.failed == 0,
       );
 
       await refreshData();
     } on RustApiException catch (e) {
-      showFeedback('批量替换失败：${e.statusCode ?? '-'}', isSuccess: false);
+      showFeedback(
+        'Batch replace failed: ${e.statusCode ?? '-'}',
+        isSuccess: false,
+      );
     } catch (e) {
-      showFeedback('批量替换失败：$e', isSuccess: false);
+      showFeedback('Batch replace failed: $e', isSuccess: false);
     }
   }
 
@@ -395,12 +410,15 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final project = _selectedProject;
 
     if (token == null || token.isEmpty || project == null) {
-      showFeedback('无法获取项目信息', isSuccess: false);
+      showFeedback('Cannot load project', isSuccess: false);
       return;
     }
 
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('请先选择要生成配音的镜头', isSuccess: false);
+      showFeedback(
+        'Select shots to generate voiceover first',
+        isSuccess: false,
+      );
       return;
     }
 
@@ -414,7 +432,10 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         .toList();
 
     if (eligibleShots.isEmpty) {
-      showFeedback('所选镜头都没有可用的配音文本', isSuccess: false);
+      showFeedback(
+        'None of the selected shots have usable voiceover text',
+        isSuccess: false,
+      );
       return;
     }
 
@@ -464,7 +485,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
             final progressPercent = (progress * 100).toStringAsFixed(0);
 
             return AlertDialog(
-              title: const Text('批量生成配音'),
+              title: const Text('Batch generate voiceover'),
               content: SizedBox(
                 width: 480,
                 child: Column(
@@ -473,12 +494,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                     LinearProgressIndicator(value: progress),
                     const SizedBox(height: 16),
                     Text(
-                      '进度：$totalProcessed / ${eligibleShots.length} ($progressPercent%)',
+                      'Progress: $totalProcessed / ${eligibleShots.length} ($progressPercent%)',
                       style: Theme.of(ctx).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '成功：$totalSuccessful · 失败：$totalFailed',
+                      'Succeeded: $totalSuccessful · failed: $totalFailed',
                       style: Theme.of(ctx).textTheme.bodyMedium,
                     ),
                     if (failedItems.isNotEmpty) ...[
@@ -486,7 +507,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                       const Divider(),
                       const SizedBox(height: 8),
                       const Text(
-                        '失败项：',
+                        'Failed items:',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
@@ -500,7 +521,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
-                                '分镜 #${item.shotId}: ${item.errorMessage}',
+                                'Shot #${item.shotId}: ${item.errorMessage}',
                                 style: Theme.of(ctx).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(ctx).colorScheme.error,
@@ -518,7 +539,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                 if (totalProcessed >= eligibleShots.length)
                   FilledButton(
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('完成'),
+                    child: const Text('Done'),
                   )
                 else
                   const SizedBox.shrink(),
@@ -545,11 +566,14 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         failedItems.add(
           BatchOperationFailedItem(
             shotId: shot.storyboardNumericId,
-            errorMessage: '${e.statusCode ?? "未知错误"}: ${e.message}',
+            errorMessage: '${e.statusCode ?? "unknown error"}: ${e.message}',
           ),
         );
       }
-      showFeedback('批量配音生成失败：${e.statusCode ?? "-"}', isSuccess: false);
+      showFeedback(
+        'Batch voiceover generation failed: ${e.statusCode ?? "-"}',
+        isSuccess: false,
+      );
     } catch (e) {
       totalProcessed = eligibleShots.length;
       totalFailed = eligibleShots.length;
@@ -561,15 +585,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
           ),
         );
       }
-      showFeedback('批量配音生成失败：$e', isSuccess: false);
+      showFeedback('Batch voiceover generation failed: $e', isSuccess: false);
     }
 
     // Final feedback
     if (totalFailed == 0) {
-      showFeedback('批量配音生成完成：已为 $totalSuccessful 个镜头入队任务', isSuccess: true);
+      showFeedback(
+        'Batch voiceover done: enqueued jobs for $totalSuccessful shot(s)',
+        isSuccess: true,
+      );
     } else {
       showFeedback(
-        '批量配音生成完成：成功 $totalSuccessful，失败 $totalFailed',
+        'Batch voiceover done: succeeded $totalSuccessful, failed $totalFailed',
         isSuccess: false,
       );
     }
@@ -588,12 +615,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final project = _selectedProject;
 
     if (token == null || token.isEmpty || project == null) {
-      showFeedback('无法获取项目信息', isSuccess: false);
+      showFeedback('Cannot load project', isSuccess: false);
       return;
     }
 
     if (!item.voiceoverScriptReady) {
-      showFeedback('该镜头没有可用的配音文本', isSuccess: false);
+      showFeedback('This shot has no usable voiceover text', isSuccess: false);
       return;
     }
 
@@ -621,7 +648,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
             children: [
               CircularProgressIndicator(),
               SizedBox(width: 16),
-              Text('正在生成配音...'),
+              Text('Generating voiceover...'),
             ],
           ),
         );
@@ -649,14 +676,17 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
       if (response.taskId.isNotEmpty) {
         showFeedback(
-          '分镜 #${item.storyboardNumericId} 配音生成任务已入队',
+          'Shot #${item.storyboardNumericId} voiceover job enqueued',
           isSuccess: true,
         );
 
         // Refresh project data to show updated voiceover status
         await _loadProjectOverview();
       } else {
-        showFeedback('配音生成失败：未能创建任务', isSuccess: false);
+        showFeedback(
+          'Voiceover generation failed: could not create task',
+          isSuccess: false,
+        );
       }
     } on RustApiException catch (e) {
       // Close progress dialog
@@ -665,7 +695,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       }
 
       showFeedback(
-        '配音生成失败：${e.statusCode ?? "-"} - ${e.message}',
+        'Voiceover generation failed: ${e.statusCode ?? "-"} - ${e.message}',
         isSuccess: false,
       );
     } catch (e) {
@@ -674,7 +704,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         Navigator.of(context).pop();
       }
 
-      showFeedback('配音生成失败：$e', isSuccess: false);
+      showFeedback('Voiceover generation failed: $e', isSuccess: false);
     }
   }
 
@@ -718,7 +748,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                   failed++;
                   final storyboardId = operation['storyboardId'] as int;
                   final errorMessage = e is RustApiException
-                      ? '错误代码: ${e.statusCode ?? '-'}'
+                      ? 'Error code: ${e.statusCode ?? '-'}'
                       : e.toString();
                   failedItems.add(
                     BatchOperationFailedItem(
@@ -778,7 +808,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                       if (context.mounted) {
                         await _showBatchOperationProgress(
                           context: context,
-                          title: '$title（重试）',
+                          title: '$title (retry)',
                           operations: retryOperations,
                           executeOperation: executeOperation,
                           onComplete: onComplete,

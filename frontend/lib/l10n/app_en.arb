@@ -58,6 +58,40 @@
   "shortVideoSpaceFocusSearch": "Focus search box",
   "shortVideoSpaceUndoOperation": "Undo last operation",
   "shortVideoSpaceRedoOperation": "Redo last operation",
+  "shortVideoSpaceUndoRedoOperationDefault": "Operation",
+  "shortVideoSpaceUndoSucceeded": "Undone: {description}",
+  "@shortVideoSpaceUndoSucceeded": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceUndoFailed": "Undo failed: {error}",
+  "@shortVideoSpaceUndoFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceRedoSucceeded": "Redone: {description}",
+  "@shortVideoSpaceRedoSucceeded": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceRedoFailed": "Redo failed: {error}",
+  "@shortVideoSpaceRedoFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpacePreviewVideoLoadFailed": "Failed to load video",
   "shortVideoSpaceFileOperations": "File Operations",
   "shortVideoSpaceSelectionOperations": "Selection Operations",
   "shortVideoSpaceNavigation": "Navigation",
@@ -8797,8 +8831,8 @@
   "agentWorkspaceProductionPromptExtraConstraint": "额外约束：{constraint}",
   "agentWorkspaceProductionPromptAssetFocus": "资产焦点：{scope}",
   "agentWorkspaceProductionPromptExecutionOrder": "Agent workspace production prompt execution order",
-  "agentWorkspaceProductionStoryboardPriorityMissing": "Agent workspace production storyboard priority missing",
-  "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
+  "agentWorkspaceProductionStoryboardPriorityMissing": "Priority: show missing frame shots",
+  "agentWorkspaceProductionCollapsedRows": "{count} more rows collapsed",
   "agentWorkspaceProductionReviewTarget": "目标：{target}",
   "agentWorkspaceProductionReviewGrade": "等级：{grade}",
   "agentWorkspaceProductionReviewIssues": "issues: severe {severe}, medium {medium}, minor {minor}",
@@ -8833,12 +8867,12 @@
   "agentWorkspaceSummaryReturnedObjectKeys": "返回对象 keys={keys}",
   "agentWorkspaceProductionSummaryFlowEmpty": "Agent workspace production summary flow empty",
   "agentWorkspaceProductionSummaryFlowEmptyString": "Agent workspace production summary flow empty string",
-  "agentWorkspaceProductionSummaryTextChars": "文本 {chars} 字",
-  "agentWorkspaceProductionSummaryLineCount": "行数 {count}",
+  "agentWorkspaceProductionSummaryTextChars": "text {chars} chars",
+  "agentWorkspaceProductionSummaryLineCount": "line count {count}",
   "agentWorkspaceProductionSummaryPlanSections": "计划章节 {count}",
-  "agentWorkspaceProductionSummaryRewriteInherited": "Agent workspace production summary rewrite inherited",
-  "agentWorkspaceProductionSummaryStoryboardRows": "分镜 {count} 条",
-  "agentWorkspaceProductionSummaryLinkedAssets": "关联资产 {count}",
+  "agentWorkspaceProductionSummaryRewriteInherited": "Rewrite constraints inherited",
+  "agentWorkspaceProductionSummaryStoryboardRows": "storyboard table {count} rows",
+  "agentWorkspaceProductionSummaryLinkedAssets": "linked assets {count}",
   "agentWorkspaceProductionSummaryListCount": "列表 {count} 项",
   "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",
   "agentWorkspaceProductionSummaryMediaUrls": "媒体 URL {count}",

@@ -114,6 +114,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoSpaceRedoOperation => 'Redo last operation';
 
   @override
+  String get shortVideoSpaceUndoRedoOperationDefault => 'Operation';
+
+  @override
+  String shortVideoSpaceUndoSucceeded(String description) {
+    return 'Undone: $description';
+  }
+
+  @override
+  String shortVideoSpaceUndoFailed(String error) {
+    return 'Undo failed: $error';
+  }
+
+  @override
+  String shortVideoSpaceRedoSucceeded(String description) {
+    return 'Redone: $description';
+  }
+
+  @override
+  String shortVideoSpaceRedoFailed(String error) {
+    return 'Redo failed: $error';
+  }
+
+  @override
+  String get shortVideoSpacePreviewVideoLoadFailed => 'Failed to load video';
+
+  @override
   String get shortVideoSpaceFileOperations => 'File Operations';
 
   @override
@@ -11977,11 +12003,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceProductionStoryboardPriorityMissing =>
-      'Agent workspace production storyboard priority missing';
+      'Priority: show missing frame shots';
 
   @override
   String agentWorkspaceProductionCollapsedRows(int count) {
-    return '已折叠 $count 行';
+    return '$count more rows collapsed';
   }
 
   @override
@@ -12157,12 +12183,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryTextChars(int chars) {
-    return '文本 $chars 字';
+    return 'text $chars chars';
   }
 
   @override
   String agentWorkspaceProductionSummaryLineCount(int count) {
-    return '行数 $count';
+    return 'line count $count';
   }
 
   @override
@@ -12172,16 +12198,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceProductionSummaryRewriteInherited =>
-      'Agent workspace production summary rewrite inherited';
+      'Rewrite constraints inherited';
 
   @override
   String agentWorkspaceProductionSummaryStoryboardRows(int count) {
-    return '分镜 $count 条';
+    return 'storyboard table $count rows';
   }
 
   @override
   String agentWorkspaceProductionSummaryLinkedAssets(int count) {
-    return '关联资产 $count';
+    return 'linked assets $count';
   }
 
   @override
