@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../config.dart';
 import '../../core.dart';
+import '../project_scope.dart';
 import 'models.dart';
 
 /// `POST /api/v1/production/edit-image/get-image-flow` — OpenAPI `postEditImageGetImageFlowV1`.
@@ -109,9 +110,12 @@ Future<UpdateImageFlowResponseV1> postProductionEditImageUpdateImageFlowV1(
 }
 
 /// `POST /api/v1/production/edit-image/generate-flow-image` — OpenAPI `postEditImageGenerateFlowImageV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required String flowId,
   required String prompt,
@@ -120,12 +124,15 @@ Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/edit-image/generate-flow-image',
   );
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'scriptId': scriptId,
-    'flowId': flowId,
-    'prompt': prompt,
-  };
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'flowId': flowId,
+      'prompt': prompt,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (model != null) body['model'] = model;
   final res = await http
       .post(
@@ -146,14 +153,25 @@ Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
 }
 
 /// `POST /api/v1/production/edit-image/upload-image` — OpenAPI `postProductionEditImageUploadImageV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<EditImageUploadImageResponseV1> postProductionEditImageUploadImageV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required String base64Data,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/edit-image/upload-image',
+  );
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'base64Data': base64Data,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -162,11 +180,7 @@ Future<EditImageUploadImageResponseV1> postProductionEditImageUploadImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'base64Data': base64Data,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400 || res.statusCode == 404) {

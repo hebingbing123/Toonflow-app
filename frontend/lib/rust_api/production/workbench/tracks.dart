@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../config.dart';
 import '../../core.dart';
+import '../project_scope.dart';
 
 /// OpenAPI **`VideoItem`** — video in workbench list.
 class VideoItem {
@@ -69,9 +70,12 @@ class VideoListResponse {
 }
 
 /// `POST /api/v1/production/workbench/get-video-list` — OpenAPI `postWorkbenchGetVideoListV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<VideoListResponse> postWorkbenchGetVideoListV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   int? trackId,
   int limit = 50,
   int offset = 0,
@@ -79,11 +83,11 @@ Future<VideoListResponse> postWorkbenchGetVideoListV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/get-video-list',
   );
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'limit': limit,
-    'offset': offset,
-  };
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'limit': limit, 'offset': offset},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (trackId != null) body['trackId'] = trackId;
   final res = await http
       .post(
@@ -125,19 +129,22 @@ class AddTrackResponse {
 }
 
 /// `POST /api/v1/production/workbench/add-track` — OpenAPI `postWorkbenchAddTrackV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<AddTrackResponse> postWorkbenchAddTrackV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required String trackName,
   String? trackType,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/workbench/add-track');
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'scriptId': scriptId,
-    'trackName': trackName,
-  };
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId, 'trackName': trackName},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (trackType != null) body['trackType'] = trackType;
   final res = await http
       .post(
@@ -173,14 +180,22 @@ class DeleteTrackResponse {
 }
 
 /// `POST /api/v1/production/workbench/delete-track` — OpenAPI `postWorkbenchDeleteTrackV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<DeleteTrackResponse> postWorkbenchDeleteTrackV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int trackId,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/delete-track',
+  );
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId, 'trackId': trackId},
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -189,11 +204,7 @@ Future<DeleteTrackResponse> postWorkbenchDeleteTrackV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'trackId': trackId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
