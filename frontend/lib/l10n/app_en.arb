@@ -6013,6 +6013,122 @@
     }
   },
   "skillsHarnessListSampleEmpty": "—",
+  "storyboardWorkbenchErrNoExportJobSubmitted": "No submitted export job yet.",
+  "storyboardWorkbenchExportCompletedSyncedProduction": "Export finished; production data for this shot was synced automatically.",
+  "storyboardWorkbenchSyncProductionLoadingSummary": "Syncing production data for this shot.",
+  "storyboardWorkbenchSyncProductionLoadingDetail": "When sync completes, the current frame, tracks, and available video settings will refresh.",
+  "storyboardWorkbenchSyncProductionFailedSummary": "Failed to sync production data for this shot.",
+  "storyboardWorkbenchSyncProductionFailedFallbackDetail": "Check that this shot exists on the production side, then try syncing again.",
+  "storyboardWorkbenchRefreshVideoLoadingSummary": "Refreshing video data for this shot.",
+  "storyboardWorkbenchRefreshVideoLoadingDetail": "When refresh completes, model info, rendered videos, and in-flight jobs will update.",
+  "storyboardWorkbenchRefreshVideoFailedSummary": "Failed to refresh video data for this shot.",
+  "storyboardWorkbenchRefreshVideoFailedFallbackDetail": "Try again later, or continue editing images and tracks first.",
+  "storyboardWorkbenchProductionMetaNotLoaded": "Production view not loaded yet",
+  "storyboardWorkbenchProductionMetaSbIndex": "Index {sbIndex}",
+  "@storyboardWorkbenchProductionMetaSbIndex": {
+    "placeholders": {
+      "sbIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardWorkbenchProductionMetaState": "State {state}",
+  "@storyboardWorkbenchProductionMetaState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardWorkbenchProductionMetaDuration": "Duration {duration}",
+  "@storyboardWorkbenchProductionMetaDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardWorkbenchProductionMetaTrack": "Track {trackId}",
+  "@storyboardWorkbenchProductionMetaTrack": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardWorkbenchProductionMetaLoadedEmpty": "Production view loaded",
+  "shortVideoReadinessNoPayloadHeadline": "Shot readiness data is not available yet.",
+  "shortVideoReadinessEmptyProjectHeadline": "This project has no storyboard rows yet; split shots on the script side first to see the rollup.",
+  "shortVideoReadinessRollupHeadline": "{ready}/{total} shots ready; {blocked} blocked.",
+  "@shortVideoReadinessRollupHeadline": {
+    "placeholders": {
+      "ready": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "blocked": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessReasonRollupLine": "{reasonLabel} ({count} shots)",
+  "@shortVideoReadinessReasonRollupLine": {
+    "placeholders": {
+      "reasonLabel": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessStoryboardDetailPrefix": "Shot #{storyboardNumericId}",
+  "@shortVideoReadinessStoryboardDetailPrefix": {
+    "placeholders": {
+      "storyboardNumericId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessScriptSuffix": " · Script #{scriptId}",
+  "@shortVideoReadinessScriptSuffix": {
+    "placeholders": {
+      "scriptId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessSlotSuffix": " · Slot {sbIndex}",
+  "@shortVideoReadinessSlotSuffix": {
+    "placeholders": {
+      "sbIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessBlockedShotDetail": "{lead}: {reasons}",
+  "@shortVideoReadinessBlockedShotDetail": {
+    "placeholders": {
+      "lead": {
+        "type": "String"
+      },
+      "reasons": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoCandidateCompareReadinessNoData": "Readiness data unavailable for this shot.",
+  "shortVideoCandidateCompareReadinessReady": "Ready to continue generating or exporting.",
+  "shortVideoCandidateCompareReadinessBlocked": "Needs {items}",
+  "@shortVideoCandidateCompareReadinessBlocked": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
   "scriptEditorStoryboardsProductionEmptyData": "Production view has no storyboard rows yet.",
   "scriptEditorStoryboardsProductionSummaryLine": "Production view · {count} rows · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {
@@ -6766,59 +6882,89 @@
   "shortVideoSpacePublishAssemblyHeadlineScripts": "{count, plural, =1{1 script} other{{count} scripts}} · {shots} shots (export path snapshot)\nTotal duration: {seconds}s ({formatted})",
   "@shortVideoSpacePublishAssemblyHeadlineScripts": {
     "placeholders": {
-      "count": {"type": "int"},
-      "shots": {"type": "int"},
-      "seconds": {"type": "int"},
-      "formatted": {"type": "String"}
+      "count": {
+        "type": "int"
+      },
+      "shots": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyVoiceProfileNotSet": "Voice profile: Not set",
   "shortVideoSpacePublishAssemblyVoiceProfile": "Voice profile: {profile}",
   "@shortVideoSpacePublishAssemblyVoiceProfile": {
     "placeholders": {
-      "profile": {"type": "String"}
+      "profile": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblySubtitleDefault": "Subtitle: Default",
   "shortVideoSpacePublishAssemblySubtitle": "Subtitle: {style}",
   "@shortVideoSpacePublishAssemblySubtitle": {
     "placeholders": {
-      "style": {"type": "String"}
+      "style": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyBgmNotSpecified": "BGM: Not specified",
   "shortVideoSpacePublishAssemblyBgm": "BGM: {strategy}",
   "@shortVideoSpacePublishAssemblyBgm": {
     "placeholders": {
-      "strategy": {"type": "String"}
+      "strategy": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyEffectiveTts": "Effective TTS (queue/worker): {voice}",
   "@shortVideoSpacePublishAssemblyEffectiveTts": {
     "placeholders": {
-      "voice": {"type": "String"}
+      "voice": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyScriptTitle": "Script #{id}",
   "@shortVideoSpacePublishAssemblyScriptTitle": {
     "placeholders": {
-      "id": {"type": "int"}
+      "id": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyScriptTitleNamed": "Script #{id} · {name}",
   "@shortVideoSpacePublishAssemblyScriptTitleNamed": {
     "placeholders": {
-      "id": {"type": "int"},
-      "name": {"type": "String"}
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyScriptSummary": "{title} · {shots} shots · Final selected {withMedia} · Voiceover ready {voReady}",
   "@shortVideoSpacePublishAssemblyScriptSummary": {
     "placeholders": {
-      "title": {"type": "String"},
-      "shots": {"type": "int"},
-      "withMedia": {"type": "int"},
-      "voReady": {"type": "int"}
+      "title": {
+        "type": "String"
+      },
+      "shots": {
+        "type": "int"
+      },
+      "withMedia": {
+        "type": "int"
+      },
+      "voReady": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyShotPreviewYes": "Preview✓",
@@ -6832,78 +6978,130 @@
   "shortVideoSpacePublishAssemblyShotDetail": "Shot[{order}] · {preview} · {duration} · {subtitle} · {voiceover} · BGM {bgm}",
   "@shortVideoSpacePublishAssemblyShotDetail": {
     "placeholders": {
-      "order": {"type": "String"},
-      "preview": {"type": "String"},
-      "duration": {"type": "String"},
-      "subtitle": {"type": "String"},
-      "voiceover": {"type": "String"},
-      "bgm": {"type": "String"}
+      "order": {
+        "type": "String"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      },
+      "subtitle": {
+        "type": "String"
+      },
+      "voiceover": {
+        "type": "String"
+      },
+      "bgm": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyMoreShots": "…{count} more shots, view in production workspace timeline",
   "@shortVideoSpacePublishAssemblyMoreShots": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyQualityProjectBadCase": "Project-level bad cases pending review: {count} (same source as production overview)",
   "@shortVideoSpacePublishAssemblyQualityProjectBadCase": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyQualityAssemblyReviews": "Reviews on current assembly storyboards: {total} · Bad cases {badCase} · Affected storyboards {shots}",
   "@shortVideoSpacePublishAssemblyQualityAssemblyReviews": {
     "placeholders": {
-      "total": {"type": "int"},
-      "badCase": {"type": "int"},
-      "shots": {"type": "int"}
+      "total": {
+        "type": "int"
+      },
+      "badCase": {
+        "type": "int"
+      },
+      "shots": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyQualityLateStageBadCase": "Late-stage bad cases (storyboard panel/video prompt): {count}",
   "@shortVideoSpacePublishAssemblyQualityLateStageBadCase": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyQualityByStage": "By stage: {stages}",
   "@shortVideoSpacePublishAssemblyQualityByStage": {
     "placeholders": {
-      "stages": {"type": "String"}
+      "stages": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyQualityStageBadCase": "{stage} · Bad cases {count}",
   "@shortVideoSpacePublishAssemblyQualityStageBadCase": {
     "placeholders": {
-      "stage": {"type": "String"},
-      "count": {"type": "int"}
+      "stage": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyQualityTaskCenterHint": "In task center, you can filter quality review list by project; storyboard-level targets match assembly.",
   "shortVideoSpacePublishAssemblyMultiTrackEstimate": "Track usage estimate: Video 1 + Subtitle {subtitle} + Voiceover {voiceover} + BGM {bgm} = {total} tracks.",
   "@shortVideoSpacePublishAssemblyMultiTrackEstimate": {
     "placeholders": {
-      "subtitle": {"type": "int"},
-      "voiceover": {"type": "int"},
-      "bgm": {"type": "int"},
-      "total": {"type": "int"}
+      "subtitle": {
+        "type": "int"
+      },
+      "voiceover": {
+        "type": "int"
+      },
+      "bgm": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyMaterialReady": "Materials ready: Video shots {video}/{totalShots}, Subtitle shots {subtitle}/{totalShots}, Voiceover shots {voiceover}/{totalShots}.",
   "@shortVideoSpacePublishAssemblyMaterialReady": {
     "placeholders": {
-      "video": {"type": "int"},
-      "subtitle": {"type": "int"},
-      "voiceover": {"type": "int"},
-      "totalShots": {"type": "int"}
+      "video": {
+        "type": "int"
+      },
+      "subtitle": {
+        "type": "int"
+      },
+      "voiceover": {
+        "type": "int"
+      },
+      "totalShots": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyDurationEstimate": "Duration estimate: Identified {known}/{total} shots, total duration ~{minutes} minutes.",
   "@shortVideoSpacePublishAssemblyDurationEstimate": {
     "placeholders": {
-      "known": {"type": "int"},
-      "total": {"type": "int"},
-      "minutes": {"type": "String"}
+      "known": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishAssemblyExportDecisionProfessional": "Export decision: Exceeds limited multi-track boundary (>4 tracks or complex duration), recommend professional platform (Requirement 8.2).",
@@ -6927,36 +7125,54 @@
   "shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase": "Quality gate: Warn mode - {count} pending review bad cases (export allowed but recommend fixing).",
   "@shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase": "Quality gate: Block mode - {count} pending review bad cases (blocks export, must fix first).",
   "@shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase": "Quality gate: Block mode - {count} pending review bad cases (not enforced yet).",
   "@shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase": "Quality gate: Block mode - No pending review bad cases (export allowed).",
   "shortVideoSpacePublishExportCheckQualityGateUnknown": "Quality gate: Unknown strategy \"{strategy}\".",
   "@shortVideoSpacePublishExportCheckQualityGateUnknown": {
     "placeholders": {
-      "strategy": {"type": "String"}
+      "strategy": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishExportCheckBlockingIssue": "Script #{scriptId} · Storyboard #{sbId}{sbIndex} · {label} · {detail}",
   "@shortVideoSpacePublishExportCheckBlockingIssue": {
     "placeholders": {
-      "scriptId": {"type": "int"},
-      "sbId": {"type": "int"},
-      "sbIndex": {"type": "String"},
-      "label": {"type": "String"},
-      "detail": {"type": "String"}
+      "scriptId": {
+        "type": "int"
+      },
+      "sbId": {
+        "type": "int"
+      },
+      "sbIndex": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishExportCheckDetailReady": "Blocking count is 0, indicating no hard blocking on server aggregation path (still subject to actual export pipeline).",
@@ -6970,7 +7186,9 @@
   "shortVideoSpacePublishCandidateDetail": "Project has {total} assets; counts aggregated by server in one go (no pagination). Can update via PATCH candidate_status in project area.",
   "@shortVideoSpacePublishCandidateDetail": {
     "placeholders": {
-      "total": {"type": "int"}
+      "total": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelLoadingHeadline": "Loading export check and publish domain…",
@@ -6981,7 +7199,9 @@
   "shortVideoSpacePublishPanelUnavailableExportGateBlocking": "Export check: Still {count} blocking items.",
   "@shortVideoSpacePublishPanelUnavailableExportGateBlocking": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelUnavailableDetail": "Confirm Supabase has applied `app_publish_*` migrations then retry; Rust worker will digest publish job queue in background.",
@@ -6990,20 +7210,28 @@
   "shortVideoSpacePublishPanelExportGateBlocking": "Export check: Still {count} blocking items; can complete fields first then submit job.",
   "@shortVideoSpacePublishPanelExportGateBlocking": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelHeadline": "Connected to publish API: {drafts} drafts · {jobs} jobs.",
   "@shortVideoSpacePublishPanelHeadline": {
     "placeholders": {
-      "drafts": {"type": "int"},
-      "jobs": {"type": "int"}
+      "drafts": {
+        "type": "int"
+      },
+      "jobs": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelCurrentDraft": "Current draft: {title}",
   "@shortVideoSpacePublishPanelCurrentDraft": {
     "placeholders": {
-      "title": {"type": "String"}
+      "title": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelCurrentDraftUntitled": "Current draft: (Untitled)",
@@ -7017,78 +7245,112 @@
   "shortVideoSpacePublishPanelDraftScheduled": " · Scheduled {time}",
   "@shortVideoSpacePublishPanelDraftScheduled": {
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelJobShortId": "{id}…",
   "@shortVideoSpacePublishPanelJobShortId": {
     "placeholders": {
-      "id": {"type": "String"}
+      "id": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelJobError": " · {error}",
   "@shortVideoSpacePublishPanelJobError": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewSucceeded": "Succeeded jobs: {count}",
   "@shortVideoSpacePublishPanelOverviewSucceeded": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewFailed": "Failed/Partial failed: {count}",
   "@shortVideoSpacePublishPanelOverviewFailed": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewAwaiting": "Awaiting confirmation: {count}",
   "@shortVideoSpacePublishPanelOverviewAwaiting": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewScheduled": "Scheduled drafts: {scheduled}/{total}",
   "@shortVideoSpacePublishPanelOverviewScheduled": {
     "placeholders": {
-      "scheduled": {"type": "int"},
-      "total": {"type": "int"}
+      "scheduled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewDeliveryModes": "Delivery modes: {modes}",
   "@shortVideoSpacePublishPanelOverviewDeliveryModes": {
     "placeholders": {
-      "modes": {"type": "String"}
+      "modes": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewPerformanceAlerts": "Low performance alerts: {count} (recommend troubleshooting in task center and rewriting copy)",
   "@shortVideoSpacePublishPanelOverviewPerformanceAlerts": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewPerformanceAlert": "{platform} · Views {views} · Completion {rate}%",
   "@shortVideoSpacePublishPanelOverviewPerformanceAlert": {
     "placeholders": {
-      "platform": {"type": "String"},
-      "views": {"type": "int"},
-      "rate": {"type": "String"}
+      "platform": {
+        "type": "String"
+      },
+      "views": {
+        "type": "int"
+      },
+      "rate": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewAudit": "Audit: {platform} · {status} · mode={mode}",
   "@shortVideoSpacePublishPanelOverviewAudit": {
     "placeholders": {
-      "platform": {"type": "String"},
-      "status": {"type": "String"},
-      "mode": {"type": "String"}
+      "platform": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelOverviewTargetAutomation": "Target automation: {modes}",
   "@shortVideoSpacePublishPanelOverviewTargetAutomation": {
     "placeholders": {
-      "modes": {"type": "String"}
+      "modes": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpacePublishPanelDetail": "Semi-auto jobs need \"Confirm\" when in `awaiting_confirmation`; worker skeleton will write `publish_attempts` placeholder success records.",
@@ -7097,7 +7359,9 @@
   "shortVideoSpaceProductionAssemblyExportStartFailed": "Export start failed: {error}",
   "@shortVideoSpaceProductionAssemblyExportStartFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyReplaceVideoTitle": "Replace current video version",
@@ -7108,46 +7372,62 @@
   "shortVideoSpaceProductionAssemblyShotDisabled": "Shot #{storyboardId} paused (cleared current video).",
   "@shortVideoSpaceProductionAssemblyShotDisabled": {
     "placeholders": {
-      "storyboardId": {"type": "int"}
+      "storyboardId": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyDisableFailed": "Pause failed: {error}",
   "@shortVideoSpaceProductionAssemblyDisableFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyNoVideoUrl": "No available video URL, please enter replacement address first.",
   "shortVideoSpaceProductionAssemblyShotWriteBack": "Shot #{storyboardId} wrote back current video version.",
   "@shortVideoSpaceProductionAssemblyShotWriteBack": {
     "placeholders": {
-      "storyboardId": {"type": "int"}
+      "storyboardId": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyWriteBackFailed": "Write back failed: {error}",
   "@shortVideoSpaceProductionAssemblyWriteBackFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyReorderPersisted": "Persisted shot reorder (wrote back timeline and shot numbers by script).",
   "shortVideoSpaceProductionAssemblyReorderFailed": "Reorder persistence failed: {error}",
   "@shortVideoSpaceProductionAssemblyReorderFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyShotAligned": "Shot #{storyboardId} aligned to {duration}s.",
   "@shortVideoSpaceProductionAssemblyShotAligned": {
     "placeholders": {
-      "storyboardId": {"type": "int"},
-      "duration": {"type": "int"}
+      "storyboardId": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyAlignFailed": "Duration alignment failed: {error}",
   "@shortVideoSpaceProductionAssemblyAlignFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing": "Subtitle exists, but duration not explicit (suggest aligning duration first).",
@@ -7160,8 +7440,12 @@
   "shortVideoSpaceProductionAssemblyTotalDuration": "Total finished duration: {seconds}s ({formatted})",
   "@shortVideoSpaceProductionAssemblyTotalDuration": {
     "placeholders": {
-      "seconds": {"type": "int"},
-      "formatted": {"type": "String"}
+      "seconds": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblySaveReorder": "Save reorder",
@@ -7172,16 +7456,24 @@
   "shortVideoSpaceProductionAssemblyScriptShotOrder": "Script #{scriptId} · Shot #{storyboardId} · Order {order}",
   "@shortVideoSpaceProductionAssemblyScriptShotOrder": {
     "placeholders": {
-      "scriptId": {"type": "int"},
-      "storyboardId": {"type": "int"},
-      "order": {"type": "int"}
+      "scriptId": {
+        "type": "int"
+      },
+      "storyboardId": {
+        "type": "int"
+      },
+      "order": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyStatusPaused": "Status: Paused",
   "shortVideoSpaceProductionAssemblyStatusEnabled": "Status: Enabled ({kind})",
   "@shortVideoSpaceProductionAssemblyStatusEnabled": {
     "placeholders": {
-      "kind": {"type": "String"}
+      "kind": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyDurationLabel": "Duration:",
@@ -7218,15 +7510,21 @@
   "shortVideoSpaceProductionAssemblyStyleUpdated": "Updated assembly-level defaults: subtitle {subtitle} · BGM {bgm}",
   "@shortVideoSpaceProductionAssemblyStyleUpdated": {
     "placeholders": {
-      "subtitle": {"type": "String"},
-      "bgm": {"type": "String"}
+      "subtitle": {
+        "type": "String"
+      },
+      "bgm": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyStyleDefault": "default",
   "shortVideoSpaceProductionAssemblyStyleWriteBackFailed": "Assembly style write back failed: {error}",
   "@shortVideoSpaceProductionAssemblyStyleWriteBackFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle": "Voiceover task center",
@@ -7236,30 +7534,54 @@
   "shortVideoSpaceProductionAssemblyBatchRetryFailed": "Batch retry failed ({count})",
   "@shortVideoSpaceProductionAssemblyBatchRetryFailed": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot": "Filter: Task ID / Script # / Shot #",
   "shortVideoSpaceProductionAssemblyTaskSummary": "Total {total} · queued {queued} · running {running} · succeeded {succeeded} · failed {failed} · cancelled {cancelled} · Showing {filtered}/{visible}",
   "@shortVideoSpaceProductionAssemblyTaskSummary": {
     "placeholders": {
-      "total": {"type": "int"},
-      "queued": {"type": "int"},
-      "running": {"type": "int"},
-      "succeeded": {"type": "int"},
-      "failed": {"type": "int"},
-      "cancelled": {"type": "int"},
-      "filtered": {"type": "int"},
-      "visible": {"type": "int"}
+      "total": {
+        "type": "int"
+      },
+      "queued": {
+        "type": "int"
+      },
+      "running": {
+        "type": "int"
+      },
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "cancelled": {
+        "type": "int"
+      },
+      "filtered": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyNoVoiceoverTasks": "No voiceover tasks yet",
   "shortVideoSpaceProductionAssemblyTaskEntry": "{prefix} {taskId} · Status {status}",
   "@shortVideoSpaceProductionAssemblyTaskEntry": {
     "placeholders": {
-      "prefix": {"type": "String"},
-      "taskId": {"type": "String"},
-      "status": {"type": "String"}
+      "prefix": {
+        "type": "String"
+      },
+      "taskId": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyLatestTask": "Latest task",
@@ -7267,17 +7589,27 @@
   "shortVideoSpaceProductionAssemblyTaskSubtitle": "Script #{scriptId} · Shot #{shotId}{audio}{error}",
   "@shortVideoSpaceProductionAssemblyTaskSubtitle": {
     "placeholders": {
-      "scriptId": {"type": "String"},
-      "shotId": {"type": "String"},
-      "audio": {"type": "String"},
-      "error": {"type": "String"}
+      "scriptId": {
+        "type": "String"
+      },
+      "shotId": {
+        "type": "String"
+      },
+      "audio": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady": " · Audio ready",
   "shortVideoSpaceProductionAssemblyTaskSubtitleError": " · Error: {error}",
   "@shortVideoSpaceProductionAssemblyTaskSubtitleError": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyPreviewAudio": "Preview audio",
@@ -7287,40 +7619,412 @@
   "shortVideoSpaceProductionAssemblyTaskCancelled": "Cancelled voiceover task {taskId}",
   "@shortVideoSpaceProductionAssemblyTaskCancelled": {
     "placeholders": {
-      "taskId": {"type": "String"}
+      "taskId": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyCancelFailed": "Cancel failed: {error}",
   "@shortVideoSpaceProductionAssemblyCancelFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyRetryTask": "Retry",
   "shortVideoSpaceProductionAssemblyTaskRetried": "Retried, task {taskId} queued",
   "@shortVideoSpaceProductionAssemblyTaskRetried": {
     "placeholders": {
-      "taskId": {"type": "String"}
+      "taskId": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyRetryFailed": "Retry failed: {error}",
   "@shortVideoSpaceProductionAssemblyRetryFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyBatchRetryCompleted": "Batch retry completed: succeeded {succeeded}, failed {failed}",
   "@shortVideoSpaceProductionAssemblyBatchRetryCompleted": {
     "placeholders": {
-      "succeeded": {"type": "int"},
-      "failed": {"type": "int"}
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "shortVideoSpaceProductionAssemblyLoadFailed": "Load failed: {error}",
   "@shortVideoSpaceProductionAssemblyLoadFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
-  }
+  },
+  "accountSectionTitle": "Account section title",
+  "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
+  "accountSectionSubtitle": "Account section subtitle",
+  "accountExportTitle": "Account export title",
+  "accountExportCreate": "Account export create",
+  "accountExportIncludeAuditLogs": "Account export include audit logs",
+  "accountExportIncludeNotifications": "Account export include notifications",
+  "accountExportActiveCount": "Account export active count",
+  "accountExportCopyLastSavedPath": "Account export copy last saved path",
+  "accountExportEmpty": "Account export empty",
+  "accountExportDefaultFileName": "Account export default file name",
+  "accountExportTaskLine": "Account export task line",
+  "accountExportSizeLine": "Account export size line",
+  "accountExportSavedSnack": "Account export saved snack",
+  "accountExportDownload": "Account export download",
+  "accountExportCopyFileName": "Account export copy file name",
+  "accountDeleteTitle": "Account delete title",
+  "accountDeleteDescription": "Account delete description",
+  "accountDeleteConfirmLabel": "Account delete confirm label",
+  "accountDeleteIrreversibleAck": "Account delete irreversible ack",
+  "accountDeleteLastResponse": "Account delete last response",
+  "accountDeleteButton": "Account delete button",
+  "accountExportStatusQueued": "Account export status queued",
+  "accountExportStatusRunning": "Account export status running",
+  "accountExportStatusSucceeded": "Account export status succeeded",
+  "accountExportStatusFailed": "Account export status failed",
+  "adminConsoleMembershipItem": "Admin console membership item",
+  "adminConsoleRecentJobItem": "Admin console recent job item",
+  "adminConsoleAuditListItem": "Admin console audit list item",
+  "adminConsoleDailyQuotaLabel": "Admin console daily quota label",
+  "adminConsoleChipMember": "Admin console chip member",
+  "adminConsoleArchivedLabel": "Admin console archived label",
+  "adminConsoleMemberListItem": "Admin console member list item",
+  "adminConsoleRecentProjectItem": "Admin console recent project item",
+  "adminConsoleChipScript": "Admin console chip script",
+  "adminConsoleChipAsset": "Admin console chip asset",
+  "adminConsoleChipJob": "Admin console chip job",
+  "adminConsoleAclMemberItem": "Admin console acl member item",
+  "adminConsoleWorkspaceCandidateItem": "Admin console workspace candidate item",
+  "adminConsoleProjectRecentJobItem": "Admin console project recent job item",
+  "adminConsoleAuditUserSummary": "Admin console audit user summary",
+  "adminConsoleAuditWorkspaceMembership": "Admin console audit workspace membership",
+  "adminConsoleAuditOwnerTransfer": "Admin console audit owner transfer",
+  "adminConsoleAuditArchiveNote": "Admin console audit archive note",
+  "adminConsoleAuditProjectOwnerTransfer": "Admin console audit project owner transfer",
+  "adminConsoleFieldUserId": "Admin console field user id",
+  "adminConsoleFieldCreatedAt": "Admin console field created at",
+  "adminConsoleFieldUpdatedAt": "Admin console field updated at",
+  "adminConsoleFieldOperationalStatus": "Admin console field operational status",
+  "adminConsoleFieldBillingProvider": "Admin console field billing provider",
+  "adminConsoleFieldSubscription": "Admin console field subscription",
+  "adminConsoleFieldCurrentWorkspace": "Admin console field current workspace",
+  "adminConsoleFieldWorkspaceId": "Admin console field workspace id",
+  "adminConsoleFieldOwner": "Admin console field owner",
+  "adminConsoleFieldArchivedAt": "Admin console field archived at",
+  "adminConsoleFieldOpsNote": "Admin console field ops note",
+  "adminConsoleFieldProjectId": "Admin console field project id",
+  "adminConsoleFieldWorkspace": "Admin console field workspace",
+  "adminConsoleFieldProjectArchivedAt": "Admin console field project archived at",
+  "adminConsoleFieldAclMode": "Admin console field acl mode",
+  "adminConsoleFieldEditorCount": "Admin console field editor count",
+  "adminConsoleFieldViewerCount": "Admin console field viewer count",
+  "agentWorkspaceProductionPromptLabel": "Agent workspace production prompt label",
+  "agentWorkspaceProductionPromptHelper": "Agent workspace production prompt helper",
+  "agentWorkspaceProductionRunWorkflow": "Agent workspace production run workflow",
+  "agentWorkspaceProductionDomainToolLabel": "Agent workspace production domain tool label",
+  "agentWorkspaceProductionFlowKeyLabel": "Agent workspace production flow key label",
+  "agentWorkspaceProductionFlowKeyHelper": "Agent workspace production flow key helper",
+  "agentWorkspaceProductionArgsLabel": "Agent workspace production args label",
+  "agentWorkspaceProductionArgsHelper": "Agent workspace production args helper",
+  "agentWorkspaceProductionReadTool": "Agent workspace production read tool",
+  "agentWorkspaceProductionSubAgentToolLabel": "Agent workspace production sub agent tool label",
+  "agentWorkspaceProductionSubAgentArgsLabel": "Agent workspace production sub agent args label",
+  "agentWorkspaceProductionSubAgentArgsHelper": "Agent workspace production sub agent args helper",
+  "agentWorkspaceProductionRunSubAgent": "Agent workspace production run sub agent",
+  "agentWorkspaceProductionWritebackToolResult": "Agent workspace production writeback tool result",
+  "agentWorkspaceProductionArgumentTemplates": "Agent workspace production argument templates",
+  "agentWorkspaceProductionCurrentCandidateArgs": "Agent workspace production current candidate args",
+  "agentWorkspaceProductionCandidateIds": "Agent workspace production candidate ids",
+  "agentWorkspaceProductionPromptPreviewTitle": "Agent workspace production prompt preview title",
+  "agentWorkspaceProductionStagesTitle": "Agent workspace production stages title",
+  "agentWorkspaceProductionFlowChip": "Agent workspace production flow chip",
+  "agentWorkspaceProductionApplyStage": "Agent workspace production apply stage",
+  "agentWorkspaceProductionDiagnosisTitle": "Agent workspace production diagnosis title",
+  "agentWorkspaceProductionToolChip": "Agent workspace production tool chip",
+  "agentWorkspaceProductionAgentChip": "Agent workspace production agent chip",
+  "agentWorkspaceProductionApplySuggestion": "Agent workspace production apply suggestion",
+  "agentWorkspaceProductionStepPullAssetsFlow": "Agent workspace production step pull assets flow",
+  "agentWorkspaceProductionStepRunAssetsSubAgent": "Agent workspace production step run assets sub agent",
+  "agentWorkspaceProductionStepPullStoryboardFlow": "Agent workspace production step pull storyboard flow",
+  "agentWorkspaceProductionStepWritebackFlow": "Agent workspace production step writeback flow",
+  "agentWorkspaceProductionStepRunStoryboardSubAgent": "Agent workspace production step run storyboard sub agent",
+  "agentWorkspaceProductionStepRunDirectorPlanSubAgent": "Agent workspace production step run director plan sub agent",
+  "agentWorkspaceProductionPromptFlowDown": "Agent workspace production prompt flow down",
+  "agentWorkspaceProductionPromptRewriteFocus": "Agent workspace production prompt rewrite focus",
+  "agentWorkspaceProductionPromptVisualPacing": "Agent workspace production prompt visual pacing",
+  "agentWorkspaceProductionPromptExtraConstraint": "Agent workspace production prompt extra constraint",
+  "agentWorkspaceProductionPromptAssetFocus": "Agent workspace production prompt asset focus",
+  "agentWorkspaceProductionPromptExecutionOrder": "Agent workspace production prompt execution order",
+  "agentWorkspaceProductionStoryboardPriorityMissing": "Agent workspace production storyboard priority missing",
+  "agentWorkspaceProductionCollapsedRows": "Agent workspace production collapsed rows",
+  "agentWorkspaceProductionReviewTarget": "Agent workspace production review target",
+  "agentWorkspaceProductionReviewGrade": "Agent workspace production review grade",
+  "agentWorkspaceProductionReviewIssues": "Agent workspace production review issues",
+  "agentWorkspaceProductionReviewNextStep": "Agent workspace production review next step",
+  "agentWorkspaceProductionReviewAssetIds": "Agent workspace production review asset ids",
+  "agentWorkspaceProductionReviewAssetScope": "Agent workspace production review asset scope",
+  "agentWorkspaceProductionReviewStoryboardIds": "Agent workspace production review storyboard ids",
+  "agentWorkspaceProductionReviewSummary": "Agent workspace production review summary",
+  "agentWorkspaceProductionShotLabel": "Agent workspace production shot label",
+  "agentWorkspaceProductionSceneLabel": "Agent workspace production scene label",
+  "agentWorkspaceProductionDurationLabel": "Agent workspace production duration label",
+  "agentWorkspaceProductionAssetsLabel": "Agent workspace production assets label",
+  "agentWorkspaceProductionStateLabel": "Agent workspace production state label",
+  "agentWorkspaceProductionModeTextOnly": "Agent workspace production mode text only",
+  "agentWorkspaceProductionResultHasImage": "Agent workspace production result has image",
+  "agentWorkspaceProductionResultMissingImage": "Agent workspace production result missing image",
+  "agentWorkspaceProductionContextFromTool": "Agent workspace production context from tool",
+  "agentWorkspaceProductionContextDerivedRewrite": "Agent workspace production context derived rewrite",
+  "agentWorkspaceProductionContextDerivedRewriteSubtitle": "Agent workspace production context derived rewrite subtitle",
+  "agentWorkspaceProductionContextReturnList": "Agent workspace production context return list",
+  "agentWorkspaceProductionContextToolText": "Agent workspace production context tool text",
+  "agentWorkspaceProductionContextReviewSummary": "Agent workspace production context review summary",
+  "agentWorkspaceProductionContextSnapshotTitle": "Agent workspace production context snapshot title",
+  "agentWorkspaceSummaryReturnedList": "Agent workspace summary returned list",
+  "agentWorkspaceSummaryReturnedText": "Agent workspace summary returned text",
+  "agentWorkspaceProductionSummaryItems": "Agent workspace production summary items",
+  "agentWorkspaceProductionSummaryReviewHeadline": "Agent workspace production summary review headline",
+  "agentWorkspaceProductionSummaryIssueBreakdown": "Agent workspace production summary issue breakdown",
+  "agentWorkspaceProductionSummaryFocusedAssets": "Agent workspace production summary focused assets",
+  "agentWorkspaceProductionSummaryFocusedAssetScope": "Agent workspace production summary focused asset scope",
+  "agentWorkspaceProductionSummaryFocusedShots": "Agent workspace production summary focused shots",
+  "agentWorkspaceSummaryReturnedObjectKeys": "Agent workspace summary returned object keys",
+  "agentWorkspaceProductionSummaryFlowEmpty": "Agent workspace production summary flow empty",
+  "agentWorkspaceProductionSummaryFlowEmptyString": "Agent workspace production summary flow empty string",
+  "agentWorkspaceProductionSummaryTextChars": "Agent workspace production summary text chars",
+  "agentWorkspaceProductionSummaryLineCount": "Agent workspace production summary line count",
+  "agentWorkspaceProductionSummaryPlanSections": "Agent workspace production summary plan sections",
+  "agentWorkspaceProductionSummaryRewriteInherited": "Agent workspace production summary rewrite inherited",
+  "agentWorkspaceProductionSummaryStoryboardRows": "Agent workspace production summary storyboard rows",
+  "agentWorkspaceProductionSummaryLinkedAssets": "Agent workspace production summary linked assets",
+  "agentWorkspaceProductionSummaryListCount": "Agent workspace production summary list count",
+  "agentWorkspaceProductionSummaryPrompts": "Agent workspace production summary prompts",
+  "agentWorkspaceProductionSummaryMediaUrls": "Agent workspace production summary media urls",
+  "agentWorkspaceProductionSummaryNeedImages": "Agent workspace production summary need images",
+  "agentWorkspaceProductionSummaryMissingFrames": "Agent workspace production summary missing frames",
+  "agentWorkspaceProductionSummaryTextOnlyCount": "Agent workspace production summary text only count",
+  "agentWorkspaceProductionSummaryStateTypes": "Agent workspace production summary state types",
+  "agentWorkspaceProductionSummaryObjectKeyCount": "Agent workspace production summary object key count",
+  "agentWorkspaceProductionSummaryObjectListEntry": "Agent workspace production summary object list entry",
+  "agentWorkspaceProductionSummaryObjectTextEntry": "Agent workspace production summary object text entry",
+  "agentWorkspaceProductionSummaryReturnedType": "Agent workspace production summary returned type",
+  "agentWorkspaceProductionIdleHint": "Agent workspace production idle hint",
+  "agentWorkspaceProductionLatestToolResult": "Agent workspace production latest tool result",
+  "agentWorkspaceProductionResultSummary": "Agent workspace production result summary",
+  "agentWorkspaceProductionSuggestedFlowKey": "Agent workspace production suggested flow key",
+  "agentWorkspaceProductionUseSuggestedFlowKey": "Agent workspace production use suggested flow key",
+  "agentWorkspaceProductionWritebackStrategy": "Agent workspace production writeback strategy",
+  "agentWorkspaceScriptStepFetchPlanData": "Agent workspace script step fetch plan data",
+  "agentWorkspaceScriptStepFetchContent": "Agent workspace script step fetch content",
+  "agentWorkspaceScriptStepGenerateDraft": "Agent workspace script step generate draft",
+  "agentWorkspaceScriptStepWriteback": "Agent workspace script step writeback",
+  "agentWorkspaceScriptPromptLabel": "Agent workspace script prompt label",
+  "agentWorkspaceScriptPromptHelper": "Agent workspace script prompt helper",
+  "agentWorkspaceScriptRunWorkflow": "Agent workspace script run workflow",
+  "agentWorkspaceScriptDomainToolLabel": "Agent workspace script domain tool label",
+  "agentWorkspaceScriptReadContext": "Agent workspace script read context",
+  "agentWorkspaceScriptArgsLabel": "Agent workspace script args label",
+  "agentWorkspaceScriptArgsHelper": "Agent workspace script args helper",
+  "agentWorkspaceScriptSubAgentToolLabel": "Agent workspace script sub agent tool label",
+  "agentWorkspaceScriptRunSubAgent": "Agent workspace script run sub agent",
+  "agentWorkspaceScriptWritebackPlanData": "Agent workspace script writeback plan data",
+  "agentWorkspaceScriptWritebackUpdateData": "Agent workspace script writeback update data",
+  "agentWorkspaceScriptStagesTitle": "Agent workspace script stages title",
+  "agentWorkspaceScriptApplyStage": "Agent workspace script apply stage",
+  "agentWorkspaceScriptAdvanceStage": "Agent workspace script advance stage",
+  "agentWorkspaceScriptDiagnosisTitle": "Agent workspace script diagnosis title",
+  "agentWorkspaceScriptToolChip": "Agent workspace script tool chip",
+  "agentWorkspaceScriptAgentChip": "Agent workspace script agent chip",
+  "agentWorkspaceScriptApplySuggestion": "Agent workspace script apply suggestion",
+  "agentWorkspaceScriptContextSkeletonFocus": "Agent workspace script context skeleton focus",
+  "agentWorkspaceScriptContextAdaptationFocus": "Agent workspace script context adaptation focus",
+  "agentWorkspaceScriptContextExecutionOrder": "Agent workspace script context execution order",
+  "agentWorkspaceScriptContextDialogueConstraint": "Agent workspace script context dialogue constraint",
+  "agentWorkspaceScriptContextStorySkeleton": "Agent workspace script context story skeleton",
+  "agentWorkspaceScriptContextFromPlanData": "Agent workspace script context from plan data",
+  "agentWorkspaceScriptContextAdaptationStrategy": "Agent workspace script context adaptation strategy",
+  "agentWorkspaceScriptContextRewriteConstraints": "Agent workspace script context rewrite constraints",
+  "agentWorkspaceScriptContextRewriteConstraintsSubtitle": "Agent workspace script context rewrite constraints subtitle",
+  "agentWorkspaceScriptContextUntitledScript": "Agent workspace script context untitled script",
+  "agentWorkspaceScriptContextNoBody": "Agent workspace script context no body",
+  "agentWorkspaceScriptContextPlanDrafts": "Agent workspace script context plan drafts",
+  "agentWorkspaceScriptContextPlanDraftsSubtitle": "Agent workspace script context plan drafts subtitle",
+  "agentWorkspaceScriptContextCurrentScriptBody": "Agent workspace script context current script body",
+  "agentWorkspaceScriptContextFromScriptContent": "Agent workspace script context from script content",
+  "agentWorkspaceScriptContextUntitledChapter": "Agent workspace script context untitled chapter",
+  "agentWorkspaceScriptContextChapterPrefix": "Agent workspace script context chapter prefix",
+  "agentWorkspaceScriptContextNovelChapters": "Agent workspace script context novel chapters",
+  "agentWorkspaceScriptContextNovelChaptersSubtitle": "Agent workspace script context novel chapters subtitle",
+  "agentWorkspaceScriptContextUntitledEvent": "Agent workspace script context untitled event",
+  "agentWorkspaceScriptContextNovelEvents": "Agent workspace script context novel events",
+  "agentWorkspaceScriptContextNovelEventsSubtitle": "Agent workspace script context novel events subtitle",
+  "agentWorkspaceScriptContextSnapshotTitle": "Agent workspace script context snapshot title",
+  "agentWorkspaceScriptLatestAssistantResult": "Agent workspace script latest assistant result",
+  "agentWorkspaceScriptWritebackSource": "Agent workspace script writeback source",
+  "agentWorkspaceScriptSummaryReviewReturned": "Agent workspace script summary review returned",
+  "agentWorkspaceScriptSummaryReviewLine": "Agent workspace script summary review line",
+  "agentWorkspaceScriptSummaryPlanDataMissing": "Agent workspace script summary plan data missing",
+  "agentWorkspaceScriptSummaryStorySkeletonReady": "Agent workspace script summary story skeleton ready",
+  "agentWorkspaceScriptSummaryAdaptationReady": "Agent workspace script summary adaptation ready",
+  "agentWorkspaceScriptSummaryPlanScripts": "Agent workspace script summary plan scripts",
+  "agentWorkspaceScriptSummaryRewriteReady": "Agent workspace script summary rewrite ready",
+  "agentWorkspaceScriptSummaryPlanDataReturned": "Agent workspace script summary plan data returned",
+  "agentWorkspaceScriptSummaryScriptEmpty": "Agent workspace script summary script empty",
+  "agentWorkspaceScriptSummaryScriptChars": "Agent workspace script summary script chars",
+  "agentWorkspaceScriptSummaryNovelTextEmpty": "Agent workspace script summary novel text empty",
+  "agentWorkspaceScriptSummaryNovelTextCount": "Agent workspace script summary novel text count",
+  "agentWorkspaceScriptSummaryNovelEventsEmpty": "Agent workspace script summary novel events empty",
+  "agentWorkspaceScriptSummaryNovelEventsCount": "Agent workspace script summary novel events count",
+  "agentWorkspaceScopeProjectIdLabel": "Agent workspace scope project id label",
+  "agentWorkspaceScopeScriptIdLabel": "Agent workspace scope script id label",
+  "agentWorkspaceScopeProjectUuidLabel": "Agent workspace scope project uuid label",
+  "agentWorkspaceScopeScriptUuidLabel": "Agent workspace scope script uuid label",
+  "agentWorkspaceScopeWorkspaceUuidLabel": "Agent workspace scope workspace uuid label",
+  "agentWorkspacePaneScript": "Agent workspace pane script",
+  "agentWorkspacePaneProduction": "Agent workspace pane production",
+  "agentWorkspacePaneActivity": "Agent workspace pane activity",
+  "agentWorkspaceActivityTitle": "Agent workspace activity title",
+  "agentWorkspaceActivityLatest": "Agent workspace activity latest",
+  "agentWorkspaceActivityLatestToolResult": "Agent workspace activity latest tool result",
+  "agentWorkspaceActivityLatestAssistantText": "Agent workspace activity latest assistant text",
+  "agentWorkspaceActivityNoWsEvents": "Agent workspace activity no ws events",
+  "agentWorkspaceProductionCardTitle": "Agent workspace production card title",
+  "agentWorkspaceGuidedTasksTitle": "Agent workspace guided tasks title",
+  "agentWorkspaceScriptWritebackSourceAssistant": "Agent workspace script writeback source assistant",
+  "agentWorkspaceScriptPlanHint": "Agent workspace script plan hint",
+  "agentWorkspaceScriptPlanWritebackReady": "Agent workspace script plan writeback ready",
+  "agentWorkspaceScriptRunningWorkflow": "Agent workspace script running workflow",
+  "agentWorkspaceScriptRunningReadContext": "Agent workspace script running read context",
+  "agentWorkspaceScriptRunningSubAgent": "Agent workspace script running sub agent",
+  "agentWorkspaceScriptRunningWriteback": "Agent workspace script running writeback",
+  "agentWorkspaceScriptRunningWritebackPlan": "Agent workspace script running writeback plan",
+  "agentWorkspaceScriptCardTitle": "Agent workspace script card title",
+  "agentWorkspaceSectionTitle": "Agent workspace section title",
+  "agentWorkspaceSectionDescription": "Agent workspace section description",
+  "contentComplianceTargetProject": "Content compliance target project",
+  "contentComplianceTargetScript": "Content compliance target script",
+  "contentComplianceTargetStoryboard": "Content compliance target storyboard",
+  "contentComplianceTargetAsset": "Content compliance target asset",
+  "contentComplianceTargetNovel": "Content compliance target novel",
+  "contentComplianceTargetUser": "Content compliance target user",
+  "contentComplianceOptionAll": "Content compliance option all",
+  "contentComplianceCategoryCopyright": "Content compliance category copyright",
+  "contentComplianceCategorySafety": "Content compliance category safety",
+  "contentComplianceCategoryHarassment": "Content compliance category harassment",
+  "contentComplianceCategoryAdult": "Content compliance category adult",
+  "contentComplianceCategoryViolence": "Content compliance category violence",
+  "contentComplianceCategorySpam": "Content compliance category spam",
+  "contentComplianceCategoryOther": "Content compliance category other",
+  "contentComplianceSeverityLow": "Content compliance severity low",
+  "contentComplianceSeverityMedium": "Content compliance severity medium",
+  "contentComplianceSeverityHigh": "Content compliance severity high",
+  "contentComplianceSeverityCritical": "Content compliance severity critical",
+  "contentComplianceStatusPending": "Content compliance status pending",
+  "contentComplianceStatusClaimed": "Content compliance status claimed",
+  "contentComplianceStatusResolved": "Content compliance status resolved",
+  "contentComplianceStatusDismissed": "Content compliance status dismissed",
+  "contentComplianceSlaOpenOver24h": "Content compliance sla open over24h",
+  "contentComplianceSlaOpenOver72h": "Content compliance sla open over72h",
+  "contentComplianceSlaClaimedOver24h": "Content compliance sla claimed over24h",
+  "contentComplianceFieldTargetType": "Content compliance field target type",
+  "contentComplianceFieldCategory": "Content compliance field category",
+  "contentComplianceFieldSeverity": "Content compliance field severity",
+  "contentComplianceFieldTargetUuid": "Content compliance field target uuid",
+  "contentComplianceFieldStatus": "Content compliance field status",
+  "contentComplianceSlaChip": "Content compliance sla chip",
+  "contentComplianceMetricPending": "Content compliance metric pending",
+  "contentComplianceMetricClaimed": "Content compliance metric claimed",
+  "contentComplianceMetricResolved": "Content compliance metric resolved",
+  "contentComplianceMetricDismissed": "Content compliance metric dismissed",
+  "contentComplianceMetricCritical": "Content compliance metric critical",
+  "contentComplianceMetricHigh": "Content compliance metric high",
+  "contentComplianceOldestHours": "Content compliance oldest hours",
+  "contentComplianceCapacityPerReviewer": "Content compliance capacity per reviewer",
+  "contentComplianceOwnerCounts": "Content compliance owner counts",
+  "contentComplianceOwnerDetail": "Content compliance owner detail",
+  "contentComplianceWorkspaceCounts": "Content compliance workspace counts",
+  "contentComplianceWorkspaceDetail": "Content compliance workspace detail",
+  "contentComplianceReportInfo": "Content compliance report info",
+  "contentComplianceResolutionLine": "Content compliance resolution line",
+  "contentComplianceActionClaim": "Content compliance action claim",
+  "contentComplianceActionResolve": "Content compliance action resolve",
+  "contentComplianceActionDismiss": "Content compliance action dismiss",
+  "contentComplianceFieldDisposition": "Content compliance field disposition",
+  "contentComplianceDispositionNone": "Content compliance disposition none",
+  "contentComplianceDispositionArchiveProject": "Content compliance disposition archive project",
+  "contentComplianceDispositionSuspendUser": "Content compliance disposition suspend user",
+  "contentComplianceFieldResolutionNote": "Content compliance field resolution note",
+  "jobsEmptyValue": "Jobs empty value",
+  "jobsKindCountEntry": "Jobs kind count entry",
+  "jobsStatusCountEntry": "Jobs status count entry",
+  "jobsIdempotencyMismatch": "Jobs idempotency mismatch",
+  "jobsUpdatedAt": "Jobs updated at",
+  "jobsClaimedBy": "Jobs claimed by",
+  "jobsFailedReason": "Jobs failed reason",
+  "jobsTitle": "Jobs title",
+  "jobsPrefsTooltip": "Jobs prefs tooltip",
+  "jobsSubtitle": "Jobs subtitle",
+  "jobsLoadList": "Jobs load list",
+  "jobsLoadFailed": "Jobs load failed",
+  "jobsLoadKinds": "Jobs load kinds",
+  "jobsLoadKindSummary": "Jobs load kind summary",
+  "jobsLoadStatusSummary": "Jobs load status summary",
+  "jobsCompatTitle": "Jobs compat title",
+  "jobsCompatSubtitle": "Jobs compat subtitle",
+  "jobsCompatHttpProbeFilters": "Jobs compat http probe filters",
+  "jobsFilterFlutterProbe": "Jobs filter flutter probe",
+  "jobsFilterFlutterProbeQueued": "Jobs filter flutter probe queued",
+  "jobsCreateProbeJob": "Jobs create probe job",
+  "jobsJobIdLabel": "Jobs job id label",
+  "jobsFetchDetail": "Jobs fetch detail",
+  "jobsDetailLabel": "Jobs detail label",
+  "jobsKindsLabel": "Jobs kinds label",
+  "jobsKindSummaryLabel": "Jobs kind summary label",
+  "jobsStatusSummaryLabel": "Jobs status summary label",
+  "jobsCountLabel": "Jobs count label",
+  "jobsRetry": "Jobs retry",
+  "jobsCancel": "Jobs cancel",
+  "notificationsRealtimeDisconnected": "Notifications realtime disconnected",
+  "notificationsPlatformStatusRecovered": "Notifications platform status recovered",
+  "notificationsPlatformStatusDegraded": "Notifications platform status degraded",
+  "notificationsPlatformStatusRecoveredMessage": "Notifications platform status recovered message",
+  "notificationsPlatformStatusDegradedMessage": "Notifications platform status degraded message",
+  "notificationsPlatformStatusAffectedEndpoints": "Notifications platform status affected endpoints",
+  "notificationsComplianceAlertTitle": "Notifications compliance alert title",
+  "notificationsDownloadUnsupported": "Notifications download unsupported",
+  "notificationsComplianceSharedAsyncExportCompleted": "Notifications compliance shared async export completed",
+  "notificationsComplianceSharedAsyncExportCancelled": "Notifications compliance shared async export cancelled",
+  "notificationsComplianceSharedAsyncExportFailed": "Notifications compliance shared async export failed",
+  "notificationsComplianceSharedAsyncExportFailedWithDetail": "Notifications compliance shared async export failed with detail",
+  "notificationsComplianceSharedAsyncExportTimedOut": "Notifications compliance shared async export timed out",
+  "notificationsImportJsonObjectRequired": "Notifications import json object required",
+  "notificationsImportJsonParseFailed": "Notifications import json parse failed",
+  "notificationsUnknownTemplate": "Notifications unknown template",
+  "platformStatusChipLabel": "Platform status chip label",
+  "opsWhActivityEntryTitle": "Ops wh activity entry title",
+  "opsWhFieldId": "Ops wh field id",
+  "opsWhFieldCreatedAt": "Ops wh field created at",
+  "opsWhFieldUpdatedAt": "Ops wh field updated at",
+  "opsWhApiEventTypes": "Ops wh api event types",
+  "billingAuditEventTypeLabel": "Billing audit event type label",
+  "billingAuditProviderEventIdLabel": "Billing audit provider event id label",
+  "billingAuditRawEventIdLabel": "Billing audit raw event id label",
+  "billingAuditProviderEventIdPrefixLabel": "Billing audit provider event id prefix label",
+  "billingAuditRawEventIdPrefixLabel": "Billing audit raw event id prefix label",
+  "billingAuditEventCreatedFromLabel": "Billing audit event created from label",
+  "billingAuditEventCreatedToLabel": "Billing audit event created to label",
+  "billingAuditCreatedFromLabel": "Billing audit created from label",
+  "billingAuditCreatedToLabel": "Billing audit created to label"
 }
-

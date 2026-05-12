@@ -9,6 +9,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
 import 'l10n/app_localizations.dart';
+import 'l10n/short_video_readiness_localized.dart';
 import 'locale/app_locale_notifier.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
 import 'global_search/global_search_bar.dart';

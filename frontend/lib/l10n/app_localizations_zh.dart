@@ -7684,6 +7684,115 @@ class AppLocalizationsZh extends AppLocalizations {
   String get skillsHarnessListSampleEmpty => '—';
 
   @override
+  String get storyboardWorkbenchErrNoExportJobSubmitted => '当前还没有已提交的导出任务';
+
+  @override
+  String get storyboardWorkbenchExportCompletedSyncedProduction =>
+      '导出任务已完成，已自动同步当前分镜制作数据。';
+
+  @override
+  String get storyboardWorkbenchSyncProductionLoadingSummary => '正在同步当前分镜制作数据。';
+
+  @override
+  String get storyboardWorkbenchSyncProductionLoadingDetail =>
+      '同步完成后会自动回填当前画面、轨道和可用视频参数。';
+
+  @override
+  String get storyboardWorkbenchSyncProductionFailedSummary => '同步当前分镜制作数据失败。';
+
+  @override
+  String get storyboardWorkbenchSyncProductionFailedFallbackDetail =>
+      '可先检查当前分镜是否已在 production 侧生成，再重新同步。';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoLoadingSummary => '正在刷新当前分镜的视频数据。';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoLoadingDetail =>
+      '刷新完成后会同步模型信息、已生成视频和进行中的任务。';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoFailedSummary => '刷新当前分镜的视频数据失败。';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoFailedFallbackDetail =>
+      '可稍后重试，或先继续维护图片和轨道信息。';
+
+  @override
+  String get storyboardWorkbenchProductionMetaNotLoaded => '制作视图尚未加载';
+
+  @override
+  String storyboardWorkbenchProductionMetaSbIndex(int sbIndex) {
+    return '序号 $sbIndex';
+  }
+
+  @override
+  String storyboardWorkbenchProductionMetaState(String state) {
+    return '状态 $state';
+  }
+
+  @override
+  String storyboardWorkbenchProductionMetaDuration(String duration) {
+    return '时长 $duration';
+  }
+
+  @override
+  String storyboardWorkbenchProductionMetaTrack(int trackId) {
+    return '轨道 $trackId';
+  }
+
+  @override
+  String get storyboardWorkbenchProductionMetaLoadedEmpty => '制作视图已加载';
+
+  @override
+  String get shortVideoReadinessNoPayloadHeadline => '还没有读取到分镜就绪数据。';
+
+  @override
+  String get shortVideoReadinessEmptyProjectHeadline =>
+      '当前项目还没有分镜行，可先在脚本侧拆镜后再看聚合。';
+
+  @override
+  String shortVideoReadinessRollupHeadline(int ready, int total, int blocked) {
+    return '就绪 $ready/$total 条分镜；阻塞 $blocked 条。';
+  }
+
+  @override
+  String shortVideoReadinessReasonRollupLine(String reasonLabel, int count) {
+    return '$reasonLabel（$count 条分镜）';
+  }
+
+  @override
+  String shortVideoReadinessStoryboardDetailPrefix(int storyboardNumericId) {
+    return '分镜 #$storyboardNumericId';
+  }
+
+  @override
+  String shortVideoReadinessScriptSuffix(int scriptId) {
+    return ' · 脚本 #$scriptId';
+  }
+
+  @override
+  String shortVideoReadinessSlotSuffix(int sbIndex) {
+    return ' · 镜位 $sbIndex';
+  }
+
+  @override
+  String shortVideoReadinessBlockedShotDetail(String lead, String reasons) {
+    return '$lead：$reasons';
+  }
+
+  @override
+  String get shortVideoCandidateCompareReadinessNoData => 'readiness 暂无数据';
+
+  @override
+  String get shortVideoCandidateCompareReadinessReady => '已就绪，可继续生成/导出';
+
+  @override
+  String shortVideoCandidateCompareReadinessBlocked(String items) {
+    return '待补 $items';
+  }
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData => '制作视图当前没有分镜数据';
 
   @override
@@ -9481,4 +9590,1180 @@ class AppLocalizationsZh extends AppLocalizations {
   String shortVideoSpaceProductionAssemblyLoadFailed(String error) {
     return 'Load failed: $error';
   }
+
+  @override
+  String get accountSectionTitle => '账户与隐私';
+
+  @override
+  String get accountRiskyPrefsTooltip => '本机客户端偏好（删号、导出等「不再提示」与恢复确认）';
+
+  @override
+  String get accountSectionSubtitle =>
+      '统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。';
+
+  @override
+  String get accountExportTitle => '数据导出';
+
+  @override
+  String get accountExportCreate => '创建导出包';
+
+  @override
+  String get accountExportIncludeAuditLogs => '包含审计日志';
+
+  @override
+  String get accountExportIncludeNotifications => '包含通知记录';
+
+  @override
+  String get accountExportActiveCount => '包含通知记录';
+
+  @override
+  String get accountExportCopyLastSavedPath => '复制最近保存路径';
+
+  @override
+  String get accountExportEmpty => '还没有账户导出记录。';
+
+  @override
+  String get accountExportDefaultFileName => '账户导出 #...';
+
+  @override
+  String get accountExportTaskLine => '任务 #... · ...';
+
+  @override
+  String get accountExportSizeLine => '大小 ...';
+
+  @override
+  String get accountExportSavedSnack => '已保存导出包：\$path';
+
+  @override
+  String get accountExportDownload => '下载到本机';
+
+  @override
+  String get accountExportCopyFileName => '复制文件名';
+
+  @override
+  String get accountDeleteTitle => '删除账号';
+
+  @override
+  String get accountDeleteDescription =>
+      '删号会删除当前用户、其 owner workspace、个人项目、任务、通知和本地导出/媒体目录。共享 workspace 中的成员关系也会移除。';
+
+  @override
+  String get accountDeleteConfirmLabel => '输入 DELETE MY ACCOUNT 以确认';
+
+  @override
+  String get accountDeleteIrreversibleAck =>
+      '我确认这是不可逆操作，并接受相关 workspace / project 级联删除。';
+
+  @override
+  String get accountDeleteLastResponse => 'job ...';
+
+  @override
+  String get accountDeleteButton => '永久删除当前账号';
+
+  @override
+  String get accountExportStatusQueued => '生成中';
+
+  @override
+  String get accountExportStatusRunning => '可下载';
+
+  @override
+  String get accountExportStatusSucceeded => '可下载';
+
+  @override
+  String get accountExportStatusFailed => '可下载';
+
+  @override
+  String get adminConsoleMembershipItem => '...';
+
+  @override
+  String get adminConsoleRecentJobItem => '... · ... · project ...';
+
+  @override
+  String get adminConsoleAuditListItem => '... · ... · ...';
+
+  @override
+  String get adminConsoleDailyQuotaLabel => 'dailyJobQuota';
+
+  @override
+  String get adminConsoleChipMember => 'archived';
+
+  @override
+  String get adminConsoleArchivedLabel => 'archived';
+
+  @override
+  String get adminConsoleMemberListItem => '... · ... · joined ...';
+
+  @override
+  String get adminConsoleRecentProjectItem => '#... ...';
+
+  @override
+  String get adminConsoleChipScript => 'active job ...';
+
+  @override
+  String get adminConsoleChipAsset => 'active job ...';
+
+  @override
+  String get adminConsoleChipJob => 'active job ...';
+
+  @override
+  String get adminConsoleAclMemberItem =>
+      '... · workspace ... · project ... · ...';
+
+  @override
+  String get adminConsoleWorkspaceCandidateItem => '... · ... · explicit ...';
+
+  @override
+  String get adminConsoleProjectRecentJobItem => '... · ... · ... · ...';
+
+  @override
+  String get adminConsoleAuditUserSummary => 'status=\$nextStatus · quota=...';
+
+  @override
+  String get adminConsoleAuditWorkspaceMembership =>
+      'action=\$action · user=...';
+
+  @override
+  String get adminConsoleAuditOwnerTransfer => 'owner=...';
+
+  @override
+  String get adminConsoleAuditArchiveNote =>
+      'archivedAt=\$nextArchived · opsNote=...';
+
+  @override
+  String get adminConsoleAuditProjectOwnerTransfer => 'owner=...';
+
+  @override
+  String get adminConsoleFieldUserId =>
+      'archivedAt=\$nextArchived · opsNote=...';
+
+  @override
+  String get adminConsoleFieldCreatedAt => 'admin console field created at';
+
+  @override
+  String get adminConsoleFieldUpdatedAt => 'admin console field updated at';
+
+  @override
+  String get adminConsoleFieldOperationalStatus =>
+      'admin console field operational status';
+
+  @override
+  String get adminConsoleFieldBillingProvider =>
+      'admin console field billing provider';
+
+  @override
+  String get adminConsoleFieldSubscription =>
+      'admin console field subscription';
+
+  @override
+  String get adminConsoleFieldCurrentWorkspace =>
+      'admin console field current workspace';
+
+  @override
+  String get adminConsoleFieldWorkspaceId => 'admin console field workspace id';
+
+  @override
+  String get adminConsoleFieldOwner => 'admin console field owner';
+
+  @override
+  String get adminConsoleFieldArchivedAt => 'admin console field archived at';
+
+  @override
+  String get adminConsoleFieldOpsNote => 'admin console field ops note';
+
+  @override
+  String get adminConsoleFieldProjectId => 'admin console field project id';
+
+  @override
+  String get adminConsoleFieldWorkspace => 'admin console field workspace';
+
+  @override
+  String get adminConsoleFieldProjectArchivedAt =>
+      'admin console field project archived at';
+
+  @override
+  String get adminConsoleFieldAclMode => 'admin console field acl mode';
+
+  @override
+  String get adminConsoleFieldEditorCount => 'admin console field editor count';
+
+  @override
+  String get adminConsoleFieldViewerCount => 'admin console field viewer count';
+
+  @override
+  String get agentWorkspaceProductionPromptLabel => '用于制作通道 harness.agent.run';
+
+  @override
+  String get agentWorkspaceProductionPromptHelper => '用于制作通道 harness.agent.run';
+
+  @override
+  String get agentWorkspaceProductionRunWorkflow => '运行制作工作流';
+
+  @override
+  String get agentWorkspaceProductionDomainToolLabel => '制作域工具';
+
+  @override
+  String get agentWorkspaceProductionFlowKeyLabel =>
+      '作为 get_flowData key 和写回 key';
+
+  @override
+  String get agentWorkspaceProductionFlowKeyHelper =>
+      '作为 get_flowData key 和写回 key';
+
+  @override
+  String get agentWorkspaceProductionArgsLabel =>
+      '非 get_flowData 时使用，例如 ids:[1,2]（JSON）';
+
+  @override
+  String get agentWorkspaceProductionArgsHelper =>
+      '非 get_flowData 时使用，例如 ids:[1,2]（JSON）';
+
+  @override
+  String get agentWorkspaceProductionReadTool => '读取制作工具';
+
+  @override
+  String get agentWorkspaceProductionSubAgentToolLabel => '制作子代理工具';
+
+  @override
+  String get agentWorkspaceProductionSubAgentArgsLabel =>
+      '例如 storyboardIds:[1,2]，assetIds:[7,12]（JSON）';
+
+  @override
+  String get agentWorkspaceProductionSubAgentArgsHelper =>
+      '例如 storyboardIds:[1,2]，assetIds:[7,12]（JSON）';
+
+  @override
+  String get agentWorkspaceProductionRunSubAgent => '运行子代理';
+
+  @override
+  String get agentWorkspaceProductionWritebackToolResult => '写回工具结果';
+
+  @override
+  String get agentWorkspaceProductionArgumentTemplates => '参数模板';
+
+  @override
+  String get agentWorkspaceProductionCurrentCandidateArgs => '当前结果候选参数';
+
+  @override
+  String get agentWorkspaceProductionCandidateIds => '候选 ... 项：......';
+
+  @override
+  String get agentWorkspaceProductionPromptPreviewTitle => '执行提示';
+
+  @override
+  String get agentWorkspaceProductionStagesTitle => '执行阶段';
+
+  @override
+  String get agentWorkspaceProductionFlowChip => 'flow=...';
+
+  @override
+  String get agentWorkspaceProductionApplyStage => '应用阶段';
+
+  @override
+  String get agentWorkspaceProductionDiagnosisTitle => '下一步建议';
+
+  @override
+  String get agentWorkspaceProductionToolChip => 'tool=...';
+
+  @override
+  String get agentWorkspaceProductionAgentChip => 'agent=...';
+
+  @override
+  String get agentWorkspaceProductionApplySuggestion => '应用建议';
+
+  @override
+  String get agentWorkspaceProductionStepPullAssetsFlow => '1) 拉取资产 flow';
+
+  @override
+  String get agentWorkspaceProductionStepRunAssetsSubAgent => '2) 运行资产子代理';
+
+  @override
+  String get agentWorkspaceProductionStepPullStoryboardFlow => '3) 拉取分镜 flow';
+
+  @override
+  String get agentWorkspaceProductionStepWritebackFlow => '4) 写回 flow';
+
+  @override
+  String get agentWorkspaceProductionStepRunStoryboardSubAgent => '5) 运行分镜子代理';
+
+  @override
+  String get agentWorkspaceProductionStepRunDirectorPlanSubAgent =>
+      '6) 运行导演计划子代理';
+
+  @override
+  String get agentWorkspaceProductionPromptFlowDown =>
+      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。';
+
+  @override
+  String get agentWorkspaceProductionPromptRewriteFocus =>
+      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。';
+
+  @override
+  String get agentWorkspaceProductionPromptVisualPacing =>
+      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。';
+
+  @override
+  String get agentWorkspaceProductionPromptExtraConstraint =>
+      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。';
+
+  @override
+  String get agentWorkspaceProductionPromptAssetFocus =>
+      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。';
+
+  @override
+  String get agentWorkspaceProductionPromptExecutionOrder =>
+      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。';
+
+  @override
+  String get agentWorkspaceProductionStoryboardPriorityMissing =>
+      '其余 \$hiddenCount 行已折叠';
+
+  @override
+  String get agentWorkspaceProductionCollapsedRows => '其余 \$hiddenCount 行已折叠';
+
+  @override
+  String get agentWorkspaceProductionReviewTarget => '聚焦资产: ...';
+
+  @override
+  String get agentWorkspaceProductionReviewGrade => '聚焦资产: ...';
+
+  @override
+  String get agentWorkspaceProductionReviewIssues => '聚焦资产: ...';
+
+  @override
+  String get agentWorkspaceProductionReviewNextStep => '聚焦资产: ...';
+
+  @override
+  String get agentWorkspaceProductionReviewAssetIds => '聚焦资产范围: ...';
+
+  @override
+  String get agentWorkspaceProductionReviewAssetScope => '聚焦资产范围: ...';
+
+  @override
+  String get agentWorkspaceProductionReviewStoryboardIds => '结论: ...';
+
+  @override
+  String get agentWorkspaceProductionReviewSummary => '结论: ...';
+
+  @override
+  String get agentWorkspaceProductionShotLabel => '时长: \$duration';
+
+  @override
+  String get agentWorkspaceProductionSceneLabel => '时长: \$duration';
+
+  @override
+  String get agentWorkspaceProductionDurationLabel => '资产: ...';
+
+  @override
+  String get agentWorkspaceProductionAssetsLabel => '资产: ...';
+
+  @override
+  String get agentWorkspaceProductionStateLabel => '模式: 纯文本';
+
+  @override
+  String get agentWorkspaceProductionModeTextOnly => '结果: 已有画面';
+
+  @override
+  String get agentWorkspaceProductionResultHasImage => '结果: 缺帧待补图';
+
+  @override
+  String get agentWorkspaceProductionResultMissingImage => '资产: ...';
+
+  @override
+  String get agentWorkspaceProductionContextFromTool => '来自 \$toolName';
+
+  @override
+  String get agentWorkspaceProductionContextDerivedRewrite =>
+      '由 scriptPlan 派生的 production 执行提示';
+
+  @override
+  String get agentWorkspaceProductionContextDerivedRewriteSubtitle =>
+      '由 scriptPlan 派生的 production 执行提示';
+
+  @override
+  String get agentWorkspaceProductionContextReturnList => '来自 \$toolName';
+
+  @override
+  String get agentWorkspaceProductionContextToolText => '工具返回文本';
+
+  @override
+  String get agentWorkspaceProductionContextReviewSummary => '来自 \$toolName';
+
+  @override
+  String get agentWorkspaceProductionContextSnapshotTitle => '上下文快照';
+
+  @override
+  String get agentWorkspaceSummaryReturnedList => '返回列表 ... 项';
+
+  @override
+  String get agentWorkspaceSummaryReturnedText => '返回文本 ... 字';
+
+  @override
+  String get agentWorkspaceProductionSummaryItems => '返回 items ... 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryReviewHeadline => '聚焦资产 ... 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryIssueBreakdown => '聚焦资产 ... 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryFocusedAssets =>
+      'agent workspace production summary focused assets';
+
+  @override
+  String get agentWorkspaceProductionSummaryFocusedAssetScope => '聚焦资产范围 ...';
+
+  @override
+  String get agentWorkspaceProductionSummaryFocusedShots => '聚焦镜头 ... 项';
+
+  @override
+  String get agentWorkspaceSummaryReturnedObjectKeys => '返回对象 keys=...';
+
+  @override
+  String get agentWorkspaceProductionSummaryFlowEmpty => '当前 flow 为空';
+
+  @override
+  String get agentWorkspaceProductionSummaryFlowEmptyString => '当前 flow 为空字符串';
+
+  @override
+  String get agentWorkspaceProductionSummaryTextChars => '已承接改写约束';
+
+  @override
+  String get agentWorkspaceProductionSummaryLineCount => '已承接改写约束';
+
+  @override
+  String get agentWorkspaceProductionSummaryPlanSections => '已承接改写约束';
+
+  @override
+  String get agentWorkspaceProductionSummaryRewriteInherited => '已承接改写约束';
+
+  @override
+  String get agentWorkspaceProductionSummaryStoryboardRows =>
+      '关联资产 \$assetCount 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryLinkedAssets =>
+      '关联资产 \$assetCount 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryListCount => '含媒体地址 \$withUrl 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryPrompts => '含媒体地址 \$withUrl 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryMediaUrls => '含媒体地址 \$withUrl 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryNeedImages =>
+      '纯文本 \$skippedCount 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryMissingFrames =>
+      '纯文本 \$skippedCount 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryTextOnlyCount =>
+      'agent workspace production summary text only count';
+
+  @override
+  String get agentWorkspaceProductionSummaryStateTypes => '状态种类 \$states 个';
+
+  @override
+  String get agentWorkspaceProductionSummaryObjectKeyCount => '对象 keys=... 个';
+
+  @override
+  String get agentWorkspaceProductionSummaryObjectListEntry => '...: ... 项';
+
+  @override
+  String get agentWorkspaceProductionSummaryObjectTextEntry => '...: ... 字';
+
+  @override
+  String get agentWorkspaceProductionSummaryReturnedType => '返回 ...';
+
+  @override
+  String get agentWorkspaceProductionIdleHint => '等待执行：可直接用引导任务或表单按钮。';
+
+  @override
+  String get agentWorkspaceProductionLatestToolResult =>
+      '最新工具结果：\$workspaceLastToolResultLine';
+
+  @override
+  String get agentWorkspaceProductionResultSummary => '结果摘要';
+
+  @override
+  String get agentWorkspaceProductionSuggestedFlowKey =>
+      '建议写回 key：\$suggestedFlowKeyLine';
+
+  @override
+  String get agentWorkspaceProductionUseSuggestedFlowKey => '使用该 key';
+
+  @override
+  String get agentWorkspaceProductionWritebackStrategy =>
+      '核心 key 回写策略：get_flowData 直接写回；资产/分镜/导演计划相关工具会先刷新对应 flow key 再写回。';
+
+  @override
+  String get agentWorkspaceScriptStepFetchPlanData => '1) 拉取 planData';
+
+  @override
+  String get agentWorkspaceScriptStepFetchContent => '2) 拉取剧本正文';
+
+  @override
+  String get agentWorkspaceScriptStepGenerateDraft => '3) 生成剧本草稿';
+
+  @override
+  String get agentWorkspaceScriptStepWriteback => '4) 写回剧本';
+
+  @override
+  String get agentWorkspaceScriptPromptLabel => '用于剧本通道 harness.agent.run';
+
+  @override
+  String get agentWorkspaceScriptPromptHelper => '用于剧本通道 harness.agent.run';
+
+  @override
+  String get agentWorkspaceScriptRunWorkflow => '运行剧本工作流';
+
+  @override
+  String get agentWorkspaceScriptDomainToolLabel => '剧本域工具';
+
+  @override
+  String get agentWorkspaceScriptReadContext => '读取剧本上下文';
+
+  @override
+  String get agentWorkspaceScriptArgsLabel => '优先沿用最近章节结果填充 novelId；拿不准时先别写死。';
+
+  @override
+  String get agentWorkspaceScriptArgsHelper => '优先沿用最近章节结果填充 novelId；拿不准时先别写死。';
+
+  @override
+  String get agentWorkspaceScriptSubAgentToolLabel => '剧本子代理工具';
+
+  @override
+  String get agentWorkspaceScriptRunSubAgent => '运行子代理';
+
+  @override
+  String get agentWorkspaceScriptWritebackPlanData => '写回计划数据';
+
+  @override
+  String get agentWorkspaceScriptWritebackUpdateData => 'update-data 写回';
+
+  @override
+  String get agentWorkspaceScriptStagesTitle => '执行阶段';
+
+  @override
+  String get agentWorkspaceScriptApplyStage => '应用阶段';
+
+  @override
+  String get agentWorkspaceScriptAdvanceStage => '推进阶段';
+
+  @override
+  String get agentWorkspaceScriptDiagnosisTitle => '下一步建议';
+
+  @override
+  String get agentWorkspaceScriptToolChip => 'tool=...';
+
+  @override
+  String get agentWorkspaceScriptAgentChip => 'agent=...';
+
+  @override
+  String get agentWorkspaceScriptApplySuggestion => '应用建议';
+
+  @override
+  String get agentWorkspaceScriptContextSkeletonFocus => '骨架重点：\$skeletonHint';
+
+  @override
+  String get agentWorkspaceScriptContextAdaptationFocus =>
+      '改编口径：\$strategyHint';
+
+  @override
+  String get agentWorkspaceScriptContextExecutionOrder =>
+      '对白约束：避免解释剧情，优先口语化冲突表达和情绪推进。';
+
+  @override
+  String get agentWorkspaceScriptContextDialogueConstraint =>
+      '对白约束：避免解释剧情，优先口语化冲突表达和情绪推进。';
+
+  @override
+  String get agentWorkspaceScriptContextStorySkeleton => '来自 get_planData';
+
+  @override
+  String get agentWorkspaceScriptContextFromPlanData => '来自 get_planData';
+
+  @override
+  String get agentWorkspaceScriptContextAdaptationStrategy => '来自 get_planData';
+
+  @override
+  String get agentWorkspaceScriptContextRewriteConstraints =>
+      '由 get_planData 派生的下游消费提示';
+
+  @override
+  String get agentWorkspaceScriptContextRewriteConstraintsSubtitle =>
+      '由 get_planData 派生的下游消费提示';
+
+  @override
+  String get agentWorkspaceScriptContextUntitledScript => '未命名剧本';
+
+  @override
+  String get agentWorkspaceScriptContextNoBody => '无正文';
+
+  @override
+  String get agentWorkspaceScriptContextPlanDrafts => '最多展示前 4 条 script rows';
+
+  @override
+  String get agentWorkspaceScriptContextPlanDraftsSubtitle =>
+      '最多展示前 4 条 script rows';
+
+  @override
+  String get agentWorkspaceScriptContextCurrentScriptBody =>
+      '来自 get_script_content';
+
+  @override
+  String get agentWorkspaceScriptContextFromScriptContent =>
+      '来自 get_script_content';
+
+  @override
+  String get agentWorkspaceScriptContextUntitledChapter => 'chapter';
+
+  @override
+  String get agentWorkspaceScriptContextChapterPrefix => '第 ... 章 · \$chapter';
+
+  @override
+  String get agentWorkspaceScriptContextNovelChapters =>
+      '来自 get_novel_text，最多展示前 4 条';
+
+  @override
+  String get agentWorkspaceScriptContextNovelChaptersSubtitle =>
+      '来自 get_novel_text，最多展示前 4 条';
+
+  @override
+  String get agentWorkspaceScriptContextUntitledEvent => '未命名事件';
+
+  @override
+  String get agentWorkspaceScriptContextNovelEvents =>
+      '来自 get_novel_events，最多展示前 6 条';
+
+  @override
+  String get agentWorkspaceScriptContextNovelEventsSubtitle =>
+      '来自 get_novel_events，最多展示前 6 条';
+
+  @override
+  String get agentWorkspaceScriptContextSnapshotTitle => '上下文快照';
+
+  @override
+  String get agentWorkspaceScriptLatestAssistantResult => '最新助手结果';
+
+  @override
+  String get agentWorkspaceScriptWritebackSource =>
+      '写回来源：\$scriptWritebackSourceLine';
+
+  @override
+  String get agentWorkspaceScriptSummaryReviewReturned => '审核结果已返回';
+
+  @override
+  String get agentWorkspaceScriptSummaryReviewLine =>
+      '审核 ...：... 级，问题 \$issueCount 项\$summary';
+
+  @override
+  String get agentWorkspaceScriptSummaryPlanDataMissing => 'planData 缺少 data';
+
+  @override
+  String get agentWorkspaceScriptSummaryStorySkeletonReady => '故事骨架已就绪';
+
+  @override
+  String get agentWorkspaceScriptSummaryAdaptationReady => '改编策略已就绪';
+
+  @override
+  String get agentWorkspaceScriptSummaryPlanScripts => '计划剧本 ... 条';
+
+  @override
+  String get agentWorkspaceScriptSummaryRewriteReady => '改写约束已可下游消费';
+
+  @override
+  String get agentWorkspaceScriptSummaryPlanDataReturned => 'planData 已返回';
+
+  @override
+  String get agentWorkspaceScriptSummaryScriptEmpty => '剧本正文 ... 字';
+
+  @override
+  String get agentWorkspaceScriptSummaryScriptChars => '剧本正文 ... 字';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelTextEmpty => '章节材料 ... 条';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelTextCount => '章节材料 ... 条';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelEventsEmpty => '小说事件 ... 条';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelEventsCount => '小说事件 ... 条';
+
+  @override
+  String get agentWorkspaceScopeProjectIdLabel => '项目 ID（numeric）';
+
+  @override
+  String get agentWorkspaceScopeScriptIdLabel => '剧本 ID（numeric）';
+
+  @override
+  String get agentWorkspaceScopeProjectUuidLabel =>
+      '项目 UUID（可选，与 WS projectUuid 对齐）';
+
+  @override
+  String get agentWorkspaceScopeScriptUuidLabel => '剧本 UUID（可选，制作 attach）';
+
+  @override
+  String get agentWorkspaceScopeWorkspaceUuidLabel =>
+      '工作区 UUID（可选，WS workspaceUuid）';
+
+  @override
+  String get agentWorkspacePaneScript => '执行动态';
+
+  @override
+  String get agentWorkspacePaneProduction => '执行动态';
+
+  @override
+  String get agentWorkspacePaneActivity => '执行动态';
+
+  @override
+  String get agentWorkspaceActivityTitle => '执行动态';
+
+  @override
+  String get agentWorkspaceActivityLatest => 'latest: \$eventType';
+
+  @override
+  String get agentWorkspaceActivityLatestToolResult =>
+      '最新工具结果：\$workspaceLastToolResultLine';
+
+  @override
+  String get agentWorkspaceActivityLatestAssistantText => '最新助手文本';
+
+  @override
+  String get agentWorkspaceActivityNoWsEvents => '暂无 WS 事件。';
+
+  @override
+  String get agentWorkspaceProductionCardTitle => '制作工作区';
+
+  @override
+  String get agentWorkspaceGuidedTasksTitle => '引导任务';
+
+  @override
+  String get agentWorkspaceScriptWritebackSourceAssistant => 'assistant stream';
+
+  @override
+  String get agentWorkspaceScriptPlanHint =>
+      'PlanData source ready:\$planHint story/adaptation + script rows=\$scriptCount';
+
+  @override
+  String get agentWorkspaceScriptPlanWritebackReady =>
+      'PlanData source ready:\$planHint story/adaptation + script rows=\$scriptCount';
+
+  @override
+  String get agentWorkspaceScriptRunningWorkflow => '执行中：写回计划数据';
+
+  @override
+  String get agentWorkspaceScriptRunningReadContext => '执行中：写回计划数据';
+
+  @override
+  String get agentWorkspaceScriptRunningSubAgent => '执行中：写回计划数据';
+
+  @override
+  String get agentWorkspaceScriptRunningWriteback =>
+      'agent workspace script running writeback';
+
+  @override
+  String get agentWorkspaceScriptRunningWritebackPlan =>
+      'agent workspace script running writeback plan';
+
+  @override
+  String get agentWorkspaceScriptCardTitle => '剧本工作区';
+
+  @override
+  String get agentWorkspaceSectionTitle => 'Agent 工作区';
+
+  @override
+  String get agentWorkspaceSectionDescription =>
+      '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独执行动态面板。';
+
+  @override
+  String get contentComplianceTargetProject =>
+      'content compliance target project';
+
+  @override
+  String get contentComplianceTargetScript =>
+      'content compliance target script';
+
+  @override
+  String get contentComplianceTargetStoryboard =>
+      'content compliance target storyboard';
+
+  @override
+  String get contentComplianceTargetAsset => 'content compliance target asset';
+
+  @override
+  String get contentComplianceTargetNovel => 'content compliance target novel';
+
+  @override
+  String get contentComplianceTargetUser => 'content compliance target user';
+
+  @override
+  String get contentComplianceOptionAll => 'content compliance option all';
+
+  @override
+  String get contentComplianceCategoryCopyright =>
+      'content compliance category copyright';
+
+  @override
+  String get contentComplianceCategorySafety =>
+      'content compliance category safety';
+
+  @override
+  String get contentComplianceCategoryHarassment =>
+      'content compliance category harassment';
+
+  @override
+  String get contentComplianceCategoryAdult =>
+      'content compliance category adult';
+
+  @override
+  String get contentComplianceCategoryViolence =>
+      'content compliance category violence';
+
+  @override
+  String get contentComplianceCategorySpam =>
+      'content compliance category spam';
+
+  @override
+  String get contentComplianceCategoryOther =>
+      'content compliance category other';
+
+  @override
+  String get contentComplianceSeverityLow => 'content compliance severity low';
+
+  @override
+  String get contentComplianceSeverityMedium =>
+      'content compliance severity medium';
+
+  @override
+  String get contentComplianceSeverityHigh =>
+      'content compliance severity high';
+
+  @override
+  String get contentComplianceSeverityCritical =>
+      'content compliance severity critical';
+
+  @override
+  String get contentComplianceStatusPending =>
+      'content compliance status pending';
+
+  @override
+  String get contentComplianceStatusClaimed =>
+      'content compliance status claimed';
+
+  @override
+  String get contentComplianceStatusResolved =>
+      'content compliance status resolved';
+
+  @override
+  String get contentComplianceStatusDismissed =>
+      'content compliance status dismissed';
+
+  @override
+  String get contentComplianceSlaOpenOver24h =>
+      'content compliance sla open over24h';
+
+  @override
+  String get contentComplianceSlaOpenOver72h =>
+      'content compliance sla open over72h';
+
+  @override
+  String get contentComplianceSlaClaimedOver24h => 'claimed>24h ...';
+
+  @override
+  String get contentComplianceFieldTargetType => 'storyboard';
+
+  @override
+  String get contentComplianceFieldCategory => 'violence';
+
+  @override
+  String get contentComplianceFieldSeverity => 'critical';
+
+  @override
+  String get contentComplianceFieldTargetUuid => 'target UUID';
+
+  @override
+  String get contentComplianceFieldStatus => 'resolved';
+
+  @override
+  String get contentComplianceSlaChip => 'SLA: ...';
+
+  @override
+  String get contentComplianceMetricPending => 'high ...';
+
+  @override
+  String get contentComplianceMetricClaimed => 'high ...';
+
+  @override
+  String get contentComplianceMetricResolved =>
+      'content compliance metric resolved';
+
+  @override
+  String get contentComplianceMetricDismissed =>
+      'content compliance metric dismissed';
+
+  @override
+  String get contentComplianceMetricCritical =>
+      'content compliance metric critical';
+
+  @override
+  String get contentComplianceMetricHigh => 'content compliance metric high';
+
+  @override
+  String get contentComplianceOldestHours => 'oldest ...h';
+
+  @override
+  String get contentComplianceCapacityPerReviewer => 'capacity .../reviewer';
+
+  @override
+  String get contentComplianceOwnerCounts => 'pending ... · claimed ...';
+
+  @override
+  String get contentComplianceOwnerDetail => '...';
+
+  @override
+  String get contentComplianceWorkspaceCounts =>
+      'open ... · pending ... · claimed ...';
+
+  @override
+  String get contentComplianceWorkspaceDetail =>
+      'critical ... · high ... · SLA ... · oldest ...h';
+
+  @override
+  String get contentComplianceReportInfo => 'reporter ...';
+
+  @override
+  String get contentComplianceResolutionLine => 'resolution: ...';
+
+  @override
+  String get contentComplianceActionClaim => 'content compliance action claim';
+
+  @override
+  String get contentComplianceActionResolve => 'resolve';
+
+  @override
+  String get contentComplianceActionDismiss => 'dismiss';
+
+  @override
+  String get contentComplianceFieldDisposition => 'disposition';
+
+  @override
+  String get contentComplianceDispositionNone => 'disposition';
+
+  @override
+  String get contentComplianceDispositionArchiveProject => 'archive_project';
+
+  @override
+  String get contentComplianceDispositionSuspendUser => 'suspend_user';
+
+  @override
+  String get contentComplianceFieldResolutionNote => 'resolution note';
+
+  @override
+  String get jobsEmptyValue => 'jobs empty value';
+
+  @override
+  String get jobsKindCountEntry => 'jobs kind count entry';
+
+  @override
+  String get jobsStatusCountEntry => 'jobs status count entry';
+
+  @override
+  String get jobsIdempotencyMismatch => 'jobs idempotency mismatch';
+
+  @override
+  String get jobsUpdatedAt => 'jobs updated at';
+
+  @override
+  String get jobsClaimedBy => 'jobs claimed by';
+
+  @override
+  String get jobsFailedReason => 'jobs failed reason';
+
+  @override
+  String get jobsTitle => '任务作业';
+
+  @override
+  String get jobsPrefsTooltip => '本机客户端偏好';
+
+  @override
+  String get jobsSubtitle => '查看作业列表、状态汇总，并按 ID 打开单条执行记录。';
+
+  @override
+  String get jobsLoadList => '加载作业列表';
+
+  @override
+  String get jobsLoadFailed => '查看失败作业';
+
+  @override
+  String get jobsLoadKinds => '加载作业类型';
+
+  @override
+  String get jobsLoadKindSummary => '查看类型汇总';
+
+  @override
+  String get jobsLoadStatusSummary => '查看状态汇总';
+
+  @override
+  String get jobsCompatTitle => '保留 flutter.probe 相关回归入口，默认折叠';
+
+  @override
+  String get jobsCompatSubtitle => '保留 flutter.probe 相关回归入口，默认折叠';
+
+  @override
+  String get jobsCompatHttpProbeFilters => 'HTTP probe filters';
+
+  @override
+  String get jobsFilterFlutterProbe => '按 flutter.probe 查看';
+
+  @override
+  String get jobsFilterFlutterProbeQueued => '查看 flutter.probe 排队中';
+
+  @override
+  String get jobsCreateProbeJob => '创建 probe 作业';
+
+  @override
+  String get jobsJobIdLabel => '作业 ID（点下方列表可自动填入）';
+
+  @override
+  String get jobsFetchDetail => '查看作业详情';
+
+  @override
+  String get jobsDetailLabel => '作业详情：...';
+
+  @override
+  String get jobsKindsLabel => '作业类型：...';
+
+  @override
+  String get jobsKindSummaryLabel => '类型汇总：...';
+
+  @override
+  String get jobsStatusSummaryLabel => '状态汇总：...';
+
+  @override
+  String get jobsCountLabel => '... 条作业';
+
+  @override
+  String get jobsRetry => 'jobs retry';
+
+  @override
+  String get jobsCancel => 'jobs cancel';
+
+  @override
+  String get notificationsRealtimeDisconnected =>
+      'notifications realtime disconnected';
+
+  @override
+  String get notificationsPlatformStatusRecovered =>
+      'notifications platform status recovered';
+
+  @override
+  String get notificationsPlatformStatusDegraded =>
+      'notifications platform status degraded';
+
+  @override
+  String get notificationsPlatformStatusRecoveredMessage =>
+      'notifications platform status recovered message';
+
+  @override
+  String get notificationsPlatformStatusDegradedMessage =>
+      'notifications platform status degraded message';
+
+  @override
+  String get notificationsPlatformStatusAffectedEndpoints =>
+      'notifications platform status affected endpoints';
+
+  @override
+  String get notificationsComplianceAlertTitle =>
+      'notifications compliance alert title';
+
+  @override
+  String get notificationsDownloadUnsupported =>
+      'notifications download unsupported';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportCompleted =>
+      'notifications compliance shared async export completed';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportCancelled =>
+      'notifications compliance shared async export cancelled';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportFailed =>
+      'notifications compliance shared async export failed';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportFailedWithDetail =>
+      'notifications compliance shared async export failed with detail';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportTimedOut =>
+      'notifications compliance shared async export timed out';
+
+  @override
+  String get notificationsImportJsonObjectRequired =>
+      'notifications import json object required';
+
+  @override
+  String get notificationsImportJsonParseFailed =>
+      'notifications import json parse failed';
+
+  @override
+  String get notificationsUnknownTemplate => 'notifications unknown template';
+
+  @override
+  String get platformStatusChipLabel => '\$title: \$value';
+
+  @override
+  String get opsWhActivityEntryTitle => '... · ...';
+
+  @override
+  String get opsWhFieldId => 'updatedAt: ...';
+
+  @override
+  String get opsWhFieldCreatedAt => 'updatedAt: ...';
+
+  @override
+  String get opsWhFieldUpdatedAt => 'updatedAt: ...';
+
+  @override
+  String get opsWhApiEventTypes => 'API: ...';
+
+  @override
+  String get billingAuditEventTypeLabel => 'event_type';
+
+  @override
+  String get billingAuditProviderEventIdLabel => 'provider_event_id';
+
+  @override
+  String get billingAuditRawEventIdLabel => 'raw_event_id';
+
+  @override
+  String get billingAuditProviderEventIdPrefixLabel =>
+      'provider_event_id_prefix';
+
+  @override
+  String get billingAuditRawEventIdPrefixLabel => 'raw_event_id_prefix';
+
+  @override
+  String get billingAuditEventCreatedFromLabel => 'event_created_from';
+
+  @override
+  String get billingAuditEventCreatedToLabel => 'event_created_to';
+
+  @override
+  String get billingAuditCreatedFromLabel => 'created_from';
+
+  @override
+  String get billingAuditCreatedToLabel => 'created_to';
 }

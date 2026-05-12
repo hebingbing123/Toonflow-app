@@ -12717,6 +12717,168 @@ abstract class AppLocalizations {
   /// **'—'**
   String get skillsHarnessListSampleEmpty;
 
+  /// No description provided for @storyboardWorkbenchErrNoExportJobSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'No submitted export job yet.'**
+  String get storyboardWorkbenchErrNoExportJobSubmitted;
+
+  /// No description provided for @storyboardWorkbenchExportCompletedSyncedProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Export finished; production data for this shot was synced automatically.'**
+  String get storyboardWorkbenchExportCompletedSyncedProduction;
+
+  /// No description provided for @storyboardWorkbenchSyncProductionLoadingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing production data for this shot.'**
+  String get storyboardWorkbenchSyncProductionLoadingSummary;
+
+  /// No description provided for @storyboardWorkbenchSyncProductionLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When sync completes, the current frame, tracks, and available video settings will refresh.'**
+  String get storyboardWorkbenchSyncProductionLoadingDetail;
+
+  /// No description provided for @storyboardWorkbenchSyncProductionFailedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to sync production data for this shot.'**
+  String get storyboardWorkbenchSyncProductionFailedSummary;
+
+  /// No description provided for @storyboardWorkbenchSyncProductionFailedFallbackDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that this shot exists on the production side, then try syncing again.'**
+  String get storyboardWorkbenchSyncProductionFailedFallbackDetail;
+
+  /// No description provided for @storyboardWorkbenchRefreshVideoLoadingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing video data for this shot.'**
+  String get storyboardWorkbenchRefreshVideoLoadingSummary;
+
+  /// No description provided for @storyboardWorkbenchRefreshVideoLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When refresh completes, model info, rendered videos, and in-flight jobs will update.'**
+  String get storyboardWorkbenchRefreshVideoLoadingDetail;
+
+  /// No description provided for @storyboardWorkbenchRefreshVideoFailedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to refresh video data for this shot.'**
+  String get storyboardWorkbenchRefreshVideoFailedSummary;
+
+  /// No description provided for @storyboardWorkbenchRefreshVideoFailedFallbackDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again later, or continue editing images and tracks first.'**
+  String get storyboardWorkbenchRefreshVideoFailedFallbackDetail;
+
+  /// No description provided for @storyboardWorkbenchProductionMetaNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Production view not loaded yet'**
+  String get storyboardWorkbenchProductionMetaNotLoaded;
+
+  /// No description provided for @storyboardWorkbenchProductionMetaSbIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Index {sbIndex}'**
+  String storyboardWorkbenchProductionMetaSbIndex(int sbIndex);
+
+  /// No description provided for @storyboardWorkbenchProductionMetaState.
+  ///
+  /// In en, this message translates to:
+  /// **'State {state}'**
+  String storyboardWorkbenchProductionMetaState(String state);
+
+  /// No description provided for @storyboardWorkbenchProductionMetaDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration {duration}'**
+  String storyboardWorkbenchProductionMetaDuration(String duration);
+
+  /// No description provided for @storyboardWorkbenchProductionMetaTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track {trackId}'**
+  String storyboardWorkbenchProductionMetaTrack(int trackId);
+
+  /// No description provided for @storyboardWorkbenchProductionMetaLoadedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Production view loaded'**
+  String get storyboardWorkbenchProductionMetaLoadedEmpty;
+
+  /// No description provided for @shortVideoReadinessNoPayloadHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot readiness data is not available yet.'**
+  String get shortVideoReadinessNoPayloadHeadline;
+
+  /// No description provided for @shortVideoReadinessEmptyProjectHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has no storyboard rows yet; split shots on the script side first to see the rollup.'**
+  String get shortVideoReadinessEmptyProjectHeadline;
+
+  /// No description provided for @shortVideoReadinessRollupHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready}/{total} shots ready; {blocked} blocked.'**
+  String shortVideoReadinessRollupHeadline(int ready, int total, int blocked);
+
+  /// No description provided for @shortVideoReadinessReasonRollupLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{reasonLabel} ({count} shots)'**
+  String shortVideoReadinessReasonRollupLine(String reasonLabel, int count);
+
+  /// No description provided for @shortVideoReadinessStoryboardDetailPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot #{storyboardNumericId}'**
+  String shortVideoReadinessStoryboardDetailPrefix(int storyboardNumericId);
+
+  /// No description provided for @shortVideoReadinessScriptSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · Script #{scriptId}'**
+  String shortVideoReadinessScriptSuffix(int scriptId);
+
+  /// No description provided for @shortVideoReadinessSlotSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · Slot {sbIndex}'**
+  String shortVideoReadinessSlotSuffix(int sbIndex);
+
+  /// No description provided for @shortVideoReadinessBlockedShotDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{lead}: {reasons}'**
+  String shortVideoReadinessBlockedShotDetail(String lead, String reasons);
+
+  /// No description provided for @shortVideoCandidateCompareReadinessNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness data unavailable for this shot.'**
+  String get shortVideoCandidateCompareReadinessNoData;
+
+  /// No description provided for @shortVideoCandidateCompareReadinessReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to continue generating or exporting.'**
+  String get shortVideoCandidateCompareReadinessReady;
+
+  /// No description provided for @shortVideoCandidateCompareReadinessBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs {items}'**
+  String shortVideoCandidateCompareReadinessBlocked(String items);
+
   /// No description provided for @scriptEditorStoryboardsProductionEmptyData.
   ///
   /// In en, this message translates to:
@@ -15376,6 +15538,2160 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Load failed: {error}'**
   String shortVideoSpaceProductionAssemblyLoadFailed(String error);
+
+  /// No description provided for @accountSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account section title'**
+  String get accountSectionTitle;
+
+  /// No description provided for @accountRiskyPrefsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Account risky prefs tooltip'**
+  String get accountRiskyPrefsTooltip;
+
+  /// No description provided for @accountSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account section subtitle'**
+  String get accountSectionSubtitle;
+
+  /// No description provided for @accountExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export title'**
+  String get accountExportTitle;
+
+  /// No description provided for @accountExportCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export create'**
+  String get accountExportCreate;
+
+  /// No description provided for @accountExportIncludeAuditLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export include audit logs'**
+  String get accountExportIncludeAuditLogs;
+
+  /// No description provided for @accountExportIncludeNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export include notifications'**
+  String get accountExportIncludeNotifications;
+
+  /// No description provided for @accountExportActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export active count'**
+  String get accountExportActiveCount;
+
+  /// No description provided for @accountExportCopyLastSavedPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export copy last saved path'**
+  String get accountExportCopyLastSavedPath;
+
+  /// No description provided for @accountExportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export empty'**
+  String get accountExportEmpty;
+
+  /// No description provided for @accountExportDefaultFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export default file name'**
+  String get accountExportDefaultFileName;
+
+  /// No description provided for @accountExportTaskLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export task line'**
+  String get accountExportTaskLine;
+
+  /// No description provided for @accountExportSizeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export size line'**
+  String get accountExportSizeLine;
+
+  /// No description provided for @accountExportSavedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export saved snack'**
+  String get accountExportSavedSnack;
+
+  /// No description provided for @accountExportDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export download'**
+  String get accountExportDownload;
+
+  /// No description provided for @accountExportCopyFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export copy file name'**
+  String get accountExportCopyFileName;
+
+  /// No description provided for @accountDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account delete title'**
+  String get accountDeleteTitle;
+
+  /// No description provided for @accountDeleteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Account delete description'**
+  String get accountDeleteDescription;
+
+  /// No description provided for @accountDeleteConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account delete confirm label'**
+  String get accountDeleteConfirmLabel;
+
+  /// No description provided for @accountDeleteIrreversibleAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Account delete irreversible ack'**
+  String get accountDeleteIrreversibleAck;
+
+  /// No description provided for @accountDeleteLastResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Account delete last response'**
+  String get accountDeleteLastResponse;
+
+  /// No description provided for @accountDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Account delete button'**
+  String get accountDeleteButton;
+
+  /// No description provided for @accountExportStatusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export status queued'**
+  String get accountExportStatusQueued;
+
+  /// No description provided for @accountExportStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export status running'**
+  String get accountExportStatusRunning;
+
+  /// No description provided for @accountExportStatusSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export status succeeded'**
+  String get accountExportStatusSucceeded;
+
+  /// No description provided for @accountExportStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Account export status failed'**
+  String get accountExportStatusFailed;
+
+  /// No description provided for @adminConsoleMembershipItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console membership item'**
+  String get adminConsoleMembershipItem;
+
+  /// No description provided for @adminConsoleRecentJobItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console recent job item'**
+  String get adminConsoleRecentJobItem;
+
+  /// No description provided for @adminConsoleAuditListItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console audit list item'**
+  String get adminConsoleAuditListItem;
+
+  /// No description provided for @adminConsoleDailyQuotaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console daily quota label'**
+  String get adminConsoleDailyQuotaLabel;
+
+  /// No description provided for @adminConsoleChipMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console chip member'**
+  String get adminConsoleChipMember;
+
+  /// No description provided for @adminConsoleArchivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console archived label'**
+  String get adminConsoleArchivedLabel;
+
+  /// No description provided for @adminConsoleMemberListItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console member list item'**
+  String get adminConsoleMemberListItem;
+
+  /// No description provided for @adminConsoleRecentProjectItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console recent project item'**
+  String get adminConsoleRecentProjectItem;
+
+  /// No description provided for @adminConsoleChipScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console chip script'**
+  String get adminConsoleChipScript;
+
+  /// No description provided for @adminConsoleChipAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console chip asset'**
+  String get adminConsoleChipAsset;
+
+  /// No description provided for @adminConsoleChipJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console chip job'**
+  String get adminConsoleChipJob;
+
+  /// No description provided for @adminConsoleAclMemberItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console acl member item'**
+  String get adminConsoleAclMemberItem;
+
+  /// No description provided for @adminConsoleWorkspaceCandidateItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console workspace candidate item'**
+  String get adminConsoleWorkspaceCandidateItem;
+
+  /// No description provided for @adminConsoleProjectRecentJobItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console project recent job item'**
+  String get adminConsoleProjectRecentJobItem;
+
+  /// No description provided for @adminConsoleAuditUserSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console audit user summary'**
+  String get adminConsoleAuditUserSummary;
+
+  /// No description provided for @adminConsoleAuditWorkspaceMembership.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console audit workspace membership'**
+  String get adminConsoleAuditWorkspaceMembership;
+
+  /// No description provided for @adminConsoleAuditOwnerTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console audit owner transfer'**
+  String get adminConsoleAuditOwnerTransfer;
+
+  /// No description provided for @adminConsoleAuditArchiveNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console audit archive note'**
+  String get adminConsoleAuditArchiveNote;
+
+  /// No description provided for @adminConsoleAuditProjectOwnerTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console audit project owner transfer'**
+  String get adminConsoleAuditProjectOwnerTransfer;
+
+  /// No description provided for @adminConsoleFieldUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field user id'**
+  String get adminConsoleFieldUserId;
+
+  /// No description provided for @adminConsoleFieldCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field created at'**
+  String get adminConsoleFieldCreatedAt;
+
+  /// No description provided for @adminConsoleFieldUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field updated at'**
+  String get adminConsoleFieldUpdatedAt;
+
+  /// No description provided for @adminConsoleFieldOperationalStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field operational status'**
+  String get adminConsoleFieldOperationalStatus;
+
+  /// No description provided for @adminConsoleFieldBillingProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field billing provider'**
+  String get adminConsoleFieldBillingProvider;
+
+  /// No description provided for @adminConsoleFieldSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field subscription'**
+  String get adminConsoleFieldSubscription;
+
+  /// No description provided for @adminConsoleFieldCurrentWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field current workspace'**
+  String get adminConsoleFieldCurrentWorkspace;
+
+  /// No description provided for @adminConsoleFieldWorkspaceId.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field workspace id'**
+  String get adminConsoleFieldWorkspaceId;
+
+  /// No description provided for @adminConsoleFieldOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field owner'**
+  String get adminConsoleFieldOwner;
+
+  /// No description provided for @adminConsoleFieldArchivedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field archived at'**
+  String get adminConsoleFieldArchivedAt;
+
+  /// No description provided for @adminConsoleFieldOpsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field ops note'**
+  String get adminConsoleFieldOpsNote;
+
+  /// No description provided for @adminConsoleFieldProjectId.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field project id'**
+  String get adminConsoleFieldProjectId;
+
+  /// No description provided for @adminConsoleFieldWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field workspace'**
+  String get adminConsoleFieldWorkspace;
+
+  /// No description provided for @adminConsoleFieldProjectArchivedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field project archived at'**
+  String get adminConsoleFieldProjectArchivedAt;
+
+  /// No description provided for @adminConsoleFieldAclMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field acl mode'**
+  String get adminConsoleFieldAclMode;
+
+  /// No description provided for @adminConsoleFieldEditorCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field editor count'**
+  String get adminConsoleFieldEditorCount;
+
+  /// No description provided for @adminConsoleFieldViewerCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console field viewer count'**
+  String get adminConsoleFieldViewerCount;
+
+  /// No description provided for @agentWorkspaceProductionPromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt label'**
+  String get agentWorkspaceProductionPromptLabel;
+
+  /// No description provided for @agentWorkspaceProductionPromptHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt helper'**
+  String get agentWorkspaceProductionPromptHelper;
+
+  /// No description provided for @agentWorkspaceProductionRunWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production run workflow'**
+  String get agentWorkspaceProductionRunWorkflow;
+
+  /// No description provided for @agentWorkspaceProductionDomainToolLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production domain tool label'**
+  String get agentWorkspaceProductionDomainToolLabel;
+
+  /// No description provided for @agentWorkspaceProductionFlowKeyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production flow key label'**
+  String get agentWorkspaceProductionFlowKeyLabel;
+
+  /// No description provided for @agentWorkspaceProductionFlowKeyHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production flow key helper'**
+  String get agentWorkspaceProductionFlowKeyHelper;
+
+  /// No description provided for @agentWorkspaceProductionArgsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production args label'**
+  String get agentWorkspaceProductionArgsLabel;
+
+  /// No description provided for @agentWorkspaceProductionArgsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production args helper'**
+  String get agentWorkspaceProductionArgsHelper;
+
+  /// No description provided for @agentWorkspaceProductionReadTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production read tool'**
+  String get agentWorkspaceProductionReadTool;
+
+  /// No description provided for @agentWorkspaceProductionSubAgentToolLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production sub agent tool label'**
+  String get agentWorkspaceProductionSubAgentToolLabel;
+
+  /// No description provided for @agentWorkspaceProductionSubAgentArgsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production sub agent args label'**
+  String get agentWorkspaceProductionSubAgentArgsLabel;
+
+  /// No description provided for @agentWorkspaceProductionSubAgentArgsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production sub agent args helper'**
+  String get agentWorkspaceProductionSubAgentArgsHelper;
+
+  /// No description provided for @agentWorkspaceProductionRunSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production run sub agent'**
+  String get agentWorkspaceProductionRunSubAgent;
+
+  /// No description provided for @agentWorkspaceProductionWritebackToolResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production writeback tool result'**
+  String get agentWorkspaceProductionWritebackToolResult;
+
+  /// No description provided for @agentWorkspaceProductionArgumentTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production argument templates'**
+  String get agentWorkspaceProductionArgumentTemplates;
+
+  /// No description provided for @agentWorkspaceProductionCurrentCandidateArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production current candidate args'**
+  String get agentWorkspaceProductionCurrentCandidateArgs;
+
+  /// No description provided for @agentWorkspaceProductionCandidateIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production candidate ids'**
+  String get agentWorkspaceProductionCandidateIds;
+
+  /// No description provided for @agentWorkspaceProductionPromptPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt preview title'**
+  String get agentWorkspaceProductionPromptPreviewTitle;
+
+  /// No description provided for @agentWorkspaceProductionStagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production stages title'**
+  String get agentWorkspaceProductionStagesTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production flow chip'**
+  String get agentWorkspaceProductionFlowChip;
+
+  /// No description provided for @agentWorkspaceProductionApplyStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production apply stage'**
+  String get agentWorkspaceProductionApplyStage;
+
+  /// No description provided for @agentWorkspaceProductionDiagnosisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production diagnosis title'**
+  String get agentWorkspaceProductionDiagnosisTitle;
+
+  /// No description provided for @agentWorkspaceProductionToolChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production tool chip'**
+  String get agentWorkspaceProductionToolChip;
+
+  /// No description provided for @agentWorkspaceProductionAgentChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production agent chip'**
+  String get agentWorkspaceProductionAgentChip;
+
+  /// No description provided for @agentWorkspaceProductionApplySuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production apply suggestion'**
+  String get agentWorkspaceProductionApplySuggestion;
+
+  /// No description provided for @agentWorkspaceProductionStepPullAssetsFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production step pull assets flow'**
+  String get agentWorkspaceProductionStepPullAssetsFlow;
+
+  /// No description provided for @agentWorkspaceProductionStepRunAssetsSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production step run assets sub agent'**
+  String get agentWorkspaceProductionStepRunAssetsSubAgent;
+
+  /// No description provided for @agentWorkspaceProductionStepPullStoryboardFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production step pull storyboard flow'**
+  String get agentWorkspaceProductionStepPullStoryboardFlow;
+
+  /// No description provided for @agentWorkspaceProductionStepWritebackFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production step writeback flow'**
+  String get agentWorkspaceProductionStepWritebackFlow;
+
+  /// No description provided for @agentWorkspaceProductionStepRunStoryboardSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production step run storyboard sub agent'**
+  String get agentWorkspaceProductionStepRunStoryboardSubAgent;
+
+  /// No description provided for @agentWorkspaceProductionStepRunDirectorPlanSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production step run director plan sub agent'**
+  String get agentWorkspaceProductionStepRunDirectorPlanSubAgent;
+
+  /// No description provided for @agentWorkspaceProductionPromptFlowDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt flow down'**
+  String get agentWorkspaceProductionPromptFlowDown;
+
+  /// No description provided for @agentWorkspaceProductionPromptRewriteFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt rewrite focus'**
+  String get agentWorkspaceProductionPromptRewriteFocus;
+
+  /// No description provided for @agentWorkspaceProductionPromptVisualPacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt visual pacing'**
+  String get agentWorkspaceProductionPromptVisualPacing;
+
+  /// No description provided for @agentWorkspaceProductionPromptExtraConstraint.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt extra constraint'**
+  String get agentWorkspaceProductionPromptExtraConstraint;
+
+  /// No description provided for @agentWorkspaceProductionPromptAssetFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt asset focus'**
+  String get agentWorkspaceProductionPromptAssetFocus;
+
+  /// No description provided for @agentWorkspaceProductionPromptExecutionOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production prompt execution order'**
+  String get agentWorkspaceProductionPromptExecutionOrder;
+
+  /// No description provided for @agentWorkspaceProductionStoryboardPriorityMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production storyboard priority missing'**
+  String get agentWorkspaceProductionStoryboardPriorityMissing;
+
+  /// No description provided for @agentWorkspaceProductionCollapsedRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production collapsed rows'**
+  String get agentWorkspaceProductionCollapsedRows;
+
+  /// No description provided for @agentWorkspaceProductionReviewTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review target'**
+  String get agentWorkspaceProductionReviewTarget;
+
+  /// No description provided for @agentWorkspaceProductionReviewGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review grade'**
+  String get agentWorkspaceProductionReviewGrade;
+
+  /// No description provided for @agentWorkspaceProductionReviewIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review issues'**
+  String get agentWorkspaceProductionReviewIssues;
+
+  /// No description provided for @agentWorkspaceProductionReviewNextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review next step'**
+  String get agentWorkspaceProductionReviewNextStep;
+
+  /// No description provided for @agentWorkspaceProductionReviewAssetIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review asset ids'**
+  String get agentWorkspaceProductionReviewAssetIds;
+
+  /// No description provided for @agentWorkspaceProductionReviewAssetScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review asset scope'**
+  String get agentWorkspaceProductionReviewAssetScope;
+
+  /// No description provided for @agentWorkspaceProductionReviewStoryboardIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review storyboard ids'**
+  String get agentWorkspaceProductionReviewStoryboardIds;
+
+  /// No description provided for @agentWorkspaceProductionReviewSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production review summary'**
+  String get agentWorkspaceProductionReviewSummary;
+
+  /// No description provided for @agentWorkspaceProductionShotLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production shot label'**
+  String get agentWorkspaceProductionShotLabel;
+
+  /// No description provided for @agentWorkspaceProductionSceneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production scene label'**
+  String get agentWorkspaceProductionSceneLabel;
+
+  /// No description provided for @agentWorkspaceProductionDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production duration label'**
+  String get agentWorkspaceProductionDurationLabel;
+
+  /// No description provided for @agentWorkspaceProductionAssetsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production assets label'**
+  String get agentWorkspaceProductionAssetsLabel;
+
+  /// No description provided for @agentWorkspaceProductionStateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production state label'**
+  String get agentWorkspaceProductionStateLabel;
+
+  /// No description provided for @agentWorkspaceProductionModeTextOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production mode text only'**
+  String get agentWorkspaceProductionModeTextOnly;
+
+  /// No description provided for @agentWorkspaceProductionResultHasImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production result has image'**
+  String get agentWorkspaceProductionResultHasImage;
+
+  /// No description provided for @agentWorkspaceProductionResultMissingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production result missing image'**
+  String get agentWorkspaceProductionResultMissingImage;
+
+  /// No description provided for @agentWorkspaceProductionContextFromTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production context from tool'**
+  String get agentWorkspaceProductionContextFromTool;
+
+  /// No description provided for @agentWorkspaceProductionContextDerivedRewrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production context derived rewrite'**
+  String get agentWorkspaceProductionContextDerivedRewrite;
+
+  /// No description provided for @agentWorkspaceProductionContextDerivedRewriteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production context derived rewrite subtitle'**
+  String get agentWorkspaceProductionContextDerivedRewriteSubtitle;
+
+  /// No description provided for @agentWorkspaceProductionContextReturnList.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production context return list'**
+  String get agentWorkspaceProductionContextReturnList;
+
+  /// No description provided for @agentWorkspaceProductionContextToolText.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production context tool text'**
+  String get agentWorkspaceProductionContextToolText;
+
+  /// No description provided for @agentWorkspaceProductionContextReviewSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production context review summary'**
+  String get agentWorkspaceProductionContextReviewSummary;
+
+  /// No description provided for @agentWorkspaceProductionContextSnapshotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production context snapshot title'**
+  String get agentWorkspaceProductionContextSnapshotTitle;
+
+  /// No description provided for @agentWorkspaceSummaryReturnedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace summary returned list'**
+  String get agentWorkspaceSummaryReturnedList;
+
+  /// No description provided for @agentWorkspaceSummaryReturnedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace summary returned text'**
+  String get agentWorkspaceSummaryReturnedText;
+
+  /// No description provided for @agentWorkspaceProductionSummaryItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary items'**
+  String get agentWorkspaceProductionSummaryItems;
+
+  /// No description provided for @agentWorkspaceProductionSummaryReviewHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary review headline'**
+  String get agentWorkspaceProductionSummaryReviewHeadline;
+
+  /// No description provided for @agentWorkspaceProductionSummaryIssueBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary issue breakdown'**
+  String get agentWorkspaceProductionSummaryIssueBreakdown;
+
+  /// No description provided for @agentWorkspaceProductionSummaryFocusedAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary focused assets'**
+  String get agentWorkspaceProductionSummaryFocusedAssets;
+
+  /// No description provided for @agentWorkspaceProductionSummaryFocusedAssetScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary focused asset scope'**
+  String get agentWorkspaceProductionSummaryFocusedAssetScope;
+
+  /// No description provided for @agentWorkspaceProductionSummaryFocusedShots.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary focused shots'**
+  String get agentWorkspaceProductionSummaryFocusedShots;
+
+  /// No description provided for @agentWorkspaceSummaryReturnedObjectKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace summary returned object keys'**
+  String get agentWorkspaceSummaryReturnedObjectKeys;
+
+  /// No description provided for @agentWorkspaceProductionSummaryFlowEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary flow empty'**
+  String get agentWorkspaceProductionSummaryFlowEmpty;
+
+  /// No description provided for @agentWorkspaceProductionSummaryFlowEmptyString.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary flow empty string'**
+  String get agentWorkspaceProductionSummaryFlowEmptyString;
+
+  /// No description provided for @agentWorkspaceProductionSummaryTextChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary text chars'**
+  String get agentWorkspaceProductionSummaryTextChars;
+
+  /// No description provided for @agentWorkspaceProductionSummaryLineCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary line count'**
+  String get agentWorkspaceProductionSummaryLineCount;
+
+  /// No description provided for @agentWorkspaceProductionSummaryPlanSections.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary plan sections'**
+  String get agentWorkspaceProductionSummaryPlanSections;
+
+  /// No description provided for @agentWorkspaceProductionSummaryRewriteInherited.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary rewrite inherited'**
+  String get agentWorkspaceProductionSummaryRewriteInherited;
+
+  /// No description provided for @agentWorkspaceProductionSummaryStoryboardRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary storyboard rows'**
+  String get agentWorkspaceProductionSummaryStoryboardRows;
+
+  /// No description provided for @agentWorkspaceProductionSummaryLinkedAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary linked assets'**
+  String get agentWorkspaceProductionSummaryLinkedAssets;
+
+  /// No description provided for @agentWorkspaceProductionSummaryListCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary list count'**
+  String get agentWorkspaceProductionSummaryListCount;
+
+  /// No description provided for @agentWorkspaceProductionSummaryPrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary prompts'**
+  String get agentWorkspaceProductionSummaryPrompts;
+
+  /// No description provided for @agentWorkspaceProductionSummaryMediaUrls.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary media urls'**
+  String get agentWorkspaceProductionSummaryMediaUrls;
+
+  /// No description provided for @agentWorkspaceProductionSummaryNeedImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary need images'**
+  String get agentWorkspaceProductionSummaryNeedImages;
+
+  /// No description provided for @agentWorkspaceProductionSummaryMissingFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary missing frames'**
+  String get agentWorkspaceProductionSummaryMissingFrames;
+
+  /// No description provided for @agentWorkspaceProductionSummaryTextOnlyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary text only count'**
+  String get agentWorkspaceProductionSummaryTextOnlyCount;
+
+  /// No description provided for @agentWorkspaceProductionSummaryStateTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary state types'**
+  String get agentWorkspaceProductionSummaryStateTypes;
+
+  /// No description provided for @agentWorkspaceProductionSummaryObjectKeyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary object key count'**
+  String get agentWorkspaceProductionSummaryObjectKeyCount;
+
+  /// No description provided for @agentWorkspaceProductionSummaryObjectListEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary object list entry'**
+  String get agentWorkspaceProductionSummaryObjectListEntry;
+
+  /// No description provided for @agentWorkspaceProductionSummaryObjectTextEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary object text entry'**
+  String get agentWorkspaceProductionSummaryObjectTextEntry;
+
+  /// No description provided for @agentWorkspaceProductionSummaryReturnedType.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production summary returned type'**
+  String get agentWorkspaceProductionSummaryReturnedType;
+
+  /// No description provided for @agentWorkspaceProductionIdleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production idle hint'**
+  String get agentWorkspaceProductionIdleHint;
+
+  /// No description provided for @agentWorkspaceProductionLatestToolResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production latest tool result'**
+  String get agentWorkspaceProductionLatestToolResult;
+
+  /// No description provided for @agentWorkspaceProductionResultSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production result summary'**
+  String get agentWorkspaceProductionResultSummary;
+
+  /// No description provided for @agentWorkspaceProductionSuggestedFlowKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production suggested flow key'**
+  String get agentWorkspaceProductionSuggestedFlowKey;
+
+  /// No description provided for @agentWorkspaceProductionUseSuggestedFlowKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production use suggested flow key'**
+  String get agentWorkspaceProductionUseSuggestedFlowKey;
+
+  /// No description provided for @agentWorkspaceProductionWritebackStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production writeback strategy'**
+  String get agentWorkspaceProductionWritebackStrategy;
+
+  /// No description provided for @agentWorkspaceScriptStepFetchPlanData.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script step fetch plan data'**
+  String get agentWorkspaceScriptStepFetchPlanData;
+
+  /// No description provided for @agentWorkspaceScriptStepFetchContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script step fetch content'**
+  String get agentWorkspaceScriptStepFetchContent;
+
+  /// No description provided for @agentWorkspaceScriptStepGenerateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script step generate draft'**
+  String get agentWorkspaceScriptStepGenerateDraft;
+
+  /// No description provided for @agentWorkspaceScriptStepWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script step writeback'**
+  String get agentWorkspaceScriptStepWriteback;
+
+  /// No description provided for @agentWorkspaceScriptPromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script prompt label'**
+  String get agentWorkspaceScriptPromptLabel;
+
+  /// No description provided for @agentWorkspaceScriptPromptHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script prompt helper'**
+  String get agentWorkspaceScriptPromptHelper;
+
+  /// No description provided for @agentWorkspaceScriptRunWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script run workflow'**
+  String get agentWorkspaceScriptRunWorkflow;
+
+  /// No description provided for @agentWorkspaceScriptDomainToolLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script domain tool label'**
+  String get agentWorkspaceScriptDomainToolLabel;
+
+  /// No description provided for @agentWorkspaceScriptReadContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script read context'**
+  String get agentWorkspaceScriptReadContext;
+
+  /// No description provided for @agentWorkspaceScriptArgsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script args label'**
+  String get agentWorkspaceScriptArgsLabel;
+
+  /// No description provided for @agentWorkspaceScriptArgsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script args helper'**
+  String get agentWorkspaceScriptArgsHelper;
+
+  /// No description provided for @agentWorkspaceScriptSubAgentToolLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script sub agent tool label'**
+  String get agentWorkspaceScriptSubAgentToolLabel;
+
+  /// No description provided for @agentWorkspaceScriptRunSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script run sub agent'**
+  String get agentWorkspaceScriptRunSubAgent;
+
+  /// No description provided for @agentWorkspaceScriptWritebackPlanData.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script writeback plan data'**
+  String get agentWorkspaceScriptWritebackPlanData;
+
+  /// No description provided for @agentWorkspaceScriptWritebackUpdateData.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script writeback update data'**
+  String get agentWorkspaceScriptWritebackUpdateData;
+
+  /// No description provided for @agentWorkspaceScriptStagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script stages title'**
+  String get agentWorkspaceScriptStagesTitle;
+
+  /// No description provided for @agentWorkspaceScriptApplyStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script apply stage'**
+  String get agentWorkspaceScriptApplyStage;
+
+  /// No description provided for @agentWorkspaceScriptAdvanceStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script advance stage'**
+  String get agentWorkspaceScriptAdvanceStage;
+
+  /// No description provided for @agentWorkspaceScriptDiagnosisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script diagnosis title'**
+  String get agentWorkspaceScriptDiagnosisTitle;
+
+  /// No description provided for @agentWorkspaceScriptToolChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script tool chip'**
+  String get agentWorkspaceScriptToolChip;
+
+  /// No description provided for @agentWorkspaceScriptAgentChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script agent chip'**
+  String get agentWorkspaceScriptAgentChip;
+
+  /// No description provided for @agentWorkspaceScriptApplySuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script apply suggestion'**
+  String get agentWorkspaceScriptApplySuggestion;
+
+  /// No description provided for @agentWorkspaceScriptContextSkeletonFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context skeleton focus'**
+  String get agentWorkspaceScriptContextSkeletonFocus;
+
+  /// No description provided for @agentWorkspaceScriptContextAdaptationFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context adaptation focus'**
+  String get agentWorkspaceScriptContextAdaptationFocus;
+
+  /// No description provided for @agentWorkspaceScriptContextExecutionOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context execution order'**
+  String get agentWorkspaceScriptContextExecutionOrder;
+
+  /// No description provided for @agentWorkspaceScriptContextDialogueConstraint.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context dialogue constraint'**
+  String get agentWorkspaceScriptContextDialogueConstraint;
+
+  /// No description provided for @agentWorkspaceScriptContextStorySkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context story skeleton'**
+  String get agentWorkspaceScriptContextStorySkeleton;
+
+  /// No description provided for @agentWorkspaceScriptContextFromPlanData.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context from plan data'**
+  String get agentWorkspaceScriptContextFromPlanData;
+
+  /// No description provided for @agentWorkspaceScriptContextAdaptationStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context adaptation strategy'**
+  String get agentWorkspaceScriptContextAdaptationStrategy;
+
+  /// No description provided for @agentWorkspaceScriptContextRewriteConstraints.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context rewrite constraints'**
+  String get agentWorkspaceScriptContextRewriteConstraints;
+
+  /// No description provided for @agentWorkspaceScriptContextRewriteConstraintsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context rewrite constraints subtitle'**
+  String get agentWorkspaceScriptContextRewriteConstraintsSubtitle;
+
+  /// No description provided for @agentWorkspaceScriptContextUntitledScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context untitled script'**
+  String get agentWorkspaceScriptContextUntitledScript;
+
+  /// No description provided for @agentWorkspaceScriptContextNoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context no body'**
+  String get agentWorkspaceScriptContextNoBody;
+
+  /// No description provided for @agentWorkspaceScriptContextPlanDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context plan drafts'**
+  String get agentWorkspaceScriptContextPlanDrafts;
+
+  /// No description provided for @agentWorkspaceScriptContextPlanDraftsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context plan drafts subtitle'**
+  String get agentWorkspaceScriptContextPlanDraftsSubtitle;
+
+  /// No description provided for @agentWorkspaceScriptContextCurrentScriptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context current script body'**
+  String get agentWorkspaceScriptContextCurrentScriptBody;
+
+  /// No description provided for @agentWorkspaceScriptContextFromScriptContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context from script content'**
+  String get agentWorkspaceScriptContextFromScriptContent;
+
+  /// No description provided for @agentWorkspaceScriptContextUntitledChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context untitled chapter'**
+  String get agentWorkspaceScriptContextUntitledChapter;
+
+  /// No description provided for @agentWorkspaceScriptContextChapterPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context chapter prefix'**
+  String get agentWorkspaceScriptContextChapterPrefix;
+
+  /// No description provided for @agentWorkspaceScriptContextNovelChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context novel chapters'**
+  String get agentWorkspaceScriptContextNovelChapters;
+
+  /// No description provided for @agentWorkspaceScriptContextNovelChaptersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context novel chapters subtitle'**
+  String get agentWorkspaceScriptContextNovelChaptersSubtitle;
+
+  /// No description provided for @agentWorkspaceScriptContextUntitledEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context untitled event'**
+  String get agentWorkspaceScriptContextUntitledEvent;
+
+  /// No description provided for @agentWorkspaceScriptContextNovelEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context novel events'**
+  String get agentWorkspaceScriptContextNovelEvents;
+
+  /// No description provided for @agentWorkspaceScriptContextNovelEventsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context novel events subtitle'**
+  String get agentWorkspaceScriptContextNovelEventsSubtitle;
+
+  /// No description provided for @agentWorkspaceScriptContextSnapshotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script context snapshot title'**
+  String get agentWorkspaceScriptContextSnapshotTitle;
+
+  /// No description provided for @agentWorkspaceScriptLatestAssistantResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script latest assistant result'**
+  String get agentWorkspaceScriptLatestAssistantResult;
+
+  /// No description provided for @agentWorkspaceScriptWritebackSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script writeback source'**
+  String get agentWorkspaceScriptWritebackSource;
+
+  /// No description provided for @agentWorkspaceScriptSummaryReviewReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary review returned'**
+  String get agentWorkspaceScriptSummaryReviewReturned;
+
+  /// No description provided for @agentWorkspaceScriptSummaryReviewLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary review line'**
+  String get agentWorkspaceScriptSummaryReviewLine;
+
+  /// No description provided for @agentWorkspaceScriptSummaryPlanDataMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary plan data missing'**
+  String get agentWorkspaceScriptSummaryPlanDataMissing;
+
+  /// No description provided for @agentWorkspaceScriptSummaryStorySkeletonReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary story skeleton ready'**
+  String get agentWorkspaceScriptSummaryStorySkeletonReady;
+
+  /// No description provided for @agentWorkspaceScriptSummaryAdaptationReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary adaptation ready'**
+  String get agentWorkspaceScriptSummaryAdaptationReady;
+
+  /// No description provided for @agentWorkspaceScriptSummaryPlanScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary plan scripts'**
+  String get agentWorkspaceScriptSummaryPlanScripts;
+
+  /// No description provided for @agentWorkspaceScriptSummaryRewriteReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary rewrite ready'**
+  String get agentWorkspaceScriptSummaryRewriteReady;
+
+  /// No description provided for @agentWorkspaceScriptSummaryPlanDataReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary plan data returned'**
+  String get agentWorkspaceScriptSummaryPlanDataReturned;
+
+  /// No description provided for @agentWorkspaceScriptSummaryScriptEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary script empty'**
+  String get agentWorkspaceScriptSummaryScriptEmpty;
+
+  /// No description provided for @agentWorkspaceScriptSummaryScriptChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary script chars'**
+  String get agentWorkspaceScriptSummaryScriptChars;
+
+  /// No description provided for @agentWorkspaceScriptSummaryNovelTextEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary novel text empty'**
+  String get agentWorkspaceScriptSummaryNovelTextEmpty;
+
+  /// No description provided for @agentWorkspaceScriptSummaryNovelTextCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary novel text count'**
+  String get agentWorkspaceScriptSummaryNovelTextCount;
+
+  /// No description provided for @agentWorkspaceScriptSummaryNovelEventsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary novel events empty'**
+  String get agentWorkspaceScriptSummaryNovelEventsEmpty;
+
+  /// No description provided for @agentWorkspaceScriptSummaryNovelEventsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script summary novel events count'**
+  String get agentWorkspaceScriptSummaryNovelEventsCount;
+
+  /// No description provided for @agentWorkspaceScopeProjectIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace scope project id label'**
+  String get agentWorkspaceScopeProjectIdLabel;
+
+  /// No description provided for @agentWorkspaceScopeScriptIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace scope script id label'**
+  String get agentWorkspaceScopeScriptIdLabel;
+
+  /// No description provided for @agentWorkspaceScopeProjectUuidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace scope project uuid label'**
+  String get agentWorkspaceScopeProjectUuidLabel;
+
+  /// No description provided for @agentWorkspaceScopeScriptUuidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace scope script uuid label'**
+  String get agentWorkspaceScopeScriptUuidLabel;
+
+  /// No description provided for @agentWorkspaceScopeWorkspaceUuidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace scope workspace uuid label'**
+  String get agentWorkspaceScopeWorkspaceUuidLabel;
+
+  /// No description provided for @agentWorkspacePaneScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace pane script'**
+  String get agentWorkspacePaneScript;
+
+  /// No description provided for @agentWorkspacePaneProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace pane production'**
+  String get agentWorkspacePaneProduction;
+
+  /// No description provided for @agentWorkspacePaneActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace pane activity'**
+  String get agentWorkspacePaneActivity;
+
+  /// No description provided for @agentWorkspaceActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace activity title'**
+  String get agentWorkspaceActivityTitle;
+
+  /// No description provided for @agentWorkspaceActivityLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace activity latest'**
+  String get agentWorkspaceActivityLatest;
+
+  /// No description provided for @agentWorkspaceActivityLatestToolResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace activity latest tool result'**
+  String get agentWorkspaceActivityLatestToolResult;
+
+  /// No description provided for @agentWorkspaceActivityLatestAssistantText.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace activity latest assistant text'**
+  String get agentWorkspaceActivityLatestAssistantText;
+
+  /// No description provided for @agentWorkspaceActivityNoWsEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace activity no ws events'**
+  String get agentWorkspaceActivityNoWsEvents;
+
+  /// No description provided for @agentWorkspaceProductionCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace production card title'**
+  String get agentWorkspaceProductionCardTitle;
+
+  /// No description provided for @agentWorkspaceGuidedTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace guided tasks title'**
+  String get agentWorkspaceGuidedTasksTitle;
+
+  /// No description provided for @agentWorkspaceScriptWritebackSourceAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script writeback source assistant'**
+  String get agentWorkspaceScriptWritebackSourceAssistant;
+
+  /// No description provided for @agentWorkspaceScriptPlanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script plan hint'**
+  String get agentWorkspaceScriptPlanHint;
+
+  /// No description provided for @agentWorkspaceScriptPlanWritebackReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script plan writeback ready'**
+  String get agentWorkspaceScriptPlanWritebackReady;
+
+  /// No description provided for @agentWorkspaceScriptRunningWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script running workflow'**
+  String get agentWorkspaceScriptRunningWorkflow;
+
+  /// No description provided for @agentWorkspaceScriptRunningReadContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script running read context'**
+  String get agentWorkspaceScriptRunningReadContext;
+
+  /// No description provided for @agentWorkspaceScriptRunningSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script running sub agent'**
+  String get agentWorkspaceScriptRunningSubAgent;
+
+  /// No description provided for @agentWorkspaceScriptRunningWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script running writeback'**
+  String get agentWorkspaceScriptRunningWriteback;
+
+  /// No description provided for @agentWorkspaceScriptRunningWritebackPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script running writeback plan'**
+  String get agentWorkspaceScriptRunningWritebackPlan;
+
+  /// No description provided for @agentWorkspaceScriptCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace script card title'**
+  String get agentWorkspaceScriptCardTitle;
+
+  /// No description provided for @agentWorkspaceSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace section title'**
+  String get agentWorkspaceSectionTitle;
+
+  /// No description provided for @agentWorkspaceSectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent workspace section description'**
+  String get agentWorkspaceSectionDescription;
+
+  /// No description provided for @contentComplianceTargetProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance target project'**
+  String get contentComplianceTargetProject;
+
+  /// No description provided for @contentComplianceTargetScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance target script'**
+  String get contentComplianceTargetScript;
+
+  /// No description provided for @contentComplianceTargetStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance target storyboard'**
+  String get contentComplianceTargetStoryboard;
+
+  /// No description provided for @contentComplianceTargetAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance target asset'**
+  String get contentComplianceTargetAsset;
+
+  /// No description provided for @contentComplianceTargetNovel.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance target novel'**
+  String get contentComplianceTargetNovel;
+
+  /// No description provided for @contentComplianceTargetUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance target user'**
+  String get contentComplianceTargetUser;
+
+  /// No description provided for @contentComplianceOptionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance option all'**
+  String get contentComplianceOptionAll;
+
+  /// No description provided for @contentComplianceCategoryCopyright.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance category copyright'**
+  String get contentComplianceCategoryCopyright;
+
+  /// No description provided for @contentComplianceCategorySafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance category safety'**
+  String get contentComplianceCategorySafety;
+
+  /// No description provided for @contentComplianceCategoryHarassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance category harassment'**
+  String get contentComplianceCategoryHarassment;
+
+  /// No description provided for @contentComplianceCategoryAdult.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance category adult'**
+  String get contentComplianceCategoryAdult;
+
+  /// No description provided for @contentComplianceCategoryViolence.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance category violence'**
+  String get contentComplianceCategoryViolence;
+
+  /// No description provided for @contentComplianceCategorySpam.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance category spam'**
+  String get contentComplianceCategorySpam;
+
+  /// No description provided for @contentComplianceCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance category other'**
+  String get contentComplianceCategoryOther;
+
+  /// No description provided for @contentComplianceSeverityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance severity low'**
+  String get contentComplianceSeverityLow;
+
+  /// No description provided for @contentComplianceSeverityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance severity medium'**
+  String get contentComplianceSeverityMedium;
+
+  /// No description provided for @contentComplianceSeverityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance severity high'**
+  String get contentComplianceSeverityHigh;
+
+  /// No description provided for @contentComplianceSeverityCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance severity critical'**
+  String get contentComplianceSeverityCritical;
+
+  /// No description provided for @contentComplianceStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance status pending'**
+  String get contentComplianceStatusPending;
+
+  /// No description provided for @contentComplianceStatusClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance status claimed'**
+  String get contentComplianceStatusClaimed;
+
+  /// No description provided for @contentComplianceStatusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance status resolved'**
+  String get contentComplianceStatusResolved;
+
+  /// No description provided for @contentComplianceStatusDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance status dismissed'**
+  String get contentComplianceStatusDismissed;
+
+  /// No description provided for @contentComplianceSlaOpenOver24h.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance sla open over24h'**
+  String get contentComplianceSlaOpenOver24h;
+
+  /// No description provided for @contentComplianceSlaOpenOver72h.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance sla open over72h'**
+  String get contentComplianceSlaOpenOver72h;
+
+  /// No description provided for @contentComplianceSlaClaimedOver24h.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance sla claimed over24h'**
+  String get contentComplianceSlaClaimedOver24h;
+
+  /// No description provided for @contentComplianceFieldTargetType.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance field target type'**
+  String get contentComplianceFieldTargetType;
+
+  /// No description provided for @contentComplianceFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance field category'**
+  String get contentComplianceFieldCategory;
+
+  /// No description provided for @contentComplianceFieldSeverity.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance field severity'**
+  String get contentComplianceFieldSeverity;
+
+  /// No description provided for @contentComplianceFieldTargetUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance field target uuid'**
+  String get contentComplianceFieldTargetUuid;
+
+  /// No description provided for @contentComplianceFieldStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance field status'**
+  String get contentComplianceFieldStatus;
+
+  /// No description provided for @contentComplianceSlaChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance sla chip'**
+  String get contentComplianceSlaChip;
+
+  /// No description provided for @contentComplianceMetricPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance metric pending'**
+  String get contentComplianceMetricPending;
+
+  /// No description provided for @contentComplianceMetricClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance metric claimed'**
+  String get contentComplianceMetricClaimed;
+
+  /// No description provided for @contentComplianceMetricResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance metric resolved'**
+  String get contentComplianceMetricResolved;
+
+  /// No description provided for @contentComplianceMetricDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance metric dismissed'**
+  String get contentComplianceMetricDismissed;
+
+  /// No description provided for @contentComplianceMetricCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance metric critical'**
+  String get contentComplianceMetricCritical;
+
+  /// No description provided for @contentComplianceMetricHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance metric high'**
+  String get contentComplianceMetricHigh;
+
+  /// No description provided for @contentComplianceOldestHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance oldest hours'**
+  String get contentComplianceOldestHours;
+
+  /// No description provided for @contentComplianceCapacityPerReviewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance capacity per reviewer'**
+  String get contentComplianceCapacityPerReviewer;
+
+  /// No description provided for @contentComplianceOwnerCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance owner counts'**
+  String get contentComplianceOwnerCounts;
+
+  /// No description provided for @contentComplianceOwnerDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance owner detail'**
+  String get contentComplianceOwnerDetail;
+
+  /// No description provided for @contentComplianceWorkspaceCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance workspace counts'**
+  String get contentComplianceWorkspaceCounts;
+
+  /// No description provided for @contentComplianceWorkspaceDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance workspace detail'**
+  String get contentComplianceWorkspaceDetail;
+
+  /// No description provided for @contentComplianceReportInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance report info'**
+  String get contentComplianceReportInfo;
+
+  /// No description provided for @contentComplianceResolutionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance resolution line'**
+  String get contentComplianceResolutionLine;
+
+  /// No description provided for @contentComplianceActionClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance action claim'**
+  String get contentComplianceActionClaim;
+
+  /// No description provided for @contentComplianceActionResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance action resolve'**
+  String get contentComplianceActionResolve;
+
+  /// No description provided for @contentComplianceActionDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance action dismiss'**
+  String get contentComplianceActionDismiss;
+
+  /// No description provided for @contentComplianceFieldDisposition.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance field disposition'**
+  String get contentComplianceFieldDisposition;
+
+  /// No description provided for @contentComplianceDispositionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance disposition none'**
+  String get contentComplianceDispositionNone;
+
+  /// No description provided for @contentComplianceDispositionArchiveProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance disposition archive project'**
+  String get contentComplianceDispositionArchiveProject;
+
+  /// No description provided for @contentComplianceDispositionSuspendUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance disposition suspend user'**
+  String get contentComplianceDispositionSuspendUser;
+
+  /// No description provided for @contentComplianceFieldResolutionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Content compliance field resolution note'**
+  String get contentComplianceFieldResolutionNote;
+
+  /// No description provided for @jobsEmptyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs empty value'**
+  String get jobsEmptyValue;
+
+  /// No description provided for @jobsKindCountEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs kind count entry'**
+  String get jobsKindCountEntry;
+
+  /// No description provided for @jobsStatusCountEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs status count entry'**
+  String get jobsStatusCountEntry;
+
+  /// No description provided for @jobsIdempotencyMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs idempotency mismatch'**
+  String get jobsIdempotencyMismatch;
+
+  /// No description provided for @jobsUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs updated at'**
+  String get jobsUpdatedAt;
+
+  /// No description provided for @jobsClaimedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs claimed by'**
+  String get jobsClaimedBy;
+
+  /// No description provided for @jobsFailedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs failed reason'**
+  String get jobsFailedReason;
+
+  /// No description provided for @jobsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs title'**
+  String get jobsTitle;
+
+  /// No description provided for @jobsPrefsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs prefs tooltip'**
+  String get jobsPrefsTooltip;
+
+  /// No description provided for @jobsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs subtitle'**
+  String get jobsSubtitle;
+
+  /// No description provided for @jobsLoadList.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs load list'**
+  String get jobsLoadList;
+
+  /// No description provided for @jobsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs load failed'**
+  String get jobsLoadFailed;
+
+  /// No description provided for @jobsLoadKinds.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs load kinds'**
+  String get jobsLoadKinds;
+
+  /// No description provided for @jobsLoadKindSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs load kind summary'**
+  String get jobsLoadKindSummary;
+
+  /// No description provided for @jobsLoadStatusSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs load status summary'**
+  String get jobsLoadStatusSummary;
+
+  /// No description provided for @jobsCompatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs compat title'**
+  String get jobsCompatTitle;
+
+  /// No description provided for @jobsCompatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs compat subtitle'**
+  String get jobsCompatSubtitle;
+
+  /// No description provided for @jobsCompatHttpProbeFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs compat http probe filters'**
+  String get jobsCompatHttpProbeFilters;
+
+  /// No description provided for @jobsFilterFlutterProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs filter flutter probe'**
+  String get jobsFilterFlutterProbe;
+
+  /// No description provided for @jobsFilterFlutterProbeQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs filter flutter probe queued'**
+  String get jobsFilterFlutterProbeQueued;
+
+  /// No description provided for @jobsCreateProbeJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs create probe job'**
+  String get jobsCreateProbeJob;
+
+  /// No description provided for @jobsJobIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs job id label'**
+  String get jobsJobIdLabel;
+
+  /// No description provided for @jobsFetchDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs fetch detail'**
+  String get jobsFetchDetail;
+
+  /// No description provided for @jobsDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs detail label'**
+  String get jobsDetailLabel;
+
+  /// No description provided for @jobsKindsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs kinds label'**
+  String get jobsKindsLabel;
+
+  /// No description provided for @jobsKindSummaryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs kind summary label'**
+  String get jobsKindSummaryLabel;
+
+  /// No description provided for @jobsStatusSummaryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs status summary label'**
+  String get jobsStatusSummaryLabel;
+
+  /// No description provided for @jobsCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs count label'**
+  String get jobsCountLabel;
+
+  /// No description provided for @jobsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs retry'**
+  String get jobsRetry;
+
+  /// No description provided for @jobsCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs cancel'**
+  String get jobsCancel;
+
+  /// No description provided for @notificationsRealtimeDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications realtime disconnected'**
+  String get notificationsRealtimeDisconnected;
+
+  /// No description provided for @notificationsPlatformStatusRecovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications platform status recovered'**
+  String get notificationsPlatformStatusRecovered;
+
+  /// No description provided for @notificationsPlatformStatusDegraded.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications platform status degraded'**
+  String get notificationsPlatformStatusDegraded;
+
+  /// No description provided for @notificationsPlatformStatusRecoveredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications platform status recovered message'**
+  String get notificationsPlatformStatusRecoveredMessage;
+
+  /// No description provided for @notificationsPlatformStatusDegradedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications platform status degraded message'**
+  String get notificationsPlatformStatusDegradedMessage;
+
+  /// No description provided for @notificationsPlatformStatusAffectedEndpoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications platform status affected endpoints'**
+  String get notificationsPlatformStatusAffectedEndpoints;
+
+  /// No description provided for @notificationsComplianceAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications compliance alert title'**
+  String get notificationsComplianceAlertTitle;
+
+  /// No description provided for @notificationsDownloadUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications download unsupported'**
+  String get notificationsDownloadUnsupported;
+
+  /// No description provided for @notificationsComplianceSharedAsyncExportCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications compliance shared async export completed'**
+  String get notificationsComplianceSharedAsyncExportCompleted;
+
+  /// No description provided for @notificationsComplianceSharedAsyncExportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications compliance shared async export cancelled'**
+  String get notificationsComplianceSharedAsyncExportCancelled;
+
+  /// No description provided for @notificationsComplianceSharedAsyncExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications compliance shared async export failed'**
+  String get notificationsComplianceSharedAsyncExportFailed;
+
+  /// No description provided for @notificationsComplianceSharedAsyncExportFailedWithDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications compliance shared async export failed with detail'**
+  String get notificationsComplianceSharedAsyncExportFailedWithDetail;
+
+  /// No description provided for @notificationsComplianceSharedAsyncExportTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications compliance shared async export timed out'**
+  String get notificationsComplianceSharedAsyncExportTimedOut;
+
+  /// No description provided for @notificationsImportJsonObjectRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications import json object required'**
+  String get notificationsImportJsonObjectRequired;
+
+  /// No description provided for @notificationsImportJsonParseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications import json parse failed'**
+  String get notificationsImportJsonParseFailed;
+
+  /// No description provided for @notificationsUnknownTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications unknown template'**
+  String get notificationsUnknownTemplate;
+
+  /// No description provided for @platformStatusChipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform status chip label'**
+  String get platformStatusChipLabel;
+
+  /// No description provided for @opsWhActivityEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ops wh activity entry title'**
+  String get opsWhActivityEntryTitle;
+
+  /// No description provided for @opsWhFieldId.
+  ///
+  /// In en, this message translates to:
+  /// **'Ops wh field id'**
+  String get opsWhFieldId;
+
+  /// No description provided for @opsWhFieldCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ops wh field created at'**
+  String get opsWhFieldCreatedAt;
+
+  /// No description provided for @opsWhFieldUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ops wh field updated at'**
+  String get opsWhFieldUpdatedAt;
+
+  /// No description provided for @opsWhApiEventTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Ops wh api event types'**
+  String get opsWhApiEventTypes;
+
+  /// No description provided for @billingAuditEventTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit event type label'**
+  String get billingAuditEventTypeLabel;
+
+  /// No description provided for @billingAuditProviderEventIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit provider event id label'**
+  String get billingAuditProviderEventIdLabel;
+
+  /// No description provided for @billingAuditRawEventIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit raw event id label'**
+  String get billingAuditRawEventIdLabel;
+
+  /// No description provided for @billingAuditProviderEventIdPrefixLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit provider event id prefix label'**
+  String get billingAuditProviderEventIdPrefixLabel;
+
+  /// No description provided for @billingAuditRawEventIdPrefixLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit raw event id prefix label'**
+  String get billingAuditRawEventIdPrefixLabel;
+
+  /// No description provided for @billingAuditEventCreatedFromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit event created from label'**
+  String get billingAuditEventCreatedFromLabel;
+
+  /// No description provided for @billingAuditEventCreatedToLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit event created to label'**
+  String get billingAuditEventCreatedToLabel;
+
+  /// No description provided for @billingAuditCreatedFromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit created from label'**
+  String get billingAuditCreatedFromLabel;
+
+  /// No description provided for @billingAuditCreatedToLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing audit created to label'**
+  String get billingAuditCreatedToLabel;
 }
 
 class _AppLocalizationsDelegate

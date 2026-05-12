@@ -350,6 +350,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     final shotReadinessUi = project == null
         ? const ShotReadinessUi(headline: '选择短剧项目后，会显示服务端分镜阻塞汇总。')
         : buildShotReadinessUi(
+            l10n: l10n,
             loadingProjectOverview: _loadingProjectOverview,
             readiness: _shotReadiness,
             readinessUnavailable: _shotReadinessUnavailable,
@@ -561,6 +562,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       batchGenerateCandidateClipsBusy: _batchCandidateBusy,
     );
     final candidateComparePanelUi = buildShortVideoCandidateComparePanelUi(
+      l10n: l10n,
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
       storyboardRows: _candidateCompareRows,

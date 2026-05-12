@@ -196,22 +196,30 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     return diagnostics;
   }
 
-  String _storyboardProductionMetaLine(ProductionStoryboardItemV1? row) {
-    if (row == null) return '制作视图尚未加载';
+  String _storyboardProductionMetaLine(
+    AppLocalizations l10n,
+    ProductionStoryboardItemV1? row,
+  ) {
+    if (row == null) return l10n.storyboardWorkbenchProductionMetaNotLoaded;
     final parts = <String>[
-      if (row.sbIndex != null) '序号 ${row.sbIndex}',
-      if ((row.state ?? '').trim().isNotEmpty) '状态 ${row.state}',
-      if ((row.duration ?? '').trim().isNotEmpty) '时长 ${row.duration}',
-      if (row.trackId != null) '轨道 ${row.trackId}',
+      if (row.sbIndex != null)
+        l10n.storyboardWorkbenchProductionMetaSbIndex(row.sbIndex!),
+      if ((row.state ?? '').trim().isNotEmpty)
+        l10n.storyboardWorkbenchProductionMetaState(row.state!.trim()),
+      if ((row.duration ?? '').trim().isNotEmpty)
+        l10n.storyboardWorkbenchProductionMetaDuration(row.duration!.trim()),
+      if (row.trackId != null)
+        l10n.storyboardWorkbenchProductionMetaTrack(row.trackId!),
     ];
     if (parts.isEmpty) {
-      return '制作视图已加载';
+      return l10n.storyboardWorkbenchProductionMetaLoadedEmpty;
     }
     return parts.join(' · ');
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final viewState = _buildWorkbenchViewState();
 
     return Column(
@@ -221,7 +229,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           loadingProduction: _loadingProduction,
           scriptStoryboard: widget.scriptStoryboard,
           productionRow: _productionRow,
-          metaLine: _storyboardProductionMetaLine(_productionRow),
+          metaLine: _storyboardProductionMetaLine(l10n, _productionRow),
         ),
         if (_storyboardShotReadiness != null) ...[
           const SizedBox(height: 12),

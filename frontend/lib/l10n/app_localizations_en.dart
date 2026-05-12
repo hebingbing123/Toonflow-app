@@ -8023,6 +8023,125 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skillsHarnessListSampleEmpty => '—';
 
   @override
+  String get storyboardWorkbenchErrNoExportJobSubmitted =>
+      'No submitted export job yet.';
+
+  @override
+  String get storyboardWorkbenchExportCompletedSyncedProduction =>
+      'Export finished; production data for this shot was synced automatically.';
+
+  @override
+  String get storyboardWorkbenchSyncProductionLoadingSummary =>
+      'Syncing production data for this shot.';
+
+  @override
+  String get storyboardWorkbenchSyncProductionLoadingDetail =>
+      'When sync completes, the current frame, tracks, and available video settings will refresh.';
+
+  @override
+  String get storyboardWorkbenchSyncProductionFailedSummary =>
+      'Failed to sync production data for this shot.';
+
+  @override
+  String get storyboardWorkbenchSyncProductionFailedFallbackDetail =>
+      'Check that this shot exists on the production side, then try syncing again.';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoLoadingSummary =>
+      'Refreshing video data for this shot.';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoLoadingDetail =>
+      'When refresh completes, model info, rendered videos, and in-flight jobs will update.';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoFailedSummary =>
+      'Failed to refresh video data for this shot.';
+
+  @override
+  String get storyboardWorkbenchRefreshVideoFailedFallbackDetail =>
+      'Try again later, or continue editing images and tracks first.';
+
+  @override
+  String get storyboardWorkbenchProductionMetaNotLoaded =>
+      'Production view not loaded yet';
+
+  @override
+  String storyboardWorkbenchProductionMetaSbIndex(int sbIndex) {
+    return 'Index $sbIndex';
+  }
+
+  @override
+  String storyboardWorkbenchProductionMetaState(String state) {
+    return 'State $state';
+  }
+
+  @override
+  String storyboardWorkbenchProductionMetaDuration(String duration) {
+    return 'Duration $duration';
+  }
+
+  @override
+  String storyboardWorkbenchProductionMetaTrack(int trackId) {
+    return 'Track $trackId';
+  }
+
+  @override
+  String get storyboardWorkbenchProductionMetaLoadedEmpty =>
+      'Production view loaded';
+
+  @override
+  String get shortVideoReadinessNoPayloadHeadline =>
+      'Shot readiness data is not available yet.';
+
+  @override
+  String get shortVideoReadinessEmptyProjectHeadline =>
+      'This project has no storyboard rows yet; split shots on the script side first to see the rollup.';
+
+  @override
+  String shortVideoReadinessRollupHeadline(int ready, int total, int blocked) {
+    return '$ready/$total shots ready; $blocked blocked.';
+  }
+
+  @override
+  String shortVideoReadinessReasonRollupLine(String reasonLabel, int count) {
+    return '$reasonLabel ($count shots)';
+  }
+
+  @override
+  String shortVideoReadinessStoryboardDetailPrefix(int storyboardNumericId) {
+    return 'Shot #$storyboardNumericId';
+  }
+
+  @override
+  String shortVideoReadinessScriptSuffix(int scriptId) {
+    return ' · Script #$scriptId';
+  }
+
+  @override
+  String shortVideoReadinessSlotSuffix(int sbIndex) {
+    return ' · Slot $sbIndex';
+  }
+
+  @override
+  String shortVideoReadinessBlockedShotDetail(String lead, String reasons) {
+    return '$lead: $reasons';
+  }
+
+  @override
+  String get shortVideoCandidateCompareReadinessNoData =>
+      'Readiness data unavailable for this shot.';
+
+  @override
+  String get shortVideoCandidateCompareReadinessReady =>
+      'Ready to continue generating or exporting.';
+
+  @override
+  String shortVideoCandidateCompareReadinessBlocked(String items) {
+    return 'Needs $items';
+  }
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData =>
       'Production view has no storyboard rows yet.';
 
@@ -9899,4 +10018,1330 @@ class AppLocalizationsEn extends AppLocalizations {
   String shortVideoSpaceProductionAssemblyLoadFailed(String error) {
     return 'Load failed: $error';
   }
+
+  @override
+  String get accountSectionTitle => 'Account section title';
+
+  @override
+  String get accountRiskyPrefsTooltip => 'Account risky prefs tooltip';
+
+  @override
+  String get accountSectionSubtitle => 'Account section subtitle';
+
+  @override
+  String get accountExportTitle => 'Account export title';
+
+  @override
+  String get accountExportCreate => 'Account export create';
+
+  @override
+  String get accountExportIncludeAuditLogs =>
+      'Account export include audit logs';
+
+  @override
+  String get accountExportIncludeNotifications =>
+      'Account export include notifications';
+
+  @override
+  String get accountExportActiveCount => 'Account export active count';
+
+  @override
+  String get accountExportCopyLastSavedPath =>
+      'Account export copy last saved path';
+
+  @override
+  String get accountExportEmpty => 'Account export empty';
+
+  @override
+  String get accountExportDefaultFileName => 'Account export default file name';
+
+  @override
+  String get accountExportTaskLine => 'Account export task line';
+
+  @override
+  String get accountExportSizeLine => 'Account export size line';
+
+  @override
+  String get accountExportSavedSnack => 'Account export saved snack';
+
+  @override
+  String get accountExportDownload => 'Account export download';
+
+  @override
+  String get accountExportCopyFileName => 'Account export copy file name';
+
+  @override
+  String get accountDeleteTitle => 'Account delete title';
+
+  @override
+  String get accountDeleteDescription => 'Account delete description';
+
+  @override
+  String get accountDeleteConfirmLabel => 'Account delete confirm label';
+
+  @override
+  String get accountDeleteIrreversibleAck => 'Account delete irreversible ack';
+
+  @override
+  String get accountDeleteLastResponse => 'Account delete last response';
+
+  @override
+  String get accountDeleteButton => 'Account delete button';
+
+  @override
+  String get accountExportStatusQueued => 'Account export status queued';
+
+  @override
+  String get accountExportStatusRunning => 'Account export status running';
+
+  @override
+  String get accountExportStatusSucceeded => 'Account export status succeeded';
+
+  @override
+  String get accountExportStatusFailed => 'Account export status failed';
+
+  @override
+  String get adminConsoleMembershipItem => 'Admin console membership item';
+
+  @override
+  String get adminConsoleRecentJobItem => 'Admin console recent job item';
+
+  @override
+  String get adminConsoleAuditListItem => 'Admin console audit list item';
+
+  @override
+  String get adminConsoleDailyQuotaLabel => 'Admin console daily quota label';
+
+  @override
+  String get adminConsoleChipMember => 'Admin console chip member';
+
+  @override
+  String get adminConsoleArchivedLabel => 'Admin console archived label';
+
+  @override
+  String get adminConsoleMemberListItem => 'Admin console member list item';
+
+  @override
+  String get adminConsoleRecentProjectItem =>
+      'Admin console recent project item';
+
+  @override
+  String get adminConsoleChipScript => 'Admin console chip script';
+
+  @override
+  String get adminConsoleChipAsset => 'Admin console chip asset';
+
+  @override
+  String get adminConsoleChipJob => 'Admin console chip job';
+
+  @override
+  String get adminConsoleAclMemberItem => 'Admin console acl member item';
+
+  @override
+  String get adminConsoleWorkspaceCandidateItem =>
+      'Admin console workspace candidate item';
+
+  @override
+  String get adminConsoleProjectRecentJobItem =>
+      'Admin console project recent job item';
+
+  @override
+  String get adminConsoleAuditUserSummary => 'Admin console audit user summary';
+
+  @override
+  String get adminConsoleAuditWorkspaceMembership =>
+      'Admin console audit workspace membership';
+
+  @override
+  String get adminConsoleAuditOwnerTransfer =>
+      'Admin console audit owner transfer';
+
+  @override
+  String get adminConsoleAuditArchiveNote => 'Admin console audit archive note';
+
+  @override
+  String get adminConsoleAuditProjectOwnerTransfer =>
+      'Admin console audit project owner transfer';
+
+  @override
+  String get adminConsoleFieldUserId => 'Admin console field user id';
+
+  @override
+  String get adminConsoleFieldCreatedAt => 'Admin console field created at';
+
+  @override
+  String get adminConsoleFieldUpdatedAt => 'Admin console field updated at';
+
+  @override
+  String get adminConsoleFieldOperationalStatus =>
+      'Admin console field operational status';
+
+  @override
+  String get adminConsoleFieldBillingProvider =>
+      'Admin console field billing provider';
+
+  @override
+  String get adminConsoleFieldSubscription =>
+      'Admin console field subscription';
+
+  @override
+  String get adminConsoleFieldCurrentWorkspace =>
+      'Admin console field current workspace';
+
+  @override
+  String get adminConsoleFieldWorkspaceId => 'Admin console field workspace id';
+
+  @override
+  String get adminConsoleFieldOwner => 'Admin console field owner';
+
+  @override
+  String get adminConsoleFieldArchivedAt => 'Admin console field archived at';
+
+  @override
+  String get adminConsoleFieldOpsNote => 'Admin console field ops note';
+
+  @override
+  String get adminConsoleFieldProjectId => 'Admin console field project id';
+
+  @override
+  String get adminConsoleFieldWorkspace => 'Admin console field workspace';
+
+  @override
+  String get adminConsoleFieldProjectArchivedAt =>
+      'Admin console field project archived at';
+
+  @override
+  String get adminConsoleFieldAclMode => 'Admin console field acl mode';
+
+  @override
+  String get adminConsoleFieldEditorCount => 'Admin console field editor count';
+
+  @override
+  String get adminConsoleFieldViewerCount => 'Admin console field viewer count';
+
+  @override
+  String get agentWorkspaceProductionPromptLabel =>
+      'Agent workspace production prompt label';
+
+  @override
+  String get agentWorkspaceProductionPromptHelper =>
+      'Agent workspace production prompt helper';
+
+  @override
+  String get agentWorkspaceProductionRunWorkflow =>
+      'Agent workspace production run workflow';
+
+  @override
+  String get agentWorkspaceProductionDomainToolLabel =>
+      'Agent workspace production domain tool label';
+
+  @override
+  String get agentWorkspaceProductionFlowKeyLabel =>
+      'Agent workspace production flow key label';
+
+  @override
+  String get agentWorkspaceProductionFlowKeyHelper =>
+      'Agent workspace production flow key helper';
+
+  @override
+  String get agentWorkspaceProductionArgsLabel =>
+      'Agent workspace production args label';
+
+  @override
+  String get agentWorkspaceProductionArgsHelper =>
+      'Agent workspace production args helper';
+
+  @override
+  String get agentWorkspaceProductionReadTool =>
+      'Agent workspace production read tool';
+
+  @override
+  String get agentWorkspaceProductionSubAgentToolLabel =>
+      'Agent workspace production sub agent tool label';
+
+  @override
+  String get agentWorkspaceProductionSubAgentArgsLabel =>
+      'Agent workspace production sub agent args label';
+
+  @override
+  String get agentWorkspaceProductionSubAgentArgsHelper =>
+      'Agent workspace production sub agent args helper';
+
+  @override
+  String get agentWorkspaceProductionRunSubAgent =>
+      'Agent workspace production run sub agent';
+
+  @override
+  String get agentWorkspaceProductionWritebackToolResult =>
+      'Agent workspace production writeback tool result';
+
+  @override
+  String get agentWorkspaceProductionArgumentTemplates =>
+      'Agent workspace production argument templates';
+
+  @override
+  String get agentWorkspaceProductionCurrentCandidateArgs =>
+      'Agent workspace production current candidate args';
+
+  @override
+  String get agentWorkspaceProductionCandidateIds =>
+      'Agent workspace production candidate ids';
+
+  @override
+  String get agentWorkspaceProductionPromptPreviewTitle =>
+      'Agent workspace production prompt preview title';
+
+  @override
+  String get agentWorkspaceProductionStagesTitle =>
+      'Agent workspace production stages title';
+
+  @override
+  String get agentWorkspaceProductionFlowChip =>
+      'Agent workspace production flow chip';
+
+  @override
+  String get agentWorkspaceProductionApplyStage =>
+      'Agent workspace production apply stage';
+
+  @override
+  String get agentWorkspaceProductionDiagnosisTitle =>
+      'Agent workspace production diagnosis title';
+
+  @override
+  String get agentWorkspaceProductionToolChip =>
+      'Agent workspace production tool chip';
+
+  @override
+  String get agentWorkspaceProductionAgentChip =>
+      'Agent workspace production agent chip';
+
+  @override
+  String get agentWorkspaceProductionApplySuggestion =>
+      'Agent workspace production apply suggestion';
+
+  @override
+  String get agentWorkspaceProductionStepPullAssetsFlow =>
+      'Agent workspace production step pull assets flow';
+
+  @override
+  String get agentWorkspaceProductionStepRunAssetsSubAgent =>
+      'Agent workspace production step run assets sub agent';
+
+  @override
+  String get agentWorkspaceProductionStepPullStoryboardFlow =>
+      'Agent workspace production step pull storyboard flow';
+
+  @override
+  String get agentWorkspaceProductionStepWritebackFlow =>
+      'Agent workspace production step writeback flow';
+
+  @override
+  String get agentWorkspaceProductionStepRunStoryboardSubAgent =>
+      'Agent workspace production step run storyboard sub agent';
+
+  @override
+  String get agentWorkspaceProductionStepRunDirectorPlanSubAgent =>
+      'Agent workspace production step run director plan sub agent';
+
+  @override
+  String get agentWorkspaceProductionPromptFlowDown =>
+      'Agent workspace production prompt flow down';
+
+  @override
+  String get agentWorkspaceProductionPromptRewriteFocus =>
+      'Agent workspace production prompt rewrite focus';
+
+  @override
+  String get agentWorkspaceProductionPromptVisualPacing =>
+      'Agent workspace production prompt visual pacing';
+
+  @override
+  String get agentWorkspaceProductionPromptExtraConstraint =>
+      'Agent workspace production prompt extra constraint';
+
+  @override
+  String get agentWorkspaceProductionPromptAssetFocus =>
+      'Agent workspace production prompt asset focus';
+
+  @override
+  String get agentWorkspaceProductionPromptExecutionOrder =>
+      'Agent workspace production prompt execution order';
+
+  @override
+  String get agentWorkspaceProductionStoryboardPriorityMissing =>
+      'Agent workspace production storyboard priority missing';
+
+  @override
+  String get agentWorkspaceProductionCollapsedRows =>
+      'Agent workspace production collapsed rows';
+
+  @override
+  String get agentWorkspaceProductionReviewTarget =>
+      'Agent workspace production review target';
+
+  @override
+  String get agentWorkspaceProductionReviewGrade =>
+      'Agent workspace production review grade';
+
+  @override
+  String get agentWorkspaceProductionReviewIssues =>
+      'Agent workspace production review issues';
+
+  @override
+  String get agentWorkspaceProductionReviewNextStep =>
+      'Agent workspace production review next step';
+
+  @override
+  String get agentWorkspaceProductionReviewAssetIds =>
+      'Agent workspace production review asset ids';
+
+  @override
+  String get agentWorkspaceProductionReviewAssetScope =>
+      'Agent workspace production review asset scope';
+
+  @override
+  String get agentWorkspaceProductionReviewStoryboardIds =>
+      'Agent workspace production review storyboard ids';
+
+  @override
+  String get agentWorkspaceProductionReviewSummary =>
+      'Agent workspace production review summary';
+
+  @override
+  String get agentWorkspaceProductionShotLabel =>
+      'Agent workspace production shot label';
+
+  @override
+  String get agentWorkspaceProductionSceneLabel =>
+      'Agent workspace production scene label';
+
+  @override
+  String get agentWorkspaceProductionDurationLabel =>
+      'Agent workspace production duration label';
+
+  @override
+  String get agentWorkspaceProductionAssetsLabel =>
+      'Agent workspace production assets label';
+
+  @override
+  String get agentWorkspaceProductionStateLabel =>
+      'Agent workspace production state label';
+
+  @override
+  String get agentWorkspaceProductionModeTextOnly =>
+      'Agent workspace production mode text only';
+
+  @override
+  String get agentWorkspaceProductionResultHasImage =>
+      'Agent workspace production result has image';
+
+  @override
+  String get agentWorkspaceProductionResultMissingImage =>
+      'Agent workspace production result missing image';
+
+  @override
+  String get agentWorkspaceProductionContextFromTool =>
+      'Agent workspace production context from tool';
+
+  @override
+  String get agentWorkspaceProductionContextDerivedRewrite =>
+      'Agent workspace production context derived rewrite';
+
+  @override
+  String get agentWorkspaceProductionContextDerivedRewriteSubtitle =>
+      'Agent workspace production context derived rewrite subtitle';
+
+  @override
+  String get agentWorkspaceProductionContextReturnList =>
+      'Agent workspace production context return list';
+
+  @override
+  String get agentWorkspaceProductionContextToolText =>
+      'Agent workspace production context tool text';
+
+  @override
+  String get agentWorkspaceProductionContextReviewSummary =>
+      'Agent workspace production context review summary';
+
+  @override
+  String get agentWorkspaceProductionContextSnapshotTitle =>
+      'Agent workspace production context snapshot title';
+
+  @override
+  String get agentWorkspaceSummaryReturnedList =>
+      'Agent workspace summary returned list';
+
+  @override
+  String get agentWorkspaceSummaryReturnedText =>
+      'Agent workspace summary returned text';
+
+  @override
+  String get agentWorkspaceProductionSummaryItems =>
+      'Agent workspace production summary items';
+
+  @override
+  String get agentWorkspaceProductionSummaryReviewHeadline =>
+      'Agent workspace production summary review headline';
+
+  @override
+  String get agentWorkspaceProductionSummaryIssueBreakdown =>
+      'Agent workspace production summary issue breakdown';
+
+  @override
+  String get agentWorkspaceProductionSummaryFocusedAssets =>
+      'Agent workspace production summary focused assets';
+
+  @override
+  String get agentWorkspaceProductionSummaryFocusedAssetScope =>
+      'Agent workspace production summary focused asset scope';
+
+  @override
+  String get agentWorkspaceProductionSummaryFocusedShots =>
+      'Agent workspace production summary focused shots';
+
+  @override
+  String get agentWorkspaceSummaryReturnedObjectKeys =>
+      'Agent workspace summary returned object keys';
+
+  @override
+  String get agentWorkspaceProductionSummaryFlowEmpty =>
+      'Agent workspace production summary flow empty';
+
+  @override
+  String get agentWorkspaceProductionSummaryFlowEmptyString =>
+      'Agent workspace production summary flow empty string';
+
+  @override
+  String get agentWorkspaceProductionSummaryTextChars =>
+      'Agent workspace production summary text chars';
+
+  @override
+  String get agentWorkspaceProductionSummaryLineCount =>
+      'Agent workspace production summary line count';
+
+  @override
+  String get agentWorkspaceProductionSummaryPlanSections =>
+      'Agent workspace production summary plan sections';
+
+  @override
+  String get agentWorkspaceProductionSummaryRewriteInherited =>
+      'Agent workspace production summary rewrite inherited';
+
+  @override
+  String get agentWorkspaceProductionSummaryStoryboardRows =>
+      'Agent workspace production summary storyboard rows';
+
+  @override
+  String get agentWorkspaceProductionSummaryLinkedAssets =>
+      'Agent workspace production summary linked assets';
+
+  @override
+  String get agentWorkspaceProductionSummaryListCount =>
+      'Agent workspace production summary list count';
+
+  @override
+  String get agentWorkspaceProductionSummaryPrompts =>
+      'Agent workspace production summary prompts';
+
+  @override
+  String get agentWorkspaceProductionSummaryMediaUrls =>
+      'Agent workspace production summary media urls';
+
+  @override
+  String get agentWorkspaceProductionSummaryNeedImages =>
+      'Agent workspace production summary need images';
+
+  @override
+  String get agentWorkspaceProductionSummaryMissingFrames =>
+      'Agent workspace production summary missing frames';
+
+  @override
+  String get agentWorkspaceProductionSummaryTextOnlyCount =>
+      'Agent workspace production summary text only count';
+
+  @override
+  String get agentWorkspaceProductionSummaryStateTypes =>
+      'Agent workspace production summary state types';
+
+  @override
+  String get agentWorkspaceProductionSummaryObjectKeyCount =>
+      'Agent workspace production summary object key count';
+
+  @override
+  String get agentWorkspaceProductionSummaryObjectListEntry =>
+      'Agent workspace production summary object list entry';
+
+  @override
+  String get agentWorkspaceProductionSummaryObjectTextEntry =>
+      'Agent workspace production summary object text entry';
+
+  @override
+  String get agentWorkspaceProductionSummaryReturnedType =>
+      'Agent workspace production summary returned type';
+
+  @override
+  String get agentWorkspaceProductionIdleHint =>
+      'Agent workspace production idle hint';
+
+  @override
+  String get agentWorkspaceProductionLatestToolResult =>
+      'Agent workspace production latest tool result';
+
+  @override
+  String get agentWorkspaceProductionResultSummary =>
+      'Agent workspace production result summary';
+
+  @override
+  String get agentWorkspaceProductionSuggestedFlowKey =>
+      'Agent workspace production suggested flow key';
+
+  @override
+  String get agentWorkspaceProductionUseSuggestedFlowKey =>
+      'Agent workspace production use suggested flow key';
+
+  @override
+  String get agentWorkspaceProductionWritebackStrategy =>
+      'Agent workspace production writeback strategy';
+
+  @override
+  String get agentWorkspaceScriptStepFetchPlanData =>
+      'Agent workspace script step fetch plan data';
+
+  @override
+  String get agentWorkspaceScriptStepFetchContent =>
+      'Agent workspace script step fetch content';
+
+  @override
+  String get agentWorkspaceScriptStepGenerateDraft =>
+      'Agent workspace script step generate draft';
+
+  @override
+  String get agentWorkspaceScriptStepWriteback =>
+      'Agent workspace script step writeback';
+
+  @override
+  String get agentWorkspaceScriptPromptLabel =>
+      'Agent workspace script prompt label';
+
+  @override
+  String get agentWorkspaceScriptPromptHelper =>
+      'Agent workspace script prompt helper';
+
+  @override
+  String get agentWorkspaceScriptRunWorkflow =>
+      'Agent workspace script run workflow';
+
+  @override
+  String get agentWorkspaceScriptDomainToolLabel =>
+      'Agent workspace script domain tool label';
+
+  @override
+  String get agentWorkspaceScriptReadContext =>
+      'Agent workspace script read context';
+
+  @override
+  String get agentWorkspaceScriptArgsLabel =>
+      'Agent workspace script args label';
+
+  @override
+  String get agentWorkspaceScriptArgsHelper =>
+      'Agent workspace script args helper';
+
+  @override
+  String get agentWorkspaceScriptSubAgentToolLabel =>
+      'Agent workspace script sub agent tool label';
+
+  @override
+  String get agentWorkspaceScriptRunSubAgent =>
+      'Agent workspace script run sub agent';
+
+  @override
+  String get agentWorkspaceScriptWritebackPlanData =>
+      'Agent workspace script writeback plan data';
+
+  @override
+  String get agentWorkspaceScriptWritebackUpdateData =>
+      'Agent workspace script writeback update data';
+
+  @override
+  String get agentWorkspaceScriptStagesTitle =>
+      'Agent workspace script stages title';
+
+  @override
+  String get agentWorkspaceScriptApplyStage =>
+      'Agent workspace script apply stage';
+
+  @override
+  String get agentWorkspaceScriptAdvanceStage =>
+      'Agent workspace script advance stage';
+
+  @override
+  String get agentWorkspaceScriptDiagnosisTitle =>
+      'Agent workspace script diagnosis title';
+
+  @override
+  String get agentWorkspaceScriptToolChip => 'Agent workspace script tool chip';
+
+  @override
+  String get agentWorkspaceScriptAgentChip =>
+      'Agent workspace script agent chip';
+
+  @override
+  String get agentWorkspaceScriptApplySuggestion =>
+      'Agent workspace script apply suggestion';
+
+  @override
+  String get agentWorkspaceScriptContextSkeletonFocus =>
+      'Agent workspace script context skeleton focus';
+
+  @override
+  String get agentWorkspaceScriptContextAdaptationFocus =>
+      'Agent workspace script context adaptation focus';
+
+  @override
+  String get agentWorkspaceScriptContextExecutionOrder =>
+      'Agent workspace script context execution order';
+
+  @override
+  String get agentWorkspaceScriptContextDialogueConstraint =>
+      'Agent workspace script context dialogue constraint';
+
+  @override
+  String get agentWorkspaceScriptContextStorySkeleton =>
+      'Agent workspace script context story skeleton';
+
+  @override
+  String get agentWorkspaceScriptContextFromPlanData =>
+      'Agent workspace script context from plan data';
+
+  @override
+  String get agentWorkspaceScriptContextAdaptationStrategy =>
+      'Agent workspace script context adaptation strategy';
+
+  @override
+  String get agentWorkspaceScriptContextRewriteConstraints =>
+      'Agent workspace script context rewrite constraints';
+
+  @override
+  String get agentWorkspaceScriptContextRewriteConstraintsSubtitle =>
+      'Agent workspace script context rewrite constraints subtitle';
+
+  @override
+  String get agentWorkspaceScriptContextUntitledScript =>
+      'Agent workspace script context untitled script';
+
+  @override
+  String get agentWorkspaceScriptContextNoBody =>
+      'Agent workspace script context no body';
+
+  @override
+  String get agentWorkspaceScriptContextPlanDrafts =>
+      'Agent workspace script context plan drafts';
+
+  @override
+  String get agentWorkspaceScriptContextPlanDraftsSubtitle =>
+      'Agent workspace script context plan drafts subtitle';
+
+  @override
+  String get agentWorkspaceScriptContextCurrentScriptBody =>
+      'Agent workspace script context current script body';
+
+  @override
+  String get agentWorkspaceScriptContextFromScriptContent =>
+      'Agent workspace script context from script content';
+
+  @override
+  String get agentWorkspaceScriptContextUntitledChapter =>
+      'Agent workspace script context untitled chapter';
+
+  @override
+  String get agentWorkspaceScriptContextChapterPrefix =>
+      'Agent workspace script context chapter prefix';
+
+  @override
+  String get agentWorkspaceScriptContextNovelChapters =>
+      'Agent workspace script context novel chapters';
+
+  @override
+  String get agentWorkspaceScriptContextNovelChaptersSubtitle =>
+      'Agent workspace script context novel chapters subtitle';
+
+  @override
+  String get agentWorkspaceScriptContextUntitledEvent =>
+      'Agent workspace script context untitled event';
+
+  @override
+  String get agentWorkspaceScriptContextNovelEvents =>
+      'Agent workspace script context novel events';
+
+  @override
+  String get agentWorkspaceScriptContextNovelEventsSubtitle =>
+      'Agent workspace script context novel events subtitle';
+
+  @override
+  String get agentWorkspaceScriptContextSnapshotTitle =>
+      'Agent workspace script context snapshot title';
+
+  @override
+  String get agentWorkspaceScriptLatestAssistantResult =>
+      'Agent workspace script latest assistant result';
+
+  @override
+  String get agentWorkspaceScriptWritebackSource =>
+      'Agent workspace script writeback source';
+
+  @override
+  String get agentWorkspaceScriptSummaryReviewReturned =>
+      'Agent workspace script summary review returned';
+
+  @override
+  String get agentWorkspaceScriptSummaryReviewLine =>
+      'Agent workspace script summary review line';
+
+  @override
+  String get agentWorkspaceScriptSummaryPlanDataMissing =>
+      'Agent workspace script summary plan data missing';
+
+  @override
+  String get agentWorkspaceScriptSummaryStorySkeletonReady =>
+      'Agent workspace script summary story skeleton ready';
+
+  @override
+  String get agentWorkspaceScriptSummaryAdaptationReady =>
+      'Agent workspace script summary adaptation ready';
+
+  @override
+  String get agentWorkspaceScriptSummaryPlanScripts =>
+      'Agent workspace script summary plan scripts';
+
+  @override
+  String get agentWorkspaceScriptSummaryRewriteReady =>
+      'Agent workspace script summary rewrite ready';
+
+  @override
+  String get agentWorkspaceScriptSummaryPlanDataReturned =>
+      'Agent workspace script summary plan data returned';
+
+  @override
+  String get agentWorkspaceScriptSummaryScriptEmpty =>
+      'Agent workspace script summary script empty';
+
+  @override
+  String get agentWorkspaceScriptSummaryScriptChars =>
+      'Agent workspace script summary script chars';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelTextEmpty =>
+      'Agent workspace script summary novel text empty';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelTextCount =>
+      'Agent workspace script summary novel text count';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelEventsEmpty =>
+      'Agent workspace script summary novel events empty';
+
+  @override
+  String get agentWorkspaceScriptSummaryNovelEventsCount =>
+      'Agent workspace script summary novel events count';
+
+  @override
+  String get agentWorkspaceScopeProjectIdLabel =>
+      'Agent workspace scope project id label';
+
+  @override
+  String get agentWorkspaceScopeScriptIdLabel =>
+      'Agent workspace scope script id label';
+
+  @override
+  String get agentWorkspaceScopeProjectUuidLabel =>
+      'Agent workspace scope project uuid label';
+
+  @override
+  String get agentWorkspaceScopeScriptUuidLabel =>
+      'Agent workspace scope script uuid label';
+
+  @override
+  String get agentWorkspaceScopeWorkspaceUuidLabel =>
+      'Agent workspace scope workspace uuid label';
+
+  @override
+  String get agentWorkspacePaneScript => 'Agent workspace pane script';
+
+  @override
+  String get agentWorkspacePaneProduction => 'Agent workspace pane production';
+
+  @override
+  String get agentWorkspacePaneActivity => 'Agent workspace pane activity';
+
+  @override
+  String get agentWorkspaceActivityTitle => 'Agent workspace activity title';
+
+  @override
+  String get agentWorkspaceActivityLatest => 'Agent workspace activity latest';
+
+  @override
+  String get agentWorkspaceActivityLatestToolResult =>
+      'Agent workspace activity latest tool result';
+
+  @override
+  String get agentWorkspaceActivityLatestAssistantText =>
+      'Agent workspace activity latest assistant text';
+
+  @override
+  String get agentWorkspaceActivityNoWsEvents =>
+      'Agent workspace activity no ws events';
+
+  @override
+  String get agentWorkspaceProductionCardTitle =>
+      'Agent workspace production card title';
+
+  @override
+  String get agentWorkspaceGuidedTasksTitle =>
+      'Agent workspace guided tasks title';
+
+  @override
+  String get agentWorkspaceScriptWritebackSourceAssistant =>
+      'Agent workspace script writeback source assistant';
+
+  @override
+  String get agentWorkspaceScriptPlanHint => 'Agent workspace script plan hint';
+
+  @override
+  String get agentWorkspaceScriptPlanWritebackReady =>
+      'Agent workspace script plan writeback ready';
+
+  @override
+  String get agentWorkspaceScriptRunningWorkflow =>
+      'Agent workspace script running workflow';
+
+  @override
+  String get agentWorkspaceScriptRunningReadContext =>
+      'Agent workspace script running read context';
+
+  @override
+  String get agentWorkspaceScriptRunningSubAgent =>
+      'Agent workspace script running sub agent';
+
+  @override
+  String get agentWorkspaceScriptRunningWriteback =>
+      'Agent workspace script running writeback';
+
+  @override
+  String get agentWorkspaceScriptRunningWritebackPlan =>
+      'Agent workspace script running writeback plan';
+
+  @override
+  String get agentWorkspaceScriptCardTitle =>
+      'Agent workspace script card title';
+
+  @override
+  String get agentWorkspaceSectionTitle => 'Agent workspace section title';
+
+  @override
+  String get agentWorkspaceSectionDescription =>
+      'Agent workspace section description';
+
+  @override
+  String get contentComplianceTargetProject =>
+      'Content compliance target project';
+
+  @override
+  String get contentComplianceTargetScript =>
+      'Content compliance target script';
+
+  @override
+  String get contentComplianceTargetStoryboard =>
+      'Content compliance target storyboard';
+
+  @override
+  String get contentComplianceTargetAsset => 'Content compliance target asset';
+
+  @override
+  String get contentComplianceTargetNovel => 'Content compliance target novel';
+
+  @override
+  String get contentComplianceTargetUser => 'Content compliance target user';
+
+  @override
+  String get contentComplianceOptionAll => 'Content compliance option all';
+
+  @override
+  String get contentComplianceCategoryCopyright =>
+      'Content compliance category copyright';
+
+  @override
+  String get contentComplianceCategorySafety =>
+      'Content compliance category safety';
+
+  @override
+  String get contentComplianceCategoryHarassment =>
+      'Content compliance category harassment';
+
+  @override
+  String get contentComplianceCategoryAdult =>
+      'Content compliance category adult';
+
+  @override
+  String get contentComplianceCategoryViolence =>
+      'Content compliance category violence';
+
+  @override
+  String get contentComplianceCategorySpam =>
+      'Content compliance category spam';
+
+  @override
+  String get contentComplianceCategoryOther =>
+      'Content compliance category other';
+
+  @override
+  String get contentComplianceSeverityLow => 'Content compliance severity low';
+
+  @override
+  String get contentComplianceSeverityMedium =>
+      'Content compliance severity medium';
+
+  @override
+  String get contentComplianceSeverityHigh =>
+      'Content compliance severity high';
+
+  @override
+  String get contentComplianceSeverityCritical =>
+      'Content compliance severity critical';
+
+  @override
+  String get contentComplianceStatusPending =>
+      'Content compliance status pending';
+
+  @override
+  String get contentComplianceStatusClaimed =>
+      'Content compliance status claimed';
+
+  @override
+  String get contentComplianceStatusResolved =>
+      'Content compliance status resolved';
+
+  @override
+  String get contentComplianceStatusDismissed =>
+      'Content compliance status dismissed';
+
+  @override
+  String get contentComplianceSlaOpenOver24h =>
+      'Content compliance sla open over24h';
+
+  @override
+  String get contentComplianceSlaOpenOver72h =>
+      'Content compliance sla open over72h';
+
+  @override
+  String get contentComplianceSlaClaimedOver24h =>
+      'Content compliance sla claimed over24h';
+
+  @override
+  String get contentComplianceFieldTargetType =>
+      'Content compliance field target type';
+
+  @override
+  String get contentComplianceFieldCategory =>
+      'Content compliance field category';
+
+  @override
+  String get contentComplianceFieldSeverity =>
+      'Content compliance field severity';
+
+  @override
+  String get contentComplianceFieldTargetUuid =>
+      'Content compliance field target uuid';
+
+  @override
+  String get contentComplianceFieldStatus => 'Content compliance field status';
+
+  @override
+  String get contentComplianceSlaChip => 'Content compliance sla chip';
+
+  @override
+  String get contentComplianceMetricPending =>
+      'Content compliance metric pending';
+
+  @override
+  String get contentComplianceMetricClaimed =>
+      'Content compliance metric claimed';
+
+  @override
+  String get contentComplianceMetricResolved =>
+      'Content compliance metric resolved';
+
+  @override
+  String get contentComplianceMetricDismissed =>
+      'Content compliance metric dismissed';
+
+  @override
+  String get contentComplianceMetricCritical =>
+      'Content compliance metric critical';
+
+  @override
+  String get contentComplianceMetricHigh => 'Content compliance metric high';
+
+  @override
+  String get contentComplianceOldestHours => 'Content compliance oldest hours';
+
+  @override
+  String get contentComplianceCapacityPerReviewer =>
+      'Content compliance capacity per reviewer';
+
+  @override
+  String get contentComplianceOwnerCounts => 'Content compliance owner counts';
+
+  @override
+  String get contentComplianceOwnerDetail => 'Content compliance owner detail';
+
+  @override
+  String get contentComplianceWorkspaceCounts =>
+      'Content compliance workspace counts';
+
+  @override
+  String get contentComplianceWorkspaceDetail =>
+      'Content compliance workspace detail';
+
+  @override
+  String get contentComplianceReportInfo => 'Content compliance report info';
+
+  @override
+  String get contentComplianceResolutionLine =>
+      'Content compliance resolution line';
+
+  @override
+  String get contentComplianceActionClaim => 'Content compliance action claim';
+
+  @override
+  String get contentComplianceActionResolve =>
+      'Content compliance action resolve';
+
+  @override
+  String get contentComplianceActionDismiss =>
+      'Content compliance action dismiss';
+
+  @override
+  String get contentComplianceFieldDisposition =>
+      'Content compliance field disposition';
+
+  @override
+  String get contentComplianceDispositionNone =>
+      'Content compliance disposition none';
+
+  @override
+  String get contentComplianceDispositionArchiveProject =>
+      'Content compliance disposition archive project';
+
+  @override
+  String get contentComplianceDispositionSuspendUser =>
+      'Content compliance disposition suspend user';
+
+  @override
+  String get contentComplianceFieldResolutionNote =>
+      'Content compliance field resolution note';
+
+  @override
+  String get jobsEmptyValue => 'Jobs empty value';
+
+  @override
+  String get jobsKindCountEntry => 'Jobs kind count entry';
+
+  @override
+  String get jobsStatusCountEntry => 'Jobs status count entry';
+
+  @override
+  String get jobsIdempotencyMismatch => 'Jobs idempotency mismatch';
+
+  @override
+  String get jobsUpdatedAt => 'Jobs updated at';
+
+  @override
+  String get jobsClaimedBy => 'Jobs claimed by';
+
+  @override
+  String get jobsFailedReason => 'Jobs failed reason';
+
+  @override
+  String get jobsTitle => 'Jobs title';
+
+  @override
+  String get jobsPrefsTooltip => 'Jobs prefs tooltip';
+
+  @override
+  String get jobsSubtitle => 'Jobs subtitle';
+
+  @override
+  String get jobsLoadList => 'Jobs load list';
+
+  @override
+  String get jobsLoadFailed => 'Jobs load failed';
+
+  @override
+  String get jobsLoadKinds => 'Jobs load kinds';
+
+  @override
+  String get jobsLoadKindSummary => 'Jobs load kind summary';
+
+  @override
+  String get jobsLoadStatusSummary => 'Jobs load status summary';
+
+  @override
+  String get jobsCompatTitle => 'Jobs compat title';
+
+  @override
+  String get jobsCompatSubtitle => 'Jobs compat subtitle';
+
+  @override
+  String get jobsCompatHttpProbeFilters => 'Jobs compat http probe filters';
+
+  @override
+  String get jobsFilterFlutterProbe => 'Jobs filter flutter probe';
+
+  @override
+  String get jobsFilterFlutterProbeQueued => 'Jobs filter flutter probe queued';
+
+  @override
+  String get jobsCreateProbeJob => 'Jobs create probe job';
+
+  @override
+  String get jobsJobIdLabel => 'Jobs job id label';
+
+  @override
+  String get jobsFetchDetail => 'Jobs fetch detail';
+
+  @override
+  String get jobsDetailLabel => 'Jobs detail label';
+
+  @override
+  String get jobsKindsLabel => 'Jobs kinds label';
+
+  @override
+  String get jobsKindSummaryLabel => 'Jobs kind summary label';
+
+  @override
+  String get jobsStatusSummaryLabel => 'Jobs status summary label';
+
+  @override
+  String get jobsCountLabel => 'Jobs count label';
+
+  @override
+  String get jobsRetry => 'Jobs retry';
+
+  @override
+  String get jobsCancel => 'Jobs cancel';
+
+  @override
+  String get notificationsRealtimeDisconnected =>
+      'Notifications realtime disconnected';
+
+  @override
+  String get notificationsPlatformStatusRecovered =>
+      'Notifications platform status recovered';
+
+  @override
+  String get notificationsPlatformStatusDegraded =>
+      'Notifications platform status degraded';
+
+  @override
+  String get notificationsPlatformStatusRecoveredMessage =>
+      'Notifications platform status recovered message';
+
+  @override
+  String get notificationsPlatformStatusDegradedMessage =>
+      'Notifications platform status degraded message';
+
+  @override
+  String get notificationsPlatformStatusAffectedEndpoints =>
+      'Notifications platform status affected endpoints';
+
+  @override
+  String get notificationsComplianceAlertTitle =>
+      'Notifications compliance alert title';
+
+  @override
+  String get notificationsDownloadUnsupported =>
+      'Notifications download unsupported';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportCompleted =>
+      'Notifications compliance shared async export completed';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportCancelled =>
+      'Notifications compliance shared async export cancelled';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportFailed =>
+      'Notifications compliance shared async export failed';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportFailedWithDetail =>
+      'Notifications compliance shared async export failed with detail';
+
+  @override
+  String get notificationsComplianceSharedAsyncExportTimedOut =>
+      'Notifications compliance shared async export timed out';
+
+  @override
+  String get notificationsImportJsonObjectRequired =>
+      'Notifications import json object required';
+
+  @override
+  String get notificationsImportJsonParseFailed =>
+      'Notifications import json parse failed';
+
+  @override
+  String get notificationsUnknownTemplate => 'Notifications unknown template';
+
+  @override
+  String get platformStatusChipLabel => 'Platform status chip label';
+
+  @override
+  String get opsWhActivityEntryTitle => 'Ops wh activity entry title';
+
+  @override
+  String get opsWhFieldId => 'Ops wh field id';
+
+  @override
+  String get opsWhFieldCreatedAt => 'Ops wh field created at';
+
+  @override
+  String get opsWhFieldUpdatedAt => 'Ops wh field updated at';
+
+  @override
+  String get opsWhApiEventTypes => 'Ops wh api event types';
+
+  @override
+  String get billingAuditEventTypeLabel => 'Billing audit event type label';
+
+  @override
+  String get billingAuditProviderEventIdLabel =>
+      'Billing audit provider event id label';
+
+  @override
+  String get billingAuditRawEventIdLabel => 'Billing audit raw event id label';
+
+  @override
+  String get billingAuditProviderEventIdPrefixLabel =>
+      'Billing audit provider event id prefix label';
+
+  @override
+  String get billingAuditRawEventIdPrefixLabel =>
+      'Billing audit raw event id prefix label';
+
+  @override
+  String get billingAuditEventCreatedFromLabel =>
+      'Billing audit event created from label';
+
+  @override
+  String get billingAuditEventCreatedToLabel =>
+      'Billing audit event created to label';
+
+  @override
+  String get billingAuditCreatedFromLabel => 'Billing audit created from label';
+
+  @override
+  String get billingAuditCreatedToLabel => 'Billing audit created to label';
 }

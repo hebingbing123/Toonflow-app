@@ -4,9 +4,10 @@ part of '../../home_page.dart';
 /// focused on state ownership and section composition.
 extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
   Future<void> _refreshExportJobStatus() async {
+    final l10n = AppLocalizations.of(context)!;
     final jobId = _latestExportJobId?.trim();
     if (jobId == null || jobId.isEmpty) {
-      throw const FormatException('当前还没有已提交的导出任务');
+      throw FormatException(l10n.storyboardWorkbenchErrNoExportJobSubmitted);
     }
     _applyWorkbenchState(() => _loadingExportJob = true);
     try {
@@ -25,7 +26,9 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
         if (!mounted) return;
         _applyWorkbenchState(() {
           _latestExportWritebackSynced = true;
-          _setWorkbenchFollowUp('导出任务已完成，已自动同步当前分镜制作数据。');
+          _setWorkbenchFollowUp(
+            l10n.storyboardWorkbenchExportCompletedSyncedProduction,
+          );
         });
       }
     } finally {
@@ -39,14 +42,15 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
     bool syncImageUrl = false,
     bool syncTrackId = false,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     _applyWorkbenchState(() {
       _loadingProduction = true;
       _productionError = null;
       _setWorkbenchActionNotice(
-        actionSummary: '正在同步当前分镜制作数据。',
+        actionSummary: l10n.storyboardWorkbenchSyncProductionLoadingSummary,
         recommendedAction:
             StoryboardWorkbenchRecommendedAction.syncProductionData,
-        detail: '同步完成后会自动回填当前画面、轨道和可用视频参数。',
+        detail: l10n.storyboardWorkbenchSyncProductionLoadingDetail,
       );
     });
     try {
@@ -104,11 +108,12 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
           e.toString(),
         );
         _setWorkbenchFailureNotice(
-          actionSummary: '同步当前分镜制作数据失败。',
+          actionSummary: l10n.storyboardWorkbenchSyncProductionFailedSummary,
           recommendedAction:
               StoryboardWorkbenchRecommendedAction.syncProductionData,
           error: e,
-          fallbackDetail: '可先检查当前分镜是否已在 production 侧生成，再重新同步。',
+          fallbackDetail:
+              l10n.storyboardWorkbenchSyncProductionFailedFallbackDetail,
         );
       });
     } catch (e) {
@@ -119,11 +124,12 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
           e.toString(),
         );
         _setWorkbenchFailureNotice(
-          actionSummary: '同步当前分镜制作数据失败。',
+          actionSummary: l10n.storyboardWorkbenchSyncProductionFailedSummary,
           recommendedAction:
               StoryboardWorkbenchRecommendedAction.syncProductionData,
           error: e,
-          fallbackDetail: '可先检查当前分镜是否已在 production 侧生成，再重新同步。',
+          fallbackDetail:
+              l10n.storyboardWorkbenchSyncProductionFailedFallbackDetail,
         );
       });
     } finally {
@@ -134,13 +140,14 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _refreshWorkbenchData() async {
+    final l10n = AppLocalizations.of(context)!;
     _applyWorkbenchState(() {
       _loadingWorkbench = true;
       _setWorkbenchActionNotice(
-        actionSummary: '正在刷新当前分镜的视频数据。',
+        actionSummary: l10n.storyboardWorkbenchRefreshVideoLoadingSummary,
         recommendedAction:
             StoryboardWorkbenchRecommendedAction.refreshVideoData,
-        detail: '刷新完成后会同步模型信息、已生成视频和进行中的任务。',
+        detail: l10n.storyboardWorkbenchRefreshVideoLoadingDetail,
       );
     });
     try {
@@ -164,22 +171,24 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       if (!mounted) return;
       _applyWorkbenchState(() {
         _setWorkbenchFailureNotice(
-          actionSummary: '刷新当前分镜的视频数据失败。',
+          actionSummary: l10n.storyboardWorkbenchRefreshVideoFailedSummary,
           recommendedAction:
               StoryboardWorkbenchRecommendedAction.refreshVideoData,
           error: e,
-          fallbackDetail: '可稍后重试，或先继续维护图片和轨道信息。',
+          fallbackDetail:
+              l10n.storyboardWorkbenchRefreshVideoFailedFallbackDetail,
         );
       });
     } catch (e) {
       if (!mounted) return;
       _applyWorkbenchState(() {
         _setWorkbenchFailureNotice(
-          actionSummary: '刷新当前分镜的视频数据失败。',
+          actionSummary: l10n.storyboardWorkbenchRefreshVideoFailedSummary,
           recommendedAction:
               StoryboardWorkbenchRecommendedAction.refreshVideoData,
           error: e,
-          fallbackDetail: '可稍后重试，或先继续维护图片和轨道信息。',
+          fallbackDetail:
+              l10n.storyboardWorkbenchRefreshVideoFailedFallbackDetail,
         );
       });
     } finally {

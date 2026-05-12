@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/short_video_readiness_localized.dart';
 import '../rust_api.dart';
 import 'support_project_api.dart';
 import 'view.dart';
@@ -162,6 +164,7 @@ String shortVideoReadinessGapSummary({
 
 /// Builds the Space panel for **`GET /api/v1/projects/{id}/short-video-readiness`**.
 ShotReadinessUi buildShotReadinessUi({
+  required AppLocalizations l10n,
   required bool loadingProjectOverview,
   required ProjectShortVideoReadiness? readiness,
   required bool readinessUnavailable,
@@ -173,36 +176,47 @@ ShotReadinessUi buildShotReadinessUi({
     return const ShotReadinessUi(unavailable: true);
   }
   if (readiness == null) {
-    return const ShotReadinessUi(
-      headline: '还没有读取到分镜就绪数据。',
+    return ShotReadinessUi(
+      headline: l10n.shortVideoReadinessNoPayloadHeadline,
     );
   }
   final roll = readiness.rollup;
   if (roll.totalStoryboards == 0) {
-    return const ShotReadinessUi(
-      headline: '当前项目还没有分镜行，可先在脚本侧拆镜后再看聚合。',
+    return ShotReadinessUi(
+      headline: l10n.shortVideoReadinessEmptyProjectHeadline,
     );
   }
-  final headline =
-      '就绪 ${roll.readyCount}/${roll.totalStoryboards} 条分镜；阻塞 ${roll.blockedCount} 条。';
+  final headline = l10n.shortVideoReadinessRollupHeadline(
+    roll.readyCount,
+    roll.totalStoryboards,
+    roll.blockedCount,
+  );
   final reasonLines = readiness.rollup.byReason
       .map(
-        (e) =>
-            '${labelShortVideoBlockingReason(e.reason)}（${e.storyboardCount} 条分镜）',
+        (e) => l10n.shortVideoReadinessReasonRollupLine(
+          labelShortVideoBlockingReasonLocalized(l10n, e.reason),
+          e.storyboardCount,
+        ),
       )
       .toList(growable: false);
   final shotDetailLines = readiness.storyboards
       .where((s) => !s.readyForGeneration)
       .take(5)
       .map((s) {
-        final parts =
-            s.blockingReasons.map(labelShortVideoBlockingReason).join('、');
+        final parts = s.blockingReasons
+            .map((c) => labelShortVideoBlockingReasonLocalized(l10n, c))
+            .join('、');
         final script = s.scriptNumericId;
         final idx = s.sbIndex;
-        return '分镜 #${s.storyboardNumericId}'
-            '${script != null ? ' · 脚本 #$script' : ''}'
-            '${idx != null ? ' · 镜位 $idx' : ''}'
-            '：$parts';
+        final prefix = l10n.shortVideoReadinessStoryboardDetailPrefix(
+          s.storyboardNumericId,
+        );
+        final scriptSeg =
+            script != null ? l10n.shortVideoReadinessScriptSuffix(script) : '';
+        final slotSeg =
+            idx != null ? l10n.shortVideoReadinessSlotSuffix(idx) : '';
+        final lead = '$prefix$scriptSeg$slotSeg';
+        return l10n.shortVideoReadinessBlockedShotDetail(lead, parts);
       })
       .toList(growable: false);
   return ShotReadinessUi(
@@ -278,6 +292,7 @@ ShortVideoAssetsOverviewPanelUi buildShortVideoAssetsOverviewPanelUi({
 }
 
 ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
+  required AppLocalizations l10n,
   required bool projectSelected,
   required bool loadingProjectOverview,
   required List<ProductionStoryboardItemV1> storyboardRows,
@@ -338,10 +353,14 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
     final badCases = shotReviews.where((review) => review.isBadCase).length;
     final passed = shotReviews.where((review) => review.passed == true).length;
     final readinessLine = shotReadiness == null
-        ? 'readiness 暂无数据'
+        ? l10n.shortVideoCandidateCompareReadinessNoData
         : shotReadiness.readyForGeneration
-        ? '已就绪，可继续生成/导出'
-        : '待补 ${shotReadiness.blockingReasons.map(labelShortVideoBlockingReason).join('、')}';
+        ? l10n.shortVideoCandidateCompareReadinessReady
+        : l10n.shortVideoCandidateCompareReadinessBlocked(
+            shotReadiness.blockingReasons
+                .map((c) => labelShortVideoBlockingReasonLocalized(l10n, c))
+                .join('、'),
+          );
     final qualityLine = shotReviews.isEmpty
         ? (isLiveAction
               ? '暂无质检记录，先盯表演自然度、真实感和口播镜头质感。'

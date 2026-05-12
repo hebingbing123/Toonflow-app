@@ -231,12 +231,18 @@ void main() {
   });
 
   test('blocking reason labels map API codes to Chinese', () {
-    expect(labelShortVideoBlockingReason('missing_reference_visual'), '参考图');
     expect(
-      labelShortVideoBlockingReason('missing_live_action_reference_shot'),
+      labelShortVideoBlockingReason(zh, 'missing_reference_visual'),
+      '参考图',
+    );
+    expect(
+      labelShortVideoBlockingReason(
+        zh,
+        'missing_live_action_reference_shot',
+      ),
       '真人参考镜头',
     );
-    expect(labelShortVideoBlockingReason('unknown_code'), 'unknown_code');
+    expect(labelShortVideoBlockingReason(zh, 'unknown_code'), 'unknown_code');
   });
 
   test('export check issue codes map to Chinese labels', () {
@@ -360,6 +366,7 @@ void main() {
           as Map<String, dynamic>,
     );
     final ui = buildShotReadinessUi(
+      l10n: zh,
       loadingProjectOverview: false,
       readiness: readiness,
       readinessUnavailable: false,
@@ -368,7 +375,10 @@ void main() {
     expect(ui.reasonLines.single, contains('参考图'));
     expect(ui.shotDetailLines, isNotEmpty);
     expect(
-      formatStoryboardShortVideoReadinessSummary(readiness.storyboards.first),
+      formatStoryboardShortVideoReadinessSummary(
+        zh,
+        readiness.storyboards.first,
+      ),
       contains('参考图'),
     );
   });
@@ -421,6 +431,7 @@ void main() {
       ],
     });
     final panel = buildShortVideoCandidateComparePanelUi(
+      l10n: zh,
       projectSelected: true,
       loadingProjectOverview: false,
       storyboardRows: const [
