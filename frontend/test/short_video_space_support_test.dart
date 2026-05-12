@@ -22,6 +22,91 @@ void main() {
     expect(scope.workspaceId, 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee');
   });
 
+  test('short video selection resolver prefers current selected project id', () {
+    const projects = <ProjectRow>[
+      ProjectRow(
+        id: 'project-uuid-7',
+        numericId: 7,
+        name: 'First',
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
+      ),
+      ProjectRow(
+        id: 'project-uuid-9',
+        numericId: 9,
+        name: 'Second',
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
+      ),
+    ];
+
+    expect(
+      resolveShortVideoSelectedProjectId(
+        projects,
+        currentProjectId: 'project-uuid-7',
+        preferredProjectUuid: 'project-uuid-9',
+      ),
+      'project-uuid-7',
+    );
+  });
+
+  test('short video selection resolver falls back to scoped uuid on reload', () {
+    const projects = <ProjectRow>[
+      ProjectRow(
+        id: 'project-uuid-7',
+        numericId: 7,
+        name: 'First',
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
+      ),
+      ProjectRow(
+        id: 'project-uuid-9',
+        numericId: 9,
+        name: 'Second',
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
+      ),
+    ];
+
+    expect(
+      resolveShortVideoSelectedProjectId(
+        projects,
+        currentProjectId: null,
+        preferredProjectUuid: ' project-uuid-9 ',
+      ),
+      'project-uuid-9',
+    );
+  });
+
+  test('short video selection resolver can prioritize updated scoped uuid', () {
+    const projects = <ProjectRow>[
+      ProjectRow(
+        id: 'project-uuid-7',
+        numericId: 7,
+        name: 'First',
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
+      ),
+      ProjectRow(
+        id: 'project-uuid-9',
+        numericId: 9,
+        name: 'Second',
+        projectAccessMode: 'inherited',
+        projectAccessRole: 'member',
+      ),
+    ];
+
+    expect(
+      resolveShortVideoSelectedProjectId(
+        projects,
+        currentProjectId: 'project-uuid-7',
+        preferredProjectUuid: 'project-uuid-9',
+        preferScopedProjectUuid: true,
+      ),
+      'project-uuid-9',
+    );
+  });
+
   test('live-action readiness highlights scene clip and manual gaps', () {
     final items = buildShortVideoReadinessItems(
       isAnimated: false,

@@ -37,6 +37,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
   const ShortVideoSpaceSection({
     super.key,
     required this.accessToken,
+    this.initialProjectUuid,
     required this.onOpenProjects,
     required this.onSyncProjectContext,
     required this.onOpenScriptWorkspace,
@@ -46,6 +47,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
   });
 
   final String? accessToken;
+  final String? initialProjectUuid;
   final VoidCallback onOpenProjects;
   final ValueChanged<ShortVideoProjectScope?> onSyncProjectContext;
   final VoidCallback onOpenScriptWorkspace;
@@ -201,6 +203,31 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProjects();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ShortVideoSpaceSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldUuid = oldWidget.initialProjectUuid?.trim();
+    final nextUuid = widget.initialProjectUuid?.trim();
+    if (oldUuid == nextUuid || _projects.isEmpty) {
+      return;
+    }
+    final nextSelectedId = resolveShortVideoSelectedProjectId(
+      _projects,
+      currentProjectId: _selectedProjectId,
+      preferredProjectUuid: nextUuid,
+      preferScopedProjectUuid: true,
+    );
+    if (nextSelectedId == null || nextSelectedId == _selectedProjectId) {
+      return;
+    }
+    setState(() {
+      _selectedProjectId = nextSelectedId;
+    });
+    _applyProjectPreset(_selectedProject);
+    _syncSelectedProjectContext();
+    _loadProjectOverview();
   }
 
   // Project management methods moved to section_project.dart

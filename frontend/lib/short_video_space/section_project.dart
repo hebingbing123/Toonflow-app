@@ -61,15 +61,11 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   }
 
   String? _resolveProjectIdAfterReload(List<ProjectRow> projects) {
-    if (projects.isEmpty) {
-      return null;
-    }
-    final currentId = _selectedProjectId;
-    if (currentId != null &&
-        projects.any((project) => project.id == currentId)) {
-      return currentId;
-    }
-    return projects.first.id;
+    return resolveShortVideoSelectedProjectId(
+      projects,
+      currentProjectId: _selectedProjectId,
+      preferredProjectUuid: widget.initialProjectUuid,
+    );
   }
 
   void _applyProjectPreset(ProjectRow? project) {

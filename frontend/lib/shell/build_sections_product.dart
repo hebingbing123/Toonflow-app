@@ -214,6 +214,10 @@ extension _HomePageBuildProductSections on _HomePageState {
           ProductWorkspacePane.shortVideoSpace)
         ShortVideoSpaceSection(
           accessToken: _session?.accessToken,
+          initialProjectUuid:
+              _workspaceInputController.projectUuidController.text.trim().isEmpty
+              ? null
+              : _workspaceInputController.projectUuidController.text.trim(),
           onOpenProjects: () {
             _shellNavigationController.selectProductWorkspacePane(
               ProductWorkspacePane.projects,

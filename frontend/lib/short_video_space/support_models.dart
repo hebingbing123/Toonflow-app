@@ -41,3 +41,36 @@ class ShortVideoProjectScope {
     );
   }
 }
+
+String? resolveShortVideoSelectedProjectId(
+  List<ProjectRow> projects, {
+  String? currentProjectId,
+  String? preferredProjectUuid,
+  bool preferScopedProjectUuid = false,
+}) {
+  if (projects.isEmpty) {
+    return null;
+  }
+  final normalizedCurrentId = currentProjectId?.trim();
+  final normalizedPreferredUuid = preferredProjectUuid?.trim();
+
+  ProjectRow? byId(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    for (final project in projects) {
+      if (project.id == value) {
+        return project;
+      }
+    }
+    return null;
+  }
+
+  final scopedMatch = byId(normalizedPreferredUuid);
+  final currentMatch = byId(normalizedCurrentId);
+
+  if (preferScopedProjectUuid) {
+    return scopedMatch?.id ?? currentMatch?.id ?? projects.first.id;
+  }
+  return currentMatch?.id ?? scopedMatch?.id ?? projects.first.id;
+}
