@@ -5934,6 +5934,171 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorProbeTasksBusyLabel => 'tasks…';
+
+  @override
+  String get projectEditorProbeTasksButtonCompatGetProject =>
+      'compat tasks get-project';
+
+  @override
+  String projectEditorProbeTasksCompatGetProjectResult(String line) {
+    return 'compat getProject (GET projects): $line';
+  }
+
+  @override
+  String get projectEditorProbeTasksButtonCompatCategories =>
+      'compat tasks categories';
+
+  @override
+  String projectEditorProbeTasksCompatCategoriesResult(String line) {
+    return 'compat categories (GET jobs/kinds): $line';
+  }
+
+  @override
+  String get projectEditorProbeTasksButtonCompatList => 'compat tasks list';
+
+  @override
+  String get projectEditorProbeTasksButtonCompatTaskDetails =>
+      'compat task-details int';
+
+  @override
+  String projectEditorProbeTasksCompatTaskDetailsResult(
+    int taskId,
+    String kind,
+    String status,
+  ) {
+    return 'compat task-details (GET jobs/task-detail): #$taskId -> $kind/$status';
+  }
+
+  @override
+  String get projectEditorProbeProjectBusyLabel => 'project…';
+
+  @override
+  String get projectEditorProbeProjectButtonGetProject =>
+      'POST project get-project';
+
+  @override
+  String projectEditorProbeProjectEditNoopResult(
+    int numericId,
+    String message,
+  ) {
+    return 'POST …/project/edit-project noop #$numericId: $message';
+  }
+
+  @override
+  String get projectEditorProbeProjectButtonEditNoop =>
+      'POST project edit (noop)';
+
+  @override
+  String get projectEditorProbeProjectButtonDeleteZero =>
+      'POST project delete id=0';
+
+  @override
+  String get projectEditorProbeProjectDeleteUnexpected200 =>
+      'POST …/project/delete-project: unexpected 200';
+
+  @override
+  String get projectEditorProbeProjectDeleteExpected400 =>
+      'POST …/project/delete-project id=0 -> 400 (expected)';
+
+  @override
+  String get projectEditorProbeProjectButtonEditZero =>
+      'POST project edit id=0';
+
+  @override
+  String get projectEditorProbeProjectEditUnexpected200 =>
+      'POST …/project/edit-project: unexpected 200';
+
+  @override
+  String get projectEditorProbeProjectEditExpected400 =>
+      'POST …/project/edit-project id=0 -> 400 (expected)';
+
+  @override
+  String get projectEditorProbeProjectButtonAddDelete => 'POST project add→del';
+
+  @override
+  String projectEditorProbeProjectAddMissingAfterList(String name) {
+    return 'add-project ok but get-project missing name=\"$name\"';
+  }
+
+  @override
+  String projectEditorProbeProjectAddDeleteOk(int numericId) {
+    return 'POST add-project → delete project#$numericId ok';
+  }
+
+  @override
+  String projectEditorProbeScriptsBatchAddProbeResult(int inserted) {
+    return 'POST …/projects/:id/scripts/batch-add: inserted=$inserted';
+  }
+
+  @override
+  String get projectEditorProbeScriptsButtonBatchAdd =>
+      'POST projects/…/scripts/batch-add';
+
+  @override
+  String get projectEditorProbeScriptsButtonPostGetScriptApi =>
+      'POST get-script-api';
+
+  @override
+  String projectEditorProbeScriptsGetByNumericResult(int sid, String name) {
+    return 'GET …/projects/:id/scripts/$sid: $name';
+  }
+
+  @override
+  String get projectEditorProbeScriptsPatchNameNoopBusy => 'script…';
+
+  @override
+  String get projectEditorProbeScriptsButtonPatchNameNoop =>
+      'PATCH projects/…/scripts (name noop)';
+
+  @override
+  String projectEditorProbeScriptsPatchNameNoopResult(int sid, String name) {
+    return 'PATCH …/projects/:id/scripts/$sid name noop → $name';
+  }
+
+  @override
+  String get projectEditorProbeScriptsExportZipBusy => 'export…';
+
+  @override
+  String get projectEditorProbeScriptsButtonExportZip =>
+      'POST scripts/export (ZIP)';
+
+  @override
+  String projectEditorProbeScriptsExportZipResult(int bytes, int count) {
+    return 'POST …/scripts/export: $bytes bytes · $count numeric id(s)';
+  }
+
+  @override
+  String get projectEditorProbeScriptsPollExtractBusy => 'poll…';
+
+  @override
+  String get projectEditorProbeScriptsButtonPollExtract =>
+      'POST extract-state/poll';
+
+  @override
+  String projectEditorProbeScriptsPollExtractResult(
+    int rowCount,
+    String sample,
+  ) {
+    return 'POST …/extract-state/poll: $rowCount row(s) $sample';
+  }
+
+  @override
+  String get projectEditorProbeScriptsExtractAssetsBusy => 'extract…';
+
+  @override
+  String get projectEditorProbeScriptsButtonExtractAssets =>
+      'POST extract-assets';
+
+  @override
+  String projectEditorProbeScriptsExtractAssetsResult(
+    String status,
+    String message,
+  ) {
+    return 'POST …/extract-assets: $status — $message';
+  }
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty =>
       'Production asset data is empty';
 

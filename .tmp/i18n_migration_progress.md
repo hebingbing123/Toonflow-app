@@ -116,32 +116,25 @@
 #### Files with Hardcoded Chinese Strings Still to Migrate:
 
 1. **frontend/lib/project_editor/scripts/dialogs/batch_add.dart**
-   - ❌ Batch add dialog strings (partially covered in ARB, need to update Dart file)
-   - Estimated: ~15 string replacements
+   - ✅ Already uses `AppLocalizations` for all dialog UI and snackbars
 
 2. **frontend/lib/project_editor/http_probes/tasks_probe.dart**
-   - ❌ Probe result messages
-   - Estimated: ~5 string replacements
+   - ✅ Snackbar copy + button labels moved to ARB (`projectEditorProbeTasks*`)
 
 3. **frontend/lib/project_editor/http_probes/project_probe.dart**
-   - ❌ Probe result messages
-   - Estimated: ~3 string replacements
+   - ✅ Snackbar copy + button labels moved to ARB (`projectEditorProbeProject*`)
 
 4. **frontend/lib/project_editor/scripts/probe/actions.dart**
-   - ❌ Script probe messages
-   - Estimated: ~5 string replacements
+   - ✅ Script probe snackbars + buttons moved to ARB (`projectEditorProbeScripts*`)
 
 5. **frontend/lib/project_editor/assets/generation/dialog_state.dart**
-   - ❌ Needs l10n parameter passed to summary functions
-   - Estimated: ~3 function call updates
+   - ✅ Already passes `l10n` into summary helpers
 
 6. **frontend/lib/project_editor/assets/generation/dialog_state_snapshot_helpers.dart**
-   - ❌ Needs l10n parameter passed to summary functions
-   - Estimated: ~2 function call updates
+   - ✅ Already passes `l10n`
 
 7. **frontend/lib/project_editor/assets/generation/dialog_state_mutation_helpers.dart**
-   - ❌ Needs l10n parameter passed to summary functions
-   - Estimated: ~2 function call updates
+   - ✅ Already passes `l10n`
 
 8. **Other project_editor files**
    - Need to scan for additional hardcoded strings in:

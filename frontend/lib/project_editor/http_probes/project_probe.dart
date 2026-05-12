@@ -10,6 +10,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
     required List<bool> tasksProbeBusy,
     required List<bool> projectProbeBusy,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -23,10 +24,10 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   final rows = await postProjectGetProject(token);
                   if (!ctx.mounted) return;
                   final line = rows.isEmpty
-                      ? '0 项'
+                      ? l10n.projectEditorProbeProjectsZeroItems
                       : rows.map((r) => '#${r.numericId} ${r.name ?? ""}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text('GET …/projects（compat 列表）：$line')),
+                    SnackBar(content: Text(l10n.projectEditorProbeProjectsCompatList(line))),
                   );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -41,7 +42,9 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                 }
               },
         child: Text(
-          projectProbeBusy[0] ? 'project…' : 'POST project get-project',
+          projectProbeBusy[0]
+              ? l10n.projectEditorProbeProjectBusyLabel
+              : l10n.projectEditorProbeProjectButtonGetProject,
         ),
       ),
       TextButton(
@@ -74,7 +77,10 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/project/edit-project noop #${pr.numericId}：$msg',
+                        l10n.projectEditorProbeProjectEditNoopResult(
+                          pr.numericId,
+                          msg,
+                        ),
                       ),
                     ),
                   );
@@ -90,7 +96,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project edit (noop)'),
+        child: Text(
+          projectProbeBusy[0]
+              ? l10n.projectEditorProbeProjectBusyLabel
+              : l10n.projectEditorProbeProjectButtonEditNoop,
+        ),
       ),
       TextButton(
         onPressed:
@@ -104,18 +114,16 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   await postProjectDeleteProject(token, 0);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(
-                      content: Text('POST …/project/delete-project：unexpected 200'),
+                    SnackBar(
+                      content: Text(l10n.projectEditorProbeProjectDeleteUnexpected200),
                     ),
                   );
                 } on RustApiException catch (e) {
                   if (!ctx.mounted) return;
                   if (e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'POST …/project/delete-project id=0 -> 400 (expected)',
-                        ),
+                      SnackBar(
+                        content: Text(l10n.projectEditorProbeProjectDeleteExpected400),
                       ),
                     );
                   } else {
@@ -129,7 +137,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project delete id=0'),
+        child: Text(
+          projectProbeBusy[0]
+              ? l10n.projectEditorProbeProjectBusyLabel
+              : l10n.projectEditorProbeProjectButtonDeleteZero,
+        ),
       ),
       TextButton(
         onPressed:
@@ -157,18 +169,16 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(
-                      content: Text('POST …/project/edit-project：unexpected 200'),
+                    SnackBar(
+                      content: Text(l10n.projectEditorProbeProjectEditUnexpected200),
                     ),
                   );
                 } on RustApiException catch (e) {
                   if (!ctx.mounted) return;
                   if (e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'POST …/project/edit-project id=0 -> 400 (expected)',
-                        ),
+                      SnackBar(
+                        content: Text(l10n.projectEditorProbeProjectEditExpected400),
                       ),
                     );
                   } else {
@@ -182,7 +192,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project edit id=0'),
+        child: Text(
+          projectProbeBusy[0]
+              ? l10n.projectEditorProbeProjectBusyLabel
+              : l10n.projectEditorProbeProjectButtonEditZero,
+        ),
       ),
       TextButton(
         onPressed:
@@ -222,7 +236,9 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'add-project ok but get-project missing name="$probeName"',
+                          l10n.projectEditorProbeProjectAddMissingAfterList(
+                            probeName,
+                          ),
                         ),
                       ),
                     );
@@ -237,7 +253,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST add-project → delete project#${match.numericId} ok',
+                        l10n.projectEditorProbeProjectAddDeleteOk(match.numericId),
                       ),
                     ),
                   );
@@ -253,7 +269,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project add→del'),
+        child: Text(
+          projectProbeBusy[0]
+              ? l10n.projectEditorProbeProjectBusyLabel
+              : l10n.projectEditorProbeProjectButtonAddDelete,
+        ),
       ),
     ];
   }

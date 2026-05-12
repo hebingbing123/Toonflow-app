@@ -10,6 +10,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
     required List<bool> scriptProbeBusy,
     required List<ScriptBrief> scriptList,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed: scriptProbeBusy[0] || saving[0]
@@ -39,7 +40,9 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/projects/{id}/scripts/batch-add：inserted=${created.inserted}',
+                        l10n.projectEditorProbeScriptsBatchAddProbeResult(
+                          created.inserted,
+                        ),
                       ),
                     ),
                   );
@@ -55,7 +58,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST projects/…/scripts/batch-add'),
+        child: Text(l10n.projectEditorProbeScriptsButtonBatchAdd),
       ),
       TextButton(
         onPressed: scriptProbeBusy[0] || saving[0]
@@ -67,7 +70,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       await postScriptsGetScriptApiByProjectId(token, p.id);
                   if (!ctx.mounted) return;
                   final sample = rows.isEmpty
-                      ? '0 条'
+                      ? l10n.projectEditorProbeScriptsZeroItems
                       : rows
                             .take(2)
                             .map(
@@ -77,7 +80,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/projects/{id}/scripts/get-script-api：${rows.length} 条 · $sample',
+                        l10n.projectEditorProbeScriptsPostGetScriptApi(rows.length, sample, p.id),
                       ),
                     ),
                   );
@@ -93,7 +96,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST get-script-api'),
+        child: Text(l10n.projectEditorProbeScriptsButtonPostGetScriptApi),
       ),
       TextButton(
         onPressed: scriptProbeBusy[0] || scriptList.isEmpty || saving[0]
@@ -111,7 +114,10 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'GET …/projects/{id}/scripts/$sid：${row.name ?? "(null)"}',
+                        l10n.projectEditorProbeScriptsGetByNumericResult(
+                          sid,
+                          row.name ?? '(null)',
+                        ),
                       ),
                     ),
                   );
@@ -128,7 +134,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                 }
               },
         child: Text(
-          scriptProbeBusy[0] ? 'script…' : 'GET projects/…/scripts (首条)',
+          scriptProbeBusy[0] ? l10n.projectEditorProbeScriptsLoading : l10n.projectEditorProbeScriptsGetFirstScript,
         ),
       ),
       TextButton(
@@ -153,7 +159,10 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'PATCH …/projects/{id}/scripts/$sid name noop → ${patched.name ?? "(null)"}',
+                        l10n.projectEditorProbeScriptsPatchNameNoopResult(
+                          sid,
+                          patched.name ?? '(null)',
+                        ),
                       ),
                     ),
                   );
@@ -170,7 +179,9 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                 }
               },
         child: Text(
-          scriptProbeBusy[0] ? 'script…' : 'PATCH projects/…/scripts (name noop)',
+          scriptProbeBusy[0]
+              ? l10n.projectEditorProbeScriptsPatchNameNoopBusy
+              : l10n.projectEditorProbeScriptsButtonPatchNameNoop,
         ),
       ),
       TextButton(
@@ -185,7 +196,10 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/scripts/export：${zip.length} bytes · ${ids.length} numeric id(s)',
+                        l10n.projectEditorProbeScriptsExportZipResult(
+                          zip.length,
+                          ids.length,
+                        ),
                       ),
                     ),
                   );
@@ -201,7 +215,11 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(scriptProbeBusy[0] ? 'export…' : 'POST scripts/export (ZIP)'),
+        child: Text(
+          scriptProbeBusy[0]
+              ? l10n.projectEditorProbeScriptsExportZipBusy
+              : l10n.projectEditorProbeScriptsButtonExportZip,
+        ),
       ),
       TextButton(
         onPressed: scriptProbeBusy[0] || scriptList.isEmpty || saving[0]
@@ -213,7 +231,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   final rows = await pollScriptExtractState(token, ids);
                   if (!ctx.mounted) return;
                   final sample = rows.isEmpty
-                      ? '（empty：均在提取中或 idle）'
+                      ? l10n.projectEditorProbeScriptsEmpty
                       : rows
                             .take(3)
                             .map((r) => '#${r.numericId} state=${r.extractState}')
@@ -221,7 +239,10 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/extract-state/poll：${rows.length} row(s) $sample',
+                        l10n.projectEditorProbeScriptsPollExtractResult(
+                          rows.length,
+                          sample,
+                        ),
                       ),
                     ),
                   );
@@ -237,7 +258,11 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(scriptProbeBusy[0] ? 'poll…' : 'POST extract-state/poll'),
+        child: Text(
+          scriptProbeBusy[0]
+              ? l10n.projectEditorProbeScriptsPollExtractBusy
+              : l10n.projectEditorProbeScriptsButtonPollExtract,
+        ),
       ),
       TextButton(
         onPressed: scriptProbeBusy[0] || scriptList.isEmpty || saving[0]
@@ -255,7 +280,10 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/extract-assets：${acc.status} — ${acc.message}',
+                        l10n.projectEditorProbeScriptsExtractAssetsResult(
+                          acc.status,
+                          acc.message,
+                        ),
                       ),
                     ),
                   );
@@ -271,7 +299,11 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(scriptProbeBusy[0] ? 'extract…' : 'POST extract-assets'),
+        child: Text(
+          scriptProbeBusy[0]
+              ? l10n.projectEditorProbeScriptsExtractAssetsBusy
+              : l10n.projectEditorProbeScriptsButtonExtractAssets,
+        ),
       ),
     ];
   }

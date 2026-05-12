@@ -4297,6 +4297,151 @@
       }
     }
   },
+  "projectEditorProbeTasksBusyLabel": "tasks…",
+  "projectEditorProbeTasksButtonCompatGetProject": "compat tasks get-project",
+  "projectEditorProbeTasksCompatGetProjectResult": "compat getProject（GET projects）：{line}",
+  "@projectEditorProbeTasksCompatGetProjectResult": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeTasksButtonCompatCategories": "compat tasks categories",
+  "projectEditorProbeTasksCompatCategoriesResult": "compat categories（GET jobs/kinds）：{line}",
+  "@projectEditorProbeTasksCompatCategoriesResult": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeTasksButtonCompatList": "compat tasks list",
+  "projectEditorProbeTasksButtonCompatTaskDetails": "compat task-details int",
+  "projectEditorProbeTasksCompatTaskDetailsResult": "compat task-details（GET jobs/task-detail）：#{taskId} -> {kind}/{status}",
+  "@projectEditorProbeTasksCompatTaskDetailsResult": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeProjectBusyLabel": "project…",
+  "projectEditorProbeProjectButtonGetProject": "POST project get-project",
+  "projectEditorProbeProjectEditNoopResult": "POST …/project/edit-project noop #{numericId}：{message}",
+  "@projectEditorProbeProjectEditNoopResult": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeProjectButtonEditNoop": "POST project edit (noop)",
+  "projectEditorProbeProjectButtonDeleteZero": "POST project delete id=0",
+  "projectEditorProbeProjectDeleteUnexpected200": "POST …/project/delete-project：unexpected 200",
+  "projectEditorProbeProjectDeleteExpected400": "POST …/project/delete-project id=0 -> 400（预期）",
+  "projectEditorProbeProjectButtonEditZero": "POST project edit id=0",
+  "projectEditorProbeProjectEditUnexpected200": "POST …/project/edit-project：unexpected 200",
+  "projectEditorProbeProjectEditExpected400": "POST …/project/edit-project id=0 -> 400（预期）",
+  "projectEditorProbeProjectButtonAddDelete": "POST project add→del",
+  "projectEditorProbeProjectAddMissingAfterList": "add-project 成功但 get-project 未找到 name=\"{name}\"",
+  "@projectEditorProbeProjectAddMissingAfterList": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeProjectAddDeleteOk": "POST add-project → 已删除 project#{numericId}",
+  "@projectEditorProbeProjectAddDeleteOk": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorProbeScriptsBatchAddProbeResult": "POST …/projects/:id/scripts/batch-add：inserted={inserted}",
+  "@projectEditorProbeScriptsBatchAddProbeResult": {
+    "placeholders": {
+      "inserted": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorProbeScriptsButtonBatchAdd": "POST projects/…/scripts/batch-add",
+  "projectEditorProbeScriptsButtonPostGetScriptApi": "POST get-script-api",
+  "projectEditorProbeScriptsGetByNumericResult": "GET …/projects/:id/scripts/{sid}：{name}",
+  "@projectEditorProbeScriptsGetByNumericResult": {
+    "placeholders": {
+      "sid": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeScriptsPatchNameNoopBusy": "script…",
+  "projectEditorProbeScriptsButtonPatchNameNoop": "PATCH projects/…/scripts（name noop）",
+  "projectEditorProbeScriptsPatchNameNoopResult": "PATCH …/projects/:id/scripts/{sid} name noop → {name}",
+  "@projectEditorProbeScriptsPatchNameNoopResult": {
+    "placeholders": {
+      "sid": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeScriptsExportZipBusy": "export…",
+  "projectEditorProbeScriptsButtonExportZip": "POST scripts/export（ZIP）",
+  "projectEditorProbeScriptsExportZipResult": "POST …/scripts/export：{bytes} 字节 · {count} 个 numeric id",
+  "@projectEditorProbeScriptsExportZipResult": {
+    "placeholders": {
+      "bytes": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorProbeScriptsPollExtractBusy": "poll…",
+  "projectEditorProbeScriptsButtonPollExtract": "POST extract-state/poll",
+  "projectEditorProbeScriptsPollExtractResult": "POST …/extract-state/poll：{rowCount} 行 {sample}",
+  "@projectEditorProbeScriptsPollExtractResult": {
+    "placeholders": {
+      "rowCount": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeScriptsExtractAssetsBusy": "extract…",
+  "projectEditorProbeScriptsButtonExtractAssets": "POST extract-assets",
+  "projectEditorProbeScriptsExtractAssetsResult": "POST …/extract-assets：{status} — {message}",
+  "@projectEditorProbeScriptsExtractAssetsResult": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
   "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

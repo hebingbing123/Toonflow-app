@@ -10,6 +10,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
     required List<bool> tasksProbeBusy,
     required List<bool> projectProbeBusy,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -21,11 +22,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   final items = await postTasksGetProject(token);
                   if (!ctx.mounted) return;
                   final line = items.isEmpty
-                      ? '0 项'
+                      ? l10n.projectEditorProbeTasksZeroItems
                       : items.map((e) => '#${e.numericId} ${e.name}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('compat getProject（GET projects）：$line'),
+                      content: Text(l10n.projectEditorProbeTasksCompatGetProjectResult(line)),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -40,7 +41,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat tasks get-project'),
+        child: Text(
+          tasksProbeBusy[0]
+              ? l10n.projectEditorProbeTasksBusyLabel
+              : l10n.projectEditorProbeTasksButtonCompatGetProject,
+        ),
       ),
       TextButton(
         onPressed:
@@ -52,11 +57,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   final rows = await postTasksGetTaskCategories(token);
                   if (!ctx.mounted) return;
                   final line = rows.isEmpty
-                      ? '0 类'
+                      ? l10n.projectEditorProbeTasksZeroClasses
                       : rows.map((e) => e.taskClass).join(', ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('compat categories（GET jobs/kinds）：$line'),
+                      content: Text(l10n.projectEditorProbeTasksCompatCategoriesResult(line)),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -71,7 +76,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat tasks categories'),
+        child: Text(
+          tasksProbeBusy[0]
+              ? l10n.projectEditorProbeTasksBusyLabel
+              : l10n.projectEditorProbeTasksButtonCompatCategories,
+        ),
       ),
       TextButton(
         onPressed:
@@ -90,7 +99,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'compat get-task-api（GET jobs/page）：total=${r.total} · ${r.data.length} 条本页',
+                        l10n.projectEditorProbeTasksCompatGetTaskApi(r.total, r.data.length),
                       ),
                     ),
                   );
@@ -106,7 +115,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat tasks list'),
+        child: Text(
+          tasksProbeBusy[0]
+              ? l10n.projectEditorProbeTasksBusyLabel
+              : l10n.projectEditorProbeTasksButtonCompatList,
+        ),
       ),
       TextButton(
         onPressed:
@@ -132,7 +145,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'compat task-details（GET jobs/task-detail）：#${row.numericTaskId} -> ${row.kind}/${row.status}',
+                        l10n.projectEditorProbeTasksCompatTaskDetailsResult(
+                          row.numericTaskId,
+                          row.kind,
+                          row.status,
+                        ),
                       ),
                     ),
                   );
@@ -148,7 +165,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat task-details int'),
+        child: Text(
+          tasksProbeBusy[0]
+              ? l10n.projectEditorProbeTasksBusyLabel
+              : l10n.projectEditorProbeTasksButtonCompatTaskDetails,
+        ),
       ),
     ];
   }

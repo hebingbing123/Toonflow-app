@@ -9741,6 +9741,238 @@ abstract class AppLocalizations {
     Object id,
   );
 
+  /// No description provided for @projectEditorProbeTasksBusyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'tasks…'**
+  String get projectEditorProbeTasksBusyLabel;
+
+  /// No description provided for @projectEditorProbeTasksButtonCompatGetProject.
+  ///
+  /// In en, this message translates to:
+  /// **'compat tasks get-project'**
+  String get projectEditorProbeTasksButtonCompatGetProject;
+
+  /// No description provided for @projectEditorProbeTasksCompatGetProjectResult.
+  ///
+  /// In en, this message translates to:
+  /// **'compat getProject (GET projects): {line}'**
+  String projectEditorProbeTasksCompatGetProjectResult(String line);
+
+  /// No description provided for @projectEditorProbeTasksButtonCompatCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'compat tasks categories'**
+  String get projectEditorProbeTasksButtonCompatCategories;
+
+  /// No description provided for @projectEditorProbeTasksCompatCategoriesResult.
+  ///
+  /// In en, this message translates to:
+  /// **'compat categories (GET jobs/kinds): {line}'**
+  String projectEditorProbeTasksCompatCategoriesResult(String line);
+
+  /// No description provided for @projectEditorProbeTasksButtonCompatList.
+  ///
+  /// In en, this message translates to:
+  /// **'compat tasks list'**
+  String get projectEditorProbeTasksButtonCompatList;
+
+  /// No description provided for @projectEditorProbeTasksButtonCompatTaskDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'compat task-details int'**
+  String get projectEditorProbeTasksButtonCompatTaskDetails;
+
+  /// No description provided for @projectEditorProbeTasksCompatTaskDetailsResult.
+  ///
+  /// In en, this message translates to:
+  /// **'compat task-details (GET jobs/task-detail): #{taskId} -> {kind}/{status}'**
+  String projectEditorProbeTasksCompatTaskDetailsResult(
+    int taskId,
+    String kind,
+    String status,
+  );
+
+  /// No description provided for @projectEditorProbeProjectBusyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'project…'**
+  String get projectEditorProbeProjectBusyLabel;
+
+  /// No description provided for @projectEditorProbeProjectButtonGetProject.
+  ///
+  /// In en, this message translates to:
+  /// **'POST project get-project'**
+  String get projectEditorProbeProjectButtonGetProject;
+
+  /// No description provided for @projectEditorProbeProjectEditNoopResult.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/project/edit-project noop #{numericId}: {message}'**
+  String projectEditorProbeProjectEditNoopResult(int numericId, String message);
+
+  /// No description provided for @projectEditorProbeProjectButtonEditNoop.
+  ///
+  /// In en, this message translates to:
+  /// **'POST project edit (noop)'**
+  String get projectEditorProbeProjectButtonEditNoop;
+
+  /// No description provided for @projectEditorProbeProjectButtonDeleteZero.
+  ///
+  /// In en, this message translates to:
+  /// **'POST project delete id=0'**
+  String get projectEditorProbeProjectButtonDeleteZero;
+
+  /// No description provided for @projectEditorProbeProjectDeleteUnexpected200.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/project/delete-project: unexpected 200'**
+  String get projectEditorProbeProjectDeleteUnexpected200;
+
+  /// No description provided for @projectEditorProbeProjectDeleteExpected400.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/project/delete-project id=0 -> 400 (expected)'**
+  String get projectEditorProbeProjectDeleteExpected400;
+
+  /// No description provided for @projectEditorProbeProjectButtonEditZero.
+  ///
+  /// In en, this message translates to:
+  /// **'POST project edit id=0'**
+  String get projectEditorProbeProjectButtonEditZero;
+
+  /// No description provided for @projectEditorProbeProjectEditUnexpected200.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/project/edit-project: unexpected 200'**
+  String get projectEditorProbeProjectEditUnexpected200;
+
+  /// No description provided for @projectEditorProbeProjectEditExpected400.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/project/edit-project id=0 -> 400 (expected)'**
+  String get projectEditorProbeProjectEditExpected400;
+
+  /// No description provided for @projectEditorProbeProjectButtonAddDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'POST project add→del'**
+  String get projectEditorProbeProjectButtonAddDelete;
+
+  /// No description provided for @projectEditorProbeProjectAddMissingAfterList.
+  ///
+  /// In en, this message translates to:
+  /// **'add-project ok but get-project missing name=\"{name}\"'**
+  String projectEditorProbeProjectAddMissingAfterList(String name);
+
+  /// No description provided for @projectEditorProbeProjectAddDeleteOk.
+  ///
+  /// In en, this message translates to:
+  /// **'POST add-project → delete project#{numericId} ok'**
+  String projectEditorProbeProjectAddDeleteOk(int numericId);
+
+  /// No description provided for @projectEditorProbeScriptsBatchAddProbeResult.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/projects/:id/scripts/batch-add: inserted={inserted}'**
+  String projectEditorProbeScriptsBatchAddProbeResult(int inserted);
+
+  /// No description provided for @projectEditorProbeScriptsButtonBatchAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'POST projects/…/scripts/batch-add'**
+  String get projectEditorProbeScriptsButtonBatchAdd;
+
+  /// No description provided for @projectEditorProbeScriptsButtonPostGetScriptApi.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-script-api'**
+  String get projectEditorProbeScriptsButtonPostGetScriptApi;
+
+  /// No description provided for @projectEditorProbeScriptsGetByNumericResult.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/projects/:id/scripts/{sid}: {name}'**
+  String projectEditorProbeScriptsGetByNumericResult(int sid, String name);
+
+  /// No description provided for @projectEditorProbeScriptsPatchNameNoopBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'script…'**
+  String get projectEditorProbeScriptsPatchNameNoopBusy;
+
+  /// No description provided for @projectEditorProbeScriptsButtonPatchNameNoop.
+  ///
+  /// In en, this message translates to:
+  /// **'PATCH projects/…/scripts (name noop)'**
+  String get projectEditorProbeScriptsButtonPatchNameNoop;
+
+  /// No description provided for @projectEditorProbeScriptsPatchNameNoopResult.
+  ///
+  /// In en, this message translates to:
+  /// **'PATCH …/projects/:id/scripts/{sid} name noop → {name}'**
+  String projectEditorProbeScriptsPatchNameNoopResult(int sid, String name);
+
+  /// No description provided for @projectEditorProbeScriptsExportZipBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'export…'**
+  String get projectEditorProbeScriptsExportZipBusy;
+
+  /// No description provided for @projectEditorProbeScriptsButtonExportZip.
+  ///
+  /// In en, this message translates to:
+  /// **'POST scripts/export (ZIP)'**
+  String get projectEditorProbeScriptsButtonExportZip;
+
+  /// No description provided for @projectEditorProbeScriptsExportZipResult.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/scripts/export: {bytes} bytes · {count} numeric id(s)'**
+  String projectEditorProbeScriptsExportZipResult(int bytes, int count);
+
+  /// No description provided for @projectEditorProbeScriptsPollExtractBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'poll…'**
+  String get projectEditorProbeScriptsPollExtractBusy;
+
+  /// No description provided for @projectEditorProbeScriptsButtonPollExtract.
+  ///
+  /// In en, this message translates to:
+  /// **'POST extract-state/poll'**
+  String get projectEditorProbeScriptsButtonPollExtract;
+
+  /// No description provided for @projectEditorProbeScriptsPollExtractResult.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/extract-state/poll: {rowCount} row(s) {sample}'**
+  String projectEditorProbeScriptsPollExtractResult(
+    int rowCount,
+    String sample,
+  );
+
+  /// No description provided for @projectEditorProbeScriptsExtractAssetsBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'extract…'**
+  String get projectEditorProbeScriptsExtractAssetsBusy;
+
+  /// No description provided for @projectEditorProbeScriptsButtonExtractAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'POST extract-assets'**
+  String get projectEditorProbeScriptsButtonExtractAssets;
+
+  /// No description provided for @projectEditorProbeScriptsExtractAssetsResult.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/extract-assets: {status} — {message}'**
+  String projectEditorProbeScriptsExtractAssetsResult(
+    String status,
+    String message,
+  );
+
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///
   /// In en, this message translates to:
