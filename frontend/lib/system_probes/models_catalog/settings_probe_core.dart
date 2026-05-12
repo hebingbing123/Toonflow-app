@@ -21,6 +21,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
       fetchAssets: fetchProjectAssetsByProjectId,
       fetchStoryboards: fetchStoryboardsForProjectScript,
     );
+    final projectId = scope.projectId;
     final modelTest = await postSettingsVendorModelTestV1(
       token,
       modelName: 'gpt-4o-mini',
@@ -34,10 +35,9 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     );
     statuses['model-test'] = modelTest;
 
-    final scriptAgentGetPlan = await postScriptAgentGetPlanDataV1(
-      token,
-      projectId: scope.projectId,
-    );
+    final scriptAgentGetPlan = projectId == null
+        ? 404
+        : await postScriptAgentGetPlanDataV1(token, projectId: projectId);
     _expectProbeStatus(
       label: 'POST script-agent/get-plan-data',
       status: scriptAgentGetPlan,
@@ -45,16 +45,18 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     );
     statuses['script-agent/get-plan'] = scriptAgentGetPlan;
 
-    final generate = await postAssetsGenerateGenerateV1(
-      token,
-      projectId: scope.projectId,
-      assetNumericId: resources.assetId,
-      model: '1:gpt-4o-mini',
-      resolution: '1024x1024',
-      type: 'role',
-      name: 'probe',
-      prompt: 'probe',
-    );
+    final generate = projectId == null
+        ? 404
+        : await postAssetsGenerateGenerateV1(
+            token,
+            projectId: projectId,
+            assetNumericId: resources.assetId,
+            model: '1:gpt-4o-mini',
+            resolution: '1024x1024',
+            type: 'role',
+            name: 'probe',
+            prompt: 'probe',
+          );
     _expectProbeStatus(
       label: 'POST assets-generate/generate',
       status: generate,
@@ -130,10 +132,14 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
       scriptIdText: _workspaceInputController.scriptIdController.text,
       fetchProjects: fetchProjects,
     );
-    final scriptAgentSetPlan = await postScriptAgentSetPlanDataV1(
-      token,
-      projectId: scope.projectId,
-    );
+    final projectId = scope.projectId;
+    final scriptId = scope.scriptId;
+    final scriptAgentSetPlan = projectId == null
+        ? 404
+        : await postScriptAgentSetPlanDataV1(
+            token,
+            projectId: projectId,
+          );
     _expectProbeStatus(
       label: 'POST script-agent/set-plan-data',
       status: scriptAgentSetPlan,
@@ -141,10 +147,9 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     );
     statuses['script-agent/set'] = scriptAgentSetPlan;
 
-    final scriptAgentUpdate = await postScriptAgentUpdateDataV1(
-      token,
-      id: scope.scriptId,
-    );
+    final scriptAgentUpdate = scriptId == null
+        ? 404
+        : await postScriptAgentUpdateDataV1(token, id: scriptId);
     _expectProbeStatus(
       label: 'POST script-agent/update-data',
       status: scriptAgentUpdate,

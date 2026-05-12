@@ -26,7 +26,6 @@ Future<AccountProbeClearScope> resolveAccountProbeClearScope({
   required String projectUuidText,
   required String scriptIdText,
   required AccountProbesFetchProjects fetchProjects,
-  int fallbackProjectId = 1,
 }) async {
   final explicitProjectUuid = _trimmedNonEmpty(projectUuidText);
   var projectId = _parsePositiveInt(projectIdText);
@@ -46,7 +45,7 @@ Future<AccountProbeClearScope> resolveAccountProbeClearScope({
     }
   }
   return AccountProbeClearScope(
-    projectId: explicitProjectUuid != null ? projectId : (projectId ?? fallbackProjectId),
+    projectId: projectId,
     projectUuid: explicitProjectUuid,
     scriptId: _parsePositiveInt(scriptIdText),
   );
@@ -146,6 +145,7 @@ class AccountProbesController extends ChangeNotifier {
     try {
       final summary = await fetchUsageSummary(token);
       usageSummaryBody =
+          'scope=${summary.scope} · '
           'events_last_24h=${summary.eventsLast24h} · '
           'events_last_7d=${summary.eventsLast7d} · '
           'event_counts_last_7d=${summary.eventCountsLast7d}';

@@ -1,6 +1,21 @@
 part of '../../../home_page.dart';
 
 extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
+  int _missingProductionScopeStatus({
+    required Map<String, int> statuses,
+    required String key,
+    required String label,
+  }) {
+    const status = 404;
+    _expectProbeStatus(
+      label: label,
+      status: status,
+      accepted: const [200, 404, 503],
+    );
+    statuses[key] = status;
+    return status;
+  }
+
   Future<({Map<String, int> statuses, int implementedCount})>
   _runModelsCatalogProductionProbes(String token) async {
     final statuses = <String, int>{};
@@ -19,11 +34,60 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       fetchAssets: fetchProjectAssetsByProjectId,
       fetchStoryboards: fetchStoryboardsForProjectScript,
     );
+    final projectId = scope.projectId;
+    final scriptId = scope.scriptId;
+    if (projectId == null || scriptId == null) {
+      _missingProductionScopeStatus(
+        statuses: statuses,
+        key: 'production/get-data',
+        label: 'POST production/get-production-data',
+      );
+      _missingProductionScopeStatus(
+        statuses: statuses,
+        key: 'flow',
+        label: 'POST production/get-flow-data',
+      );
+      _missingProductionScopeStatus(
+        statuses: statuses,
+        key: 'save',
+        label: 'POST production/save-flow-data',
+      );
+      _missingProductionScopeStatus(
+        statuses: statuses,
+        key: 'workbench/generate',
+        label: 'POST production/workbench/generate-video',
+      );
+      _missingProductionScopeStatus(
+        statuses: statuses,
+        key: 'workbench/batch-candidate-clips',
+        label: 'POST production/workbench/batch-generate-candidate-clips',
+      );
+      _missingProductionScopeStatus(
+        statuses: statuses,
+        key: 'storyboard/poll',
+        label: 'POST production/storyboard/polling-image',
+      );
+      _missingProductionScopeStatus(
+        statuses: statuses,
+        key: 'export',
+        label: 'POST production/export-image',
+      );
+      await _runTypedProductionProbeSuite(
+        token,
+        statuses,
+        projectId: -1,
+        scriptId: -1,
+        assetId: resources.assetId,
+        storyboardId: resources.storyboardId,
+        skipRequests: true,
+      );
+      return (statuses: statuses, implementedCount: 29);
+    }
 
     final getData = await postProductionGetProductionDataV1(
       token,
-      projectId: scope.projectId,
-      scriptId: scope.scriptId,
+      projectId: projectId,
+      scriptId: scriptId,
       storyboardIds: [resources.storyboardId],
     );
     _expectProbeStatus(
@@ -35,8 +99,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     final flowData = await postProductionGetFlowDataV1(
       token,
-      projectId: scope.projectId,
-      episodesId: scope.scriptId,
+      projectId: projectId,
+      episodesId: scriptId,
     );
     _expectProbeStatus(
       label: 'POST production/get-flow-data',
@@ -47,8 +111,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     final flowSave = await postProductionSaveFlowDataV1(
       token,
-      projectId: scope.projectId,
-      episodesId: scope.scriptId,
+      projectId: projectId,
+      episodesId: scriptId,
     );
     _expectProbeStatus(
       label: 'POST production/save-flow-data',
@@ -59,8 +123,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     await postProductionWorkbenchGenerateVideoV1(
       token,
-      projectId: scope.projectId,
-      scriptId: scope.scriptId,
+      projectId: projectId,
+      scriptId: scriptId,
       uploadData: [
         {'id': resources.assetId, 'sources': 'assets'},
       ],
@@ -82,8 +146,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     try {
       await postProductionWorkbenchBatchGenerateCandidateClipsV1(
         token,
-        projectId: scope.projectId,
-        scriptId: scope.scriptId,
+        projectId: projectId,
+        scriptId: scriptId,
       );
       batchCandStatus = 200;
     } on RustApiException catch (e) {
@@ -98,8 +162,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     final storyboardPoll = await postProductionStoryboardPollingImageV1(
       token,
-      projectId: scope.projectId,
-      scriptId: scope.scriptId,
+      projectId: projectId,
+      scriptId: scriptId,
       ids: [resources.storyboardId],
     );
     _expectProbeStatus(
@@ -111,8 +175,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     final exportImage = await postProductionExportImageV1(
       token,
-      projectId: scope.projectId,
-      scriptId: scope.scriptId,
+      projectId: projectId,
+      scriptId: scriptId,
       shotId: [
         {'id': '${resources.storyboardId}'},
       ],
@@ -127,8 +191,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     await _runTypedProductionProbeSuite(
       token,
       statuses,
-      projectId: scope.projectId,
-      scriptId: scope.scriptId,
+      projectId: projectId,
+      scriptId: scriptId,
       assetId: resources.assetId,
       storyboardId: resources.storyboardId,
     );

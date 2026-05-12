@@ -44,12 +44,12 @@ void main() {
       );
 
       expect(scope.projectId, 77);
-      expect(scope.scriptId, 1);
+      expect(scope.scriptId, isNull);
       expect(fetchCalls, 1);
     },
   );
 
-  test('production probe scope falls back when uuid is unknown', () async {
+  test('production probe scope leaves scope empty when uuid is unknown', () async {
     final scope = await resolveProductionProbeScope(
       token: 'token',
       projectIdText: '',
@@ -65,8 +65,8 @@ void main() {
       ],
     );
 
-    expect(scope.projectId, 1);
-    expect(scope.scriptId, 1);
+    expect(scope.projectId, isNull);
+    expect(scope.scriptId, isNull);
   });
 
   test('production probe resource scope prefers explicit project uuid', () async {

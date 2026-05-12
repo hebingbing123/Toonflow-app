@@ -138,14 +138,17 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       fetchAssets: fetchProjectAssetsByProjectId,
       fetchStoryboards: fetchStoryboardsForProjectScript,
     );
-    final polish = await postAssetsGeneratePolishPromptV1(
-      token,
-      assetsId: resources.assetId,
-      projectId: scope.projectId,
-      type: 'role',
-      name: 'n',
-      describe: 'd',
-    );
+    final projectId = scope.projectId;
+    final polish = projectId == null
+        ? 404
+        : await postAssetsGeneratePolishPromptV1(
+            token,
+            assetsId: resources.assetId,
+            projectId: projectId,
+            type: 'role',
+            name: 'n',
+            describe: 'd',
+          );
     _expectProbeStatus(
       label: 'POST assets-generate/polish-prompt',
       status: polish,
@@ -153,15 +156,22 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
     );
     statuses['polish'] = polish;
 
-    final batchGenerate = await postAssetsGenerateBatchGenerateV1(
-      token,
-      projectId: scope.projectId,
-      model: '1:x',
-      resolution: '1024x1024',
-      items: [
-        {'id': resources.assetId, 'type': 'role', 'name': 'n', 'prompt': 'p'},
-      ],
-    );
+    final batchGenerate = projectId == null
+        ? 404
+        : await postAssetsGenerateBatchGenerateV1(
+            token,
+            projectId: projectId,
+            model: '1:x',
+            resolution: '1024x1024',
+            items: [
+              {
+                'id': resources.assetId,
+                'type': 'role',
+                'name': 'n',
+                'prompt': 'p',
+              },
+            ],
+          );
     _expectProbeStatus(
       label: 'POST assets-generate/batch-generate',
       status: batchGenerate,
@@ -169,18 +179,20 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
     );
     statuses['batch'] = batchGenerate;
 
-    final batchPolish = await postAssetsGenerateBatchPolishV1(
-      token,
-      projectId: scope.projectId,
-      items: [
-        {
-          'assetsId': resources.assetId,
-          'type': 'role',
-          'name': 'n',
-          'describe': 'd',
-        },
-      ],
-    );
+    final batchPolish = projectId == null
+        ? 404
+        : await postAssetsGenerateBatchPolishV1(
+            token,
+            projectId: projectId,
+            items: [
+              {
+                'assetsId': resources.assetId,
+                'type': 'role',
+                'name': 'n',
+                'describe': 'd',
+              },
+            ],
+          );
     _expectProbeStatus(
       label: 'POST assets-generate/batch-polish',
       status: batchPolish,

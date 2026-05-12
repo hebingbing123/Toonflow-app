@@ -16,10 +16,10 @@ typedef ProductionProbeFetchStoryboards =
     );
 
 class ProductionProbeScope {
-  const ProductionProbeScope({required this.projectId, required this.scriptId});
+  const ProductionProbeScope({this.projectId, this.scriptId});
 
-  final int projectId;
-  final int scriptId;
+  final int? projectId;
+  final int? scriptId;
 }
 
 Future<ProductionProbeScope> resolveProductionProbeScope({
@@ -28,8 +28,6 @@ Future<ProductionProbeScope> resolveProductionProbeScope({
   required String projectUuidText,
   required String scriptIdText,
   required ProductionProbeFetchProjects fetchProjects,
-  int fallbackProjectId = 1,
-  int fallbackScriptId = 1,
 }) async {
   var projectId = _parsePositiveInt(projectIdText);
   if (projectId == null) {
@@ -45,8 +43,8 @@ Future<ProductionProbeScope> resolveProductionProbeScope({
     }
   }
   return ProductionProbeScope(
-    projectId: projectId ?? fallbackProjectId,
-    scriptId: _parsePositiveInt(scriptIdText) ?? fallbackScriptId,
+    projectId: projectId,
+    scriptId: _parsePositiveInt(scriptIdText),
   );
 }
 
@@ -119,9 +117,13 @@ Future<String?> _resolveProjectUuid({
     return explicitProjectUuid;
   }
   try {
+    final numericProjectId = scope.projectId;
+    if (numericProjectId == null || numericProjectId <= 0) {
+      return null;
+    }
     final projects = await fetchProjects(token);
     for (final project in projects) {
-      if (project.numericId == scope.projectId) {
+      if (project.numericId == numericProjectId) {
         return project.id;
       }
     }
@@ -132,7 +134,7 @@ Future<String?> _resolveProjectUuid({
 Future<int> _resolveAssetId({
   required String token,
   required String projectUuid,
-  required int scriptId,
+  required int? scriptId,
   required ProductionProbeFetchAssets fetchAssets,
   required int fallbackAssetId,
 }) async {
@@ -140,7 +142,7 @@ Future<int> _resolveAssetId({
     final scopedAssets = await fetchAssets(
       token,
       projectUuid,
-      scriptNumericId: scriptId,
+      scriptNumericId: scriptId != null && scriptId > 0 ? scriptId : null,
     );
     final scopedAssetId = _firstAssetId(scopedAssets);
     if (scopedAssetId != null) {
@@ -160,10 +162,13 @@ Future<int> _resolveAssetId({
 Future<int> _resolveStoryboardId({
   required String token,
   required String projectUuid,
-  required int scriptId,
+  required int? scriptId,
   required ProductionProbeFetchStoryboards fetchStoryboards,
   required int fallbackStoryboardId,
 }) async {
+  if (scriptId == null || scriptId <= 0) {
+    return fallbackStoryboardId;
+  }
   try {
     final storyboards = await fetchStoryboards(token, projectUuid, scriptId);
     final storyboardId = _firstStoryboardId(storyboards);

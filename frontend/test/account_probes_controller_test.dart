@@ -67,7 +67,7 @@ void main() {
     expect(scope.scriptId, isNull);
   });
 
-  test('account probe clear scope keeps legacy fallback when probing fails', () async {
+  test('account probe clear scope keeps scope empty when probing fails', () async {
     final scope = await resolveAccountProbeClearScope(
       token: 'token',
       projectIdText: '',
@@ -76,7 +76,7 @@ void main() {
       fetchProjects: (token) async => throw RustApiException('boom'),
     );
 
-    expect(scope.projectId, 1);
+    expect(scope.projectId, isNull);
     expect(scope.projectUuid, isNull);
     expect(scope.scriptId, isNull);
   });
