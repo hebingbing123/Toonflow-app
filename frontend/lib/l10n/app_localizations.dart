@@ -14204,6 +14204,961 @@ abstract class AppLocalizations {
   /// **'Needs {items}'**
   String shortVideoCandidateCompareReadinessBlocked(String items);
 
+  /// No description provided for @shortVideoMetricStoryboardReadiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard readiness'**
+  String get shortVideoMetricStoryboardReadiness;
+
+  /// No description provided for @shortVideoShotReadinessSelectProjectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a short drama project to see server-side shot blocking rollup.'**
+  String get shortVideoShotReadinessSelectProjectHint;
+
+  /// No description provided for @shortVideoTaskUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed task'**
+  String get shortVideoTaskUnnamed;
+
+  /// No description provided for @shortVideoBadCaseUncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get shortVideoBadCaseUncategorized;
+
+  /// No description provided for @shortVideoTaskStatusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get shortVideoTaskStatusQueued;
+
+  /// No description provided for @shortVideoTaskStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get shortVideoTaskStatusRunning;
+
+  /// No description provided for @shortVideoTaskStatusSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get shortVideoTaskStatusSucceeded;
+
+  /// No description provided for @shortVideoTaskStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get shortVideoTaskStatusFailed;
+
+  /// No description provided for @shortVideoTaskStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get shortVideoTaskStatusCancelled;
+
+  /// No description provided for @shortVideoQualityNoSignalAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality reviews have not surfaced strong signals yet; we will highlight style consistency, character continuity, and pacing risks here.'**
+  String get shortVideoQualityNoSignalAnimated;
+
+  /// No description provided for @shortVideoQualityNoSignalLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality reviews have not surfaced strong signals yet; we will highlight performance naturalness, realism, and voiceover pacing here.'**
+  String get shortVideoQualityNoSignalLive;
+
+  /// No description provided for @shortVideoQualityInsightAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto/manual review pass rate is about {passRate}%; {badCount} bad cases logged—keep focusing on character consistency, visual continuity, and shot rhythm.'**
+  String shortVideoQualityInsightAnimated(String passRate, int badCount);
+
+  /// No description provided for @shortVideoQualityInsightLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto/manual review pass rate is about {passRate}%; {badCount} bad cases logged—keep focusing on performance naturalness, scene realism, and voiceover shot quality.'**
+  String shortVideoQualityInsightLive(String passRate, int badCount);
+
+  /// No description provided for @shortVideoReadinessGapAllReadyAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Animated short-drama basics are in place—you can move forward with script, production, and QA loops.'**
+  String get shortVideoReadinessGapAllReadyAnimated;
+
+  /// No description provided for @shortVideoReadinessGapAllReadyLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action basics are in place—you can continue shot generation, voiceover, and final review.'**
+  String get shortVideoReadinessGapAllReadyLive;
+
+  /// No description provided for @shortVideoReadinessGapAndMore.
+  ///
+  /// In en, this message translates to:
+  /// **' and {count} more'**
+  String shortVideoReadinessGapAndMore(int count);
+
+  /// No description provided for @shortVideoReadinessGapMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Still missing {labels}{more}. Complete these preparation items in the project area first.'**
+  String shortVideoReadinessGapMissing(String labels, String more);
+
+  /// No description provided for @shortVideoReadinessLabelScriptBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Script foundation'**
+  String get shortVideoReadinessLabelScriptBase;
+
+  /// No description provided for @shortVideoReadinessDetailScriptsHas.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} script(s) on file'**
+  String shortVideoReadinessDetailScriptsHas(int count);
+
+  /// No description provided for @shortVideoReadinessDetailScriptsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No first-draft script yet'**
+  String get shortVideoReadinessDetailScriptsMissing;
+
+  /// No description provided for @shortVideoReadinessAnimLabelRoleAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Character assets'**
+  String get shortVideoReadinessAnimLabelRoleAssets;
+
+  /// No description provided for @shortVideoReadinessDetailRolesHas.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} character asset(s)'**
+  String shortVideoReadinessDetailRolesHas(int count);
+
+  /// No description provided for @shortVideoReadinessDetailRolesMissingAnim.
+  ///
+  /// In en, this message translates to:
+  /// **'Character assets still missing'**
+  String get shortVideoReadinessDetailRolesMissingAnim;
+
+  /// No description provided for @shortVideoReadinessLiveLabelRoleSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Character setup'**
+  String get shortVideoReadinessLiveLabelRoleSetup;
+
+  /// No description provided for @shortVideoReadinessDetailRolesMissingLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Character setup / assets still missing'**
+  String get shortVideoReadinessDetailRolesMissingLive;
+
+  /// No description provided for @shortVideoReadinessLabelSceneAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene assets'**
+  String get shortVideoReadinessLabelSceneAssets;
+
+  /// No description provided for @shortVideoReadinessDetailScenesHas.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scene asset(s)'**
+  String shortVideoReadinessDetailScenesHas(int count);
+
+  /// No description provided for @shortVideoReadinessDetailScenesMissingAnim.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene assets still missing'**
+  String get shortVideoReadinessDetailScenesMissingAnim;
+
+  /// No description provided for @shortVideoReadinessDetailScenesMissingLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live scene references still missing'**
+  String get shortVideoReadinessDetailScenesMissingLive;
+
+  /// No description provided for @shortVideoReadinessAnimLabelVisualStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual style signal'**
+  String get shortVideoReadinessAnimLabelVisualStyle;
+
+  /// No description provided for @shortVideoReadinessDetailVisualConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured: {name}'**
+  String shortVideoReadinessDetailVisualConfigured(String name);
+
+  /// No description provided for @shortVideoReadinessDetailVisualMissingAnim.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual style not locked yet'**
+  String get shortVideoReadinessDetailVisualMissingAnim;
+
+  /// No description provided for @shortVideoReadinessLiveLabelVisualManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual manual'**
+  String get shortVideoReadinessLiveLabelVisualManual;
+
+  /// No description provided for @shortVideoReadinessDetailVisualMissingLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live visual style not locked yet'**
+  String get shortVideoReadinessDetailVisualMissingLive;
+
+  /// No description provided for @shortVideoReadinessFallbackStylePack.
+  ///
+  /// In en, this message translates to:
+  /// **'style pack'**
+  String get shortVideoReadinessFallbackStylePack;
+
+  /// No description provided for @shortVideoReadinessFallbackDirectorPack.
+  ///
+  /// In en, this message translates to:
+  /// **'director manual or story style pack'**
+  String get shortVideoReadinessFallbackDirectorPack;
+
+  /// No description provided for @shortVideoReadinessFallbackLiveVisualPack.
+  ///
+  /// In en, this message translates to:
+  /// **'visual style or style pack'**
+  String get shortVideoReadinessFallbackLiveVisualPack;
+
+  /// No description provided for @shortVideoReadinessAnimLabelDirectorManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Director manual'**
+  String get shortVideoReadinessAnimLabelDirectorManual;
+
+  /// No description provided for @shortVideoReadinessLiveLabelPerformanceManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance / voiceover manual'**
+  String get shortVideoReadinessLiveLabelPerformanceManual;
+
+  /// No description provided for @shortVideoReadinessDetailDirectorConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured: {name}'**
+  String shortVideoReadinessDetailDirectorConfigured(String name);
+
+  /// No description provided for @shortVideoReadinessDetailDirectorMissingAnim.
+  ///
+  /// In en, this message translates to:
+  /// **'Director manual not locked yet'**
+  String get shortVideoReadinessDetailDirectorMissingAnim;
+
+  /// No description provided for @shortVideoReadinessDetailPerformanceMissingLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover tone / director manual not locked yet'**
+  String get shortVideoReadinessDetailPerformanceMissingLive;
+
+  /// No description provided for @shortVideoReadinessAnimLabelStoryboardBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard foundation'**
+  String get shortVideoReadinessAnimLabelStoryboardBase;
+
+  /// No description provided for @shortVideoReadinessDetailStoryboardsHas.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} storyboard row(s)'**
+  String shortVideoReadinessDetailStoryboardsHas(int count);
+
+  /// No description provided for @shortVideoReadinessDetailStoryboardsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No storyboard structure yet'**
+  String get shortVideoReadinessDetailStoryboardsMissing;
+
+  /// No description provided for @shortVideoReadinessLiveLabelClipRefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot / clip references'**
+  String get shortVideoReadinessLiveLabelClipRefs;
+
+  /// No description provided for @shortVideoReadinessDetailClipsHas.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} clip reference(s)'**
+  String shortVideoReadinessDetailClipsHas(int count);
+
+  /// No description provided for @shortVideoReadinessDetailClipsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Live shots / clip references still missing'**
+  String get shortVideoReadinessDetailClipsMissing;
+
+  /// No description provided for @shortVideoAssetTypeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get shortVideoAssetTypeRole;
+
+  /// No description provided for @shortVideoAssetTypeScene.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene'**
+  String get shortVideoAssetTypeScene;
+
+  /// No description provided for @shortVideoAssetTypeTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Prop'**
+  String get shortVideoAssetTypeTool;
+
+  /// No description provided for @shortVideoAssetTypeClip.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot'**
+  String get shortVideoAssetTypeClip;
+
+  /// No description provided for @shortVideoAssetTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get shortVideoAssetTypeOther;
+
+  /// No description provided for @shortVideoAssetsOverviewLoadingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading assets overview…'**
+  String get shortVideoAssetsOverviewLoadingHeadline;
+
+  /// No description provided for @shortVideoAssetsOverviewLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts by asset type with linked script IDs (app_script_asset).'**
+  String get shortVideoAssetsOverviewLoadingDetail;
+
+  /// No description provided for @shortVideoAssetsOverviewUnavailableHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets overview is temporarily unavailable.'**
+  String get shortVideoAssetsOverviewUnavailableHeadline;
+
+  /// No description provided for @shortVideoAssetsOverviewUnavailableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh later, or maintain assets and script links in the project area.'**
+  String get shortVideoAssetsOverviewUnavailableDetail;
+
+  /// No description provided for @shortVideoAssetsOverviewNoLinkedScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'No linked scripts'**
+  String get shortVideoAssetsOverviewNoLinkedScripts;
+
+  /// No description provided for @shortVideoAssetsOverviewScriptsPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts '**
+  String get shortVideoAssetsOverviewScriptsPrefix;
+
+  /// No description provided for @shortVideoAssetsOverviewScriptsEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'…'**
+  String get shortVideoAssetsOverviewScriptsEllipsis;
+
+  /// No description provided for @shortVideoAssetsOverviewTypeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} · {count} items · {scriptPart}'**
+  String shortVideoAssetsOverviewTypeLine(
+    String type,
+    int count,
+    String scriptPart,
+  );
+
+  /// No description provided for @shortVideoAssetsOverviewHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} assets total, grouped by type (per-row script summary shows experimental script linkage).'**
+  String shortVideoAssetsOverviewHeadline(int total);
+
+  /// No description provided for @shortVideoAssetsOverviewFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only aggregate API; candidate state is still maintained via PATCH in the project area.'**
+  String get shortVideoAssetsOverviewFooter;
+
+  /// No description provided for @shortVideoCandidateCompareLoadingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing shot candidates and current versions…'**
+  String get shortVideoCandidateCompareLoadingHeadline;
+
+  /// No description provided for @shortVideoCandidateCompareLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregates reference frames, current video, readiness, and quality summaries per shot.'**
+  String get shortVideoCandidateCompareLoadingDetail;
+
+  /// No description provided for @shortVideoCandidateCompareUnavailableHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'No comparable shot candidates yet.'**
+  String get shortVideoCandidateCompareUnavailableHeadline;
+
+  /// No description provided for @shortVideoCandidateCompareUnavailableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate shots or add reference frames in production, then return to Space.'**
+  String get shortVideoCandidateCompareUnavailableDetail;
+
+  /// No description provided for @shortVideoCandidateQualityNoReviewsLive.
+  ///
+  /// In en, this message translates to:
+  /// **'No QA records yet—watch performance naturalness, realism, and voiceover shot quality.'**
+  String get shortVideoCandidateQualityNoReviewsLive;
+
+  /// No description provided for @shortVideoCandidateQualityNoReviewsAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'No QA records yet—watch character consistency, visual continuity, and shot rhythm.'**
+  String get shortVideoCandidateQualityNoReviewsAnimated;
+
+  /// No description provided for @shortVideoCandidateQualitySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} reviews · {passed} passed · {bad} bad cases'**
+  String shortVideoCandidateQualitySummary(int total, int passed, int bad);
+
+  /// No description provided for @shortVideoCandidateCompareHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare current version, references, and QA for {count} prioritized shots.'**
+  String shortVideoCandidateCompareHeadline(int count);
+
+  /// No description provided for @shortVideoCandidateCompareDetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live mode shows reference shots and performance constraints so you can lock realism first.'**
+  String get shortVideoCandidateCompareDetailLive;
+
+  /// No description provided for @shortVideoCandidateCompareDetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'See which shots lack references, video, or too many bad cases before partial rework in production.'**
+  String get shortVideoCandidateCompareDetailAnimated;
+
+  /// No description provided for @shortVideoSpaceModeTitleAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Animated short drama'**
+  String get shortVideoSpaceModeTitleAnimated;
+
+  /// No description provided for @shortVideoSpaceModeTitleLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action short drama'**
+  String get shortVideoSpaceModeTitleLive;
+
+  /// No description provided for @shortVideoSpaceModeSummaryAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'The main pipeline is closer to animated short drama, so we emphasize style, character consistency, storyboard images, and continuity.'**
+  String get shortVideoSpaceModeSummaryAnimated;
+
+  /// No description provided for @shortVideoSpaceModeSummaryLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action should be a first-class mode in the same Space; focus shifts to performance, scene realism, reference shots, and voiceover quality.'**
+  String get shortVideoSpaceModeSummaryLive;
+
+  /// No description provided for @shortVideoSpaceModeAdviceAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare visual style, art manuals, and character assets before script and production.'**
+  String get shortVideoSpaceModeAdviceAnimated;
+
+  /// No description provided for @shortVideoSpaceModeAdviceLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare live references, character setup, shot language, and visual manuals before script and production.'**
+  String get shortVideoSpaceModeAdviceLive;
+
+  /// No description provided for @shortVideoProjectOptionUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed project'**
+  String get shortVideoProjectOptionUnnamed;
+
+  /// No description provided for @shortVideoMetricScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts'**
+  String get shortVideoMetricScript;
+
+  /// No description provided for @shortVideoMetricStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboards'**
+  String get shortVideoMetricStoryboard;
+
+  /// No description provided for @shortVideoMetricRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles'**
+  String get shortVideoMetricRole;
+
+  /// No description provided for @shortVideoMetricNovel.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels'**
+  String get shortVideoMetricNovel;
+
+  /// No description provided for @shortVideoMetricVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get shortVideoMetricVideo;
+
+  /// No description provided for @shortVideoMetricRecentTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent tasks'**
+  String get shortVideoMetricRecentTasks;
+
+  /// No description provided for @shortVideoMetricGenerationJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation jobs'**
+  String get shortVideoMetricGenerationJobs;
+
+  /// No description provided for @shortVideoMetricInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get shortVideoMetricInProgress;
+
+  /// No description provided for @shortVideoMetricFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get shortVideoMetricFailed;
+
+  /// No description provided for @shortVideoMetricBadCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad cases'**
+  String get shortVideoMetricBadCases;
+
+  /// No description provided for @shortVideoMetricPassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass rate'**
+  String get shortVideoMetricPassRate;
+
+  /// No description provided for @shortVideoMetricScenes.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenes'**
+  String get shortVideoMetricScenes;
+
+  /// No description provided for @shortVideoMetricClips.
+  ///
+  /// In en, this message translates to:
+  /// **'Clips'**
+  String get shortVideoMetricClips;
+
+  /// No description provided for @shortVideoReadinessIntroAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Animated mode prioritizes style, characters, and storyboard continuity.'**
+  String get shortVideoReadinessIntroAnimated;
+
+  /// No description provided for @shortVideoReadinessIntroLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action mode prioritizes character setup, scene references, clip footage, and voiceover manuals.'**
+  String get shortVideoReadinessIntroLive;
+
+  /// No description provided for @shortVideoSpacePageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video Space'**
+  String get shortVideoSpacePageTitle;
+
+  /// No description provided for @shortVideoSpacePageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspired by MoneyPrinterTurbo-style pipelines, this entry gathers the path from theme to finished cuts, then wires script, assets, narration, subtitles, and QA into one flow.'**
+  String get shortVideoSpacePageSubtitle;
+
+  /// No description provided for @shortVideoSpaceSectionCreativeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Creative mode'**
+  String get shortVideoSpaceSectionCreativeMode;
+
+  /// No description provided for @shortVideoSpaceSectionModeReadiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode readiness'**
+  String get shortVideoSpaceSectionModeReadiness;
+
+  /// No description provided for @shortVideoSpaceReadinessReadyChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get shortVideoSpaceReadinessReadyChip;
+
+  /// No description provided for @shortVideoSpaceSectionShotReadinessServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot generation readiness (server)'**
+  String get shortVideoSpaceSectionShotReadinessServer;
+
+  /// No description provided for @shortVideoSpaceShotReadinessLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading shot readiness rollup…'**
+  String get shortVideoSpaceShotReadinessLoading;
+
+  /// No description provided for @shortVideoSpaceShotReadinessUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot readiness summary is unavailable; other overview data still applies.'**
+  String get shortVideoSpaceShotReadinessUnavailableHint;
+
+  /// No description provided for @shortVideoSpaceShotReadinessPriorityShots.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots to prioritize'**
+  String get shortVideoSpaceShotReadinessPriorityShots;
+
+  /// No description provided for @shortVideoSpaceOpenProductionBoardButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open storyboards in production workspace'**
+  String get shortVideoSpaceOpenProductionBoardButton;
+
+  /// No description provided for @shortVideoSpaceSectionSuggestedNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested next step'**
+  String get shortVideoSpaceSectionSuggestedNext;
+
+  /// No description provided for @shortVideoSpaceSectionMigrationOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested migration order'**
+  String get shortVideoSpaceSectionMigrationOrder;
+
+  /// No description provided for @shortVideoSpaceNavProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get shortVideoSpaceNavProjects;
+
+  /// No description provided for @shortVideoSpaceNavScriptWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Script workspace'**
+  String get shortVideoSpaceNavScriptWorkspace;
+
+  /// No description provided for @shortVideoSpaceNavProductionWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Production workspace'**
+  String get shortVideoSpaceNavProductionWorkspace;
+
+  /// No description provided for @shortVideoSpaceNavTaskCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Task center'**
+  String get shortVideoSpaceNavTaskCenter;
+
+  /// No description provided for @shortVideoSpaceNavQualityReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality reviews'**
+  String get shortVideoSpaceNavQualityReviews;
+
+  /// No description provided for @shortVideoCandidateCompareStoryboardOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard #{id}'**
+  String shortVideoCandidateCompareStoryboardOnly(int id);
+
+  /// No description provided for @shortVideoCandidateCompareStoryboardWithScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard #{storyboardId} · Script #{scriptId}'**
+  String shortVideoCandidateCompareStoryboardWithScript(
+    int storyboardId,
+    int scriptId,
+  );
+
+  /// No description provided for @shortVideoCandidateReferenceImageNotPreviewable.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference image cannot be previewed'**
+  String get shortVideoCandidateReferenceImageNotPreviewable;
+
+  /// No description provided for @shortVideoCandidateLiveRefShotCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} live reference shots'**
+  String shortVideoCandidateLiveRefShotCount(int count);
+
+  /// No description provided for @shortVideoCandidateCurrentVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Current video'**
+  String get shortVideoCandidateCurrentVideo;
+
+  /// No description provided for @shortVideoCandidateSetCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as current'**
+  String get shortVideoCandidateSetCurrent;
+
+  /// No description provided for @shortVideoCandidatePartialRework.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework'**
+  String get shortVideoCandidatePartialRework;
+
+  /// No description provided for @shortVideoDeliveryModeLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live ✓'**
+  String get shortVideoDeliveryModeLive;
+
+  /// No description provided for @shortVideoDeliveryModeSandbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Sandbox ⚠️'**
+  String get shortVideoDeliveryModeSandbox;
+
+  /// No description provided for @shortVideoDeliveryModeManualBridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual 👤'**
+  String get shortVideoDeliveryModeManualBridge;
+
+  /// No description provided for @shortVideoDeliveryModeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get shortVideoDeliveryModeUnknown;
+
+  /// No description provided for @shortVideoPublishPlatformDouyin.
+  ///
+  /// In en, this message translates to:
+  /// **'Douyin'**
+  String get shortVideoPublishPlatformDouyin;
+
+  /// No description provided for @shortVideoPublishPlatformBilibili.
+  ///
+  /// In en, this message translates to:
+  /// **'Bilibili'**
+  String get shortVideoPublishPlatformBilibili;
+
+  /// No description provided for @shortVideoPublishPlatformXiaohongshu.
+  ///
+  /// In en, this message translates to:
+  /// **'Xiaohongshu'**
+  String get shortVideoPublishPlatformXiaohongshu;
+
+  /// No description provided for @shortVideoPublishPlatformWeixinChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Weixin Channels'**
+  String get shortVideoPublishPlatformWeixinChannels;
+
+  /// No description provided for @shortVideoPublishPlatformKuaishou.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuaishou'**
+  String get shortVideoPublishPlatformKuaishou;
+
+  /// No description provided for @shortVideoPublishPlatformTiktok.
+  ///
+  /// In en, this message translates to:
+  /// **'TikTok'**
+  String get shortVideoPublishPlatformTiktok;
+
+  /// No description provided for @shortVideoPublishPlatformYoutubeShorts.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube Shorts'**
+  String get shortVideoPublishPlatformYoutubeShorts;
+
+  /// No description provided for @shortVideoPublishPlatformInstagramReels.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram Reels'**
+  String get shortVideoPublishPlatformInstagramReels;
+
+  /// No description provided for @shortVideoPublishPlatformFacebookReels.
+  ///
+  /// In en, this message translates to:
+  /// **'Facebook Reels'**
+  String get shortVideoPublishPlatformFacebookReels;
+
+  /// No description provided for @shortVideoSpaceAspectRatioPortrait916.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait 9:16'**
+  String get shortVideoSpaceAspectRatioPortrait916;
+
+  /// No description provided for @shortVideoSpaceAspectRatioLandscape169.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape 16:9'**
+  String get shortVideoSpaceAspectRatioLandscape169;
+
+  /// No description provided for @shortVideoSpaceAspectRatioSquare11.
+  ///
+  /// In en, this message translates to:
+  /// **'Square 1:1'**
+  String get shortVideoSpaceAspectRatioSquare11;
+
+  /// No description provided for @shortVideoSpacePublishMarketPlatformTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Default publish market / platforms'**
+  String get shortVideoSpacePublishMarketPlatformTitle;
+
+  /// No description provided for @shortVideoSpaceTargetMarketLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target market'**
+  String get shortVideoSpaceTargetMarketLabel;
+
+  /// No description provided for @shortVideoSpaceTargetMarketDomestic.
+  ///
+  /// In en, this message translates to:
+  /// **'Domestic'**
+  String get shortVideoSpaceTargetMarketDomestic;
+
+  /// No description provided for @shortVideoSpaceTargetMarketOverseas.
+  ///
+  /// In en, this message translates to:
+  /// **'Overseas'**
+  String get shortVideoSpaceTargetMarketOverseas;
+
+  /// No description provided for @shortVideoSpaceTargetMarketBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get shortVideoSpaceTargetMarketBoth;
+
+  /// No description provided for @shortVideoSpaceTargetPlatformsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one target platform (saved on the project for distribution and validation).'**
+  String get shortVideoSpaceTargetPlatformsHint;
+
+  /// No description provided for @shortVideoSpaceDurationStrategyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration strategy'**
+  String get shortVideoSpaceDurationStrategyTitle;
+
+  /// No description provided for @shortVideoSpaceDurationShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short'**
+  String get shortVideoSpaceDurationShort;
+
+  /// No description provided for @shortVideoSpaceDurationMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get shortVideoSpaceDurationMedium;
+
+  /// No description provided for @shortVideoSpaceDurationLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Long'**
+  String get shortVideoSpaceDurationLong;
+
+  /// No description provided for @shortVideoSpaceVoiceSubtitleBgmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover / subtitles / BGM (project defaults)'**
+  String get shortVideoSpaceVoiceSubtitleBgmTitle;
+
+  /// No description provided for @shortVideoSpaceVoiceProfileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice profile (voice_profile)'**
+  String get shortVideoSpaceVoiceProfileLabel;
+
+  /// No description provided for @shortVideoSpaceVoiceProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. default_narrator (optional)'**
+  String get shortVideoSpaceVoiceProfileHint;
+
+  /// No description provided for @shortVideoSpaceSubtitleStyleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle style (subtitle_style)'**
+  String get shortVideoSpaceSubtitleStyleLabel;
+
+  /// No description provided for @shortVideoSpaceBgmStrategyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'BGM strategy (bgm_strategy)'**
+  String get shortVideoSpaceBgmStrategyLabel;
+
+  /// No description provided for @shortVideoSpaceCreatingProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating…'**
+  String get shortVideoSpaceCreatingProject;
+
+  /// No description provided for @shortVideoSpaceCreateProjectDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Create short drama project'**
+  String get shortVideoSpaceCreateProjectDirect;
+
+  /// No description provided for @shortVideoSpaceSavingProjectConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get shortVideoSpaceSavingProjectConfig;
+
+  /// No description provided for @shortVideoSpaceSaveProjectConfigWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Save back to project'**
+  String get shortVideoSpaceSaveProjectConfigWriteback;
+
+  /// No description provided for @shortVideoSpaceOpenProjectsRefine.
+  ///
+  /// In en, this message translates to:
+  /// **'Open projects to refine'**
+  String get shortVideoSpaceOpenProjectsRefine;
+
+  /// No description provided for @shortVideoSpaceLoadingProjectReadiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading project readiness…'**
+  String get shortVideoSpaceLoadingProjectReadiness;
+
+  /// No description provided for @shortVideoSpaceMetricChipVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual'**
+  String get shortVideoSpaceMetricChipVisual;
+
+  /// No description provided for @shortVideoSpaceMetricChipManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get shortVideoSpaceMetricChipManual;
+
   /// No description provided for @scriptEditorStoryboardsProductionEmptyData.
   ///
   /// In en, this message translates to:

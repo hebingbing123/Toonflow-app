@@ -638,10 +638,17 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   final scheduledDraftCount = drafts
       .where((d) => (d.scheduledAt ?? '').trim().isNotEmpty)
       .length;
-  final labels = Map<String, String>.from(kShortVideoPublishPlatformLabels);
+  final labels = <String, String>{
+    for (final id in kShortVideoPublishPlatformIdsInDisplayOrder)
+      id: shortVideoPublishPlatformLabel(l10n, id),
+  };
   if (matrix != null) {
     for (final p in matrix.platforms) {
-      labels[p.platformId] = p.labelZh;
+      labels[p.platformId] = shortVideoPublishPlatformLabelWithMatrixFallback(
+        l10n,
+        p.platformId,
+        p.labelZh,
+      );
     }
   }
 
@@ -658,13 +665,13 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
         .take(3)
         .map(
           (a) => l10n.shortVideoSpacePublishPanelOverviewPerformanceAlert(
-            kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId,
+            shortVideoPublishPlatformLabel(l10n, a.platformId),
             a.views,
             (a.completionRate * 100).toStringAsFixed(0),
           ),
         ),
     ...audits.take(3).map((a) {
-      final p = kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId;
+      final p = shortVideoPublishPlatformLabel(l10n, a.platformId);
       return l10n.shortVideoSpacePublishPanelOverviewAudit(p, a.status, a.deliveryMode);
     }),
     if (publishAutomationModesByPlatform.isNotEmpty)

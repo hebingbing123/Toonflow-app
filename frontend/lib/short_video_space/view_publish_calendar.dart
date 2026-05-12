@@ -12,6 +12,7 @@ class _PublishCalendarPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
+    final l10n = AppLocalizations.of(context)!;
     
     if (!publishPanelUi.visible ||
         publishPanelUi.loading ||
@@ -26,7 +27,7 @@ class _PublishCalendarPanel extends StatelessWidget {
       children: [
         const SizedBox(height: 14),
         Text(
-          '排程月历（按本地日历日计数；点选某日批量写入定时）',
+          l10n.shortVideoSpaceScheduleCalendar,
           style: theme.textTheme.labelSmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 8),

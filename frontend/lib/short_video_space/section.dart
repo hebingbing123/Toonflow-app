@@ -241,19 +241,21 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     final l10n = AppLocalizations.of(context)!;
     final visualLabel = shortVideoVisualStyleLabel(project);
     final directionLabel = shortVideoDirectionLabel(project);
-    final modeTitle = _isAnimated ? '动漫短剧' : '真人短剧';
+    final modeTitle = _isAnimated
+        ? l10n.shortVideoSpaceModeTitleAnimated
+        : l10n.shortVideoSpaceModeTitleLive;
     final modeSummary = _isAnimated
-        ? '当前主链路更贴近动漫短剧，所以会优先强调画风、角色一致性、分镜出图和连续性。'
-        : '真人短剧也应该成为同一个 Space 里的标准模式，后续重点会转向演员感、场景真实度、镜头参考和口播质感。';
+        ? l10n.shortVideoSpaceModeSummaryAnimated
+        : l10n.shortVideoSpaceModeSummaryLive;
     final modeAdvice = _isAnimated
-        ? '建议先准备画风、视觉手册和角色资产，再进入脚本与制作流程。'
-        : '建议先准备真人参考图、角色设定、镜头语气和视觉手册，再进入脚本与制作流程。';
+        ? l10n.shortVideoSpaceModeAdviceAnimated
+        : l10n.shortVideoSpaceModeAdviceLive;
     final projectOptions = _projects
         .map(
           (row) => ShortVideoProjectOption(
             id: row.id,
             label:
-                '#${row.numericId} ${row.name?.trim().isNotEmpty == true ? row.name!.trim() : "未命名项目"}',
+                '#${row.numericId} ${row.name?.trim().isNotEmpty == true ? row.name!.trim() : l10n.shortVideoProjectOptionUnnamed}',
           ),
         )
         .toList(growable: false);
@@ -261,34 +263,36 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         ? const <ShortVideoMetricData>[]
         : <ShortVideoMetricData>[
             ShortVideoMetricData(
-              label: '剧本',
+              label: l10n.shortVideoMetricScript,
               value: _projectStats!.scriptCount.toString(),
             ),
             ShortVideoMetricData(
-              label: '分镜',
+              label: l10n.shortVideoMetricStoryboard,
               value: _projectStats!.storyboardCount.toString(),
             ),
             ShortVideoMetricData(
-              label: '角色',
+              label: l10n.shortVideoMetricRole,
               value: _projectStats!.roleCount.toString(),
             ),
             ShortVideoMetricData(
-              label: '小说',
+              label: l10n.shortVideoMetricNovel,
               value: _projectStats!.novelCount.toString(),
             ),
             ShortVideoMetricData(
-              label: '视频',
+              label: l10n.shortVideoMetricVideo,
               value: _projectStats!.videoCount.toString(),
             ),
           ];
     final po = _productionOverview;
     final overviewMetrics = <ShortVideoMetricData>[
       ShortVideoMetricData(
-        label: '最近任务',
+        label: l10n.shortVideoMetricRecentTasks,
         value: (_recentProjectTasks?.total ?? 0).toString(),
       ),
       ShortVideoMetricData(
-        label: po != null ? '生成任务' : '进行中',
+        label: po != null
+            ? l10n.shortVideoMetricGenerationJobs
+            : l10n.shortVideoMetricInProgress,
         value: po != null
             ? po.runningGenerationJobCount.toString()
             : shortVideoCountTasksByStatus(
@@ -297,30 +301,36 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               ).toString(),
       ),
       ShortVideoMetricData(
-        label: '失败',
+        label: l10n.shortVideoMetricFailed,
         value: shortVideoCountTasksByStatus(
           _recentProjectTasks,
           'failed',
         ).toString(),
       ),
       ShortVideoMetricData(
-        label: '坏例',
+        label: l10n.shortVideoMetricBadCases,
         value: po != null
             ? po.pendingReviewBadCaseCount.toString()
             : (_qualityScopeInsight?.badCaseCount ?? 0).toString(),
       ),
       ShortVideoMetricData(
-        label: '通过率',
+        label: l10n.shortVideoMetricPassRate,
         value:
             '${(_qualityScopeInsight?.passRatePercent ?? 0).toStringAsFixed(0)}%',
       ),
-      ShortVideoMetricData(label: '场景', value: _sceneAssetCount.toString()),
-      ShortVideoMetricData(label: 'clip', value: _clipAssetCount.toString()),
+      ShortVideoMetricData(
+        label: l10n.shortVideoMetricScenes,
+        value: _sceneAssetCount.toString(),
+      ),
+      ShortVideoMetricData(
+        label: l10n.shortVideoMetricClips,
+        value: _clipAssetCount.toString(),
+      ),
     ];
     if (po != null && po.totalStoryboardCount > 0) {
       overviewMetrics.add(
         ShortVideoMetricData(
-          label: '分镜就绪',
+          label: l10n.shortVideoMetricStoryboardReadiness,
           value: '${po.readyStoryboardCount}/${po.totalStoryboardCount}',
         ),
       );
@@ -328,7 +338,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     final badCaseMetrics = _badCaseStats
         .map(
           (item) => ShortVideoMetricData(
-            label: shortVideoFormatBadCaseLabel(item),
+            label: shortVideoFormatBadCaseLabel(l10n, item),
             value: item.count.toString(),
           ),
         )
@@ -337,10 +347,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         .take(3)
         .map(
           (task) =>
-              '${shortVideoFormatTaskKind(task)} · ${shortVideoFormatTaskStatus(task)}',
+              '${shortVideoFormatTaskKind(l10n, task)} · ${shortVideoFormatTaskStatus(l10n, task)}',
         )
         .toList(growable: false);
     final readinessItems = buildShortVideoReadinessItems(
+      l10n,
       isAnimated: _isAnimated,
       project: project,
       stats: _projectStats,
@@ -348,7 +359,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       clipAssetCount: _clipAssetCount,
     );
     final shotReadinessUi = project == null
-        ? const ShotReadinessUi(headline: '选择短剧项目后，会显示服务端分镜阻塞汇总。')
+        ? ShotReadinessUi(headline: l10n.shortVideoShotReadinessSelectProjectHint)
         : buildShotReadinessUi(
             l10n: l10n,
             loadingProjectOverview: _loadingProjectOverview,
@@ -356,6 +367,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             readinessUnavailable: _shotReadinessUnavailable,
           );
     final assetsOverviewPanelUi = buildShortVideoAssetsOverviewPanelUi(
+      l10n: l10n,
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
       overview: _projectAssetsOverview,
@@ -704,6 +716,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         ),
         overviewMetrics: overviewMetrics,
         qualitySummaryLine: shortVideoQualitySummaryLine(
+          l10n,
           isAnimated: _isAnimated,
           insight: _qualityScopeInsight,
         ),
@@ -745,11 +758,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             ? null
             : widget.onOpenProjects,
         readinessIntro: _isAnimated
-            ? '动漫短剧更看重画风、角色和分镜连续性。'
-            : '真人短剧更看重角色设定、场景参考、clip 镜头素材和口播手册。',
+            ? l10n.shortVideoReadinessIntroAnimated
+            : l10n.shortVideoReadinessIntroLive,
         readinessCountLabel:
             '${readinessItems.where((item) => item.ready).length}/${readinessItems.length}',
         readinessGapSummary: shortVideoReadinessGapSummary(
+          l10n,
           isAnimated: _isAnimated,
           readinessItems: readinessItems,
         ),

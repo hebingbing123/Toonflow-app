@@ -78,15 +78,16 @@ class _ProjectSelectorPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
+    final l10n = AppLocalizations.of(context)!;
     
     return _Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('短视频目标配置', style: theme.textTheme.titleSmall),
+          Text(l10n.shortVideoSpaceTargetConfiguration, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           Text(
-            '把创作模式和画幅直接写回项目,后面的脚本与制作流程就能基于同一份项目配置继续工作。',
+            l10n.shortVideoSpaceConfigurationDescription,
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 12),
@@ -95,8 +96,8 @@ class _ProjectSelectorPanel extends StatelessWidget {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: selectedProjectId,
-                  decoration: const InputDecoration(
-                    labelText: '目标项目',
+                  decoration: InputDecoration(
+                    labelText: l10n.shortVideoSpaceTargetProject,
                     border: OutlineInputBorder(),
                   ),
                   items: projectOptions
@@ -114,7 +115,11 @@ class _ProjectSelectorPanel extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: loadingProjects ? null : onRefreshProjects,
                 icon: const Icon(Icons.refresh_outlined),
-                label: Text(loadingProjects ? '读取中' : '刷新项目'),
+                label: Text(
+                  loadingProjects
+                      ? l10n.shortVideoSpaceLoading
+                      : l10n.shortVideoSpaceRefreshProjects,
+                ),
               ),
             ],
           ),
@@ -125,7 +130,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
               child: TextButton.icon(
                 onPressed: () => onResetConfirmationDontShowAgain!.call(context),
                 icon: const Icon(Icons.notifications_active_outlined, size: 18),
-                label: const Text('恢复高风险确认提示'),
+                label: Text(l10n.shortVideoSpaceRestoreRiskyConfirmation),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.primary,
                 ),
@@ -136,10 +141,19 @@ class _ProjectSelectorPanel extends StatelessWidget {
           _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
           const SizedBox(height: 12),
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: '9:16', label: Text('竖屏 9:16')),
-              ButtonSegment(value: '16:9', label: Text('横屏 16:9')),
-              ButtonSegment(value: '1:1', label: Text('方屏 1:1')),
+            segments: [
+              ButtonSegment(
+                value: '9:16',
+                label: Text(l10n.shortVideoSpaceAspectRatioPortrait916),
+              ),
+              ButtonSegment(
+                value: '16:9',
+                label: Text(l10n.shortVideoSpaceAspectRatioLandscape169),
+              ),
+              ButtonSegment(
+                value: '1:1',
+                label: Text(l10n.shortVideoSpaceAspectRatioSquare11),
+              ),
             ],
             selected: {videoRatio},
             onSelectionChanged: (selection) {
@@ -150,19 +164,31 @@ class _ProjectSelectorPanel extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          Text('默认发布市场 / 平台', style: theme.textTheme.titleSmall),
+          Text(
+            l10n.shortVideoSpacePublishMarketPlatformTitle,
+            style: theme.textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             key: ValueKey<String>('tm-$selectedProjectId'),
             initialValue: targetMarket,
-            decoration: const InputDecoration(
-              labelText: '目标市场',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoSpaceTargetMarketLabel,
+              border: const OutlineInputBorder(),
             ),
-            items: const [
-              DropdownMenuItem(value: 'domestic', child: Text('国内')),
-              DropdownMenuItem(value: 'overseas', child: Text('海外')),
-              DropdownMenuItem(value: 'both', child: Text('双端')),
+            items: [
+              DropdownMenuItem(
+                value: 'domestic',
+                child: Text(l10n.shortVideoSpaceTargetMarketDomestic),
+              ),
+              DropdownMenuItem(
+                value: 'overseas',
+                child: Text(l10n.shortVideoSpaceTargetMarketOverseas),
+              ),
+              DropdownMenuItem(
+                value: 'both',
+                child: Text(l10n.shortVideoSpaceTargetMarketBoth),
+              ),
             ],
             onChanged: loadingProjects
                 ? null
@@ -174,22 +200,22 @@ class _ProjectSelectorPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '目标平台（至少选一个；写回项目供分发与校验共用）',
+            l10n.shortVideoSpaceTargetPlatformsHint,
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: kShortVideoPublishPlatformLabels.entries
+            children: kShortVideoPublishPlatformIdsInDisplayOrder
                 .map(
-                  (e) => FilterChip(
-                    label: Text(e.value),
-                    selected: targetPlatforms.contains(e.key),
+                  (id) => FilterChip(
+                    label: Text(shortVideoPublishPlatformLabel(l10n, id)),
+                    selected: targetPlatforms.contains(id),
                     onSelected: loadingProjects
                         ? null
                         : (_) {
-                            onPublishPlatformTapped(e.key);
+                            onPublishPlatformTapped(id);
                           },
                     showCheckmark: false,
                   ),
@@ -197,13 +223,25 @@ class _ProjectSelectorPanel extends StatelessWidget {
                 .toList(growable: false),
           ),
           const SizedBox(height: 12),
-          Text('时长策略', style: theme.textTheme.labelLarge),
+          Text(
+            l10n.shortVideoSpaceDurationStrategyTitle,
+            style: theme.textTheme.labelLarge,
+          ),
           const SizedBox(height: 8),
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'short', label: Text('短')),
-              ButtonSegment(value: 'medium', label: Text('中')),
-              ButtonSegment(value: 'long', label: Text('长')),
+            segments: [
+              ButtonSegment(
+                value: 'short',
+                label: Text(l10n.shortVideoSpaceDurationShort),
+              ),
+              ButtonSegment(
+                value: 'medium',
+                label: Text(l10n.shortVideoSpaceDurationMedium),
+              ),
+              ButtonSegment(
+                value: 'long',
+                label: Text(l10n.shortVideoSpaceDurationLong),
+              ),
             ],
             selected: {durationStrategy},
             onSelectionChanged: (selection) {
@@ -214,15 +252,18 @@ class _ProjectSelectorPanel extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          Text('旁白 / 字幕 / BGM（项目级默认）', style: theme.textTheme.titleSmall),
+          Text(
+            l10n.shortVideoSpaceVoiceSubtitleBgmTitle,
+            style: theme.textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           TextFormField(
             key: ValueKey<String>('vp-$selectedProjectId'),
             initialValue: voiceProfile,
-            decoration: const InputDecoration(
-              labelText: '声线标识 voice_profile',
-              hintText: '如 default_narrator（可留空）',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoSpaceVoiceProfileLabel,
+              hintText: l10n.shortVideoSpaceVoiceProfileHint,
+              border: const OutlineInputBorder(),
             ),
             onChanged: onVoiceProfileChanged,
           ),
@@ -230,9 +271,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
           TextFormField(
             key: ValueKey<String>('ss-$selectedProjectId'),
             initialValue: subtitleStyle,
-            decoration: const InputDecoration(
-              labelText: '字幕样式 subtitle_style',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoSpaceSubtitleStyleLabel,
+              border: const OutlineInputBorder(),
             ),
             onChanged: onSubtitleStyleChanged,
           ),
@@ -240,9 +281,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
           TextFormField(
             key: ValueKey<String>('bgm-$selectedProjectId'),
             initialValue: bgmStrategy,
-            decoration: const InputDecoration(
-              labelText: 'BGM 策略 bgm_strategy',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoSpaceBgmStrategyLabel,
+              border: const OutlineInputBorder(),
             ),
             onChanged: onBgmStrategyChanged,
           ),
@@ -254,17 +295,25 @@ class _ProjectSelectorPanel extends StatelessWidget {
               FilledButton.tonalIcon(
                 onPressed: creatingProject ? null : onCreateProject,
                 icon: const Icon(Icons.add_circle_outline),
-                label: Text(creatingProject ? '新建中' : '直接新建短剧项目'),
+                label: Text(
+                  creatingProject
+                      ? l10n.shortVideoSpaceCreatingProject
+                      : l10n.shortVideoSpaceCreateProjectDirect,
+                ),
               ),
               FilledButton.icon(
                 onPressed: savingProjectConfig ? null : onSaveProjectConfig,
                 icon: const Icon(Icons.save_outlined),
-                label: Text(savingProjectConfig ? '保存中' : '写回项目配置'),
+                label: Text(
+                  savingProjectConfig
+                      ? l10n.shortVideoSpaceSavingProjectConfig
+                      : l10n.shortVideoSpaceSaveProjectConfigWriteback,
+                ),
               ),
               OutlinedButton.icon(
                 onPressed: onOpenProjects,
                 icon: const Icon(Icons.tune_outlined),
-                label: const Text('打开项目区继续细化'),
+                label: Text(l10n.shortVideoSpaceOpenProjectsRefine),
               ),
             ],
           ),
@@ -324,7 +373,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             loadingProjectOverview
-                ? '正在读取当前项目准备度…'
+                ? l10n.shortVideoSpaceLoadingProjectReadiness
                 : projectReadinessSummary,
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
@@ -335,9 +384,15 @@ class _ProjectSelectorPanel extends StatelessWidget {
               runSpacing: 8,
               children: [
                 if (visualLabel != null)
-                  _MetricChip(label: '视觉', value: visualLabel!),
+                  _MetricChip(
+                    label: l10n.shortVideoSpaceMetricChipVisual,
+                    value: visualLabel!,
+                  ),
                 if (directionLabel != null)
-                  _MetricChip(label: '手册', value: directionLabel!),
+                  _MetricChip(
+                    label: l10n.shortVideoSpaceMetricChipManual,
+                    value: directionLabel!,
+                  ),
               ],
             ),
           ],

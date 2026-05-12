@@ -9051,6 +9051,577 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shortVideoMetricStoryboardReadiness => 'Storyboard readiness';
+
+  @override
+  String get shortVideoShotReadinessSelectProjectHint =>
+      'Select a short drama project to see server-side shot blocking rollup.';
+
+  @override
+  String get shortVideoTaskUnnamed => 'Unnamed task';
+
+  @override
+  String get shortVideoBadCaseUncategorized => 'Uncategorized';
+
+  @override
+  String get shortVideoTaskStatusQueued => 'Queued';
+
+  @override
+  String get shortVideoTaskStatusRunning => 'Running';
+
+  @override
+  String get shortVideoTaskStatusSucceeded => 'Succeeded';
+
+  @override
+  String get shortVideoTaskStatusFailed => 'Failed';
+
+  @override
+  String get shortVideoTaskStatusCancelled => 'Cancelled';
+
+  @override
+  String get shortVideoQualityNoSignalAnimated =>
+      'Quality reviews have not surfaced strong signals yet; we will highlight style consistency, character continuity, and pacing risks here.';
+
+  @override
+  String get shortVideoQualityNoSignalLive =>
+      'Quality reviews have not surfaced strong signals yet; we will highlight performance naturalness, realism, and voiceover pacing here.';
+
+  @override
+  String shortVideoQualityInsightAnimated(String passRate, int badCount) {
+    return 'Auto/manual review pass rate is about $passRate%; $badCount bad cases logged—keep focusing on character consistency, visual continuity, and shot rhythm.';
+  }
+
+  @override
+  String shortVideoQualityInsightLive(String passRate, int badCount) {
+    return 'Auto/manual review pass rate is about $passRate%; $badCount bad cases logged—keep focusing on performance naturalness, scene realism, and voiceover shot quality.';
+  }
+
+  @override
+  String get shortVideoReadinessGapAllReadyAnimated =>
+      'Animated short-drama basics are in place—you can move forward with script, production, and QA loops.';
+
+  @override
+  String get shortVideoReadinessGapAllReadyLive =>
+      'Live-action basics are in place—you can continue shot generation, voiceover, and final review.';
+
+  @override
+  String shortVideoReadinessGapAndMore(int count) {
+    return ' and $count more';
+  }
+
+  @override
+  String shortVideoReadinessGapMissing(String labels, String more) {
+    return 'Still missing $labels$more. Complete these preparation items in the project area first.';
+  }
+
+  @override
+  String get shortVideoReadinessLabelScriptBase => 'Script foundation';
+
+  @override
+  String shortVideoReadinessDetailScriptsHas(int count) {
+    return '$count script(s) on file';
+  }
+
+  @override
+  String get shortVideoReadinessDetailScriptsMissing =>
+      'No first-draft script yet';
+
+  @override
+  String get shortVideoReadinessAnimLabelRoleAssets => 'Character assets';
+
+  @override
+  String shortVideoReadinessDetailRolesHas(int count) {
+    return '$count character asset(s)';
+  }
+
+  @override
+  String get shortVideoReadinessDetailRolesMissingAnim =>
+      'Character assets still missing';
+
+  @override
+  String get shortVideoReadinessLiveLabelRoleSetup => 'Character setup';
+
+  @override
+  String get shortVideoReadinessDetailRolesMissingLive =>
+      'Character setup / assets still missing';
+
+  @override
+  String get shortVideoReadinessLabelSceneAssets => 'Scene assets';
+
+  @override
+  String shortVideoReadinessDetailScenesHas(int count) {
+    return '$count scene asset(s)';
+  }
+
+  @override
+  String get shortVideoReadinessDetailScenesMissingAnim =>
+      'Scene assets still missing';
+
+  @override
+  String get shortVideoReadinessDetailScenesMissingLive =>
+      'Live scene references still missing';
+
+  @override
+  String get shortVideoReadinessAnimLabelVisualStyle => 'Visual style signal';
+
+  @override
+  String shortVideoReadinessDetailVisualConfigured(String name) {
+    return 'Configured: $name';
+  }
+
+  @override
+  String get shortVideoReadinessDetailVisualMissingAnim =>
+      'Visual style not locked yet';
+
+  @override
+  String get shortVideoReadinessLiveLabelVisualManual => 'Visual manual';
+
+  @override
+  String get shortVideoReadinessDetailVisualMissingLive =>
+      'Live visual style not locked yet';
+
+  @override
+  String get shortVideoReadinessFallbackStylePack => 'style pack';
+
+  @override
+  String get shortVideoReadinessFallbackDirectorPack =>
+      'director manual or story style pack';
+
+  @override
+  String get shortVideoReadinessFallbackLiveVisualPack =>
+      'visual style or style pack';
+
+  @override
+  String get shortVideoReadinessAnimLabelDirectorManual => 'Director manual';
+
+  @override
+  String get shortVideoReadinessLiveLabelPerformanceManual =>
+      'Performance / voiceover manual';
+
+  @override
+  String shortVideoReadinessDetailDirectorConfigured(String name) {
+    return 'Configured: $name';
+  }
+
+  @override
+  String get shortVideoReadinessDetailDirectorMissingAnim =>
+      'Director manual not locked yet';
+
+  @override
+  String get shortVideoReadinessDetailPerformanceMissingLive =>
+      'Voiceover tone / director manual not locked yet';
+
+  @override
+  String get shortVideoReadinessAnimLabelStoryboardBase =>
+      'Storyboard foundation';
+
+  @override
+  String shortVideoReadinessDetailStoryboardsHas(int count) {
+    return '$count storyboard row(s)';
+  }
+
+  @override
+  String get shortVideoReadinessDetailStoryboardsMissing =>
+      'No storyboard structure yet';
+
+  @override
+  String get shortVideoReadinessLiveLabelClipRefs => 'Shot / clip references';
+
+  @override
+  String shortVideoReadinessDetailClipsHas(int count) {
+    return '$count clip reference(s)';
+  }
+
+  @override
+  String get shortVideoReadinessDetailClipsMissing =>
+      'Live shots / clip references still missing';
+
+  @override
+  String get shortVideoAssetTypeRole => 'Role';
+
+  @override
+  String get shortVideoAssetTypeScene => 'Scene';
+
+  @override
+  String get shortVideoAssetTypeTool => 'Prop';
+
+  @override
+  String get shortVideoAssetTypeClip => 'Shot';
+
+  @override
+  String get shortVideoAssetTypeOther => 'Other';
+
+  @override
+  String get shortVideoAssetsOverviewLoadingHeadline =>
+      'Loading assets overview…';
+
+  @override
+  String get shortVideoAssetsOverviewLoadingDetail =>
+      'Counts by asset type with linked script IDs (app_script_asset).';
+
+  @override
+  String get shortVideoAssetsOverviewUnavailableHeadline =>
+      'Assets overview is temporarily unavailable.';
+
+  @override
+  String get shortVideoAssetsOverviewUnavailableDetail =>
+      'Refresh later, or maintain assets and script links in the project area.';
+
+  @override
+  String get shortVideoAssetsOverviewNoLinkedScripts => 'No linked scripts';
+
+  @override
+  String get shortVideoAssetsOverviewScriptsPrefix => 'Scripts ';
+
+  @override
+  String get shortVideoAssetsOverviewScriptsEllipsis => '…';
+
+  @override
+  String shortVideoAssetsOverviewTypeLine(
+    String type,
+    int count,
+    String scriptPart,
+  ) {
+    return '$type · $count items · $scriptPart';
+  }
+
+  @override
+  String shortVideoAssetsOverviewHeadline(int total) {
+    return '$total assets total, grouped by type (per-row script summary shows experimental script linkage).';
+  }
+
+  @override
+  String get shortVideoAssetsOverviewFooter =>
+      'Read-only aggregate API; candidate state is still maintained via PATCH in the project area.';
+
+  @override
+  String get shortVideoCandidateCompareLoadingHeadline =>
+      'Preparing shot candidates and current versions…';
+
+  @override
+  String get shortVideoCandidateCompareLoadingDetail =>
+      'Aggregates reference frames, current video, readiness, and quality summaries per shot.';
+
+  @override
+  String get shortVideoCandidateCompareUnavailableHeadline =>
+      'No comparable shot candidates yet.';
+
+  @override
+  String get shortVideoCandidateCompareUnavailableDetail =>
+      'Generate shots or add reference frames in production, then return to Space.';
+
+  @override
+  String get shortVideoCandidateQualityNoReviewsLive =>
+      'No QA records yet—watch performance naturalness, realism, and voiceover shot quality.';
+
+  @override
+  String get shortVideoCandidateQualityNoReviewsAnimated =>
+      'No QA records yet—watch character consistency, visual continuity, and shot rhythm.';
+
+  @override
+  String shortVideoCandidateQualitySummary(int total, int passed, int bad) {
+    return '$total reviews · $passed passed · $bad bad cases';
+  }
+
+  @override
+  String shortVideoCandidateCompareHeadline(int count) {
+    return 'Compare current version, references, and QA for $count prioritized shots.';
+  }
+
+  @override
+  String get shortVideoCandidateCompareDetailLive =>
+      'Live mode shows reference shots and performance constraints so you can lock realism first.';
+
+  @override
+  String get shortVideoCandidateCompareDetailAnimated =>
+      'See which shots lack references, video, or too many bad cases before partial rework in production.';
+
+  @override
+  String get shortVideoSpaceModeTitleAnimated => 'Animated short drama';
+
+  @override
+  String get shortVideoSpaceModeTitleLive => 'Live-action short drama';
+
+  @override
+  String get shortVideoSpaceModeSummaryAnimated =>
+      'The main pipeline is closer to animated short drama, so we emphasize style, character consistency, storyboard images, and continuity.';
+
+  @override
+  String get shortVideoSpaceModeSummaryLive =>
+      'Live-action should be a first-class mode in the same Space; focus shifts to performance, scene realism, reference shots, and voiceover quality.';
+
+  @override
+  String get shortVideoSpaceModeAdviceAnimated =>
+      'Prepare visual style, art manuals, and character assets before script and production.';
+
+  @override
+  String get shortVideoSpaceModeAdviceLive =>
+      'Prepare live references, character setup, shot language, and visual manuals before script and production.';
+
+  @override
+  String get shortVideoProjectOptionUnnamed => 'Unnamed project';
+
+  @override
+  String get shortVideoMetricScript => 'Scripts';
+
+  @override
+  String get shortVideoMetricStoryboard => 'Storyboards';
+
+  @override
+  String get shortVideoMetricRole => 'Roles';
+
+  @override
+  String get shortVideoMetricNovel => 'Novels';
+
+  @override
+  String get shortVideoMetricVideo => 'Videos';
+
+  @override
+  String get shortVideoMetricRecentTasks => 'Recent tasks';
+
+  @override
+  String get shortVideoMetricGenerationJobs => 'Generation jobs';
+
+  @override
+  String get shortVideoMetricInProgress => 'In progress';
+
+  @override
+  String get shortVideoMetricFailed => 'Failed';
+
+  @override
+  String get shortVideoMetricBadCases => 'Bad cases';
+
+  @override
+  String get shortVideoMetricPassRate => 'Pass rate';
+
+  @override
+  String get shortVideoMetricScenes => 'Scenes';
+
+  @override
+  String get shortVideoMetricClips => 'Clips';
+
+  @override
+  String get shortVideoReadinessIntroAnimated =>
+      'Animated mode prioritizes style, characters, and storyboard continuity.';
+
+  @override
+  String get shortVideoReadinessIntroLive =>
+      'Live-action mode prioritizes character setup, scene references, clip footage, and voiceover manuals.';
+
+  @override
+  String get shortVideoSpacePageTitle => 'Short video Space';
+
+  @override
+  String get shortVideoSpacePageSubtitle =>
+      'Inspired by MoneyPrinterTurbo-style pipelines, this entry gathers the path from theme to finished cuts, then wires script, assets, narration, subtitles, and QA into one flow.';
+
+  @override
+  String get shortVideoSpaceSectionCreativeMode => 'Creative mode';
+
+  @override
+  String get shortVideoSpaceSectionModeReadiness => 'Mode readiness';
+
+  @override
+  String get shortVideoSpaceReadinessReadyChip => 'Ready';
+
+  @override
+  String get shortVideoSpaceSectionShotReadinessServer =>
+      'Shot generation readiness (server)';
+
+  @override
+  String get shortVideoSpaceShotReadinessLoading =>
+      'Loading shot readiness rollup…';
+
+  @override
+  String get shortVideoSpaceShotReadinessUnavailableHint =>
+      'Shot readiness summary is unavailable; other overview data still applies.';
+
+  @override
+  String get shortVideoSpaceShotReadinessPriorityShots => 'Shots to prioritize';
+
+  @override
+  String get shortVideoSpaceOpenProductionBoardButton =>
+      'Open storyboards in production workspace';
+
+  @override
+  String get shortVideoSpaceSectionSuggestedNext => 'Suggested next step';
+
+  @override
+  String get shortVideoSpaceSectionMigrationOrder =>
+      'Suggested migration order';
+
+  @override
+  String get shortVideoSpaceNavProjects => 'Projects';
+
+  @override
+  String get shortVideoSpaceNavScriptWorkspace => 'Script workspace';
+
+  @override
+  String get shortVideoSpaceNavProductionWorkspace => 'Production workspace';
+
+  @override
+  String get shortVideoSpaceNavTaskCenter => 'Task center';
+
+  @override
+  String get shortVideoSpaceNavQualityReviews => 'Quality reviews';
+
+  @override
+  String shortVideoCandidateCompareStoryboardOnly(int id) {
+    return 'Storyboard #$id';
+  }
+
+  @override
+  String shortVideoCandidateCompareStoryboardWithScript(
+    int storyboardId,
+    int scriptId,
+  ) {
+    return 'Storyboard #$storyboardId · Script #$scriptId';
+  }
+
+  @override
+  String get shortVideoCandidateReferenceImageNotPreviewable =>
+      'Reference image cannot be previewed';
+
+  @override
+  String shortVideoCandidateLiveRefShotCount(int count) {
+    return '$count live reference shots';
+  }
+
+  @override
+  String get shortVideoCandidateCurrentVideo => 'Current video';
+
+  @override
+  String get shortVideoCandidateSetCurrent => 'Set as current';
+
+  @override
+  String get shortVideoCandidatePartialRework => 'Partial rework';
+
+  @override
+  String get shortVideoDeliveryModeLive => 'Live ✓';
+
+  @override
+  String get shortVideoDeliveryModeSandbox => 'Sandbox ⚠️';
+
+  @override
+  String get shortVideoDeliveryModeManualBridge => 'Manual 👤';
+
+  @override
+  String get shortVideoDeliveryModeUnknown => 'Unknown';
+
+  @override
+  String get shortVideoPublishPlatformDouyin => 'Douyin';
+
+  @override
+  String get shortVideoPublishPlatformBilibili => 'Bilibili';
+
+  @override
+  String get shortVideoPublishPlatformXiaohongshu => 'Xiaohongshu';
+
+  @override
+  String get shortVideoPublishPlatformWeixinChannels => 'Weixin Channels';
+
+  @override
+  String get shortVideoPublishPlatformKuaishou => 'Kuaishou';
+
+  @override
+  String get shortVideoPublishPlatformTiktok => 'TikTok';
+
+  @override
+  String get shortVideoPublishPlatformYoutubeShorts => 'YouTube Shorts';
+
+  @override
+  String get shortVideoPublishPlatformInstagramReels => 'Instagram Reels';
+
+  @override
+  String get shortVideoPublishPlatformFacebookReels => 'Facebook Reels';
+
+  @override
+  String get shortVideoSpaceAspectRatioPortrait916 => 'Portrait 9:16';
+
+  @override
+  String get shortVideoSpaceAspectRatioLandscape169 => 'Landscape 16:9';
+
+  @override
+  String get shortVideoSpaceAspectRatioSquare11 => 'Square 1:1';
+
+  @override
+  String get shortVideoSpacePublishMarketPlatformTitle =>
+      'Default publish market / platforms';
+
+  @override
+  String get shortVideoSpaceTargetMarketLabel => 'Target market';
+
+  @override
+  String get shortVideoSpaceTargetMarketDomestic => 'Domestic';
+
+  @override
+  String get shortVideoSpaceTargetMarketOverseas => 'Overseas';
+
+  @override
+  String get shortVideoSpaceTargetMarketBoth => 'Both';
+
+  @override
+  String get shortVideoSpaceTargetPlatformsHint =>
+      'Pick at least one target platform (saved on the project for distribution and validation).';
+
+  @override
+  String get shortVideoSpaceDurationStrategyTitle => 'Duration strategy';
+
+  @override
+  String get shortVideoSpaceDurationShort => 'Short';
+
+  @override
+  String get shortVideoSpaceDurationMedium => 'Medium';
+
+  @override
+  String get shortVideoSpaceDurationLong => 'Long';
+
+  @override
+  String get shortVideoSpaceVoiceSubtitleBgmTitle =>
+      'Voiceover / subtitles / BGM (project defaults)';
+
+  @override
+  String get shortVideoSpaceVoiceProfileLabel =>
+      'Voice profile (voice_profile)';
+
+  @override
+  String get shortVideoSpaceVoiceProfileHint =>
+      'e.g. default_narrator (optional)';
+
+  @override
+  String get shortVideoSpaceSubtitleStyleLabel =>
+      'Subtitle style (subtitle_style)';
+
+  @override
+  String get shortVideoSpaceBgmStrategyLabel => 'BGM strategy (bgm_strategy)';
+
+  @override
+  String get shortVideoSpaceCreatingProject => 'Creating…';
+
+  @override
+  String get shortVideoSpaceCreateProjectDirect => 'Create short drama project';
+
+  @override
+  String get shortVideoSpaceSavingProjectConfig => 'Saving…';
+
+  @override
+  String get shortVideoSpaceSaveProjectConfigWriteback =>
+      'Save back to project';
+
+  @override
+  String get shortVideoSpaceOpenProjectsRefine => 'Open projects to refine';
+
+  @override
+  String get shortVideoSpaceLoadingProjectReadiness =>
+      'Loading project readiness…';
+
+  @override
+  String get shortVideoSpaceMetricChipVisual => 'Visual';
+
+  @override
+  String get shortVideoSpaceMetricChipManual => 'Manual';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData =>
       'Production view has no storyboard rows yet.';
 

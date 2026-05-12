@@ -5,7 +5,8 @@ part of 'section.dart';
 /// Undo/Redo operations for ShortVideoSpaceSection
 ///
 /// **Validates: Requirements 18, 19**
-extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionState {
+extension _ShortVideoSpaceSectionUndoRedoExtension
+    on _ShortVideoSpaceSectionState {
   /// Performs undo operation (Ctrl+Z / Cmd+Z)
   ///
   /// Restores the state to before the last operation and moves the operation
@@ -20,24 +21,18 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
       if (success) {
         // Refresh the assembly data after undo
         await _loadProjectOverview();
-        
+
         // Show feedback
         final operation = _operationHistory.peekRedo();
         final description = operation?.getDescription() ?? '操作';
-        _showOperationFeedback(
-          '已撤销：$description',
-          isSuccess: true,
-        );
-        
+        _showOperationFeedback('已撤销：$description', isSuccess: true);
+
         // Update UI state
         setState(() {});
       }
       return success;
     } catch (e) {
-      _showOperationFeedback(
-        '撤销失败：$e',
-        isSuccess: false,
-      );
+      _showOperationFeedback('撤销失败：$e', isSuccess: false);
       return false;
     }
   }
@@ -56,24 +51,18 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
       if (success) {
         // Refresh the assembly data after redo
         await _loadProjectOverview();
-        
+
         // Show feedback
         final operation = _operationHistory.peekUndo();
         final description = operation?.getDescription() ?? '操作';
-        _showOperationFeedback(
-          '已重做：$description',
-          isSuccess: true,
-        );
-        
+        _showOperationFeedback('已重做：$description', isSuccess: true);
+
         // Update UI state
         setState(() {});
       }
       return success;
     } catch (e) {
-      _showOperationFeedback(
-        '重做失败：$e',
-        isSuccess: false,
-      );
+      _showOperationFeedback('重做失败：$e', isSuccess: false);
       return false;
     }
   }
@@ -87,7 +76,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
       return;
     }
 
-    final isControlPressed = HardwareKeyboard.instance.isControlPressed ||
+    final isControlPressed =
+        HardwareKeyboard.instance.isControlPressed ||
         HardwareKeyboard.instance.isMetaPressed;
     final isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
 
@@ -229,7 +219,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
       undo: () async {
         await postStoryboardUpdateDurationV1(
           token,
-          projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
           duration: previousDuration,
@@ -238,7 +228,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
       redo: () async {
         await postStoryboardUpdateDurationV1(
           token,
-          projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
           duration: newDuration,
@@ -312,14 +302,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
     final operation = Operation(
       type: 'batch_enable',
       timestamp: DateTime.now(),
-      beforeState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
-      afterState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
+      beforeState: {'scriptId': scriptId, 'operations': operations},
+      afterState: {'scriptId': scriptId, 'operations': operations},
       undo: () async {
         // Disable all shots that were enabled
         for (final op in operations) {
@@ -362,14 +346,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
     final operation = Operation(
       type: 'batch_disable',
       timestamp: DateTime.now(),
-      beforeState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
-      afterState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
+      beforeState: {'scriptId': scriptId, 'operations': operations},
+      afterState: {'scriptId': scriptId, 'operations': operations},
       undo: () async {
         // Re-enable all shots that were disabled
         for (final op in operations) {
@@ -412,20 +390,14 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
     final operation = Operation(
       type: 'batch_duration',
       timestamp: DateTime.now(),
-      beforeState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
-      afterState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
+      beforeState: {'scriptId': scriptId, 'operations': operations},
+      afterState: {'scriptId': scriptId, 'operations': operations},
       undo: () async {
         // Restore previous durations
         for (final op in operations) {
           await postStoryboardUpdateDurationV1(
             token,
-            projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
             duration: op['previousDuration'] as int,
@@ -437,7 +409,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
         for (final op in operations) {
           await postStoryboardUpdateDurationV1(
             token,
-            projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
             duration: op['newDuration'] as int,
@@ -463,14 +435,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
     final operation = Operation(
       type: 'batch_replace',
       timestamp: DateTime.now(),
-      beforeState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
-      afterState: {
-        'scriptId': scriptId,
-        'operations': operations,
-      },
+      beforeState: {'scriptId': scriptId, 'operations': operations},
+      afterState: {'scriptId': scriptId, 'operations': operations},
       undo: () async {
         // Restore previous video URLs
         for (final op in operations) {
@@ -512,9 +478,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
       mainAxisSize: MainAxisSize.min,
       children: [
         Tooltip(
-          message: canUndo
-              ? '撤销：$undoDescription (Ctrl+Z / Cmd+Z)'
-              : '无可撤销操作',
+          message: canUndo ? '撤销：$undoDescription (Ctrl+Z / Cmd+Z)' : '无可撤销操作',
           child: IconButton(
             icon: const Icon(Icons.undo),
             onPressed: canUndo ? () => _performUndo() : null,
@@ -573,8 +537,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
                       Text(
                         '历史记录摘要',
                         style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -621,8 +585,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
                           Text(
                             '暂无操作历史',
                             style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(
-                                  color: Theme.of(ctx).colorScheme.outline,
-                                ),
+                              color: Theme.of(ctx).colorScheme.outline,
+                            ),
                           ),
                         ],
                       ),
@@ -636,8 +600,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
                         Text(
                           '操作记录（从新到旧）',
                           style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Flexible(
@@ -646,9 +610,10 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
                             itemCount: historyList.length,
                             itemBuilder: (ctx, idx) {
                               // Show from newest to oldest
-                              final operation = historyList[historyList.length - 1 - idx];
+                              final operation =
+                                  historyList[historyList.length - 1 - idx];
                               final isLatest = idx == 0;
-                              
+
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 elevation: isLatest ? 2 : 0,
@@ -659,13 +624,19 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
                                   leading: CircleAvatar(
                                     backgroundColor: isLatest
                                         ? Theme.of(ctx).colorScheme.primary
-                                        : Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                                        : Theme.of(
+                                            ctx,
+                                          ).colorScheme.surfaceContainerHighest,
                                     child: Text(
                                       '${historyList.length - idx}',
                                       style: TextStyle(
                                         color: isLatest
-                                            ? Theme.of(ctx).colorScheme.onPrimary
-                                            : Theme.of(ctx).colorScheme.onSurfaceVariant,
+                                            ? Theme.of(
+                                                ctx,
+                                              ).colorScheme.onPrimary
+                                            : Theme.of(
+                                                ctx,
+                                              ).colorScheme.onSurfaceVariant,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -673,20 +644,27 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
                                   title: Text(
                                     operation.getDescription(),
                                     style: TextStyle(
-                                      fontWeight: isLatest ? FontWeight.bold : null,
+                                      fontWeight: isLatest
+                                          ? FontWeight.bold
+                                          : null,
                                     ),
                                   ),
                                   subtitle: Text(
-                                    _formatOperationTimestamp(operation.timestamp),
+                                    _formatOperationTimestamp(
+                                      operation.timestamp,
+                                    ),
                                     style: Theme.of(ctx).textTheme.bodySmall,
                                   ),
                                   trailing: isLatest
                                       ? Chip(
                                           label: const Text('最新'),
-                                          backgroundColor:
-                                              Theme.of(ctx).colorScheme.primary,
+                                          backgroundColor: Theme.of(
+                                            ctx,
+                                          ).colorScheme.primary,
                                           labelStyle: TextStyle(
-                                            color: Theme.of(ctx).colorScheme.onPrimary,
+                                            color: Theme.of(
+                                              ctx,
+                                            ).colorScheme.onPrimary,
                                             fontSize: 11,
                                           ),
                                         )
@@ -708,10 +686,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
                 onPressed: () {
                   _operationHistory.clearHistory();
                   Navigator.of(ctx).pop();
-                  _showOperationFeedback(
-                    '已清空操作历史',
-                    isSuccess: true,
-                  );
+                  _showOperationFeedback('已清空操作历史', isSuccess: true);
                   setState(() {});
                 },
                 icon: const Icon(Icons.delete_outline),

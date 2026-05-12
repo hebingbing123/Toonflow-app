@@ -3,7 +3,8 @@
 part of 'section.dart';
 
 /// Production workflow methods for ShortVideoSpaceSection
-extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionState {
+extension _ShortVideoSpaceSectionProductionExtension
+    on _ShortVideoSpaceSectionState {
   Future<void> _runBatchCandidateClips() async {
     final token = widget.accessToken;
     final project = _selectedProject;
@@ -201,18 +202,21 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
       await Future.wait([
         Future(() async {
           try {
-            assemblySlice =
-                await fetchProjectShortVideoAssemblyByProjectId(token, project.id);
+            assemblySlice = await fetchProjectShortVideoAssemblyByProjectId(
+              token,
+              project.id,
+            );
           } catch (_) {
             assemblySlice = null;
           }
         }),
         Future(() async {
           try {
-            exportCheckSlice = await fetchProjectShortVideoExportCheckByProjectId(
-              token,
-              project.id,
-            );
+            exportCheckSlice =
+                await fetchProjectShortVideoExportCheckByProjectId(
+                  token,
+                  project.id,
+                );
           } catch (_) {
             exportCheckSlice = null;
           }
@@ -391,13 +395,16 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
     try {
       await postWorkbenchStoryboardMediaOpV1(
         token,
-        <String, dynamic>{
-          'op': 'selectVideo',
-          'projectId': project.numericId,
-          'scriptId': row.scriptId,
-          'storyboardId': row.id,
-          'videoUrl': videoUrl,
-        },
+        buildStoryboardMediaOpBodyV1(
+          base: <String, dynamic>{
+            'op': 'selectVideo',
+            'scriptId': row.scriptId,
+            'storyboardId': row.id,
+            'videoUrl': videoUrl,
+          },
+          projectUuid: project.id,
+          projectId: project.numericId,
+        ),
       );
       if (!mounted) return;
       setState(() {

@@ -62,14 +62,14 @@ List<String> getAvailableVoiceoverVoices(String provider) {
   }
 }
 
-String getVoiceoverDisplayName(String voiceId) {
-  const openAIVoices = <String, String>{
-    'alloy': 'Alloy (中性)',
-    'echo': 'Echo (男性)',
-    'fable': 'Fable (英式)',
-    'onyx': 'Onyx (深沉)',
-    'nova': 'Nova (女性)',
-    'shimmer': 'Shimmer (柔和)',
+String getVoiceoverDisplayName(String voiceId, AppLocalizations l10n) {
+  final openAIVoices = <String, String>{
+    'alloy': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy,
+    'echo': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceEcho,
+    'fable': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceFable,
+    'onyx': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx,
+    'nova': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceNova,
+    'shimmer': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer,
   };
 
   return openAIVoices[voiceId] ?? voiceId;
@@ -115,9 +115,10 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final availableVoices = getAvailableVoiceoverVoices(_selectedProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      title: const Text('配音参数设置'),
+      title: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsTitle),
       content: SizedBox(
         width: 520,
         child: SingleChildScrollView(
@@ -125,9 +126,9 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'TTS 供应商',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsProviderLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -139,18 +140,18 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                     vertical: 8,
                   ),
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'openai',
-                    child: Text('OpenAI TTS'),
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI),
                   ),
                   DropdownMenuItem(
                     value: 'azure',
-                    child: Text('Azure TTS'),
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsProviderAzure),
                   ),
                   DropdownMenuItem(
                     value: 'google',
-                    child: Text('Google TTS'),
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsProviderGoogle),
                   ),
                 ],
                 onChanged: (value) {
@@ -165,9 +166,9 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
-                '声线',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -184,7 +185,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                     .map(
                       (voice) => DropdownMenuItem(
                         value: voice,
-                        child: Text(getVoiceoverDisplayName(voice)),
+                        child: Text(getVoiceoverDisplayName(voice, l10n)),
                       ),
                     )
                     .toList(),
@@ -198,9 +199,9 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
-                '情绪',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -212,22 +213,22 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                     vertical: 8,
                   ),
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'neutral',
-                    child: Text('中性 (Neutral)'),
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral),
                   ),
                   DropdownMenuItem(
                     value: 'happy',
-                    child: Text('愉悦 (Happy)'),
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionHappy),
                   ),
                   DropdownMenuItem(
                     value: 'sad',
-                    child: Text('悲伤 (Sad)'),
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionSad),
                   ),
                   DropdownMenuItem(
                     value: 'angry',
-                    child: Text('愤怒 (Angry)'),
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionAngry),
                   ),
                 ],
                 onChanged: (value) {
@@ -240,9 +241,9 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
-                '语速',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsSpeedLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Row(
@@ -275,7 +276,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
               ),
               const SizedBox(height: 8),
               Text(
-                '调整范围：0.5x (慢速) - 2.0x (快速)',
+                l10n.shortVideoSpaceDialogVoiceoverSettingsSpeedRange,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
@@ -295,7 +296,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '保存后将应用到新生成的配音。已生成的配音需要重新生成才能应用新参数。',
+                        l10n.shortVideoSpaceDialogVoiceoverSettingsInfoMessage,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(
                                 context,
@@ -313,7 +314,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -326,7 +327,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
               ),
             );
           },
-          child: const Text('保存'),
+          child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsSave),
         ),
       ],
     );

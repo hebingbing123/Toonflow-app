@@ -3,11 +3,15 @@
 part of 'section.dart';
 
 /// Assembly and clip desk operations for ShortVideoSpaceSection
-extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpaceSectionState {
+extension _ShortVideoSpaceSectionProductionAssemblyExtension
+    on _ShortVideoSpaceSectionState {
   Future<void> _startExportFlow() async {
     final token = widget.accessToken?.trim();
     final project = _selectedProject;
-    if (token == null || token.isEmpty || project == null || _exportActionBusy) {
+    if (token == null ||
+        token.isEmpty ||
+        project == null ||
+        _exportActionBusy) {
       return;
     }
 
@@ -43,9 +47,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
         return;
       }
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(completed ? '导出已完成。' : '导出未完成或已取消。'),
-        ),
+        SnackBar(content: Text(completed ? '导出已完成。' : '导出未完成或已取消。')),
       );
       await _loadProjectOverview();
     } on RustApiException catch (e) {
@@ -57,9 +59,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(content: Text('导出启动失败：$e')),
-      );
+      ScaffoldMessenger.maybeOf(
+        context,
+      )?.showSnackBar(SnackBar(content: Text('导出启动失败：$e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -82,7 +84,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
       _projectConfigLine = message;
       _operationFeedbackIsSuccess = isSuccess;
     });
-    
+
     // Auto-clear after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
@@ -207,14 +209,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   storyboardId: item.storyboardNumericId,
                 );
                 pausedStoryboardIds.add(item.storyboardNumericId);
-                
+
                 // Record operation for undo/redo
                 _recordDisableOperation(
                   scriptId: item.scriptNumericId,
                   storyboardId: item.storyboardNumericId,
                   previousVideoUrl: item.selectedMediaUrl,
                 );
-                
+
                 if (mounted) {
                   _showOperationFeedback(
                     '分镜 #${item.storyboardNumericId} 已暂停（清空当前视频）。',
@@ -231,10 +233,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback(
-                  '暂停失败：$e',
-                  isSuccess: false,
-                );
+                _showOperationFeedback('暂停失败：$e', isSuccess: false);
               }
             }
 
@@ -252,8 +251,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               try {
                 // Store previous URL for undo/redo
                 final previousUrl = item.selectedMediaUrl;
-                final isReplace = replacementUrl != null && previousUrl.isNotEmpty;
-                
+                final isReplace =
+                    replacementUrl != null && previousUrl.isNotEmpty;
+
                 await postWorkbenchSelectVideoV1(
                   token,
                   projectUuid: project.id,
@@ -261,7 +261,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   storyboardId: item.storyboardNumericId,
                   videoUrl: seedUrl,
                 );
-                
+
                 // Record operation for undo/redo
                 if (isReplace) {
                   _recordReplaceOperation(
@@ -277,7 +277,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     videoUrl: seedUrl,
                   );
                 }
-                
+
                 pausedStoryboardIds.remove(item.storyboardNumericId);
                 if (replacementUrl != null) {
                   final idx = ordered.indexWhere(
@@ -285,7 +285,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                         entry.storyboardNumericId == item.storyboardNumericId,
                   );
                   if (idx >= 0) {
-                    ordered[idx] = ordered[idx].copyWith(selectedMediaUrl: seedUrl);
+                    ordered[idx] = ordered[idx].copyWith(
+                      selectedMediaUrl: seedUrl,
+                    );
                   }
                 }
                 if (mounted) {
@@ -304,19 +306,16 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback(
-                  '写回失败：$e',
-                  isSuccess: false,
-                );
+                _showOperationFeedback('写回失败：$e', isSuccess: false);
               }
             }
 
             Future<void> persistReorder() async {
               final byScript = <int, List<int>>{};
               for (final item in ordered) {
-                byScript.putIfAbsent(item.scriptNumericId, () => <int>[]).add(
-                  item.storyboardNumericId,
-                );
+                byScript
+                    .putIfAbsent(item.scriptNumericId, () => <int>[])
+                    .add(item.storyboardNumericId);
               }
               setLocalState(() {
                 operationInProgress = true;
@@ -329,7 +328,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   try {
                     flowData = await fetchProductionFlowDataV1(
                       token,
-                      projectId: project.numericId,
+                      projectUuid: project.id,
                       episodesId: scriptNumericId,
                     );
                   } on RustApiException {
@@ -340,12 +339,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                       .toList(growable: false);
                   final code = await postProductionSaveFlowDataV1(
                     token,
-                    projectId: project.numericId,
+                    projectUuid: project.id,
                     episodesId: scriptNumericId,
                     data: flowData,
                   );
                   if (code != 200) {
-                    throw RustApiException('save flow failed', statusCode: code);
+                    throw RustApiException(
+                      'save flow failed',
+                      statusCode: code,
+                    );
                   }
                 }
                 if (mounted) {
@@ -363,10 +365,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback(
-                  '重排持久化失败：$e',
-                  isSuccess: false,
-                );
+                _showOperationFeedback('重排持久化失败：$e', isSuccess: false);
               } finally {
                 setLocalState(() {
                   operationInProgress = false;
@@ -380,13 +379,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
             ) async {
               try {
                 // Store previous duration for undo/redo
-                final previousDuration = int.tryParse(
-                  item.durationText.replaceAll(RegExp(r'[^0-9]'), ''),
-                ) ?? 0;
-                
+                final previousDuration =
+                    int.tryParse(
+                      item.durationText.replaceAll(RegExp(r'[^0-9]'), ''),
+                    ) ??
+                    0;
+
                 final status = await postStoryboardUpdateDurationV1(
                   token,
-                  projectId: project.numericId,
+                  projectUuid: project.id,
                   scriptId: item.scriptNumericId,
                   storyboardId: item.storyboardNumericId,
                   duration: durationSeconds,
@@ -397,7 +398,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     statusCode: status,
                   );
                 }
-                
+
                 // Record operation for undo/redo
                 _recordDurationOperation(
                   scriptId: item.scriptNumericId,
@@ -405,7 +406,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   previousDuration: previousDuration,
                   newDuration: durationSeconds,
                 );
-                
+
                 final idx = ordered.indexWhere(
                   (entry) =>
                       entry.storyboardNumericId == item.storyboardNumericId,
@@ -431,10 +432,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback(
-                  '时长对齐失败：$e',
-                  isSuccess: false,
-                );
+                _showOperationFeedback('时长对齐失败：$e', isSuccess: false);
               }
             }
 
@@ -500,7 +498,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               final lowerText = text.toLowerCase();
               final lowerKeyword = keyword.toLowerCase();
               final matches = <int>[];
-              
+
               // Find all occurrences of the keyword
               var startIndex = 0;
               while (true) {
@@ -521,49 +519,55 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               for (final matchIndex in matches) {
                 // Add text before match
                 if (matchIndex > currentIndex) {
-                  spans.add(TextSpan(
-                    text: text.substring(currentIndex, matchIndex),
-                    style: style,
-                  ));
+                  spans.add(
+                    TextSpan(
+                      text: text.substring(currentIndex, matchIndex),
+                      style: style,
+                    ),
+                  );
                 }
 
                 // Add highlighted match
-                spans.add(TextSpan(
-                  text: text.substring(
-                    matchIndex,
-                    matchIndex + lowerKeyword.length,
+                spans.add(
+                  TextSpan(
+                    text: text.substring(
+                      matchIndex,
+                      matchIndex + lowerKeyword.length,
+                    ),
+                    style: (style ?? const TextStyle()).copyWith(
+                      backgroundColor: Theme.of(
+                        ctx,
+                      ).colorScheme.primaryContainer,
+                      color: Theme.of(ctx).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  style: (style ?? const TextStyle()).copyWith(
-                    backgroundColor: Theme.of(ctx).colorScheme.primaryContainer,
-                    color: Theme.of(ctx).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ));
+                );
 
                 currentIndex = matchIndex + lowerKeyword.length;
               }
 
               // Add remaining text
               if (currentIndex < text.length) {
-                spans.add(TextSpan(
-                  text: text.substring(currentIndex),
-                  style: style,
-                ));
+                spans.add(
+                  TextSpan(text: text.substring(currentIndex), style: style),
+                );
               }
 
-              return RichText(
-                text: TextSpan(children: spans),
-              );
+              return RichText(text: TextSpan(children: spans));
             }
 
             bool matchesStatusFilters(_AssemblyClipDeskOpEntry item) {
               if (filterState.statusFilters.isEmpty) {
                 return true;
               }
-              final paused = pausedStoryboardIds.contains(item.storyboardNumericId);
+              final paused = pausedStoryboardIds.contains(
+                item.storyboardNumericId,
+              );
               final durationSec = parseDurationSeconds(item.durationText);
               final hasSubtitle = item.subtitleText.isNotEmpty;
-              final hasVoiceover = item.voiceoverScriptReady || item.voiceoverAssetReady;
+              final hasVoiceover =
+                  item.voiceoverScriptReady || item.voiceoverAssetReady;
               for (final filter in filterState.statusFilters) {
                 switch (filter) {
                   case ShotStatusFilter.enabled:
@@ -627,13 +631,18 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     if (postProductionReady) return true;
                     break;
                   case QualityFilter.hasDegradation:
-                    if (qualityIssue || pausedStoryboardIds.contains(item.storyboardNumericId)) {
+                    if (qualityIssue ||
+                        pausedStoryboardIds.contains(
+                          item.storyboardNumericId,
+                        )) {
                       return true;
                     }
                     break;
                   case QualityFilter.noDegradation:
                     if (!qualityIssue &&
-                        !pausedStoryboardIds.contains(item.storyboardNumericId)) {
+                        !pausedStoryboardIds.contains(
+                          item.storyboardNumericId,
+                        )) {
                       return true;
                     }
                     break;
@@ -643,11 +652,13 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
             }
 
             List<_AssemblyClipDeskOpEntry> buildVisibleEntries() {
-              return ordered.where((item) {
-                return matchesSearch(item) &&
-                    matchesStatusFilters(item) &&
-                    matchesQualityFilters(item);
-              }).toList(growable: false);
+              return ordered
+                  .where((item) {
+                    return matchesSearch(item) &&
+                        matchesStatusFilters(item) &&
+                        matchesQualityFilters(item);
+                  })
+                  .toList(growable: false);
             }
 
             // 计算当前总时长（实时更新）
@@ -676,7 +687,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
             }
 
             final currentTotalDuration = calculateCurrentTotalDuration();
-            final currentTotalFormatted = formatDurationHHMMSS(currentTotalDuration);
+            final currentTotalFormatted = formatDurationHHMMSS(
+              currentTotalDuration,
+            );
             final visibleEntries = buildVisibleEntries();
 
             return AlertDialog(
@@ -687,9 +700,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '支持基础重排（本次面板视图）、启停和替换当前视频版本。',
-                    ),
+                    const Text('支持基础重排（本次面板视图）、启停和替换当前视频版本。'),
                     const SizedBox(height: 4),
                     Text(
                       '启停 / 替换会直接写回 J 媒体槽位；重排仅用于本次排障视图。',
@@ -700,7 +711,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          ctx,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Row(
@@ -714,8 +727,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           Text(
                             '成片总时长：$currentTotalDuration秒 ($currentTotalFormatted)',
                             style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -768,7 +781,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           await _batchEnableShots(
                             selectedStoryboardIds: selectedStoryboardIds,
                             allEntries: ordered,
-                            projectId: project.numericId,
                             projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
@@ -787,7 +799,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           });
                           await _batchDisableShots(
                             selectedStoryboardIds: selectedStoryboardIds,
-                            projectId: project.numericId,
                             projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
@@ -806,7 +817,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           });
                           await _batchUpdateDuration(
                             selectedStoryboardIds: selectedStoryboardIds,
-                            projectId: project.numericId,
                             projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
@@ -826,7 +836,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           await _batchReplaceVideos(
                             selectedStoryboardIds: selectedStoryboardIds,
                             allEntries: ordered,
-                            projectId: project.numericId,
                             projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
@@ -864,17 +873,22 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                         runSpacing: 8,
                         children: [
                           FilledButton.tonalIcon(
-                            onPressed: operationInProgress ? null : () => unawaited(persistReorder()),
+                            onPressed: operationInProgress
+                                ? null
+                                : () => unawaited(persistReorder()),
                             icon: const Icon(Icons.save_outlined),
                             label: const Text('保存重排顺序'),
                           ),
                           OutlinedButton.icon(
-                            onPressed: operationInProgress ? null : () {
-                              ordered = List<_AssemblyClipDeskOpEntry>.from(
-                                initialOrdered,
-                              );
-                              setLocalState(() {});
-                            },
+                            onPressed: operationInProgress
+                                ? null
+                                : () {
+                                    ordered =
+                                        List<_AssemblyClipDeskOpEntry>.from(
+                                          initialOrdered,
+                                        );
+                                    setLocalState(() {});
+                                  },
                             icon: const Icon(Icons.undo_outlined),
                             label: const Text('撤销到打开时'),
                           ),
@@ -882,13 +896,13 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             onPressed: operationInProgress
                                 ? null
                                 : () => unawaited(
-                                      _openTtsTaskCenterDialog(
-                                        context: ctx,
-                                        token: token,
-                                        projectId: project.id,
-                                        entries: ordered,
-                                      ),
+                                    _openTtsTaskCenterDialog(
+                                      context: ctx,
+                                      token: token,
+                                      projectId: project.id,
+                                      entries: ordered,
                                     ),
+                                  ),
                             icon: const Icon(Icons.record_voice_over_outlined),
                             label: const Text('配音任务'),
                           ),
@@ -951,7 +965,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
           item.storyboardId: item.storyboardNumericId,
     };
     final scriptByShotNumeric = <int, int>{
-      for (final item in entries) item.storyboardNumericId: item.scriptNumericId,
+      for (final item in entries)
+        item.storyboardNumericId: item.scriptNumericId,
     };
     var tasks = const <TtsTaskV1>[];
     var loading = true;
@@ -1015,7 +1030,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                   final shotId = (task.shotId ?? '').trim();
                   if (shotId.isEmpty) continue;
                   final current = latestTaskByShotId[shotId];
-                  if (current == null || current.updatedAt.isBefore(task.updatedAt)) {
+                  if (current == null ||
+                      current.updatedAt.isBefore(task.updatedAt)) {
                     latestTaskByShotId[shotId] = task;
                   }
                 }
@@ -1037,6 +1053,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 final scriptHit = scriptNumeric?.toString().contains(q) == true;
                 return taskIdHit || shotHit || scriptHit;
               }
+
               final filteredTasks = visibleTasks
                   .where(matchesKeyword)
                   .toList(growable: false);
@@ -1061,11 +1078,26 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             value: statusFilter,
                             items: const [
                               DropdownMenuItem(value: '', child: Text('全部状态')),
-                              DropdownMenuItem(value: 'queued', child: Text('queued')),
-                              DropdownMenuItem(value: 'running', child: Text('running')),
-                              DropdownMenuItem(value: 'succeeded', child: Text('succeeded')),
-                              DropdownMenuItem(value: 'failed', child: Text('failed')),
-                              DropdownMenuItem(value: 'cancelled', child: Text('cancelled')),
+                              DropdownMenuItem(
+                                value: 'queued',
+                                child: Text('queued'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'running',
+                                child: Text('running'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'succeeded',
+                                child: Text('succeeded'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'failed',
+                                child: Text('failed'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'cancelled',
+                                child: Text('cancelled'),
+                              ),
                             ],
                             onChanged: requestBusy
                                 ? null
@@ -1079,8 +1111,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           ),
                           const SizedBox(width: 8),
                           OutlinedButton.icon(
-                            onPressed:
-                                (loading || requestBusy) ? null : () => unawaited(loadTasks()),
+                            onPressed: (loading || requestBusy)
+                                ? null
+                                : () => unawaited(loadTasks()),
                             icon: const Icon(Icons.refresh_outlined),
                             label: const Text('刷新'),
                           ),
@@ -1093,20 +1126,24 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                 : (selected) {
                                     setState(() {
                                       groupedByShot = selected;
-                                      _ttsTaskCenterGroupedByShot = groupedByShot;
+                                      _ttsTaskCenterGroupedByShot =
+                                          groupedByShot;
                                     });
                                   },
                           ),
                           const SizedBox(width: 8),
                           OutlinedButton.icon(
-                            onPressed: (loading || requestBusy || retryableFilteredTasks.isEmpty)
+                            onPressed:
+                                (loading ||
+                                    requestBusy ||
+                                    retryableFilteredTasks.isEmpty)
                                 ? null
                                 : () async {
                                     final retrySettings =
                                         await _openVoiceoverSettingsDialog(
-                                      context: ctx,
-                                      initialSettings: _ttsRetrySettings,
-                                    );
+                                          context: ctx,
+                                          initialSettings: _ttsRetrySettings,
+                                        );
                                     if (retrySettings == null) {
                                       return;
                                     }
@@ -1144,7 +1181,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                     });
                                   },
                             icon: const Icon(Icons.replay_outlined),
-                            label: Text('批量重试失败 (${retryableFilteredTasks.length})'),
+                            label: Text(
+                              '批量重试失败 (${retryableFilteredTasks.length})',
+                            ),
                           ),
                         ],
                       ),
@@ -1168,7 +1207,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                       if (errorMessage != null)
                         Text(
                           errorMessage!,
-                          style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+                          style: TextStyle(
+                            color: Theme.of(ctx).colorScheme.error,
+                          ),
                         ),
                       const SizedBox(height: 8),
                       if (!loading && tasks.isNotEmpty)
@@ -1182,177 +1223,193 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           '展示 ${filteredTasks.length}/${visibleTasks.length}',
                           style: Theme.of(ctx).textTheme.bodySmall,
                         ),
-                      if (!loading && tasks.isNotEmpty) const SizedBox(height: 8),
+                      if (!loading && tasks.isNotEmpty)
+                        const SizedBox(height: 8),
                       Expanded(
                         child: loading
                             ? const Center(child: CircularProgressIndicator())
                             : tasks.isEmpty
-                                ? const Center(child: Text('暂无配音任务'))
-                                : ListView.separated(
-                                    itemCount: groupedByShot
-                                        ? filteredTasks.length
-                                        : filteredTasks.length,
-                                    separatorBuilder: (context, _) =>
-                                        const Divider(height: 1),
-                                    itemBuilder: (_, index) {
-                                      final task = filteredTasks[index];
-                                      final shotNumeric = task.shotId == null
-                                          ? null
-                                          : shotNumericById[task.shotId!];
-                                      final scriptNumeric = shotNumeric == null
-                                          ? null
-                                          : scriptByShotNumeric[shotNumeric];
-                                      final canCancel = task.status == 'queued' ||
-                                          task.status == 'running';
-                                      final hasAudio = (task.audioUrl ?? '')
-                                          .trim()
-                                          .isNotEmpty;
-                                      final canRetry = task.status == 'failed' &&
-                                          task.taskId.trim().isNotEmpty;
-                                      return ListTile(
-                                        dense: true,
-                                        title: Text(
-                                          '${groupedByShot ? "最近任务" : "任务"} ${task.taskId.substring(0, 8)} · 状态 ${task.status}',
-                                        ),
-                                        subtitle: Text(
-                                          '剧本 #${scriptNumeric ?? "-"} · 分镜 #${shotNumeric ?? "-"}'
-                                          '${task.audioUrl != null && task.audioUrl!.isNotEmpty ? ' · 音频就绪' : ''}'
-                                          '${task.error != null && task.error!.isNotEmpty ? ' · 错误: ${task.error}' : ''}',
-                                        ),
-                                        trailing: Wrap(
-                                          spacing: 4,
-                                          children: [
-                                            if (hasAudio)
-                                              IconButton(
-                                                tooltip: '预览音频',
-                                                onPressed: () {
-                                                  _showAudioPreviewDialog(
-                                                    context: ctx,
-                                                    audioUrl: task.audioUrl!.trim(),
-                                                  );
-                                                },
-                                                icon: const Icon(
-                                                  Icons.play_circle_outline,
+                            ? const Center(child: Text('暂无配音任务'))
+                            : ListView.separated(
+                                itemCount: groupedByShot
+                                    ? filteredTasks.length
+                                    : filteredTasks.length,
+                                separatorBuilder: (context, _) =>
+                                    const Divider(height: 1),
+                                itemBuilder: (_, index) {
+                                  final task = filteredTasks[index];
+                                  final shotNumeric = task.shotId == null
+                                      ? null
+                                      : shotNumericById[task.shotId!];
+                                  final scriptNumeric = shotNumeric == null
+                                      ? null
+                                      : scriptByShotNumeric[shotNumeric];
+                                  final canCancel =
+                                      task.status == 'queued' ||
+                                      task.status == 'running';
+                                  final hasAudio = (task.audioUrl ?? '')
+                                      .trim()
+                                      .isNotEmpty;
+                                  final canRetry =
+                                      task.status == 'failed' &&
+                                      task.taskId.trim().isNotEmpty;
+                                  return ListTile(
+                                    dense: true,
+                                    title: Text(
+                                      '${groupedByShot ? "最近任务" : "任务"} ${task.taskId.substring(0, 8)} · 状态 ${task.status}',
+                                    ),
+                                    subtitle: Text(
+                                      '剧本 #${scriptNumeric ?? "-"} · 分镜 #${shotNumeric ?? "-"}'
+                                      '${task.audioUrl != null && task.audioUrl!.isNotEmpty ? ' · 音频就绪' : ''}'
+                                      '${task.error != null && task.error!.isNotEmpty ? ' · 错误: ${task.error}' : ''}',
+                                    ),
+                                    trailing: Wrap(
+                                      spacing: 4,
+                                      children: [
+                                        if (hasAudio)
+                                          IconButton(
+                                            tooltip: '预览音频',
+                                            onPressed: () {
+                                              _showAudioPreviewDialog(
+                                                context: ctx,
+                                                audioUrl: task.audioUrl!.trim(),
+                                              );
+                                            },
+                                            icon: const Icon(
+                                              Icons.play_circle_outline,
+                                            ),
+                                          ),
+                                        if (hasAudio)
+                                          IconButton(
+                                            tooltip: '复制音频链接',
+                                            onPressed: () async {
+                                              await Clipboard.setData(
+                                                ClipboardData(
+                                                  text: task.audioUrl!.trim(),
                                                 ),
-                                              ),
-                                            if (hasAudio)
-                                              IconButton(
-                                                tooltip: '复制音频链接',
-                                                onPressed: () async {
-                                                  await Clipboard.setData(
-                                                    ClipboardData(
-                                                      text: task.audioUrl!.trim(),
-                                                    ),
-                                                  );
-                                                  if (!mounted) return;
-                                                  _showOperationFeedback(
-                                                    '已复制音频链接',
-                                                    isSuccess: true,
-                                                  );
-                                                },
-                                                icon: const Icon(Icons.link),
-                                              ),
-                                            if (canCancel)
-                                              TextButton(
-                                                onPressed: requestBusy
-                                                    ? null
-                                                    : () async {
-                                                        setState(() {
-                                                          requestBusy = true;
-                                                        });
-                                                        try {
-                                                          await postTtsCancelV1(
-                                                            token,
-                                                            task.taskId,
-                                                          );
-                                                          if (!mounted) return;
-                                                          _showOperationFeedback(
-                                                            '已取消配音任务 ${task.taskId.substring(0, 8)}',
-                                                            isSuccess: true,
-                                                          );
-                                                          await loadTasks();
-                                                        } on RustApiException catch (e) {
-                                                          if (!mounted) return;
-                                                          _showOperationFeedback(
-                                                            '取消失败：${e.statusCode ?? '-'}',
-                                                            isSuccess: false,
-                                                          );
-                                                        } catch (e) {
-                                                          if (!mounted) return;
-                                                          _showOperationFeedback(
-                                                            '取消失败：$e',
-                                                            isSuccess: false,
-                                                          );
-                                                        } finally {
-                                                          setState(() {
-                                                            requestBusy = false;
-                                                          });
-                                                        }
-                                                      },
-                                                child: const Text('取消'),
-                                              ),
-                                            if (canRetry)
-                                              TextButton(
-                                                onPressed: requestBusy
-                                                    ? null
-                                                    : () async {
-                                                        final retrySettings =
-                                                            await _openVoiceoverSettingsDialog(
+                                              );
+                                              if (!mounted) return;
+                                              _showOperationFeedback(
+                                                '已复制音频链接',
+                                                isSuccess: true,
+                                              );
+                                            },
+                                            icon: const Icon(Icons.link),
+                                          ),
+                                        if (canCancel)
+                                          TextButton(
+                                            onPressed: requestBusy
+                                                ? null
+                                                : () async {
+                                                    setState(() {
+                                                      requestBusy = true;
+                                                    });
+                                                    try {
+                                                      await postTtsCancelV1(
+                                                        token,
+                                                        task.taskId,
+                                                      );
+                                                      if (!mounted) return;
+                                                      _showOperationFeedback(
+                                                        '已取消配音任务 ${task.taskId.substring(0, 8)}',
+                                                        isSuccess: true,
+                                                      );
+                                                      await loadTasks();
+                                                    } on RustApiException catch (
+                                                      e
+                                                    ) {
+                                                      if (!mounted) return;
+                                                      _showOperationFeedback(
+                                                        '取消失败：${e.statusCode ?? '-'}',
+                                                        isSuccess: false,
+                                                      );
+                                                    } catch (e) {
+                                                      if (!mounted) return;
+                                                      _showOperationFeedback(
+                                                        '取消失败：$e',
+                                                        isSuccess: false,
+                                                      );
+                                                    } finally {
+                                                      setState(() {
+                                                        requestBusy = false;
+                                                      });
+                                                    }
+                                                  },
+                                            child: const Text('取消'),
+                                          ),
+                                        if (canRetry)
+                                          TextButton(
+                                            onPressed: requestBusy
+                                                ? null
+                                                : () async {
+                                                    final retrySettings =
+                                                        await _openVoiceoverSettingsDialog(
                                                           context: ctx,
                                                           initialSettings:
                                                               _ttsRetrySettings,
                                                         );
-                                                        if (retrySettings == null) {
-                                                          return;
-                                                        }
-                                                        _ttsRetrySettings =
-                                                            retrySettings;
-                                                        setState(() {
-                                                          requestBusy = true;
-                                                        });
-                                                        try {
-                                                          final response =
-                                                              await postTtsRetryV1(
+                                                    if (retrySettings == null) {
+                                                      return;
+                                                    }
+                                                    _ttsRetrySettings =
+                                                        retrySettings;
+                                                    setState(() {
+                                                      requestBusy = true;
+                                                    });
+                                                    try {
+                                                      final response =
+                                                          await postTtsRetryV1(
                                                             token,
                                                             TtsRetryRequestV1(
-                                                              taskId: task.taskId,
-                                                              provider: retrySettings.provider,
-                                                              voiceId: retrySettings.voiceId,
-                                                              emotion: retrySettings.emotion,
-                                                              speed: retrySettings.speed,
+                                                              taskId:
+                                                                  task.taskId,
+                                                              provider:
+                                                                  retrySettings
+                                                                      .provider,
+                                                              voiceId:
+                                                                  retrySettings
+                                                                      .voiceId,
+                                                              emotion:
+                                                                  retrySettings
+                                                                      .emotion,
+                                                              speed:
+                                                                  retrySettings
+                                                                      .speed,
                                                             ),
                                                           );
-                                                          if (!mounted) return;
-                                                          _showOperationFeedback(
-                                                            '已重试，任务 ${response.taskId.substring(0, 8)} 已入队',
-                                                            isSuccess: true,
-                                                          );
-                                                          await loadTasks();
-                                                        } on RustApiException catch (e) {
-                                                          if (!mounted) return;
-                                                          _showOperationFeedback(
-                                                            '重试失败：${e.statusCode ?? '-'}',
-                                                            isSuccess: false,
-                                                          );
-                                                        } catch (e) {
-                                                          if (!mounted) return;
-                                                          _showOperationFeedback(
-                                                            '重试失败：$e',
-                                                            isSuccess: false,
-                                                          );
-                                                        } finally {
-                                                          setState(() {
-                                                            requestBusy = false;
-                                                          });
-                                                        }
-                                                      },
-                                                child: const Text('重试'),
-                                              ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                                      if (!mounted) return;
+                                                      _showOperationFeedback(
+                                                        '已重试，任务 ${response.taskId.substring(0, 8)} 已入队',
+                                                        isSuccess: true,
+                                                      );
+                                                      await loadTasks();
+                                                    } on RustApiException catch (
+                                                      e
+                                                    ) {
+                                                      if (!mounted) return;
+                                                      _showOperationFeedback(
+                                                        '重试失败：${e.statusCode ?? '-'}',
+                                                        isSuccess: false,
+                                                      );
+                                                    } catch (e) {
+                                                      if (!mounted) return;
+                                                      _showOperationFeedback(
+                                                        '重试失败：$e',
+                                                        isSuccess: false,
+                                                      );
+                                                    } finally {
+                                                      setState(() {
+                                                        requestBusy = false;
+                                                      });
+                                                    }
+                                                  },
+                                            child: const Text('重试'),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
                     ],
                   ),
@@ -1374,9 +1431,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
   }
 
   /// Build virtual scroll list with FlutterListView for efficient rendering
-  /// 
+  ///
   /// **Validates: Requirements 29**
-  /// 
+  ///
   /// Automatically enables virtual scrolling when item count > 100
   Widget _buildVirtualScrollList({
     required List<_AssemblyClipDeskOpEntry> visibleEntries,
@@ -1388,11 +1445,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
     required BuildContext ctx,
     required void Function(void Function()) setLocalState,
     required Future<void> Function(_AssemblyClipDeskOpEntry) runDisable,
-    required Future<void> Function(_AssemblyClipDeskOpEntry, {String? replacementUrl}) runEnableOrReplace,
-    required Future<void> Function(_AssemblyClipDeskOpEntry, int) runAlignDuration,
+    required Future<void> Function(
+      _AssemblyClipDeskOpEntry, {
+      String? replacementUrl,
+    })
+    runEnableOrReplace,
+    required Future<void> Function(_AssemblyClipDeskOpEntry, int)
+    runAlignDuration,
     required int? Function(String) parseDurationSeconds,
     required String Function(_AssemblyClipDeskOpEntry) subtitleMismatchLine,
-    required Widget Function(String, String, {TextStyle? style}) buildHighlightedText,
+    required Widget Function(String, String, {TextStyle? style})
+    buildHighlightedText,
   }) {
     // Use virtual scrolling when item count > 100 for performance
     final useVirtualScrolling = visibleEntries.length > 100;
@@ -1423,7 +1486,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
           childCount: visibleEntries.length,
           // Configure cache extent for better performance
           // This determines how many pixels of content to cache outside the viewport
-          onItemKey: (idx) => visibleEntries[idx].storyboardNumericId.toString(),
+          onItemKey: (idx) =>
+              visibleEntries[idx].storyboardNumericId.toString(),
         ),
       );
     } else {
@@ -1465,11 +1529,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
     required BuildContext ctx,
     required void Function(void Function()) setLocalState,
     required Future<void> Function(_AssemblyClipDeskOpEntry) runDisable,
-    required Future<void> Function(_AssemblyClipDeskOpEntry, {String? replacementUrl}) runEnableOrReplace,
-    required Future<void> Function(_AssemblyClipDeskOpEntry, int) runAlignDuration,
+    required Future<void> Function(
+      _AssemblyClipDeskOpEntry, {
+      String? replacementUrl,
+    })
+    runEnableOrReplace,
+    required Future<void> Function(_AssemblyClipDeskOpEntry, int)
+    runAlignDuration,
     required int? Function(String) parseDurationSeconds,
     required String Function(_AssemblyClipDeskOpEntry) subtitleMismatchLine,
-    required Widget Function(String, String, {TextStyle? style}) buildHighlightedText,
+    required Widget Function(String, String, {TextStyle? style})
+    buildHighlightedText,
   }) {
     final actualIndex = ordered.indexOf(item);
     final paused = pausedStoryboardIds.contains(item.storyboardNumericId);
@@ -1493,7 +1563,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                         if (checked == true) {
                           selectedStoryboardIds.add(item.storyboardNumericId);
                         } else {
-                          selectedStoryboardIds.remove(item.storyboardNumericId);
+                          selectedStoryboardIds.remove(
+                            item.storyboardNumericId,
+                          );
                         }
                       });
                     },
@@ -1507,11 +1579,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${actualIndex + 1}',
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    paused
-                        ? '状态：暂停'
-                        : '状态：启用（${item.selectedMediaKind}）',
-                  ),
+                  Text(paused ? '状态：暂停' : '状态：启用（${item.selectedMediaKind}）'),
                   const SizedBox(height: 2),
                   Row(
                     children: [
@@ -1581,17 +1649,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                 ? filterState.searchKeyword
                                 : '',
                             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(ctx).colorScheme.error,
-                                ),
+                              color: Theme.of(ctx).colorScheme.error,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ],
                   const SizedBox(height: 2),
-                  Text(
-                    '错位检查：${subtitleMismatchLine(item)}',
-                  ),
+                  Text('错位检查：${subtitleMismatchLine(item)}'),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -1636,8 +1702,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             ? null
                             : () async {
                                 final ctrl = TextEditingController(
-                                  text: parseDurationSeconds(item.durationText)
-                                          ?.toString() ??
+                                  text:
+                                      parseDurationSeconds(
+                                        item.durationText,
+                                      )?.toString() ??
                                       '',
                                 );
                                 final picked = await showDialog<int>(
@@ -1660,8 +1728,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                                       ),
                                       FilledButton(
                                         onPressed: () {
-                                          final sec =
-                                              int.tryParse(ctrl.text.trim());
+                                          final sec = int.tryParse(
+                                            ctrl.text.trim(),
+                                          );
                                           Navigator.of(dCtx).pop(sec);
                                         },
                                         child: const Text('对齐并写回'),
@@ -1683,10 +1752,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                         onPressed: operationInProgress
                             ? null
                             : () async {
-                                final nextUrl = await _promptReplacementVideoUrl(
-                                  ctx,
-                                  initialValue: item.selectedMediaUrl,
-                                );
+                                final nextUrl =
+                                    await _promptReplacementVideoUrl(
+                                      ctx,
+                                      initialValue: item.selectedMediaUrl,
+                                    );
                                 if ((nextUrl ?? '').trim().isEmpty) {
                                   return;
                                 }
@@ -1798,7 +1868,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                       token,
                       project.id,
                       <String, dynamic>{
-                        'subtitleStyle': nextSubtitle.isEmpty ? null : nextSubtitle,
+                        'subtitleStyle': nextSubtitle.isEmpty
+                            ? null
+                            : nextSubtitle,
                         'bgmStrategy': nextBgm.isEmpty ? null : nextBgm,
                       },
                     );
@@ -1824,10 +1896,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                     );
                   } catch (e) {
                     if (!mounted) return;
-                    _showOperationFeedback(
-                      '成片样式写回失败：$e',
-                      isSuccess: false,
-                    );
+                    _showOperationFeedback('成片样式写回失败：$e', isSuccess: false);
                   }
                 },
                 child: const Text('保存并刷新'),

@@ -8636,6 +8636,544 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shortVideoMetricStoryboardReadiness => '分镜就绪';
+
+  @override
+  String get shortVideoShotReadinessSelectProjectHint =>
+      '选择短剧项目后，会显示服务端分镜阻塞汇总。';
+
+  @override
+  String get shortVideoTaskUnnamed => '未命名任务';
+
+  @override
+  String get shortVideoBadCaseUncategorized => '未分类';
+
+  @override
+  String get shortVideoTaskStatusQueued => '排队中';
+
+  @override
+  String get shortVideoTaskStatusRunning => '进行中';
+
+  @override
+  String get shortVideoTaskStatusSucceeded => '已完成';
+
+  @override
+  String get shortVideoTaskStatusFailed => '失败';
+
+  @override
+  String get shortVideoTaskStatusCancelled => '已取消';
+
+  @override
+  String get shortVideoQualityNoSignalAnimated =>
+      '质量评审还没有收敛出明显信号，后续会在这里提醒画风一致性、角色连续性和镜头节奏风险。';
+
+  @override
+  String get shortVideoQualityNoSignalLive =>
+      '质量评审还没有收敛出明显信号，后续会在这里提醒表演自然度、真实感和口播节奏风险。';
+
+  @override
+  String shortVideoQualityInsightAnimated(String passRate, int badCount) {
+    return '当前项目自动/人工评审通过率约 $passRate%，已记录 $badCount 条坏例；继续重点盯角色一致性、画面连续性和镜头节奏。';
+  }
+
+  @override
+  String shortVideoQualityInsightLive(String passRate, int badCount) {
+    return '当前项目自动/人工评审通过率约 $passRate%，已记录 $badCount 条坏例；继续重点盯表演自然度、场景真实感和口播镜头质感。';
+  }
+
+  @override
+  String get shortVideoReadinessGapAllReadyAnimated =>
+      '动漫短剧的基础准备项已经齐了，可以直接推进脚本、制作和质检闭环。';
+
+  @override
+  String get shortVideoReadinessGapAllReadyLive =>
+      '真人短剧的基础准备项已经齐了，可以继续推进镜头生成、口播和成片复核。';
+
+  @override
+  String shortVideoReadinessGapAndMore(int count) {
+    return ' 等 $count 项';
+  }
+
+  @override
+  String shortVideoReadinessGapMissing(String labels, String more) {
+    return '当前还缺 $labels$more，建议先回项目区把这些准备项补齐。';
+  }
+
+  @override
+  String get shortVideoReadinessLabelScriptBase => '剧本基础';
+
+  @override
+  String shortVideoReadinessDetailScriptsHas(int count) {
+    return '已有 $count 份剧本';
+  }
+
+  @override
+  String get shortVideoReadinessDetailScriptsMissing => '还没有第一版剧本';
+
+  @override
+  String get shortVideoReadinessAnimLabelRoleAssets => '角色资产';
+
+  @override
+  String shortVideoReadinessDetailRolesHas(int count) {
+    return '已有 $count 个角色资产';
+  }
+
+  @override
+  String get shortVideoReadinessDetailRolesMissingAnim => '还缺角色资产';
+
+  @override
+  String get shortVideoReadinessLiveLabelRoleSetup => '角色设定';
+
+  @override
+  String get shortVideoReadinessDetailRolesMissingLive => '还缺角色设定 / 角色资产';
+
+  @override
+  String get shortVideoReadinessLabelSceneAssets => '场景资产';
+
+  @override
+  String shortVideoReadinessDetailScenesHas(int count) {
+    return '已有 $count 个场景资产';
+  }
+
+  @override
+  String get shortVideoReadinessDetailScenesMissingAnim => '还缺场景资产';
+
+  @override
+  String get shortVideoReadinessDetailScenesMissingLive => '还缺真人场景参考';
+
+  @override
+  String get shortVideoReadinessAnimLabelVisualStyle => '画风信号';
+
+  @override
+  String shortVideoReadinessDetailVisualConfigured(String name) {
+    return '已配置 $name';
+  }
+
+  @override
+  String get shortVideoReadinessDetailVisualMissingAnim => '还没收口画风 / 视觉风格';
+
+  @override
+  String get shortVideoReadinessLiveLabelVisualManual => '视觉手册';
+
+  @override
+  String get shortVideoReadinessDetailVisualMissingLive => '还没收口真人视觉风格';
+
+  @override
+  String get shortVideoReadinessFallbackStylePack => '画风或风格包';
+
+  @override
+  String get shortVideoReadinessFallbackDirectorPack => '导演手册或故事风格包';
+
+  @override
+  String get shortVideoReadinessFallbackLiveVisualPack => '视觉风格或风格包';
+
+  @override
+  String get shortVideoReadinessAnimLabelDirectorManual => '导演手册';
+
+  @override
+  String get shortVideoReadinessLiveLabelPerformanceManual => '表演 / 口播手册';
+
+  @override
+  String shortVideoReadinessDetailDirectorConfigured(String name) {
+    return '已配置 $name';
+  }
+
+  @override
+  String get shortVideoReadinessDetailDirectorMissingAnim => '还没收口导演手册';
+
+  @override
+  String get shortVideoReadinessDetailPerformanceMissingLive =>
+      '还没收口口播语气 / 导演手册';
+
+  @override
+  String get shortVideoReadinessAnimLabelStoryboardBase => '分镜基础';
+
+  @override
+  String shortVideoReadinessDetailStoryboardsHas(int count) {
+    return '已有 $count 条分镜';
+  }
+
+  @override
+  String get shortVideoReadinessDetailStoryboardsMissing => '还没有分镜结构';
+
+  @override
+  String get shortVideoReadinessLiveLabelClipRefs => '镜头素材';
+
+  @override
+  String shortVideoReadinessDetailClipsHas(int count) {
+    return '已有 $count 份 clip 参考';
+  }
+
+  @override
+  String get shortVideoReadinessDetailClipsMissing => '还缺真人镜头 / clip 参考';
+
+  @override
+  String get shortVideoAssetTypeRole => '角色';
+
+  @override
+  String get shortVideoAssetTypeScene => '场景';
+
+  @override
+  String get shortVideoAssetTypeTool => '道具';
+
+  @override
+  String get shortVideoAssetTypeClip => '镜头';
+
+  @override
+  String get shortVideoAssetTypeOther => '其他';
+
+  @override
+  String get shortVideoAssetsOverviewLoadingHeadline => '正在读取资产总览…';
+
+  @override
+  String get shortVideoAssetsOverviewLoadingDetail =>
+      '按资产类型汇总数量，并聚合关联剧本号（app_script_asset）。';
+
+  @override
+  String get shortVideoAssetsOverviewUnavailableHeadline => '资产总览暂不可用。';
+
+  @override
+  String get shortVideoAssetsOverviewUnavailableDetail =>
+      '可稍后刷新，或在项目区维护资产与剧本挂载关系。';
+
+  @override
+  String get shortVideoAssetsOverviewNoLinkedScripts => '暂无关联剧本';
+
+  @override
+  String get shortVideoAssetsOverviewScriptsPrefix => '剧本 ';
+
+  @override
+  String get shortVideoAssetsOverviewScriptsEllipsis => '…';
+
+  @override
+  String shortVideoAssetsOverviewTypeLine(
+    String type,
+    int count,
+    String scriptPart,
+  ) {
+    return '$type · $count 条 · $scriptPart';
+  }
+
+  @override
+  String shortVideoAssetsOverviewHeadline(int total) {
+    return '共 $total 条资产，按类型分组（实验剧本挂载关系见每行「剧本」摘要）。';
+  }
+
+  @override
+  String get shortVideoAssetsOverviewFooter =>
+      '数据来自只读聚合接口；候选状态维护仍在项目区 PATCH 资产。';
+
+  @override
+  String get shortVideoCandidateCompareLoadingHeadline => '正在整理分镜候选与当前版本…';
+
+  @override
+  String get shortVideoCandidateCompareLoadingDetail =>
+      '会按分镜聚合参考图、当前视频、readiness 与质量评审摘要。';
+
+  @override
+  String get shortVideoCandidateCompareUnavailableHeadline => '当前还没有可对比的分镜候选。';
+
+  @override
+  String get shortVideoCandidateCompareUnavailableDetail =>
+      '先在制作工作区生成镜头或补参考图，再回到 Space 查看对比。';
+
+  @override
+  String get shortVideoCandidateQualityNoReviewsLive =>
+      '暂无质检记录，先盯表演自然度、真实感和口播镜头质感。';
+
+  @override
+  String get shortVideoCandidateQualityNoReviewsAnimated =>
+      '暂无质检记录，先盯角色一致性、画面连续性和镜头节奏。';
+
+  @override
+  String shortVideoCandidateQualitySummary(int total, int passed, int bad) {
+    return '评审 $total 条 · 通过 $passed 条 · 坏例 $bad 条';
+  }
+
+  @override
+  String shortVideoCandidateCompareHeadline(int count) {
+    return '优先对比 $count 条分镜的当前版本、参考图与质检状态。';
+  }
+
+  @override
+  String get shortVideoCandidateCompareDetailLive =>
+      '真人模式会额外展示参考镜头与表演/口播约束命中情况，方便先锁住真实感与演员感。';
+
+  @override
+  String get shortVideoCandidateCompareDetailAnimated =>
+      '先看哪几条分镜缺参考、缺当前视频或命中过多坏例，再决定去制作台局部返工。';
+
+  @override
+  String get shortVideoSpaceModeTitleAnimated => '动漫短剧';
+
+  @override
+  String get shortVideoSpaceModeTitleLive => '真人短剧';
+
+  @override
+  String get shortVideoSpaceModeSummaryAnimated =>
+      '当前主链路更贴近动漫短剧，所以会优先强调画风、角色一致性、分镜出图和连续性。';
+
+  @override
+  String get shortVideoSpaceModeSummaryLive =>
+      '真人短剧也应该成为同一个 Space 里的标准模式，后续重点会转向演员感、场景真实度、镜头参考和口播质感。';
+
+  @override
+  String get shortVideoSpaceModeAdviceAnimated =>
+      '建议先准备画风、视觉手册和角色资产，再进入脚本与制作流程。';
+
+  @override
+  String get shortVideoSpaceModeAdviceLive =>
+      '建议先准备真人参考图、角色设定、镜头语气和视觉手册，再进入脚本与制作流程。';
+
+  @override
+  String get shortVideoProjectOptionUnnamed => '未命名项目';
+
+  @override
+  String get shortVideoMetricScript => '剧本';
+
+  @override
+  String get shortVideoMetricStoryboard => '分镜';
+
+  @override
+  String get shortVideoMetricRole => '角色';
+
+  @override
+  String get shortVideoMetricNovel => '小说';
+
+  @override
+  String get shortVideoMetricVideo => '视频';
+
+  @override
+  String get shortVideoMetricRecentTasks => '最近任务';
+
+  @override
+  String get shortVideoMetricGenerationJobs => '生成任务';
+
+  @override
+  String get shortVideoMetricInProgress => '进行中';
+
+  @override
+  String get shortVideoMetricFailed => '失败';
+
+  @override
+  String get shortVideoMetricBadCases => '坏例';
+
+  @override
+  String get shortVideoMetricPassRate => '通过率';
+
+  @override
+  String get shortVideoMetricScenes => '场景';
+
+  @override
+  String get shortVideoMetricClips => 'clip';
+
+  @override
+  String get shortVideoReadinessIntroAnimated => '动漫短剧更看重画风、角色和分镜连续性。';
+
+  @override
+  String get shortVideoReadinessIntroLive => '真人短剧更看重角色设定、场景参考、clip 镜头素材和口播手册。';
+
+  @override
+  String get shortVideoSpacePageTitle => '短视频 Space';
+
+  @override
+  String get shortVideoSpacePageSubtitle =>
+      '参考 MoneyPrinterTurbo 的长处，先把“主题到成片”的链路聚成一个入口，再逐步把脚本、素材、旁白、字幕和质检串成标准流程。';
+
+  @override
+  String get shortVideoSpaceSectionCreativeMode => '创作模式';
+
+  @override
+  String get shortVideoSpaceSectionModeReadiness => '模式准备度';
+
+  @override
+  String get shortVideoSpaceReadinessReadyChip => '已就绪';
+
+  @override
+  String get shortVideoSpaceSectionShotReadinessServer => '分镜生成就绪（服务端）';
+
+  @override
+  String get shortVideoSpaceShotReadinessLoading => '正在读取分镜就绪聚合…';
+
+  @override
+  String get shortVideoSpaceShotReadinessUnavailableHint =>
+      '分镜就绪摘要暂不可用，其余概览仍有效。';
+
+  @override
+  String get shortVideoSpaceShotReadinessPriorityShots => '优先处理的分镜';
+
+  @override
+  String get shortVideoSpaceOpenProductionBoardButton => '打开制作工作区分镜';
+
+  @override
+  String get shortVideoSpaceSectionSuggestedNext => '建议下一步';
+
+  @override
+  String get shortVideoSpaceSectionMigrationOrder => '建议迁移顺序';
+
+  @override
+  String get shortVideoSpaceNavProjects => '项目';
+
+  @override
+  String get shortVideoSpaceNavScriptWorkspace => '脚本工作区';
+
+  @override
+  String get shortVideoSpaceNavProductionWorkspace => '制作工作区';
+
+  @override
+  String get shortVideoSpaceNavTaskCenter => '任务中心';
+
+  @override
+  String get shortVideoSpaceNavQualityReviews => '质量评审';
+
+  @override
+  String shortVideoCandidateCompareStoryboardOnly(int id) {
+    return '分镜 #$id';
+  }
+
+  @override
+  String shortVideoCandidateCompareStoryboardWithScript(
+    int storyboardId,
+    int scriptId,
+  ) {
+    return '分镜 #$storyboardId · 脚本 #$scriptId';
+  }
+
+  @override
+  String get shortVideoCandidateReferenceImageNotPreviewable => '参考图不可预览';
+
+  @override
+  String shortVideoCandidateLiveRefShotCount(int count) {
+    return '真人参考镜头 $count 条';
+  }
+
+  @override
+  String get shortVideoCandidateCurrentVideo => '当前视频';
+
+  @override
+  String get shortVideoCandidateSetCurrent => '设为当前';
+
+  @override
+  String get shortVideoCandidatePartialRework => '局部返工';
+
+  @override
+  String get shortVideoDeliveryModeLive => '真实 ✓';
+
+  @override
+  String get shortVideoDeliveryModeSandbox => '沙盒 ⚠️';
+
+  @override
+  String get shortVideoDeliveryModeManualBridge => '人工 👤';
+
+  @override
+  String get shortVideoDeliveryModeUnknown => '未知';
+
+  @override
+  String get shortVideoPublishPlatformDouyin => '抖音';
+
+  @override
+  String get shortVideoPublishPlatformBilibili => '哔哩哔哩';
+
+  @override
+  String get shortVideoPublishPlatformXiaohongshu => '小红书';
+
+  @override
+  String get shortVideoPublishPlatformWeixinChannels => '视频号';
+
+  @override
+  String get shortVideoPublishPlatformKuaishou => '快手';
+
+  @override
+  String get shortVideoPublishPlatformTiktok => 'TikTok';
+
+  @override
+  String get shortVideoPublishPlatformYoutubeShorts => 'YouTube Shorts';
+
+  @override
+  String get shortVideoPublishPlatformInstagramReels => 'Instagram Reels';
+
+  @override
+  String get shortVideoPublishPlatformFacebookReels => 'Facebook Reels';
+
+  @override
+  String get shortVideoSpaceAspectRatioPortrait916 => '竖屏 9:16';
+
+  @override
+  String get shortVideoSpaceAspectRatioLandscape169 => '横屏 16:9';
+
+  @override
+  String get shortVideoSpaceAspectRatioSquare11 => '方屏 1:1';
+
+  @override
+  String get shortVideoSpacePublishMarketPlatformTitle => '默认发布市场 / 平台';
+
+  @override
+  String get shortVideoSpaceTargetMarketLabel => '目标市场';
+
+  @override
+  String get shortVideoSpaceTargetMarketDomestic => '国内';
+
+  @override
+  String get shortVideoSpaceTargetMarketOverseas => '海外';
+
+  @override
+  String get shortVideoSpaceTargetMarketBoth => '双端';
+
+  @override
+  String get shortVideoSpaceTargetPlatformsHint => '目标平台（至少选一个；写回项目供分发与校验共用）';
+
+  @override
+  String get shortVideoSpaceDurationStrategyTitle => '时长策略';
+
+  @override
+  String get shortVideoSpaceDurationShort => '短';
+
+  @override
+  String get shortVideoSpaceDurationMedium => '中';
+
+  @override
+  String get shortVideoSpaceDurationLong => '长';
+
+  @override
+  String get shortVideoSpaceVoiceSubtitleBgmTitle => '旁白 / 字幕 / BGM（项目级默认）';
+
+  @override
+  String get shortVideoSpaceVoiceProfileLabel => '声线标识 voice_profile';
+
+  @override
+  String get shortVideoSpaceVoiceProfileHint => '如 default_narrator（可留空）';
+
+  @override
+  String get shortVideoSpaceSubtitleStyleLabel => '字幕样式 subtitle_style';
+
+  @override
+  String get shortVideoSpaceBgmStrategyLabel => 'BGM 策略 bgm_strategy';
+
+  @override
+  String get shortVideoSpaceCreatingProject => '新建中';
+
+  @override
+  String get shortVideoSpaceCreateProjectDirect => '直接新建短剧项目';
+
+  @override
+  String get shortVideoSpaceSavingProjectConfig => '保存中';
+
+  @override
+  String get shortVideoSpaceSaveProjectConfigWriteback => '写回项目配置';
+
+  @override
+  String get shortVideoSpaceOpenProjectsRefine => '打开项目区继续细化';
+
+  @override
+  String get shortVideoSpaceLoadingProjectReadiness => '正在读取当前项目准备度…';
+
+  @override
+  String get shortVideoSpaceMetricChipVisual => '视觉';
+
+  @override
+  String get shortVideoSpaceMetricChipManual => '手册';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData => '制作视图当前没有分镜数据';
 
   @override

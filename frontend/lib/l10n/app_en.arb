@@ -6809,6 +6809,314 @@
       }
     }
   },
+  "shortVideoMetricStoryboardReadiness": "Storyboard readiness",
+  "shortVideoShotReadinessSelectProjectHint": "Select a short drama project to see server-side shot blocking rollup.",
+  "shortVideoTaskUnnamed": "Unnamed task",
+  "shortVideoBadCaseUncategorized": "Uncategorized",
+  "shortVideoTaskStatusQueued": "Queued",
+  "shortVideoTaskStatusRunning": "Running",
+  "shortVideoTaskStatusSucceeded": "Succeeded",
+  "shortVideoTaskStatusFailed": "Failed",
+  "shortVideoTaskStatusCancelled": "Cancelled",
+  "shortVideoQualityNoSignalAnimated": "Quality reviews have not surfaced strong signals yet; we will highlight style consistency, character continuity, and pacing risks here.",
+  "shortVideoQualityNoSignalLive": "Quality reviews have not surfaced strong signals yet; we will highlight performance naturalness, realism, and voiceover pacing here.",
+  "shortVideoQualityInsightAnimated": "Auto/manual review pass rate is about {passRate}%; {badCount} bad cases logged—keep focusing on character consistency, visual continuity, and shot rhythm.",
+  "@shortVideoQualityInsightAnimated": {
+    "placeholders": {
+      "passRate": {
+        "type": "String"
+      },
+      "badCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoQualityInsightLive": "Auto/manual review pass rate is about {passRate}%; {badCount} bad cases logged—keep focusing on performance naturalness, scene realism, and voiceover shot quality.",
+  "@shortVideoQualityInsightLive": {
+    "placeholders": {
+      "passRate": {
+        "type": "String"
+      },
+      "badCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessGapAllReadyAnimated": "Animated short-drama basics are in place—you can move forward with script, production, and QA loops.",
+  "shortVideoReadinessGapAllReadyLive": "Live-action basics are in place—you can continue shot generation, voiceover, and final review.",
+  "shortVideoReadinessGapAndMore": " and {count} more",
+  "@shortVideoReadinessGapAndMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessGapMissing": "Still missing {labels}{more}. Complete these preparation items in the project area first.",
+  "@shortVideoReadinessGapMissing": {
+    "placeholders": {
+      "labels": {
+        "type": "String"
+      },
+      "more": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoReadinessLabelScriptBase": "Script foundation",
+  "shortVideoReadinessDetailScriptsHas": "{count} script(s) on file",
+  "@shortVideoReadinessDetailScriptsHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailScriptsMissing": "No first-draft script yet",
+  "shortVideoReadinessAnimLabelRoleAssets": "Character assets",
+  "shortVideoReadinessDetailRolesHas": "{count} character asset(s)",
+  "@shortVideoReadinessDetailRolesHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailRolesMissingAnim": "Character assets still missing",
+  "shortVideoReadinessLiveLabelRoleSetup": "Character setup",
+  "shortVideoReadinessDetailRolesMissingLive": "Character setup / assets still missing",
+  "shortVideoReadinessLabelSceneAssets": "Scene assets",
+  "shortVideoReadinessDetailScenesHas": "{count} scene asset(s)",
+  "@shortVideoReadinessDetailScenesHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailScenesMissingAnim": "Scene assets still missing",
+  "shortVideoReadinessDetailScenesMissingLive": "Live scene references still missing",
+  "shortVideoReadinessAnimLabelVisualStyle": "Visual style signal",
+  "shortVideoReadinessDetailVisualConfigured": "Configured: {name}",
+  "@shortVideoReadinessDetailVisualConfigured": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoReadinessDetailVisualMissingAnim": "Visual style not locked yet",
+  "shortVideoReadinessLiveLabelVisualManual": "Visual manual",
+  "shortVideoReadinessDetailVisualMissingLive": "Live visual style not locked yet",
+  "shortVideoReadinessFallbackStylePack": "style pack",
+  "shortVideoReadinessFallbackDirectorPack": "director manual or story style pack",
+  "shortVideoReadinessFallbackLiveVisualPack": "visual style or style pack",
+  "shortVideoReadinessAnimLabelDirectorManual": "Director manual",
+  "shortVideoReadinessLiveLabelPerformanceManual": "Performance / voiceover manual",
+  "shortVideoReadinessDetailDirectorConfigured": "Configured: {name}",
+  "@shortVideoReadinessDetailDirectorConfigured": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoReadinessDetailDirectorMissingAnim": "Director manual not locked yet",
+  "shortVideoReadinessDetailPerformanceMissingLive": "Voiceover tone / director manual not locked yet",
+  "shortVideoReadinessAnimLabelStoryboardBase": "Storyboard foundation",
+  "shortVideoReadinessDetailStoryboardsHas": "{count} storyboard row(s)",
+  "@shortVideoReadinessDetailStoryboardsHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailStoryboardsMissing": "No storyboard structure yet",
+  "shortVideoReadinessLiveLabelClipRefs": "Shot / clip references",
+  "shortVideoReadinessDetailClipsHas": "{count} clip reference(s)",
+  "@shortVideoReadinessDetailClipsHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailClipsMissing": "Live shots / clip references still missing",
+  "shortVideoAssetTypeRole": "Role",
+  "shortVideoAssetTypeScene": "Scene",
+  "shortVideoAssetTypeTool": "Prop",
+  "shortVideoAssetTypeClip": "Shot",
+  "shortVideoAssetTypeOther": "Other",
+  "shortVideoAssetsOverviewLoadingHeadline": "Loading assets overview…",
+  "shortVideoAssetsOverviewLoadingDetail": "Counts by asset type with linked script IDs (app_script_asset).",
+  "shortVideoAssetsOverviewUnavailableHeadline": "Assets overview is temporarily unavailable.",
+  "shortVideoAssetsOverviewUnavailableDetail": "Refresh later, or maintain assets and script links in the project area.",
+  "shortVideoAssetsOverviewNoLinkedScripts": "No linked scripts",
+  "shortVideoAssetsOverviewScriptsPrefix": "Scripts ",
+  "shortVideoAssetsOverviewScriptsEllipsis": "…",
+  "shortVideoAssetsOverviewTypeLine": "{type} · {count} items · {scriptPart}",
+  "@shortVideoAssetsOverviewTypeLine": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "scriptPart": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssetsOverviewHeadline": "{total} assets total, grouped by type (per-row script summary shows experimental script linkage).",
+  "@shortVideoAssetsOverviewHeadline": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoAssetsOverviewFooter": "Read-only aggregate API; candidate state is still maintained via PATCH in the project area.",
+  "shortVideoCandidateCompareLoadingHeadline": "Preparing shot candidates and current versions…",
+  "shortVideoCandidateCompareLoadingDetail": "Aggregates reference frames, current video, readiness, and quality summaries per shot.",
+  "shortVideoCandidateCompareUnavailableHeadline": "No comparable shot candidates yet.",
+  "shortVideoCandidateCompareUnavailableDetail": "Generate shots or add reference frames in production, then return to Space.",
+  "shortVideoCandidateQualityNoReviewsLive": "No QA records yet—watch performance naturalness, realism, and voiceover shot quality.",
+  "shortVideoCandidateQualityNoReviewsAnimated": "No QA records yet—watch character consistency, visual continuity, and shot rhythm.",
+  "shortVideoCandidateQualitySummary": "{total} reviews · {passed} passed · {bad} bad cases",
+  "@shortVideoCandidateQualitySummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "passed": {
+        "type": "int"
+      },
+      "bad": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCompareHeadline": "Compare current version, references, and QA for {count} prioritized shots.",
+  "@shortVideoCandidateCompareHeadline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCompareDetailLive": "Live mode shows reference shots and performance constraints so you can lock realism first.",
+  "shortVideoCandidateCompareDetailAnimated": "See which shots lack references, video, or too many bad cases before partial rework in production.",
+  "shortVideoSpaceModeTitleAnimated": "Animated short drama",
+  "shortVideoSpaceModeTitleLive": "Live-action short drama",
+  "shortVideoSpaceModeSummaryAnimated": "The main pipeline is closer to animated short drama, so we emphasize style, character consistency, storyboard images, and continuity.",
+  "shortVideoSpaceModeSummaryLive": "Live-action should be a first-class mode in the same Space; focus shifts to performance, scene realism, reference shots, and voiceover quality.",
+  "shortVideoSpaceModeAdviceAnimated": "Prepare visual style, art manuals, and character assets before script and production.",
+  "shortVideoSpaceModeAdviceLive": "Prepare live references, character setup, shot language, and visual manuals before script and production.",
+  "shortVideoProjectOptionUnnamed": "Unnamed project",
+  "shortVideoMetricScript": "Scripts",
+  "shortVideoMetricStoryboard": "Storyboards",
+  "shortVideoMetricRole": "Roles",
+  "shortVideoMetricNovel": "Novels",
+  "shortVideoMetricVideo": "Videos",
+  "shortVideoMetricRecentTasks": "Recent tasks",
+  "shortVideoMetricGenerationJobs": "Generation jobs",
+  "shortVideoMetricInProgress": "In progress",
+  "shortVideoMetricFailed": "Failed",
+  "shortVideoMetricBadCases": "Bad cases",
+  "shortVideoMetricPassRate": "Pass rate",
+  "shortVideoMetricScenes": "Scenes",
+  "shortVideoMetricClips": "Clips",
+  "shortVideoReadinessIntroAnimated": "Animated mode prioritizes style, characters, and storyboard continuity.",
+  "shortVideoReadinessIntroLive": "Live-action mode prioritizes character setup, scene references, clip footage, and voiceover manuals.",
+  "shortVideoSpacePageTitle": "Short video Space",
+  "shortVideoSpacePageSubtitle": "Inspired by MoneyPrinterTurbo-style pipelines, this entry gathers the path from theme to finished cuts, then wires script, assets, narration, subtitles, and QA into one flow.",
+  "shortVideoSpaceSectionCreativeMode": "Creative mode",
+  "shortVideoSpaceSectionModeReadiness": "Mode readiness",
+  "shortVideoSpaceReadinessReadyChip": "Ready",
+  "shortVideoSpaceSectionShotReadinessServer": "Shot generation readiness (server)",
+  "shortVideoSpaceShotReadinessLoading": "Loading shot readiness rollup…",
+  "shortVideoSpaceShotReadinessUnavailableHint": "Shot readiness summary is unavailable; other overview data still applies.",
+  "shortVideoSpaceShotReadinessPriorityShots": "Shots to prioritize",
+  "shortVideoSpaceOpenProductionBoardButton": "Open storyboards in production workspace",
+  "shortVideoSpaceSectionSuggestedNext": "Suggested next step",
+  "shortVideoSpaceSectionMigrationOrder": "Suggested migration order",
+  "shortVideoSpaceNavProjects": "Projects",
+  "shortVideoSpaceNavScriptWorkspace": "Script workspace",
+  "shortVideoSpaceNavProductionWorkspace": "Production workspace",
+  "shortVideoSpaceNavTaskCenter": "Task center",
+  "shortVideoSpaceNavQualityReviews": "Quality reviews",
+  "shortVideoCandidateCompareStoryboardOnly": "Storyboard #{id}",
+  "@shortVideoCandidateCompareStoryboardOnly": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCompareStoryboardWithScript": "Storyboard #{storyboardId} · Script #{scriptId}",
+  "@shortVideoCandidateCompareStoryboardWithScript": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      },
+      "scriptId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateReferenceImageNotPreviewable": "Reference image cannot be previewed",
+  "shortVideoCandidateLiveRefShotCount": "{count} live reference shots",
+  "@shortVideoCandidateLiveRefShotCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCurrentVideo": "Current video",
+  "shortVideoCandidateSetCurrent": "Set as current",
+  "shortVideoCandidatePartialRework": "Partial rework",
+  "shortVideoDeliveryModeLive": "Live ✓",
+  "shortVideoDeliveryModeSandbox": "Sandbox ⚠️",
+  "shortVideoDeliveryModeManualBridge": "Manual 👤",
+  "shortVideoDeliveryModeUnknown": "Unknown",
+  "shortVideoPublishPlatformDouyin": "Douyin",
+  "shortVideoPublishPlatformBilibili": "Bilibili",
+  "shortVideoPublishPlatformXiaohongshu": "Xiaohongshu",
+  "shortVideoPublishPlatformWeixinChannels": "Weixin Channels",
+  "shortVideoPublishPlatformKuaishou": "Kuaishou",
+  "shortVideoPublishPlatformTiktok": "TikTok",
+  "shortVideoPublishPlatformYoutubeShorts": "YouTube Shorts",
+  "shortVideoPublishPlatformInstagramReels": "Instagram Reels",
+  "shortVideoPublishPlatformFacebookReels": "Facebook Reels",
+  "shortVideoSpaceAspectRatioPortrait916": "Portrait 9:16",
+  "shortVideoSpaceAspectRatioLandscape169": "Landscape 16:9",
+  "shortVideoSpaceAspectRatioSquare11": "Square 1:1",
+  "shortVideoSpacePublishMarketPlatformTitle": "Default publish market / platforms",
+  "shortVideoSpaceTargetMarketLabel": "Target market",
+  "shortVideoSpaceTargetMarketDomestic": "Domestic",
+  "shortVideoSpaceTargetMarketOverseas": "Overseas",
+  "shortVideoSpaceTargetMarketBoth": "Both",
+  "shortVideoSpaceTargetPlatformsHint": "Pick at least one target platform (saved on the project for distribution and validation).",
+  "shortVideoSpaceDurationStrategyTitle": "Duration strategy",
+  "shortVideoSpaceDurationShort": "Short",
+  "shortVideoSpaceDurationMedium": "Medium",
+  "shortVideoSpaceDurationLong": "Long",
+  "shortVideoSpaceVoiceSubtitleBgmTitle": "Voiceover / subtitles / BGM (project defaults)",
+  "shortVideoSpaceVoiceProfileLabel": "Voice profile (voice_profile)",
+  "shortVideoSpaceVoiceProfileHint": "e.g. default_narrator (optional)",
+  "shortVideoSpaceSubtitleStyleLabel": "Subtitle style (subtitle_style)",
+  "shortVideoSpaceBgmStrategyLabel": "BGM strategy (bgm_strategy)",
+  "shortVideoSpaceCreatingProject": "Creating…",
+  "shortVideoSpaceCreateProjectDirect": "Create short drama project",
+  "shortVideoSpaceSavingProjectConfig": "Saving…",
+  "shortVideoSpaceSaveProjectConfigWriteback": "Save back to project",
+  "shortVideoSpaceOpenProjectsRefine": "Open projects to refine",
+  "shortVideoSpaceLoadingProjectReadiness": "Loading project readiness…",
+  "shortVideoSpaceMetricChipVisual": "Visual",
+  "shortVideoSpaceMetricChipManual": "Manual",
   "scriptEditorStoryboardsProductionEmptyData": "Production view has no storyboard rows yet.",
   "scriptEditorStoryboardsProductionSummaryLine": "Production view · {count} rows · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {

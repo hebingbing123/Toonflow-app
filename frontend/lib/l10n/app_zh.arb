@@ -6809,6 +6809,314 @@
       }
     }
   },
+  "shortVideoMetricStoryboardReadiness": "分镜就绪",
+  "shortVideoShotReadinessSelectProjectHint": "选择短剧项目后，会显示服务端分镜阻塞汇总。",
+  "shortVideoTaskUnnamed": "未命名任务",
+  "shortVideoBadCaseUncategorized": "未分类",
+  "shortVideoTaskStatusQueued": "排队中",
+  "shortVideoTaskStatusRunning": "进行中",
+  "shortVideoTaskStatusSucceeded": "已完成",
+  "shortVideoTaskStatusFailed": "失败",
+  "shortVideoTaskStatusCancelled": "已取消",
+  "shortVideoQualityNoSignalAnimated": "质量评审还没有收敛出明显信号，后续会在这里提醒画风一致性、角色连续性和镜头节奏风险。",
+  "shortVideoQualityNoSignalLive": "质量评审还没有收敛出明显信号，后续会在这里提醒表演自然度、真实感和口播节奏风险。",
+  "shortVideoQualityInsightAnimated": "当前项目自动/人工评审通过率约 {passRate}%，已记录 {badCount} 条坏例；继续重点盯角色一致性、画面连续性和镜头节奏。",
+  "@shortVideoQualityInsightAnimated": {
+    "placeholders": {
+      "passRate": {
+        "type": "String"
+      },
+      "badCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoQualityInsightLive": "当前项目自动/人工评审通过率约 {passRate}%，已记录 {badCount} 条坏例；继续重点盯表演自然度、场景真实感和口播镜头质感。",
+  "@shortVideoQualityInsightLive": {
+    "placeholders": {
+      "passRate": {
+        "type": "String"
+      },
+      "badCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessGapAllReadyAnimated": "动漫短剧的基础准备项已经齐了，可以直接推进脚本、制作和质检闭环。",
+  "shortVideoReadinessGapAllReadyLive": "真人短剧的基础准备项已经齐了，可以继续推进镜头生成、口播和成片复核。",
+  "shortVideoReadinessGapAndMore": " 等 {count} 项",
+  "@shortVideoReadinessGapAndMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessGapMissing": "当前还缺 {labels}{more}，建议先回项目区把这些准备项补齐。",
+  "@shortVideoReadinessGapMissing": {
+    "placeholders": {
+      "labels": {
+        "type": "String"
+      },
+      "more": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoReadinessLabelScriptBase": "剧本基础",
+  "shortVideoReadinessDetailScriptsHas": "已有 {count} 份剧本",
+  "@shortVideoReadinessDetailScriptsHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailScriptsMissing": "还没有第一版剧本",
+  "shortVideoReadinessAnimLabelRoleAssets": "角色资产",
+  "shortVideoReadinessDetailRolesHas": "已有 {count} 个角色资产",
+  "@shortVideoReadinessDetailRolesHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailRolesMissingAnim": "还缺角色资产",
+  "shortVideoReadinessLiveLabelRoleSetup": "角色设定",
+  "shortVideoReadinessDetailRolesMissingLive": "还缺角色设定 / 角色资产",
+  "shortVideoReadinessLabelSceneAssets": "场景资产",
+  "shortVideoReadinessDetailScenesHas": "已有 {count} 个场景资产",
+  "@shortVideoReadinessDetailScenesHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailScenesMissingAnim": "还缺场景资产",
+  "shortVideoReadinessDetailScenesMissingLive": "还缺真人场景参考",
+  "shortVideoReadinessAnimLabelVisualStyle": "画风信号",
+  "shortVideoReadinessDetailVisualConfigured": "已配置 {name}",
+  "@shortVideoReadinessDetailVisualConfigured": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoReadinessDetailVisualMissingAnim": "还没收口画风 / 视觉风格",
+  "shortVideoReadinessLiveLabelVisualManual": "视觉手册",
+  "shortVideoReadinessDetailVisualMissingLive": "还没收口真人视觉风格",
+  "shortVideoReadinessFallbackStylePack": "画风或风格包",
+  "shortVideoReadinessFallbackDirectorPack": "导演手册或故事风格包",
+  "shortVideoReadinessFallbackLiveVisualPack": "视觉风格或风格包",
+  "shortVideoReadinessAnimLabelDirectorManual": "导演手册",
+  "shortVideoReadinessLiveLabelPerformanceManual": "表演 / 口播手册",
+  "shortVideoReadinessDetailDirectorConfigured": "已配置 {name}",
+  "@shortVideoReadinessDetailDirectorConfigured": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoReadinessDetailDirectorMissingAnim": "还没收口导演手册",
+  "shortVideoReadinessDetailPerformanceMissingLive": "还没收口口播语气 / 导演手册",
+  "shortVideoReadinessAnimLabelStoryboardBase": "分镜基础",
+  "shortVideoReadinessDetailStoryboardsHas": "已有 {count} 条分镜",
+  "@shortVideoReadinessDetailStoryboardsHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailStoryboardsMissing": "还没有分镜结构",
+  "shortVideoReadinessLiveLabelClipRefs": "镜头素材",
+  "shortVideoReadinessDetailClipsHas": "已有 {count} 份 clip 参考",
+  "@shortVideoReadinessDetailClipsHas": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoReadinessDetailClipsMissing": "还缺真人镜头 / clip 参考",
+  "shortVideoAssetTypeRole": "角色",
+  "shortVideoAssetTypeScene": "场景",
+  "shortVideoAssetTypeTool": "道具",
+  "shortVideoAssetTypeClip": "镜头",
+  "shortVideoAssetTypeOther": "其他",
+  "shortVideoAssetsOverviewLoadingHeadline": "正在读取资产总览…",
+  "shortVideoAssetsOverviewLoadingDetail": "按资产类型汇总数量，并聚合关联剧本号（app_script_asset）。",
+  "shortVideoAssetsOverviewUnavailableHeadline": "资产总览暂不可用。",
+  "shortVideoAssetsOverviewUnavailableDetail": "可稍后刷新，或在项目区维护资产与剧本挂载关系。",
+  "shortVideoAssetsOverviewNoLinkedScripts": "暂无关联剧本",
+  "shortVideoAssetsOverviewScriptsPrefix": "剧本 ",
+  "shortVideoAssetsOverviewScriptsEllipsis": "…",
+  "shortVideoAssetsOverviewTypeLine": "{type} · {count} 条 · {scriptPart}",
+  "@shortVideoAssetsOverviewTypeLine": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "scriptPart": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssetsOverviewHeadline": "共 {total} 条资产，按类型分组（实验剧本挂载关系见每行「剧本」摘要）。",
+  "@shortVideoAssetsOverviewHeadline": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoAssetsOverviewFooter": "数据来自只读聚合接口；候选状态维护仍在项目区 PATCH 资产。",
+  "shortVideoCandidateCompareLoadingHeadline": "正在整理分镜候选与当前版本…",
+  "shortVideoCandidateCompareLoadingDetail": "会按分镜聚合参考图、当前视频、readiness 与质量评审摘要。",
+  "shortVideoCandidateCompareUnavailableHeadline": "当前还没有可对比的分镜候选。",
+  "shortVideoCandidateCompareUnavailableDetail": "先在制作工作区生成镜头或补参考图，再回到 Space 查看对比。",
+  "shortVideoCandidateQualityNoReviewsLive": "暂无质检记录，先盯表演自然度、真实感和口播镜头质感。",
+  "shortVideoCandidateQualityNoReviewsAnimated": "暂无质检记录，先盯角色一致性、画面连续性和镜头节奏。",
+  "shortVideoCandidateQualitySummary": "评审 {total} 条 · 通过 {passed} 条 · 坏例 {bad} 条",
+  "@shortVideoCandidateQualitySummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "passed": {
+        "type": "int"
+      },
+      "bad": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCompareHeadline": "优先对比 {count} 条分镜的当前版本、参考图与质检状态。",
+  "@shortVideoCandidateCompareHeadline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCompareDetailLive": "真人模式会额外展示参考镜头与表演/口播约束命中情况，方便先锁住真实感与演员感。",
+  "shortVideoCandidateCompareDetailAnimated": "先看哪几条分镜缺参考、缺当前视频或命中过多坏例，再决定去制作台局部返工。",
+  "shortVideoSpaceModeTitleAnimated": "动漫短剧",
+  "shortVideoSpaceModeTitleLive": "真人短剧",
+  "shortVideoSpaceModeSummaryAnimated": "当前主链路更贴近动漫短剧，所以会优先强调画风、角色一致性、分镜出图和连续性。",
+  "shortVideoSpaceModeSummaryLive": "真人短剧也应该成为同一个 Space 里的标准模式，后续重点会转向演员感、场景真实度、镜头参考和口播质感。",
+  "shortVideoSpaceModeAdviceAnimated": "建议先准备画风、视觉手册和角色资产，再进入脚本与制作流程。",
+  "shortVideoSpaceModeAdviceLive": "建议先准备真人参考图、角色设定、镜头语气和视觉手册，再进入脚本与制作流程。",
+  "shortVideoProjectOptionUnnamed": "未命名项目",
+  "shortVideoMetricScript": "剧本",
+  "shortVideoMetricStoryboard": "分镜",
+  "shortVideoMetricRole": "角色",
+  "shortVideoMetricNovel": "小说",
+  "shortVideoMetricVideo": "视频",
+  "shortVideoMetricRecentTasks": "最近任务",
+  "shortVideoMetricGenerationJobs": "生成任务",
+  "shortVideoMetricInProgress": "进行中",
+  "shortVideoMetricFailed": "失败",
+  "shortVideoMetricBadCases": "坏例",
+  "shortVideoMetricPassRate": "通过率",
+  "shortVideoMetricScenes": "场景",
+  "shortVideoMetricClips": "clip",
+  "shortVideoReadinessIntroAnimated": "动漫短剧更看重画风、角色和分镜连续性。",
+  "shortVideoReadinessIntroLive": "真人短剧更看重角色设定、场景参考、clip 镜头素材和口播手册。",
+  "shortVideoSpacePageTitle": "短视频 Space",
+  "shortVideoSpacePageSubtitle": "参考 MoneyPrinterTurbo 的长处，先把“主题到成片”的链路聚成一个入口，再逐步把脚本、素材、旁白、字幕和质检串成标准流程。",
+  "shortVideoSpaceSectionCreativeMode": "创作模式",
+  "shortVideoSpaceSectionModeReadiness": "模式准备度",
+  "shortVideoSpaceReadinessReadyChip": "已就绪",
+  "shortVideoSpaceSectionShotReadinessServer": "分镜生成就绪（服务端）",
+  "shortVideoSpaceShotReadinessLoading": "正在读取分镜就绪聚合…",
+  "shortVideoSpaceShotReadinessUnavailableHint": "分镜就绪摘要暂不可用，其余概览仍有效。",
+  "shortVideoSpaceShotReadinessPriorityShots": "优先处理的分镜",
+  "shortVideoSpaceOpenProductionBoardButton": "打开制作工作区分镜",
+  "shortVideoSpaceSectionSuggestedNext": "建议下一步",
+  "shortVideoSpaceSectionMigrationOrder": "建议迁移顺序",
+  "shortVideoSpaceNavProjects": "项目",
+  "shortVideoSpaceNavScriptWorkspace": "脚本工作区",
+  "shortVideoSpaceNavProductionWorkspace": "制作工作区",
+  "shortVideoSpaceNavTaskCenter": "任务中心",
+  "shortVideoSpaceNavQualityReviews": "质量评审",
+  "shortVideoCandidateCompareStoryboardOnly": "分镜 #{id}",
+  "@shortVideoCandidateCompareStoryboardOnly": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCompareStoryboardWithScript": "分镜 #{storyboardId} · 脚本 #{scriptId}",
+  "@shortVideoCandidateCompareStoryboardWithScript": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      },
+      "scriptId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateReferenceImageNotPreviewable": "参考图不可预览",
+  "shortVideoCandidateLiveRefShotCount": "真人参考镜头 {count} 条",
+  "@shortVideoCandidateLiveRefShotCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoCandidateCurrentVideo": "当前视频",
+  "shortVideoCandidateSetCurrent": "设为当前",
+  "shortVideoCandidatePartialRework": "局部返工",
+  "shortVideoDeliveryModeLive": "真实 ✓",
+  "shortVideoDeliveryModeSandbox": "沙盒 ⚠️",
+  "shortVideoDeliveryModeManualBridge": "人工 👤",
+  "shortVideoDeliveryModeUnknown": "未知",
+  "shortVideoPublishPlatformDouyin": "抖音",
+  "shortVideoPublishPlatformBilibili": "哔哩哔哩",
+  "shortVideoPublishPlatformXiaohongshu": "小红书",
+  "shortVideoPublishPlatformWeixinChannels": "视频号",
+  "shortVideoPublishPlatformKuaishou": "快手",
+  "shortVideoPublishPlatformTiktok": "TikTok",
+  "shortVideoPublishPlatformYoutubeShorts": "YouTube Shorts",
+  "shortVideoPublishPlatformInstagramReels": "Instagram Reels",
+  "shortVideoPublishPlatformFacebookReels": "Facebook Reels",
+  "shortVideoSpaceAspectRatioPortrait916": "竖屏 9:16",
+  "shortVideoSpaceAspectRatioLandscape169": "横屏 16:9",
+  "shortVideoSpaceAspectRatioSquare11": "方屏 1:1",
+  "shortVideoSpacePublishMarketPlatformTitle": "默认发布市场 / 平台",
+  "shortVideoSpaceTargetMarketLabel": "目标市场",
+  "shortVideoSpaceTargetMarketDomestic": "国内",
+  "shortVideoSpaceTargetMarketOverseas": "海外",
+  "shortVideoSpaceTargetMarketBoth": "双端",
+  "shortVideoSpaceTargetPlatformsHint": "目标平台（至少选一个；写回项目供分发与校验共用）",
+  "shortVideoSpaceDurationStrategyTitle": "时长策略",
+  "shortVideoSpaceDurationShort": "短",
+  "shortVideoSpaceDurationMedium": "中",
+  "shortVideoSpaceDurationLong": "长",
+  "shortVideoSpaceVoiceSubtitleBgmTitle": "旁白 / 字幕 / BGM（项目级默认）",
+  "shortVideoSpaceVoiceProfileLabel": "声线标识 voice_profile",
+  "shortVideoSpaceVoiceProfileHint": "如 default_narrator（可留空）",
+  "shortVideoSpaceSubtitleStyleLabel": "字幕样式 subtitle_style",
+  "shortVideoSpaceBgmStrategyLabel": "BGM 策略 bgm_strategy",
+  "shortVideoSpaceCreatingProject": "新建中",
+  "shortVideoSpaceCreateProjectDirect": "直接新建短剧项目",
+  "shortVideoSpaceSavingProjectConfig": "保存中",
+  "shortVideoSpaceSaveProjectConfigWriteback": "写回项目配置",
+  "shortVideoSpaceOpenProjectsRefine": "打开项目区继续细化",
+  "shortVideoSpaceLoadingProjectReadiness": "正在读取当前项目准备度…",
+  "shortVideoSpaceMetricChipVisual": "视觉",
+  "shortVideoSpaceMetricChipManual": "手册",
   "scriptEditorStoryboardsProductionEmptyData": "制作视图当前没有分镜数据",
   "scriptEditorStoryboardsProductionSummaryLine": "制作视图 {count} 条 · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {

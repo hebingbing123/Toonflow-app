@@ -5,7 +5,8 @@ part of 'section.dart';
 const int _kMaxAssemblyVersions = 20;
 
 /// Draft + assembly version snapshot management (`flow_data.assembly_versions`).
-extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSectionState {
+extension _ShortVideoSpaceSectionDraftManagementExtension
+    on _ShortVideoSpaceSectionState {
   /// Load drafts and versions from flow_data
   Future<void> _loadDraftsAndVersions() async {
     final token = widget.accessToken;
@@ -33,14 +34,15 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       try {
         flowData = await fetchProductionFlowDataV1(
           token,
-          projectId: project.numericId,
+          projectUuid: project.id,
           episodesId: firstScriptId,
         );
       } on RustApiException {
         flowData = <String, dynamic>{};
       }
 
-      final versionsData = flowData['assembly_versions'] as Map<String, dynamic>?;
+      final versionsData =
+          flowData['assembly_versions'] as Map<String, dynamic>?;
       var nextDrafts = const <AssemblyDraft>[];
       var nextVersions = const <AssemblyVersion>[];
       var nextCurrent = 'default';
@@ -73,10 +75,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback(
-          '加载草稿和版本失败：$e',
-          isSuccess: false,
-        );
+        _showOperationFeedback('加载草稿和版本失败：$e', isSuccess: false);
       }
     }
   }
@@ -97,22 +96,25 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
     try {
       flowData = await fetchProductionFlowDataV1(
         token,
-        projectId: project.numericId,
+        projectUuid: project.id,
         episodesId: firstScriptId,
       );
     } on RustApiException {
       flowData = <String, dynamic>{};
     }
-    final versionsData = flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
-    versionsData['drafts'] =
-        _assemblyDrafts.map((d) => d.toJson()).toList(growable: false);
-    versionsData['versions'] =
-        _assemblyVersions.map((v) => v.toJson()).toList(growable: false);
+    final versionsData =
+        flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
+    versionsData['drafts'] = _assemblyDrafts
+        .map((d) => d.toJson())
+        .toList(growable: false);
+    versionsData['versions'] = _assemblyVersions
+        .map((v) => v.toJson())
+        .toList(growable: false);
     versionsData['current_version_id'] = _currentAssemblyVersionId;
     flowData['assembly_versions'] = versionsData;
     final code = await postProductionSaveFlowDataV1(
       token,
-      projectId: project.numericId,
+      projectUuid: project.id,
       episodesId: firstScriptId,
       data: flowData,
     );
@@ -188,7 +190,6 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
             if (durationSeconds != null && durationSeconds > 0) {
               await postStoryboardUpdateDurationV1(
                 token,
-                projectId: project.numericId,
                 projectUuid: project.id,
                 scriptId: script.scriptNumericId,
                 storyboardId: shot.storyboardNumericId,
@@ -225,7 +226,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       try {
         flowData = await fetchProductionFlowDataV1(
           token,
-          projectId: project.numericId,
+          projectUuid: project.id,
           episodesId: firstScriptId,
         );
       } on RustApiException {
@@ -243,21 +244,23 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
         shotConfig: _buildCurrentShotConfig(),
       );
 
-      final versionsData = flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
+      final versionsData =
+          flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
       final draftsList = versionsData['drafts'] as List<dynamic>? ?? [];
       draftsList.insert(0, newDraft.toJson());
       if (draftsList.length > 10) {
         draftsList.removeRange(10, draftsList.length);
       }
       versionsData['drafts'] = draftsList;
-      versionsData['versions'] =
-          _assemblyVersions.map((v) => v.toJson()).toList(growable: false);
+      versionsData['versions'] = _assemblyVersions
+          .map((v) => v.toJson())
+          .toList(growable: false);
       versionsData['current_version_id'] = _currentAssemblyVersionId;
       flowData['assembly_versions'] = versionsData;
 
       final code = await postProductionSaveFlowDataV1(
         token,
-        projectId: project.numericId,
+        projectUuid: project.id,
         episodesId: firstScriptId,
         data: flowData,
       );
@@ -269,17 +272,11 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       await _loadDraftsAndVersions();
 
       if (mounted) {
-        _showOperationFeedback(
-          '草稿 "$name" 保存成功',
-          isSuccess: true,
-        );
+        _showOperationFeedback('草稿 "$name" 保存成功', isSuccess: true);
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback(
-          '保存草稿失败：$e',
-          isSuccess: false,
-        );
+        _showOperationFeedback('保存草稿失败：$e', isSuccess: false);
       }
       rethrow;
     }
@@ -302,17 +299,11 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       await _applyAssemblyShotConfig(draft.shotConfig);
 
       if (mounted) {
-        _showOperationFeedback(
-          '草稿 "${draft.name}" 已恢复',
-          isSuccess: true,
-        );
+        _showOperationFeedback('草稿 "${draft.name}" 已恢复', isSuccess: true);
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback(
-          '恢复草稿失败：$e',
-          isSuccess: false,
-        );
+        _showOperationFeedback('恢复草稿失败：$e', isSuccess: false);
       }
       rethrow;
     }
@@ -337,28 +328,30 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       try {
         flowData = await fetchProductionFlowDataV1(
           token,
-          projectId: project.numericId,
+          projectUuid: project.id,
           episodesId: firstScriptId,
         );
       } on RustApiException {
         flowData = <String, dynamic>{};
       }
 
-      final versionsData = flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
+      final versionsData =
+          flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
       final draftsList = versionsData['drafts'] as List<dynamic>? ?? [];
       draftsList.removeWhere((d) {
         final draft = d as Map<String, dynamic>;
         return draft['id'] == draftId;
       });
       versionsData['drafts'] = draftsList;
-      versionsData['versions'] =
-          _assemblyVersions.map((v) => v.toJson()).toList(growable: false);
+      versionsData['versions'] = _assemblyVersions
+          .map((v) => v.toJson())
+          .toList(growable: false);
       versionsData['current_version_id'] = _currentAssemblyVersionId;
       flowData['assembly_versions'] = versionsData;
 
       final code = await postProductionSaveFlowDataV1(
         token,
-        projectId: project.numericId,
+        projectUuid: project.id,
         episodesId: firstScriptId,
         data: flowData,
       );
@@ -370,17 +363,11 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       await _loadDraftsAndVersions();
 
       if (mounted) {
-        _showOperationFeedback(
-          '草稿已删除',
-          isSuccess: true,
-        );
+        _showOperationFeedback('草稿已删除', isSuccess: true);
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback(
-          '删除草稿失败：$e',
-          isSuccess: false,
-        );
+        _showOperationFeedback('删除草稿失败：$e', isSuccess: false);
       }
       rethrow;
     }
@@ -425,10 +412,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       );
       if (mounted) {
         setState(() {
-          _assemblyVersions = <AssemblyVersion>[
-            version,
-            ..._assemblyVersions,
-          ];
+          _assemblyVersions = <AssemblyVersion>[version, ..._assemblyVersions];
           _currentAssemblyVersionId = version.id;
         });
       }
@@ -507,8 +491,10 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
       await _persistAssemblyBlockToFlow();
 
       if (removedWasCurrent) {
-        final snap =
-            remaining.firstWhere((v) => v.id == newCurrent, orElse: () => remaining.first);
+        final snap = remaining.firstWhere(
+          (v) => v.id == newCurrent,
+          orElse: () => remaining.first,
+        );
         await _applyAssemblyShotConfig(snap.shotConfig);
       }
 

@@ -40,6 +40,7 @@ class _ProductionPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
+    final l10n = AppLocalizations.of(context)!;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +49,7 @@ class _ProductionPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('当前项目概览', style: theme.textTheme.titleSmall),
+              Text(l10n.shortVideoSpaceCurrentProjectOverview, style: theme.textTheme.titleSmall),
               const SizedBox(height: 8),
               Text(
                 spaceOverviewSummary,
@@ -69,7 +70,7 @@ class _ProductionPanel extends StatelessWidget {
               Text(qualitySummaryLine, style: theme.textTheme.bodySmall),
               if (badCaseMetrics.isNotEmpty) ...[
                 const SizedBox(height: 10),
-                Text('最近坏例倾向', style: theme.textTheme.labelLarge),
+                Text(l10n.shortVideoSpaceRecentBadCaseTrends, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -84,7 +85,7 @@ class _ProductionPanel extends StatelessWidget {
               ],
               if (recentTaskLines.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Text('最近任务流', style: theme.textTheme.labelLarge),
+                Text(l10n.shortVideoSpaceRecentTaskFlow, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 for (final line in recentTaskLines)
                   Padding(
@@ -114,7 +115,7 @@ class _ProductionPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('资产总览', style: theme.textTheme.titleSmall),
+                Text(l10n.shortVideoSpaceAssetsOverview, style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 if (assetsOverviewPanelUi.loading)
                   Text(
@@ -171,7 +172,7 @@ class _ProductionPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('成片装配快照', style: theme.textTheme.titleSmall),
+                Text(l10n.shortVideoSpaceAssemblySnapshot, style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 if (assemblyPanelUi.loading)
                   Text(
@@ -198,7 +199,7 @@ class _ProductionPanel extends StatelessWidget {
                   if (assemblyPanelUi.qualityLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Text(
-                      '成片候选验收（质量评审）',
+                      l10n.shortVideoSpaceQualityReview,
                       style: theme.textTheme.labelMedium,
                     ),
                     const SizedBox(height: 6),
@@ -250,7 +251,7 @@ class _ProductionPanel extends StatelessWidget {
                   ],
                   if (assemblyPanelUi.multiTrackDecisionLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    Text('受限多轨导出决策（K5）', style: theme.textTheme.labelMedium),
+                    Text(l10n.shortVideoSpaceMultiTrackExportDecision, style: theme.textTheme.labelMedium),
                     const SizedBox(height: 6),
                     for (final line in assemblyPanelUi.multiTrackDecisionLines)
                       Padding(
@@ -292,19 +293,19 @@ class _ProductionPanel extends StatelessWidget {
                       OutlinedButton.icon(
                         onPressed: onOpenProductionForAssemblyExport,
                         icon: const Icon(Icons.movie_creation_outlined),
-                        label: const Text('打开制作工作区'),
+                        label: Text(l10n.shortVideoSpaceOpenProductionWorkspace),
                       ),
                       if (onOpenAssemblyClipDeskOps != null)
                         OutlinedButton.icon(
                           onPressed: onOpenAssemblyClipDeskOps,
                           icon: const Icon(Icons.tune_outlined),
-                          label: const Text('镜头基础操作'),
+                          label: Text(l10n.shortVideoSpaceBasicShotOperations),
                         ),
                       if (onOpenAssemblyDefaultsEditor != null)
                         OutlinedButton.icon(
                           onPressed: onOpenAssemblyDefaultsEditor,
                           icon: const Icon(Icons.subtitles_outlined),
-                          label: const Text('成片样式调整'),
+                          label: Text(l10n.shortVideoSpaceAssemblyStyleAdjustment),
                         ),
                     ],
                   ),
@@ -323,7 +324,7 @@ class _ProductionPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('导出前检查', style: theme.textTheme.titleSmall),
+                Text(l10n.shortVideoSpaceExportPreCheck, style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 if (exportCheckPanelUi.loading)
                   Text(
@@ -363,7 +364,7 @@ class _ProductionPanel extends StatelessWidget {
                   if (exportCheckPanelUi.qualityGateBlockingLines.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
-                      '质量门禁阻断原因',
+                      l10n.shortVideoSpaceQualityGateBlockingReasons,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: outline,
                         fontWeight: FontWeight.bold,
@@ -385,7 +386,7 @@ class _ProductionPanel extends StatelessWidget {
                   if (exportCheckPanelUi.blockingLines.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
-                      '阻塞项（按接口顺序节选）',
+                      l10n.shortVideoSpaceBlockingItems,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: outline,
                       ),
@@ -405,7 +406,7 @@ class _ProductionPanel extends StatelessWidget {
                   if (exportCheckPanelUi.warningLines.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
-                      '警告项（按接口顺序节选）',
+                      l10n.shortVideoSpaceWarningItems,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: outline,
                       ),
@@ -444,12 +445,12 @@ class _ProductionPanel extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.file_upload_outlined),
-                      label: Text(exportActionBusy ? '导出中…' : '开始导出'),
+                      label: Text(exportActionBusy ? l10n.shortVideoSpaceExporting : l10n.shortVideoSpaceStartExport),
                     ),
                     OutlinedButton.icon(
                       onPressed: exportActionBusy ? null : onOpenExportHistory,
                       icon: const Icon(Icons.history),
-                      label: const Text('导出历史'),
+                      label: Text(l10n.shortVideoSpaceExportHistory),
                     ),
                   ],
                 ),

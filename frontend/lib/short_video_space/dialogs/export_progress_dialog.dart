@@ -60,18 +60,18 @@ enum ExportTaskStatus {
     }
   }
 
-  String get displayName {
+  String displayName(AppLocalizations l10n) {
     switch (this) {
       case ExportTaskStatus.queued:
-        return '排队中';
+        return l10n.shortVideoSpaceDialogExportProgressStatusQueued;
       case ExportTaskStatus.processing:
-        return '处理中';
+        return l10n.shortVideoSpaceDialogExportProgressStatusProcessing;
       case ExportTaskStatus.completed:
-        return '已完成';
+        return l10n.shortVideoSpaceDialogExportProgressStatusCompleted;
       case ExportTaskStatus.failed:
-        return '失败';
+        return l10n.shortVideoSpaceDialogExportProgressStatusFailed;
       case ExportTaskStatus.cancelled:
-        return '已取消';
+        return l10n.shortVideoSpaceDialogExportProgressStatusCancelled;
     }
   }
 
@@ -108,18 +108,18 @@ enum ExportTaskStage {
     }
   }
 
-  String get displayName {
+  String displayName(AppLocalizations l10n) {
     switch (this) {
       case ExportTaskStage.initializing:
-        return '初始化';
+        return l10n.shortVideoSpaceDialogExportProgressStageInitializing;
       case ExportTaskStage.loadingAssets:
-        return '加载素材';
+        return l10n.shortVideoSpaceDialogExportProgressStageLoadingAssets;
       case ExportTaskStage.encoding:
-        return '编码视频';
+        return l10n.shortVideoSpaceDialogExportProgressStageEncoding;
       case ExportTaskStage.uploading:
-        return '上传文件';
+        return l10n.shortVideoSpaceDialogExportProgressStageUploading;
       case ExportTaskStage.finalizing:
-        return '完成处理';
+        return l10n.shortVideoSpaceDialogExportProgressStageFinalizing;
     }
   }
 }
@@ -237,8 +237,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       _pollTimer?.cancel();
       _pollTimer = null;
 
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = '获取进度失败: $e';
+        _errorMessage = l10n.shortVideoSpaceDialogExportProgressFetchError(e.toString());
       });
     }
   }
@@ -247,7 +248,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
   Future<ExportTaskProgress> _fetchExportProgress(String taskId) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
-      throw Exception('会话已失效，请重新登录');
+      final l10n = AppLocalizations.of(context)!;
+      throw Exception(l10n.shortVideoSpaceDialogExportProgressSessionExpired);
     }
     final task = await getExportTaskByIdV1(token, taskId);
     return ExportTaskProgress(
@@ -285,9 +287,10 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     } catch (e) {
       if (!mounted) return;
 
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _cancelling = false;
-        _errorMessage = '取消失败: $e';
+        _errorMessage = l10n.shortVideoSpaceDialogExportProgressCancelFailed(e.toString());
       });
     }
   }
@@ -296,7 +299,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
   Future<void> _cancelExportTask(String taskId) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
-      throw Exception('会话已失效，请重新登录');
+      final l10n = AppLocalizations.of(context)!;
+      throw Exception(l10n.shortVideoSpaceDialogExportProgressSessionExpired);
     }
     await postExportCancelV1(token, taskId);
   }
@@ -305,17 +309,18 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
   Widget build(BuildContext context) {
     final progress = _progress;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       title: Row(
         children: [
           const Icon(Icons.video_file_outlined),
           const SizedBox(width: 8),
-          const Text('导出进度'),
+          Text(l10n.shortVideoSpaceDialogExportProgressTitle),
           const Spacer(),
           if (progress != null && !progress.status.isTerminal)
             Text(
-              progress.status.displayName,
+              progress.status.displayName(l10n),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -350,8 +355,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                     child: CircularProgressIndicator(),
                   ),
                 ),
-                const Center(
-                  child: Text('正在获取导出状态...'),
+                Center(
+                  child: Text(l10n.shortVideoSpaceDialogExportProgressLoadingStatus),
                 ),
               ],
             ] else ...[
@@ -376,14 +381,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 children: [
                   if (progress.stage != null)
                     Text(
-                      progress.stage!.displayName,
+                      progress.stage!.displayName(l10n),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     )
                   else
                     Text(
-                      progress.status.displayName,
+                      progress.status.displayName(l10n),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -416,7 +421,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _getStatusMessage(progress),
+                        _getStatusMessage(progress, l10n),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -460,7 +465,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
             // Task ID (for debugging) — show in loading / error / progress states
             const SizedBox(height: 12),
             Text(
-              '任务 ID: ${widget.taskId}',
+              l10n.shortVideoSpaceDialogExportProgressTaskId(widget.taskId),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontFamily: 'monospace',
@@ -473,7 +478,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         if (progress == null && _errorMessage != null)
           FilledButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('关闭'),
+            child: Text(l10n.shortVideoSpaceDialogExportProgressCloseButton),
           ),
         if (progress != null && !progress.status.isTerminal)
           TextButton(
@@ -484,14 +489,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('取消导出'),
+                : Text(l10n.shortVideoSpaceDialogExportProgressCancelButton),
           ),
         if (progress?.status.isTerminal == true)
           FilledButton(
             onPressed: () => Navigator.of(context).pop(
               progress?.status == ExportTaskStatus.completed,
             ),
-            child: const Text('关闭'),
+            child: Text(l10n.shortVideoSpaceDialogExportProgressCloseButton),
           ),
       ],
     );
@@ -512,32 +517,32 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     }
   }
 
-  String _getStatusMessage(ExportTaskProgress progress) {
+  String _getStatusMessage(ExportTaskProgress progress, AppLocalizations l10n) {
     switch (progress.status) {
       case ExportTaskStatus.queued:
-        return '导出任务已加入队列，等待处理...';
+        return l10n.shortVideoSpaceDialogExportProgressMessageQueued;
       case ExportTaskStatus.processing:
         if (progress.stage != null) {
           switch (progress.stage!) {
             case ExportTaskStage.initializing:
-              return '正在初始化导出任务...';
+              return l10n.shortVideoSpaceDialogExportProgressMessageInitializing;
             case ExportTaskStage.loadingAssets:
-              return '正在加载视频素材和音频文件...';
+              return l10n.shortVideoSpaceDialogExportProgressMessageLoadingAssets;
             case ExportTaskStage.encoding:
-              return '正在编码视频，这可能需要几分钟...';
+              return l10n.shortVideoSpaceDialogExportProgressMessageEncoding;
             case ExportTaskStage.uploading:
-              return '正在上传导出的视频文件...';
+              return l10n.shortVideoSpaceDialogExportProgressMessageUploading;
             case ExportTaskStage.finalizing:
-              return '正在完成最后的处理步骤...';
+              return l10n.shortVideoSpaceDialogExportProgressMessageFinalizing;
           }
         }
-        return '正在处理导出任务...';
+        return l10n.shortVideoSpaceDialogExportProgressMessageProcessing;
       case ExportTaskStatus.completed:
-        return '导出成功完成！视频已准备好下载。';
+        return l10n.shortVideoSpaceDialogExportProgressMessageCompleted;
       case ExportTaskStatus.failed:
-        return progress.errorMessage ?? '导出失败，请重试或联系支持。';
+        return progress.errorMessage ?? l10n.shortVideoSpaceDialogExportProgressMessageFailed;
       case ExportTaskStatus.cancelled:
-        return '导出已被取消。';
+        return l10n.shortVideoSpaceDialogExportProgressMessageCancelled;
     }
   }
 }

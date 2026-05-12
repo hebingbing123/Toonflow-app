@@ -6,56 +6,61 @@ import '../rust_api.dart';
 import 'support_project_api.dart';
 import 'view.dart';
 
-String shortVideoQualitySummaryLine({
+String shortVideoQualitySummaryLine(
+  AppLocalizations l10n, {
   required bool isAnimated,
   required QualityScopeInsightRow? insight,
 }) {
   if (insight == null) {
     return isAnimated
-        ? '质量评审还没有收敛出明显信号，后续会在这里提醒画风一致性、角色连续性和镜头节奏风险。'
-        : '质量评审还没有收敛出明显信号，后续会在这里提醒表演自然度、真实感和口播节奏风险。';
+        ? l10n.shortVideoQualityNoSignalAnimated
+        : l10n.shortVideoQualityNoSignalLive;
   }
   final passRate = insight.passRatePercent.toStringAsFixed(0);
   if (isAnimated) {
-    return '当前项目自动/人工评审通过率约 $passRate%，已记录 ${insight.badCaseCount} 条坏例；继续重点盯角色一致性、画面连续性和镜头节奏。';
+    return l10n.shortVideoQualityInsightAnimated(
+      passRate,
+      insight.badCaseCount,
+    );
   }
-  return '当前项目自动/人工评审通过率约 $passRate%，已记录 ${insight.badCaseCount} 条坏例；继续重点盯表演自然度、场景真实感和口播镜头质感。';
+  return l10n.shortVideoQualityInsightLive(passRate, insight.badCaseCount);
 }
 
-String shortVideoFormatBadCaseLabel(BadCaseStatItem item) {
+String shortVideoFormatBadCaseLabel(AppLocalizations l10n, BadCaseStatItem item) {
   final raw = (item.badCaseCategory ?? '').trim();
   if (raw.isEmpty) {
-    return '未分类';
+    return l10n.shortVideoBadCaseUncategorized;
   }
   return raw.replaceAll('_', ' ');
 }
 
-String shortVideoFormatTaskKind(JobRow row) {
+String shortVideoFormatTaskKind(AppLocalizations l10n, JobRow row) {
   final kind = row.kind.trim();
   if (kind.isEmpty) {
-    return '未命名任务';
+    return l10n.shortVideoTaskUnnamed;
   }
   return kind.replaceAll('.', ' / ');
 }
 
-String shortVideoFormatTaskStatus(JobRow row) {
+String shortVideoFormatTaskStatus(AppLocalizations l10n, JobRow row) {
   switch (row.status) {
     case 'queued':
-      return '排队中';
+      return l10n.shortVideoTaskStatusQueued;
     case 'running':
-      return '进行中';
+      return l10n.shortVideoTaskStatusRunning;
     case 'succeeded':
-      return '已完成';
+      return l10n.shortVideoTaskStatusSucceeded;
     case 'failed':
-      return '失败';
+      return l10n.shortVideoTaskStatusFailed;
     case 'cancelled':
-      return '已取消';
+      return l10n.shortVideoTaskStatusCancelled;
     default:
       return row.status;
   }
 }
 
-List<ShortVideoReadinessItem> buildShortVideoReadinessItems({
+List<ShortVideoReadinessItem> buildShortVideoReadinessItems(
+  AppLocalizations l10n, {
   required bool isAnimated,
   required ProjectRow? project,
   required ProjectStats? stats,
@@ -72,94 +77,119 @@ List<ShortVideoReadinessItem> buildShortVideoReadinessItems({
   if (isAnimated) {
     return <ShortVideoReadinessItem>[
       ShortVideoReadinessItem(
-        label: '剧本基础',
+        label: l10n.shortVideoReadinessLabelScriptBase,
         ready: scriptCount > 0,
-        detail: scriptCount > 0 ? '已有 $scriptCount 份剧本' : '还没有第一版剧本',
+        detail: scriptCount > 0
+            ? l10n.shortVideoReadinessDetailScriptsHas(scriptCount)
+            : l10n.shortVideoReadinessDetailScriptsMissing,
       ),
       ShortVideoReadinessItem(
-        label: '角色资产',
+        label: l10n.shortVideoReadinessAnimLabelRoleAssets,
         ready: roleCount > 0,
-        detail: roleCount > 0 ? '已有 $roleCount 个角色资产' : '还缺角色资产',
+        detail: roleCount > 0
+            ? l10n.shortVideoReadinessDetailRolesHas(roleCount)
+            : l10n.shortVideoReadinessDetailRolesMissingAnim,
       ),
       ShortVideoReadinessItem(
-        label: '场景资产',
+        label: l10n.shortVideoReadinessLabelSceneAssets,
         ready: sceneAssetCount > 0,
-        detail: sceneAssetCount > 0 ? '已有 $sceneAssetCount 个场景资产' : '还缺场景资产',
+        detail: sceneAssetCount > 0
+            ? l10n.shortVideoReadinessDetailScenesHas(sceneAssetCount)
+            : l10n.shortVideoReadinessDetailScenesMissingAnim,
       ),
       ShortVideoReadinessItem(
-        label: '画风信号',
+        label: l10n.shortVideoReadinessAnimLabelVisualStyle,
         ready: hasVisualStyle,
         detail: hasVisualStyle
-            ? '已配置 ${visualLabel ?? "画风或风格包"}'
-            : '还没收口画风 / 视觉风格',
+            ? l10n.shortVideoReadinessDetailVisualConfigured(
+                visualLabel ?? l10n.shortVideoReadinessFallbackStylePack,
+              )
+            : l10n.shortVideoReadinessDetailVisualMissingAnim,
       ),
       ShortVideoReadinessItem(
-        label: '导演手册',
+        label: l10n.shortVideoReadinessAnimLabelDirectorManual,
         ready: hasDirection,
         detail: hasDirection
-            ? '已配置 ${directionLabel ?? "导演手册或故事风格包"}'
-            : '还没收口导演手册',
+            ? l10n.shortVideoReadinessDetailDirectorConfigured(
+                directionLabel ?? l10n.shortVideoReadinessFallbackDirectorPack,
+              )
+            : l10n.shortVideoReadinessDetailDirectorMissingAnim,
       ),
       ShortVideoReadinessItem(
-        label: '分镜基础',
+        label: l10n.shortVideoReadinessAnimLabelStoryboardBase,
         ready: storyboardCount > 0,
-        detail: storyboardCount > 0 ? '已有 $storyboardCount 条分镜' : '还没有分镜结构',
+        detail: storyboardCount > 0
+            ? l10n.shortVideoReadinessDetailStoryboardsHas(storyboardCount)
+            : l10n.shortVideoReadinessDetailStoryboardsMissing,
       ),
     ];
   }
   return <ShortVideoReadinessItem>[
     ShortVideoReadinessItem(
-      label: '剧本基础',
+      label: l10n.shortVideoReadinessLabelScriptBase,
       ready: scriptCount > 0,
-      detail: scriptCount > 0 ? '已有 $scriptCount 份剧本' : '还没有第一版剧本',
+      detail: scriptCount > 0
+          ? l10n.shortVideoReadinessDetailScriptsHas(scriptCount)
+          : l10n.shortVideoReadinessDetailScriptsMissing,
     ),
     ShortVideoReadinessItem(
-      label: '角色设定',
+      label: l10n.shortVideoReadinessLiveLabelRoleSetup,
       ready: roleCount > 0,
-      detail: roleCount > 0 ? '已有 $roleCount 个角色资产' : '还缺角色设定 / 角色资产',
+      detail: roleCount > 0
+          ? l10n.shortVideoReadinessDetailRolesHas(roleCount)
+          : l10n.shortVideoReadinessDetailRolesMissingLive,
     ),
     ShortVideoReadinessItem(
-      label: '场景参考',
+      label: l10n.shortVideoReadinessLabelSceneAssets,
       ready: sceneAssetCount > 0,
-      detail: sceneAssetCount > 0 ? '已有 $sceneAssetCount 个场景资产' : '还缺真人场景参考',
+      detail: sceneAssetCount > 0
+          ? l10n.shortVideoReadinessDetailScenesHas(sceneAssetCount)
+          : l10n.shortVideoReadinessDetailScenesMissingLive,
     ),
     ShortVideoReadinessItem(
-      label: '镜头素材',
+      label: l10n.shortVideoReadinessLiveLabelClipRefs,
       ready: clipAssetCount > 0,
       detail: clipAssetCount > 0
-          ? '已有 $clipAssetCount 份 clip 参考'
-          : '还缺真人镜头 / clip 参考',
+          ? l10n.shortVideoReadinessDetailClipsHas(clipAssetCount)
+          : l10n.shortVideoReadinessDetailClipsMissing,
     ),
     ShortVideoReadinessItem(
-      label: '视觉手册',
+      label: l10n.shortVideoReadinessLiveLabelVisualManual,
       ready: hasVisualStyle,
       detail: hasVisualStyle
-          ? '已配置 ${visualLabel ?? "视觉风格或风格包"}'
-          : '还没收口真人视觉风格',
+          ? l10n.shortVideoReadinessDetailVisualConfigured(
+              visualLabel ?? l10n.shortVideoReadinessFallbackLiveVisualPack,
+            )
+          : l10n.shortVideoReadinessDetailVisualMissingLive,
     ),
     ShortVideoReadinessItem(
-      label: '表演 / 口播手册',
+      label: l10n.shortVideoReadinessLiveLabelPerformanceManual,
       ready: hasDirection,
       detail: hasDirection
-          ? '已配置 ${directionLabel ?? "导演手册或故事风格包"}'
-          : '还没收口口播语气 / 导演手册',
+          ? l10n.shortVideoReadinessDetailDirectorConfigured(
+              directionLabel ?? l10n.shortVideoReadinessFallbackDirectorPack,
+            )
+          : l10n.shortVideoReadinessDetailPerformanceMissingLive,
     ),
   ];
 }
 
-String shortVideoReadinessGapSummary({
+String shortVideoReadinessGapSummary(
+  AppLocalizations l10n, {
   required bool isAnimated,
   required List<ShortVideoReadinessItem> readinessItems,
 }) {
   final missing = readinessItems.where((item) => !item.ready).toList();
   if (missing.isEmpty) {
     return isAnimated
-        ? '动漫短剧的基础准备项已经齐了，可以直接推进脚本、制作和质检闭环。'
-        : '真人短剧的基础准备项已经齐了，可以继续推进镜头生成、口播和成片复核。';
+        ? l10n.shortVideoReadinessGapAllReadyAnimated
+        : l10n.shortVideoReadinessGapAllReadyLive;
   }
   final labels = missing.take(3).map((item) => item.label).join('、');
-  final suffix = missing.length > 3 ? ' 等 ${missing.length} 项' : '';
-  return '当前还缺 $labels$suffix，建议先回项目区把这些准备项补齐。';
+  final more = missing.length > 3
+      ? l10n.shortVideoReadinessGapAndMore(missing.length)
+      : '';
+  return l10n.shortVideoReadinessGapMissing(labels, more);
 }
 
 /// Builds the Space panel for **`GET /api/v1/projects/{id}/short-video-readiness`**.
@@ -226,23 +256,24 @@ ShotReadinessUi buildShotReadinessUi({
   );
 }
 
-String shortVideoAssetTypeOverviewLabel(String assetType) {
+String shortVideoAssetTypeOverviewLabel(AppLocalizations l10n, String assetType) {
   switch (assetType) {
     case 'role':
-      return '角色';
+      return l10n.shortVideoAssetTypeRole;
     case 'scene':
-      return '场景';
+      return l10n.shortVideoAssetTypeScene;
     case 'tool':
-      return '道具';
+      return l10n.shortVideoAssetTypeTool;
     case 'clip':
-      return '镜头';
+      return l10n.shortVideoAssetTypeClip;
     default:
-      return assetType.isEmpty ? '其他' : assetType;
+      return assetType.isEmpty ? l10n.shortVideoAssetTypeOther : assetType;
   }
 }
 
 /// Space **统一资产总览**（C9）：消费 **`GET /projects/{id}/assets-overview`**。
 ShortVideoAssetsOverviewPanelUi buildShortVideoAssetsOverviewPanelUi({
+  required AppLocalizations l10n,
   required bool projectSelected,
   required bool loadingProjectOverview,
   required ProjectAssetsOverview? overview,
@@ -251,19 +282,19 @@ ShortVideoAssetsOverviewPanelUi buildShortVideoAssetsOverviewPanelUi({
     return const ShortVideoAssetsOverviewPanelUi(visible: false);
   }
   if (loadingProjectOverview) {
-    return const ShortVideoAssetsOverviewPanelUi(
+    return ShortVideoAssetsOverviewPanelUi(
       visible: true,
       loading: true,
-      headline: '正在读取资产总览…',
-      detail: '按资产类型汇总数量，并聚合关联剧本号（app_script_asset）。',
+      headline: l10n.shortVideoAssetsOverviewLoadingHeadline,
+      detail: l10n.shortVideoAssetsOverviewLoadingDetail,
     );
   }
   if (overview == null) {
-    return const ShortVideoAssetsOverviewPanelUi(
+    return ShortVideoAssetsOverviewPanelUi(
       visible: true,
       unavailable: true,
-      headline: '资产总览暂不可用。',
-      detail: '可稍后刷新，或在项目区维护资产与剧本挂载关系。',
+      headline: l10n.shortVideoAssetsOverviewUnavailableHeadline,
+      detail: l10n.shortVideoAssetsOverviewUnavailableDetail,
     );
   }
   final lines = <String>[];
@@ -273,21 +304,24 @@ ShortVideoAssetsOverviewPanelUi buildShortVideoAssetsOverviewPanelUi({
       ids.addAll(item.linkedScriptNumericIds);
     }
     final sorted = ids.toList()..sort();
-    final idPart = sorted.isEmpty
-        ? '暂无关联剧本'
-        : '剧本 ${sorted.take(8).map((n) => '#$n').join('·')}${sorted.length > 8 ? '…' : ''}';
+    final scriptPart = sorted.isEmpty
+        ? l10n.shortVideoAssetsOverviewNoLinkedScripts
+        : '${l10n.shortVideoAssetsOverviewScriptsPrefix}'
+              '${sorted.take(8).map((n) => '#$n').join('·')}'
+              '${sorted.length > 8 ? l10n.shortVideoAssetsOverviewScriptsEllipsis : ''}';
     lines.add(
-      '${shortVideoAssetTypeOverviewLabel(g.assetType)} · ${g.items.length} 条 · $idPart',
+      l10n.shortVideoAssetsOverviewTypeLine(
+        shortVideoAssetTypeOverviewLabel(l10n, g.assetType),
+        g.items.length,
+        scriptPart,
+      ),
     );
   }
-  final headline =
-      '共 ${overview.totalCount} 条资产，按类型分组（实验剧本挂载关系见每行「剧本」摘要）。';
-  const detail = '数据来自只读聚合接口；候选状态维护仍在项目区 PATCH 资产。';
   return ShortVideoAssetsOverviewPanelUi(
     visible: true,
-    headline: headline,
+    headline: l10n.shortVideoAssetsOverviewHeadline(overview.totalCount),
     typeLines: lines,
-    detail: detail,
+    detail: l10n.shortVideoAssetsOverviewFooter,
   );
 }
 
@@ -306,19 +340,19 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
     return const ShortVideoCandidateComparePanelUi(visible: false);
   }
   if (loadingProjectOverview) {
-    return const ShortVideoCandidateComparePanelUi(
+    return ShortVideoCandidateComparePanelUi(
       visible: true,
       loading: true,
-      headline: '正在整理分镜候选与当前版本…',
-      detail: '会按分镜聚合参考图、当前视频、readiness 与质量评审摘要。',
+      headline: l10n.shortVideoCandidateCompareLoadingHeadline,
+      detail: l10n.shortVideoCandidateCompareLoadingDetail,
     );
   }
   if (storyboardRows.isEmpty) {
-    return const ShortVideoCandidateComparePanelUi(
+    return ShortVideoCandidateComparePanelUi(
       visible: true,
       unavailable: true,
-      headline: '当前还没有可对比的分镜候选。',
-      detail: '先在制作工作区生成镜头或补参考图，再回到 Space 查看对比。',
+      headline: l10n.shortVideoCandidateCompareUnavailableHeadline,
+      detail: l10n.shortVideoCandidateCompareUnavailableDetail,
     );
   }
 
@@ -363,9 +397,13 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
           );
     final qualityLine = shotReviews.isEmpty
         ? (isLiveAction
-              ? '暂无质检记录，先盯表演自然度、真实感和口播镜头质感。'
-              : '暂无质检记录，先盯角色一致性、画面连续性和镜头节奏。')
-        : '评审 ${shotReviews.length} 条 · 通过 $passed 条 · 坏例 $badCases 条';
+              ? l10n.shortVideoCandidateQualityNoReviewsLive
+              : l10n.shortVideoCandidateQualityNoReviewsAnimated)
+        : l10n.shortVideoCandidateQualitySummary(
+            shotReviews.length,
+            passed,
+            badCases,
+          );
     return ShortVideoCandidateCompareItemUi(
       storyboardNumericId: row.id,
       scriptNumericId: row.scriptId,
@@ -383,10 +421,10 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
 
   return ShortVideoCandidateComparePanelUi(
     visible: true,
-    headline: '优先对比 ${items.length} 条分镜的当前版本、参考图与质检状态。',
+    headline: l10n.shortVideoCandidateCompareHeadline(items.length),
     detail: isLiveAction
-        ? '真人模式会额外展示参考镜头与表演/口播约束命中情况，方便先锁住真实感与演员感。'
-        : '先看哪几条分镜缺参考、缺当前视频或命中过多坏例，再决定去制作台局部返工。',
+        ? l10n.shortVideoCandidateCompareDetailLive
+        : l10n.shortVideoCandidateCompareDetailAnimated,
     items: items,
   );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'publish_copy_editor.dart';
@@ -15,6 +16,60 @@ part 'view_publish_jobs.dart';
 part 'view_publish_audit.dart';
 
 enum ShortVideoMode { animated, liveAction }
+
+/// Display order for publish platform chips (full matrix; ids match backend).
+const List<String> kShortVideoPublishPlatformIdsInDisplayOrder = <String>[
+  'douyin',
+  'bilibili',
+  'xiaohongshu',
+  'weixin_channels',
+  'kuaishou',
+  'tiktok',
+  'youtube_shorts',
+  'instagram_reels',
+  'facebook_reels',
+];
+
+String shortVideoPublishPlatformLabel(AppLocalizations l10n, String platformId) {
+  switch (platformId) {
+    case 'douyin':
+      return l10n.shortVideoPublishPlatformDouyin;
+    case 'bilibili':
+      return l10n.shortVideoPublishPlatformBilibili;
+    case 'xiaohongshu':
+      return l10n.shortVideoPublishPlatformXiaohongshu;
+    case 'weixin_channels':
+      return l10n.shortVideoPublishPlatformWeixinChannels;
+    case 'kuaishou':
+      return l10n.shortVideoPublishPlatformKuaishou;
+    case 'tiktok':
+      return l10n.shortVideoPublishPlatformTiktok;
+    case 'youtube_shorts':
+      return l10n.shortVideoPublishPlatformYoutubeShorts;
+    case 'instagram_reels':
+      return l10n.shortVideoPublishPlatformInstagramReels;
+    case 'facebook_reels':
+      return l10n.shortVideoPublishPlatformFacebookReels;
+    default:
+      return platformId;
+  }
+}
+
+String shortVideoPublishPlatformLabelWithMatrixFallback(
+  AppLocalizations l10n,
+  String platformId,
+  String? labelZhFromMatrix,
+) {
+  final localized = shortVideoPublishPlatformLabel(l10n, platformId);
+  if (localized != platformId) {
+    return localized;
+  }
+  final f = labelZhFromMatrix?.trim() ?? '';
+  if (f.isNotEmpty) {
+    return f;
+  }
+  return platformId;
+}
 
 class ShortVideoProjectOption {
   const ShortVideoProjectOption({required this.id, required this.label});
@@ -345,19 +400,6 @@ class ShortVideoStageCardData {
   final String detail;
 }
 
-/// 与后端 `validate_target_platforms` 约定的平台 id → 展示名（需求：全矩阵勾选）。
-const Map<String, String> kShortVideoPublishPlatformLabels = {
-  'douyin': '抖音',
-  'bilibili': '哔哩哔哩',
-  'xiaohongshu': '小红书',
-  'weixin_channels': '视频号',
-  'kuaishou': '快手',
-  'tiktok': 'TikTok',
-  'youtube_shorts': 'YouTube Shorts',
-  'instagram_reels': 'Instagram Reels',
-  'facebook_reels': 'Facebook Reels',
-};
-
 /// P11: Delivery Mode Badge widget
 class DeliveryModeBadge extends StatelessWidget {
   const DeliveryModeBadge({
@@ -372,36 +414,39 @@ class DeliveryModeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final l10n = AppLocalizations.of(context)!;
+
     Color bgColor;
     Color textColor;
     IconData icon;
     String label;
-    
+
     switch (deliveryMode.toLowerCase()) {
       case 'live':
         bgColor = Colors.green.shade100;
         textColor = Colors.green.shade900;
         icon = Icons.check_circle;
-        label = '真实 ✓';
+        label = l10n.shortVideoDeliveryModeLive;
         break;
       case 'sandbox':
         bgColor = Colors.grey.shade200;
         textColor = Colors.grey.shade800;
         icon = Icons.warning_amber;
-        label = '沙盒 ⚠️';
+        label = l10n.shortVideoDeliveryModeSandbox;
         break;
       case 'manual_bridge':
         bgColor = Colors.blue.shade100;
         textColor = Colors.blue.shade900;
         icon = Icons.person;
-        label = '人工 👤';
+        label = l10n.shortVideoDeliveryModeManualBridge;
         break;
       default:
         bgColor = Colors.orange.shade100;
         textColor = Colors.orange.shade900;
         icon = Icons.help_outline;
-        label = deliveryMode.isEmpty ? '未知' : deliveryMode;
+        label = deliveryMode.isEmpty
+            ? l10n.shortVideoDeliveryModeUnknown
+            : deliveryMode;
     }
     
     if (small) {
@@ -602,6 +647,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -611,18 +657,18 @@ class ShortVideoSpaceView extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '短视频 Space',
+                l10n.shortVideoSpacePageTitle,
                 style: theme.textTheme.titleLarge,
               ),
             ),
-            const RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: '本机客户端偏好（含发布/成片等「不再提示」）',
+            RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.notificationsRiskyPrefsTooltip,
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
-          '参考 MoneyPrinterTurbo 的长处，先把“主题到成片”的链路聚成一个入口，再逐步把脚本、素材、旁白、字幕和质检串成标准流程。',
+          l10n.shortVideoSpacePageSubtitle,
           style: theme.textTheme.bodyMedium?.copyWith(color: outline),
         ),
         const SizedBox(height: 16),
@@ -630,7 +676,10 @@ class ShortVideoSpaceView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('创作模式', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.shortVideoSpaceSectionCreativeMode,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
               const SizedBox(height: 12),
@@ -714,7 +763,10 @@ class ShortVideoSpaceView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('模式准备度', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.shortVideoSpaceSectionModeReadiness,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Text(
                 readinessIntro,
@@ -725,7 +777,10 @@ class ShortVideoSpaceView extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _MetricChip(label: '已就绪', value: readinessCountLabel),
+                  _MetricChip(
+                    label: l10n.shortVideoSpaceReadinessReadyChip,
+                    value: readinessCountLabel,
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -740,16 +795,19 @@ class ShortVideoSpaceView extends StatelessWidget {
                   child: _ReadinessRow(item: item),
                 ),
               const SizedBox(height: 16),
-              Text('分镜生成就绪（服务端）', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.shortVideoSpaceSectionShotReadinessServer,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               if (shotReadinessUi.loading)
                 Text(
-                  '正在读取分镜就绪聚合…',
+                  l10n.shortVideoSpaceShotReadinessLoading,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 )
               else if (shotReadinessUi.unavailable)
                 Text(
-                  '分镜就绪摘要暂不可用，其余概览仍有效。',
+                  l10n.shortVideoSpaceShotReadinessUnavailableHint,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 )
               else ...[
@@ -785,7 +843,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                 if (shotReadinessUi.shotDetailLines.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
-                    '优先处理的分镜',
+                    l10n.shortVideoSpaceShotReadinessPriorityShots,
                     style: theme.textTheme.labelLarge,
                   ),
                   const SizedBox(height: 6),
@@ -813,7 +871,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onOpenProductionForShotReadiness,
                     icon: const Icon(Icons.movie_creation_outlined),
-                    label: const Text('打开制作工作区分镜'),
+                    label: Text(l10n.shortVideoSpaceOpenProductionBoardButton),
                   ),
                 ],
               ],
@@ -825,7 +883,10 @@ class ShortVideoSpaceView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('建议下一步', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.shortVideoSpaceSectionSuggestedNext,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Text(nextStepTitle, style: theme.textTheme.titleMedium),
               const SizedBox(height: 6),
@@ -861,7 +922,10 @@ class ShortVideoSpaceView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('建议迁移顺序', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.shortVideoSpaceSectionMigrationOrder,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               Text(migrationSummary, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 12),
@@ -872,27 +936,27 @@ class ShortVideoSpaceView extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onOpenProjects,
                     icon: const Icon(Icons.folder_open_outlined),
-                    label: const Text('项目'),
+                    label: Text(l10n.shortVideoSpaceNavProjects),
                   ),
                   OutlinedButton.icon(
                     onPressed: onOpenScriptWorkspace,
                     icon: const Icon(Icons.edit_note_outlined),
-                    label: const Text('脚本工作区'),
+                    label: Text(l10n.shortVideoSpaceNavScriptWorkspace),
                   ),
                   OutlinedButton.icon(
                     onPressed: onOpenProductionWorkspace,
                     icon: const Icon(Icons.movie_creation_outlined),
-                    label: const Text('制作工作区'),
+                    label: Text(l10n.shortVideoSpaceNavProductionWorkspace),
                   ),
                   OutlinedButton.icon(
                     onPressed: onOpenTasks,
                     icon: const Icon(Icons.checklist_outlined),
-                    label: const Text('任务中心'),
+                    label: Text(l10n.shortVideoSpaceNavTaskCenter),
                   ),
                   OutlinedButton.icon(
                     onPressed: onOpenQuality,
                     icon: const Icon(Icons.fact_check_outlined),
-                    label: const Text('质量评审'),
+                    label: Text(l10n.shortVideoSpaceNavQualityReviews),
                   ),
                 ],
               ),
@@ -931,17 +995,18 @@ class _ModeSegmentedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SegmentedButton<ShortVideoMode>(
-      segments: const [
+      segments: [
         ButtonSegment(
           value: ShortVideoMode.animated,
-          icon: Icon(Icons.auto_awesome_outlined),
-          label: Text('动漫短剧'),
+          icon: const Icon(Icons.auto_awesome_outlined),
+          label: Text(l10n.shortVideoSpaceModeTitleAnimated),
         ),
         ButtonSegment(
           value: ShortVideoMode.liveAction,
-          icon: Icon(Icons.person_outline),
-          label: Text('真人短剧'),
+          icon: const Icon(Icons.person_outline),
+          label: Text(l10n.shortVideoSpaceModeTitleLive),
         ),
       ],
       selected: {mode},
@@ -1007,6 +1072,15 @@ class _CandidateCompareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
+    final l10n = AppLocalizations.of(context)!;
+    final header = item.scriptNumericId != null
+        ? l10n.shortVideoCandidateCompareStoryboardWithScript(
+            item.storyboardNumericId,
+            item.scriptNumericId!,
+          )
+        : l10n.shortVideoCandidateCompareStoryboardOnly(
+            item.storyboardNumericId,
+          );
     return SizedBox(
       width: 280,
       child: Container(
@@ -1019,8 +1093,7 @@ class _CandidateCompareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '分镜 #${item.storyboardNumericId}'
-              '${item.scriptNumericId != null ? ' · 脚本 #${item.scriptNumericId}' : ''}',
+              header,
               style: theme.textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -1043,7 +1116,7 @@ class _CandidateCompareCard extends StatelessWidget {
                     height: 120,
                     color: theme.colorScheme.surfaceContainerHighest,
                     alignment: Alignment.center,
-                    child: const Text('参考图不可预览'),
+                    child: Text(l10n.shortVideoCandidateReferenceImageNotPreviewable),
                   ),
                 ),
               ),
@@ -1051,7 +1124,9 @@ class _CandidateCompareCard extends StatelessWidget {
             if (item.liveActionReferenceShotUrls.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                '真人参考镜头 ${item.liveActionReferenceShotUrls.length} 条',
+                l10n.shortVideoCandidateLiveRefShotCount(
+                  item.liveActionReferenceShotUrls.length,
+                ),
                 style: theme.textTheme.labelMedium,
               ),
               const SizedBox(height: 4),
@@ -1062,7 +1137,10 @@ class _CandidateCompareCard extends StatelessWidget {
             ],
             if ((item.selectedVideoUrl ?? '').trim().isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text('当前视频', style: theme.textTheme.labelMedium),
+              Text(
+                l10n.shortVideoCandidateCurrentVideo,
+                style: theme.textTheme.labelMedium,
+              ),
               const SizedBox(height: 4),
               SelectableText(
                 item.selectedVideoUrl!,
@@ -1077,12 +1155,12 @@ class _CandidateCompareCard extends StatelessWidget {
                 if (item.onSetCurrent != null)
                   FilledButton.tonal(
                     onPressed: item.onSetCurrent,
-                    child: const Text('设为当前'),
+                    child: Text(l10n.shortVideoCandidateSetCurrent),
                   ),
                 if (item.onOpenRework != null)
                   OutlinedButton(
                     onPressed: item.onOpenRework,
-                    child: const Text('局部返工'),
+                    child: Text(l10n.shortVideoCandidatePartialRework),
                   ),
               ],
             ),

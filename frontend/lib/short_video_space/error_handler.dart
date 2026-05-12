@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api/core.dart';
 
 /// 错误严重程度
@@ -49,24 +50,27 @@ class ShortVideoErrorHandler {
   static ErrorHandlingResult handleApiError(
     Object error, {
     String? context,
+    required AppLocalizations l10n,
   }) {
     if (error is RustApiException) {
-      return _handleRustApiException(error, context: context);
+      return _handleRustApiException(error, context: context, l10n: l10n);
     }
 
     if (error is TimeoutException) {
+      final contextStr = context != null ? '（$context）' : '';
       return ErrorHandlingResult(
         shouldRetry: true,
-        userMessage: '请求超时${context != null ? '（$context）' : ''}，请检查网络连接后重试。',
+        userMessage: l10n.shortVideoSpaceErrorTimeout(contextStr),
         retryDelayMs: 2000,
         severity: ErrorSeverity.warning,
       );
     }
 
     // 通用错误
+    final contextStr = context != null ? '（$context）' : '';
     return ErrorHandlingResult(
       shouldRetry: false,
-      userMessage: '操作失败${context != null ? '（$context）' : ''}：${error.toString()}',
+      userMessage: l10n.shortVideoSpaceErrorOperationFailed(contextStr, error.toString()),
       severity: ErrorSeverity.error,
     );
   }
@@ -75,9 +79,19 @@ class ShortVideoErrorHandler {
   static ErrorHandlingResult _handleRustApiException(
     RustApiException error, {
     String? context,
+    required AppLocalizations l10n,
   }) {
     final statusCode = error.statusCode;
     final details = RustApiErrorDetails.tryParse(error.message);
+    final contextStr = context != null ? '（$context）' : '';
+
+    if (details?.code == 'concurrent_limit_exceeded') {
+      return ErrorHandlingResult(
+        shouldRetry: false,
+        userMessage: l10n.shortVideoSpaceErrorConcurrentLimitExceeded(contextStr),
+        severity: ErrorSeverity.warning,
+      );
+    }
 
     // 429 频率限制
     if (statusCode == 429 || details?.code == 'quota_exceeded') {
@@ -85,7 +99,7 @@ class ShortVideoErrorHandler {
       final waitText = formatRetryAfterMs(waitMs);
       return ErrorHandlingResult(
         shouldRetry: true,
-        userMessage: '请求过于频繁${context != null ? '（$context）' : ''}，$waitText。',
+        userMessage: l10n.shortVideoSpaceErrorRateLimitWithWait(contextStr, waitText),
         retryDelayMs: waitMs,
         severity: ErrorSeverity.warning,
       );
@@ -95,7 +109,7 @@ class ShortVideoErrorHandler {
     if (statusCode == 404) {
       return ErrorHandlingResult(
         shouldRetry: false,
-        userMessage: '未找到对应记录${context != null ? '（$context）' : ''}。',
+        userMessage: l10n.shortVideoSpaceErrorNotFound(contextStr),
         severity: ErrorSeverity.error,
       );
     }
@@ -104,17 +118,17 @@ class ShortVideoErrorHandler {
     if (statusCode == 401 || statusCode == 403) {
       return ErrorHandlingResult(
         shouldRetry: false,
-        userMessage: '权限不足${context != null ? '（$context）' : ''}，请检查登录状态。',
+        userMessage: l10n.shortVideoSpaceErrorPermissionDenied(contextStr),
         severity: ErrorSeverity.critical,
       );
     }
 
     // 400 请求参数错误
     if (statusCode == 400) {
-      final message = details?.message ?? '请求参数错误';
+      final message = details?.message ?? l10n.shortVideoSpaceErrorBadRequest;
       return ErrorHandlingResult(
         shouldRetry: false,
-        userMessage: '$message${context != null ? '（$context）' : ''}',
+        userMessage: l10n.shortVideoSpaceErrorBadRequestWithContext(message, contextStr),
         severity: ErrorSeverity.error,
       );
     }
@@ -123,7 +137,7 @@ class ShortVideoErrorHandler {
     if (statusCode != null && statusCode >= 500) {
       return ErrorHandlingResult(
         shouldRetry: true,
-        userMessage: '服务器错误${context != null ? '（$context）' : ''}，请稍后重试。',
+        userMessage: l10n.shortVideoSpaceErrorServerError(contextStr),
         retryDelayMs: 3000,
         severity: ErrorSeverity.error,
       );
@@ -133,7 +147,7 @@ class ShortVideoErrorHandler {
     if (details != null) {
       return ErrorHandlingResult(
         shouldRetry: false,
-        userMessage: '${details.message}${context != null ? '（$context）' : ''}',
+        userMessage: l10n.shortVideoSpaceErrorDetailedMessage(details.message, contextStr),
         severity: ErrorSeverity.error,
       );
     }
@@ -141,7 +155,7 @@ class ShortVideoErrorHandler {
     // 默认错误处理
     return ErrorHandlingResult(
       shouldRetry: false,
-      userMessage: '操作失败${context != null ? '（$context）' : ''}：${formatRustApiException(error)}',
+      userMessage: l10n.shortVideoSpaceErrorDefaultMessage(contextStr, formatRustApiException(error)),
       severity: ErrorSeverity.error,
     );
   }
@@ -154,6 +168,7 @@ class ShortVideoErrorHandler {
   }) {
     if (!context.mounted) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     final snackBar = SnackBar(
       content: Text(result.userMessage),
@@ -161,7 +176,7 @@ class ShortVideoErrorHandler {
       duration: _getDuration(result.severity),
       action: result.shouldRetry && onRetry != null
           ? SnackBarAction(
-              label: '重试',
+              label: l10n.shortVideoSpaceErrorRetryButton,
               textColor: Colors.white,
               onPressed: onRetry,
             )
@@ -216,6 +231,8 @@ class ShortVideoErrorHandler {
     void Function(ErrorHandlingResult)? onError,
     bool showErrorToUser = true,
   }) async {
+    if (!context.mounted) return null;
+    final l10n = AppLocalizations.of(context)!;
     int attemptCount = 0;
 
     while (attemptCount <= maxRetries) {
@@ -227,6 +244,7 @@ class ShortVideoErrorHandler {
         final result = handleApiError(
           error,
           context: operationContext,
+          l10n: l10n,
         );
 
         // 调用错误回调
@@ -271,6 +289,8 @@ class ShortVideoErrorHandler {
     void Function(int completed, int total, int failed)? onProgress,
     int maxConcurrent = 5,
   }) async {
+    if (!context.mounted) return (0, 0, <String>[]);
+    final l10n = AppLocalizations.of(context)!;
     int completed = 0;
     int failed = 0;
     final List<String> failureDetails = [];
@@ -285,7 +305,7 @@ class ShortVideoErrorHandler {
             await op();
             return (true, null);
           } catch (error) {
-            final result = handleApiError(error, context: operationName);
+            final result = handleApiError(error, context: operationName, l10n: l10n);
             return (false, result.userMessage);
           }
         }),

@@ -111,6 +111,7 @@ void main() {
 
   test('live-action readiness highlights scene clip and manual gaps', () {
     final items = buildShortVideoReadinessItems(
+      zh,
       isAnimated: false,
       project: const ProjectRow(
         id: 'project-1',
@@ -139,7 +140,7 @@ void main() {
       '视觉手册',
     ]);
     expect(items.where((item) => !item.ready).map((item) => item.label), [
-      '场景参考',
+      '场景资产',
       '镜头素材',
       '表演 / 口播手册',
     ]);
@@ -307,6 +308,7 @@ void main() {
       ],
     });
     final ui = buildShortVideoAssetsOverviewPanelUi(
+      l10n: zh,
       projectSelected: true,
       loadingProjectOverview: false,
       overview: overview,

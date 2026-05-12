@@ -3,12 +3,12 @@
 part of 'section.dart';
 
 /// Batch operations for ShortVideoSpaceSection
-extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVideoSpaceSectionState {
+extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
+    on _ShortVideoSpaceSectionState {
   /// Batch enable selected shots
   Future<void> _batchEnableShots({
     required Set<int> selectedStoryboardIds,
     required List<_AssemblyClipDeskOpEntry> allEntries,
-    required int projectId,
     required String projectUuid,
     required int scriptId,
     required String token,
@@ -28,12 +28,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
         (e) => e.storyboardNumericId == storyboardId,
         orElse: () => throw Exception('Shot not found: $storyboardId'),
       );
-      
+
       if (entry.selectedMediaUrl.trim().isEmpty) {
         // Skip shots without video URLs
         continue;
       }
-      
+
       operations.add({
         'storyboardId': storyboardId,
         'videoUrl': entry.selectedMediaUrl,
@@ -85,15 +85,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
 
         await refreshData();
       } on RustApiException catch (e) {
-        showFeedback(
-          '批量启用失败：${e.statusCode ?? '-'}',
-          isSuccess: false,
-        );
+        showFeedback('批量启用失败：${e.statusCode ?? '-'}', isSuccess: false);
       } catch (e) {
-        showFeedback(
-          '批量启用失败：$e',
-          isSuccess: false,
-        );
+        showFeedback('批量启用失败：$e', isSuccess: false);
       }
     }
   }
@@ -101,7 +95,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
   /// Batch disable selected shots
   Future<void> _batchDisableShots({
     required Set<int> selectedStoryboardIds,
-    required int projectId,
     required String projectUuid,
     required int scriptId,
     required String token,
@@ -171,15 +164,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
 
         await refreshData();
       } on RustApiException catch (e) {
-        showFeedback(
-          '批量禁用失败：${e.statusCode ?? '-'}',
-          isSuccess: false,
-        );
+        showFeedback('批量禁用失败：${e.statusCode ?? '-'}', isSuccess: false);
       } catch (e) {
-        showFeedback(
-          '批量禁用失败：$e',
-          isSuccess: false,
-        );
+        showFeedback('批量禁用失败：$e', isSuccess: false);
       }
     }
   }
@@ -187,7 +174,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
   /// Batch update duration for selected shots
   Future<void> _batchUpdateDuration({
     required Set<int> selectedStoryboardIds,
-    required int projectId,
     required String projectUuid,
     required int scriptId,
     required String token,
@@ -238,10 +224,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
 
     // Build operations list
     final operations = selectedStoryboardIds
-        .map((id) => {
-              'storyboardId': id,
-              'duration': duration,
-            })
+        .map((id) => {'storyboardId': id, 'duration': duration})
         .toList();
 
     // Show progress dialog
@@ -253,7 +236,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
         executeOperation: (operation) async {
           await postStoryboardUpdateDurationV1(
             token,
-            projectId: projectId,
             projectUuid: projectUuid,
             scriptId: scriptId,
             storyboardId: operation['storyboardId'] as int,
@@ -275,7 +257,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
   Future<void> _batchReplaceVideos({
     required Set<int> selectedStoryboardIds,
     required List<_AssemblyClipDeskOpEntry> allEntries,
-    required int projectId,
     required String projectUuid,
     required int scriptId,
     required String token,
@@ -373,10 +354,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       }
 
       if (newUrl != entry.selectedMediaUrl) {
-        operations.add({
-          'storyboardId': storyboardId,
-          'videoUrl': newUrl,
-        });
+        operations.add({'storyboardId': storyboardId, 'videoUrl': newUrl});
       }
     }
 
@@ -400,15 +378,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
 
       await refreshData();
     } on RustApiException catch (e) {
-      showFeedback(
-        '批量替换失败：${e.statusCode ?? '-'}',
-        isSuccess: false,
-      );
+      showFeedback('批量替换失败：${e.statusCode ?? '-'}', isSuccess: false);
     } catch (e) {
-      showFeedback(
-        '批量替换失败：$e',
-        isSuccess: false,
-      );
+      showFeedback('批量替换失败：$e', isSuccess: false);
     }
   }
 
@@ -421,7 +393,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
   }) async {
     final token = widget.accessToken;
     final project = _selectedProject;
-    
+
     if (token == null || token.isEmpty || project == null) {
       showFeedback('无法获取项目信息', isSuccess: false);
       return;
@@ -434,9 +406,11 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
 
     // Filter shots that have voiceover script ready
     final eligibleShots = allEntries
-        .where((e) =>
-            selectedStoryboardIds.contains(e.storyboardNumericId) &&
-            e.voiceoverScriptReady)
+        .where(
+          (e) =>
+              selectedStoryboardIds.contains(e.storyboardNumericId) &&
+              e.voiceoverScriptReady,
+        )
         .toList();
 
     if (eligibleShots.isEmpty) {
@@ -527,7 +501,8 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
                                 '分镜 #${item.shotId}: ${item.errorMessage}',
-                                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(ctx).textTheme.bodySmall
+                                    ?.copyWith(
                                       color: Theme.of(ctx).colorScheme.error,
                                     ),
                               ),
@@ -557,10 +532,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     try {
       final response = await postTtsBatchGenerateV1(
         token,
-        TtsBatchGenerateRequestV1(
-          projectId: project.id,
-          shots: requestShots,
-        ),
+        TtsBatchGenerateRequestV1(projectId: project.id, shots: requestShots),
       );
 
       totalProcessed = eligibleShots.length;
@@ -577,10 +549,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
           ),
         );
       }
-      showFeedback(
-        '批量配音生成失败：${e.statusCode ?? "-"}',
-        isSuccess: false,
-      );
+      showFeedback('批量配音生成失败：${e.statusCode ?? "-"}', isSuccess: false);
     } catch (e) {
       totalProcessed = eligibleShots.length;
       totalFailed = eligibleShots.length;
@@ -592,18 +561,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
           ),
         );
       }
-      showFeedback(
-        '批量配音生成失败：$e',
-        isSuccess: false,
-      );
+      showFeedback('批量配音生成失败：$e', isSuccess: false);
     }
 
     // Final feedback
     if (totalFailed == 0) {
-      showFeedback(
-        '批量配音生成完成：已为 $totalSuccessful 个镜头入队任务',
-        isSuccess: true,
-      );
+      showFeedback('批量配音生成完成：已为 $totalSuccessful 个镜头入队任务', isSuccess: true);
     } else {
       showFeedback(
         '批量配音生成完成：成功 $totalSuccessful，失败 $totalFailed',
@@ -623,7 +586,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
   }) async {
     final token = widget.accessToken;
     final project = _selectedProject;
-    
+
     if (token == null || token.isEmpty || project == null) {
       showFeedback('无法获取项目信息', isSuccess: false);
       return;
@@ -648,7 +611,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
 
     // Show progress indicator
     if (!context.mounted) return;
-    
+
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -689,21 +652,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
           '分镜 #${item.storyboardNumericId} 配音生成任务已入队',
           isSuccess: true,
         );
-        
+
         // Refresh project data to show updated voiceover status
         await _loadProjectOverview();
       } else {
-        showFeedback(
-          '配音生成失败：未能创建任务',
-          isSuccess: false,
-        );
+        showFeedback('配音生成失败：未能创建任务', isSuccess: false);
       }
     } on RustApiException catch (e) {
       // Close progress dialog
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-      
+
       showFeedback(
         '配音生成失败：${e.statusCode ?? "-"} - ${e.message}',
         isSuccess: false,
@@ -713,23 +673,26 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-      
-      showFeedback(
-        '配音生成失败：$e',
-        isSuccess: false,
-      );
+
+      showFeedback('配音生成失败：$e', isSuccess: false);
     }
   }
 
   /// Show batch operation progress dialog
-  /// 
+  ///
   /// Executes operations one by one and displays real-time progress
   Future<void> _showBatchOperationProgress({
     required BuildContext context,
     required String title,
     required List<Map<String, dynamic>> operations,
-    required Future<void> Function(Map<String, dynamic> operation) executeOperation,
-    required Future<void> Function(int successful, int failed, List<BatchOperationFailedItem> failedItems) onComplete,
+    required Future<void> Function(Map<String, dynamic> operation)
+    executeOperation,
+    required Future<void> Function(
+      int successful,
+      int failed,
+      List<BatchOperationFailedItem> failedItems,
+    )
+    onComplete,
   }) async {
     var completed = 0;
     var successful = 0;
@@ -757,10 +720,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
                   final errorMessage = e is RustApiException
                       ? '错误代码: ${e.statusCode ?? '-'}'
                       : e.toString();
-                  failedItems.add(BatchOperationFailedItem(
-                    shotId: storyboardId,
-                    errorMessage: errorMessage,
-                  ));
+                  failedItems.add(
+                    BatchOperationFailedItem(
+                      shotId: storyboardId,
+                      errorMessage: errorMessage,
+                    ),
+                  );
                 }
 
                 completed++;
@@ -803,9 +768,11 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
 
                       // Retry failed operations
                       final retryOperations = failedItems
-                          .map((item) => operations.firstWhere(
-                                (op) => op['storyboardId'] == item.shotId,
-                              ))
+                          .map(
+                            (item) => operations.firstWhere(
+                              (op) => op['storyboardId'] == item.shotId,
+                            ),
+                          )
                           .toList();
 
                       if (context.mounted) {

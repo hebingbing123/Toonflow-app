@@ -285,15 +285,15 @@ class _DeleteVersionConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('确认删除'),
+      title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '确定要删除版本 "${widget.versionName}" 吗？\n\n'
-            '此操作无法撤销。',
+            l10n.shortVideoSpaceDialogConfirmDeleteVersionMessage(widget.versionName),
           ),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
@@ -304,7 +304,7 @@ class _DeleteVersionConfirmationDialogState
                   _dontShowAgain = value ?? false;
                 });
               },
-              title: const Text('不再提示'),
+              title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -316,7 +316,7 @@ class _DeleteVersionConfirmationDialogState
           onPressed: () => Navigator.of(
             context,
           ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
-          child: const Text('取消'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
@@ -325,7 +325,7 @@ class _DeleteVersionConfirmationDialogState
           style: FilledButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
-          child: const Text('删除'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionConfirm),
         ),
       ],
     );
@@ -352,15 +352,15 @@ class _BatchDisableConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('确认批量禁用'),
+      title: Text(l10n.shortVideoSpaceDialogConfirmBatchDisableTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '确定要禁用选中的 ${widget.shotCount} 个镜头吗？\n\n'
-            '禁用后的镜头将不会出现在最终视频中。',
+            l10n.shortVideoSpaceDialogConfirmBatchDisableMessage(widget.shotCount),
           ),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
@@ -371,7 +371,7 @@ class _BatchDisableConfirmationDialogState
                   _dontShowAgain = value ?? false;
                 });
               },
-              title: const Text('不再提示'),
+              title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -383,13 +383,13 @@ class _BatchDisableConfirmationDialogState
           onPressed: () => Navigator.of(
             context,
           ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
-          child: const Text('取消'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
           ),
-          child: const Text('确认禁用'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmBatchDisableConfirm),
         ),
       ],
     );
@@ -416,15 +416,15 @@ class _RestoreDraftConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('确认恢复草稿'),
+      title: Text(l10n.shortVideoSpaceDialogConfirmRestoreDraftTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '确定要恢复草稿 "${widget.draftName}" 吗？\n\n'
-            '当前未保存的编辑状态将会丢失。',
+            l10n.shortVideoSpaceDialogConfirmRestoreDraftMessage(widget.draftName),
           ),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
@@ -435,7 +435,7 @@ class _RestoreDraftConfirmationDialogState
                   _dontShowAgain = value ?? false;
                 });
               },
-              title: const Text('不再提示'),
+              title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -447,13 +447,13 @@ class _RestoreDraftConfirmationDialogState
           onPressed: () => Navigator.of(
             context,
           ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
-          child: const Text('取消'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
           ),
-          child: const Text('恢复'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmRestoreDraftConfirm),
         ),
       ],
     );
@@ -476,13 +476,14 @@ class _CancelExportConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('取消导出'),
+      title: Text(l10n.shortVideoSpaceDialogConfirmCancelExportTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('确定要取消导出吗？已处理的内容将会丢失。'),
+          Text(l10n.shortVideoSpaceDialogConfirmCancelExportMessage),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
             CheckboxListTile(
@@ -492,7 +493,7 @@ class _CancelExportConfirmationDialogState
                   _dontShowAgain = value ?? false;
                 });
               },
-              title: const Text('不再提示'),
+              title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -504,13 +505,13 @@ class _CancelExportConfirmationDialogState
           onPressed: () => Navigator.of(
             context,
           ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
-          child: const Text('继续导出'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmCancelExportContinue),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
           ),
-          child: const Text('确认取消'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmCancelExportConfirm),
         ),
       ],
     );
@@ -537,13 +538,14 @@ class _BatchArchivePublishConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('批量归档确认'),
+      title: Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('确定要归档 ${widget.draftCount} 张发布草稿吗？归档后将从待发布队列中移除（视后端策略可能可恢复）。'),
+          Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveMessage(widget.draftCount)),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
             CheckboxListTile(
@@ -553,7 +555,7 @@ class _BatchArchivePublishConfirmationDialogState
                   _dontShowAgain = value ?? false;
                 });
               },
-              title: const Text('不再提示'),
+              title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -565,7 +567,7 @@ class _BatchArchivePublishConfirmationDialogState
           onPressed: () => Navigator.of(
             context,
           ).pop(ConfirmationResult(confirmed: false, dontShowAgain: false)),
-          child: const Text('取消'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
@@ -574,7 +576,7 @@ class _BatchArchivePublishConfirmationDialogState
           style: FilledButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
-          child: const Text('确认归档'),
+          child: Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveConfirm),
         ),
       ],
     );

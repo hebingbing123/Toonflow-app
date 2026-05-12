@@ -79,10 +79,11 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   void _handleSaveShortcut() {
     final project = _selectedProject;
     final token = widget.accessToken;
+    final l10n = AppLocalizations.of(context)!;
 
     if (project == null || token == null || token.isEmpty) {
       _showOperationFeedback(
-        '无法保存：未选择项目或未登录',
+        l10n.shortVideoSpaceCannotSaveNoProject,
         isSuccess: false,
       );
       return;
@@ -90,7 +91,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
 
     if (_savingProjectConfig) {
       _showOperationFeedback(
-        '正在保存中，请稍候...',
+        l10n.shortVideoSpaceSavingInProgress,
         isSuccess: false,
       );
       return;
@@ -109,6 +110,8 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   /// Note: The actual selection logic is handled in the dialog's local state.
   /// This method broadcasts a notification that can be listened to by the dialog.
   void _handleSelectAllShortcut() {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Since the batch selection state is managed within the dialog's StatefulBuilder,
     // we need to use a notification or callback mechanism.
     // For now, we'll show a feedback message indicating the shortcut is available
@@ -117,7 +120,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
     // The actual implementation will be in the dialog context where the selection
     // state is managed. This is a placeholder that shows the shortcut is recognized.
     _showOperationFeedback(
-      '全选快捷键 (Ctrl+A / Cmd+A) 在镜头操作面板中可用',
+      l10n.shortVideoSpaceSelectAllAvailable,
       isSuccess: true,
     );
   }
@@ -127,17 +130,18 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   /// Focuses the search input field in the filter panel if it exists.
   void _handleFocusSearchShortcut() {
     final focusNode = _ShortVideoSpaceSectionKeyboardShortcutsExtension._searchFocusNode;
+    final l10n = AppLocalizations.of(context)!;
     
     if (focusNode != null && focusNode.canRequestFocus) {
       focusNode.requestFocus();
       
       _showOperationFeedback(
-        '已聚焦搜索框',
+        l10n.shortVideoSpaceSearchFocused,
         isSuccess: true,
       );
     } else {
       _showOperationFeedback(
-        '搜索框不可用（请先打开镜头操作面板）',
+        l10n.shortVideoSpaceSearchNotAvailable,
         isSuccess: false,
       );
     }
@@ -148,31 +152,33 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   /// Returns a list of shortcut descriptions for display in help dialogs
   /// or documentation.
   List<KeyboardShortcutInfo> getAvailableShortcuts() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return [
       KeyboardShortcutInfo(
         keys: 'Ctrl+S / Cmd+S',
-        description: '保存项目配置',
-        category: '文件操作',
+        description: l10n.shortVideoSpaceSaveProjectConfig,
+        category: l10n.shortVideoSpaceFileOperations,
       ),
       KeyboardShortcutInfo(
         keys: 'Ctrl+A / Cmd+A',
-        description: '全选镜头（在批量操作模式下）',
-        category: '选择操作',
+        description: l10n.shortVideoSpaceSelectAllShots,
+        category: l10n.shortVideoSpaceSelectionOperations,
       ),
       KeyboardShortcutInfo(
         keys: 'Ctrl+F / Cmd+F',
-        description: '聚焦搜索框',
-        category: '导航',
+        description: l10n.shortVideoSpaceFocusSearch,
+        category: l10n.shortVideoSpaceNavigation,
       ),
       KeyboardShortcutInfo(
         keys: 'Ctrl+Z / Cmd+Z',
-        description: '撤销上一步操作',
-        category: '编辑操作',
+        description: l10n.shortVideoSpaceUndoOperation,
+        category: l10n.shortVideoSpaceEditOperations,
       ),
       KeyboardShortcutInfo(
         keys: 'Ctrl+Shift+Z / Cmd+Shift+Z',
-        description: '重做上一步操作',
-        category: '编辑操作',
+        description: l10n.shortVideoSpaceRedoOperation,
+        category: l10n.shortVideoSpaceEditOperations,
       ),
     ];
   }
@@ -182,6 +188,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   Future<void> _showKeyboardShortcutsDialog() async {
     final shortcuts = getAvailableShortcuts();
     final groupedShortcuts = <String, List<KeyboardShortcutInfo>>{};
+    final l10n = AppLocalizations.of(context)!;
 
     // Group shortcuts by category
     for (final shortcut in shortcuts) {
@@ -194,11 +201,11 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.keyboard),
-              SizedBox(width: 8),
-              Text('键盘快捷键'),
+              const Icon(Icons.keyboard),
+              const SizedBox(width: 8),
+              Text(l10n.shortVideoSpaceKeyboardShortcuts),
             ],
           ),
           content: SizedBox(
@@ -269,7 +276,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('关闭'),
+              child: Text(l10n.shortVideoSpaceClose),
             ),
           ],
         );
