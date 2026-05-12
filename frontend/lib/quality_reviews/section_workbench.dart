@@ -1,6 +1,6 @@
 part of 'section.dart';
 
-/// 质量评审工作台，收拢筛选、统计、详情与手动创建。
+/// Quality review workbench: filters, stats, detail, and manual creation.
 class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   const _QualityReviewsWorkbenchDialog({
     required this.accessToken,
@@ -298,12 +298,11 @@ class _QualityReviewsWorkbenchDialogState
             ? l10n.qualityReviewsNoBadCaseData
             : items
                   .map(
-                    (e) =>
-                        l10n.qualityReviewsBadCaseStatsLine(
-                          e.badCaseCategory ?? l10n.qualityReviewsUncategorized,
-                          e.count,
-                          e.passRatePercent.toStringAsFixed(1),
-                        ),
+                    (e) => l10n.qualityReviewsBadCaseStatsLine(
+                      e.badCaseCategory ?? l10n.qualityReviewsUncategorized,
+                      e.count,
+                      e.passRatePercent.toStringAsFixed(1),
+                    ),
                   )
                   .join(' | ');
         _statusLine = l10n.qualityReviewsStatusRefreshedBadCaseDistribution;
@@ -425,7 +424,9 @@ class _QualityReviewsWorkbenchDialogState
     final score = int.tryParse(_ctrls.createScoreCtrl.text.trim());
     final rawTargetId = _ctrls.createTargetIdCtrl.text.trim();
     if (targetType.isEmpty || source.isEmpty) {
-      setState(() => _statusLine = l10n.qualityReviewsErrTargetTypeSourceRequired);
+      setState(
+        () => _statusLine = l10n.qualityReviewsErrTargetTypeSourceRequired,
+      );
       return;
     }
     if (scriptId != null && projectId == null) {

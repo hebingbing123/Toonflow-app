@@ -2613,6 +2613,48 @@
     }
   },
   "qualityReviewsNoQualityStats": "当前没有质量统计",
+  "qualityReviewsDashboardStatsScopePrefix": "scope={scope} · ",
+  "@qualityReviewsDashboardStatsScopePrefix": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDashboardTargetStatRow": "{targetType}：共 {totalReviews} 条，通过率 {passPct}%，均分 {avgScore}",
+  "@qualityReviewsDashboardTargetStatRow": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "totalReviews": {
+        "type": "int"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "avgScore": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDashboardStagePassRateRow": "{date} {targetType}：通过率 {passPct}%，共 {totalReviews} 条",
+  "@qualityReviewsDashboardStagePassRateRow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "targetType": {
+        "type": "String"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "totalReviews": {
+        "type": "int"
+      }
+    }
+  },
   "qualityReviewsNoScopeLeaderboard": "当前没有 scope 榜单",
   "qualityReviewsItemUnit": "条",
   "qualityReviewsEmotionRisk": "情绪",

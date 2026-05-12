@@ -3644,6 +3644,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qualityReviewsNoQualityStats => '当前没有质量统计';
 
   @override
+  String qualityReviewsDashboardStatsScopePrefix(String scope) {
+    return 'scope=$scope · ';
+  }
+
+  @override
+  String qualityReviewsDashboardTargetStatRow(
+    String targetType,
+    int totalReviews,
+    String passPct,
+    String avgScore,
+  ) {
+    return '$targetType：共 $totalReviews 条，通过率 $passPct%，均分 $avgScore';
+  }
+
+  @override
+  String qualityReviewsDashboardStagePassRateRow(
+    String date,
+    String targetType,
+    String passPct,
+    int totalReviews,
+  ) {
+    return '$date $targetType：通过率 $passPct%，共 $totalReviews 条';
+  }
+
+  @override
   String get qualityReviewsNoScopeLeaderboard => '当前没有 scope 榜单';
 
   @override

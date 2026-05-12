@@ -313,18 +313,20 @@ class QualityReviewsController extends ChangeNotifier {
           token,
           onlyIfStale: true,
         );
+        final timeStr = refresh.refreshedAt.toLocal().toString().substring(
+          0,
+          19,
+        );
         qualityDashboardRefreshLine = refresh.performed
             ? (_l10n?.qualityReviewsDashboardRefreshPerformed(
-                  refresh.rowCount,
-                  refresh.sourceReviewCount,
-                  refresh.sourceUsageCount,
-                  refresh.refreshedAt.toLocal().toString().substring(0, 19),
-                ) ??
-                '底层快照已刷新 ${refresh.rowCount} 条 review fact · reviews=${refresh.sourceReviewCount} · usage=${refresh.sourceUsageCount} · ${refresh.refreshedAt.toLocal().toString().substring(0, 19)}')
-            : (_l10n?.qualityReviewsDashboardRefreshSkipped(
-                  refresh.refreshedAt.toLocal().toString().substring(0, 19),
-                ) ??
-                '底层快照保持现状 · fresh snapshot skipped refresh · ${refresh.refreshedAt.toLocal().toString().substring(0, 19)}');
+                    refresh.rowCount,
+                    refresh.sourceReviewCount,
+                    refresh.sourceUsageCount,
+                    timeStr,
+                  ) ??
+                  'Snapshot refreshed: ${refresh.rowCount} review facts · reviews=${refresh.sourceReviewCount} · usage=${refresh.sourceUsageCount} · $timeStr')
+            : (_l10n?.qualityReviewsDashboardRefreshSkipped(timeStr) ??
+                  'Snapshot unchanged · fresh snapshot skipped refresh · $timeStr');
       }
       final dashboard = await fetchQualityDashboard(
         token,
@@ -332,27 +334,40 @@ class QualityReviewsController extends ChangeNotifier {
         scriptId: null,
       );
 
+      final l10n = _l10n;
       qualityDashboardMeta = dashboard.meta;
       qualityStatsRows = dashboard.stats;
       final scopePrefix = dashboard.stats.isNotEmpty
-          ? 'scope=${dashboard.stats.first.scope} · '
+          ? (l10n?.qualityReviewsDashboardStatsScopePrefix(
+                  dashboard.stats.first.scope,
+                ) ??
+                'scope=${dashboard.stats.first.scope} · ')
           : '';
       qualityStatsLine = dashboard.stats.isEmpty
-          ? (_l10n?.qualityReviewsNoQualityStats ?? '当前没有质量统计')
-          : '$scopePrefix${dashboard.stats
-                .map(
-                  (row) =>
-                      '${row.targetType}: total=${row.totalReviews}, pass=${row.passRatePercent.toStringAsFixed(1)}%, avg=${row.avgOverallScore.toStringAsFixed(1)}',
-                )
-                .join(' | ')}';
+          ? (l10n?.qualityReviewsNoQualityStats ?? 'No quality stats yet')
+          : '$scopePrefix${dashboard.stats.map((row) {
+              final passPct = row.passRatePercent.toStringAsFixed(1);
+              final avgScore = row.avgOverallScore.toStringAsFixed(1);
+              return l10n?.qualityReviewsDashboardTargetStatRow(row.targetType, row.totalReviews, passPct, avgScore) ?? '${row.targetType}: total=${row.totalReviews}, pass=$passPct%, avg=$avgScore';
+            }).join(' | ')}';
       qualityStagePassRateRows = dashboard.stagePassRate;
       qualityStagePassRateLine = dashboard.stagePassRate.isEmpty
-          ? (_l10n?.qualityReviewsNoStagePassRate ?? '当前没有阶段通过率')
+          ? (l10n?.qualityReviewsNoStagePassRate ?? 'No stage pass rates yet')
           : dashboard.stagePassRate
-                .map(
-                  (row) =>
-                      '${row.reviewDate.toIso8601String().substring(0, 10)} ${row.targetType}: pass=${row.passRatePercent.toStringAsFixed(1)}%, total=${row.totalReviews}',
-                )
+                .map((row) {
+                  final date = row.reviewDate.toIso8601String().substring(
+                    0,
+                    10,
+                  );
+                  final passPct = row.passRatePercent.toStringAsFixed(1);
+                  return l10n?.qualityReviewsDashboardStagePassRateRow(
+                        date,
+                        row.targetType,
+                        passPct,
+                        row.totalReviews,
+                      ) ??
+                      '$date ${row.targetType}: pass=$passPct%, total=${row.totalReviews}';
+                })
                 .join(' | ');
       qualityStageGradeRows = dashboard.stageGradeDistribution;
       qualityStageGradeLine = summarizeDashboardStageGradeDistributionRows(

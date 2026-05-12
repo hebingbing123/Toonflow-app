@@ -29,7 +29,8 @@ class QualityReviewsSection extends StatelessWidget {
   final int? initialProjectNumericId;
   final String? initialProjectUuid;
   final PlatformConfigToggleSetV1 platformConfig;
-  final Future<List<ProjectRow>> Function(String accessToken)? fetchProjectsOverride;
+  final Future<List<ProjectRow>> Function(String accessToken)?
+  fetchProjectsOverride;
 
   String? _buildInitialProjectScopeSummary({
     required int? resolvedProjectNumericId,
@@ -53,7 +54,10 @@ class QualityReviewsSection extends StatelessWidget {
     }
     final token = accessToken;
     final projectUuid = initialProjectUuid?.trim();
-    if (token == null || token.isEmpty || projectUuid == null || projectUuid.isEmpty) {
+    if (token == null ||
+        token.isEmpty ||
+        projectUuid == null ||
+        projectUuid.isEmpty) {
       return null;
     }
     final rows = await (fetchProjectsOverride ?? fetchProjects)(token);
@@ -69,9 +73,9 @@ class QualityReviewsSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final token = accessToken;
     if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.qualityReviewsErrNotLoggedIn)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.qualityReviewsErrNotLoggedIn)),
+      );
       return;
     }
     final resolvedProjectNumericId = await _resolveInitialProjectNumericId();
@@ -139,7 +143,8 @@ class QualityReviewsSection extends StatelessWidget {
               loadingQualityReviews: controller.loadingQualityReviews,
               loadingQualityBadCases: controller.loadingQualityBadCases,
               loadingQualityStats: controller.loadingQualityStats,
-              loadingQualityStagePassRate: controller.loadingQualityStagePassRate,
+              loadingQualityStagePassRate:
+                  controller.loadingQualityStagePassRate,
               onOpenWorkbench: () => _openQualityWorkbench(context),
               onLoadQualityDashboard: () async {
                 final projectId = await _resolveInitialProjectNumericId();
@@ -180,10 +185,12 @@ class QualityReviewsSection extends StatelessWidget {
                       if (!context.mounted) {
                         return;
                       }
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(
-                        SnackBar(content: Text(l10n.qualityReviewsCopiedDashboardSummary)),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n.qualityReviewsCopiedDashboardSummary,
+                          ),
+                        ),
                       );
                     },
                     child: Text(l10n.qualityReviewsCopyDashboardSummary),
@@ -235,7 +242,9 @@ class QualityReviewsSection extends StatelessWidget {
             if (controller.qualityReviewByIdLine != null) ...[
               const SizedBox(height: 8),
               SelectableText(
-                l10n.qualityReviewsSummaryReviewDetails(controller.qualityReviewByIdLine!),
+                l10n.qualityReviewsSummaryReviewDetails(
+                  controller.qualityReviewByIdLine!,
+                ),
               ),
             ],
             if (controller.qualityStatsLine != null) ...[
@@ -247,31 +256,41 @@ class QualityReviewsSection extends StatelessWidget {
             if (controller.qualityStagePassRateLine != null) ...[
               const SizedBox(height: 8),
               SelectableText(
-                l10n.qualityReviewsSummaryStagePassRate(controller.qualityStagePassRateLine!),
+                l10n.qualityReviewsSummaryStagePassRate(
+                  controller.qualityStagePassRateLine!,
+                ),
               ),
             ],
             if (controller.qualityStageGradeLine != null) ...[
               const SizedBox(height: 8),
               SelectableText(
-                l10n.qualityReviewsSummaryStageGrade(controller.qualityStageGradeLine!),
+                l10n.qualityReviewsSummaryStageGrade(
+                  controller.qualityStageGradeLine!,
+                ),
               ),
             ],
             if (controller.qualityScopeInsightsLine != null) ...[
               const SizedBox(height: 8),
               SelectableText(
-                l10n.qualityReviewsSummaryScopeInsights(controller.qualityScopeInsightsLine!),
+                l10n.qualityReviewsSummaryScopeInsights(
+                  controller.qualityScopeInsightsLine!,
+                ),
               ),
             ],
             if (controller.qualityTokenEfficiencyLine != null) ...[
               const SizedBox(height: 8),
               SelectableText(
-                l10n.qualityReviewsSummaryTokenEfficiency(controller.qualityTokenEfficiencyLine!),
+                l10n.qualityReviewsSummaryTokenEfficiency(
+                  controller.qualityTokenEfficiencyLine!,
+                ),
               ),
             ],
             if (controller.qualityBadCaseStatsLine != null) ...[
               const SizedBox(height: 8),
               SelectableText(
-                l10n.qualityReviewsSummaryBadCaseHotspots(controller.qualityBadCaseStatsLine!),
+                l10n.qualityReviewsSummaryBadCaseHotspots(
+                  controller.qualityBadCaseStatsLine!,
+                ),
               ),
             ],
             if (controller.qualityReviews != null) ...[

@@ -62,7 +62,7 @@ String? summarizeTokenEfficiencyFromQualityReviews(
         avgDelivery,
         hitRate,
       ) ??
-      'auto样本 $parsed 条 · 平均 prompt=$avgPrompt chars · memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery) · delivery优先命中 $hitRate%';
+      'auto samples $parsed · avg prompt=$avgPrompt chars · memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery) · delivery-priority hit $hitRate%';
 }
 
 String? summarizePromptDiagnosticsFromQualityReviews(
@@ -168,22 +168,23 @@ String? summarizePromptDiagnosticsFromQualityReviews(
       .toStringAsFixed(1);
   final parts = <String>[
     l10n?.qualityReviewsAutoDiagnosticsCount(samples.length) ??
-        'auto诊断 ${samples.length} 条',
-    l10n?.qualityReviewsAveragePrompt(avgPrompt) ?? '平均 prompt=$avgPrompt chars',
+        'auto diagnostics ${samples.length}',
+    l10n?.qualityReviewsAveragePrompt(avgPrompt) ??
+        'avg prompt=$avgPrompt chars',
     'memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery)',
     l10n?.qualityReviewsDeliveryPriorityRate(deliveryHitRate) ??
-        'delivery优先 $deliveryHitRate%',
+        'delivery-priority $deliveryHitRate%',
   ];
   if (topNegativeSource != null) {
     parts.add(
-      '${describeAutoNegativeSource(topNegativeSource.key, l10n: l10n)} ${topNegativeSource.value}${l10n?.qualityReviewsTimesUnit ?? " 次"}',
+      '${describeAutoNegativeSource(topNegativeSource.key, l10n: l10n)} ${topNegativeSource.value}${l10n?.qualityReviewsTimesUnit ?? ' times'}',
     );
   }
   final hitBucketSummary = joinTopBucketCounts(memoryHitBuckets, l10n: l10n);
   if (hitBucketSummary.isNotEmpty) {
     parts.add(
       l10n?.qualityReviewsHitMemoryBuckets(hitBucketSummary) ??
-          '命中记忆 $hitBucketSummary',
+          'hit memory $hitBucketSummary',
     );
   }
   final suppressedBucketSummary = joinTopBucketCounts(
@@ -193,13 +194,16 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   if (suppressedBucketSummary.isNotEmpty) {
     parts.add(
       l10n?.qualityReviewsSuppressedBuckets(suppressedBucketSummary) ??
-          '压缩桶 $suppressedBucketSummary',
+          'suppressed buckets $suppressedBucketSummary',
     );
   }
   if (directorYieldHits > 0) {
     parts.add(
-      l10n?.qualityReviewsDirectorYieldCount(directorYieldHits, samples.length) ??
-          '导演让位 $directorYieldHits/${samples.length}',
+      l10n?.qualityReviewsDirectorYieldCount(
+            directorYieldHits,
+            samples.length,
+          ) ??
+          'director yield $directorYieldHits/${samples.length}',
     );
   }
   if (continuityHits > 0) {
@@ -208,13 +212,16 @@ String? summarizePromptDiagnosticsFromQualityReviews(
             continuityHits,
             samples.length,
           ) ??
-          '连续性约束 $continuityHits/${samples.length}',
+          'continuity constraints $continuityHits/${samples.length}',
     );
   }
   if (referenceFrameHits > 0) {
     parts.add(
-      l10n?.qualityReviewsReferenceFrameCount(referenceFrameHits, samples.length) ??
-          '参考帧 $referenceFrameHits/${samples.length}',
+      l10n?.qualityReviewsReferenceFrameCount(
+            referenceFrameHits,
+            samples.length,
+          ) ??
+          'reference frame $referenceFrameHits/${samples.length}',
     );
   }
   return parts.join(' · ');
@@ -257,7 +264,7 @@ String? summarizeQualityReviewPromptDiagnostics(
     parts.add(describeAutoNegativeSource(negativeSource, l10n: l10n));
   }
   if (diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
-    parts.add(l10n?.qualityReviewsDeliveryPriority ?? 'delivery优先');
+    parts.add(l10n?.qualityReviewsDeliveryPriority ?? 'delivery-priority');
   }
   final memoryHitBucketCounts = diagnosticStringIntMap(
     diagnostics,
@@ -276,7 +283,7 @@ String? summarizeQualityReviewPromptDiagnostics(
               l10n: l10n,
             ),
           ) ??
-          '命中=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts, l10n: l10n)}',
+          'hit=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts, l10n: l10n)}',
     );
   }
   final memorySuppressedBucketCounts = diagnosticStringIntMap(
@@ -296,14 +303,17 @@ String? summarizeQualityReviewPromptDiagnostics(
               l10n: l10n,
             ),
           ) ??
-          '压缩=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts, l10n: l10n)}',
+          'suppressed=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts, l10n: l10n)}',
     );
   }
   if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
-    parts.add(l10n?.qualityReviewsDirectorYield ?? '导演让位');
+    parts.add(l10n?.qualityReviewsDirectorYield ?? 'director yield');
   }
   if (directorSaved > 0) {
-    parts.add(l10n?.qualityReviewsSavedChars(directorSaved) ?? '省下$directorSaved chars');
+    parts.add(
+      l10n?.qualityReviewsSavedChars(directorSaved) ??
+          'saved $directorSaved chars',
+    );
   }
   if (negativeSavedChars > 0 || negativeSavedFragments > 0) {
     parts.add(
@@ -311,7 +321,7 @@ String? summarizeQualityReviewPromptDiagnostics(
             negativeSavedFragments,
             negativeSavedChars,
           ) ??
-          '负向精简=$negativeSavedFragments条/$negativeSavedChars chars',
+          'negative slim=$negativeSavedFragments items/$negativeSavedChars chars',
     );
   }
   final scopeSummary = describeMemoryScopeRows(
@@ -322,17 +332,17 @@ String? summarizeQualityReviewPromptDiagnostics(
   if (scopeSummary != null) {
     parts.add(
       l10n?.qualityReviewsMemoryScopeLevel(scopeSummary) ??
-          '记忆层级=$scopeSummary',
+          'memory scope=$scopeSummary',
     );
   }
   if (continuityCount > 0) {
     parts.add(
       l10n?.qualityReviewsContinuityCount(continuityCount) ??
-          '连续性$continuityCount',
+          'continuity $continuityCount',
     );
   }
   if (diagnosticBool(diagnostics, 'usesReferenceFrame')) {
-    parts.add(l10n?.qualityReviewsReferenceFrame ?? '参考帧');
+    parts.add(l10n?.qualityReviewsReferenceFrame ?? 'reference frame');
   }
   return parts.join(' · ');
 }
@@ -357,38 +367,50 @@ String? summarizeQualityReviewMemoryWriteback(
   final parts = <String>[];
   switch (action) {
     case 'promoted_selected_memory':
-      parts.add(l10n?.qualityReviewsWritebackPromotedSelected ?? '正向记忆晋升');
+      parts.add(
+        l10n?.qualityReviewsWritebackPromotedSelected ??
+            'promoted selected memory',
+      );
       break;
     case 'persisted_rejected_memory':
-      parts.add(l10n?.qualityReviewsWritebackRejectedMemory ?? '坏例记忆回写');
+      parts.add(
+        l10n?.qualityReviewsWritebackRejectedMemory ??
+            'bad-case memory writeback',
+      );
       break;
     case 'replaced_summary_memory':
-      parts.add(l10n?.qualityReviewsWritebackSummaryMemory ?? '评审摘要回写');
+      parts.add(
+        l10n?.qualityReviewsWritebackSummaryMemory ??
+            'review summary writeback',
+      );
       break;
     case 'promoted_selected_memory_missing_prompt_seed':
       parts.add(
-        l10n?.qualityReviewsWritebackMissingPromptSeed ?? '正向记忆待补 prompt seed',
+        l10n?.qualityReviewsWritebackMissingPromptSeed ??
+            'selected memory missing prompt seed',
       );
       break;
     case 'promoted_selected_memory_empty':
       parts.add(
         l10n?.qualityReviewsWritebackEmptySelectedMemory ??
-            '正向记忆未提炼出有效片段',
+            'selected memory yielded no effective fragment',
       );
       break;
     default:
       if (action != null) parts.add(action);
   }
   if (storyboardId > 0) {
-    parts.add(l10n?.qualityReviewsShotId(storyboardId) ?? '镜头$storyboardId');
+    parts.add(l10n?.qualityReviewsShotId(storyboardId) ?? 'shot $storyboardId');
   }
   if (memoryName != null) {
-    parts.add(l10n?.qualityReviewsWriteMemory(memoryName) ?? '写入=$memoryName');
+    parts.add(
+      l10n?.qualityReviewsWriteMemory(memoryName) ?? 'write=$memoryName',
+    );
   }
   if (clearedMemoryName != null) {
     parts.add(
       l10n?.qualityReviewsClearMemory(clearedMemoryName) ??
-          '清理=$clearedMemoryName',
+          'clear=$clearedMemoryName',
     );
   }
   if (removedChars > 0 || removedRows > 0) {
@@ -399,13 +421,13 @@ String? summarizeQualityReviewMemoryWriteback(
             removedDuplicateRows,
             removedVisualRows,
           ) ??
-          'slim $removedChars chars / $removedRows条（重复 $removedDuplicateRows / 纯视觉 $removedVisualRows）',
+          'slim $removedChars chars / $removedRows items (dup $removedDuplicateRows / visual-only $removedVisualRows)',
     );
   }
   final focusSummary = summarizeFeedbackFocusTags(focusTags, l10n: l10n);
   if (focusSummary != null) {
     parts.add(
-      l10n?.qualityReviewsFocusWatchTag(focusSummary) ?? '关注=$focusSummary',
+      l10n?.qualityReviewsFocusWatchTag(focusSummary) ?? 'watch=$focusSummary',
     );
   }
   return parts.isEmpty ? null : parts.join(' · ');
@@ -491,17 +513,17 @@ String? summarizeMemoryScopePressureFromQualityReviews(
           l10n: l10n,
         );
         final parts = <String>[
-          '${entry.key} ${entry.value.reviews}${l10n?.qualityReviewsItemUnit ?? "条"}',
+          '${entry.key} ${entry.value.reviews}${l10n?.qualityReviewsItemUnit ?? ' items'}',
         ];
         if (hitSummary.isNotEmpty) {
           parts.add(
-            l10n?.qualityReviewsHitSummary(hitSummary) ?? '命中 $hitSummary',
+            l10n?.qualityReviewsHitSummary(hitSummary) ?? 'hit $hitSummary',
           );
         }
         if (suppressedSummary.isNotEmpty) {
           parts.add(
             l10n?.qualityReviewsSuppressedSummary(suppressedSummary) ??
-                '压缩 $suppressedSummary',
+                'suppressed $suppressedSummary',
           );
         }
         return parts.join(' · ');
@@ -583,7 +605,7 @@ String? summarizeMemoryOptimizationSavingsFromQualityReviews(
               value.removedDuplicateRows,
               value.removedVisualRows,
             ) ??
-            '${entry.key} ${value.reviews}条 · slim ${value.removedChars} chars / ${value.removedRows}条（重复 ${value.removedDuplicateRows} / 纯视觉 ${value.removedVisualRows}）';
+            '${entry.key} ${value.reviews} items · slim ${value.removedChars} chars / ${value.removedRows} items (dup ${value.removedDuplicateRows} / visual-only ${value.removedVisualRows})';
       })
       .join(' | ');
 }
@@ -713,21 +735,21 @@ String? summarizeScopeRepairQueueFromQualityReviews(
             .map((item) => item.key)
             .join(' / ');
         final parts = <String>[
-          '${entry.key} ${value.reviews}${l10n?.qualityReviewsItemUnit ?? "条"}',
+          '${entry.key} ${value.reviews}${l10n?.qualityReviewsItemUnit ?? ' items'}',
           if (value.badCases > 0)
             l10n?.qualityReviewsBadCaseCount(value.badCases) ??
-                '坏例 ${value.badCases}',
+                'bad cases ${value.badCases}',
           if (value.dialogueRiskHits > 0)
             l10n?.qualityReviewsDialogueRiskCount(value.dialogueRiskHits) ??
-                '情绪/台词 ${value.dialogueRiskHits}',
+                'emotion/dialogue ${value.dialogueRiskHits}',
           if (value.visualRiskHits > 0)
             l10n?.qualityReviewsVisualRiskCount(value.visualRiskHits) ??
-                '真实感 ${value.visualRiskHits}',
+                'realism ${value.visualRiskHits}',
           if (value.removedChars > 0) 'slim ${value.removedChars} chars',
         ];
         if (nextStep.isNotEmpty) {
           parts.add(
-            l10n?.qualityReviewsNextStep(nextStep) ?? '下一步 $nextStep',
+            l10n?.qualityReviewsNextStep(nextStep) ?? 'next step $nextStep',
           );
         }
         return parts.join(' · ');

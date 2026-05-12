@@ -6337,6 +6337,34 @@ abstract class AppLocalizations {
   /// **'No quality stats yet'**
   String get qualityReviewsNoQualityStats;
 
+  /// No description provided for @qualityReviewsDashboardStatsScopePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'scope={scope} · '**
+  String qualityReviewsDashboardStatsScopePrefix(String scope);
+
+  /// No description provided for @qualityReviewsDashboardTargetStatRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: total={totalReviews}, pass={passPct}%, avg={avgScore}'**
+  String qualityReviewsDashboardTargetStatRow(
+    String targetType,
+    int totalReviews,
+    String passPct,
+    String avgScore,
+  );
+
+  /// No description provided for @qualityReviewsDashboardStagePassRateRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} {targetType}: pass={passPct}%, total={totalReviews}'**
+  String qualityReviewsDashboardStagePassRateRow(
+    String date,
+    String targetType,
+    String passPct,
+    int totalReviews,
+  );
+
   /// No description provided for @qualityReviewsNoScopeLeaderboard.
   ///
   /// In en, this message translates to:

@@ -3,14 +3,14 @@ import 'dart:collection';
 import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
-// ── 通用辅助函数 ────────────────────────────────────────────────
+// Shared helpers
 
 int qualityScorePercent(int? score, {int fallback = 10}) {
   final normalized = (score ?? fallback).clamp(0, 10);
   return normalized * 10;
 }
 
-// ── 诊断数据提取辅助 ────────────────────────────────────────────────
+// Diagnostic extraction
 
 Map<String, dynamic>? qualityDiagnosticsMap(QualityReview row) {
   final params = row.modelParams;
@@ -62,26 +62,26 @@ Map<String, int> diagnosticStringIntMap(Map<String, dynamic> map, String key) {
   return result;
 }
 
-String describeAutoNegativeSource(
-  String source, {
-  AppLocalizations? l10n,
-}) {
+String describeAutoNegativeSource(String source, {AppLocalizations? l10n}) {
   switch (source) {
     case 'review+rejected_memory':
       return l10n?.qualityReviewsNegativeConstraintReviewAndBadCase ??
-          '负向约束=评审+坏例记忆';
+          'negative constraint=reviews+bad-case memory';
     case 'review':
-      return l10n?.qualityReviewsNegativeConstraintRecentReviews ?? '负向约束=近期评审';
+      return l10n?.qualityReviewsNegativeConstraintRecentReviews ??
+          'negative constraint=recent reviews';
     case 'rejected_memory':
-      return l10n?.qualityReviewsNegativeConstraintBadCaseMemory ?? '负向约束=坏例记忆';
+      return l10n?.qualityReviewsNegativeConstraintBadCaseMemory ??
+          'negative constraint=bad-case memory';
     case 'pending_observation_note':
-      return l10n?.qualityReviewsNegativeConstraintPendingBadCase ?? '负向约束=待观察坏例';
+      return l10n?.qualityReviewsNegativeConstraintPendingBadCase ??
+          'negative constraint=pending bad cases';
     case 'pending_rejected_observation':
       return l10n?.qualityReviewsNegativeConstraintPendingRejected ??
-          '负向约束=待观察拒绝项';
+          'negative constraint=pending rejected items';
     default:
       return l10n?.qualityReviewsNegativeConstraintGeneric(source) ??
-          '负向约束=$source';
+          'negative constraint=$source';
   }
 }
 
@@ -96,40 +96,41 @@ String joinTopBucketCounts(
       .map(
         (entry) =>
             l10n?.qualityReviewsBucketCount(entry.key, entry.value) ??
-            '${entry.key}${entry.value}次',
+            '${entry.key} ${entry.value} times',
       )
       .join(' / ');
 }
 
 String joinBucketListWithCounts(
   List<String> buckets,
-  Map<String, int> counts,
-  {AppLocalizations? l10n}
-) {
+  Map<String, int> counts, {
+  AppLocalizations? l10n,
+}) {
   if (buckets.isEmpty) return '';
   return buckets
       .map((bucket) {
         final count = counts[bucket];
         return count == null || count <= 1
             ? bucket
-            : (l10n?.qualityReviewsBucketCount(bucket, count) ?? '$bucket$count次');
+            : (l10n?.qualityReviewsBucketCount(bucket, count) ??
+                  '$bucket $count times');
       })
       .join('/');
 }
 
-String describeFeedbackFocusTag(
-  String tag, {
-  AppLocalizations? l10n,
-}) {
+String describeFeedbackFocusTag(String tag, {AppLocalizations? l10n}) {
   switch (tag) {
     case 'delivery_realism':
-      return l10n?.qualityReviewsFeedbackTagDeliveryRealism ?? '台词真实';
+      return l10n?.qualityReviewsFeedbackTagDeliveryRealism ??
+          'dialogue realism';
     case 'emotion_arc':
-      return l10n?.qualityReviewsFeedbackTagEmotionArc ?? '情绪层次';
+      return l10n?.qualityReviewsFeedbackTagEmotionArc ?? 'emotion arc';
     case 'identity_continuity':
-      return l10n?.qualityReviewsFeedbackTagIdentityContinuity ?? '人物一致';
+      return l10n?.qualityReviewsFeedbackTagIdentityContinuity ??
+          'identity continuity';
     case 'lighting_realism':
-      return l10n?.qualityReviewsFeedbackTagLightingRealism ?? '光影真实';
+      return l10n?.qualityReviewsFeedbackTagLightingRealism ??
+          'lighting realism';
     default:
       return tag;
   }
@@ -169,11 +170,13 @@ String? describeMemoryScopeRows({
 }) {
   final parts = <String>[
     if (projectScopeRows > 0)
-      l10n?.qualityReviewsScopeProject(projectScopeRows) ?? '项目$projectScopeRows',
+      l10n?.qualityReviewsScopeProject(projectScopeRows) ??
+          'project $projectScopeRows',
     if (scriptScopeRows > 0)
-      l10n?.qualityReviewsScopeScript(scriptScopeRows) ?? '剧本$scriptScopeRows',
+      l10n?.qualityReviewsScopeScript(scriptScopeRows) ??
+          'script $scriptScopeRows',
     if (roleScopeRows > 0)
-      l10n?.qualityReviewsScopeRole(roleScopeRows) ?? '角色$roleScopeRows',
+      l10n?.qualityReviewsScopeRole(roleScopeRows) ?? 'role $roleScopeRows',
   ];
   if (parts.isEmpty) return null;
   return parts.join('/');
@@ -200,12 +203,15 @@ String qualityTokenEfficiencyFocusLabel(
 }) {
   switch (focus) {
     case 'selected_video_memory':
-      return l10n?.qualityReviewsFocusSelectedVideoMemory ?? '镜头级精选记忆';
+      return l10n?.qualityReviewsFocusSelectedVideoMemory ??
+          'selected shot memory';
     case 'rejected_video_negative_memory':
-      return l10n?.qualityReviewsFocusRejectedVideoNegativeMemory ?? '坏例记忆';
+      return l10n?.qualityReviewsFocusRejectedVideoNegativeMemory ??
+          'bad-case memory';
     case 'project_video_style_memory':
-      return l10n?.qualityReviewsFocusProjectVideoStyleMemory ?? '项目级风格记忆';
+      return l10n?.qualityReviewsFocusProjectVideoStyleMemory ??
+          'project style memory';
     default:
-      return l10n?.qualityReviewsFocusCurrentMemory ?? '当前记忆';
+      return l10n?.qualityReviewsFocusCurrentMemory ?? 'current memory';
   }
 }

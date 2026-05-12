@@ -2613,6 +2613,48 @@
     }
   },
   "qualityReviewsNoQualityStats": "No quality stats yet",
+  "qualityReviewsDashboardStatsScopePrefix": "scope={scope} · ",
+  "@qualityReviewsDashboardStatsScopePrefix": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDashboardTargetStatRow": "{targetType}: total={totalReviews}, pass={passPct}%, avg={avgScore}",
+  "@qualityReviewsDashboardTargetStatRow": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "totalReviews": {
+        "type": "int"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "avgScore": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsDashboardStagePassRateRow": "{date} {targetType}: pass={passPct}%, total={totalReviews}",
+  "@qualityReviewsDashboardStagePassRateRow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "targetType": {
+        "type": "String"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "totalReviews": {
+        "type": "int"
+      }
+    }
+  },
   "qualityReviewsNoScopeLeaderboard": "No scope leaderboard yet",
   "qualityReviewsItemUnit": "items",
   "qualityReviewsEmotionRisk": "emotion",

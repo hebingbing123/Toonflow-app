@@ -3800,6 +3800,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qualityReviewsNoQualityStats => 'No quality stats yet';
 
   @override
+  String qualityReviewsDashboardStatsScopePrefix(String scope) {
+    return 'scope=$scope · ';
+  }
+
+  @override
+  String qualityReviewsDashboardTargetStatRow(
+    String targetType,
+    int totalReviews,
+    String passPct,
+    String avgScore,
+  ) {
+    return '$targetType: total=$totalReviews, pass=$passPct%, avg=$avgScore';
+  }
+
+  @override
+  String qualityReviewsDashboardStagePassRateRow(
+    String date,
+    String targetType,
+    String passPct,
+    int totalReviews,
+  ) {
+    return '$date $targetType: pass=$passPct%, total=$totalReviews';
+  }
+
+  @override
   String get qualityReviewsNoScopeLeaderboard => 'No scope leaderboard yet';
 
   @override

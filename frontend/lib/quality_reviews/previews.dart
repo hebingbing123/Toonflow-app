@@ -187,7 +187,10 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (qualityStatsRows?.isNotEmpty == true) ...[
-          Text(l10n.qualityReviewsTargetType, style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.qualityReviewsTargetType,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -211,7 +214,10 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (stageGradeRows?.isNotEmpty == true) ...[
-          Text(l10n.qualityReviewsStageGrade, style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.qualityReviewsStageGrade,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -231,7 +237,10 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (badCaseStats?.isNotEmpty == true) ...[
-          Text(l10n.qualityReviewsBadCaseHotspots, style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.qualityReviewsBadCaseHotspots,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -254,7 +263,10 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (scopeInsightRows?.isNotEmpty == true) ...[
-          Text(l10n.qualityReviewsScopeLeaderboard, style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.qualityReviewsScopeLeaderboard,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           ...scopeInsightRows!
               .take(3)
@@ -270,7 +282,10 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (tokenEfficiencyRows?.isNotEmpty == true) ...[
-          Text(l10n.qualityReviewsTokenEfficiency, style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.qualityReviewsTokenEfficiency,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           ...tokenEfficiencyRows!
               .take(3)

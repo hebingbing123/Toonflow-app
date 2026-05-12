@@ -50,10 +50,7 @@ List<String> buildQualityReviewRepairSuggestions(
       diagnostics,
       'memoryScriptScopeRowCount',
     );
-    final roleScopeRows = diagnosticInt(
-      diagnostics,
-      'memoryRoleScopeRowCount',
-    );
+    final roleScopeRows = diagnosticInt(diagnostics, 'memoryRoleScopeRowCount');
     final hitCounts = diagnosticStringIntMap(
       diagnostics,
       'memoryHitBucketCounts',
@@ -83,14 +80,14 @@ List<String> buildQualityReviewRepairSuggestions(
       addTagged(
         'reference_frame',
         l10n?.qualityReviewsSuggestionReferenceFrame ??
-            '先补参考帧和上一镜衔接，锁定脸、服化道和站位连续性。',
+            'Add reference frame and previous-shot continuity first; lock face, costume/props, and blocking continuity.',
       );
     }
     if (continuityCount > 0 || badCaseCategory.contains('continuity')) {
       addTagged(
         'continuity',
         l10n?.qualityReviewsSuggestionContinuity ??
-            '把连续性约束压成 1-2 条硬规则，只留机位、服化道和角色位置。',
+            'Compress continuity constraints to 1-2 hard rules: camera setup, costume/props, and character positions only.',
       );
     }
     if (hitBuckets.contains('表演') ||
@@ -103,7 +100,7 @@ List<String> buildQualityReviewRepairSuggestions(
       addTagged(
         'delivery',
         l10n?.qualityReviewsSuggestionDelivery ??
-            '保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。',
+            'Keep delivery/tone memory, add performable emotional actions, and do not trim delivery memory first.',
       );
     }
     if (suppressedBuckets.contains('动作') ||
@@ -113,14 +110,14 @@ List<String> buildQualityReviewRepairSuggestions(
       addTagged(
         'trim_generic',
         l10n?.qualityReviewsSuggestionTrimGeneric ??
-            '继续压动作/光影这类泛句，把预算留给表情、口型和人物一致性。',
+            'Continue trimming generic action/lighting lines and reserve budget for expressions, lip sync, and identity continuity.',
       );
     }
     if (autoNegativeSource != null && negativePromptChars > 0) {
       addTagged(
         'negative_reuse',
         l10n?.qualityReviewsSuggestionNegativeReuse ??
-            '沿用现有坏例负向约束，手动补词前先去重，避免同义词重复烧 token。',
+            'Reuse existing bad-case negative constraints; dedupe manually added phrases first to avoid repeated token burn.',
       );
     }
     if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory') ||
@@ -128,7 +125,7 @@ List<String> buildQualityReviewRepairSuggestions(
       addTagged(
         'director_trim',
         l10n?.qualityReviewsSuggestionDirectorTrim ??
-            '导演描述已经让位给记忆，优先回收重复导演句，不动关键表演锚点。',
+            'Director descriptions already yielded to memory; reclaim repeated director lines first and keep key performance anchors.',
       );
     }
     if (projectScopeRows > 0 &&
@@ -138,7 +135,7 @@ List<String> buildQualityReviewRepairSuggestions(
       addTagged(
         'project_scope_trim',
         l10n?.qualityReviewsSuggestionProjectScopeTrim ??
-            '当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。',
+            'Current hits are mostly project-scoped memory; trim generic style lines first and keep character performance details.',
       );
     }
     if (roleScopeRows > 0 &&
@@ -147,7 +144,7 @@ List<String> buildQualityReviewRepairSuggestions(
       addTagged(
         'role_scope_keep',
         l10n?.qualityReviewsSuggestionRoleScopeKeep ??
-            '已经命中角色级记忆，优先加强角色表演动作，不要回退成泛项目描述。',
+            'Role-scoped memory already hit; strengthen role performance actions first and avoid regressing to generic project copy.',
       );
     }
   }
@@ -161,7 +158,7 @@ List<String> buildQualityReviewRepairSuggestions(
     addTagged(
       'emotion',
       l10n?.qualityReviewsSuggestionEmotion ??
-          '下一轮把情绪弧线写成可观察动作，避免只剩解释性台词。',
+          'In next round, turn emotional arc into observable actions; avoid explanatory dialogue only.',
     );
   }
   if (row.isBadCase &&
@@ -172,14 +169,14 @@ List<String> buildQualityReviewRepairSuggestions(
     addTagged(
       'visual',
       l10n?.qualityReviewsSuggestionVisual ??
-          '优先补人物外观和镜头真实感约束，再决定是否继续加风格描述。',
+          'Prioritize character appearance and shot realism constraints, then decide whether to add more style descriptions.',
     );
   }
   if (overallScore < 70 && suggestions.isEmpty) {
     addTagged(
       'general',
       l10n?.qualityReviewsSuggestionGeneral ??
-          '先锁定人物情绪、连续性和坏例约束，再做下一轮生成。',
+          'Lock emotion, continuity, and bad-case constraints first, then run the next generation round.',
     );
   }
   return suggestions;
@@ -192,7 +189,10 @@ String? summarizeQualityRepairPlanFromReviews(
 }) {
   final counts = <String, int>{};
   for (final row in rows) {
-    for (final suggestion in buildQualityReviewRepairSuggestions(row, l10n: l10n)) {
+    for (final suggestion in buildQualityReviewRepairSuggestions(
+      row,
+      l10n: l10n,
+    )) {
       counts.update(suggestion, (count) => count + 1, ifAbsent: () => 1);
     }
   }
@@ -208,7 +208,7 @@ String? summarizeQualityRepairPlanFromReviews(
       .map(
         (entry) =>
             l10n?.qualityReviewsRepairPlanCount(entry.key, entry.value) ??
-            '${entry.key} ${entry.value}次',
+            '${entry.key} ${entry.value} times',
       )
       .join(' | ');
 }
@@ -228,7 +228,7 @@ String? summarizeQualityTokenEfficiencyActionPlan(
   final scope = () {
     if (projectId != null && scriptId != null) return 'P$projectId/S$scriptId';
     if (projectId != null) return 'P$projectId';
-    return l10n?.qualityReviewsCurrentFilterScope ?? '当前筛选范围';
+    return l10n?.qualityReviewsCurrentFilterScope ?? 'current filter scope';
   }();
 
   final ranked = items.toList()
@@ -243,20 +243,35 @@ String? summarizeQualityTokenEfficiencyActionPlan(
   final visible = ranked
       .take(maxItems)
       .map((row) {
-        final focus = qualityTokenEfficiencyFocusLabel(row.memoryFocus, l10n: l10n);
+        final focus = qualityTokenEfficiencyFocusLabel(
+          row.memoryFocus,
+          l10n: l10n,
+        );
         switch (row.memoryAction) {
           case 'keep_delivery_memory':
-            return l10n?.qualityReviewsActionPlanKeepDelivery(row.targetType, focus) ??
-                '${row.targetType} 保留$focus的表演/情绪记忆，继续压泛风格句，别先删 delivery 片段。';
+            return l10n?.qualityReviewsActionPlanKeepDelivery(
+                  row.targetType,
+                  focus,
+                ) ??
+                '${row.targetType}: keep delivery/emotion memory from $focus; continue trimming generic style lines before delivery fragments.';
           case 'reuse_negative_memory':
-            return l10n?.qualityReviewsActionPlanReuseNegative(row.targetType, focus) ??
-                '${row.targetType} 先复用$focus做坏例隔离约束，锁住穿帮/假感后再决定是否补 prompt。';
+            return l10n?.qualityReviewsActionPlanReuseNegative(
+                  row.targetType,
+                  focus,
+                ) ??
+                '${row.targetType}: reuse $focus for bad-case isolation constraints; lock glitches/fakeness before deciding prompt additions.';
           case 'trim_generic_style_memory':
-            return l10n?.qualityReviewsActionPlanTrimGeneric(row.targetType, focus) ??
-                '${row.targetType} 优先压$focus里的动作/光影/氛围套话，把 token 留给人物表演、口型和连续性。';
+            return l10n?.qualityReviewsActionPlanTrimGeneric(
+                  row.targetType,
+                  focus,
+                ) ??
+                '${row.targetType}: prioritize trimming action/lighting/mood filler in $focus; reserve tokens for performance, lip sync, and continuity.';
           case 'promote_selected_memory':
-            return l10n?.qualityReviewsActionPlanPromoteSelected(row.targetType, focus) ??
-                '${row.targetType} 从高分样本晋升一条$focus，复用人物情绪和镜头执行，减少重复描述。';
+            return l10n?.qualityReviewsActionPlanPromoteSelected(
+                  row.targetType,
+                  focus,
+                ) ??
+                '${row.targetType}: promote one high-score sample to $focus; reuse emotion and shot execution while reducing repetitive descriptions.';
           default:
             return null;
         }
@@ -265,7 +280,7 @@ String? summarizeQualityTokenEfficiencyActionPlan(
       .join(' | ');
   if (visible.isEmpty) return null;
   return l10n?.qualityReviewsScopedMemorySuggestion(scope, visible) ??
-      '$scope 独立记忆建议：$visible';
+      '$scope scoped-memory suggestion: $visible';
 }
 
 String? buildQualityScopedExecutionChecklist({
@@ -281,7 +296,7 @@ String? buildQualityScopedExecutionChecklist({
   final scope = () {
     if (projectId != null && scriptId != null) return 'P$projectId/S$scriptId';
     if (projectId != null) return 'P$projectId';
-    return l10n?.qualityReviewsCurrentFilterScope ?? '当前筛选范围';
+    return l10n?.qualityReviewsCurrentFilterScope ?? 'current filter scope';
   }();
 
   for (final row in tokenRows.where((row) => row.memoryAction != 'observe')) {
@@ -290,25 +305,25 @@ String? buildQualityScopedExecutionChecklist({
       case 'keep_delivery_memory':
         steps.add(
           l10n?.qualityReviewsChecklistKeepDelivery(focus) ??
-              '保留$focus里的表演、语气、口型和情绪记忆，只压泛风格套话。',
+              'Keep performance/tone/lip-sync/emotion memory in $focus, only trim generic style filler.',
         );
         break;
       case 'reuse_negative_memory':
         steps.add(
           l10n?.qualityReviewsChecklistReuseNegative(focus) ??
-              '先复用$focus里的坏例约束，锁住穿帮、假感和冷场，再决定是否补 prompt。',
+              'Reuse bad-case constraints in $focus first; lock glitches/fakeness/coldness before deciding prompt additions.',
         );
         break;
       case 'trim_generic_style_memory':
         steps.add(
           l10n?.qualityReviewsChecklistTrimGeneric(focus) ??
-              '清掉$focus里的动作、光影、氛围套话，把 token 留给人物表演和连续性。',
+              'Remove action/lighting/mood filler in $focus; keep tokens for performance and continuity.',
         );
         break;
       case 'promote_selected_memory':
         steps.add(
           l10n?.qualityReviewsChecklistPromoteSelected(focus) ??
-              '把高分样本晋升为$focus，复用人物情绪和镜头执行，减少重复导演描述。',
+              'Promote high-score samples to $focus; reuse emotion and shot execution while reducing repetitive director copy.',
         );
         break;
     }
@@ -317,7 +332,10 @@ String? buildQualityScopedExecutionChecklist({
 
   final suggestionCounts = <String, int>{};
   for (final review in reviews) {
-    for (final suggestion in buildQualityReviewRepairSuggestions(review, l10n: l10n)) {
+    for (final suggestion in buildQualityReviewRepairSuggestions(
+      review,
+      l10n: l10n,
+    )) {
       suggestionCounts.update(
         suggestion,
         (count) => count + 1,
@@ -340,10 +358,10 @@ String? buildQualityScopedExecutionChecklist({
 
   final numbered = steps.take(maxItems).toList(growable: false);
   final lines = <String>[
-    l10n?.qualityReviewsChecklistTitle(scope) ?? '$scope 执行清单：',
+    l10n?.qualityReviewsChecklistTitle(scope) ?? '$scope checklist:',
     for (var i = 0; i < numbered.length; i++) '${i + 1}. ${numbered[i]}',
     l10n?.qualityReviewsChecklistScope(scope) ??
-        '范围：记忆只在 $scope 生效，不跨用户、项目或短剧复用。',
+        'Scope: memory takes effect only in $scope; no reuse across users, projects, or shows.',
   ];
   return lines.join('\n');
 }

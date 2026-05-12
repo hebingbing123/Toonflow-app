@@ -270,7 +270,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(l10n.qualityReviewsCopiedFilterQuery),
+                              content: Text(
+                                l10n.qualityReviewsCopiedFilterQuery,
+                              ),
                             ),
                           );
                         },
@@ -385,9 +387,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             (value) => DropdownMenuItem<String>(
                               value: value,
                               child: Text(
-                                value == 'all'
-                                    ? l10n.qualityReviewsAll
-                                    : value,
+                                value == 'all' ? l10n.qualityReviewsAll : value,
                               ),
                             ),
                           )
@@ -514,7 +514,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               TextField(
                 controller: model.reviewIdCtrl,
-                decoration: InputDecoration(labelText: l10n.qualityReviewsReviewId),
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsReviewId,
+                ),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
@@ -654,7 +656,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ),
               if (model.statusLine != null) ...[
                 const SizedBox(height: 12),
-                SelectableText(l10n.qualityReviewsStatusLine(model.statusLine!)),
+                SelectableText(
+                  l10n.qualityReviewsStatusLine(model.statusLine!),
+                ),
               ],
               if (model.reviewDetails != null) ...[
                 const SizedBox(height: 12),
@@ -779,7 +783,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (promptDiagnosticsSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText(
-                  l10n.qualityReviewsPromptDiagnostics(promptDiagnosticsSummary),
+                  l10n.qualityReviewsPromptDiagnostics(
+                    promptDiagnosticsSummary,
+                  ),
                 ),
               ],
               if (memoryScopePressureSummary != null) ...[
@@ -791,7 +797,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (memoryOptimizationSavingsSummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText(
-                  l10n.qualityReviewsMemorySlimming(memoryOptimizationSavingsSummary),
+                  l10n.qualityReviewsMemorySlimming(
+                    memoryOptimizationSavingsSummary,
+                  ),
                 ),
               ],
               if (scopeRepairQueueSummary != null) ...[
@@ -802,12 +810,16 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ],
               if (repairPlanSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText(l10n.qualityReviewsRepairSuggestions(repairPlanSummary)),
+                SelectableText(
+                  l10n.qualityReviewsRepairSuggestions(repairPlanSummary),
+                ),
               ],
               if (tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText(
-                  l10n.qualityReviewsSummaryTokenEfficiency(tokenEfficiencySummary),
+                  l10n.qualityReviewsSummaryTokenEfficiency(
+                    tokenEfficiencySummary,
+                  ),
                 ),
               ],
               if (model.reviews.isNotEmpty) ...[
@@ -829,10 +841,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         l10n: l10n,
                       );
                   final writebackSummary =
-                      summarizeQualityReviewMemoryWriteback(
-                        review,
-                        l10n: l10n,
-                      );
+                      summarizeQualityReviewMemoryWriteback(review, l10n: l10n);
                   final repairSuggestions = buildQualityReviewRepairSuggestions(
                     review,
                     l10n: l10n,
