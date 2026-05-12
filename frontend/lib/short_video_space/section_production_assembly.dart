@@ -202,7 +202,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
               try {
                 await postWorkbenchDeleteVideoV1(
                   token,
-                  projectId: project.numericId,
                   projectUuid: project.id,
                   scriptId: item.scriptNumericId,
                   storyboardId: item.storyboardNumericId,
@@ -257,7 +256,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 
                 await postWorkbenchSelectVideoV1(
                   token,
-                  projectId: project.numericId,
                   projectUuid: project.id,
                   scriptId: item.scriptNumericId,
                   storyboardId: item.storyboardNumericId,

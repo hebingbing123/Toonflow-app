@@ -166,7 +166,6 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
           if (enabled && videoUrl.isNotEmpty) {
             await postWorkbenchSelectVideoV1(
               token,
-              projectId: project.numericId,
               projectUuid: project.id,
               scriptId: script.scriptNumericId,
               storyboardId: shot.storyboardNumericId,
@@ -175,7 +174,6 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
           } else {
             await postWorkbenchDeleteVideoV1(
               token,
-              projectId: project.numericId,
               projectUuid: project.id,
               scriptId: script.scriptNumericId,
               storyboardId: shot.storyboardNumericId,

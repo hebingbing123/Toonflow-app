@@ -54,7 +54,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
         executeOperation: (operation) async {
           await postWorkbenchSelectVideoV1(
             token,
-            projectId: projectId,
             projectUuid: projectUuid,
             scriptId: scriptId,
             storyboardId: operation['storyboardId'] as int,
@@ -74,7 +73,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       try {
         final response = await postProductionWorkbenchBatchSelectVideoV1(
           token,
-          projectId: projectId,
           projectUuid: projectUuid,
           scriptId: scriptId,
           operations: operations,
@@ -143,7 +141,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
         executeOperation: (operation) async {
           await postWorkbenchDeleteVideoV1(
             token,
-            projectId: projectId,
             projectUuid: projectUuid,
             scriptId: scriptId,
             storyboardId: operation['storyboardId'] as int,
@@ -162,7 +159,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       try {
         final response = await postProductionWorkbenchBatchDeleteVideoV1(
           token,
-          projectId: projectId,
           projectUuid: projectUuid,
           scriptId: scriptId,
           storyboardIds: selectedStoryboardIds.toList(),
@@ -392,7 +388,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     try {
       final response = await postProductionWorkbenchBatchSelectVideoV1(
         token,
-        projectId: projectId,
         projectUuid: projectUuid,
         scriptId: scriptId,
         operations: operations,
