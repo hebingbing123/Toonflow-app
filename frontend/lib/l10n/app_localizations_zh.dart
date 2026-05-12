@@ -6329,6 +6329,293 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsWorkbenchCardSummaryEmptyHelp =>
+      '用显式表单完成章节新增、搜索、查看、更新、删除和事件生成，不再依赖首条/末条 probe 按钮。';
+
+  @override
+  String projectEditorNovelsWorkbenchCardSummaryDualBounds(
+    String summaryLine,
+    int firstId,
+    String firstChapter,
+    int lastId,
+    String lastChapter,
+  ) {
+    return '$summaryLine；首条 #$firstId $firstChapter，末条 #$lastId $lastChapter。';
+  }
+
+  @override
+  String get projectEditorNovelsWorkbenchCardOpenButton => '打开章节工作台';
+
+  @override
+  String get projectEditorNovelsWorkbenchCardRefreshChapters => '刷新章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchCardRefreshChaptersBusy => '刷新章节…';
+
+  @override
+  String get projectEditorNovelsWorkbenchCardGenerateEventsForTopThree =>
+      '为前 3 条生成事件';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchKeywordLabel => '搜索章节关键字';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchKeywordHelper =>
+      '调用 GET /projects/:project_uuid/novels?search=';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeStatusLabel => '准入状态';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeStatusAll => '全部状态';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeSourceLabel => '接入来源';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeSourceAll => '全部来源';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchButton => '搜索';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchClearFilters => '清空筛选';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchRefreshList => '刷新列表';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateSectionTitle => '新增章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateChapterTitleLabel => '章节标题';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateChapterBodyLabel => '章节正文';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateSubmit => '新增章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditSectionTitle => '读取 / 更新章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditNumericIdLabel => '章节 numeric ID';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditReadButton => '读取章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditPatchChapterLabel => '更新后的章节标题';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditPatchBodyLabel => '更新后的章节正文';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditIntakeStatusLabel => '准入状态';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditIntakeStatusHelper =>
+      'draft / pending_review / admitted / rejected';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditSourceUrlLabel => '来源 URL';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditIntakeNoteLabel => '准入备注';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditSaveButton => '保存章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteSectionTitle => '删除 / 生成事件';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteNumericIdLabel =>
+      '待删除章节 numeric ID';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteButton => '删除章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteGenerateIdsLabel => '生成事件章节 IDs';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteGenerateIdsHelper =>
+      '用逗号分隔，如 1,2,3';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteGenerateEventsButton => '生成章节事件';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotSectionTitle => '快照 / 批量动作';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotEventStateIdsLabel =>
+      '查询章节 ID（numeric）';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotEventStateIdsHelper =>
+      '用于 get-novel-event-state；用逗号分隔，如 1,2,3';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotReadNovelDataButton =>
+      '读取 get-novel-data';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotReadNovelIndexButton =>
+      '读取 get-novel-index';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotReadEventStateButton =>
+      '读取 event-state';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsLabel =>
+      '批量删除章节 IDs';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsHelper =>
+      '调用 workbench batch-delete；用逗号分隔，删除后会回刷工作台。';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteButton => '批量删除章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsLabel =>
+      '批量准入章节 IDs';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsHelper =>
+      '用逗号分隔，如 1,2,3';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionStatusLabel =>
+      '目标准入状态';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteLabel =>
+      '批量准入备注';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteHelper =>
+      '留空表示不写备注；会覆盖所选章节的 intake_note。';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionButton =>
+      '批量更新准入状态';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportSectionTitle => '整本导入';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCrawlUrlLabel => '抓取 URL';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCrawlUrlHelper =>
+      '以 client 抓取+修正+导入为主；server 用于托管预览。';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportBatchUrlsLabel =>
+      '批量托管 URL（每行一个）';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportBatchUrlsHelper =>
+      '仅用于托管导入（增值）批量触发；默认导入仍以预解析修正区为准。';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleDelayLabel =>
+      '托管计划延迟（分钟）';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleDelayHelper =>
+      '0 表示立即执行';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleRepeatLabel =>
+      '重复间隔（分钟）';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleRepeatHelper =>
+      '留空表示不重复';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCreateScheduleButton =>
+      '创建托管抓取计划';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportListSchedulesButton => '查看托管计划';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportRefreshObservabilityButton =>
+      '刷新托管统计';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCrawlPreparseButton => '抓取并预解析';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportRawPasteLabel => '粘贴整本或多章节正文';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportRawPasteHelper =>
+      '支持按「第十二章 / 第3回 / 第五集」等标题自动切章。';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportBatchSizeLabel => '每批导入条数';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreparseButton => '预解析整本';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportParsedChaptersButton =>
+      '导入预解析章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportServerImportButton => '托管导入（增值）';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportServerBatchButton =>
+      '批量托管导入（增值）';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportExecutionSideLabel => '抓取执行端';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportExecutionSideClient =>
+      'client (当前可用)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportExecutionSideServer =>
+      'server (托管预览)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportIntakeStatusAfterImportLabel =>
+      '导入后准入状态';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportIntakeNoteLabel => '导入备注';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportIntakeNoteHelper =>
+      '可写抓取来源、清洗说明、待审原因等';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewAddChapterButton =>
+      '补充章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip =>
+      '删除该章节';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewChapterTitleField =>
+      '章节标题';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewChapterBodyField =>
+      '章节正文';
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
 
   @override

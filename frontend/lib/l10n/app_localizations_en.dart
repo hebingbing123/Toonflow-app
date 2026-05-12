@@ -6593,6 +6593,321 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsWorkbenchCardSummaryEmptyHelp =>
+      'Use explicit forms to add, search, view, update, delete chapters, and generate events—without legacy first/last probe shortcuts.';
+
+  @override
+  String projectEditorNovelsWorkbenchCardSummaryDualBounds(
+    String summaryLine,
+    int firstId,
+    String firstChapter,
+    int lastId,
+    String lastChapter,
+  ) {
+    return '$summaryLine · first #$firstId $firstChapter · last #$lastId $lastChapter.';
+  }
+
+  @override
+  String get projectEditorNovelsWorkbenchCardOpenButton =>
+      'Open chapters workbench';
+
+  @override
+  String get projectEditorNovelsWorkbenchCardRefreshChapters =>
+      'Refresh chapters';
+
+  @override
+  String get projectEditorNovelsWorkbenchCardRefreshChaptersBusy =>
+      'Refreshing chapters…';
+
+  @override
+  String get projectEditorNovelsWorkbenchCardGenerateEventsForTopThree =>
+      'Generate events for top 3';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchKeywordLabel =>
+      'Search chapter keyword';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchKeywordHelper =>
+      'Calls GET /projects/:project_uuid/novels?search=';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeStatusLabel =>
+      'Admission status';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeStatusAll =>
+      'All statuses';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeSourceLabel =>
+      'Intake source';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchIntakeSourceAll => 'All sources';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchButton => 'Search';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchClearFilters => 'Clear filters';
+
+  @override
+  String get projectEditorNovelsWorkbenchSearchRefreshList => 'Refresh list';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateSectionTitle => 'Add chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateChapterTitleLabel =>
+      'Chapter title';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateChapterBodyLabel =>
+      'Chapter body';
+
+  @override
+  String get projectEditorNovelsWorkbenchCreateSubmit => 'Add chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditSectionTitle =>
+      'Read / update chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditNumericIdLabel =>
+      'Chapter numeric ID';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditReadButton => 'Load chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditPatchChapterLabel =>
+      'Updated chapter title';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditPatchBodyLabel =>
+      'Updated chapter body';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditIntakeStatusLabel =>
+      'Admission status';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditIntakeStatusHelper =>
+      'draft / pending_review / admitted / rejected';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditSourceUrlLabel => 'Source URL';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditIntakeNoteLabel =>
+      'Admission note';
+
+  @override
+  String get projectEditorNovelsWorkbenchEditSaveButton => 'Save chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteSectionTitle =>
+      'Delete / generate events';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteNumericIdLabel =>
+      'Chapter numeric ID to delete';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteButton => 'Delete chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteGenerateIdsLabel =>
+      'Chapter IDs for event generation';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteGenerateIdsHelper =>
+      'Comma-separated, e.g. 1,2,3';
+
+  @override
+  String get projectEditorNovelsWorkbenchDeleteGenerateEventsButton =>
+      'Generate chapter events';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotSectionTitle =>
+      'Snapshots / batch actions';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotEventStateIdsLabel =>
+      'Chapter IDs (numeric)';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotEventStateIdsHelper =>
+      'For get-novel-event-state; comma-separated, e.g. 1,2,3';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotReadNovelDataButton =>
+      'Read get-novel-data';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotReadNovelIndexButton =>
+      'Read get-novel-index';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotReadEventStateButton =>
+      'Read event-state';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsLabel =>
+      'Batch delete chapter IDs';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsHelper =>
+      'Calls workbench batch-delete; comma-separated; refreshes the workbench after delete.';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteButton =>
+      'Batch delete chapters';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsLabel =>
+      'Batch admission chapter IDs';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsHelper =>
+      'Comma-separated, e.g. 1,2,3';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionStatusLabel =>
+      'Target admission status';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteLabel =>
+      'Batch admission note';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteHelper =>
+      'Leave empty to clear; overwrites intake_note for selected chapters.';
+
+  @override
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionButton =>
+      'Batch update admission status';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportSectionTitle =>
+      'Whole-book import';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCrawlUrlLabel => 'Crawl URL';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCrawlUrlHelper =>
+      'Prefer client crawl + fix + import; server is for hosted preview.';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportBatchUrlsLabel =>
+      'Batch hosted URLs (one per line)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportBatchUrlsHelper =>
+      'Hosted import (paid) batch trigger only; default import still uses the pre-parse editor.';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleDelayLabel =>
+      'Hosted schedule delay (minutes)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleDelayHelper =>
+      '0 means run immediately';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleRepeatLabel =>
+      'Repeat interval (minutes)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportScheduleRepeatHelper =>
+      'Leave empty for no repeat';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCreateScheduleButton =>
+      'Create hosted crawl schedule';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportListSchedulesButton =>
+      'View hosted schedules';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportRefreshObservabilityButton =>
+      'Refresh hosted stats';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportCrawlPreparseButton =>
+      'Crawl and pre-parse';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportRawPasteLabel =>
+      'Paste whole book or multi-chapter text';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportRawPasteHelper =>
+      'Auto-split by headings like “Chapter 12”, “第3回”, “第五集”.';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportBatchSizeLabel =>
+      'Chapters per import batch';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreparseButton =>
+      'Pre-parse whole book';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportParsedChaptersButton =>
+      'Import pre-parsed chapters';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportServerImportButton =>
+      'Hosted import (paid)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportServerBatchButton =>
+      'Batch hosted import (paid)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportExecutionSideLabel =>
+      'Crawl execution side';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportExecutionSideClient =>
+      'client (available)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportExecutionSideServer =>
+      'server (hosted preview)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportIntakeStatusAfterImportLabel =>
+      'Admission status after import';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportIntakeNoteLabel => 'Import note';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportIntakeNoteHelper =>
+      'Crawl source, cleanup notes, review reasons, etc.';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewAddChapterButton =>
+      'Add chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip =>
+      'Remove this chapter';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewChapterTitleField =>
+      'Chapter title';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportPreviewChapterBodyField =>
+      'Chapter body';
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty =>
       'Production asset data is empty';
 

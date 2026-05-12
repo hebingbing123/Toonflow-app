@@ -10637,6 +10637,492 @@ abstract class AppLocalizations {
   /// **'Supplement chapter {n}'**
   String projectEditorNovelsActionImportPreviewSupplementChapterTitle(int n);
 
+  /// No description provided for @projectEditorNovelsWorkbenchCardSummaryEmptyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use explicit forms to add, search, view, update, delete chapters, and generate events—without legacy first/last probe shortcuts.'**
+  String get projectEditorNovelsWorkbenchCardSummaryEmptyHelp;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCardSummaryDualBounds.
+  ///
+  /// In en, this message translates to:
+  /// **'{summaryLine} · first #{firstId} {firstChapter} · last #{lastId} {lastChapter}.'**
+  String projectEditorNovelsWorkbenchCardSummaryDualBounds(
+    String summaryLine,
+    int firstId,
+    String firstChapter,
+    int lastId,
+    String lastChapter,
+  );
+
+  /// No description provided for @projectEditorNovelsWorkbenchCardOpenButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open chapters workbench'**
+  String get projectEditorNovelsWorkbenchCardOpenButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCardRefreshChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh chapters'**
+  String get projectEditorNovelsWorkbenchCardRefreshChapters;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCardRefreshChaptersBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing chapters…'**
+  String get projectEditorNovelsWorkbenchCardRefreshChaptersBusy;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCardGenerateEventsForTopThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate events for top 3'**
+  String get projectEditorNovelsWorkbenchCardGenerateEventsForTopThree;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchKeywordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search chapter keyword'**
+  String get projectEditorNovelsWorkbenchSearchKeywordLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchKeywordHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls GET /projects/:project_uuid/novels?search='**
+  String get projectEditorNovelsWorkbenchSearchKeywordHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchIntakeStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admission status'**
+  String get projectEditorNovelsWorkbenchSearchIntakeStatusLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchIntakeStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All statuses'**
+  String get projectEditorNovelsWorkbenchSearchIntakeStatusAll;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchIntakeSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Intake source'**
+  String get projectEditorNovelsWorkbenchSearchIntakeSourceLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchIntakeSourceAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All sources'**
+  String get projectEditorNovelsWorkbenchSearchIntakeSourceAll;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get projectEditorNovelsWorkbenchSearchButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get projectEditorNovelsWorkbenchSearchClearFilters;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSearchRefreshList.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh list'**
+  String get projectEditorNovelsWorkbenchSearchRefreshList;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCreateSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add chapter'**
+  String get projectEditorNovelsWorkbenchCreateSectionTitle;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCreateChapterTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter title'**
+  String get projectEditorNovelsWorkbenchCreateChapterTitleLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCreateChapterBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter body'**
+  String get projectEditorNovelsWorkbenchCreateChapterBodyLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchCreateSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add chapter'**
+  String get projectEditorNovelsWorkbenchCreateSubmit;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read / update chapter'**
+  String get projectEditorNovelsWorkbenchEditSectionTitle;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditNumericIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter numeric ID'**
+  String get projectEditorNovelsWorkbenchEditNumericIdLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditReadButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Load chapter'**
+  String get projectEditorNovelsWorkbenchEditReadButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditPatchChapterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated chapter title'**
+  String get projectEditorNovelsWorkbenchEditPatchChapterLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditPatchBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated chapter body'**
+  String get projectEditorNovelsWorkbenchEditPatchBodyLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditIntakeStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admission status'**
+  String get projectEditorNovelsWorkbenchEditIntakeStatusLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditIntakeStatusHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'draft / pending_review / admitted / rejected'**
+  String get projectEditorNovelsWorkbenchEditIntakeStatusHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditSourceUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Source URL'**
+  String get projectEditorNovelsWorkbenchEditSourceUrlLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditIntakeNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admission note'**
+  String get projectEditorNovelsWorkbenchEditIntakeNoteLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchEditSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save chapter'**
+  String get projectEditorNovelsWorkbenchEditSaveButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchDeleteSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete / generate events'**
+  String get projectEditorNovelsWorkbenchDeleteSectionTitle;
+
+  /// No description provided for @projectEditorNovelsWorkbenchDeleteNumericIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter numeric ID to delete'**
+  String get projectEditorNovelsWorkbenchDeleteNumericIdLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete chapter'**
+  String get projectEditorNovelsWorkbenchDeleteButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchDeleteGenerateIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter IDs for event generation'**
+  String get projectEditorNovelsWorkbenchDeleteGenerateIdsLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchDeleteGenerateIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated, e.g. 1,2,3'**
+  String get projectEditorNovelsWorkbenchDeleteGenerateIdsHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchDeleteGenerateEventsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate chapter events'**
+  String get projectEditorNovelsWorkbenchDeleteGenerateEventsButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshots / batch actions'**
+  String get projectEditorNovelsWorkbenchSnapshotSectionTitle;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotEventStateIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter IDs (numeric)'**
+  String get projectEditorNovelsWorkbenchSnapshotEventStateIdsLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotEventStateIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'For get-novel-event-state; comma-separated, e.g. 1,2,3'**
+  String get projectEditorNovelsWorkbenchSnapshotEventStateIdsHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotReadNovelDataButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Read get-novel-data'**
+  String get projectEditorNovelsWorkbenchSnapshotReadNovelDataButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotReadNovelIndexButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Read get-novel-index'**
+  String get projectEditorNovelsWorkbenchSnapshotReadNovelIndexButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotReadEventStateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Read event-state'**
+  String get projectEditorNovelsWorkbenchSnapshotReadEventStateButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch delete chapter IDs'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls workbench batch-delete; comma-separated; refreshes the workbench after delete.'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch delete chapters'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchDeleteButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch admission chapter IDs'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated, e.g. 1,2,3'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchAdmissionStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target admission status'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionStatusLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch admission note'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to clear; overwrites intake_note for selected chapters.'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchSnapshotBatchAdmissionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch update admission status'**
+  String get projectEditorNovelsWorkbenchSnapshotBatchAdmissionButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole-book import'**
+  String get projectEditorNovelsWorkbenchImportSectionTitle;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportCrawlUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl URL'**
+  String get projectEditorNovelsWorkbenchImportCrawlUrlLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportCrawlUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer client crawl + fix + import; server is for hosted preview.'**
+  String get projectEditorNovelsWorkbenchImportCrawlUrlHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportBatchUrlsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch hosted URLs (one per line)'**
+  String get projectEditorNovelsWorkbenchImportBatchUrlsLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportBatchUrlsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted import (paid) batch trigger only; default import still uses the pre-parse editor.'**
+  String get projectEditorNovelsWorkbenchImportBatchUrlsHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportScheduleDelayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted schedule delay (minutes)'**
+  String get projectEditorNovelsWorkbenchImportScheduleDelayLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportScheduleDelayHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'0 means run immediately'**
+  String get projectEditorNovelsWorkbenchImportScheduleDelayHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportScheduleRepeatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat interval (minutes)'**
+  String get projectEditorNovelsWorkbenchImportScheduleRepeatLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportScheduleRepeatHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for no repeat'**
+  String get projectEditorNovelsWorkbenchImportScheduleRepeatHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportCreateScheduleButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create hosted crawl schedule'**
+  String get projectEditorNovelsWorkbenchImportCreateScheduleButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportListSchedulesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'View hosted schedules'**
+  String get projectEditorNovelsWorkbenchImportListSchedulesButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportRefreshObservabilityButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh hosted stats'**
+  String get projectEditorNovelsWorkbenchImportRefreshObservabilityButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportCrawlPreparseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl and pre-parse'**
+  String get projectEditorNovelsWorkbenchImportCrawlPreparseButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportRawPasteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste whole book or multi-chapter text'**
+  String get projectEditorNovelsWorkbenchImportRawPasteLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportRawPasteHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-split by headings like “Chapter 12”, “第3回”, “第五集”.'**
+  String get projectEditorNovelsWorkbenchImportRawPasteHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportBatchSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapters per import batch'**
+  String get projectEditorNovelsWorkbenchImportBatchSizeLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportPreparseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-parse whole book'**
+  String get projectEditorNovelsWorkbenchImportPreparseButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportParsedChaptersButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Import pre-parsed chapters'**
+  String get projectEditorNovelsWorkbenchImportParsedChaptersButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportServerImportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted import (paid)'**
+  String get projectEditorNovelsWorkbenchImportServerImportButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportServerBatchButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch hosted import (paid)'**
+  String get projectEditorNovelsWorkbenchImportServerBatchButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportExecutionSideLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl execution side'**
+  String get projectEditorNovelsWorkbenchImportExecutionSideLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportExecutionSideClient.
+  ///
+  /// In en, this message translates to:
+  /// **'client (available)'**
+  String get projectEditorNovelsWorkbenchImportExecutionSideClient;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportExecutionSideServer.
+  ///
+  /// In en, this message translates to:
+  /// **'server (hosted preview)'**
+  String get projectEditorNovelsWorkbenchImportExecutionSideServer;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportIntakeStatusAfterImportLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admission status after import'**
+  String get projectEditorNovelsWorkbenchImportIntakeStatusAfterImportLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportIntakeNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Import note'**
+  String get projectEditorNovelsWorkbenchImportIntakeNoteLabel;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportIntakeNoteHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl source, cleanup notes, review reasons, etc.'**
+  String get projectEditorNovelsWorkbenchImportIntakeNoteHelper;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportPreviewAddChapterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add chapter'**
+  String get projectEditorNovelsWorkbenchImportPreviewAddChapterButton;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this chapter'**
+  String get projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportPreviewChapterTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter title'**
+  String get projectEditorNovelsWorkbenchImportPreviewChapterTitleField;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportPreviewChapterBodyField.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter body'**
+  String get projectEditorNovelsWorkbenchImportPreviewChapterBodyField;
+
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///
   /// In en, this message translates to:

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'support.dart';
 
 Widget buildProjectNovelsWorkbenchSection({
   required BuildContext ctx,
+  required AppLocalizations l10n,
   required List<NovelRow> novels,
   required List<bool> novelsLoading,
   required List<bool> novelsBusy,
@@ -39,12 +41,21 @@ Widget buildProjectNovelsWorkbenchSection({
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('章节工作台', style: Theme.of(ctx).textTheme.titleSmall),
+        Text(
+          l10n.projectEditorNovelsChapterWorkbenchTitle,
+          style: Theme.of(ctx).textTheme.titleSmall,
+        ),
         const SizedBox(height: 4),
         Text(
           first == null
-              ? '用显式表单完成章节新增、搜索、查看、更新、删除和事件生成，不再依赖首条/末条 probe 按钮。'
-              : '$summaryLine；首条 #${first.numericId} ${first.chapter}，末条 #${last!.numericId} ${last.chapter}。',
+              ? l10n.projectEditorNovelsWorkbenchCardSummaryEmptyHelp
+              : l10n.projectEditorNovelsWorkbenchCardSummaryDualBounds(
+                  summaryLine,
+                  first.numericId,
+                  first.chapter,
+                  last!.numericId,
+                  last.chapter,
+                ),
           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
             color: Theme.of(ctx).colorScheme.onSurfaceVariant,
           ),
@@ -65,17 +76,23 @@ Widget buildProjectNovelsWorkbenchSection({
           children: [
             FilledButton.tonal(
               onPressed: disabled ? null : openWorkbench,
-              child: const Text('打开章节工作台'),
+              child: Text(l10n.projectEditorNovelsWorkbenchCardOpenButton),
             ),
             OutlinedButton(
               onPressed: disabled ? null : () => refreshNovels(),
-              child: Text(novelsLoading[0] ? '刷新章节…' : '刷新章节'),
+              child: Text(
+                novelsLoading[0]
+                    ? l10n.projectEditorNovelsWorkbenchCardRefreshChaptersBusy
+                    : l10n.projectEditorNovelsWorkbenchCardRefreshChapters,
+              ),
             ),
             OutlinedButton(
               onPressed: disabled || novels.isEmpty
                   ? null
                   : () => generateEvents(),
-              child: const Text('为前 3 条生成事件'),
+              child: Text(
+                l10n.projectEditorNovelsWorkbenchCardGenerateEventsForTopThree,
+              ),
             ),
           ],
         ),

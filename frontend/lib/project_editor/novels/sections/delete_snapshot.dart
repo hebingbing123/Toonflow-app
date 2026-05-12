@@ -20,12 +20,17 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('删除 / 生成事件', style: Theme.of(ctx).textTheme.labelLarge),
+        Text(
+          l10n.projectEditorNovelsWorkbenchDeleteSectionTitle,
+          style: Theme.of(ctx).textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: deleteNovelIdCtrl,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: '待删除章节 numeric ID'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchDeleteNumericIdLabel,
+          ),
         ),
         const SizedBox(height: 8),
         OutlinedButton(
@@ -47,14 +52,14 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                     applyInfoLine: updateInfoLine,
                   ),
                 ),
-          child: const Text('删除章节'),
+          child: Text(l10n.projectEditorNovelsWorkbenchDeleteButton),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: generateIdsCtrl,
-          decoration: const InputDecoration(
-            labelText: '生成事件章节 IDs',
-            helperText: '用逗号分隔，如 1,2,3',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchDeleteGenerateIdsLabel,
+            helperText: l10n.projectEditorNovelsWorkbenchDeleteGenerateIdsHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -77,7 +82,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                     applyInfoLine: updateInfoLine,
                   ),
                 ),
-          child: const Text('生成章节事件'),
+          child: Text(l10n.projectEditorNovelsWorkbenchDeleteGenerateEventsButton),
         ),
       ],
     );
@@ -104,13 +109,17 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('快照 / 批量动作', style: Theme.of(ctx).textTheme.labelLarge),
+        Text(
+          l10n.projectEditorNovelsWorkbenchSnapshotSectionTitle,
+          style: Theme.of(ctx).textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: numericIdsCtrl,
-          decoration: const InputDecoration(
-            labelText: '查询章节 ID（numeric）',
-            helperText: '用于 get-novel-event-state；用逗号分隔，如 1,2,3',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchSnapshotEventStateIdsLabel,
+            helperText:
+                l10n.projectEditorNovelsWorkbenchSnapshotEventStateIdsHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -134,7 +143,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
-              child: const Text('读取 get-novel-data'),
+              child: Text(l10n.projectEditorNovelsWorkbenchSnapshotReadNovelDataButton),
             ),
             OutlinedButton(
               onPressed: localBusy
@@ -152,7 +161,9 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
-              child: const Text('读取 get-novel-index'),
+              child: Text(
+                l10n.projectEditorNovelsWorkbenchSnapshotReadNovelIndexButton,
+              ),
             ),
             OutlinedButton(
               onPressed: localBusy
@@ -171,16 +182,19 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
-              child: const Text('读取 event-state'),
+              child: Text(
+                l10n.projectEditorNovelsWorkbenchSnapshotReadEventStateButton,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
         TextField(
           controller: batchDeleteIdsCtrl,
-          decoration: const InputDecoration(
-            labelText: '批量删除章节 IDs',
-            helperText: '调用 workbench batch-delete；用逗号分隔，删除后会回刷工作台。',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsLabel,
+            helperText:
+                l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -203,14 +217,16 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                     applyInfoLine: updateInfoLine,
                   ),
                 ),
-          child: const Text('批量删除章节'),
+          child: Text(l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteButton),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: batchAdmissionIdsCtrl,
-          decoration: const InputDecoration(
-            labelText: '批量准入章节 IDs',
-            helperText: '用逗号分隔，如 1,2,3',
+          decoration: InputDecoration(
+            labelText:
+                l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsLabel,
+            helperText:
+                l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -218,7 +234,10 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
           initialValue: batchAdmissionStatusCtrl.text.isEmpty
               ? 'pending_review'
               : batchAdmissionStatusCtrl.text,
-          decoration: const InputDecoration(labelText: '目标准入状态'),
+          decoration: InputDecoration(
+            labelText:
+                l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionStatusLabel,
+          ),
           items: const [
             DropdownMenuItem(value: 'draft', child: Text('draft')),
             DropdownMenuItem(
@@ -236,9 +255,11 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
         TextField(
           controller: batchAdmissionNoteCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(
-            labelText: '批量准入备注',
-            helperText: '留空表示不写备注；会覆盖所选章节的 intake_note。',
+          decoration: InputDecoration(
+            labelText:
+                l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteLabel,
+            helperText:
+                l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -263,7 +284,9 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                     applyInfoLine: updateInfoLine,
                   ),
                 ),
-          child: const Text('批量更新准入状态'),
+          child: Text(
+            l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionButton,
+          ),
         ),
       ],
     );

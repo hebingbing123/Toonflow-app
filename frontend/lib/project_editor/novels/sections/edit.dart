@@ -23,12 +23,17 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('读取 / 更新章节', style: Theme.of(ctx).textTheme.labelLarge),
+        Text(
+          l10n.projectEditorNovelsWorkbenchEditSectionTitle,
+          style: Theme.of(ctx).textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: selectedNovelIdCtrl,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: '章节 numeric ID'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchEditNumericIdLabel,
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -57,40 +62,48 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
-              child: const Text('读取章节'),
+              child: Text(l10n.projectEditorNovelsWorkbenchEditReadButton),
             ),
           ],
         ),
         const SizedBox(height: 8),
         TextField(
           controller: patchChapterCtrl,
-          decoration: const InputDecoration(labelText: '更新后的章节标题'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchEditPatchChapterLabel,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: patchBodyCtrl,
           minLines: 3,
           maxLines: 6,
-          decoration: const InputDecoration(labelText: '更新后的章节正文'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchEditPatchBodyLabel,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: patchIntakeStatusCtrl,
-          decoration: const InputDecoration(
-            labelText: '准入状态',
-            helperText: 'draft / pending_review / admitted / rejected',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchEditIntakeStatusLabel,
+            helperText: l10n.projectEditorNovelsWorkbenchEditIntakeStatusHelper,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: patchIntakeSourceUrlCtrl,
-          decoration: const InputDecoration(labelText: '来源 URL'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchEditSourceUrlLabel,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: patchIntakeNoteCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(labelText: '准入备注'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchEditIntakeNoteLabel,
+          ),
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
@@ -117,7 +130,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
                     applyInfoLine: updateInfoLine,
                   ),
                 ),
-          child: const Text('保存章节'),
+          child: Text(l10n.projectEditorNovelsWorkbenchEditSaveButton),
         ),
       ],
     );

@@ -23,9 +23,9 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
       children: [
         TextField(
           controller: searchCtrl,
-          decoration: const InputDecoration(
-            labelText: '搜索章节关键字',
-            helperText: '调用 GET /projects/{project_uuid}/novels?search=',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchSearchKeywordLabel,
+            helperText: l10n.projectEditorNovelsWorkbenchSearchKeywordHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -36,16 +36,21 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                 initialValue: searchIntakeStatusCtrl.text.isEmpty
                     ? ''
                     : searchIntakeStatusCtrl.text,
-                decoration: const InputDecoration(labelText: '准入状态'),
-                items: const [
-                  DropdownMenuItem(value: '', child: Text('全部状态')),
-                  DropdownMenuItem(value: 'draft', child: Text('draft')),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsWorkbenchSearchIntakeStatusLabel,
+                ),
+                items: [
                   DropdownMenuItem(
+                    value: '',
+                    child: Text(l10n.projectEditorNovelsWorkbenchSearchIntakeStatusAll),
+                  ),
+                  const DropdownMenuItem(value: 'draft', child: Text('draft')),
+                  const DropdownMenuItem(
                     value: 'pending_review',
                     child: Text('pending_review'),
                   ),
-                  DropdownMenuItem(value: 'admitted', child: Text('admitted')),
-                  DropdownMenuItem(value: 'rejected', child: Text('rejected')),
+                  const DropdownMenuItem(value: 'admitted', child: Text('admitted')),
+                  const DropdownMenuItem(value: 'rejected', child: Text('rejected')),
                 ],
                 onChanged: (value) {
                   searchIntakeStatusCtrl.text = value ?? '';
@@ -58,19 +63,24 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                 initialValue: searchIntakeSourceCtrl.text.isEmpty
                     ? ''
                     : searchIntakeSourceCtrl.text,
-                decoration: const InputDecoration(labelText: '接入来源'),
-                items: const [
-                  DropdownMenuItem(value: '', child: Text('全部来源')),
-                  DropdownMenuItem(value: 'manual', child: Text('manual')),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsWorkbenchSearchIntakeSourceLabel,
+                ),
+                items: [
                   DropdownMenuItem(
+                    value: '',
+                    child: Text(l10n.projectEditorNovelsWorkbenchSearchIntakeSourceAll),
+                  ),
+                  const DropdownMenuItem(value: 'manual', child: Text('manual')),
+                  const DropdownMenuItem(
                     value: 'whole_book_import',
                     child: Text('whole_book_import'),
                   ),
-                  DropdownMenuItem(
+                  const DropdownMenuItem(
                     value: 'crawler_client',
                     child: Text('crawler_client'),
                   ),
-                  DropdownMenuItem(
+                  const DropdownMenuItem(
                     value: 'crawler_server',
                     child: Text('crawler_server'),
                   ),
@@ -106,7 +116,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                         applyResult: applyResult,
                       ),
                     ),
-              child: const Text('搜索'),
+              child: Text(l10n.projectEditorNovelsWorkbenchSearchButton),
             ),
             OutlinedButton(
               onPressed: localBusy
@@ -121,7 +131,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                         l10n.projectEditorNovelsActionSearchFiltersCleared,
                       );
                     },
-              child: const Text('清空筛选'),
+              child: Text(l10n.projectEditorNovelsWorkbenchSearchClearFilters),
             ),
             OutlinedButton(
               onPressed: localBusy
@@ -134,7 +144,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                       setLocalBusy: setLocalBusy,
                       action: () => refreshWorkbench(setLocalState),
                     ),
-              child: const Text('刷新列表'),
+              child: Text(l10n.projectEditorNovelsWorkbenchSearchRefreshList),
             ),
           ],
         ),

@@ -17,6 +17,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
         const SizedBox(height: 8),
         buildProjectNovelsWorkbenchSection(
           ctx: ctx,
+          l10n: l10n,
           novels: dialogState.novelsRef[0]?.items ?? const <NovelRow>[],
           novelsLoading: dialogState.novelsLoading,
           novelsBusy: dialogState.novelsBusy,

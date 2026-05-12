@@ -23,18 +23,25 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('新增章节', style: Theme.of(ctx).textTheme.labelLarge),
+        Text(
+          l10n.projectEditorNovelsWorkbenchCreateSectionTitle,
+          style: Theme.of(ctx).textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: createChapterCtrl,
-          decoration: const InputDecoration(labelText: '章节标题'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchCreateChapterTitleLabel,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: createBodyCtrl,
           minLines: 3,
           maxLines: 6,
-          decoration: const InputDecoration(labelText: '章节正文'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchCreateChapterBodyLabel,
+          ),
         ),
         const SizedBox(height: 8),
         FilledButton(
@@ -61,7 +68,7 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
                     updateInfoLine(l10n.projectEditorNovelsActionChapterCreateOk);
                   },
                 ),
-          child: const Text('新增章节'),
+          child: Text(l10n.projectEditorNovelsWorkbenchCreateSubmit),
         ),
       ],
     );

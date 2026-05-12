@@ -41,14 +41,16 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('整本导入', style: Theme.of(ctx).textTheme.labelLarge),
+        Text(
+          l10n.projectEditorNovelsWorkbenchImportSectionTitle,
+          style: Theme.of(ctx).textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: importUrlCtrl,
-          decoration: const InputDecoration(
-            labelText: '抓取 URL',
-            helperText:
-                '以 client 抓取+修正+导入为主；server 用于托管预览。',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchImportCrawlUrlLabel,
+            helperText: l10n.projectEditorNovelsWorkbenchImportCrawlUrlHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -56,9 +58,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           controller: importBatchUrlsCtrl,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '批量托管 URL（每行一个）',
-            helperText: '仅用于托管导入（增值）批量触发；默认导入仍以预解析修正区为准。',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchImportBatchUrlsLabel,
+            helperText: l10n.projectEditorNovelsWorkbenchImportBatchUrlsHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -69,9 +71,11 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
               child: TextField(
                 controller: importScheduleDelayMinutesCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: '托管计划延迟（分钟）',
-                  helperText: '0 表示立即执行',
+                decoration: InputDecoration(
+                  labelText:
+                      l10n.projectEditorNovelsWorkbenchImportScheduleDelayLabel,
+                  helperText:
+                      l10n.projectEditorNovelsWorkbenchImportScheduleDelayHelper,
                 ),
               ),
             ),
@@ -81,9 +85,11 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
               child: TextField(
                 controller: importScheduleRepeatMinutesCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: '重复间隔（分钟）',
-                  helperText: '留空表示不重复',
+                decoration: InputDecoration(
+                  labelText:
+                      l10n.projectEditorNovelsWorkbenchImportScheduleRepeatLabel,
+                  helperText:
+                      l10n.projectEditorNovelsWorkbenchImportScheduleRepeatHelper,
                 ),
               ),
             ),
@@ -116,7 +122,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                               applyInfoLine: updateInfoLine,
                             ),
                           ),
-              child: const Text('创建托管抓取计划'),
+              child: Text(l10n.projectEditorNovelsWorkbenchImportCreateScheduleButton),
             ),
             const SizedBox(width: 8),
             OutlinedButton(
@@ -136,7 +142,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                               applyInfoLine: updateInfoLine,
                             ),
                           ),
-              child: const Text('查看托管计划'),
+              child: Text(l10n.projectEditorNovelsWorkbenchImportListSchedulesButton),
             ),
             const SizedBox(width: 8),
             OutlinedButton(
@@ -156,7 +162,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                               applyInfoLine: updateInfoLine,
                             ),
                           ),
-              child: const Text('刷新托管统计'),
+              child: Text(
+                l10n.projectEditorNovelsWorkbenchImportRefreshObservabilityButton,
+              ),
             ),
           ],
         ),
@@ -183,7 +191,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       applyImportPreview: applyImportPreview,
                     ),
                   ),
-            child: const Text('抓取并预解析'),
+            child: Text(l10n.projectEditorNovelsWorkbenchImportCrawlPreparseButton),
           ),
         ),
         const SizedBox(height: 8),
@@ -191,9 +199,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           controller: importRawTextCtrl,
           minLines: 6,
           maxLines: 10,
-          decoration: const InputDecoration(
-            labelText: '粘贴整本或多章节正文',
-            helperText: '支持按“第十二章 / 第3回 / 第五集”等标题自动切章。',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorNovelsWorkbenchImportRawPasteLabel,
+            helperText: l10n.projectEditorNovelsWorkbenchImportRawPasteHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -204,7 +212,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
               child: TextField(
                 controller: importBatchSizeCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '每批导入条数'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsWorkbenchImportBatchSizeLabel,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -224,7 +234,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                               ),
                       );
                     },
-              child: const Text('预解析整本'),
+              child: Text(l10n.projectEditorNovelsWorkbenchImportPreparseButton),
             ),
             const SizedBox(width: 8),
             FilledButton(
@@ -254,7 +264,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
-              child: const Text('导入预解析章节'),
+              child: Text(
+                l10n.projectEditorNovelsWorkbenchImportParsedChaptersButton,
+              ),
             ),
             const SizedBox(width: 8),
             OutlinedButton(
@@ -280,7 +292,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
-              child: const Text('托管导入（增值）'),
+              child: Text(l10n.projectEditorNovelsWorkbenchImportServerImportButton),
             ),
             const SizedBox(width: 8),
             OutlinedButton(
@@ -306,7 +318,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         applyInfoLine: updateInfoLine,
                       ),
                     ),
-              child: const Text('批量托管导入（增值）'),
+              child: Text(
+                l10n.projectEditorNovelsWorkbenchImportServerBatchButton,
+              ),
             ),
           ],
         ),
@@ -319,15 +333,21 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                 initialValue: importExecutionSideCtrl.text.isEmpty
                     ? 'client'
                     : importExecutionSideCtrl.text,
-                decoration: const InputDecoration(labelText: '抓取执行端'),
-                items: const [
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsWorkbenchImportExecutionSideLabel,
+                ),
+                items: [
                   DropdownMenuItem(
                     value: 'client',
-                    child: Text('client (当前可用)'),
+                    child: Text(
+                      l10n.projectEditorNovelsWorkbenchImportExecutionSideClient,
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'server',
-                    child: Text('server (托管预览)'),
+                    child: Text(
+                      l10n.projectEditorNovelsWorkbenchImportExecutionSideServer,
+                    ),
                   ),
                 ],
                 onChanged: (value) {
@@ -341,7 +361,10 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                 initialValue: importIntakeStatusCtrl.text.isEmpty
                     ? 'pending_review'
                     : importIntakeStatusCtrl.text,
-                decoration: const InputDecoration(labelText: '导入后准入状态'),
+                decoration: InputDecoration(
+                  labelText:
+                      l10n.projectEditorNovelsWorkbenchImportIntakeStatusAfterImportLabel,
+                ),
                 items: const [
                   DropdownMenuItem(value: 'draft', child: Text('draft')),
                   DropdownMenuItem(
@@ -361,9 +384,10 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
               child: TextField(
                 controller: importIntakeNoteCtrl,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: '导入备注',
-                  helperText: '可写抓取来源、清洗说明、待审原因等',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsWorkbenchImportIntakeNoteLabel,
+                  helperText:
+                      l10n.projectEditorNovelsWorkbenchImportIntakeNoteHelper,
                 ),
               ),
             ),
@@ -409,7 +433,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                                 ),
                               ], l10n.projectEditorNovelsActionImportPreviewAppendChapter);
                             },
-                      child: const Text('补充章节'),
+                      child: Text(
+                        l10n.projectEditorNovelsWorkbenchImportPreviewAddChapterButton,
+                      ),
                     ),
                   ],
                 ),
@@ -438,7 +464,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                               ),
                             ),
                             IconButton(
-                              tooltip: '删除该章节',
+                              tooltip: l10n
+                                  .projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip,
                               onPressed: localBusy
                                   ? null
                                   : () {
@@ -463,7 +490,10 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             'import-preview-title-${row.chapterIndex}-${row.chapter}',
                           ),
                           initialValue: row.chapter,
-                          decoration: const InputDecoration(labelText: '章节标题'),
+                          decoration: InputDecoration(
+                            labelText: l10n
+                                .projectEditorNovelsWorkbenchImportPreviewChapterTitleField,
+                          ),
                           onChanged: (value) {
                             final updated = List<ParsedNovelChapter>.from(
                               importPreviewRows,
@@ -485,7 +515,10 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                           initialValue: row.chapterData,
                           minLines: 2,
                           maxLines: 4,
-                          decoration: const InputDecoration(labelText: '章节正文'),
+                          decoration: InputDecoration(
+                            labelText: l10n
+                                .projectEditorNovelsWorkbenchImportPreviewChapterBodyField,
+                          ),
                           onChanged: (value) {
                             final updated = List<ParsedNovelChapter>.from(
                               importPreviewRows,
