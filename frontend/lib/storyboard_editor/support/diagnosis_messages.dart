@@ -61,17 +61,18 @@ enum StoryboardWorkbenchRecommendedAction {
 }
 
 String describeStoryboardListRecommendedAction(
+  AppLocalizations l10n,
   StoryboardListRecommendedAction action,
 ) {
   switch (action) {
     case StoryboardListRecommendedAction.addStoryboard:
-      return '继续新增分镜';
+      return l10n.scriptEditorStoryboardsRecommendAddStoryboard;
     case StoryboardListRecommendedAction.refreshProductionSummary:
-      return '刷新制作视图';
+      return l10n.scriptEditorStoryboardsRecommendRefreshProduction;
     case StoryboardListRecommendedAction.openBatchWorkbench:
-      return '进入分镜出图工作台';
+      return l10n.scriptEditorStoryboardsRecommendOpenBatchWorkbench;
     case StoryboardListRecommendedAction.editStoryboard:
-      return '补充分镜提示词';
+      return l10n.scriptEditorStoryboardsRecommendEditPrompts;
   }
 }
 
@@ -111,14 +112,20 @@ String describeStoryboardWorkbenchRecommendedAction(
   }
 }
 
-String buildStoryboardListFollowUp({
+String buildStoryboardListFollowUp(
+  AppLocalizations l10n, {
   required String actionSummary,
   required StoryboardListDiagnosis diagnosis,
 }) {
   final nextAction = describeStoryboardListRecommendedAction(
+    l10n,
     diagnosis.recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+  return l10n.scriptEditorStoryboardsFollowUpLine(
+    actionSummary,
+    nextAction,
+    diagnosis.detail,
+  );
 }
 
 String buildStoryboardBatchWorkbenchFollowUp({

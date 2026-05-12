@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import '../../storyboard_editor/support/diagnosis.dart';
 
@@ -55,9 +56,10 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     return AlertDialog(
-      title: Text('分镜 (${model.boardsList.length})'),
+      title: Text(l10n.scriptEditorStoryboardsDialogTitle(model.boardsList.length)),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -67,15 +69,16 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
             children: [
               Text(
                 model.boardsList.isEmpty
-                    ? '当前剧本还没有分镜，可直接新增单条或按每行一个提示词批量导入。'
-                    : '按剧本维护分镜顺序、提示词与状态；点击条目可进入单条编辑。',
+                    ? l10n.scriptEditorStoryboardsIntroEmpty
+                    : l10n.scriptEditorStoryboardsIntroHasBoards,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 8),
               Text(
-                model.productionSummaryLine ?? '制作视图摘要尚未加载',
+                model.productionSummaryLine ??
+                    l10n.scriptEditorStoryboardsProductionSummaryPending,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
@@ -97,7 +100,12 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '推荐动作：${describeStoryboardListRecommendedAction(model.diagnosis.recommendedAction)}',
+                      l10n.scriptEditorStoryboardsRecommendedActionLine(
+                        describeStoryboardListRecommendedAction(
+                          l10n,
+                          model.diagnosis.recommendedAction,
+                        ),
+                      ),
                       style: Theme.of(
                         context,
                       ).textTheme.bodySmall?.copyWith(color: outline),
@@ -126,24 +134,34 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                   children: [
                     FilledButton.tonal(
                       onPressed: callbacks.onAddStoryboard,
-                      child: Text(model.actionBusy ? '处理中…' : '新增分镜'),
+                      child: Text(
+                        model.actionBusy
+                            ? l10n.scriptEditorStoryboardsBusy
+                            : l10n.scriptEditorStoryboardAddDialogTitle,
+                      ),
                     ),
                     TextButton(
                       onPressed: callbacks.onBatchAddStoryboards,
-                      child: const Text('批量新增分镜'),
+                      child: Text(l10n.scriptEditorStoryboardBatchAddDialogTitle),
                     ),
                     TextButton(
                       onPressed: callbacks.onReloadBoards,
-                      child: Text(model.boardsLoading ? '刷新中…' : '刷新列表'),
+                      child: Text(
+                        model.boardsLoading
+                            ? l10n.scriptEditorStoryboardsRefreshing
+                            : l10n.scriptEditorStoryboardsRefreshList,
+                      ),
                     ),
                     TextButton(
                       onPressed: callbacks.onOpenBatchWorkbench,
-                      child: const Text('分镜出图工作台'),
+                      child: Text(l10n.scriptEditorStoryboardsOpenImageWorkbench),
                     ),
                     TextButton(
                       onPressed: callbacks.onReloadProductionSummary,
                       child: Text(
-                        model.productionSummaryLoading ? '读取制作视图…' : '刷新制作视图',
+                        model.productionSummaryLoading
+                            ? l10n.scriptEditorStoryboardsLoadingProductionView
+                            : l10n.scriptEditorStoryboardsRefreshProductionView,
                       ),
                     ),
                   ],
@@ -155,7 +173,7 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                 child: model.boardsList.isEmpty
                     ? Center(
                         child: Text(
-                          '暂无分镜',
+                          l10n.scriptEditorStoryboardsEmptyList,
                           style: Theme.of(
                             context,
                           ).textTheme.bodyMedium?.copyWith(color: outline),
@@ -167,11 +185,17 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                         itemBuilder: (_, i) {
                           final board = model.boardsList[i];
                           final parts = <String>[
-                            '序号 ${board.sbIndex ?? i + 1}',
+                            l10n.scriptEditorStoryboardsRowOrder(
+                              board.sbIndex ?? i + 1,
+                            ),
                             if ((board.state ?? '').trim().isNotEmpty)
-                              '状态 ${board.state}',
+                              l10n.scriptEditorStoryboardsRowState(
+                                board.state!.trim(),
+                              ),
                             if ((board.duration ?? '').trim().isNotEmpty)
-                              '时长 ${board.duration}',
+                              l10n.scriptEditorStoryboardsRowDuration(
+                                board.duration!.trim(),
+                              ),
                           ];
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
@@ -198,7 +222,10 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(onPressed: callbacks.onClose, child: const Text('Close')),
+        TextButton(
+          onPressed: callbacks.onClose,
+          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
+        ),
       ],
     );
   }

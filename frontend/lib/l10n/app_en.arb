@@ -5478,6 +5478,130 @@
       }
     }
   },
+  "scriptEditorStoryboardsDialogTitle": "Storyboards ({count})",
+  "@scriptEditorStoryboardsDialogTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsIntroEmpty": "This script has no storyboards yet. Add one or paste one prompt per line to import a batch.",
+  "scriptEditorStoryboardsIntroHasBoards": "Manage shot order, prompts, and status for this script; tap a row to edit a single storyboard.",
+  "scriptEditorStoryboardsProductionSummaryPending": "Production view summary not loaded yet.",
+  "scriptEditorStoryboardsRecommendedActionLine": "Recommended action: {action}",
+  "@scriptEditorStoryboardsRecommendedActionLine": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsBusy": "Working…",
+  "scriptEditorStoryboardsRefreshList": "Refresh list",
+  "scriptEditorStoryboardsRefreshing": "Refreshing…",
+  "scriptEditorStoryboardsOpenImageWorkbench": "Storyboard image workbench",
+  "scriptEditorStoryboardsRefreshProductionView": "Refresh production view",
+  "scriptEditorStoryboardsLoadingProductionView": "Loading production view…",
+  "scriptEditorStoryboardsEmptyList": "No storyboards",
+  "scriptEditorStoryboardsRowOrder": "Order {index}",
+  "@scriptEditorStoryboardsRowOrder": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsRowState": "State {state}",
+  "@scriptEditorStoryboardsRowState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsRowDuration": "Duration {duration}",
+  "@scriptEditorStoryboardsRowDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsStateFallback": "unknown",
+  "scriptEditorStoryboardsProductionEmptyData": "Production view has no storyboard rows yet.",
+  "scriptEditorStoryboardsProductionSummaryLine": "Production view · {count} rows · {preview}{ellipsis}",
+  "@scriptEditorStoryboardsProductionSummaryLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsProductionReadFailed": "Failed to read production view: {error}",
+  "@scriptEditorStoryboardsProductionReadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsDiagnosisEmptySummary": "This script has no storyboards yet.",
+  "scriptEditorStoryboardsDiagnosisEmptyDetail": "Add a single shot or batch-import prompts, then sync the production view or start image generation.",
+  "scriptEditorStoryboardsDiagnosisProductionNotSyncedSummary": "Maintaining {count} storyboards, but the production view is not synced.",
+  "@scriptEditorStoryboardsDiagnosisProductionNotSyncedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsDiagnosisProductionNotSyncedDetail": "Refresh the production view first to confirm production-side rows exist, then decide whether to continue batch generation.",
+  "scriptEditorStoryboardsDiagnosisNoPromptsSummary": "{count} storyboards exist, but none have a usable prompt.",
+  "@scriptEditorStoryboardsDiagnosisNoPromptsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsDiagnosisNoPromptsDetail": "Open individual storyboards to fill prompts before the image workbench is reliable.",
+  "scriptEditorStoryboardsDiagnosisReadyBatchSummary": "{ready}/{total} storyboards can enter the image-generation flow.",
+  "@scriptEditorStoryboardsDiagnosisReadyBatchSummary": {
+    "placeholders": {
+      "ready": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsDiagnosisReadyBatchDetail": "Open the storyboard image workbench to read the production view, generate previews, and export selected images in batch.",
+  "scriptEditorStoryboardsRecommendAddStoryboard": "Keep adding storyboards",
+  "scriptEditorStoryboardsRecommendRefreshProduction": "Refresh production view",
+  "scriptEditorStoryboardsRecommendOpenBatchWorkbench": "Open storyboard image workbench",
+  "scriptEditorStoryboardsRecommendEditPrompts": "Fill in storyboard prompts",
+  "scriptEditorStoryboardsFollowUpLine": "{actionSummary} Suggested next step: {nextAction}. {detail}",
+  "@scriptEditorStoryboardsFollowUpLine": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorScriptsSingleWorkbenchRecentExtractError": "Recent extract error: {reason}",
   "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
     "placeholders": {

@@ -1,3 +1,5 @@
+import 'package:openflow_app/l10n/app_localizations.dart';
+
 import 'media.dart';
 import '../../../rust_api.dart';
 

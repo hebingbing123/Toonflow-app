@@ -11810,6 +11810,209 @@ abstract class AppLocalizations {
   /// **'Batch-added {count} storyboards.'**
   String scriptEditorStoryboardBatchAddFollowUpSummary(int count);
 
+  /// No description provided for @scriptEditorStoryboardsDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboards ({count})'**
+  String scriptEditorStoryboardsDialogTitle(int count);
+
+  /// No description provided for @scriptEditorStoryboardsIntroEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This script has no storyboards yet. Add one or paste one prompt per line to import a batch.'**
+  String get scriptEditorStoryboardsIntroEmpty;
+
+  /// No description provided for @scriptEditorStoryboardsIntroHasBoards.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage shot order, prompts, and status for this script; tap a row to edit a single storyboard.'**
+  String get scriptEditorStoryboardsIntroHasBoards;
+
+  /// No description provided for @scriptEditorStoryboardsProductionSummaryPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Production view summary not loaded yet.'**
+  String get scriptEditorStoryboardsProductionSummaryPending;
+
+  /// No description provided for @scriptEditorStoryboardsRecommendedActionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended action: {action}'**
+  String scriptEditorStoryboardsRecommendedActionLine(String action);
+
+  /// No description provided for @scriptEditorStoryboardsBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get scriptEditorStoryboardsBusy;
+
+  /// No description provided for @scriptEditorStoryboardsRefreshList.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh list'**
+  String get scriptEditorStoryboardsRefreshList;
+
+  /// No description provided for @scriptEditorStoryboardsRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get scriptEditorStoryboardsRefreshing;
+
+  /// No description provided for @scriptEditorStoryboardsOpenImageWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard image workbench'**
+  String get scriptEditorStoryboardsOpenImageWorkbench;
+
+  /// No description provided for @scriptEditorStoryboardsRefreshProductionView.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh production view'**
+  String get scriptEditorStoryboardsRefreshProductionView;
+
+  /// No description provided for @scriptEditorStoryboardsLoadingProductionView.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading production view…'**
+  String get scriptEditorStoryboardsLoadingProductionView;
+
+  /// No description provided for @scriptEditorStoryboardsEmptyList.
+  ///
+  /// In en, this message translates to:
+  /// **'No storyboards'**
+  String get scriptEditorStoryboardsEmptyList;
+
+  /// No description provided for @scriptEditorStoryboardsRowOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Order {index}'**
+  String scriptEditorStoryboardsRowOrder(int index);
+
+  /// No description provided for @scriptEditorStoryboardsRowState.
+  ///
+  /// In en, this message translates to:
+  /// **'State {state}'**
+  String scriptEditorStoryboardsRowState(String state);
+
+  /// No description provided for @scriptEditorStoryboardsRowDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration {duration}'**
+  String scriptEditorStoryboardsRowDuration(String duration);
+
+  /// No description provided for @scriptEditorStoryboardsStateFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown'**
+  String get scriptEditorStoryboardsStateFallback;
+
+  /// No description provided for @scriptEditorStoryboardsProductionEmptyData.
+  ///
+  /// In en, this message translates to:
+  /// **'Production view has no storyboard rows yet.'**
+  String get scriptEditorStoryboardsProductionEmptyData;
+
+  /// No description provided for @scriptEditorStoryboardsProductionSummaryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Production view · {count} rows · {preview}{ellipsis}'**
+  String scriptEditorStoryboardsProductionSummaryLine(
+    int count,
+    String preview,
+    String ellipsis,
+  );
+
+  /// No description provided for @scriptEditorStoryboardsProductionReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to read production view: {error}'**
+  String scriptEditorStoryboardsProductionReadFailed(String error);
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisEmptySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This script has no storyboards yet.'**
+  String get scriptEditorStoryboardsDiagnosisEmptySummary;
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisEmptyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a single shot or batch-import prompts, then sync the production view or start image generation.'**
+  String get scriptEditorStoryboardsDiagnosisEmptyDetail;
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisProductionNotSyncedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintaining {count} storyboards, but the production view is not synced.'**
+  String scriptEditorStoryboardsDiagnosisProductionNotSyncedSummary(int count);
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisProductionNotSyncedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the production view first to confirm production-side rows exist, then decide whether to continue batch generation.'**
+  String get scriptEditorStoryboardsDiagnosisProductionNotSyncedDetail;
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisNoPromptsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} storyboards exist, but none have a usable prompt.'**
+  String scriptEditorStoryboardsDiagnosisNoPromptsSummary(int count);
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisNoPromptsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Open individual storyboards to fill prompts before the image workbench is reliable.'**
+  String get scriptEditorStoryboardsDiagnosisNoPromptsDetail;
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisReadyBatchSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready}/{total} storyboards can enter the image-generation flow.'**
+  String scriptEditorStoryboardsDiagnosisReadyBatchSummary(
+    int ready,
+    int total,
+  );
+
+  /// No description provided for @scriptEditorStoryboardsDiagnosisReadyBatchDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the storyboard image workbench to read the production view, generate previews, and export selected images in batch.'**
+  String get scriptEditorStoryboardsDiagnosisReadyBatchDetail;
+
+  /// No description provided for @scriptEditorStoryboardsRecommendAddStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep adding storyboards'**
+  String get scriptEditorStoryboardsRecommendAddStoryboard;
+
+  /// No description provided for @scriptEditorStoryboardsRecommendRefreshProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh production view'**
+  String get scriptEditorStoryboardsRecommendRefreshProduction;
+
+  /// No description provided for @scriptEditorStoryboardsRecommendOpenBatchWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open storyboard image workbench'**
+  String get scriptEditorStoryboardsRecommendOpenBatchWorkbench;
+
+  /// No description provided for @scriptEditorStoryboardsRecommendEditPrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in storyboard prompts'**
+  String get scriptEditorStoryboardsRecommendEditPrompts;
+
+  /// No description provided for @scriptEditorStoryboardsFollowUpLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{actionSummary} Suggested next step: {nextAction}. {detail}'**
+  String scriptEditorStoryboardsFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  );
+
   /// No description provided for @projectEditorScriptsSingleWorkbenchRecentExtractError.
   ///
   /// In en, this message translates to:

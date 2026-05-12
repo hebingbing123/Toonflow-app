@@ -1,10 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/script_editor/storyboards/workbench_view.dart';
 import 'package:openflow_app/storyboard_editor/support/diagnosis.dart';
 import 'package:openflow_app/rust_api.dart';
 
+final _zh = AppLocalizationsZh();
+
 void noop() {}
+
+Widget appWithZh(Widget child) => MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: Scaffold(body: child),
+    );
 
 StoryboardsWorkbenchDialogViewModel buildDialogModel({
   List<StoryboardRow> boardsList = const <StoryboardRow>[
@@ -29,9 +46,9 @@ StoryboardsWorkbenchDialogViewModel buildDialogModel({
     boardsList: boardsList,
     diagnosis:
         diagnosis ??
-        const StoryboardListDiagnosis(
-          summary: '已有 1/1 条分镜可直接进入出图流程。',
-          detail: '可以进入分镜出图工作台批量读取制作视图、生成预览并导出所选图片。',
+        StoryboardListDiagnosis(
+          summary: _zh.scriptEditorStoryboardsDiagnosisReadyBatchSummary(1, 1),
+          detail: _zh.scriptEditorStoryboardsDiagnosisReadyBatchDetail,
           recommendedAction: StoryboardListRecommendedAction.openBatchWorkbench,
         ),
     productionSummaryLine: productionSummaryLine,
@@ -67,46 +84,58 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StoryboardsWorkbenchDialogView(
-            model: buildDialogModel(),
-            callbacks: buildDialogCallbacks(),
-          ),
+      appWithZh(
+        StoryboardsWorkbenchDialogView(
+          model: buildDialogModel(),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('分镜 (1)'), findsOneWidget);
+    expect(find.text(_zh.scriptEditorStoryboardsDialogTitle(1)), findsOneWidget);
     expect(find.text('制作视图 1 条 · #21:draft'), findsOneWidget);
-    expect(find.text('推荐动作：进入分镜出图工作台'), findsOneWidget);
+    expect(
+      find.text(
+        _zh.scriptEditorStoryboardsRecommendedActionLine(
+          _zh.scriptEditorStoryboardsRecommendOpenBatchWorkbench,
+        ),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('最近操作：已同步分镜列表'), findsOneWidget);
-    expect(find.text('新增分镜'), findsOneWidget);
-    expect(find.text('批量新增分镜'), findsOneWidget);
-    expect(find.text('分镜出图工作台'), findsOneWidget);
+    expect(find.text(_zh.scriptEditorStoryboardAddDialogTitle), findsOneWidget);
+    expect(
+      find.text(_zh.scriptEditorStoryboardBatchAddDialogTitle),
+      findsOneWidget,
+    );
+    expect(
+      find.text(_zh.scriptEditorStoryboardsOpenImageWorkbench),
+      findsOneWidget,
+    );
     expect(find.widgetWithText(ListTile, '#21'), findsOneWidget);
     expect(find.textContaining('夜景街道推镜'), findsOneWidget);
+    final subtitleLine =
+        '${_zh.scriptEditorStoryboardsRowOrder(1)} · ${_zh.scriptEditorStoryboardsRowState('draft')} · ${_zh.scriptEditorStoryboardsRowDuration('5s')}';
+    expect(find.textContaining(subtitleLine), findsOneWidget);
   });
 
   testWidgets('storyboards workbench view disables busy actions', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StoryboardsWorkbenchDialogView(
-            model: buildDialogModel(
-              actionBusy: true,
-              boardsLoading: true,
-              productionSummaryLoading: true,
-            ),
-            callbacks: buildDialogCallbacks(
-              onAddStoryboard: null,
-              onBatchAddStoryboards: null,
-              onReloadBoards: null,
-              onOpenBatchWorkbench: null,
-              onReloadProductionSummary: null,
-            ),
+      appWithZh(
+        StoryboardsWorkbenchDialogView(
+          model: buildDialogModel(
+            actionBusy: true,
+            boardsLoading: true,
+            productionSummaryLoading: true,
+          ),
+          callbacks: buildDialogCallbacks(
+            onAddStoryboard: null,
+            onBatchAddStoryboards: null,
+            onReloadBoards: null,
+            onOpenBatchWorkbench: null,
+            onReloadProductionSummary: null,
           ),
         ),
       ),
@@ -118,31 +147,54 @@ void main() {
     );
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, '批量新增分镜'))
+          .widget<TextButton>(
+            find.widgetWithText(
+              TextButton,
+              _zh.scriptEditorStoryboardBatchAddDialogTitle,
+            ),
+          )
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, '刷新中…'))
+          .widget<TextButton>(
+            find.widgetWithText(
+              TextButton,
+              _zh.scriptEditorStoryboardsRefreshing,
+            ),
+          )
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, '分镜出图工作台'))
+          .widget<TextButton>(
+            find.widgetWithText(
+              TextButton,
+              _zh.scriptEditorStoryboardsOpenImageWorkbench,
+            ),
+          )
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, '读取制作视图…'))
+          .widget<TextButton>(
+            find.widgetWithText(
+              TextButton,
+              _zh.scriptEditorStoryboardsLoadingProductionView,
+            ),
+          )
           .onPressed,
       isNull,
     );
-    expect(find.text('处理中…'), findsOneWidget);
-    expect(find.text('刷新中…'), findsOneWidget);
-    expect(find.text('读取制作视图…'), findsOneWidget);
+    expect(find.text(_zh.scriptEditorStoryboardsBusy), findsOneWidget);
+    expect(find.text(_zh.scriptEditorStoryboardsRefreshing), findsOneWidget);
+    expect(
+      find.text(_zh.scriptEditorStoryboardsLoadingProductionView),
+      findsOneWidget,
+    );
   });
 
   testWidgets('storyboards workbench view forwards storyboard selection', (
@@ -151,13 +203,11 @@ void main() {
     StoryboardRow? openedBoard;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StoryboardsWorkbenchDialogView(
-            model: buildDialogModel(),
-            callbacks: buildDialogCallbacks(
-              onOpenStoryboard: (board) async => openedBoard = board,
-            ),
+      appWithZh(
+        StoryboardsWorkbenchDialogView(
+          model: buildDialogModel(),
+          callbacks: buildDialogCallbacks(
+            onOpenStoryboard: (board) async => openedBoard = board,
           ),
         ),
       ),

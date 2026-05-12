@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/storyboard_editor/support.dart';
 import 'package:openflow_app/rust_api.dart';
+
+final _zh = AppLocalizationsZh();
 
 void main() {
   test(
@@ -191,6 +194,7 @@ void main() {
 
   test('diagnoseStoryboardList requests creation when there are no boards', () {
     final diagnosis = diagnoseStoryboardList(
+      _zh,
       boards: const <StoryboardRow>[],
       productionSummaryLoaded: false,
     );
@@ -199,13 +203,14 @@ void main() {
       diagnosis.recommendedAction,
       StoryboardListRecommendedAction.addStoryboard,
     );
-    expect(diagnosis.summary, '当前剧本还没有分镜。');
+    expect(diagnosis.summary, _zh.scriptEditorStoryboardsDiagnosisEmptySummary);
   });
 
   test(
     'diagnoseStoryboardList requests production refresh before workbench',
     () {
       final diagnosis = diagnoseStoryboardList(
+        _zh,
         boards: const [
           StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
         ],
@@ -221,6 +226,7 @@ void main() {
 
   test('diagnoseStoryboardList routes to editing when prompts are missing', () {
     final diagnosis = diagnoseStoryboardList(
+      _zh,
       boards: const [
         StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '  '),
       ],
@@ -235,8 +241,10 @@ void main() {
 
   test('buildStoryboardListFollowUp appends the recommended action', () {
     final line = buildStoryboardListFollowUp(
+      _zh,
       actionSummary: '已批量新增 2 条分镜。',
       diagnosis: diagnoseStoryboardList(
+        _zh,
         boards: const [
           StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
           StoryboardRow(id: '2', numericId: 12, scriptId: '3', prompt: '镜头二'),
@@ -245,7 +253,12 @@ void main() {
       ),
     );
 
-    expect(line, contains('下一步建议：进入分镜出图工作台。'));
+    expect(
+      line,
+      contains(
+        '下一步建议：${_zh.scriptEditorStoryboardsRecommendOpenBatchWorkbench}',
+      ),
+    );
   });
 
   test(

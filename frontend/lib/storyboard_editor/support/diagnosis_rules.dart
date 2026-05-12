@@ -1,14 +1,15 @@
 part of 'diagnosis.dart';
 
-StoryboardListDiagnosis diagnoseStoryboardList({
+StoryboardListDiagnosis diagnoseStoryboardList(
+  AppLocalizations l10n, {
   required Iterable<StoryboardRow> boards,
   required bool productionSummaryLoaded,
 }) {
   final rows = boards.toList(growable: false);
   if (rows.isEmpty) {
-    return const StoryboardListDiagnosis(
-      summary: '当前剧本还没有分镜。',
-      detail: '先新增单条或批量导入分镜，再继续同步制作视图或发起出图。',
+    return StoryboardListDiagnosis(
+      summary: l10n.scriptEditorStoryboardsDiagnosisEmptySummary,
+      detail: l10n.scriptEditorStoryboardsDiagnosisEmptyDetail,
       recommendedAction: StoryboardListRecommendedAction.addStoryboard,
     );
   }
@@ -18,8 +19,10 @@ StoryboardListDiagnosis diagnoseStoryboardList({
       .length;
   if (!productionSummaryLoaded) {
     return StoryboardListDiagnosis(
-      summary: '已维护 ${rows.length} 条分镜，但制作视图还未同步。',
-      detail: '建议先刷新制作视图，确认 production 侧是否已生成对应记录，再决定是否继续批量出图。',
+      summary: l10n.scriptEditorStoryboardsDiagnosisProductionNotSyncedSummary(
+        rows.length,
+      ),
+      detail: l10n.scriptEditorStoryboardsDiagnosisProductionNotSyncedDetail,
       recommendedAction:
           StoryboardListRecommendedAction.refreshProductionSummary,
     );
@@ -27,15 +30,20 @@ StoryboardListDiagnosis diagnoseStoryboardList({
 
   if (readyPromptCount == 0) {
     return StoryboardListDiagnosis(
-      summary: '已存在 ${rows.length} 条分镜，但都还缺少可用提示词。',
-      detail: '先打开单条分镜补全提示词，再进入出图工作台会更稳妥。',
+      summary: l10n.scriptEditorStoryboardsDiagnosisNoPromptsSummary(
+        rows.length,
+      ),
+      detail: l10n.scriptEditorStoryboardsDiagnosisNoPromptsDetail,
       recommendedAction: StoryboardListRecommendedAction.editStoryboard,
     );
   }
 
   return StoryboardListDiagnosis(
-    summary: '已有 $readyPromptCount/${rows.length} 条分镜可直接进入出图流程。',
-    detail: '可以进入分镜出图工作台批量读取制作视图、生成预览并导出所选图片。',
+    summary: l10n.scriptEditorStoryboardsDiagnosisReadyBatchSummary(
+      readyPromptCount,
+      rows.length,
+    ),
+    detail: l10n.scriptEditorStoryboardsDiagnosisReadyBatchDetail,
     recommendedAction: StoryboardListRecommendedAction.openBatchWorkbench,
   );
 }

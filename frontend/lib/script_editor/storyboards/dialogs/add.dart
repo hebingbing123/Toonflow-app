@@ -125,6 +125,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
         );
         if (!ctx.mounted) return;
         await _reloadProductionStoryboardSummary(
+          l10n: flowL10n,
           token: token,
           projectId: projectId,
           projectNumericId: projectNumericId,
@@ -137,10 +138,12 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
         if (!ctx.mounted) return;
         setBoardsState(() {
           storyboardTaskLine[0] = buildStoryboardListFollowUp(
+            flowL10n,
             actionSummary: flowL10n.scriptEditorStoryboardAddFollowUpSummary(
               added.storyboardId,
             ),
             diagnosis: diagnoseStoryboardList(
+              flowL10n,
               boards: boardsList,
               productionSummaryLoaded: productionSummaryLoaded[0],
             ),

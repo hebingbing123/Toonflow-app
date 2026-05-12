@@ -2,6 +2,7 @@ part of '../../../home_page.dart';
 
 extension _HomePageScriptEditorStoryboards on _HomePageState {
   Future<void> _reloadProductionStoryboardSummary({
+    required AppLocalizations l10n,
     required String token,
     required String projectId,
     required int projectNumericId,
@@ -20,23 +21,35 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         projectUuid: projectId,
         scriptId: scriptNumericId,
       );
+      final unknown = l10n.scriptEditorStoryboardsStateFallback;
       final preview = response.data
           .take(4)
           .map(
-            (item) =>
-                '#${item.id}:${(item.state ?? 'unknown').trim().isEmpty ? 'unknown' : item.state}',
+            (item) {
+              final raw = (item.state ?? '').trim();
+              final state = raw.isEmpty ? unknown : raw;
+              return '#${item.id}:$state';
+            },
           )
           .join(', ');
       productionSummaryLine[0] = response.data.isEmpty
-          ? '制作视图当前没有分镜数据'
-          : '制作视图 ${response.data.length} 条 · $preview${response.data.length > 4 ? '…' : ''}';
+          ? l10n.scriptEditorStoryboardsProductionEmptyData
+          : l10n.scriptEditorStoryboardsProductionSummaryLine(
+              response.data.length,
+              preview,
+              response.data.length > 4 ? '…' : '',
+            );
       productionSummaryLoaded[0] = true;
     } on RustApiException catch (e) {
       productionSummaryLoaded[0] = false;
-      productionSummaryLine[0] = '制作视图读取失败：$e';
+      productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
+        e.toString(),
+      );
     } catch (e) {
       productionSummaryLoaded[0] = false;
-      productionSummaryLine[0] = '制作视图读取失败：$e';
+      productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
+        e.toString(),
+      );
     } finally {
       productionSummaryLoading[0] = false;
       setBoardsState(() {});
@@ -103,6 +116,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   if (!ctx2.mounted) return;
                   await _reloadProductionStoryboardSummary(
+                    l10n: AppLocalizations.of(ctx2)!,
                     token: token,
                     projectId: projectId,
                     projectNumericId: projectNumericId,
@@ -114,7 +128,9 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                   );
                 });
               }
+              final l10n = AppLocalizations.of(ctx2)!;
               final diagnosis = diagnoseStoryboardList(
+                l10n,
                 boards: boardsList,
                 productionSummaryLoaded: productionSummaryLoaded[0],
               );
@@ -195,6 +211,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           );
                           if (!ctx2.mounted) return;
                           await _reloadProductionStoryboardSummary(
+                            l10n: AppLocalizations.of(ctx2)!,
                             token: token,
                             projectId: projectId,
                             projectNumericId: projectNumericId,
@@ -209,6 +226,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                       actionBusy[0] || productionSummaryLoading[0]
                       ? null
                       : () => _reloadProductionStoryboardSummary(
+                          l10n: AppLocalizations.of(ctx2)!,
                           token: token,
                           projectId: projectId,
                           projectNumericId: projectNumericId,
@@ -237,6 +255,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                         );
                         if (!ctx2.mounted) return;
                         await _reloadProductionStoryboardSummary(
+                          l10n: AppLocalizations.of(ctx2)!,
                           token: token,
                           projectId: projectId,
                           projectNumericId: projectNumericId,

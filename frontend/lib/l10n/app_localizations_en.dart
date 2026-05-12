@@ -7401,6 +7401,151 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String scriptEditorStoryboardsDialogTitle(int count) {
+    return 'Storyboards ($count)';
+  }
+
+  @override
+  String get scriptEditorStoryboardsIntroEmpty =>
+      'This script has no storyboards yet. Add one or paste one prompt per line to import a batch.';
+
+  @override
+  String get scriptEditorStoryboardsIntroHasBoards =>
+      'Manage shot order, prompts, and status for this script; tap a row to edit a single storyboard.';
+
+  @override
+  String get scriptEditorStoryboardsProductionSummaryPending =>
+      'Production view summary not loaded yet.';
+
+  @override
+  String scriptEditorStoryboardsRecommendedActionLine(String action) {
+    return 'Recommended action: $action';
+  }
+
+  @override
+  String get scriptEditorStoryboardsBusy => 'Working…';
+
+  @override
+  String get scriptEditorStoryboardsRefreshList => 'Refresh list';
+
+  @override
+  String get scriptEditorStoryboardsRefreshing => 'Refreshing…';
+
+  @override
+  String get scriptEditorStoryboardsOpenImageWorkbench =>
+      'Storyboard image workbench';
+
+  @override
+  String get scriptEditorStoryboardsRefreshProductionView =>
+      'Refresh production view';
+
+  @override
+  String get scriptEditorStoryboardsLoadingProductionView =>
+      'Loading production view…';
+
+  @override
+  String get scriptEditorStoryboardsEmptyList => 'No storyboards';
+
+  @override
+  String scriptEditorStoryboardsRowOrder(int index) {
+    return 'Order $index';
+  }
+
+  @override
+  String scriptEditorStoryboardsRowState(String state) {
+    return 'State $state';
+  }
+
+  @override
+  String scriptEditorStoryboardsRowDuration(String duration) {
+    return 'Duration $duration';
+  }
+
+  @override
+  String get scriptEditorStoryboardsStateFallback => 'unknown';
+
+  @override
+  String get scriptEditorStoryboardsProductionEmptyData =>
+      'Production view has no storyboard rows yet.';
+
+  @override
+  String scriptEditorStoryboardsProductionSummaryLine(
+    int count,
+    String preview,
+    String ellipsis,
+  ) {
+    return 'Production view · $count rows · $preview$ellipsis';
+  }
+
+  @override
+  String scriptEditorStoryboardsProductionReadFailed(String error) {
+    return 'Failed to read production view: $error';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisEmptySummary =>
+      'This script has no storyboards yet.';
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisEmptyDetail =>
+      'Add a single shot or batch-import prompts, then sync the production view or start image generation.';
+
+  @override
+  String scriptEditorStoryboardsDiagnosisProductionNotSyncedSummary(int count) {
+    return 'Maintaining $count storyboards, but the production view is not synced.';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisProductionNotSyncedDetail =>
+      'Refresh the production view first to confirm production-side rows exist, then decide whether to continue batch generation.';
+
+  @override
+  String scriptEditorStoryboardsDiagnosisNoPromptsSummary(int count) {
+    return '$count storyboards exist, but none have a usable prompt.';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisNoPromptsDetail =>
+      'Open individual storyboards to fill prompts before the image workbench is reliable.';
+
+  @override
+  String scriptEditorStoryboardsDiagnosisReadyBatchSummary(
+    int ready,
+    int total,
+  ) {
+    return '$ready/$total storyboards can enter the image-generation flow.';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisReadyBatchDetail =>
+      'Open the storyboard image workbench to read the production view, generate previews, and export selected images in batch.';
+
+  @override
+  String get scriptEditorStoryboardsRecommendAddStoryboard =>
+      'Keep adding storyboards';
+
+  @override
+  String get scriptEditorStoryboardsRecommendRefreshProduction =>
+      'Refresh production view';
+
+  @override
+  String get scriptEditorStoryboardsRecommendOpenBatchWorkbench =>
+      'Open storyboard image workbench';
+
+  @override
+  String get scriptEditorStoryboardsRecommendEditPrompts =>
+      'Fill in storyboard prompts';
+
+  @override
+  String scriptEditorStoryboardsFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary Suggested next step: $nextAction. $detail';
+  }
+
+  @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
     return 'Recent extract error: $reason';
   }

@@ -7085,6 +7085,141 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String scriptEditorStoryboardsDialogTitle(int count) {
+    return '分镜 ($count)';
+  }
+
+  @override
+  String get scriptEditorStoryboardsIntroEmpty =>
+      '当前剧本还没有分镜，可直接新增单条或按每行一个提示词批量导入。';
+
+  @override
+  String get scriptEditorStoryboardsIntroHasBoards =>
+      '按剧本维护分镜顺序、提示词与状态；点击条目可进入单条编辑。';
+
+  @override
+  String get scriptEditorStoryboardsProductionSummaryPending => '制作视图摘要尚未加载';
+
+  @override
+  String scriptEditorStoryboardsRecommendedActionLine(String action) {
+    return '推荐动作：$action';
+  }
+
+  @override
+  String get scriptEditorStoryboardsBusy => '处理中…';
+
+  @override
+  String get scriptEditorStoryboardsRefreshList => '刷新列表';
+
+  @override
+  String get scriptEditorStoryboardsRefreshing => '刷新中…';
+
+  @override
+  String get scriptEditorStoryboardsOpenImageWorkbench => '分镜出图工作台';
+
+  @override
+  String get scriptEditorStoryboardsRefreshProductionView => '刷新制作视图';
+
+  @override
+  String get scriptEditorStoryboardsLoadingProductionView => '读取制作视图…';
+
+  @override
+  String get scriptEditorStoryboardsEmptyList => '暂无分镜';
+
+  @override
+  String scriptEditorStoryboardsRowOrder(int index) {
+    return '序号 $index';
+  }
+
+  @override
+  String scriptEditorStoryboardsRowState(String state) {
+    return '状态 $state';
+  }
+
+  @override
+  String scriptEditorStoryboardsRowDuration(String duration) {
+    return '时长 $duration';
+  }
+
+  @override
+  String get scriptEditorStoryboardsStateFallback => 'unknown';
+
+  @override
+  String get scriptEditorStoryboardsProductionEmptyData => '制作视图当前没有分镜数据';
+
+  @override
+  String scriptEditorStoryboardsProductionSummaryLine(
+    int count,
+    String preview,
+    String ellipsis,
+  ) {
+    return '制作视图 $count 条 · $preview$ellipsis';
+  }
+
+  @override
+  String scriptEditorStoryboardsProductionReadFailed(String error) {
+    return '制作视图读取失败：$error';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisEmptySummary => '当前剧本还没有分镜。';
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisEmptyDetail =>
+      '先新增单条或批量导入分镜，再继续同步制作视图或发起出图。';
+
+  @override
+  String scriptEditorStoryboardsDiagnosisProductionNotSyncedSummary(int count) {
+    return '已维护 $count 条分镜，但制作视图还未同步。';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisProductionNotSyncedDetail =>
+      '建议先刷新制作视图，确认 production 侧是否已生成对应记录，再决定是否继续批量出图。';
+
+  @override
+  String scriptEditorStoryboardsDiagnosisNoPromptsSummary(int count) {
+    return '已存在 $count 条分镜，但都还缺少可用提示词。';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisNoPromptsDetail =>
+      '先打开单条分镜补全提示词，再进入出图工作台会更稳妥。';
+
+  @override
+  String scriptEditorStoryboardsDiagnosisReadyBatchSummary(
+    int ready,
+    int total,
+  ) {
+    return '已有 $ready/$total 条分镜可直接进入出图流程。';
+  }
+
+  @override
+  String get scriptEditorStoryboardsDiagnosisReadyBatchDetail =>
+      '可以进入分镜出图工作台批量读取制作视图、生成预览并导出所选图片。';
+
+  @override
+  String get scriptEditorStoryboardsRecommendAddStoryboard => '继续新增分镜';
+
+  @override
+  String get scriptEditorStoryboardsRecommendRefreshProduction => '刷新制作视图';
+
+  @override
+  String get scriptEditorStoryboardsRecommendOpenBatchWorkbench => '进入分镜出图工作台';
+
+  @override
+  String get scriptEditorStoryboardsRecommendEditPrompts => '补充分镜提示词';
+
+  @override
+  String scriptEditorStoryboardsFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary 下一步建议：$nextAction。$detail';
+  }
+
+  @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
     return '最近提取错误：$reason';
   }
