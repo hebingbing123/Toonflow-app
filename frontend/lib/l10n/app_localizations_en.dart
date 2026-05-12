@@ -2340,6 +2340,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Project numeric ID (optional)';
 
   @override
+  String get taskCenterFieldProjectUuidOptional => 'Project UUID (optional)';
+
+  @override
   String get taskCenterFieldTaskClassOptional => 'Task class (optional)';
 
   @override

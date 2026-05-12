@@ -10,6 +10,7 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController stateCtrl,
   required TextEditingController taskClassCtrl,
   required TextEditingController projectIdCtrl,
+  required TextEditingController projectUuidCtrl,
   required TextEditingController numericTaskIdCtrl,
   required TextEditingController uuidCtrl,
   TextEditingController? productionPhaseCtrl,
@@ -51,6 +52,7 @@ TaskCenterWorkbenchDialogViewModel buildDialogModel({
     stateCtrl: stateCtrl,
     taskClassCtrl: taskClassCtrl,
     projectIdCtrl: projectIdCtrl,
+    projectUuidCtrl: projectUuidCtrl,
     numericTaskIdCtrl: numericTaskIdCtrl,
     uuidCtrl: uuidCtrl,
     productionPhaseCtrl: productionPhaseCtrl ?? TextEditingController(),
@@ -108,6 +110,7 @@ void main() {
   late TextEditingController stateCtrl;
   late TextEditingController taskClassCtrl;
   late TextEditingController projectIdCtrl;
+  late TextEditingController projectUuidCtrl;
   late TextEditingController numericTaskIdCtrl;
   late TextEditingController uuidCtrl;
 
@@ -117,6 +120,9 @@ void main() {
     stateCtrl = TextEditingController(text: 'queued');
     taskClassCtrl = TextEditingController();
     projectIdCtrl = TextEditingController(text: '7');
+    projectUuidCtrl = TextEditingController(
+      text: '550e8400-e29b-41d4-a716-446655440007',
+    );
     numericTaskIdCtrl = TextEditingController(text: '11');
     uuidCtrl = TextEditingController(text: 'job-11');
   });
@@ -127,6 +133,7 @@ void main() {
     stateCtrl.dispose();
     taskClassCtrl.dispose();
     projectIdCtrl.dispose();
+    projectUuidCtrl.dispose();
     numericTaskIdCtrl.dispose();
     uuidCtrl.dispose();
   });
@@ -147,6 +154,7 @@ void main() {
               stateCtrl: stateCtrl,
               taskClassCtrl: taskClassCtrl,
               projectIdCtrl: projectIdCtrl,
+              projectUuidCtrl: projectUuidCtrl,
               numericTaskIdCtrl: numericTaskIdCtrl,
               uuidCtrl: uuidCtrl,
             ),
@@ -163,6 +171,7 @@ void main() {
     expect(find.text('1 个项目 · #7 春季短剧'), findsOneWidget);
     expect(find.text('2 个分类 · storyboard, render'), findsOneWidget);
     expect(find.text('1 条任务'), findsOneWidget);
+    expect(find.text('项目 UUID（可空）'), findsOneWidget);
     expect(find.text('任务详情'), findsOneWidget);
     expect(find.textContaining('#11 · job-11'), findsOneWidget);
     expect(find.text('状态：已刷新 1 条任务。'), findsOneWidget);
@@ -184,6 +193,7 @@ void main() {
               stateCtrl: stateCtrl,
               taskClassCtrl: taskClassCtrl,
               projectIdCtrl: projectIdCtrl,
+              projectUuidCtrl: projectUuidCtrl,
               numericTaskIdCtrl: numericTaskIdCtrl,
               uuidCtrl: uuidCtrl,
               loadingProjects: true,
@@ -222,6 +232,7 @@ void main() {
               stateCtrl: stateCtrl,
               taskClassCtrl: taskClassCtrl,
               projectIdCtrl: projectIdCtrl,
+              projectUuidCtrl: projectUuidCtrl,
               numericTaskIdCtrl: numericTaskIdCtrl,
               uuidCtrl: uuidCtrl,
             ),

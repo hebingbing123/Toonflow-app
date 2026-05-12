@@ -3984,6 +3984,12 @@ abstract class AppLocalizations {
   /// **'Project numeric ID (optional)'**
   String get taskCenterFieldProjectNumericIdOptional;
 
+  /// No description provided for @taskCenterFieldProjectUuidOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Project UUID (optional)'**
+  String get taskCenterFieldProjectUuidOptional;
+
   /// No description provided for @taskCenterFieldTaskClassOptional.
   ///
   /// In en, this message translates to:

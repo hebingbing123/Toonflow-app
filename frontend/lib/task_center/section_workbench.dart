@@ -498,6 +498,7 @@ class _TaskCenterWorkbenchDialogState
         stateCtrl: _ctrls.stateCtrl,
         taskClassCtrl: _ctrls.taskClassCtrl,
         projectIdCtrl: _ctrls.projectIdCtrl,
+        projectUuidCtrl: _ctrls.projectUuidCtrl,
         numericTaskIdCtrl: _ctrls.numericTaskIdCtrl,
         uuidCtrl: _ctrls.uuidCtrl,
         productionPhaseCtrl: _ctrls.productionPhaseCtrl,

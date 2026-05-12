@@ -2245,6 +2245,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskCenterFieldProjectNumericIdOptional => '项目 numeric ID（可空）';
 
   @override
+  String get taskCenterFieldProjectUuidOptional => '项目 UUID（可空）';
+
+  @override
   String get taskCenterFieldTaskClassOptional => '任务分类（可空）';
 
   @override

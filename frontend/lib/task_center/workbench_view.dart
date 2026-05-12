@@ -30,6 +30,7 @@ class TaskCenterWorkbenchDialogViewModel {
     required this.stateCtrl,
     required this.taskClassCtrl,
     required this.projectIdCtrl,
+    required this.projectUuidCtrl,
     required this.numericTaskIdCtrl,
     required this.uuidCtrl,
     required this.productionPhaseCtrl,
@@ -56,6 +57,7 @@ class TaskCenterWorkbenchDialogViewModel {
   final TextEditingController stateCtrl;
   final TextEditingController taskClassCtrl;
   final TextEditingController projectIdCtrl;
+  final TextEditingController projectUuidCtrl;
   final TextEditingController numericTaskIdCtrl;
   final TextEditingController uuidCtrl;
   final TextEditingController productionPhaseCtrl;
@@ -245,6 +247,19 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: model.projectUuidCtrl,
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldProjectUuidOptional,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
                   Expanded(
                     child: TextField(
                       controller: model.taskClassCtrl,
