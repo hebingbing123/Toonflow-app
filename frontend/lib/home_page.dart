@@ -198,6 +198,25 @@ class _HomePageState extends State<HomePage> {
   late final JobsController _jobsController = JobsController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
+    onJobScopeResolved: (scope) {
+      if (!scope.hasProjectScope) {
+        return;
+      }
+      if (mounted) {
+        setState(() {
+          _productScopedProjectNumericId = scope.projectNumericId;
+        });
+      } else {
+        _productScopedProjectNumericId = scope.projectNumericId;
+      }
+      _workspaceInputController.applyProjectScopeRef(
+        projectNumericId: scope.projectNumericId,
+        scriptNumericId: scope.scriptNumericId,
+        projectUuid: scope.projectUuid,
+        scriptUuid: scope.scriptUuid,
+        workspaceId: scope.workspaceId,
+      );
+    },
   );
 
   late final AccountController _accountController = AccountController(

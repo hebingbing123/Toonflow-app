@@ -5,20 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
+import 'product_scope.dart';
 import '../../rust_api.dart';
 
 typedef JobsAccessTokenProvider = String? Function();
 typedef JobsErrorSink = void Function(String? error);
+typedef JobsScopeSink = void Function(JobProductScope scope);
 
 class JobsController extends ChangeNotifier {
   JobsController({
     required JobsAccessTokenProvider accessTokenProvider,
     required JobsErrorSink onErrorChanged,
+    JobsScopeSink? onJobScopeResolved,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _onJobScopeResolved = onJobScopeResolved;
 
   final JobsAccessTokenProvider _accessTokenProvider;
   final JobsErrorSink _onErrorChanged;
+  final JobsScopeSink? _onJobScopeResolved;
   WebSocketChannel? _ws;
   StreamSubscription<dynamic>? _wsSub;
   String? _wsToken;
@@ -49,6 +54,10 @@ class JobsController extends ChangeNotifier {
 
   void selectJob(JobRow job) {
     jobIdController.text = job.id;
+    final scope = jobProductScopeFromRow(job);
+    if (scope.hasProjectScope) {
+      _onJobScopeResolved?.call(scope);
+    }
     notifyListeners();
   }
 
@@ -190,6 +199,10 @@ class JobsController extends ChangeNotifier {
     notifyListeners();
     try {
       final job = await fetchJob(token, id);
+      final scope = jobProductScopeFromRow(job);
+      if (scope.hasProjectScope) {
+        _onJobScopeResolved?.call(scope);
+      }
       final parts = <String>[
         '${job.kind} · ${job.status}',
         'updated ${job.updatedAt}',
