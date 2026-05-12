@@ -12675,4 +12675,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get apiKeysAuditEmpty => '还没有 API key 生命周期记录。';
+
+  @override
+  String get statusPageTitle => 'Toonflow 状态';
+
+  @override
+  String get statusPageRefreshTooltip => '刷新';
+
+  @override
+  String get statusPageHeadline => '公开只读状态页';
+
+  @override
+  String get statusPageIntroBase =>
+      '聚合 /health、/api/v1/health、/api/v1/ready、/api/v1/version。';
+
+  @override
+  String get statusPageIntroInternalSuffix =>
+      ' 当前 dart-define 带 INTERNAL_OPS_TOKEN，因此附带内部队列统计。';
+
+  @override
+  String get statusPageRefreshing => '刷新中…';
+
+  @override
+  String get statusPageRefreshAction => '刷新状态';
+
+  @override
+  String statusPageLastUpdated(String time) {
+    return '最近刷新：$time';
+  }
+
+  @override
+  String get statusPageRequestFailed => '请求失败';
+
+  @override
+  String get statusPageVersionSectionTitle => '版本信息';
+
+  @override
+  String get statusPageInternalQueueSectionTitle => '内部队列统计';
+
+  @override
+  String statusPageApiBaseLabel(String baseUrl) {
+    return 'API：$baseUrl';
+  }
 }

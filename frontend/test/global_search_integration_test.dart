@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/global_search/global_search_bar.dart';
 import 'package:openflow_app/global_search/search_results_page.dart';
 import 'package:openflow_app/global_search/advanced_filter_panel.dart';
 import 'package:openflow_app/global_search/search_history_list.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 
 /// Task 12.2: 最终集成测试
 ///
@@ -23,11 +25,19 @@ void main() {
         // 1. 渲染包含全局搜索框的应用
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: Scaffold(
               appBar: AppBar(
                 title: GlobalSearchBar(
                   accessToken: 'test-token',
-                  onNavigateToResults: (query) {
+                  onNavigateToResults: (query, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {
                     // 导航到搜索结果页
                     Navigator.push(
                       tester.element(find.byType(GlobalSearchBar)),
@@ -72,6 +82,14 @@ void main() {
         // 1. 渲染搜索结果页
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -117,12 +135,20 @@ void main() {
         // 1. 渲染包含搜索历史的搜索框
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: Scaffold(
               body: Column(
                 children: [
                   GlobalSearchBar(
                     accessToken: 'test-token',
-                    onNavigateToResults: (_) {},
+                    onNavigateToResults: (_, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {},
                   ),
                   Expanded(
                     child: SearchHistoryList(
@@ -151,6 +177,14 @@ void main() {
         // 1. 渲染搜索结果页
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -172,6 +206,14 @@ void main() {
         // 1. 渲染搜索结果页
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -193,6 +235,14 @@ void main() {
         // 用户 A 的搜索结果页
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'project',
               accessToken: 'user-a-token',
@@ -209,6 +259,14 @@ void main() {
         // 切换到用户 B
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'project',
               accessToken: 'user-b-token',
@@ -230,6 +288,14 @@ void main() {
         // Workspace A 的搜索结果
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'workspace-a-token',
@@ -244,6 +310,14 @@ void main() {
         // 切换到 Workspace B
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'workspace-b-token',
@@ -262,6 +336,14 @@ void main() {
         // 用户 A 的搜索历史
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: Scaffold(
               body: SearchHistoryList(
                 accessToken: 'user-a-token',
@@ -279,6 +361,14 @@ void main() {
         // 切换到用户 B
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: Scaffold(
               body: SearchHistoryList(
                 accessToken: 'user-b-token',
@@ -300,6 +390,14 @@ void main() {
         // 无效 token 的搜索结果页
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: null,
@@ -320,6 +418,14 @@ void main() {
         // 渲染搜索结果页
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -346,6 +452,14 @@ void main() {
         // 渲染搜索结果页
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -366,6 +480,14 @@ void main() {
       testWidgets('filter panel opens quickly', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -396,6 +518,14 @@ void main() {
       testWidgets('pagination navigation is responsive', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -412,6 +542,14 @@ void main() {
       testWidgets('keyboard navigation responds quickly', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -431,6 +569,14 @@ void main() {
       testWidgets('handles missing access token gracefully', (tester) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: null,
@@ -449,6 +595,14 @@ void main() {
       testWidgets('retry button triggers new search attempt', (tester) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: null,
@@ -473,6 +627,14 @@ void main() {
       testWidgets('handles empty query gracefully', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: '',
               accessToken: 'test-token',
@@ -491,6 +653,14 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: longQuery,
               accessToken: 'test-token',
@@ -509,6 +679,14 @@ void main() {
         // 模拟网络超时场景
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -532,6 +710,14 @@ void main() {
       testWidgets('cancels pending requests on dispose', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -551,6 +737,14 @@ void main() {
       testWidgets('handles rapid filter changes', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -581,6 +775,14 @@ void main() {
       testWidgets('handles rapid pagination clicks', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -597,6 +799,14 @@ void main() {
       testWidgets('displays user-friendly error messages', (tester) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: null,
@@ -618,6 +828,14 @@ void main() {
       testWidgets('maintains UI state during error recovery', (tester) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: null,
@@ -645,11 +863,19 @@ void main() {
           (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: Scaffold(
               appBar: AppBar(
                 title: GlobalSearchBar(
                   accessToken: 'test-token',
-                  onNavigateToResults: (_) {},
+                  onNavigateToResults: (_, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {},
                 ),
               ),
             ),
@@ -667,6 +893,14 @@ void main() {
           (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -684,6 +918,14 @@ void main() {
           (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: SearchResultsPage(
               query: 'test',
               accessToken: 'test-token',
@@ -705,12 +947,20 @@ void main() {
           (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: Scaffold(
               body: Column(
                 children: [
                   GlobalSearchBar(
                     accessToken: 'test-token',
-                    onNavigateToResults: (_) {},
+                    onNavigateToResults: (_, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {},
                   ),
                   Expanded(
                     child: SearchHistoryList(
@@ -737,11 +987,19 @@ void main() {
         // 完整的应用流程测试
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
             home: Scaffold(
               appBar: AppBar(
                 title: GlobalSearchBar(
                   accessToken: 'test-token',
-                  onNavigateToResults: (query) {
+                  onNavigateToResults: (query, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {
                     Navigator.push(
                       tester.element(find.byType(GlobalSearchBar)),
                       MaterialPageRoute(

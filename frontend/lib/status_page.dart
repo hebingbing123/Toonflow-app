@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'config.dart';
+import 'l10n/app_localizations.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
 import 'rust_api.dart';
 
@@ -83,12 +84,13 @@ class _StatusPageState extends State<StatusPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Toonflow Status'),
+        title: Text(l10n.statusPageTitle),
         actions: [
           IconButton(
-            tooltip: '刷新',
+            tooltip: l10n.statusPageRefreshTooltip,
             onPressed: _loading ? null : _refresh,
             icon: const Icon(Icons.refresh),
           ),
@@ -98,11 +100,13 @@ class _StatusPageState extends State<StatusPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('公开只读状态页', style: theme.textTheme.headlineSmall),
+          Text(l10n.statusPageHeadline, style: theme.textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(
-            '聚合 /health、/api/v1/health、/api/v1/ready、/api/v1/version。'
-            '${_showInternalQueueStats ? ' 当前 dart-define 带 INTERNAL_OPS_TOKEN，因此附带内部队列统计。' : ''}',
+            l10n.statusPageIntroBase +
+                (_showInternalQueueStats
+                    ? l10n.statusPageIntroInternalSuffix
+                    : ''),
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
@@ -113,15 +117,24 @@ class _StatusPageState extends State<StatusPage> {
               FilledButton.tonalIcon(
                 onPressed: _loading ? null : _refresh,
                 icon: const Icon(Icons.sync),
-                label: Text(_loading ? '刷新中…' : '刷新状态'),
+                label: Text(
+                  _loading
+                      ? l10n.statusPageRefreshing
+                      : l10n.statusPageRefreshAction,
+                ),
               ),
-              OutlinedButton(onPressed: null, child: Text('API: $kApiBaseUrl')),
+              OutlinedButton(
+                onPressed: null,
+                child: Text(l10n.statusPageApiBaseLabel(kApiBaseUrl)),
+              ),
             ],
           ),
           if (_lastUpdatedAt != null) ...[
             const SizedBox(height: 8),
             Text(
-              '最近刷新：${_lastUpdatedAt!.toLocal().toIso8601String()}',
+              l10n.statusPageLastUpdated(
+                _lastUpdatedAt!.toLocal().toIso8601String(),
+              ),
               style: theme.textTheme.bodySmall,
             ),
           ],
@@ -131,7 +144,11 @@ class _StatusPageState extends State<StatusPage> {
           ],
           if (_error != null) ...[
             const SizedBox(height: 16),
-            _StatusBand(title: '请求失败', tone: _BandTone.error, lines: [_error!]),
+            _StatusBand(
+              title: l10n.statusPageRequestFailed,
+              tone: _BandTone.error,
+              lines: [_error!],
+            ),
           ],
           if (_healthRoot != null && _healthV1 != null && _ready != null) ...[
             const SizedBox(height: 16),
@@ -160,7 +177,7 @@ class _StatusPageState extends State<StatusPage> {
           if (_version != null) ...[
             const SizedBox(height: 16),
             _StatusBand(
-              title: '版本信息',
+              title: l10n.statusPageVersionSectionTitle,
               tone: _BandTone.neutral,
               lines: [
                 'service=${_version!.service}',
@@ -173,7 +190,7 @@ class _StatusPageState extends State<StatusPage> {
           if (_queueStats != null) ...[
             const SizedBox(height: 16),
             _StatusBand(
-              title: '内部队列统计',
+              title: l10n.statusPageInternalQueueSectionTitle,
               tone: _BandTone.info,
               lines: [
                 'pending=${_queueStats!.pending}',

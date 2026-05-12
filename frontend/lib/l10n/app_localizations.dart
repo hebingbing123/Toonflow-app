@@ -20418,6 +20418,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No API key lifecycle records yet.'**
   String get apiKeysAuditEmpty;
+
+  /// No description provided for @statusPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Toonflow Status'**
+  String get statusPageTitle;
+
+  /// No description provided for @statusPageRefreshTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get statusPageRefreshTooltip;
+
+  /// No description provided for @statusPageHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Public read-only status'**
+  String get statusPageHeadline;
+
+  /// No description provided for @statusPageIntroBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregates /health, /api/v1/health, /api/v1/ready, and /api/v1/version.'**
+  String get statusPageIntroBase;
+
+  /// No description provided for @statusPageIntroInternalSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.'**
+  String get statusPageIntroInternalSuffix;
+
+  /// No description provided for @statusPageRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get statusPageRefreshing;
+
+  /// No description provided for @statusPageRefreshAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get statusPageRefreshAction;
+
+  /// No description provided for @statusPageLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last refreshed: {time}'**
+  String statusPageLastUpdated(String time);
+
+  /// No description provided for @statusPageRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Request failed'**
+  String get statusPageRequestFailed;
+
+  /// No description provided for @statusPageVersionSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get statusPageVersionSectionTitle;
+
+  /// No description provided for @statusPageInternalQueueSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal queue stats'**
+  String get statusPageInternalQueueSectionTitle;
+
+  /// No description provided for @statusPageApiBaseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'API: {baseUrl}'**
+  String statusPageApiBaseLabel(String baseUrl);
 }
 
 class _AppLocalizationsDelegate

@@ -10302,5 +10302,31 @@
   },
   "apiKeysDelete": "Delete",
   "apiKeysAuditTitle": "Admin audit",
-  "apiKeysAuditEmpty": "No API key lifecycle records yet."
+  "apiKeysAuditEmpty": "No API key lifecycle records yet.",
+  "statusPageTitle": "Toonflow Status",
+  "statusPageRefreshTooltip": "Refresh",
+  "statusPageHeadline": "Public read-only status",
+  "statusPageIntroBase": "Aggregates /health, /api/v1/health, /api/v1/ready, and /api/v1/version.",
+  "statusPageIntroInternalSuffix": " INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.",
+  "statusPageRefreshing": "Refreshing…",
+  "statusPageRefreshAction": "Refresh status",
+  "statusPageLastUpdated": "Last refreshed: {time}",
+  "@statusPageLastUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageRequestFailed": "Request failed",
+  "statusPageVersionSectionTitle": "Version",
+  "statusPageInternalQueueSectionTitle": "Internal queue stats",
+  "statusPageApiBaseLabel": "API: {baseUrl}",
+  "@statusPageApiBaseLabel": {
+    "placeholders": {
+      "baseUrl": {
+        "type": "String"
+      }
+    }
+  }
 }

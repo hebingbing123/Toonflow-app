@@ -13301,4 +13301,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apiKeysAuditEmpty => 'No API key lifecycle records yet.';
+
+  @override
+  String get statusPageTitle => 'Toonflow Status';
+
+  @override
+  String get statusPageRefreshTooltip => 'Refresh';
+
+  @override
+  String get statusPageHeadline => 'Public read-only status';
+
+  @override
+  String get statusPageIntroBase =>
+      'Aggregates /health, /api/v1/health, /api/v1/ready, and /api/v1/version.';
+
+  @override
+  String get statusPageIntroInternalSuffix =>
+      ' INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.';
+
+  @override
+  String get statusPageRefreshing => 'Refreshing…';
+
+  @override
+  String get statusPageRefreshAction => 'Refresh status';
+
+  @override
+  String statusPageLastUpdated(String time) {
+    return 'Last refreshed: $time';
+  }
+
+  @override
+  String get statusPageRequestFailed => 'Request failed';
+
+  @override
+  String get statusPageVersionSectionTitle => 'Version';
+
+  @override
+  String get statusPageInternalQueueSectionTitle => 'Internal queue stats';
+
+  @override
+  String statusPageApiBaseLabel(String baseUrl) {
+    return 'API: $baseUrl';
+  }
 }

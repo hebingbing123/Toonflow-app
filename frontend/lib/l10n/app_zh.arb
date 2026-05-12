@@ -9988,5 +9988,31 @@
   },
   "apiKeysDelete": "删除",
   "apiKeysAuditTitle": "管理审计",
-  "apiKeysAuditEmpty": "还没有 API key 生命周期记录。"
+  "apiKeysAuditEmpty": "还没有 API key 生命周期记录。",
+  "statusPageTitle": "Toonflow 状态",
+  "statusPageRefreshTooltip": "刷新",
+  "statusPageHeadline": "公开只读状态页",
+  "statusPageIntroBase": "聚合 /health、/api/v1/health、/api/v1/ready、/api/v1/version。",
+  "statusPageIntroInternalSuffix": " 当前 dart-define 带 INTERNAL_OPS_TOKEN，因此附带内部队列统计。",
+  "statusPageRefreshing": "刷新中…",
+  "statusPageRefreshAction": "刷新状态",
+  "statusPageLastUpdated": "最近刷新：{time}",
+  "@statusPageLastUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageRequestFailed": "请求失败",
+  "statusPageVersionSectionTitle": "版本信息",
+  "statusPageInternalQueueSectionTitle": "内部队列统计",
+  "statusPageApiBaseLabel": "API：{baseUrl}",
+  "@statusPageApiBaseLabel": {
+    "placeholders": {
+      "baseUrl": {
+        "type": "String"
+      }
+    }
+  }
 }
