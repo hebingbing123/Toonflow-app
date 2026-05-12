@@ -20064,6 +20064,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'未读 {count}'**
   String notificationsUnreadCount(int count);
+
+  /// No description provided for @apiKeysSnackFillName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a key name first.'**
+  String get apiKeysSnackFillName;
+
+  /// No description provided for @apiKeysSnackPickExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose an expiry date first.'**
+  String get apiKeysSnackPickExpiry;
+
+  /// No description provided for @apiKeysDatePickerHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose expiry date'**
+  String get apiKeysDatePickerHelp;
+
+  /// No description provided for @apiKeysRotateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate {displayName}'**
+  String apiKeysRotateTitle(String displayName);
+
+  /// No description provided for @apiKeysRotateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotation immediately invalidates the old secret and shows the new plaintext token only once.'**
+  String get apiKeysRotateBody;
+
+  /// No description provided for @apiKeysExpiryPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry policy'**
+  String get apiKeysExpiryPolicy;
+
+  /// No description provided for @apiKeysExpiryKeepCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current'**
+  String get apiKeysExpiryKeepCurrent;
+
+  /// No description provided for @apiKeysExpiryClearExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear expiry'**
+  String get apiKeysExpiryClearExpiry;
+
+  /// No description provided for @apiKeysExpirySevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get apiKeysExpirySevenDays;
+
+  /// No description provided for @apiKeysExpiryThirtyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get apiKeysExpiryThirtyDays;
+
+  /// No description provided for @apiKeysExpiryNinetyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'90 days'**
+  String get apiKeysExpiryNinetyDays;
+
+  /// No description provided for @apiKeysExpiryCustomDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom date'**
+  String get apiKeysExpiryCustomDate;
+
+  /// No description provided for @apiKeysExpiresAtUtc.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date} at 23:59 UTC'**
+  String apiKeysExpiresAtUtc(String date);
+
+  /// No description provided for @apiKeysActionRotate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate'**
+  String get apiKeysActionRotate;
+
+  /// No description provided for @apiKeysRevokeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke {displayName}'**
+  String apiKeysRevokeTitle(String displayName);
+
+  /// No description provided for @apiKeysRevokeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'After revocation the existing token stops working until you restore or rotate again.'**
+  String get apiKeysRevokeBody;
+
+  /// No description provided for @apiKeysRevokeReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get apiKeysRevokeReasonLabel;
+
+  /// No description provided for @apiKeysRevokeReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. credential leak, env retired, bot disabled'**
+  String get apiKeysRevokeReasonHint;
+
+  /// No description provided for @apiKeysActionRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get apiKeysActionRevoke;
+
+  /// No description provided for @apiKeysSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'API keys'**
+  String get apiKeysSectionTitle;
+
+  /// No description provided for @apiKeysRiskyPrefsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Local client preferences (confirmations for key rotation/deletion and reset).'**
+  String get apiKeysRiskyPrefsTooltip;
+
+  /// No description provided for @apiKeysIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue user-level credentials for server automation, CLI, CI/CD, and internal integrations. Read-only keys may call GET/HEAD/OPTIONS only; read-write keys may call mutating REST endpoints.'**
+  String get apiKeysIntroBody;
+
+  /// No description provided for @apiKeysCreateNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue new key'**
+  String get apiKeysCreateNewTitle;
+
+  /// No description provided for @apiKeysRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get apiKeysRefresh;
+
+  /// No description provided for @apiKeysDisplayNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get apiKeysDisplayNameLabel;
+
+  /// No description provided for @apiKeysDisplayNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. CI deploy / data export / internal bot'**
+  String get apiKeysDisplayNameHint;
+
+  /// No description provided for @apiKeysPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions'**
+  String get apiKeysPermissionTitle;
+
+  /// No description provided for @apiKeysScopeReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get apiKeysScopeReadOnly;
+
+  /// No description provided for @apiKeysScopeReadWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-write'**
+  String get apiKeysScopeReadWrite;
+
+  /// No description provided for @apiKeysExpiryNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never expires'**
+  String get apiKeysExpiryNever;
+
+  /// No description provided for @apiKeysCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating…'**
+  String get apiKeysCreating;
+
+  /// No description provided for @apiKeysCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create API key'**
+  String get apiKeysCreateButton;
+
+  /// No description provided for @apiKeysPlaintextOnceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time plaintext'**
+  String get apiKeysPlaintextOnceTitle;
+
+  /// No description provided for @apiKeysPlaintextOnceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This secret is shown only once. Copy it immediately to your secret manager, CI secret, or integration config.'**
+  String get apiKeysPlaintextOnceBody;
+
+  /// No description provided for @apiKeysCopiedPlaintextSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied one-time plaintext API key'**
+  String get apiKeysCopiedPlaintextSnack;
+
+  /// No description provided for @apiKeysCopyPlaintext.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy plaintext'**
+  String get apiKeysCopyPlaintext;
+
+  /// No description provided for @apiKeysHidePlaintext.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get apiKeysHidePlaintext;
+
+  /// No description provided for @apiKeysExistingKeysTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing keys'**
+  String get apiKeysExistingKeysTitle;
+
+  /// No description provided for @apiKeysEmptyList.
+  ///
+  /// In en, this message translates to:
+  /// **'No API keys yet.'**
+  String get apiKeysEmptyList;
+
+  /// No description provided for @apiKeysChipUsable.
+  ///
+  /// In en, this message translates to:
+  /// **'Usable'**
+  String get apiKeysChipUsable;
+
+  /// No description provided for @apiKeysChipUnusable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not usable'**
+  String get apiKeysChipUnusable;
+
+  /// No description provided for @apiKeysChipActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get apiKeysChipActive;
+
+  /// No description provided for @apiKeysChipRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get apiKeysChipRevoked;
+
+  /// No description provided for @apiKeysChipExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get apiKeysChipExpired;
+
+  /// No description provided for @apiKeysCopyPublicIdTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy publicId'**
+  String get apiKeysCopyPublicIdTooltip;
+
+  /// No description provided for @apiKeysCopiedPublicIdSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied publicId'**
+  String get apiKeysCopiedPublicIdSnack;
+
+  /// No description provided for @apiKeysMetaLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {createdAt} · Updated {updatedAt} · Used {useCount} times'**
+  String apiKeysMetaLine(String createdAt, String updatedAt, int useCount);
+
+  /// No description provided for @apiKeysLastUsedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Last used {lastUsedAt} · {method} {path}'**
+  String apiKeysLastUsedLine(String lastUsedAt, String method, String path);
+
+  /// No description provided for @apiKeysSourceLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Source {source}'**
+  String apiKeysSourceLine(String source);
+
+  /// No description provided for @apiKeysExpiresAtLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires at {expiresAt}'**
+  String apiKeysExpiresAtLine(String expiresAt);
+
+  /// No description provided for @apiKeysRotatedAtLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Last rotated {rotatedAt}'**
+  String apiKeysRotatedAtLine(String rotatedAt);
+
+  /// No description provided for @apiKeysRevokedAtLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked at {revokedAt}'**
+  String apiKeysRevokedAtLine(String revokedAt);
+
+  /// No description provided for @apiKeysExpiredNeedsRotate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired — rotate'**
+  String get apiKeysExpiredNeedsRotate;
+
+  /// No description provided for @apiKeysRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get apiKeysRestore;
+
+  /// No description provided for @apiKeysDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete API key'**
+  String get apiKeysDeleteTitle;
+
+  /// No description provided for @apiKeysDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'About to delete {displayName}\n{keyHint}'**
+  String apiKeysDeleteBody(String displayName, String keyHint);
+
+  /// No description provided for @apiKeysDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get apiKeysDelete;
+
+  /// No description provided for @apiKeysAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin audit'**
+  String get apiKeysAuditTitle;
+
+  /// No description provided for @apiKeysAuditEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No API key lifecycle records yet.'**
+  String get apiKeysAuditEmpty;
 }
 
 class _AppLocalizationsDelegate

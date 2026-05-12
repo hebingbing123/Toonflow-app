@@ -13097,4 +13097,208 @@ class AppLocalizationsEn extends AppLocalizations {
   String notificationsUnreadCount(int count) {
     return '未读 $count';
   }
+
+  @override
+  String get apiKeysSnackFillName => 'Please enter a key name first.';
+
+  @override
+  String get apiKeysSnackPickExpiry => 'Please choose an expiry date first.';
+
+  @override
+  String get apiKeysDatePickerHelp => 'Choose expiry date';
+
+  @override
+  String apiKeysRotateTitle(String displayName) {
+    return 'Rotate $displayName';
+  }
+
+  @override
+  String get apiKeysRotateBody =>
+      'Rotation immediately invalidates the old secret and shows the new plaintext token only once.';
+
+  @override
+  String get apiKeysExpiryPolicy => 'Expiry policy';
+
+  @override
+  String get apiKeysExpiryKeepCurrent => 'Keep current';
+
+  @override
+  String get apiKeysExpiryClearExpiry => 'Clear expiry';
+
+  @override
+  String get apiKeysExpirySevenDays => '7 days';
+
+  @override
+  String get apiKeysExpiryThirtyDays => '30 days';
+
+  @override
+  String get apiKeysExpiryNinetyDays => '90 days';
+
+  @override
+  String get apiKeysExpiryCustomDate => 'Custom date';
+
+  @override
+  String apiKeysExpiresAtUtc(String date) {
+    return 'Expires $date at 23:59 UTC';
+  }
+
+  @override
+  String get apiKeysActionRotate => 'Rotate';
+
+  @override
+  String apiKeysRevokeTitle(String displayName) {
+    return 'Revoke $displayName';
+  }
+
+  @override
+  String get apiKeysRevokeBody =>
+      'After revocation the existing token stops working until you restore or rotate again.';
+
+  @override
+  String get apiKeysRevokeReasonLabel => 'Reason (optional)';
+
+  @override
+  String get apiKeysRevokeReasonHint =>
+      'e.g. credential leak, env retired, bot disabled';
+
+  @override
+  String get apiKeysActionRevoke => 'Revoke';
+
+  @override
+  String get apiKeysSectionTitle => 'API keys';
+
+  @override
+  String get apiKeysRiskyPrefsTooltip =>
+      'Local client preferences (confirmations for key rotation/deletion and reset).';
+
+  @override
+  String get apiKeysIntroBody =>
+      'Issue user-level credentials for server automation, CLI, CI/CD, and internal integrations. Read-only keys may call GET/HEAD/OPTIONS only; read-write keys may call mutating REST endpoints.';
+
+  @override
+  String get apiKeysCreateNewTitle => 'Issue new key';
+
+  @override
+  String get apiKeysRefresh => 'Refresh';
+
+  @override
+  String get apiKeysDisplayNameLabel => 'Name';
+
+  @override
+  String get apiKeysDisplayNameHint =>
+      'e.g. CI deploy / data export / internal bot';
+
+  @override
+  String get apiKeysPermissionTitle => 'Permissions';
+
+  @override
+  String get apiKeysScopeReadOnly => 'Read-only';
+
+  @override
+  String get apiKeysScopeReadWrite => 'Read-write';
+
+  @override
+  String get apiKeysExpiryNever => 'Never expires';
+
+  @override
+  String get apiKeysCreating => 'Creating…';
+
+  @override
+  String get apiKeysCreateButton => 'Create API key';
+
+  @override
+  String get apiKeysPlaintextOnceTitle => 'One-time plaintext';
+
+  @override
+  String get apiKeysPlaintextOnceBody =>
+      'This secret is shown only once. Copy it immediately to your secret manager, CI secret, or integration config.';
+
+  @override
+  String get apiKeysCopiedPlaintextSnack => 'Copied one-time plaintext API key';
+
+  @override
+  String get apiKeysCopyPlaintext => 'Copy plaintext';
+
+  @override
+  String get apiKeysHidePlaintext => 'Hide';
+
+  @override
+  String get apiKeysExistingKeysTitle => 'Existing keys';
+
+  @override
+  String get apiKeysEmptyList => 'No API keys yet.';
+
+  @override
+  String get apiKeysChipUsable => 'Usable';
+
+  @override
+  String get apiKeysChipUnusable => 'Not usable';
+
+  @override
+  String get apiKeysChipActive => 'Active';
+
+  @override
+  String get apiKeysChipRevoked => 'Revoked';
+
+  @override
+  String get apiKeysChipExpired => 'Expired';
+
+  @override
+  String get apiKeysCopyPublicIdTooltip => 'Copy publicId';
+
+  @override
+  String get apiKeysCopiedPublicIdSnack => 'Copied publicId';
+
+  @override
+  String apiKeysMetaLine(String createdAt, String updatedAt, int useCount) {
+    return 'Created $createdAt · Updated $updatedAt · Used $useCount times';
+  }
+
+  @override
+  String apiKeysLastUsedLine(String lastUsedAt, String method, String path) {
+    return 'Last used $lastUsedAt · $method $path';
+  }
+
+  @override
+  String apiKeysSourceLine(String source) {
+    return 'Source $source';
+  }
+
+  @override
+  String apiKeysExpiresAtLine(String expiresAt) {
+    return 'Expires at $expiresAt';
+  }
+
+  @override
+  String apiKeysRotatedAtLine(String rotatedAt) {
+    return 'Last rotated $rotatedAt';
+  }
+
+  @override
+  String apiKeysRevokedAtLine(String revokedAt) {
+    return 'Revoked at $revokedAt';
+  }
+
+  @override
+  String get apiKeysExpiredNeedsRotate => 'Expired — rotate';
+
+  @override
+  String get apiKeysRestore => 'Restore';
+
+  @override
+  String get apiKeysDeleteTitle => 'Delete API key';
+
+  @override
+  String apiKeysDeleteBody(String displayName, String keyHint) {
+    return 'About to delete $displayName\n$keyHint';
+  }
+
+  @override
+  String get apiKeysDelete => 'Delete';
+
+  @override
+  String get apiKeysAuditTitle => 'Admin audit';
+
+  @override
+  String get apiKeysAuditEmpty => 'No API key lifecycle records yet.';
 }

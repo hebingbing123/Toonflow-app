@@ -10158,5 +10158,149 @@
         "type": "int"
       }
     }
-  }
+  },
+  "apiKeysSnackFillName": "Please enter a key name first.",
+  "apiKeysSnackPickExpiry": "Please choose an expiry date first.",
+  "apiKeysDatePickerHelp": "Choose expiry date",
+  "apiKeysRotateTitle": "Rotate {displayName}",
+  "@apiKeysRotateTitle": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRotateBody": "Rotation immediately invalidates the old secret and shows the new plaintext token only once.",
+  "apiKeysExpiryPolicy": "Expiry policy",
+  "apiKeysExpiryKeepCurrent": "Keep current",
+  "apiKeysExpiryClearExpiry": "Clear expiry",
+  "apiKeysExpirySevenDays": "7 days",
+  "apiKeysExpiryThirtyDays": "30 days",
+  "apiKeysExpiryNinetyDays": "90 days",
+  "apiKeysExpiryCustomDate": "Custom date",
+  "apiKeysExpiresAtUtc": "Expires {date} at 23:59 UTC",
+  "@apiKeysExpiresAtUtc": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysActionRotate": "Rotate",
+  "apiKeysRevokeTitle": "Revoke {displayName}",
+  "@apiKeysRevokeTitle": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRevokeBody": "After revocation the existing token stops working until you restore or rotate again.",
+  "apiKeysRevokeReasonLabel": "Reason (optional)",
+  "apiKeysRevokeReasonHint": "e.g. credential leak, env retired, bot disabled",
+  "apiKeysActionRevoke": "Revoke",
+  "apiKeysSectionTitle": "API keys",
+  "apiKeysRiskyPrefsTooltip": "Local client preferences (confirmations for key rotation/deletion and reset).",
+  "apiKeysIntroBody": "Issue user-level credentials for server automation, CLI, CI/CD, and internal integrations. Read-only keys may call GET/HEAD/OPTIONS only; read-write keys may call mutating REST endpoints.",
+  "apiKeysCreateNewTitle": "Issue new key",
+  "apiKeysRefresh": "Refresh",
+  "apiKeysDisplayNameLabel": "Name",
+  "apiKeysDisplayNameHint": "e.g. CI deploy / data export / internal bot",
+  "apiKeysPermissionTitle": "Permissions",
+  "apiKeysScopeReadOnly": "Read-only",
+  "apiKeysScopeReadWrite": "Read-write",
+  "apiKeysExpiryNever": "Never expires",
+  "apiKeysCreating": "Creating…",
+  "apiKeysCreateButton": "Create API key",
+  "apiKeysPlaintextOnceTitle": "One-time plaintext",
+  "apiKeysPlaintextOnceBody": "This secret is shown only once. Copy it immediately to your secret manager, CI secret, or integration config.",
+  "apiKeysCopiedPlaintextSnack": "Copied one-time plaintext API key",
+  "apiKeysCopyPlaintext": "Copy plaintext",
+  "apiKeysHidePlaintext": "Hide",
+  "apiKeysExistingKeysTitle": "Existing keys",
+  "apiKeysEmptyList": "No API keys yet.",
+  "apiKeysChipUsable": "Usable",
+  "apiKeysChipUnusable": "Not usable",
+  "apiKeysChipActive": "Active",
+  "apiKeysChipRevoked": "Revoked",
+  "apiKeysChipExpired": "Expired",
+  "apiKeysCopyPublicIdTooltip": "Copy publicId",
+  "apiKeysCopiedPublicIdSnack": "Copied publicId",
+  "apiKeysMetaLine": "Created {createdAt} · Updated {updatedAt} · Used {useCount} times",
+  "@apiKeysMetaLine": {
+    "placeholders": {
+      "createdAt": {
+        "type": "String"
+      },
+      "updatedAt": {
+        "type": "String"
+      },
+      "useCount": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysLastUsedLine": "Last used {lastUsedAt} · {method} {path}",
+  "@apiKeysLastUsedLine": {
+    "placeholders": {
+      "lastUsedAt": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysSourceLine": "Source {source}",
+  "@apiKeysSourceLine": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysExpiresAtLine": "Expires at {expiresAt}",
+  "@apiKeysExpiresAtLine": {
+    "placeholders": {
+      "expiresAt": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRotatedAtLine": "Last rotated {rotatedAt}",
+  "@apiKeysRotatedAtLine": {
+    "placeholders": {
+      "rotatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRevokedAtLine": "Revoked at {revokedAt}",
+  "@apiKeysRevokedAtLine": {
+    "placeholders": {
+      "revokedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysExpiredNeedsRotate": "Expired — rotate",
+  "apiKeysRestore": "Restore",
+  "apiKeysDeleteTitle": "Delete API key",
+  "apiKeysDeleteBody": "About to delete {displayName}\n{keyHint}",
+  "@apiKeysDeleteBody": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      },
+      "keyHint": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysDelete": "Delete",
+  "apiKeysAuditTitle": "Admin audit",
+  "apiKeysAuditEmpty": "No API key lifecycle records yet."
 }

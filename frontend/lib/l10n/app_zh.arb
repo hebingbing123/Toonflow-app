@@ -9844,5 +9844,149 @@
         "type": "int"
       }
     }
-  }
+  },
+  "apiKeysSnackFillName": "请先填写密钥名称",
+  "apiKeysSnackPickExpiry": "请先选择过期日期",
+  "apiKeysDatePickerHelp": "选择过期日期",
+  "apiKeysRotateTitle": "轮换 {displayName}",
+  "@apiKeysRotateTitle": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRotateBody": "轮换会立即作废旧 secret，并只显示一次新的明文 token。",
+  "apiKeysExpiryPolicy": "过期策略",
+  "apiKeysExpiryKeepCurrent": "保留当前",
+  "apiKeysExpiryClearExpiry": "清除过期",
+  "apiKeysExpirySevenDays": "7 天",
+  "apiKeysExpiryThirtyDays": "30 天",
+  "apiKeysExpiryNinetyDays": "90 天",
+  "apiKeysExpiryCustomDate": "自定义日期",
+  "apiKeysExpiresAtUtc": "将于 {date} 23:59 UTC 过期",
+  "@apiKeysExpiresAtUtc": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysActionRotate": "轮换",
+  "apiKeysRevokeTitle": "撤销 {displayName}",
+  "@apiKeysRevokeTitle": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRevokeBody": "撤销后现有 token 将立即失效，直到再次恢复或轮换。",
+  "apiKeysRevokeReasonLabel": "原因（可选）",
+  "apiKeysRevokeReasonHint": "例如：凭据暴露、环境下线、机器人停用",
+  "apiKeysActionRevoke": "撤销",
+  "apiKeysSectionTitle": "API 密钥",
+  "apiKeysRiskyPrefsTooltip": "本机客户端偏好（密钥轮换/删除等「不再提示」与恢复确认）",
+  "apiKeysIntroBody": "为服务端自动化、CLI、CI/CD 与内部集成签发用户级凭据。只读 key 只能调用 GET/HEAD/OPTIONS；读写 key 才允许执行变更类 REST 接口。",
+  "apiKeysCreateNewTitle": "签发新密钥",
+  "apiKeysRefresh": "刷新",
+  "apiKeysDisplayNameLabel": "名称",
+  "apiKeysDisplayNameHint": "例如 CI deploy / data export / internal bot",
+  "apiKeysPermissionTitle": "权限",
+  "apiKeysScopeReadOnly": "只读",
+  "apiKeysScopeReadWrite": "读写",
+  "apiKeysExpiryNever": "不过期",
+  "apiKeysCreating": "签发中…",
+  "apiKeysCreateButton": "创建 API key",
+  "apiKeysPlaintextOnceTitle": "一次性明文",
+  "apiKeysPlaintextOnceBody": "这个 secret 只会显示这一次。请立刻复制到凭据管理器、CI secret 或你的集成配置里。",
+  "apiKeysCopiedPlaintextSnack": "已复制一次性明文 API key",
+  "apiKeysCopyPlaintext": "复制明文",
+  "apiKeysHidePlaintext": "隐藏",
+  "apiKeysExistingKeysTitle": "现有密钥",
+  "apiKeysEmptyList": "还没有 API key。",
+  "apiKeysChipUsable": "可用",
+  "apiKeysChipUnusable": "不可用",
+  "apiKeysChipActive": "生效",
+  "apiKeysChipRevoked": "已撤销",
+  "apiKeysChipExpired": "已过期",
+  "apiKeysCopyPublicIdTooltip": "复制 publicId",
+  "apiKeysCopiedPublicIdSnack": "已复制 publicId",
+  "apiKeysMetaLine": "创建 {createdAt} · 更新 {updatedAt} · 使用 {useCount} 次",
+  "@apiKeysMetaLine": {
+    "placeholders": {
+      "createdAt": {
+        "type": "String"
+      },
+      "updatedAt": {
+        "type": "String"
+      },
+      "useCount": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysLastUsedLine": "最近使用 {lastUsedAt} · {method} {path}",
+  "@apiKeysLastUsedLine": {
+    "placeholders": {
+      "lastUsedAt": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysSourceLine": "来源 {source}",
+  "@apiKeysSourceLine": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysExpiresAtLine": "过期时间 {expiresAt}",
+  "@apiKeysExpiresAtLine": {
+    "placeholders": {
+      "expiresAt": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRotatedAtLine": "最近轮换 {rotatedAt}",
+  "@apiKeysRotatedAtLine": {
+    "placeholders": {
+      "rotatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysRevokedAtLine": "撤销时间 {revokedAt}",
+  "@apiKeysRevokedAtLine": {
+    "placeholders": {
+      "revokedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysExpiredNeedsRotate": "已过期，需轮换",
+  "apiKeysRestore": "恢复",
+  "apiKeysDeleteTitle": "删除 API key",
+  "apiKeysDeleteBody": "即将删除 {displayName}\n{keyHint}",
+  "@apiKeysDeleteBody": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      },
+      "keyHint": {
+        "type": "String"
+      }
+    }
+  },
+  "apiKeysDelete": "删除",
+  "apiKeysAuditTitle": "管理审计",
+  "apiKeysAuditEmpty": "还没有 API key 生命周期记录。"
 }

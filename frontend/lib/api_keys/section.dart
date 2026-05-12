@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
@@ -57,13 +58,14 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<void> _createKey() async {
+    final l10n = AppLocalizations.of(context)!;
     final displayName = _displayNameController.text.trim();
     if (displayName.isEmpty) {
-      _showSnackBar('请先填写密钥名称');
+      _showSnackBar(l10n.apiKeysSnackFillName);
       return;
     }
     if (_expiryPreset == _ExpiryPreset.custom && _customExpiryDate == null) {
-      _showSnackBar('请先选择过期日期');
+      _showSnackBar(l10n.apiKeysSnackPickExpiry);
       return;
     }
     await widget.controller.createKey(
@@ -99,13 +101,14 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<DateTime?> _pickExpiryDate({DateTime? initialDate}) async {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate ?? now.add(const Duration(days: 7)),
       firstDate: now,
       lastDate: now.add(const Duration(days: 3650)),
-      helpText: '选择过期日期',
+      helpText: l10n.apiKeysDatePickerHelp,
     );
     return picked;
   }
@@ -122,6 +125,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<void> _showRotateDialog(ApiKeyRecordV1 item) async {
+    final l10n = AppLocalizations.of(context)!;
     var expiryPreset = _ExpiryPreset.none;
     DateTime? customDate;
     final action = await showDialog<String>(
@@ -141,7 +145,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             }
 
             return AlertDialog(
-              title: Text('轮换 ${item.displayName}'),
+              title: Text(l10n.apiKeysRotateTitle(item.displayName)),
               content: SizedBox(
                 width: 420,
                 child: Column(
@@ -149,18 +153,21 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '轮换会立即作废旧 secret，并只显示一次新的明文 token。',
+                      l10n.apiKeysRotateBody,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 12),
-                    Text('过期策略', style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      l10n.apiKeysExpiryPolicy,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
                         _choiceChip(
-                          label: '保留当前',
+                          label: l10n.apiKeysExpiryKeepCurrent,
                           selected: expiryPreset == _ExpiryPreset.none,
                           onSelected: () {
                             setDialogState(() {
@@ -169,7 +176,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                           },
                         ),
                         _choiceChip(
-                          label: '清除过期',
+                          label: l10n.apiKeysExpiryClearExpiry,
                           selected:
                               expiryPreset == _ExpiryPreset.custom &&
                               customDate ==
@@ -184,7 +191,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                           },
                         ),
                         _choiceChip(
-                          label: '7 天',
+                          label: l10n.apiKeysExpirySevenDays,
                           selected: expiryPreset == _ExpiryPreset.sevenDays,
                           onSelected: () {
                             setDialogState(() {
@@ -194,7 +201,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                           },
                         ),
                         _choiceChip(
-                          label: '30 天',
+                          label: l10n.apiKeysExpiryThirtyDays,
                           selected: expiryPreset == _ExpiryPreset.thirtyDays,
                           onSelected: () {
                             setDialogState(() {
@@ -204,7 +211,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                           },
                         ),
                         _choiceChip(
-                          label: '自定义日期',
+                          label: l10n.apiKeysExpiryCustomDate,
                           selected:
                               expiryPreset == _ExpiryPreset.custom &&
                               customDate != null &&
@@ -221,7 +228,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                             DateTime.fromMillisecondsSinceEpoch(0)) ...[
                       const SizedBox(height: 8),
                       Text(
-                        '将于 ${_fmtDate(customDate!)} 23:59 UTC 过期',
+                        l10n.apiKeysExpiresAtUtc(_fmtDate(customDate!)),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -231,7 +238,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
+                  child: Text(l10n.globalSearchCancel),
                 ),
                 FilledButton(
                   onPressed: () {
@@ -256,7 +263,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     };
                     Navigator.of(context).pop(expiresAt);
                   },
-                  child: const Text('轮换'),
+                  child: Text(l10n.apiKeysActionRotate),
                 ),
               ],
             );
@@ -271,27 +278,28 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<void> _showRevokeDialog(ApiKeyRecordV1 item) async {
+    final l10n = AppLocalizations.of(context)!;
     final reasonController = TextEditingController();
     try {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('撤销 ${item.displayName}'),
+          title: Text(l10n.apiKeysRevokeTitle(item.displayName)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '撤销后现有 token 将立即失效，直到再次恢复或轮换。',
+                l10n.apiKeysRevokeBody,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: reasonController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: '原因（可选）',
-                  hintText: '例如：凭据暴露、环境下线、机器人停用',
+                decoration: InputDecoration(
+                  labelText: l10n.apiKeysRevokeReasonLabel,
+                  hintText: l10n.apiKeysRevokeReasonHint,
                 ),
               ),
             ],
@@ -299,11 +307,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              child: Text(l10n.globalSearchCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('撤销'),
+              child: Text(l10n.apiKeysActionRevoke),
             ),
           ],
         ),
@@ -324,6 +332,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(
@@ -334,34 +343,34 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             children: [
               Expanded(
                 child: Text(
-                  'API 密钥',
+                  l10n.apiKeysSectionTitle,
                   style: theme.textTheme.titleMedium,
                 ),
               ),
-              const RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: '本机客户端偏好（密钥轮换/删除等「不再提示」与恢复确认）',
+              RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.apiKeysRiskyPrefsTooltip,
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            '为服务端自动化、CLI、CI/CD 与内部集成签发用户级凭据。只读 key 只能调用 GET/HEAD/OPTIONS；读写 key 才允许执行变更类 REST 接口。',
+            l10n.apiKeysIntroBody,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 12),
-          _buildCreatePanel(context),
+          _buildCreatePanel(context, l10n),
           const SizedBox(height: 14),
-          _buildListPanel(context),
+          _buildListPanel(context, l10n),
           const SizedBox(height: 14),
-          _buildAuditPanel(context),
+          _buildAuditPanel(context, l10n),
         ],
       ),
     );
   }
 
-  Widget _buildCreatePanel(BuildContext context) {
+  Widget _buildCreatePanel(BuildContext context, AppLocalizations l10n) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -375,13 +384,18 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
         children: [
           Row(
             children: [
-              Expanded(child: Text('签发新密钥', style: theme.textTheme.titleSmall)),
+              Expanded(
+                child: Text(
+                  l10n.apiKeysCreateNewTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
               TextButton.icon(
                 onPressed: widget.controller.loading
                     ? null
                     : widget.controller.refresh,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('刷新'),
+                label: Text(l10n.apiKeysRefresh),
               ),
             ],
           ),
@@ -389,20 +403,20 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           TextField(
             controller: _displayNameController,
             maxLength: 80,
-            decoration: const InputDecoration(
-              labelText: '名称',
-              hintText: '例如 CI deploy / data export / internal bot',
+            decoration: InputDecoration(
+              labelText: l10n.apiKeysDisplayNameLabel,
+              hintText: l10n.apiKeysDisplayNameHint,
             ),
           ),
           const SizedBox(height: 8),
-          Text('权限', style: theme.textTheme.titleSmall),
+          Text(l10n.apiKeysPermissionTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               _choiceChip(
-                label: '只读',
+                label: l10n.apiKeysScopeReadOnly,
                 selected: _scope == ApiKeyScopeV1.readOnly,
                 onSelected: () {
                   setState(() {
@@ -411,7 +425,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 },
               ),
               _choiceChip(
-                label: '读写',
+                label: l10n.apiKeysScopeReadWrite,
                 selected: _scope == ApiKeyScopeV1.readWrite,
                 onSelected: () {
                   setState(() {
@@ -422,14 +436,14 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             ],
           ),
           const SizedBox(height: 12),
-          Text('过期策略', style: theme.textTheme.titleSmall),
+          Text(l10n.apiKeysExpiryPolicy, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               _choiceChip(
-                label: '不过期',
+                label: l10n.apiKeysExpiryNever,
                 selected: _expiryPreset == _ExpiryPreset.none,
                 onSelected: () {
                   setState(() {
@@ -439,7 +453,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 },
               ),
               _choiceChip(
-                label: '7 天',
+                label: l10n.apiKeysExpirySevenDays,
                 selected: _expiryPreset == _ExpiryPreset.sevenDays,
                 onSelected: () {
                   setState(() {
@@ -449,7 +463,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 },
               ),
               _choiceChip(
-                label: '30 天',
+                label: l10n.apiKeysExpiryThirtyDays,
                 selected: _expiryPreset == _ExpiryPreset.thirtyDays,
                 onSelected: () {
                   setState(() {
@@ -459,7 +473,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 },
               ),
               _choiceChip(
-                label: '90 天',
+                label: l10n.apiKeysExpiryNinetyDays,
                 selected: _expiryPreset == _ExpiryPreset.ninetyDays,
                 onSelected: () {
                   setState(() {
@@ -470,7 +484,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ),
               _choiceChip(
                 label: _customExpiryDate == null
-                    ? '自定义日期'
+                    ? l10n.apiKeysExpiryCustomDate
                     : _fmtDate(_customExpiryDate!),
                 selected: _expiryPreset == _ExpiryPreset.custom,
                 onSelected: _pickCustomCreateExpiry,
@@ -482,7 +496,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                '将于 ${_fmtDate(_customExpiryDate!)} 23:59 UTC 过期',
+                l10n.apiKeysExpiresAtUtc(_fmtDate(_customExpiryDate!)),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -498,7 +512,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.key_outlined),
-            label: Text(widget.controller.creating ? '签发中…' : '创建 API key'),
+            label: Text(
+              widget.controller.creating
+                  ? l10n.apiKeysCreating
+                  : l10n.apiKeysCreateButton,
+            ),
           ),
           if (widget.controller.latestPlaintextToken != null) ...[
             const SizedBox(height: 14),
@@ -514,10 +532,13 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('一次性明文', style: theme.textTheme.titleSmall),
+                  Text(
+                    l10n.apiKeysPlaintextOnceTitle,
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                    '这个 secret 只会显示这一次。请立刻复制到凭据管理器、CI secret 或你的集成配置里。',
+                    l10n.apiKeysPlaintextOnceBody,
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 10),
@@ -530,14 +551,14 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                       OutlinedButton.icon(
                         onPressed: () => _copyText(
                           widget.controller.latestPlaintextToken!,
-                          '已复制一次性明文 API key',
+                          l10n.apiKeysCopiedPlaintextSnack,
                         ),
                         icon: const Icon(Icons.copy_outlined, size: 18),
-                        label: const Text('复制明文'),
+                        label: Text(l10n.apiKeysCopyPlaintext),
                       ),
                       TextButton(
                         onPressed: widget.controller.clearLatestPlaintextToken,
-                        child: const Text('隐藏'),
+                        child: Text(l10n.apiKeysHidePlaintext),
                       ),
                     ],
                   ),
@@ -550,7 +571,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     );
   }
 
-  Widget _buildListPanel(BuildContext context) {
+  Widget _buildListPanel(BuildContext context, AppLocalizations l10n) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -562,7 +583,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('现有密钥', style: theme.textTheme.titleSmall),
+          Text(l10n.apiKeysExistingKeysTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -578,21 +599,25 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             const Center(child: CircularProgressIndicator())
           else if (widget.controller.items.isEmpty)
             Text(
-              '还没有 API key。',
+              l10n.apiKeysEmptyList,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             )
           else
             ...widget.controller.items.map(
-              (item) => _buildKeyCard(context, item),
+              (item) => _buildKeyCard(context, l10n, item),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildKeyCard(BuildContext context, ApiKeyRecordV1 item) {
+  Widget _buildKeyCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    ApiKeyRecordV1 item,
+  ) {
     final busy = widget.controller.busyKeyId == item.id;
     final theme = Theme.of(context);
     return Container(
@@ -619,21 +644,31 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                       runSpacing: 8,
                       children: [
                         Chip(
-                          label: Text(item.isUsable ? '可用' : '不可用'),
+                          label: Text(
+                            item.isUsable
+                                ? l10n.apiKeysChipUsable
+                                : l10n.apiKeysChipUnusable,
+                          ),
                           visualDensity: VisualDensity.compact,
                         ),
                         Chip(
-                          label: Text(item.isActive ? 'active' : 'revoked'),
+                          label: Text(
+                            item.isActive
+                                ? l10n.apiKeysChipActive
+                                : l10n.apiKeysChipRevoked,
+                          ),
                           visualDensity: VisualDensity.compact,
                         ),
                         if (item.isExpired)
-                          const Chip(
-                            label: Text('expired'),
+                          Chip(
+                            label: Text(l10n.apiKeysChipExpired),
                             visualDensity: VisualDensity.compact,
                           ),
                         Chip(
                           label: Text(
-                            item.scope == ApiKeyScopeV1.readOnly ? '只读' : '读写',
+                            item.scope == ApiKeyScopeV1.readOnly
+                                ? l10n.apiKeysScopeReadOnly
+                                : l10n.apiKeysScopeReadWrite,
                           ),
                           visualDensity: VisualDensity.compact,
                         ),
@@ -643,8 +678,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 ),
               ),
               IconButton(
-                tooltip: '复制 publicId',
-                onPressed: () => _copyText(item.publicId, '已复制 publicId'),
+                tooltip: l10n.apiKeysCopyPublicIdTooltip,
+                onPressed: () =>
+                    _copyText(item.publicId, l10n.apiKeysCopiedPublicIdSnack),
                 icon: const Icon(Icons.tag_outlined),
               ),
             ],
@@ -660,21 +696,31 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ),
           const SizedBox(height: 4),
           Text(
-            '创建 ${_fmt(item.createdAt)} · 更新 ${_fmt(item.updatedAt)} · 使用 ${item.useCount} 次',
+            l10n.apiKeysMetaLine(
+              _fmt(item.createdAt),
+              _fmt(item.updatedAt),
+              item.useCount,
+            ),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           if (item.lastUsedAt != null)
             Text(
-              '最近使用 ${_fmt(item.lastUsedAt!)} · ${item.lastUsedMethod ?? ''} ${item.lastUsedPath ?? ''}',
+              l10n.apiKeysLastUsedLine(
+                _fmt(item.lastUsedAt!),
+                item.lastUsedMethod ?? '',
+                item.lastUsedPath ?? '',
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           if (item.lastUsedIp != null || item.lastUsedUserAgent != null)
             Text(
-              '来源 ${item.lastUsedIp ?? 'unknown'}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
+              l10n.apiKeysSourceLine(
+                '${item.lastUsedIp ?? 'unknown'}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -683,21 +729,21 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             ),
           if (item.expiresAt != null)
             Text(
-              '过期时间 ${_fmt(item.expiresAt!)}',
+              l10n.apiKeysExpiresAtLine(_fmt(item.expiresAt!)),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           if (item.rotatedAt != null)
             Text(
-              '最近轮换 ${_fmt(item.rotatedAt!)}',
+              l10n.apiKeysRotatedAtLine(_fmt(item.rotatedAt!)),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           if (item.revokedAt != null)
             Text(
-              '撤销时间 ${_fmt(item.revokedAt!)}',
+              l10n.apiKeysRevokedAtLine(_fmt(item.revokedAt!)),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -716,19 +762,23 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.refresh_outlined),
-                label: const Text('轮换'),
+                label: Text(l10n.apiKeysActionRotate),
               ),
               if (item.isActive)
                 OutlinedButton(
                   onPressed: busy ? null : () => _showRevokeDialog(item),
-                  child: const Text('撤销'),
+                  child: Text(l10n.apiKeysActionRevoke),
                 )
               else
                 OutlinedButton(
                   onPressed: busy || item.isExpired
                       ? null
                       : () => widget.controller.activateKey(item.id),
-                  child: Text(item.isExpired ? '已过期，需轮换' : '恢复'),
+                  child: Text(
+                    item.isExpired
+                        ? l10n.apiKeysExpiredNeedsRotate
+                        : l10n.apiKeysRestore,
+                  ),
                 ),
               OutlinedButton(
                 onPressed: busy
@@ -737,20 +787,23 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('删除 API key'),
+                            title: Text(l10n.apiKeysDeleteTitle),
                             content: SelectableText(
-                              '即将删除 ${item.displayName}\n${item.keyHint}',
+                              l10n.apiKeysDeleteBody(
+                                item.displayName,
+                                item.keyHint,
+                              ),
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(false),
-                                child: const Text('取消'),
+                                child: Text(l10n.globalSearchCancel),
                               ),
                               FilledButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(true),
-                                child: const Text('删除'),
+                                child: Text(l10n.apiKeysDelete),
                               ),
                             ],
                           ),
@@ -759,7 +812,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                           await widget.controller.deleteKey(item.id);
                         }
                       },
-                child: const Text('删除'),
+                child: Text(l10n.apiKeysDelete),
               ),
             ],
           ),
@@ -768,7 +821,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     );
   }
 
-  Widget _buildAuditPanel(BuildContext context) {
+  Widget _buildAuditPanel(BuildContext context, AppLocalizations l10n) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -780,11 +833,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('管理审计', style: theme.textTheme.titleSmall),
+          Text(l10n.apiKeysAuditTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           if (widget.controller.auditItems.isEmpty)
             Text(
-              '还没有 API key 生命周期记录。',
+              l10n.apiKeysAuditEmpty,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

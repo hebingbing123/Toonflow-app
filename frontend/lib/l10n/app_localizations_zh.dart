@@ -12475,4 +12475,204 @@ class AppLocalizationsZh extends AppLocalizations {
   String notificationsUnreadCount(int count) {
     return '未读 $count';
   }
+
+  @override
+  String get apiKeysSnackFillName => '请先填写密钥名称';
+
+  @override
+  String get apiKeysSnackPickExpiry => '请先选择过期日期';
+
+  @override
+  String get apiKeysDatePickerHelp => '选择过期日期';
+
+  @override
+  String apiKeysRotateTitle(String displayName) {
+    return '轮换 $displayName';
+  }
+
+  @override
+  String get apiKeysRotateBody => '轮换会立即作废旧 secret，并只显示一次新的明文 token。';
+
+  @override
+  String get apiKeysExpiryPolicy => '过期策略';
+
+  @override
+  String get apiKeysExpiryKeepCurrent => '保留当前';
+
+  @override
+  String get apiKeysExpiryClearExpiry => '清除过期';
+
+  @override
+  String get apiKeysExpirySevenDays => '7 天';
+
+  @override
+  String get apiKeysExpiryThirtyDays => '30 天';
+
+  @override
+  String get apiKeysExpiryNinetyDays => '90 天';
+
+  @override
+  String get apiKeysExpiryCustomDate => '自定义日期';
+
+  @override
+  String apiKeysExpiresAtUtc(String date) {
+    return '将于 $date 23:59 UTC 过期';
+  }
+
+  @override
+  String get apiKeysActionRotate => '轮换';
+
+  @override
+  String apiKeysRevokeTitle(String displayName) {
+    return '撤销 $displayName';
+  }
+
+  @override
+  String get apiKeysRevokeBody => '撤销后现有 token 将立即失效，直到再次恢复或轮换。';
+
+  @override
+  String get apiKeysRevokeReasonLabel => '原因（可选）';
+
+  @override
+  String get apiKeysRevokeReasonHint => '例如：凭据暴露、环境下线、机器人停用';
+
+  @override
+  String get apiKeysActionRevoke => '撤销';
+
+  @override
+  String get apiKeysSectionTitle => 'API 密钥';
+
+  @override
+  String get apiKeysRiskyPrefsTooltip => '本机客户端偏好（密钥轮换/删除等「不再提示」与恢复确认）';
+
+  @override
+  String get apiKeysIntroBody =>
+      '为服务端自动化、CLI、CI/CD 与内部集成签发用户级凭据。只读 key 只能调用 GET/HEAD/OPTIONS；读写 key 才允许执行变更类 REST 接口。';
+
+  @override
+  String get apiKeysCreateNewTitle => '签发新密钥';
+
+  @override
+  String get apiKeysRefresh => '刷新';
+
+  @override
+  String get apiKeysDisplayNameLabel => '名称';
+
+  @override
+  String get apiKeysDisplayNameHint =>
+      '例如 CI deploy / data export / internal bot';
+
+  @override
+  String get apiKeysPermissionTitle => '权限';
+
+  @override
+  String get apiKeysScopeReadOnly => '只读';
+
+  @override
+  String get apiKeysScopeReadWrite => '读写';
+
+  @override
+  String get apiKeysExpiryNever => '不过期';
+
+  @override
+  String get apiKeysCreating => '签发中…';
+
+  @override
+  String get apiKeysCreateButton => '创建 API key';
+
+  @override
+  String get apiKeysPlaintextOnceTitle => '一次性明文';
+
+  @override
+  String get apiKeysPlaintextOnceBody =>
+      '这个 secret 只会显示这一次。请立刻复制到凭据管理器、CI secret 或你的集成配置里。';
+
+  @override
+  String get apiKeysCopiedPlaintextSnack => '已复制一次性明文 API key';
+
+  @override
+  String get apiKeysCopyPlaintext => '复制明文';
+
+  @override
+  String get apiKeysHidePlaintext => '隐藏';
+
+  @override
+  String get apiKeysExistingKeysTitle => '现有密钥';
+
+  @override
+  String get apiKeysEmptyList => '还没有 API key。';
+
+  @override
+  String get apiKeysChipUsable => '可用';
+
+  @override
+  String get apiKeysChipUnusable => '不可用';
+
+  @override
+  String get apiKeysChipActive => '生效';
+
+  @override
+  String get apiKeysChipRevoked => '已撤销';
+
+  @override
+  String get apiKeysChipExpired => '已过期';
+
+  @override
+  String get apiKeysCopyPublicIdTooltip => '复制 publicId';
+
+  @override
+  String get apiKeysCopiedPublicIdSnack => '已复制 publicId';
+
+  @override
+  String apiKeysMetaLine(String createdAt, String updatedAt, int useCount) {
+    return '创建 $createdAt · 更新 $updatedAt · 使用 $useCount 次';
+  }
+
+  @override
+  String apiKeysLastUsedLine(String lastUsedAt, String method, String path) {
+    return '最近使用 $lastUsedAt · $method $path';
+  }
+
+  @override
+  String apiKeysSourceLine(String source) {
+    return '来源 $source';
+  }
+
+  @override
+  String apiKeysExpiresAtLine(String expiresAt) {
+    return '过期时间 $expiresAt';
+  }
+
+  @override
+  String apiKeysRotatedAtLine(String rotatedAt) {
+    return '最近轮换 $rotatedAt';
+  }
+
+  @override
+  String apiKeysRevokedAtLine(String revokedAt) {
+    return '撤销时间 $revokedAt';
+  }
+
+  @override
+  String get apiKeysExpiredNeedsRotate => '已过期，需轮换';
+
+  @override
+  String get apiKeysRestore => '恢复';
+
+  @override
+  String get apiKeysDeleteTitle => '删除 API key';
+
+  @override
+  String apiKeysDeleteBody(String displayName, String keyHint) {
+    return '即将删除 $displayName\n$keyHint';
+  }
+
+  @override
+  String get apiKeysDelete => '删除';
+
+  @override
+  String get apiKeysAuditTitle => '管理审计';
+
+  @override
+  String get apiKeysAuditEmpty => '还没有 API key 生命周期记录。';
 }
