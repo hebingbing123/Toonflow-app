@@ -5444,6 +5444,40 @@
   "scriptEditorSaveSaving": "保存中…",
   "scriptEditorSaveChanges": "保存修改",
   "scriptEditorDeletedSnackBar": "剧本已删除",
+  "scriptEditorStoryboardAddDialogTitle": "新增分镜",
+  "scriptEditorStoryboardAddPromptLabel": "分镜提示词",
+  "scriptEditorStoryboardAddPromptHelper": "填写本镜头的画面描述或动作提示。",
+  "scriptEditorStoryboardAddDurationOptionalLabel": "时长（可选）",
+  "scriptEditorStoryboardAddDurationOptionalHelper": "整数秒；留空表示由后端默认。",
+  "scriptEditorStoryboardAddConfirmButton": "新增",
+  "scriptEditorStoryboardAddPromptRequiredSnackBar": "分镜提示词不能为空",
+  "scriptEditorStoryboardDurationMustBeIntegerSnackBar": "时长必须是整数",
+  "scriptEditorStoryboardDurationMustBePositiveSnackBar": "时长必须是正整数",
+  "scriptEditorStoryboardAddFollowUpSummary": "已新增分镜 #{storyboardId}。",
+  "@scriptEditorStoryboardAddFollowUpSummary": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchAddDialogTitle": "批量新增分镜",
+  "scriptEditorStoryboardBatchAddPromptsLabel": "每行一条分镜提示词",
+  "scriptEditorStoryboardBatchAddPromptsHelper": "会忽略空行，并按输入顺序批量创建。",
+  "scriptEditorStoryboardBatchAddUnifiedDurationLabel": "统一时长（可选）",
+  "scriptEditorStoryboardBatchAddUnifiedDurationHelper": "若填写，会作用于本次全部新增分镜。",
+  "scriptEditorStoryboardBatchAddConfirmButton": "批量新增",
+  "scriptEditorStoryboardBatchAddNeedOnePromptSnackBar": "至少填写一条分镜提示词",
+  "scriptEditorStoryboardBatchAddUnifiedDurationMustBeIntegerSnackBar": "统一时长必须是整数",
+  "scriptEditorStoryboardBatchAddUnifiedDurationMustBePositiveSnackBar": "统一时长必须是正整数",
+  "scriptEditorStoryboardBatchAddFollowUpSummary": "已批量新增 {count} 条分镜。",
+  "@scriptEditorStoryboardBatchAddFollowUpSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorScriptsSingleWorkbenchRecentExtractError": "最近提取错误：{reason}",
   "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
     "placeholders": {

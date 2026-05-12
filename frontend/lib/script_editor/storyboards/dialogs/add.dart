@@ -21,8 +21,9 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
+          final l10n = AppLocalizations.of(dialogCtx)!;
           return AlertDialog(
-            title: const Text('新增分镜'),
+            title: Text(l10n.scriptEditorStoryboardAddDialogTitle),
             content: SizedBox(
               width: 420,
               child: Column(
@@ -33,9 +34,9 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
                     controller: promptCtrl,
                     minLines: 3,
                     maxLines: 5,
-                    decoration: const InputDecoration(
-                      labelText: '分镜提示词',
-                      helperText: '填写本镜头的画面描述或动作提示。',
+                    decoration: InputDecoration(
+                      labelText: l10n.scriptEditorStoryboardAddPromptLabel,
+                      helperText: l10n.scriptEditorStoryboardAddPromptHelper,
                       alignLabelWithHint: true,
                     ),
                   ),
@@ -43,9 +44,10 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
                   TextField(
                     controller: durationCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '时长（可选）',
-                      helperText: '整数秒；留空表示由后端默认。',
+                    decoration: InputDecoration(
+                      labelText: l10n.scriptEditorStoryboardAddDurationOptionalLabel,
+                      helperText:
+                          l10n.scriptEditorStoryboardAddDurationOptionalHelper,
                     ),
                   ),
                 ],
@@ -54,36 +56,49 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(false),
-                child: const Text('取消'),
+                child: Text(l10n.projectEditorScriptsBatchAddCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
-                child: const Text('新增'),
+                child: Text(l10n.scriptEditorStoryboardAddConfirmButton),
               ),
             ],
           );
         },
       );
       if (confirmed != true || !ctx.mounted) return;
+      final flowL10n = AppLocalizations.of(ctx)!;
       final prompt = promptCtrl.text.trim();
       if (prompt.isEmpty) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('分镜提示词不能为空')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(
+              flowL10n.scriptEditorStoryboardAddPromptRequiredSnackBar,
+            ),
+          ),
+        );
         return;
       }
       final durationText = durationCtrl.text.trim();
       final duration = durationText.isEmpty ? null : int.tryParse(durationText);
       if (durationText.isNotEmpty && duration == null) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('时长必须是整数')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(
+              flowL10n.scriptEditorStoryboardDurationMustBeIntegerSnackBar,
+            ),
+          ),
+        );
         return;
       }
       if (duration != null && duration <= 0) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('时长必须是正整数')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(
+              flowL10n.scriptEditorStoryboardDurationMustBePositiveSnackBar,
+            ),
+          ),
+        );
         return;
       }
 
@@ -122,7 +137,9 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
         if (!ctx.mounted) return;
         setBoardsState(() {
           storyboardTaskLine[0] = buildStoryboardListFollowUp(
-            actionSummary: '已新增分镜 #${added.storyboardId}。',
+            actionSummary: flowL10n.scriptEditorStoryboardAddFollowUpSummary(
+              added.storyboardId,
+            ),
             diagnosis: diagnoseStoryboardList(
               boards: boardsList,
               productionSummaryLoaded: productionSummaryLoaded[0],

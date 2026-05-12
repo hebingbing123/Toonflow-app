@@ -21,8 +21,9 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
+          final l10n = AppLocalizations.of(dialogCtx)!;
           return AlertDialog(
-            title: const Text('批量新增分镜'),
+            title: Text(l10n.scriptEditorStoryboardBatchAddDialogTitle),
             content: SizedBox(
               width: 460,
               child: Column(
@@ -33,9 +34,10 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
                     controller: promptsCtrl,
                     minLines: 6,
                     maxLines: 10,
-                    decoration: const InputDecoration(
-                      labelText: '每行一条分镜提示词',
-                      helperText: '会忽略空行，并按输入顺序批量创建。',
+                    decoration: InputDecoration(
+                      labelText: l10n.scriptEditorStoryboardBatchAddPromptsLabel,
+                      helperText:
+                          l10n.scriptEditorStoryboardBatchAddPromptsHelper,
                       alignLabelWithHint: true,
                     ),
                   ),
@@ -43,9 +45,11 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
                   TextField(
                     controller: durationCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '统一时长（可选）',
-                      helperText: '若填写，会作用于本次全部新增分镜。',
+                    decoration: InputDecoration(
+                      labelText:
+                          l10n.scriptEditorStoryboardBatchAddUnifiedDurationLabel,
+                      helperText:
+                          l10n.scriptEditorStoryboardBatchAddUnifiedDurationHelper,
                     ),
                   ),
                 ],
@@ -54,40 +58,55 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(false),
-                child: const Text('取消'),
+                child: Text(l10n.projectEditorScriptsBatchAddCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
-                child: const Text('批量新增'),
+                child: Text(l10n.scriptEditorStoryboardBatchAddConfirmButton),
               ),
             ],
           );
         },
       );
       if (confirmed != true || !ctx.mounted) return;
+      final flowL10n = AppLocalizations.of(ctx)!;
       final prompts = promptsCtrl.text
           .split('\n')
           .map((line) => line.trim())
           .where((line) => line.isNotEmpty)
           .toList(growable: false);
       if (prompts.isEmpty) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('至少填写一条分镜提示词')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(
+              flowL10n.scriptEditorStoryboardBatchAddNeedOnePromptSnackBar,
+            ),
+          ),
+        );
         return;
       }
       final durationText = durationCtrl.text.trim();
       final duration = durationText.isEmpty ? null : int.tryParse(durationText);
       if (durationText.isNotEmpty && duration == null) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('统一时长必须是整数')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(
+              flowL10n
+                  .scriptEditorStoryboardBatchAddUnifiedDurationMustBeIntegerSnackBar,
+            ),
+          ),
+        );
         return;
       }
       if (duration != null && duration <= 0) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('统一时长必须是正整数')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(
+              flowL10n
+                  .scriptEditorStoryboardBatchAddUnifiedDurationMustBePositiveSnackBar,
+            ),
+          ),
+        );
         return;
       }
       final payload = prompts
@@ -131,7 +150,10 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
         if (!ctx.mounted) return;
         setBoardsState(() {
           storyboardTaskLine[0] = buildStoryboardListFollowUp(
-            actionSummary: '已批量新增 ${added.added} 条分镜。',
+            actionSummary:
+                flowL10n.scriptEditorStoryboardBatchAddFollowUpSummary(
+              added.added,
+            ),
             diagnosis: diagnoseStoryboardList(
               boards: boardsList,
               productionSummaryLoaded: productionSummaryLoaded[0],

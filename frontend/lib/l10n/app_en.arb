@@ -5444,6 +5444,40 @@
   "scriptEditorSaveSaving": "Saving…",
   "scriptEditorSaveChanges": "Save changes",
   "scriptEditorDeletedSnackBar": "Script deleted",
+  "scriptEditorStoryboardAddDialogTitle": "Add storyboard",
+  "scriptEditorStoryboardAddPromptLabel": "Shot prompt",
+  "scriptEditorStoryboardAddPromptHelper": "Describe this shot's visuals or motion.",
+  "scriptEditorStoryboardAddDurationOptionalLabel": "Duration (optional)",
+  "scriptEditorStoryboardAddDurationOptionalHelper": "Whole seconds; leave empty for backend default.",
+  "scriptEditorStoryboardAddConfirmButton": "Add",
+  "scriptEditorStoryboardAddPromptRequiredSnackBar": "Storyboard prompt cannot be empty.",
+  "scriptEditorStoryboardDurationMustBeIntegerSnackBar": "Duration must be an integer.",
+  "scriptEditorStoryboardDurationMustBePositiveSnackBar": "Duration must be a positive integer.",
+  "scriptEditorStoryboardAddFollowUpSummary": "Added storyboard #{storyboardId}.",
+  "@scriptEditorStoryboardAddFollowUpSummary": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchAddDialogTitle": "Batch add storyboards",
+  "scriptEditorStoryboardBatchAddPromptsLabel": "One prompt per line",
+  "scriptEditorStoryboardBatchAddPromptsHelper": "Empty lines are skipped; shots are created in input order.",
+  "scriptEditorStoryboardBatchAddUnifiedDurationLabel": "Shared duration (optional)",
+  "scriptEditorStoryboardBatchAddUnifiedDurationHelper": "If set, applies to every shot added in this batch.",
+  "scriptEditorStoryboardBatchAddConfirmButton": "Batch add",
+  "scriptEditorStoryboardBatchAddNeedOnePromptSnackBar": "Enter at least one storyboard prompt.",
+  "scriptEditorStoryboardBatchAddUnifiedDurationMustBeIntegerSnackBar": "Shared duration must be an integer.",
+  "scriptEditorStoryboardBatchAddUnifiedDurationMustBePositiveSnackBar": "Shared duration must be a positive integer.",
+  "scriptEditorStoryboardBatchAddFollowUpSummary": "Batch-added {count} storyboards.",
+  "@scriptEditorStoryboardBatchAddFollowUpSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorScriptsSingleWorkbenchRecentExtractError": "Recent extract error: {reason}",
   "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
     "placeholders": {

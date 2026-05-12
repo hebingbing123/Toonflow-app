@@ -11689,6 +11689,127 @@ abstract class AppLocalizations {
   /// **'Script deleted'**
   String get scriptEditorDeletedSnackBar;
 
+  /// No description provided for @scriptEditorStoryboardAddDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add storyboard'**
+  String get scriptEditorStoryboardAddDialogTitle;
+
+  /// No description provided for @scriptEditorStoryboardAddPromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot prompt'**
+  String get scriptEditorStoryboardAddPromptLabel;
+
+  /// No description provided for @scriptEditorStoryboardAddPromptHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe this shot\'s visuals or motion.'**
+  String get scriptEditorStoryboardAddPromptHelper;
+
+  /// No description provided for @scriptEditorStoryboardAddDurationOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (optional)'**
+  String get scriptEditorStoryboardAddDurationOptionalLabel;
+
+  /// No description provided for @scriptEditorStoryboardAddDurationOptionalHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole seconds; leave empty for backend default.'**
+  String get scriptEditorStoryboardAddDurationOptionalHelper;
+
+  /// No description provided for @scriptEditorStoryboardAddConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get scriptEditorStoryboardAddConfirmButton;
+
+  /// No description provided for @scriptEditorStoryboardAddPromptRequiredSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard prompt cannot be empty.'**
+  String get scriptEditorStoryboardAddPromptRequiredSnackBar;
+
+  /// No description provided for @scriptEditorStoryboardDurationMustBeIntegerSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration must be an integer.'**
+  String get scriptEditorStoryboardDurationMustBeIntegerSnackBar;
+
+  /// No description provided for @scriptEditorStoryboardDurationMustBePositiveSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration must be a positive integer.'**
+  String get scriptEditorStoryboardDurationMustBePositiveSnackBar;
+
+  /// No description provided for @scriptEditorStoryboardAddFollowUpSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Added storyboard #{storyboardId}.'**
+  String scriptEditorStoryboardAddFollowUpSummary(int storyboardId);
+
+  /// No description provided for @scriptEditorStoryboardBatchAddDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch add storyboards'**
+  String get scriptEditorStoryboardBatchAddDialogTitle;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddPromptsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'One prompt per line'**
+  String get scriptEditorStoryboardBatchAddPromptsLabel;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddPromptsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty lines are skipped; shots are created in input order.'**
+  String get scriptEditorStoryboardBatchAddPromptsHelper;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddUnifiedDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared duration (optional)'**
+  String get scriptEditorStoryboardBatchAddUnifiedDurationLabel;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddUnifiedDurationHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'If set, applies to every shot added in this batch.'**
+  String get scriptEditorStoryboardBatchAddUnifiedDurationHelper;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch add'**
+  String get scriptEditorStoryboardBatchAddConfirmButton;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddNeedOnePromptSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one storyboard prompt.'**
+  String get scriptEditorStoryboardBatchAddNeedOnePromptSnackBar;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddUnifiedDurationMustBeIntegerSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared duration must be an integer.'**
+  String get scriptEditorStoryboardBatchAddUnifiedDurationMustBeIntegerSnackBar;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddUnifiedDurationMustBePositiveSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared duration must be a positive integer.'**
+  String
+  get scriptEditorStoryboardBatchAddUnifiedDurationMustBePositiveSnackBar;
+
+  /// No description provided for @scriptEditorStoryboardBatchAddFollowUpSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-added {count} storyboards.'**
+  String scriptEditorStoryboardBatchAddFollowUpSummary(int count);
+
   /// No description provided for @projectEditorScriptsSingleWorkbenchRecentExtractError.
   ///
   /// In en, this message translates to:

@@ -7321,6 +7321,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scriptEditorDeletedSnackBar => 'Script deleted';
 
   @override
+  String get scriptEditorStoryboardAddDialogTitle => 'Add storyboard';
+
+  @override
+  String get scriptEditorStoryboardAddPromptLabel => 'Shot prompt';
+
+  @override
+  String get scriptEditorStoryboardAddPromptHelper =>
+      'Describe this shot\'s visuals or motion.';
+
+  @override
+  String get scriptEditorStoryboardAddDurationOptionalLabel =>
+      'Duration (optional)';
+
+  @override
+  String get scriptEditorStoryboardAddDurationOptionalHelper =>
+      'Whole seconds; leave empty for backend default.';
+
+  @override
+  String get scriptEditorStoryboardAddConfirmButton => 'Add';
+
+  @override
+  String get scriptEditorStoryboardAddPromptRequiredSnackBar =>
+      'Storyboard prompt cannot be empty.';
+
+  @override
+  String get scriptEditorStoryboardDurationMustBeIntegerSnackBar =>
+      'Duration must be an integer.';
+
+  @override
+  String get scriptEditorStoryboardDurationMustBePositiveSnackBar =>
+      'Duration must be a positive integer.';
+
+  @override
+  String scriptEditorStoryboardAddFollowUpSummary(int storyboardId) {
+    return 'Added storyboard #$storyboardId.';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchAddDialogTitle =>
+      'Batch add storyboards';
+
+  @override
+  String get scriptEditorStoryboardBatchAddPromptsLabel =>
+      'One prompt per line';
+
+  @override
+  String get scriptEditorStoryboardBatchAddPromptsHelper =>
+      'Empty lines are skipped; shots are created in input order.';
+
+  @override
+  String get scriptEditorStoryboardBatchAddUnifiedDurationLabel =>
+      'Shared duration (optional)';
+
+  @override
+  String get scriptEditorStoryboardBatchAddUnifiedDurationHelper =>
+      'If set, applies to every shot added in this batch.';
+
+  @override
+  String get scriptEditorStoryboardBatchAddConfirmButton => 'Batch add';
+
+  @override
+  String get scriptEditorStoryboardBatchAddNeedOnePromptSnackBar =>
+      'Enter at least one storyboard prompt.';
+
+  @override
+  String
+  get scriptEditorStoryboardBatchAddUnifiedDurationMustBeIntegerSnackBar =>
+      'Shared duration must be an integer.';
+
+  @override
+  String
+  get scriptEditorStoryboardBatchAddUnifiedDurationMustBePositiveSnackBar =>
+      'Shared duration must be a positive integer.';
+
+  @override
+  String scriptEditorStoryboardBatchAddFollowUpSummary(int count) {
+    return 'Batch-added $count storyboards.';
+  }
+
+  @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
     return 'Recent extract error: $reason';
   }

@@ -7014,6 +7014,77 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scriptEditorDeletedSnackBar => '剧本已删除';
 
   @override
+  String get scriptEditorStoryboardAddDialogTitle => '新增分镜';
+
+  @override
+  String get scriptEditorStoryboardAddPromptLabel => '分镜提示词';
+
+  @override
+  String get scriptEditorStoryboardAddPromptHelper => '填写本镜头的画面描述或动作提示。';
+
+  @override
+  String get scriptEditorStoryboardAddDurationOptionalLabel => '时长（可选）';
+
+  @override
+  String get scriptEditorStoryboardAddDurationOptionalHelper =>
+      '整数秒；留空表示由后端默认。';
+
+  @override
+  String get scriptEditorStoryboardAddConfirmButton => '新增';
+
+  @override
+  String get scriptEditorStoryboardAddPromptRequiredSnackBar => '分镜提示词不能为空';
+
+  @override
+  String get scriptEditorStoryboardDurationMustBeIntegerSnackBar => '时长必须是整数';
+
+  @override
+  String get scriptEditorStoryboardDurationMustBePositiveSnackBar => '时长必须是正整数';
+
+  @override
+  String scriptEditorStoryboardAddFollowUpSummary(int storyboardId) {
+    return '已新增分镜 #$storyboardId。';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchAddDialogTitle => '批量新增分镜';
+
+  @override
+  String get scriptEditorStoryboardBatchAddPromptsLabel => '每行一条分镜提示词';
+
+  @override
+  String get scriptEditorStoryboardBatchAddPromptsHelper => '会忽略空行，并按输入顺序批量创建。';
+
+  @override
+  String get scriptEditorStoryboardBatchAddUnifiedDurationLabel => '统一时长（可选）';
+
+  @override
+  String get scriptEditorStoryboardBatchAddUnifiedDurationHelper =>
+      '若填写，会作用于本次全部新增分镜。';
+
+  @override
+  String get scriptEditorStoryboardBatchAddConfirmButton => '批量新增';
+
+  @override
+  String get scriptEditorStoryboardBatchAddNeedOnePromptSnackBar =>
+      '至少填写一条分镜提示词';
+
+  @override
+  String
+  get scriptEditorStoryboardBatchAddUnifiedDurationMustBeIntegerSnackBar =>
+      '统一时长必须是整数';
+
+  @override
+  String
+  get scriptEditorStoryboardBatchAddUnifiedDurationMustBePositiveSnackBar =>
+      '统一时长必须是正整数';
+
+  @override
+  String scriptEditorStoryboardBatchAddFollowUpSummary(int count) {
+    return '已批量新增 $count 条分镜。';
+  }
+
+  @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
     return '最近提取错误：$reason';
   }
