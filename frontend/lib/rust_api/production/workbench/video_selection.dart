@@ -5,6 +5,24 @@ import 'package:http/http.dart' as http;
 import '../../../config.dart';
 import '../../core.dart';
 
+Map<String, dynamic> buildWorkbenchVideoSelectionBodyV1({
+  required Map<String, dynamic> base,
+  int? projectId,
+  String? projectUuid,
+}) {
+  final body = Map<String, dynamic>.from(base);
+  final uuid = projectUuid?.trim();
+  if (uuid != null && uuid.isNotEmpty) {
+    body['projectUuid'] = uuid;
+    return body;
+  }
+  if (projectId != null) {
+    body['projectId'] = projectId;
+    return body;
+  }
+  throw ArgumentError('projectUuid or projectId is required');
+}
+
 class WorkbenchVideoMemoryFeedback {
   const WorkbenchVideoMemoryFeedback({
     required this.kind,
@@ -73,12 +91,21 @@ class DeleteVideoResponse {
 /// `POST /api/v1/production/workbench/delete-video` — OpenAPI `postWorkbenchDeleteVideoV1`.
 Future<DeleteVideoResponse> postWorkbenchDeleteVideoV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/delete-video',
+  );
+  final body = buildWorkbenchVideoSelectionBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -87,11 +114,7 @@ Future<DeleteVideoResponse> postWorkbenchDeleteVideoV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -133,13 +156,23 @@ class SelectVideoResponse {
 /// `POST /api/v1/production/workbench/select-video` — OpenAPI `postWorkbenchSelectVideoV1`.
 Future<SelectVideoResponse> postWorkbenchSelectVideoV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
   required String videoUrl,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/select-video',
+  );
+  final body = buildWorkbenchVideoSelectionBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+      'videoUrl': videoUrl,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -148,12 +181,7 @@ Future<SelectVideoResponse> postWorkbenchSelectVideoV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-          'videoUrl': videoUrl,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -223,12 +251,21 @@ class BatchSelectVideoResponse {
 /// `POST /api/v1/production/workbench/batch-select-video` — OpenAPI `postProductionWorkbenchBatchSelectVideoV1`.
 Future<BatchSelectVideoResponse> postProductionWorkbenchBatchSelectVideoV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<Map<String, dynamic>> operations,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/batch-select-video',
+  );
+  final body = buildWorkbenchVideoSelectionBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'operations': operations,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -237,11 +274,7 @@ Future<BatchSelectVideoResponse> postProductionWorkbenchBatchSelectVideoV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'operations': operations,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -284,12 +317,21 @@ class BatchDeleteVideoResponse {
 /// `POST /api/v1/production/workbench/batch-delete-video` — OpenAPI `postProductionWorkbenchBatchDeleteVideoV1`.
 Future<BatchDeleteVideoResponse> postProductionWorkbenchBatchDeleteVideoV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<int> storyboardIds,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/batch-delete-video',
+  );
+  final body = buildWorkbenchVideoSelectionBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardIds': storyboardIds,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -298,11 +340,7 @@ Future<BatchDeleteVideoResponse> postProductionWorkbenchBatchDeleteVideoV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardIds': storyboardIds,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -346,12 +384,21 @@ class BatchUpdateDurationResponse {
 Future<BatchUpdateDurationResponse>
 postProductionWorkbenchBatchUpdateDurationV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<Map<String, dynamic>> operations,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/batch-update-duration',
+  );
+  final body = buildWorkbenchVideoSelectionBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'operations': operations,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -360,11 +407,7 @@ postProductionWorkbenchBatchUpdateDurationV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'operations': operations,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 400 || res.statusCode == 404) {

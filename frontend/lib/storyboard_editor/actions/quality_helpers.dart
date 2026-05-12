@@ -194,6 +194,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     final response = await postWorkbenchDeleteVideoV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
     );

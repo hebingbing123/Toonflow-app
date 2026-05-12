@@ -51,6 +51,7 @@ extension _HomePageScriptEditor on _HomePageState {
                           onOpenEditImageWorkbench: () =>
                               _openScriptEditImageWorkbenchDialog(
                                 token: token,
+                                projectId: projectId,
                                 projectNumericId: projectNumericId,
                                 scriptNumericId: scriptNumericId,
                               ),
